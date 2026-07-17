@@ -179,7 +179,7 @@ def _get_field_choices(
         field = model._meta.get_field(field_name)
         if field.choices:
             return [choice[0] for choice in field.choices if choice[0]]
-    except (LookupError, Exception):
+    except LookupError, Exception:
         pass
     return None
 

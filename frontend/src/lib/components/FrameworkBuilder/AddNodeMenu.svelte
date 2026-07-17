@@ -46,50 +46,50 @@
 	{#if open}
 		<div
 			role="menu"
-			class="absolute left-1/2 -translate-x-1/2 z-20 mt-1 w-64 bg-white border border-gray-200 rounded-lg shadow-lg py-1"
+			class="absolute left-1/2 -translate-x-1/2 z-20 mt-1 w-64 bg-surface-50-950 border border-surface-200-800 rounded-lg shadow-lg py-1"
 		>
 			<button
 				type="button"
 				role="menuitem"
-				class="w-full px-3 py-2 text-left hover:bg-gray-50"
+				class="w-full px-3 py-2 text-left hover:bg-surface-50-950"
 				onclick={() => addWith('blank')}
 			>
-				<div class="text-sm text-gray-700">{m.builderBlankNode()}</div>
-				<div class="text-xs text-gray-400">{m.builderBlankNodeHint()}</div>
+				<div class="text-sm text-surface-700-300">{m.builderBlankNode()}</div>
+				<div class="text-xs text-surface-500">{m.builderBlankNodeHint()}</div>
 			</button>
-			<div class="border-t border-gray-100 my-1"></div>
+			<div class="border-t border-surface-100-900 my-1"></div>
 			<button
 				type="button"
 				role="menuitem"
-				class="w-full px-3 py-2 text-left hover:bg-gray-50"
+				class="w-full px-3 py-2 text-left hover:bg-surface-50-950"
 				onclick={() => addWith('group')}
 			>
-				<div class="text-sm text-gray-700">
-					<i class="fa-solid fa-folder text-gray-400 mr-1"></i>{m.builderGroup()}
+				<div class="text-sm text-surface-700-300">
+					<i class="fa-solid fa-folder text-surface-500 mr-1"></i>{m.builderGroup()}
 				</div>
-				<div class="text-xs text-gray-400">{m.builderGroupHint()}</div>
+				<div class="text-xs text-surface-500">{m.builderGroupHint()}</div>
 			</button>
 			<button
 				type="button"
 				role="menuitem"
-				class="w-full px-3 py-2 text-left hover:bg-gray-50"
+				class="w-full px-3 py-2 text-left hover:bg-surface-50-950"
 				onclick={() => addWith('requirement')}
 			>
-				<div class="text-sm text-gray-700">
+				<div class="text-sm text-surface-700-300">
 					<i class="fa-solid fa-square-check text-green-500 mr-1"></i>{m.requirement()}
 				</div>
-				<div class="text-xs text-gray-400">{m.builderRequirementHint()}</div>
+				<div class="text-xs text-surface-500">{m.builderRequirementHint()}</div>
 			</button>
 			<button
 				type="button"
 				role="menuitem"
-				class="w-full px-3 py-2 text-left hover:bg-gray-50"
+				class="w-full px-3 py-2 text-left hover:bg-surface-50-950"
 				onclick={() => addWith('splash')}
 			>
-				<div class="text-sm text-gray-700">
+				<div class="text-sm text-surface-700-300">
 					<i class="fa-solid fa-display text-purple-400 mr-1"></i>{m.builderSplashScreen()}
 				</div>
-				<div class="text-xs text-gray-400">{m.builderSplashScreenHint()}</div>
+				<div class="text-xs text-surface-500">{m.builderSplashScreenHint()}</div>
 			</button>
 		</div>
 	{/if}

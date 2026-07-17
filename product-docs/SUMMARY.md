@@ -33,6 +33,7 @@
   * [Incidents](concepts/incidents.md)
 * Governance
   * [Policies](concepts/policies.md)
+  * [Documents](concepts/documents.md)
   * [Findings assessments](concepts/findings-assessments.md)
   * [Validation flows](concepts/validation-flows.md)
 * Risk
@@ -49,6 +50,7 @@
   * [Privacy register](concepts/privacy-register.md)
   * [Project management](concepts/project-management.md)
   * [Terminology](concepts/terminology.md)
+  * [Object classifications](concepts/object-classification.md)
 
 ## Installation
 
@@ -67,8 +69,8 @@
   * [Managing secrets](installation/managing-secrets.md)
   * [Setting up S3](installation/s3.md)
   * [Setting up mailer](installation/mailer.md)
-  * [Infrastructure configuration](installation/infra-config.md)
   * [Prometheus metrics](installation/prometheus-metrics.md)
+  * [Structured logging](installation/structured-logging.md)
 * Maintenance
   * [Updating your local instance](installation/updating.md)
   * [Special cases](installation/special-cases.md)
@@ -83,6 +85,7 @@
   * [Feature flags](configuration/settings/feature-flags.md)
   * [Vulnerability SLA policy](configuration/settings/vulnerability-sla.md)
   * [Security intelligence feeds](configuration/settings/sec-intel-feeds.md)
+  * [Allowed IP whitelist](configuration/settings/infra-config-allowed-ip.md)
   * [Branding](configuration/settings/branding.md)
   * [Custom templates](configuration/settings/custom-templates.md)
 * [Organization](configuration/organization/README.md)
@@ -94,6 +97,7 @@
 * [SSO](configuration/sso/README.md)
   * [SAML](configuration/sso/saml.md)
   * [OpenID Connect (OIDC)](configuration/sso/oidc.md)
+  * [SCIM provisioning and IdP groups](configuration/sso/scim.md)
   * [Identity providers](configuration/sso/identity-providers/README.md)
     * [Microsoft Entra ID](configuration/sso/identity-providers/entra-id.md)
     * [Okta](configuration/sso/identity-providers/okta.md)
@@ -108,12 +112,7 @@
   * [Upgrading a library](configuration/libraries/upgrading-a-library.md)
   * [Library clean-up](configuration/libraries/library-cleanup.md)
 * [Authoring](configuration/authoring/README.md)
-  * [Framework](configuration/authoring/framework.md)
-    * [Framework builder — reference](configuration/authoring/framework-builder.md)
-  * [Risk matrix](configuration/authoring/matrix.md)
-    * [Matrix editor — reference](configuration/authoring/matrix-editor.md)
-  * [Journey preset](configuration/authoring/preset.md)
-    * [Preset editor — reference](configuration/authoring/preset-editor.md)
+  * [Library builder](configuration/authoring/library-builder.md)
   * [Excel-driven authoring](configuration/authoring/excel.md)
 * [Data import wizard](configuration/data-import.md)
 * [Changing the language](configuration/language.md)
@@ -140,8 +139,12 @@
   * [Managing a collection](guides/collections.md)
   * [Managing an accreditation](guides/accreditations.md)
   * [Managing a responsibility matrix](guides/responsibility-matrix.md)
+* Documents
+  * [Authoring documents](guides/documents/authoring-documents.md)
+  * [Document templates](guides/documents/document-templates.md)
 * Third-party
   * [Third-Party Risk Management](guides/tprm.md)
+  * [Common TPRM pitfalls](guides/tprm-challenges.md)
 
 ## Features
 
@@ -159,6 +162,7 @@
 * [Scoring Assistant](features/scoring-assistant.md)
 * [Assignments / respondent mode](features/assignments.md)
 * [Comments](features/comments.md)
+* [Audit log](features/audit-log.md)
 * [Domain export/import](features/domain-export-import.md)
 * [Focus mode](features/focus-mode.md)
 * [Sync to actions](features/sync-to-actions.md)
@@ -168,12 +172,13 @@
 * [Insights](features/insights.md)
 * [Control Plan](features/control-plan.md)
 * [Action plans](features/action-plans.md)
-* [Context menu](features/context-menu.md)
-* [Batch actions](features/batch-actions.md)
+* [Working with tables](features/working-with-tables.md)
+* [Custom fields](features/custom-fields.md)
 * [Command palette](features/command-palette.md)
 * [Universal search](features/search.md)
 * [My assignments](features/my-assignments.md)
 * [Notifications](features/notifications.md)
+* [Portals and trust center](features/portals.md)
 * [Framework-specific features](features/framework-specific/README.md)
   * [ISO 27001](features/framework-specific/iso.md)
   * [CCB CyFun](features/framework-specific/cyfun.md)
@@ -186,6 +191,7 @@
 * [API reference](integrations/api.md)
 * [Generating a PAT](integrations/pat.md)
 * [Outgoing webhooks](integrations/webhooks.md)
+* [Audit log forwarding](integrations/audit-log-forwarding.md)
 * [MCP setup guide](integrations/mcp.md)
 * [Third-party integrations](integrations/third-party/README.md)
   * [Jira](integrations/third-party/jira.md)

@@ -49,7 +49,7 @@ Almost every operational object in CISO Assistant is bound to a domain: assessme
 Because reorganisations happen, the domain assignment is **not permanent**:
 
 - **One at a time** — edit any object and pick a different **Domain** in the form. The platform re-evaluates IAM scoping on save, so the object disappears from one domain's views and appears in the other's.
-- **In bulk** — for models that opt in to bulk operations, the [Batch actions](../features/batch-actions.md) toolbar exposes a **Change folder** action: select multiple rows in the table, choose the destination domain, and the move is applied across the selection in one go. Useful when reorganising a subsidiary into its own sub-tree, or pulling a programme's controls into a dedicated domain.
+- **In bulk** — for models that opt in to bulk operations, the [batch actions](../features/working-with-tables.md#batch-actions-many-rows) toolbar exposes a **Change folder** action: select multiple rows in the table, choose the destination domain, and the move is applied across the selection in one go. Useful when reorganising a subsidiary into its own sub-tree, or pulling a programme's controls into a dedicated domain.
 
 A handful of objects whose domain is forced by a parent (e.g. risk scenarios always inherit their risk assessment's domain) intentionally don't expose the batch **Change folder** action — moving the parent moves the children.
 

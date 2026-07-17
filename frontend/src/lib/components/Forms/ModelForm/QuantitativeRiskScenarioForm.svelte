@@ -1,6 +1,5 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -48,14 +47,6 @@
 	bind:cachedValue={formDataCache['quantitative_risk_study']}
 	label="Quantitative Risk Study"
 	hidden={initialData.quantitative_risk_study}
-/>
-
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
 />
 
 <Checkbox {form} field="is_selected" label={m.isSelected()} helpText={m.isSelectedHelpText()} />

@@ -98,7 +98,7 @@
 				</option>
 			{/each}
 		</select>
-		<span class="text-xs text-gray-400">{m.hasTranslations()}</span>
+		<span class="text-xs text-surface-500">{m.hasTranslations()}</span>
 	</div>
 
 	<!-- Translation tables per category -->
@@ -130,7 +130,7 @@
 									</span>
 								</td>
 								<td>
-									<span class="text-sm text-gray-600">{level.name}</span>
+									<span class="text-sm text-surface-600-400">{level.name}</span>
 								</td>
 								<td>
 									<input
@@ -144,7 +144,7 @@
 								</td>
 								<td>
 									<span
-										class="text-sm text-gray-600 truncate block max-w-48"
+										class="text-sm text-surface-600-400 truncate block max-w-48"
 										title={level.description}
 									>
 										{level.description}

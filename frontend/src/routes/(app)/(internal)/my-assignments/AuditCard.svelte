@@ -9,10 +9,10 @@
 	const badge_style = {
 		planned: 'bg-yellow-100',
 		in_progress: ' bg-orange-200',
-		in_review: 'text-white bg-blue-500',
-		done: 'text-white bg-cyan-600',
+		in_review: 'text-white bg-blue-500 dark:bg-blue-600',
+		done: 'text-white bg-cyan-600 dark:bg-cyan-700',
 		deprecated: 'text-white bg-red-400',
-		null: 'bg-gray-200'
+		null: 'bg-surface-200-800'
 	};
 </script>
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { marked } from 'marked';
 	import sanitizeHtml from 'sanitize-html';
+	import * as m from '$paraglide/messages';
 
 	interface Props {
 		content: string | null | undefined;
@@ -65,13 +66,26 @@
 	function processContent(content: string | null | undefined): string {
 		if (!content || content.trim() === '') return '';
 
-		let html = marked(content) as string;
+		// Resolve canonical document links [label](document:<uuid>) to the reader.
+		const src = content.replace(
+			/\]\(document:([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\)/g,
+			'](/documents/$1/read)'
+		);
+
+		let html = marked(src) as string;
 
 		// Temporarily give internal image URLs an https scheme so they survive
 		// sanitize-html's allowedSchemes check, then strip the fake origin after.
 		html = html.replace(INTERNAL_IMG_RE, (_, path) => `src="${INTERNAL_PLACEHOLDER}${path}"`);
 		html = sanitizeHtml(html, sanitizeConfig);
 		html = html.replace(new RegExp(`src="${INTERNAL_PLACEHOLDER}`, 'g'), 'src="');
+
+		// Name GFM task-list checkboxes, which render unlabeled.
+		html = html.replace(/<input\b([^>]*?\btype="checkbox"[^>]*?)\s*\/?>/g, (full, attrs) =>
+			/aria-label/.test(attrs)
+				? full
+				: `<input${attrs} aria-label="${/\bchecked\b/.test(attrs) ? m.taskItemChecked() : m.taskItemUnchecked()}" />`
+		);
 
 		// Clean up excessive spacing
 		html = html
@@ -89,9 +103,11 @@
 </script>
 
 {#if renderedContent}
-	<div class="prose prose-sm max-w-none wrap-break-word whitespace-pre-line {className}">
+	<div
+		class="prose prose-sm dark:prose-invert max-w-none wrap-break-word whitespace-pre-line {className}"
+	>
 		{@html renderedContent}
 	</div>
 {:else}
-	<span class="text-gray-500 italic">--</span>
+	<span class="text-surface-600-400 italic">--</span>
 {/if}

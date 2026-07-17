@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from core.permissions import IsAdministrator
+from core.permissions import IsGlobalAdmin
 from core.serializers import SerializerFactory
 from iam.models import Folder, Permission, RoleAssignment, User
 from iam.sso.models import SSOSettings
@@ -112,6 +112,20 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
         self.check_object_permissions(self.request, obj)
         return obj
 
+    @action(detail=True, methods=["get"])
+    def defaults(self, request, pk=None):
+        """Expose each flag's serializer default so the frontend "Reset to
+        defaults" never drifts from the backend. Only exposed flags are
+        returned (get_fields already drops gated ones like chat_mode)."""
+        serializer = self.get_serializer_class()()
+        flag_defaults = {
+            name: field.default
+            for name, field in serializer.fields.items()
+            if name not in serializer.Meta.read_only_fields
+            and getattr(field, "default", serializers.empty) is not serializers.empty
+        }
+        return Response(flag_defaults)
+
 
 class GeneralSettingsViewSet(viewsets.ModelViewSet):
     model = GlobalSettings
@@ -160,11 +174,15 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "mapping_max_depth": 3,
             "allow_self_validation": False,
             "show_warning_external_links": True,
+            "show_get_started": True,
+            "personal_folders": False,
             "builtin_metrics_retention_days": 730,  # 2 years default, minimum is 1
             "allow_assignments_to_entities": False,
             "enforce_mfa": False,
             "default_language": "en",
             "default_custom_analytics_dashboard": None,
+            "default_packager": "custom",
+            "disable_partially_compliant_result": False,
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")
@@ -291,6 +309,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
     @action(detail=True, name="Get security objective scales")
     def security_objective_scale(self, request):
         choices = {
+            "1-3": "1-3",
             "1-4": "1-4",
             "1-5": "1-5",
             "0-3": "0-3",
@@ -391,7 +410,7 @@ class InfraConfigViewSet(viewsets.ModelViewSet):
     model = GlobalSettings
     serializer_class = InfraConfigSerializer
     queryset = GlobalSettings.objects.filter(name="infra-config")
-    permission_classes = [IsAuthenticated, IsAdministrator]
+    permission_classes = [IsAuthenticated, IsGlobalAdmin]
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()

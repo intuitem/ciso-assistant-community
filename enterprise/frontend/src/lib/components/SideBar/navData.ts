@@ -135,6 +135,11 @@ export const navData = {
 					href: '/user-groups'
 				},
 				{
+					name: 'idpGroups',
+					fa_icon: 'fa-solid fa-id-badge',
+					href: '/idp-groups'
+				},
+				{
 					name: 'roles',
 					fa_icon: 'fa-solid fa-shield-halved',
 					href: '/roles',
@@ -184,6 +189,12 @@ export const navData = {
 					name: 'riskMatrices',
 					fa_icon: 'fa-solid fa-table-cells-large',
 					href: '/risk-matrices'
+				},
+				{
+					name: 'documentTemplates',
+					fa_icon: 'fa-solid fa-file-code',
+					href: '/document-templates',
+					permissions: ['view_documenttemplate']
 				}
 			]
 		},
@@ -209,6 +220,12 @@ export const navData = {
 					name: 'appliedControls',
 					fa_icon: 'fa-solid fa-fire-extinguisher',
 					href: '/applied-controls'
+				},
+				{
+					name: 'documents',
+					fa_icon: 'fa-solid fa-file-lines',
+					href: '/documents',
+					permissions: ['view_documentcontainer']
 				},
 				{
 					name: 'calendar',
@@ -507,6 +524,18 @@ export const navData = {
 					permissions: ['view_terminology']
 				},
 				{
+					name: 'objectClassifications',
+					fa_icon: 'fa-solid fa-shield-halved',
+					href: '/object-classifications',
+					permissions: ['view_objectclassification']
+				},
+				{
+					name: 'customFields',
+					fa_icon: 'fa-solid fa-sliders',
+					href: '/custom-fields',
+					permissions: ['view_customfielddefinition']
+				},
+				{
 					name: 'settings',
 					fa_icon: 'fa-solid fa-cog',
 					href: '/settings',
@@ -528,13 +557,19 @@ export const navData = {
 					name: 'Audit log',
 					fa_icon: 'fa-solid fa-newspaper',
 					href: '/audit-log',
-					permissions: ['view_logentry']
+					permissions: ['view_central_auditlog']
 				},
 				{
 					name: 'experimental',
 					fa_icon: 'fa-solid fa-flask',
 					href: '/experimental',
 					permissions: ['change_globalsettings']
+				},
+				{
+					name: 'managePortals',
+					fa_icon: 'fa-solid fa-table-cells-large',
+					href: '/portal-editor',
+					permissions: ['change_portal']
 				}
 			]
 		}

@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -108,6 +109,29 @@ class IntegrationConfigurationViewSet(BaseModelViewSet):
 
     filterset_fields = ["provider", "provider__name", "provider__provider_type"]
 
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except ValidationError as exc:
+            logger.warning(
+                "IntegrationConfiguration create rejected",
+                errors=exc.detail,
+                provider_id=str(request.data.get("provider_id", "")),
+            )
+            raise
+
+    def update(self, request, *args, **kwargs):
+        try:
+            return super().update(request, *args, **kwargs)
+        except ValidationError as exc:
+            logger.warning(
+                "IntegrationConfiguration update rejected",
+                errors=exc.detail,
+                config_id=kwargs.get("pk"),
+                provider_id=str(request.data.get("provider_id", "")),
+            )
+            raise
+
     @action(detail=True, methods=["post"], url_path="test-connection")
     def test_connection(self, request, pk=None):
         """
@@ -148,9 +172,17 @@ class IntegrationConfigurationViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="remote-objects")
     def list_remote_objects(self, request, pk=None):
+        from integrations.syncable import get_spec
+
         instance = self.get_object()
+        model_key = request.query_params.get("model_key", "applied_control")
+        if get_spec(model_key) is None:
+            return Response(
+                {"error": f"Unknown model_key '{model_key}'"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         try:
-            client = IntegrationRegistry.get_client(instance)
+            client = IntegrationRegistry.get_client(instance, model_key)
             remote_objects = client.list_remote_objects()
             return Response(remote_objects, status=status.HTTP_200_OK)
         except Exception:

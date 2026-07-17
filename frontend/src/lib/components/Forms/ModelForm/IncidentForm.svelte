@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Select from '../Select.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
@@ -31,13 +30,6 @@
 	const disableDoubleDash = true;
 </script>
 
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 <TextField
 	type="datetime-local"
 	step="1"
@@ -74,13 +66,6 @@
 	options={model.selectOptions['detection']}
 	cacheLock={cacheLocks['detection']}
 	bind:cachedValue={formDataCache['detection']}
-/>
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
 />
 <Select
 	{form}

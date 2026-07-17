@@ -27,7 +27,7 @@ Instance-wide settings that don't belong to a more specific category. Grouped he
 - **Show warning on external links** — interstitial prompt before opening links that leave the platform.
 - **Enforce MFA** — make multi-factor authentication mandatory for every user account.
 - **Allow assignments to entities** — whether requirements and tasks can be assigned to third-party entities (not just internal users).
-- **Mapping max depth** — limit on how many mapping hops the platform follows when projecting one framework onto another.
+- **Mapping max depth** — how many frameworks a chained mapping path may span when projecting one framework onto another, counted as nodes in the path (2–5, default 3). A value of 3 allows one pivot — A → B → C. See [transitive inference](../../concepts/mappings.md#transitive-inference-pivot-mappings).
 
 ## Retention
 
@@ -47,6 +47,16 @@ These settings drive the optional AI features (chat mode, agentic workflows, RAG
 - **Embedding backend** — which backend powers semantic search over knowledge.
 - **Chat system prompt** — system prompt prepended to chat-mode conversations.
 
+{% hint style="warning" %}
+**Local or self-hosted LLMs.** The **Ollama URL** and OpenAI **API base URL** are checked when you save them and must resolve to a public address — private, loopback, and internal IPs are rejected to prevent server-side request forgery (SSRF). To point at a local or in-network model (for example Ollama on `localhost`, LM Studio, or an in-cluster endpoint), start the backend with the environment variable `ALLOW_PRIVATE_NETWORK_REQUESTS=True`. (This variable was previously named `WEBHOOK_ALLOW_PRIVATE_IPS`; the old name is no longer recognized.)
+{% endhint %}
+
 ## Analytics
 
 - **Default custom analytics dashboard** — UUID of the dashboard shown by default on the analytics page.
+
+## Domain-tree audit inheritance
+
+Shown only when the **Domain-tree audit inheritance** feature flag is on (under the **Compliance assessments** group).
+
+- **Domain inheritance strategy** — when the same framework is audited at several levels of the domain tree, decides how a child audit combines results with its parent audits. Options: _No inheritance_ (default), _Parent always wins_, _Child always wins_, _Best case (optimistic)_, _Worst case (prudent)_. Scores from a different scale are normalised to the top parent's scale. This one org-wide setting drives the **Combined view** on the [Framework report](../../features/framework-report.md#combined-view-domain-tree-inheritance) and the inheritance panel in [Advanced Analytics](../../features/audit-analytics.md). Leaving it on _No inheritance_ keeps the feature dormant even with the flag enabled.

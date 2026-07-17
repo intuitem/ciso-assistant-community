@@ -1,7 +1,5 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
-	import TextField from '../TextField.svelte';
 	import Select from '../Select.svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -27,22 +25,6 @@
 		context = 'default'
 	}: Props = $props();
 </script>
-
-<TextField
-	{form}
-	field="ref_id"
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-	label={m.refId()}
-/>
-
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
 
 <Select
 	{form}

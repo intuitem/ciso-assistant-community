@@ -63,7 +63,7 @@ This makes it easy to update later with `git pull`.
 
 Before you begin, make sure you have:
 
-1. **CISO Assistant running** - Either locally or on a server (can be the same machine or a remote server). If you're on a SaaS instance, you need to have the API enabled. You can open a support request to do, and keep in mind that it requires ip filtering to be enabled as well.
+1. **CISO Assistant running** - Either locally or on a server (can be the same machine or a remote server). The API must be reachable from the machine running the MCP server, which means that machine's IP must be in the [Allowed IP whitelist](../configuration/settings/infra-config-allowed-ip.md). On **SaaS**, IP filtering is already enabled — just add your IP under **Settings → Infrastructure**. **On-premises** administrators should enable it first (`ENABLE_INFRA_CONFIG_MANAGEMENT=True`) and add their IPs. Remember that allowlist changes take about 10 minutes to apply.
 2. **Python 3.14+** installed
 3.  **uv** package manager (recommended) - Install with:
 

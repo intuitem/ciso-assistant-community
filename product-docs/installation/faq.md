@@ -30,13 +30,13 @@ If you didn't get the prompt to create the first user, or lost the password but 
 
 In your compose file folder, try:
 
-`docker compose exec backend poetry run python manage.py createsuperuser`
+`docker compose exec backend uv run python manage.py createsuperuser`
 
 Alternatively, in a docker environment:
 
 `docker ps -a | grep backend` (this will get you the id of the Backend for CISO Assistant container, keep it for the next step)
 
-`docker exec -it <the_container_id> poetry run python manage.py createsuperuser`
+`docker exec -it <the_container_id> uv run python manage.py createsuperuser`
 
 and you should get a prompt now 😉
 
@@ -46,7 +46,7 @@ and you should get a prompt now 😉
 
 
 
-`docker compose exec backend poetry run python manage.py changepassword <user_email>`&#x20;
+`docker compose exec backend uv run python manage.py changepassword <user_email>`&#x20;
 
 
 
@@ -65,7 +65,7 @@ Make sure you share these information if you're reporting an issue on Discord or
 If you want to trigger the migration to make sure that all increments have been properly applied:
 
 ```
-docker compose exec backend poetry run python manage.py migrate
+docker compose exec backend uv run python manage.py migrate
 ```
 
 ### Healthcheck fails during the installation
@@ -86,7 +86,7 @@ docker compose up -d
 wait for the init to finish and then trigger the first user creation manually:
 
 ```
-docker compose exec backend poetry run python manage.py createsuperuser
+docker compose exec backend uv run python manage.py createsuperuser
 ```
 
 ### "Payload too large" when uploading a file to the frontend

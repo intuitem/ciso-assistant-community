@@ -57,6 +57,7 @@ We’re constantly evolving with input from users and customers. Like an octopus
 [![API Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml)
 [![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
+[![Plumber Score](https://score.getplumber.io/github.com/intuitem/ciso-assistant-community.svg)](https://score.getplumber.io/github.com/intuitem/ciso-assistant-community)
 
 ---
 
@@ -99,6 +100,92 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 ## Features
 
 ![Current features](features.png)
+
+<!-- FEATURES:START -->
+<details>
+<summary><strong>📋 Full feature list</strong> — click to expand (searchable, 57 features)</summary>
+
+**Compliance & frameworks**
+- Audit and campaigns management
+- Automatic mapping
+- Mapping explorer
+- Custom frameworks supported
+- +167 frameworks included
+- Policies management
+- Evidence management
+
+**Risk management**
+- Risk assessments and registers
+- EBIOS RM module
+- Risk acceptance workflows
+- Business Impact Analysis
+- Cyber Risk Quantification
+- Vulnerability management
+- Vulnerability enrichment
+
+**Third-party risk**
+- Third-party risk management
+
+**Operations & remediation**
+- Action plan tracking and prioritization
+- Findings tracking
+- Recommendations engine
+- Control plan
+- Task management
+- Kanban boards
+- Periodic checks
+- Exceptions tracking
+- Incidents management
+- Validation & approval flows
+- Email reminders
+
+**Reporting & analytics**
+- Analytics and dashboards
+- Reports generation
+- Automated quality checks
+- Advanced insights
+- Custom metrics tracking
+
+**Collaboration & productivity**
+- Assignments & respondent mode
+- Comments & collaboration
+- Universal search
+- Command palette
+
+**Automation & integrations**
+- Comprehensive REST API
+- CLI for automation
+- Data import wizard
+- Kafka integration
+- MCP support
+- Outgoing webhooks
+- Jira & ServiceNow integrations
+- Consultant features (e.g. single-domain export/import)
+
+**Security & access**
+- Flexible RBAC
+- SSO with SAML or OIDC
+- MFA with TOTP and security keys
+- SCIM provisioning
+- Audit log
+
+**Privacy**
+- GDPR processings
+
+**Programme management**
+- Project management
+- Responsibility matrices
+
+**Platform**
+- Portals & trust center
+- Custom fields
+- Multi-level domains
+- Kubernetes (Helm) deployment
+- Open Source
+- Available in +26 languages
+
+</details>
+<!-- FEATURES:END -->
 
 Upcoming features are listed on the roadmap.
 
@@ -251,7 +338,7 @@ Read more here: [AI engine](backend/chat/README.md)
 106. OWASP Top 10 Web - Threat catalog 🐝🌐
 107. OWASP MAS Threat Modelling Guide - Threat catalog 🐝📱
 108. CISA Cybersecurity Performance Goals (CPG) v2.0 🇺🇸
-109. ANSSI : Référentiel Cyber France pour la réglmentation NIS2 (ReCyF) 🇫🇷
+109. ANSSI : Référentiel Cyber France pour la réglementation NIS2 (ReCyF) 🇫🇷
 110. Cadre Conformité Cyber France (3CF) v3.1 (2026) ✈️🇫🇷
 111. Règles OIV - Secteur « Transport aérien » (2016) ✈️🇫🇷
 112. IEC 62443 series — parts 2-1, 2-4, 3-2, 3-3, 4-1, 4-2 🏭🌐
@@ -390,19 +477,20 @@ For the following executions, use "docker compose up" directly.
 ## Setting up CISO Assistant for development
 
 > [!WARNING]
+>
 > ### Important note for Windows users
+>
 > The best working solution for users developing on **Windows** is to use [Ubuntu](https://apps.microsoft.com/detail/9pdxgncfsczv) installed on [WSL2](https://apps.microsoft.com/detail/9p9tqf7mrm4r) (Docker is not required).
 >
 > It is now also possible to run and develop CISO Assistant natively on Windows without WSL2 nor Docker, but it will require some extra steps.
 > Please note that the native running on Windows is still in **EXPERIMENTAL PHASE** and should **NOT** be used if you are unsure of what you are doing, or if you want to ensure stability throughout development.
 > Nevertheless, we would love to hear any suggestions in order to enhance the development experience for Windows users. Please feel free to open an Issue/PR about it!
 
-
 ### Requirements
 
 - Python 3.14+
 - pip 25.3+
-- poetry 2.0+
+- uv 0.9+
 - node 24+
 - npm 10.2+
 - pnpm 10.30+
@@ -418,25 +506,27 @@ pacman -S mingw-w64-ucrt-x86_64-file mingw-w64-ucrt-x86_64-pango
 ```
 
 You will also have to add those 2 system environment variables after installing the dependencies:
+
 ```conf
 MAGIC=Full path to the `magic.mgc` file (usually `C:\msys64\ucrt64\share\misc\magic.mgc`)
 WEASYPRINT_DLL_DIRECTORIES=Same path as your MSYS2 UCRT64 binaries
 ```
 
-
 Given that the default encoding on Windows isn't `UTF-8` but `cp1252`, certain python script printing `UTF-8` characters such as emojis may cause the backend crash or malfunction in some cases (e.g. library importation).
 To avoid this issue with this project, enforce the `UTF-8` encoding by adding these 2 user environment variables:
+
 ```conf
 PYTHONUTF8=1
 PYTHONIOENCODING=utf-8:replace
 ```
 
 > [!NOTE]
+>
 > ### Known issues
+>
 > - The `libmagic` library on Windows (MIME detection) struggles to recognize an Excel file (`.xlsx`) by reading its first `2048` bits as it returns `application/octet-stream` most of the time when importing an Excel library (backend displays the warning message `[warning  ] Invalid MIME type`). This doesn't prevent the Excel file from being imported thanks to the fallback method in `backend/library/views.py:StoredLibraryViewSet.upload_library`.
 
 </details>
-
 
 ### Running the backend
 
@@ -548,6 +638,11 @@ export ENABLE_SANDBOX=True  # optional, default value is True in production enfi
 # Logging configuration
 export LOG_LEVEL=INFO # optional, default value is INFO. Available options: DEBUG, INFO, WARNING, ERROR, CRITICAL
 export LOG_FORMAT=plain # optional, default value is plain. Available options: json, plain
+# LOG_FORMAT=json emits one JSON object per line (timestamp, level, logger, event, ...),
+# which SIEMs (Splunk, Sentinel, ADX) ingest natively without custom parsing.
+# Set the same LOG_FORMAT=json on the frontend container to get structured JSON
+# from the SvelteKit SSR process (auth events, errors) on the same schema; the
+# backend and huey worker share this setting automatically.
 
 # Authentication options
 export AUTH_TOKEN_TTL=3600 # optional, default value is 3600 seconds (60 minutes). It defines the time to live of the authentication token
@@ -555,25 +650,25 @@ export AUTH_TOKEN_AUTO_REFRESH=True # optional, default value is True. It define
 export AUTH_TOKEN_AUTO_REFRESH_TTL=36000 # optional, default value is 36000 seconds (10 hours). It defines the time to live of the authentication token after auto refresh. You can disable it by setting it to 0.
 ```
 
-3. Install poetry
-
-Visit the poetry website for instructions: <https://python-poetry.org/docs/#installation>
-
 <details>
-<summary>[EXPERIMENTAL] How to install Poetry natively on Windows?</summary>
+<summary>[EXPERIMENTAL] Other variable for development on Windows without WSL2</summary>
 
-```shell
-python -m pip install --user pipx
-pipx install poetry
-```
+Only PostgreSQL custom variables can be configured.
+
+Use the helper scripts documented in [`tools/.windows/README.md`](tools/.windows/README.md) for more information.
 
 </details>
 
 
-4. Install required dependencies.
+3. Install uv
+
+Visit the uv website for instructions: <https://docs.astral.sh/uv/getting-started/installation/>
+
+4. Move to backend and install required dependencies.
 
 ```sh
-poetry install
+cd backend
+uv sync
 ```
 
 5. Recommended: Install the pre-commit hooks.
@@ -594,6 +689,13 @@ pre-commit install
   - `create user ciso-assistantuser with password '<POSTGRES_PASSWORD>';`
   - `grant all privileges on database ciso-assistant to ciso-assistantuser;`
 
+<details>
+<summary>[EXPERIMENTAL] Setup PostgreSQL on Windows</summary>
+
+For more information, see the documentation in [`tools/.windows/README.md`](tools/.windows/README.md).
+
+</details>
+
 7. If you want to setup s3 bucket:
 
 - Choose your s3 provider or try s3 feature with miniO with this command:
@@ -606,21 +708,34 @@ pre-commit install
 8. Apply migrations.
 
 ```sh
-poetry run python manage.py migrate
+uv run python manage.py migrate
 ```
+<details>
+<summary>[EXPERIMENTAL] Apply migration on Windows without WSL2</summary>
+
+For more information, see the documentation in [`tools/.windows/README.md`](tools/.windows/README.md).
+
+</details>
 
 9. Create a Django superuser, that will be CISO Assistant administrator.
 
 > If you have set a mailer and CISO_SUPERUSER_EMAIL variable, there's no need to create a Django superuser with `createsuperuser`, as it will be created automatically on first start. You should receive an email with a link to setup your password.
 
 ```sh
-poetry run python manage.py createsuperuser
+uv run python manage.py createsuperuser
 ```
+
+<details>
+<summary>[EXPERIMENTAL] Create a Django superuser on Windows without WSL2</summary>
+
+For more information, see the documentation in [`tools/.windows/README.md`](tools/.windows/README.md).
+
+</details>
 
 10. Run development server.
 
 ```sh
-poetry run python manage.py runserver
+uv run python manage.py runserver
 ```
 
 <details>
@@ -690,15 +805,15 @@ find . -path "*/migrations/*.pyc"  -delete
 After a change (or a clean), it is necessary to re-generate migration files:
 
 ```sh
-poetry run python manage.py makemigrations
-poetry run python manage.py migrate
+uv run python manage.py makemigrations
+uv run python manage.py migrate
 ```
 
 These migration files should be tracked by version control.
 
 ### Test suite
 
-To run API tests on the backend, simply type `poetry run pytest` in a shell in the backend folder.
+To run API tests on the backend, simply type `uv run pytest` in a shell in the backend folder.
 
 To run functional tests on the frontend, do the following actions:
 
@@ -719,12 +834,12 @@ The goal of the test harness is to prevent any regression, i.e. all the tests sh
 
 To interact with the API via Swagger or directly with HTTP calls:
 
-1. Authenticate by sending a POST request to `/api/iam/login/` with your credentials in the request body. The response will include an authentication token.
+1. Create a Personal Access Token (PAT) from your user profile in the application.
 2. Include this token in the header of subsequent requests as: `Authorization: Token <token>`
 
 ⚠️ Note: use `Token`, **not** `Bearer`.
 
-When using the interactive Swagger UI, simply log in, the token will be automatically handled for subsequent requests.
+PATs respect MFA: they are issued from an authenticated session, so an account protected by MFA stays protected. For interactive/browser flows, authentication goes through the standard login (which enforces MFA when enabled).
 
 ## Setting CISO Assistant for production
 
@@ -744,6 +859,7 @@ Set `DJANGO_DEBUG=False` for security reasons.
 ### Non-root docker containers
 
 docker-compose.yml now relies on a non-root user 1001:1001, which is available in the image. Older deployments are using root user, which is still supported. To transition to non-root, use the following steps in the host:
+
 - docker compose down
 - update the docker-compose.yml file
 - sudo chown -R 1001:1001 db

@@ -4,7 +4,7 @@ description: Formal sign-off workflow that routes assessments, policies, evidenc
 
 # Validation flows
 
-A **validation flow** (labelled **Validations** in the sidebar) is the platform's structured sign-off workflow. It takes one or more objects — an audit, a risk assessment, a policy, an evidence record, a security exception, a contract, an accreditation — bundles them into a single request, and routes that request to a designated approver for a formal decision. The decision and its context are preserved as an audit trail.
+A **validation flow** (labelled **Validations** in the sidebar) is the platform's structured sign-off workflow. It takes one or more objects — an audit, a risk assessment, a policy, a security exception, a contract, an accreditation — bundles them into a single request, and routes that request to a designated approver for a formal decision. The decision and its context are preserved as an audit trail.
 
 It's the answer to _"who approved this, when, and on what evidence?"_ — the question that comes up in every certification audit, every internal review, and every regulator visit.
 
@@ -13,7 +13,7 @@ It's the answer to _"who approved this, when, and on what evidence?"_ — the qu
 ```mermaid
 graph LR
   R[Requester] -->|submits| VF[Validation flow]
-  VF -->|bundles| OBJ[Audits / risk studies / policies / evidence / exceptions / contracts / processings / accreditations]
+  VF -->|bundles| OBJ[Audits / risk assessments / BIAs / follow-ups / policies / exceptions / processings / accreditations / contracts]
   VF -->|routed to| A[Approver]
   A -->|decision| ST{Status}
   ST -.->|accepted| OK[Accepted]
@@ -34,23 +34,12 @@ A **requester** submits a validation flow for one or more objects in their domai
 
 ## What can be validated
 
-A single validation flow can bundle objects from across the platform — the request travels with the full bundle so the approver sees everything at once. The bundle can include:
+There are two ways to start a flow, and they cover slightly different objects:
 
-- **Audits** (compliance assessments)
-- **Risk assessments**
-- **Business impact analyses**
-- **Quantitative risk studies**
-- **EBIOS RM studies**
-- **Entity assessments** (third-party)
-- **Findings assessments** (follow-ups)
-- **Evidences**
-- **Security exceptions**
-- **Policies**
-- **Processings** (privacy)
-- **Accreditations**
-- **Contracts** (third-party)
+- **From the Validations list** — click **+**, then expand the **More** section to attach objects. The picker offers **Audits**, **Risk assessments**, **Business impact analyses**, **Findings assessments** (follow-ups), **Security exceptions**, **Processings** (privacy), **Accreditations**, and **Contracts** (third-party). You can mix several types in one flow when they belong to the same approval decision (e.g. "approve this audit and the related exceptions").
+- **From an object's own page** — objects that carry a validation section let you submit the open object directly. This is the only way to route a **Policy** through a flow, and it's also available on audits, risk assessments, BIAs, follow-ups, exceptions, processings, accreditations, and contracts.
 
-The bundle is loose — you mix object types in the same flow when they belong to the same approval decision (e.g. "approve this audit and the evidences supporting its results").
+So the full set of objects that can go through a validation flow is: audits, risk assessments, business impact analyses, follow-ups, policies, security exceptions, processings, accreditations, and contracts.
 
 ## Status lifecycle
 
@@ -86,7 +75,7 @@ The pattern fits anywhere a decision needs **formal, traceable sign-off**:
 - A security exception being granted — naming the risk-owner who accepted the residual risk.
 - An audit's results being signed off before publication to stakeholders.
 - A risk assessment's residual-risk acceptance — the formal capture required by ISO 27005 and most internal risk frameworks.
-- A third-party contract or entity assessment going through procurement sign-off.
+- A third-party contract going through procurement sign-off.
 
 It is _not_ the right tool for casual review or peer feedback — for those, use comments, the requirement-assessment review status, or a [findings assessment](findings-assessments.md). Validation flows are explicitly heavy: they exist so that the approval is preserved as evidence.
 

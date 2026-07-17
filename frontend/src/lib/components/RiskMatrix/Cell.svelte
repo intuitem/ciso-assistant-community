@@ -61,7 +61,7 @@
 		</Popover.Trigger>
 		<Popover.Positioner class="!z-50">
 			<Popover.Content>
-				<div class="card bg-surface-300">
+				<div class="card bg-surface-300-700">
 					<div class="p-4 max-h-56 overflow-y-auto">
 						{#each cellData as item}
 							{@const SvelteComponent = dataItemComponent}

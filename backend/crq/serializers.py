@@ -7,6 +7,7 @@ from core.serializers import (
 )
 from core.models import AppliedControl
 from core.utils import get_global_currency
+from pmbok.models import GenericCollection
 
 from .models import (
     QuantitativeRiskHypothesis,
@@ -78,6 +79,13 @@ class ImpactField(serializers.Field):
 
 
 class QuantitativeRiskStudyWriteSerializer(BaseModelSerializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
+
     class Meta:
         model = QuantitativeRiskStudy
         exclude = ["created_at", "updated_at"]
@@ -353,7 +361,7 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
     roc = serializers.DecimalField(max_digits=12, decimal_places=4, read_only=True)
     roc_display = serializers.CharField(read_only=True)
     roc_interpretation = serializers.CharField(read_only=True)
-    roc_calculation_explanation = serializers.CharField(read_only=True)
+    roc_calculation_explanation = serializers.JSONField(read_only=True)
     folder = FieldsRelatedField()
 
     def get_lec_data(self, obj):

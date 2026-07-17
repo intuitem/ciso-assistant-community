@@ -36,6 +36,7 @@ from structlog import get_logger
 from django.utils.timezone import now
 
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
+from custom_fields.host import CustomFieldsMixin
 
 from library.helpers import (
     get_referential_translation,
@@ -46,18 +47,19 @@ from library.helpers import (
 
 from core.utils import format_currency as _fmt_currency
 from global_settings.models import GlobalSettings
+from integrations.sync_mixin import IntegrationSyncableMixin
 
 from .base_models import (
     AbstractBaseModel,
     ActorSyncManager,
     ActorSyncMixin,
-    EditableMixin,
     ETADueDateMixin,
     NameDescriptionMixin,
 )
 from .utils import (
+    aggregate_compute_results,
     camel_case,
-    is_compute_result_truthy,
+    resolve_compute_result,
     sha256,
     update_selected_implementation_groups,
     _is_question_visible,
@@ -65,6 +67,7 @@ from .utils import (
 )
 from .validators import (
     validate_file_name,
+    validate_html_template_file_name,
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
@@ -114,81 +117,6 @@ def match_urn(urn_string):
         return match.groups()  # Returns all captured groups from the regex match
     else:
         return None
-
-
-def _create_questions_from_data(requirement_node, questions_data):
-    """Create Question and QuestionChoice objects from the old JSON questions format.
-
-    Args:
-        requirement_node: RequirementNode instance
-        questions_data: dict keyed by question URN with type, text, choices, etc.
-    """
-    from core.models import Question, QuestionChoice
-
-    questions_to_create = []
-    choices_data_per_question = []  # parallel list: choices data for each question
-
-    for order, (q_urn, q_data) in enumerate(questions_data.items()):
-        raw_type = q_data.get("type", "text")
-        q_type = "unique_choice" if raw_type == "single_choice" else raw_type
-        parts = q_urn.split(":")
-        q_ref_id = parts[-1] if parts else q_urn
-        question_text = q_data.get("text", "")
-
-        questions_to_create.append(
-            Question(
-                requirement_node=requirement_node,
-                urn=q_urn,
-                ref_id=q_ref_id,
-                text=question_text,
-                annotation=q_data.get("annotation", question_text),
-                type=q_type,
-                config=q_data.get("config"),
-                depends_on=q_data.get("depends_on"),
-                order=order,
-                weight=q_data.get("weight", 1),
-                folder=requirement_node.folder,
-                is_published=True,
-                translations=q_data.get("translations"),
-            )
-        )
-        choices_data_per_question.append(q_data.get("choices", []))
-
-    created_questions = Question.objects.bulk_create(questions_to_create)
-
-    choices_to_create = []
-    for question, choices_data in zip(created_questions, choices_data_per_question):
-        for c_order, choice in enumerate(choices_data):
-            c_urn = choice.get("urn") or None
-            c_parts = c_urn.split(":") if c_urn else []
-            c_ref_id = c_parts[-1] if c_parts else None
-            compute_result = choice.get("compute_result")
-            if compute_result is not None:
-                compute_result = str(compute_result).lower()
-            choice_value = choice.get("value", "")
-            choices_to_create.append(
-                QuestionChoice(
-                    question=question,
-                    urn=c_urn,
-                    ref_id=c_ref_id,
-                    value=choice_value,
-                    annotation=choice.get("annotation", choice_value),
-                    add_score=choice.get("add_score"),
-                    compute_result=compute_result,
-                    order=c_order,
-                    description=choice.get("description"),
-                    color=choice.get("color"),
-                    select_implementation_groups=choice.get(
-                        "select_implementation_groups"
-                    ),
-                    folder=requirement_node.folder,
-                    is_published=True,
-                    translations=choice.get("translations"),
-                )
-            )
-
-    if choices_to_create:
-        QuestionChoice.objects.bulk_create(choices_to_create)
 
 
 def _sync_questions_from_data(requirement_node, questions_data):
@@ -723,6 +651,162 @@ class StoredLibrary(LibraryMixin):
             library_label.garbage_collect()
 
 
+def librarydraft_fingerprint(draft) -> str:
+    """Stable hash of everything a LibraryDraft publishes (metadata + objects).
+
+    Deterministic — unlike to_library_dict(), it reads the *stored*
+    publication_date instead of defaulting to today's date, so the hash does
+    not drift over time. Module-level and attribute-based so the data
+    migration can apply it to historical model instances too.
+    """
+    payload = {
+        "urn": draft.urn or f"urn:{draft.packager}:risk:library:{draft.ref_id}",
+        "locale": draft.locale,
+        "ref_id": draft.ref_id,
+        "name": draft.name,
+        "description": draft.description,
+        "copyright": draft.copyright,
+        "version": draft.version,
+        "publication_date": draft.publication_date.isoformat()
+        if draft.publication_date
+        else None,
+        "provider": draft.provider,
+        "packager": draft.packager,
+        "annotation": draft.annotation,
+        "translations": draft.translations,
+        "dependencies": draft.dependencies,
+        "labels": draft.labels,
+        "content": draft.content,
+    }
+    encoded = json.dumps(payload, sort_keys=True, default=str).encode()
+    return hashlib.sha256(encoded).hexdigest()
+
+
+class LibraryDraft(NameDescriptionMixin, FolderMixin):
+    """
+    Work-in-progress library authored in the builder.
+
+    A draft is a document: it serializes to the same library YAML the tools/
+    Excel converter produces, and publishing means feeding that YAML to the
+    existing StoredLibrary/loader path. The builder never writes live
+    referential objects (Framework/ReferenceControl/Threat/...) itself.
+
+    Identity is (packager, ref_id): both are URN-safe slugs from which the
+    draft's whole URN family is derived. They are freely editable while the
+    draft has never been published; once published (or adopted from an
+    existing library), the identity is frozen because external artifacts may
+    reference it by URN.
+    """
+
+    # Segments used to mint URNs, hence stricter than the display-oriented
+    # packager/ref_id columns of LibraryMixin (legacy libraries hold values
+    # like "Paul Flatt" there).
+    IDENTITY_REGEX = r"^[a-z0-9_-]+$"
+
+    packager = models.CharField(
+        max_length=100,
+        validators=[
+            RegexValidator(regex=IDENTITY_REGEX, message="invalidLibraryIdentity")
+        ],
+        verbose_name=_("Packager"),
+    )
+    ref_id = models.CharField(
+        max_length=100,
+        validators=[
+            RegexValidator(regex=IDENTITY_REGEX, message="invalidLibraryIdentity")
+        ],
+        verbose_name=_("Reference ID"),
+    )
+    # Set when the draft adopts an existing library whose URN predates the
+    # minted urn:{packager}:risk:library:{ref_id} convention; null otherwise.
+    # unique: at most one draft may own a published identity (NULLs — fresh
+    # drafts — are exempt, as SQL uniqueness ignores them).
+    urn = models.CharField(
+        max_length=255, null=True, blank=True, unique=True, verbose_name=_("URN")
+    )
+    locale = models.CharField(max_length=100, default="en", verbose_name=_("Locale"))
+    version = models.IntegerField(
+        default=1, validators=[MinValueValidator(1)], verbose_name=_("Version")
+    )
+    provider = models.CharField(
+        max_length=200, blank=True, null=True, verbose_name=_("Provider")
+    )
+    copyright = models.CharField(
+        max_length=4096, blank=True, null=True, verbose_name=_("Copyright")
+    )
+    publication_date = models.DateField(null=True, blank=True)
+    annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
+    translations = models.JSONField(default=dict, blank=True)
+    dependencies = models.JSONField(default=list, blank=True)
+    labels = models.JSONField(default=list, blank=True)
+    # The library "objects" document (framework, threats, reference_controls,
+    # risk_matrices, requirement_mapping_sets, metric_definitions, preset).
+    content = models.JSONField(default=dict, blank=True)
+    # Builder lifecycle markers — never overload is_published (IAM visibility).
+    first_published_at = models.DateTimeField(null=True, blank=True)
+    last_published_at = models.DateTimeField(null=True, blank=True)
+    # Snapshot of what was last loaded, so the builder can tell a published
+    # draft that is unchanged from one that has pending edits (see
+    # has_unpublished_changes). Set together with last_published_at.
+    last_published_version = models.IntegerField(null=True, blank=True)
+    last_published_hash = models.CharField(max_length=64, null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("Library draft")
+        verbose_name_plural = _("Library drafts")
+
+    @property
+    def effective_urn(self) -> str:
+        return self.urn or f"urn:{self.packager}:risk:library:{self.ref_id}"
+
+    @property
+    def identity_locked(self) -> bool:
+        return self.first_published_at is not None
+
+    def publish_fingerprint(self) -> str:
+        return librarydraft_fingerprint(self)
+
+    def mark_published(self):
+        """Record the just-published snapshot. Caller saves the row."""
+        self.last_published_version = self.version
+        self.last_published_hash = self.publish_fingerprint()
+
+    @property
+    def has_unpublished_changes(self) -> bool:
+        """True for a published (identity-committed) draft edited since its
+        last publication snapshot."""
+        return (
+            self.identity_locked
+            and self.last_published_hash is not None
+            and self.publish_fingerprint() != self.last_published_hash
+        )
+
+    def to_library_dict(self) -> dict:
+        """Assemble the full library document (the YAML shape) from the draft."""
+        library = {
+            "urn": self.effective_urn,
+            "locale": self.locale,
+            "ref_id": self.ref_id,
+            "name": self.name,
+            "description": self.description,
+            "copyright": self.copyright,
+            "version": self.version,
+            "publication_date": self.publication_date or now().date(),
+            "provider": self.provider,
+            "packager": self.packager,
+            "annotation": self.annotation,
+        }
+        library = {key: value for key, value in library.items() if value is not None}
+        if self.translations:
+            library["translations"] = self.translations
+        if self.dependencies:
+            library["dependencies"] = self.dependencies
+        if self.labels:
+            library["labels"] = self.labels
+        library["objects"] = self.content or {}
+        return library
+
+
 class LibraryUpdater:
     class ScoreChangeDetected(Exception):
         """Exception raised when score boundaries change, requiring user decision"""
@@ -897,6 +981,8 @@ class LibraryUpdater:
                 framework_dict["urn"] = framework_dict["urn"].lower()
                 if "outcomes_definition" not in framework_dict:
                     framework_dict["outcomes_definition"] = []
+                # An omitted IG definition means that the framework no longer defines implementation groups.
+                framework_dict.setdefault("implementation_groups_definition", None)
                 prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
@@ -952,6 +1038,37 @@ class LibraryUpdater:
                     ).select_related("folder", "perimeter")
                 ]
 
+                # Drop selected IGs that the updated framework no longer defines.
+                valid_implementation_groups = {
+                    group.get("ref_id")
+                    for group in new_framework.implementation_groups_definition or []
+                    if isinstance(group, dict) and group.get("ref_id")
+                }
+                assessments_with_stale_implementation_groups = []
+                for compliance_assessment in compliance_assessments:
+                    selected_groups = (
+                        compliance_assessment.selected_implementation_groups or []
+                    )
+                    cleaned_groups = [
+                        group
+                        for group in selected_groups
+                        if group in valid_implementation_groups
+                    ]
+                    if cleaned_groups != selected_groups:
+                        compliance_assessment.selected_implementation_groups = (
+                            cleaned_groups
+                        )
+                        assessments_with_stale_implementation_groups.append(
+                            compliance_assessment
+                        )
+
+                if assessments_with_stale_implementation_groups:
+                    ComplianceAssessment.objects.bulk_update(
+                        assessments_with_stale_implementation_groups,
+                        ["selected_implementation_groups"],
+                        batch_size=100,
+                    )
+
                 existing_requirement_node_objects = {
                     rn.urn.lower(): rn
                     for rn in RequirementNode.objects.filter(framework=new_framework)
@@ -966,10 +1083,22 @@ class LibraryUpdater:
 
                 requirement_assessment_objects_to_create = []
                 requirement_assessment_objects_to_update = []
+                # Parallel set for O(1) dedup; `ra not in <list>` is O(N) via Django __eq__.
+                ra_pks_to_update = set()
                 answers_changed_ca_ids = set()
                 requirement_node_objects_to_update = []
                 order_id = 0
                 all_fields_to_update = set()
+                # Omitting one of these nullable fields in a new version must clear its previous value.
+                clearable_requirement_node_fields = (
+                    "ref_id",
+                    "name",
+                    "description",
+                    "annotation",
+                    "typical_evidence",
+                    "visibility_expression",
+                    "implementation_groups",
+                )
 
                 # Check if score boundaries changed (triggers warning + strategy prompt)
                 score_boundaries_changed = (
@@ -1086,6 +1215,9 @@ class LibraryUpdater:
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
+                        # Consider omissions before applying imported values.
+                        for field in clearable_requirement_node_fields:
+                            requirement_node_dict.setdefault(field, None)
                         for key, value in requirement_node_dict.items():
                             setattr(requirement_node_object, key, value)
                         requirement_node_object.clean()
@@ -1200,7 +1332,9 @@ class LibraryUpdater:
                                 ra.is_scored = (
                                     new_score is not None and self.strategy != "reset"
                                 )
-                                requirement_assessment_objects_to_update.append(ra)
+                                if ra.pk not in ra_pks_to_update:
+                                    ra_pks_to_update.add(ra.pk)
+                                    requirement_assessment_objects_to_update.append(ra)
 
                             # -------- Strategy application for documentation_score --------
                             if hasattr(ra, "documentation_score"):
@@ -1209,10 +1343,15 @@ class LibraryUpdater:
 
                                 if new_doc_score != old_doc_score:
                                     ra.documentation_score = new_doc_score
-                                    requirement_assessment_objects_to_update.append(ra)
+                                    if ra.pk not in ra_pks_to_update:
+                                        ra_pks_to_update.add(ra.pk)
+                                        requirement_assessment_objects_to_update.append(
+                                            ra
+                                        )
 
                         if questions is None:
-                            if ra not in requirement_assessment_objects_to_update:
+                            if ra.pk not in ra_pks_to_update:
+                                ra_pks_to_update.add(ra.pk)
                                 requirement_assessment_objects_to_update.append(ra)
                             continue
 
@@ -1275,21 +1414,28 @@ class LibraryUpdater:
 
                         if ra_changed:
                             ra.recompute_assessment()
-                            if ra not in requirement_assessment_objects_to_update:
+                            if ra.pk not in ra_pks_to_update:
+                                ra_pks_to_update.add(ra.pk)
                                 requirement_assessment_objects_to_update.append(ra)
 
-                    # update threats linked to the requirement_node
-                    for threat_urn in requirement_node.get("threats", []):
+                    # Sync threats linked to the requirement_node. Use .set()
+                    # (not add-only): a link removed in the new version must be
+                    # removed from the live node too.
+                    new_threats = []
+                    for threat_urn in requirement_node.get("threats") or []:
                         normalized_threat_urn = threat_urn.lower()
                         threat_object = (
                             objects_tracked.get(normalized_threat_urn)
                             or Threat.objects.filter(urn=normalized_threat_urn).first()
                         )
                         if threat_object:
-                            requirement_node_object.threats.add(threat_object)
+                            new_threats.append(threat_object)
+                    if new_threats or requirement_node_object.threats.exists():
+                        requirement_node_object.threats.set(new_threats)
 
-                    # update reference_controls linked to the requirement_node
-                    for rc_urn in requirement_node.get("reference_controls", []):
+                    # Sync reference_controls linked to the requirement_node.
+                    new_reference_controls = []
+                    for rc_urn in requirement_node.get("reference_controls") or []:
                         normalized_rc_urn = rc_urn.lower()
                         rc_object = (
                             objects_tracked.get(normalized_rc_urn)
@@ -1298,22 +1444,18 @@ class LibraryUpdater:
                             ).first()
                         )
                         if rc_object:
-                            requirement_node_object.reference_controls.add(rc_object)
+                            new_reference_controls.append(rc_object)
+                    if (
+                        new_reference_controls
+                        or requirement_node_object.reference_controls.exists()
+                    ):
+                        requirement_node_object.reference_controls.set(
+                            new_reference_controls
+                        )
 
                 # Fix for the dual bulk_update issue - consolidate into one update
                 if requirement_node_objects_to_update:
-                    # Ensure all needed fields are included
-                    fields_to_update = sorted(
-                        all_fields_to_update.union(
-                            {
-                                "name",
-                                "description",
-                                "order_id",
-                                "implementation_groups",
-                                "visibility_expression",
-                            }
-                        )
-                    )
+                    fields_to_update = sorted(all_fields_to_update)
                     RequirementNode.objects.bulk_update(
                         requirement_node_objects_to_update,
                         fields_to_update,
@@ -1654,6 +1796,138 @@ class LoadedLibrary(LibraryMixin):
         )
 
 
+class ObjectClassification(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+    DEFAULT_TLP_LEVELS = [
+        {
+            "abbreviation": "CLEAR",
+            "name": "clear",
+            "rank": 0,
+            "hexcolor": "#FFFFFF",
+            "translations": {"fr": {"name": "clair"}},
+        },
+        {
+            "abbreviation": "GREEN",
+            "name": "green",
+            "rank": 1,
+            "hexcolor": "#33FF00",
+            "translations": {"fr": {"name": "vert"}},
+        },
+        {
+            "abbreviation": "AMBER",
+            "name": "amber",
+            "rank": 2,
+            "hexcolor": "#FFC000",
+            "translations": {"fr": {"name": "orange"}},
+        },
+        {
+            "abbreviation": "AMBER+STRICT",
+            "name": "amber_strict",
+            "rank": 3,
+            "hexcolor": "#FFC000",
+            "translations": {"fr": {"name": "orange+strict"}},
+        },
+        {
+            "abbreviation": "RED",
+            "name": "red",
+            "rank": 4,
+            "hexcolor": "#FF2B2B",
+            "translations": {"fr": {"name": "rouge"}},
+        },
+    ]
+
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+    builtin = models.BooleanField(default=False, verbose_name=_("Built-in"))
+    is_visible = models.BooleanField(default=True, verbose_name=_("Is Visible"))
+    translations = models.JSONField(
+        default=dict, blank=True, null=True, verbose_name=_("Translations")
+    )
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name = _("Object classification")
+        verbose_name_plural = _("Object classifications")
+
+    @classmethod
+    def create_default_classifications(cls):
+        # is_visible is user-controlled: set on insert only, never on re-seed.
+        tlp, _ = cls.objects.update_or_create(
+            ref_id="TLP",
+            defaults={
+                "name": "TLP",
+                "description": "Traffic Light Protocol",
+                "builtin": True,
+                "translations": {
+                    "fr": {
+                        "name": "TLP",
+                        "description": "Protocole des feux de circulation",
+                    }
+                },
+            },
+            create_defaults={
+                "name": "TLP",
+                "description": "Traffic Light Protocol",
+                "builtin": True,
+                "is_visible": True,
+                "translations": {
+                    "fr": {
+                        "name": "TLP",
+                        "description": "Protocole des feux de circulation",
+                    }
+                },
+            },
+        )
+        for level in cls.DEFAULT_TLP_LEVELS:
+            ClassificationLevel.objects.update_or_create(
+                object_classification=tlp,
+                abbreviation=level["abbreviation"],
+                defaults={**level, "builtin": True},
+            )
+
+
+class ClassificationLevel(NameDescriptionMixin, FolderMixin):
+    object_classification = models.ForeignKey(
+        ObjectClassification,
+        on_delete=models.CASCADE,
+        related_name="levels",
+        verbose_name=_("Object classification"),
+    )
+    rank = models.PositiveIntegerField(default=0, verbose_name=_("Rank"))
+    hexcolor = models.CharField(
+        max_length=9, blank=True, default="", verbose_name=_("Color")
+    )
+    abbreviation = models.CharField(
+        max_length=50, blank=True, default="", verbose_name=_("Abbreviation")
+    )
+    builtin = models.BooleanField(default=False, verbose_name=_("Built-in"))
+    is_visible = models.BooleanField(default=True, verbose_name=_("Is Visible"))
+    translations = models.JSONField(
+        default=dict, blank=True, null=True, verbose_name=_("Translations")
+    )
+
+    fields_to_check = ["abbreviation", "object_classification"]
+
+    class Meta:
+        ordering = ["object_classification", "rank"]
+        verbose_name = _("Classification level")
+        verbose_name_plural = _("Classification levels")
+
+    def save(self, *args, **kwargs):
+        if self.object_classification_id:
+            self.folder = self.object_classification.folder
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.abbreviation or self.name
+
+    @property
+    def label(self):
+        t = (self.translations or {}).get(get_language(), {})
+        return t.get("name") or self.abbreviation or self.name
+
+
 class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     """
     Model to store custom terminology for the application
@@ -1668,6 +1942,8 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         METRIC_UNIT = "metric_definition.unit", "metricUnit"
         PROJECT_STATUS = "project.status", "projectStatus"
         PROJECT_HEALTH = "project.health", "projectHealth"
+        PROCESSING_NATURE = "processing.nature", "processingNature"
+        PERSONAL_DATA_CATEGORY = "personal_data.category", "personalDataCategory"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -2290,7 +2566,7 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         return unsynced_applied_controls_query
 
 
-class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
+class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -2314,6 +2590,11 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
             "If the risk matrix is set as disabled, it will not be available for selection for new risk assessments."
         ),
     )
+
+    class Meta(ReferentialObjectMixin.Meta, I18nObjectMixin.Meta):
+        # Explicit MRO for the parents' (abstract-only) Meta classes; no
+        # options of its own.
+        pass
 
     @property
     def is_used(self) -> bool:
@@ -2382,7 +2663,7 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         return self.get_name_translated
 
 
-class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
+class Framework(ReferentialObjectMixin, I18nObjectMixin):
     min_score = models.IntegerField(default=0, verbose_name=_("Minimum score"))
     max_score = models.IntegerField(default=100, verbose_name=_("Maximum score"))
     scores_definition = models.JSONField(
@@ -2420,6 +2701,13 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
     class Meta:
         verbose_name = _("Framework")
         verbose_name_plural = _("Frameworks")
+
+    def get_implementation_groups_definition_translated(self):
+        import copy
+
+        return update_translations_in_object(
+            copy.deepcopy(self.implementation_groups_definition or [])
+        )
 
     def is_deletable(self) -> bool:
         """
@@ -2493,7 +2781,7 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
         return self._is_dynamic_cache
 
     def __str__(self) -> str:
-        return f"{self.provider} - {self.name}"
+        return f"{self.provider} - {self.get_name_translated}"
 
 
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
@@ -2588,7 +2876,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         reference_controls = []
         for control in _reference_controls:
             reference_controls.append(
-                {"str": control.display_long, "urn": control.urn, "id": control.id}
+                {"str": control.display_long, "urn": control.urn, "id": str(control.id)}
             )
         return reference_controls
 
@@ -2598,7 +2886,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         threats = []
         for control in _threats:
             threats.append(
-                {"str": control.display_long, "urn": control.urn, "id": control.id}
+                {"str": control.display_long, "urn": control.urn, "id": str(control.id)}
             )
         return threats
 
@@ -2649,9 +2937,9 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             if choice.add_score is not None:
                 choice_data["add_score"] = choice.add_score
             if choice.compute_result is not None:
-                choice_data["compute_result"] = is_compute_result_truthy(
-                    choice.compute_result
-                )
+                resolved = resolve_compute_result(choice.compute_result)
+                if resolved is not None:
+                    choice_data["compute_result"] = resolved
             if choice.color:
                 choice_data["color"] = choice.color
             if choice.select_implementation_groups:
@@ -2668,6 +2956,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             q_data = {
                 "type": question.type,
                 "text": q_tr.get("text", question.text or ""),
+                "weight": question.weight,
             }
             if question.annotation:
                 q_data["annotation"] = question.annotation
@@ -3039,7 +3328,7 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         verbose_name="Default assignee",
         blank=True,
     )
-    fields_to_check = ["name"]
+    fields_to_check = ["ref_id", "name"]
 
     class Meta:
         verbose_name = _("Perimeter")
@@ -3071,6 +3360,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
         DRAFT = "draft", "draft"
         IN_REVIEW = "in_review", "in review"
         APPROVED = "approved", "approved"
+        REJECTED = "rejected", "rejected"
         RESOLVED = "resolved", "resolved"
         EXPIRED = "expired", "expired"
         DEPRECATED = "deprecated", "deprecated"
@@ -3111,7 +3401,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
     link = models.URLField(null=True, blank=True, verbose_name=_("Link"))
 
-    fields_to_check = ["name"]
+    fields_to_check = ["ref_id", "name"]
 
     def __str__(self):
         return self.name
@@ -3153,8 +3443,23 @@ class AssetCapability(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class Asset(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+    IntegrationSyncableMixin,
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
+    CustomFieldsMixin,
 ):
+    INTEGRATION_MODEL_KEY = "asset"
+    INTEGRATION_SYNCABLE_FIELDS: Final[set[str]] = {
+        "name",
+        "description",
+        "ref_id",
+        "type",
+        "reference_link",
+        "observation",
+    }
+
     class Type(models.TextChoices):
         """
         The type of the asset.
@@ -3232,6 +3537,7 @@ class Asset(
     }
 
     SECURITY_OBJECTIVES_SCALES = {
+        "1-3": [1, 2, 3, 3, 3],
         "1-4": [1, 2, 3, 4, 4],
         "1-5": [1, 2, 3, 4, 5],
         "0-3": [0, 1, 2, 3, 3],
@@ -3349,7 +3655,7 @@ class Asset(
         verbose_name=_("DORA Discontinuing Impact"),
     )
 
-    fields_to_check = ["name"]
+    fields_to_check = ["ref_id", "name"]
 
     class Meta:
         verbose_name_plural = _("Assets")
@@ -3938,25 +4244,40 @@ class Asset(
         ]
 
     def save(self, *args, **kwargs) -> None:
+        # Capture changed syncable fields before writing, for outbound sync.
+        changed_fields = self._capture_sync_changed_fields()
+        # _state.adding, not `pk is None`: the UUID pk is defaulted at
+        # instantiation, so pk is never None even for unsaved rows.
+        is_new = self._state.adding
+        # ``skip_sync`` lets the inbound pull path write without re-triggering a
+        # push (set by the orchestrator's _update_local_object).
+        skip_sync = kwargs.pop("skip_sync", False)
         self.full_clean()
-        return super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
+        if not skip_sync:
+            self._trigger_sync(is_new=is_new, changed_fields=changed_fields)
 
-    def get_security_objectives_comparison(self) -> list[dict]:
+    def get_security_objectives_comparison(
+        self, security_objectives=None, security_capabilities=None
+    ) -> list[dict]:
         """
         Compare security objectives (expectation) vs capabilities (reality) using RAW values.
         Returns a list of dicts with: objective, expectation, reality, verdict.
         Verdict is True if objective is met, False if not met, None if cannot be determined.
+
+        Callers may pass security_objectives/capabilities (as {"objectives": {...}})
+        to skip the per-asset graph traversal.
         """
         # Read raw JSON structures (no display/scales)
         so = (
-            self.get_security_objectives()
-            if hasattr(self, "get_security_objectives")
-            else self.security_objectives
+            security_objectives
+            if security_objectives is not None
+            else self.get_security_objectives()
         )
         sc = (
-            self.get_security_capabilities()
-            if hasattr(self, "get_security_capabilities")
-            else self.security_capabilities
+            security_capabilities
+            if security_capabilities is not None
+            else self.get_security_capabilities()
         )
 
         so_obj = (so or {}).get("objectives", {}) or {}
@@ -3998,23 +4319,32 @@ class Asset(
 
         return result
 
-    def get_recovery_objectives_comparison(self) -> list[dict]:
+    def get_recovery_objectives_comparison(
+        self,
+        disaster_recovery_objectives=None,
+        recovery_capabilities=None,
+        display_objectives_list=None,
+        display_capabilities_list=None,
+    ) -> list[dict]:
         """
         Compare recovery objectives (expectation) vs capabilities (reality).
         Returns list with objective, expectation, reality, and verdict.
         Compares raw seconds numerically, outputs formatted display strings.
         Verdict is True if objective is met, False if not met, None if cannot be determined.
+
+        Callers may pass the raw ({"objectives": {...}}) and display ([{"str": ...}])
+        inputs to skip the per-asset graph traversal.
         """
 
         dr_src = (
-            self.get_disaster_recovery_objectives()
-            if hasattr(self, "get_disaster_recovery_objectives")
-            else (getattr(self, "disaster_recovery_objectives", {}) or {})
+            disaster_recovery_objectives
+            if disaster_recovery_objectives is not None
+            else self.get_disaster_recovery_objectives()
         )
         rc_src = (
-            self.get_recovery_capabilities()
-            if hasattr(self, "get_recovery_capabilities")
-            else (getattr(self, "recovery_capabilities", {}) or {})
+            recovery_capabilities
+            if recovery_capabilities is not None
+            else self.get_recovery_capabilities()
         )
 
         def _normalize_seconds(source: dict) -> dict[str, int]:
@@ -4069,9 +4399,15 @@ class Asset(
             return parsed
 
         display_objectives = _parse_display(
-            self.get_disaster_recovery_objectives_display()
+            display_objectives_list
+            if display_objectives_list is not None
+            else self.get_disaster_recovery_objectives_display()
         )
-        display_capabilities = _parse_display(self.get_recovery_capabilities_display())
+        display_capabilities = _parse_display(
+            display_capabilities_list
+            if display_capabilities_list is not None
+            else self.get_recovery_capabilities_display()
+        )
 
         for item in result:
             key = item["objective"].lower()
@@ -4510,16 +4846,10 @@ class Evidence(
         super().save(*args, **kwargs)
         self.revisions.update(is_published=self.is_published)
 
-    def delete(self, using=None, keep_parents=False):
-        for rev in self.revisions.all():
-            if rev.attachment:
-                rev.attachment.delete(save=False)
-
-        return super().delete(using=using, keep_parents=keep_parents)
-
     @property
     def last_revision(self):
-        return self.revisions.order_by("-version").first() or None
+        revs = self.revisions.all()
+        return max(revs, key=lambda r: r.version) if revs else None
 
     def get_folder(self):
         if self.applied_controls:
@@ -4529,24 +4859,18 @@ class Evidence(
         else:
             return None
 
-    def filename(self):
-        return (
-            os.path.basename(self.last_revision.attachment.name)
-            if self.last_revision and self.last_revision.attachment
-            else None
-        )
+    def filename(self) -> str | None:
+        return self.last_revision.filename() if self.last_revision else None
 
     def get_size(self):
+        rev = self.last_revision
         if (
-            not self.last_revision
-            or not self.last_revision.attachment
-            or not self.last_revision.attachment.storage.exists(
-                self.last_revision.attachment.name
-            )
+            not rev
+            or not rev.attachment
+            or not rev.attachment.storage.exists(rev.attachment.name)
         ):
             return None
-        # get the attachment size with the correct unit
-        size = self.last_revision.attachment.size
+        size = rev.attachment.size
         if size < 1024:
             return f"{size} B"
         elif size < 1024 * 1024:
@@ -4556,9 +4880,10 @@ class Evidence(
 
     @property
     def attachment_hash(self):
-        if not self.last_revision or not self.last_revision.attachment:
+        rev = self.last_revision
+        if not rev or not rev.attachment:
             return None
-        return hashlib.sha256(self.last_revision.attachment.read()).hexdigest()
+        return hashlib.sha256(rev.attachment.read()).hexdigest()
 
 
 class EvidenceRevision(AbstractBaseModel, FolderMixin):
@@ -4601,6 +4926,10 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
 
     fields_to_check = ["evidence", "version"]
+
+    class Meta:
+        verbose_name = _("Evidence Revision")
+        verbose_name_plural = _("Evidence Revisions")
 
     def __str__(self):
         return f"{self.evidence.name} v{self.version}"
@@ -4649,7 +4978,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
                             if hasattr(self.attachment, "seek"):
                                 self.attachment.seek(0)
                 except Exception as e:
-                    logger = get_logger(__name__)
                     logger.warning(
                         "Failed to compute attachment hash",
                         revision_id=self.pk,
@@ -4663,13 +4991,9 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
         super().save(*args, **kwargs)
 
-    def delete(self, using=None, keep_parents=False):
-        if self.attachment:
-            self.attachment.delete(save=False)
-
-        return super().delete(using=using, keep_parents=keep_parents)
-
-    def filename(self):
+    def filename(self) -> str | None:
+        if not self.attachment:
+            return None
         return os.path.basename(self.attachment.name)
 
     def get_size(self):
@@ -4685,10 +5009,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             return f"{size / 1024:.1f} KB"
         else:
             return f"{size / 1024 / 1024:.1f} MB"
-
-    class Meta:
-        verbose_name = _("Evidence Revision")
-        verbose_name_plural = _("Evidence Revisions")
 
 
 class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
@@ -4803,7 +5123,7 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         related_name="incidents",
     )
 
-    fields_to_check = ["name", "ref_id"]
+    fields_to_check = ["ref_id"]
 
     class Meta:
         verbose_name = "Incident"
@@ -4877,9 +5197,26 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
             raise ValidationError("Timestamp cannot be in the future.")
         self.folder = self.incident.folder
         super().save(*args, **kwargs)
+        self.touch_incident()
+
+    def delete(self, *args, **kwargs):
+        incident = self.incident
+        super().delete(*args, **kwargs)
+        self.touch_incident(incident)
+
+    def touch_incident(self, incident=None):
+        incident = incident or self.incident
+        Incident.objects.filter(pk=incident.pk).update(updated_at=now())
 
 
 class Comment(AbstractBaseModel, FolderMixin):
+    PARENT_FIELDS = (
+        "requirement_assessment",
+        "risk_scenario",
+        "applied_control",
+        "finding",
+    )
+
     body = models.TextField(verbose_name=_("Body"))
     is_tainted = models.BooleanField(default=False, verbose_name=_("Edited"))
     is_active = models.BooleanField(default=True, verbose_name=_("Active"))
@@ -4975,6 +5312,11 @@ class Comment(AbstractBaseModel, FolderMixin):
         if not self._state.adding and self.pk:
             try:
                 old = Comment.objects.get(pk=self.pk)
+                for field_name in self.PARENT_FIELDS:
+                    if getattr(old, f"{field_name}_id") != getattr(
+                        self, f"{field_name}_id"
+                    ):
+                        raise ValidationError(_("Comment parent cannot be changed."))
                 if old.body != self.body:
                     self.is_tainted = True
             except Comment.DoesNotExist:
@@ -4996,8 +5338,15 @@ def _get_default_applied_control_cost():
 
 
 class AppliedControl(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+    IntegrationSyncableMixin,
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
+    CustomFieldsMixin,
 ):
+    INTEGRATION_MODEL_KEY = "applied_control"
+
     class Status(models.TextChoices):
         TO_DO = "to_do", _("To do")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -5199,18 +5548,15 @@ class AppliedControl(
         related_name="applied_controls",
     )
 
-    fields_to_check = ["name"]
+    fields_to_check = ["ref_id", "name"]
 
     class Meta:
         verbose_name = _("Applied control")
         verbose_name_plural = _("Applied controls")
 
     def save(self, *args, **kwargs):
-        # Track what changed
-        changed_fields = []
-        old_instance = AppliedControl.objects.filter(pk=self.pk).first()
-        if old_instance:
-            changed_fields = self._get_changed_fields(old_instance)
+        # Track what changed (vs the persisted row) for outbound sync.
+        changed_fields = self._capture_sync_changed_fields()
 
         if self.reference_control and self.category is None:
             self.category = self.reference_control.category
@@ -5219,8 +5565,9 @@ class AppliedControl(
         if self.status == "active":
             self.progress_field = 100
 
-        # Save first
-        is_new = self.pk is None
+        # Save first. _state.adding, not `pk is None`: the UUID pk is defaulted
+        # at instantiation, so pk is never None even for unsaved rows.
+        is_new = self._state.adding
         skip_sync = kwargs.pop("skip_sync", False)
         super(AppliedControl, self).save(*args, **kwargs)
 
@@ -5235,47 +5582,6 @@ class AppliedControl(
         from metrology.models import BuiltinMetricSample
 
         BuiltinMetricSample.update_or_create_snapshot(self.folder)
-
-    def _get_changed_fields(self, old_instance) -> list[str]:
-        """Detect which fields changed"""
-        changed = []
-
-        for field in self.INTEGRATION_SYNCABLE_FIELDS:
-            old_val = getattr(old_instance, field)
-            new_val = getattr(self, field)
-            if old_val != new_val:
-                changed.append(field)
-
-        return changed
-
-    def _trigger_sync(self, is_new: bool, changed_fields: List[str]):
-        """Queue sync tasks for all active integrations"""
-        from integrations.tasks import sync_object_to_integrations
-        from integrations.models import IntegrationConfiguration
-
-        # Find all active ITSM integrations for this folder
-        configurations = IntegrationConfiguration.objects.filter(
-            folder=Folder.get_root_folder(),
-            provider__provider_type="itsm",
-            is_active=True,
-        )
-
-        if configurations.exists() and (is_new or changed_fields):
-            # Dispatch async task
-            logger.debug(
-                "Dispatching remote object sync task", applied_control_id=self.pk
-            )
-            transaction.on_commit(
-                lambda: sync_object_to_integrations.schedule(
-                    args=(
-                        ContentType.objects.get_for_model(self),
-                        self.pk,
-                        list(configurations.values_list("id", flat=True)),
-                        changed_fields,
-                    ),
-                    delay=1,
-                )
-            )
 
     @property
     def risk_scenarios(self):
@@ -5307,6 +5613,10 @@ class AppliedControl(
     @property
     def annual_cost(self):
         """Returns the annualized cost as a numeric value"""
+        return self.compute_annual_cost()
+
+    def compute_annual_cost(self, daily_rate=None):
+        """Annualized cost. Pass daily_rate to skip the per-control GlobalSettings lookup."""
         if not self.cost:
             return 0
 
@@ -5314,11 +5624,9 @@ class AppliedControl(
         run_cost = self.cost.get("run", {})
         amortization_period = self.cost.get("amortization_period", 1)
 
-        # Get daily rate from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        daily_rate = (
-            general_settings.value.get("daily_rate", 500) if general_settings else 500
-        )
+        # Get daily rate from global settings unless provided by the caller
+        if daily_rate is None:
+            daily_rate = GlobalSettings.get_daily_rate()
 
         # Calculate annual cost
         annual_cost = 0
@@ -5358,15 +5666,15 @@ class AppliedControl(
             if (cost_data := self.cost.get(cost_type)) is None:
                 continue
 
-            if (cost := cost_data.get("fixed_cost", 0)) == 0:
+            fixed_cost = cost_data.get("fixed_cost", 0)
+            people_days = cost_data.get("people_days", 0)
+            if not fixed_cost and not people_days:
                 continue
 
-            people_days = cost_data.get("people_days", 0)
             cost_parts: list[str] = []
-
-            stringified_cost = self._stringify_cost(cost, currency)
-            cost_parts.append(stringified_cost)
-            if people_days > 0:
+            if fixed_cost:
+                cost_parts.append(self._stringify_cost(fixed_cost, currency))
+            if people_days:
                 cost_parts.append(f"{people_days} people days")
 
             cost_string = ", ".join(cost_parts)
@@ -5677,7 +5985,7 @@ class Vulnerability(
     )
     is_published = models.BooleanField(_("published"), default=True)
 
-    fields_to_check = ["name"]
+    fields_to_check = ["ref_id", "name"]
 
     def save(self, *args, **kwargs):
         from datetime import date
@@ -6848,6 +7156,12 @@ class ComplianceAssessment(Assessment):
     class Meta:
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
+        permissions = [
+            (
+                "view_compliance_assessment_full",
+                "Can view the full auditor view of a compliance assessment (all rows and fields)",
+            ),
+        ]
 
     # --- Visibility-derived booleans ---
     # These mirror legacy boolean fields. Storage is `field_visibility` keyed by
@@ -7236,7 +7550,12 @@ class ComplianceAssessment(Assessment):
                     else:
                         score = 0
                 else:
-                    score = getattr(ras, score_field) or 0
+                    raw = getattr(ras, score_field)
+                    if raw is None:
+                        if score_field == "score":
+                            continue
+                        raw = 0
+                    score = raw
                 total += score * weight
                 total_weight += weight
             if total_weight == 0:
@@ -7266,8 +7585,11 @@ class ComplianceAssessment(Assessment):
                 else:
                     raw = ra_max
             else:
-                # Legacy semantics: None -> 0 (pulls unscored to min).
-                raw = getattr(ras, score_field) or 0
+                raw = getattr(ras, score_field)
+                if raw is None:
+                    if score_field == "score":
+                        return None
+                    raw = 0
 
             ratio = (raw - ra_min) / ra_range
             return ratio, (ras.requirement.weight or 1)
@@ -7393,7 +7715,13 @@ class ComplianceAssessment(Assessment):
           (only when show_documentation_score is enabled)
         - maturity_score: average of the enabled layers
 
-        Each layer uses the same score_calculation_method (AVG, SUM, AVG_OF_AVG).
+        Each layer uses the same score_calculation_method (AVG, SUM, AVG_OF_AVG)
+        and is computed independently over the SAME row set: an RA must have an
+        actual implementation score to participate. `is_scored=True` with
+        `score is None` is a data inconsistency (the answer-driven path never
+        produces it) and is treated as fully unscored, so it is dropped from
+        both layers, not just the implementation one. A standalone
+        documentation_score on such a row is therefore not aggregated.
 
         When anchor_na_to_target is True, N/A requirements are included with
         their scores replaced by the effective target (target_score or max_score).
@@ -7407,14 +7735,15 @@ class ComplianceAssessment(Assessment):
                 requirement_assessments_scored = [
                     requirement
                     for requirement in prefetched_requirements
-                    if requirement.is_scored
-                    or requirement.result == RequirementAssessment.Result.NOT_APPLICABLE
+                    if requirement.result == RequirementAssessment.Result.NOT_APPLICABLE
+                    or (requirement.is_scored and requirement.score is not None)
                 ]
             else:
                 requirement_assessments_scored = [
                     requirement
                     for requirement in prefetched_requirements
                     if requirement.is_scored
+                    and requirement.score is not None
                     and requirement.result
                     != RequirementAssessment.Result.NOT_APPLICABLE
                 ]
@@ -7426,13 +7755,13 @@ class ComplianceAssessment(Assessment):
             )
             if self.anchor_na_to_target:
                 # Keep N/A items (they'll be anchored to target), but still
-                # exclude non-N/A items that have is_scored=False.
-                qs = qs.exclude(
-                    ~Q(result=RequirementAssessment.Result.NOT_APPLICABLE),
-                    is_scored=False,
+                # exclude non-N/A items that aren't actually scored.
+                qs = qs.filter(
+                    Q(result=RequirementAssessment.Result.NOT_APPLICABLE)
+                    | (Q(is_scored=True) & Q(score__isnull=False))
                 )
             else:
-                qs = qs.exclude(is_scored=False).exclude(
+                qs = qs.filter(is_scored=True, score__isnull=False).exclude(
                     result=RequirementAssessment.Result.NOT_APPLICABLE
                 )
             requirement_assessments_scored = list(qs)
@@ -7480,21 +7809,23 @@ class ComplianceAssessment(Assessment):
         not the CA's max — keeping 100% achievable when every RA is at its max.
         """
         if self.score_calculation_method == self.CalculationMethod.SUM:
-            # Keep this set aligned with _compute_score_for_field's numerator:
-            # when anchor_na_to_target is on, N/A items contribute on the
-            # numerator side, so they must be in the max here too — otherwise
-            # the displayed ratio can exceed 100%.
+            # Keep this set aligned with get_global_score's numerator: rows the
+            # numerator skips (is_scored=False, or is_scored=True with a null
+            # score) must not inflate the denominator. When anchor_na_to_target
+            # is on, N/A items contribute on the numerator side (anchored to
+            # target), so they stay in the max too, otherwise the displayed
+            # ratio can exceed 100%.
             qs = RequirementAssessment.objects.filter(
                 compliance_assessment=self,
                 requirement__assessable=True,
             ).select_related("requirement")
             if self.anchor_na_to_target:
-                qs = qs.exclude(
-                    ~Q(result=RequirementAssessment.Result.NOT_APPLICABLE),
-                    is_scored=False,
+                qs = qs.filter(
+                    Q(result=RequirementAssessment.Result.NOT_APPLICABLE)
+                    | (Q(is_scored=True) & Q(score__isnull=False))
                 )
             else:
-                qs = qs.exclude(is_scored=False).exclude(
+                qs = qs.filter(is_scored=True, score__isnull=False).exclude(
                     result=RequirementAssessment.Result.NOT_APPLICABLE
                 )
             requirement_assessments_scored = qs
@@ -7534,7 +7865,7 @@ class ComplianceAssessment(Assessment):
 
         return [
             group.get("name")
-            for group in framework.implementation_groups_definition
+            for group in framework.get_implementation_groups_definition_translated()
             if group.get("ref_id") in self.selected_implementation_groups
         ]
 
@@ -8040,107 +8371,6 @@ class ComplianceAssessment(Assessment):
         }
         return findings
 
-    def compute_requirement_assessments_results(
-        self, mapping_set: RequirementMappingSet, source_assessment: Self
-    ) -> tuple[list["RequirementAssessment"], dict["RequirementAssessment", list[str]]]:
-        requirement_assessments: list[RequirementAssessment] = []
-        assessment_source_dict: dict[RequirementAssessment, list[str]] = {}
-        result_order = (
-            RequirementAssessment.Result.NOT_ASSESSED,
-            RequirementAssessment.Result.NOT_APPLICABLE,
-            RequirementAssessment.Result.NON_COMPLIANT,
-            RequirementAssessment.Result.PARTIALLY_COMPLIANT,
-            RequirementAssessment.Result.COMPLIANT,
-        )
-
-        def assign_attributes(target, attributes):
-            """
-            Helper function to assign attributes to a target object.
-            Only assigns if the attribute is not None.
-            """
-            keys = ["result", "status", "score", "is_scored", "observation"]
-            for key, value in zip(keys, attributes):
-                if value is not None:
-                    setattr(target, key, value)
-
-        for requirement_assessment in self.requirement_assessments.all():
-            mappings = mapping_set.mappings.filter(
-                target_requirement=requirement_assessment.requirement
-            )
-            inferences = []
-            refs = []
-
-            # Filter for full coverage relationships if applicable
-            if mappings.filter(
-                relationship__in=RequirementMapping.FULL_COVERAGE_RELATIONSHIPS
-            ).exists():
-                mappings = mappings.filter(
-                    relationship__in=RequirementMapping.FULL_COVERAGE_RELATIONSHIPS
-                )
-
-            for mapping in mappings:
-                source_requirement_assessment = RequirementAssessment.objects.get(
-                    compliance_assessment=source_assessment,
-                    requirement=mapping.source_requirement,
-                )
-                inferred_result = requirement_assessment.infer_result(
-                    mapping=mapping,
-                    source_requirement_assessment=source_requirement_assessment,
-                )
-                if inferred_result.get("result") in result_order:
-                    inferences.append(
-                        (
-                            inferred_result.get("result"),
-                            inferred_result.get("status"),
-                            inferred_result.get("score"),
-                            inferred_result.get("is_scored"),
-                            inferred_result.get("observation"),
-                        )
-                    )
-                    refs.append(source_requirement_assessment)
-
-            if inferences:
-                if len(inferences) == 1:
-                    selected_inference = inferences[0]
-                    ref = refs[0]
-                else:
-                    selected_inference = min(
-                        inferences, key=lambda x: result_order.index(x[0])
-                    )
-                    ref = refs[inferences.index(selected_inference)]
-
-                assessment_source_dict[requirement_assessment] = [
-                    str(ref.id) for ref in refs
-                ]
-
-                assign_attributes(requirement_assessment, selected_inference)
-                requirement_assessment.mapping_inference = {
-                    "result": requirement_assessment.result,
-                    "source_requirement_assessment": {
-                        "str": str(ref),
-                        "id": str(ref.id),
-                        "is_scored": ref.is_scored,
-                        "score": ref.score,
-                        "coverage": mapping.coverage,
-                    },
-                    # "mappings": [mapping.id for mapping in mappings],
-                }
-                requirement_assessments.append(requirement_assessment)
-
-        RequirementAssessment.objects.bulk_update(
-            requirement_assessments,
-            [
-                "mapping_inference",
-                "result",
-                "status",
-                "score",
-                "is_scored",
-                "observation",
-            ],
-            batch_size=1000,
-        )
-        return requirement_assessments, assessment_source_dict
-
     def _get_progress_counts(self) -> tuple[int, int]:
         """
         Return (total, assessed) counts for assessable requirements
@@ -8629,6 +8859,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         Does NOT save the model.
         """
         questions_qs = self.requirement.questions.prefetch_related("choices").all()
+        if not questions_qs.exists():
+            return
+
         answers_qs = (
             self.answers.select_related("question")
             .prefetch_related("selected_choices")
@@ -8645,20 +8878,25 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         total_score = 0
         total_weight = 0
-        resolved = self.get_resolved_scoring()
-        min_score = resolved["min_score"] if resolved["min_score"] is not None else 0
-        max_score = resolved["max_score"] if resolved["max_score"] is not None else 100
+        scoring = self.get_resolved_scoring()
+        min_score = scoring["min_score"] if scoring["min_score"] is not None else 0
+        max_score = scoring["max_score"] if scoring["max_score"] is not None else 100
         results = []
         visible_questions = 0
         answered_visible_questions = 0
         is_score_computed = False
-        is_result_computed = False
+        # Tracks whether the requirement is configured to drive `result` from
+        # questionnaire answers (i.e. at least one choice carries a resolvable
+        # `compute_result`). Set inline during the question pass below.
+        is_result_driven = False
 
         # Determine aggregation method
         scores_def = self.compliance_assessment.scores_definition
         aggregation = None
         if isinstance(scores_def, dict):
-            aggregation = scores_def.get("aggregation")
+            candidate = scores_def.get("aggregation")
+            if candidate in ("sum", "mean"):
+                aggregation = candidate
         if not aggregation:
             if (
                 self.compliance_assessment.score_calculation_method
@@ -8669,6 +8907,16 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 aggregation = "mean"
 
         for question in questions_qs:
+            # Detect result-driven capability across ALL choices (selection /
+            # visibility agnostic). Short-circuits across questions once set.
+            if not is_result_driven:
+                for choice in question.choices.all():
+                    if choice.compute_result is None:
+                        continue
+                    if resolve_compute_result(choice.compute_result) is not None:
+                        is_result_driven = True
+                        break
+
             if not _is_question_visible(question, answers_by_urn, questions_by_urn):
                 continue
 
@@ -8687,8 +8935,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         total_weight += question.weight
 
                     if choice.compute_result is not None:
-                        is_result_computed = True
-                        results.append(is_compute_result_truthy(choice.compute_result))
+                        resolved_cr = resolve_compute_result(choice.compute_result)
+                        if resolved_cr is not None:
+                            results.append(resolved_cr)
 
         if is_score_computed:
             if aggregation == "mean" and total_weight > 0:
@@ -8700,19 +8949,28 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             new_score = None
         new_is_scored = is_score_computed
 
-        # Determine overall result
-        if visible_questions == 0:
-            new_result = self.Result.NOT_APPLICABLE
-        elif answered_visible_questions < visible_questions:
-            new_result = self.Result.NOT_ASSESSED
-        elif not results:
-            new_result = self.Result.NOT_ASSESSED
-        elif all(results):
-            new_result = self.Result.COMPLIANT
-        elif any(results):
-            new_result = self.Result.PARTIALLY_COMPLIANT
-        else:
-            new_result = self.Result.NON_COMPLIANT
+        # `is_result_driven` was set inline during the question pass: True iff
+        # at least one choice carries a resolvable `compute_result`. For
+        # score-only questionnaires (or only-unresolvable values), we must NOT
+        # touch self.result, otherwise a manually-set result would be silently
+        # reset to NOT_ASSESSED on every recompute.
+        new_result = self.result
+        if is_result_driven:
+            if visible_questions == 0:
+                new_result = self.Result.NOT_APPLICABLE
+            elif answered_visible_questions < visible_questions:
+                new_result = self.Result.NOT_ASSESSED
+            elif not results:
+                new_result = self.Result.NOT_ASSESSED
+            else:
+                aggregated = aggregate_compute_results(results)
+                result_map = {
+                    "compliant": self.Result.COMPLIANT,
+                    "partially_compliant": self.Result.PARTIALLY_COMPLIANT,
+                    "non_compliant": self.Result.NON_COMPLIANT,
+                    "not_applicable": self.Result.NOT_APPLICABLE,
+                }
+                new_result = result_map.get(aggregated, self.Result.NOT_ASSESSED)
 
         # Update attributes
         self.score = new_score
@@ -8928,6 +9186,8 @@ class FindingsAssessment(Assessment):
     class Category(models.TextChoices):
         UNDEFINED = "--", "Undefined"
         PENTEST = "pentest", "Pentest"
+        THREAT_HUNTING = "threat_hunting", "Threat hunting"
+        RED_TEAMING = "red_teaming", "Red teaming"
         AUDIT = "audit", "Audit"
         SELF_IDENTIFIED = "self_identified", "Self-identified"
 
@@ -9197,18 +9457,35 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
         )
 
     def set_state(self, state):
-        self.state = state
-        if state == "accepted":
-            self.accepted_at = datetime.now()
-            # iterate over the risk scenarios to set their treatment to accepted
-            for scenario in self.risk_scenarios.all():
-                scenario.treatment = "accept"
-                scenario.save()
-        if state == "rejected":
-            self.rejected_at = datetime.now()
-        elif state == "revoked":
-            self.revoked_at = datetime.now()
-        self.save()
+        # Scenario treatments and the acceptance state must move together, so all
+        # writes are wrapped in a single transaction.
+        with transaction.atomic():
+            self.state = state
+            if state == "accepted":
+                self.accepted_at = datetime.now()
+                # iterate over the risk scenarios to set their treatment to accepted
+                for scenario in self.risk_scenarios.all():
+                    scenario.treatment = "accept"
+                    scenario.save()
+            if state == "rejected":
+                self.rejected_at = datetime.now()
+            elif state == "revoked":
+                self.revoked_at = datetime.now()
+                # revert the treatment set on acceptance, leaving scenarios that have
+                # since moved to another treatment, or are still covered by another
+                # accepted acceptance, untouched
+                for scenario in self.risk_scenarios.all():
+                    if scenario.treatment != "accept":
+                        continue
+                    still_accepted = (
+                        scenario.riskacceptance_set.filter(state="accepted")
+                        .exclude(pk=self.pk)
+                        .exists()
+                    )
+                    if not still_accepted:
+                        scenario.treatment = "open"
+                        scenario.save()
+            self.save()
 
 
 # tasks management
@@ -9636,7 +9913,7 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
             return "VAL.000001"
         try:
             suffix = int(last.ref_id.split(".")[1])
-        except (IndexError, ValueError):
+        except IndexError, ValueError:
             # Fallback if existing data is malformed
             suffix = 0
         return f"VAL.{suffix + 1:06d}"
@@ -9664,6 +9941,18 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
             if getattr(self, field).exists():
                 linked.append(field)
         return linked
+
+    @property
+    def last_event(self):
+        """Most recent flow event. Reuses the prefetch cache when available."""
+        # FlowEvent is ordered by -created_at, so the first item is the latest.
+        events = list(self.events.all())
+        return events[0] if events else None
+
+    @property
+    def last_event_notes(self) -> str | None:
+        event = self.last_event
+        return event.event_notes if event else None
 
     def __str__(self) -> str:
         return self.ref_id
@@ -9837,7 +10126,7 @@ class Actor(AbstractBaseModel):
         return str(self.specific)
 
 
-class Preset(NameDescriptionMixin, FolderMixin, EditableMixin):
+class Preset(NameDescriptionMixin, FolderMixin):
     """Template definition. Library-backed (urn set) or user-authored (urn null)."""
 
     urn = models.CharField(max_length=255, null=True, blank=True, unique=True)
@@ -10069,6 +10358,12 @@ auditlog.register(
     PresetJourneyStep,
     exclude_fields=common_exclude,
 )
+auditlog.register(
+    LibraryDraft,
+    # The document blob changes on every autosave; the auditable event is the
+    # publication, captured on the stored/loaded library side.
+    exclude_fields=common_exclude + ["content"],
+)
 
 
 class CustomEmailTemplate(AbstractBaseModel, FolderMixin):
@@ -10130,8 +10425,78 @@ class CustomWordTemplate(AbstractBaseModel, FolderMixin):
 
     fields_to_check = ["template_key", "language"]
 
+    def delete(self, *args, **kwargs):
+        if self.file:
+            self.file.delete(save=False)
+        super().delete(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.template_key} ({self.language})"
+
+
+class CustomDocHtmlTemplate(AbstractBaseModel, FolderMixin):
+    """
+    Allows admins to override built-in HTML render templates (WeasyPrint PDF
+    layouts, etc.). Each record overrides one template for one language.
+    Access is gated by the enterprise viewset and UI.
+    """
+
+    template_key = models.CharField(
+        max_length=100,
+        help_text=_("Template identifier, e.g. 'document_pdf'"),
+    )
+    language = models.CharField(
+        max_length=10,
+        help_text=_("Language code, e.g. 'en', 'fr'"),
+    )
+    file = models.FileField(
+        upload_to="custom_html_templates/",
+        validators=[
+            FileExtensionValidator(["html"]),
+            validate_file_size,
+            validate_html_template_file_name,
+        ],
+        help_text=_("Custom .html template file (Django template syntax)"),
+    )
+    is_active = models.BooleanField(default=True)
+
+    fields_to_check = ["template_key", "language"]
+
+    def delete(self, *args, **kwargs):
+        if self.file:
+            self.file.delete(save=False)
+        super().delete(*args, **kwargs)
+
     def __str__(self):
         return f"{self.template_key} ({self.language})"
 
 
 # actions - 0: create, 1: update, 2: delete
+
+auditlog.register(
+    Team,
+    m2m_fields={"members", "deputies"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    ValidationFlow,
+    m2m_fields={
+        "compliance_assessments",
+        "risk_assessments",
+        "business_impact_analysis",
+        "crq_studies",
+        "ebios_studies",
+        "entity_assessments",
+        "findings_assessments",
+        "evidences",
+        "security_exceptions",
+        "policies",
+        "processings",
+    },
+    exclude_fields=common_exclude,
+)
+auditlog.register(StoredLibrary, exclude_fields=common_exclude)
+auditlog.register(LoadedLibrary, exclude_fields=common_exclude)
+auditlog.register(RiskMatrix, exclude_fields=common_exclude)
+auditlog.register(CustomEmailTemplate, exclude_fields=common_exclude)
+auditlog.register(CustomWordTemplate, exclude_fields=common_exclude)

@@ -442,11 +442,18 @@ def annotate_tree_with_aggregated_scores(
                 and node.get("assessable")
                 and node.get("result") != "not_applicable"
             )
+            score_val = node.get("score")
+            # `is_scored` with `score is None` is a data inconsistency; treat
+            # it as unscored to avoid producing a negative ratio on offset
+            # scales (where (0 - min) / range < 0).
+            if is_assessed and score_val is None:
+                is_assessed = False
             weight = node.get("weight") or 1
             if is_assessed:
-                score_val = node.get("score") or 0
                 ra_min = (
-                    node.get("min_score") if node.get("min_score") is not None else 0
+                    node.get("min_score")
+                    if node.get("min_score") is not None
+                    else ca_min
                 )
                 ra_max = (
                     node.get("max_score")
@@ -466,7 +473,13 @@ def annotate_tree_with_aggregated_scores(
                 node["_leaf_weighted_max"] = ra_max * weight
                 node["_leaf_weight"] = weight
                 if show_doc:
-                    doc_val = node.get("documentation_score") or 0
+                    # documentation_score=None keeps its legacy "no doc -> 0"
+                    # semantic so the tree matches the global score and radar,
+                    # which also map doc None -> 0 in _compute_score_for_field.
+                    # (score=None is excluded above; doc is not.)
+                    doc_val = node.get("documentation_score")
+                    if doc_val is None:
+                        doc_val = 0
                     doc_ratio = (doc_val - ra_min) / ra_range
                     node["aggregated_documentation_score"] = doc_val
                     node["_aggregated_doc_ratio"] = doc_ratio

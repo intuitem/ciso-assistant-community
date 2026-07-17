@@ -39,7 +39,7 @@
 	let closeModal = true;
 
 	// Base Classes
-	const cBase = 'card bg-surface-50 p-4 w-fit max-w-4xl shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-fit max-w-4xl shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	const form = defaults(
@@ -126,7 +126,7 @@
 				/>
 				<div class="flex flex-row justify-between space-x-4">
 					<button
-						class="btn bg-gray-400 text-white font-semibold w-full"
+						class="btn bg-surface-400-600 text-white font-semibold w-full"
 						data-testid="cancel-button"
 						type="button"
 						onclick={(event) => {

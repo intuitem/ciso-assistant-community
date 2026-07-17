@@ -121,7 +121,7 @@ docker compose up -d
 Since the PostgreSQL database is brand new and empty, you also need to create a temporary superuser:
 
 ```bash
-docker exec -it backend poetry run python manage.py createsuperuser
+docker exec -it backend uv run python manage.py createsuperuser
 ```
 
 

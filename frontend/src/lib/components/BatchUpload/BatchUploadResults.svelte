@@ -12,28 +12,43 @@
 		{
 			key: 'created',
 			label: m.created(),
-			cls: 'bg-green-50 text-green-800',
+			cls: 'bg-green-50 text-green-800 dark:bg-green-900/40 dark:text-green-200',
 			icon: 'fa-circle-plus'
 		},
 		{
 			key: 'revision_added',
 			label: m.revisions(),
-			cls: 'bg-blue-50 text-blue-800',
+			cls: 'bg-blue-50 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200',
 			icon: 'fa-code-branch'
 		},
 		{
 			key: 'replaced',
 			label: m.replaced(),
-			cls: 'bg-violet-50 text-violet-800',
+			cls: 'bg-violet-50 text-violet-800 dark:bg-violet-900/40 dark:text-violet-200',
 			icon: 'fa-rotate'
 		},
-		{ key: 'renamed', label: m.renamed(), cls: 'bg-amber-50 text-amber-800', icon: 'fa-pen' },
-		{ key: 'skipped', label: m.skipped(), cls: 'bg-gray-50 text-gray-700', icon: 'fa-forward' },
-		{ key: 'duplicate', label: m.duplicates(), cls: 'bg-cyan-50 text-cyan-800', icon: 'fa-clone' },
+		{
+			key: 'renamed',
+			label: m.renamed(),
+			cls: 'bg-amber-50 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
+			icon: 'fa-pen'
+		},
+		{
+			key: 'skipped',
+			label: m.skipped(),
+			cls: 'bg-surface-100-900 text-surface-700-300',
+			icon: 'fa-forward'
+		},
+		{
+			key: 'duplicate',
+			label: m.duplicates(),
+			cls: 'bg-cyan-50 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-200',
+			icon: 'fa-clone'
+		},
 		{
 			key: 'errors',
 			label: m.errors(),
-			cls: 'bg-red-50 text-red-800',
+			cls: 'bg-red-50 text-red-800 dark:bg-red-900/40 dark:text-red-200',
 			icon: 'fa-triangle-exclamation'
 		}
 	] as const);
@@ -41,7 +56,7 @@
 
 {#if summary}
 	<div class="space-y-2">
-		<div class="text-sm text-gray-600">{m.processedNFiles({ count: summary.total })}</div>
+		<div class="text-sm text-surface-600-400">{m.processedNFiles({ count: summary.total })}</div>
 		<div class="grid grid-cols-2 md:grid-cols-4 gap-2">
 			{#each cells as cell}
 				{@const count = summary[cell.key as keyof BatchSummary] ?? 0}

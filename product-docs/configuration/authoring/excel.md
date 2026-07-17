@@ -30,6 +30,5 @@ For framework scoring, the framework `_meta` tab defines the default `min_score`
 
 ## Related
 
-- [Framework authoring](framework.md) — the editorial discipline that sits on top of the Excel format.
-- [Risk matrix authoring](matrix.md) — the matrix-specific conventions when authored in Excel.
+- [Library builder](library-builder.md) — the in-app alternative, and the editorial discipline that sits on top of the library format.
 - [Library upgrade](../libraries/library-upgrade.md) — what changes in a re-converted Excel file are safe to ship as a minor upgrade.

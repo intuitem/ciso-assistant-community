@@ -7,8 +7,8 @@
 
 <div class="p-4 space-y-4">
 	<div>
-		<h2 class="text-lg font-semibold text-gray-900">Analytics Export</h2>
-		<p class="text-sm text-gray-600">
+		<h2 class="text-lg font-semibold text-surface-900-100">Analytics Export</h2>
+		<p class="text-sm text-surface-600-400">
 			Export all analytics dashboard data as a multi-sheet Excel file (Summary, Risk Levels,
 			Compliance, Controls, Incidents) — ready to use in Power BI or any reporting tool.
 		</p>
@@ -16,7 +16,7 @@
 
 	<a
 		href="/analytics/export/xlsx"
-		class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm"
+		class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-surface-600-400 bg-surface-50-950 border border-surface-200-800 rounded-lg hover:bg-surface-50-950 hover:text-surface-900-100 transition-colors shadow-sm"
 		download
 	>
 		<i class="fa-solid fa-file-excel text-green-600"></i>

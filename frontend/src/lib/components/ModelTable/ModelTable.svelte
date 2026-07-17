@@ -26,6 +26,7 @@
 	import { contextMenuActions, listViewFields, getBatchActions } from '$lib/utils/table';
 	import { tableFilterStates } from '$lib/utils/stores';
 	import BatchActionBar from './BatchActionBar.svelte';
+	import ColumnSelector from './ColumnSelector.svelte';
 	import type { urlModel } from '$lib/utils/types.js';
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 	import { m } from '$paraglide/messages';
@@ -43,9 +44,13 @@
 	import Search from './Search.svelte';
 	import Th from './Th.svelte';
 	import ThFilter from './ThFilter.svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import {
+		canPerformAction,
+		canPerformActionOnObject,
+		hasPermissionAnywhere
+	} from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
-	import { tableHandlers, tableStates } from '$lib/utils/stores';
+	import { tableHandlers, tableStates, tableColumnStates } from '$lib/utils/stores';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import {
@@ -89,6 +94,8 @@
 		baseEndpoint?: string;
 		detailQueryParameter?: string;
 		fields?: string[];
+		columnSelector?: boolean;
+		columnStateKey?: string;
 		canSelectObject?: boolean;
 		overrideFilters?: { [key: string]: any[] };
 		defaultFilters?: { [key: string]: any[] };
@@ -111,7 +118,7 @@
 	}
 
 	let {
-		source = { head: [], body: [] },
+		source = { head: {}, body: [] },
 		interactive = true,
 		search = true,
 		thFilter = false,
@@ -123,11 +130,11 @@
 		orderBy = undefined,
 		element = 'table',
 		text = 'text-xs',
-		backgroundColor = 'bg-white',
+		backgroundColor = 'bg-surface-50-950',
 		color = '',
 		regionHead = '',
-		regionHeadCell = 'uppercase bg-white text-gray-700',
-		regionBody = 'bg-white',
+		regionHeadCell = 'uppercase bg-surface-50-950 text-surface-700-300',
+		regionBody = 'bg-surface-50-950',
 		regionCell = 'max-w-[65ch] max-h-[8em] overflow-hidden hover:overflow-y-auto',
 		regionFoot = '',
 		regionFootCell = '',
@@ -142,6 +149,8 @@
 		baseEndpoint = `/${URLModel}`,
 		detailQueryParameter = $bindable(),
 		fields = [],
+		columnSelector = undefined,
+		columnStateKey = undefined,
 		canSelectObject = false,
 		overrideFilters = {},
 		defaultFilters = {},
@@ -190,6 +199,68 @@
 			)
 	);
 
+	// Column visibility & order, persisted per URLModel through the column selector.
+	const allColumns = $derived(
+		Object.entries(tableSource.head).map(([key, label]) => ({ key, label: label as string }))
+	);
+	const allColumnKeys = $derived(allColumns.map((c) => c.key));
+	// A page-provided `fields` curation is the default visible set; otherwise the generic list-view default.
+	const defaultColumns = $derived(
+		(fields.length > 0
+			? fields
+			: URLModel && listViewFields[URLModel]?.body
+				? listViewFields[URLModel].body
+				: allColumnKeys
+		).filter((key) => allColumnKeys.includes(key))
+	);
+	// Offered on standalone list pages, or wherever a page opts in explicitly (even alongside `fields`).
+	const showColumnSelector = $derived(
+		(columnSelector ?? Boolean(deleteForm)) &&
+			Boolean(URLModel) &&
+			(columnSelector === true || isStandaloneTable) &&
+			(columnSelector === true || fields.length === 0) &&
+			allColumns.length > 1
+	);
+	// Persistence key: distinct per embedded table when set, else the shared per-model key.
+	const stateKey = $derived(columnStateKey ?? URLModel);
+	// Stored choice, with stale keys dropped and a fallback to defaults so a table is never empty.
+	const storedColumns = $derived(stateKey ? $tableColumnStates[stateKey] : undefined);
+	const sanitizedStored = $derived(storedColumns?.filter((key) => allColumnKeys.includes(key)));
+	const visibleColumns = $derived(sanitizedStored?.length ? sanitizedStored : defaultColumns);
+	// Keys to render, in order. Without the selector, keep natural head order (behaviour unchanged).
+	const renderColumnKeys = $derived(
+		showColumnSelector
+			? visibleColumns
+			: allColumnKeys.filter((key) => fields.length === 0 || fields.includes(key))
+	);
+	$effect(() => {
+		if (fields.length > 0 && allColumnKeys.length > 0 && renderColumnKeys.length === 0) {
+			console.warn(
+				`ModelTable(${URLModel}): none of \`fields\` [${fields.join(', ')}] match source.head keys [${allColumnKeys.join(', ')}] — table will render no columns. Build head with headData().`
+			);
+		}
+	});
+
+	// Order-sensitive so a pure reorder of the default set still persists instead of resetting.
+	const sameAsDefault = (cols: string[]) =>
+		cols.length === defaultColumns.length && cols.every((key, i) => defaultColumns[i] === key);
+
+	function setVisibleColumns(visible: string[]) {
+		if (!stateKey) return;
+		if (sameAsDefault(visible)) {
+			resetColumns();
+			return;
+		}
+		$tableColumnStates = { ...$tableColumnStates, [stateKey]: visible };
+	}
+
+	function resetColumns() {
+		if (!stateKey) return;
+		const next = { ...$tableColumnStates };
+		delete next[stateKey];
+		$tableColumnStates = next;
+	}
+
 	function onRowClick(
 		event: SvelteEvent<MouseEvent | KeyboardEvent, HTMLTableRowElement>,
 		rowIndex: number
@@ -228,6 +299,22 @@
 	const user = page.data.user;
 
 	const isRelatedField = (fieldName: string): boolean => relatedFieldNames.has(fieldName);
+	const nonNavigableRelatedFields = new Set(['qualifications', 'relationship', 'nature']);
+	const getRelatedFieldHref = (
+		fieldName: string,
+		id: string,
+		options: { fallbackToDashedField?: boolean } = {}
+	): string | undefined => {
+		if (nonNavigableRelatedFields.has(fieldName)) return undefined;
+		const relatedUrlModel = model?.foreignKeyFields?.find(
+			(field) => field.field === fieldName
+		)?.urlModel;
+		const urlModel =
+			relatedUrlModel ?? (options.fallbackToDashedField ? fieldName.replace(/_/g, '-') : undefined);
+
+		if (!urlModel) return undefined;
+		return `/${urlModel}/${id}`;
+	};
 
 	let classProp = ''; // Replacing $$props.class
 
@@ -268,18 +355,20 @@
 			URLModel,
 			endpoint: baseEndpoint,
 			fields:
-				fields.length > 0
-					? { head: fields, body: fields }
-					: {
-							head:
-								typeof tableSource.head[0] === 'string'
-									? Object.values(tableSource.head)
-									: Object.keys(tableSource.head),
-							body:
-								typeof tableSource.body[0] === 'string'
-									? Object.values(tableSource.body)
-									: Object.keys(tableSource.body)
-						},
+				showColumnSelector && allColumnKeys.length > 0
+					? { head: allColumnKeys, body: allColumnKeys }
+					: fields.length > 0
+						? { head: fields, body: fields }
+						: {
+								head:
+									typeof tableSource.head[0] === 'string'
+										? Object.values(tableSource.head)
+										: Object.keys(tableSource.head),
+								body:
+									typeof tableSource.body[0] === 'string'
+										? Object.values(tableSource.body)
+										: Object.keys(tableSource.body)
+							},
 			featureFlags: page.data?.featureflags
 		})
 	);
@@ -301,14 +390,14 @@
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type) ||
 		forcePreventDelete;
-	const preventEdit = (row: TableSource) => forcePreventEdit;
+	const preventEdit = (row: TableSource) => row?.meta?.builtin || forcePreventEdit;
 
 	const tableURLModel = URLModel;
 
 	let contextMenuOpenRow: TableSource | undefined = $state(undefined);
 
-	const filters = source?.filters ?? tableFilters;
-	const filteredFields = Object.keys(filters);
+	const filters = $derived(source?.filters ?? tableFilters);
+	const filteredFields = $derived(Object.keys(filters));
 	// Only persist filters on standalone list pages, not embedded sub-tables
 	const isStandaloneTable = baseEndpoint === `/${URLModel}`;
 	const filterStoreKey = `${page.url.pathname}::${baseEndpoint}`;
@@ -425,24 +514,17 @@
 							page.params.id ||
 							user.root_folder_id
 					})
-				: Object.hasOwn(user.permissions, `add_${model.name}`)
+				: hasPermissionAnywhere(user, `add_${model.name}`)
 			: false
 	);
 	let contextMenuCanEditObject = $derived(
 		(model
-			? page.params.id
-				? canPerformAction({
-						user,
-						action: 'change',
-						model: model.name,
-						domain:
-							model.name === 'folder'
-								? contextMenuOpenRow?.meta.id
-								: (contextMenuOpenRow?.meta.folder?.id ??
-									contextMenuOpenRow?.meta.folder ??
-									user.root_folder_id)
-					})
-				: Object.hasOwn(user.permissions, `change_${model.name}`)
+			? canPerformActionOnObject({
+					user,
+					action: 'change',
+					model: model.name,
+					object: contextMenuOpenRow?.meta
+				})
 			: false) &&
 			(!(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) ||
 				URLModel === 'terminologies' ||
@@ -456,21 +538,14 @@
 	);
 
 	let contextMenuCanDeleteObject = $derived(
-		!preventDelete(contextMenuOpenRow ?? { head: [], body: [], meta: [] }) &&
+		!preventDelete(contextMenuOpenRow ?? { head: {}, body: [], meta: [] }) &&
 			(model
-				? page.params.id
-					? canPerformAction({
-							user,
-							action: 'delete',
-							model: model.name,
-							domain:
-								model.name === 'folder'
-									? contextMenuOpenRow?.meta.id
-									: (contextMenuOpenRow?.meta.folder?.id ??
-										contextMenuOpenRow?.meta.folder ??
-										user.root_folder_id)
-						})
-					: Object.hasOwn(user.permissions, `delete_${model.name}`)
+				? canPerformActionOnObject({
+						user,
+						action: 'delete',
+						model: model.name,
+						object: contextMenuOpenRow?.meta
+					})
 				: false)
 	);
 
@@ -563,7 +638,10 @@
 	}
 
 	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
-		return isDark(backgroundHexColor) ? 'text-white' : '';
+		// The badge background is a fixed hex color, so the text must be a fixed color too
+		// (not theme-dependent), otherwise it turns light in dark mode and vanishes on a
+		// light-colored badge. White on dark backgrounds, fixed dark surface otherwise.
+		return isDark(backgroundHexColor) ? 'text-white' : 'text-surface-950';
 	});
 
 	const tail_render = $derived(tail);
@@ -635,8 +713,8 @@
 		URLModel && model
 			? getBatchActions(URLModel).filter((a) =>
 					a.type === 'delete'
-						? Object.hasOwn(user.permissions, `delete_${model.name}`)
-						: Object.hasOwn(user.permissions, `change_${model.name}`)
+						? hasPermissionAnywhere(user, `delete_${model.name}`)
+						: hasPermissionAnywhere(user, `change_${model.name}`)
 				)
 			: []
 	);
@@ -679,9 +757,11 @@
 		}
 		previousRowSignature = sig;
 	});
+
+	let tableWrapEl: HTMLElement | undefined = $state();
 </script>
 
-<div class="card table-wrap {classesBase}">
+<div class="card table-wrap {classesBase}" bind:this={tableWrapEl}>
 	<header class="flex items-center justify-between gap-2 px-2 h-16">
 		{#if hasBatchActions && selectedIds.size > 0}
 			<BatchActionBar
@@ -710,7 +790,7 @@
 					</Popover.Trigger>
 					<Popover.Positioner class="z-50!">
 						<Popover.Content
-							class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
+							class="card p-2 bg-surface-50-950 max-w-lg shadow-lg space-y-2 border border-surface-200-800"
 						>
 							<SuperForm {_form} validators={zod(z.object({}))}>
 								{#snippet children({ form })}
@@ -761,6 +841,14 @@
 			{#if pagination && rowsPerPage}
 				<RowsPerPage {handler} />
 			{/if}
+			{#if showColumnSelector}
+				<ColumnSelector
+					columns={allColumns}
+					visible={visibleColumns}
+					onChange={setVisibleColumns}
+					onReset={resetColumns}
+				/>
+			{/if}
 			<div class="flex space-x-2 items-center">
 				{@render optButton?.()}
 				{#if canSelectObject}
@@ -799,23 +887,22 @@
 						}}
 					>
 						<span
-							class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-white/10"
+							class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-surface-100-900/10"
 						>
 							<input
 								type="checkbox"
 								class="checkbox pointer-events-none"
+								aria-label={m.selectAll()}
 								checked={selectAllChecked}
 								tabindex={-1}
 							/>
 						</span>
 					</th>
 				{/if}
-				{#each Object.entries(tableSource.head) as [key, heading]}
-					{#if fields.length === 0 || fields.includes(key)}
-						<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}
-							>{safeTranslate(heading)}</Th
-						>
-					{/if}
+				{#each renderColumnKeys as key (key)}
+					<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}
+						>{safeTranslate(tableSource.head[key])}</Th
+					>
 				{/each}
 				{#if displayActions}
 					<th class="{regionHeadCell} select-none text-end"></th>
@@ -826,7 +913,7 @@
 					{#if hasBatchActions}
 						<th></th>
 					{/if}
-					{#each Object.entries(tableSource.head) as [key, _]}
+					{#each renderColumnKeys as key (key)}
 						{#if thFilterFields.includes(key)}
 							<ThFilter {handler} filterBy={key} />
 						{:else}
@@ -847,7 +934,7 @@
 								onkeydown={(e) => onRowKeydown(e, rowIndex)}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
 								aria-rowindex={rowIndex + 1}
-								class="hover:preset-tonal-primary even:bg-surface-50 cursor-pointer"
+								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer"
 							>
 								{#if hasBatchActions}
 									<td
@@ -859,188 +946,207 @@
 										}}
 									>
 										<span
-											class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-white/10"
+											class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-surface-100-900/10"
 										>
 											<input
 												type="checkbox"
 												class="checkbox pointer-events-none"
+												aria-label={m.selectRow()}
 												checked={selectedIds.has(meta?.id)}
 												tabindex={-1}
 											/>
 										</span>
 									</td>
 								{/if}
-								{#each Object.entries(row) as [key, value]}
-									{#if key !== 'meta'}
-										{@const component = fieldComponentMap[key]}
-										<td role="gridcell">
-											<div class={regionCell}>
-												{#if component && browser}
-													{@const CellComponent = component}
-													{#if CellComponent === LecChartPreview}
-														{#key `${meta?.id || rowIndex}-${key}`}
-															<CellComponent {meta} cell={value} />
-														{/key}
-													{:else}
+								{#each renderColumnKeys as key (key)}
+									{@const value = row[key]}
+									{@const component = fieldComponentMap[key]}
+									<td role="gridcell">
+										<div class={regionCell}>
+											{#if component && browser}
+												{@const CellComponent = component}
+												{#if CellComponent === LecChartPreview}
+													{#key `${meta?.id || rowIndex}-${key}`}
 														<CellComponent {meta} cell={value} />
-													{/if}
+													{/key}
 												{:else}
-													<div
-														data-testid="model-table-td-array-elem"
-														class="base-font-family whitespace-pre-line break-words"
-													>
-														{#if Array.isArray(value)}
-															{@const hiddenCount = isRelatedField(key) ? countMasked(value) : 0}
-															{@const visibleValues = isRelatedField(key)
-																? value.filter((item) => !isMaskedPlaceholder(item))
-																: value}
-															{#if visibleValues.length > 0}
-																<ul class="list-disc pl-4 whitespace-normal">
-																	{#each [...visibleValues].sort((a, b) => {
-																		if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
-																		return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
-																	}) as val}
-																		<li>
-																			{#if key === 'linked_models' && typeof val === 'string'}
-																				{safeTranslate(convertLinkedModelName(val))}
-																			{:else if key === 'security_objectives' || key === 'security_capabilities'}
-																				{@const [securityObjectiveName, securityObjectiveValue] =
-																					Object.entries(val)[0]}
-																				{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																			{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
-																				{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
+													<CellComponent {meta} cell={value} />
+												{/if}
+											{:else}
+												<div
+													data-testid="model-table-td-array-elem"
+													class="base-font-family whitespace-pre-line break-words"
+												>
+													{#if Array.isArray(value)}
+														{@const hiddenCount = isRelatedField(key) ? countMasked(value) : 0}
+														{@const visibleValues = isRelatedField(key)
+															? value.filter((item) => !isMaskedPlaceholder(item))
+															: value}
+														{#if visibleValues.length > 0}
+															<ul class="list-disc pl-4 whitespace-normal">
+																{#each [...visibleValues].sort((a, b) => {
+																	if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
+																	return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
+																}) as val}
+																	<li>
+																		{#if key === 'linked_models' && typeof val === 'string'}
+																			{safeTranslate(convertLinkedModelName(val))}
+																		{:else if key === 'security_objectives' || key === 'security_capabilities'}
+																			{@const [securityObjectiveName, securityObjectiveValue] =
+																				Object.entries(val)[0]}
+																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
+																		{:else if val.str && val.id}
+																			{@const itemHref = getRelatedFieldHref(key, val.id, {
+																				fallbackToDashedField: true
+																			})}
+																			{#if itemHref}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
 																					>{safeTranslate(val.str)}</Anchor
 																				>
-																			{:else if val.str}
-																				{safeTranslate(val.str)}
-																			{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
-																				<span class="text"
-																					>{unsafeTranslate(val.split(':')[0] + 'Colon')}
-																					{val.split(':')[1]}</span
-																				>
 																			{:else}
-																				{val ?? '-'}
+																				{safeTranslate(val.str)}
 																			{/if}
-																		</li>
-																	{/each}
-																</ul>
-																{#if hiddenCount > 0}
-																	<p class="mt-1 text-xs text-yellow-700">
-																		{m.objectsNotVisible({ count: hiddenCount })}
-																	</p>
-																{/if}
-															{:else if hiddenCount > 0}
-																<p class="text-xs text-yellow-700">
+																		{:else if val.str}
+																			{safeTranslate(val.str)}
+																		{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
+																			<span class="text"
+																				>{unsafeTranslate(val.split(':')[0] + 'Colon')}
+																				{val.split(':')[1]}</span
+																			>
+																		{:else}
+																			{val ?? '-'}
+																		{/if}
+																	</li>
+																{/each}
+															</ul>
+															{#if hiddenCount > 0}
+																<p class="mt-1 text-xs text-yellow-700">
 																	{m.objectsNotVisible({ count: hiddenCount })}
 																</p>
-															{:else}
-																--
 															{/if}
-														{:else if isMaskedPlaceholder(value)}
-															{#if isRelatedField(key)}
-																<p class="text-xs text-yellow-700">
-																	{m.objectsNotVisible({ count: 1 })}
-																</p>
-															{:else}
-																--
-															{/if}
-														{:else if value && value.str}
-															{#if value.id}
-																{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
-																{#if key === 'ro_to_couple'}
-																	<Anchor
-																		breadcrumbAction="push"
-																		href={itemHref}
-																		class="anchor"
-																		stopPropagation
-																		>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
-																			'-'
-																		)[1]}</Anchor
-																	>
-																{:else}
-																	<Anchor
-																		breadcrumbAction="push"
-																		href={itemHref}
-																		class="anchor"
-																		stopPropagation>{safeTranslate(value.str)}</Anchor
-																	>
-																{/if}
-															{:else}
-																{safeTranslate(value.str) ?? '-'}
-															{/if}
-														{:else if value && value.hexcolor}
-															<p
-																class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
-																	value.hexcolor
-																)}"
-																style="background-color: {value.hexcolor}"
-															>
-																{safeTranslate(value.name ?? value.str) ?? '-'}
+														{:else if hiddenCount > 0}
+															<p class="text-xs text-yellow-700">
+																{m.objectsNotVisible({ count: hiddenCount })}
 															</p>
-														{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
-															{formatDateOrDateTime(value, getLocale())}
-														{:else if [true, false].includes(value)}
-															{@const bd = booleanDisplay(value, key, URLModel)}
-															<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
-														{:else if value === 'YES' || value === 'NO'}
-															{@const bd = booleanDisplay(value === 'YES', key, URLModel)}
-															<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
-														{:else if key === 'progress' || key === 'treatment_progress'}
-															<span class="ml-9"
-																>{value != null
-																	? safeTranslate('percentageDisplay', { number: value })
-																	: '--'}</span
-															>
-														{:else if key === 'translations'}
-															{#if Object.keys(value).length > 0}
-																<div class="flex flex-col gap-2">
-																	{#each Object.entries(value) as [lang, translation]}
-																		<div class="flex flex-row gap-2">
-																			<strong>{lang}:</strong>
-																			<span>{safeTranslate(translation)}</span>
-																		</div>
-																	{/each}
-																</div>
-															{:else}
-																--
-															{/if}
-														{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
-															<div class="flex items-center space-x-2">
-																<span>{safeTranslate(value ?? '-')}</span>
-																<span
-																	class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-sm dark:bg-green-200 dark:text-green-900"
-																>
-																	{m.accept()}
-																</span>
-															</div>
-														{:else if (key === 'name' || key === 'str') && row.meta?.is_locked}
-															<div class="flex items-center space-x-2">
-																<i class="fa-solid fa-lock text-yellow-600" title={m.isLocked()}
-																></i>
-																<span class="text-yellow-600">{safeTranslate(value ?? '-')}</span>
-															</div>
-														{:else if key === 'icon_fa_class'}
-															<i class="text-lg fa {value}"></i>
-														{:else if value && value.name}
-															{value.name}
 														{:else}
-															<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-															{@const displayValue = ['name', 'description', 'ref_id'].includes(key)
-																? (value ?? '-')
-																: safeTranslate(value ?? '-')}
-															{#if displayValue?.length > 300}
-																{displayValue.slice(0, 300)}...
-															{:else}
-																{displayValue}
-															{/if}
+															--
 														{/if}
-														{@render badge?.(key, row)}
-													</div>
-												{/if}
-											</div>
-										</td>
-									{/if}
+													{:else if isMaskedPlaceholder(value)}
+														{#if isRelatedField(key)}
+															<p class="text-xs text-yellow-700">
+																{m.objectsNotVisible({ count: 1 })}
+															</p>
+														{:else}
+															--
+														{/if}
+													{:else if value && value.str}
+														{@const itemHref = value.id
+															? getRelatedFieldHref(key, value.id)
+															: undefined}
+														{#if itemHref}
+															{#if key === 'ro_to_couple'}
+																<Anchor
+																	breadcrumbAction="push"
+																	href={itemHref}
+																	class="anchor"
+																	stopPropagation
+																	>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
+																		'-'
+																	)[1]}</Anchor
+																>
+															{:else}
+																<Anchor
+																	breadcrumbAction="push"
+																	href={itemHref}
+																	class="anchor"
+																	stopPropagation>{safeTranslate(value.str)}</Anchor
+																>
+															{/if}
+														{:else}
+															{safeTranslate(value.str) ?? '-'}
+														{/if}
+													{:else if value && value.hexcolor}
+														<p
+															class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
+																value.hexcolor
+															)}"
+															style="background-color: {value.hexcolor}"
+														>
+															{safeTranslate(value.name ?? value.str) ?? '-'}
+														</p>
+													{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'end_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
+														{formatDateOrDateTime(value, getLocale())}
+													{:else if [true, false].includes(value)}
+														{@const bd = booleanDisplay(value, key, URLModel)}
+														<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
+													{:else if value === 'YES' || value === 'NO'}
+														{@const bd = booleanDisplay(value === 'YES', key, URLModel)}
+														<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
+													{:else if key === 'progress' || key === 'treatment_progress' || key === 'progress_field'}
+														<span class="ml-9"
+															>{value != null
+																? safeTranslate('percentageDisplay', { number: value })
+																: '--'}</span
+														>
+													{:else if key === 'translations'}
+														{#if Object.keys(value).length > 0}
+															<div class="flex flex-col gap-2">
+																{#each Object.entries(value) as [lang, translation]}
+																	<div class="flex flex-row gap-2">
+																		<strong>{lang}:</strong>
+																		<span>{safeTranslate(translation)}</span>
+																	</div>
+																{/each}
+															</div>
+														{:else}
+															--
+														{/if}
+													{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.state}
+														<div class="flex items-center space-x-2">
+															<span>{safeTranslate(value ?? '-')}</span>
+															<span
+																class="badge text-xs"
+																class:preset-tonal-success={row.meta.state === 'Accepted'}
+																class:preset-tonal-error={row.meta.state === 'Rejected' ||
+																	row.meta.state === 'Revoked'}
+																class:preset-tonal-primary={row.meta.state === 'Submitted'}
+																class:preset-tonal-secondary={row.meta.state === 'Created'}
+															>
+																{row.meta.state === 'Created'
+																	? m.draft()
+																	: safeTranslate(row.meta.state)}
+															</span>
+														</div>
+													{:else if (key === 'name' || key === 'str') && row.meta?.is_locked}
+														<div class="flex items-center space-x-2">
+															<i class="fa-solid fa-lock text-yellow-600" title={m.isLocked()}></i>
+															<span class="text-yellow-600">{safeTranslate(value ?? '-')}</span>
+														</div>
+													{:else if key === 'icon_fa_class'}
+														<i class="text-lg fa {value}"></i>
+													{:else if value && value.name}
+														{value.name}
+													{:else}
+														<!-- NOTE: We will have to handle the ellipses for RTL languages-->
+														{@const displayValue = [
+															'name',
+															'description',
+															'ref_id',
+															'key'
+														].includes(key)
+															? (value ?? '-')
+															: safeTranslate(value ?? '-')}
+														{#if displayValue?.length > 300}
+															{displayValue.slice(0, 300)}...
+														{:else}
+															{displayValue}
+														{/if}
+													{/if}
+													{@render badge?.(key, row)}
+												</div>
+											{/if}
+										</div>
+									</td>
 								{/each}
 								{#if displayActions}
 									<td class="text-end {regionCell}" role="gridcell">
@@ -1093,17 +1199,17 @@
 			</ContextMenu.Trigger>
 			{#if contextMenuDisplayEdit || contextMenuDisplayDelete || Object.hasOwn(contextMenuActions, URLModel)}
 				<ContextMenu.Content
-					class="z-50 min-w-[180px] outline-hidden bg-white px-1 py-1.5 shadow-md border border-surface-200 rounded-md"
+					class="z-50 min-w-[180px] outline-hidden bg-surface-50-950 px-1 py-1.5 shadow-md border border-surface-200-800 rounded-md"
 				>
 					{#if Object.hasOwn(contextMenuActions, URLModel)}
 						{#each contextMenuActions[URLModel] as action}
 							<action.component row={contextMenuOpenRow} {handler} {URLModel} {action} />
 						{/each}
-						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
+						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100-900" />
 					{/if}
 					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) || URLModel === 'terminologies' || URLModel === 'entities'}
 						<ContextMenu.Item
-							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
 							onclick={() => {
 								goto(
 									`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`,
@@ -1116,7 +1222,7 @@
 							{m.edit()}
 						</ContextMenu.Item>
 						<ContextMenu.Item
-							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
 							onclick={() => {
 								goto(`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`, {
 									breadcrumbAction: 'push'
@@ -1127,9 +1233,9 @@
 						</ContextMenu.Item>
 					{/if}
 					{#if contextMenuDisplayDelete}
-						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
+						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100-900" />
 						<ContextMenu.Item
-							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer text-red-500 data-highlighted:bg-surface-50"
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer text-red-500 data-highlighted:bg-surface-100-900"
 							onclick={() => {
 								if (URLModel === 'folders') {
 									contextMenuPromptModalConfirmDelete(
@@ -1166,7 +1272,7 @@
 			<RowCount {handler} />
 		{/if}
 		{#if pagination}
-			<Pagination {handler} {URLModel} />
+			<Pagination {handler} {URLModel} scrollTarget={tableWrapEl} />
 		{/if}
 	</footer>
 </div>

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -23,14 +22,6 @@
 		initialData = {}
 	}: Props = $props();
 </script>
-
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
 
 <Select
 	{form}
@@ -133,13 +124,6 @@
 	label={m.dueDate()}
 	cacheLock={cacheLocks['due_date']}
 	bind:cachedValue={formDataCache['due_date']}
-/>
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
 />
 <AutocompleteSelect
 	multiple

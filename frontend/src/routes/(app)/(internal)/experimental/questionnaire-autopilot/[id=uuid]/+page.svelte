@@ -721,15 +721,15 @@
 </script>
 
 {#if !chatEnabled}
-	<div class="bg-white shadow-sm py-6 px-6 card max-w-2xl border-l-4 border-amber-400">
+	<div class="bg-surface-50-950 shadow-sm py-6 px-6 card max-w-2xl border-l-4 border-amber-400">
 		<h4 class="h4 font-bold">
 			<i class="fa-solid fa-robot mr-2 text-amber-600"></i>AI chat is required
 		</h4>
-		<p class="text-sm text-gray-700 mt-2">
+		<p class="text-sm text-surface-700-300 mt-2">
 			This run is still available, but Questionnaire Autopilot needs the same LLM and retrieval
 			pipeline as AI Chat — currently disabled on this deployment.
 		</p>
-		<p class="text-xs text-gray-500 mt-2">
+		<p class="text-xs text-surface-600-400 mt-2">
 			Ask an administrator to enable <code class="font-mono">ENABLE_CHAT</code> on the backend and
 			turn on the <em>chat mode</em> feature flag in Settings.
 		</p>
@@ -737,21 +737,21 @@
 {:else}
 	<div class="space-y-4">
 		<!-- Header -->
-		<div class="bg-white shadow-sm py-3 px-6 card flex items-center justify-between">
+		<div class="bg-surface-50-950 shadow-sm py-3 px-6 card flex items-center justify-between">
 			<div>
 				<a
 					href="/experimental/questionnaire-autopilot"
-					class="text-xs text-gray-500 hover:text-gray-700"
+					class="text-xs text-surface-600-400 hover:text-surface-700-300"
 				>
 					<i class="fa-solid fa-chevron-left mr-1"></i>All runs
 				</a>
 				<h4 class="h4 font-bold mt-1 font-mono">{run.title || run.filename}</h4>
 				{#if run.title && run.filename && run.title !== run.filename}
-					<div class="text-xs text-gray-500 mt-0.5">
+					<div class="text-xs text-surface-600-400 mt-0.5">
 						<i class="fa-solid fa-file-excel mr-1"></i>{run.filename}
 					</div>
 				{/if}
-				<div class="text-xs text-gray-500 mt-1">
+				<div class="text-xs text-surface-600-400 mt-1">
 					Domain: {run.folder?.str || run.folder?.name || '—'} · Uploaded
 					{formatDate(new Date(run.created_at), true, getLocale())}
 				</div>
@@ -785,24 +785,24 @@
 		</div>
 
 		{#if phase === 'parsing'}
-			<div class="bg-white shadow-sm py-6 px-6 card text-center">
+			<div class="bg-surface-50-950 shadow-sm py-6 px-6 card text-center">
 				<i class="fa-solid fa-spinner fa-spin text-2xl text-blue-500"></i>
-				<p class="mt-2 text-sm text-gray-600">Parsing the workbook…</p>
+				<p class="mt-2 text-sm text-surface-600-400">Parsing the workbook…</p>
 			</div>
 		{:else if phase === 'parse_failed'}
-			<div class="bg-white shadow-sm py-4 px-6 card border-l-4 border-red-500">
+			<div class="bg-surface-50-950 shadow-sm py-4 px-6 card border-l-4 border-red-500">
 				<div class="font-semibold text-red-700">Parsing failed</div>
-				<div class="text-sm text-gray-700 mt-1 font-mono whitespace-pre-wrap">
+				<div class="text-sm text-surface-700-300 mt-1 font-mono whitespace-pre-wrap">
 					{run.error_message || 'Unknown error.'}
 				</div>
 			</div>
 		{:else if phase === 'mapping' && run.parsed_data?.sheets}
 			<div class="grid grid-cols-3 gap-4">
-				<div class="col-span-1 bg-white shadow-sm py-4 px-6 card space-y-4">
+				<div class="col-span-1 bg-surface-50-950 shadow-sm py-4 px-6 card space-y-4">
 					<div>
 						<h5 class="font-semibold text-sm mb-2">1. Pick the sheet</h5>
 						<select
-							class="w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+							class="w-full rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm"
 							bind:value={selectedSheetName}
 							onchange={onSheetChange}
 						>
@@ -819,12 +819,12 @@
 							<h5 class="font-semibold text-sm">2. Map the columns</h5>
 
 							<div>
-								<label for="qcol" class="block text-xs font-medium text-gray-700">
+								<label for="qcol" class="block text-xs font-medium text-surface-700-300">
 									Question column *
 								</label>
 								<select
 									id="qcol"
-									class="mt-1 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+									class="mt-1 w-full rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm"
 									bind:value={questionCol}
 								>
 									<option value="">— select —</option>
@@ -835,12 +835,12 @@
 							</div>
 
 							<div>
-								<label for="acol" class="block text-xs font-medium text-gray-700">
+								<label for="acol" class="block text-xs font-medium text-surface-700-300">
 									Answer / Status column
 								</label>
 								<select
 									id="acol"
-									class="mt-1 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+									class="mt-1 w-full rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm"
 									bind:value={answerCol}
 								>
 									<option value="">— optional —</option>
@@ -851,12 +851,12 @@
 							</div>
 
 							<div>
-								<label for="ccol" class="block text-xs font-medium text-gray-700">
+								<label for="ccol" class="block text-xs font-medium text-surface-700-300">
 									Comment column
 								</label>
 								<select
 									id="ccol"
-									class="mt-1 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+									class="mt-1 w-full rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm"
 									bind:value={commentCol}
 								>
 									<option value="">— optional —</option>
@@ -867,12 +867,12 @@
 							</div>
 
 							<div>
-								<label for="scol" class="block text-xs font-medium text-gray-700">
+								<label for="scol" class="block text-xs font-medium text-surface-700-300">
 									Section column
 								</label>
 								<select
 									id="scol"
-									class="mt-1 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+									class="mt-1 w-full rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm"
 									bind:value={sectionCol}
 								>
 									<option value="">— optional —</option>
@@ -894,7 +894,7 @@
 					{/if}
 				</div>
 
-				<div class="col-span-2 bg-white shadow-sm py-4 px-6 card overflow-x-auto">
+				<div class="col-span-2 bg-surface-50-950 shadow-sm py-4 px-6 card overflow-x-auto">
 					<h5 class="font-semibold text-sm mb-2">
 						Preview — first {selectedSheet?.rows_preview.length ?? 0} of
 						{selectedSheet?.row_count ?? 0} rows
@@ -902,16 +902,16 @@
 					{#if selectedSheet && selectedSheet.headers.length > 0}
 						<table class="text-xs w-full border-collapse">
 							<thead>
-								<tr class="bg-gray-50">
+								<tr class="bg-surface-50-950">
 									{#each selectedSheet.headers as header, i}
 										<th
-											class="border border-gray-200 px-2 py-1 text-left font-semibold
+											class="border border-surface-200-800 px-2 py-1 text-left font-semibold
 										{i === questionCol ? 'bg-pink-100' : ''}
 										{i === answerCol ? 'bg-blue-100' : ''}
 										{i === commentCol ? 'bg-yellow-100' : ''}
 										{i === sectionCol ? 'bg-purple-100' : ''}"
 										>
-											<span class="text-gray-400 mr-1">{i + 1}.</span>
+											<span class="text-surface-500 mr-1">{i + 1}.</span>
 											{header}
 										</th>
 									{/each}
@@ -922,7 +922,7 @@
 									<tr>
 										{#each row as cell, i}
 											<td
-												class="border border-gray-200 px-2 py-1 align-top
+												class="border border-surface-200-800 px-2 py-1 align-top
 											{i === questionCol ? 'bg-pink-50' : ''}
 											{i === answerCol ? 'bg-blue-50' : ''}
 											{i === commentCol ? 'bg-yellow-50' : ''}
@@ -936,15 +936,15 @@
 							</tbody>
 						</table>
 					{:else}
-						<p class="text-sm text-gray-500">This sheet appears empty.</p>
+						<p class="text-sm text-surface-600-400">This sheet appears empty.</p>
 					{/if}
 				</div>
 			</div>
 		{:else if phase === 'extract'}
-			<div class="bg-white shadow-sm py-6 px-6 card flex items-center justify-between">
+			<div class="bg-surface-50-950 shadow-sm py-6 px-6 card flex items-center justify-between">
 				<div>
 					<div class="font-semibold">Mapping saved.</div>
-					<div class="text-sm text-gray-600 mt-1">
+					<div class="text-sm text-surface-600-400 mt-1">
 						Sheet: <span class="font-mono">{run.column_mapping.sheet}</span> · Question column:
 						<span class="font-mono">{(run.column_mapping.question_col ?? 0) + 1}</span>
 						{#if run.column_mapping.section_col != null}
@@ -953,7 +953,7 @@
 							>
 						{/if}
 					</div>
-					<p class="text-sm text-gray-500 mt-2">
+					<p class="text-sm text-surface-600-400 mt-2">
 						Next step: extract the questions into individual records so the agent can answer each
 						one.
 					</p>
@@ -968,14 +968,14 @@
 				</button>
 			</div>
 		{:else if phase === 'configure_run'}
-			<div class="bg-white shadow-sm py-6 px-6 card space-y-4">
+			<div class="bg-surface-50-950 shadow-sm py-6 px-6 card space-y-4">
 				<div>
 					<div class="font-semibold">{questions.length} questions extracted.</div>
-					<p class="text-sm text-gray-600 mt-1">
+					<p class="text-sm text-surface-600-400 mt-1">
 						Pick how the agent should work, then start the prefill. You'll see live progress — no
 						need to keep this page focused.
 					</p>
-					<p class="text-xs text-gray-500 mt-2 flex items-start gap-1.5">
+					<p class="text-xs text-surface-600-400 mt-2 flex items-start gap-1.5">
 						<i class="fa-solid fa-arrows-rotate mt-0.5 text-blue-500"></i>
 						<span>
 							When you start, we first refresh the domain's vector index (drops stale entries, picks
@@ -986,7 +986,7 @@
 				<div class="space-y-2">
 					<label
 						class="flex items-start gap-3 p-3 rounded border-2 cursor-pointer
-					{strictness === 'fast' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}"
+					{strictness === 'fast' ? 'border-blue-500 bg-blue-50' : 'border-surface-200-800'}"
 					>
 						<input
 							type="radio"
@@ -997,7 +997,7 @@
 						/>
 						<div>
 							<div class="font-medium">Fast</div>
-							<div class="text-xs text-gray-600">
+							<div class="text-xs text-surface-600-400">
 								Single pass per question, no critic. Lower confidence on the proposals; best when
 								you want a quick draft to edit.
 							</div>
@@ -1005,7 +1005,7 @@
 					</label>
 					<label
 						class="flex items-start gap-3 p-3 rounded border-2 cursor-pointer
-					{strictness === 'thorough' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}"
+					{strictness === 'thorough' ? 'border-blue-500 bg-blue-50' : 'border-surface-200-800'}"
 					>
 						<input
 							type="radio"
@@ -1016,7 +1016,7 @@
 						/>
 						<div>
 							<div class="font-medium">Thorough</div>
-							<div class="text-xs text-gray-600">
+							<div class="text-xs text-surface-600-400">
 								Critic step + one retry on low-confidence answers. ~3–5× the cost and time of Fast;
 								better grounding on the answers we keep.
 							</div>
@@ -1036,16 +1036,16 @@
 				</div>
 			</div>
 		{:else if phase === 'running' && agentRun}
-			<div class="bg-white shadow-sm py-6 px-6 card space-y-4">
+			<div class="bg-surface-50-950 shadow-sm py-6 px-6 card space-y-4">
 				<div class="flex items-center justify-between">
 					<div>
 						<h5 class="font-semibold">
 							<i class="fa-solid fa-robot mr-2 text-blue-500"></i>Agent is working
 						</h5>
-						<div class="text-xs text-gray-500 mt-1">
+						<div class="text-xs text-surface-600-400 mt-1">
 							Strictness: {agentRun.strictness} · Model: {agentRun.model_used || '—'} · Tokens: {agentRun.total_tokens.toLocaleString()}
 						</div>
-						<div class="text-xs text-gray-500 mt-0.5">
+						<div class="text-xs text-surface-600-400 mt-0.5">
 							Started: {formatTimestamp(agentRun.started_at)} · Elapsed:
 							{runDurationMs != null ? formatDuration(runDurationMs) : '—'}
 						</div>
@@ -1061,7 +1061,7 @@
 				</div>
 
 				<div>
-					<div class="flex justify-between text-xs text-gray-600 mb-1">
+					<div class="flex justify-between text-xs text-surface-600-400 mb-1">
 						<span>{agentRun.completed_steps} / {agentRun.total_steps} questions</span>
 						<span>
 							{agentRun.total_steps > 0
@@ -1069,7 +1069,7 @@
 								: 0}%
 						</span>
 					</div>
-					<div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+					<div class="w-full bg-surface-200-800 rounded-full h-2 overflow-hidden">
 						<div
 							class="bg-blue-500 h-2 transition-all duration-500"
 							style="width: {agentRun.total_steps > 0
@@ -1080,7 +1080,7 @@
 				</div>
 
 				{#if agentRun.current_step_label}
-					<div class="text-sm font-mono bg-gray-50 px-3 py-2 rounded">
+					<div class="text-sm font-mono bg-surface-50-950 px-3 py-2 rounded">
 						{agentRun.current_step_label}
 					</div>
 				{/if}
@@ -1092,7 +1092,7 @@
 							No heartbeat for {heartbeatStaleness}s — agent may be stuck. Consider cancelling.
 						</span>
 					{:else if heartbeatStaleness != null}
-						<span class="text-gray-500">
+						<span class="text-surface-600-400">
 							<i class="fa-solid fa-heart-pulse mr-1 text-green-500"></i>
 							Last heartbeat {heartbeatStaleness}s ago
 						</span>
@@ -1105,18 +1105,18 @@
 				{@render bandedReview('Answers drafted so far — populating live')}
 			{/if}
 		{:else if phase === 'review' && agentRun}
-			<div class="bg-white shadow-sm py-4 px-6 card space-y-3">
+			<div class="bg-surface-50-950 shadow-sm py-4 px-6 card space-y-3">
 				<div class="flex items-start justify-between gap-4">
 					<div>
 						<h5 class="font-semibold">
 							<i class="fa-solid fa-circle-check mr-2 text-green-500"></i>Run complete —
 							{answeredCount} of {questions.length} answered
 						</h5>
-						<div class="text-xs text-gray-500 mt-1">
+						<div class="text-xs text-surface-600-400 mt-1">
 							{agentRun.strictness} mode · {agentRun.model_used || '—'} ·
 							{agentRun.total_tokens.toLocaleString()} tokens
 						</div>
-						<div class="text-xs text-gray-500 mt-0.5">
+						<div class="text-xs text-surface-600-400 mt-0.5">
 							Started: {formatTimestamp(agentRun.started_at)} · Finished:
 							{formatTimestamp(agentRun.finished_at)} · Duration:
 							{runDurationMs != null ? formatDuration(runDurationMs) : '—'}
@@ -1132,7 +1132,7 @@
 						</a>
 						{@render valueMappingHint()}
 						<div class="flex flex-col items-end gap-1">
-							<div class="text-gray-500">Run again with:</div>
+							<div class="text-surface-600-400">Run again with:</div>
 							<div class="flex gap-2">
 								<button
 									type="button"
@@ -1151,7 +1151,7 @@
 									<i class="fa-solid fa-magnifying-glass-chart mr-1"></i>Thorough
 								</button>
 							</div>
-							<div class="text-[10px] text-gray-400 mt-0.5 max-w-[260px] text-right">
+							<div class="text-[10px] text-surface-500 mt-0.5 max-w-[260px] text-right">
 								<i class="fa-solid fa-arrows-rotate mr-1 text-blue-500"></i>
 								Re-runs the domain index refresh first, then the prefill.
 							</div>
@@ -1163,22 +1163,22 @@
 			{@render statsBreakdown()}
 			{@render bandedReview('Sorted by confidence ascending — the gnarly ones come first.')}
 		{:else if phase === 'run_ended' && agentRun}
-			<div class="bg-white shadow-sm py-4 px-6 card border-l-4 border-red-500 space-y-3">
+			<div class="bg-surface-50-950 shadow-sm py-4 px-6 card border-l-4 border-red-500 space-y-3">
 				<div class="flex items-start justify-between gap-4">
 					<div>
 						<div class="font-semibold text-red-700">
 							Run {agentRun.status === 'cancelled' ? 'cancelled' : 'failed'}
 						</div>
-						<div class="text-xs text-gray-500 mt-1">
+						<div class="text-xs text-surface-600-400 mt-1">
 							{agentRun.strictness} mode · {agentRun.model_used || '—'} ·
 							{agentRun.total_tokens.toLocaleString()} tokens
 						</div>
-						<div class="text-xs text-gray-500 mt-0.5">
+						<div class="text-xs text-surface-600-400 mt-0.5">
 							Started: {formatTimestamp(agentRun.started_at)} · Ended:
 							{formatTimestamp(agentRun.finished_at)} · Duration:
 							{runDurationMs != null ? formatDuration(runDurationMs) : '—'}
 						</div>
-						<div class="text-xs text-gray-500 mt-1">
+						<div class="text-xs text-surface-600-400 mt-1">
 							Completed {agentRun.completed_steps} of {agentRun.total_steps} questions before stopping.
 						</div>
 					</div>
@@ -1194,7 +1194,7 @@
 							{@render valueMappingHint()}
 						{/if}
 						<div class="flex flex-col items-end gap-1">
-							<div class="text-gray-500">Run again with:</div>
+							<div class="text-surface-600-400">Run again with:</div>
 							<div class="flex gap-2">
 								<button
 									type="button"
@@ -1213,7 +1213,7 @@
 									<i class="fa-solid fa-magnifying-glass-chart mr-1"></i>Thorough
 								</button>
 							</div>
-							<div class="text-[10px] text-gray-400 mt-0.5 max-w-[260px] text-right">
+							<div class="text-[10px] text-surface-500 mt-0.5 max-w-[260px] text-right">
 								<i class="fa-solid fa-arrows-rotate mr-1 text-blue-500"></i>
 								Re-runs the domain index refresh first, then the prefill.
 							</div>
@@ -1222,7 +1222,7 @@
 				</div>
 				{#if agentRun.error_message}
 					<div
-						class="text-sm text-gray-700 font-mono whitespace-pre-wrap bg-gray-50 px-3 py-2 rounded"
+						class="text-sm text-surface-700-300 font-mono whitespace-pre-wrap bg-surface-50-950 px-3 py-2 rounded"
 					>
 						{agentRun.error_message}
 					</div>
@@ -1248,22 +1248,22 @@
 				if (e.target === e.currentTarget) closePicker();
 			}}
 		>
-			<div class="bg-white rounded-lg shadow-xl w-full max-w-2xl flex flex-col">
+			<div class="bg-surface-50-950 rounded-lg shadow-xl w-full max-w-2xl flex flex-col">
 				<div class="px-6 py-4 border-b">
 					<h4 class="font-semibold">Use an existing applied control</h4>
-					<p class="text-xs text-gray-500 mt-1">
+					<p class="text-xs text-surface-600-400 mt-1">
 						Pick a control in this domain. The agent will re-run the question with it as priority
 						context.
 					</p>
 				</div>
 				{#if pickerQuestion}
-					<div class="px-6 py-3 bg-gray-50 border-b">
-						<div class="text-[10px] uppercase tracking-wide text-gray-500 font-semibold">
+					<div class="px-6 py-3 bg-surface-50-950 border-b">
+						<div class="text-[10px] uppercase tracking-wide text-surface-600-400 font-semibold">
 							Question
 						</div>
 						<div class="text-sm mt-1">{pickerQuestion.text}</div>
 						{#if pickerQuestion.section || pickerQuestion.ref_id}
-							<div class="text-xs text-gray-500 mt-1 flex items-center gap-2">
+							<div class="text-xs text-surface-600-400 mt-1 flex items-center gap-2">
 								{#if pickerQuestion.section}
 									<span>{pickerQuestion.section}</span>
 								{/if}
@@ -1309,22 +1309,24 @@
 				if (e.target === e.currentTarget) closeSuggest();
 			}}
 		>
-			<div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+			<div
+				class="bg-surface-50-950 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+			>
 				<div class="px-6 py-4 border-b">
 					<h4 class="font-semibold">Suggest a control to create</h4>
-					<p class="text-xs text-gray-500 mt-1">
+					<p class="text-xs text-surface-600-400 mt-1">
 						Review the draft, edit anything, then create. We'll add the control to the domain and
 						immediately re-try the question with it.
 					</p>
 				</div>
 				{#if suggestQuestion}
-					<div class="px-6 py-3 bg-gray-50 border-b">
-						<div class="text-[10px] uppercase tracking-wide text-gray-500 font-semibold">
+					<div class="px-6 py-3 bg-surface-50-950 border-b">
+						<div class="text-[10px] uppercase tracking-wide text-surface-600-400 font-semibold">
 							Question
 						</div>
 						<div class="text-sm mt-1">{suggestQuestion.text}</div>
 						{#if suggestQuestion.section || suggestQuestion.ref_id}
-							<div class="text-xs text-gray-500 mt-1 flex items-center gap-2">
+							<div class="text-xs text-surface-600-400 mt-1 flex items-center gap-2">
 								{#if suggestQuestion.section}
 									<span>{suggestQuestion.section}</span>
 								{/if}
@@ -1337,7 +1339,7 @@
 				{/if}
 
 				{#if suggestLoading || !suggestDraft}
-					<div class="px-6 py-12 text-center text-sm text-gray-500">
+					<div class="px-6 py-12 text-center text-sm text-surface-600-400">
 						<i class="fa-solid fa-wand-magic-sparkles fa-pulse mr-2 text-blue-500"></i>
 						Drafting a control from the question…
 					</div>
@@ -1353,32 +1355,36 @@
 							</div>
 						{/if}
 						<div>
-							<label for="d-name" class="block text-xs font-medium text-gray-700"> Name * </label>
+							<label for="d-name" class="block text-xs font-medium text-surface-700-300">
+								Name *
+							</label>
 							<input
 								id="d-name"
 								type="text"
 								bind:value={suggestDraft.name}
 								maxlength="200"
-								class="mt-1 w-full rounded-lg border-gray-300 sm:text-sm"
+								class="mt-1 w-full rounded-lg border-surface-300-700 sm:text-sm"
 							/>
 						</div>
 						<div>
-							<label for="d-desc" class="block text-xs font-medium text-gray-700">
+							<label for="d-desc" class="block text-xs font-medium text-surface-700-300">
 								Description
 							</label>
 							<textarea
 								id="d-desc"
 								bind:value={suggestDraft.description}
 								rows="3"
-								class="mt-1 w-full rounded-lg border-gray-300 sm:text-sm"
+								class="mt-1 w-full rounded-lg border-surface-300-700 sm:text-sm"
 							></textarea>
 						</div>
 						<div>
-							<label for="d-status" class="block text-xs font-medium text-gray-700"> Status </label>
+							<label for="d-status" class="block text-xs font-medium text-surface-700-300">
+								Status
+							</label>
 							<select
 								id="d-status"
 								bind:value={suggestDraft.status}
-								class="mt-1 w-full rounded-lg border-gray-300 sm:text-sm"
+								class="mt-1 w-full rounded-lg border-surface-300-700 sm:text-sm"
 							>
 								<option value="to_do">To do</option>
 								<option value="in_progress">In progress</option>
@@ -1387,7 +1393,7 @@
 								<option value="degraded">Degraded</option>
 							</select>
 						</div>
-						<p class="text-[11px] text-gray-400">
+						<p class="text-[11px] text-surface-500">
 							The agent's drafted observation, category and CSF function will be saved along with
 							the control — you can refine them later from the Applied Controls page.
 						</p>
@@ -1416,7 +1422,7 @@
 	{/if}
 
 	{#if autoAcceptedQuestions.length > 0}
-		<div class="bg-white shadow-sm card overflow-hidden">
+		<div class="bg-surface-50-950 shadow-sm card overflow-hidden">
 			<button
 				type="button"
 				class="w-full flex items-center justify-between px-6 py-3 bg-green-50
@@ -1440,14 +1446,14 @@
 				></i>
 			</button>
 			{#if autoAcceptedExpanded}
-				<div class="divide-y divide-gray-200">
+				<div class="divide-y divide-surface-200-800">
 					{#each autoAcceptedQuestions as question}
 						{@const action = actionByQuestion[question.id]}
 						{@const bar = confidenceBar(action?.confidence ?? null)}
 						<div class="px-6 py-4 space-y-2">
 							<div class="flex items-start justify-between gap-4">
 								<div class="flex-1">
-									<div class="flex items-center gap-2 text-xs text-gray-500">
+									<div class="flex items-center gap-2 text-xs text-surface-600-400">
 										{#if question.section}
 											<span class="font-medium">{question.section}</span>
 										{/if}
@@ -1466,13 +1472,13 @@
 											{action.payload.status ?? VERDICT.NEEDS_INFO}
 										</span>
 										<div class="w-32">
-											<div class="flex justify-between text-[10px] text-gray-500">
+											<div class="flex justify-between text-[10px] text-surface-600-400">
 												<span>conf.</span>
 												<span>
 													{action.confidence != null ? action.confidence.toFixed(2) : '—'}
 												</span>
 											</div>
-											<div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+											<div class="w-full bg-surface-200-800 rounded-full h-1.5 overflow-hidden">
 												<div class="{bar.color} h-1.5" style="width: {bar.width}"></div>
 											</div>
 										</div>
@@ -1480,7 +1486,7 @@
 								{/if}
 							</div>
 							{#if action}
-								<div class="text-sm bg-gray-50 px-3 py-2 rounded whitespace-pre-wrap">
+								<div class="text-sm bg-surface-50-950 px-3 py-2 rounded whitespace-pre-wrap">
 									{action.payload.comment || '(no comment)'}
 								</div>
 							{/if}
@@ -1493,18 +1499,18 @@
 {/snippet}
 
 {#snippet reviewList(headerText: string, qList: Question[])}
-	<div class="bg-white shadow-sm card overflow-hidden">
-		<div class="px-6 py-3 bg-gray-50 text-xs text-gray-600 border-b">
+	<div class="bg-surface-50-950 shadow-sm card overflow-hidden">
+		<div class="px-6 py-3 bg-surface-50-950 text-xs text-surface-600-400 border-b">
 			{headerText}
 		</div>
-		<div class="divide-y divide-gray-200">
+		<div class="divide-y divide-surface-200-800">
 			{#each qList as question}
 				{@const action = actionByQuestion[question.id]}
 				{@const bar = confidenceBar(action?.confidence ?? null)}
 				<div class="px-6 py-4 space-y-2">
 					<div class="flex items-start justify-between gap-4">
 						<div class="flex-1">
-							<div class="flex items-center gap-2 text-xs text-gray-500">
+							<div class="flex items-center gap-2 text-xs text-surface-600-400">
 								{#if question.section}
 									<span class="font-medium">{question.section}</span>
 								{/if}
@@ -1523,35 +1529,35 @@
 									{action.payload.status ?? VERDICT.NEEDS_INFO}
 								</span>
 								<div class="w-32">
-									<div class="flex justify-between text-[10px] text-gray-500">
+									<div class="flex justify-between text-[10px] text-surface-600-400">
 										<span>conf.</span>
 										<span>
 											{action.confidence != null ? action.confidence.toFixed(2) : '—'}
 										</span>
 									</div>
-									<div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+									<div class="w-full bg-surface-200-800 rounded-full h-1.5 overflow-hidden">
 										<div class="{bar.color} h-1.5" style="width: {bar.width}"></div>
 									</div>
 								</div>
 							</div>
 						{:else}
-							<div class="text-xs text-gray-400 min-w-[140px] text-right">pending…</div>
+							<div class="text-xs text-surface-500 min-w-[140px] text-right">pending…</div>
 						{/if}
 					</div>
 					{#if action}
-						<div class="text-sm bg-gray-50 px-3 py-2 rounded whitespace-pre-wrap">
+						<div class="text-sm bg-surface-50-950 px-3 py-2 rounded whitespace-pre-wrap">
 							{action.payload.comment || '(no comment)'}
 						</div>
 						{#if action.source_refs && action.source_refs.length > 0}
 							<details class="text-xs">
-								<summary class="cursor-pointer text-gray-500 hover:text-gray-700">
+								<summary class="cursor-pointer text-surface-600-400 hover:text-surface-700-300">
 									{action.source_refs.length} citation{action.source_refs.length === 1 ? '' : 's'}
 								</summary>
 								<div class="mt-2 space-y-1 pl-4">
 									{#each action.source_refs as ref}
 										{@const href = getCitationHref(ref)}
-										<div class="text-gray-700">
-											<span class="font-mono text-gray-400">[{ref.index}]</span>
+										<div class="text-surface-700-300">
+											<span class="font-mono text-surface-500">[{ref.index}]</span>
 											{#if href}
 												<a
 													{href}
@@ -1566,7 +1572,7 @@
 											{:else}
 												<span class="font-medium">{ref.name || ref.kind || 'passage'}</span>
 											{/if}
-											<div class="text-gray-500 italic mt-0.5">{ref.snippet}</div>
+											<div class="text-surface-600-400 italic mt-0.5">{ref.snippet}</div>
 										</div>
 									{/each}
 								</div>
@@ -1575,7 +1581,7 @@
 						{#if action.payload.status === VERDICT.NEEDS_INFO || (action.confidence != null && action.confidence < AUTO_ACCEPT_THRESHOLD)}
 							<div class="flex items-center gap-3 text-xs pt-1">
 								{#if retryBusyForQuestion === question.id}
-									<span class="text-gray-500">
+									<span class="text-surface-600-400">
 										<i class="fa-solid fa-spinner fa-spin mr-1"></i>
 										Re-trying with hint…
 									</span>
@@ -1609,10 +1615,10 @@
 {/snippet}
 
 {#snippet statsBreakdown()}
-	<div class="bg-white shadow-sm py-4 px-6 card space-y-3">
+	<div class="bg-surface-50-950 shadow-sm py-4 px-6 card space-y-3">
 		<div class="flex items-center justify-between gap-2">
 			<div class="font-semibold text-sm">Answer breakdown</div>
-			<div class="text-xs text-gray-500 text-right">
+			<div class="text-xs text-surface-600-400 text-right">
 				<div>
 					{answeredCount} answered{pendingCount > 0 ? ` · ${pendingCount} pending` : ''}
 				</div>
@@ -1630,7 +1636,7 @@
 			</div>
 		</div>
 
-		<div class="flex w-full h-3 rounded-full overflow-hidden bg-gray-100">
+		<div class="flex w-full h-3 rounded-full overflow-hidden bg-surface-100-900">
 			{#each statusBreakdown as item}
 				{#if item.count > 0}
 					<div
@@ -1661,19 +1667,19 @@
 {#snippet valueMappingHint()}
 	{#if run.value_mapping?.has_multiple_vocabs}
 		<div
-			class="text-[11px] text-gray-500 max-w-[280px] text-right leading-snug"
+			class="text-[11px] text-surface-600-400 max-w-[280px] text-right leading-snug"
 			title="The questionnaire uses {run.value_mapping
 				.vocab_count} different answer vocabularies — each question writes its own value."
 		>
 			<i class="fa-solid fa-language mr-1"></i>
 			{run.value_mapping.vocab_count} answer vocabularies detected — each question writes its own value.
-			<div class="text-[10px] text-gray-400 mt-0.5">
+			<div class="text-[10px] text-surface-500 mt-0.5">
 				Needs info → cell left blank for manual review.
 			</div>
 		</div>
 	{:else if run.value_mapping && run.value_mapping.source && run.value_mapping.source !== 'fallback'}
 		<div
-			class="text-[11px] text-gray-500 max-w-[280px] text-right leading-snug"
+			class="text-[11px] text-surface-600-400 max-w-[280px] text-right leading-snug"
 			title="Yes → {run.value_mapping.yes} · Partial → {run.value_mapping.partial} · No → {run
 				.value_mapping.no} · Needs info → blank for review"
 		>
@@ -1686,7 +1692,7 @@
 			<span class="font-mono">{run.value_mapping.yes}</span> /
 			<span class="font-mono">{run.value_mapping.partial}</span> /
 			<span class="font-mono">{run.value_mapping.no}</span>
-			<div class="text-[10px] text-gray-400 mt-0.5">
+			<div class="text-[10px] text-surface-500 mt-0.5">
 				Needs info → cell left blank for manual review.
 			</div>
 		</div>
@@ -1700,7 +1706,7 @@
 			review.
 		</div>
 	{:else if run.value_mapping && run.value_mapping.source === 'fallback'}
-		<div class="text-[11px] text-gray-400 max-w-[280px] text-right leading-snug">
+		<div class="text-[11px] text-surface-500 max-w-[280px] text-right leading-snug">
 			<i class="fa-solid fa-language mr-1"></i>Using internal labels (no customer vocabulary
 			detected). Needs info cells are left blank.
 		</div>

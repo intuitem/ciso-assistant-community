@@ -41,13 +41,6 @@
 	bind:cachedValue={formDataCache['provider_entity']}
 	label={m.providerEntity()}
 />
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 <Score
 	{form}
 	label={m.criticality()}

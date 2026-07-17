@@ -3,6 +3,7 @@ import type { PageServerLoad } from './$types';
 
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
+import { formatSelectFieldData } from '$lib/utils/load';
 import { modelSchema } from '$lib/utils/schemas';
 import { headData } from '$lib/utils/table';
 import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
@@ -55,12 +56,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			const url = `${BASE_API_URL}/${URLModel}/${selectField.field}/`;
 			const response = await fetch(url);
 			if (response.ok) {
-				selectOptions[selectField.field] = await response.json().then((data) =>
-					Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}))
-				);
+				const responseData = await response.json();
+				selectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
 			} else {
 				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 			}
@@ -128,12 +125,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			const url = `${BASE_API_URL}/applied-controls/${selectField.field}/`;
 			const response = await fetch(url);
 			if (response.ok) {
-				measureSelectOptions[selectField.field] = await response.json().then((data) =>
-					Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}))
-				);
+				const responseData = await response.json();
+				measureSelectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
 			} else {
 				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 			}

@@ -1,4 +1,5 @@
-FROM node:24-slim AS builder
+ARG NODE_IMAGE=node:24-slim
+FROM ${NODE_IMAGE} AS builder
 ENV NODE_OPTIONS="--max-old-space-size=10240"
 WORKDIR /app
 
@@ -11,7 +12,8 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm run build
 RUN pnpm prune
 
-FROM node:24-slim
+ARG NODE_IMAGE=node:24-slim
+FROM ${NODE_IMAGE}
 ENV NODE_OPTIONS="--max-old-space-size=10240"
 WORKDIR /app
 COPY --from=builder /app/build build/

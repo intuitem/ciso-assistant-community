@@ -12,7 +12,7 @@ repos:
         # reproducible build hash (see .github/actions/cla-assistant/README.md).
         exclude: ^\.github/actions/cla-assistant/dist/
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.2
+    rev: v0.15.17
     hooks:
       # Run the linter.
       # - id: ruff

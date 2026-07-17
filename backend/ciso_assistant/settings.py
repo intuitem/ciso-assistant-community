@@ -22,7 +22,7 @@ from . import meta
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(os.getenv("DJANGO_BASE_DIR", Path(__file__).resolve().parent.parent))
 load_dotenv(BASE_DIR / ".meta")
 
 
@@ -30,7 +30,7 @@ VERSION = os.getenv("CISO_ASSISTANT_VERSION", "unset")
 BUILD = os.getenv("CISO_ASSISTANT_BUILD", "unset")
 SCHEMA_VERSION = meta.SCHEMA_VERSION
 
-LOG_LEVEL = os.environ.get("LOG_LEVEL", "WARNING")
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
 LOG_OUTFILE = os.environ.get("LOG_OUTFILE", "")
 DB_LOG = os.environ.get("DB_LOG", "").lower() == "true"
@@ -45,6 +45,17 @@ def set_ciso_assistant_url(_, __, event_dict):
 
 
 _SENSITIVE_QUERY_PARAMS = frozenset({"code", "token", "id_token", "access_token"})
+
+_QUIET_PATHS = frozenset({"/api/health/"})
+
+
+def quiet_healthcheck(_, __, event_dict):
+    request = event_dict.get("request", "")
+    if isinstance(request, str):
+        for path in _QUIET_PATHS:
+            if path in request:
+                raise structlog.DropEvent
+    return event_dict
 
 
 def redact_sensitive_query_params(_, __, event_dict):
@@ -75,15 +86,35 @@ LOGGING = {
             "processor": structlog.dev.ConsoleRenderer(),
         },
     },
+    # Warning and above go to stderr, the rest to stdout, so systemd/journald
+    # assigns error vs info priority correctly.
+    "filters": {
+        "below_warning": {
+            "()": "django.utils.log.CallbackFilter",
+            "callback": lambda record: record.levelno < logging.WARNING,
+        },
+    },
     "handlers": {
-        "console": {
+        "stdout": {
             "class": "logging.StreamHandler",
+            "stream": "ext://sys.stdout",
+            "formatter": LOG_FORMAT,
+            "filters": ["below_warning"],
+        },
+        "stderr": {
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stderr",
+            "level": "WARNING",
             "formatter": LOG_FORMAT,
         },
     },
     "loggers": {
-        "": {"handlers": ["console"], "level": LOG_LEVEL},
-        "httpx": {"handlers": ["console"], "level": "WARNING", "propagate": False},
+        "": {"handlers": ["stdout", "stderr"], "level": LOG_LEVEL},
+        "httpx": {
+            "handlers": ["stdout", "stderr"],
+            "level": "WARNING",
+            "propagate": False,
+        },
         # Disable Django's default request logger — it logs full URLs including
         # sensitive OAuth2 query params (code, token). Request logging is already
         # handled by django_structlog with query-param redaction.
@@ -95,7 +126,7 @@ if LOG_OUTFILE:
     LOGGING["handlers"]["file"] = {
         "level": LOG_LEVEL,
         "class": "logging.handlers.WatchedFileHandler",
-        "filename": "ciso-assistant.log",
+        "filename": LOG_OUTFILE,
         "formatter": "json",
     }
     LOGGING["loggers"][""]["handlers"].append("file")
@@ -103,6 +134,7 @@ if LOG_OUTFILE:
 structlog.configure(
     processors=[
         structlog.contextvars.merge_contextvars,
+        quiet_healthcheck,
         redact_sensitive_query_params,
         set_ciso_assistant_url,
         structlog.stdlib.filter_by_level,
@@ -216,7 +248,7 @@ LOCAL_STORAGE_DIRECTORY = os.environ.get(
     "LOCAL_STORAGE_DIRECTORY", BASE_DIR / "db/attachments"
 )
 
-EXPOSE_METRICS = os.environ.get("EXPOSE_METRICS", "False").lower() in (
+EXPOSE_METRICS = os.environ.get("EXPOSE_METRICS", "False").strip().lower() in (
     "true",
     "1",
     "yes",
@@ -428,9 +460,11 @@ INSTALLED_APPS = [
     "privacy",
     "resilience",
     "crq",
+    "custom_fields",
     "metrology",
     "chat",
     "doc_management",
+    "portals",
     "core",
     "cal",
     "django_filters",
@@ -535,6 +569,7 @@ def _build_tls12_context():
     context = ssl.create_default_context()
     context.minimum_version = ssl.TLSVersion.TLSv1_2
     context.maximum_version = ssl.TLSVersion.TLSv1_2
+    context.set_ciphers("ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256")
     return context
 
 
@@ -600,7 +635,7 @@ if DEBUG:
 
     if DB_LOG:
         LOGGING["loggers"]["django.db.backends"] = {
-            "handlers": ["console"],
+            "handlers": ["stdout", "stderr"],
             "level": "DEBUG",
             "propagate": False,
         }
@@ -682,6 +717,7 @@ LANGUAGES = [
     ("lt", "Lithuanian"),
     ("ko", "Korean"),
     ("et", "Estonian"),
+    ("sk", "Slovak"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -785,6 +821,8 @@ HEADLESS_FRONTEND_URLS = {
     "socialaccount_login_error": CISO_ASSISTANT_URL + "/login",
 }
 
+ACCOUNT_LOGOUT_REDIRECT_URL = CISO_ASSISTANT_URL + "/login"
+
 SOCIALACCOUNT_PROVIDERS = {
     "saml": {
         "EMAIL_AUTHENTICATION": True,
@@ -819,6 +857,7 @@ HUEY = {
 AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
 
-WEBHOOK_ALLOW_PRIVATE_IPS = os.environ.get(
-    "WEBHOOK_ALLOW_PRIVATE_IPS", "False"
+# Allow outbound server-side requests (webhooks, integrations, LLM URLs) to private/loopback addresses
+ALLOW_PRIVATE_NETWORK_REQUESTS = os.environ.get(
+    "ALLOW_PRIVATE_NETWORK_REQUESTS", "False"
 ).lower() in ("true", "1", "yes")
