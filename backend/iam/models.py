@@ -4,7 +4,7 @@ Inspired from Azure IAM model"""
 from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Generator, List, Literal, Optional, Tuple, Iterable
+from typing import Any, Generator, List, Literal, Optional, Iterable
 from typing import TYPE_CHECKING, cast
 import uuid
 from allauth.account.models import EmailAddress
@@ -1361,22 +1361,23 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if is_accessible:
             return True
 
-        has_is_published_field = any(
-            f.name == "is_published" for f in model._meta.get_fields()
-        )
-
-        if has_is_published_field and getattr(obj, "is_published"):
-            ancestor_folder_ids = (
-                Folder.objects.filter(
-                    ~Q(content_type=Folder.ContentType.ENCLAVE)
-                    & Q(descendants__in=direct_accessible_folder_id_set)
-                )
-                .values_list("id", flat=True)
-                .distinct()
+        if perm == "view":
+            has_is_published_field = any(
+                f.name == "is_published" for f in model._meta.get_fields()
             )
 
-            is_accessible = iam_folder.id in ancestor_folder_ids
-            return is_accessible
+            if has_is_published_field and getattr(obj, "is_published"):
+                ancestor_folder_ids = (
+                    Folder.objects.filter(
+                        ~Q(content_type=Folder.ContentType.ENCLAVE)
+                        & Q(descendants__in=direct_accessible_folder_id_set)
+                    )
+                    .values_list("id", flat=True)
+                    .distinct()
+                )
+
+                is_accessible = iam_folder.id in ancestor_folder_ids
+                return is_accessible
 
         return False
 
@@ -1681,7 +1682,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         folder: Folder,
         user: AbstractBaseUser | AnonymousUser,
         object_type: type[models.Model],
-    ) -> Tuple[QuerySet[uuid.UUID], QuerySet[uuid.UUID], QuerySet[uuid.UUID]]:
+    ) -> tuple[QuerySet[uuid.UUID], QuerySet[uuid.UUID], QuerySet[uuid.UUID]]:
         """
         Gets all objects of a specified type that a user can reach in a given folder
         Only accessible folders are considered
