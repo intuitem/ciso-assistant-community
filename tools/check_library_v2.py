@@ -2529,6 +2529,34 @@ def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, co
             ctx.add_sheet_warning_msg(current_sheet_name, msg)
 
 
+# Ensure that choice-based question types have a non-empty "question_choices" value.
+def _answers_validate_question_choices(df: pd.DataFrame, sheet_name: str, context: str):
+
+    question_types_requiring_choices = {"unique_choice", "multiple_choice"}
+    problematic_rows = []
+
+    for row_idx, row in df.iterrows():
+        question_type_raw = row.get("question_type", "")
+        if pd.isna(question_type_raw):
+            continue
+
+        question_type = str(question_type_raw).strip().lower()
+        question_choices = row.get("question_choices", "")
+
+        if (
+            question_type in question_types_requiring_choices
+            and (pd.isna(question_choices) or str(question_choices).strip() == "")
+        ):
+            problematic_rows.append((row_idx + 2, question_type))
+
+    if problematic_rows:
+        raise ValueError(
+            f"({context}) [{sheet_name}] The field \"question_choices\" must not be empty for choice-based question types:\n   - "
+            + "\n   - ".join(f'Row #{row}: question_type "{question_type}"' for row, question_type in problematic_rows)
+            + '\n> 💡 Tip: Fill "question_choices" for every "unique_choice" and "multiple_choice" question.'
+        )
+
+
 
 # Get the "threats" or "reference_controls" section from a YAML Framework file passed as argument
 def get_yaml_section_from_files(yaml_files: List[str], section_type: YAMLSectionTypes, current_sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None) -> Dict:
@@ -2882,16 +2910,7 @@ def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
 
     # Check that "question_choices" is filled for relevant question types ("unique_choice" & "multiple_choice")
-    for row_idx, row in df.iterrows():
-        question_type_raw = row.get("question_type", "")
-        if pd.isna(question_type_raw):
-            continue
-
-        question_type = str(question_type_raw).strip().lower()
-        if question_type in {"unique_choice", "multiple_choice"}:
-            question_choices = row.get("question_choices", "")
-            if pd.isna(question_choices) or str(question_choices).strip() == "":
-                raise ValueError(f"({fct_name}) [{sheet_name}] Row #{row_idx + 2}: For question_type \"{question_type}\", the field \"question_choices\" must not be empty")
+    _answers_validate_question_choices(df, sheet_name, fct_name)
 
     # Check if the "answers" sheet is actually used in a "framework" sheet
     frameworks_with_answers = check_content_sheet_usage_in_frameworks(wb, sheet_name, "answers_definition", fct_name, ctx)
