@@ -5049,7 +5049,7 @@
 	"scoreRange": "Vyhovující bodové rozmezí",
 	"scoreScale": "Dostupná hodnotící škála",
 	"downloadExcelTemplate": "Stažení předpřipravené tabulky ve formátu pro Excel",
-	"frameworkActionsHelp": "Předpřipravená tabulka v aplikaci Excel je navržena způsobem pro využití osobami s externím pracovním úvazkem. Až budou tyto tabulky úspěšně doplněny, použijte pak {dataWizard} pro bezproblémové naimportování všech výsledných dat.",
+	"frameworkActionsHelp": "Předpřipravená tabulka v aplikaci Excel je navržena pro využití externími pracovníky. Až budou tyto tabulky úspěšně doplněny, použijte {dataWizard} pro bezproblémové naimportování všech výsledných dat.",
     "documentContainer": "Dokument",
     "documentContainers": "Dokumenty",
     "addDocumentContainer": "Nový dokument",
@@ -5151,7 +5151,7 @@
     "system": "Systém",
     "dataWizardUpdateExisting": "Aktualizovat stávající hodnocení",
     "dataWizardCreateNewAssessment": "Vytvořit nové",
-    "dataWizardUpdateExistingHint": "Ponechte 'Vytvořit nové' pro vytvoření čerstvého hodnocení. Pokud vyberete existující, naimportované řádky se do něj promítnou a strategie řešení konfliktů se aplikuje na jeho podřízené položky.",
+    "dataWizardUpdateExistingHint": "Ponechte 'Vytvořit nové' pro vytvoření nového hodnocení. Pokud vyberete existující, naimportované řádky se do něj promítnou a strategie řešení konfliktů se aplikuje na jeho podřízené položky.",
     "projectStatus": "Stav projektu",
     "portals": "Portály",
     "backToApp": "Zpět do aplikace",
@@ -5311,7 +5311,7 @@
     "subsequentOrAssociatedArrangement": "Následné nebo přidružené ujednání",
     "terminationNotForCauseExpiredAndNotRenewed": "Ukončení bez udání důvodu: Vypršela platnost a neobnoveno",
     "terminationForCauseProviderInBreachOfApplicableLawRegulationsOrContractualProvisions": "Ukončení s udáním důvodu: Poskytovatel v rozporu s platnými zákony, nařízeními nebo smluvními ustanoveními",
-    "terminationForCauseIdentifiedImpedimentsOfTheProviderCapableOfAlteringTheSupportedFunction": "Ukončení z důvodu: Identifikovány překážky poskytovatele způsobilé ovlivnit podporovanou funkci",
+    "terminationForCauseIdentifiedImpedimentsOfTheProviderCapableOfAlteringTheSupportedFunction": "Ukončení s udáním důvodu: Identifikovány překážky poskytovatele způsobilé ovlivnit podporovanou funkcii",
     "terminationForCauseProviderSWeaknessesRegardingTheManagementAndSecurityOfSensitiveDataOrInformation": "Ukončení s udáním důvodu: Slabiny poskytovatele týkající se řízení a zabezpečení citlivých dat či informací",
     "terminationAsRequestedByTheCompetentAuthority": "Ukončení: Na žádost příslušného úřadu",
     "otherReasonsForTermination": "Jiné důvody k ukončení",
@@ -5589,5 +5589,5 @@
     "importTemplatesSingleNote": "Importujete jen jednu jedinou šablonu? Často je mnohem rychlejší si ji založit manuálně přímo ze seznamu se šablonami.",
     "unpublishedDocumentsNotice": "Připraveno celkem {count} dokumentů jakožto koncept (draft). Nejsou zatím publikované — uvidíte je tedy jen v pohledu správy (manage).",
     "authored": "Napsáno v aplikaci",
-    "uploaded": "Nahráno ze souboru",	
+    "uploaded": "Nahráno ze souboru"	
 }
