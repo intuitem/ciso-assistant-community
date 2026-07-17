@@ -10395,9 +10395,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     min_score_fallback,
                 )
                 continue
-            buckets.setdefault((status_driven, result_visible, has_questions), []).append(
-                ca_id
-            )
+            buckets.setdefault(
+                (status_driven, result_visible, has_questions), []
+            ).append(ca_id)
 
         for (
             status_driven,
@@ -11322,6 +11322,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
+            # Question-driven requirements: score and is_scored belong to
+            # recompute_assessment (a committed score means "questionnaire
+            # complete" for progress). Direct writes are ignored — same
+            # contract as the write serializer, so clients that round-trip
+            # the field keep working — and flagged in the response. This must
+            # run before score validation so a round-tripped empty value does
+            # not trip the integer parse.
+            score_ignored = (
+                "score" in request.data
+                and requirement_assessment.requirement.questions.exists()
+            )
+            if score_ignored:
+                score = None
+
             # validate if score value is within the resolved scale
             if score is not None:
                 try:
@@ -11352,24 +11366,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
 
-            # Question-driven requirements: score and is_scored belong to
-            # recompute_assessment (a committed score means "questionnaire
-            # complete" for progress), so direct writes are refused.
-            if (
-                "score" in request.data
-                and requirement_assessment.requirement.questions.exists()
-            ):
-                return Response(
-                    {
-                        "error": (
-                            "This requirement is question-driven: its score is "
-                            "computed from the questionnaire answers and cannot "
-                            "be set directly."
-                        )
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
             # Update the requirement assessment
             requirement_assessment.result = result
             requirement_assessment.observation = observation
@@ -11382,7 +11378,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if score is not None:
                 requirement_assessment.score = score
                 requirement_assessment.is_scored = True
-            elif score is None and "score" in request.data:
+            elif score is None and "score" in request.data and not score_ignored:
                 # Explicitly setting score to null/empty
                 requirement_assessment.score = None
                 requirement_assessment.is_scored = False
@@ -11394,6 +11390,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "urn": urn,
                 "result": result,
             }
+            if score_ignored:
+                response_data["score_ignored"] = (
+                    "This requirement is question-driven: its score is computed "
+                    "from the questionnaire answers, the provided value was ignored."
+                )
 
             # Include status in response if it was updated
             if status_value is not None:
@@ -11403,7 +11404,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if score is not None:
                 response_data["score"] = score
                 response_data["is_scored"] = True
-            elif score is None and "score" in request.data:
+            elif score is None and "score" in request.data and not score_ignored:
                 response_data["score"] = None
                 response_data["is_scored"] = False
 
@@ -12300,19 +12301,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 id__in=ra_ids, requirement__assessable=True
             )
             total = ras.count()
-            done = ras.exclude(
-                result=RequirementAssessment.Result.NOT_ASSESSED
-            ).count()
+            done = ras.exclude(result=RequirementAssessment.Result.NOT_ASSESSED).count()
 
             # Respondent-facing progress: track the respondent's own work,
             # not the audit-level progress mode (the status field may not
             # even be visible to them). Question frameworks: share of
             # answered questions, computed in SQL over the pre-seeded Answer
-            # rows (questions hidden by depends-on rules keep empty answers,
-            # so the percentage is slightly conservative on conditional
-            # questionnaires — the trade-off for not walking every answer in
-            # Python on each load). Other frameworks: share of requirements
-            # with a result (respondent alignment auto-maps to result).
+            # rows. Other frameworks: share of requirements with a result
+            # (respondent alignment auto-maps to result).
             has_questions = (
                 Question.objects.filter(
                     requirement_node__framework=ca.framework
@@ -12321,21 +12317,48 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 else False
             )
             if has_questions:
-                answer_counts = Answer.objects.filter(
-                    requirement_assessment__in=ras
-                ).aggregate(
-                    total=Count("id", distinct=True),
-                    answered=Count(
-                        "id",
-                        filter=Q(selected_choices__isnull=False)
-                        | (~Q(value=None) & ~Q(value="")),
-                        distinct=True,
-                    ),
+                # Per-requirement answer counts in one GROUP BY. Questions
+                # hidden by depends-on rules keep empty seeded Answer rows,
+                # so raw counts alone would cap conditional questionnaires
+                # below 100%: a requirement whose questionnaire is COMPLETE
+                # (result or committed score — the recompute only sets them
+                # once every VISIBLE question is answered) therefore counts
+                # as fully answered.
+                per_ra_counts = (
+                    Answer.objects.filter(requirement_assessment__in=ras)
+                    .values("requirement_assessment_id")
+                    .annotate(
+                        total=Count("id", distinct=True),
+                        answered=Count(
+                            "id",
+                            filter=Q(selected_choices__isnull=False)
+                            | (~Q(value=None) & ~Q(value="")),
+                            distinct=True,
+                        ),
+                    )
                 )
-                total_q = answer_counts["total"]
-                progress_percent = (
-                    int(answer_counts["answered"] / total_q * 100) if total_q else 0
+                complete_ra_ids = set(
+                    ras.filter(
+                        ~Q(result=RequirementAssessment.Result.NOT_ASSESSED)
+                        | Q(score__isnull=False)
+                    ).values_list("id", flat=True)
                 )
+                total_q = 0
+                answered_q = 0
+                for row in per_ra_counts:
+                    total_q += row["total"]
+                    answered_q += (
+                        row["total"]
+                        if row["requirement_assessment_id"] in complete_ra_ids
+                        else row["answered"]
+                    )
+                if total_q > 0:
+                    progress_percent = int(answered_q / total_q * 100)
+                else:
+                    # Mixed framework, but this assignment only covers
+                    # question-less requirements: fall back to result-based
+                    # progress instead of locking at 0%.
+                    progress_percent = int(done / total * 100) if total > 0 else 0
             else:
                 progress_percent = int(done / total * 100) if total > 0 else 0
 
