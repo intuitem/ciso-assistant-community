@@ -13,6 +13,7 @@
 			joinType?: string;
 			assignments?: { role_code: string; is_blocking: boolean }[];
 			error?: string | null;
+			runState?: 'visited' | 'active' | 'error' | null;
 		};
 	}
 
@@ -73,7 +74,10 @@
 	class="step-node relative rounded-base border-[1.5px] bg-surface-50-950 px-3 py-2 min-w-[160px] max-w-[220px] select-none transition-shadow
 	{style.border}
 	{selected ? 'ring-2 ring-primary-500 ring-offset-2 ring-offset-surface-50-950 shadow-lg' : 'shadow-sm'}
-	{data.error ? 'ring-2 ring-error-500' : ''}"
+	{data.error ? 'ring-2 ring-error-500' : ''}
+	{data.runState === 'visited' ? 'ring-2 ring-success-400' : ''}
+	{data.runState === 'active' ? 'ring-2 ring-warning-400 animate-pulse' : ''}
+	{data.runState === 'error' ? 'ring-2 ring-error-500 animate-pulse' : ''}"
 	title={data.error ?? undefined}
 	onmouseenter={() => (hovered = true)}
 	onmouseleave={() => (hovered = false)}
@@ -120,6 +124,20 @@
 			class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-error-500 text-white text-[9px] flex items-center justify-center"
 		>
 			!
+		</span>
+	{/if}
+
+	{#if data.runState === 'visited'}
+		<span
+			class="absolute -top-2 -left-2 w-4 h-4 rounded-full bg-success-500 text-white text-[8px] flex items-center justify-center"
+		>
+			<i class="fa-solid fa-check"></i>
+		</span>
+	{:else if data.runState === 'active'}
+		<span
+			class="absolute -top-2 -left-2 w-4 h-4 rounded-full bg-warning-500 text-white text-[8px] flex items-center justify-center"
+		>
+			<i class="fa-solid fa-circle-notch fa-spin"></i>
 		</span>
 	{/if}
 

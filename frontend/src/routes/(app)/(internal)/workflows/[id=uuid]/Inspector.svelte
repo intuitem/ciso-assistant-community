@@ -130,7 +130,26 @@
 		if (nodeDomain?.type === 'start' && !nodeDomain.input_mapping) {
 			nodeDomain.input_mapping = {};
 		}
+		if (['action', 'subprocess'].includes(nodeDomain?.type) && !nodeDomain.output_mapping) {
+			nodeDomain.output_mapping = {};
+		}
 	});
+
+	// What a path into this step's output typically looks like, for the hint.
+	const OUTPUT_EXAMPLES: Record<string, string> = {
+		http_request: 'body.summary',
+		create_object: 'created_object_id',
+		provision_folder: 'folder_id',
+		provision_user: 'user_id',
+		manage_group_membership: 'group_id',
+		send_email: 'subject',
+		log: 'message'
+	};
+	const outputExample = $derived(
+		nodeDomain?.type === 'subprocess'
+			? 'a child workflow variable key'
+			: (OUTPUT_EXAMPLES[actionConfig?.type] ?? 'created_object_id')
+	);
 
 	let copiedHook = $state(false);
 	async function copyHookUrl() {
@@ -151,6 +170,20 @@
 	function removeInputMapping(key: string) {
 		const { [key]: _, ...rest } = nodeDomain.input_mapping;
 		nodeDomain.input_mapping = rest;
+		onChange();
+	}
+
+	function addOutputMapping() {
+		const used = new Set(Object.keys(nodeDomain.output_mapping ?? {}));
+		const candidate = variables.find((v) => !used.has(v.key));
+		if (!candidate) return;
+		nodeDomain.output_mapping = { ...nodeDomain.output_mapping, [candidate.key]: '' };
+		onChange();
+	}
+
+	function removeOutputMapping(key: string) {
+		const { [key]: _, ...rest } = nodeDomain.output_mapping;
+		nodeDomain.output_mapping = rest;
 		onChange();
 	}
 
@@ -727,6 +760,46 @@
 						syntax: '{{variable}}'
 					})}
 				</p>
+			{/if}
+
+			{#if ['action', 'subprocess'].includes(nodeDomain.type)}
+				<div>
+					<div class="flex items-center justify-between mb-1">
+						{@render fieldLabel(m.outputMapping())}
+						<button
+							type="button"
+							class="text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold disabled:opacity-50"
+							onclick={addOutputMapping}
+							disabled={!variables.length}
+						>
+							<i class="fa-solid fa-plus mr-0.5"></i>{m.addMapping()}
+						</button>
+					</div>
+					{#each Object.keys(nodeDomain.output_mapping ?? {}) as key (key)}
+						<div class="flex items-center gap-1 mb-1">
+							<span class="text-xs font-mono w-24 truncate shrink-0">{key}</span>
+							<i class="fa-solid fa-arrow-left text-[9px] text-surface-500 shrink-0"></i>
+							<input
+								type="text"
+								class="input text-xs flex-1 min-w-0 font-mono"
+								placeholder={m.outputPath()}
+								bind:value={nodeDomain.output_mapping[key]}
+								oninput={onChange}
+							/>
+							<button
+								type="button"
+								aria-label="Remove mapping"
+								class="text-error-500 hover:text-error-600 cursor-pointer text-xs shrink-0"
+								onclick={() => removeOutputMapping(key)}
+							>
+								<i class="fa-solid fa-xmark"></i>
+							</button>
+						</div>
+					{/each}
+					<p class="text-[10px] text-surface-500 leading-relaxed">
+						{m.outputMappingHint({ example: outputExample })}
+					</p>
+				</div>
 			{/if}
 
 			{#if nodeDomain.type === 'start'}

@@ -8,6 +8,7 @@
 		data: {
 			nodeType: 'start' | 'end';
 			error?: string | null;
+			runState?: 'visited' | 'active' | 'error' | null;
 		};
 	}
 
@@ -29,7 +30,9 @@
 		? 'bg-success-100 dark:bg-success-950 border-success-500 text-success-700 dark:text-success-300'
 		: 'bg-surface-200-800 border-surface-600-400 text-surface-800-200'}
 	{selected ? 'ring-2 ring-primary-500 ring-offset-2 ring-offset-surface-50-950' : ''}
-	{data.error ? 'ring-2 ring-error-500' : ''}"
+	{data.error ? 'ring-2 ring-error-500' : ''}
+	{data.runState === 'visited' ? 'ring-2 ring-success-400' : ''}
+	{data.runState === 'active' ? 'ring-2 ring-warning-400 animate-pulse' : ''}"
 	title={data.error ?? undefined}
 	data-testid="workflow-node-{data.nodeType}"
 >

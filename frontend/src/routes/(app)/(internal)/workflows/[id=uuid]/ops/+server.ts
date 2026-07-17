@@ -113,6 +113,42 @@ export const POST: RequestHandler = async ({ fetch, request, url }) => {
 			);
 		}
 
+		case 'list-schedules': {
+			const workflowId = requireUuid(body.workflow, 'workflow');
+			return proxy(
+				fetch,
+				`${BASE_API_URL}/workflows/workflow-schedules/?workflow=${workflowId}`,
+				'GET'
+			);
+		}
+
+		case 'create-schedule': {
+			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-schedules/`, 'POST', {
+				name: body.name,
+				workflow: requireUuid(body.workflow, 'workflow'),
+				cron_expression: body.cron_expression,
+				timezone: body.timezone || 'UTC',
+				enabled: body.enabled ?? true
+			});
+		}
+
+		case 'update-schedule': {
+			return proxy(
+				fetch,
+				`${BASE_API_URL}/workflows/workflow-schedules/${requireUuid(body.id, 'id')}/`,
+				'PATCH',
+				body.patch ?? {}
+			);
+		}
+
+		case 'delete-schedule': {
+			return proxy(
+				fetch,
+				`${BASE_API_URL}/workflows/workflow-schedules/${requireUuid(body.id, 'id')}/`,
+				'DELETE'
+			);
+		}
+
 		case 'instance-logs': {
 			const instanceId = requireUuid(body.instance, 'instance');
 			return proxy(

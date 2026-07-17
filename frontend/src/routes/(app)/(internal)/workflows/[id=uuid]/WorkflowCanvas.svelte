@@ -20,6 +20,7 @@
 	import Palette from './Palette.svelte';
 	import Inspector from './Inspector.svelte';
 	import RunsPanel from './RunsPanel.svelte';
+	import SchedulesPanel from './SchedulesPanel.svelte';
 	import StepNode from './nodes/StepNode.svelte';
 	import TerminalNode from './nodes/TerminalNode.svelte';
 
@@ -205,14 +206,117 @@
 
 	function markDirty() {
 		if (readonly) return;
+		clearRunView();
 		saveState = 'dirty';
 		validationErrors = [];
 		if (saveTimer) clearTimeout(saveTimer);
 		saveTimer = setTimeout(save, 1200);
 	}
 
+	// ---------- run visualization ----------
+
+	type RunState = 'visited' | 'active' | 'error';
+	interface RunView {
+		runId: string;
+		nodeStates: Record<string, RunState>;
+		edgeIds: Set<string>;
+		replaying: boolean;
+	}
+	let runView = $state<RunView | null>(null);
+	let replayTimer: ReturnType<typeof setTimeout> | null = null;
+
+	const TRAVERSED_EDGE_STYLE = 'stroke: var(--color-success-400); stroke-width: 2.5;';
+
+	function markVisited(nodeId: string, view: RunView) {
+		if (!view.nodeStates[nodeId]) view.nodeStates[nodeId] = 'visited';
+		for (const edge of edges) {
+			if (edge.target === nodeId && view.nodeStates[edge.source]) {
+				view.edgeIds.add(edge.id);
+			}
+		}
+	}
+
+	function applyRunView(currentNodeId: string | null = null) {
+		nodes = nodes.map((n) => ({
+			...n,
+			data: {
+				...n.data,
+				runState: currentNodeId === n.id ? 'active' : (runView?.nodeStates[n.id] ?? null)
+			}
+		}));
+		edges = edges.map((e) => {
+			const traversed = runView?.edgeIds.has(e.id) ?? false;
+			return {
+				...e,
+				animated: traversed,
+				style: traversed ? TRAVERSED_EDGE_STYLE : EDGE_STYLE
+			};
+		});
+	}
+
+	function visitedSteps(logs: any[]) {
+		return logs.filter((entry) => entry.event_type === 'node_entered' && entry.node?.id);
+	}
+
+	function showRun(run: any, logs: any[]) {
+		stopReplay();
+		runView = {
+			runId: run.id,
+			nodeStates: {},
+			edgeIds: new Set(),
+			replaying: false
+		};
+		for (const step of visitedSteps(logs)) markVisited(step.node.id, runView);
+		for (const active of run.active_nodes ?? []) {
+			runView.nodeStates[active.id] = active.status === 'error' ? 'error' : 'active';
+		}
+		applyRunView();
+	}
+
+	function replayRun(run: any, logs: any[]) {
+		stopReplay();
+		const steps = visitedSteps(logs);
+		if (!steps.length) return showRun(run, logs);
+		runView = { runId: run.id, nodeStates: {}, edgeIds: new Set(), replaying: true };
+		applyRunView();
+		let index = 0;
+		const tick = () => {
+			if (!runView) return;
+			if (index >= steps.length) {
+				showRun(run, logs);
+				return;
+			}
+			const nodeId = steps[index].node.id;
+			markVisited(nodeId, runView);
+			applyRunView(nodeId);
+			index += 1;
+			replayTimer = setTimeout(tick, 650);
+		};
+		tick();
+	}
+
+	function stopReplay() {
+		if (replayTimer) clearTimeout(replayTimer);
+		replayTimer = null;
+	}
+
+	function clearRunView() {
+		if (!runView) return;
+		stopReplay();
+		runView = null;
+		applyRunView();
+	}
+
+	$effect(() => () => stopReplay());
+
 	function refreshVisuals() {
-		nodes = nodes.map((n) => ({ ...n, data: visualData(n.data.domain, n.data.error ?? null) }));
+		nodes = nodes.map((n) => ({
+			...n,
+			data: {
+				...visualData(n.data.domain, n.data.error ?? null),
+				runState: n.data.runState ?? null
+			}
+		}));
 		edges = edges.map((e) => ({ ...e, label: edgeLabel(e.data!.domain) || undefined }));
 	}
 
@@ -287,6 +391,7 @@
 
 	let runsOpen = $state(false);
 	let runsPanel = $state<RunsPanel | null>(null);
+	let schedulesOpen = $state(false);
 	let running = $state(false);
 
 	async function runWorkflow() {
@@ -556,6 +661,16 @@
 						<button
 							type="button"
 							class="btn preset-tonal text-sm"
+							class:preset-filled-secondary-500={schedulesOpen}
+							onclick={() => (schedulesOpen = !schedulesOpen)}
+							data-testid="toggle-schedules"
+						>
+							<i class="fa-solid fa-clock mr-1"></i>
+							{m.workflowSchedules()}
+						</button>
+						<button
+							type="button"
+							class="btn preset-tonal text-sm"
 							class:preset-filled-secondary-500={runsOpen}
 							onclick={() => (runsOpen = !runsOpen)}
 							data-testid="toggle-runs"
@@ -627,6 +742,25 @@
 					</div>
 				</Panel>
 
+				{#if runView}
+					<Panel position="top-center">
+						<button
+							type="button"
+							class="btn preset-tonal text-xs shadow-md"
+							title={m.exitRunView()}
+							onclick={clearRunView}
+							data-testid="exit-run-view"
+						>
+							<i class="fa-solid fa-clock-rotate-left mr-1 text-success-500"></i>
+							{String(runView.runId).slice(0, 8)}
+							{#if runView.replaying}
+								<i class="fa-solid fa-circle-notch fa-spin ml-1"></i>
+							{/if}
+							<i class="fa-solid fa-xmark ml-2"></i>
+						</button>
+					</Panel>
+				{/if}
+
 				{#if validationErrors.length}
 					<Panel position="bottom-right">
 						<div
@@ -657,8 +791,12 @@
 			</SvelteFlow>
 		</div>
 
+		{#if schedulesOpen}
+			<SchedulesPanel {workflowId} />
+		{/if}
+
 		{#if runsOpen}
-			<RunsPanel bind:this={runsPanel} {workflowId} />
+			<RunsPanel bind:this={runsPanel} {workflowId} onShowRun={showRun} onReplayRun={replayRun} />
 		{/if}
 	</div>
 

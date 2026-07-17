@@ -3,9 +3,17 @@
 
 	interface Props {
 		workflowId: string;
+		onShowRun?: (run: any, logs: any[]) => void;
+		onReplayRun?: (run: any, logs: any[]) => void;
 	}
 
-	let { workflowId }: Props = $props();
+	let { workflowId, onShowRun, onReplayRun }: Props = $props();
+
+	async function withLogs(run: any, callback?: (run: any, logs: any[]) => void) {
+		if (!callback) return;
+		if (!logs[run.id]) await loadLogs(run.id);
+		callback(run, logs[run.id] ?? []);
+	}
 
 	let runs = $state<any[]>([]);
 	let expandedId = $state<string | null>(null);
@@ -115,6 +123,38 @@
 						<span class="ml-auto text-surface-500 shrink-0">
 							{relativeTime(run.created_at)}
 						</span>
+						{#if onShowRun}
+							<span
+								role="button"
+								tabindex="0"
+								title={m.showRunOnCanvas()}
+								class="btn-icon preset-tonal w-6 h-6 text-[10px] shrink-0"
+								onclick={(e) => {
+									e.stopPropagation();
+									withLogs(run, onShowRun);
+								}}
+								onkeydown={(e) => e.key === 'Enter' && withLogs(run, onShowRun)}
+								data-testid="show-run"
+							>
+								<i class="fa-solid fa-eye"></i>
+							</span>
+						{/if}
+						{#if onReplayRun}
+							<span
+								role="button"
+								tabindex="0"
+								title={m.replayRun()}
+								class="btn-icon preset-tonal w-6 h-6 text-[10px] shrink-0"
+								onclick={(e) => {
+									e.stopPropagation();
+									withLogs(run, onReplayRun);
+								}}
+								onkeydown={(e) => e.key === 'Enter' && withLogs(run, onReplayRun)}
+								data-testid="replay-run"
+							>
+								<i class="fa-solid fa-play"></i>
+							</span>
+						{/if}
 						<i
 							class="fa-solid fa-chevron-{expandedId === run.id
 								? 'up'
