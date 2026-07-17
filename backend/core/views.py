@@ -10335,14 +10335,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         return qs
 
     def _get_optimized_object_data(self, queryset):
-        """Compute per-page requirement counts in one bounded GROUP BY,
+        """Compute per-page requirement counts for EVERY audit of the page,
         replacing the Count(distinct=True) annotations dropped from the
         list queryset. Bounded by `len(queryset)` (≤ page size), so the
         cost is independent of the total RA table size.
 
-        Only the no-implementation-groups case is computed here; audits
-        with `selected_implementation_groups` fall back to the model's
-        cascade counts inside `ComplianceAssessmentListSerializer.get_progress`.
+        Audits without implementation groups go through per-mode GROUP BY
+        buckets; audits with implementation groups share one scalar
+        `.values()` scan for the whole page (their IG filtering intersects
+        two JSON lists, which SQL can't do).
         """
         from core.models import Question
 
@@ -10358,29 +10359,46 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         # and result-visible buckets are purely scalar (no Exists, no extra
         # joins), i.e. the same cost profile as before the cascade.
         audit_meta = ComplianceAssessment.objects.filter(id__in=audit_ids).values_list(
-            "id", "field_visibility", "framework_id"
+            "id",
+            "field_visibility",
+            "framework_id",
+            "selected_implementation_groups",
+            "min_score",
+            "framework__min_score",
         )
         frameworks_with_questions = set(
             Question.objects.filter(
-                requirement_node__framework_id__in={fw for _, _, fw in audit_meta}
+                requirement_node__framework_id__in={m[2] for m in audit_meta}
             )
             .values_list("requirement_node__framework_id", flat=True)
             .distinct()
         )
+        # Audits with no RA rows must still resolve to 0%, so seed the maps.
+        total_map: dict = {ca_id: 0 for ca_id in audit_ids}
+        assessed_map: dict = {ca_id: 0 for ca_id in audit_ids}
         buckets: dict = {}
-        for ca_id, field_visibility, framework_id in audit_meta:
+        ig_meta: dict = {}
+        for ca_id, field_visibility, framework_id, igs, ca_min, fw_min in audit_meta:
             status_driven, result_visible = (
                 ComplianceAssessment.progress_mode_from_visibility(field_visibility)
             )
-            key = (
-                status_driven,
-                result_visible,
-                not status_driven and framework_id in frameworks_with_questions,
+            has_questions = (
+                not status_driven and framework_id in frameworks_with_questions
             )
-            buckets.setdefault(key, []).append(ca_id)
+            if igs:
+                min_score_fallback = ca_min if ca_min is not None else (fw_min or 0)
+                ig_meta[ca_id] = (
+                    set(igs),
+                    status_driven,
+                    result_visible,
+                    has_questions,
+                    min_score_fallback,
+                )
+                continue
+            buckets.setdefault((status_driven, result_visible, has_questions), []).append(
+                ca_id
+            )
 
-        total_map: dict = {}
-        assessed_map: dict = {}
         for (
             status_driven,
             result_visible,
@@ -10408,6 +10426,51 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for r in rows:
                 total_map[r["compliance_assessment_id"]] = r["total"]
                 assessed_map[r["compliance_assessment_id"]] = r["assessed"]
+
+        if ig_meta:
+            # One scalar scan for all IG audits of the page (no ORM
+            # instantiation, no per-audit query); IG membership and the
+            # cascade are evaluated in Python via progress_assessed_scalar.
+            ig_rows = RequirementAssessment.objects.filter(
+                compliance_assessment_id__in=ig_meta.keys(),
+                requirement__assessable=True,
+            )
+            row_fields = [
+                "compliance_assessment_id",
+                "status",
+                "result",
+                "score",
+                "requirement__implementation_groups",
+                "requirement__min_score",
+            ]
+            if any(meta[3] for meta in ig_meta.values()):
+                ig_rows = ig_rows.annotate(
+                    _has_questions=RequirementAssessment.has_questions_subquery()
+                )
+                row_fields.append("_has_questions")
+            for row in ig_rows.values(*row_fields).iterator():
+                ca_id = row["compliance_assessment_id"]
+                selected, status_driven, result_visible, has_questions, min_fb = (
+                    ig_meta[ca_id]
+                )
+                groups = set(row["requirement__implementation_groups"] or [])
+                if selected.isdisjoint(groups):
+                    continue
+                total_map[ca_id] += 1
+                if RequirementAssessment.progress_assessed_scalar(
+                    row["status"],
+                    row["result"],
+                    row["score"],
+                    row["requirement__min_score"],
+                    status_driven=status_driven,
+                    has_questions=(
+                        row.get("_has_questions", False) if has_questions else False
+                    ),
+                    result_visible=result_visible,
+                    min_score_fallback=min_fb,
+                ):
+                    assessed_map[ca_id] += 1
+
         optimized_data["total_requirements"] = total_map
         optimized_data["assessed_requirements"] = assessed_map
         return optimized_data

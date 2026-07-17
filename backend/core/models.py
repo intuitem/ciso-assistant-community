@@ -8936,6 +8936,40 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             )
         return content
 
+    @staticmethod
+    def progress_assessed_scalar(
+        status,
+        result,
+        score,
+        requirement_min_score,
+        *,
+        status_driven: bool,
+        has_questions: bool,
+        result_visible: bool,
+        min_score_fallback: int = 0,
+    ) -> bool:
+        """In-memory form of `progress_assessed_q`, on raw scalar values so
+        `.values()` rows work too.
+
+        `min_score_fallback` is the audit-level resolved minimum (audit
+        min_score, else framework's); `requirement_min_score` takes
+        precedence when set.
+        """
+        if status_driven:
+            return status == RequirementAssessment.Status.DONE
+        result_assessed = result != RequirementAssessment.Result.NOT_ASSESSED
+        score_assessed = score is not None
+        if has_questions:
+            return result_assessed or score_assessed
+        if result_visible:
+            return result_assessed
+        resolved_min = (
+            requirement_min_score
+            if requirement_min_score is not None
+            else min_score_fallback
+        )
+        return score is not None and score > resolved_min
+
     def is_assessed_for_progress(
         self,
         *,
@@ -8944,23 +8978,18 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         result_visible: bool,
         min_score_fallback: int = 0,
     ) -> bool:
-        """In-memory form of `progress_assessed_q` for prefetched/iterated RAs.
-
-        `min_score_fallback` is the audit-level resolved minimum (audit
-        min_score, else framework's); the requirement override takes
-        precedence when set. Callers must have `requirement` loaded.
-        """
-        if status_driven:
-            return self.status == self.Status.DONE
-        result_assessed = self.result != self.Result.NOT_ASSESSED
-        score_assessed = self.score is not None
-        if has_questions:
-            return result_assessed or score_assessed
-        if result_visible:
-            return result_assessed
-        req_min = self.requirement.min_score
-        resolved_min = req_min if req_min is not None else min_score_fallback
-        return self.score is not None and self.score > resolved_min
+        """Instance form of `progress_assessed_scalar` (requirement must be
+        loaded)."""
+        return self.progress_assessed_scalar(
+            self.status,
+            self.result,
+            self.score,
+            self.requirement.min_score,
+            status_driven=status_driven,
+            has_questions=has_questions,
+            result_visible=result_visible,
+            min_score_fallback=min_score_fallback,
+        )
 
     def get_visible_questions_counts(self) -> tuple[int, int]:
         """Return (visible_questions_count, answered_visible_questions_count) for this assessment."""

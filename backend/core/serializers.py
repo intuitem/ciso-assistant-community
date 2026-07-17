@@ -2857,17 +2857,18 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
     progress = serializers.SerializerMethodField()
 
     def get_progress(self, obj):
-        if not obj.selected_implementation_groups:
-            # Fast path: read page-scoped counts from optimized_data
-            # (computed in ComplianceAssessmentViewSet._get_optimized_object_data
-            # via a single bounded GROUP BY query, replacing the previous
-            # Count(distinct=True) annotations).
-            optimized_data = self.context.get("optimized_data") or {}
-            total = optimized_data.get("total_requirements", {}).get(obj.id, 0)
+        # Fast path: page-scoped counts from optimized_data, computed for
+        # every audit of the page (per-mode GROUP BY buckets, plus one shared
+        # scalar scan for implementation-groups audits) in
+        # ComplianceAssessmentViewSet._get_optimized_object_data.
+        optimized_data = self.context.get("optimized_data") or {}
+        total_map = optimized_data.get("total_requirements")
+        if total_map is not None and obj.id in total_map:
+            total = total_map[obj.id]
             assessed = optimized_data.get("assessed_requirements", {}).get(obj.id, 0)
             return int((assessed / total) * 100) if total else 0
-        # Audits with implementation groups: the model walks scalar-only RAs
-        # with the same cascade (bounded to the page's IG audits).
+        # No optimized context (serializer used outside the list action):
+        # fall back to the model's cascade counts.
         return obj.progress
 
     class Meta:
