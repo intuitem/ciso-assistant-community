@@ -1138,6 +1138,24 @@ def validate_optional_columns_content_sheet(df, sheet_name: str, optional_column
                 print(msg)
 
 
+# Ensure that either all columns from the given list are present or none of them are.
+def validate_columns_presence_together(df: pd.DataFrame, column_names: List[str], sheet_name: str, context: str = None):
+
+    context = context or "validate_columns_presence_together"
+    present_columns = [column for column in column_names if column in df.columns]
+
+    if not present_columns or len(present_columns) == len(column_names):
+        return
+
+    missing_columns = [column for column in column_names if column not in df.columns]
+    raise ValueError(
+        f"({context}) [{sheet_name}] Columns {', '.join(f'\"{column}\"' for column in column_names)} must be present together. "
+        f"Missing: {', '.join(f'\"{column}\"' for column in missing_columns)}."
+        f"\n> 💡 Tip: Add the missing column(s), or remove the existing column(s): "
+        f"{', '.join(f'\"{column}\"' for column in present_columns)}."
+    )
+
+
 # Check that values in each column from the given list are unique. Raise error or emit warning if duplicates are found
 def validate_unique_column_values(df, column_names: List[str], sheet_name: str, context: str = None, warn_only: bool = False, ctx: ConsoleContext = None):
 
@@ -2615,16 +2633,9 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
 
-    # Check that "questions" and "answer" appear together (or not at all)
-    has_questions = "questions" in df.columns
-    has_answer = "answer" in df.columns
-
-    if has_questions != has_answer:
-        missing_col = "answer" if has_questions else "questions"
-        raise ValueError(
-            f"({fct_name}) [{sheet_name}] Column \"{missing_col}\" is required when column \"{'questions' if missing_col == 'answer' else 'answer'}\" is present."
-            f"\n> 💡 Tip: Either provide both \"questions\" and \"answer\" columns, or remove both."
-        )
+    # Check that "questions" and "answer" appear together, or not at all
+    question_answer_column_names = ["questions", "answer"]
+    validate_columns_presence_together(df, question_answer_column_names, sheet_name, fct_name)
 
     # Check uniqueness of some column values
     validate_unique_column_values(df, ["ref_id"], sheet_name, fct_name, ctx=ctx)
@@ -2668,11 +2679,11 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
     # Check if values in "condition" columns are valid
     validate_allowed_column_values(df, "condition", condition_values, sheet_name, fct_name, ctx=ctx, split_regex=CommonSeparatorRegex.LF)
     
-    # Check if the number of lines in cells of "depends_on" are coherent with lines in celles of "questions"
-    validate_cell_line_count_alignment(df, "questions", "depends_on", sheet_name, fct_name, cmp_can_be_empty=True)
+    # Check if the number of lines in cells of "depends_on" are coherent with lines in cells of "answer"
+    validate_cell_line_count_alignment(df, "answer", "depends_on", sheet_name, fct_name, cmp_can_be_empty=True)
     
-    # Check if the number of lines in cells of "condition" are coherent with lines in celles of "questions"
-    validate_cell_line_count_alignment(df, "questions", "condition", sheet_name, fct_name, cmp_can_be_empty=True)
+    # Check if the number of lines in cells of "condition" are coherent with lines in cells of "depends_on"
+    validate_cell_line_count_alignment(df, "depends_on", "condition", sheet_name, fct_name, cmp_can_be_empty=True)
     
     # Check if values in "weight" columns are valid
     validate_integer_value(df, sheet_name, "weight", fct_name, value_name="weight", positive_only=True)
