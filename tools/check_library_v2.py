@@ -758,6 +758,30 @@ def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
+# Check that framework definition keys point to existing meta sheets.
+def _framework_validate_definition_keys(wb: Workbook, df: pd.DataFrame, sheet_name: str, definition_keys: List[str], context: str):
+
+    for def_key in definition_keys:
+        matches = df[df.iloc[:, 0] == def_key]
+        if matches.empty:
+            continue
+
+        value = str(matches.iloc[0, 1]).strip()
+        if not value:
+            continue
+
+        expected_sheet = f"{value}{SheetTypes.META.value}"
+        if expected_sheet in wb.sheetnames:
+            continue
+
+        row = matches.index[0] + 1
+        sheet_type = def_key.removesuffix("_definition")
+        raise ValueError(
+            f"({context}) [{sheet_name}] Row #{row}: Key \"{def_key}\" points to missing sheet starting with \"{value}\" (Missing \"{expected_sheet}\")"
+            f"\n> 💡 Tip: Make sure \"{sheet_type}\" sheets start with \"{value}\", set the right value for key \"{def_key}\" or simply remove the key \"{def_key}\"."
+        )
+
+
 # Validate optional framework score bounds and ensure min_score <= max_score.
 def _framework_validate_min_max_score(df: pd.DataFrame, sheet_name: str, context: str):
 
@@ -817,25 +841,8 @@ def validate_framework_meta(wb: Workbook, df, sheet_name: str, verbose: bool = F
     validate_ref_id(ref_id_value, fct_name, ref_id_row)
     
     # Check that *_definition keys (if present) point to an existing *_meta sheet
-    for def_key in ["implementation_groups_definition", "answers_definition", "scores_definition"]:
-        matches = df[df.iloc[:, 0] == def_key]
-        if matches.empty:
-            continue
-
-        value = str(matches.iloc[0, 1]).strip()
-        if not value:
-            continue
-
-        expected_sheet = f"{value}{SheetTypes.META.value}"
-        if expected_sheet in wb.sheetnames:
-            continue
-
-        row = matches.index[0] + 1
-        sheet_type = def_key.split('_')[0]
-        raise ValueError(
-            f"({fct_name}) [{sheet_name}] Row #{row}: Key \"{def_key}\" points to missing sheet starting with \"{value}\" (Missing \"{expected_sheet}\")"
-            f"\n> 💡 Tip: Make sure \"{sheet_type}\" sheets start with \"{value}\", set the right value for key \"{def_key}\" or simply remove the key \"{def_key}\"."
-        )
+    definition_keys = ["implementation_groups_definition", "answers_definition", "scores_definition"]
+    _framework_validate_definition_keys(wb, df, sheet_name, definition_keys, fct_name)
         
     # Validate min_score and max_score if present
     _framework_validate_min_max_score(df, sheet_name, fct_name)
@@ -1563,7 +1570,6 @@ def validate_cell_line_count_alignment(
         # --- Rule 1: ref empty => cmp must be empty
         if not ref_str:
             if cmp_str:
-                cmp_lines = _parse_lines(cmp_str, cmp_line_break_indicator)
                 errors.append(
                     f'Row #{excel_row}: "{ref_column}" is empty but "{cmp_column}" is not'
                 )
