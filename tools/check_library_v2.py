@@ -176,10 +176,12 @@ class URNMetadataFormat(Enum):
     MATRIX_URN = f"{URNObjects.URN_BEGGINING.value}:{PACKAGER_INDICATOR}:{URNObjects.URN_3RD_WORD.value}:{URNObjects.MATRIX.value}:{ID_INDICATOR}"
 
 
-class CommonRegexSeparator(Enum):
+class CommonSeparatorRegex(Enum):
     LF = r"\n+"
     SPACE_COMMA_LF = r"[\s,\n]+"
-    
+
+class CommonLineBreakIndicator(Enum):
+    PIPE = "|"
 
 # ─────────────────────────────────────────────────────────────
 # MISC
@@ -320,6 +322,41 @@ def get_non_empty_column_values(df: pd.DataFrame, column_name: str) -> List[str]
     ]
 
 
+# Group lines prefixed by a custom line-break indicator with the previous item.
+def parse_multiline_with_custom_separator(
+    input_value: str,
+    line_break_indicator: str | CommonLineBreakIndicator,
+) -> List[str]:
+
+    if isinstance(line_break_indicator, CommonLineBreakIndicator):
+        line_break_indicator = line_break_indicator.value
+
+    if not line_break_indicator:
+        raise ValueError("line_break_indicator cannot be empty")
+
+    items = []
+
+    for raw_line in input_value.splitlines():
+        line = raw_line.strip()
+
+        if not line:
+            continue
+
+        if line.startswith(line_break_indicator):
+            continuation = line[len(line_break_indicator):].strip()
+
+            if not continuation:
+                continue
+
+            if items:
+                items[-1] += f"\n{continuation}"
+            else:
+                items.append(continuation)
+        else:
+            items.append(line)
+
+    return items
+
 
 # ─────────────────────────────────────────────────────────────
 # VALIDATE UTILS
@@ -414,7 +451,7 @@ def validate_labels(labels_value: str, context: str, row: int):
     if labels_value is None or str(labels_value).strip() == "":
         return
 
-    raw_labels  = [x for x in re.split(CommonRegexSeparator.SPACE_COMMA_LF.value, str(labels_value).strip()) if x]
+    raw_labels  = [x for x in re.split(CommonSeparatorRegex.SPACE_COMMA_LF.value, str(labels_value).strip()) if x]
 
     for label in raw_labels:
         
@@ -1129,7 +1166,9 @@ def validate_unique_column_values(df, column_names: List[str], sheet_name: str, 
                 raise ValueError(msg)
 
 
-def validate_extra_locales_in_content(df, sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False):
+# Pass "wb" when the sheet requires type-specific validation.
+# It allows the function to retrieve the "_content" sheet type from its corresponding "_meta" sheet and apply the appropriate checks.
+def validate_extra_locales_in_content(df, sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False, wb: Workbook = None):
 
     for col in df.columns:
         match = re.fullmatch(r"(.+)\[(.+)\]", str(col))  # Match "column_name[locale]"
@@ -1165,6 +1204,19 @@ def validate_extra_locales_in_content(df, sheet_name: str, context: str, ctx: Co
                 print(msg)
 
 
+        ##### Specific sheet Checking #####
+        content_sheet_type = get_content_sheet_type(wb, sheet_name) if wb is not None else None
+        
+        # In framework sheets, translated questions must contain the same number of elements as the base "questions" value on the same row.
+        if content_sheet_type == MetaTypes.FRAMEWORK.value and base_col == "questions":
+            validate_cell_line_count_alignment(df, base_col, col, sheet_name, context,
+                cmp_can_be_empty=True,
+                ref_line_break_indicator=CommonLineBreakIndicator.PIPE,
+                cmp_line_break_indicator=CommonLineBreakIndicator.PIPE,
+                allow_single_cmp=False,
+            )
+
+
 # Return the name of a "_content" sheet by removing the trailing "_content" in the given sheet name.
 def get_content_sheet_base_name(content_sheet_name: str) -> str:
     if not content_sheet_name.endswith(SheetTypes.CONTENT.value):
@@ -1172,6 +1224,24 @@ def get_content_sheet_base_name(content_sheet_name: str) -> str:
 
     base_name = re.sub(r'_content$', '', content_sheet_name)
     return base_name
+
+
+# Return the type declared in the meta sheet corresponding to a content sheet.
+def get_content_sheet_type(wb: Workbook, content_sheet_name: str) -> str:
+    base_name = get_content_sheet_base_name(content_sheet_name)
+    meta_sheet_name = f"{base_name}{SheetTypes.META.value}"
+
+    if meta_sheet_name not in wb.sheetnames:
+        raise ValueError(
+            f"[{content_sheet_name}] No corresponding meta sheet found (Missing \"{meta_sheet_name}\")"
+        )
+
+    meta_sheets_with_type = get_meta_sheets_with_type(wb)
+
+    if meta_sheet_name not in meta_sheets_with_type:
+        raise ValueError(f"[{meta_sheet_name}] Missing or empty \"type\" field in meta sheet")
+
+    return meta_sheets_with_type[meta_sheet_name]
 
 
 # Replace the suffix of each sheet name in the list with the target sheet type suffix. Valid suffixes are defined in SheetTypes.
@@ -1301,7 +1371,7 @@ def validate_allowed_column_values(
     context: str = None,
     warn_only: bool = False,
     ctx: ConsoleContext = None,
-    split_regex: str | CommonRegexSeparator = None,
+    split_regex: str | CommonSeparatorRegex = None,
 ):
     """
     Args:
@@ -1364,7 +1434,7 @@ def validate_allowed_column_values(
     # Case 2: Multi-value cells (split by regex)
     # ───────────────────────────────────────────────────────────────
     
-    if isinstance(split_regex, CommonRegexSeparator):
+    if isinstance(split_regex, CommonSeparatorRegex):
         split_regex = split_regex.value
 
     for idx, cell_value in df[column_name].dropna().items():
@@ -1410,8 +1480,11 @@ def validate_cell_line_count_alignment(
     cmp_column: str,
     sheet_name: str,
     context: str = None,
-    split_regex: str | CommonRegexSeparator = CommonRegexSeparator.LF,
+    split_regex: str | CommonSeparatorRegex = CommonSeparatorRegex.LF,
     cmp_can_be_empty: bool = False,
+    ref_line_break_indicator: str | CommonLineBreakIndicator = None,
+    cmp_line_break_indicator: str | CommonLineBreakIndicator = None,
+    allow_single_cmp: bool = True,
 ):
     """
     Checks the match of the number of "internal lines" (split regex) between 2 columns.
@@ -1420,7 +1493,11 @@ def validate_cell_line_count_alignment(
     1) If ref cell is empty => cmp cell must be empty.
     2) If cmp cell is empty => ref cell must be empty.
     3) If both are not empty:
-       - cmp must have either 1 internal line OR the same internal line count as ref.
+       - cmp must have the same internal line count as ref.
+       - if allow_single_cmp=True, cmp may also contain a single internal line.
+
+    If "ref_line_break_indicator" or "cmp_line_break_indicator" is provided,
+    prefixed lines in the corresponding column are grouped with the previous element.
 
     The function collects all incoherences and raises ONE ValueError at the end.
     """
@@ -1432,13 +1509,22 @@ def validate_cell_line_count_alignment(
         return
 
     # Allow Enum (CommonRegexSeparator) or string
-    if isinstance(split_regex, CommonRegexSeparator):
+    if isinstance(split_regex, CommonSeparatorRegex):
         split_regex = split_regex.value
 
     errors = []
 
     def _split_lines(cell_str: str) -> List[str]:
         return [x.strip() for x in re.split(split_regex, cell_str) if x.strip()]
+
+    def _parse_lines(
+        cell_str: str,
+        line_break_indicator: str | CommonLineBreakIndicator = None,
+    ) -> List[str]:
+        if line_break_indicator is not None:
+            return parse_multiline_with_custom_separator(cell_str, line_break_indicator)
+
+        return _split_lines(cell_str)
 
     for idx, row in df.iterrows():
         ref_raw = row.get(ref_column, "")
@@ -1452,11 +1538,9 @@ def validate_cell_line_count_alignment(
         # --- Rule 1: ref empty => cmp must be empty
         if not ref_str:
             if cmp_str:
-                cmp_lines = _split_lines(cmp_str)
-                details = ", ".join(f'#{i}="{v}"' for i, v in enumerate(cmp_lines, start=1))
+                cmp_lines = _parse_lines(cmp_str, cmp_line_break_indicator)
                 errors.append(
-                    f'Row #{excel_row}: "{ref_column}" is empty but "{cmp_column}" is not '
-                    f'(cmp has {len(cmp_lines)} line(s): {details})'
+                    f'Row #{excel_row}: "{ref_column}" is empty but "{cmp_column}" is not'
                 )
             continue
 
@@ -1469,16 +1553,21 @@ def validate_cell_line_count_alignment(
             continue
 
         # --- Rule 3: both not empty => cmp must have 1 line OR ref_count lines
-        ref_lines = _split_lines(ref_str)
-        cmp_lines = _split_lines(cmp_str)
+        ref_lines = _parse_lines(ref_str, ref_line_break_indicator)
+        cmp_lines = _parse_lines(cmp_str, cmp_line_break_indicator)
 
         ref_count = len(ref_lines)
         cmp_count = len(cmp_lines)
 
-        if cmp_count != 1 and cmp_count != ref_count:
+        valid_cmp_counts = {ref_count}
+        if allow_single_cmp:
+            valid_cmp_counts.add(1)
+
+        if cmp_count not in valid_cmp_counts:
+            expected_count = f"1 or {ref_count}" if allow_single_cmp and ref_count != 1 else str(ref_count)
             errors.append(
-                f'Row #{excel_row}: "{cmp_column}" has {cmp_count} line(s) but "{ref_column}" has {ref_count} '
-                f'(expected 1 or {ref_count})'
+                f'Row #{excel_row}: "{ref_column}" has {ref_count} line(s) but "{cmp_column}" has {cmp_count} '
+                f'(expected {expected_count})'
             )
 
     if errors:
@@ -2013,43 +2102,6 @@ def _framework_validate_column_against_reference_sheet(wb: Workbook, df: pd.Data
             ctx.add_sheet_verbose_msg(current_sheet_name, msg)
 
 
-# For each row, ensure that the number of entries in "questions" matches the number of entries in "answer" (or is 1), unless both are empty.
-def _framework_validate_question_answer_alignment(df: pd.DataFrame, sheet_name: str, context: str, verbose: bool = False, ctx: ConsoleContext = None):
-
-    if "questions" not in df.columns or "answer" not in df.columns:
-        return  # Skip if one of them is missing — already validated elsewhere
-
-    for idx, row in df.iterrows():
-        q_raw = str(row["questions"]).strip() if pd.notna(row["questions"]) else ""
-        a_raw = str(row["answer"]).strip() if pd.notna(row["answer"]) else ""
-
-        if not q_raw:
-            if a_raw:
-                raise ValueError(
-                    f"({context}) [{sheet_name}] Row #{idx + 2}: \"questions\" is empty but \"answer\" is not."
-                    "\n> 💡 Tip: Either remove the answer or provide a question."
-                )
-            continue  # both empty = OK
-
-        q_list = [q.strip() for q in q_raw.split("\n") if q.strip()]
-        a_list = [a.strip() for a in a_raw.split("\n") if a.strip()]
-
-        q_count = len(q_list)
-        a_count = len(a_list)
-
-        if a_count not in [1, q_count]:
-            raise ValueError(
-                f"({context}) [{sheet_name}] Row #{idx + 2}: Found {q_count} question(s) but {a_count} answer(s)."
-                f"\n> 💡 Tip: You must provide either 1 answer for all questions ({q_count} answer{'s' if q_count > 1 else ''}), or one answer per question."
-            )
-
-    if verbose:
-            msg = f'💬 ℹ️  [INFO] ({context}) [{sheet_name}] Number of entries in the column "questions" matches the number of entries in the column "answer"'
-            print(msg)
-            if ctx:
-                ctx.add_sheet_verbose_msg(sheet_name, msg)
-
-
 # Validate that all URNs in the column use defined prefix_ids and reference existing ref_ids when required
 def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, column_name: str, current_sheet_name: str, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
     
@@ -2557,6 +2609,9 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
 
     # Additional rule: for non-empty rows, at least "ref_id", "name" or "description" must be filled
     _framework_validate_minimum_fields_and_ref_id(df, sheet_name, fct_name)
+    
+    # Ensure that the number of "questions" and "answer" entries match per row (1 or same count), or both are empty
+    validate_cell_line_count_alignment(df, "questions", "answer", sheet_name, fct_name, ref_line_break_indicator=CommonLineBreakIndicator.PIPE)
 
     # Validate columns that reference other sheets (only if they contain non-empty values)
     for column in ["implementation_groups", "answer"]:
@@ -2572,10 +2627,6 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
             if not non_empty_values[non_empty_values != ""].empty:
                 _framework_validate_framework_column_urns(wb, df, column, sheet_name, external_refs, verbose, ctx)
 
-    # Ensure that the number of "questions" and "answer" entries match per row (1 or same count), or both are empty
-    _framework_validate_question_answer_alignment(df, sheet_name, fct_name, verbose, ctx)
-
-
     # Special values
     importance_values = ["mandatory", "recommended", "nice_to_have"]
     condition_values = ["any", "all", "/"]
@@ -2584,7 +2635,7 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
     validate_allowed_column_values(df, "importance", importance_values, sheet_name, fct_name, ctx=ctx)
     
     # Check if values in "condition" columns are valid
-    validate_allowed_column_values(df, "condition", condition_values, sheet_name, fct_name, ctx=ctx, split_regex=CommonRegexSeparator.LF)
+    validate_allowed_column_values(df, "condition", condition_values, sheet_name, fct_name, ctx=ctx, split_regex=CommonSeparatorRegex.LF)
     
     # Check if the number of lines in cells of "depends_on" are coherent with lines in celles of "questions"
     validate_cell_line_count_alignment(df, "questions", "depends_on", sheet_name, fct_name, cmp_can_be_empty=True)
@@ -2598,7 +2649,7 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
 
 
     # Extra locales
-    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose, wb=wb)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
