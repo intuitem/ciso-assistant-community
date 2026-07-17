@@ -1685,6 +1685,27 @@ def _URN_prefix_check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFram
             ctx.add_sheet_verbose_msg(sheet_name, msg)
 
 
+# Check whether URN Prefix IDs are used in framework content sheets, or warn if that's not the case.
+def _URN_prefix_validate_ids_usage_in_frameworks(wb: Workbook, df: pd.DataFrame, sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False,):
+
+    # 1. Get "framework" content sheets
+    framework_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.FRAMEWORK)
+    framework_sheets = get_corresponding_type_sheet_names(framework_sheets, SheetTypes.CONTENT)
+
+    # 2. Check if every Prefix IDs are actually used in "framework" sheets
+    if framework_sheets:
+        _URN_prefix_check_unused_ids_in_frameworks(wb, df, framework_sheets, sheet_name, context, ctx, verbose)
+        return
+
+    msg = (
+        f"⚠️  [WARNING] ({context}) [{sheet_name}] This sheet is not used in any framework sheet"
+        "\n> 💡 Tip: You can remove this sheet and its meta sheet if you are not using it"
+    )
+    print(msg)
+    if ctx:
+        ctx.add_sheet_warning_msg(sheet_name, msg)
+
+
 #  Classify each prefix_value as 'internal' or 'external' depending on whether it's used in the base_urn field of the corresponding *_meta sheets.
 def _URN_prefix_classify_prefix_usage(wb: Workbook, df_urn_prefix: pd.DataFrame, meta_sheets: List[str], meta_type: MetaTypes, sheet_name: str, fct_name: str, ctx: ConsoleContext = None) -> Tuple[List[str], List[str], List[str]]:
     """
@@ -1760,6 +1781,87 @@ def _URN_prefix_classify_prefix_usage(wb: Workbook, df_urn_prefix: pd.DataFrame,
             external_prefixes.append(prefix)
 
     return internal_prefixes, external_prefixes, internal_meta_sheets
+
+
+# Classify URN prefixes as internal or external and validate the required external library dependencies.
+def _URN_prefix_validate_prefix_values_and_dependencies(wb: Workbook, df: pd.DataFrame, sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False):
+
+    # 1. Get "threats" meta sheets
+    threats_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.THREATS)
+
+    # 2. Get "reference_controls" sheets
+    ref_ctrl_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.REFERENCE_CONTROLS)
+
+    # 3. Check whether the values for each "prefix_value" come from internal sheets or external framework
+    internal_threats = []
+    external_threats = []
+    internal_ref_ctrl = []
+    external_ref_ctrl = []
+
+    if threats_sheets:
+        internal_threats, external_threats, _ = _URN_prefix_classify_prefix_usage(wb, df, threats_sheets, MetaTypes.THREATS, sheet_name, context, ctx)
+    if ref_ctrl_sheets:
+        internal_ref_ctrl, external_ref_ctrl, _ = _URN_prefix_classify_prefix_usage(wb, df, ref_ctrl_sheets, MetaTypes.REFERENCE_CONTROLS, sheet_name, context, ctx)
+
+    # Info messages for "threats" & "reference_controls"
+    print_info_about_internal_external_URN_prefix(sheet_name, internal_threats, external_threats, internal_ref_ctrl, external_ref_ctrl, context, verbose, ctx)
+
+    ### 4. Check if external prefixes are declared in "dependencies" from "library_meta" ###
+
+    # 1. Normalize external URNs by replacing the object type (4th element) with "library"
+    def normalize_to_library(urn_list: List[str], target_type: str) -> List[str]:
+        normalized = []
+        for urn in urn_list:
+            parts = urn.split(":")
+            if len(parts) > 3 and parts[3].strip() == target_type:
+                parts[3] = "library"
+                normalized.append(":".join(parts))
+        return normalized
+
+    normalized_ext_threats = normalize_to_library(external_threats, "threat")
+    normalized_ext_ref_ctrl = normalize_to_library(external_ref_ctrl, "function")
+
+    # 2. Merge and deduplicate normalized external URNs
+    required_dependencies = sorted(set(normalized_ext_threats + normalized_ext_ref_ctrl))
+
+    if required_dependencies:
+
+        # 3. Load "library_meta" sheet as a key-value dictionary
+        try:
+            rows = list(wb[MandatorySheets.LIBRARY_META.value].values)
+            meta_dict = {
+                str(row[0]).strip(): str(row[1]).strip()
+                for row in rows if row and len(row) >= 2 and row[0] and row[1]
+            }
+        except Exception as e:
+            raise ValueError(f"({context}) [{sheet_name}] Could not read \"{MandatorySheets.LIBRARY_META.value}\" sheet: {e}")
+
+        # 4. Ensure "dependencies" field exists and is non-empty
+        if "dependencies" not in meta_dict or not meta_dict["dependencies"].strip():
+            raise ValueError(
+                f"({context}) [{sheet_name}] \"{MandatorySheets.LIBRARY_META.value}\" is missing a non-empty \"dependencies\" field, "
+                f"required to declare external libraries: {', '.join(f'\"{d}\"' for d in required_dependencies)}"
+            )
+
+        # 5. Parse declared dependencies
+        declared_dependencies = [
+            dep.strip() for dep in meta_dict.get("dependencies", "").split(",") if dep.strip()
+        ]
+
+        # 6. Compare with required dependencies
+        missing_dependencies = [dep for dep in required_dependencies if dep not in declared_dependencies]
+
+        if missing_dependencies:
+            missing_list = ", ".join(f'"{d}"' for d in missing_dependencies)
+            threat_list = ", ".join(f'"{t}"' for t in external_threats)
+            ref_ctrl_list = ", ".join(f'"{r}"' for r in external_ref_ctrl)
+
+            raise ValueError(
+                f"({context}) [{sheet_name}] Missing required dependencies in \"{MandatorySheets.LIBRARY_META.value}\": {missing_list}\n"
+                f"> 💡 Tip: These are required due to the following external prefixes:\n"
+                f"   - External \"threats\": {threat_list or 'None'}\n"
+                f"   - External \"reference_controls\": {ref_ctrl_list or 'None'}"
+            )
 
 
 # Print information indicating whether the references mentioned in a URN prefix sheet are internal or external to the current workbook.
@@ -2935,103 +3037,11 @@ def validate_urn_prefix_content(wb: Workbook, df: pd.DataFrame, sheet_name, verb
     # Check uniqueness of some column values
     validate_unique_column_values(df, ["prefix_id", "prefix_value"], sheet_name, fct_name, ctx=ctx)
 
-    ### Check if URN Prefix IDs are used in "framework" sheets ###
-    
-    # 1. Get "framework" content sheets
-    framework_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.FRAMEWORK)
-    framework_sheets = get_corresponding_type_sheet_names(framework_sheets, SheetTypes.CONTENT)
+    # Check if URN Prefix IDs are used in "framework" sheets
+    _URN_prefix_validate_ids_usage_in_frameworks(wb, df, sheet_name, fct_name, ctx, verbose)
 
-    # 2. Check if every Prefix IDs are actually used in "framework" sheets
-    if framework_sheets:
-        _URN_prefix_check_unused_ids_in_frameworks(wb, df, framework_sheets, sheet_name, fct_name, ctx, verbose)
-    else:
-        msg = (
-            f"⚠️  [WARNING] ({fct_name}) [{sheet_name}] This sheet is not used in any framework sheet"
-            f"\n> 💡 Tip: You can remove this sheet and its meta sheet if you are not using it"
-        )
-        print(msg)
-        if ctx:
-            ctx.add_sheet_warning_msg(sheet_name, msg)
-
-
-    ### Check if "prefix_value" come from internal sheets or external framework ###
-
-    # 1. Get "threats" meta sheets
-    threats_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.THREATS)
-
-    # 2. Get "reference_controls" sheets
-    ref_ctrl_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.REFERENCE_CONTROLS)
-    
-    # 3. Check whether the values for each "prefix_value" come from internal sheets or external framework
-    internal_threats = []
-    external_threats = []
-    internal_ref_ctrl = []
-    external_ref_ctrl = []
-    
-    if threats_sheets:
-        internal_threats, external_threats, _ = _URN_prefix_classify_prefix_usage(wb, df, threats_sheets, MetaTypes.THREATS, sheet_name, fct_name, ctx)
-    if ref_ctrl_sheets:
-        internal_ref_ctrl, external_ref_ctrl, _ = _URN_prefix_classify_prefix_usage(wb, df, ref_ctrl_sheets, MetaTypes.REFERENCE_CONTROLS, sheet_name, fct_name, ctx)
-
-    # Info messages for "threats"
-    print_info_about_internal_external_URN_prefix(sheet_name, internal_threats, external_threats, internal_ref_ctrl, external_ref_ctrl, fct_name, verbose, ctx)
-
-    ### 4. Check if external prefixes are declared in "dependencies" from "library_meta" ###
-
-    # 1. Normalize external URNs by replacing the object type (4th element) with "library"
-    def normalize_to_library(urn_list: List[str], target_type: str) -> List[str]:
-        normalized = []
-        for urn in urn_list:
-            parts = urn.split(":")
-            if len(parts) > 3 and parts[3].strip() == target_type:
-                parts[3] = "library"
-                normalized.append(":".join(parts))
-        return normalized
-
-    normalized_ext_threats = normalize_to_library(external_threats, "threat")
-    normalized_ext_ref_ctrl = normalize_to_library(external_ref_ctrl, "function")
-
-    # 2. Merge and deduplicate normalized external URNs
-    required_dependencies = sorted(set(normalized_ext_threats + normalized_ext_ref_ctrl))
-
-    if required_dependencies:
-
-        # 3. Load "library_meta" sheet as a key-value dictionary
-        try:
-            rows = list(wb[MandatorySheets.LIBRARY_META.value].values)
-            meta_dict = {
-                str(row[0]).strip(): str(row[1]).strip()
-                for row in rows if row and len(row) >= 2 and row[0] and row[1]
-            }
-        except Exception as e:
-            raise ValueError(f"({fct_name}) [{sheet_name}] Could not read \"{MandatorySheets.LIBRARY_META.value}\" sheet: {e}")
-
-        # 4. Ensure "dependencies" field exists and is non-empty
-        if "dependencies" not in meta_dict or not meta_dict["dependencies"].strip():
-            raise ValueError(
-                f"({fct_name}) [{sheet_name}] \"{MandatorySheets.LIBRARY_META.value}\" is missing a non-empty \"dependencies\" field, "
-                f"required to declare external libraries: {', '.join(f'\"{d}\"' for d in required_dependencies)}"
-            )
-
-        # 5. Parse declared dependencies
-        declared_dependencies = [
-            dep.strip() for dep in meta_dict.get("dependencies", "").split(",") if dep.strip()
-        ]
-
-        # 6. Compare with required dependencies
-        missing_dependencies = [dep for dep in required_dependencies if dep not in declared_dependencies]
-
-        if missing_dependencies:
-            missing_list = ", ".join(f'"{d}"' for d in missing_dependencies)
-            threat_list = ", ".join(f'"{t}"' for t in external_threats)
-            ref_ctrl_list = ", ".join(f'"{r}"' for r in external_ref_ctrl)
-
-            raise ValueError(
-                f"({fct_name}) [{sheet_name}] Missing required dependencies in \"{MandatorySheets.LIBRARY_META.value}\": {missing_list}\n"
-                f"> 💡 Tip: These are required due to the following external prefixes:\n"
-                f"   - External \"threats\": {threat_list or 'None'}\n"
-                f"   - External \"reference_controls\": {ref_ctrl_list or 'None'}"
-            )
+    # Check if "prefix_value" come from internal sheets or external framework
+    _URN_prefix_validate_prefix_values_and_dependencies(wb, df, sheet_name, fct_name, ctx, verbose)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
