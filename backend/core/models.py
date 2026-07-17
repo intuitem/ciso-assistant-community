@@ -7175,6 +7175,23 @@ class ComplianceAssessment(Assessment):
         pair = resolve_field_visibility(self, field)
         return pair.get("auditor", "edit") != "hidden"
 
+    @staticmethod
+    def progress_mode_from_visibility(field_visibility) -> tuple[bool, bool]:
+        """Resolve the progress mode from a raw `field_visibility` dict.
+
+        Returns (status_driven, result_visible). Single resolver shared by the
+        model counts, the list-path bucketing and the auditee dashboard, so
+        the mode can never diverge between surfaces. `result_visible` is
+        always False in status mode (irrelevant there).
+        """
+        from core.utils import resolve_visibility_from_overrides
+
+        status_pair = resolve_visibility_from_overrides(field_visibility, "status")
+        if status_pair.get("auditor", "edit") != "hidden":
+            return True, False
+        result_pair = resolve_visibility_from_overrides(field_visibility, "result")
+        return False, result_pair.get("auditor", "edit") != "hidden"
+
     def _set_field_hidden(self, field, hidden):
         # When un-hiding via the legacy boolean setters (scoring_enabled,
         # show_documentation_score, extended_result_enabled, progress_status_enabled),
@@ -8383,8 +8400,9 @@ class ComplianceAssessment(Assessment):
         requirements = RequirementAssessment.objects.filter(
             compliance_assessment=self, requirement__assessable=True
         )
-        status_driven = self._auditor_visible("status")
-        result_visible = not status_driven and self._auditor_visible("result")
+        status_driven, result_visible = self.progress_mode_from_visibility(
+            self.field_visibility
+        )
         min_score_fallback = 0
         if not status_driven and not result_visible:
             if self.min_score is not None:

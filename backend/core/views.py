@@ -9987,7 +9987,7 @@ class JourneyViewSet(BaseModelViewSet):
                     "total": total_ra,
                     "assessed": assessed_ra,
                     "percent": (
-                        round(assessed_ra / total_ra * 100) if total_ra > 0 else 0
+                        int(assessed_ra / total_ra * 100) if total_ra > 0 else 0
                     ),
                 }
             except ComplianceAssessment.DoesNotExist, ValueError:
@@ -10345,7 +10345,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         cascade counts inside `ComplianceAssessmentListSerializer.get_progress`.
         """
         from core.models import Question
-        from core.utils import resolve_visibility_from_overrides
 
         optimized_data = super()._get_optimized_object_data(queryset)
         audit_ids = [a.id for a in queryset]
@@ -10370,18 +10369,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         buckets: dict = {}
         for ca_id, field_visibility, framework_id in audit_meta:
-            status_pair = resolve_visibility_from_overrides(field_visibility, "status")
-            if status_pair.get("auditor", "edit") != "hidden":
-                key = (True, False, False)
-            else:
-                result_pair = resolve_visibility_from_overrides(
-                    field_visibility, "result"
-                )
-                key = (
-                    False,
-                    result_pair.get("auditor", "edit") != "hidden",
-                    framework_id in frameworks_with_questions,
-                )
+            status_driven, result_visible = (
+                ComplianceAssessment.progress_mode_from_visibility(field_visibility)
+            )
+            key = (
+                status_driven,
+                result_visible,
+                not status_driven and framework_id in frameworks_with_questions,
+            )
             buckets.setdefault(key, []).append(ca_id)
 
         total_map: dict = {}
@@ -10436,17 +10431,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
         )
 
-        if self.action == "list":
-            # List view: lightweight prefetch for progress with implementation groups
-            qs = qs.prefetch_related(
-                Prefetch(
-                    "requirement_assessments",
-                    queryset=RequirementAssessment.objects.filter(
-                        requirement__assessable=True
-                    ).select_related("requirement"),
-                ),
-            )
-        elif self.action == "retrieve":
+        # No requirement_assessments prefetch on the list action: progress is
+        # served by `_get_optimized_object_data` (no-IG audits) or the model's
+        # scalar-only counts (IG audits); nothing else in the list serializer
+        # reads RAs, and the prefetch used to hydrate ~page x framework-size
+        # ORM objects per request for nothing.
+        if self.action == "retrieve":
             # Detail view only: full prefetches for the read serializer
             qs = qs.select_related(
                 "framework__library",  # For framework.has_update property
@@ -11298,6 +11288,24 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         },
                         status=status.HTTP_400_BAD_REQUEST,
                     )
+
+            # Question-driven requirements: score and is_scored belong to
+            # recompute_assessment (a committed score means "questionnaire
+            # complete" for progress), so direct writes are refused.
+            if (
+                "score" in request.data
+                and requirement_assessment.requirement.questions.exists()
+            ):
+                return Response(
+                    {
+                        "error": (
+                            "This requirement is question-driven: its score is "
+                            "computed from the questionnaire answers and cannot "
+                            "be set directly."
+                        )
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             # Update the requirement assessment
             requirement_assessment.result = result
@@ -12211,6 +12219,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             .distinct()
         )
 
+        from core.models import Answer, Question
+
         # Only include compliance assessments the user can view
         (viewable_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, ComplianceAssessment
@@ -12223,28 +12233,48 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             ca = assignment.compliance_assessment
             ra_ids = assignment.requirement_assessments.values_list("id", flat=True)
-            status_driven = ca._auditor_visible("status")
-            counts = (
-                RequirementAssessment.objects.filter(
-                    id__in=ra_ids, requirement__assessable=True
-                )
-                .annotate(_has_questions=RequirementAssessment.has_questions_subquery())
-                .aggregate(
-                    total=Count("id"),
-                    done=Count(
+            ras = RequirementAssessment.objects.filter(
+                id__in=ra_ids, requirement__assessable=True
+            )
+            total = ras.count()
+            done = ras.exclude(
+                result=RequirementAssessment.Result.NOT_ASSESSED
+            ).count()
+
+            # Respondent-facing progress: track the respondent's own work,
+            # not the audit-level progress mode (the status field may not
+            # even be visible to them). Question frameworks: share of
+            # answered questions, computed in SQL over the pre-seeded Answer
+            # rows (questions hidden by depends-on rules keep empty answers,
+            # so the percentage is slightly conservative on conditional
+            # questionnaires — the trade-off for not walking every answer in
+            # Python on each load). Other frameworks: share of requirements
+            # with a result (respondent alignment auto-maps to result).
+            has_questions = (
+                Question.objects.filter(
+                    requirement_node__framework=ca.framework
+                ).exists()
+                if ca.framework
+                else False
+            )
+            if has_questions:
+                answer_counts = Answer.objects.filter(
+                    requirement_assessment__in=ras
+                ).aggregate(
+                    total=Count("id", distinct=True),
+                    answered=Count(
                         "id",
-                        filter=RequirementAssessment.progress_assessed_q(
-                            status_driven=status_driven,
-                            result_visible=not status_driven
-                            and ca._auditor_visible("result"),
-                            has_questions_annotation=not status_driven,
-                        ),
+                        filter=Q(selected_choices__isnull=False)
+                        | (~Q(value=None) & ~Q(value="")),
+                        distinct=True,
                     ),
                 )
-            )
-            total = counts["total"]
-            done = counts["done"]
-            progress_percent = round(done / total * 100) if total > 0 else 0
+                total_q = answer_counts["total"]
+                progress_percent = (
+                    int(answer_counts["answered"] / total_q * 100) if total_q else 0
+                )
+            else:
+                progress_percent = int(done / total * 100) if total > 0 else 0
 
             actor_names = ", ".join(str(a) for a in assignment.actor.all())
 

@@ -3044,36 +3044,43 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     compliance_assessment=updated_instance
                 ).update(folder=updated_instance.folder)
 
-            # Toggle is_scored on all requirement assessments when scoring visibility flips.
-            # RAs whose requirement has questions are excluded: their score and
-            # is_scored belong to recompute_assessment (a committed score means
-            # "questionnaire complete" for the progress cascade), so they must
-            # never be pre-filled.
+            # Toggle is_scored on all requirement assessments when scoring
+            # visibility flips. `is_scored` follows the toggle on EVERY RA so
+            # get_global_score goes quiet when scoring is disabled; scores are
+            # never touched on question-bearing RAs (they belong to
+            # recompute_assessment: a committed score means "questionnaire
+            # complete" for the progress cascade) and only pre-filled at the
+            # resolved minimum on the others.
             if updated_instance.scoring_enabled != old_scoring_enabled:
-                assessable_ras = (
-                    RequirementAssessment.objects.filter(
-                        compliance_assessment=updated_instance,
-                        requirement__assessable=True,
-                    )
-                    .exclude(
-                        result=RequirementAssessment.Result.NOT_APPLICABLE,
-                    )
-                    .exclude(requirement__questions__isnull=False)
+                assessable_ras = RequirementAssessment.objects.filter(
+                    compliance_assessment=updated_instance,
+                    requirement__assessable=True,
+                ).exclude(
+                    result=RequirementAssessment.Result.NOT_APPLICABLE,
+                )
+                manual_ras = assessable_ras.exclude(
+                    requirement__questions__isnull=False
                 )
                 if updated_instance.scoring_enabled:
                     # Turn on: set is_scored=True, initialize score to the RA's
                     # resolved minimum (Node override falling back to CA) only
                     # for RAs that don't already have a score. A RN that
                     # overrides min_score above the CA min must not be
-                    # initialised below its own range.
-                    assessable_ras.update(is_scored=True)
+                    # initialised below its own range. Question RAs re-enter
+                    # the global score only where the recompute committed a
+                    # score (complete questionnaires survive an off/on
+                    # round-trip).
+                    manual_ras.update(is_scored=True)
+                    assessable_ras.filter(
+                        requirement__questions__isnull=False, score__isnull=False
+                    ).update(is_scored=True)
                     ca_min = updated_instance.min_score
                     framework_min = (
                         updated_instance.framework.min_score
                         if updated_instance.framework is not None
                         else None
                     )
-                    for ra in assessable_ras.filter(score__isnull=True).select_related(
+                    for ra in manual_ras.filter(score__isnull=True).select_related(
                         "requirement"
                     ):
                         req_min = ra.requirement.min_score
@@ -3461,6 +3468,16 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         with transaction.atomic():
             # Handle answers if provided in old JSON format
             answers_data = validated_data.pop("answers", None)
+
+            # Question-driven RAs: score and is_scored belong to
+            # recompute_assessment (a committed score means "questionnaire
+            # complete" for progress). Forms round-trip every field on save,
+            # so manual writes are dropped rather than rejected.
+            if (
+                "score" in validated_data or "is_scored" in validated_data
+            ) and instance.requirement.questions.exists():
+                validated_data.pop("score", None)
+                validated_data.pop("is_scored", None)
 
             instance = super().update(instance, validated_data)
 
