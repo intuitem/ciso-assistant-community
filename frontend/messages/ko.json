@@ -2196,6 +2196,8 @@
 	"forceSSOLogin": "SSO 로그인 강제",
 	"forceSSOLoginHelpText": "모든 사용자에게 SSO를 요구하고 저장된 비밀번호를 모두 초기화합니다. '강제 SSO에서 제외'가 활성화된 사용자는 비밀번호 기반 대체 접근을 유지합니다.",
 	"forceSSOLoginHelpText2": "이 옵션을 활성화하기 전에 SSO가 정상적으로 작동하는지 또는 대체 계정이 있는지 확인하세요.",
+	"enableSpInitiatedSlo": "서비스 공급자가 시작하는 단일 로그아웃 사용",
+	"enableSpInitiatedSloHelpText": "로그아웃 시 ID 공급자 세션도 종료합니다.",
 	"lastOccurrenceStatus": "마지막 발생 상태",
 	"showAllEvents": "모든 이벤트 보기",
 	"featureFlags": "기능 플래그",

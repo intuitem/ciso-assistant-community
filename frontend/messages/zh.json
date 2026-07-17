@@ -1770,6 +1770,8 @@
 	"forceSSOLogin": "强制SSO登录",
 	"forceSSOLoginHelpText": "要求所有用户使用SSO并重置所有保存的密码。启用排除强制SSO的用户将保留密码备用访问权限。",
 	"forceSSOLoginHelpText2": "启用此选项前，请确保您的SSO正常工作或有备用账户。",
+	"enableSpInitiatedSlo": "启用由服务提供方发起的单点登出",
+	"enableSpInitiatedSloHelpText": "登出时同时结束身份提供方的会话。",
 	"lastOccurrenceStatus": "上次执行状态",
 	"showAllEvents": "显示所有事件",
 	"featureFlags": "功能开关",

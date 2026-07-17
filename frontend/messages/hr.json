@@ -1638,6 +1638,8 @@
 	"forceSSOLogin": "Prisilna SSO prijava",
 	"forceSSOLoginHelpText": "Zahtijevaj SSO od svih korisnika i resetiraj sve pohranjene lozinke. Korisnici s omogućenim 'Izuzmi iz SSO prijave' će zadržati pričuvnu prijavu putem lozinke.",
 	"forceSSOLoginHelpText2": "Osigurajte da je SSO funkcionalan ili da imate pričuvni račun prije omogućavanja ove opcije.",
+	"enableSpInitiatedSlo": "Omogući jedinstvenu odjavu koju pokreće davatelj usluge",
+	"enableSpInitiatedSloHelpText": "Pri odjavi zatvori i sesiju kod davatelja identiteta.",
 	"lastOccurrenceStatus": "Status posljednjeg događaja",
 	"showAllEvents": "Prikaži sve događaje",
 	"featureFlags": "Zastavice značajki",

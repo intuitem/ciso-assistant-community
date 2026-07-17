@@ -2507,6 +2507,8 @@
 	"forceSSOLogin": "Force SSO login",
 	"forceSSOLoginHelpText": "Require SSO for all users and reset any saved passwords. Users with 'Exclude from forced SSO' enabled will retain password-based fallback access.",
 	"forceSSOLoginHelpText2": "Ensure your SSO is functional or that you have a fallback account before enabling this option.",
+	"enableSpInitiatedSlo": "Enable service provider-initiated single logout",
+	"enableSpInitiatedSloHelpText": "On logout, also close the identity provider session.",
 	"lastOccurrenceStatus": "Last occurrence status",
 	"showAllEvents": "Show all events",
 	"featureFlags": "Feature flags",
