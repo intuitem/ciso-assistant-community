@@ -11,7 +11,7 @@ dependencies = [
     "python-dotenv>=1.0.1,<2",
     "markdown>=3.10.2,<4",
     "ciso-assistant-community",
-    "torch>=2.12.0,<3",
+    "torch>=2.13.0,<3",
 ]
 
 [dependency-groups]
