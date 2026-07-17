@@ -711,53 +711,6 @@ def validate_related_content_sheet_from_name_key(wb: Workbook, df, sheet_name: s
         )
 
 
-
-# [META] Library {OK}²
-def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
-
-    fct_name = get_current_fct_name()
-    
-    expected_type = MetaTypes.LIBRARY
-    expected_keys = [
-        "urn", "version", "locale", "ref_id", "name",
-        "description", "copyright", "provider", "packager"
-    ]
-    optional_keys = ["dependencies", "labels"]
-
-    validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
-    validate_optional_values_meta_sheet(df, sheet_name, optional_keys, fct_name, verbose, ctx)
-
-    # URN
-    urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True) 
-    validate_urn(urn_value, fct_name, urn_row)
-    validate_urn_type(urn_value, URNMetadataFormat.LIBRARY_URN, fct_name, urn_row)
-
-    # ref_id
-    ref_id_value, ref_id_row = get_meta_value(df, "ref_id", sheet_name, required=True,  with_row=True)
-    validate_ref_id(ref_id_value, fct_name, ref_id_row)
-
-    # version
-    version_value, version_row = get_meta_value(df, "version", sheet_name, required=True,  with_row=True)
-    validate_integer_value(version_value, sheet_name, context=fct_name, row=version_row, value_name="version", positive_only=True)
-
-    # labels (Optional)
-    labels_value, labels_row = get_meta_value(df, "labels", sheet_name, required=False, with_row=True)
-    if labels_value is not None:
-        validate_labels(labels_value, fct_name, labels_row)
-
-    # locale
-    locale_value, locale_row = get_meta_value(df, "locale", sheet_name, required=True, with_row=True)
-    if not is_valid_locale(locale_value):
-        raise ValueError(
-            f"({fct_name}) [{sheet_name}] Row #{locale_row}: Invalid \"locale\" value: \"{locale_value}\""
-            "\n> 💡 Tip: Locale setting must comply with ISO 639 Set 1 (e.g., \"en\", \"fr\"). See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes")
-
-    # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, fct_name)
-
-    print_sheet_validation(sheet_name, verbose, ctx)
-
-
 # Check that framework definition keys point to existing meta sheets.
 def _framework_validate_definition_keys(wb: Workbook, df: pd.DataFrame, sheet_name: str, definition_keys: List[str], context: str):
 
@@ -807,6 +760,53 @@ def _framework_validate_min_max_score(df: pd.DataFrame, sheet_name: str, context
 
     if min_score > max_score:
         raise ValueError(f"({context}) [{sheet_name}] Invalid score range: \"min_score\" ({min_score}) must be less than or equal to \"max_score\" ({max_score})")
+
+
+
+# [META] Library {OK}²
+def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+
+    fct_name = get_current_fct_name()
+    
+    expected_type = MetaTypes.LIBRARY
+    expected_keys = [
+        "urn", "version", "locale", "ref_id", "name",
+        "description", "copyright", "provider", "packager"
+    ]
+    optional_keys = ["dependencies", "labels"]
+
+    validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, optional_keys, fct_name, verbose, ctx)
+
+    # URN
+    urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True) 
+    validate_urn(urn_value, fct_name, urn_row)
+    validate_urn_type(urn_value, URNMetadataFormat.LIBRARY_URN, fct_name, urn_row)
+
+    # ref_id
+    ref_id_value, ref_id_row = get_meta_value(df, "ref_id", sheet_name, required=True,  with_row=True)
+    validate_ref_id(ref_id_value, fct_name, ref_id_row)
+
+    # version
+    version_value, version_row = get_meta_value(df, "version", sheet_name, required=True,  with_row=True)
+    validate_integer_value(version_value, sheet_name, context=fct_name, row=version_row, value_name="version", positive_only=True)
+
+    # labels (Optional)
+    labels_value, labels_row = get_meta_value(df, "labels", sheet_name, required=False, with_row=True)
+    if labels_value is not None:
+        validate_labels(labels_value, fct_name, labels_row)
+
+    # locale
+    locale_value, locale_row = get_meta_value(df, "locale", sheet_name, required=True, with_row=True)
+    if not is_valid_locale(locale_value):
+        raise ValueError(
+            f"({fct_name}) [{sheet_name}] Row #{locale_row}: Invalid \"locale\" value: \"{locale_value}\""
+            "\n> 💡 Tip: Locale setting must comply with ISO 639 Set 1 (e.g., \"en\", \"fr\"). See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes")
+
+    # Extra locales
+    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+
+    print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [META] Framework {OK}²
