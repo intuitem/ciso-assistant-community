@@ -50,7 +50,9 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|UUID|Ref|Name|Inherent Level|Current Level|Residual Level|Treatment|\n"
+        result += (
+            "|UUID|Ref|Name|Inherent Level|Current Level|Residual Level|Treatment|\n"
+        )
         result += "|---|---|---|---|---|---|---|\n"
 
         for rs in scenarios:
@@ -196,8 +198,7 @@ async def get_applied_controls(folder: str = None):
             )
             owner_uuids = (
                 ", ".join(
-                    o.get("id", "") if isinstance(o, dict) else str(o)
-                    for o in owners
+                    o.get("id", "") if isinstance(o, dict) else str(o) for o in owners
                 )
                 if owners
                 else "N/A"
@@ -1518,7 +1519,11 @@ async def get_asset_classes(
             ac_id = ac.get("id", "N/A")
             name = ac.get("name", "N/A")
             parent_obj = ac.get("parent")
-            parent_name = parent_obj.get("str", "N/A") if isinstance(parent_obj, dict) else (parent_obj or "N/A")
+            parent_name = (
+                parent_obj.get("str", "N/A")
+                if isinstance(parent_obj, dict)
+                else (parent_obj or "N/A")
+            )
             result += f"|{ac_id}|{name}|{parent_name}|\n"
 
         return success_response(
