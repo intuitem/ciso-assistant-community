@@ -2834,7 +2834,7 @@ def validate_requirement_mapping_set_content(wb: Workbook, df, sheet_name, verbo
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] Scores {OK}²
+# [CONTENT] Scores {OK} [Add logic checking sheet presence in CONTENT FRAMEWORK sheet in column "scores_definition"]
 def validate_scores_content(wb: Workbook, df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
@@ -2845,14 +2845,7 @@ def validate_scores_content(wb: Workbook, df, sheet_name, verbose: bool = False,
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
 
     # Validate each "score" value is a non-negative integer
-    for idx, value in enumerate(df["score"], start=2):  # Row number starts at 2
-        value_str = str(value).strip()
-        if not value_str.isdigit():
-            raise ValueError(f"({fct_name}) [{sheet_name}] Row #{idx}: Key \"score\" must be a non-negative integer, got \"{value_str}\"")
-        
-        value_int = int(value_str)
-        if value_int < 0:
-            raise ValueError(f"({fct_name}) [{sheet_name}] Row #{idx}: Key \"score\" must be >= 0, got \"{value_int}\"")
+    validate_integer_value(df, sheet_name, "score", fct_name, value_name="score", min=0)
 
     # Check uniqueness of some column values
     validate_unique_column_values(df, ["score"], sheet_name, fct_name, ctx=ctx)
