@@ -82,19 +82,12 @@ class Command(BaseCommand):
     def _resolvable_requirement_ids(
         self, scoped_ca: "ComplianceAssessment | None"
     ) -> set:
-        """Return requirement node IDs whose questionnaire drives result or
-        score: at least one choice with a compute_result value resolvable by
-        `resolve_compute_result`, or with an `add_score`.
+        """Return requirement node IDs that carry at least one choice with a
+        compute_result value resolvable by `resolve_compute_result`.
 
-        Score-driven requirements are included because `recompute_assessment`
-        only commits a score once every visible question is answered — this
-        command is the realignment path for scores committed by older
-        versions (partial questionnaires, scoring-toggle pre-fill).
-
-        We pull (requirement_id, compute_result, add_score) tuples in one
-        query and resolve in Python, since the resolver normalizes whitespace
-        and handles unknown / legacy values that pure SQL cannot match
-        cleanly.
+        We pull (requirement_id, compute_result) pairs in one query and resolve
+        in Python, since the resolver normalizes whitespace and handles
+        unknown / legacy values that pure SQL cannot match cleanly.
 
         When scoped to a single compliance assessment, the scan is restricted
         to requirement nodes that audit references, so single-CA runs don't
@@ -103,11 +96,7 @@ class Command(BaseCommand):
         has no `related_name`, so resolving the join name implicitly is
         fragile and easy to break with future model edits.
         """
-        from django.db.models import Q
-
-        choices_qs = QuestionChoice.objects.filter(
-            Q(compute_result__isnull=False) | Q(add_score__isnull=False)
-        )
+        choices_qs = QuestionChoice.objects.filter(compute_result__isnull=False)
         if scoped_ca is not None:
             scoped_requirement_ids = RequirementAssessment.objects.filter(
                 compliance_assessment=scoped_ca,
@@ -116,13 +105,12 @@ class Command(BaseCommand):
                 question__requirement_node_id__in=scoped_requirement_ids,
             )
         pairs = choices_qs.values_list(
-            "question__requirement_node_id", "compute_result", "add_score"
+            "question__requirement_node_id", "compute_result"
         ).distinct()
         return {
             req_id
-            for req_id, cr, add_score in pairs
-            if req_id is not None
-            and (add_score is not None or resolve_compute_result(cr) is not None)
+            for req_id, cr in pairs
+            if req_id is not None and resolve_compute_result(cr) is not None
         }
 
     def _flush_batch(self, batch, fields, dry_run):
