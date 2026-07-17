@@ -4,7 +4,7 @@ Inspired from Azure IAM model"""
 from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Generator, List, Literal, Optional, Tuple, Iterable
+from typing import Any, Generator, List, Literal, Optional, Iterable
 from typing import TYPE_CHECKING, cast
 import uuid
 from allauth.account.models import EmailAddress
