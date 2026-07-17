@@ -134,6 +134,7 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 		action: string; // parent action url segment, e.g. 'remove-members'
 		payloadField: string; // request body key holding the selected ids, e.g. 'users'
 		label?: string; // i18n key for the button (defaults to 'remove')
+		successMessage?: string; // i18n key for the success toast
 	};
 }
 
@@ -893,7 +894,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				removeFromParent: {
 					action: 'remove-members',
 					payloadField: 'users',
-					label: 'removeFromGroup'
+					label: 'removeFromGroup',
+					successMessage: 'membersRemoved'
 				}
 			}
 		],

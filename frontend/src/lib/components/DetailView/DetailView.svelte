@@ -36,8 +36,10 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
 
 	const modalStore: ModalStore = getModalStore();
+	const toastStore = getToastStore();
 
 	const defaultExcludes = ['id', 'is_published', 'str', 'path', 'sync_mappings'];
 
@@ -232,8 +234,16 @@
 			clear();
 			reload();
 			await invalidateAll();
+			toastStore.trigger({
+				message: safeTranslate(field.removeFromParent.successMessage ?? 'saved'),
+				background: 'preset-filled-success-500'
+			});
 		} else {
-			console.error('Failed to remove from parent', await res.json());
+			const body = await res.json().catch(() => ({}));
+			toastStore.trigger({
+				message: typeof body?.error === 'string' ? safeTranslate(body.error) : m.anErrorOccurred(),
+				background: 'preset-filled-error-500'
+			});
 		}
 	}
 

@@ -4561,6 +4561,8 @@
 	"manageMembers": "Manage members",
 	"addMembers": "Add members",
 	"removeFromGroup": "Remove from group",
+	"membersAdded": "Members added",
+	"membersRemoved": "Members removed",
 	"browse": "Browse",
 	"list": "List",
 	"includeInactive": "Include inactive",

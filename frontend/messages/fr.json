@@ -4462,6 +4462,8 @@
 	"manageMembers": "Gérer les membres",
 	"addMembers": "Ajouter des membres",
 	"removeFromGroup": "Retirer du groupe",
+	"membersAdded": "Membres ajoutés",
+	"membersRemoved": "Membres retirés",
 	"browse": "Parcourir",
 	"list": "Liste",
 	"includeInactive": "Inclure les inactifs",
