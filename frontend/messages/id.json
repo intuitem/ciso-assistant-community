@@ -1209,6 +1209,8 @@
 	"forceSSOLogin": "Paksa login SSO",
 	"forceSSOLoginHelpText": "Wajibkan SSO untuk semua pengguna dan atur ulang semua kata sandi yang disimpan. Pengguna dengan 'Kecualikan dari SSO wajib' yang diaktifkan akan mempertahankan akses cadangan berbasis kata sandi.",
 	"forceSSOLoginHelpText2": "Pastikan SSO Anda berfungsi atau Anda memiliki akun cadangan sebelum mengaktifkan opsi ini.",
+	"enableSpInitiatedSlo": "Aktifkan logout tunggal yang diinisiasi penyedia layanan",
+	"enableSpInitiatedSloHelpText": "Saat logout, tutup juga sesi di penyedia identitas.",
 	"youCanSetPasswordHere": "Anda dapat mengatur kata sandi di sini.",
 	"mappingSuggested": "Pemetaan disarankan",
 	"mappingSuggestedHelpText": "Saran pemetaan berdasarkan kerangka kerja yang dimuat",

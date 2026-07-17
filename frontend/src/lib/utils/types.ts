@@ -14,7 +14,6 @@ export interface User {
 	date_joined: string;
 	user_groups: Record<string, any>[];
 	roles: Record<string, any>[];
-	permissions: Record<string, any>[];
 	is_third_party: boolean;
 	is_auditee: boolean;
 	is_admin: boolean;

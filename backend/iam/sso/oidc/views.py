@@ -26,6 +26,7 @@ from urllib.parse import urlparse
 
 from iam.sso.errors import AuthError
 from iam.sso.redirects import get_sso_authenticate_url
+from iam.sso.slo import stash_oidc_slo_state
 from iam.utils import generate_token
 
 logger = structlog.get_logger(__name__)
@@ -89,6 +90,7 @@ class NonceValidatingOpenIDConnectAdapter(OpenIDConnectOAuth2Adapter):
                     provider=self.provider_id,
                 )
             data["id_token"] = decoded
+            stash_oidc_slo_state(request, id_token_str)
         return self.get_provider().sociallogin_from_response(request, data)
 
 
