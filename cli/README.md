@@ -279,6 +279,45 @@ The backup/restore system uses a custom binary streaming protocol to avoid memor
 - **Manifest**: JSON Lines format allows incremental append (crash-safe)
 - **Batch Processing**: Configurable batch sizes balance efficiency vs memory usage
 
+### Domain Export and Import Commands
+
+These commands wrap the domain (folder) export/import endpoints, giving community users access to a capability that is otherwise only surfaced in the enterprise frontend.
+
+#### `export-domain`
+
+Exports a single domain (folder) and its content as a zip archive (`data.json` dump plus evidence attachments).
+
+```bash
+uv run clica.py export-domain --folder "My Domain" --output ./my-domain.zip
+```
+
+**Parameters:**
+
+- `--folder`: Domain name or UUID to export (required)
+- `--output`: Output zip path (default: `./<folder>-domain-export.zip`)
+
+**Notes:**
+
+- Requires `view` permission on every object type contained in the domain.
+
+#### `import-domain`
+
+Imports a domain from an export zip into a new folder.
+
+```bash
+uv run clica.py import-domain --file ./my-domain.zip --name "My Domain (restored)"
+```
+
+**Parameters:**
+
+- `--file`: Path to the domain export zip to import (required)
+- `--name`: Name for the imported domain (default: the zip file name)
+- `--load-missing-libraries`: Load libraries referenced by the dump that are missing on the target
+
+**Notes:**
+
+- Requires `add_folder` permission on the root folder.
+
 ### Instance Management Commands
 
 

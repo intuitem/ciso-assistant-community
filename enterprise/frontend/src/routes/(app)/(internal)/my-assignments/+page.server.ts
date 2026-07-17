@@ -101,9 +101,19 @@ export const load: PageServerLoad = async ({ fetch, parent, url }) => {
 		findings: buildEndpoint('/findings', ownerParams, 'limit=0'),
 		organisationObjectives: buildEndpoint('/organisation-objectives', assignedToParams, 'limit=0'),
 		rightRequests: buildEndpoint('/privacy/right-requests', ownerParams, 'limit=0'),
-		validationFlows: buildEndpoint('/validation-flows', approverParams, 'limit=0'),
 		metricInstances: buildEndpoint('/metrology/metric-instances', ownerParams, 'limit=0')
 	};
+
+	// Fail closed: these sections are scoped to a resolved approver. Without an approver
+	// filter the endpoints would return every item in scope instead of the approver's own.
+	if (approverParams) {
+		countEndpoints.validationFlows = buildEndpoint('/validation-flows', approverParams, 'limit=0');
+		countEndpoints.riskAcceptances = buildEndpoint(
+			'/risk-acceptances',
+			approverParams,
+			'state=submitted&limit=0'
+		);
+	}
 
 	const countsPromise = Promise.all(
 		Object.entries(countEndpoints).map(async ([key, endpoint]) => {
