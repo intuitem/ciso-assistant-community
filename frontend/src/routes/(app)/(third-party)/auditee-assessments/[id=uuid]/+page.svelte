@@ -323,7 +323,10 @@
 	};
 
 	const totalAssessable = $derived(assessableItems.length);
-	// Per-item completion, mirroring the backend cascade: a question-bearing
+	// Per-item completion, mirroring the backend auditee-dashboard rules.
+	// This page is respondent-oriented ON PURPOSE: the audit-level progress
+	// mode (status-driven / score above minimum) does NOT apply here, since
+	// respondents can neither see nor edit those fields. A question-bearing
 	// requirement completes through its answers (whether or not they compute
 	// a result), alignment-driven ones through the respondent's alignment
 	// answer, the rest through the result.
