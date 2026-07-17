@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0176_librarydraft'),
+        ("core", "0176_librarydraft"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='securityexception',
-            name='link',
-            field=models.URLField(blank=True, max_length=2048, null=True, verbose_name='Link'),
+            model_name="securityexception",
+            name="link",
+            field=models.URLField(
+                blank=True, max_length=2048, null=True, verbose_name="Link"
+            ),
         ),
     ]

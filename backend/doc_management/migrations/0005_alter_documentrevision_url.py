@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('doc_management', '0004_documentcontainer_classification_and_more'),
+        ("doc_management", "0004_documentcontainer_classification_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='documentrevision',
-            name='url',
+            model_name="documentrevision",
+            name="url",
             field=models.URLField(blank=True, max_length=2048),
         ),
     ]

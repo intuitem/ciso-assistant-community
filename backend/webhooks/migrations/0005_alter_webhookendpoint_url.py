@@ -4,15 +4,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('webhooks', '0004_webhookendpoint_body_format_webhookendpoint_headers_and_more'),
+        (
+            "webhooks",
+            "0004_webhookendpoint_body_format_webhookendpoint_headers_and_more",
+        ),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='webhookendpoint',
-            name='url',
-            field=models.URLField(blank=True, default='', help_text='Consumer URL (HTTP transport).', max_length=2048),
+            model_name="webhookendpoint",
+            name="url",
+            field=models.URLField(
+                blank=True,
+                default="",
+                help_text="Consumer URL (HTTP transport).",
+                max_length=2048,
+            ),
         ),
     ]

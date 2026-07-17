@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('integrations', '0002_integrationschemacache'),
+        ("integrations", "0002_integrationschemacache"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='integrationconfiguration',
-            name='webhook_url',
+            model_name="integrationconfiguration",
+            name="webhook_url",
             field=models.URLField(blank=True, max_length=2048),
         ),
     ]

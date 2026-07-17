@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pmbok', '0006_project_responsibilitymatrix_projects'),
+        ("pmbok", "0006_project_responsibilitymatrix_projects"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='project',
-            name='ref_link',
+            model_name="project",
+            name="ref_link",
             field=models.URLField(blank=True, max_length=2048),
         ),
     ]
