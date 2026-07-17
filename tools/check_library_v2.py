@@ -1307,7 +1307,7 @@ def check_content_sheet_usage_in_frameworks(wb: Workbook, sheet_name: str, meta_
 
 
 # Check whether each ID is used in at least one framework sheet. Emit a warning if any IDs are unused.
-def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column: str, target_column: str, frameworks_sheet_names: List[str], sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False):
+def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column: str, target_column: str, frameworks_sheet_names: List[str], sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False, emit_messages: bool = True) -> List[str]:
 
     ids_to_check = get_non_empty_column_values(df_ids, id_column)
     unused_ids = []
@@ -1345,7 +1345,7 @@ def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column
         if not found:
             unused_ids.append(_id)
 
-    if unused_ids:
+    if unused_ids and emit_messages:
         msg = (
             f"⚠️  [WARNING] ({context}) [{sheet_name}] The following ID(s) from column \"{id_column}\" are not used in any framework sheet:\n   - "
             f"{'\n   - '.join(f'{x}' for x in unused_ids)}\n"
@@ -1354,12 +1354,37 @@ def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column
         print(msg)
         if ctx:
             ctx.add_sheet_warning_msg(sheet_name, msg)
-    else:
-        if verbose:
-            msg = (f"💬 ℹ️  [INFO] ({context}) [{sheet_name}] All ID(s) from column \"{id_column}\" are used in framework sheets")
-            print(msg)
-            if ctx:
-                ctx.add_sheet_verbose_msg(sheet_name, msg)
+    elif not unused_ids and emit_messages and verbose:
+        msg = (f"💬 ℹ️  [INFO] ({context}) [{sheet_name}] All ID(s) from column \"{id_column}\" are used in framework sheets")
+        print(msg)
+        if ctx:
+            ctx.add_sheet_verbose_msg(sheet_name, msg)
+
+    return unused_ids
+
+
+# Ensure that at least one implementation group marked as "default_selected" is used in a CONTENT framework sheet 
+def _implementation_groups_check_unused_default_ids_in_frameworks(wb: Workbook, df: pd.DataFrame, frameworks_sheet_names: List[str], sheet_name: str, context: str):
+
+    if "default_selected" not in df.columns:
+        return
+
+    default_selected_mask = (df["default_selected"].fillna("").astype(str).str.strip().isin(["x", "X"]))
+    default_selected_df = df.loc[default_selected_mask].copy()
+    default_selected_ids = get_non_empty_column_values(default_selected_df, "ref_id")
+
+    if not default_selected_ids:
+        return
+
+    unused_default_ids = check_unused_ids_in_frameworks(wb, default_selected_df, "ref_id", "implementation_groups", frameworks_sheet_names, sheet_name, context, emit_messages=False)
+
+    if unused_default_ids == default_selected_ids:
+        default_ids = ", ".join(f'"{_id}"' for _id in default_selected_ids)
+        raise ValueError(
+            f'({context}) [{sheet_name}] None of the implementation groups marked as \"default_selected\" ({default_ids}) are used in a framework content sheet. '
+            "This will result in an empty framework in CISO Assistant."
+            '\n> 💡 Tip: Add at least one of these \"default_selected\" implementation groups to the "implementation_groups" column of your framework content sheet, or remove the "default_selected" column.'
+        )
 
 
 # Validate that all non-empty values in a specific column are in the allowed list. Ignores blank or whitespace-only cells.
@@ -1390,7 +1415,6 @@ def validate_allowed_column_values(
 
     if column_name not in df.columns:
         return
-        # raise ValueError(f"({context}) [{sheet_name}] Column \"{column_name}\" not found in sheet")
 
     invalid_values = []
 
@@ -2730,18 +2754,22 @@ def validate_risk_matrix_content(df, sheet_name, verbose: bool = False, ctx: Con
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] Implementation Groups {OK} [Check optional column: "default_selected"]
+# [CONTENT] Implementation Groups {OK}²
 def validate_implementation_groups_content(wb: Workbook, df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     required_columns = ["ref_id", "name"]
-    optional_columns = ["description"]
+    optional_columns = ["description", "default_selected"]
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
 
     # Check uniqueness of some column values
     validate_unique_column_values(df, ["ref_id"], sheet_name, fct_name, ctx=ctx)
+    
+    # Check "default_selected" values
+    default_selected_values = ["x", "X"]
+    validate_allowed_column_values(df, "default_selected", default_selected_values, sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
@@ -2752,6 +2780,7 @@ def validate_implementation_groups_content(wb: Workbook, df, sheet_name, verbose
 
     # Check if every implementation groups are actually used in "framework" sheets
     if frameworks_with_imp_grp:
+        _implementation_groups_check_unused_default_ids_in_frameworks(wb, df, frameworks_with_imp_grp, sheet_name, fct_name)
         check_unused_ids_in_frameworks(wb, df, "ref_id", "implementation_groups", frameworks_with_imp_grp, sheet_name, fct_name, ctx, verbose)
 
     print_sheet_validation(sheet_name, verbose, ctx)
