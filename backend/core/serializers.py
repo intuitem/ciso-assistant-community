@@ -3098,6 +3098,11 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     # Turn off: only flip is_scored, preserve existing scores
                     assessable_ras.update(is_scored=False)
 
+                # QuerySet.update() bypasses the RA save hooks that normally
+                # refresh the audit's daily metrics, so schedule one refresh
+                # after the bulk is_scored flip.
+                transaction.on_commit(updated_instance.upsert_daily_metrics)
+
             # Determine newly assigned authors
             new_author_ids = set(updated_instance.authors.values_list("id", flat=True))
             newly_assigned_ids = new_author_ids - old_author_ids

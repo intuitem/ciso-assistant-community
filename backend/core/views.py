@@ -10365,6 +10365,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             "selected_implementation_groups",
             "min_score",
             "framework__min_score",
+            "framework__field_visibility",
         )
         frameworks_with_questions = set(
             Question.objects.filter(
@@ -10378,9 +10379,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         assessed_map: dict = {ca_id: 0 for ca_id in audit_ids}
         buckets: dict = {}
         ig_meta: dict = {}
-        for ca_id, field_visibility, framework_id, igs, ca_min, fw_min in audit_meta:
+        for (
+            ca_id,
+            field_visibility,
+            framework_id,
+            igs,
+            ca_min,
+            fw_min,
+            fw_fv,
+        ) in audit_meta:
             status_driven, result_visible = (
-                ComplianceAssessment.progress_mode_from_visibility(field_visibility)
+                ComplianceAssessment.progress_mode_from_visibility(
+                    field_visibility, fw_fv
+                )
             )
             has_questions = (
                 not status_driven and framework_id in frameworks_with_questions
@@ -10409,8 +10420,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 requirement__assessable=True,
             )
             if has_questions:
+                from django.db.models import Exists, OuterRef
+
+                from core.models import Answer
+
                 ras = ras.annotate(
-                    _has_questions=RequirementAssessment.has_questions_subquery()
+                    _has_questions=RequirementAssessment.has_questions_subquery(),
+                    _has_answers=Exists(
+                        Answer.objects.filter(requirement_assessment=OuterRef("pk"))
+                    ),
+                    _has_unanswered=Exists(
+                        RequirementAssessment._unanswered_answers_subquery()
+                    ),
                 )
             rows = ras.values("compliance_assessment_id").annotate(
                 total=Count("id"),
@@ -10444,10 +10465,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "requirement__min_score",
             ]
             if any(meta[3] for meta in ig_meta.values()):
+                from core.models import Answer
+                from django.db.models import Exists, OuterRef
+
                 ig_rows = ig_rows.annotate(
-                    _has_questions=RequirementAssessment.has_questions_subquery()
+                    _has_questions=RequirementAssessment.has_questions_subquery(),
+                    _has_answers=Exists(
+                        Answer.objects.filter(requirement_assessment=OuterRef("pk"))
+                    ),
+                    _has_unanswered=Exists(
+                        RequirementAssessment._unanswered_answers_subquery()
+                    ),
                 )
-                row_fields.append("_has_questions")
+                row_fields += ["_has_questions", "_has_answers", "_has_unanswered"]
             for row in ig_rows.values(*row_fields).iterator():
                 ca_id = row["compliance_assessment_id"]
                 selected, status_driven, result_visible, has_questions, min_fb = (
@@ -10468,6 +10498,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     ),
                     result_visible=result_visible,
                     min_score_fallback=min_fb,
+                    questionnaire_fully_answered=(
+                        row.get("_has_answers", False)
+                        and not row.get("_has_unanswered", True)
+                        if has_questions
+                        else False
+                    ),
                 ):
                     assessed_map[ca_id] += 1
 
@@ -12284,6 +12320,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
 
         from core.models import Answer, Question
+        from core.utils import resolve_visibility_from_overrides
 
         # Only include compliance assessments the user can view
         (viewable_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
@@ -12300,15 +12337,47 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             ras = RequirementAssessment.objects.filter(
                 id__in=ra_ids, requirement__assessable=True
             )
-            total = ras.count()
-            done = ras.exclude(result=RequirementAssessment.Result.NOT_ASSESSED).count()
-
+            # Respect the audit's implementation-groups scope: out-of-scope
+            # requirements are hidden from the audit and must not weigh on
+            # the respondent's progress either.
+            if ca.selected_implementation_groups:
+                selected_groups = set(ca.selected_implementation_groups)
+                ras = RequirementAssessment.objects.filter(
+                    id__in=[
+                        ra_id
+                        for ra_id, groups in ras.values_list(
+                            "id", "requirement__implementation_groups"
+                        )
+                        if selected_groups & set(groups or [])
+                    ]
+                )
             # Respondent-facing progress: track the respondent's own work,
             # not the audit-level progress mode (the status field may not
-            # even be visible to them). Question frameworks: share of
-            # answered questions, computed in SQL over the pre-seeded Answer
-            # rows. Other frameworks: share of requirements with a result
-            # (respondent alignment auto-maps to result).
+            # even be visible to them). Per requirement, mirroring the
+            # frontend assessment page: questions when it has some (share of
+            # answered questions), else the respondent's alignment answer
+            # when that field is in use, else the result. One scalar fetch
+            # covers total/done/carriers for the whole assignment.
+            ra_rows = list(
+                ras.values_list("id", "result", "score", "respondent_alignment")
+            )
+            total = len(ra_rows)
+            alignment_pair = resolve_visibility_from_overrides(
+                ca.field_visibility
+                or (
+                    getattr(ca.framework, "field_visibility", None)
+                    if ca.framework_id
+                    else None
+                ),
+                "respondent_alignment",
+            )
+            alignment_in_use = alignment_pair.get("respondent", "edit") != "hidden"
+
+            def unit_done(result_value, alignment_value):
+                if alignment_in_use:
+                    return bool(alignment_value)
+                return result_value != RequirementAssessment.Result.NOT_ASSESSED
+
             has_questions = (
                 Question.objects.filter(
                     requirement_node__framework=ca.framework
@@ -12323,43 +12392,55 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 # below 100%: a requirement whose questionnaire is COMPLETE
                 # (result or committed score — the recompute only sets them
                 # once every VISIBLE question is answered) therefore counts
-                # as fully answered.
+                # as fully answered. Question-less requirements of a mixed
+                # framework count as one virtual unit (alignment/result),
+                # exactly like the frontend's virtual question.
                 per_ra_counts = (
-                    Answer.objects.filter(requirement_assessment__in=ras)
+                    Answer.objects.filter(
+                        requirement_assessment_id__in=[row[0] for row in ra_rows]
+                    )
                     .values("requirement_assessment_id")
                     .annotate(
                         total=Count("id", distinct=True),
                         answered=Count(
                             "id",
                             filter=Q(selected_choices__isnull=False)
-                            | (~Q(value=None) & ~Q(value="")),
+                            | ~Answer.empty_value_q(),
                             distinct=True,
                         ),
                     )
                 )
-                complete_ra_ids = set(
-                    ras.filter(
-                        ~Q(result=RequirementAssessment.Result.NOT_ASSESSED)
-                        | Q(score__isnull=False)
-                    ).values_list("id", flat=True)
-                )
+                counts_by_ra = {
+                    row["requirement_assessment_id"]: (row["total"], row["answered"])
+                    for row in per_ra_counts
+                }
                 total_q = 0
                 answered_q = 0
-                for row in per_ra_counts:
-                    total_q += row["total"]
-                    answered_q += (
-                        row["total"]
-                        if row["requirement_assessment_id"] in complete_ra_ids
-                        else row["answered"]
+                done = 0
+                for ra_id, result_value, score_value, alignment_value in ra_rows:
+                    row_total, row_answered = counts_by_ra.get(ra_id, (0, 0))
+                    if row_total == 0:
+                        total_q += 1
+                        if unit_done(result_value, alignment_value):
+                            answered_q += 1
+                            done += 1
+                        continue
+                    total_q += row_total
+                    complete = (
+                        result_value != RequirementAssessment.Result.NOT_ASSESSED
+                        or score_value is not None
+                        or row_answered == row_total
                     )
-                if total_q > 0:
-                    progress_percent = int(answered_q / total_q * 100)
-                else:
-                    # Mixed framework, but this assignment only covers
-                    # question-less requirements: fall back to result-based
-                    # progress instead of locking at 0%.
-                    progress_percent = int(done / total * 100) if total > 0 else 0
+                    answered_q += row_total if complete else row_answered
+                    if complete:
+                        done += 1
+                progress_percent = int(answered_q / total_q * 100) if total_q else 0
             else:
+                done = sum(
+                    1
+                    for _, result_value, _, alignment_value in ra_rows
+                    if unit_done(result_value, alignment_value)
+                )
                 progress_percent = int(done / total * 100) if total > 0 else 0
 
             actor_names = ", ".join(str(a) for a in assignment.actor.all())
