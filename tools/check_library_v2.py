@@ -758,6 +758,33 @@ def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
+# Validate optional framework score bounds and ensure min_score <= max_score.
+def _framework_validate_min_max_score(df: pd.DataFrame, sheet_name: str, context: str):
+
+    min_score, min_score_row = get_meta_value(df, "min_score", sheet_name, with_row=True)
+    max_score, max_score_row = get_meta_value(df, "max_score", sheet_name, with_row=True)
+
+    if min_score is None and max_score is None:
+        return
+
+    if min_score is None or max_score is None:
+        missing_key = "min_score" if min_score is None else "max_score"
+        present_key = "max_score" if min_score is None else "min_score"
+        raise ValueError(
+            f"({context}) [{sheet_name}] Missing \"{missing_key}\": it is required when \"{present_key}\" is defined."
+            f"\n> 💡 Tip: Define both \"min_score\" and \"max_score\", or remove \"{present_key}\"."
+        )
+
+    validate_integer_value(min_score, sheet_name, context=context, row=min_score_row, value_name="min_score", min=0)
+    validate_integer_value(max_score, sheet_name, context=context, row=max_score_row, value_name="max_score", min=0)
+
+    min_score = int(min_score)
+    max_score = int(max_score)
+
+    if min_score > max_score:
+        raise ValueError(f"({context}) [{sheet_name}] Invalid score range: \"min_score\" ({min_score}) must be less than or equal to \"max_score\" ({max_score})")
+
+
 # [META] Framework {OK}²
 def validate_framework_meta(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
@@ -811,33 +838,7 @@ def validate_framework_meta(wb: Workbook, df, sheet_name: str, verbose: bool = F
         )
         
     # Validate min_score and max_score if present
-    min_score = None
-    max_score = None
-
-    for key in ["min_score", "max_score"]:
-        matches = df[df.iloc[:, 0] == key]
-        if matches.empty:
-            continue
-
-        value_str = str(matches.iloc[0, 1]).strip()
-        row = matches.index[0] + 1
-
-        if not value_str.isdigit():
-            raise ValueError(f"({fct_name}) [{sheet_name}] Row #{row}: Key \"{key}\" must be a non-negative integer, got \"{value_str}\"")
-
-        value = int(value_str)
-        if value < 0:
-            raise ValueError(f"({fct_name}) [{sheet_name}] Row #{row}: Key \"{key}\" must be >= 0, got \"{value}\"")
-
-        if key == "min_score":
-            min_score = value
-        else:
-            max_score = value
-
-    # Validate min <= max if both are present
-    if min_score is not None and max_score is not None:
-        if min_score > max_score:
-            raise ValueError(f"({fct_name}) [{sheet_name}] Invalid score range: 'min_score' ({min_score}) must be less than or equal to 'max_score' ({max_score})")
+    _framework_validate_min_max_score(df, sheet_name, fct_name)
 
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
