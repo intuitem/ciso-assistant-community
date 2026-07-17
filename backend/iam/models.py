@@ -1361,22 +1361,23 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if is_accessible:
             return True
 
-        has_is_published_field = any(
-            f.name == "is_published" for f in model._meta.get_fields()
-        )
-
-        if has_is_published_field and getattr(obj, "is_published"):
-            ancestor_folder_ids = (
-                Folder.objects.filter(
-                    ~Q(content_type=Folder.ContentType.ENCLAVE)
-                    & Q(descendants__in=direct_accessible_folder_id_set)
-                )
-                .values_list("id", flat=True)
-                .distinct()
+        if perm == "view":
+            has_is_published_field = any(
+                f.name == "is_published" for f in model._meta.get_fields()
             )
 
-            is_accessible = iam_folder.id in ancestor_folder_ids
-            return is_accessible
+            if has_is_published_field and getattr(obj, "is_published"):
+                ancestor_folder_ids = (
+                    Folder.objects.filter(
+                        ~Q(content_type=Folder.ContentType.ENCLAVE)
+                        & Q(descendants__in=direct_accessible_folder_id_set)
+                    )
+                    .values_list("id", flat=True)
+                    .distinct()
+                )
+
+                is_accessible = iam_folder.id in ancestor_folder_ids
+                return is_accessible
 
         return False
 
