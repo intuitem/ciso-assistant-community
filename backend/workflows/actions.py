@@ -303,18 +303,22 @@ class EmitEventAction(BaseAction):
         return {"event_key": event_key, "woken_tokens": woken}
 
 
+SECRETS_REFERENCE_RE = re.compile(r"\{\{\s*secrets\.")
+
+
 def _secrets_context(instance, raw_config):
     """Merge decrypted secrets into a rendering context, only when the config
     actually references {{secrets.*}} and only for http_request."""
     import json
 
-    if "{{secrets." not in json.dumps(raw_config):
+    # Must tolerate the same whitespace TEMPLATE_RE accepts ({{ secrets.x }}).
+    if not SECRETS_REFERENCE_RE.search(json.dumps(raw_config)):
         return instance.variables
     from .models import WorkflowSecret
 
     folder_ids = _accessible_folder_ids(instance.folder)
     secrets = {
-        secret.name: secret.get_value()
+        secret.name: secret.value
         for secret in WorkflowSecret.objects.filter(folder_id__in=folder_ids)
     }
     return {**instance.variables, "secrets": secrets}
@@ -373,6 +377,14 @@ class HttpRequestAction(BaseAction):
             response_body = response.json()
         except ValueError:
             response_body = response.text[:5000]
+        # An error status fails the node right here (and stays retry-eligible)
+        # instead of letting downstream nodes run on empty variables. Graphs
+        # that want to branch on the status opt in via allow_error_status.
+        if response.status_code >= 400 and not config.get("allow_error_status"):
+            raise ActionError(
+                f"http_request: HTTP {response.status_code} from {url}: "
+                f"{str(response_body)[:200]}"
+            )
         # Secrets never appear here unless the remote echoes them; request
         # details (headers) are deliberately not logged.
         return {"status": response.status_code, "body": response_body}

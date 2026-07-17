@@ -1,4 +1,5 @@
-from huey.contrib.djhuey import db_task
+from huey import crontab
+from huey.contrib.djhuey import db_periodic_task, db_task
 
 
 @db_task()
@@ -24,3 +25,10 @@ def retry_token_task(token_id):
     token.status = WorkflowToken.Status.ACTIVE
     token.save(update_fields=["status", "updated_at"])
     run_instance(token.instance)
+
+
+@db_periodic_task(crontab(minute="*"))
+def process_workflow_schedules():
+    from .scheduling import run_due_schedules
+
+    run_due_schedules()

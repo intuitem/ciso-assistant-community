@@ -83,6 +83,7 @@ def create_instance(
     initiated_by=None,
     parent_instance=None,
     parent_token=None,
+    schedule=None,
 ):
     start_node = version.nodes.filter(type=WorkflowNode.Type.START).first()
     if start_node is None:
@@ -110,6 +111,7 @@ def create_instance(
             initiated_by=initiated_by,
             parent_instance=parent_instance,
             parent_token=parent_token,
+            schedule=schedule,
         )
         _log(
             instance,

@@ -7,9 +7,15 @@ from workflows.models import (
     Workflow,
     WorkflowInstance,
     WorkflowInstanceLog,
+    WorkflowSchedule,
     WorkflowSecret,
     WorkflowToken,
     WorkflowVersion,
+)
+from workflows.scheduling import (
+    CronValidationError,
+    validate_cron_expression,
+    validate_timezone,
 )
 
 
@@ -96,26 +102,52 @@ class WorkflowSecretReadSerializer(BaseModelSerializer):
 
 
 class WorkflowSecretWriteSerializer(BaseModelSerializer):
-    value = serializers.CharField(write_only=True)
-
     class Meta:
         model = WorkflowSecret
         fields = ["name", "folder", "value"]
+        extra_kwargs = {"value": {"write_only": True}}
 
-    def create(self, validated_data):
-        value = validated_data.pop("value")
-        secret = WorkflowSecret(**validated_data)
-        secret.set_value(value)
-        secret.save()
-        return secret
 
-    def update(self, instance, validated_data):
-        value = validated_data.pop("value", None)
-        instance = super().update(instance, validated_data)
-        if value:
-            instance.set_value(value)
-            instance.save()
-        return instance
+class WorkflowScheduleReadSerializer(BaseModelSerializer):
+    workflow = FieldsRelatedField()
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = WorkflowSchedule
+        fields = "__all__"
+
+
+class WorkflowScheduleWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = WorkflowSchedule
+        fields = [
+            "name",
+            "description",
+            "workflow",
+            "cron_expression",
+            "timezone",
+            "enabled",
+        ]
+
+    def validate_timezone(self, value):
+        try:
+            validate_timezone(value)
+        except CronValidationError as e:
+            raise serializers.ValidationError(str(e))
+        return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        expression = attrs.get(
+            "cron_expression",
+            getattr(self.instance, "cron_expression", None),
+        )
+        tz_name = attrs.get("timezone", getattr(self.instance, "timezone", "UTC"))
+        try:
+            validate_cron_expression(expression, tz_name)
+        except CronValidationError as e:
+            raise serializers.ValidationError({"cron_expression": str(e)})
+        return attrs
 
 
 class WorkflowInstanceLogReadSerializer(BaseModelSerializer):

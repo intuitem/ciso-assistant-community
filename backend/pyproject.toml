@@ -54,6 +54,7 @@ dependencies = [
     "PyMuPDF>=1.25.5,<2",
     "markdown>=3.10.2,<4",
     "rapidfuzz>=3.14.3,<4",
+    "cronsim>=2.6,<3",
 ]
 
 [dependency-groups]

@@ -98,9 +98,9 @@ class TestUpsert:
 class TestHttpRequest:
     def test_request_with_secret_header(self, monkeypatch):
         _, version = make_workflow()
-        secret = WorkflowSecret(name="api_token", folder=Folder.get_root_folder())
-        secret.set_value("s3cr3t-value")
-        secret.save()
+        WorkflowSecret.objects.create(
+            name="api_token", folder=Folder.get_root_folder(), value="s3cr3t-value"
+        )
 
         captured = {}
 
@@ -372,8 +372,14 @@ class TestSecretApi:
         assert resp.status_code == 201, resp.data
         assert "super-secret" not in str(resp.data)
         assert "value" not in resp.data
-        assert "encrypted_value" not in resp.data
 
+        # Also absent from reads (list/retrieve use the Read serializer).
+        retrieve = WorkflowSecretViewSet.as_view({"get": "retrieve"})
         secret = WorkflowSecret.objects.get(name="hris_token")
-        assert secret.get_value() == "super-secret"
-        assert b"super-secret" not in bytes(secret.encrypted_value)
+        read_req = factory.get(f"/api/workflows/workflow-secrets/{secret.id}/")
+        force_authenticate(read_req, user=superuser)
+        read_resp = retrieve(read_req, pk=str(secret.id))
+        assert "super-secret" not in str(read_resp.data)
+        assert "value" not in read_resp.data
+
+        assert secret.value == "super-secret"

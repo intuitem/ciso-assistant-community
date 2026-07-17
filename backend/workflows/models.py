@@ -45,6 +45,7 @@ class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
         super().save(*args, **kwargs)
         if folder_changed:
             self.versions.update(folder=self.folder)
+            self.schedules.update(folder=self.folder)
             WorkflowNode.objects.filter(version__workflow=self).update(
                 folder=self.folder
             )
@@ -458,6 +459,7 @@ class WorkflowInstance(AbstractBaseModel, FolderMixin):
         MANUAL = "manual", "Manual"
         WEBHOOK = "webhook", "Webhook"
         SUBPROCESS = "subprocess", "Subprocess"
+        SCHEDULED = "scheduled", "Scheduled"
 
     workflow = models.ForeignKey(
         Workflow,
@@ -501,6 +503,13 @@ class WorkflowInstance(AbstractBaseModel, FolderMixin):
         null=True,
         blank=True,
         related_name="subprocess_instances",
+    )
+    schedule = models.ForeignKey(
+        "workflows.WorkflowSchedule",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="instances",
     )
 
     class Meta:
@@ -600,12 +609,12 @@ class WorkflowInstanceLog(AbstractBaseModel, FolderMixin):
 
 
 class WorkflowSecret(AbstractBaseModel, FolderMixin):
-    """Encrypted named credential for http_request, referenced as
-    {{secrets.NAME}}. Values are write-only: the API never returns them and
-    the engine resolves them only at execution time (spec D17)."""
+    """Named credential for http_request, referenced as {{secrets.NAME}}.
+    Values are write-only at the API level: never returned in responses,
+    resolved only by the engine at execution time (spec D17)."""
 
     name = models.CharField(max_length=100)
-    encrypted_value = models.BinaryField()
+    value = models.TextField(default="")
 
     fields_to_check = ["name"]
 
@@ -618,18 +627,66 @@ class WorkflowSecret(AbstractBaseModel, FolderMixin):
             )
         ]
 
-    def set_value(self, value: str):
-        from .crypto import encrypt_secret
-
-        self.encrypted_value = encrypt_secret(value)
-
-    def get_value(self) -> str:
-        from .crypto import decrypt_secret
-
-        return decrypt_secret(bytes(self.encrypted_value))
-
     def __str__(self):
         return self.name
+
+
+class WorkflowSchedule(NameDescriptionFolderMixin):
+    """Cron trigger for a workflow (spec D19). Rows are the source of truth;
+    a single huey tick (workflows.scheduling.run_due_schedules) fires the
+    published version of due workflows. Overlapping runs are skipped, not
+    queued."""
+
+    class Result(models.TextChoices):
+        TRIGGERED = "triggered", "Triggered"
+        SKIPPED_OVERLAP = "skipped_overlap", "Skipped (previous run still active)"
+        SKIPPED_UNPUBLISHED = "skipped_unpublished", "Skipped (no published version)"
+        ERROR = "error", "Error"
+
+    workflow = models.ForeignKey(
+        Workflow,
+        on_delete=models.CASCADE,
+        related_name="schedules",
+    )
+    cron_expression = models.CharField(max_length=100)
+    timezone = models.CharField(max_length=50, default="UTC")
+    enabled = models.BooleanField(default=True)
+    next_run_at = models.DateTimeField(null=True, blank=True)
+    last_run_at = models.DateTimeField(null=True, blank=True)
+    last_result = models.CharField(max_length=30, choices=Result.choices, blank=True)
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def save(self, *args, **kwargs):
+        from .scheduling import next_occurrence
+
+        self.folder = self.workflow.folder
+        if not self.enabled:
+            self.next_run_at = None
+        else:
+            previous = (
+                type(self)
+                .objects.filter(pk=self.pk)
+                .values("cron_expression", "timezone", "enabled")
+                .first()
+            )
+            if (
+                self.next_run_at is None
+                or previous is None
+                or not previous["enabled"]
+                or previous["cron_expression"] != self.cron_expression
+                or previous["timezone"] != self.timezone
+            ):
+                self.next_run_at = next_occurrence(
+                    self.cron_expression, self.timezone, timezone.now()
+                )
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.workflow.name}: {self.cron_expression}"
 
 
 def _clone_row(instance, **overrides):
@@ -665,3 +722,7 @@ auditlog.register(Condition, exclude_fields=common_exclude)
 auditlog.register(NodeAssignment, exclude_fields=common_exclude)
 auditlog.register(NodePresentation, exclude_fields=common_exclude)
 auditlog.register(WorkflowInstance, exclude_fields=common_exclude)
+auditlog.register(
+    WorkflowSchedule,
+    exclude_fields=common_exclude + ["next_run_at", "last_run_at", "last_result"],
+)

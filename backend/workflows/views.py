@@ -22,6 +22,7 @@ from .models import (
     Workflow,
     WorkflowInstance,
     WorkflowNode,
+    WorkflowSchedule,
     WorkflowSecret,
     WorkflowVersion,
     generate_webhook_secret,
@@ -137,6 +138,14 @@ class WorkflowVersionViewSet(BaseModelViewSet):
             {"id": str(draft.id), "version_number": draft.version_number},
             status=status.HTTP_201_CREATED,
         )
+
+
+class WorkflowScheduleViewSet(BaseModelViewSet):
+    model = WorkflowSchedule
+    serializers_module = "workflows.serializers"
+    filterset_fields = ["workflow", "folder", "enabled"]
+    search_fields = ["name", "cron_expression"]
+    ordering = ["created_at"]
 
 
 class WorkflowSecretViewSet(BaseModelViewSet):

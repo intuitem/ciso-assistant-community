@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from workflows.views import (
     WorkflowInstanceViewSet,
+    WorkflowScheduleViewSet,
     WorkflowSecretViewSet,
     WorkflowVersionViewSet,
     WorkflowViewSet,
@@ -18,6 +19,9 @@ router.register(
     "workflow-instances", WorkflowInstanceViewSet, basename="workflow-instances"
 )
 router.register("workflow-secrets", WorkflowSecretViewSet, basename="workflow-secrets")
+router.register(
+    "workflow-schedules", WorkflowScheduleViewSet, basename="workflow-schedules"
+)
 
 urlpatterns = [
     path(
