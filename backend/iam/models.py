@@ -1681,7 +1681,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         folder: Folder,
         user: AbstractBaseUser | AnonymousUser,
         object_type: type[models.Model],
-    ) -> Tuple[QuerySet[uuid.UUID], QuerySet[uuid.UUID], QuerySet[uuid.UUID]]:
+    ) -> tuple[QuerySet[uuid.UUID], QuerySet[uuid.UUID], QuerySet[uuid.UUID]]:
         """
         Gets all objects of a specified type that a user can reach in a given folder
         Only accessible folders are considered
