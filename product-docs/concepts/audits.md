@@ -75,7 +75,7 @@ The headline dimension — the actual answer to _"does this requirement hold?"_.
 
 This is the field that feeds the framework's compliance percentages, the report, and the cross-framework roll-ups.
 
-For questionnaire-driven frameworks (whether authored in the [framework builder UI](../configuration/authoring/framework-builder.md#questions-and-choices) or imported from an [Excel source](../configuration/authoring/framework.md#questions-and-choices) — same vocabulary on both paths), the result is computed from the `compute_result` tag carried by each question choice and aggregated _worst-wins_ across the requirement's questions, with `not_applicable` neutral. The full rule lives in the framework builder reference.
+For questionnaire-driven frameworks (whether authored in the [library builder](../configuration/authoring/library-builder.md#add-questions-and-choices) or imported from an [Excel source](../configuration/authoring/excel.md) — same vocabulary on both paths), the result is computed from the `compute_result` tag carried by each question choice and aggregated _worst-wins_ across the requirement's questions, with `not_applicable` neutral.
 
 If you maintain a tenant whose audits were produced under the older boolean-collapse logic, see [Special cases — Recompute assessment results](../installation/special-cases.md#recompute-assessment-results-after-the-semantic-compute_result-upgrade) for the realignment procedure.
 

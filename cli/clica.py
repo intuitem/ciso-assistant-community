@@ -1231,5 +1231,100 @@ def restore_full(src_dir, verify_hashes):
     rprint("[dim]Note: You will need to regenerate your Personal Access Token[/dim]")
 
 
+@cli.command(name="export-domain")
+@click.option("--folder", required=True, help="Domain name or UUID to export.")
+@click.option(
+    "--output",
+    default=None,
+    type=click.Path(dir_okay=False),
+    help="Output zip path (default: ./<folder>-domain-export.zip).",
+)
+def export_domain(folder, output):
+    """Export a domain (folder) as a zip archive."""
+    if not TOKEN:
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    folder_id = resolve_folder_id(folder, required=True)
+    headers = {"Authorization": f"Token {TOKEN}"}
+    url = f"{API_URL}/folders/{folder_id}/export/"
+    out_path = Path(output) if output else Path(f"./{folder}-domain-export.zip")
+
+    with requests.get(
+        url,
+        headers=headers,
+        verify=VERIFY_CERTIFICATE,
+        stream=True,
+        timeout=(10, 3600),
+    ) as res:
+        if res.status_code != 200:
+            rprint(
+                f"[bold red]Error exporting domain: {res.status_code} {res.reason}[/bold red]",
+                file=sys.stderr,
+            )
+            rprint(res.text, file=sys.stderr)
+            sys.exit(1)
+
+        with open(out_path, "wb") as f:
+            for chunk in res.iter_content(chunk_size=1024 * 1024):
+                f.write(chunk)
+    rprint(f"[green]✓ Domain exported to {out_path}[/green]")
+
+
+@cli.command(name="import-domain")
+@click.option("--file", required=True, help="Path to the domain export zip to import.")
+@click.option("--name", default=None, help="Name for the imported domain.")
+@click.option(
+    "--load-missing-libraries",
+    is_flag=True,
+    default=False,
+    help="Load libraries referenced by the dump that are missing on the target.",
+)
+def import_domain(file, name, load_missing_libraries):
+    """Import a domain (folder) from an export zip."""
+    if not TOKEN:
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    file_path = Path(file)
+    if not file_path.exists():
+        rprint(f"[bold red]File not found: {file_path}[/bold red]", file=sys.stderr)
+        sys.exit(1)
+
+    domain_name = name or file_path.stem
+    headers = {
+        "Authorization": f"Token {TOKEN}",
+        "Content-Disposition": f'attachment; filename="{file_path.name}"',
+        "X-CISOAssistantDomainName": domain_name,
+    }
+    url = f"{API_URL}/folders/import/"
+    params = {"load_missing_libraries": str(load_missing_libraries).lower()}
+    with open(file_path, "rb") as f:
+        res = requests.post(
+            url,
+            headers=headers,
+            params=params,
+            data=f,
+            verify=VERIFY_CERTIFICATE,
+            timeout=(10, 3600),
+        )
+
+    if res.status_code != 200:
+        rprint(
+            f"[bold red]Error importing domain: {res.status_code} {res.reason}[/bold red]",
+            file=sys.stderr,
+        )
+        rprint(res.text, file=sys.stderr)
+        sys.exit(1)
+
+    rprint(f"[green]✓ Domain '{domain_name}' imported successfully[/green]")
+
+
 if __name__ == "__main__":
     cli()

@@ -44,7 +44,11 @@
 	import Search from './Search.svelte';
 	import Th from './Th.svelte';
 	import ThFilter from './ThFilter.svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import {
+		canPerformAction,
+		canPerformActionOnObject,
+		hasPermissionAnywhere
+	} from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
 	import { tableHandlers, tableStates, tableColumnStates } from '$lib/utils/stores';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
@@ -111,6 +115,15 @@
 		actionsBody?: import('svelte').Snippet;
 		actionsHead?: import('svelte').Snippet;
 		tail?: import('svelte').Snippet;
+		// Opt-in multi-row selection independent of batch actions. Renders the
+		// checkbox column and exposes the current selection to `selectActions`.
+		selectable?: boolean;
+		// Toolbar rendered when rows are selected (selectable mode). Receives the
+		// selected ids, a clear callback, and a reload callback (to refresh rows
+		// after acting) — e.g. a "remove from group" button.
+		selectActions?: import('svelte').Snippet<
+			[{ ids: string[]; clear: () => void; reload: () => void }]
+		>;
 	}
 
 	let {
@@ -169,7 +182,9 @@
 		actions,
 		actionsBody,
 		actionsHead,
-		tail
+		tail,
+		selectable = false,
+		selectActions
 	}: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
@@ -510,24 +525,17 @@
 							page.params.id ||
 							user.root_folder_id
 					})
-				: Object.hasOwn(user.permissions, `add_${model.name}`)
+				: hasPermissionAnywhere(user, `add_${model.name}`)
 			: false
 	);
 	let contextMenuCanEditObject = $derived(
 		(model
-			? page.params.id
-				? canPerformAction({
-						user,
-						action: 'change',
-						model: model.name,
-						domain:
-							model.name === 'folder'
-								? contextMenuOpenRow?.meta.id
-								: (contextMenuOpenRow?.meta.folder?.id ??
-									contextMenuOpenRow?.meta.folder ??
-									user.root_folder_id)
-					})
-				: Object.hasOwn(user.permissions, `change_${model.name}`)
+			? canPerformActionOnObject({
+					user,
+					action: 'change',
+					model: model.name,
+					object: contextMenuOpenRow?.meta
+				})
 			: false) &&
 			(!(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) ||
 				URLModel === 'terminologies' ||
@@ -543,19 +551,12 @@
 	let contextMenuCanDeleteObject = $derived(
 		!preventDelete(contextMenuOpenRow ?? { head: {}, body: [], meta: [] }) &&
 			(model
-				? page.params.id
-					? canPerformAction({
-							user,
-							action: 'delete',
-							model: model.name,
-							domain:
-								model.name === 'folder'
-									? contextMenuOpenRow?.meta.id
-									: (contextMenuOpenRow?.meta.folder?.id ??
-										contextMenuOpenRow?.meta.folder ??
-										user.root_folder_id)
-						})
-					: Object.hasOwn(user.permissions, `delete_${model.name}`)
+				? canPerformActionOnObject({
+						user,
+						action: 'delete',
+						model: model.name,
+						object: contextMenuOpenRow?.meta
+					})
 				: false)
 	);
 
@@ -723,8 +724,8 @@
 		URLModel && model
 			? getBatchActions(URLModel).filter((a) =>
 					a.type === 'delete'
-						? Object.hasOwn(user.permissions, `delete_${model.name}`)
-						: Object.hasOwn(user.permissions, `change_${model.name}`)
+						? hasPermissionAnywhere(user, `delete_${model.name}`)
+						: hasPermissionAnywhere(user, `change_${model.name}`)
 				)
 			: []
 	);
@@ -781,6 +782,20 @@
 				{handler}
 				onClearSelection={clearSelection}
 			/>
+		{:else if selectable && selectedIds.size > 0}
+			<div class="flex items-center gap-3 px-2">
+				<span class="text-sm text-surface-700-300"
+					>{selectedIds.size} {safeTranslate('selected')}</span
+				>
+				{@render selectActions?.({
+					ids: [...selectedIds],
+					clear: clearSelection,
+					reload: () => handler.invalidate()
+				})}
+				<button type="button" class="btn btn-sm preset-tonal" onclick={clearSelection}
+					>{safeTranslate('cancel')}</button
+				>
+			</div>
 		{:else}
 			{#if !hideFilters}
 				<Popover
@@ -887,7 +902,7 @@
 	>
 		<thead class="table-head {regionHead}">
 			<tr>
-				{#if hasBatchActions}
+				{#if hasBatchActions || selectable}
 					<th
 						class="{regionHeadCell} group/check w-10 text-center cursor-pointer"
 						title={m.selectAll()}
@@ -920,7 +935,7 @@
 			</tr>
 			{#if thFilter}
 				<tr>
-					{#if hasBatchActions}
+					{#if hasBatchActions || selectable}
 						<th></th>
 					{/if}
 					{#each renderColumnKeys as key (key)}
@@ -946,7 +961,7 @@
 								aria-rowindex={rowIndex + 1}
 								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer"
 							>
-								{#if hasBatchActions}
+								{#if hasBatchActions || selectable}
 									<td
 										class="group/check w-10 text-center cursor-pointer"
 										role="gridcell"

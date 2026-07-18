@@ -25,10 +25,10 @@
 
 	import { onMount } from 'svelte';
 
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getListViewFields } from '$lib/utils/table';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformActionOnObject, resolveObjectDomain } from '$lib/utils/access-control';
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import {
 		getModalStore,
@@ -36,8 +36,10 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
 
 	const modalStore: ModalStore = getModalStore();
+	const toastStore = getToastStore();
 
 	const defaultExcludes = ['id', 'is_published', 'str', 'path', 'sync_mappings'];
 
@@ -213,6 +215,38 @@
 		modalStore.trigger(modal);
 	}
 
+	async function removeFromParent(
+		field: any,
+		ids: string[],
+		clear: () => void,
+		reload: () => void
+	): Promise<void> {
+		if (!field?.removeFromParent || !ids.length) return;
+		const res = await fetch(
+			`/${data.model.urlModel}/${data.data.id}/${field.removeFromParent.action}`,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ [field.removeFromParent.payloadField]: ids })
+			}
+		);
+		if (res.ok) {
+			clear();
+			reload();
+			await invalidateAll();
+			toastStore.trigger({
+				message: safeTranslate(field.removeFromParent.successMessage ?? 'saved'),
+				background: 'preset-filled-success-500'
+			});
+		} else {
+			const body = await res.json().catch(() => ({}));
+			toastStore.trigger({
+				message: typeof body?.error === 'string' ? safeTranslate(body.error) : m.anErrorOccurred(),
+				background: 'preset-filled-error-500'
+			});
+		}
+	}
+
 	function modalSelectExisting(field: ReverseForeignKeyField): void {
 		if (!field.addExisting || !data.updateForm) return;
 		const addExisting = field.addExisting;
@@ -365,15 +399,19 @@
 	}
 
 	const user = page.data.user;
-	const canEditObject: boolean = canPerformAction({
-		user,
-		action: 'change',
-		model: data.model.name,
-		domain:
-			data.model.name === 'folder'
-				? data.data.id
-				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
-	});
+	const objectDomain: string = $derived(
+		resolveObjectDomain(data.model.name, data.data) ?? user.root_folder_id
+	);
+	// Same helper as ModelTable/TableRowActions so edit affordances agree everywhere,
+	// including the no-folder fallback (existential check deferring to the backend).
+	const canEditObject: boolean = $derived(
+		canPerformActionOnObject({
+			user,
+			action: 'change',
+			model: data.model.name,
+			object: data.data
+		})
+	);
 
 	let displayEditButton = $derived(function () {
 		return (
@@ -894,7 +932,7 @@
 				{/if}
 			{/if}
 			{@render actions?.()}
-			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} />
+			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} folderId={objectDomain} />
 		</div>
 	</div>
 </div>
@@ -964,7 +1002,21 @@
 								expectedCount={getExpectedCount(urlmodel, field)}
 								fields={fieldsToUse}
 								defaultFilters={field.defaultFilters || {}}
+								selectable={Boolean(canEditObject && field?.removeFromParent)}
 							>
+								{#snippet selectActions({ ids, clear, reload })}
+									{#if field?.removeFromParent}
+										<button
+											type="button"
+											class="btn btn-sm preset-filled-error-500"
+											onclick={() => removeFromParent(field, ids, clear, reload)}
+										>
+											<i class="fa-solid fa-user-minus mr-2"></i>{safeTranslate(
+												field.removeFromParent.label ?? 'remove'
+											)}
+										</button>
+									{/if}
+								{/snippet}
 								{#snippet addButton()}
 									{#if canEditObject && field?.addExisting}
 										<span

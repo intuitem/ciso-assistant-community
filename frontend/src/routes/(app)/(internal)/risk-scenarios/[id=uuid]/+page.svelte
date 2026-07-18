@@ -21,7 +21,7 @@
 	import { openRiskAcceptanceModal } from '$lib/utils/riskAcceptance';
 
 	import { onMount } from 'svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import {
 		getModalStore,
 		type ModalComponent,
@@ -45,13 +45,22 @@
 
 	const user = page.data.user;
 	const model = URL_MODEL_MAP['risk-scenarios'];
-	const canEditObject: boolean = canPerformAction({
-		user,
-		action: 'change',
-		model: model.name,
-		domain: data.scenario.folder.id
-	});
-	const canCreateAcceptance = Object.hasOwn(user?.permissions ?? {}, 'add_riskacceptance');
+	const canEditObject: boolean = $derived(
+		canPerformActionOnObject({
+			user,
+			action: 'change',
+			model: model.name,
+			object: data.scenario
+		})
+	);
+	const canCreateAcceptance = $derived(
+		canPerformActionOnObject({
+			user,
+			action: 'add',
+			model: 'riskacceptance',
+			object: data.scenario
+		})
+	);
 	let color_map = $state({});
 	color_map['--'] = '#A9A9A9';
 
@@ -229,7 +238,11 @@
 					{m.requestRiskAcceptance()}
 				</button>
 			{/if}
-			<AuditTrailButton model="risk-scenarios" objectId={data.scenario.id} />
+			<AuditTrailButton
+				model="risk-scenarios"
+				objectId={data.scenario.id}
+				folderId={data.scenario.folder?.id ?? user.root_folder_id}
+			/>
 		</div>
 	</div>
 
