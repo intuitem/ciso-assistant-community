@@ -115,6 +115,15 @@
 		actionsBody?: import('svelte').Snippet;
 		actionsHead?: import('svelte').Snippet;
 		tail?: import('svelte').Snippet;
+		// Opt-in multi-row selection independent of batch actions. Renders the
+		// checkbox column and exposes the current selection to `selectActions`.
+		selectable?: boolean;
+		// Toolbar rendered when rows are selected (selectable mode). Receives the
+		// selected ids, a clear callback, and a reload callback (to refresh rows
+		// after acting) — e.g. a "remove from group" button.
+		selectActions?: import('svelte').Snippet<
+			[{ ids: string[]; clear: () => void; reload: () => void }]
+		>;
 	}
 
 	let {
@@ -173,7 +182,9 @@
 		actions,
 		actionsBody,
 		actionsHead,
-		tail
+		tail,
+		selectable = false,
+		selectActions
 	}: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
@@ -771,6 +782,20 @@
 				{handler}
 				onClearSelection={clearSelection}
 			/>
+		{:else if selectable && selectedIds.size > 0}
+			<div class="flex items-center gap-3 px-2">
+				<span class="text-sm text-surface-700-300"
+					>{selectedIds.size} {safeTranslate('selected')}</span
+				>
+				{@render selectActions?.({
+					ids: [...selectedIds],
+					clear: clearSelection,
+					reload: () => handler.invalidate()
+				})}
+				<button type="button" class="btn btn-sm preset-tonal" onclick={clearSelection}
+					>{safeTranslate('cancel')}</button
+				>
+			</div>
 		{:else}
 			{#if !hideFilters}
 				<Popover
@@ -877,7 +902,7 @@
 	>
 		<thead class="table-head {regionHead}">
 			<tr>
-				{#if hasBatchActions}
+				{#if hasBatchActions || selectable}
 					<th
 						class="{regionHeadCell} group/check w-10 text-center cursor-pointer"
 						title={m.selectAll()}
@@ -910,7 +935,7 @@
 			</tr>
 			{#if thFilter}
 				<tr>
-					{#if hasBatchActions}
+					{#if hasBatchActions || selectable}
 						<th></th>
 					{/if}
 					{#each renderColumnKeys as key (key)}
@@ -936,7 +961,7 @@
 								aria-rowindex={rowIndex + 1}
 								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer"
 							>
-								{#if hasBatchActions}
+								{#if hasBatchActions || selectable}
 									<td
 										class="group/check w-10 text-center cursor-pointer"
 										role="gridcell"

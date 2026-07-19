@@ -729,6 +729,7 @@ export const SnapshotEditSchema = z.object({
 export const SSOSettingsSchema = z.object({
 	is_enabled: z.boolean().default(false).optional(),
 	force_sso: z.boolean().default(false).optional(),
+	slo_enabled: z.boolean().default(false).optional(),
 	provider: z.string().default('saml'),
 	provider_id: z.string().optional(),
 	provider_name: z.string().optional(),

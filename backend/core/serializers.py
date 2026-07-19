@@ -2120,6 +2120,25 @@ class UserWriteSerializer(BaseModelSerializer):
         return super().update(instance, validated_data)
 
 
+def build_autocomplete_serializer(model_cls, extra_fields=()):
+    """Build a lightweight serializer for autocomplete/entity pickers: ``id`` plus
+    the given fields, and always a display ``str``. Enables server-side search so
+    pickers scale to large datasets without loading every row client-side. Used by
+    core.views.AutocompleteMixin."""
+
+    class _AutocompleteSerializer(BaseModelSerializer):
+        class Meta:
+            model = model_cls
+            fields = ["id", *extra_fields]
+
+        def to_representation(self, instance):
+            data = super().to_representation(instance)
+            data["str"] = str(instance)
+            return data
+
+    return _AutocompleteSerializer
+
+
 class UserGroupReadSerializer(BaseModelSerializer):
     path = PathField(source="get_folder_full_path", read_only=True)
     name = serializers.CharField(source="__str__")

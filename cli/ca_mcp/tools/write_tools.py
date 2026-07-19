@@ -139,24 +139,37 @@ async def create_asset(
             payload["folder"] = folder_id
 
         sec_params = [
-            sec_confidentiality, sec_confidentiality_enabled,
-            sec_integrity, sec_integrity_enabled,
-            sec_availability, sec_availability_enabled,
+            sec_confidentiality,
+            sec_confidentiality_enabled,
+            sec_integrity,
+            sec_integrity_enabled,
+            sec_availability,
+            sec_availability_enabled,
         ]
         if any(p is not None for p in sec_params):
             payload["security_objectives"] = {
                 "objectives": {
                     "confidentiality": {
-                        "value": sec_confidentiality if sec_confidentiality is not None else 0,
-                        "is_enabled": sec_confidentiality_enabled if sec_confidentiality_enabled is not None else sec_confidentiality is not None,
+                        "value": sec_confidentiality
+                        if sec_confidentiality is not None
+                        else 0,
+                        "is_enabled": sec_confidentiality_enabled
+                        if sec_confidentiality_enabled is not None
+                        else sec_confidentiality is not None,
                     },
                     "integrity": {
                         "value": sec_integrity if sec_integrity is not None else 0,
-                        "is_enabled": sec_integrity_enabled if sec_integrity_enabled is not None else sec_integrity is not None,
+                        "is_enabled": sec_integrity_enabled
+                        if sec_integrity_enabled is not None
+                        else sec_integrity is not None,
                     },
                     "availability": {
-                        "value": sec_availability if sec_availability is not None else 0,
-                        "is_enabled": sec_availability_enabled if sec_availability_enabled is not None else sec_availability is not None,
+                        "value": sec_availability
+                        if sec_availability is not None
+                        else 0,
+                        "is_enabled": sec_availability_enabled
+                        if sec_availability_enabled is not None
+                        else sec_availability is not None,
                     },
                 }
             }
