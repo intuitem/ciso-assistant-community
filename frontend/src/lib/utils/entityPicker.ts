@@ -1,13 +1,6 @@
 import EntityPickerModal from '$lib/components/Modals/EntityPickerModal.svelte';
 import type { ModalComponent, ModalSettings, ModalStore } from '$lib/components/Modals/stores';
 
-export interface EntityPickerColumn {
-	key: string;
-	label: string;
-	filter?: 'icontains' | 'exact';
-	sortable?: boolean;
-}
-
 export interface EntityPickerOptions {
 	/** API resource whose `/{endpoint}/autocomplete` action backs the picker. */
 	endpoint: string;
@@ -17,8 +10,6 @@ export interface EntityPickerOptions {
 	labelField?: string;
 	/** Optional secondary text shown after the label (e.g. 'email'). */
 	secondaryField?: string;
-	/** Columns for the browse (table) mode. */
-	columns?: EntityPickerColumn[];
 	/** Fixed query params applied to every request (e.g. scoping filters). */
 	scopeFilters?: Record<string, string>;
 	/** Boolean field driving an active/inactive badge + an "include inactive" toggle. */
