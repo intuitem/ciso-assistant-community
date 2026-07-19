@@ -51,6 +51,7 @@ from core.models import (
     RiskScenario,
     SecurityException,
     StoredLibrary,
+    TaskNode,
     TaskTemplate,
     Terminology,
     Threat,
@@ -395,7 +396,7 @@ def import_objects(
 
         error_dict = {}
         for model in filter(
-            lambda x: x not in [RequirementAssessment], models_map.values()
+            lambda x: x not in [RequirementAssessment, TaskNode], models_map.values()
         ):
             if not RoleAssignment.is_access_allowed(
                 user=user,

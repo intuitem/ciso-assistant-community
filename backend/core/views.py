@@ -831,6 +831,35 @@ def get_or_create_personal_folder(user):
     return folder
 
 
+class AutocompleteMixin:
+    """Adds a lightweight, server-paginated ``autocomplete`` action for entity
+    pickers (search/ordering/filtering come from the viewset's existing filter
+    backends). A model becomes pickable by mixing this in and either setting
+    ``autocomplete_fields`` (extra fields beyond id/str) or overriding
+    ``autocomplete_serializer_class``. The frontend proxies ``/{model}/autocomplete``
+    generically (see [model]/autocomplete/+server.ts)."""
+
+    autocomplete_serializer_class = None
+    autocomplete_fields: list[str] = []
+
+    def get_autocomplete_serializer_class(self):
+        if self.autocomplete_serializer_class:
+            return self.autocomplete_serializer_class
+        from core.serializers import build_autocomplete_serializer
+
+        return build_autocomplete_serializer(self.model, self.autocomplete_fields)
+
+    @action(detail=False, name="Lightweight autocomplete search")
+    def autocomplete(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(qs)
+        objects = page if page is not None else qs
+        serializer = self.get_autocomplete_serializer_class()(objects, many=True)
+        if page is not None:
+            return self.get_paginated_response(serializer.data)
+        return Response(serializer.data)
+
+
 class BaseModelViewSet(viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
@@ -7107,6 +7136,28 @@ class UserFilter(GenericFilterSet):
     exclude_current = df.BooleanFilter(
         method="filter_exclude_current", label="Exclude current user"
     )
+    # Per-column partial-match search for pickers (the exact-match email/
+    # first_name/last_name filters from Meta.fields are kept alongside these).
+    email__icontains = df.CharFilter(field_name="email", lookup_expr="icontains")
+    first_name__icontains = df.CharFilter(
+        field_name="first_name", lookup_expr="icontains"
+    )
+    last_name__icontains = df.CharFilter(
+        field_name="last_name", lookup_expr="icontains"
+    )
+    # Add-only member pickers: drop users already in the given group.
+    exclude_user_groups = df.UUIDFilter(method="filter_exclude_user_groups")
+
+    def filter_exclude_user_groups(self, queryset, name, value):
+        # Only honour the exclusion for a group the caller can actually read, so
+        # this endpoint can't be used to infer membership of groups they can't see.
+        if (
+            value
+            and self.request
+            and RoleAssignment.is_object_readable(self.request.user, UserGroup, value)
+        ):
+            return queryset.exclude(user_groups__id=value)
+        return queryset
 
     def filter_approver(self, queryset, name, value):
         """we don't know yet which folders will be used, so filter on any folder"""
@@ -7387,7 +7438,7 @@ class TeamViewSet(BaseModelViewSet):
         )
 
 
-class UserViewSet(BaseModelViewSet):
+class UserViewSet(AutocompleteMixin, BaseModelViewSet):
     """
     API endpoint that allows users to be viewed or edited
     """
@@ -7396,11 +7447,17 @@ class UserViewSet(BaseModelViewSet):
     ordering = ["-is_active", "-is_superuser", "email", "id"]
     filterset_class = UserFilter
     search_fields = ["email", "first_name", "last_name"]
+    autocomplete_fields = ["first_name", "last_name", "email", "is_active"]
 
     def get_queryset(self):
         # Use base IAM filtering
         # but ensure current user is always included
         queryset = super().get_queryset() | User.objects.filter(pk=self.request.user.pk)
+
+        # The autocomplete path serializes only id/name/email — skip the
+        # user_groups prefetch so it stays lightweight at scale.
+        if self.action == "autocomplete":
+            return queryset.distinct()
 
         # Add prefetch for user_groups visibility
         viewable_user_group_ids = RoleAssignment.get_accessible_object_ids(
@@ -7432,17 +7489,25 @@ class UserViewSet(BaseModelViewSet):
             "user_groups" in request.data
             and user.user_groups.filter(name="BI-UG-ADM").exists()
         ):
-            direct_admin_count = User.objects.filter(
-                user_groups__name="BI-UG-ADM"
-            ).count()
-            if direct_admin_count == 1:
-                admin_group = UserGroup.objects.get(name="BI-UG-ADM")
-                new_user_groups = set(request.data["user_groups"])
-                if str(admin_group.pk) not in new_user_groups:
-                    return Response(
-                        {"error": "attemptToRemoveOnlyAdminUserGroup"},
-                        status=status.HTTP_403_FORBIDDEN,
-                    )
+            with transaction.atomic():
+                # Lock the admin group row so this check-then-act can't race a
+                # concurrent admin-membership change into a zero-admin lockout.
+                admin_group = (
+                    UserGroup.objects.select_for_update()
+                    .filter(name="BI-UG-ADM")
+                    .first()
+                )
+                direct_admin_count = User.objects.filter(
+                    user_groups__name="BI-UG-ADM"
+                ).count()
+                if direct_admin_count == 1 and admin_group is not None:
+                    new_user_groups = set(request.data["user_groups"])
+                    if str(admin_group.pk) not in new_user_groups:
+                        return Response(
+                            {"error": "attemptToRemoveOnlyAdminUserGroup"},
+                            status=status.HTTP_403_FORBIDDEN,
+                        )
+                return super().update(request, *args, **kwargs)
 
         return super().update(request, *args, **kwargs)
 
@@ -7450,14 +7515,19 @@ class UserViewSet(BaseModelViewSet):
         user = self.get_object()
         # Protect the last direct (locally-managed) administrator — see update().
         if user.user_groups.filter(name="BI-UG-ADM").exists():
-            direct_admin_count = User.objects.filter(
-                user_groups__name="BI-UG-ADM"
-            ).count()
-            if direct_admin_count == 1:
-                return Response(
-                    {"error": "attemptToDeleteOnlyAdminAccountError"},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
+            with transaction.atomic():
+                # Lock the admin group row so this check-then-act can't race a
+                # concurrent admin removal into a zero-admin lockout.
+                UserGroup.objects.select_for_update().filter(name="BI-UG-ADM").first()
+                direct_admin_count = User.objects.filter(
+                    user_groups__name="BI-UG-ADM"
+                ).count()
+                if direct_admin_count == 1:
+                    return Response(
+                        {"error": "attemptToDeleteOnlyAdminAccountError"},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+                return super().destroy(request, *args, **kwargs)
 
         return super().destroy(request, *args, **kwargs)
 
@@ -7596,6 +7666,15 @@ class UserGroupViewSet(BaseModelViewSet):
         DjangoFilterBackend,
         UserGroupFilter,
     ]
+    # Membership is a property of the *group* (folder = its domain), not of the
+    # globally-scoped User. Authorizing add/remove members on change_usergroup —
+    # checked against the group's folder by has_object_permission — lets a domain
+    # manager manage the membership of groups in their domain (and subdomains, via
+    # folder recursion) without holding change_user, which is Global-only.
+    permission_overrides = {
+        "add_members": "change_usergroup",
+        "remove_members": "change_usergroup",
+    }
 
     def get_queryset(self):
         return super().get_queryset().select_related("folder")
@@ -7608,6 +7687,102 @@ class UserGroupViewSet(BaseModelViewSet):
                 status=status.HTTP_403_FORBIDDEN,
             )
         return super().destroy(request, *args, **kwargs)
+
+    MEMBER_BATCH_LIMIT = 100
+
+    def _member_ids(self, request) -> list[str]:
+        ids = request.data.get("users")
+        if isinstance(ids, str):
+            ids = [i for i in ids.split(",") if i]
+        ids = [i for i in (ids or []) if i]
+        if not ids:
+            raise DRFValidationError({"users": ["This field is required."]})
+        if len(ids) > self.MEMBER_BATCH_LIMIT:
+            raise DRFValidationError(
+                {"users": [f"Too many ids (max {self.MEMBER_BATCH_LIMIT})"]}
+            )
+        return ids
+
+    @action(detail=True, methods=["post"], url_path="add-members")
+    def add_members(self, request, pk=None):
+        """Add users to this group. Only the M2M through-rows are written — no User
+        attribute is touched — so membership management is granted without leaking
+        change_user. Authorized on the group's folder (see permission_overrides)."""
+        group = self.get_object()
+        users = User.objects.filter(pk__in=self._member_ids(request))
+        group.user_set.add(*users)
+        logger.info(
+            "users added to user group",
+            user_group=group,
+            users=list(users),
+            actor=request.user,
+        )
+        return Response({"count": group.user_set.count()})
+
+    def _blocks_domain_admin_self_removal(self, actor, group, ids) -> bool:
+        """A user may not strip their own domain-admin entitlement by removing
+        themselves from a group that grants Domain Manager (BI-RL-DMA) — that would
+        be a self-lockout. Exempt when the actor still administers the domain from a
+        higher level (a global admin, or a parent-domain manager); removal by anyone
+        else is unaffected."""
+        if str(actor.pk) not in {str(i) for i in ids}:
+            return False  # not removing self
+        grants_domain_admin = RoleAssignment.objects.filter(
+            user_group=group, role__name="BI-RL-DMA"
+        ).exists()
+        if not grants_domain_admin:
+            return False
+        # is_access_allowed walks up from the PARENT folder, so a match means the
+        # actor holds group-management rights at a strictly higher level (global or
+        # parent domain) — never via this group's own scope.
+        parent = group.folder.parent_folder
+        if parent is not None and RoleAssignment.is_access_allowed(
+            actor,
+            Permission.objects.get(codename="change_usergroup"),
+            parent,
+        ):
+            return False
+        return True
+
+    @action(detail=True, methods=["post"], url_path="remove-members")
+    def remove_members(self, request, pk=None):
+        """Remove users from this group (batch). Same authorization as add_members.
+        Protects the last direct BI-UG-ADM administrator, mirroring UserViewSet, so
+        membership management can never strip the lockout-proof admin anchor."""
+        group = self.get_object()
+        ids = self._member_ids(request)
+        users = User.objects.filter(pk__in=ids)
+
+        if group.name == "BI-UG-ADM":
+            with transaction.atomic():
+                # Lock the admin group row so concurrent removals serialize; without
+                # it the last-admin check is a TOCTOU that can strip every admin.
+                UserGroup.objects.select_for_update().get(pk=group.pk)
+                direct_admin_count = User.objects.filter(
+                    user_groups__name="BI-UG-ADM"
+                ).count()
+                removing = group.user_set.filter(pk__in=ids).count()
+                if direct_admin_count - removing < 1:
+                    return Response(
+                        {"error": "attemptToRemoveOnlyAdminUserGroup"},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+                group.user_set.remove(*users)
+        elif self._blocks_domain_admin_self_removal(request.user, group, ids):
+            return Response(
+                {"error": "attemptToRemoveSelfFromDomainAdminGroup"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        else:
+            group.user_set.remove(*users)
+
+        logger.info(
+            "users removed from user group",
+            user_group=group,
+            users=list(users),
+            actor=request.user,
+        )
+        return Response({"count": group.user_set.count()})
 
 
 class IdPGroupViewSet(BaseModelViewSet):
