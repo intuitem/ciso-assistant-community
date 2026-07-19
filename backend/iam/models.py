@@ -1458,7 +1458,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     ) -> Tuple[list[str], list[str], list[str]]:
         from core.models import Actor, Team
         from tprm.models import Entity
-
+    
         view_user_ids, change_user_ids, delete_user_ids = (
             RoleAssignment.get_accessible_object_ids(folder, user, User)
         )

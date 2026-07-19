@@ -3,7 +3,7 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { m } from '$paraglide/messages';
-	import MarkdownField from '../MarkdownField.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
 	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';

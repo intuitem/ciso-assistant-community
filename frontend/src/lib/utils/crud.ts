@@ -170,9 +170,8 @@ export interface ModelMapEntry {
 	endpointUrl?: string;
 	customNameDescription?: boolean;
 	/**
-	 * Fields (in addition to DEFAULT_MARKDOWN_FIELDS) whose content is authored and
-	 * rendered as Markdown for this model. Single source of truth consumed by the
-	 * detail view, the list view, and (by convention) the form editors.
+	 * Fields (in addition to `DEFAULT_MARKDOWN_FIELDS`) whose content is edited and
+	 * rendered as Markdown for this model.
 	 */
 	markdownFields?: string[];
 }
@@ -1962,6 +1961,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'strategic_scenario' },
 			{ field: 'ro_to_couple' },
 			{ field: 'is_selected' },
+			{ field: 'justification' },
 			{ field: 'stakeholders' },
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'ebios_rm_study' }
@@ -3266,17 +3266,10 @@ const FIELD_COMPONENT_MAP = {
 };
 
 /**
- * Fields rendered and edited as Markdown on every model.
- * Together with each model's optional `markdownFields`, this is the single source
- * of truth consumed by the detail view (render), the list view (render) and, by
- * convention, the form editors (MarkdownField / TableMarkdownField).
+ * Default fields rendered and edited as Markdown.
+ * Model-specific fields can be added through `markdownFields`.
  */
-export const DEFAULT_MARKDOWN_FIELDS = [
-	'description',
-	'observation',
-	'annotation',
-	'justification'
-];
+const DEFAULT_MARKDOWN_FIELDS = ['description', 'observation', 'annotation', 'justification'];
 
 export function getMarkdownFields(model: urlModel | string | undefined): Set<string> {
 	const modelSpecific = (model ? getModelInfo(model)?.markdownFields : undefined) ?? [];

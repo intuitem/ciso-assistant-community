@@ -4,7 +4,7 @@
 	import { m } from '$paraglide/messages';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import Checkbox from '../Checkbox.svelte';
-	import MarkdownField from '../MarkdownField.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 
 	interface Props {

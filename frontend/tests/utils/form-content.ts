@@ -62,9 +62,6 @@ export class FormContent {
 				});
 			}
 
-			// Markdown fields render preview-first; switch to edit mode before filling.
-			// Detected generically via the edit-toggle button, so there is no per-field
-			// list to keep in sync with the app's markdown fields.
 			if (field?.type === FormFieldType.TEXT) {
 				const markdownEditBtn = this.page.getByTestId(`markdown-edit-btn-${key}`);
 				if (await markdownEditBtn.isVisible()) {

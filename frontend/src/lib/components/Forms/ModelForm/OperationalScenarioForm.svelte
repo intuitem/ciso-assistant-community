@@ -4,7 +4,7 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { m } from '$paraglide/messages';
-	import MarkdownField from '../MarkdownField.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Select from '../Select.svelte';
 	import { page } from '$app/state';
 	import TextField from '../TextField.svelte';
