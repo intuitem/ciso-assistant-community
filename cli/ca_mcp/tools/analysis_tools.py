@@ -1,6 +1,6 @@
 """Analysis MCP tools for CISO Assistant"""
 
-from ..client import make_get_request, fetch_all_results, get_paginated_results
+from ..client import make_get_request, fetch_all_results
 from ..utils.response_formatter import (
     success_response,
     error_response,
@@ -53,11 +53,14 @@ async def get_all_audits_with_metrics(
         # filters, so we use it purely as an id -> metrics map and display only
         # the filtered subset above. Best-effort: if recap is unavailable, each
         # audit's metrics degrade to "unavailable" rather than failing the run.
+        # recap returns a bare (non-paginated) list, so we read it directly.
         metrics_map = {}
         recap_res = make_get_request("/compliance-assessments/recap/")
         if recap_res.status_code == 200:
-            for entry in get_paginated_results(recap_res.json()):
-                metrics_map[str(entry.get("id"))] = entry
+            recap_data = recap_res.json()
+            if isinstance(recap_data, list):
+                for entry in recap_data:
+                    metrics_map[str(entry.get("id"))] = entry
 
         def _fmt_score(value):
             # -1 is the backend sentinel for "nothing scored"
@@ -270,9 +273,27 @@ async def get_audit_global_score(audit_name: str):
             "Use get_audits_progress() to see available audits",
             retry_allowed=True,
         )
+    except Exception as e:
+        return error_response(
+            "API Error",
+            f"Unable to resolve audit: {e}",
+            "Verify the API connection and token configuration",
+            retry_allowed=True,
+        )
 
-    # Single O(1) call to the server-side aggregate endpoint
-    res = make_get_request(f"/compliance-assessments/{audit_id}/global_score/")
+    # Single O(1) call to the server-side aggregate endpoint. Guard the request
+    # and JSON decode so timeouts, connection errors, or a malformed body return
+    # a structured tool error instead of escaping as an unhandled exception.
+    try:
+        res = make_get_request(f"/compliance-assessments/{audit_id}/global_score/")
+    except Exception as e:
+        return error_response(
+            "API Error",
+            f"Unable to fetch global score: {e}",
+            "Verify the API connection and token configuration",
+            retry_allowed=True,
+        )
+
     if res.status_code != 200:
         return error_response(
             "API Error",
@@ -281,7 +302,15 @@ async def get_audit_global_score(audit_name: str):
             retry_allowed=False,
         )
 
-    scores = res.json()
+    try:
+        scores = res.json()
+    except ValueError as e:
+        return error_response(
+            "API Error",
+            f"Invalid response decoding global score: {e}",
+            "Report this error to the user",
+            retry_allowed=False,
+        )
 
     def _fmt(value):
         # -1 is the backend sentinel for "nothing scored"
