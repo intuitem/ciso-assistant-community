@@ -199,35 +199,37 @@
 	</div>
 {:then counts}
 	<div class="grid grid-cols-12 gap-4 p-2">
-		<div
-			class="col-span-7 bg-linear-to-br from-pink-200 to-pink-50 dark:from-pink-950/40 dark:to-pink-950/10 p-2 rounded"
-		>
-			<div class="font-bold mb-2">
-				<i class="fa-solid fa-fire-extinguisher mr-2"></i>{m.appliedControls()}
-				{#if counts.appliedControls > 0}
-					<span class="badge variant-filled-surface ml-2">{counts.appliedControls}</span>
-				{/if}
+		{#if showEmptySections || counts.appliedControls > 0}
+			<div
+				class="col-span-7 bg-linear-to-br from-pink-200 to-pink-50 dark:from-pink-950/40 dark:to-pink-950/10 p-2 rounded"
+			>
+				<div class="font-bold mb-2">
+					<i class="fa-solid fa-fire-extinguisher mr-2"></i>{m.appliedControls()}
+					{#if counts.appliedControls > 0}
+						<span class="badge variant-filled-surface ml-2">{counts.appliedControls}</span>
+					{/if}
+				</div>
+				<ModelTable
+					source={{
+						head: {
+							ref_id: 'ref_id',
+							name: 'name',
+							status: 'status',
+							priority: 'priority',
+							eta: 'eta',
+							folder: 'folder'
+						},
+						body: [],
+						filters: APPLIED_CONTROL_FILTERS
+					}}
+					URLModel="applied-controls"
+					baseEndpoint="/applied-controls?{ownerParams}"
+				/>
 			</div>
-			<ModelTable
-				source={{
-					head: {
-						ref_id: 'ref_id',
-						name: 'name',
-						status: 'status',
-						priority: 'priority',
-						eta: 'eta',
-						folder: 'folder'
-					},
-					body: [],
-					filters: APPLIED_CONTROL_FILTERS
-				}}
-				URLModel="applied-controls"
-				baseEndpoint="/applied-controls?{ownerParams}"
-			/>
-		</div>
-		<div class="col-span-5 p-2 flex items-center justify-center">
-			<ActivityTracker metrics={data.data.metrics} />
-		</div>
+			<div class="col-span-5 p-2 flex items-center justify-center">
+				<ActivityTracker metrics={data.data.metrics} />
+			</div>
+		{/if}
 		{#if showEmptySections || counts.tasks > 0}
 			<div
 				class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 dark:from-violet-950/40 dark:to-violet-950/10 p-2 rounded"
@@ -414,7 +416,7 @@
 				/>
 			</div>
 		{/if}
-		{#if (showEmptySections || counts.validationFlows > 0) && data.featureflags?.validation_flows}
+		{#if approverParams && (showEmptySections || counts.validationFlows > 0) && data.featureflags?.validation_flows}
 			<div
 				class="col-span-6 bg-linear-to-br from-orange-200 to-orange-50 dark:from-orange-950/40 dark:to-orange-950/10 p-2 rounded"
 			>
@@ -438,6 +440,31 @@
 					hideFilters={true}
 					URLModel="validation-flows"
 					baseEndpoint="/validation-flows?{approverParams}"
+				/>
+			</div>
+		{/if}
+		{#if approverParams && (showEmptySections || counts.riskAcceptances > 0)}
+			<div
+				class="col-span-6 bg-linear-to-br from-yellow-200 to-yellow-50 dark:from-yellow-950/40 dark:to-yellow-950/10 p-2 rounded"
+			>
+				<div class="font-bold mb-2">
+					<i class="fa-solid fa-signature mr-2"></i>{m.riskAcceptances()}
+					{#if counts.riskAcceptances > 0}
+						<span class="badge variant-filled-surface ml-2">{counts.riskAcceptances}</span>
+					{/if}
+				</div>
+				<ModelTable
+					source={{
+						head: {
+							name: 'name',
+							expiry_date: 'expiry_date',
+							folder: 'folder'
+						},
+						body: []
+					}}
+					hideFilters={true}
+					URLModel="risk-acceptances"
+					baseEndpoint="/risk-acceptances?{approverParams}&state=submitted"
 				/>
 			</div>
 		{/if}
