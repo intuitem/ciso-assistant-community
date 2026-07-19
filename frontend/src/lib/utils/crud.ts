@@ -2242,6 +2242,10 @@ export const URL_MODEL_MAP: ModelMap = {
 				addExisting: {
 					parentField: 'reference_controls'
 				}
+			},
+			{
+				field: 'findings',
+				urlModel: 'task-templates'
 			}
 		],
 		selectFields: [
@@ -2370,6 +2374,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
+			{ field: 'findings', urlModel: 'findings' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [

@@ -9638,6 +9638,14 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         related_name="task_templates",
     )
 
+    findings = models.ManyToManyField(
+        Finding,
+        verbose_name="Findings",
+        blank=True,
+        help_text="Findings related to the task",
+        related_name="task_templates",
+    )
+
     link = models.URLField(
         blank=True,
         null=True,
