@@ -4,7 +4,7 @@
 	import { m } from '$paraglide/messages';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import Checkbox from '../Checkbox.svelte';
-	import TextArea from '../TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 
 	interface Props {
@@ -59,7 +59,7 @@
 	label={m.selected()}
 	helpText={m.attackPathIsSelectedHelpText()}
 />
-<TextArea
+<MarkdownField
 	{form}
 	field="justification"
 	label={m.justification()}

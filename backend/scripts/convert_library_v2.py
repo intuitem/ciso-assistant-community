@@ -684,6 +684,9 @@ def parse_risk_matrix(meta, content_ws, wb):
         "grid": [],
     }
 
+    if meta.get("annotation"):
+        risk_matrix["annotation"] = meta.get("annotation")
+
     translations = extract_translations_from_metadata(meta, "risk_matrix")
     if translations:
         risk_matrix["translations"] = translations
@@ -1021,6 +1024,9 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
         "name": meta.get("name"),
         "description": meta.get("description"),
     }
+
+    if meta.get("annotation"):
+        framework["annotation"] = meta.get("annotation")
 
     translations = extract_translations_from_metadata(meta, "framework")
     if translations:
