@@ -8908,8 +8908,16 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     #      (result set by the result-driven path, or score committed by the
     #      complete-questionnaire discipline in recompute_assessment — both
     #      resolve conditional visibility at write time) OR every seeded
-    #      Answer row non-empty (covers purely informational questionnaires,
-    #      e.g. the profiling section of dynamic questionnaires)
+    #      Answer row non-empty (covers informational questionnaires that
+    #      compute neither result nor score, e.g. a profiling section).
+    #      KNOWN GAP: the "all rows non-empty" signal is visibility-blind
+    #      (SQL cannot evaluate depends_on), so a questionnaire that is BOTH
+    #      informational AND conditional keeps empty hidden rows and never
+    #      fires this signal; with no carrier either, such an RA stays
+    #      uncounted until a result/status is set. Shipped libraries don't
+    #      hit this (their conditional questions compute). Closing it fully
+    #      needs a persisted completion flag (rejected) or write-time answer
+    #      cleanup (out of scope).
     #   2. result visible on the audit: result set
     #   3. score-only audit: score strictly above the resolved minimum
     #      (requirement override, then audit, then framework). The scoring
@@ -9361,11 +9369,18 @@ class Answer(AbstractBaseModel, FolderMixin):
     @staticmethod
     def empty_value_q() -> Q:
         """Empty `value` in every storage form: SQL NULL (seeded rows), JSON
-        null (client writes) and empty string — the SQL counterpart of the
-        Python-side emptiness in `_build_answer_context`. Single definition
-        for every consumer (progress, dashboards).
+        null (client writes), empty string and empty container ([]/{}, e.g. a
+        choice answer cleared without a `selected_choices` row) — the SQL
+        counterpart of the Python-side emptiness in `_build_answer_context`.
+        Single definition for every consumer (progress, dashboards).
         """
-        return Q(value__isnull=True) | Q(value=None) | Q(value="")
+        return (
+            Q(value__isnull=True)
+            | Q(value=None)
+            | Q(value="")
+            | Q(value=[])
+            | Q(value={})
+        )
 
     def __str__(self) -> str:
         return f"Answer to {self.question} for {self.requirement_assessment}"
