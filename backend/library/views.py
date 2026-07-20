@@ -49,7 +49,7 @@ from core.models import (
     match_urn,
 )
 from core.sandbox import SandboxTimeoutError, SandboxViolationError
-from core.views import BaseModelViewSet, GenericFilterSet
+from core.views import BaseModelViewSet, GenericFilterSet, SmartOrderingFilter
 from iam.models import RoleAssignment, Folder, Permission
 from library import builder
 from library import framework_editor as fw_editor
@@ -865,7 +865,7 @@ class MappingLibrariesList(generics.ListAPIView):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        SmartOrderingFilter,
     ]
     ordering_fields = "__all__"
 

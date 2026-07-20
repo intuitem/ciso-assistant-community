@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, params }) => {
@@ -21,11 +22,10 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 	const metrics = await metricsResponse.json();
 
 	// Fetch asset assessments with full details
-	const assetsResponse = await fetch(
+	const assetAssessments = await fetchAllPages(
+		fetch,
 		`${BASE_API_URL}/resilience/asset-assessments/?bia=${params.id}`
-	);
-	const assetsData = await assetsResponse.json();
-	const assetAssessments = assetsData.results || [];
+	).catch(() => []);
 
 	// Fetch full asset details with comparisons for each asset assessment
 	const assetsWithDetails = await Promise.all(

@@ -1,22 +1,18 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch, locals }) => {
 	const [drafts, customLibraries, orphanFrameworks] = await Promise.all([
-		fetch(`${BASE_API_URL}/library-drafts/?ordering=-updated_at`)
-			.then((r) => r.json())
-			.then((d) => d.results ?? d)
-			.catch(() => []),
+		fetchAllPages(fetch, `${BASE_API_URL}/library-drafts/?ordering=-updated_at`).catch(() => []),
 		// Adoption candidates: custom (non-builtin) stored libraries.
-		fetch(`${BASE_API_URL}/stored-libraries/?is_custom=true&ordering=name`)
-			.then((r) => r.json())
-			.then((d) => d.results ?? d)
-			.catch(() => []),
+		fetchAllPages(fetch, `${BASE_API_URL}/stored-libraries/?is_custom=true&ordering=name`).catch(
+			() => []
+		),
 		// Adoption candidates: library-less live frameworks (retired editor).
-		fetch(`${BASE_API_URL}/frameworks/?library__isnull=true&ordering=name`)
-			.then((r) => r.json())
-			.then((d) => d.results ?? d)
-			.catch(() => [])
+		fetchAllPages(fetch, `${BASE_API_URL}/frameworks/?library__isnull=true&ordering=name`).catch(
+			() => []
+		)
 	]);
 
 	return {

@@ -204,7 +204,13 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 		}
 		case 'revisions': {
 			const documentId = req('document');
-			endpoint = `${BASE_API_URL}/document-revisions/?document=${documentId}&ordering=-version_number`;
+			const qp = new URLSearchParams({ document: documentId, ordering: '-version_number' });
+			// Forward paging params so clients can fetch every revision page.
+			for (const key of ['limit', 'offset']) {
+				const value = url.searchParams.get(key);
+				if (value) qp.set(key, value);
+			}
+			endpoint = `${BASE_API_URL}/document-revisions/?${qp}`;
 			break;
 		}
 		case 'revision': {

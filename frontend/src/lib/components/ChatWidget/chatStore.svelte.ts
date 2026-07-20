@@ -3,6 +3,7 @@ import { browser } from '$app/environment';
 import { m } from '$paraglide/messages';
 import { getLocale } from '$paraglide/runtime';
 import { formatDate } from '$lib/utils/datetime';
+import { fetchAllPages } from '$lib/utils/pagination';
 
 const CHAT_API = '/fe-api/chat';
 const STORAGE_KEY = 'ciso-chat-state';
@@ -764,23 +765,20 @@ export function getLoadingHistory() {
 export async function loadSessionHistory() {
 	loadingHistory = true;
 	try {
-		const res = await fetch(`${CHAT_API}/sessions`);
-		if (res.ok) {
-			const data = await res.json();
-			sessionHistory = (data.results ?? data)
-				.map((s: any) => ({
-					id: s.id,
-					title: s.title || `Chat ${formatDate(new Date(s.created_at), false, getLocale())}`,
-					folder: s.folder?.str ?? '',
-					message_count: s.message_count ?? 0,
-					created_at: s.created_at
-				}))
-				.sort(
-					(a: ChatSession, b: ChatSession) =>
-						new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-				)
-				.slice(0, 30);
-		}
+		const sessions = await fetchAllPages(fetch, `${CHAT_API}/sessions`);
+		sessionHistory = sessions
+			.map((s: any) => ({
+				id: s.id,
+				title: s.title || `Chat ${formatDate(new Date(s.created_at), false, getLocale())}`,
+				folder: s.folder?.str ?? '',
+				message_count: s.message_count ?? 0,
+				created_at: s.created_at
+			}))
+			.sort(
+				(a: ChatSession, b: ChatSession) =>
+					new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+			)
+			.slice(0, 30);
 	} catch {
 		// Ignore — sidebar just stays empty
 	}

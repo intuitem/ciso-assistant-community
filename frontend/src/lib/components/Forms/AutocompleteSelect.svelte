@@ -125,7 +125,7 @@
 		mount = () => null,
 		optionSnippet = undefined,
 		placeholder = '',
-		lazy = false,
+		lazy = true,
 		lazyLimit = 20,
 		lazyThreshold = 50,
 		maxVisibleChips: _maxVisibleChips = 3

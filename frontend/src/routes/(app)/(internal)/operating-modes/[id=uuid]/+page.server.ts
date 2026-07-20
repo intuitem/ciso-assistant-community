@@ -5,6 +5,7 @@ import { nestedDeleteFormAction, nestedWriteFormAction } from '$lib/utils/action
 import { loadDetail } from '$lib/utils/load';
 import { defaultWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { modelSchema } from '$lib/utils/schemas';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -21,18 +22,17 @@ export const load: PageServerLoad = async (event) => {
 	const eaModel = getModelInfo('elementary-actions');
 	const eaCreateSchema = modelSchema('elementary-actions');
 
-	const [detail, objectResponse, eaRes, kcRes, attackStageRes, iconRes] = await Promise.all([
-		loadDetail({ event, model: model, id: event.params.id }),
-		event.fetch(objectEndpoint),
-		event.fetch(eaEndpoint),
-		event.fetch(killChainEndpoint),
-		event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/attack_stage/`),
-		event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/icon/`)
-	]);
+	const [detail, objectResponse, elementaryActions, killChainSteps, attackStageRes, iconRes] =
+		await Promise.all([
+			loadDetail({ event, model: model, id: event.params.id }),
+			event.fetch(objectEndpoint),
+			fetchAllPages<any>(event.fetch, eaEndpoint),
+			fetchAllPages<any>(event.fetch, killChainEndpoint),
+			event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/attack_stage/`),
+			event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/icon/`)
+		]);
 
 	const object = await objectResponse.json();
-	const eaData = await eaRes.json();
-	const kcData = await kcRes.json();
 
 	const eaInitialData: Record<string, any> = {};
 	if (object.folder) {
@@ -63,8 +63,8 @@ export const load: PageServerLoad = async (event) => {
 		...detail,
 		model,
 		object,
-		elementaryActions: eaData.results ?? eaData,
-		killChainSteps: kcData.results ?? kcData,
+		elementaryActions,
+		killChainSteps,
 		operatingModeId: event.params.id,
 		eaModel: {
 			urlModel: 'elementary-actions',

@@ -1,11 +1,9 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import type { PageServerLoad } from './$types';
 
 async function fetchAll(fetch: typeof globalThis.fetch, endpoint: string) {
-	const res = await fetch(`${BASE_API_URL}/${endpoint}/`);
-	if (!res.ok) return [];
-	const data = await res.json();
-	return data.results ?? data;
+	return fetchAllPages(fetch, `${BASE_API_URL}/${endpoint}/`).catch(() => []);
 }
 
 export const load: PageServerLoad = async ({ fetch }) => {

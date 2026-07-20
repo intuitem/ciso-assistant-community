@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import type { PageServerLoad } from './$types';
 import { TODAY } from '$lib/utils/constants';
 import { m } from '$paraglide/messages';
@@ -48,14 +49,13 @@ export const load: PageServerLoad = async ({ locals, fetch, params }) => {
 		`${BASE_API_URL}/threats/threats_count/?folder=${params.id}`
 	).then((res) => res.json());
 
-	const req_risk_assessments = await fetch(`${BASE_API_URL}/risk-assessments/`);
-	const risk_assessments = await req_risk_assessments.json();
+	const risk_assessments = await fetchAllPages(fetch, `${BASE_API_URL}/risk-assessments/`);
 
 	return {
 		risks_count_per_level,
 		threats_count,
 		folderData,
-		risk_assessments: risk_assessments.results,
+		risk_assessments,
 		applied_control_status: applied_control_status.results,
 		user: locals.user,
 		title: `${m.analytics()} - ${folderData?.name}`,

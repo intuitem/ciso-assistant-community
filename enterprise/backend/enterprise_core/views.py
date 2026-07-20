@@ -26,7 +26,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
-from core.views import BaseModelViewSet, GenericFilterSet, RoleFilter
+from core.views import (
+    BaseModelViewSet,
+    GenericFilterSet,
+    RoleFilter,
+    SmartOrderingFilter,
+)
 from core.utils import MAIN_ENTITY_DEFAULT_NAME
 from iam.models import User, Role, UserGroup, RoleAssignment
 from tprm.models import Entity
@@ -515,7 +520,7 @@ class LogEntryViewSet(
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        SmartOrderingFilter,
     ]
     ordering = ["-timestamp"]
     ordering_fields = "__all__"

@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import type { PageServerLoad } from './$types';
 
 function clampInt(raw: string | null, fallback: number, min: number, max: number): number {
@@ -61,17 +62,17 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	const reviewPromise = safeFetch(fetch, endpoint, { folders: [], buckets: [], granularity });
 
 	// Each filter dropdown fetched independently — one failure won't block others
-	const foldersPromise = safeFetch(fetch, `${BASE_API_URL}/folders/`);
-	const actorsPromise = safeFetch(fetch, `${BASE_API_URL}/actors/`);
-	const controlsPromise = safeFetch(fetch, `${BASE_API_URL}/applied-controls/?page_size=500`);
+	const foldersPromise = fetchAllPages(fetch, `${BASE_API_URL}/folders/`).catch(() => []);
+	const actorsPromise = fetchAllPages(fetch, `${BASE_API_URL}/actors/`).catch(() => []);
+	const controlsPromise = fetchAllPages(fetch, `${BASE_API_URL}/applied-controls/`).catch(() => []);
 
 	return {
 		reviewData: reviewPromise,
 		filterData: Promise.all([foldersPromise, actorsPromise, controlsPromise]).then(
-			([foldersData, actorsData, controlsData]) => ({
-				allFolders: foldersData.results || foldersData || [],
-				allActors: actorsData.results || actorsData || [],
-				allAppliedControls: controlsData.results || controlsData || []
+			([allFolders, allActors, allAppliedControls]) => ({
+				allFolders,
+				allActors,
+				allAppliedControls
 			})
 		),
 		startMonth,

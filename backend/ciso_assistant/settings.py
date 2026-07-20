@@ -438,7 +438,14 @@ else:
     MEDIA_ROOT = LOCAL_STORAGE_DIRECTORY
     MEDIA_URL = ""
 
-PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=5000))
+# Default page size when a list request passes no ?limit=.
+PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=50))
+# Hard ceiling a client can request via ?limit= (larger values are clamped,
+# invalid ones rejected with HTTP 400). The ceiling follows PAGINATE_BY upward
+# so raising only PAGINATE_BY keeps working, and the default page size can
+# never exceed the ceiling.
+PAGINATE_MAX = int(os.environ.get("PAGINATE_MAX", default=max(200, PAGINATE_BY)))
+PAGINATE_BY = min(PAGINATE_BY, PAGINATE_MAX)
 
 # Application definition
 

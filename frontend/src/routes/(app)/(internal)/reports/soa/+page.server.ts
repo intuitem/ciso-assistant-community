@@ -1,23 +1,12 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { error } from '@sveltejs/kit';
+import { fetchAllPages } from '$lib/utils/pagination';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const [complianceRes, riskRes] = await Promise.all([
-		fetch(`${BASE_API_URL}/compliance-assessments/?ordering=-created_at`),
-		fetch(`${BASE_API_URL}/risk-assessments/?ordering=-created_at`)
+	const [complianceAssessments, riskAssessments] = await Promise.all([
+		fetchAllPages(fetch, `${BASE_API_URL}/compliance-assessments/?ordering=-created_at`),
+		fetchAllPages(fetch, `${BASE_API_URL}/risk-assessments/?ordering=-created_at`)
 	]);
-
-	if (!complianceRes.ok) {
-		error(400, 'Error loading compliance assessments');
-	}
-	if (!riskRes.ok) {
-		error(400, 'Error loading risk assessments');
-	}
-
-	const complianceData = await complianceRes.json();
-	const riskData = await riskRes.json();
-	const complianceAssessments = complianceData.results ?? complianceData;
 
 	// Fetch implementation_groups_definition for each unique framework
 	const frameworkIds = [
@@ -41,7 +30,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
 	return {
 		complianceAssessments,
-		riskAssessments: riskData.results ?? riskData,
+		riskAssessments,
 		frameworkGroupsMap
 	};
 };

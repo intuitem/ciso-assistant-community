@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -15,28 +16,26 @@ export const load = (async ({ fetch, params }) => {
 	}
 	const run = await runRes.json();
 
-	const [questionsData, agentRunsData] = await Promise.all([
-		fetchJson(
+	const [questions, agentRunsData] = await Promise.all([
+		fetchAllPages<any>(
 			fetch,
 			`${BASE_API_URL}/chat/questionnaire-questions/?questionnaire_run=${params.id}&ordering=ord`
-		),
+		).catch(() => []),
 		fetchJson(
 			fetch,
 			`${BASE_API_URL}/chat/agent-runs/?target_object_id=${params.id}&ordering=-created_at`
 		)
 	]);
 
-	const questions = questionsData?.results ?? questionsData ?? [];
 	const agentRuns = agentRunsData?.results ?? agentRunsData ?? [];
 	const latestAgentRun = agentRuns[0] ?? null;
 
 	let actions: any[] = [];
 	if (latestAgentRun && latestAgentRun.status === 'succeeded') {
-		const actionsData = await fetchJson(
+		actions = await fetchAllPages(
 			fetch,
 			`${BASE_API_URL}/chat/agent-actions/?agent_run=${latestAgentRun.id}&kind=propose_answer&ordering=-created_at`
-		);
-		actions = actionsData?.results ?? actionsData ?? [];
+		).catch(() => []);
 	}
 
 	return { run, questions, latestAgentRun, actions };

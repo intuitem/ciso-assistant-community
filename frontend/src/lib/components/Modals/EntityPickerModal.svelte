@@ -4,6 +4,7 @@
 	import { m } from '$paraglide/messages';
 	import { getModalStore, type ModalStore } from './stores';
 	import type { EntityPickerOptions } from '$lib/utils/entityPicker';
+	import { fetchAllPages } from '$lib/utils/pagination';
 
 	// Canonical picker types live in entityPicker.ts; the modal just adds the
 	// Skeleton-injected `parent`.
@@ -100,21 +101,15 @@
 	async function hydrateSelection() {
 		let p: URLSearchParams;
 		if (initialSelectedIds.length) {
-			p = new URLSearchParams({ id: initialSelectedIds.join(','), limit: '10000' });
+			p = new URLSearchParams({ id: initialSelectedIds.join(',') });
 		} else if (initialSelectedParams) {
-			p = new URLSearchParams({ ...initialSelectedParams, limit: '10000' });
+			p = new URLSearchParams({ ...initialSelectedParams });
 		} else {
 			return;
 		}
 		try {
-			const res = await fetch(`/${endpoint}/autocomplete?${p.toString()}`);
-			if (res.ok) {
-				const data = await res.json();
-				for (const o of data?.results ?? data ?? []) selected.set(o.id, o);
-			} else {
-				console.error(`Failed to hydrate ${endpoint} selection:`, res.status);
-				loadError = true;
-			}
+			const rows = await fetchAllPages(fetch, `/${endpoint}/autocomplete?${p.toString()}`);
+			for (const o of rows) selected.set(o.id, o);
 		} catch (e) {
 			console.error(`Failed to hydrate ${endpoint} selection:`, e);
 			loadError = true;

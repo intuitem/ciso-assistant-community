@@ -654,6 +654,7 @@ class AttachmentMetadataView(APIView):
 
         queryset = queryset.order_by("created_at", "id")
         paginator = LimitOffsetPagination()
+        paginator.max_limit = settings.PAGINATE_MAX
         paginated_queryset = paginator.paginate_queryset(queryset, request)
 
         results = []
