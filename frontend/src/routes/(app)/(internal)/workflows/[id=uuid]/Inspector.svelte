@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import DataBrowser from './DataBrowser.svelte';
+	import { renderTemplate } from './expressions';
 
 	interface Option {
 		id: string;
@@ -20,6 +22,10 @@
 		creatableModels?: any[];
 		fkOptions?: Record<string, Option[]>;
 		hookUrl?: string | null;
+		referenceRunId?: string | null;
+		referenceVariables?: Record<string, unknown>;
+		referenceNodes?: { key: string; label: string; output: unknown }[];
+		secretNames?: string[];
 		onChange: () => void;
 	}
 
@@ -34,8 +40,66 @@
 		creatableModels = [],
 		fkOptions = {},
 		hookUrl = null,
+		referenceRunId = null,
+		referenceVariables = {},
+		referenceNodes = [],
+		secretNames = [],
 		onChange
 	}: Props = $props();
+
+	// ---------- expression assist (spec D20) ----------
+
+	let lastFocusedInput: HTMLInputElement | HTMLTextAreaElement | null = null;
+	let lastFocusedValue = $state('');
+
+	function isTemplateField(el: EventTarget | null): el is HTMLInputElement | HTMLTextAreaElement {
+		return (
+			(el instanceof HTMLInputElement && el.type === 'text') ||
+			el instanceof HTMLTextAreaElement
+		);
+	}
+
+	function trackFocus(event: Event) {
+		if (isTemplateField(event.target) && !event.target.readOnly) {
+			lastFocusedInput = event.target;
+			lastFocusedValue = event.target.value;
+		}
+	}
+
+	function trackInput(event: Event) {
+		if (event.target === lastFocusedInput && isTemplateField(event.target)) {
+			lastFocusedValue = event.target.value;
+		}
+	}
+
+	let copiedExpression = $state(false);
+	function insertExpression(expression: string) {
+		const el = lastFocusedInput;
+		if (el && document.contains(el)) {
+			const start = el.selectionStart ?? el.value.length;
+			const end = el.selectionEnd ?? start;
+			el.value = el.value.slice(0, start) + expression + el.value.slice(end);
+			el.dispatchEvent(new Event('input', { bubbles: true }));
+			el.focus();
+			el.setSelectionRange(start + expression.length, start + expression.length);
+			lastFocusedValue = el.value;
+		} else {
+			navigator.clipboard.writeText(expression);
+			copiedExpression = true;
+			setTimeout(() => (copiedExpression = false), 1200);
+		}
+	}
+
+	const previewContext = $derived({
+		...referenceVariables,
+		node: Object.fromEntries(referenceNodes.map((n) => [n.key, n.output])),
+		secrets: Object.fromEntries(secretNames.map((name) => [name, '•••']))
+	});
+	const livePreview = $derived(
+		lastFocusedValue.includes('{{')
+			? renderTemplate(lastFocusedValue, previewContext)
+			: null
+	);
 
 	// emit_event is hidden pending the event-node redesign (correlation +
 	// buffering); the engine still executes it for graphs that carry it.
@@ -306,6 +370,8 @@
 <aside
 	class="w-72 shrink-0 h-full overflow-y-auto border-l border-surface-200-800 bg-surface-100-900"
 	data-testid="workflow-inspector"
+	onfocusincapture={trackFocus}
+	oninputcapture={trackInput}
 >
 	{#if selectedNode && nodeDomain}
 		<div class="p-3 space-y-3">
@@ -315,6 +381,11 @@
 						'workflowNode' + nodeDomain.type.charAt(0).toUpperCase() + nodeDomain.type.slice(1)
 					)}
 				</span>
+				{#if nodeDomain.ref}
+					<span class="badge preset-tonal text-[9px] font-mono lowercase" title={m.nodeRef()}>
+						{nodeDomain.ref}
+					</span>
+				{/if}
 			</div>
 
 			{#if nodeDomain.type !== 'start' && nodeDomain.type !== 'end'}
@@ -994,6 +1065,38 @@
 					</div>
 				</div>
 			{/if}
+
+			<div class="pt-2 border-t border-surface-200-800">
+				<div class="flex items-center justify-between mb-1">
+					{@render fieldLabel(m.availableData())}
+					{#if copiedExpression}
+						<span class="text-[9px] text-success-600">{m.copied()}</span>
+					{/if}
+				</div>
+				{#if livePreview !== null}
+					<p
+						class="text-[10px] font-mono bg-surface-50-950 border border-surface-200-800 rounded px-1.5 py-1 mb-2 break-all"
+					>
+						<span class="text-surface-500">{m.previewLabel()}:</span>
+						<span class="text-success-600 dark:text-success-400">{livePreview}</span>
+					</p>
+				{/if}
+				{#if referenceRunId}
+					<DataBrowser
+						variables={referenceVariables}
+						nodes={referenceNodes}
+						{secretNames}
+						onInsert={insertExpression}
+					/>
+					<p class="text-[9px] text-surface-500 mt-1 leading-relaxed">
+						<i class="fa-solid fa-arrow-pointer mr-1"></i>{m.insertHint()}
+					</p>
+				{:else}
+					<p class="text-[10px] text-surface-500 leading-relaxed">
+						{m.noReferenceRun()}
+					</p>
+				{/if}
+			</div>
 		</div>
 	{:else if selectedEdge && edgeDomain}
 		<div class="p-3 space-y-3">

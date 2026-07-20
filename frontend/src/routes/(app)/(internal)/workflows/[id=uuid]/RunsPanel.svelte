@@ -5,9 +5,19 @@
 		workflowId: string;
 		onShowRun?: (run: any, logs: any[]) => void;
 		onReplayRun?: (run: any, logs: any[]) => void;
+		onPinReference?: (run: any) => void;
+		onRunsRefreshed?: (runs: any[]) => void;
+		referenceRunId?: string | null;
 	}
 
-	let { workflowId, onShowRun, onReplayRun }: Props = $props();
+	let {
+		workflowId,
+		onShowRun,
+		onReplayRun,
+		onPinReference,
+		onRunsRefreshed,
+		referenceRunId = null
+	}: Props = $props();
 
 	async function withLogs(run: any, callback?: (run: any, logs: any[]) => void) {
 		if (!callback) return;
@@ -33,6 +43,7 @@
 		if (res.ok) {
 			const data = await res.json();
 			runs = data.results ?? data;
+			onRunsRefreshed?.(runs);
 			if (expandedId) await loadLogs(expandedId);
 		}
 		loading = false;
@@ -123,6 +134,24 @@
 						<span class="ml-auto text-surface-500 shrink-0">
 							{relativeTime(run.created_at)}
 						</span>
+						{#if onPinReference}
+							<span
+								role="button"
+								tabindex="0"
+								title={m.useAsReference()}
+								class="btn-icon w-6 h-6 text-[10px] shrink-0 {referenceRunId === run.id
+									? 'preset-filled-secondary-500'
+									: 'preset-tonal'}"
+								onclick={(e) => {
+									e.stopPropagation();
+									onPinReference(run);
+								}}
+								onkeydown={(e) => e.key === 'Enter' && onPinReference(run)}
+								data-testid="pin-reference"
+							>
+								<i class="fa-solid fa-thumbtack"></i>
+							</span>
+						{/if}
 						{#if onShowRun}
 							<span
 								role="button"

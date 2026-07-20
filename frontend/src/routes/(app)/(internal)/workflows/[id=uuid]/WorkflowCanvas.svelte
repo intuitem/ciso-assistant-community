@@ -213,6 +213,97 @@
 		saveTimer = setTimeout(save, 1200);
 	}
 
+	// ---------- reference run for the data browser (spec D20) ----------
+
+	let referenceRun = $state<any | null>(null);
+	let referencePinned = $state(false);
+	let referenceFetchInFlight = false;
+
+	function pickReference(runs: any[]) {
+		return (
+			runs.find(
+				(run: any) => run.status === 'completed' && Object.keys(run.node_outputs ?? {}).length
+			) ??
+			runs.find((run: any) => Object.keys(run.node_outputs ?? {}).length) ??
+			null
+		);
+	}
+
+	async function ensureReferenceRun() {
+		if (referenceRun || referenceFetchInFlight) return;
+		referenceFetchInFlight = true;
+		try {
+			const res = await fetch(opsUrl('list-instances'), {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ workflow: workflowId })
+			});
+			if (!res.ok) return;
+			const data = await res.json();
+			referenceRun = pickReference(data.results ?? data);
+		} finally {
+			// Deliberately no "already attempted" latch: while no run has data
+			// yet, every node selection retries, and the runs-panel poll below
+			// picks new runs up live.
+			referenceFetchInFlight = false;
+		}
+	}
+
+	function pinReference(run: any) {
+		referencePinned = true;
+		referenceRun = run;
+	}
+
+	// Runs-panel polling feeds this: without an explicit pin, the reference
+	// follows the latest run with data, so the browser populates live.
+	function handleRunsRefreshed(runs: any[]) {
+		if (referencePinned) return;
+		const candidate = pickReference(runs);
+		if (candidate && candidate.id !== referenceRun?.id) {
+			referenceRun = candidate;
+		}
+	}
+
+	$effect(() => {
+		if (selectedNodeId && !readonly) ensureReferenceRun();
+	});
+
+	// Upstream nodes only: data available TO the selected node.
+	const ancestorNodeIds = $derived.by(() => {
+		if (!selectedNodeId) return new Set<string>();
+		const incoming = new Map<string, string[]>();
+		for (const e of edges) {
+			incoming.set(e.target, [...(incoming.get(e.target) ?? []), e.source]);
+		}
+		const seen = new Set<string>();
+		const stack = [...(incoming.get(selectedNodeId) ?? [])];
+		while (stack.length) {
+			const id = stack.pop()!;
+			if (seen.has(id)) continue;
+			seen.add(id);
+			stack.push(...(incoming.get(id) ?? []));
+		}
+		return seen;
+	});
+
+	const referenceNodes = $derived.by(() => {
+		if (!referenceRun) return [];
+		const outputs = referenceRun.node_outputs ?? {};
+		return nodes
+			.filter((n) => ancestorNodeIds.has(n.id))
+			.map((n) => {
+				const domain: any = n.data.domain;
+				const key = domain.ref || domain.id;
+				return { key, label: String(n.data.label), output: outputs[key] };
+			})
+			.filter((entry) => entry.output !== undefined);
+	});
+
+	const referenceVariables = $derived.by(() => {
+		if (!referenceRun) return {};
+		return referenceRun.variables ?? {};
+	});
+
 	// ---------- run visualization ----------
 
 	type RunState = 'visited' | 'active' | 'error';
@@ -796,7 +887,15 @@
 		{/if}
 
 		{#if runsOpen}
-			<RunsPanel bind:this={runsPanel} {workflowId} onShowRun={showRun} onReplayRun={replayRun} />
+			<RunsPanel
+				bind:this={runsPanel}
+				{workflowId}
+				onShowRun={showRun}
+				onReplayRun={replayRun}
+				onPinReference={pinReference}
+				onRunsRefreshed={handleRunsRefreshed}
+				referenceRunId={referenceRun?.id ?? null}
+			/>
 		{/if}
 	</div>
 
@@ -811,6 +910,10 @@
 		{creatableModels}
 		{fkOptions}
 		{hookUrl}
+		referenceRunId={referenceRun?.id ?? null}
+		{referenceVariables}
+		{referenceNodes}
+		secretNames={secrets.map((s: any) => s.name)}
 		onChange={handleInspectorChange}
 	/>
 </div>
