@@ -736,7 +736,7 @@ def _framework_validate_definition_keys(wb: Workbook, df: pd.DataFrame, sheet_na
 
 
 # Validate optional framework score bounds and ensure min_score <= max_score.
-def _framework_validate_min_max_score(df: pd.DataFrame, sheet_name: str, context: str):
+def _framework_validate_meta_min_max_score(df: pd.DataFrame, sheet_name: str, context: str):
 
     min_score, min_score_row = get_meta_value(df, "min_score", sheet_name, with_row=True)
     max_score, max_score_row = get_meta_value(df, "max_score", sheet_name, with_row=True)
@@ -845,7 +845,7 @@ def validate_framework_meta(wb: Workbook, df, sheet_name: str, verbose: bool = F
     _framework_validate_definition_keys(wb, df, sheet_name, definition_keys, fct_name)
         
     # Validate min_score and max_score if present
-    _framework_validate_min_max_score(df, sheet_name, fct_name)
+    _framework_validate_meta_min_max_score(df, sheet_name, fct_name)
 
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
@@ -2748,8 +2748,54 @@ def get_yaml_section_from_files(yaml_files: List[str], section_type: YAMLSection
     return extracted_sections
 
 
+# Validate paired minimum and maximum columns and ensure each minimum is less than or equal to its maximum.
+def validate_min_max_columns(df: pd.DataFrame, min_column: str, max_column: str, sheet_name: str, context: str):
 
-# [CONTENT] Framework {OK} [Check new optional columns : "min_score", "max_score" & "scores_definition"]
+    validate_columns_presence_together(df, [min_column, max_column], sheet_name, context)
+
+    # If neither column is present, skip checking
+    if min_column not in df.columns:
+        return
+
+    validate_integer_value(df, sheet_name, min_column, context, value_name=min_column, min=0)
+    validate_integer_value(df, sheet_name, max_column, context, value_name=max_column, min=0)
+
+    incomplete_rows = []
+    invalid_ranges = []
+
+    for index, row in df.iterrows():
+        min_value = row[min_column]
+        max_value = row[max_column]
+        excel_row = index + 2
+
+        min_is_empty = pd.isna(min_value) or str(min_value).strip() == ""
+        max_is_empty = pd.isna(max_value) or str(max_value).strip() == ""
+
+        if min_is_empty and max_is_empty:
+            continue
+
+        if min_is_empty or max_is_empty:
+            incomplete_rows.append(f'Row #{excel_row}: "{min_column if min_is_empty else max_column}" is missing')
+            continue
+
+        if int(min_value) > int(max_value):
+            invalid_ranges.append(f'Row #{excel_row}: "{min_column}" ({min_value}) > "{max_column}" ({max_value})')
+
+    if incomplete_rows:
+        raise ValueError(
+            f'({context}) [{sheet_name}] "{min_column}" and "{max_column}" must be filled together.\n   - '
+            + "\n   - ".join(incomplete_rows)
+        )
+
+    if invalid_ranges:
+        raise ValueError(
+            f'({context}) [{sheet_name}] Invalid minimum/maximum ranges:\n   - '
+            + "\n   - ".join(invalid_ranges)
+        )
+
+
+
+# [CONTENT] Framework {OK} [Check new optional columns : "scores_definition"]
 def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
@@ -2757,7 +2803,8 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
     optional_columns = [
         "implementation_groups", "description", "threats",
         "reference_controls", "typical_evidence", "annotation",
-        "questions", "answer", "urn_id", "importance", "weight"
+        "questions", "answer", "urn_id", "importance", "weight",
+        "min_score", "max_score"
     ]
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
@@ -2818,6 +2865,8 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
     # Check if values in "weight" columns are valid
     validate_integer_value(df, sheet_name, "weight", fct_name, value_name="weight", positive_only=True)
     
+    # Validate "min_score" and "max_score" values if columns are present
+    validate_min_max_columns(df, "min_score", "max_score", sheet_name, fct_name)
 
 
     # Extra locales
