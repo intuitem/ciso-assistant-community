@@ -176,6 +176,25 @@ def process_implementation_groups(wb, ig_defs):
 
 def process_scores(wb, scores_def):
 
+    # scores_definition has two shapes: the classic bare list, or the wrapped
+    # form {"scale": [...], "alternatives": {ref: [...]}} used when requirement
+    # nodes override their scale via scores_definition_ref. The Excel format
+    # only models a single scale: keep the default one and warn about any
+    # alternative that actually differs from it.
+    if isinstance(scores_def, dict):
+        scale = scores_def.get("scale") or []
+        dropped = [
+            ref
+            for ref, entries in (scores_def.get("alternatives") or {}).items()
+            if entries != scale
+        ]
+        if dropped:
+            print(
+                f"⚠️  [WARNING] {len(dropped)} alternative score scale(s) dropped ({', '.join(sorted(dropped))}): "
+                "nodes referencing them through scores_definition_ref fall back to the default scale"
+            )
+        scores_def = scale
+
     scores_meta_ws = wb.create_sheet(title="scores_meta")
     scores_meta_ws.append(["type", "scores"])
     scores_meta_ws.append(["name", "scores"])
@@ -226,7 +245,7 @@ def process_reference_controls(wb, ref_controls):
     ref_cont_meta_ws.append(["base_urn", str(base_urn)])
 
     # Define base columns
-    headers = ["ref_id", "name", "csf_function", "category", "description", "annotation"]
+    headers = ["ref_id", "node_id", "name", "csf_function", "category", "description", "annotation"]
 
     # Extract translation columns
     translation_columns = extract_translation_columns(ref_controls)
@@ -239,6 +258,10 @@ def process_reference_controls(wb, ref_controls):
     # Fill the rows
     for ctrl in ref_controls:
         row = {key: ctrl.get(key, "") for key in headers}
+        # node_id (URN suffix) lets convert_library_v2.py rebuild identical URNs
+        urn = str(ctrl.get("urn", "") or "")
+        if urn.startswith(base_urn + ":"):
+            row["node_id"] = urn.removeprefix(base_urn + ":")
         row.update(extract_translation_values(ctrl, translation_columns))
         rows.append(row)
 
@@ -259,7 +282,7 @@ def process_threats(wb, threats):
     threats_meta_ws.append(["base_urn", str(base_urn)])
 
     # Define base columns
-    headers = ["ref_id", "name", "description", "annotation"]
+    headers = ["ref_id", "node_id", "name", "description", "annotation"]
 
     # Extract translation columns
     translation_columns = extract_translation_columns(threats)
@@ -272,6 +295,10 @@ def process_threats(wb, threats):
     # Fill the rows
     for threat in threats:
         row = {key: threat.get(key, "") for key in headers}
+        # node_id (URN suffix) lets convert_library_v2.py rebuild identical URNs
+        urn = str(threat.get("urn", "") or "")
+        if urn.startswith(base_urn + ":"):
+            row["node_id"] = urn.removeprefix(base_urn + ":")
         row.update(extract_translation_values(threat, translation_columns))
         rows.append(row)
 
@@ -374,7 +401,7 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
             # --- [Sheet] framework_content ---
             content_ws = wb.create_sheet(title="framework_content")
             headers = [
-                "assessable", "depth", "ref_id", "urn_id", "name", "description",
+                "assessable", "depth", "ref_id", "node_id", "name", "description",
                 "annotation", "typical_evidence", "questions", "answer",
                 "implementation_groups", "reference_controls", "threats", "urn", "parent_urn"
             ]
@@ -397,9 +424,13 @@ def recreate_excel_from_yaml(yaml_path, output_excel_path):
                 else:
                     row["assessable"] = ""
 
-                # Compute urn_id from urn and base_urn
-                if base_urn and row.get("urn"):
-                    row["urn_id"] = row["urn"].removeprefix(base_urn + ":")
+                # Compute node_id (the URN suffix) from urn and base_urn, so that
+                # convert_library_v2.py rebuilds identical URNs instead of
+                # regenerating them from ref_id. Only when the urn actually sits
+                # under base_urn: a mismatched value would be used verbatim as a
+                # suffix and corrupt the URN on the way back.
+                if base_urn and row.get("urn") and row["urn"].startswith(base_urn + ":"):
+                    row["node_id"] = row["urn"].removeprefix(base_urn + ":")
 
                 convert_list_fields_to_string(row, node, ["implementation_groups", "threats", "reference_controls"])
 
@@ -501,5 +532,7 @@ if __name__ == "__main__":
     try:
         recreate_excel_from_yaml(args.yaml_path, output_excel)
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         print(f"❌ [ERROR] {e}")
         exit(1)
