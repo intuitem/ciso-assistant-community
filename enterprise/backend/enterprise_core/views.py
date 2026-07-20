@@ -280,6 +280,10 @@ class RoleViewSet(BaseModelViewSet):
         RoleFilter,
     ]
 
+    def get_queryset(self):
+        # Service account roles are internal; managed via /api/iam/service-accounts/.
+        return super().get_queryset().exclude(service_account__isnull=False)
+
     def _get_default_permissions(self):
         return Permission.objects.filter(
             codename__in=["view_folder", "view_globalsettings"],

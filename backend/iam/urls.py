@@ -14,6 +14,7 @@ from .views import (
     RevokeOtherSessionsView,
     SCIMTokenViewSet,
     SCIMTokenDeleteView,
+    ServiceAccountViewSet,
 )
 
 urlpatterns = [
@@ -41,6 +42,28 @@ urlpatterns = [
         "auth-tokens/<str:pk>/",
         AuthTokenDetailView.as_view(),
         name="auth-token-detail",
+    ),
+    path(
+        "service-accounts/",
+        ServiceAccountViewSet.as_view({"get": "list", "post": "create"}),
+        name="service-accounts",
+    ),
+    path(
+        "service-accounts/permissions/",
+        ServiceAccountViewSet.as_view({"get": "permissions_catalog"}),
+        name="service-account-permissions",
+    ),
+    path(
+        "service-accounts/<uuid:pk>/",
+        ServiceAccountViewSet.as_view(
+            {"get": "retrieve", "patch": "partial_update", "delete": "destroy"}
+        ),
+        name="service-account-detail",
+    ),
+    path(
+        "service-accounts/<uuid:pk>/rotate-secret/",
+        ServiceAccountViewSet.as_view({"post": "rotate_secret"}),
+        name="service-account-rotate-secret",
     ),
     path("scim-token/", SCIMTokenViewSet.as_view(), name="scim-token"),
     path(

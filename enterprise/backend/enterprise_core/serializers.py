@@ -316,3 +316,6 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
     idp_groups = serializers.BooleanField(
         source="value.idp_groups", required=False, default=False
     )
+    service_accounts = serializers.BooleanField(
+        source="value.service_accounts", required=False, default=False
+    )

@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from core.serializer_fields import FieldsRelatedField
 
-from .models import PersonalAccessToken, User
+from .models import PersonalAccessToken, ServiceAccount, User
 
 logger = structlog.get_logger(__name__)
 
@@ -97,6 +97,77 @@ class PersonalAccessTokenReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = PersonalAccessToken
         fields = ["name", "user", "created", "expiry", "digest"]
+
+
+class ServiceAccountReadSerializer(serializers.ModelSerializer):
+    """
+    Serializer for ServiceAccount model. Never exposes the client secret.
+    """
+
+    client_id = serializers.CharField(read_only=True)
+    created_by = FieldsRelatedField(["email", "id"])
+    permissions = serializers.SerializerMethodField()
+    perimeter_folders = serializers.SerializerMethodField()
+    is_recursive = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ServiceAccount
+        fields = [
+            "id",
+            "name",
+            "description",
+            "client_id",
+            "is_active",
+            "created_at",
+            "updated_at",
+            "created_by",
+            "permissions",
+            "perimeter_folders",
+            "is_recursive",
+        ]
+
+    def get_permissions(self, obj) -> list[dict]:
+        return [
+            {
+                "id": permission.id,
+                "codename": permission.codename,
+                "app_label": permission.content_type.app_label,
+                "model": permission.content_type.model,
+            }
+            for permission in obj.role.permissions.select_related("content_type").all()
+        ]
+
+    def get_perimeter_folders(self, obj) -> list[dict]:
+        role_assignment = obj.role_assignment
+        if role_assignment is None:
+            return []
+        return [
+            {"id": str(folder.id), "str": folder.name}
+            for folder in role_assignment.perimeter_folders.all()
+        ]
+
+    def get_is_recursive(self, obj) -> bool:
+        role_assignment = obj.role_assignment
+        return role_assignment.is_recursive if role_assignment else False
+
+
+class ServiceAccountWriteSerializer(serializers.Serializer):
+    """
+    Serializer for creating/updating a ServiceAccount. Permission and folder
+    ids are re-validated server-side in iam.service_accounts helpers.
+    """
+
+    name = serializers.CharField(max_length=200)
+    description = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )
+    permissions = serializers.ListField(
+        child=serializers.IntegerField(), allow_empty=False
+    )
+    perimeter_folders = serializers.ListField(
+        child=serializers.UUIDField(), allow_empty=False
+    )
+    is_recursive = serializers.BooleanField(default=False)
 
 
 class DisableMFASerializer(serializers.Serializer):

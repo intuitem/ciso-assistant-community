@@ -47,6 +47,8 @@ logger = structlog.get_logger(__name__)
 from auditlog.registry import auditlog
 from auditlog.signals import pre_log
 from allauth.mfa.models import Authenticator
+from allauth.idp.oidc.adapter import get_adapter as get_oidc_adapter
+from allauth.idp.oidc.models import Client, Token
 from core.context import focus_folder_id_var
 from django.shortcuts import get_object_or_404
 from iam.cache_builders import (
@@ -89,6 +91,7 @@ IGNORED_PERMISSION_MODELS = (
     "historicalmetric",
     "idpgroup",
     "scimtoken",
+    "serviceaccount",
 )
 
 
@@ -1023,7 +1026,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def get_editors(cls) -> List["User"]:
         return [
             user
-            for user in cls.objects.all()
+            for user in cls.objects.exclude(service_account__isnull=False)
             if user.is_editor and not user.is_third_party
         ]
 
@@ -1714,6 +1717,93 @@ class SCIMToken(models.Model):
         return f"{self.name} : {self.auth_token.digest}"
 
 
+class ServiceAccount(AbstractBaseModel):
+    """Machine principal authenticating via the OAuth2 client_credentials grant.
+
+    Composed of an allauth OIDC Client (credentials), a dedicated internal User
+    (RBAC identity, hidden from user-facing surfaces) and a dedicated Role
+    (explicit permissions) bound through a RoleAssignment on explicitly chosen
+    perimeter folders. Admin-managed; excluded from the RBAC permission catalog
+    via IGNORED_PERMISSION_MODELS.
+    """
+
+    name = models.CharField(max_length=200, unique=True, verbose_name=_("Name"))
+    description = models.TextField(blank=True, null=True)
+    client = models.OneToOneField(
+        Client,
+        on_delete=models.PROTECT,
+        related_name="service_account",
+    )
+    user = models.OneToOneField(
+        User,
+        on_delete=models.PROTECT,
+        related_name="service_account",
+    )
+    role = models.OneToOneField(
+        Role,
+        on_delete=models.PROTECT,
+        related_name="service_account",
+    )
+    created_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="created_service_accounts",
+    )
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = _("Service account")
+        verbose_name_plural = _("Service accounts")
+
+    @property
+    def client_id(self) -> str:
+        return self.client.pk
+
+    @property
+    def role_assignment(self) -> RoleAssignment | None:
+        return RoleAssignment.objects.filter(user=self.user, role=self.role).first()
+
+    def deactivate(self):
+        """Block token issuance (no grant types) and revoke outstanding tokens."""
+        self.is_active = False
+        self.save(update_fields=["is_active", "updated_at"])
+        self.client.set_grant_types([])
+        self.client.save(update_fields=["grant_types"])
+        Token.objects.filter(client=self.client).delete()
+        self.user.is_active = False
+        self.user.save(update_fields=["is_active"])
+
+    def activate(self):
+        self.is_active = True
+        self.save(update_fields=["is_active", "updated_at"])
+        self.client.set_grant_types([Client.GrantType.CLIENT_CREDENTIALS])
+        self.client.save(update_fields=["grant_types"])
+        self.user.is_active = True
+        self.user.save(update_fields=["is_active"])
+
+    def rotate_secret(self) -> str:
+        """Set a fresh client secret and revoke outstanding tokens.
+        Returns the plaintext secret — the only time it is available."""
+        plain_secret = get_oidc_adapter().generate_client_secret()
+        self.client.set_secret(plain_secret)
+        self.client.save(update_fields=["secret"])
+        Token.objects.filter(client=self.client).delete()
+        return plain_secret
+
+    def delete(self, *args, **kwargs):
+        client, user, role = self.client, self.user, self.role
+        result = super().delete(*args, **kwargs)
+        client.delete()  # cascades outstanding OIDC tokens
+        user.delete()  # cascades the role assignment
+        role.delete()
+        return result
+
+    def __str__(self):
+        return self.name
+
+
 common_exclude = ["created_at", "updated_at"]
 auditlog.register(
     User,
@@ -1738,6 +1828,7 @@ auditlog.register(Role, exclude_fields=common_exclude)
 auditlog.register(UserGroup, exclude_fields=common_exclude)
 auditlog.register(PersonalAccessToken)
 auditlog.register(SCIMToken)
+auditlog.register(ServiceAccount, exclude_fields=common_exclude)
 
 
 def _skip_builtin_rbac(sender, instance, **kwargs):
