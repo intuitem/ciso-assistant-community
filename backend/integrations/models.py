@@ -35,7 +35,9 @@ class IntegrationConfiguration(AbstractBaseModel, FolderMixin):
 
     # Webhook configuration
     webhook_secret = models.CharField(max_length=255)
-    webhook_url = models.URLField(blank=True)  # For registering with remote system
+    webhook_url = models.URLField(
+        blank=True, max_length=2048
+    )  # For registering with remote system
 
     is_active = models.BooleanField(default=True)
     last_sync_at = models.DateTimeField(null=True, blank=True)

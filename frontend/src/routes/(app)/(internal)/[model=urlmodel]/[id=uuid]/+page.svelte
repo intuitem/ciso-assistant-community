@@ -47,11 +47,6 @@
 			labelField: 'email',
 			secondaryField: 'str',
 			activeField: 'is_active',
-			columns: [
-				{ key: 'email', label: 'email', filter: 'icontains' },
-				{ key: 'first_name', label: 'firstName', filter: 'icontains' },
-				{ key: 'last_name', label: 'lastName', filter: 'icontains' }
-			],
 			// Add-only: exclude users already in the group so the picker only ever
 			// lists candidates to add. Removal is a batch action on the Users tab.
 			scopeFilters: { exclude_user_groups: groupId },

@@ -215,7 +215,7 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin, CustomFieldsMixin
     )
 
     ref_id = models.CharField(max_length=100, blank=True)
-    ref_link = models.URLField(blank=True)
+    ref_link = models.URLField(blank=True, max_length=2048)
 
     owner = models.ForeignKey(
         "core.Actor",
