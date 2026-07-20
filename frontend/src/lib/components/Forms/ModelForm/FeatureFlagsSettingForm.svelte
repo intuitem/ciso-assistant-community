@@ -257,6 +257,11 @@
 					description: m.idpGroupsDescription()
 				},
 				{
+					field: 'service_accounts',
+					label: m.serviceAccounts(),
+					description: m.serviceAccountsDescription()
+				},
+				{
 					field: 'terminologies',
 					label: m.terminologies(),
 					description: m.riskOriginHelpText()

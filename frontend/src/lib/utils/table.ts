@@ -1918,6 +1918,10 @@ export const listViewFields = {
 		head: ['name', 'userGroups'],
 		body: ['name', 'user_groups']
 	},
+	'service-accounts': {
+		head: ['name', 'clientId', 'isActive', 'createdAt'],
+		body: ['name', 'client_id', 'is_active', 'created_at']
+	},
 	roles: {
 		head: ['name', 'description'],
 		body: ['name', 'description']

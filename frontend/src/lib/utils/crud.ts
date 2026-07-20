@@ -918,6 +918,28 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		filters: []
 	},
+	'service-accounts': {
+		endpointUrl: 'iam/service-accounts',
+		name: 'serviceaccount',
+		localName: 'serviceAccount',
+		localNamePlural: 'serviceAccounts',
+		verboseName: 'Service account',
+		verboseNamePlural: 'Service accounts',
+		foreignKeyFields: [{ field: 'perimeter_folders', urlModel: 'folders' }],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'client_id' },
+			{ field: 'is_active' },
+			{ field: 'is_recursive' },
+			{ field: 'perimeter_folders' },
+			{ field: 'created_by' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
+		filters: []
+	},
 	'role-assignments': {
 		name: 'roleassignment',
 		localName: 'roleAssignment',

@@ -35,6 +35,7 @@
 	import SsoSettingsForm from './ModelForm/SsoSettingForm.svelte';
 	import FolderForm from './ModelForm/FolderForm.svelte';
 	import IdpGroupForm from './ModelForm/IdpGroupForm.svelte';
+	import ServiceAccountForm from './ModelForm/ServiceAccountForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
 	import FeatureFlagsSettingForm from './ModelForm/FeatureFlagsSettingForm.svelte';
 	import VulnerabilitySlaSettingForm from './ModelForm/VulnerabilitySlaSettingForm.svelte';
@@ -500,6 +501,8 @@
 			/>
 		{:else if URLModel === 'idp-groups'}
 			<IdpGroupForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} />
+		{:else if URLModel === 'service-accounts'}
+			<ServiceAccountForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} />
 		{:else if URLModel === 'risk-assessments'}
 			<RiskAssessmentForm
 				{form}
