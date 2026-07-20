@@ -386,7 +386,7 @@ class DataContractor(ProcessingChildMixin, NameDescriptionFolderMixin):
         max_length=255, choices=RELATIONSHIP_TYPE_CHOICES
     )
     country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
-    documentation_link = models.URLField(blank=True)
+    documentation_link = models.URLField(blank=True, max_length=2048)
 
     fields_to_check = ["entity", "relationship_type", "processing"]
 
@@ -417,7 +417,7 @@ class DataTransfer(ProcessingChildMixin, NameDescriptionFolderMixin):
         max_length=255, choices=TRANSFER_MECHANISM_CHOICES, blank=True
     )
     guarantees = models.TextField(blank=True)
-    documentation_link = models.URLField(blank=True)
+    documentation_link = models.URLField(blank=True, max_length=2048)
 
     fields_to_check = ["entity", "country", "processing"]
 
