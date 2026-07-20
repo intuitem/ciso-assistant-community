@@ -25,7 +25,8 @@ from django.core.validators import (
 )
 from django.core.files.storage import default_storage
 from django.db import models, transaction
-from django.db.models import F, Q, OuterRef, Subquery, Prefetch, Count
+from django.db.models import F, Q, Exists, OuterRef, Subquery, Prefetch, Count, Value
+from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet
 from django.forms.models import model_to_dict
 from django.urls import reverse
@@ -7174,6 +7175,31 @@ class ComplianceAssessment(Assessment):
         pair = resolve_field_visibility(self, field)
         return pair.get("auditor", "edit") != "hidden"
 
+    @staticmethod
+    def progress_mode_from_visibility(
+        field_visibility, framework_field_visibility=None
+    ) -> tuple[bool, bool]:
+        """Resolve the progress mode from a raw `field_visibility` dict.
+
+        Returns (status_driven, result_visible). Single resolver shared by the
+        model counts, the list-path bucketing and the auditee dashboard, so
+        the mode can never diverge between surfaces. `result_visible` is
+        always False in status mode (irrelevant there).
+
+        Legacy audits can carry an EMPTY stored map; the UI then resolves
+        against the framework template (see the read serializer's
+        `get_field_visibility`), so the mode must use the same fallback or
+        the visible fields and the progress mode would diverge.
+        """
+        from core.utils import resolve_visibility_from_overrides
+
+        overrides = field_visibility or framework_field_visibility
+        status_pair = resolve_visibility_from_overrides(overrides, "status")
+        if status_pair.get("auditor", "edit") != "hidden":
+            return True, False
+        result_pair = resolve_visibility_from_overrides(overrides, "result")
+        return False, result_pair.get("auditor", "edit") != "hidden"
+
     def _set_field_hidden(self, field, hidden):
         # When un-hiding via the legacy boolean setters (scoring_enabled,
         # show_documentation_score, extended_result_enabled, progress_status_enabled),
@@ -8373,21 +8399,48 @@ class ComplianceAssessment(Assessment):
 
     def _get_progress_counts(self) -> tuple[int, int]:
         """
-        Return (total, assessed) counts for assessable requirements
+        Return (total, assessed) counts for assessable requirements.
+
+        "Assessed" follows the progress cascade documented on
+        RequirementAssessment.progress_assessed_q.
         """
 
         requirements = RequirementAssessment.objects.filter(
             compliance_assessment=self, requirement__assessable=True
         )
+        status_driven, result_visible = self.progress_mode_from_visibility(
+            self.field_visibility,
+            getattr(self.framework, "field_visibility", None)
+            if self.framework_id
+            else None,
+        )
+        min_score_fallback = 0
+        if not status_driven and not result_visible:
+            if self.min_score is not None:
+                min_score_fallback = self.min_score
+            elif self.framework_id is not None:
+                min_score_fallback = self.framework.min_score
+        framework_has_questions = not status_driven and self.has_questions
+        if framework_has_questions:
+            requirements = requirements.annotate(
+                _has_questions=RequirementAssessment.has_questions_subquery(),
+                _has_answers=Exists(
+                    Answer.objects.filter(requirement_assessment=OuterRef("pk"))
+                ),
+                _has_unanswered=Exists(
+                    RequirementAssessment._unanswered_answers_subquery()
+                ),
+            )
+        assessed_filter = RequirementAssessment.progress_assessed_q(
+            status_driven=status_driven,
+            result_visible=result_visible,
+            has_questions_annotation=framework_has_questions,
+        )
 
         if not self.selected_implementation_groups:
             counts = requirements.aggregate(
                 total=Count("id"),
-                assessed=Count(
-                    "id",
-                    filter=~Q(result=RequirementAssessment.Result.NOT_ASSESSED)
-                    | Q(score__isnull=False),
-                ),
+                assessed=Count("id", filter=assessed_filter),
             )
             return counts["total"], counts["assessed"]
 
@@ -8397,10 +8450,12 @@ class ComplianceAssessment(Assessment):
         lightweight_requirements = (
             requirements.select_related("requirement")
             .only(
+                "status",
                 "result",
                 "score",
                 "requirement_id",
                 "requirement__implementation_groups",
+                "requirement__min_score",
             )
             .iterator()
         )
@@ -8413,10 +8468,22 @@ class ComplianceAssessment(Assessment):
                 continue
 
             total += 1
-            if (
-                requirement_assessment.result
-                != RequirementAssessment.Result.NOT_ASSESSED
-            ) or requirement_assessment.score is not None:
+            if requirement_assessment.is_assessed_for_progress(
+                status_driven=status_driven,
+                has_questions=(
+                    requirement_assessment._has_questions
+                    if framework_has_questions
+                    else False
+                ),
+                result_visible=result_visible,
+                min_score_fallback=min_score_fallback,
+                questionnaire_fully_answered=(
+                    requirement_assessment._has_answers
+                    and not requirement_assessment._has_unanswered
+                    if framework_has_questions
+                    else False
+                ),
+            ):
                 assessed += 1
 
         return total, assessed
@@ -8829,6 +8896,160 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         ca = self.compliance_assessment
         _defer_once("_pending_metrics_updates", ca.pk, ca.upsert_daily_metrics)
 
+    # Audit progress — whether an assessable RA counts as assessed:
+    #
+    # STATUS MODE — the status field is visible on the audit (its visibility
+    # IS the mode switch): only `status == done` counts, content is ignored.
+    # Every assessable RA stays in the denominator.
+    #
+    # CONTENT MODE — status hidden; first matching branch decides:
+    #   1. requirement has questions: every question answered, whether or not
+    #      it computes anything. Two complementary signals: the carriers
+    #      (result set by the result-driven path, or score committed by the
+    #      complete-questionnaire discipline in recompute_assessment — both
+    #      resolve conditional visibility at write time) OR every seeded
+    #      Answer row non-empty (covers informational questionnaires that
+    #      compute neither result nor score, e.g. a profiling section).
+    #      KNOWN GAP: the "all rows non-empty" signal is visibility-blind
+    #      (SQL cannot evaluate depends_on), so a questionnaire that is BOTH
+    #      informational AND conditional keeps empty hidden rows and never
+    #      fires this signal; with no carrier either, such an RA stays
+    #      uncounted until a result/status is set. Shipped libraries don't
+    #      hit this (their conditional questions compute). Closing it fully
+    #      needs a persisted completion flag (rejected) or write-time answer
+    #      cleanup (out of scope).
+    #   2. result visible on the audit: result set
+    #   3. score-only audit: score strictly above the resolved minimum
+    #      (requirement override, then audit, then framework). The scoring
+    #      toggle pre-fills scores at that minimum, so a score left at min is
+    #      indistinguishable from an untouched one and must not count.
+    # `progress_assessed_q` and `is_assessed_for_progress` are the SQL and
+    # Python forms of the same rules and MUST stay in sync. Both operate on
+    # scalar fields only: answer/visibility resolution happens at write time.
+
+    @classmethod
+    def has_questions_subquery(cls) -> Exists:
+        """Per-RA `Exists` for annotating `_has_questions` on RA querysets."""
+        return Exists(
+            Question.objects.filter(requirement_node_id=OuterRef("requirement_id"))
+        )
+
+    @classmethod
+    def progress_assessed_q(
+        cls,
+        *,
+        status_driven: bool,
+        result_visible: bool,
+        has_questions_annotation: bool,
+    ) -> Q:
+        """Filter for RAs counting as assessed in audit progress.
+
+        `status_driven` is the audit-level mode switch (status field visible
+        to the auditor); when True the other parameters are irrelevant.
+        In content mode, when `has_questions_annotation` is True the queryset
+        must be annotated with `_has_questions` (see `has_questions_subquery`)
+        plus `_has_answers` and `_has_unanswered` (see
+        `_unanswered_answers_subquery`); pass False when the audit's framework
+        has no questions to skip that branch entirely. The score branch
+        resolves the minimum per row, so the filter works across audits in a
+        single GROUP BY.
+        """
+        if status_driven:
+            return Q(status=cls.Status.DONE)
+        result_assessed = ~Q(result=cls.Result.NOT_ASSESSED)
+        score_assessed = Q(score__isnull=False)
+        score_progressed = Q(
+            score__gt=Coalesce(
+                F("requirement__min_score"),
+                F("compliance_assessment__min_score"),
+                F("compliance_assessment__framework__min_score"),
+                Value(0),
+            )
+        )
+        content = result_assessed if result_visible else score_progressed
+        if has_questions_annotation:
+            # A question counts whether or not it computes anything: fully
+            # answered seeded rows complete the carriers for informational
+            # questionnaires. The _has_answers guard keeps unseeded legacy
+            # RAs out. Annotations (not inline Exists) because correlated
+            # OuterRefs cannot resolve inside grouped aggregates.
+            fully_answered = Q(_has_answers=True) & Q(_has_unanswered=False)
+            content = (
+                Q(_has_questions=True)
+                & (result_assessed | score_assessed | fully_answered)
+            ) | (Q(_has_questions=False) & content)
+        return content
+
+    @staticmethod
+    def _unanswered_answers_subquery():
+        """Empty seeded Answer rows of an RA (no choice, no non-empty value) —
+        same emptiness semantics as `_build_answer_context`."""
+        return Answer.objects.filter(
+            requirement_assessment=OuterRef("pk"),
+            selected_choices__isnull=True,
+        ).filter(Answer.empty_value_q())
+
+    @staticmethod
+    def progress_assessed_scalar(
+        status,
+        result,
+        score,
+        requirement_min_score,
+        *,
+        status_driven: bool,
+        has_questions: bool,
+        result_visible: bool,
+        min_score_fallback: int = 0,
+        questionnaire_fully_answered: bool = False,
+    ) -> bool:
+        """In-memory form of `progress_assessed_q`, on raw scalar values so
+        `.values()` rows work too.
+
+        `min_score_fallback` is the audit-level resolved minimum (audit
+        min_score, else framework's); `requirement_min_score` takes
+        precedence when set. `questionnaire_fully_answered` is the
+        answers-based signal of the questions branch (every seeded Answer row
+        non-empty), which callers on question frameworks must compute (see
+        `_unanswered_answers_subquery`).
+        """
+        if status_driven:
+            return status == RequirementAssessment.Status.DONE
+        result_assessed = result != RequirementAssessment.Result.NOT_ASSESSED
+        score_assessed = score is not None
+        if has_questions:
+            return result_assessed or score_assessed or questionnaire_fully_answered
+        if result_visible:
+            return result_assessed
+        resolved_min = (
+            requirement_min_score
+            if requirement_min_score is not None
+            else min_score_fallback
+        )
+        return score is not None and score > resolved_min
+
+    def is_assessed_for_progress(
+        self,
+        *,
+        status_driven: bool,
+        has_questions: bool,
+        result_visible: bool,
+        min_score_fallback: int = 0,
+        questionnaire_fully_answered: bool = False,
+    ) -> bool:
+        """Instance form of `progress_assessed_scalar` (requirement must be
+        loaded)."""
+        return self.progress_assessed_scalar(
+            self.status,
+            self.result,
+            self.score,
+            self.requirement.min_score,
+            status_driven=status_driven,
+            has_questions=has_questions,
+            result_visible=result_visible,
+            min_score_fallback=min_score_fallback,
+            questionnaire_fully_answered=questionnaire_fully_answered,
+        )
+
     def get_visible_questions_counts(self) -> tuple[int, int]:
         """Return (visible_questions_count, answered_visible_questions_count) for this assessment."""
         # Use prefetched objects if available
@@ -8939,7 +9160,13 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         if resolved_cr is not None:
                             results.append(resolved_cr)
 
-        if is_score_computed:
+        # A score is only committed once every visible question has an answer:
+        # a committed score marks the RA as assessed in the progress cascade,
+        # so a partially answered questionnaire must not produce one.
+        questionnaire_complete = (
+            visible_questions > 0 and answered_visible_questions == visible_questions
+        )
+        if is_score_computed and questionnaire_complete:
             if aggregation == "mean" and total_weight > 0:
                 computed_score = total_score / total_weight
             else:
@@ -8947,7 +9174,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             new_score = max(min(int(computed_score), max_score), min_score)
         else:
             new_score = None
-        new_is_scored = is_score_computed
+        new_is_scored = is_score_computed and questionnaire_complete
 
         # `is_result_driven` was set inline during the question pass: True iff
         # at least one choice carries a resolvable `compute_result`. For
@@ -9138,6 +9365,22 @@ class Answer(AbstractBaseModel, FolderMixin):
         unique_together = [("requirement_assessment", "question")]
         verbose_name = _("Answer")
         verbose_name_plural = _("Answers")
+
+    @staticmethod
+    def empty_value_q() -> Q:
+        """Empty `value` in every storage form: SQL NULL (seeded rows), JSON
+        null (client writes), empty string and empty container ([]/{}, e.g. a
+        choice answer cleared without a `selected_choices` row) — the SQL
+        counterpart of the Python-side emptiness in `_build_answer_context`.
+        Single definition for every consumer (progress, dashboards).
+        """
+        return (
+            Q(value__isnull=True)
+            | Q(value=None)
+            | Q(value="")
+            | Q(value=[])
+            | Q(value={})
+        )
 
     def __str__(self) -> str:
         return f"Answer to {self.question} for {self.requirement_assessment}"
