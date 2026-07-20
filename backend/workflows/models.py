@@ -207,6 +207,9 @@ class WorkflowNode(AbstractBaseModel, FolderMixin):
         default=JoinType.NONE,
     )
     label = models.CharField(max_length=200, blank=True)
+    # Stable slug for {{node.<ref>.<path>}} references (spec D20).
+    # Auto-generated from the label on first save, then never regenerated.
+    ref = models.CharField(max_length=100, blank=True)
     task_template = models.ForeignKey(
         "core.TaskTemplate",
         on_delete=models.SET_NULL,
@@ -237,7 +240,24 @@ class WorkflowNode(AbstractBaseModel, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.version.folder
+        if not self.ref:
+            self.ref = self._generate_ref()
         super().save(*args, **kwargs)
+
+    def _generate_ref(self):
+        from django.utils.text import slugify
+
+        base = slugify(self.label or self.type).replace("-", "_")[:80] or self.type
+        candidate = base
+        suffix = 2
+        while (
+            WorkflowNode.objects.filter(version=self.version, ref=candidate)
+            .exclude(pk=self.pk)
+            .exists()
+        ):
+            candidate = f"{base}_{suffix}"
+            suffix += 1
+        return candidate
 
     def __str__(self):
         return self.label or self.type
@@ -483,6 +503,10 @@ class WorkflowInstance(AbstractBaseModel, FolderMixin):
     )
     variables = models.JSONField(default=dict, blank=True)
     payload = models.JSONField(default=dict, blank=True)
+    # Per-node action outputs keyed by node ref (or node id for pre-ref
+    # graphs), addressable in templates as {{node.<ref>.<path>}} and browsed
+    # by the builder's reference-run data panel (spec D20).
+    node_outputs = models.JSONField(default=dict, blank=True)
     initiated_by = models.ForeignKey(
         "iam.User",
         on_delete=models.SET_NULL,

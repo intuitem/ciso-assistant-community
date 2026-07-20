@@ -7,6 +7,8 @@ trees, assignments and presentations are recreated on every save (they are
 small and have no identity worth preserving).
 """
 
+import re
+
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import ProtectedError
@@ -26,6 +28,7 @@ NODE_FIELDS = [
     "fork_type",
     "join_type",
     "label",
+    "ref",
     "action_config",
     "input_mapping",
     "output_mapping",
@@ -36,6 +39,8 @@ NODE_FIELDS = [
     "retry_delay_seconds",
     "retry_backoff",
 ]
+
+REF_RE = re.compile(r"^[a-z][a-z0-9_]{0,99}$")
 
 VARIABLE_FIELDS = ["key", "type", "default_value"]
 EDGE_FIELDS = ["label", "priority"]
@@ -198,6 +203,7 @@ def save_graph(version, payload):
         variables[data["id"]] = variable
 
     nodes = {}
+    seen_refs = set()
     existing_nodes = {str(n.id): n for n in version.nodes.all()}
     for data in nodes_data:
         node = existing_nodes.get(data["id"]) or WorkflowNode(
@@ -206,9 +212,17 @@ def save_graph(version, payload):
         for field in NODE_FIELDS:
             if field in data:
                 setattr(node, field, data[field])
+        if node.ref and not REF_RE.match(node.ref):
+            raise GraphValidationError(
+                f"Invalid node ref '{node.ref}': lowercase letters, digits and "
+                "underscores only, starting with a letter"
+            )
         node.task_template_id = data.get("task_template") or None
         node.subprocess_workflow_id = data.get("subprocess_workflow") or None
         _save_row(node)
+        if node.ref in seen_refs:
+            raise GraphValidationError(f"Duplicate node ref '{node.ref}'")
+        seen_refs.add(node.ref)
         nodes[data["id"]] = node
 
         # Assignments and presentation are recreated wholesale.

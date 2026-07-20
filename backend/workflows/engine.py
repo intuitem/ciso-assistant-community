@@ -207,6 +207,7 @@ def _process(token):
 
         if node.type == WorkflowNode.Type.ACTION:
             output = execute_action(node, instance) or {}
+            _store_node_output(node, output, instance)
             _apply_output_mapping(node, output, instance)
             _log(
                 instance,
@@ -286,12 +287,69 @@ def _start_subprocess(token):
         parent_token=token,
     )
     if child.status == WorkflowInstance.Status.COMPLETED:
+        _store_node_output(node, child.variables, instance)
         _apply_output_mapping(node, child.variables, instance)
     elif child.status == WorkflowInstance.Status.ACTIVE:
         token.status = WorkflowToken.Status.WAITING
         token.save(update_fields=["status", "updated_at"])
     else:
         raise EngineError(f"Subprocess failed ({child})")
+
+
+def _store_node_output(node, output, instance):
+    """Persist the node's output for {{node.<ref>.<path>}} references and the
+    builder's reference-run data browser (spec D20). Structure-preserving:
+    nested JSON stays navigable and referenceable; only oversized leaves and
+    collections shrink. The display log truncates flat and harder."""
+    key = node.ref or str(node.id)
+    instance.node_outputs[key] = _cap_structure(output)
+    instance.save(update_fields=["node_outputs", "updated_at"])
+
+
+MAX_LEAF_CHARS = 1000
+MAX_COLLECTION_ITEMS = 100
+MAX_STRUCTURE_DEPTH = 10
+
+
+def _cap_structure(value, budget=None, depth=0):
+    """Bound node_outputs without flattening: dicts and lists keep their shape
+    (so paths into them keep working), long strings truncate, huge collections
+    tail-omit, and a global character budget backstops pathological payloads."""
+    if budget is None:
+        budget = [32000]
+    if budget[0] <= 0:
+        return "<truncated: output budget exceeded>"
+    if depth > MAX_STRUCTURE_DEPTH:
+        return "<truncated: max depth>"
+
+    if isinstance(value, str):
+        if len(value) > MAX_LEAF_CHARS:
+            budget[0] -= MAX_LEAF_CHARS
+            return f"{value[:MAX_LEAF_CHARS]}… <{len(value)} chars truncated>"
+        budget[0] -= len(value)
+        return value
+
+    if isinstance(value, dict):
+        capped = {}
+        for index, (key, item) in enumerate(value.items()):
+            if index >= MAX_COLLECTION_ITEMS or budget[0] <= 0:
+                capped["<omitted>"] = f"{len(value) - index} more keys"
+                break
+            budget[0] -= len(str(key))
+            capped[key] = _cap_structure(item, budget, depth + 1)
+        return capped
+
+    if isinstance(value, list):
+        capped_items = []
+        for index, item in enumerate(value):
+            if index >= MAX_COLLECTION_ITEMS or budget[0] <= 0:
+                capped_items.append(f"<{len(value) - index} more items>")
+                break
+            capped_items.append(_cap_structure(item, budget, depth + 1))
+        return capped_items
+
+    budget[0] -= 8
+    return value
 
 
 def _apply_output_mapping(node, output, instance):

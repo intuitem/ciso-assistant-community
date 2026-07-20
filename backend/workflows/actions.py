@@ -49,12 +49,20 @@ def dig(data, path):
 
 
 def render(value, variables):
-    """Replace {{path}} placeholders in strings; leave other types alone."""
+    """Replace {{path}} placeholders in strings; leave other types alone.
+    Objects and lists serialize as JSON so whole-object references
+    ({{node.fetch.body}}) compose into request bodies and fields."""
     if isinstance(value, str):
 
         def substitute(match):
             resolved = dig(variables, match.group(1))
-            return "" if resolved is None else str(resolved)
+            if resolved is None:
+                return ""
+            if isinstance(resolved, (dict, list)):
+                import json
+
+                return json.dumps(resolved, default=str)
+            return str(resolved)
 
         return TEMPLATE_RE.sub(substitute, value)
     if isinstance(value, dict):
@@ -62,6 +70,12 @@ def render(value, variables):
     if isinstance(value, list):
         return [render(v, variables) for v in value]
     return value
+
+
+def _render_context(instance):
+    """Template context: instance variables plus the node-output namespace
+    ({{node.<ref>.<path>}}, spec D20)."""
+    return {**instance.variables, "node": instance.node_outputs}
 
 
 ACTION_REGISTRY = {}
@@ -84,7 +98,7 @@ class LogAction(BaseAction):
     action_type = "log"
 
     def execute(self, config, instance):
-        return {"message": render(config.get("message", ""), instance.variables)}
+        return {"message": render(config.get("message", ""), _render_context(instance))}
 
 
 @register
@@ -92,7 +106,7 @@ class SetVariablesAction(BaseAction):
     action_type = "set_variables"
 
     def execute(self, config, instance):
-        values = render(config.get("variables", {}), instance.variables)
+        values = render(config.get("variables", {}), _render_context(instance))
         instance.variables.update(values)
         instance.save(update_fields=["variables", "updated_at"])
         return values
@@ -200,7 +214,7 @@ class CreateObjectAction(BaseAction):
         entry = CREATABLE_MODELS.get(config.get("model"))
         if entry is None:
             raise ActionError(f"create_object: unknown model '{config.get('model')}'")
-        fields = render(config.get("fields", {}), instance.variables)
+        fields = render(config.get("fields", {}), _render_context(instance))
         kwargs = {
             key: value
             for key, value in fields.items()
@@ -272,15 +286,15 @@ class SendEmailAction(BaseAction):
 
         recipients = [
             email.strip()
-            for email in render(config.get("recipients", ""), instance.variables).split(
-                ","
-            )
+            for email in render(
+                config.get("recipients", ""), _render_context(instance)
+            ).split(",")
             if email.strip()
         ]
         if not recipients:
             raise ActionError("send_email: no recipients configured")
-        subject = render(config.get("subject", ""), instance.variables)
-        body = render(config.get("body", ""), instance.variables)
+        subject = render(config.get("subject", ""), _render_context(instance))
+        body = render(config.get("body", ""), _render_context(instance))
         for email in recipients:
             send_notification_email(subject, body, email)
         return {"recipients": recipients, "subject": subject}
@@ -291,7 +305,7 @@ class EmitEventAction(BaseAction):
     action_type = "emit_event"
 
     def execute(self, config, instance):
-        event_key = render(config.get("event_key", ""), instance.variables)
+        event_key = render(config.get("event_key", ""), _render_context(instance))
         if not event_key:
             raise ActionError("emit_event: no event_key configured")
         # Broadcast semantics (spec §7): wake every waiting event token whose
@@ -313,7 +327,7 @@ def _secrets_context(instance, raw_config):
 
     # Must tolerate the same whitespace TEMPLATE_RE accepts ({{ secrets.x }}).
     if not SECRETS_REFERENCE_RE.search(json.dumps(raw_config)):
-        return instance.variables
+        return _render_context(instance)
     from .models import WorkflowSecret
 
     folder_ids = _accessible_folder_ids(instance.folder)
@@ -321,7 +335,7 @@ def _secrets_context(instance, raw_config):
         secret.name: secret.value
         for secret in WorkflowSecret.objects.filter(folder_id__in=folder_ids)
     }
-    return {**instance.variables, "secrets": secrets}
+    return {**_render_context(instance), "secrets": secrets}
 
 
 @register
@@ -406,10 +420,10 @@ class ProvisionFolderAction(BaseAction):
     def execute(self, config, instance):
         from iam.models import Folder
 
-        name = render(config.get("name", ""), instance.variables)
+        name = render(config.get("name", ""), _render_context(instance))
         if not name:
             raise ActionError("provision_folder: 'name' is required")
-        parent_id = render(config.get("parent"), instance.variables)
+        parent_id = render(config.get("parent"), _render_context(instance))
         if parent_id:
             parent = Folder.objects.filter(id=parent_id).first()
             if parent is None or parent.id not in _accessible_folder_ids(
@@ -455,14 +469,20 @@ class ProvisionUserAction(BaseAction):
     def execute(self, config, instance):
         from iam.models import User
 
-        email = render(config.get("email", ""), instance.variables).strip().lower()
+        email = (
+            render(config.get("email", ""), _render_context(instance)).strip().lower()
+        )
         if not email:
             raise ActionError("provision_user: 'email' is required")
         fields = {
-            "first_name": render(config.get("first_name", ""), instance.variables),
-            "last_name": render(config.get("last_name", ""), instance.variables),
+            "first_name": render(
+                config.get("first_name", ""), _render_context(instance)
+            ),
+            "last_name": render(config.get("last_name", ""), _render_context(instance)),
         }
-        is_active = _as_bool(render(config.get("is_active", True), instance.variables))
+        is_active = _as_bool(
+            render(config.get("is_active", True), _render_context(instance))
+        )
 
         user = User.objects.filter(email__iexact=email).first()
         created = user is None
@@ -491,7 +511,7 @@ class ManageGroupMembershipAction(BaseAction):
     def execute(self, config, instance):
         from iam.models import Folder, User, UserGroup
 
-        context = instance.variables
+        context = _render_context(instance)
         user_ref = render(config.get("user", ""), context).strip()
         if not user_ref:
             raise ActionError("manage_group_membership: 'user' is required")
