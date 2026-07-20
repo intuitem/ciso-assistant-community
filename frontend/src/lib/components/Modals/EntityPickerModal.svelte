@@ -16,7 +16,6 @@
 		subtitle,
 		labelField = 'str',
 		secondaryField,
-		columns = [],
 		scopeFilters = {},
 		activeField,
 		initialSelectedIds = [],
@@ -34,15 +33,11 @@
 	let offset = $state(0);
 	let pageSize = $state(10);
 	let query = $state('');
-	let columnFilters = $state<Record<string, string>>({});
 	let includeInactive = $state(false);
-	let mode = $state<'list' | 'table'>('list');
 	let loading = $state(false);
 	let loadError = $state(false);
 	let saving = $state(false);
 	let saveError = $state(false);
-	// Server-side sort: the column key, prefixed with '-' for descending. Empty = default.
-	let ordering = $state('');
 	let debounce: ReturnType<typeof setTimeout> | null = null;
 	// Monotonic request id: a slow earlier response must not overwrite a newer one.
 	let loadSeq = 0;
@@ -52,26 +47,8 @@
 		for (const [k, v] of Object.entries(scopeFilters)) if (v != null && v !== '') p.set(k, v);
 		if (activeField && !includeInactive) p.set(activeField, 'true');
 		if (query.trim()) p.set('search', query.trim());
-		for (const [k, v] of Object.entries(columnFilters)) {
-			if (!v) continue;
-			const col = columns.find((c) => c.key === k);
-			p.set(col?.filter === 'exact' ? k : `${k}__icontains`, v);
-		}
-		if (ordering) p.set('ordering', ordering);
 		for (const [k, v] of Object.entries(extra)) p.set(k, v);
 		return p;
-	}
-
-	function toggleSort(key: string) {
-		// asc -> desc -> off
-		ordering = ordering === key ? `-${key}` : ordering === `-${key}` ? '' : key;
-		reloadFromStart();
-	}
-
-	function sortIcon(key: string): string {
-		if (ordering === key) return 'fa-sort-up';
-		if (ordering === `-${key}`) return 'fa-sort-down';
-		return 'fa-sort';
 	}
 
 	async function load() {
@@ -128,12 +105,6 @@
 
 	function onSearch(value: string) {
 		query = value;
-		if (debounce) clearTimeout(debounce);
-		debounce = setTimeout(reloadFromStart, 200);
-	}
-
-	function onColumnFilter(key: string, value: string) {
-		columnFilters = { ...columnFilters, [key]: value };
 		if (debounce) clearTimeout(debounce);
 		debounce = setTimeout(reloadFromStart, 200);
 	}
@@ -240,14 +211,6 @@
 					oninput={(e) => onSearch(e.currentTarget.value)}
 				/>
 			</div>
-			<button
-				type="button"
-				class="btn preset-tonal flex items-center gap-2"
-				onclick={() => (mode = mode === 'list' ? 'table' : 'list')}
-			>
-				<i class="fa-solid {mode === 'list' ? 'fa-table' : 'fa-list'}"></i>
-				{mode === 'list' ? safeTranslate('browse') : safeTranslate('list')}
-			</button>
 			{#if activeField}
 				<label class="flex items-center gap-2 text-sm text-surface-600-400 whitespace-nowrap">
 					<input
@@ -276,153 +239,52 @@
 		</div>
 
 		<div class="h-[520px] max-h-[62vh] overflow-y-auto px-3">
-			{#if mode === 'list'}
-				{#if loading}
-					<div class="flex items-center justify-center h-full text-surface-500">
-						<i class="fa-solid fa-circle-notch fa-spin"></i>
-					</div>
-				{:else if loadError}
-					<div class="flex items-center justify-center h-full text-error-500 text-sm">
-						<i class="fa-solid fa-triangle-exclamation mr-2"></i>{safeTranslate('error')}
-					</div>
-				{:else if rows.length === 0}
-					<div class="flex items-center justify-center h-full text-surface-500 text-sm">
-						{safeTranslate('noResults')}
-					</div>
-				{:else}
-					{#each rows as row}
-						<button
-							type="button"
-							class="w-full flex items-center gap-3 px-2 py-2 rounded text-left hover:bg-surface-100-900 {selected.has(
-								row.id
-							)
-								? 'bg-primary-50-950'
-								: ''}"
-							onclick={() => toggle(row)}
-						>
-							<i
-								class="fa-{selected.has(row.id) ? 'solid' : 'regular'} fa-square{selected.has(
-									row.id
-								)
-									? '-check'
-									: ''} text-lg {selected.has(row.id) ? 'text-primary-500' : 'text-surface-400'}"
-							></i>
-							<span
-								class="w-8 h-8 rounded-full bg-primary-100-900 text-primary-700-300 flex items-center justify-center text-xs font-medium shrink-0"
-								>{initials(row)}</span
-							>
-							<span class="flex-1 min-w-0 flex items-baseline gap-2">
-								<span class="truncate max-w-[45%]">{label(row)}</span>
-								{#if secondaryField && row[secondaryField] && row[secondaryField] !== label(row)}
-									<span class="truncate text-surface-600-400">({row[secondaryField]})</span>
-								{/if}
-								{#if activeField && row[activeField] === false}
-									<span
-										class="shrink-0 text-xs px-2 rounded-full bg-surface-200-800 text-surface-600-400"
-										>{safeTranslate('inactive')}</span
-									>
-								{/if}
-							</span>
-						</button>
-					{/each}
-				{/if}
+			{#if loading}
+				<div class="flex items-center justify-center h-full text-surface-500">
+					<i class="fa-solid fa-circle-notch fa-spin"></i>
+				</div>
+			{:else if loadError}
+				<div class="flex items-center justify-center h-full text-error-500 text-sm">
+					<i class="fa-solid fa-triangle-exclamation mr-2"></i>{safeTranslate('error')}
+				</div>
+			{:else if rows.length === 0}
+				<div class="flex items-center justify-center h-full text-surface-500 text-sm">
+					{safeTranslate('noResults')}
+				</div>
 			{:else}
-				<table class="w-full text-sm">
-					<thead class="sticky top-0 bg-surface-50-950">
-						<tr class="text-left text-surface-600-400">
-							<th class="w-6 py-1 pl-2"></th>
-							{#each columns as col}
-								<th class="py-1 pl-3 pr-3 font-medium">
-									{#if col.sortable !== false}
-										<button
-											type="button"
-											class="flex items-center gap-1 p-0 hover:text-primary-500"
-											onclick={() => toggleSort(col.key)}
-										>
-											{safeTranslate(col.label)}
-											<i
-												class="fa-solid {sortIcon(col.key)} text-xs {ordering.replace('-', '') ===
-												col.key
-													? 'text-primary-500'
-													: 'text-surface-400'}"
-											></i>
-										</button>
-									{:else}
-										{safeTranslate(col.label)}
-									{/if}
-								</th>
-							{/each}
-						</tr>
-						<tr class="border-b border-surface-200-800">
-							<th class="w-6 pb-2 pl-2"></th>
-							{#each columns as col}
-								<th class="pb-2 pr-3 font-normal">
-									{#if col.filter}
-										<input
-											type="text"
-											class="input text-sm h-8 w-full font-normal"
-											placeholder={safeTranslate(col.label)}
-											value={columnFilters[col.key] ?? ''}
-											oninput={(e) => onColumnFilter(col.key, e.currentTarget.value)}
-										/>
-									{/if}
-								</th>
-							{/each}
-						</tr>
-					</thead>
-					<tbody>
-						{#if loading}
-							<tr>
-								<td colspan={columns.length + 1} class="text-center py-16 text-surface-500">
-									<i class="fa-solid fa-circle-notch fa-spin"></i>
-								</td>
-							</tr>
-						{:else if loadError}
-							<tr>
-								<td colspan={columns.length + 1} class="text-center py-16 text-error-500 text-sm">
-									<i class="fa-solid fa-triangle-exclamation mr-2"></i>{safeTranslate('error')}
-								</td>
-							</tr>
-						{:else if rows.length === 0}
-							<tr>
-								<td colspan={columns.length + 1} class="text-center py-16 text-surface-500 text-sm">
-									{safeTranslate('noResults')}
-								</td>
-							</tr>
-						{:else}
-							{#each rows as row}
-								<tr
-									tabindex="0"
-									role="button"
-									aria-pressed={selected.has(row.id)}
-									class="cursor-pointer hover:bg-surface-100-900 {selected.has(row.id)
-										? 'bg-primary-50-950'
-										: ''}"
-									onclick={() => toggle(row)}
-									onkeydown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											e.preventDefault();
-											toggle(row);
-										}
-									}}
+				{#each rows as row}
+					<button
+						type="button"
+						class="w-full flex items-center gap-3 px-2 py-2 rounded text-left hover:bg-surface-100-900 {selected.has(
+							row.id
+						)
+							? 'bg-primary-50-950'
+							: ''}"
+						onclick={() => toggle(row)}
+					>
+						<i
+							class="fa-{selected.has(row.id) ? 'solid' : 'regular'} fa-square{selected.has(row.id)
+								? '-check'
+								: ''} text-lg {selected.has(row.id) ? 'text-primary-500' : 'text-surface-400'}"
+						></i>
+						<span
+							class="w-8 h-8 rounded-full bg-primary-100-900 text-primary-700-300 flex items-center justify-center text-xs font-medium shrink-0"
+							>{initials(row)}</span
+						>
+						<span class="flex-1 min-w-0 flex items-baseline gap-2">
+							<span class="truncate max-w-[45%]">{label(row)}</span>
+							{#if secondaryField && row[secondaryField] && row[secondaryField] !== label(row)}
+								<span class="truncate text-surface-600-400">({row[secondaryField]})</span>
+							{/if}
+							{#if activeField && row[activeField] === false}
+								<span
+									class="shrink-0 text-xs px-2 rounded-full bg-surface-200-800 text-surface-600-400"
+									>{safeTranslate('inactive')}</span
 								>
-									<td class="w-6 py-2 pl-2">
-										<i
-											class="fa-{selected.has(row.id) ? 'solid' : 'regular'} fa-square{selected.has(
-												row.id
-											)
-												? '-check'
-												: ''} {selected.has(row.id) ? 'text-primary-500' : 'text-surface-400'}"
-										></i>
-									</td>
-									{#each columns as col}
-										<td class="py-2 pl-3 pr-3 truncate">{row[col.key] ?? ''}</td>
-									{/each}
-								</tr>
-							{/each}
-						{/if}
-					</tbody>
-				</table>
+							{/if}
+						</span>
+					</button>
+				{/each}
 			{/if}
 		</div>
 
