@@ -3,7 +3,7 @@
 import json
 import sys
 from rich import print as rprint
-from ..client import make_get_request, get_paginated_results
+from ..client import make_get_request, get_paginated_results, fetch_all_results
 from ..utils.response_formatter import (
     success_response,
     error_response,
@@ -35,13 +35,9 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
             params["risk_assessment"] = resolve_risk_assessment_id(risk_assessment)
             filters["risk_assessment"] = risk_assessment
 
-        res = make_get_request("/risk-scenarios/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        scenarios = get_paginated_results(data)
+        scenarios, error = fetch_all_results("/risk-scenarios/", params=params)
+        if error:
+            return error
 
         if not scenarios:
             return empty_response("risk scenarios", filters)
@@ -163,13 +159,9 @@ async def get_applied_controls(folder: str = None):
             params["folder"] = resolve_folder_id(folder)
             filters["folder"] = folder
 
-        res = make_get_request("/applied-controls/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        controls = get_paginated_results(data)
+        controls, error = fetch_all_results("/applied-controls/", params=params)
+        if error:
+            return error
 
         if not controls:
             return empty_response("applied controls", filters)
@@ -269,23 +261,14 @@ async def get_audits_progress(
             params["framework"] = resolve_framework_id(framework)
             filters["framework"] = framework
 
-        res = make_get_request("/compliance-assessments/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        audits = get_paginated_results(data)
+        audits, error = fetch_all_results("/compliance-assessments/", params=params)
+        if error:
+            return error
 
         if not audits:
             return empty_response("audits", filters)
 
-        total_count = (
-            data.get("count", len(audits)) if isinstance(data, dict) else len(audits)
-        )
-        result = f"Found {total_count} audits"
-        if total_count > len(audits):
-            result += f" (showing first {len(audits)}, use filters to narrow down)"
+        result = f"Found {len(audits)} audits"
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -330,13 +313,9 @@ async def get_folders(name: str = None):
             params["name"] = name
             filters["name"] = name
 
-        res = make_get_request("/folders/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        folders = get_paginated_results(data)
+        folders, error = fetch_all_results("/folders/", params=params)
+        if error:
+            return error
 
         if not folders:
             return empty_response("folders", filters)
@@ -393,13 +372,9 @@ async def get_perimeters(folder: str = None, name: str = None):
             params["name"] = name
             filters["name"] = name
 
-        res = make_get_request("/perimeters/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        perimeters = get_paginated_results(data)
+        perimeters, error = fetch_all_results("/perimeters/", params=params)
+        if error:
+            return error
 
         if not perimeters:
             return empty_response("perimeters", filters)
@@ -435,13 +410,9 @@ async def get_perimeters(folder: str = None, name: str = None):
 async def get_risk_matrices():
     """List risk matrices with IDs and names for creating risk assessments"""
     try:
-        res = make_get_request("/risk-matrices/")
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        matrices = get_paginated_results(data)
+        matrices, error = fetch_all_results("/risk-matrices/")
+        if error:
+            return error
 
         if not matrices:
             return empty_response("risk matrices", None)
@@ -611,13 +582,9 @@ async def get_risk_assessments(folder: str = None, perimeter: str = None):
         if perimeter:
             params["perimeter"] = resolve_perimeter_id(perimeter)
 
-        res = make_get_request("/risk-assessments/", params=params)
-
-        if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
-
-        data = res.json()
-        assessments = get_paginated_results(data)
+        assessments, error = fetch_all_results("/risk-assessments/", params=params)
+        if error:
+            return error
 
         if not assessments:
             return "No risk assessments found"
@@ -673,13 +640,9 @@ async def get_threats(
         if library:
             params["library"] = resolve_library_id(library)
 
-        res = make_get_request("/threats/", params=params)
-
-        if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
-
-        data = res.json()
-        threats = get_paginated_results(data)
+        threats, error = fetch_all_results("/threats/", params=params)
+        if error:
+            return error
 
         if not threats:
             return "No threats found"
@@ -729,13 +692,9 @@ async def get_assets(folder: str = None):
             params["folder"] = resolve_folder_id(folder)
             filters["folder"] = folder
 
-        res = make_get_request("/assets/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        assets = get_paginated_results(data)
+        assets, error = fetch_all_results("/assets/", params=params)
+        if error:
+            return error
 
         if not assets:
             return empty_response("assets", filters)
@@ -784,13 +743,9 @@ async def get_incidents(folder: str = None):
         if folder:
             params["folder"] = resolve_folder_id(folder)
 
-        res = make_get_request("/incidents/", params=params)
-
-        if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
-
-        data = res.json()
-        incidents = get_paginated_results(data)
+        incidents, error = fetch_all_results("/incidents/", params=params)
+        if error:
+            return error
 
         if not incidents:
             return "No incidents found"
@@ -831,13 +786,9 @@ async def get_security_exceptions(folder: str = None):
         if folder:
             params["folder"] = resolve_folder_id(folder)
 
-        res = make_get_request("/security-exceptions/", params=params)
-
-        if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
-
-        data = res.json()
-        exceptions = get_paginated_results(data)
+        exceptions, error = fetch_all_results("/security-exceptions/", params=params)
+        if error:
+            return error
 
         if not exceptions:
             return "No security exceptions found"
@@ -901,13 +852,9 @@ async def get_frameworks(folder: str = None):
         if folder:
             params["folder"] = resolve_folder_id(folder)
 
-        res = make_get_request("/frameworks/", params=params)
-
-        if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
-
-        data = res.json()
-        frameworks = get_paginated_results(data)
+        frameworks, error = fetch_all_results("/frameworks/", params=params)
+        if error:
+            return error
 
         if not frameworks:
             return "No frameworks found"
@@ -949,13 +896,11 @@ async def get_business_impact_analyses(folder: str = None):
         if folder:
             params["perimeter__folder"] = resolve_folder_id(folder)
 
-        res = make_get_request("/resilience/business-impact-analysis/", params=params)
-
-        if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
-
-        data = res.json()
-        bias = get_paginated_results(data)
+        bias, error = fetch_all_results(
+            "/resilience/business-impact-analysis/", params=params
+        )
+        if error:
+            return error
 
         if not bias:
             return "No Business Impact Analyses found"
@@ -1024,13 +969,11 @@ async def get_requirement_assessments(
         if ref_id:
             params["ref_id"] = ref_id
 
-        res = make_get_request("/requirement-assessments/", params=params)
-
-        if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
-
-        data = res.json()
-        req_assessments = get_paginated_results(data)
+        req_assessments, error = fetch_all_results(
+            "/requirement-assessments/", params=params
+        )
+        if error:
+            return error
 
         if not req_assessments:
             return "No requirement assessments found"
@@ -1060,13 +1003,9 @@ async def get_requirement_assessments(
 async def get_quantitative_risk_studies():
     """List quantitative risk studies with IDs, names, and status"""
     try:
-        res = make_get_request("/crq/quantitative-risk-studies/")
-
-        if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
-
-        data = res.json()
-        studies = get_paginated_results(data)
+        studies, error = fetch_all_results("/crq/quantitative-risk-studies/")
+        if error:
+            return error
 
         if not studies:
             return "No quantitative risk studies found"
@@ -1117,13 +1056,11 @@ async def get_quantitative_risk_scenarios(study_id_or_name: str = None):
                     else:
                         return f"Quantitative risk study '{study_id_or_name}' not found"
 
-        res = make_get_request("/crq/quantitative-risk-scenarios/", params=params)
-
-        if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
-
-        data = res.json()
-        scenarios = get_paginated_results(data)
+        scenarios, error = fetch_all_results(
+            "/crq/quantitative-risk-scenarios/", params=params
+        )
+        if error:
+            return error
 
         if not scenarios:
             return "No quantitative risk scenarios found"
@@ -1179,13 +1116,11 @@ async def get_quantitative_risk_hypotheses(scenario_id_or_name: str = None):
                     else:
                         return f"Quantitative risk scenario '{scenario_id_or_name}' not found"
 
-        res = make_get_request("/crq/quantitative-risk-hypotheses/", params=params)
-
-        if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
-
-        data = res.json()
-        hypotheses = get_paginated_results(data)
+        hypotheses, error = fetch_all_results(
+            "/crq/quantitative-risk-hypotheses/", params=params
+        )
+        if error:
+            return error
 
         if not hypotheses:
             return "No quantitative risk hypotheses found"
@@ -1236,13 +1171,19 @@ async def get_task_templates(
         if search:
             params["search"] = search
 
-        res = make_get_request("/task-templates/", params=params)
+        if limit is not None or offset is not None:
+            # Explicit pagination requested: fetch a single page as asked
+            res = make_get_request("/task-templates/", params=params)
 
-        if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
+            if res.status_code != 200:
+                return f"Error: HTTP {res.status_code} - {res.text}"
 
-        data = res.json()
-        tasks = get_paginated_results(data)
+            data = res.json()
+            tasks = get_paginated_results(data)
+        else:
+            tasks, error = fetch_all_results("/task-templates/", params=params)
+            if error:
+                return error
 
         if not tasks:
             return "No task found"
@@ -1365,13 +1306,9 @@ async def get_vulnerabilities(
             params["search"] = search
             filters["search"] = search
 
-        res = make_get_request("/vulnerabilities/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        vulnerabilities = get_paginated_results(data)
+        vulnerabilities, error = fetch_all_results("/vulnerabilities/", params=params)
+        if error:
+            return error
 
         if not vulnerabilities:
             return empty_response("vulnerabilities", filters)
@@ -1497,13 +1434,9 @@ async def get_asset_classes(
             params["search"] = search
             filters["search"] = search
 
-        res = make_get_request("/asset-class/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        asset_classes = get_paginated_results(data)
+        asset_classes, error = fetch_all_results("/asset-class/", params=params)
+        if error:
+            return error
 
         if not asset_classes:
             return empty_response("asset classes", filters)
@@ -1585,13 +1518,9 @@ async def get_users(
         if exclude_current is not None:
             params["exclude_current"] = exclude_current
 
-        res = make_get_request("/users/", params=params)
-
-        if res.status_code != 200:
-            return http_error_response(res.status_code, res.text)
-
-        data = res.json()
-        users = get_paginated_results(data)
+        users, error = fetch_all_results("/users/", params=params)
+        if error:
+            return error
 
         if not users:
             return empty_response("users", filters)
