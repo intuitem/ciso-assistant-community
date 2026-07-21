@@ -7,6 +7,7 @@ from collections import Counter
 from uuid import UUID
 
 from django.contrib.auth.models import Permission
+from django.db import transaction
 from django.db.models import Count, Max, Min, Q
 from django.http import HttpResponse
 from django.utils import timezone
@@ -780,9 +781,10 @@ class PostureAssessmentViewSet(BaseModelViewSet):
                 {"error": "asset must be a valid UUID"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        deleted, _ = assessment.results.filter(asset_id=asset_id).delete()
-        assessment.runs.filter(results__isnull=True).delete()
-        assessment.assets.remove(asset_id)
+        with transaction.atomic():
+            deleted, _ = assessment.results.filter(asset_id=asset_id).delete()
+            assessment.runs.filter(results__isnull=True).delete()
+            assessment.assets.remove(asset_id)
         return Response({"deleted_results": deleted})
 
     def _follow_up_findings(self, assessment):
