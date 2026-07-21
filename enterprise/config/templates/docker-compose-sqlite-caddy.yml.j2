@@ -111,7 +111,7 @@ services:
 
   caddy:
     container_name: caddy
-    image: caddy:2.11.2
+    image: caddy:2.11.4
     environment:
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
     depends_on:
