@@ -7,8 +7,13 @@
  * collection must page through it.
  */
 
+/** Request the server's hard ceiling (PAGINATE_MAX default) per page — the
+ * server clamps anything higher, so this stays correct if the ceiling moves,
+ * and cuts round-trips 4× versus the 50-row default page size. */
+const MAX_PAGE_SIZE = 200;
+
 interface FetchAllPagesOptions {
-	/** Explicit page size; omitted → the server's default page size. */
+	/** Explicit page size (default MAX_PAGE_SIZE). */
 	pageSize?: number;
 	/** Abort guard against runaway loops (default 1000 pages). */
 	maxPages?: number;
@@ -37,14 +42,18 @@ function withPageParams(url: string, offset: number, limit?: number): string {
 export async function fetchAllPages<T = Record<string, any>>(
 	fetchFn: typeof fetch,
 	url: string,
-	{ pageSize, maxPages = 1000 }: FetchAllPagesOptions = {}
+	{ pageSize = MAX_PAGE_SIZE, maxPages = 1000 }: FetchAllPagesOptions = {}
 ): Promise<T[]> {
 	const results: T[] = [];
 	let offset = 0;
 	for (let page = 0; page < maxPages; page++) {
 		const res = await fetchFn(withPageParams(url, offset, pageSize));
 		if (!res.ok) {
-			throw new Error(`fetchAllPages: ${res.status} ${res.statusText} for ${url}`);
+			const err = new Error(
+				`fetchAllPages: ${res.status} ${res.statusText} for ${url}`
+			) as Error & { status: number };
+			err.status = res.status;
+			throw err;
 		}
 		const data = await res.json();
 		if (Array.isArray(data)) {

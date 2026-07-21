@@ -9,7 +9,7 @@ from core.models import Vulnerability
 from core.views import SmartOrderingFilter
 from iam.models import Folder
 
-from .fixtures import *  # noqa: F401,F403
+from .fixtures import domain_perimeter_fixture  # noqa: F401
 
 
 def request_with(params):
@@ -85,6 +85,20 @@ class TestSmartOrderingTiebreaker:
             request_with({"ordering": "folder"}), None, OrderedByNameView
         )
         assert ordering == ["folder__name", "pk"]
+
+    def test_folder_alias_skipped_without_folder_relation(self):
+        # Views exposing a string `folder` annotation (e.g. the audit log)
+        # must order on the annotation, not a nonexistent relation.
+        class AnnotatedFolderView:
+            ordering = ["name"]
+            ordering_fields = ["folder", "name"]
+
+        ordering = SmartOrderingFilter().get_ordering(
+            request_with({"ordering": "folder"}),
+            Folder.objects.all(),
+            AnnotatedFolderView,
+        )
+        assert ordering == ["folder", "pk"]
 
     @pytest.mark.django_db
     def test_offset_paging_is_lossless_when_sort_keys_tie(

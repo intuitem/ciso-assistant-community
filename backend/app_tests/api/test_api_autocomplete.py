@@ -60,3 +60,32 @@ class TestGenericAutocomplete:
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_folder_masking_matches_list_endpoint(self, authenticated_client):
+        # Autocomplete must apply the same related-field IAM masking as the
+        # list endpoint: the nested folder representation must be identical
+        # for the same user + object (masked to {} when unviewable, populated
+        # otherwise) — never richer via autocomplete.
+        from test_utils import EndpointTestsUtils
+
+        Threat.objects.create(
+            name="Published threat",
+            folder=Folder.get_root_folder(),
+            is_published=True,
+        )
+        scoped_client, _, _ = EndpointTestsUtils.get_test_client_and_folder(
+            authenticated_client, "BI-UG-AUD", "test"
+        )
+
+        list_resp = scoped_client.get(reverse("threats-list"))
+        auto_resp = scoped_client.get(reverse("threats-autocomplete"))
+        assert list_resp.status_code == status.HTTP_200_OK
+        assert auto_resp.status_code == status.HTTP_200_OK
+
+        def folder_of(resp):
+            row = next(
+                r for r in _rows(resp) if r.get("name") == "Published threat"
+            )
+            return row["folder"]
+
+        assert folder_of(auto_resp) == folder_of(list_resp)

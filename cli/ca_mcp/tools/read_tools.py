@@ -1172,6 +1172,9 @@ async def get_task_templates(
     try:
         params = {}
 
+        # The API rejects limit<=0 (400); treat it as "no explicit limit".
+        if limit is not None and limit <= 0:
+            limit = None
         if limit is not None:
             params["limit"] = limit
         if offset is not None:

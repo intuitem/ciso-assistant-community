@@ -51,6 +51,9 @@ ceiling follows `PAGINATE_BY` upward, raising only `PAGINATE_BY` raises both.
 {% hint style="warning" %}
 Releases prior to this change defaulted to 5,000-row pages, which let scripts
 fetch most collections in a single request. If an integration relies on that,
-either teach it to follow `next` links (recommended) or pin the old behavior
-with `PAGINATE_BY=5000` while you migrate it.
+teach it to follow `next` links (recommended). As a transition workaround,
+`PAGINATE_BY=5000` restores the old **default page size** only — responses
+remain paginated envelopes, invalid `limit`/`offset` values are still
+rejected, and collections larger than the page size still require following
+`next`.
 {% endhint %}

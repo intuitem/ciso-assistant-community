@@ -3,7 +3,6 @@ import { browser } from '$app/environment';
 import { m } from '$paraglide/messages';
 import { getLocale } from '$paraglide/runtime';
 import { formatDate } from '$lib/utils/datetime';
-import { fetchAllPages } from '$lib/utils/pagination';
 
 const CHAT_API = '/fe-api/chat';
 const STORAGE_KEY = 'ciso-chat-state';
@@ -765,7 +764,13 @@ export function getLoadingHistory() {
 export async function loadSessionHistory() {
 	loadingHistory = true;
 	try {
-		const sessions = await fetchAllPages(fetch, `${CHAT_API}/sessions`);
+		// Single fetch on purpose: only the 30 most recent sessions are kept.
+		// The ordering/limit params make this hold whether the endpoint
+		// returns a plain array (current) or a paginated envelope.
+		const res = await fetch(`${CHAT_API}/sessions?ordering=-created_at&limit=30`);
+		if (!res.ok) throw new Error(`sessions: ${res.status}`);
+		const data = await res.json();
+		const sessions: any[] = Array.isArray(data) ? data : (data.results ?? []);
 		sessionHistory = sessions
 			.map((s: any) => ({
 				id: s.id,

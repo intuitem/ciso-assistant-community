@@ -1,7 +1,7 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { fetchAllPages } from '$lib/utils/pagination';
 import { del, postJSON } from '$lib/utils/portalApi';
-import { fail, redirect, type Actions } from '@sveltejs/kit';
+import { error, fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
@@ -9,7 +9,9 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 	const [portals, presets] = await Promise.all([
 		fetchAllPages(fetch, `${BASE_API_URL}/portals/`),
 		fetchAllPages(fetch, `${BASE_API_URL}/portal-presets/`)
-	]);
+	]).catch((e) => {
+		error(e?.status ?? 500, 'Failed to load portals');
+	});
 	return { portals, presets };
 };
 

@@ -2148,10 +2148,14 @@ def build_autocomplete_serializer(model_cls, extra_fields=()):
     ):
         label_fields.append("description")
     has_folder = "folder" not in extra_fields and _has_field("folder")
+    # Hierarchy breadcrumb used by pickers to disambiguate same-named rows.
+    has_path = "path" not in extra_fields and hasattr(model_cls, "get_folder_full_path")
 
     class _AutocompleteSerializer(BaseModelSerializer):
         if has_folder:
             folder = FieldsRelatedField()
+        if has_path:
+            path = PathField(source="get_folder_full_path", read_only=True)
 
         class Meta:
             model = model_cls
@@ -2159,6 +2163,7 @@ def build_autocomplete_serializer(model_cls, extra_fields=()):
                 "id",
                 *label_fields,
                 *(["folder"] if has_folder else []),
+                *(["path"] if has_path else []),
                 *extra_fields,
             ]
 

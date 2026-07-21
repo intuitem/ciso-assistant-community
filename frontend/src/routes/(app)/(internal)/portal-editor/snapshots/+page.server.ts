@@ -2,7 +2,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { fetchAllPages } from '$lib/utils/pagination';
 import { del, patchJSON, postJSON } from '$lib/utils/portalApi';
 import { SnapshotCreateSchema, SnapshotEditSchema } from '$lib/utils/schemas';
-import { fail, redirect, type Actions } from '@sveltejs/kit';
+import { error, fail, redirect, type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
@@ -13,7 +13,9 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 		fetchAllPages(fetch, `${BASE_API_URL}/framework-snapshots/`),
 		fetchAllPages(fetch, `${BASE_API_URL}/compliance-assessments/`),
 		fetchAllPages(fetch, `${BASE_API_URL}/frameworks/`)
-	]);
+	]).catch((e) => {
+		error(e?.status ?? 500, 'Failed to load snapshots');
+	});
 	// The compliance-assessments list serializer only embeds {id, str} for framework, so
 	// the IG definitions come from the frameworks endpoint, keyed by framework id.
 	return {

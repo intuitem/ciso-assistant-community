@@ -760,11 +760,24 @@ class SmartOrderingFilter(filters.OrderingFilter):
 
     def get_ordering(self, request, queryset, view):
         ordering = super().get_ordering(request, queryset, view) or []
+        # Only rewrite `folder` to the related name when the model really has
+        # a folder relation — views that expose a string `folder` annotation
+        # (e.g. the audit log) must order on the annotation itself.
+        model = getattr(queryset, "model", None)
+        map_folder = True
+        if model is not None:
+            try:
+                folder_field = model._meta.get_field("folder")
+                # concrete excludes reverse accessors that happen to be
+                # named "folder" (e.g. on the Folder model itself).
+                map_folder = folder_field.is_relation and folder_field.concrete
+            except FieldDoesNotExist:
+                map_folder = False
         ordering = [
             "folder__name"
-            if f == "folder"
+            if f == "folder" and map_folder
             else "-folder__name"
-            if f == "-folder"
+            if f == "-folder" and map_folder
             else f
             for f in ordering
         ]
@@ -864,17 +877,31 @@ class AutocompleteMixin:
         # model's filterset does not declare an id filter.
         ids = request.query_params.get("id")
         if ids:
+            tokens = [t for t in ids.split(",") if t]
             try:
-                uuids = [UUID(i) for i in ids.split(",") if i]
+                parsed = [UUID(t) for t in tokens]
             except ValueError:
-                raise DRFValidationError({"id": "expected a comma-separated UUID list"})
-            qs = qs.filter(id__in=uuids)
+                # Some wrapped models (e.g. auth Permission) use integer pks.
+                try:
+                    parsed = [int(t) for t in tokens]
+                except ValueError:
+                    raise DRFValidationError(
+                        {"id": "expected a comma-separated id list"}
+                    )
+            qs = qs.filter(id__in=parsed)
         page = self.paginate_queryset(qs)
         objects = page if page is not None else qs
         serializer = self.get_autocomplete_serializer_class()(objects, many=True)
+        data = serializer.data
+        # Apply the same related-field IAM masking as list()/retrieve(): the
+        # nested folder must not leak where the user lacks view access.
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
         if page is not None:
-            return self.get_paginated_response(serializer.data)
-        return Response(serializer.data)
+            return self.get_paginated_response(data)
+        return Response(data)
 
 
 class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):

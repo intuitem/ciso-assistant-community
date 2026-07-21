@@ -6,7 +6,7 @@
 	}
 
 	let { data }: Props = $props();
-	const mapping_sets = data.data;
+	const mapping_sets = $derived(data.data);
 </script>
 
 <div>

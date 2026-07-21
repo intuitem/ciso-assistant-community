@@ -14,7 +14,7 @@ from rest_framework import status
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.pagination import LimitOffsetPagination
+from core.pagination import CustomLimitOffsetPagination
 from core.models import EvidenceRevision
 from core.utils import compare_schema_versions
 from iam.models import User
@@ -653,8 +653,7 @@ class AttachmentMetadataView(APIView):
             queryset = queryset.filter(created_at__lte=created_before)
 
         queryset = queryset.order_by("created_at", "id")
-        paginator = LimitOffsetPagination()
-        paginator.max_limit = settings.PAGINATE_MAX
+        paginator = CustomLimitOffsetPagination()
         paginated_queryset = paginator.paginate_queryset(queryset, request)
 
         results = []

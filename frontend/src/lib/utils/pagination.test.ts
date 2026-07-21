@@ -36,21 +36,21 @@ describe('fetchAllPages', () => {
 		expect(fetchFn).toHaveBeenCalledTimes(3);
 	});
 
-	it('keeps the first request identical to the caller url', async () => {
-		const fetchFn = paginatedFetch([1, 2], 5);
+	it('requests the max page size by default', async () => {
+		const fetchFn = paginatedFetch([1, 2], 500);
 		await fetchAllPages(fetchFn, '/assets?folder=f1');
-		expect(fetchFn).toHaveBeenNthCalledWith(1, '/assets?folder=f1');
-		const fetchFn2 = paginatedFetch([1, 2], 5);
+		expect(fetchFn).toHaveBeenNthCalledWith(1, '/assets?folder=f1&limit=200');
+		const fetchFn2 = paginatedFetch([1, 2], 500);
 		await fetchAllPages(fetchFn2, '/assets');
-		expect(fetchFn2).toHaveBeenNthCalledWith(1, '/assets');
+		expect(fetchFn2).toHaveBeenNthCalledWith(1, '/assets?limit=200');
 	});
 
 	it('pages with explicit offsets on subsequent requests', async () => {
 		const rows = Array.from({ length: 7 }, (_, i) => i);
 		const fetchFn = paginatedFetch(rows, 3);
-		await fetchAllPages(fetchFn, '/assets?folder=f1');
-		expect(fetchFn).toHaveBeenNthCalledWith(2, '/assets?folder=f1&offset=3');
-		expect(fetchFn).toHaveBeenNthCalledWith(3, '/assets?folder=f1&offset=6');
+		await fetchAllPages(fetchFn, '/assets?folder=f1', { pageSize: 3 });
+		expect(fetchFn).toHaveBeenNthCalledWith(2, '/assets?folder=f1&offset=3&limit=3');
+		expect(fetchFn).toHaveBeenNthCalledWith(3, '/assets?folder=f1&offset=6&limit=3');
 	});
 
 	it('honors an explicit pageSize option', async () => {
