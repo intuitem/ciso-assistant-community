@@ -125,8 +125,8 @@ export abstract class BaseResourceHandler implements IResourceHandler {
     let count = 0;
     for (;;) {
       const url = buildUrl(this.context.credentials.baseUrl, path, {
-        ...(params ?? {}),
-        ...(offset > 0 ? { offset } : {}),
+        ...params,
+        ...(offset > 0 && { offset }),
       });
       const page = await this.request(
         "GET",
