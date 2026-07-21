@@ -6,6 +6,7 @@
 	import Select from '$lib/components/Forms/Select.svelte';
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import { page } from '$app/state';
 
 	interface Props {
@@ -148,7 +149,7 @@
 		label={m.fearedEvents()}
 		helpText={m.roToFearedEventHelpText()}
 	/>
-	<TextArea
+	<MarkdownField
 		{form}
 		field="justification"
 		label={m.justification()}

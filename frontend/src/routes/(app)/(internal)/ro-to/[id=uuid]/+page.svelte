@@ -3,6 +3,7 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import { pageTitle } from '$lib/utils/stores';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -193,7 +194,7 @@
 					<span>{m.justification()}</span>
 				</h3>
 				{#if roto.justification}
-					<p class="text-surface-600-400">{roto.justification}</p>
+					<MarkdownRenderer content={roto.justification} />
 				{:else}
 					<p class="text-surface-600-400">{m.noJustification()}</p>
 				{/if}

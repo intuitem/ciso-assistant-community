@@ -310,11 +310,33 @@
 		}, 0)
 	);
 	const useQuestionProgress = $derived(showAnswers && totalQuestions > 0);
+	// Respondents track their own work: when the alignment field is in use,
+	// the fallback progress counts their alignment answers, not the results
+	// (which the auditor can set independently).
+	const useAlignmentProgress = $derived(!isAuditor && showRespondentAlignment);
+	// Mirrors the backend auto-map (alignment answer -> result) for ToC dots.
+	const alignmentResultEquivalent: Record<string, string> = {
+		yes: 'compliant',
+		no: 'non_compliant',
+		in_progress: 'partially_compliant',
+		not_applicable: 'not_applicable'
+	};
 
 	const totalAssessable = $derived(assessableItems.length);
-	const assessedCount = $derived(
-		assessableItems.filter((item) => item.data.result !== 'not_assessed').length
-	);
+	// Per-item completion, mirroring the backend auditee-dashboard rules.
+	// This page is respondent-oriented ON PURPOSE: the audit-level progress
+	// mode (status-driven / score above minimum) does NOT apply here, since
+	// respondents can neither see nor edit those fields. A question-bearing
+	// requirement completes through its answers (whether or not they compute
+	// a result), alignment-driven ones through the respondent's alignment
+	// answer, the rest through the result.
+	function isItemDone(item: { data: Record<string, any> }): boolean {
+		const visible = item.data.visible_questions ?? 0;
+		if (visible > 0) return (item.data.answered_questions ?? 0) >= visible;
+		if (useAlignmentProgress) return Boolean(item.data.respondent_alignment);
+		return item.data.result !== 'not_assessed';
+	}
+	const assessedCount = $derived(assessableItems.filter(isItemDone).length);
 	const progressPercent = $derived(
 		useQuestionProgress
 			? Math.round((answeredQuestions / totalQuestions) * 100)
@@ -551,6 +573,8 @@
 				id: item.data.id,
 				title,
 				result: item.data.result,
+				alignment: item.data.respondent_alignment,
+				hasVisibleQuestions: (item.data.visible_questions ?? 0) > 0,
 				questionColor: getQuestionStatus(item)
 			};
 		})
@@ -660,9 +684,13 @@
 								class="inline-block w-2 h-2 rounded-full flex-shrink-0"
 								style="background-color: {section.result === '__splash__'
 									? '#a855f7'
-									: useQuestionProgress
+									: useQuestionProgress || section.hasVisibleQuestions
 										? section.questionColor
-										: (complianceResultColorMap[section.result] ?? '#d1d5db')};"
+										: useAlignmentProgress
+											? (complianceResultColorMap[
+													alignmentResultEquivalent[section.alignment] ?? ''
+												] ?? '#d1d5db')
+											: (complianceResultColorMap[section.result] ?? '#d1d5db')};"
 							></span>
 							<span class="truncate">{section.title}</span>
 						</button>
