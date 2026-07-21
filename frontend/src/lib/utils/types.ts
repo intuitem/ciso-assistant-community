@@ -14,7 +14,6 @@ export interface User {
 	date_joined: string;
 	user_groups: Record<string, any>[];
 	roles: Record<string, any>[];
-	permissions: Record<string, any>[];
 	is_third_party: boolean;
 	is_auditee: boolean;
 	is_admin: boolean;
@@ -132,6 +131,9 @@ export const URL_MODEL = [
 	'quantitative-risk-hypotheses',
 	// terminologies
 	'terminologies',
+	// classifications
+	'object-classifications',
+	'classification-levels',
 	// roles,
 	'roles',
 	'permissions',
@@ -152,7 +154,9 @@ export const URL_MODEL = [
 	'dashboard-widgets',
 	'dashboard-text-widgets',
 	'dashboard-builtin-widgets',
-	// policy documents
+	// document management
+	'document-containers',
+	'document-templates',
 	'managed-documents',
 	'document-revisions',
 	// presets/journeys

@@ -12,7 +12,7 @@
 	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
-	import { getModelInfo } from '$lib/utils/crud.js';
+	import { getModelInfo, getMarkdownFields } from '$lib/utils/crud';
 	import { formatDate, formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -25,10 +25,10 @@
 
 	import { onMount } from 'svelte';
 
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getListViewFields } from '$lib/utils/table';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformActionOnObject, resolveObjectDomain } from '$lib/utils/access-control';
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import {
 		getModalStore,
@@ -36,8 +36,10 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
 
 	const modalStore: ModalStore = getModalStore();
+	const toastStore = getToastStore();
 
 	const defaultExcludes = ['id', 'is_published', 'str', 'path', 'sync_mappings'];
 
@@ -112,6 +114,8 @@
 	}: Props = $props();
 
 	exclude = [...exclude, ...defaultExcludes];
+
+	const markdownFieldSet = $derived(getMarkdownFields(data.urlModel));
 
 	const getRelatedModelIndex = (model: ModelMapEntry, relatedModel: Record<string, string>) => {
 		if (!model.reverseForeignKeyFields) return -1;
@@ -211,6 +215,38 @@
 			title: safeTranslate('add-' + model.info.localName)
 		};
 		modalStore.trigger(modal);
+	}
+
+	async function removeFromParent(
+		field: any,
+		ids: string[],
+		clear: () => void,
+		reload: () => void
+	): Promise<void> {
+		if (!field?.removeFromParent || !ids.length) return;
+		const res = await fetch(
+			`/${data.model.urlModel}/${data.data.id}/${field.removeFromParent.action}`,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ [field.removeFromParent.payloadField]: ids })
+			}
+		);
+		if (res.ok) {
+			clear();
+			reload();
+			await invalidateAll();
+			toastStore.trigger({
+				message: safeTranslate(field.removeFromParent.successMessage ?? 'saved'),
+				background: 'preset-filled-success-500'
+			});
+		} else {
+			const body = await res.json().catch(() => ({}));
+			toastStore.trigger({
+				message: typeof body?.error === 'string' ? safeTranslate(body.error) : m.anErrorOccurred(),
+				background: 'preset-filled-error-500'
+			});
+		}
 	}
 
 	function modalSelectExisting(field: ReverseForeignKeyField): void {
@@ -365,15 +401,19 @@
 	}
 
 	const user = page.data.user;
-	const canEditObject: boolean = canPerformAction({
-		user,
-		action: 'change',
-		model: data.model.name,
-		domain:
-			data.model.name === 'folder'
-				? data.data.id
-				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
-	});
+	const objectDomain: string = $derived(
+		resolveObjectDomain(data.model.name, data.data) ?? user.root_folder_id
+	);
+	// Same helper as ModelTable/TableRowActions so edit affordances agree everywhere,
+	// including the no-folder fallback (existential check deferring to the backend).
+	const canEditObject: boolean = $derived(
+		canPerformActionOnObject({
+			user,
+			action: 'change',
+			model: data.model.name,
+			object: data.data
+		})
+	);
 
 	let displayEditButton = $derived(function () {
 		return (
@@ -441,16 +481,18 @@
 	<!-- Warning for non-visible objects (only for users with edit permissions) -->
 
 	{#if data.urlModel === 'risk-acceptances' && data.data.state === 'Created'}
-		<div class="flex flex-row items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2">
-			<div class="text-yelloW-900">
+		<div
+			class="flex flex-row items-center bg-yellow-100 dark:bg-yellow-900 rounded-container shadow-sm px-6 py-2"
+		>
+			<div class="text-yellow-800 dark:text-yellow-200">
 				{m.riskAcceptanceNotYetSubmittedMessage()}
 			</div>
 		</div>
 	{:else if data.data.state === 'Submitted' && page.data.user.id === data.data.approver?.id}
 		<div
-			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2 justify-between"
+			class="flex flex-row space-x-4 items-center bg-yellow-100 dark:bg-yellow-900 rounded-container shadow-sm px-6 py-2 justify-between"
 		>
-			<div class="text-yellow-900">
+			<div class="text-yellow-800 dark:text-yellow-200">
 				{m.riskAcceptanceValidatingReviewMessage()}
 			</div>
 			<div class="flex space-x-2">
@@ -474,9 +516,9 @@
 		</div>
 	{:else if data.data.state === 'Accepted'}
 		<div
-			class="flex flex-row items-center space-x-4 bg-green-100 rounded-container shadow-lg px-6 py-2 mt-2 justify-between"
+			class="flex flex-row items-center space-x-4 bg-green-100 dark:bg-green-900 rounded-container shadow-lg px-6 py-2 mt-2 justify-between"
 		>
-			<div class="text-green-900">
+			<div class="text-green-800 dark:text-green-200">
 				{m.riskAcceptanceValidatedMessage()}
 			</div>
 			{#if page.data.user.id === data.data.approver?.id}
@@ -745,7 +787,7 @@
 												>
 											{:else if ISO_8601_REGEX.test(value) && dateFieldsToFormat.includes(key)}
 												{formatDateOrDateTime(value, getLocale())}
-											{:else if key === 'description' || key === 'observation' || key === 'annotation' || key === 'justification'}
+											{:else if markdownFieldSet.has(key)}
 												<MarkdownRenderer content={value} />
 											{:else if typeof value === 'boolean'}
 												{@const bd = booleanDisplay(value, key, data.urlModel)}
@@ -892,7 +934,7 @@
 				{/if}
 			{/if}
 			{@render actions?.()}
-			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} />
+			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} folderId={objectDomain} />
 		</div>
 	</div>
 </div>
@@ -962,7 +1004,21 @@
 								expectedCount={getExpectedCount(urlmodel, field)}
 								fields={fieldsToUse}
 								defaultFilters={field.defaultFilters || {}}
+								selectable={Boolean(canEditObject && field?.removeFromParent)}
 							>
+								{#snippet selectActions({ ids, clear, reload })}
+									{#if field?.removeFromParent}
+										<button
+											type="button"
+											class="btn btn-sm preset-filled-error-500"
+											onclick={() => removeFromParent(field, ids, clear, reload)}
+										>
+											<i class="fa-solid fa-user-minus mr-2"></i>{safeTranslate(
+												field.removeFromParent.label ?? 'remove'
+											)}
+										</button>
+									{/if}
+								{/snippet}
 								{#snippet addButton()}
 									{#if canEditObject && field?.addExisting}
 										<span

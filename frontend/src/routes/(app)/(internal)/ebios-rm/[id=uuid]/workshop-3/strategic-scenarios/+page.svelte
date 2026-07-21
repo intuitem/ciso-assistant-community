@@ -82,6 +82,7 @@
 	deleteForm={data.deleteForm}
 	{URLModel}
 	baseEndpoint="/strategic-scenarios?ebios_rm_study={page.params.id}"
+	columnSelector={true}
 >
 	{#snippet addButton()}
 		<div>

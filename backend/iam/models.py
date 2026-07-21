@@ -45,6 +45,7 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 from auditlog.registry import auditlog
+from auditlog.signals import pre_log
 from allauth.mfa.models import Authenticator
 from core.context import focus_folder_id_var
 from django.shortcuts import get_object_or_404
@@ -462,10 +463,6 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
         invalidate_groups_cache()
         invalidate_assignments_cache()
         return result
-
-    @property
-    def permissions(self):
-        return RoleAssignment.get_permissions(self)
 
 
 class UserManager(BaseUserManager):
@@ -951,10 +948,6 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     @property
     def username(self):
         return self.email
-
-    @property
-    def permissions(self):
-        return RoleAssignment.get_permissions(self)
 
     @staticmethod
     def get_admin_users() -> QuerySet["User"]:
@@ -1509,6 +1502,31 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return self.user_group in user.user_groups.all()
 
     @staticmethod
+    def has_permission_anywhere(
+        principal: AbstractBaseUser | AnonymousUser | UserGroup, codename: str
+    ) -> bool:
+        """Existential check: does the principal hold this permission codename on at
+        least one folder? Uses caches only — no database access. Only valid for
+        genuinely folder-agnostic questions; scoped decisions must use
+        is_access_allowed with the object's folder.
+        """
+        if isinstance(principal, AnonymousUser) or not getattr(
+            principal, "is_authenticated", True
+        ):
+            return False
+
+        roles_state = get_roles_state()
+        if isinstance(principal, UserGroup):
+            assignments = get_assignments_state().by_group.get(principal.id, ())
+        else:
+            assignments = _iter_assignment_lites_for_user(principal)
+
+        return any(
+            codename in roles_state.role_permissions.get(a.role_id, frozenset())
+            for a in assignments
+        )
+
+    @staticmethod
     def get_permissions(principal: AbstractBaseUser | AnonymousUser | UserGroup):
         """Get all permissions attached to a user/group (direct or indirect), using caches.
 
@@ -1711,3 +1729,22 @@ auditlog.register(
     m2m_fields={"user_groups"},
     exclude_fields=common_exclude,
 )
+auditlog.register(
+    RoleAssignment,
+    m2m_fields={"perimeter_folders"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(Role, exclude_fields=common_exclude)
+auditlog.register(UserGroup, exclude_fields=common_exclude)
+auditlog.register(PersonalAccessToken)
+auditlog.register(SCIMToken)
+
+
+def _skip_builtin_rbac(sender, instance, **kwargs):
+    if getattr(instance, "builtin", False):
+        return False
+    return True
+
+
+for _rbac_model in (RoleAssignment, Role, UserGroup):
+    pre_log.connect(_skip_builtin_rbac, sender=_rbac_model)

@@ -3,6 +3,7 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import { pageTitle } from '$lib/utils/stores';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { canPerformAction } from '$lib/utils/access-control';
@@ -440,7 +441,7 @@
 					<span>{m.justification()}</span>
 				</h3>
 				{#if operationalScenario.justification}
-					<p class="text-surface-600-400">{operationalScenario.justification}</p>
+					<MarkdownRenderer content={operationalScenario.justification} />
 				{:else}
 					<p class="text-surface-600-400">{m.noJustification()}</p>
 				{/if}

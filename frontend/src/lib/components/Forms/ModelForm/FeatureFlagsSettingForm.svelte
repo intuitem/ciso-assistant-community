@@ -128,6 +128,11 @@
 					description: m.policyDocumentsFlagDescription()
 				},
 				{
+					field: 'document_management',
+					label: m.documentManagementFlag(),
+					description: m.documentManagementFlagDescription()
+				},
+				{
 					field: 'exceptions',
 					label: m.securityExceptions(),
 					description: m.securityExceptionsDescription()
@@ -317,6 +322,7 @@
 				'follow_up',
 				'reports',
 				'policy_documents',
+				'document_management',
 				'advanced_analytics',
 				'auditee_mode',
 				'campaigns',

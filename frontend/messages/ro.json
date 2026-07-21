@@ -1,4 +1,12 @@
 {
+	"manageMembers": "Gestionați membrii",
+	"addMembers": "Adăugați membri",
+	"removeFromGroup": "Eliminați din grup",
+	"membersAdded": "Membri adăugați",
+	"membersRemoved": "Membri eliminați",
+	"includeInactive": "Includeți inactivii",
+	"noResults": "Niciun rezultat. Rafinați căutarea.",
+	"nothingSelected": "Nimic selectat încă.",
 	"licenseExpiresToday": "Licența dvs. expiră astăzi.",
 	"licenseExpiresTomorrow": "Licența dvs. expiră mâine.",
 	"licenseExpiresInDays": "Licența dvs. expiră în {days_left} zile.",
@@ -628,6 +636,7 @@
 	"missingMandatoyObjects2": "Vă rugăm să le adăugați înainte de a continua",
 	"attemptToDeleteOnlyAdminAccountError": "Nu puteți șterge singurul cont de administrator al aplicației dvs.",
 	"attemptToRemoveOnlyAdminUserGroup": "Nu puteți elimina singurul administrator al aplicației din grupul de utilizatori administratori.",
+	"attemptToRemoveSelfFromDomainAdminGroup": "Nu vă puteți elimina singur dintr-un grup de administratori de domeniu. Cereți altui administrator să o facă.",
 	"scoringHelpText": "Bifați pentru a activa scorarea",
 	"minScore": "Scor minim",
 	"maxScore": "Scor maxim",
@@ -1018,6 +1027,8 @@
 	"forceSSOLogin": "Forțați autentificarea SSO",
 	"forceSSOLoginHelpText": "Solicitați SSO pentru toți utilizatorii și resetați parolele salvate. Utilizatorii cu 'Excludeți din SSO forțat' activat vor păstra accesul de rezervă bazat pe parolă.",
 	"forceSSOLoginHelpText2": "Asigurați-vă că SSO-ul dvs. funcționează sau că aveți un cont de rezervă înainte de a activa această opțiune.",
+	"enableSpInitiatedSlo": "Activează deconectarea unică inițiată de furnizorul de servicii",
+	"enableSpInitiatedSloHelpText": "La deconectare, închide și sesiunea de la furnizorul de identitate.",
 	"youCanSetPasswordHere": "Puteți seta parola dvs. aici.",
 	"mappingSuggested": "Sugestie de mapare",
 	"mappingSuggestedHelpText": "Sugestii de mapare bazate pe cadre încărcate",
@@ -1669,5 +1680,6 @@
 	"scimTokenGenerationFailed": "Generarea tokenului SCIM a eșuat",
 	"idpGroup": "Grup IdP",
 	"idpGroups": "Grupuri IdP",
-	"idpGroupsDescription": "Activați federarea grupurilor IdP (provizionare SCIM, mapări de grupuri IdP și apartenențe la grupuri IdP ale utilizatorilor)."
+	"idpGroupsDescription": "Activați federarea grupurilor IdP (provizionare SCIM, mapări de grupuri IdP și apartenențe la grupuri IdP ale utilizatorilor).",
+	"ebiosRmStudyDomainHelpText": "Schimbarea domeniului mută studiul și toate obiectele atelierelor sale în domeniul selectat."
 }

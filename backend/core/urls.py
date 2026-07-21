@@ -8,6 +8,7 @@ from tprm.views import (
     ContractViewSet,
 )
 from library.views import (
+    LibraryDraftViewSet,
     MappingLibrariesList,
     StoredLibraryViewSet,
     LoadedLibraryViewSet,
@@ -104,6 +105,7 @@ router.register(
 )
 router.register(r"stored-libraries", StoredLibraryViewSet, basename="stored-libraries")
 router.register(r"loaded-libraries", LoadedLibraryViewSet, basename="loaded-libraries")
+router.register(r"library-drafts", LibraryDraftViewSet, basename="library-drafts")
 router.register(
     r"requirement-mapping-sets",
     RequirementMappingSetViewSet,
@@ -134,6 +136,16 @@ router.register(r"comments", CommentViewSet, basename="comments")
 router.register(r"task-templates", TaskTemplateViewSet, basename="task-templates")
 router.register(r"task-nodes", TaskNodeViewSet, basename="task-nodes")
 router.register(r"terminologies", TerminologyViewSet, basename="terminologies")
+router.register(
+    r"object-classifications",
+    ObjectClassificationViewSet,
+    basename="object-classifications",
+)
+router.register(
+    r"classification-levels",
+    ClassificationLevelViewSet,
+    basename="classification-levels",
+)
 router.register(r"questions", QuestionViewSet, basename="questions")
 router.register(r"question-choices", QuestionChoiceViewSet, basename="question-choices")
 router.register(r"answers", AnswerViewSet, basename="answers")

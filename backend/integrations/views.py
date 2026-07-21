@@ -172,9 +172,17 @@ class IntegrationConfigurationViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="remote-objects")
     def list_remote_objects(self, request, pk=None):
+        from integrations.syncable import get_spec
+
         instance = self.get_object()
+        model_key = request.query_params.get("model_key", "applied_control")
+        if get_spec(model_key) is None:
+            return Response(
+                {"error": f"Unknown model_key '{model_key}'"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         try:
-            client = IntegrationRegistry.get_client(instance)
+            client = IntegrationRegistry.get_client(instance, model_key)
             remote_objects = client.list_remote_objects()
             return Response(remote_objects, status=status.HTTP_200_OK)
         except Exception:

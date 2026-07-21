@@ -127,6 +127,15 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 	batchCreate?: {
 		label?: string; // i18n key for button title (defaults to 'batchCreate')
 	};
+	// Enables multi-row selection on the reverse-FK table with an action that POSTs
+	// the selected ids to a parent endpoint (e.g. remove members from a group).
+	// Gated by change permission on the parent's folder.
+	removeFromParent?: {
+		action: string; // parent action url segment, e.g. 'remove-members'
+		payloadField: string; // request body key holding the selected ids, e.g. 'users'
+		label?: string; // i18n key for the button (defaults to 'remove')
+		successMessage?: string; // i18n key for the success toast
+	};
 }
 
 interface Field {
@@ -169,6 +178,11 @@ export interface ModelMapEntry {
 	path?: string;
 	endpointUrl?: string;
 	customNameDescription?: boolean;
+	/**
+	 * Fields (in addition to `DEFAULT_MARKDOWN_FIELDS`) whose content is edited and
+	 * rendered as Markdown for this model.
+	 */
+	markdownFields?: string[];
 }
 
 type ModelMap = {
@@ -418,6 +432,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{
 				field: 'applied_controls',
+				urlModel: 'document-containers'
+			},
+			{
+				field: 'applied_controls',
 				urlModel: 'evidences',
 				addExisting: {
 					parentField: 'evidences'
@@ -525,6 +543,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'sync_mappings' }
 		],
 		reverseForeignKeyFields: [
+			{
+				field: 'policies',
+				urlModel: 'document-containers'
+			},
 			{
 				field: 'applied_controls',
 				urlModel: 'evidences',
@@ -870,7 +892,16 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'users',
 				disableCreate: true,
 				disableDelete: true,
-				folderPermsNeeded: [{ model: 'folder', action: 'change' }]
+				folderPermsNeeded: [{ model: 'folder', action: 'change' }],
+				// Select members in the table and remove them from the group. Routes to
+				// the group's change_usergroup-gated endpoint, so a domain manager can
+				// remove members without write access on the (Global) User object.
+				removeFromParent: {
+					action: 'remove-members',
+					payloadField: 'users',
+					label: 'removeFromGroup',
+					successMessage: 'membersRemoved'
+				}
 			}
 		],
 		filters: []
@@ -980,6 +1011,61 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'evidence', urlModel: 'evidences' },
 			{ field: 'task_node', urlModel: 'task-nodes' }
+		]
+	},
+	'document-containers': {
+		name: 'documentcontainer',
+		localName: 'documentContainer',
+		localNamePlural: 'documentContainers',
+		verboseName: 'Document',
+		verboseNamePlural: 'Documents',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'policies', urlModel: 'policies' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'task_templates', urlModel: 'task-templates' },
+			{ field: 'processings', urlModel: 'processings' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'classification', urlModel: 'classification-levels' }
+		],
+		reverseForeignKeyFields: [{ field: 'container', urlModel: 'managed-documents' }],
+		selectFields: [{ field: 'document_type' }],
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'document_type' },
+			{ field: 'folder' },
+			{ field: 'classification' },
+			{ field: 'policies' },
+			{ field: 'applied_controls' },
+			{ field: 'task_templates' },
+			{ field: 'processings' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		]
+	},
+	'document-templates': {
+		name: 'documenttemplate',
+		localName: 'documentTemplate',
+		localNamePlural: 'documentTemplates',
+		verboseName: 'Document template',
+		verboseNamePlural: 'Document templates',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		],
+		selectFields: [{ field: 'document_type' }],
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'provider' },
+			{ field: 'document_type' },
+			{ field: 'locale' },
+			{ field: 'folder' },
+			{ field: 'builtin' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
 		]
 	},
 	'managed-documents': {
@@ -1495,6 +1581,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{
+				field: 'processings',
+				urlModel: 'document-containers'
+			},
+			{
 				field: 'processing',
 				urlModel: 'personal-data',
 				batchCreate: {
@@ -1567,6 +1657,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'dataBreaches',
 		verboseName: 'data breach',
 		verboseNamePlural: 'data breaches',
+		markdownFields: ['potential_consequences'],
 		selectFields: [{ field: 'breach_type' }, { field: 'risk_level' }, { field: 'status' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
@@ -1883,11 +1974,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		detailViewFields: [
 			{ field: 'id' },
 			{ field: 'ref_id' },
-			{ field: 'form_display_name' },
+			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'strategic_scenario' },
 			{ field: 'ro_to_couple' },
 			{ field: 'is_selected' },
+			{ field: 'justification' },
 			{ field: 'stakeholders' },
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'ebios_rm_study' }
@@ -1900,6 +1992,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'operationalScenarios',
 		verboseName: 'Operational scenario',
 		verboseNamePlural: 'Operational scenarios',
+		markdownFields: ['operating_modes_description'],
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
 			{ field: 'threats', urlModel: 'threats' },
@@ -2167,6 +2260,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'incidents',
 		verboseName: 'Incident',
 		verboseNamePlural: 'Incidents',
+		markdownFields: ['resolution'],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'threats', urlModel: 'threats' },
@@ -2273,6 +2367,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [
+			{
+				field: 'task_templates',
+				urlModel: 'document-containers'
+			},
 			{
 				field: 'task_template',
 				urlModel: 'task-nodes',
@@ -2640,6 +2738,42 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'builtin' },
 			{ field: 'is_visible' },
 			{ field: 'translations' }
+		]
+	},
+	'object-classifications': {
+		name: 'objectClassification',
+		localName: 'objectClassification',
+		localNamePlural: 'objectClassifications',
+		verboseName: 'Object classification',
+		verboseNamePlural: 'Object classifications',
+		customNameDescription: true,
+		reverseForeignKeyFields: [
+			{ field: 'object_classification', urlModel: 'classification-levels' }
+		],
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'ref_id' },
+			{ field: 'builtin' },
+			{ field: 'is_visible' }
+		]
+	},
+	'classification-levels': {
+		name: 'classificationLevel',
+		localName: 'classificationLevel',
+		localNamePlural: 'classificationLevels',
+		verboseName: 'Classification level',
+		verboseNamePlural: 'Classification levels',
+		customNameDescription: true,
+		foreignKeyFields: [{ field: 'object_classification', urlModel: 'object-classifications' }],
+		detailViewFields: [
+			{ field: 'abbreviation' },
+			{ field: 'name' },
+			{ field: 'rank' },
+			{ field: 'hexcolor' },
+			{ field: 'object_classification' },
+			{ field: 'builtin' },
+			{ field: 'is_visible' }
 		]
 	},
 	roles: {
@@ -3149,12 +3283,26 @@ const FIELD_COMPONENT_MAP = {
 	}
 };
 
+/**
+ * Default fields rendered and edited as Markdown.
+ * Model-specific fields can be added through `markdownFields`.
+ */
+const DEFAULT_MARKDOWN_FIELDS = ['description', 'observation', 'annotation', 'justification'];
+
+export function getMarkdownFields(model: urlModel | string | undefined): Set<string> {
+	const modelSpecific = (model ? getModelInfo(model)?.markdownFields : undefined) ?? [];
+	return new Set([...DEFAULT_MARKDOWN_FIELDS, ...modelSpecific]);
+}
+
 export function getFieldComponentMap(URLModel: string) {
 	const fieldComponentMap = FIELD_COMPONENT_MAP[URLModel] ?? {};
 	const listViewConfig = listViewFields[URLModel] ?? { body: [] };
 
-	if (listViewConfig.body.findIndex((field) => field === 'description') >= 0) {
-		fieldComponentMap.description = MarkdownDescription;
+	const markdownFields = getMarkdownFields(URLModel);
+	for (const field of listViewConfig.body) {
+		if (markdownFields.has(field) && !fieldComponentMap[field]) {
+			fieldComponentMap[field] = MarkdownDescription;
+		}
 	}
 	return fieldComponentMap;
 }

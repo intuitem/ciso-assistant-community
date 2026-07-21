@@ -58,7 +58,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
         with:
-          version: 10
+          version: 11
 
       - name: Install community frontend dependencies
         working-directory: ${{ env.frontend-directory }}
@@ -104,7 +104,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
         with:
-          version: 10
+          version: 11
 
       - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
@@ -164,7 +164,7 @@ jobs:
       DB_HOST: localhost
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -225,7 +225,7 @@ jobs:
       LICENSE_SEATS: 999
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -299,7 +299,7 @@ jobs:
       PUBLIC_BACKEND_API_URL: http://localhost:8173/api
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres # test credential
@@ -307,7 +307,7 @@ jobs:
         ports: ["5432:5432"]
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
       mailhog:
-        image: mailhog/mailhog
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/mailhog:v1.0.1
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
@@ -365,7 +365,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
         with:
-          version: 10
+          version: 11
 
       - name: Install community frontend dependencies (if not cached/part of build artifact)
         working-directory: ${{ env.frontend-directory }}
@@ -486,7 +486,7 @@ jobs:
       PUBLIC_BACKEND_API_URL: http://localhost:8173/api
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:16
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -494,7 +494,7 @@ jobs:
         ports: ["5432:5432"]
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
       mailhog:
-        image: mailhog/mailhog
+        image: ghcr.io/intuitem/ciso-assistant-community/mirror/mailhog:v1.0.1
         ports: ["1025:1025", "8025:8025"]
 
     strategy:
@@ -555,7 +555,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
         with:
-          version: 10
+          version: 11
 
       - name: Install enterprise frontend dependencies
         working-directory: ${{ env.enterprise-frontend-build-directory }}
