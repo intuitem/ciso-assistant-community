@@ -1,10 +1,12 @@
 <script lang="ts">
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import { URL_MODEL_MAP } from '$lib/utils/crud.js';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { URL_MODEL_MAP, getMarkdownFields } from '$lib/utils/crud';
 	const showRisks = true;
 	let { data } = $props();
 	const riskMatrix = data.data;
+	const markdownFieldSet = getMarkdownFields(data.urlModel);
 </script>
 
 <div class="flex flex-row justify-between">
@@ -46,6 +48,8 @@
 									}/${value.id}`}
 									<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
 								{/if}
+							{:else if markdownFieldSet.has(key)}
+								<MarkdownRenderer content={value} />
 							{:else}
 								{value.str ?? value}
 							{/if}
