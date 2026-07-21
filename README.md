@@ -843,9 +843,25 @@ PATs respect MFA: they are issued from an authenticated session, so an account p
 
 ## Setting CISO Assistant for production
 
-The docker-compose.yml highlights a relevant configuration with a Caddy proxy in front of the frontend. It exposes API calls only for SSO. Note that docker-compose.yml exposes the full API, which is not yet recommended for production.
+The docker-compose.yml highlights a relevant configuration for testing, with a Caddy proxy in front of the frontend. It exposes the full API, which is not yet recommended for production.
 
-Set `DJANGO_DEBUG=False` for security reasons.
+For production, the config builder can be used to generate a more hardened and tailored docker-compose.yml file, though several hardening steps are still required.
+
+The following recommendations apply for production:
+- Set `DJANGO_DEBUG=False` for security reasons.
+- Pin versions to the latest production version for all images (backend, frontend, reverse proxy)
+- Harden the network configuration to expose only the relevant ports, and filter the URLs to limit full API access to trusted IP ranges.
+  If public API access is restricted and SSO is enabled, keep these endpoints reachable by the browser or identity provider:
+  - `/api/iam/sso/redirect/`
+  - `/api/accounts/saml/0/acs/`
+  - `/api/accounts/saml/0/acs/finish/`
+  - `/api/accounts/oidc/openid_connect/login/callback/`
+  - `/api/iam/sso/logout/`
+- Use non-root deployment, as explained below.
+- Use a valid certificate for the reverse proxy
+- If the reverse proxy is not running on the same host as the backend and frontend, use a VPN like wireguard between the nodes.
+- Use an encrypted volume for the database, and manage the encryption key cautiously.
+- Manage secrets in environment variables instead of putting them directly in the docker-compose.yml file.
 
 > [!NOTE]
 > The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the `HOST_HEADER` and `PROTOCOL_HEADER` variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue. Beware that this approach does not work with "pnpm run dev", which should not be a worry for production.
