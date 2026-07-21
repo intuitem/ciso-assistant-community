@@ -16,14 +16,24 @@ OCSF_STATUS_ID_MAP = {1: "pass", 2: "not_checked", 3: "fail", 99: "not_checked"}
 
 
 class ImportError_(Exception):
-    pass
+    @property
+    def message(self):
+        return self.args[0] if self.args else "import failed"
+
+
+PARSE_ERROR_CAP = 20
+
+
+def _record_parse_error(extras, item):
+    if len(extras["parse_errors"]) < PARSE_ERROR_CAP:
+        extras["parse_errors"].append(item)
 
 
 def _entry(row, extras):
     ref_id = (row.get("ref_id") or "").strip()
     result = (row.get("result") or "").strip().lower()
     if not ref_id or result not in RESULT_VALUES:
-        extras["parse_errors"].append(row)
+        _record_parse_error(extras, row)
         return None
     return {
         "ref_id": ref_id,
@@ -97,7 +107,7 @@ def parse_ocsf(file):
     tool = ""
     for event in events:
         if not isinstance(event, dict):
-            extras["parse_errors"].append(event)
+            _record_parse_error(extras, event)
             continue
         if event.get("class_uid") != 2003:
             extras["skipped_other_class"] += 1
@@ -111,7 +121,7 @@ def parse_ocsf(file):
             compliance.get("status_id")
         )
         if result is None:
-            extras["parse_errors"].append({"status": compliance.get("status")})
+            _record_parse_error(extras, {"status": compliance.get("status")})
             continue
         if not tool:
             product = (event.get("metadata") or {}).get("product") or {}
@@ -251,8 +261,7 @@ def parse_mapped_csv(file, mapping):
         ref_id = (row.get(columns["ref_id"]) or "").strip()
         raw_result = (row.get(columns["result"]) or "").strip()
         if not ref_id:
-            if len(extras["parse_errors"]) < 20:
-                extras["parse_errors"].append({"row": str(row)[:200]})
+            _record_parse_error(extras, {"row": str(row)[:200]})
             continue
         if raw_result not in values:
             extras["skipped_unmapped"] += 1

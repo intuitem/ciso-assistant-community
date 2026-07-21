@@ -306,6 +306,9 @@ def main():
 
     rows, warnings = parse_rows(summary_table_lines(doc))
     doc.close()
+    bad = [r for r in args.rename if "=" not in r]
+    if bad:
+        sys.exit(f"--rename expects REF=New title, got: {', '.join(bad)}")
     renames = dict(r.split("=", 1) for r in args.rename)
     if renames:
         rows = [(ref, d, renames.pop(ref, t), tag) for ref, d, t, tag in rows]

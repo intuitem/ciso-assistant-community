@@ -556,7 +556,9 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         writer = csv.writer(response)
         writer.writerow(self.EXPORT_COLUMNS)
         for row in rows:
-            writer.writerow(self._export_row(row))
+            writer.writerow(
+                [escape_excel_formula(value) for value in self._export_row(row)]
+            )
         return response
 
     @action(
@@ -588,7 +590,7 @@ class PostureAssessmentViewSet(BaseModelViewSet):
                 analyze_csv(file, delimiter=request.data.get("delimiter") or None)
             )
         except ImportError_ as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": e.message}, status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
     def _target_asset_ids(request):
@@ -668,7 +670,7 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         try:
             groups, extras = parse_mapped_csv(file, mapping)
         except ImportError_ as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": e.message}, status=status.HTTP_400_BAD_REQUEST)
         tool = (file.name or "")[:100]
 
         if (mapping.get("columns") or {}).get("asset"):
@@ -734,7 +736,7 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         try:
             entries, extras = parse_file(file)
         except ImportError_ as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": e.message}, status=status.HTTP_400_BAD_REQUEST)
 
         tool = extras.pop("tool", "") or (file.name or "")[:100]
         if request.data.get("assets"):

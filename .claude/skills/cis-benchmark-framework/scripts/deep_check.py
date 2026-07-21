@@ -111,7 +111,8 @@ def parse_body(doc, known_refs=None):
 
 
 def yaml_nodes(path):
-    lib = yaml.safe_load(open(path))
+    with open(path) as f:
+        lib = yaml.safe_load(f)
     fw = lib["objects"]["framework"]
     nodes = []
     for n in fw["requirement_nodes"]:

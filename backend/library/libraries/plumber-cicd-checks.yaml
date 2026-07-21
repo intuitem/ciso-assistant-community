@@ -79,7 +79,7 @@ objects:
         digest pinning, a tag can be reassigned to a different image, introducing supply chain
         risks.
       annotation: |-
-        Severity: high. Plumber control: containerImageMustNotUseForbiddenTags.
+        Severity: high. Plumber control: containerImagesMustBePinnedByDigest.
         Remediation: Pin the image using its digest: 'image: registry.example.com/myimage@sha256:abc123...'. You can find the digest with 'docker inspect --format={{.RepoDigests}} <image>'.
         Documentation: https://getplumber.io/docs/cli/issues/ISSUE-103
       implementation_groups:

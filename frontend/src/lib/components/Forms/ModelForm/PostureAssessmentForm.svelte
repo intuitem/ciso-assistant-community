@@ -29,10 +29,20 @@
 	}: Props = $props();
 
 	let implementationGroupsChoices = $state<{ label: string; value: string }[]>([]);
+	let frameworkRequestSeq = 0;
 
 	async function handleFrameworkChange(id: string) {
 		if (!id) return;
-		const r = await fetch(`/frameworks/${id}`).then((res) => res.json());
+		const seq = ++frameworkRequestSeq;
+		let r: any;
+		try {
+			const res = await fetch(`/frameworks/${id}`);
+			if (!res.ok) return;
+			r = await res.json();
+		} catch {
+			return;
+		}
+		if (seq !== frameworkRequestSeq) return;
 		const implementation_groups = r['implementation_groups_definition'] || [];
 		implementationGroupsChoices = implementation_groups.map((group: any) => ({
 			label: group.name,

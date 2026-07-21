@@ -7,20 +7,40 @@ import { nestedDeleteFormAction } from '$lib/utils/actions';
 
 export const load: PageServerLoad = async (event) => {
 	const endpoint = `${BASE_API_URL}/automation/posture-assessments/${event.params.id}`;
+	const fetchJson = (url: string) => event.fetch(url).then((res) => (res.ok ? res.json() : null));
 	const [detailData, posture, actionPlan, trend, runs] = await Promise.all([
 		loadDetail({
 			event,
 			model: getModelInfo('posture-assessments'),
 			id: event.params.id
 		}),
-		event.fetch(`${endpoint}/posture/`).then((res) => res.json()),
-		event.fetch(`${endpoint}/action-plan/`).then((res) => res.json()),
-		event.fetch(`${endpoint}/trend/`).then((res) => res.json()),
-		event.fetch(`${endpoint}/runs/`).then((res) => res.json())
+		fetchJson(`${endpoint}/posture/`),
+		fetchJson(`${endpoint}/action-plan/`),
+		fetchJson(`${endpoint}/trend/`),
+		fetchJson(`${endpoint}/runs/`)
 	]);
 
 	return { ...detailData, posture, actionPlan, trend, runs };
 };
+
+// atomic M2M add/remove server-side — avoids the read-then-PATCH race on assets
+async function mutateAssets(event: any, action: 'add_m2m' | 'remove_m2m', assetId: string) {
+	const res = await event.fetch(`${BASE_API_URL}/automation/posture-assessments/batch-action/`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			action,
+			ids: [event.params.id],
+			field: 'assets',
+			value: [assetId]
+		})
+	});
+	if (!res.ok) return fail(res.status, await res.json());
+	const body = await res.json();
+	if (body.failed?.length)
+		return fail(400, { error: body.failed[0]?.error ?? 'batch action failed' });
+	return null;
+}
 
 export const actions: Actions = {
 	delete: async (event) => {
@@ -28,34 +48,17 @@ export const actions: Actions = {
 	},
 	addAsset: async (event) => {
 		const formData = await event.request.formData();
-		const endpoint = `${BASE_API_URL}/automation/posture-assessments/${event.params.id}/`;
-		const assessment = await event.fetch(endpoint).then((res) => res.json());
-		const current = (assessment.assets ?? []).map((a: any) => a.id);
 		const assetId = formData.get('asset');
 		if (!assetId) return fail(400, { error: 'asset required' });
-		const res = await event.fetch(endpoint, {
-			method: 'PATCH',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ assets: [...current, assetId] })
-		});
-		if (!res.ok) return fail(res.status, await res.json());
-		return { added: assetId };
+		const result = await mutateAssets(event, 'add_m2m', assetId as string);
+		return result ?? { added: assetId };
 	},
 	removeAsset: async (event) => {
 		const formData = await event.request.formData();
-		const endpoint = `${BASE_API_URL}/automation/posture-assessments/${event.params.id}/`;
-		const assessment = await event.fetch(endpoint).then((res) => res.json());
 		const assetId = formData.get('asset');
-		const kept = (assessment.assets ?? [])
-			.map((a: any) => a.id)
-			.filter((id: string) => id !== assetId);
-		const res = await event.fetch(endpoint, {
-			method: 'PATCH',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ assets: kept })
-		});
-		if (!res.ok) return fail(res.status, await res.json());
-		return { removed: assetId };
+		if (!assetId) return fail(400, { error: 'asset required' });
+		const result = await mutateAssets(event, 'remove_m2m', assetId as string);
+		return result ?? { removed: assetId };
 	},
 	importFile: async (event) => {
 		const formData = await event.request.formData();

@@ -103,6 +103,7 @@
 								name="result"
 								class="select w-36 py-0.5 text-sm"
 								value={row.result}
+								aria-label="{row.requirement.ref_id} — {m.result()}"
 								onchange={submitOnChange}
 							>
 								{#each RESULT_ORDER as key}

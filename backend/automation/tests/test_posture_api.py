@@ -1330,6 +1330,35 @@ class TestActionPlan:
 
 
 @pytest.mark.django_db
+class TestBatchAssetMutation:
+    def batch(self, s, action, asset):
+        return s["client"].post(
+            "/api/automation/posture-assessments/batch-action/",
+            {
+                "action": action,
+                "ids": [str(s["pa"].id)],
+                "field": "assets",
+                "value": [str(asset.id)],
+            },
+            format="json",
+        )
+
+    def test_add_and_remove_asset(self, setup):
+        s = setup
+        newcomer = Asset.objects.create(name="vm-3", folder=s["domain"])
+        res = self.batch(s, "add_m2m", newcomer)
+        assert res.status_code == 200
+        assert res.json()["failed"] == []
+        assert s["pa"].assets.filter(id=newcomer.id).exists()
+
+        res = self.batch(s, "remove_m2m", newcomer)
+        assert res.status_code == 200
+        assert res.json()["failed"] == []
+        assert not s["pa"].assets.filter(id=newcomer.id).exists()
+        assert s["pa"].assets.count() == 2
+
+
+@pytest.mark.django_db
 class TestPosturePermissions:
     def make_user(self, email, role_name, domain):
         user = User.objects.create_user(email)

@@ -150,6 +150,8 @@
 
 	const modalStore: ModalStore = getModalStore();
 
+	let purgeError = $state('');
+
 	async function confirmPurge(asset: { id: string; name: string }) {
 		let impact = '';
 		try {
@@ -172,11 +174,8 @@
 				if (!confirmed) return;
 				const fd = new FormData();
 				fd.set('asset', asset.id);
-				await fetch('?/purgeAsset', {
-					method: 'POST',
-					body: fd,
-					headers: { 'x-sveltekit-action': 'true' }
-				});
+				const result = await postAction('purgeAsset', fd);
+				purgeError = result.type === 'success' ? '' : ((result as any).data?.error ?? m.error());
 				await invalidateAll();
 			}
 		});
@@ -469,6 +468,11 @@
 
 			<Tabs.Content value="assets" class="p-4">
 				<div data-testid="posture-assets-card" class="space-y-3">
+					{#if purgeError}
+						<p class="text-sm text-error-600-400">
+							<i class="fa-solid fa-triangle-exclamation mr-1"></i>{purgeError}
+						</p>
+					{/if}
 					<div class="flex items-center justify-between relative">
 						<h3 class="text-lg font-semibold">{m.assets()}</h3>
 						<div class="flex items-center gap-2">
