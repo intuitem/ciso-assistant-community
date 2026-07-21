@@ -17,6 +17,12 @@ type FormField = {
 	type: FormFieldType;
 };
 
+/** Lazy selects surface options through server-side search on name/description.
+ * Option labels compose scope and ref_id prefixes ("folder/ref_id - name"), so
+ * strip them to type a fragment the backend search can actually match. */
+const lazySearchText = (label: string): string =>
+	String(label).split('/').pop()!.split(' - ').pop()!;
+
 export class FormContent {
 	readonly formTitle: Locator;
 	readonly saveButton: Locator;
@@ -103,13 +109,15 @@ export class FormContent {
 									(resp) => resp.url().includes(values[key].request.url) && resp.status() === 200
 								);
 								await field.locator.click();
-								await expect(
-									field.locator.getByRole('option', { name: values[key].value }).first()
-								).toBeVisible({ timeout: 10_000 });
-								await field.locator
+								const optionLocator = field.locator
 									.getByRole('option', { name: values[key].value })
-									.first()
-									.click();
+									.first();
+								// If the option isn't immediately visible, type to trigger lazy search
+								if (!(await optionLocator.isVisible())) {
+									await field.locator.getByRole('textbox').fill(lazySearchText(values[key].value));
+								}
+								await expect(optionLocator).toBeVisible({ timeout: 10_000 });
+								await optionLocator.click();
 
 								await responsePromise;
 							} else {
@@ -119,7 +127,7 @@ export class FormContent {
 									.first();
 								// If the option isn't immediately visible, type to trigger lazy search
 								if (!(await optionLocator.isVisible())) {
-									await field.locator.getByRole('textbox').fill(values[key]);
+									await field.locator.getByRole('textbox').fill(lazySearchText(values[key]));
 								}
 								await expect(optionLocator).toBeVisible({ timeout: 10_000 });
 								await optionLocator.click();
@@ -133,7 +141,7 @@ export class FormContent {
 						const optionLocator = field.locator.getByRole('option', { name: val }).first();
 						// If the option isn't immediately visible, type to trigger lazy search
 						if (!(await optionLocator.isVisible())) {
-							await field.locator.getByRole('textbox').fill(val);
+							await field.locator.getByRole('textbox').fill(lazySearchText(val));
 						}
 						await expect(optionLocator).toBeVisible({ timeout: 10_000 });
 						await optionLocator.click();

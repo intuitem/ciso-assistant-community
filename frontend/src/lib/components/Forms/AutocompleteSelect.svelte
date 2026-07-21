@@ -377,10 +377,13 @@
 
 		const processed = objects
 			.map((object) => {
-				const mainLabel =
+				const composedLabel =
 					optionsLabelField === 'auto'
 						? append(object.ref_id, object.name || object.description)
 						: getNestedValue(object, optionsLabelField);
+				// Lightweight payloads (e.g. autocomplete) may lack the label
+				// fields — fall back to the server-side display string.
+				const mainLabel = composedLabel || object.str || '';
 
 				const extraParts = optionsExtraFields.map((fieldPath) => {
 					const value = getNestedValue(object, fieldPath[0], fieldPath[1]);

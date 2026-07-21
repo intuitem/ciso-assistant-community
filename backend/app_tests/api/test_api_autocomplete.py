@@ -40,6 +40,20 @@ class TestGenericAutocomplete:
         assert response.status_code == status.HTTP_200_OK
         assert [r["id"] for r in _rows(response)] == [str(target.id)]
 
+    def test_payload_carries_label_fields(self, authenticated_client):
+        # Option labels compose ref_id/name and the folder scope client-side;
+        # the lightweight payload must carry them so lazily searched options
+        # render exactly like eagerly fetched ones.
+        root = Folder.get_root_folder()
+        Threat.objects.create(name="Phishing", ref_id="T-1", folder=root)
+
+        response = authenticated_client.get(reverse("threats-autocomplete"))
+
+        row = next(r for r in _rows(response) if r.get("name") == "Phishing")
+        assert row["ref_id"] == "T-1"
+        assert str(row["folder"]["id"]) == str(root.id)
+        assert row["folder"]["str"] == str(root)
+
     def test_invalid_id_list_is_rejected(self, authenticated_client):
         response = authenticated_client.get(
             reverse("threats-autocomplete"), {"id": "not-a-uuid"}

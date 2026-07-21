@@ -857,6 +857,9 @@ class AutocompleteMixin:
     @action(detail=False, name="Lightweight autocomplete search")
     def autocomplete(self, request):
         qs = self.filter_queryset(self.get_queryset())
+        # The autocomplete serializer nests the folder when the model has one.
+        if any(f.name == "folder" and f.is_relation for f in self.model._meta.fields):
+            qs = qs.select_related("folder")
         # Selected-item hydration passes ?id=a,b,c — honor it even when the
         # model's filterset does not declare an id filter.
         ids = request.query_params.get("id")
