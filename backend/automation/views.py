@@ -796,10 +796,14 @@ class PostureAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], url_path="action-plan")
     def action_plan(self, request, pk=None):
         assessment = self.get_object()
-        fails = [r for r in assessment.current_posture() if r["result"] == "fail"]
+        severity = {"fail": 0, "error": 1, "not_checked": 2, "not_applicable": 3}
+        non_pass = sorted(
+            (r for r in assessment.current_posture() if r["result"] != "pass"),
+            key=lambda r: severity.get(r["result"], len(severity)),
+        )
         findings = self._follow_up_findings(assessment)
         rows = []
-        for r in fails:
+        for r in non_pass:
             finding = findings.get((r["requirement_id"], r["asset_id"]))
             rows.append(
                 {
@@ -812,6 +816,7 @@ class PostureAssessmentViewSet(BaseModelViewSet):
                         "id": str(r["asset_id"]),
                         "str": f"{r['asset__folder__name']}/{r['asset__name']}",
                     },
+                    "result": r["result"],
                     "actual": r["actual"],
                     "expected": r["expected"],
                     "message": r["message"],
@@ -830,9 +835,11 @@ class PostureAssessmentViewSet(BaseModelViewSet):
                     else None,
                 }
             )
+        by_result = Counter(row["result"] for row in rows)
         return Response(
             {
-                "total_fails": len(rows),
+                "total": len(rows),
+                "by_result": dict(by_result),
                 "planned": sum(1 for row in rows if row["finding"]),
                 "results": rows,
             }

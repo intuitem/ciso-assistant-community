@@ -46,7 +46,7 @@
 	const PRESETS: Preset[] = [
 		{
 			key: 'standard',
-			label: 'Standard CSV',
+			label: m.importPresetStandard(),
 			columns: {
 				ref_id: 'ref_id',
 				result: 'result',
@@ -59,7 +59,7 @@
 		},
 		{
 			key: 'prowler',
-			label: 'Prowler compliance',
+			label: m.importPresetProwler(),
 			columns: {
 				ref_id: 'REQUIREMENTS_ID',
 				result: 'STATUS',
@@ -295,7 +295,7 @@
 					<div class="grid grid-cols-2 md:grid-cols-3 gap-2">
 						{#each resultValues as value}
 							<label class="label text-sm">
-								<span class="font-mono text-xs">{value || '(empty)'}</span>
+								<span class="font-mono text-xs">{value || m.importEmptyValue()}</span>
 								<select
 									class="select"
 									bind:value={valueMap[value]}

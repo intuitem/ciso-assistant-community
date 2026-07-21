@@ -1237,7 +1237,7 @@ class TestActionPlan:
             format="json",
         )
 
-    def test_fails_listed_unplanned(self, setup):
+    def test_non_pass_listed_unplanned(self, setup):
         s = setup
         upload(
             s["client"],
@@ -1249,10 +1249,34 @@ class TestActionPlan:
             ],
         )
         plan = self.action_plan(s)
-        assert plan["total_fails"] == 1
+        assert plan["total"] == 1
+        assert plan["by_result"] == {"fail": 1}
         assert plan["planned"] == 0
         assert plan["results"][0]["requirement"]["ref_id"] == "1.1"
+        assert plan["results"][0]["result"] == "fail"
         assert plan["results"][0]["finding"] is None
+
+    def test_ordered_by_severity(self, setup):
+        s = setup
+        upload(
+            s["client"],
+            s["pa"],
+            s["asset1"],
+            [
+                {"ref_id": "1.1", "result": "not_checked"},
+                {"ref_id": "1.2", "result": "error"},
+                {"ref_id": "2.1", "result": "fail"},
+                {"ref_id": "2.2", "result": "pass"},
+            ],
+        )
+        plan = self.action_plan(s)
+        assert plan["total"] == 3
+        assert plan["by_result"] == {"fail": 1, "error": 1, "not_checked": 1}
+        assert [r["result"] for r in plan["results"]] == [
+            "fail",
+            "error",
+            "not_checked",
+        ]
 
     def test_create_finding_requires_attached_follow_up(self, setup):
         s = setup

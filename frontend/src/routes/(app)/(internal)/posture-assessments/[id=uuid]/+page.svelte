@@ -108,8 +108,9 @@
 	});
 
 	const actionPlanRows = $derived.by(() => {
-		const rows = data.actionPlan?.results ?? [];
-		if (filterStatuses.length > 0 && !filterStatuses.includes('fail')) return [];
+		let rows = data.actionPlan?.results ?? [];
+		if (filterStatuses.length > 0)
+			rows = rows.filter((row: any) => filterStatuses.includes(row.result));
 		return filterAsset ? rows.filter((row: any) => row.asset.id === filterAsset) : rows;
 	});
 
@@ -131,12 +132,20 @@
 				return {
 					id: a.id,
 					name: assetLabel(a),
+					shortName: a.str ?? a.name,
+					folder: a.folder?.str ?? '',
 					measured: acc?.measured ?? 0,
 					passRate: applicable ? Math.round((100 * (acc?.pass ?? 0)) / applicable) : null,
 					lastRun: acc?.last || null
 				};
 			})
 			.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+	});
+
+	const assetGroups = $derived.by(() => {
+		const groups: Record<string, typeof assetRows> = {};
+		for (const row of assetRows) (groups[row.folder] ??= []).push(row);
+		return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
 	});
 
 	const modalStore: ModalStore = getModalStore();
@@ -286,13 +295,6 @@
 					label={m.treeView()}
 				>
 					<i class="fa-solid fa-folder-tree mr-2"></i>{m.treeView()}
-				</Anchor>
-				<Anchor
-					href="/posture-assessments/{data.data.id}/matrix"
-					class="btn preset-filled-primary-500 h-fit w-full"
-					label={m.matrixEdit()}
-				>
-					<i class="fa-solid fa-table-cells mr-2"></i>{m.matrixEdit()}
 				</Anchor>
 			</div>
 		{/snippet}
@@ -546,66 +548,73 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each assetRows as row (row.id)}
-								<tr class="border-t border-surface-200-800" data-testid="posture-asset-row">
-									<td class="px-2 py-2 font-medium">{row.name}</td>
-									<td class="px-2 py-2 {row.measured === 0 ? 'text-surface-500' : ''}">
-										{row.measured}/{totalChecks}
+							{#each assetGroups as [folder, rows] (folder)}
+								<tr class="border-t border-surface-200-800 bg-surface-100-900">
+									<td colspan="5" class="px-2 py-1.5 font-semibold text-surface-700-300">
+										<i class="fa-solid fa-diagram-project mr-2 text-surface-500"></i>{folder || '—'}
 									</td>
-									<td class="px-2 py-2">
-										{row.passRate != null ? `${row.passRate}%` : '--'}
-									</td>
-									<td class="px-2 py-2 whitespace-nowrap">
-										{row.lastRun ? new Date(row.lastRun).toLocaleString() : '--'}
-									</td>
-									<td class="px-2 py-2">
-										<div class="flex items-center gap-3 justify-end">
-											<Anchor
-												href="/posture-assessments/{data.data.id}/tree?asset={row.id}"
-												class="text-surface-500 hover:text-primary-500"
-												label={m.treeView()}
-											>
-												<i class="fa-solid fa-folder-tree"></i>
-											</Anchor>
-											<Anchor
-												href="/posture-assessments/{data.data.id}/runs/new?asset={row.id}"
-												class="text-surface-500 hover:text-primary-500"
-												label={m.newManualRun()}
-											>
-												<i class="fa-solid fa-plus"></i>
-											</Anchor>
-											<a
-												href="/posture-assessments/{data.data
-													.id}/export?asset={row.id}&file_format=csv"
-												class="text-surface-500 hover:text-primary-500"
-												title="{m.exportButton()} {m.asCSV()}"
-											>
-												<i class="fa-solid fa-download"></i>
-											</a>
-											{#if row.measured === 0}
-												<form method="POST" action="?/removeAsset" use:enhance class="inline">
-													<input type="hidden" name="asset" value={row.id} />
+								</tr>
+								{#each rows as row (row.id)}
+									<tr class="border-t border-surface-200-800" data-testid="posture-asset-row">
+										<td class="px-2 py-2 font-medium pl-6">{row.shortName}</td>
+										<td class="px-2 py-2 {row.measured === 0 ? 'text-surface-500' : ''}">
+											{row.measured}/{totalChecks}
+										</td>
+										<td class="px-2 py-2">
+											{row.passRate != null ? `${row.passRate}%` : '--'}
+										</td>
+										<td class="px-2 py-2 whitespace-nowrap">
+											{row.lastRun ? new Date(row.lastRun).toLocaleString() : '--'}
+										</td>
+										<td class="px-2 py-2">
+											<div class="flex items-center gap-3 justify-end">
+												<Anchor
+													href="/posture-assessments/{data.data.id}/tree?asset={row.id}"
+													class="text-surface-500 hover:text-primary-500"
+													label={m.treeView()}
+												>
+													<i class="fa-solid fa-folder-tree"></i>
+												</Anchor>
+												<Anchor
+													href="/posture-assessments/{data.data.id}/runs/new?asset={row.id}"
+													class="text-surface-500 hover:text-primary-500"
+													label={m.newManualRun()}
+												>
+													<i class="fa-solid fa-plus"></i>
+												</Anchor>
+												<a
+													href="/posture-assessments/{data.data
+														.id}/export?asset={row.id}&file_format=csv"
+													class="text-surface-500 hover:text-primary-500"
+													title="{m.exportButton()} {m.asCSV()}"
+												>
+													<i class="fa-solid fa-download"></i>
+												</a>
+												{#if row.measured === 0}
+													<form method="POST" action="?/removeAsset" use:enhance class="inline">
+														<input type="hidden" name="asset" value={row.id} />
+														<button
+															type="submit"
+															class="text-surface-400 hover:text-red-500"
+															title={m.remove()}
+														>
+															<i class="fa-solid fa-xmark"></i>
+														</button>
+													</form>
+												{:else}
 													<button
-														type="submit"
+														type="button"
 														class="text-surface-400 hover:text-red-500"
-														title={m.remove()}
+														title={m.purgeAssetColumn()}
+														onclick={() => confirmPurge(row)}
 													>
 														<i class="fa-solid fa-xmark"></i>
 													</button>
-												</form>
-											{:else}
-												<button
-													type="button"
-													class="text-surface-400 hover:text-red-500"
-													title={m.purgeAssetColumn()}
-													onclick={() => confirmPurge(row)}
-												>
-													<i class="fa-solid fa-xmark"></i>
-												</button>
-											{/if}
-										</div>
-									</td>
-								</tr>
+												{/if}
+											</div>
+										</td>
+									</tr>
+								{/each}
 							{:else}
 								<tr><td colspan="5" class="px-2 py-4 text-surface-500">{m.noEntriesFound()}</td></tr
 								>
@@ -714,11 +723,22 @@
 					</p>
 				{:else if actionPlanRows.length}
 					<div class="flex items-center justify-between mb-4">
-						<p class="text-sm text-surface-600-400">
-							{data.actionPlan.total_fails}
-							{m.fail()} — {data.actionPlan.planned}
-							{m.planned()}, {data.actionPlan.total_fails - data.actionPlan.planned}
-							{m.unplanned()}
+						<p class="text-sm text-surface-600-400 flex items-center gap-3 flex-wrap">
+							{#each Object.entries(data.actionPlan.by_result ?? {}) as [result, count]}
+								<span class="whitespace-nowrap">
+									<span
+										class="inline-block w-2.5 h-2.5 rounded-sm mr-1 {postureResultTailwindColorMap[
+											result
+										]}"
+									></span>{count}
+									{resultLabels[result] ?? result}
+								</span>
+							{/each}
+							<span
+								>— {data.actionPlan.planned}
+								{m.planned()}, {data.actionPlan.total - data.actionPlan.planned}
+								{m.unplanned()}</span
+							>
 						</p>
 					</div>
 					{#if form?.error}
@@ -731,6 +751,7 @@
 							<thead>
 								<tr class="text-left">
 									<th class="px-2 py-1"></th>
+									<th class="px-2 py-1">{m.result()}</th>
 									<th class="px-2 py-1">{m.assets()}</th>
 									<th class="px-2 py-1">{m.observedValue()}</th>
 									<th class="px-2 py-1">{m.actionPlan()}</th>
@@ -749,6 +770,13 @@
 													? `${row.requirement.name.slice(0, 50)}…`
 													: (row.requirement.name ?? '')}
 											</span>
+										</td>
+										<td class="px-2 py-2 whitespace-nowrap">
+											<span
+												class="inline-block w-2.5 h-2.5 rounded-sm mr-1 {postureResultTailwindColorMap[
+													row.result
+												]}"
+											></span>{resultLabels[row.result] ?? row.result}
 										</td>
 										<td class="px-2 py-2 whitespace-nowrap">{row.asset.str}</td>
 										<td class="px-2 py-2 text-surface-600-400">
@@ -791,7 +819,7 @@
 						</table>
 					</div>
 				{:else}
-					<p class="text-sm text-surface-500 p-4">{m.noEntriesFound()}</p>
+					<p class="text-sm text-surface-500 p-4">{m.actionPlanEmptyHelp()}</p>
 				{/if}
 			</Tabs.Content>
 
