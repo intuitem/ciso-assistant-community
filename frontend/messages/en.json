@@ -5276,7 +5276,7 @@
 	"lbListReferenceIdPattern": "Reference ID must match [a-z0-9_-]+",
 	"lbListIdentityCollides": "This identity collides with {count} existing object(s): {objects} — publishing will conflict unless you pick another identity.",
 	"lbListIdentityFree": "Identity is free.",
-	"lbListLibraryDrafts": "Library Drafts",
+	"lbListLibraryDrafts": "Your libraries",
 	"lbListContents": "Contents",
 	"lbListPublished": "Published",
 	"lbListPublishedModified": "Published · unpublished changes",
