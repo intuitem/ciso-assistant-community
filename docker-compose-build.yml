@@ -99,7 +99,7 @@ services:
     volumes:
       - qdrant_data:/qdrant/storage
     ports:
-      - 6333:6333
+      - 127.0.0.1:6333:6333
 
   caddy:
     container_name: caddy
@@ -108,7 +108,7 @@ services:
       - CISO_ASSISTANT_URL=https://localhost:8443
     restart: unless-stopped
     ports:
-      - 8443:8443
+      - 127.0.0.1:8443:8443
     volumes:
       - ./db/caddy:/data/caddy
     command: |
