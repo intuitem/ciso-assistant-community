@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('iam', '0024_serviceaccount'),
+        ("iam", "0024_serviceaccount"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='serviceaccount',
-            name='previous_secret_expires_at',
+            model_name="serviceaccount",
+            name="previous_secret_expires_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='serviceaccount',
-            name='previous_secret_hash',
+            model_name="serviceaccount",
+            name="previous_secret_hash",
             field=models.CharField(blank=True, max_length=200, null=True),
         ),
     ]

@@ -705,7 +705,7 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
         grace_period_minutes = request.data.get("grace_period_minutes") or 0
         try:
             grace_period_minutes = int(grace_period_minutes)
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             return Response(
                 {"error": ["grace_period_minutes must be an integer"]},
                 status=status.HTTP_400_BAD_REQUEST,
