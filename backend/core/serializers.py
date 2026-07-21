@@ -2466,6 +2466,7 @@ class EvidenceReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
     requirement_assessments = FieldsRelatedField(many=True)
+    security_exceptions = FieldsRelatedField(many=True)
     contracts = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     owner = FieldsRelatedField(many=True)
@@ -2499,6 +2500,9 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     )
     findings_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=FindingsAssessment.objects.all(), required=False
+    )
+    security_exceptions = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=SecurityException.objects.all(), required=False
     )
     timeline_entries = serializers.PrimaryKeyRelatedField(
         many=True, queryset=TimelineEntry.objects.all(), required=False
@@ -4412,6 +4416,9 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
     assets = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Asset.objects.all(), required=False
     )
+    evidences = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Evidence.objects.all(), required=False
+    )
 
     def create(self, validated_data):
         owner_data = validated_data.get("owners", [])
@@ -4525,6 +4532,7 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
     severity = serializers.CharField(source="get_severity_display")
     associated_objects_count = serializers.SerializerMethodField()
     assets = FieldsRelatedField(many=True)
+    evidences = FieldsRelatedField(many=True)
     validation_flows = FieldsRelatedField(
         many=True,
         fields=[

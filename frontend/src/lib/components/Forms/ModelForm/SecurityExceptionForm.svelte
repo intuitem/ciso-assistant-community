@@ -204,3 +204,14 @@
 		</div>
 	{/if}
 </div>
+<AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="evidences"
+	optionsExtraFields={[['folder', 'str']]}
+	optionsLabelField="auto"
+	field="evidences"
+	cacheLock={cacheLocks['evidences']}
+	bind:cachedValue={formDataCache['evidences']}
+	label={m.evidences()}
+/>

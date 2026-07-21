@@ -1314,6 +1314,7 @@ export const SecurityExceptionSchema = z.object({
 	requirement_assessments: z.string().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
+	evidences: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	link: z.string().url().optional().nullable().or(z.literal(''))
 });

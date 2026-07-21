@@ -9411,6 +9411,7 @@ class EvidenceViewSet(BaseModelViewSet):
         "filtering_labels",
         "findings",
         "findings_assessments",
+        "security_exceptions",
         "genericcollection",
         "owner",
         "status",
@@ -14794,6 +14795,7 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
         "name",
         "requirement_assessments",
         "risk_scenarios",
+        "evidences",
         "owners",
         "approver",
         "folder",
@@ -14863,6 +14865,7 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
                 "vulnerabilities",
                 "risk_scenarios",
                 "requirement_assessments",
+                "evidences",
                 "owners",
                 Prefetch(
                     "validationflow_set",
