@@ -3,7 +3,7 @@
 	import FileInput from '../FileInput.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -73,7 +73,7 @@
 	cacheLock={cacheLocks['link']}
 	bind:cachedValue={formDataCache['link']}
 />
-<TextArea
+<MarkdownField
 	{form}
 	field="observation"
 	label={m.observation()}

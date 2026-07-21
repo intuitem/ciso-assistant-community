@@ -211,7 +211,9 @@ def resolve_asset_class_id(asset_class_name_or_id: str) -> str:
     res = make_get_request("/asset-class/", params={"name": asset_class_name_or_id})
 
     if res.status_code != 200:
-        raise ValueError(f"Asset class '{asset_class_name_or_id}' API error {res.status_code}")
+        raise ValueError(
+            f"Asset class '{asset_class_name_or_id}' API error {res.status_code}"
+        )
 
     data = res.json()
     asset_classes = get_paginated_results(data)
@@ -460,7 +462,9 @@ def resolve_vulnerability_id(vulnerability_name_or_id: str) -> str:
         return vulnerability_name_or_id
 
     # Otherwise, look up by name
-    res = make_get_request("/vulnerabilities/", params={"name": vulnerability_name_or_id})
+    res = make_get_request(
+        "/vulnerabilities/", params={"name": vulnerability_name_or_id}
+    )
 
     if res.status_code != 200:
         raise ValueError(
