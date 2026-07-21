@@ -9,7 +9,6 @@
 	import { invalidateAll } from '$app/navigation';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { copy } from '@svelte-put/copy';
 	import { page } from '$app/state';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
@@ -836,7 +835,6 @@
 					<button
 						type="button"
 						class="btn btn-sm preset-tonal absolute top-2 right-2"
-						use:copy={{ text: apiSnippet }}
 						onclick={() => {
 							navigator.clipboard?.writeText(apiSnippet);
 							snippetCopied = true;

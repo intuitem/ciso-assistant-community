@@ -85,6 +85,16 @@ def get_posture(client, pa):
 
 @pytest.mark.django_db
 class TestPostureIngestion:
+    def test_upload_rejects_malformed_asset_id(self, setup):
+        s = setup
+        res = s["client"].post(
+            f"/api/automation/posture-assessments/{s['pa'].id}/upload-results/",
+            {"asset": "not-a-uuid", "results": [{"ref_id": "1.1", "result": "pass"}]},
+            format="json",
+        )
+        assert res.status_code == 400
+        assert "UUID" in res.json()["error"]
+
     def test_upload_and_unknown_refs(self, setup):
         s = setup
         res = upload(
@@ -1266,7 +1276,7 @@ class TestActionPlan:
                 {"ref_id": "1.1", "result": "not_checked"},
                 {"ref_id": "1.2", "result": "error"},
                 {"ref_id": "2.1", "result": "fail"},
-                {"ref_id": "2.2", "result": "pass"},
+                {"ref_id": "1.3", "result": "pass"},
             ],
         )
         plan = self.action_plan(s)
@@ -1402,3 +1412,156 @@ class TestPosturePermissions:
         assert (
             PostureResult.objects.filter(run__posture_assessment=s["pa"]).count() == 0
         )
+
+    def test_outsider_sees_nothing(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        outsider = self.make_user("outsider@tests.com", "BI-RL-ANA", other)
+
+        listed = outsider.get("/api/automation/posture-assessments/").json()
+        assert listed["count"] == 0
+
+        base = f"/api/automation/posture-assessments/{s['pa'].id}"
+        assert outsider.get(f"{base}/").status_code == 404
+        assert outsider.get(f"{base}/posture/").status_code == 404
+        assert outsider.get(f"{base}/tree/").status_code == 404
+        res = upload(
+            outsider, s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}]
+        )
+        assert res.status_code == 404
+
+    def test_unauthenticated_rejected(self, setup):
+        s = setup
+        anonymous = APIClient()
+        res = anonymous.get("/api/automation/posture-assessments/")
+        assert res.status_code in (401, 403)
+        res = anonymous.get(
+            f"/api/automation/posture-assessments/{s['pa'].id}/posture/"
+        )
+        assert res.status_code in (401, 403)
+
+    def test_results_scoped_to_viewable_assets(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden_asset = Asset.objects.create(name="hidden-vm", folder=other)
+        upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}])
+        upload(
+            s["client"], s["pa"], hidden_asset, [{"ref_id": "1.1", "result": "fail"}]
+        )
+
+        reader = self.make_user("scoped-reader@tests.com", "BI-RL-AUD", s["domain"])
+        body = reader.get(
+            f"/api/automation/posture-assessments/{s['pa'].id}/posture/"
+        ).json()
+        asset_ids = {row["asset"]["id"] for row in body["results"]}
+        assert str(s["asset1"].id) in asset_ids
+        assert str(hidden_asset.id) not in asset_ids
+        assert body["score"] == 100.0
+
+        tree = reader.get(
+            f"/api/automation/posture-assessments/{s['pa'].id}/tree/"
+        ).json()
+        assert str(hidden_asset.id) not in {a["id"] for a in tree["assets"]}
+
+        admin_body = get_posture(s["client"], s["pa"])
+        assert str(hidden_asset.id) in {
+            row["asset"]["id"] for row in admin_body["results"]
+        }
+
+    def test_cross_domain_follow_up_link_rejected(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        foreign = FindingsAssessment.objects.create(
+            name="foreign register",
+            folder=other,
+            category=FindingsAssessment.Category.POSTURE,
+        )
+        tester = self.make_user("linker@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/",
+            {"follow_up_assessment": str(foreign.id)},
+            format="json",
+        )
+        assert res.status_code == 400
+        s["pa"].refresh_from_db()
+        assert s["pa"].follow_up_assessment is None
+
+
+@pytest.mark.django_db
+class TestLockedAssessment:
+    def test_locked_blocks_mutations(self, setup):
+        s = setup
+        upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "fail"}])
+        s["pa"].is_locked = True
+        s["pa"].save(update_fields=["is_locked"])
+
+        res = upload(
+            s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}]
+        )
+        assert res.status_code == 400
+        assert "locked" in res.json()["error"]
+
+        res = s["client"].post(
+            f"/api/automation/posture-assessments/{s['pa'].id}/purge-asset/",
+            {"asset": str(s["asset1"].id)},
+            format="json",
+        )
+        assert res.status_code == 400
+
+        res = s["client"].patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/",
+            {"name": "renamed"},
+            format="json",
+        )
+        assert res.status_code == 400
+
+        res = s["client"].patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/",
+            {"is_locked": False},
+            format="json",
+        )
+        assert res.status_code == 200
+        s["pa"].refresh_from_db()
+        assert s["pa"].is_locked is False
+
+
+@pytest.mark.django_db
+class TestIngestionValidation:
+    def test_non_dict_entries_rejected(self, setup):
+        s = setup
+        res = upload(s["client"], s["pa"], s["asset1"], ["1.1", "1.2"])
+        assert res.status_code == 400
+        assert "objects" in res.json()["error"]
+
+    def test_long_values_truncated(self, setup):
+        s = setup
+        res = upload(
+            s["client"],
+            s["pa"],
+            s["asset1"],
+            [{"ref_id": "1.1", "result": "fail", "actual": "x" * 600}],
+        )
+        assert res.status_code == 200
+        row = PostureResult.objects.get(run__posture_assessment=s["pa"])
+        assert len(row.actual) == 255
+
+    def test_history_depth_zero_rejected(self, setup):
+        s = setup
+        res = s["client"].patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/",
+            {"history_depth": 0},
+            format="json",
+        )
+        assert res.status_code == 400

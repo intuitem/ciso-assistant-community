@@ -1,6 +1,6 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
-import { fail, redirect, type Actions } from '@sveltejs/kit';
+import { error, fail, redirect, type Actions, type NumericRange } from '@sveltejs/kit';
 
 function flattenChecks(nodes: any[], acc: any[] = []) {
 	for (const node of nodes) {
@@ -12,10 +12,14 @@ function flattenChecks(nodes: any[], acc: any[] = []) {
 
 export const load: PageServerLoad = async (event) => {
 	const endpoint = `${BASE_API_URL}/automation/posture-assessments/${event.params.id}`;
-	const [assessment, tree] = await Promise.all([
-		event.fetch(`${endpoint}/`).then((res) => res.json()),
-		event.fetch(`${endpoint}/tree/`).then((res) => res.json())
+	const [assessmentRes, treeRes] = await Promise.all([
+		event.fetch(`${endpoint}/`),
+		event.fetch(`${endpoint}/tree/`)
 	]);
+	if (!assessmentRes.ok)
+		error(assessmentRes.status as NumericRange<400, 599>, await assessmentRes.json());
+	if (!treeRes.ok) error(treeRes.status as NumericRange<400, 599>, await treeRes.json());
+	const [assessment, tree] = await Promise.all([assessmentRes.json(), treeRes.json()]);
 	const asset =
 		event.url.searchParams.get('asset') ??
 		(assessment.assets?.length === 1 ? assessment.assets[0].id : null);

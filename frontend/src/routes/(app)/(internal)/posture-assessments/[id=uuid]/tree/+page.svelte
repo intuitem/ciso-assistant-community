@@ -41,6 +41,7 @@
 	}
 
 	let treeContainer: HTMLDivElement | undefined = $state();
+	let sessionRunId = $state('');
 
 	function setAll(open: boolean) {
 		treeContainer
@@ -107,10 +108,19 @@
 								.join(' — ') || resultLabels[node.current.result]}
 						></span>
 					{/if}
-					<form method="POST" action="?/setResult" use:enhance>
+					<form
+						method="POST"
+						action="?/setResult"
+						use:enhance={() =>
+							async ({ result, update }) => {
+								if (result.type === 'success' && result.data?.run_id)
+									sessionRunId = String(result.data.run_id);
+								await update({ reset: false });
+							}}
+					>
 						<input type="hidden" name="ref_id" value={node.ref_id} />
 						<input type="hidden" name="asset" value={data.selectedAsset} />
-						<input type="hidden" name="run_id" value={node.current?.run_id ?? ''} />
+						<input type="hidden" name="run_id" value={node.current?.run_id ?? sessionRunId} />
 						<select
 							name="result"
 							class="select w-40 py-1 text-sm"

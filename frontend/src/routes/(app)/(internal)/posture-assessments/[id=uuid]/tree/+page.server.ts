@@ -1,16 +1,21 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
-import { fail, type Actions } from '@sveltejs/kit';
+import { error, fail, type Actions, type NumericRange } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async (event) => {
 	const endpoint = `${BASE_API_URL}/automation/posture-assessments/${event.params.id}`;
-	const assessment = await event.fetch(`${endpoint}/`).then((res) => res.json());
+	const assessmentRes = await event.fetch(`${endpoint}/`);
+	if (!assessmentRes.ok)
+		error(assessmentRes.status as NumericRange<400, 599>, await assessmentRes.json());
+	const assessment = await assessmentRes.json();
 	const asset =
 		event.url.searchParams.get('asset') ??
 		(assessment.assets?.length === 1 ? assessment.assets[0].id : null);
-	const tree = await event
-		.fetch(`${endpoint}/tree/${asset ? `?asset=${encodeURIComponent(asset)}` : ''}`)
-		.then((res) => res.json());
+	const treeRes = await event.fetch(
+		`${endpoint}/tree/${asset ? `?asset=${encodeURIComponent(asset)}` : ''}`
+	);
+	if (!treeRes.ok) error(treeRes.status as NumericRange<400, 599>, await treeRes.json());
+	const tree = await treeRes.json();
 	return {
 		assessment,
 		tree: tree.tree,
@@ -37,6 +42,6 @@ export const actions: Actions = {
 			}
 		);
 		if (!res.ok) return fail(res.status, await res.json());
-		return { ok: true };
+		return await res.json();
 	}
 };

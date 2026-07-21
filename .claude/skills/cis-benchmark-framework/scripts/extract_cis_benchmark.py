@@ -37,9 +37,9 @@ CLASSIFICATION_RE = re.compile(r"^(Internal Only|TLP:).*", re.IGNORECASE)
 
 def cover_metadata(doc):
     """Return (title, version, publication_date) from the cover page."""
+    title_parts = []
     for page in doc[:3]:
         lines = [line.strip() for line in page.get_text().splitlines() if line.strip()]
-        title_parts = []
         for line in lines:
             m = VERSION_LINE_RE.match(line)
             if m:

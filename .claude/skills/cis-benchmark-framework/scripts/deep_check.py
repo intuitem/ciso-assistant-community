@@ -94,8 +94,8 @@ def parse_body(doc, known_refs=None):
             for line in text.splitlines()
             if line.strip() and not NOISE_RE.match(line.strip())
         ]
-        for i, l in enumerate(lines):
-            if not l.startswith("Profile Applicability:"):
+        for i, line in enumerate(lines):
+            if not line.startswith("Profile Applicability:"):
                 continue
             for j in range(i - 1, max(-1, i - 10), -1):
                 m = REF_START_RE.match(lines[j])
@@ -210,13 +210,19 @@ def check(pdf_path, yaml_path):
     shared = [r for r, _, _ in toc if r in yaml_map]
     yaml_order = [r for r, _, _, _ in nodes if r in toc_map]
     if shared != yaml_order:
+        diverged = False
         for a, b in zip(shared, yaml_order):
             if a != b:
                 say(f"ORDER-DIFF first divergence: toc={a} yaml={b}")
+                diverged = True
                 break
+        if not diverged:
+            say(
+                f"ORDER-DIFF length mismatch: toc has {len(shared)} shared refs, yaml has {len(yaml_order)}"
+            )
 
-    # --- metadata
-    cover = doc[0].get_text()
+    # --- metadata (version line may sit past page 1, like cover_metadata's doc[:3] scan)
+    cover = "\n".join(page.get_text() for page in doc[:3])
     vm = re.search(r"[vV](\d+(?:\.\d+)*)\s*[-–]\s*(\d{2})-(\d{2})-(\d{4})", cover)
     if vm:
         v, mm, dd, yyyy = vm.groups()

@@ -8,7 +8,7 @@ from core.serializers import (
     FieldsRelatedField,
     PathField,
 )
-from iam.models import RoleAssignment
+from iam.models import Folder, RoleAssignment
 
 from .models import PostureAssessment
 
@@ -18,13 +18,32 @@ class PostureAssessmentWriteSerializer(BaseModelSerializer):
         default=False, write_only=True, required=False
     )
 
+    def validate_follow_up_assessment(self, value):
+        if value and not RoleAssignment.is_access_allowed(
+            user=self.context["request"].user,
+            perm=Permission.objects.get(codename="view_findingsassessment"),
+            folder=value.folder,
+        ):
+            raise serializers.ValidationError(
+                "permission denied to link this findings assessment"
+            )
+        return value
+
+    def validate(self, attrs):
+        if self.instance and self.instance.is_locked:
+            if "is_locked" in attrs and attrs["is_locked"] is False:
+                return super().validate(attrs)
+            if [field for field in attrs if field != "is_locked"]:
+                raise serializers.ValidationError("cannot modify a locked assessment")
+        return super().validate(attrs)
+
     def create(self, validated_data):
         create_follow_up = validated_data.pop("create_follow_up_assessment", False)
         request = self.context.get("request")
         if create_follow_up and not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename="add_findingsassessment"),
-            folder=validated_data["folder"],
+            folder=validated_data.get("folder") or Folder.get_root_folder(),
         ):
             raise serializers.ValidationError(
                 {

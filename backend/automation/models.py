@@ -1,6 +1,7 @@
 from collections import Counter
 
 from auditlog.registry import auditlog
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import F, Window
 from django.db.models.functions import RowNumber
@@ -31,7 +32,9 @@ class PostureAssessment(Assessment):
         related_name="posture_assessments",
     )
     history_depth = models.PositiveSmallIntegerField(
-        default=10, verbose_name=_("History depth")
+        default=10,
+        validators=[MinValueValidator(1)],
+        verbose_name=_("History depth"),
     )
     follow_up_assessment = models.ForeignKey(
         FindingsAssessment,
@@ -72,10 +75,12 @@ class PostureAssessment(Assessment):
     def results(self):
         return PostureResult.objects.filter(run__posture_assessment=self)
 
-    def current_posture(self, asset_id=None) -> list[dict]:
+    def current_posture(self, asset_id=None, asset_ids=None) -> list[dict]:
         qs = self.results
         if asset_id:
             qs = qs.filter(asset_id=asset_id)
+        if asset_ids is not None:
+            qs = qs.filter(asset_id__in=asset_ids)
         selected_ids = self.selected_requirement_ids()
         if selected_ids is not None:
             qs = qs.filter(requirement_id__in=selected_ids)
@@ -115,14 +120,23 @@ class PostureAssessment(Assessment):
         return round(100 * counts["pass"] / applicable, 1)
 
     def prune_history(self, pairs):
-        stale = []
-        for asset_id, requirement_id in pairs:
-            pks = (
-                self.results.filter(asset_id=asset_id, requirement_id=requirement_id)
-                .order_by("-timestamp", "-created_at")
-                .values_list("pk", flat=True)
+        if not pairs:
+            return
+        stale = list(
+            self.results.filter(
+                asset_id__in={a for a, _ in pairs},
+                requirement_id__in={r for _, r in pairs},
             )
-            stale.extend(pks[self.history_depth :])
+            .annotate(
+                rn=Window(
+                    expression=RowNumber(),
+                    partition_by=[F("asset_id"), F("requirement_id")],
+                    order_by=[F("timestamp").desc(), F("created_at").desc()],
+                )
+            )
+            .filter(rn__gt=self.history_depth)
+            .values_list("pk", flat=True)
+        )
         if stale:
             self.results.filter(pk__in=stale).delete()
             self.runs.filter(results__isnull=True).delete()

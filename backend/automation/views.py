@@ -7,7 +7,7 @@ from collections import Counter
 from uuid import UUID
 
 from django.contrib.auth.models import Permission
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Count, Max, Min, Q
 from django.http import HttpResponse
 from django.utils import timezone
@@ -25,12 +25,13 @@ from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     escape_excel_formula,
 )
-from iam.models import RoleAssignment
+from iam.models import Folder, RoleAssignment
 
 from .importers import ImportError_, analyze_csv, parse_file, parse_mapped_csv
 from .models import PostureAssessment, PostureResult, PostureRun
 
 LONG_CACHE_TTL = 60  # mn
+MAX_IMPORT_FILE_SIZE = 10 * 1024 * 1024
 
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
@@ -64,6 +65,20 @@ class PostureAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(PostureAssessment.Status.choices))
 
+    def _viewable_asset_ids(self):
+        (ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, Asset
+        )
+        return ids
+
+    @staticmethod
+    def _locked(assessment):
+        if assessment.is_locked:
+            return Response(
+                {"error": "assessment is locked"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        return None
+
     @staticmethod
     def _row_payload(row):
         return {
@@ -89,7 +104,7 @@ class PostureAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def posture(self, request, pk=None):
         assessment = self.get_object()
-        rows = assessment.current_posture()
+        rows = assessment.current_posture(asset_ids=self._viewable_asset_ids())
         counts = Counter(row["result"] for row in rows)
         applicable = counts["pass"] + counts["fail"]
         score = round(100 * counts["pass"] / applicable, 1) if applicable else None
@@ -98,6 +113,7 @@ class PostureAssessmentViewSet(BaseModelViewSet):
             total_checks = (
                 RequirementNode.objects.filter(id__in=selected_ids)
                 .exclude(ref_id="")
+                .exclude(ref_id=None)
                 .count()
             )
         else:
@@ -106,6 +122,7 @@ class PostureAssessmentViewSet(BaseModelViewSet):
                     framework=assessment.framework, assessable=True
                 )
                 .exclude(ref_id="")
+                .exclude(ref_id=None)
                 .count()
             )
         return Response(
@@ -136,7 +153,9 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         if error:
             return error
 
-        rows = assessment.current_posture(asset_id=asset_id)
+        rows = assessment.current_posture(
+            asset_id=asset_id, asset_ids=self._viewable_asset_ids()
+        )
         counts_by_requirement = {}
         row_by_requirement = {}
         for r in rows:
@@ -147,14 +166,16 @@ class PostureAssessmentViewSet(BaseModelViewSet):
                 row_by_requirement[r["requirement_id"]] = r
 
         nodes = list(RequirementNode.objects.filter(framework=assessment.framework))
-        for node in nodes:
-            if node.order_id is None:
-                node.order_id = node.created_at
         children = {}
         for node in nodes:
             children.setdefault(node.parent_urn, []).append(node)
         for siblings in children.values():
-            siblings.sort(key=lambda n: n.order_id)
+            siblings.sort(
+                key=lambda n: (
+                    n.order_id is None,
+                    n.order_id if n.order_id is not None else n.created_at,
+                )
+            )
 
         ig_active = bool(assessment.selected_implementation_groups)
 
@@ -206,9 +227,9 @@ class PostureAssessmentViewSet(BaseModelViewSet):
                 ],
                 "assets": [
                     {"id": str(a.id), "str": f"{a.folder.name}/{a.name}"}
-                    for a in assessment.assets.select_related("folder").order_by(
-                        "folder__name", "name"
-                    )
+                    for a in assessment.assets.filter(id__in=self._viewable_asset_ids())
+                    .select_related("folder")
+                    .order_by("folder__name", "name")
                 ],
             }
         )
@@ -219,7 +240,7 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         asset_id, error = self._asset_param(request)
         if error:
             return error
-        qs = assessment.results
+        qs = assessment.results.filter(asset_id__in=self._viewable_asset_ids())
         if asset_id:
             qs = qs.filter(asset_id=asset_id)
         runs = (
@@ -268,7 +289,8 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         if run is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
         rows = list(
-            run.results.values(
+            run.results.filter(asset_id__in=self._viewable_asset_ids())
+            .values(
                 "id",
                 "requirement_id",
                 "asset_id",
@@ -284,7 +306,8 @@ class PostureAssessmentViewSet(BaseModelViewSet):
                 "requirement__name",
                 "asset__name",
                 "asset__folder__name",
-            ).order_by("asset__folder__name", "asset__name", "requirement__ref_id")
+            )
+            .order_by("asset__folder__name", "asset__name", "requirement__ref_id")
         )
         counts = Counter(row["result"] for row in rows)
         return Response(
@@ -312,7 +335,7 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         asset_id, error = self._asset_param(request)
         if error:
             return error
-        qs = assessment.results
+        qs = assessment.results.filter(asset_id__in=self._viewable_asset_ids())
         if asset_id:
             qs = qs.filter(asset_id=asset_id)
         selected_ids = assessment.selected_requirement_ids()
@@ -359,6 +382,9 @@ class PostureAssessmentViewSet(BaseModelViewSet):
             folder=assessment.folder,
         ):
             raise PermissionDenied()
+        locked = self._locked(assessment)
+        if locked:
+            return locked
         return self._ingest(
             request,
             assessment,
@@ -373,6 +399,18 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         if not asset_id or not isinstance(entries, list) or not entries:
             return Response(
                 {"error": "asset and a non-empty results list are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not all(isinstance(e, dict) for e in entries):
+            return Response(
+                {"error": "results entries must be objects"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            asset_id = UUID(str(asset_id))
+        except TypeError, ValueError:
+            return Response(
+                {"error": "asset must be a valid UUID"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -427,15 +465,6 @@ class PostureAssessmentViewSet(BaseModelViewSet):
 
         timestamp = timezone.now()
 
-        run, _ = PostureRun.objects.get_or_create(
-            id=run_id or uuid.uuid4(),
-            defaults={
-                "posture_assessment": assessment,
-                "started_at": timestamp,
-                "tool": tool,
-            },
-        )
-
         nodes = {
             node.ref_id: node
             for node in RequirementNode.objects.filter(
@@ -454,36 +483,75 @@ class PostureAssessmentViewSet(BaseModelViewSet):
             e.get("ref_id") for e in entries if match(e.get("ref_id")) is None
         ]
 
-        touched = set()
-        created = updated = 0
+        matched = {}
         for entry in entries:
             node = match(entry.get("ref_id"))
-            if node is None:
-                continue
-            _, was_created = PostureResult.objects.update_or_create(
-                run=run,
-                asset=asset,
-                requirement=node,
-                defaults={
-                    "result": entry["result"],
-                    "timestamp": timestamp,
-                    "actual": entry.get("actual", ""),
-                    "expected": entry.get("expected", ""),
-                    "message": entry.get("message", ""),
-                    "source": source,
-                    "imported_by": request.user,
-                },
-            )
-            created += was_created
-            updated += not was_created
-            touched.add((asset.id, node.id))
+            if node is not None:
+                matched[node.id] = entry
 
-        assessment.prune_history(touched)
+        update_fields = [
+            "result",
+            "timestamp",
+            "actual",
+            "expected",
+            "message",
+            "source",
+            "imported_by",
+        ]
+        try:
+            with transaction.atomic():
+                run, run_created = PostureRun.objects.get_or_create(
+                    id=run_id or uuid.uuid4(),
+                    posture_assessment=assessment,
+                    defaults={"started_at": timestamp, "tool": tool},
+                )
+                existing = {
+                    r.requirement_id: r
+                    for r in run.results.filter(asset=asset, requirement_id__in=matched)
+                }
+                to_create, to_update = [], []
+                for node_id, entry in matched.items():
+                    fields = {
+                        "result": entry["result"],
+                        "timestamp": timestamp,
+                        "actual": str(entry.get("actual") or "")[:255],
+                        "expected": str(entry.get("expected") or "")[:255],
+                        "message": str(entry.get("message") or ""),
+                        "source": source,
+                        "imported_by": request.user,
+                    }
+                    obj = existing.get(node_id)
+                    if obj is None:
+                        to_create.append(
+                            PostureResult(
+                                run=run, asset=asset, requirement_id=node_id, **fields
+                            )
+                        )
+                    else:
+                        for key, value in fields.items():
+                            setattr(obj, key, value)
+                        to_update.append(obj)
+                PostureResult.objects.bulk_create(to_create, batch_size=500)
+                if to_update:
+                    PostureResult.objects.bulk_update(
+                        to_update, update_fields, batch_size=500
+                    )
+                if matched:
+                    assessment.prune_history(
+                        {(asset.id, node_id) for node_id in matched}
+                    )
+                elif run_created:
+                    run.delete()
+        except IntegrityError:
+            return Response(
+                {"error": "run_id belongs to another assessment"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response(
             {
                 "run_id": str(run.id),
-                "created": created,
-                "updated": updated,
+                "created": len(to_create),
+                "updated": len(to_update),
                 "unknown_ref_ids": unknown_refs,
                 "enrolled_asset": enrolled,
             }
@@ -525,7 +593,9 @@ class PostureAssessmentViewSet(BaseModelViewSet):
             return error
         export_format = request.query_params.get("file_format", "csv")
         rows = sorted(
-            assessment.current_posture(asset_id=asset_id),
+            assessment.current_posture(
+                asset_id=asset_id, asset_ids=self._viewable_asset_ids()
+            ),
             key=lambda r: (r["asset__name"] or "", r["requirement__ref_id"] or ""),
         )
         filename = f"posture-{slugify(assessment.name)}"
@@ -581,6 +651,11 @@ class PostureAssessmentViewSet(BaseModelViewSet):
             return Response(
                 {"error": "file is required"}, status=status.HTTP_400_BAD_REQUEST
             )
+        if file.size > MAX_IMPORT_FILE_SIZE:
+            return Response(
+                {"error": "file too large (max 10 MB)"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if not (file.name or "").lower().endswith(".csv"):
             return Response(
                 {"error": "analysis supports .csv files only"},
@@ -600,9 +675,10 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         if raw:
             try:
                 ids = json.loads(raw)
-                assert isinstance(ids, list) and ids
+                if not isinstance(ids, list) or not ids:
+                    raise ValueError
                 return [UUID(str(i)) for i in ids], None
-            except json.JSONDecodeError, ValueError, AssertionError:
+            except json.JSONDecodeError, ValueError, TypeError:
                 return None, Response(
                     {"error": "assets must be a JSON list of asset UUIDs"},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -675,16 +751,15 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         tool = (file.name or "")[:100]
 
         if (mapping.get("columns") or {}).get("asset"):
+            by_name = {}
+            for row in Asset.objects.filter(
+                name__in=groups.keys(), id__in=self._viewable_asset_ids()
+            ).values("id", "name"):
+                by_name.setdefault(row["name"], []).append(row["id"])
             plan = []
             for asset_value, entries in groups.items():
-                matches = Asset.objects.filter(name=asset_value)
-                plan.append(
-                    (
-                        asset_value,
-                        matches[0].id if len(matches) == 1 else None,
-                        entries,
-                    )
-                )
+                ids = by_name.get(asset_value, [])
+                plan.append((asset_value, ids[0] if len(ids) == 1 else None, entries))
         else:
             targets, error = self._target_asset_ids(request)
             if error:
@@ -711,11 +786,19 @@ class PostureAssessmentViewSet(BaseModelViewSet):
             folder=assessment.folder,
         ):
             raise PermissionDenied()
+        locked = self._locked(assessment)
+        if locked:
+            return locked
 
         file = request.FILES.get("file")
         if file is None:
             return Response(
                 {"error": "file is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if file.size > MAX_IMPORT_FILE_SIZE:
+            return Response(
+                {"error": "file too large (max 10 MB)"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         mapping_raw = request.data.get("mapping")
@@ -774,6 +857,9 @@ class PostureAssessmentViewSet(BaseModelViewSet):
             folder=assessment.folder,
         ):
             raise PermissionDenied()
+        locked = self._locked(assessment)
+        if locked:
+            return locked
         try:
             asset_id = UUID(str(request.data.get("asset")))
         except TypeError, ValueError:
@@ -790,6 +876,12 @@ class PostureAssessmentViewSet(BaseModelViewSet):
     def _follow_up_findings(self, assessment):
         if not assessment.follow_up_assessment_id:
             return {}
+        if not RoleAssignment.is_access_allowed(
+            user=self.request.user,
+            perm=Permission.objects.get(codename="view_finding"),
+            folder=assessment.follow_up_assessment.folder,
+        ):
+            return {}
         findings = Finding.objects.filter(
             findings_assessment_id=assessment.follow_up_assessment_id,
             requirement_node__isnull=False,
@@ -802,7 +894,13 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         assessment = self.get_object()
         severity = {"fail": 0, "error": 1, "not_checked": 2, "not_applicable": 3}
         non_pass = sorted(
-            (r for r in assessment.current_posture() if r["result"] != "pass"),
+            (
+                r
+                for r in assessment.current_posture(
+                    asset_ids=self._viewable_asset_ids()
+                )
+                if r["result"] != "pass"
+            ),
             key=lambda r: severity.get(r["result"], len(severity)),
         )
         findings = self._follow_up_findings(assessment)
@@ -852,6 +950,9 @@ class PostureAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["post"], url_path="create-finding")
     def create_finding(self, request, pk=None):
         assessment = self.get_object()
+        locked = self._locked(assessment)
+        if locked:
+            return locked
         requirement = RequirementNode.objects.filter(
             id=request.data.get("requirement"), framework=assessment.framework
         ).first()
@@ -869,18 +970,18 @@ class PostureAssessmentViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        existing = Finding.objects.filter(
-            findings_assessment=follow_up, requirement_node=requirement, asset=asset
-        ).first()
-        if existing:
-            return Response({"finding": str(existing.id), "created": False})
-
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename="add_finding"),
             folder=follow_up.folder,
         ):
             raise PermissionDenied()
+
+        existing = Finding.objects.filter(
+            findings_assessment=follow_up, requirement_node=requirement, asset=asset
+        ).first()
+        if existing:
+            return Response({"finding": str(existing.id), "created": False})
 
         last = (
             assessment.results.filter(requirement=requirement, asset=asset)

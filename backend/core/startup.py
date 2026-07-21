@@ -1716,9 +1716,12 @@ TECHNICAL_TESTER_PERMISSIONS_LIST = [
     "view_securityexception",
     "add_findingsassessment",
     "view_findingsassessment",
+    "change_findingsassessment",
+    "delete_findingsassessment",
     "add_finding",
     "view_finding",
     "change_finding",
+    "delete_finding",
 ]
 
 
@@ -1823,6 +1826,11 @@ def startup(sender=None, **kwargs):
     ):
         role, _ = Role.objects.get_or_create(name=name, builtin=True)
         role.permissions.set(Permission.objects.filter(codename__in=perm_list))
+    # backfill builtin groups (e.g. technical tester) on pre-existing domains
+    for folder in Folder.objects.filter(
+        content_type=Folder.ContentType.DOMAIN, create_iam_groups=True
+    ):
+        Folder.create_default_ug_and_ra(folder)
     # if global administrators user group does not exist, then create it
     if not UserGroup.objects.filter(
         name="BI-UG-ADM", folder=Folder.get_root_folder()
