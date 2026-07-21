@@ -21,6 +21,7 @@
 	import Inspector from './Inspector.svelte';
 	import RunsPanel from './RunsPanel.svelte';
 	import SchedulesPanel from './SchedulesPanel.svelte';
+	import EventTriggersPanel from './EventTriggersPanel.svelte';
 	import StepNode from './nodes/StepNode.svelte';
 	import TerminalNode from './nodes/TerminalNode.svelte';
 
@@ -483,6 +484,7 @@
 	let runsOpen = $state(false);
 	let runsPanel = $state<RunsPanel | null>(null);
 	let schedulesOpen = $state(false);
+	let eventTriggersOpen = $state(false);
 	let running = $state(false);
 
 	async function runWorkflow() {
@@ -762,6 +764,16 @@
 						<button
 							type="button"
 							class="btn preset-tonal text-sm"
+							class:preset-filled-secondary-500={eventTriggersOpen}
+							onclick={() => (eventTriggersOpen = !eventTriggersOpen)}
+							data-testid="toggle-event-triggers"
+						>
+							<i class="fa-solid fa-bolt mr-1"></i>
+							{m.eventTriggers()}
+						</button>
+						<button
+							type="button"
+							class="btn preset-tonal text-sm"
 							class:preset-filled-secondary-500={runsOpen}
 							onclick={() => (runsOpen = !runsOpen)}
 							data-testid="toggle-runs"
@@ -884,6 +896,10 @@
 
 		{#if schedulesOpen}
 			<SchedulesPanel {workflowId} />
+		{/if}
+
+		{#if eventTriggersOpen}
+			<EventTriggersPanel {workflowId} folders={fkOptions['folders'] ?? []} />
 		{/if}
 
 		{#if runsOpen}

@@ -149,6 +149,46 @@ export const POST: RequestHandler = async ({ fetch, request, url }) => {
 			);
 		}
 
+		case 'list-event-triggers': {
+			const workflowId = requireUuid(body.workflow, 'workflow');
+			return proxy(
+				fetch,
+				`${BASE_API_URL}/workflows/workflow-event-triggers/?workflow=${workflowId}`,
+				'GET'
+			);
+		}
+
+		case 'create-event-trigger': {
+			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-event-triggers/`, 'POST', {
+				name: body.name,
+				workflow: requireUuid(body.workflow, 'workflow'),
+				event_key: body.event_key,
+				filters: body.filters ?? {},
+				enabled: body.enabled ?? true
+			});
+		}
+
+		case 'update-event-trigger': {
+			return proxy(
+				fetch,
+				`${BASE_API_URL}/workflows/workflow-event-triggers/${requireUuid(body.id, 'id')}/`,
+				'PATCH',
+				body.patch ?? {}
+			);
+		}
+
+		case 'delete-event-trigger': {
+			return proxy(
+				fetch,
+				`${BASE_API_URL}/workflows/workflow-event-triggers/${requireUuid(body.id, 'id')}/`,
+				'DELETE'
+			);
+		}
+
+		case 'event-trigger-keys': {
+			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-event-triggers/event-keys/`, 'GET');
+		}
+
 		case 'instance-logs': {
 			const instanceId = requireUuid(body.instance, 'instance');
 			return proxy(
