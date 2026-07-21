@@ -19,7 +19,7 @@ This preserves the single golden source of access control (role assignments) and
 
 From a user group's detail page:
 
-- **Add members** — the button opens a picker listing users **not already in the group**. Search, browse by columns, sort, paginate, select one or many, then confirm. Inactive users are hidden by default (toggle to include them).
+- **Add members** — the button opens a picker listing users **not already in the group**. Search, paginate, select one or many, then confirm. Inactive users are hidden by default (toggle to include them; they show an "inactive" badge).
 - **Remove members** — in the group's **Users** tab, select one or more members and click **Remove from group**.
 
 Both controls appear only for users who can change the group (i.e. `change_usergroup` on the group's folder).
@@ -28,8 +28,8 @@ Both controls appear only for users who can change the group (i.e. `change_userg
 
 The picker is a general-purpose, scalable selector — it never loads the whole directory into the browser:
 
-- Server-side **search**, **per-column filter**, **sort**, and **pagination** (a "show N entries" control) via the `/{model}/autocomplete` endpoint.
-- A persistent selection tray that survives paging, searching, and switching between the list and columnar "Browse" views.
+- Server-side **search** and **pagination** (a "show N entries" control) via the `/{model}/autocomplete` endpoint, so it scales to very large directories.
+- A persistent selection tray that survives paging and searching.
 
 ## API
 

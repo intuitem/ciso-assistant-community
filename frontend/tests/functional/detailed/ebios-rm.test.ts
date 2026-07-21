@@ -510,6 +510,7 @@ test('ebios rm study', async ({
 					timeout: 10_000
 				});
 			}
+			await page.getByTestId('markdown-edit-btn-operating_modes_description').click();
 			await page.getByTestId('form-input-operating-modes-description').click();
 			await page
 				.getByTestId('form-input-operating-modes-description')
@@ -528,6 +529,7 @@ test('ebios rm study', async ({
 					timeout: 10_000
 				});
 			}
+			await page.getByTestId('markdown-edit-btn-operating_modes_description').click();
 			await page.getByTestId('form-input-operating-modes-description').click();
 			await page
 				.getByTestId('form-input-operating-modes-description')

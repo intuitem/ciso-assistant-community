@@ -199,7 +199,7 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         validators=[validate_file_size, validate_file_name],
     )
     # Source-of-truth URL for linked revisions (the document lives externally).
-    url = models.URLField(blank=True)
+    url = models.URLField(blank=True, max_length=2048)
     published_at = models.DateTimeField(null=True, blank=True)
     editing_user = models.ForeignKey(
         User,

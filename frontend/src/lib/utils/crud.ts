@@ -178,6 +178,11 @@ export interface ModelMapEntry {
 	path?: string;
 	endpointUrl?: string;
 	customNameDescription?: boolean;
+	/**
+	 * Fields (in addition to `DEFAULT_MARKDOWN_FIELDS`) whose content is edited and
+	 * rendered as Markdown for this model.
+	 */
+	markdownFields?: string[];
 }
 
 type ModelMap = {
@@ -1652,6 +1657,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'dataBreaches',
 		verboseName: 'data breach',
 		verboseNamePlural: 'data breaches',
+		markdownFields: ['potential_consequences'],
 		selectFields: [{ field: 'breach_type' }, { field: 'risk_level' }, { field: 'status' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
@@ -1973,6 +1979,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'strategic_scenario' },
 			{ field: 'ro_to_couple' },
 			{ field: 'is_selected' },
+			{ field: 'justification' },
 			{ field: 'stakeholders' },
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'ebios_rm_study' }
@@ -1985,6 +1992,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'operationalScenarios',
 		verboseName: 'Operational scenario',
 		verboseNamePlural: 'Operational scenarios',
+		markdownFields: ['operating_modes_description'],
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
 			{ field: 'threats', urlModel: 'threats' },
@@ -2252,6 +2260,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'incidents',
 		verboseName: 'Incident',
 		verboseNamePlural: 'Incidents',
+		markdownFields: ['resolution'],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'threats', urlModel: 'threats' },
@@ -3274,12 +3283,26 @@ const FIELD_COMPONENT_MAP = {
 	}
 };
 
+/**
+ * Default fields rendered and edited as Markdown.
+ * Model-specific fields can be added through `markdownFields`.
+ */
+const DEFAULT_MARKDOWN_FIELDS = ['description', 'observation', 'annotation', 'justification'];
+
+export function getMarkdownFields(model: urlModel | string | undefined): Set<string> {
+	const modelSpecific = (model ? getModelInfo(model)?.markdownFields : undefined) ?? [];
+	return new Set([...DEFAULT_MARKDOWN_FIELDS, ...modelSpecific]);
+}
+
 export function getFieldComponentMap(URLModel: string) {
 	const fieldComponentMap = FIELD_COMPONENT_MAP[URLModel] ?? {};
 	const listViewConfig = listViewFields[URLModel] ?? { body: [] };
 
-	if (listViewConfig.body.findIndex((field) => field === 'description') >= 0) {
-		fieldComponentMap.description = MarkdownDescription;
+	const markdownFields = getMarkdownFields(URLModel);
+	for (const field of listViewConfig.body) {
+		if (markdownFields.has(field) && !fieldComponentMap[field]) {
+			fieldComponentMap[field] = MarkdownDescription;
+		}
 	}
 	return fieldComponentMap;
 }
