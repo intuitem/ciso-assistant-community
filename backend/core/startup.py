@@ -111,6 +111,7 @@ READER_PERMISSIONS_LIST = [
     "view_workflowinstancelog",
     "view_workflowsecret",
     "view_workflowschedule",
+    "view_workfloweventtrigger",
     # pmbok
     "view_genericcollection",
     "view_accreditation",
@@ -250,6 +251,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_workflowinstancelog",
     "view_workflowsecret",
     "view_workflowschedule",
+    "view_workfloweventtrigger",
     # pmbok
     "view_genericcollection",
     "view_accreditation",
@@ -607,6 +609,10 @@ ANALYST_PERMISSIONS_LIST = [
     "add_workflowschedule",
     "change_workflowschedule",
     "delete_workflowschedule",
+    "view_workfloweventtrigger",
+    "add_workfloweventtrigger",
+    "change_workfloweventtrigger",
+    "delete_workfloweventtrigger",
     # pmbok
     "view_genericcollection",
     "add_genericcollection",
@@ -1083,6 +1089,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_workflowschedule",
     "change_workflowschedule",
     "delete_workflowschedule",
+    "view_workfloweventtrigger",
+    "add_workfloweventtrigger",
+    "change_workfloweventtrigger",
+    "delete_workfloweventtrigger",
     # pmbok
     "view_genericcollection",
     "add_genericcollection",
@@ -1611,6 +1621,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_workflowschedule",
     "change_workflowschedule",
     "delete_workflowschedule",
+    "view_workfloweventtrigger",
+    "add_workfloweventtrigger",
+    "change_workfloweventtrigger",
+    "delete_workfloweventtrigger",
     # pmbok
     "view_genericcollection",
     "add_genericcollection",

@@ -2,6 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from workflows.views import (
+    WorkflowEventTriggerViewSet,
     WorkflowInstanceViewSet,
     WorkflowScheduleViewSet,
     WorkflowSecretViewSet,
@@ -21,6 +22,11 @@ router.register(
 router.register("workflow-secrets", WorkflowSecretViewSet, basename="workflow-secrets")
 router.register(
     "workflow-schedules", WorkflowScheduleViewSet, basename="workflow-schedules"
+)
+router.register(
+    "workflow-event-triggers",
+    WorkflowEventTriggerViewSet,
+    basename="workflow-event-triggers",
 )
 
 urlpatterns = [

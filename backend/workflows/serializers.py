@@ -4,7 +4,9 @@ from core.serializers import BaseModelSerializer
 from core.serializer_fields import FieldsRelatedField, PathField
 
 from workflows.models import (
+    Condition,
     Workflow,
+    WorkflowEventTrigger,
     WorkflowInstance,
     WorkflowInstanceLog,
     WorkflowSchedule,
@@ -148,6 +150,95 @@ class WorkflowScheduleWriteSerializer(BaseModelSerializer):
         except CronValidationError as e:
             raise serializers.ValidationError({"cron_expression": str(e)})
         return attrs
+
+
+class WorkflowEventTriggerReadSerializer(BaseModelSerializer):
+    workflow = FieldsRelatedField()
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = WorkflowEventTrigger
+        fields = "__all__"
+
+
+VALID_FILTER_OPS = {choice[0] for choice in Condition.Operator.choices}
+MAX_FILTER_DEPTH = 5
+
+
+class WorkflowEventTriggerWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = WorkflowEventTrigger
+        fields = [
+            "name",
+            "description",
+            "workflow",
+            "event_key",
+            "filters",
+            "enabled",
+        ]
+
+    def validate_event_key(self, value):
+        from workflows.events import event_key_catalog
+
+        if value not in {entry["key"] for entry in event_key_catalog()}:
+            raise serializers.ValidationError("invalidEventKey")
+        return value
+
+    def validate_filters(self, value):
+        if value in (None, {}):
+            return {}
+        self._validate_group(value, depth=0)
+        return value
+
+    def _validate_group(self, group, depth):
+        if depth > MAX_FILTER_DEPTH:
+            raise serializers.ValidationError("invalidFieldFilters")
+        if not isinstance(group, dict):
+            raise serializers.ValidationError("invalidFieldFilters")
+        if group.get("operator", "and") not in ("and", "or", "not"):
+            raise serializers.ValidationError("invalidFieldFilters")
+        conditions = group.get("conditions", [])
+        children = group.get("children", [])
+        if not isinstance(conditions, list) or not isinstance(children, list):
+            raise serializers.ValidationError("invalidFieldFilters")
+        for condition in conditions:
+            if (
+                not isinstance(condition, dict)
+                or not isinstance(condition.get("field"), str)
+                or not condition.get("field")
+                or condition.get("op", "eq") not in VALID_FILTER_OPS
+                or not isinstance(condition.get("changed", False), bool)
+            ):
+                raise serializers.ValidationError("invalidFieldFilters")
+        for child in children:
+            self._validate_group(child, depth + 1)
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        workflow = attrs.get("workflow") or getattr(self.instance, "workflow", None)
+        filters = attrs.get("filters")
+        if workflow is not None and filters:
+            from workflows.events import _workflow_scope
+
+            scope = _workflow_scope(workflow)
+            for condition in _walk_conditions(filters):
+                if condition.get("field") == "folder" and condition.get("op") in (
+                    "eq",
+                    "in",
+                ):
+                    values = str(condition.get("value", "")).split(",")
+                    for folder_value in (v.strip() for v in values):
+                        if folder_value and folder_value not in scope:
+                            raise serializers.ValidationError(
+                                {"filters": "foldersOutsideWorkflowScope"}
+                            )
+        return attrs
+
+
+def _walk_conditions(group):
+    yield from group.get("conditions", [])
+    for child in group.get("children", []):
+        yield from _walk_conditions(child)
 
 
 class WorkflowInstanceLogReadSerializer(BaseModelSerializer):

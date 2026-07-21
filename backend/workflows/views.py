@@ -20,6 +20,7 @@ from .engine import EngineError, trigger_instance
 from .graph import GraphValidationError, save_graph, serialize_graph
 from .models import (
     Workflow,
+    WorkflowEventTrigger,
     WorkflowInstance,
     WorkflowNode,
     WorkflowSchedule,
@@ -146,6 +147,21 @@ class WorkflowScheduleViewSet(BaseModelViewSet):
     filterset_fields = ["workflow", "folder", "enabled"]
     search_fields = ["name", "cron_expression"]
     ordering = ["created_at"]
+
+
+class WorkflowEventTriggerViewSet(BaseModelViewSet):
+    model = WorkflowEventTrigger
+    serializers_module = "workflows.serializers"
+    filterset_fields = ["workflow", "folder", "enabled", "event_key"]
+    search_fields = ["name", "event_key"]
+    ordering = ["created_at"]
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get event key catalog", url_path="event-keys")
+    def event_keys(self, request):
+        from .events import event_key_catalog
+
+        return Response(event_key_catalog())
 
 
 class WorkflowSecretViewSet(BaseModelViewSet):

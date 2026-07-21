@@ -46,6 +46,7 @@ class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
         if folder_changed:
             self.versions.update(folder=self.folder)
             self.schedules.update(folder=self.folder)
+            self.event_triggers.update(folder=self.folder)
             WorkflowNode.objects.filter(version__workflow=self).update(
                 folder=self.folder
             )
@@ -480,6 +481,7 @@ class WorkflowInstance(AbstractBaseModel, FolderMixin):
         WEBHOOK = "webhook", "Webhook"
         SUBPROCESS = "subprocess", "Subprocess"
         SCHEDULED = "scheduled", "Scheduled"
+        INTERNAL_EVENT = "internal_event", "Internal event"
 
     workflow = models.ForeignKey(
         Workflow,
@@ -535,6 +537,17 @@ class WorkflowInstance(AbstractBaseModel, FolderMixin):
         blank=True,
         related_name="instances",
     )
+    event_trigger = models.ForeignKey(
+        "workflows.WorkflowEventTrigger",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="instances",
+    )
+    # Event-chain generation counter (spec D21): user/API-caused events start
+    # instances at depth 1; changes those runs make start instances at depth 2,
+    # capped by events.MAX_TRIGGER_DEPTH to contain trigger loops.
+    trigger_depth = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         ordering = ["-created_at"]
@@ -713,6 +726,48 @@ class WorkflowSchedule(NameDescriptionFolderMixin):
         return f"{self.workflow.name}: {self.cron_expression}"
 
 
+class WorkflowEventTrigger(NameDescriptionFolderMixin):
+    """Starts the workflow's published version when an internal event matches
+    (spec D21). V1 events are CUD operations mirrored off the auditlog; the
+    event_key is a generic string so future producers (portal actions, app
+    events) dispatch through the same seam."""
+
+    class Result(models.TextChoices):
+        TRIGGERED = "triggered", "Triggered"
+        SKIPPED_UNPUBLISHED = "skipped_unpublished", "Skipped (unpublished)"
+        SKIPPED_DEPTH = "skipped_depth", "Skipped (chain depth)"
+        ERROR = "error", "Error"
+
+    workflow = models.ForeignKey(
+        Workflow,
+        on_delete=models.CASCADE,
+        related_name="event_triggers",
+    )
+    # "{model}.{created|updated|deleted}" for CUD events; free-form for
+    # future producers.
+    event_key = models.CharField(max_length=200, db_index=True)
+    # Boolean condition tree, same document shape as the graph API's edge
+    # condition_groups: {operator, conditions: [{field, op, value, changed}],
+    # children: [...]}. Python-only evaluation → JSON per D4.
+    filters = models.JSONField(default=dict, blank=True)
+    enabled = models.BooleanField(default=True)
+    last_triggered_at = models.DateTimeField(null=True, blank=True)
+    last_result = models.CharField(max_length=30, choices=Result.choices, blank=True)
+    trigger_count = models.PositiveIntegerField(default=0)
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def save(self, *args, **kwargs):
+        self.folder = self.workflow.folder
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.workflow.name}: {self.event_key}"
+
+
 def _clone_row(instance, **overrides):
     data = {
         field.name: getattr(instance, field.name)
@@ -749,4 +804,9 @@ auditlog.register(WorkflowInstance, exclude_fields=common_exclude)
 auditlog.register(
     WorkflowSchedule,
     exclude_fields=common_exclude + ["next_run_at", "last_run_at", "last_result"],
+)
+auditlog.register(
+    WorkflowEventTrigger,
+    exclude_fields=common_exclude
+    + ["last_triggered_at", "last_result", "trigger_count"],
 )

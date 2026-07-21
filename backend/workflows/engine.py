@@ -6,6 +6,7 @@ guard against runaway action loops. Task and event nodes park their token
 as `waiting`; everything else executes and advances in the same call.
 """
 
+import contextvars
 import math
 
 from django.db import transaction
@@ -19,6 +20,11 @@ from .models import (
 )
 
 MAX_STEPS = 300
+
+# Event-chain depth of the workflow run currently executing in this context;
+# 0 means "not inside a run" (user/API-caused changes). Read by the
+# internal-event producer (workflows/events.py).
+current_trigger_depth = contextvars.ContextVar("workflow_trigger_depth", default=0)
 
 
 class EngineError(Exception):
@@ -66,13 +72,19 @@ def trigger_instance(version, *, trigger="manual", payload=None, initiated_by=No
 
 
 def run_instance(instance):
-    with transaction.atomic():
-        locked = (
-            WorkflowInstance.objects.select_for_update()
-            .select_related("version")
-            .get(id=instance.id)
-        )
-        _run(locked)
+    # Expose this run's event-chain depth so changes its actions make can be
+    # attributed by the internal-event producer (spec D21 loop containment).
+    depth_token = current_trigger_depth.set(instance.trigger_depth)
+    try:
+        with transaction.atomic():
+            locked = (
+                WorkflowInstance.objects.select_for_update()
+                .select_related("version")
+                .get(id=instance.id)
+            )
+            _run(locked)
+    finally:
+        current_trigger_depth.reset(depth_token)
 
 
 def create_instance(
@@ -84,6 +96,8 @@ def create_instance(
     parent_instance=None,
     parent_token=None,
     schedule=None,
+    event_trigger=None,
+    trigger_depth=0,
 ):
     start_node = version.nodes.filter(type=WorkflowNode.Type.START).first()
     if start_node is None:
@@ -112,6 +126,8 @@ def create_instance(
             parent_instance=parent_instance,
             parent_token=parent_token,
             schedule=schedule,
+            event_trigger=event_trigger,
+            trigger_depth=trigger_depth,
         )
         _log(
             instance,

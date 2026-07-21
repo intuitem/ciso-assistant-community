@@ -32,3 +32,25 @@ def process_workflow_schedules():
     from .scheduling import run_due_schedules
 
     run_due_schedules()
+
+
+@db_task()
+def dispatch_internal_event_task(log_entry_id, origin_depth=0):
+    from auditlog.models import LogEntry
+
+    from .events import dispatch_internal_event, payload_from_log_entry
+
+    log_entry = (
+        LogEntry.objects.filter(pk=log_entry_id)
+        .select_related("content_type", "actor")
+        .first()
+    )
+    if log_entry is None or log_entry.content_type is None:
+        return
+    payload = payload_from_log_entry(log_entry)
+    dispatch_internal_event(
+        payload["event_key"],
+        payload,
+        payload.get("folder_id"),
+        origin_depth=origin_depth,
+    )
