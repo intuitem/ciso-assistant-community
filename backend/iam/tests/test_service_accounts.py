@@ -6,6 +6,8 @@ the SA's role assignment, lifecycle (deactivate/rotate/delete), and the
 exclusion of SA artifacts from user-facing surfaces.
 """
 
+from datetime import timedelta
+
 import pytest
 from knox.models import AuthToken
 from rest_framework.test import APIClient
@@ -14,6 +16,7 @@ from allauth.idp.oidc.models import Client, Token
 
 from core.startup import startup
 from django.contrib.auth.models import Permission
+from django.utils import timezone
 from global_settings.models import GlobalSettings
 from iam.models import Folder, Role, RoleAssignment, ServiceAccount, User, UserGroup
 
@@ -255,6 +258,39 @@ class TestServiceAccountTokenFlow:
         assert _fetch_token(payload["client_id"], new_secret).status_code == 200
         # rotation revoked the pre-rotation token
         assert _bearer_client(old_token).get("/api/folders/").status_code == 401
+
+    def test_rotate_secret_with_grace_period(self, admin_client, domain_folder):
+        payload = _create_sa(admin_client, domain_folder)
+        old_secret = payload["client_secret"]
+
+        response = admin_client.post(
+            f"{SA_ENDPOINT}{payload['id']}/rotate-secret/",
+            {"grace_period_minutes": 60},
+            format="json",
+        )
+        assert response.status_code == 200
+        new_secret = response.json()["client_secret"]
+
+        # both secrets mint tokens during the grace period
+        assert _fetch_token(payload["client_id"], old_secret).status_code == 200
+        assert _fetch_token(payload["client_id"], new_secret).status_code == 200
+
+        sa = ServiceAccount.objects.get(id=payload["id"])
+        sa.previous_secret_expires_at = timezone.now() - timedelta(seconds=1)
+        sa.save(update_fields=["previous_secret_expires_at"])
+
+        # old secret rejected once the grace period has elapsed
+        assert _fetch_token(payload["client_id"], old_secret).status_code in (400, 401)
+        assert _fetch_token(payload["client_id"], new_secret).status_code == 200
+
+    def test_rotate_secret_grace_period_capped(self, admin_client, domain_folder):
+        payload = _create_sa(admin_client, domain_folder)
+        response = admin_client.post(
+            f"{SA_ENDPOINT}{payload['id']}/rotate-secret/",
+            {"grace_period_minutes": 61},
+            format="json",
+        )
+        assert response.status_code == 400
 
     def test_delete_tears_down_bundle(self, admin_client, domain_folder):
         payload = _create_sa(admin_client, domain_folder)

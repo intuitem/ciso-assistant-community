@@ -702,8 +702,24 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
 
     def rotate_secret(self, request, pk=None):
         service_account = self.get_object()
+        grace_period_minutes = request.data.get("grace_period_minutes") or 0
+        try:
+            grace_period_minutes = int(grace_period_minutes)
+        except (TypeError, ValueError):
+            return Response(
+                {"error": ["grace_period_minutes must be an integer"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not 0 <= grace_period_minutes <= 60:
+            return Response(
+                {"error": ["grace_period_minutes must be between 0 and 60"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        grace_period = (
+            timedelta(minutes=grace_period_minutes) if grace_period_minutes else None
+        )
         with transaction.atomic():
-            plain_secret = service_account.rotate_secret()
+            plain_secret = service_account.rotate_secret(grace_period=grace_period)
         logger.info(
             "service account secret rotated",
             service_account=service_account.name,

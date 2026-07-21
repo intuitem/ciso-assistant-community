@@ -124,6 +124,7 @@ class ServiceAccountReadSerializer(serializers.ModelSerializer):
             "permissions",
             "perimeter_folders",
             "is_recursive",
+            "previous_secret_expires_at",
         ]
 
     def get_permissions(self, obj) -> list[dict]:

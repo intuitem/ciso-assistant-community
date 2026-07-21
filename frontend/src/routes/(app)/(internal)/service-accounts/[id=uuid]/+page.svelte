@@ -2,6 +2,7 @@
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import ServiceAccountSecretModal from '$lib/components/Modals/ServiceAccountSecretModal.svelte';
+	import ServiceAccountRotateSecretModal from '$lib/components/Modals/ServiceAccountRotateSecretModal.svelte';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import { goto, invalidateAll } from '$app/navigation';
@@ -42,30 +43,39 @@
 		modalStore.trigger(modal);
 	}
 
-	function modalRotateSecret(): void {
-		modalStore.trigger({
-			type: 'confirm',
-			title: m.rotateSecret(),
-			body: m.rotateSecretConfirm(),
-			response: async (confirmed: boolean) => {
-				if (!confirmed) return;
-				busy = true;
-				try {
-					const res = await fetch(`/service-accounts/${data.data.id}/rotate-secret`, {
-						method: 'POST'
-					});
-					if (res.ok) {
-						const result = await res.json();
-						setTimeout(() => modalSecret(result), 0);
-					} else {
-						toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
-					}
-				} catch {
-					toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
-				}
-				busy = false;
+	async function rotateSecret(gracePeriodMinutes: number): Promise<void> {
+		busy = true;
+		try {
+			const res = await fetch(`/service-accounts/${data.data.id}/rotate-secret`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ grace_period_minutes: gracePeriodMinutes })
+			});
+			if (res.ok) {
+				const result = await res.json();
+				await invalidateAll();
+				setTimeout(() => modalSecret(result), 0);
+			} else {
+				toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
 			}
-		});
+		} catch {
+			toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
+		}
+		busy = false;
+	}
+
+	function modalRotateSecret(): void {
+		const modalComponent: ModalComponent = {
+			ref: ServiceAccountRotateSecretModal,
+			props: {
+				onConfirm: rotateSecret
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
+		};
+		modalStore.trigger(modal);
 	}
 
 	async function setActive(isActive: boolean): Promise<void> {
@@ -165,6 +175,15 @@
 		{/if}
 	{/snippet}
 </DetailView>
+
+{#if data.data.previous_secret_expires_at && new Date(data.data.previous_secret_expires_at) > new Date()}
+	<div class="card p-4 preset-tonal-warning flex flex-row items-center mt-4">
+		<i class="fa-solid fa-triangle-exclamation mr-2"></i>
+		{m.previousSecretValidUntil({
+			date: new Date(data.data.previous_secret_expires_at).toLocaleString()
+		})}
+	</div>
+{/if}
 
 {#if data.data.permissions?.length}
 	<div class="card px-6 py-4 bg-surface-50-950 shadow-lg mt-4 space-y-2">

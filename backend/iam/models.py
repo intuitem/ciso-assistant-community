@@ -4,6 +4,7 @@ Inspired from Azure IAM model"""
 from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
+from datetime import timedelta
 from typing import Any, Dict, Generator, List, Optional, Tuple
 from typing import TYPE_CHECKING, Set, cast
 import uuid
@@ -1752,6 +1753,8 @@ class ServiceAccount(AbstractBaseModel):
         related_name="created_service_accounts",
     )
     is_active = models.BooleanField(default=True)
+    previous_secret_hash = models.CharField(max_length=200, null=True, blank=True)
+    previous_secret_expires_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = _("Service account")
@@ -1783,10 +1786,23 @@ class ServiceAccount(AbstractBaseModel):
         self.user.is_active = True
         self.user.save(update_fields=["is_active"])
 
-    def rotate_secret(self) -> str:
+    def rotate_secret(self, grace_period: timedelta | None = None) -> str:
         """Set a fresh client secret and revoke outstanding tokens.
-        Returns the plaintext secret — the only time it is available."""
+
+        If grace_period is given, the current (soon-to-be-replaced) secret
+        keeps authenticating client_credentials requests until it expires —
+        see Client.check_secret's monkeypatch in apps.py, the only place
+        allauth checks a Client's secret. Returns the plaintext secret — the
+        only time it is available.
+        """
         plain_secret = get_oidc_adapter().generate_client_secret()
+        if grace_period:
+            self.previous_secret_hash = self.client.secret  # already hashed
+            self.previous_secret_expires_at = timezone.now() + grace_period
+        else:
+            self.previous_secret_hash = None
+            self.previous_secret_expires_at = None
+        self.save(update_fields=["previous_secret_hash", "previous_secret_expires_at"])
         self.client.set_secret(plain_secret)
         self.client.save(update_fields=["secret"])
         Token.objects.filter(client=self.client).delete()
