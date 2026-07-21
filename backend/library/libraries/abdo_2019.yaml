@@ -105,10 +105,10 @@ objects:
       - '4'
       translations:
         en:
-          description: 'The Contractor satisfies the ABDO 2017 requirements with regard
+          description: 'The Contractor satisfies the ABDO 2019 requirements with regard
             to the
 
-            Classified Contract in question..'
+            Classified Contract in question.'
     - urn: urn:intuitem:risk:req_node:abdo_2019:1.1.2
       assessable: true
       depth: 3
@@ -216,7 +216,7 @@ objects:
 
             organisation the measures and procedures described in the
 
-            security plan..'
+            security plan.'
     - urn: urn:intuitem:risk:req_node:abdo_2019:1.2.3.1
       assessable: true
       depth: 4
@@ -801,7 +801,7 @@ objects:
       translations:
         en:
           description: 'The SO instructs employees tasked with carrying out an SC
-            on ABDO 2017
+            on ABDO 2019
 
             procedures and their corresponding responsibilities on appointment to
             a
@@ -953,7 +953,7 @@ objects:
         en:
           description: 'Once permission for outsourcing to the Subcontractor has been
 
-            granted by DISS/ISO, the Contractor incorporates the ABDO 2017 in its
+            granted by DISS/ISO, the Contractor incorporates the ABDO 2019 in its
 
             contract with the Subcontractors coming into contact with an IBP. The
 
@@ -1004,7 +1004,7 @@ objects:
       - '4'
       translations:
         en:
-          description: 'The Contractor stipulates the ABDO 2017 to its suppliers of
+          description: 'The Contractor stipulates the ABDO 2019 to its suppliers of
             system
 
             components requiring a certain degree of protection due to their
@@ -1037,7 +1037,7 @@ objects:
             (The Contractor bears responsibility for compliance with the requirements
             of
 
-            the ABDO 2017 by any company it takes under its wing as a Subcontractor).'
+            the ABDO 2019 by any company it takes under its wing as a Subcontractor).'
     - urn: urn:intuitem:risk:req_node:abdo_2019:1.7.6
       assessable: true
       depth: 3
