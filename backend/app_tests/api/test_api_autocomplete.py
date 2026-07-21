@@ -83,9 +83,7 @@ class TestGenericAutocomplete:
         assert auto_resp.status_code == status.HTTP_200_OK
 
         def folder_of(resp):
-            row = next(
-                r for r in _rows(resp) if r.get("name") == "Published threat"
-            )
+            row = next(r for r in _rows(resp) if r.get("name") == "Published threat")
             return row["folder"]
 
         assert folder_of(auto_resp) == folder_of(list_resp)
