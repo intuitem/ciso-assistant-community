@@ -509,5 +509,8 @@ def editor_doc_to_framework_object(editor_doc: dict, *, existing: dict) -> dict:
     if meta.get("ref_id"):
         framework["ref_id"] = meta["ref_id"]
     framework["urn"] = framework_urn
+    if not framework.get("ref_id"):
+        # migrated pre-LibraryDraft drafts may lack it; a save heals them
+        framework["ref_id"] = framework_urn.rsplit(":", 1)[-1]
     framework["requirement_nodes"] = requirement_nodes
     return framework

@@ -508,6 +508,8 @@ async def update_requirement_assessment(
     result: str = None,
     observation: str = None,
     score: int = None,
+    documentation_score: int = None,
+    target_score: float = None,
     is_scored: bool = None,
     eta: str = None,
     due_date: str = None,
@@ -521,7 +523,9 @@ async def update_requirement_assessment(
         status: to_do | in_progress | in_review | done
         result: not_assessed | partially_compliant | non_compliant | compliant | not_applicable
         observation: Observation text
-        score: Score value
+        score: Implementation score value (int, within the assessment's min/max score)
+        documentation_score: Documentation score value (int, within the assessment's min/max score)
+        target_score: Target score value (float)
         is_scored: Scored assessment flag
         eta: ETA date YYYY-MM-DD
         due_date: Due date YYYY-MM-DD
@@ -543,6 +547,10 @@ async def update_requirement_assessment(
             payload["observation"] = observation
         if score is not None:
             payload["score"] = score
+        if documentation_score is not None:
+            payload["documentation_score"] = documentation_score
+        if target_score is not None:
+            payload["target_score"] = target_score
         if is_scored is not None:
             payload["is_scored"] = is_scored
         if eta is not None:
@@ -586,7 +594,7 @@ async def update_requirement_assessments(
 
     Args:
         compliance_assessment_id: Compliance assessment ID or name (required)
-        updates: List of update objects. Each object must have "ref_id" (str) to identify the requirement, plus any fields to update: "result" (not_assessed|partially_compliant|non_compliant|compliant|not_applicable), "status" (to_do|in_progress|in_review|done), "observation" (str), "score" (int), "is_scored" (bool), "eta" (YYYY-MM-DD), "due_date" (YYYY-MM-DD), "selected" (bool).
+        updates: List of update objects. Each object must have "ref_id" (str) to identify the requirement, plus any fields to update: "result" (not_assessed|partially_compliant|non_compliant|compliant|not_applicable), "status" (to_do|in_progress|in_review|done), "observation" (str), "score" (int), "documentation_score" (int), "target_score" (float), "is_scored" (bool), "eta" (YYYY-MM-DD), "due_date" (YYYY-MM-DD), "selected" (bool).
     """
     try:
         if not updates:
@@ -636,6 +644,8 @@ async def update_requirement_assessments(
                 "result",
                 "observation",
                 "score",
+                "documentation_score",
+                "target_score",
                 "is_scored",
                 "eta",
                 "due_date",
