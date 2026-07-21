@@ -1794,10 +1794,11 @@ class ServiceAccount(AbstractBaseModel):
 
     def delete(self, *args, **kwargs):
         client, user, role = self.client, self.user, self.role
-        result = super().delete(*args, **kwargs)
-        client.delete()  # cascades outstanding OIDC tokens
-        user.delete()  # cascades the role assignment
-        role.delete()
+        with transaction.atomic():
+            result = super().delete(*args, **kwargs)
+            client.delete()  # cascades outstanding OIDC tokens
+            user.delete()  # cascades the role assignment
+            role.delete()
         return result
 
     def __str__(self):

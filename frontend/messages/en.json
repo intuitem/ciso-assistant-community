@@ -2549,6 +2549,7 @@
 	"createdBy": "Created by",
 	"activate": "Activate",
 	"deactivate": "Deactivate",
+	"deactivateServiceAccountConfirm": "Deactivating this service account will immediately revoke any outstanding access token and block new ones from being issued. Continue?",
 	"expiresOn": "Expires on {date}",
 	"expiresIn": "Expires in",
 	"token": "Token",

@@ -68,13 +68,13 @@
 		});
 	}
 
-	async function toggleActive(): Promise<void> {
+	async function setActive(isActive: boolean): Promise<void> {
 		busy = true;
 		try {
 			const res = await fetch(`/service-accounts/${data.data.id}`, {
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ is_active: !data.data.is_active })
+				body: JSON.stringify({ is_active: isActive })
 			});
 			if (res.ok) {
 				await invalidateAll();
@@ -85,6 +85,22 @@
 			toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
 		}
 		busy = false;
+	}
+
+	function toggleActive(): void {
+		if (data.data.is_active) {
+			modalStore.trigger({
+				type: 'confirm',
+				title: m.deactivate(),
+				body: m.deactivateServiceAccountConfirm(),
+				response: async (confirmed: boolean) => {
+					if (!confirmed) return;
+					await setActive(false);
+				}
+			});
+		} else {
+			setActive(true);
+		}
 	}
 
 	function modalConfirmDelete(): void {

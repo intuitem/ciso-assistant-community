@@ -5,7 +5,7 @@ import { getSecureRedirect } from '$lib/utils/helpers';
 import { safeTranslate } from '$lib/utils/i18n';
 import { modelSchema } from '$lib/utils/schemas';
 import { m } from '$paraglide/messages';
-import { fail, redirect, type Actions } from '@sveltejs/kit';
+import { error, fail, redirect, type Actions, type NumericRange } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { message, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -21,6 +21,9 @@ export const load: PageServerLoad = async (event) => {
 	// (nested permissions and perimeter_folders) back to the write shape.
 	const endpoint = `${BASE_API_URL}/${model.endpointUrl}/${event.params.id}/`;
 	const res = await event.fetch(endpoint);
+	if (!res.ok) {
+		error(res.status as NumericRange<400, 599>, await res.json());
+	}
 	const serviceAccount = await res.json();
 	const object = {
 		name: serviceAccount.name,

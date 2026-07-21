@@ -5,9 +5,7 @@ import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, url }) => {
 	const model = getModelInfo('service-accounts');
-	const endpoint = `${BASE_API_URL}/${model.endpointUrl}/${
-		url.searchParams ? '?' + url.searchParams.toString() : ''
-	}`;
+	const endpoint = `${BASE_API_URL}/${model.endpointUrl}/${url.search}`;
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {

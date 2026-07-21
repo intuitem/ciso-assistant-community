@@ -677,7 +677,14 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
                     is_recursive=data.get("is_recursive"),
                 )
                 if "is_active" in request.data:
-                    is_active = bool(request.data["is_active"])
+                    raw_is_active = request.data["is_active"]
+                    if isinstance(raw_is_active, str):
+                        is_active = raw_is_active.strip().lower() in (
+                            "true",
+                            "1",
+                        )
+                    else:
+                        is_active = bool(raw_is_active)
                     if is_active and not service_account.is_active:
                         service_account.activate()
                     elif not is_active and service_account.is_active:
