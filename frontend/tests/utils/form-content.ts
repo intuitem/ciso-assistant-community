@@ -92,7 +92,7 @@ export class FormContent {
 				case FormFieldType.SELECT_AUTOCOMPLETE:
 					await expect(async () => {
 						if (
-							(await field.locator.getByRole('option').isVisible()) &&
+							(await field.locator.getByRole('option').first().isVisible()) &&
 							(await field.locator
 								.getByRole('searchbox')
 								.evaluate((el) => el.classList.contains('disabled')))
