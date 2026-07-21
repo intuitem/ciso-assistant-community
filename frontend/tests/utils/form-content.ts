@@ -113,6 +113,9 @@ export class FormContent {
 								}
 								await expect(optionLocator).toBeVisible({ timeout: 10_000 });
 								await optionLocator.click();
+								// A lazy-search re-render can swallow the click — confirm the
+								// selection stuck so toPass retries instead of saving stale state.
+								await expect(field.locator).toContainText(lazySearchText(values[key].value));
 
 								await responsePromise;
 							} else {
@@ -126,6 +129,9 @@ export class FormContent {
 								}
 								await expect(optionLocator).toBeVisible({ timeout: 10_000 });
 								await optionLocator.click();
+								// A lazy-search re-render can swallow the click — confirm the
+								// selection stuck so toPass retries instead of saving stale state.
+								await expect(field.locator).toContainText(lazySearchText(values[key]));
 							}
 						}
 					}).toPass({ timeout: 22_000, intervals: [500, 1000, 10_000] });
