@@ -10156,14 +10156,13 @@ class JourneyViewSet(BaseModelViewSet):
         for ref_name, obj_id in (journey.object_refs or {}).items():
             try:
                 ca = readable_ca_qs.get(id=obj_id, folder=folder)
-                total_ra = ca.requirement_assessments.count()
-                assessed_ra = ca.requirement_assessments.exclude(status="to_do").count()
+                total_ra, assessed_ra = ca._get_progress_counts()
                 compliance_stats[ref_name] = {
                     "name": ca.name,
                     "total": total_ra,
                     "assessed": assessed_ra,
                     "percent": (
-                        round(assessed_ra / total_ra * 100) if total_ra > 0 else 0
+                        int(assessed_ra / total_ra * 100) if total_ra > 0 else 0
                     ),
                 }
             except ComplianceAssessment.DoesNotExist, ValueError:
@@ -10511,41 +10510,178 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         return qs
 
     def _get_optimized_object_data(self, queryset):
-        """Compute per-page requirement counts in one bounded GROUP BY,
+        """Compute per-page requirement counts for EVERY audit of the page,
         replacing the Count(distinct=True) annotations dropped from the
         list queryset. Bounded by `len(queryset)` (≤ page size), so the
         cost is independent of the total RA table size.
 
-        Only the no-implementation-groups case is computed here; audits
-        with `selected_implementation_groups` still rely on the prefetched
-        `requirement_assessments` for in-Python IG filtering inside
-        `ComplianceAssessmentListSerializer.get_progress`.
+        Audits without implementation groups go through per-mode GROUP BY
+        buckets; audits with implementation groups share one scalar
+        `.values()` scan for the whole page (their IG filtering intersects
+        two JSON lists, which SQL can't do).
         """
+        from core.models import Question
+
         optimized_data = super()._get_optimized_object_data(queryset)
         audit_ids = [a.id for a in queryset]
         if not audit_ids:
             return optimized_data
 
-        not_assessed = RequirementAssessment.Result.NOT_ASSESSED
-        rows = (
-            RequirementAssessment.objects.filter(
-                compliance_assessment_id__in=audit_ids,
+        # The progress mode (status visible = status-driven) and the content
+        # branches are audit-level facts known before querying, so audits are
+        # bucketed by (status_driven, result_visible, framework_has_questions)
+        # and each bucket runs the cheapest GROUP BY variant — status-driven
+        # and result-visible buckets are purely scalar (no Exists, no extra
+        # joins), i.e. the same cost profile as before the cascade.
+        audit_meta = ComplianceAssessment.objects.filter(id__in=audit_ids).values_list(
+            "id",
+            "field_visibility",
+            "framework_id",
+            "selected_implementation_groups",
+            "min_score",
+            "framework__min_score",
+            "framework__field_visibility",
+        )
+        frameworks_with_questions = set(
+            Question.objects.filter(
+                requirement_node__framework_id__in={m[2] for m in audit_meta}
+            )
+            .values_list("requirement_node__framework_id", flat=True)
+            .distinct()
+        )
+        # Audits with no RA rows must still resolve to 0%, so seed the maps.
+        total_map: dict = {ca_id: 0 for ca_id in audit_ids}
+        assessed_map: dict = {ca_id: 0 for ca_id in audit_ids}
+        buckets: dict = {}
+        ig_meta: dict = {}
+        for (
+            ca_id,
+            field_visibility,
+            framework_id,
+            igs,
+            ca_min,
+            fw_min,
+            fw_fv,
+        ) in audit_meta:
+            status_driven, result_visible = (
+                ComplianceAssessment.progress_mode_from_visibility(
+                    field_visibility, fw_fv
+                )
+            )
+            has_questions = (
+                not status_driven and framework_id in frameworks_with_questions
+            )
+            if igs:
+                min_score_fallback = ca_min if ca_min is not None else (fw_min or 0)
+                ig_meta[ca_id] = (
+                    set(igs),
+                    status_driven,
+                    result_visible,
+                    has_questions,
+                    min_score_fallback,
+                )
+                continue
+            buckets.setdefault(
+                (status_driven, result_visible, has_questions), []
+            ).append(ca_id)
+
+        for (
+            status_driven,
+            result_visible,
+            has_questions,
+        ), bucket_ids in buckets.items():
+            ras = RequirementAssessment.objects.filter(
+                compliance_assessment_id__in=bucket_ids,
                 requirement__assessable=True,
             )
-            .values("compliance_assessment_id")
-            .annotate(
+            if has_questions:
+                from django.db.models import Exists, OuterRef
+
+                from core.models import Answer
+
+                ras = ras.annotate(
+                    _has_questions=RequirementAssessment.has_questions_subquery(),
+                    _has_answers=Exists(
+                        Answer.objects.filter(requirement_assessment=OuterRef("pk"))
+                    ),
+                    _has_unanswered=Exists(
+                        RequirementAssessment._unanswered_answers_subquery()
+                    ),
+                )
+            rows = ras.values("compliance_assessment_id").annotate(
                 total=Count("id"),
                 assessed=Count(
                     "id",
-                    filter=~Q(result=not_assessed) | Q(score__isnull=False),
+                    filter=RequirementAssessment.progress_assessed_q(
+                        status_driven=status_driven,
+                        result_visible=result_visible,
+                        has_questions_annotation=has_questions,
+                    ),
                 ),
             )
-        )
-        total_map: dict = {}
-        assessed_map: dict = {}
-        for r in rows:
-            total_map[r["compliance_assessment_id"]] = r["total"]
-            assessed_map[r["compliance_assessment_id"]] = r["assessed"]
+            for r in rows:
+                total_map[r["compliance_assessment_id"]] = r["total"]
+                assessed_map[r["compliance_assessment_id"]] = r["assessed"]
+
+        if ig_meta:
+            # One scalar scan for all IG audits of the page (no ORM
+            # instantiation, no per-audit query); IG membership and the
+            # cascade are evaluated in Python via progress_assessed_scalar.
+            ig_rows = RequirementAssessment.objects.filter(
+                compliance_assessment_id__in=ig_meta.keys(),
+                requirement__assessable=True,
+            )
+            row_fields = [
+                "compliance_assessment_id",
+                "status",
+                "result",
+                "score",
+                "requirement__implementation_groups",
+                "requirement__min_score",
+            ]
+            if any(meta[3] for meta in ig_meta.values()):
+                from core.models import Answer
+                from django.db.models import Exists, OuterRef
+
+                ig_rows = ig_rows.annotate(
+                    _has_questions=RequirementAssessment.has_questions_subquery(),
+                    _has_answers=Exists(
+                        Answer.objects.filter(requirement_assessment=OuterRef("pk"))
+                    ),
+                    _has_unanswered=Exists(
+                        RequirementAssessment._unanswered_answers_subquery()
+                    ),
+                )
+                row_fields += ["_has_questions", "_has_answers", "_has_unanswered"]
+            for row in ig_rows.values(*row_fields).iterator():
+                ca_id = row["compliance_assessment_id"]
+                selected, status_driven, result_visible, has_questions, min_fb = (
+                    ig_meta[ca_id]
+                )
+                groups = set(row["requirement__implementation_groups"] or [])
+                if selected.isdisjoint(groups):
+                    continue
+                total_map[ca_id] += 1
+                if RequirementAssessment.progress_assessed_scalar(
+                    row["status"],
+                    row["result"],
+                    row["score"],
+                    row["requirement__min_score"],
+                    status_driven=status_driven,
+                    has_questions=(
+                        row.get("_has_questions", False) if has_questions else False
+                    ),
+                    result_visible=result_visible,
+                    min_score_fallback=min_fb,
+                    questionnaire_fully_answered=(
+                        row.get("_has_answers", False)
+                        and not row.get("_has_unanswered", True)
+                        if has_questions
+                        else False
+                    ),
+                ):
+                    assessed_map[ca_id] += 1
+
         optimized_data["total_requirements"] = total_map
         optimized_data["assessed_requirements"] = assessed_map
         return optimized_data
@@ -10569,17 +10705,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
         )
 
-        if self.action == "list":
-            # List view: lightweight prefetch for progress with implementation groups
-            qs = qs.prefetch_related(
-                Prefetch(
-                    "requirement_assessments",
-                    queryset=RequirementAssessment.objects.filter(
-                        requirement__assessable=True
-                    ).select_related("requirement"),
-                ),
-            )
-        elif self.action == "retrieve":
+        # No requirement_assessments prefetch on the list action: progress is
+        # served by `_get_optimized_object_data` (no-IG audits) or the model's
+        # scalar-only counts (IG audits); nothing else in the list serializer
+        # reads RAs, and the prefetch used to hydrate ~page x framework-size
+        # ORM objects per request for nothing.
+        if self.action == "retrieve":
             # Detail view only: full prefetches for the read serializer
             qs = qs.select_related(
                 "framework__library",  # For framework.has_update property
@@ -10606,36 +10737,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         # Custom detail actions (tree, global_score, donut_data, etc.)
         # use lightweight querysets — they don't need full prefetches.
 
-        # The `total_requirements` / `assessed_requirements` Count(distinct=True)
-        # annotations are catastrophic on the list path: each one forces
-        # SQLite to materialise a temp B-tree over the full LEFT JOIN of
-        # the requirement_assessments table per row, and the two together
-        # account for the ~2.7s single-query cost on /compliance-assessments/.
-        # On the list path we compute the same numbers in `_get_optimized_object_data`
-        # via a single GROUP BY bounded by the page (≤ page_size audits).
-        # Retrieve still uses the annotations because the cost is trivial
-        # at one row.
-        if self.action != "list":
-            qs = qs.annotate(
-                total_requirements=Count(
-                    "requirement_assessments",
-                    filter=Q(requirement_assessments__requirement__assessable=True),
-                    distinct=True,
-                ),
-                assessed_requirements=Count(
-                    "requirement_assessments",
-                    filter=Q(
-                        Q(
-                            ~Q(
-                                requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
-                            )
-                        )
-                        | Q(requirement_assessments__score__isnull=False),
-                        requirement_assessments__requirement__assessable=True,
-                    ),
-                    distinct=True,
-                ),
-            )
+        # Progress is computed through the model's cascade counts
+        # (`ComplianceAssessment._get_progress_counts`): one GROUP BY bounded
+        # by the page on the list path (`_get_optimized_object_data`), one
+        # scalar aggregate per object on detail paths. The former
+        # total/assessed `Count(distinct=True)` annotations were catastrophic
+        # on SQLite (temp B-tree over the full RA LEFT JOIN per row, ~2.7s on
+        # /compliance-assessments/) and must not come back.
 
         return qs
 
@@ -11425,6 +11533,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
+            # Question-driven requirements: score and is_scored belong to
+            # recompute_assessment (a committed score means "questionnaire
+            # complete" for progress). Direct writes are ignored — same
+            # contract as the write serializer, so clients that round-trip
+            # the field keep working — and flagged in the response. This must
+            # run before score validation so a round-tripped empty value does
+            # not trip the integer parse.
+            score_ignored = (
+                "score" in request.data
+                and requirement_assessment.requirement.questions.exists()
+            )
+            if score_ignored:
+                score = None
+
             # validate if score value is within the resolved scale
             if score is not None:
                 try:
@@ -11467,7 +11589,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if score is not None:
                 requirement_assessment.score = score
                 requirement_assessment.is_scored = True
-            elif score is None and "score" in request.data:
+            elif score is None and "score" in request.data and not score_ignored:
                 # Explicitly setting score to null/empty
                 requirement_assessment.score = None
                 requirement_assessment.is_scored = False
@@ -11479,6 +11601,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "urn": urn,
                 "result": result,
             }
+            if score_ignored:
+                response_data["score_ignored"] = (
+                    "This requirement is question-driven: its score is computed "
+                    "from the questionnaire answers, the provided value was ignored."
+                )
 
             # Include status in response if it was updated
             if status_value is not None:
@@ -11488,7 +11615,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if score is not None:
                 response_data["score"] = score
                 response_data["is_scored"] = True
-            elif score is None and "score" in request.data:
+            elif score is None and "score" in request.data and not score_ignored:
                 response_data["score"] = None
                 response_data["is_scored"] = False
 
@@ -12356,6 +12483,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def auditee_dashboard(self, request):
         """Returns per-assignment progress data for the auditee's dashboard."""
         user_actors = Actor.get_all_for_user(request.user)
+        # Prefetch each assignment's assessable requirement assessments with
+        # everything get_visible_questions_counts() needs, so the per-assignment
+        # loop below reads from cache (no per-assignment queries).
+        assessable_ras = (
+            RequirementAssessment.objects.filter(requirement__assessable=True)
+            .select_related("requirement")
+            .prefetch_related(
+                "requirement__questions",
+                "answers",
+                "answers__question",
+                "answers__selected_choices",
+            )
+        )
         assignments = (
             RequirementAssignment.objects.filter(actor__in=user_actors)
             .select_related(
@@ -12363,9 +12503,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "compliance_assessment__framework",
                 "compliance_assessment__folder",
             )
-            .prefetch_related("requirement_assessments", "actor")
+            .prefetch_related(
+                Prefetch("requirement_assessments", queryset=assessable_ras),
+                "actor",
+            )
             .distinct()
         )
+
+        from core.utils import resolve_visibility_from_overrides
 
         # Only include compliance assessments the user can view
         (viewable_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
@@ -12378,40 +12523,63 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 continue
 
             ca = assignment.compliance_assessment
-            ra_ids = assignment.requirement_assessments.values_list("id", flat=True)
-            ras = RequirementAssessment.objects.filter(
-                id__in=ra_ids, requirement__assessable=True
-            )
-            total = ras.count()
-            done = ras.exclude(result="not_assessed").count()
+            # Prefetched above (filtered to assessable), so this hits the cache.
+            ras = list(assignment.requirement_assessments.all())
+            # Respect the audit's implementation-groups scope: out-of-scope
+            # requirements are hidden from the audit and must not weigh on
+            # the respondent's progress either.
+            if ca.selected_implementation_groups:
+                selected_groups = set(ca.selected_implementation_groups)
+                ras = [
+                    ra
+                    for ra in ras
+                    if selected_groups & set(ra.requirement.implementation_groups or [])
+                ]
+            total = len(ras)
 
-            # Use question-based progress when framework has questions
-            has_questions = (
-                Question.objects.filter(
-                    requirement_node__framework=ca.framework
-                ).exists()
-                if ca.framework
-                else False
+            # Respondent-facing progress: track the respondent's own work, not
+            # the audit-level progress mode (the status field may not even be
+            # visible to them). Identical computation to the frontend
+            # assessment page: per requirement, share of answered VISIBLE
+            # questions (get_visible_questions_counts resolves depends_on, so
+            # conditional and informational questionnaires are correct); a
+            # requirement with no questions counts as one virtual unit,
+            # answered via the respondent's alignment answer when that field
+            # is in use, else the result. The Python walk is bounded by the
+            # respondent's own assignments, so its cost stays small.
+            alignment_pair = resolve_visibility_from_overrides(
+                ca.field_visibility
+                or (
+                    getattr(ca.framework, "field_visibility", None)
+                    if ca.framework_id
+                    else None
+                ),
+                "respondent_alignment",
             )
+            alignment_in_use = alignment_pair.get("respondent", "edit") != "hidden"
 
-            if has_questions:
-                total_q = 0
-                answered_q = 0
-                for ra in ras.prefetch_related(
-                    "answers",
-                    "answers__question",
-                    "answers__selected_choices",
-                    "requirement__questions",
-                    "requirement__questions__choices",
-                ):
-                    v, a = ra.get_visible_questions_counts()
-                    total_q += v
-                    answered_q += a
-                progress_percent = (
-                    round(answered_q / total_q * 100) if total_q > 0 else 0
+            total_q = 0
+            answered_q = 0
+            done = 0
+            for ra in ras:
+                visible, answered = ra.get_visible_questions_counts()
+                if visible > 0:
+                    total_q += visible
+                    answered_q += answered
+                    if answered >= visible:
+                        done += 1
+                    continue
+                # No visible questions: one virtual unit, respondent-driven.
+                total_q += 1
+                unit_done = (
+                    bool(ra.respondent_alignment)
+                    if alignment_in_use
+                    else ra.result != RequirementAssessment.Result.NOT_ASSESSED
                 )
-            else:
-                progress_percent = round(done / total * 100) if total > 0 else 0
+                if unit_done:
+                    answered_q += 1
+                    done += 1
+            progress_percent = int(answered_q / total_q * 100) if total_q else 0
 
             actor_names = ", ".join(str(a) for a in assignment.actor.all())
 

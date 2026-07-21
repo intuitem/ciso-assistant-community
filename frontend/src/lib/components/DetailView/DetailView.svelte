@@ -12,7 +12,7 @@
 	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
-	import { getModelInfo } from '$lib/utils/crud.js';
+	import { getModelInfo, getMarkdownFields } from '$lib/utils/crud';
 	import { formatDate, formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -114,6 +114,8 @@
 	}: Props = $props();
 
 	exclude = [...exclude, ...defaultExcludes];
+
+	const markdownFieldSet = $derived(getMarkdownFields(data.urlModel));
 
 	const getRelatedModelIndex = (model: ModelMapEntry, relatedModel: Record<string, string>) => {
 		if (!model.reverseForeignKeyFields) return -1;
@@ -785,7 +787,7 @@
 												>
 											{:else if ISO_8601_REGEX.test(value) && dateFieldsToFormat.includes(key)}
 												{formatDateOrDateTime(value, getLocale())}
-											{:else if key === 'description' || key === 'observation' || key === 'annotation' || key === 'justification'}
+											{:else if markdownFieldSet.has(key)}
 												<MarkdownRenderer content={value} />
 											{:else if typeof value === 'boolean'}
 												{@const bd = booleanDisplay(value, key, data.urlModel)}
