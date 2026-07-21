@@ -76,8 +76,10 @@ jobs:
       - name: Build and Push
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
-          context: .
+          context: ./frontend
           file: ./enterprise/frontend/Dockerfile
+          build-contexts: |
+            enterprise_frontend=./enterprise/frontend
           push: true
           tags: ghcr.io/intuitem/ciso-assistant-enterprise-frontend:${{ needs.prepare.outputs.version }}-${{ matrix.arch }}
           platforms: linux/${{ matrix.arch }}
@@ -138,8 +140,10 @@ jobs:
       - name: Build and Push
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
-          context: .
+          context: ./backend
           file: ./enterprise/backend/Dockerfile
+          build-contexts: |
+            enterprise_backend=./enterprise/backend
           push: true
           tags: ghcr.io/intuitem/ciso-assistant-enterprise-backend:${{ needs.prepare.outputs.version }}-${{ matrix.arch }}
           platforms: linux/${{ matrix.arch }}
