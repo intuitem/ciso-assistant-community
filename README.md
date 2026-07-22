@@ -349,6 +349,7 @@ Read more here: [AI engine](backend/chat/README.md)
 117. Personal Data Protection Law (PDPL) 🇸🇦
 118. NCSC - Cyber Assessment Framework (CAF) v4.0 🇬🇧
 119. Algemene Beveiligingseisen voor Rijksoverheidsopdrachten (ABRO) 2026 🇳🇱
+120. Algemene Beveiligingseisen voor Defensieopdrachten (ABDO) 2019 🇳🇱
 
 ### Community contributions
 
