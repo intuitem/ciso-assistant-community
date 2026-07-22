@@ -89,20 +89,25 @@ class PostureAssessmentWriteSerializer(BaseModelSerializer):
         if "assets" in validated_data:
             kept = {asset.id for asset in validated_data["assets"]}
             current = set(instance.assets.values_list("id", flat=True))
+            viewable = self._viewable_asset_ids()
+            if viewable is not None:
+                # the submitted list only covers viewable assets; keep invisible ones linked
+                invisible = current - viewable - kept
+                if invisible:
+                    validated_data["assets"] = list(validated_data["assets"]) + list(
+                        Asset.objects.filter(id__in=invisible)
+                    )
+                    kept |= invisible
             measured = set(
                 instance.results.values_list("asset_id", flat=True).distinct()
             )
             dropped = (current & measured) - kept
             if dropped:
-                viewable = self._viewable_asset_ids()
-                if viewable is not None:
-                    dropped &= viewable
                 names = ", ".join(
                     Asset.objects.filter(id__in=dropped).values_list("name", flat=True)
                 )
-                message = "cannot remove assets with recorded results"
                 raise serializers.ValidationError(
-                    {"assets": f"{message}: {names}" if names else message}
+                    {"assets": f"cannot remove assets with recorded results: {names}"}
                 )
         return super().update(instance, validated_data)
 

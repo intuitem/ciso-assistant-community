@@ -76,22 +76,19 @@ class PostureAssessmentViewSet(BaseModelViewSet):
             return None
         if obj.is_locked:
             return "cannot modify a locked assessment"
-        if action_type == "add_m2m":
-            viewable = {str(i) for i in self._viewable_asset_ids()}
-            if any(str(i) not in viewable for i in ids):
-                return "permission denied to add this asset"
-        else:
+        viewable = {str(i) for i in self._viewable_asset_ids()}
+        if any(str(i) not in viewable for i in ids):
+            verb = "add" if action_type == "add_m2m" else "remove"
+            return f"permission denied to {verb} this asset"
+        if action_type == "remove_m2m":
             measured = set(
                 obj.results.filter(asset_id__in=ids).values_list("asset_id", flat=True)
             )
             if measured:
                 names = ", ".join(
-                    Asset.objects.filter(
-                        id__in=measured & set(self._viewable_asset_ids())
-                    ).values_list("name", flat=True)
+                    Asset.objects.filter(id__in=measured).values_list("name", flat=True)
                 )
-                message = "cannot remove assets with recorded results"
-                return f"{message}: {names}" if names else message
+                return f"cannot remove assets with recorded results: {names}"
         return None
 
     @staticmethod
