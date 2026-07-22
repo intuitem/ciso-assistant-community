@@ -218,7 +218,7 @@
 								? '#fff'
 								: '#0f172a'}">{l.abbreviation || l.name}</span
 						>
-						<span class="flex-1 truncate text-sm">{l.label ?? l.name}</span>
+						<span class="flex-1 truncate text-sm">{l.name || l.label}</span>
 						<button
 							class="text-surface-400 hover:text-primary-500"
 							disabled={busy}

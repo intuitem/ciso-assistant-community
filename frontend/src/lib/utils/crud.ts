@@ -127,6 +127,15 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 	batchCreate?: {
 		label?: string; // i18n key for button title (defaults to 'batchCreate')
 	};
+	// Enables multi-row selection on the reverse-FK table with an action that POSTs
+	// the selected ids to a parent endpoint (e.g. remove members from a group).
+	// Gated by change permission on the parent's folder.
+	removeFromParent?: {
+		action: string; // parent action url segment, e.g. 'remove-members'
+		payloadField: string; // request body key holding the selected ids, e.g. 'users'
+		label?: string; // i18n key for the button (defaults to 'remove')
+		successMessage?: string; // i18n key for the success toast
+	};
 }
 
 interface Field {
@@ -169,6 +178,11 @@ export interface ModelMapEntry {
 	path?: string;
 	endpointUrl?: string;
 	customNameDescription?: boolean;
+	/**
+	 * Fields (in addition to `DEFAULT_MARKDOWN_FIELDS`) whose content is edited and
+	 * rendered as Markdown for this model.
+	 */
+	markdownFields?: string[];
 }
 
 type ModelMap = {
@@ -878,7 +892,16 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'users',
 				disableCreate: true,
 				disableDelete: true,
-				folderPermsNeeded: [{ model: 'folder', action: 'change' }]
+				folderPermsNeeded: [{ model: 'folder', action: 'change' }],
+				// Select members in the table and remove them from the group. Routes to
+				// the group's change_usergroup-gated endpoint, so a domain manager can
+				// remove members without write access on the (Global) User object.
+				removeFromParent: {
+					action: 'remove-members',
+					payloadField: 'users',
+					label: 'removeFromGroup',
+					successMessage: 'membersRemoved'
+				}
 			}
 		],
 		filters: []
@@ -1634,6 +1657,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'dataBreaches',
 		verboseName: 'data breach',
 		verboseNamePlural: 'data breaches',
+		markdownFields: ['potential_consequences'],
 		selectFields: [{ field: 'breach_type' }, { field: 'risk_level' }, { field: 'status' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
@@ -1955,6 +1979,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'strategic_scenario' },
 			{ field: 'ro_to_couple' },
 			{ field: 'is_selected' },
+			{ field: 'justification' },
 			{ field: 'stakeholders' },
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'ebios_rm_study' }
@@ -1967,6 +1992,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'operationalScenarios',
 		verboseName: 'Operational scenario',
 		verboseNamePlural: 'Operational scenarios',
+		markdownFields: ['operating_modes_description'],
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
 			{ field: 'threats', urlModel: 'threats' },
@@ -2155,6 +2181,39 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'is_locked' }
 		]
 	},
+	'posture-assessments': {
+		name: 'postureassessment',
+		localName: 'postureAssessment',
+		localNamePlural: 'postureAssessments',
+		verboseName: 'Technical posture',
+		verboseNamePlural: 'Technical postures',
+		endpointUrl: 'automation/posture-assessments',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'perimeter', urlModel: 'perimeters' },
+			{ field: 'framework', urlModel: 'frameworks' },
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'authors', urlModel: 'actors' },
+			{ field: 'follow_up_assessment', urlModel: 'findings-assessments' }
+		],
+		selectFields: [{ field: 'status' }],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'perimeter' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'framework' },
+			{ field: 'follow_up_assessment' },
+			{ field: 'history_depth' },
+			{ field: 'authors' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'status' },
+			{ field: 'observation' }
+		]
+	},
 	findings: {
 		name: 'finding',
 		localName: 'finding',
@@ -2209,6 +2268,10 @@ export const URL_MODEL_MAP: ModelMap = {
 				addExisting: {
 					parentField: 'reference_controls'
 				}
+			},
+			{
+				field: 'findings',
+				urlModel: 'task-templates'
 			}
 		],
 		selectFields: [
@@ -2234,6 +2297,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'incidents',
 		verboseName: 'Incident',
 		verboseNamePlural: 'Incidents',
+		markdownFields: ['resolution'],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'threats', urlModel: 'threats' },
@@ -2337,6 +2401,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
+			{ field: 'findings', urlModel: 'findings' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [
@@ -3256,12 +3321,26 @@ const FIELD_COMPONENT_MAP = {
 	}
 };
 
+/**
+ * Default fields rendered and edited as Markdown.
+ * Model-specific fields can be added through `markdownFields`.
+ */
+const DEFAULT_MARKDOWN_FIELDS = ['description', 'observation', 'annotation', 'justification'];
+
+export function getMarkdownFields(model: urlModel | string | undefined): Set<string> {
+	const modelSpecific = (model ? getModelInfo(model)?.markdownFields : undefined) ?? [];
+	return new Set([...DEFAULT_MARKDOWN_FIELDS, ...modelSpecific]);
+}
+
 export function getFieldComponentMap(URLModel: string) {
 	const fieldComponentMap = FIELD_COMPONENT_MAP[URLModel] ?? {};
 	const listViewConfig = listViewFields[URLModel] ?? { body: [] };
 
-	if (listViewConfig.body.findIndex((field) => field === 'description') >= 0) {
-		fieldComponentMap.description = MarkdownDescription;
+	const markdownFields = getMarkdownFields(URLModel);
+	for (const field of listViewConfig.body) {
+		if (markdownFields.has(field) && !fieldComponentMap[field]) {
+			fieldComponentMap[field] = MarkdownDescription;
+		}
 	}
 	return fieldComponentMap;
 }

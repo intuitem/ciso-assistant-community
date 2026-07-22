@@ -1,0 +1,1565 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:cis-benchmark-microsoft-365
+locale: en
+ref_id: cis-benchmark-microsoft-365
+name: CIS Microsoft 365 Foundations Benchmark
+description: CIS Microsoft 365 Foundations Benchmark v7.0.0
+copyright: "\xA9 CIS Security"
+version: 1
+publication_date: 2026-05-20
+provider: CIS
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cis-benchmark-microsoft-365
+    ref_id: cis-benchmark-microsoft-365
+    name: CIS Microsoft 365 Foundations Benchmark
+    description: CIS Microsoft 365 Foundations Benchmark v7.0.0
+    implementation_groups_definition:
+    - ref_id: A
+      name: Automatic
+      description: null
+    - ref_id: M
+      name: Manual
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Microsoft 365 admin center
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1
+      ref_id: '1.1'
+      name: Users
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.1
+      ref_id: 1.1.1
+      name: Ensure Administrative accounts are cloud-only
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.1
+      ref_id: 1.1.2
+      name: Ensure two emergency access accounts have been defined
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.1
+      ref_id: 1.1.3
+      name: Ensure that between two and four global admins are designated
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.1
+      ref_id: 1.1.4
+      name: Ensure administrative accounts use licenses with a reduced application
+        footprint
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1
+      ref_id: '1.2'
+      name: Teams & groups
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.2
+      ref_id: 1.2.1
+      name: Ensure that only organizationally managed/approved public groups exist
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.2
+      ref_id: 1.2.2
+      name: Ensure sign-in to shared mailboxes is blocked
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1
+      ref_id: '1.3'
+      name: Settings
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3
+      ref_id: 1.3.1
+      name: Ensure the 'Password expiration policy' is set to 'Set passwords to never
+        expire (recommended)'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3
+      ref_id: 1.3.2
+      name: Ensure 'Idle session timeout' is set to '3 hours (or less)' for unmanaged
+        devices
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3
+      ref_id: 1.3.3
+      name: Ensure 'External sharing' of calendars is not available
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3
+      ref_id: 1.3.4
+      name: Ensure 'User owned apps and services' is restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3
+      ref_id: 1.3.5
+      name: Ensure internal phishing protection for Forms is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3
+      ref_id: 1.3.6
+      name: Ensure the customer lockbox feature is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3
+      ref_id: 1.3.7
+      name: Ensure 'third-party storage services' are restricted in 'Microsoft 365
+        on the web'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3
+      ref_id: 1.3.8
+      name: Ensure that Sways cannot be shared with people outside of your organization
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:1.3
+      ref_id: 1.3.9
+      name: Ensure shared bookings pages are restricted to select users
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Microsoft Defender
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2
+      ref_id: '2.1'
+      name: Email & collaboration
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1
+      ref_id: 2.1.1
+      name: Ensure Safe Links for Office Applications is Enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1
+      ref_id: 2.1.2
+      name: Ensure the Common Attachment Types Filter is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1
+      ref_id: 2.1.3
+      name: Ensure notifications for internal users sending malware is Enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1
+      ref_id: 2.1.4
+      name: Ensure Safe Attachments policy is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1
+      ref_id: 2.1.5
+      name: Ensure Safe Attachments for SharePoint, OneDrive, and Microsoft Teams
+        is Enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1
+      ref_id: 2.1.6
+      name: Ensure Exchange Online Spam Policies are set to notify administrators
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1
+      ref_id: 2.1.7
+      name: Ensure that an anti-phishing policy has been created
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1
+      ref_id: 2.1.8
+      name: Ensure that SPF records are published for all Exchange Domains
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1
+      ref_id: 2.1.9
+      name: Ensure that DKIM is enabled for all Exchange Online Domains
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1
+      ref_id: 2.1.10
+      name: Ensure DMARC records for all Exchange Online domains are published
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1
+      ref_id: 2.1.11
+      name: Ensure comprehensive attachment filtering is applied
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1
+      ref_id: 2.1.12
+      name: Ensure the connection filter IP allow list is not used
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1
+      ref_id: 2.1.13
+      name: Ensure the connection filter safe list is off
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1
+      ref_id: 2.1.14
+      name: Ensure inbound anti-spam policies do not contain allowed domains
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1.15
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.1
+      ref_id: 2.1.15
+      name: Ensure outbound anti-spam message limits are in place
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2
+      ref_id: '2.2'
+      name: Cloud apps
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.2
+      ref_id: 2.2.1
+      name: Ensure emergency access account activity is monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2
+      ref_id: '2.4'
+      name: System
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.4
+      ref_id: 2.4.1
+      name: Ensure Priority account protection is enabled and configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.4
+      ref_id: 2.4.2
+      name: Ensure Priority accounts have 'Strict protection' presets applied
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.4
+      ref_id: 2.4.3
+      name: Ensure Microsoft Defender for Cloud Apps is enabled and configured
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.4
+      ref_id: 2.4.4
+      name: Ensure Zero-hour auto purge for Microsoft Teams is on
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:2.4
+      ref_id: 2.4.5
+      name: Ensure 'AIR' remediation is enabled
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Microsoft Purview
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:3
+      ref_id: '3.1'
+      name: Audit
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:3.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:3.1
+      ref_id: 3.1.1
+      name: Ensure Microsoft 365 audit log search is Enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:3
+      ref_id: '3.2'
+      name: Data Loss Protection
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:3.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:3.2
+      ref_id: 3.2.1
+      name: Ensure DLP policies are enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:3.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:3.2
+      ref_id: 3.2.2
+      name: Ensure DLP policies are enabled for Microsoft Teams
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:3.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:3.2
+      ref_id: 3.2.3
+      name: Ensure DLP policies are published for Copilot users
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:3.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:3
+      ref_id: '3.3'
+      name: Information Protection
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:3.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:3.3
+      ref_id: 3.3.1
+      name: Ensure Information Protection sensitivity label policies are published
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Microsoft Intune admin center
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:4
+      ref_id: '4.1'
+      name: Ensure devices without a compliance policy are marked 'not compliant'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:4
+      ref_id: '4.2'
+      name: Ensure device enrollment for personally owned devices is blocked by default
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Microsoft Entra admin center
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5
+      ref_id: '5.1'
+      name: Entra ID
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1
+      ref_id: 5.1.2
+      name: Users
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.2
+      ref_id: 5.1.2.1
+      name: Ensure 'Per-user MFA' is disabled
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.2
+      ref_id: 5.1.2.2
+      name: Ensure users cannot register applications
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.2
+      ref_id: 5.1.2.3
+      name: Ensure 'Restrict non-admin users from creating tenants' is set to 'Yes'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.2.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.2
+      ref_id: 5.1.2.4
+      name: Ensure access to the Entra admin center is restricted
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.2.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.2
+      ref_id: 5.1.2.5
+      name: Ensure the option to remain signed in is hidden
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.2.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.2
+      ref_id: 5.1.2.6
+      name: Ensure 'LinkedIn account connections' is disabled
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1
+      ref_id: 5.1.3
+      name: Groups
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.3
+      ref_id: 5.1.3.1
+      name: Ensure users cannot create security groups
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.3
+      ref_id: 5.1.3.2
+      name: Ensure that 'Restrict user ability to access groups features in My Groups'
+        is set to 'Yes'
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.3.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.3
+      ref_id: 5.1.3.3
+      name: Ensure that 'Owners can manage group membership requests in My Groups'
+        is set to 'No'
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.3.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.3
+      ref_id: 5.1.3.4
+      name: Ensure that 'Users can create Microsoft 365 groups in Azure portals, API
+        or PowerShell' is set to 'No'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1
+      ref_id: 5.1.4
+      name: Devices
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.4.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.4
+      ref_id: 5.1.4.1
+      name: Ensure the ability to join devices to Entra is restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.4.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.4
+      ref_id: 5.1.4.2
+      name: Ensure the maximum number of devices per user is limited
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.4.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.4
+      ref_id: 5.1.4.3
+      name: Ensure the GA role is not added as a local administrator during Entra
+        join
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.4.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.4
+      ref_id: 5.1.4.4
+      name: Ensure local administrator assignment is limited during Entra join
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.4.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.4
+      ref_id: 5.1.4.5
+      name: Ensure Local Administrator Password Solution is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.4.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.4
+      ref_id: 5.1.4.6
+      name: Ensure users are restricted from recovering BitLocker keys
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1
+      ref_id: 5.1.5
+      name: Enterprise apps
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.5.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.5
+      ref_id: 5.1.5.1
+      name: Ensure user consent to apps accessing company data on their behalf is
+        not allowed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.5.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.5
+      ref_id: 5.1.5.2
+      name: Ensure the admin consent workflow is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.5.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.5
+      ref_id: 5.1.5.3
+      name: Ensure password addition is blocked for applications
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.5.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.5
+      ref_id: 5.1.5.4
+      name: Ensure password lifetime for applications does not exceed 180 days
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.5.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.5
+      ref_id: 5.1.5.5
+      name: Ensure new application passwords are system-generated
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.5.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.5
+      ref_id: 5.1.5.6
+      name: Ensure maximum certificate lifetime for applications does not exceed 180
+        days
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1
+      ref_id: 5.1.6
+      name: External Identities
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.6.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.6
+      ref_id: 5.1.6.1
+      name: Ensure that collaboration invitations are sent to allowed domains only
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.6.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.6
+      ref_id: 5.1.6.2
+      name: Ensure that guest user access is restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.6.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.6
+      ref_id: 5.1.6.3
+      name: Ensure guest user invitations are limited
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.8
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1
+      ref_id: 5.1.8
+      name: Hybrid management
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.8.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.1.8
+      ref_id: 5.1.8.1
+      name: Ensure that password hash sync is enabled for hybrid deployments
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5
+      ref_id: '5.2'
+      name: ID Protection
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2
+      ref_id: 5.2.2
+      name: Conditional Access
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      ref_id: 5.2.2.1
+      name: Ensure multifactor authentication is enabled for all users in administrative
+        roles
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      ref_id: 5.2.2.2
+      name: Ensure multifactor authentication is enabled for all users
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      ref_id: 5.2.2.3
+      name: Enable Conditional Access policies to block legacy authentication
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      ref_id: 5.2.2.4
+      name: Ensure Sign-in frequency is enabled and browser sessions are not persistent
+        for Administrative users
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      ref_id: 5.2.2.5
+      name: Ensure 'Phishing-resistant MFA strength' is required for Administrators
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      ref_id: 5.2.2.6
+      name: Enable Identity Protection user risk policies
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      ref_id: 5.2.2.7
+      name: Enable Identity Protection sign-in risk policies
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      ref_id: 5.2.2.8
+      name: Ensure 'sign-in risk' is blocked for medium and high risk
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      ref_id: 5.2.2.9
+      name: Ensure a managed device is required for authentication
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2.10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      ref_id: 5.2.2.10
+      name: Ensure a managed device is required to register security information
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2.11
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      ref_id: 5.2.2.11
+      name: Ensure sign-in frequency for Intune Enrollment is set to 'Every time'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2.12
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      ref_id: 5.2.2.12
+      name: Ensure the device code sign-in flow is blocked
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2.13
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      ref_id: 5.2.2.13
+      name: Ensure that periodic reauthentication is required for all users
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2.14
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      ref_id: 5.2.2.14
+      name: Ensure trusted 'named locations' are defined
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2.15
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      ref_id: 5.2.2.15
+      name: Ensure exclusionary geographic access controls are utilized
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2.16
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      ref_id: 5.2.2.16
+      name: Ensure Token Protection is enforced for session tokens
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2.17
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.2
+      ref_id: 5.2.2.17
+      name: Ensure authentication transfer is blocked
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2
+      ref_id: 5.2.3
+      name: Authentication Methods
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3
+      ref_id: 5.2.3.1
+      name: Ensure Microsoft Authenticator is configured to protect against MFA fatigue
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3
+      ref_id: 5.2.3.2
+      name: Ensure custom banned passwords lists are used
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3
+      ref_id: 5.2.3.3
+      name: Ensure password protection is enabled for on-prem Active Directory
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3
+      ref_id: 5.2.3.4
+      name: Ensure all member users are 'MFA capable'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3
+      ref_id: 5.2.3.5
+      name: Ensure weak authentication methods are disabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3
+      ref_id: 5.2.3.6
+      name: Ensure system-preferred multifactor authentication is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3
+      ref_id: 5.2.3.7
+      name: Ensure the email OTP authentication method is disabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3
+      ref_id: 5.2.3.8
+      name: Ensure that Account 'Lockout threshold' is '10' or less
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3
+      ref_id: 5.2.3.9
+      name: Ensure that Account 'Lockout duration in seconds' is at least 60 seconds
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3.10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.3
+      ref_id: 5.2.3.10
+      name: Ensure Microsoft Authenticator on companion applications is disabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2
+      ref_id: 5.2.4
+      name: Password reset
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.4.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.4
+      ref_id: 5.2.4.1
+      name: Ensure 'Self service password reset enabled' is set to 'All'
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.4.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.4
+      ref_id: 5.2.4.2
+      name: Ensure that 2 methods are required for password reset
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.4.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.4
+      ref_id: 5.2.4.3
+      name: Ensure SSPR registration and authentication re-confirmation are required
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.4.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.4
+      ref_id: 5.2.4.4
+      name: Ensure that users are notified on password resets
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.4.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.2.4
+      ref_id: 5.2.4.5
+      name: Ensure all admins are notified when other admins reset their password
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5
+      ref_id: '5.3'
+      name: ID Governance
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.3
+      ref_id: 5.3.1
+      name: Ensure privileged role assignments are activated and not assigned
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.3
+      ref_id: 5.3.2
+      name: Ensure 'Access reviews' for guest users are configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.3
+      ref_id: 5.3.3
+      name: Ensure 'Access reviews' for privileged roles are configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.3
+      ref_id: 5.3.4
+      name: Ensure approval is required for Global Administrator role activation
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:5.3
+      ref_id: 5.3.5
+      name: Ensure approval is required for Privileged Role Administrator activation
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Exchange admin center
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6
+      ref_id: '6.1'
+      name: Audit
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.1
+      ref_id: 6.1.1
+      name: Ensure 'AuditDisabled' organizationally is set to 'False'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.1
+      ref_id: 6.1.2
+      name: Ensure mailbox audit actions are configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.1
+      ref_id: 6.1.3
+      name: Ensure 'AuditBypassEnabled' is not enabled on mailboxes
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6
+      ref_id: '6.2'
+      name: Mail flow
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.2
+      ref_id: 6.2.1
+      name: Ensure all forms of mail forwarding are blocked and/or disabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.2
+      ref_id: 6.2.2
+      name: Ensure mail transport rules do not whitelist specific domains
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.2
+      ref_id: 6.2.3
+      name: Ensure email from external senders is identified
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6
+      ref_id: '6.3'
+      name: Roles
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.3
+      ref_id: 6.3.1
+      name: Ensure users installing Outlook add-ins is not allowed
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.3
+      ref_id: 6.3.2
+      name: Ensure the ability to add personal email accounts and calendars is disabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6
+      ref_id: '6.5'
+      name: Settings
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.5
+      ref_id: 6.5.1
+      name: Ensure modern authentication for Exchange Online is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.5
+      ref_id: 6.5.2
+      name: Ensure MailTips are enabled for end users
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.5
+      ref_id: 6.5.3
+      name: Ensure additional storage providers are restricted in Outlook on the web
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.5
+      ref_id: 6.5.4
+      name: Ensure SMTP AUTH is disabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:6.5
+      ref_id: 6.5.5
+      name: Ensure Direct Send submissions are rejected
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: SharePoint admin center
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7
+      ref_id: '7.2'
+      name: Policies
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2
+      ref_id: 7.2.1
+      name: Ensure modern authentication for SharePoint applications is required
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2
+      ref_id: 7.2.2
+      name: Ensure SharePoint and OneDrive integration with Azure AD B2B is enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2
+      ref_id: 7.2.3
+      name: Ensure external content sharing is restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2
+      ref_id: 7.2.4
+      name: Ensure OneDrive content sharing is restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2
+      ref_id: 7.2.5
+      name: Ensure that SharePoint guest users cannot share items they don't own
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2
+      ref_id: 7.2.6
+      name: Ensure SharePoint external sharing is restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2
+      ref_id: 7.2.7
+      name: Ensure link sharing is restricted in SharePoint and OneDrive
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2
+      ref_id: 7.2.8
+      name: Ensure external sharing is restricted by security group
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2
+      ref_id: 7.2.9
+      name: Ensure guest access to a site or OneDrive will expire automatically
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2
+      ref_id: 7.2.10
+      name: Ensure reauthentication with verification code is restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.2
+      ref_id: 7.2.11
+      name: Ensure the SharePoint default sharing link permission is set
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7
+      ref_id: '7.3'
+      name: Settings
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:7.3
+      ref_id: 7.3.1
+      name: Ensure Office 365 SharePoint infected files are disallowed for download
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Microsoft Teams admin center
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8
+      ref_id: '8.1'
+      name: Teams
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.1
+      ref_id: 8.1.1
+      name: Ensure external file sharing in Teams is enabled for only approved cloud
+        storage services
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.1
+      ref_id: 8.1.2
+      name: Ensure users can't send emails to a channel email address
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8
+      ref_id: '8.2'
+      name: Users
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.2
+      ref_id: 8.2.1
+      name: Ensure external domains are restricted in the Teams admin center
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.2
+      ref_id: 8.2.2
+      name: Ensure communication with unmanaged Teams users is disabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.2
+      ref_id: 8.2.3
+      name: Ensure external Teams users cannot initiate conversations
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.2
+      ref_id: 8.2.4
+      name: Ensure the organization cannot communicate with accounts in trial Teams
+        tenants
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8
+      ref_id: '8.4'
+      name: Teams apps
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.4
+      ref_id: 8.4.1
+      name: Ensure app permission policies are configured
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8
+      ref_id: '8.5'
+      name: Meetings
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5
+      ref_id: 8.5.1
+      name: Ensure anonymous users can't join a meeting
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5
+      ref_id: 8.5.2
+      name: Ensure anonymous users and dial-in callers can't start a meeting
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5
+      ref_id: 8.5.3
+      name: Ensure only people in my org can bypass the lobby
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5
+      ref_id: 8.5.4
+      name: Ensure users dialing in can't bypass the lobby
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5
+      ref_id: 8.5.5
+      name: Ensure meeting chat does not allow anonymous users
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5
+      ref_id: 8.5.6
+      name: Ensure only organizers and co-organizers can present
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5
+      ref_id: 8.5.7
+      name: Ensure external participants can't give or request control
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5
+      ref_id: 8.5.8
+      name: Ensure external meeting chat is off
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.5
+      ref_id: 8.5.9
+      name: Ensure meeting recording is off by default
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8
+      ref_id: '8.6'
+      name: Messaging
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:8.6
+      ref_id: 8.6.1
+      name: Ensure users can report security concerns in Teams
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: Microsoft Fabric
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9
+      ref_id: '9.1'
+      name: Tenant settings
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1
+      ref_id: 9.1.1
+      name: Ensure guest user access is restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1
+      ref_id: 9.1.2
+      name: Ensure external user invitations are restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1
+      ref_id: 9.1.3
+      name: Ensure guest access to content is restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1
+      ref_id: 9.1.4
+      name: Ensure 'Publish to web' is restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1
+      ref_id: 9.1.5
+      name: Ensure 'Interact with and share R and Python' visuals is 'Disabled'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1
+      ref_id: 9.1.6
+      name: Ensure 'Allow users to apply sensitivity labels for content' is 'Enabled'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1
+      ref_id: 9.1.7
+      name: Ensure shareable links are restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1
+      ref_id: 9.1.8
+      name: Ensure enabling of external data sharing is restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1
+      ref_id: 9.1.9
+      name: Ensure 'Block ResourceKey Authentication' is 'Enabled'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1
+      ref_id: 9.1.10
+      name: Ensure access to APIs by service principals is restricted
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1
+      ref_id: 9.1.11
+      name: Ensure service principals cannot create and use profiles
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-microsoft-365:9.1
+      ref_id: 9.1.12
+      name: Ensure service principals ability to create workspaces, connections and
+        deployment pipelines is restricted
+      implementation_groups:
+      - A

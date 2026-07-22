@@ -778,6 +778,23 @@
 
 					{#if showAdvanced}
 						<div class="space-y-2 pt-1">
+							<div class="w-32">
+								<label
+									class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block"
+								>
+									{m.builderWeight()}
+								</label>
+								<input
+									type="number"
+									value={node.node.weight}
+									min="1"
+									class="w-full text-xs text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 px-0.5 py-0.5 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
+									onblur={(e) => {
+										const val = Number(e.currentTarget.value) || 1;
+										saveField('weight', val);
+									}}
+								/>
+							</div>
 							<div>
 								<label
 									class="text-[10px] font-semibold uppercase tracking-wider text-surface-500 block"

@@ -12,7 +12,7 @@
 	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
-	import { getModelInfo } from '$lib/utils/crud.js';
+	import { getModelInfo, getMarkdownFields } from '$lib/utils/crud';
 	import { formatDate, formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -25,7 +25,7 @@
 
 	import { onMount } from 'svelte';
 
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getListViewFields } from '$lib/utils/table';
 	import { canPerformActionOnObject, resolveObjectDomain } from '$lib/utils/access-control';
@@ -36,8 +36,10 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
 
 	const modalStore: ModalStore = getModalStore();
+	const toastStore = getToastStore();
 
 	const defaultExcludes = ['id', 'is_published', 'str', 'path', 'sync_mappings'];
 
@@ -112,6 +114,8 @@
 	}: Props = $props();
 
 	exclude = [...exclude, ...defaultExcludes];
+
+	const markdownFieldSet = $derived(getMarkdownFields(data.urlModel));
 
 	const getRelatedModelIndex = (model: ModelMapEntry, relatedModel: Record<string, string>) => {
 		if (!model.reverseForeignKeyFields) return -1;
@@ -211,6 +215,38 @@
 			title: safeTranslate('add-' + model.info.localName)
 		};
 		modalStore.trigger(modal);
+	}
+
+	async function removeFromParent(
+		field: any,
+		ids: string[],
+		clear: () => void,
+		reload: () => void
+	): Promise<void> {
+		if (!field?.removeFromParent || !ids.length) return;
+		const res = await fetch(
+			`/${data.model.urlModel}/${data.data.id}/${field.removeFromParent.action}`,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ [field.removeFromParent.payloadField]: ids })
+			}
+		);
+		if (res.ok) {
+			clear();
+			reload();
+			await invalidateAll();
+			toastStore.trigger({
+				message: safeTranslate(field.removeFromParent.successMessage ?? 'saved'),
+				background: 'preset-filled-success-500'
+			});
+		} else {
+			const body = await res.json().catch(() => ({}));
+			toastStore.trigger({
+				message: typeof body?.error === 'string' ? safeTranslate(body.error) : m.anErrorOccurred(),
+				background: 'preset-filled-error-500'
+			});
+		}
 	}
 
 	function modalSelectExisting(field: ReverseForeignKeyField): void {
@@ -751,7 +787,7 @@
 												>
 											{:else if ISO_8601_REGEX.test(value) && dateFieldsToFormat.includes(key)}
 												{formatDateOrDateTime(value, getLocale())}
-											{:else if key === 'description' || key === 'observation' || key === 'annotation' || key === 'justification'}
+											{:else if markdownFieldSet.has(key)}
 												<MarkdownRenderer content={value} />
 											{:else if typeof value === 'boolean'}
 												{@const bd = booleanDisplay(value, key, data.urlModel)}
@@ -968,7 +1004,21 @@
 								expectedCount={getExpectedCount(urlmodel, field)}
 								fields={fieldsToUse}
 								defaultFilters={field.defaultFilters || {}}
+								selectable={Boolean(canEditObject && field?.removeFromParent)}
 							>
+								{#snippet selectActions({ ids, clear, reload })}
+									{#if field?.removeFromParent}
+										<button
+											type="button"
+											class="btn btn-sm preset-filled-error-500"
+											onclick={() => removeFromParent(field, ids, clear, reload)}
+										>
+											<i class="fa-solid fa-user-minus mr-2"></i>{safeTranslate(
+												field.removeFromParent.label ?? 'remove'
+											)}
+										</button>
+									{/if}
+								{/snippet}
 								{#snippet addButton()}
 									{#if canEditObject && field?.addExisting}
 										<span
