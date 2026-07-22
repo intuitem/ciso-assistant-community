@@ -476,45 +476,45 @@ def validate_integer_value(
 ):
     """
     Validate integer(s) from:
-    - a single value (int/str)
-    - OR a DataFrame column if column_name is provided (and value_or_df is a df)
+        - a single value (int/str)
+        - OR a DataFrame column if column_name is provided (and value_or_df is a df)
     
     Parameters:
-    - value_or_df:
-        Either:
-        - a single value (int or str) to validate
-        - OR a pandas DataFrame if validating a whole column
+        - value_or_df:
+            Either:
+            - a single value (int or str) to validate
+            - OR a pandas DataFrame if validating a whole column
 
-    - sheet_name (str, optional):
-        Name of the Excel sheet (used for error messages).
+        - sheet_name (str, optional):
+            Name of the Excel sheet (used for error messages).
 
-    - column_name (str, optional):
-        Name of the DataFrame column to validate.
-        If provided, all non-empty values in this column will be checked.
+        - column_name (str, optional):
+            Name of the DataFrame column to validate.
+            If provided, all non-empty values in this column will be checked.
 
-    - context (str, optional):
-        Context string (usually the calling function name) added to error messages.
+        - context (str, optional):
+            Context string (usually the calling function name) added to error messages.
 
-    - row (int, optional):
-        Excel row number of the single value (used only when validating one value).
+        - row (int, optional):
+            Excel row number of the single value (used only when validating one value).
 
-    - value_name (str, default="value"):
-        Logical name of the value being validated (e.g. "version", "score").
-        Used in error messages.
+        - value_name (str, default="value"):
+            Logical name of the value being validated (e.g. "version", "score").
+            Used in error messages.
 
-    - positive_only (bool, default=False):
-        If True, only positive non-zero integers are accepted (> 0).
+        - positive_only (bool, default=False):
+            If True, only positive non-zero integers are accepted (> 0).
 
-    - min (int, optional):
-        Minimum allowed integer value (inclusive).
+        - min (int, optional):
+            Minimum allowed integer value (inclusive).
 
-    - max (int, optional):
-        Maximum allowed integer value (inclusive).
+        - max (int, optional):
+            Maximum allowed integer value (inclusive).
 
     Rules:
-    - Always checks "is integer" (default behavior)
-    - If positive_only=True -> checks > 0
-    - If min/max provided -> checks (min <= value <= max)
+        - Always checks "is integer" (default behavior)
+        - If positive_only=True -> checks > 0
+        - If min/max provided -> checks (min <= value <= max)
 
     Collects all invalid values and raises ONE ValueError at the end.
     """
@@ -2794,6 +2794,39 @@ def validate_min_max_columns(df: pd.DataFrame, min_column: str, max_column: str,
         )
 
 
+# Validate that framework depths start at 1 and never increase by more than one level at a time.
+def _framework_validate_depth_consistency(df: pd.DataFrame, sheet_name: str, context: str):
+
+    validate_integer_value(df, sheet_name, "depth", context, value_name="depth", positive_only=True)
+
+    depth_values = df["depth"].dropna().astype(str).map(str.strip)
+    depth_values = depth_values[depth_values != ""]     # Remove empty values
+
+    if depth_values.empty:
+        return
+
+    depths = [(index + 2, int(value)) for index, value in depth_values.items()]
+    errors = []
+
+    first_row, first_depth = depths[0]
+    if first_depth != 1:
+        errors.append(f'Row #{first_row}: The first "depth" value must be 1. Found \"{first_depth}\" instead.')
+
+    for (previous_row, previous_depth), (current_row, current_depth) in zip(depths, depths[1:]):
+        if current_depth > previous_depth + 1:
+            errors.append(
+                f'Row #{current_row}: "depth" ({current_depth}) cannot follow Row #{previous_row} '
+                f'with "depth" ({previous_depth}). Maximum allowed value is "{previous_depth + 1}".'
+            )
+
+    if errors:
+        raise ValueError(
+            f'({context}) [{sheet_name}] Inconsistent "depth" values:\n   - '
+            + "\n   - ".join(errors)
+            + '\n> 💡 Tip: Start with "depth" = 1, then keep the same depth, increase it by 1, or use any lower positive depth.'
+        )
+
+
 
 # [CONTENT] Framework {OK} [Check new optional columns : "scores_definition"]
 def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
@@ -2809,6 +2842,9 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
+
+    # Check the consistency of the "depth" hierarchy
+    _framework_validate_depth_consistency(df, sheet_name, fct_name)
 
     # Check that "questions" and "answer" appear together, or not at all
     question_answer_column_names = ["questions", "answer"]
