@@ -156,6 +156,7 @@ from core.models import (
     RiskScenario,
     AssetClass,
     Terminology,
+    Team,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
@@ -859,6 +860,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def get_queryset(self) -> models.query.QuerySet:
         if not self.model:
             return None
+
         object_ids_view = None
         if self.request.method == "GET":
             if q := re.match(
@@ -873,8 +875,12 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 else:
                     return self.model.objects.none()
 
+        root_folder = Folder.get_root_folder()
+        if root_folder is None:
+            return self.models.objects.none()
+
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.request.user, self.model
+            root_folder, self.request.user, self.model
         )
         queryset = self.model.objects.filter(id__in=object_ids_view)
 
@@ -993,29 +999,26 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return field_models
 
     def _user_can_view_all(self, model) -> bool:
-        """Whether the current user has unrestricted view access to `model`.
-
-        When True, the IAM post-filter has nothing to mask for that model
-        and can be skipped — both the per-related-model RBAC scan in
-        `_get_accessible_ids_map` and the per-row mask walk in
-        `_filter_related_fields`. Reads only the IAM snapshot caches; no
-        DB queries.
+        """Return `True` if the user has the `"view_{model.__name__.lower()}"` permission on the root `Folder`, or return `False` otherwise.`
         """
         user = self.request.user
         if not getattr(user, "is_authenticated", False):
             return False
 
         name = model.__name__.lower()
+        perm_codename = f"view_{name}"
 
-        # Actor splits into User/Team/Entity in get_accessible_object_ids;
-        # mirror that decomposition.
         if name == "actor":
-            from core.models import Team
-            from tprm.models import Entity
+            return all(self._user_can_view_all(model) for model in (User, Team, Entity))
 
-            return all(self._user_can_view_all(m) for m in (User, Team, Entity))
+        role_assignments = RoleAssignment.get_role_assignments_from_user(user)
+        root_folder = Folder.get_root_folder()
 
-        from iam.cache_builders import (
+        view_all_role_assignments = role_assignments.filter(perimeter_folders=root_folder, role__permissions__codename=perm_codename)
+        can_user_view_all = view_all_role_assignments.exists()
+        return can_user_view_all
+
+        """from iam.cache_builders import (
             get_folder_state,
             get_roles_state,
             iter_descendant_ids,
@@ -1048,7 +1051,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 covered.update(a.perimeter_folder_ids)
             if all_folder_ids.issubset(covered):
                 return True
-        return False
+        return False"""
 
     def _get_accessible_ids_map(self, related_models):
         """Return visible object IDs per related model for the current user.
@@ -7701,7 +7704,7 @@ class FolderViewSet(BaseModelViewSet):
         Return the tree of domains and perimeters.
 
         Optional query param `write_perm` (e.g. write_perm=add_asset).When provided, each node in the response carries a ``writable`` boolean
-        that is ``true`` only for folders where the requesting user holds that permission.
+        that is ``True`` only for folders where the requesting user holds that permission.
         """
         include_perimeters = request.query_params.get(
             "include_perimeters", "True"

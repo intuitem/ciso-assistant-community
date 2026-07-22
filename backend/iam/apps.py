@@ -6,7 +6,8 @@ class IamConfig(AppConfig):
     name = "iam"
 
     def ready(self):
-        from django.apps import apps
+        pass
+        """from django.apps import apps
         from django.db.models.signals import m2m_changed, post_delete
 
         from iam.cache_builders import (
@@ -77,4 +78,4 @@ class IamConfig(AppConfig):
             sender=IdPGroup,
             dispatch_uid="iam.idpgroup.post_delete.invalidate_caches",
             weak=False,
-        )
+        )"""

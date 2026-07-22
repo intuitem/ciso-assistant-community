@@ -1293,7 +1293,7 @@ def get_respondent_scoped_folder_ids(user) -> set[UUID]:
     """
     from iam.models import RoleAssignment
 
-    perms_per_folder = RoleAssignment.get_permissions_per_folder(user, recursive=True)
+    perms_per_folder = RoleAssignment.get_permissions_per_folder(user, is_recursive=True)
     return {
         UUID(folder_id)
         for folder_id, codenames in perms_per_folder.items()
