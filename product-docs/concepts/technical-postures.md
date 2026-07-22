@@ -2,6 +2,10 @@
 
 A **technical posture** measures a fleet of assets against a technical baseline — a CIS Benchmark, a hardening guide, or any check-shaped framework — and keeps the measurements coming. Where an audit captures a considered, point-in-time evaluation, a technical posture is a living scoreboard: scanners, scripts, and operators keep pushing results, and the platform always shows the latest state of every check on every asset.
 
+{% hint style="info" %}
+Technical postures are gated by the `posture_assessments` feature flag. Default off. See [Feature flags](../configuration/settings/feature-flags.md).
+{% endhint %}
+
 ## Mental model
 
 ```mermaid
