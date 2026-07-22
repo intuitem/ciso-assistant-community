@@ -462,10 +462,16 @@ DATA_WIZARD_COMMANDS = [
             "Import privacy processings from CSV/Excel.\n"
             "\nRequired columns: name\n\n"
             "Optional columns: ref_id, description, status, "
+            "information_channel, usage_channel, "
             "dpia_required (true/false), dpia_reference, "
             "processing_nature (comma-separated), "
             "assigned_to (comma-separated user emails), "
             "labels (comma-separated), domain\n"
+            "\nMulti-sheet Excel workbooks (as produced by the processing "
+            "XLSX export) are also supported: a 'Processing' sheet plus "
+            "optional 'Purposes', 'Personal data', 'Data subjects', "
+            "'Data recipients', 'Contractors' and 'Transfers' sheets "
+            "recreate the processing with its sub-objects.\n"
             "\nConflict detection: by name + folder"
         ),
         "requires_folder": True,

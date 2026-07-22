@@ -101,7 +101,11 @@
 		{ id: 'Vulnerability', label: m.vulnerabilities(), description: '' },
 		{ id: 'ReferenceControl', label: m.referenceControls(), description: '' },
 		{ id: 'Threat', label: m.threats(), description: '' },
-		{ id: 'Processing', label: m.processings(), description: '' },
+		{
+			id: 'Processing',
+			label: m.processings(),
+			description: m.dataWizardProcessingDescription()
+		},
 		{ id: 'SecurityException', label: m.securityExceptions(), description: '' },
 		{ id: 'Incident', label: m.incidents(), description: '' },
 		{
@@ -134,7 +138,7 @@
 	// Per-model accepted file extensions. Most importers consume Excel;
 	// Egerie ships an XML export, hence the explicit branch.
 	const XML_MODELS = new Set(['EbiosRMStudyEgerieXML']);
-	const CSV_CAPABLE_MODELS = new Set(['TaskTemplate']);
+	const CSV_CAPABLE_MODELS = new Set(['TaskTemplate', 'Processing']);
 	function extensionsFor(modelId: string): string[] {
 		if (XML_MODELS.has(modelId)) return ['.xml'];
 		if (CSV_CAPABLE_MODELS.has(modelId)) return ['.xls', '.xlsx', '.csv'];
