@@ -102,7 +102,10 @@ class IamConfig(AppConfig):
             service_account = ServiceAccount.objects.filter(client=self).first()
             if not service_account or not service_account.previous_secret_hash:
                 return False
-            if service_account.previous_secret_expires_at < timezone.now():
+            if (
+                not service_account.previous_secret_expires_at
+                or service_account.previous_secret_expires_at < timezone.now()
+            ):
                 return False
             return check_password(secret, service_account.previous_secret_hash)
 
