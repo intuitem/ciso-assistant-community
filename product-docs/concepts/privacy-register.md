@@ -27,6 +27,7 @@ Privacy operations also need to record events as they happen:
 - Findings from GDPR audits surface in the register as actions on processings.
 - Data contractors cross-reference TPRM entities, so a sub-processor's security review feeds both worlds.
 - A processing's **nature** and its personal-data **categories** draw from the [terminology](terminology.md) layer, so you can align them to your own internal vocabulary.
+- A processing can be exported as a multi-sheet Excel workbook from its detail page and re-imported — through the data import wizard or the CLI — to recreate it with all its sub-objects. See [Data import](../configuration/data-import.md#processings).
 
 ## Related
 

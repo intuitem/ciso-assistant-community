@@ -16228,6 +16228,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "evidences",
             "objectives",
             "incidents",
+            "findings",
             "filtering_labels",
         ]
 

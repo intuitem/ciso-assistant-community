@@ -36,6 +36,7 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 - **auditee_mode** — the read-only auditee surface for external assessors. _Default off._
 - **campaigns** — bulk-orchestration of audits across many perimeters. _PRO._
 - **audit_tree_inheritance** — combine an audit's results with parent-domain audits on the same framework. Reveals the **Domain inheritance strategy** [general setting](general.md#domain-tree-audit-inheritance) and the **Combined view** on the [Framework report](../../features/framework-report.md#combined-view-domain-tree-inheritance). _Default off._
+- **posture_assessments** — [technical postures](../../concepts/technical-postures.md): continuous measurement of assets against technical baselines (CIS Benchmarks, hardening guides) with recurring scan results. _Default off._
 
 ## Resilience
 
