@@ -7,6 +7,7 @@ ENV PYTHONUNBUFFERED=1 \
   PYTHONDONTWRITEBYTECODE=1 \
   UV_LINK_MODE=copy \
   UV_NO_SYNC=1 \
+  UV_PYTHON_DOWNLOADS=never \
   PATH="/code/.venv/bin:$PATH"
 
 COPY --from=ghcr.io/astral-sh/uv:0.11.6 /uv /bin/
@@ -18,7 +19,8 @@ RUN apt-get update && apt-get install -y \
   libyaml-cpp-dev \
   libffi-dev \
   libglib2.0-0 \
-  pango-1.0 \
+  libpango-1.0-0 \
+  libpangoft2-1.0-0 \
   libcairo2 \
   locales \
   tzdata \

@@ -6,6 +6,7 @@ ENV PYTHONUNBUFFERED=1 \
   PYTHONDONTWRITEBYTECODE=1 \
   UV_LINK_MODE=copy \
   UV_NO_SYNC=1 \
+  UV_PYTHON_DOWNLOADS=never \
   PATH="/code/.venv/bin:$PATH" \
   DJANGO_SETTINGS_MODULE=enterprise_core.settings
 
@@ -18,7 +19,8 @@ RUN apt-get update && apt-get install -y \
   libyaml-cpp-dev \
   libffi-dev \
   libglib2.0-0 \
-  pango-1.0 \
+  libpango-1.0-0 \
+  libpangoft2-1.0-0 \
   libcairo2 \
   locales \
   tzdata \
@@ -26,8 +28,6 @@ RUN apt-get update && apt-get install -y \
   fontconfig \
   fonts-freefont-ttf \
   build-essential \
-  python3-dev \
-  python3-numpy \
   libjpeg-dev \
   zlib1g-dev \
   libmagic1 \
