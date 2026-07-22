@@ -36,7 +36,7 @@ def edge(source, target, **kwargs):
 class TestNodeRefs:
     def test_refs_auto_generated_from_labels(self):
         _, version = make_workflow()
-        start = node("start")
+        start = node("trigger", trigger_config={"type": "manual"})
         fetch = node(
             "action", label="Fetch employee record", action_config={"type": "log"}
         )
@@ -51,11 +51,11 @@ class TestNodeRefs:
         )
         refs = dict(version.nodes.values_list("label", "ref"))
         assert refs["Fetch employee record"] == "fetch_employee_record"
-        assert version.nodes.get(type="start").ref == "start"
+        assert version.nodes.get(type="trigger").ref == "trigger"
 
     def test_ref_stable_across_label_rename(self):
         _, version = make_workflow()
-        start = node("start")
+        start = node("trigger", trigger_config={"type": "manual"})
         action = node("action", label="Old name", action_config={"type": "log"})
         end = node("end")
         graph = {
@@ -73,7 +73,7 @@ class TestNodeRefs:
 
     def test_duplicate_explicit_refs_rejected(self):
         _, version = make_workflow()
-        start = node("start")
+        start = node("trigger", trigger_config={"type": "manual"})
         a = node("action", label="A", ref="same", action_config={"type": "log"})
         b = node("action", label="B", ref="same", action_config={"type": "log"})
         end = node("end")
@@ -89,7 +89,7 @@ class TestNodeRefs:
 
     def test_invalid_ref_format_rejected(self):
         _, version = make_workflow()
-        start = node("start")
+        start = node("trigger", trigger_config={"type": "manual"})
         bad = node("action", ref="Not A Slug!", action_config={"type": "log"})
         end = node("end")
         with pytest.raises(GraphValidationError, match="Invalid node ref"):
@@ -132,7 +132,7 @@ class TestNodeOutputReferences:
             "core.net_safety.assert_public_url_unless_dev", lambda url, **kw: None
         )
 
-        start = node("start")
+        start = node("trigger", trigger_config={"type": "manual"})
         fetch = node(
             "action",
             label="Fetch",
@@ -190,7 +190,7 @@ class TestNodeOutputReferences:
             "core.net_safety.assert_public_url_unless_dev", lambda url, **kw: None
         )
 
-        start = node("start")
+        start = node("trigger", trigger_config={"type": "manual"})
         fetch = node(
             "action",
             label="Big fetch",

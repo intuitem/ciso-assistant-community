@@ -43,8 +43,8 @@ def edge(source, target, **kwargs):
     }
 
 
-def linear_graph(version, *action_configs, node_extras=None):
-    start = node("start")
+def linear_graph(version, *action_configs, node_extras=None, trigger=None):
+    start = node("trigger", **(trigger or {"trigger_config": {"type": "manual"}}))
     actions = [
         node(
             "action",
@@ -300,7 +300,11 @@ class TestDeputization:
 class TestWebhookHardening:
     def _hooked_workflow(self):
         workflow, version = make_workflow("Hardened")
-        linear_graph(version, {"type": "log", "message": "ok"})
+        linear_graph(
+            version,
+            {"type": "log", "message": "ok"},
+            trigger={"ref": "hook", "trigger_config": {"type": "webhook"}},
+        )
         version.publish()
         return workflow
 
@@ -310,10 +314,11 @@ class TestWebhookHardening:
         import json
 
         workflow = self._hooked_workflow()
-        workflow.webhook_hmac_secret = "hmac-key"
-        workflow.save(update_fields=["webhook_hmac_secret"])
+        registration = workflow.triggers.get(node_ref="hook")
+        registration.hmac_secret = "hmac-key"
+        registration.save()
         client = APIClient()
-        url = f"/api/workflows/hooks/{workflow.id}/{workflow.webhook_secret}/"
+        url = f"/api/workflows/hooks/{workflow.id}/hook/{registration.secret}/"
 
         resp = client.post(url, {"a": 1}, format="json")
         assert resp.status_code == 403
@@ -329,23 +334,27 @@ class TestWebhookHardening:
         assert resp.status_code == 201, resp.data
 
     def test_rotate_secret(self):
-        from workflows.views import WorkflowViewSet
+        from workflows.views import WorkflowTriggerViewSet
 
         superuser = User.objects.create_superuser(email="rotator@example.com")
         workflow = self._hooked_workflow()
-        old_secret = workflow.webhook_secret
+        registration = workflow.triggers.get(node_ref="hook")
+        old_secret = registration.secret
         factory = APIRequestFactory()
-        view = WorkflowViewSet.as_view({"post": "rotate_secret"})
-        req = factory.post(f"/api/workflows/workflows/{workflow.id}/rotate-secret/")
+        view = WorkflowTriggerViewSet.as_view({"post": "rotate_secret"})
+        req = factory.post(
+            f"/api/workflows/workflow-triggers/{registration.id}/rotate-secret/"
+        )
         force_authenticate(req, user=superuser)
-        resp = view(req, pk=str(workflow.id))
+        resp = view(req, pk=str(registration.id))
         assert resp.status_code == 200
-        workflow.refresh_from_db()
-        assert workflow.webhook_secret != old_secret
+        registration.refresh_from_db()
+        assert registration.secret != old_secret
+        assert resp.data["secret"] == registration.secret
 
         client = APIClient()
         resp = client.post(
-            f"/api/workflows/hooks/{workflow.id}/{old_secret}/", {}, format="json"
+            f"/api/workflows/hooks/{workflow.id}/hook/{old_secret}/", {}, format="json"
         )
         assert resp.status_code == 404
 

@@ -1,10 +1,16 @@
 import hashlib
 import hmac
+import json
+import re
 
+import yaml
 from django.contrib.auth.models import Permission
+from django.db import transaction
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.crypto import constant_time_compare
 from django.utils.decorators import method_decorator
+from django.utils.text import slugify
 from django.views.decorators.cache import cache_page
 from rest_framework import status
 from rest_framework.decorators import action
@@ -13,18 +19,18 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.views import BaseModelViewSet
-from iam.models import RoleAssignment
+from iam.models import Folder, RoleAssignment
 
 from .actions import required_permissions
 from .engine import EngineError, trigger_instance
 from .graph import GraphValidationError, save_graph, serialize_graph
+from .import_export import WorkflowImportError, export_workflow, import_workflow
 from .models import (
     Workflow,
-    WorkflowEventTrigger,
     WorkflowInstance,
     WorkflowNode,
-    WorkflowSchedule,
     WorkflowSecret,
+    WorkflowTrigger,
     WorkflowVersion,
     generate_webhook_secret,
 )
@@ -35,6 +41,23 @@ from .serializers import (
 from .validation import validate_graph
 
 LONG_CACHE_TTL = 60
+
+SECRET_KEY_RE = re.compile(r"^\w{1,100}$")
+
+
+def _upsert_import_secrets(provided, folder):
+    """Secrets typed into the import dialog: create or update them in the
+    target folder. Blank values are 'skip' — the import warning covers them."""
+    if not isinstance(provided, dict):
+        return
+    for name, value in provided.items():
+        if not isinstance(name, str) or not SECRET_KEY_RE.match(name):
+            continue
+        if not isinstance(value, str) or not value:
+            continue
+        WorkflowSecret.objects.update_or_create(
+            folder=folder, name=name, defaults={"value": value}
+        )
 
 
 class WorkflowViewSet(BaseModelViewSet):
@@ -66,12 +89,74 @@ class WorkflowViewSet(BaseModelViewSet):
             ]
         )
 
-    @action(detail=True, methods=["post"], url_path="rotate-secret")
-    def rotate_secret(self, request, pk=None):
+    @action(detail=True, methods=["get"], url_path="export-yaml")
+    def export_yaml(self, request, pk=None):
         workflow = self.get_object()
-        workflow.webhook_secret = generate_webhook_secret()
-        workflow.save(update_fields=["webhook_secret", "updated_at"])
-        return Response({"webhook_secret": workflow.webhook_secret})
+        content = yaml.dump(
+            export_workflow(workflow),
+            allow_unicode=True,
+            default_flow_style=False,
+            sort_keys=False,
+        )
+        response = HttpResponse(content, content_type="application/x-yaml")
+        filename = slugify(workflow.name) or "workflow"
+        response["Content-Disposition"] = f'attachment; filename="{filename}.yaml"'
+        return response
+
+    @action(detail=False, methods=["post"], url_path="import-yaml")
+    def import_yaml(self, request):
+        uploaded_file = request.FILES.get("file")
+        if not uploaded_file:
+            return Response(
+                {"error": "noFileProvided"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if uploaded_file.size > 1024 * 1024:
+            return Response(
+                {"error": "fileTooLarge"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            data = yaml.safe_load(uploaded_file.read())
+        except yaml.YAMLError:
+            return Response(
+                {"error": "invalidYamlFile"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        folder_id = request.data.get("folder")
+        if folder_id:
+            folder = Folder.objects.filter(id=folder_id).first()
+            if folder is None:
+                return Response(
+                    {"error": "invalidFolder"}, status=status.HTTP_400_BAD_REQUEST
+                )
+        else:
+            folder = Folder.get_root_folder()
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_workflow"),
+            folder=folder,
+        ):
+            return Response(
+                {"error": "permissionDenied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        try:
+            provided_secrets = json.loads(request.data.get("secrets") or "{}")
+        except json.JSONDecodeError:
+            provided_secrets = {}
+
+        try:
+            with transaction.atomic():
+                # Secrets first, so import_workflow's missing-secrets warning
+                # accounts for them; the atomic block drops them if the
+                # import itself is rejected.
+                _upsert_import_secrets(provided_secrets, folder)
+                workflow, warnings = import_workflow(data, folder, user=request.user)
+        except WorkflowImportError as e:
+            return Response({"error": e.message}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"id": str(workflow.id), "name": workflow.name, "warnings": warnings},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class WorkflowVersionViewSet(BaseModelViewSet):
@@ -141,20 +226,41 @@ class WorkflowVersionViewSet(BaseModelViewSet):
         )
 
 
-class WorkflowScheduleViewSet(BaseModelViewSet):
-    model = WorkflowSchedule
-    serializers_module = "workflows.serializers"
-    filterset_fields = ["workflow", "folder", "enabled"]
-    search_fields = ["name", "cron_expression"]
-    ordering = ["created_at"]
+class WorkflowTriggerViewSet(BaseModelViewSet):
+    """Registration rows are publish-managed (workflows.triggers): the API
+    surface is read + PATCH of the runtime state, never create/delete."""
 
-
-class WorkflowEventTriggerViewSet(BaseModelViewSet):
-    model = WorkflowEventTrigger
+    model = WorkflowTrigger
     serializers_module = "workflows.serializers"
-    filterset_fields = ["workflow", "folder", "enabled", "event_key"]
-    search_fields = ["name", "event_key"]
+    filterset_fields = ["workflow", "folder", "enabled", "type", "event_key"]
+    search_fields = ["node_ref", "event_key"]
     ordering = ["created_at"]
+    # POST detail actions map to add_* by default; rotation is a state change
+    # on an existing row and no role holds add_workflowtrigger (publish-managed).
+    permission_overrides = {"rotate_secret": "change_workflowtrigger"}
+
+    def create(self, request, *args, **kwargs):
+        return Response(
+            {"error": "triggersAreManagedByPublish"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        return Response(
+            {"error": "triggersAreManagedByPublish"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+    @action(detail=True, methods=["post"], url_path="rotate-secret")
+    def rotate_secret(self, request, pk=None):
+        trigger = self.get_object()
+        if trigger.type != WorkflowTrigger.Type.WEBHOOK:
+            return Response(
+                {"error": "notAWebhookTrigger"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        trigger.secret = generate_webhook_secret()
+        trigger.save(update_fields=["secret", "updated_at"])
+        return Response({"secret": trigger.secret})
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get event key catalog", url_path="event-keys")
@@ -205,11 +311,24 @@ class WorkflowInstanceViewSet(BaseModelViewSet):
     ordering = ["-created_at"]
 
     def create(self, request, *args, **kwargs):
-        """Launching a run: POST {version: uuid}."""
+        """Launching a run: POST {version: uuid, entry_node_ref?: str}.
+        Without an entry ref the engine's default rule applies (the manual
+        trigger node, or the sole trigger node)."""
         version = get_object_or_404(WorkflowVersion, id=request.data.get("version"))
+        entry = None
+        entry_node_ref = request.data.get("entry_node_ref")
+        if entry_node_ref:
+            entry = version.nodes.filter(
+                type=WorkflowNode.Type.TRIGGER, ref=entry_node_ref
+            ).first()
+            if entry is None:
+                return Response(
+                    {"error": "unknownTriggerNode"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         try:
             instance = trigger_instance(
-                version, trigger="manual", initiated_by=request.user
+                version, trigger="manual", initiated_by=request.user, entry_node=entry
             )
         except EngineError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -229,36 +348,59 @@ class WorkflowInstanceViewSet(BaseModelViewSet):
 
 
 class WorkflowWebhookView(APIView):
-    """Inbound trigger: POST /api/workflows/hooks/{workflow_id}/{secret}/.
+    """Inbound trigger: POST /api/workflows/hooks/{workflow_id}/{node_ref}/{secret}/.
 
-    Unauthenticated by design (n8n-style); the per-workflow secret in the URL
-    is the credential. Starts an instance of the published version with the
-    request body as payload, mapped into variables via the start node's
-    input_mapping.
+    Unauthenticated by design (n8n-style); the per-trigger-node secret in the
+    URL is the credential. Starts an instance of the published version at the
+    named webhook trigger node, with the request body as payload mapped into
+    variables via that node's input_mapping. A disabled or unknown trigger is
+    indistinguishable from a wrong URL (404 — no oracle).
     """
 
     authentication_classes = []
     permission_classes = [AllowAny]
 
-    def post(self, request, workflow_id, secret):
-        workflow = get_object_or_404(Workflow, id=workflow_id)
-        if not constant_time_compare(secret, workflow.webhook_secret):
+    def post(self, request, workflow_id, node_ref, secret):
+        registration = (
+            WorkflowTrigger.objects.filter(
+                workflow_id=workflow_id,
+                node_ref=node_ref,
+                type=WorkflowTrigger.Type.WEBHOOK,
+                enabled=True,
+            )
+            .select_related("workflow")
+            .first()
+        )
+        if registration is None or not constant_time_compare(
+            secret, registration.secret
+        ):
             return Response(status=status.HTTP_404_NOT_FOUND)
-        if workflow.webhook_hmac_secret and not self._signature_valid(
-            request, workflow.webhook_hmac_secret
+        if registration.hmac_secret and not self._signature_valid(
+            request, registration.hmac_secret
         ):
             return Response(
                 {"error": "invalidSignature"}, status=status.HTTP_403_FORBIDDEN
             )
-        version = workflow.published_version
-        if version is None:
+        version = registration.workflow.published_version
+        entry = None
+        if version is not None:
+            entry = version.nodes.filter(
+                type=WorkflowNode.Type.TRIGGER, ref=node_ref
+            ).first()
+        if entry is None:
             return Response(
                 {"error": "workflowNotPublished"},
                 status=status.HTTP_409_CONFLICT,
             )
         payload = request.data if isinstance(request.data, dict) else {}
         try:
-            instance = trigger_instance(version, trigger="webhook", payload=payload)
+            instance = trigger_instance(
+                version,
+                trigger="webhook",
+                payload=payload,
+                entry_node=entry,
+                trigger_registration=registration,
+            )
         except EngineError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(

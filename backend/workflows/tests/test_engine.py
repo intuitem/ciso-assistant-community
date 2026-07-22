@@ -49,7 +49,7 @@ def edge(source, target, **kwargs):
 class TestLinearExecution:
     def test_action_flow_completes(self):
         _, version = make_workflow()
-        start = node("start")
+        start = node("trigger", trigger_config={"type": "manual"})
         log = node(
             "action", label="Log", action_config={"type": "log", "message": "hi"}
         )
@@ -71,7 +71,11 @@ class TestLinearExecution:
     def test_create_object_with_templating(self):
         _, version = make_workflow()
         var_id = str(uuid.uuid4())
-        start = node("start", input_mapping={"vendor_name": "vendor.name"})
+        start = node(
+            "trigger",
+            trigger_config={"type": "manual"},
+            input_mapping={"vendor_name": "vendor.name"},
+        )
         create = node(
             "action",
             label="Create control",
@@ -106,7 +110,9 @@ class TestLinearExecution:
 
         _, version = make_workflow()
         start = node(
-            "start", input_mapping={"title": "alert.title", "sev": "alert.severity"}
+            "trigger",
+            trigger_config={"type": "manual"},
+            input_mapping={"title": "alert.title", "sev": "alert.severity"},
         )
         create = node(
             "action",
@@ -137,7 +143,11 @@ class TestLinearExecution:
         from tprm.models import Entity, EntityAssessment
 
         _, version = make_workflow()
-        start = node("start", input_mapping={"vendor_name": "vendor"})
+        start = node(
+            "trigger",
+            trigger_config={"type": "manual"},
+            input_mapping={"vendor_name": "vendor"},
+        )
         create_entity = node(
             "action",
             action_config={
@@ -199,7 +209,7 @@ class TestLinearExecution:
         version.refresh_from_db()
         foreign_entity = Entity.objects.create(name="Foreign vendor", folder=sibling)
 
-        start = node("start")
+        start = node("trigger", trigger_config={"type": "manual"})
         create = node(
             "action",
             action_config={
@@ -225,7 +235,7 @@ class TestLinearExecution:
 
     def test_unknown_action_fails_token_not_request(self):
         _, version = make_workflow()
-        start = node("start")
+        start = node("trigger", trigger_config={"type": "manual"})
         bad = node("action", action_config={"type": "nope"})
         end = node("end")
         save_graph(
@@ -246,7 +256,11 @@ class TestRouting:
     def _decision_version(self):
         _, version = make_workflow()
         var_id = str(uuid.uuid4())
-        start = node("start", input_mapping={"decision": "decision"})
+        start = node(
+            "trigger",
+            trigger_config={"type": "manual"},
+            input_mapping={"decision": "decision"},
+        )
         gate = node("condition", label="Gate")
         approved = node("action", label="A", action_config={"type": "log"})
         rejected = node("action", label="R", action_config={"type": "log"})
@@ -300,7 +314,7 @@ class TestRouting:
 
     def test_parallel_fork_and_join(self):
         _, version = make_workflow()
-        start = node("start")
+        start = node("trigger", trigger_config={"type": "manual"})
         fork = node(
             "action", label="Fork", action_config={"type": "log"}, fork_type="parallel"
         )
@@ -332,7 +346,7 @@ class TestRouting:
 
     def test_task_node_parks_the_run(self):
         _, version = make_workflow()
-        start = node("start")
+        start = node("trigger", trigger_config={"type": "manual"})
         task = node("task", label="Human step")
         end = node("end")
         save_graph(
@@ -352,7 +366,12 @@ class TestRouting:
 class TestTriggers:
     def _published_hook_version(self):
         workflow, version = make_workflow("Hooked")
-        start = node("start", input_mapping={"vendor_name": "vendor.name"})
+        start = node(
+            "trigger",
+            ref="hook",
+            trigger_config={"type": "webhook"},
+            input_mapping={"vendor_name": "vendor.name"},
+        )
         create = node(
             "action",
             action_config={
@@ -376,7 +395,8 @@ class TestTriggers:
     def test_webhook_trigger(self):
         workflow = self._published_hook_version()
         client = APIClient()
-        url = f"/api/workflows/hooks/{workflow.id}/{workflow.webhook_secret}/"
+        secret = workflow.triggers.get(node_ref="hook").secret
+        url = f"/api/workflows/hooks/{workflow.id}/hook/{secret}/"
         resp = client.post(url, {"vendor": {"name": "Umbrella"}}, format="json")
         assert resp.status_code == 201, resp.data
         assert resp.data["status"] == "completed"
@@ -386,7 +406,7 @@ class TestTriggers:
         workflow = self._published_hook_version()
         client = APIClient()
         resp = client.post(
-            f"/api/workflows/hooks/{workflow.id}/wrong-secret/",
+            f"/api/workflows/hooks/{workflow.id}/hook/wrong-secret/",
             {},
             format="json",
         )

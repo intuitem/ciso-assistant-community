@@ -20,12 +20,6 @@ def generate_webhook_secret():
 
 class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
     ref_id = models.CharField(max_length=100, blank=True)
-    webhook_secret = models.CharField(
-        max_length=64, default=generate_webhook_secret, unique=True
-    )
-    # When set, inbound hooks must carry a valid HMAC-SHA256 signature of the
-    # raw body (X-Hub-Signature-256 / X-Signature-256, optional sha256= prefix).
-    webhook_hmac_secret = models.CharField(max_length=128, blank=True)
 
     fields_to_check = ["name"]
 
@@ -45,8 +39,7 @@ class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
         super().save(*args, **kwargs)
         if folder_changed:
             self.versions.update(folder=self.folder)
-            self.schedules.update(folder=self.folder)
-            self.event_triggers.update(folder=self.folder)
+            self.triggers.update(folder=self.folder)
             WorkflowNode.objects.filter(version__workflow=self).update(
                 folder=self.folder
             )
@@ -121,14 +114,21 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
         """Publish this draft and archive the previously published version.
 
         Graph validity must be checked by the caller (see workflows.validation)
-        before calling this.
+        before calling this. Trigger registrations are synced here so the
+        published graph and its operational rows can never drift.
         """
-        WorkflowVersion.objects.filter(
-            workflow=self.workflow, status=self.Status.PUBLISHED
-        ).update(status=self.Status.ARCHIVED)
-        self.status = self.Status.PUBLISHED
-        self.published_at = timezone.now()
-        self.save()
+        from django.db import transaction
+
+        from .triggers import sync_trigger_registrations
+
+        with transaction.atomic():
+            WorkflowVersion.objects.filter(
+                workflow=self.workflow, status=self.Status.PUBLISHED
+            ).update(status=self.Status.ARCHIVED)
+            self.status = self.Status.PUBLISHED
+            self.published_at = timezone.now()
+            self.save()
+            sync_trigger_registrations(self)
 
     def clone_as_draft(self):
         """Clone this version's whole graph into a new draft (spec D6)."""
@@ -170,13 +170,19 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
 
 class WorkflowNode(AbstractBaseModel, FolderMixin):
     class Type(models.TextChoices):
-        START = "start", "Start"
+        TRIGGER = "trigger", "Trigger"
         END = "end", "End"
         TASK = "task", "Task"
         CONDITION = "condition", "Condition"
         ACTION = "action", "Action"
         SUBPROCESS = "subprocess", "Subprocess"
         EVENT = "event", "Event"
+
+    class TriggerType(models.TextChoices):
+        MANUAL = "manual", "Manual"
+        WEBHOOK = "webhook", "Webhook"
+        SCHEDULE = "schedule", "Schedule"
+        INTERNAL_EVENT = "internal_event", "Internal event"
 
     class ForkType(models.TextChoices):
         EXCLUSIVE = "exclusive", "Exclusive"
@@ -219,6 +225,10 @@ class WorkflowNode(AbstractBaseModel, FolderMixin):
         related_name="workflow_nodes",
     )
     action_config = models.JSONField(default=dict, blank=True)
+    # Definition half of a trigger node (spec D22): {"type": manual|webhook|
+    # schedule|internal_event, ...subtype keys}. Operational state (enabled,
+    # secrets, bookkeeping) lives on WorkflowTrigger rows synced at publish.
+    trigger_config = models.JSONField(default=dict, blank=True)
     subprocess_workflow = models.ForeignKey(
         Workflow,
         on_delete=models.PROTECT,
@@ -530,15 +540,8 @@ class WorkflowInstance(AbstractBaseModel, FolderMixin):
         blank=True,
         related_name="subprocess_instances",
     )
-    schedule = models.ForeignKey(
-        "workflows.WorkflowSchedule",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="instances",
-    )
-    event_trigger = models.ForeignKey(
-        "workflows.WorkflowEventTrigger",
+    trigger_registration = models.ForeignKey(
+        "workflows.WorkflowTrigger",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -668,72 +671,24 @@ class WorkflowSecret(AbstractBaseModel, FolderMixin):
         return self.name
 
 
-class WorkflowSchedule(NameDescriptionFolderMixin):
-    """Cron trigger for a workflow (spec D19). Rows are the source of truth;
-    a single huey tick (workflows.scheduling.run_due_schedules) fires the
-    published version of due workflows. Overlapping runs are skipped, not
-    queued."""
+class WorkflowTrigger(AbstractBaseModel, FolderMixin):
+    """Operational registration for a published trigger node (spec D22).
+
+    The definition (subtype, cron, event key, filters, input mapping) lives in
+    the immutable graph; rows are synced at publish time
+    (workflows.triggers.sync_trigger_registrations) and carry only runtime
+    state: enabled, webhook credentials, bookkeeping. Manual trigger nodes get
+    no row. The node ref is the identity — a ref rename between publishes is a
+    delete + create (state resets, webhook URL changes)."""
+
+    class Type(models.TextChoices):
+        WEBHOOK = "webhook", "Webhook"
+        SCHEDULE = "schedule", "Schedule"
+        INTERNAL_EVENT = "internal_event", "Internal event"
 
     class Result(models.TextChoices):
         TRIGGERED = "triggered", "Triggered"
         SKIPPED_OVERLAP = "skipped_overlap", "Skipped (previous run still active)"
-        SKIPPED_UNPUBLISHED = "skipped_unpublished", "Skipped (no published version)"
-        ERROR = "error", "Error"
-
-    workflow = models.ForeignKey(
-        Workflow,
-        on_delete=models.CASCADE,
-        related_name="schedules",
-    )
-    cron_expression = models.CharField(max_length=100)
-    timezone = models.CharField(max_length=50, default="UTC")
-    enabled = models.BooleanField(default=True)
-    next_run_at = models.DateTimeField(null=True, blank=True)
-    last_run_at = models.DateTimeField(null=True, blank=True)
-    last_result = models.CharField(max_length=30, choices=Result.choices, blank=True)
-
-    fields_to_check = ["name"]
-
-    class Meta:
-        ordering = ["created_at"]
-
-    def save(self, *args, **kwargs):
-        from .scheduling import next_occurrence
-
-        self.folder = self.workflow.folder
-        if not self.enabled:
-            self.next_run_at = None
-        else:
-            previous = (
-                type(self)
-                .objects.filter(pk=self.pk)
-                .values("cron_expression", "timezone", "enabled")
-                .first()
-            )
-            if (
-                self.next_run_at is None
-                or previous is None
-                or not previous["enabled"]
-                or previous["cron_expression"] != self.cron_expression
-                or previous["timezone"] != self.timezone
-            ):
-                self.next_run_at = next_occurrence(
-                    self.cron_expression, self.timezone, timezone.now()
-                )
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.workflow.name}: {self.cron_expression}"
-
-
-class WorkflowEventTrigger(NameDescriptionFolderMixin):
-    """Starts the workflow's published version when an internal event matches
-    (spec D21). V1 events are CUD operations mirrored off the auditlog; the
-    event_key is a generic string so future producers (portal actions, app
-    events) dispatch through the same seam."""
-
-    class Result(models.TextChoices):
-        TRIGGERED = "triggered", "Triggered"
         SKIPPED_UNPUBLISHED = "skipped_unpublished", "Skipped (unpublished)"
         SKIPPED_DEPTH = "skipped_depth", "Skipped (chain depth)"
         ERROR = "error", "Error"
@@ -741,31 +696,47 @@ class WorkflowEventTrigger(NameDescriptionFolderMixin):
     workflow = models.ForeignKey(
         Workflow,
         on_delete=models.CASCADE,
-        related_name="event_triggers",
+        related_name="triggers",
     )
-    # "{model}.{created|updated|deleted}" for CUD events; free-form for
-    # future producers.
-    event_key = models.CharField(max_length=200, db_index=True)
-    # Boolean condition tree, same document shape as the graph API's edge
-    # condition_groups: {operator, conditions: [{field, op, value, changed}],
-    # children: [...]}. Python-only evaluation → JSON per D4.
-    filters = models.JSONField(default=dict, blank=True)
-    enabled = models.BooleanField(default=True)
+    node_ref = models.CharField(max_length=100)
+    type = models.CharField(max_length=20, choices=Type.choices)
+    # Snapshot of the published node's trigger_config, so the scheduler and
+    # the event dispatcher never need to read the graph.
+    config = models.JSONField(default=dict, blank=True)
+    enabled = models.BooleanField(default=False)
+    # Webhook credential for /hooks/{workflow}/{node_ref}/{secret}/ plus the
+    # optional HMAC secret (X-Hub-Signature-256). Write-only at the API;
+    # never part of the graph or of YAML exports.
+    secret = models.CharField(
+        max_length=64, default=generate_webhook_secret, unique=True
+    )
+    hmac_secret = models.CharField(max_length=128, blank=True)
+    # Schedule bookkeeping. next_run_at is computed at publish-sync, on
+    # enable-toggle and by the scheduler's CAS claim — never in save().
+    next_run_at = models.DateTimeField(null=True, blank=True)
+    last_run_at = models.DateTimeField(null=True, blank=True)
+    # Event bookkeeping; event_key is denormalized from config for the
+    # indexed dispatch gate (one EXISTS query per audited save).
+    event_key = models.CharField(max_length=200, blank=True, db_index=True)
     last_triggered_at = models.DateTimeField(null=True, blank=True)
     last_result = models.CharField(max_length=30, choices=Result.choices, blank=True)
     trigger_count = models.PositiveIntegerField(default=0)
 
-    fields_to_check = ["name"]
-
     class Meta:
         ordering = ["created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["workflow", "node_ref"],
+                name="unique_workflow_trigger_node_ref",
+            )
+        ]
 
     def save(self, *args, **kwargs):
         self.folder = self.workflow.folder
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.workflow.name}: {self.event_key}"
+        return f"{self.workflow.name}: {self.node_ref} ({self.type})"
 
 
 def _clone_row(instance, **overrides):
@@ -801,12 +772,17 @@ auditlog.register(Condition, exclude_fields=common_exclude)
 auditlog.register(NodeAssignment, exclude_fields=common_exclude)
 auditlog.register(NodePresentation, exclude_fields=common_exclude)
 auditlog.register(WorkflowInstance, exclude_fields=common_exclude)
+# secret/hmac_secret excluded so LogEntry diffs never leak credentials.
 auditlog.register(
-    WorkflowSchedule,
-    exclude_fields=common_exclude + ["next_run_at", "last_run_at", "last_result"],
-)
-auditlog.register(
-    WorkflowEventTrigger,
+    WorkflowTrigger,
     exclude_fields=common_exclude
-    + ["last_triggered_at", "last_result", "trigger_count"],
+    + [
+        "secret",
+        "hmac_secret",
+        "next_run_at",
+        "last_run_at",
+        "last_triggered_at",
+        "last_result",
+        "trigger_count",
+    ],
 )

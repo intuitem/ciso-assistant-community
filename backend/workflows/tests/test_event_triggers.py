@@ -10,9 +10,9 @@ from workflows.events import (
     event_key_catalog,
 )
 from workflows.graph import save_graph
-from workflows.models import Workflow, WorkflowEventTrigger, WorkflowVersion
-from workflows.serializers import WorkflowEventTriggerWriteSerializer
+from workflows.models import Workflow, WorkflowTrigger, WorkflowVersion
 from workflows.tasks import dispatch_internal_event_task
+from workflows.validation import validate_graph
 
 
 @pytest.fixture
@@ -25,12 +25,31 @@ def capture_runs(monkeypatch):
     return launched
 
 
-def make_workflow(name="Event flow", folder=None, published=True):
+def make_workflow(
+    name="Event flow",
+    folder=None,
+    published=True,
+    event_key="appliedcontrol.updated",
+    filters=None,
+    enabled=True,
+):
+    """A workflow entered by an internal-event trigger node (ref 'on_event').
+    Publishing creates the registration row (disabled by default); dispatch
+    tests arm it explicitly."""
     workflow = Workflow.objects.create(
         name=name, folder=folder or Folder.get_root_folder()
     )
     version = WorkflowVersion.objects.create(workflow=workflow)
-    start = {"id": str(uuid.uuid4()), "type": "start", "position": {"x": 0, "y": 0}}
+    trigger_config = {"type": "internal_event", "event_key": event_key}
+    if filters:
+        trigger_config["filters"] = filters
+    trigger = {
+        "id": str(uuid.uuid4()),
+        "type": "trigger",
+        "ref": "on_event",
+        "trigger_config": trigger_config,
+        "position": {"x": 0, "y": 0},
+    }
     log = {
         "id": str(uuid.uuid4()),
         "type": "action",
@@ -42,9 +61,13 @@ def make_workflow(name="Event flow", folder=None, published=True):
     save_graph(
         version,
         {
-            "nodes": [start, log, end],
+            "nodes": [trigger, log, end],
             "edges": [
-                {"id": str(uuid.uuid4()), "source": start["id"], "target": log["id"]},
+                {
+                    "id": str(uuid.uuid4()),
+                    "source": trigger["id"],
+                    "target": log["id"],
+                },
                 {"id": str(uuid.uuid4()), "source": log["id"], "target": end["id"]},
             ],
             "variables": [],
@@ -52,16 +75,13 @@ def make_workflow(name="Event flow", folder=None, published=True):
     )
     if published:
         version.publish()
+        if enabled:
+            workflow.triggers.filter(node_ref="on_event").update(enabled=True)
     return workflow
 
 
-def make_trigger(workflow, event_key="appliedcontrol.updated", **kwargs):
-    return WorkflowEventTrigger.objects.create(
-        name=f"trigger-{uuid.uuid4().hex[:6]}",
-        workflow=workflow,
-        event_key=event_key,
-        **kwargs,
-    )
+def get_registration(workflow):
+    return workflow.triggers.get(node_ref="on_event")
 
 
 def payload(
@@ -87,10 +107,35 @@ def payload(
 
 
 @pytest.mark.django_db
+class TestRegistrationLifecycle:
+    def test_publish_creates_disarmed_registration(self):
+        workflow = make_workflow(enabled=False)
+        row = get_registration(workflow)
+        assert row.type == WorkflowTrigger.Type.INTERNAL_EVENT
+        assert row.enabled is False
+        assert row.event_key == "appliedcontrol.updated"
+        assert row.config["type"] == "internal_event"
+
+    def test_republish_preserves_enabled_and_snapshots_config(self):
+        workflow = make_workflow()
+        version = workflow.published_version
+        draft = version.clone_as_draft()
+        node = draft.nodes.get(ref="on_event")
+        node.trigger_config = {
+            "type": "internal_event",
+            "event_key": "incident.created",
+        }
+        node.save(update_fields=["trigger_config", "updated_at"])
+        draft.publish()
+        row = get_registration(workflow)
+        assert row.enabled is True
+        assert row.event_key == "incident.created"
+
+
+@pytest.mark.django_db
 class TestMatching:
     def test_key_match_and_mismatch(self, capture_runs):
-        workflow = make_workflow()
-        make_trigger(workflow, event_key="appliedcontrol.updated")
+        make_workflow()
         started = dispatch_internal_event("appliedcontrol.updated", payload(), None)
         assert len(started) == 1
         assert not dispatch_internal_event("incident.created", payload(), None)
@@ -105,8 +150,7 @@ class TestMatching:
             parent_folder=root,
             content_type=Folder.ContentType.DOMAIN,
         )
-        workflow = make_workflow(folder=domain)
-        make_trigger(workflow)
+        make_workflow(folder=domain)
 
         inside = dispatch_internal_event(
             "appliedcontrol.updated", payload(folder=domain), str(domain.id)
@@ -118,9 +162,7 @@ class TestMatching:
         assert not outside
 
     def test_transition_filter_matches_only_on_change(self, capture_runs):
-        workflow = make_workflow()
-        make_trigger(
-            workflow,
+        make_workflow(
             filters={
                 "operator": "and",
                 "conditions": [
@@ -155,9 +197,7 @@ class TestMatching:
             label="bar", folder=Folder.get_root_folder()
         )
         control.filtering_labels.add(label)
-        workflow = make_workflow()
-        make_trigger(
-            workflow,
+        make_workflow(
             filters={
                 "operator": "and",
                 "conditions": [
@@ -188,9 +228,7 @@ class TestMatching:
         labeled_elsewhere.filtering_labels.add(label)
         plain = AppliedControl.objects.create(name="D", folder=root)
 
-        workflow = make_workflow()
-        make_trigger(
-            workflow,
+        make_workflow(
             filters={
                 "operator": "or",
                 "conditions": [
@@ -229,7 +267,7 @@ class TestMatching:
 class TestDispatch:
     def test_instance_created_with_trigger_metadata(self, capture_runs):
         workflow = make_workflow()
-        trigger = make_trigger(workflow)
+        registration = get_registration(workflow)
         started = dispatch_internal_event(
             "appliedcontrol.updated",
             payload(changes={"status": ["--", "active"]}),
@@ -237,39 +275,44 @@ class TestDispatch:
         )
         instance = started[0]
         assert instance.trigger == "internal_event"
-        assert instance.event_trigger_id == trigger.id
+        assert instance.trigger_registration_id == registration.id
         assert instance.trigger_depth == 1
         assert instance.payload["new_values"] == {"status": "active"}
         assert capture_runs == [str(instance.id)]
-        trigger.refresh_from_db()
-        assert trigger.last_result == WorkflowEventTrigger.Result.TRIGGERED
-        assert trigger.trigger_count == 1
-        assert trigger.last_triggered_at is not None
+        entry_log = instance.logs.filter(event_type="instance_started").get()
+        assert entry_log.node.ref == "on_event"
+        registration.refresh_from_db()
+        assert registration.last_result == WorkflowTrigger.Result.TRIGGERED
+        assert registration.trigger_count == 1
+        assert registration.last_triggered_at is not None
 
     def test_unpublished_and_disabled_skips(self, capture_runs):
-        unpublished = make_workflow(published=False)
-        trigger = make_trigger(unpublished)
+        # Archiving the published version strands the registration row: the
+        # dispatcher must record SKIPPED_UNPUBLISHED, not crash or fire.
+        workflow = make_workflow()
+        registration = get_registration(workflow)
+        WorkflowVersion.objects.filter(id=workflow.published_version.id).update(
+            status=WorkflowVersion.Status.ARCHIVED
+        )
         assert not dispatch_internal_event("appliedcontrol.updated", payload(), None)
-        trigger.refresh_from_db()
-        assert trigger.last_result == WorkflowEventTrigger.Result.SKIPPED_UNPUBLISHED
+        registration.refresh_from_db()
+        assert registration.last_result == WorkflowTrigger.Result.SKIPPED_UNPUBLISHED
 
-        published = make_workflow(name="Disabled flow")
-        make_trigger(published, enabled=False)
+        make_workflow(name="Disabled flow", enabled=False)
         assert not dispatch_internal_event("appliedcontrol.updated", payload(), None)
 
     def test_depth_cap(self, capture_runs):
         workflow = make_workflow()
-        trigger = make_trigger(workflow)
+        registration = get_registration(workflow)
         started = dispatch_internal_event(
             "appliedcontrol.updated", payload(), None, origin_depth=MAX_TRIGGER_DEPTH
         )
         assert not started
-        trigger.refresh_from_db()
-        assert trigger.last_result == WorkflowEventTrigger.Result.SKIPPED_DEPTH
+        registration.refresh_from_db()
+        assert registration.last_result == WorkflowTrigger.Result.SKIPPED_DEPTH
 
     def test_chain_depth_increments(self, capture_runs):
-        workflow = make_workflow()
-        make_trigger(workflow)
+        make_workflow()
         started = dispatch_internal_event(
             "appliedcontrol.updated", payload(), None, origin_depth=2
         )
@@ -281,9 +324,7 @@ class TestCudProducer:
     def test_end_to_end_from_auditlog(self, capture_runs):
         from auditlog.models import LogEntry
 
-        workflow = make_workflow()
-        make_trigger(
-            workflow,
+        make_workflow(
             event_key="appliedcontrol.updated",
             filters={
                 "operator": "and",
@@ -333,41 +374,68 @@ class TestCudProducer:
 
 
 @pytest.mark.django_db
-class TestSerializerValidation:
-    def _validate(self, workflow, **overrides):
-        data = {
-            "name": "t",
-            "workflow": str(workflow.id),
-            "event_key": "appliedcontrol.updated",
-            "filters": {},
-            "enabled": True,
-        }
-        data.update(overrides)
-        serializer = WorkflowEventTriggerWriteSerializer(data=data)
-        return serializer.is_valid(), serializer.errors
+class TestConfigValidation:
+    """Event key / filter validation moved from the trigger serializer to
+    publish validation of the trigger node's config."""
 
-    def test_valid_payload(self):
-        workflow = make_workflow()
-        ok, errors = self._validate(workflow)
-        assert ok, errors
+    def _codes(self, trigger_config, folder=None):
+        workflow = Workflow.objects.create(
+            name=f"cfg {uuid.uuid4().hex[:6]}",
+            folder=folder or Folder.get_root_folder(),
+        )
+        version = WorkflowVersion.objects.create(workflow=workflow)
+        trigger = {
+            "id": str(uuid.uuid4()),
+            "type": "trigger",
+            "trigger_config": trigger_config,
+            "position": {},
+        }
+        end = {"id": str(uuid.uuid4()), "type": "end", "position": {}}
+        save_graph(
+            version,
+            {
+                "nodes": [trigger, end],
+                "edges": [
+                    {
+                        "id": str(uuid.uuid4()),
+                        "source": trigger["id"],
+                        "target": end["id"],
+                    }
+                ],
+                "variables": [],
+            },
+        )
+        return [e["code"] for e in validate_graph(version)]
+
+    def test_valid_config(self):
+        codes = self._codes(
+            {"type": "internal_event", "event_key": "appliedcontrol.updated"}
+        )
+        assert codes == []
 
     def test_unknown_event_key_rejected(self):
-        workflow = make_workflow()
-        ok, errors = self._validate(workflow, event_key="nonexistent.exploded")
-        assert not ok and "event_key" in errors
+        codes = self._codes(
+            {"type": "internal_event", "event_key": "nonexistent.exploded"}
+        )
+        assert "trigger_invalid_event_key" in codes
 
     def test_malformed_filters_rejected(self):
-        workflow = make_workflow()
-        ok, errors = self._validate(
-            workflow,
-            filters={"operator": "xor", "conditions": []},
+        codes = self._codes(
+            {
+                "type": "internal_event",
+                "event_key": "appliedcontrol.updated",
+                "filters": {"operator": "xor", "conditions": []},
+            }
         )
-        assert not ok and "filters" in errors
-        ok, errors = self._validate(
-            workflow,
-            filters={"conditions": [{"field": "", "op": "eq", "value": "x"}]},
+        assert "trigger_invalid_filters" in codes
+        codes = self._codes(
+            {
+                "type": "internal_event",
+                "event_key": "appliedcontrol.updated",
+                "filters": {"conditions": [{"field": "", "op": "eq", "value": "x"}]},
+            }
         )
-        assert not ok
+        assert "trigger_invalid_filters" in codes
 
     def test_folder_condition_outside_scope_rejected(self):
         root = Folder.get_root_folder()
@@ -381,14 +449,17 @@ class TestSerializerValidation:
             parent_folder=root,
             content_type=Folder.ContentType.DOMAIN,
         )
-        workflow = make_workflow(folder=domain)
-        ok, errors = self._validate(
-            workflow,
-            filters={
-                "operator": "and",
-                "conditions": [
-                    {"field": "folder", "op": "eq", "value": str(sibling.id)}
-                ],
+        codes = self._codes(
+            {
+                "type": "internal_event",
+                "event_key": "appliedcontrol.updated",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [
+                        {"field": "folder", "op": "eq", "value": str(sibling.id)}
+                    ],
+                },
             },
+            folder=domain,
         )
-        assert not ok and "filters" in errors
+        assert "trigger_filters_out_of_scope" in codes

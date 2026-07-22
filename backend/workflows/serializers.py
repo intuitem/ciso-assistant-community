@@ -4,20 +4,13 @@ from core.serializers import BaseModelSerializer
 from core.serializer_fields import FieldsRelatedField, PathField
 
 from workflows.models import (
-    Condition,
     Workflow,
-    WorkflowEventTrigger,
     WorkflowInstance,
     WorkflowInstanceLog,
-    WorkflowSchedule,
     WorkflowSecret,
     WorkflowToken,
+    WorkflowTrigger,
     WorkflowVersion,
-)
-from workflows.scheduling import (
-    CronValidationError,
-    validate_cron_expression,
-    validate_timezone,
 )
 
 
@@ -110,135 +103,51 @@ class WorkflowSecretWriteSerializer(BaseModelSerializer):
         extra_kwargs = {"value": {"write_only": True}}
 
 
-class WorkflowScheduleReadSerializer(BaseModelSerializer):
+class WorkflowTriggerReadSerializer(BaseModelSerializer):
     workflow = FieldsRelatedField()
     folder = FieldsRelatedField()
+    has_hmac = serializers.SerializerMethodField()
 
     class Meta:
-        model = WorkflowSchedule
-        fields = "__all__"
+        model = WorkflowTrigger
+        # secret stays readable (builders need the hook URL; view permission
+        # gates it, matching the old workflow-level webhook_secret exposure).
+        exclude = ["hmac_secret"]
+
+    def get_has_hmac(self, obj):
+        return bool(obj.hmac_secret)
 
 
-class WorkflowScheduleWriteSerializer(BaseModelSerializer):
-    class Meta:
-        model = WorkflowSchedule
-        fields = [
-            "name",
-            "description",
-            "workflow",
-            "cron_expression",
-            "timezone",
-            "enabled",
-        ]
-
-    def validate_timezone(self, value):
-        try:
-            validate_timezone(value)
-        except CronValidationError as e:
-            raise serializers.ValidationError(str(e))
-        return value
-
-    def validate(self, attrs):
-        attrs = super().validate(attrs)
-        expression = attrs.get(
-            "cron_expression",
-            getattr(self.instance, "cron_expression", None),
-        )
-        tz_name = attrs.get("timezone", getattr(self.instance, "timezone", "UTC"))
-        try:
-            validate_cron_expression(expression, tz_name)
-        except CronValidationError as e:
-            raise serializers.ValidationError({"cron_expression": str(e)})
-        return attrs
-
-
-class WorkflowEventTriggerReadSerializer(BaseModelSerializer):
-    workflow = FieldsRelatedField()
-    folder = FieldsRelatedField()
+class WorkflowTriggerWriteSerializer(BaseModelSerializer):
+    """Rows are publish-managed: the only user-writable state is the enabled
+    flag and the webhook HMAC secret."""
 
     class Meta:
-        model = WorkflowEventTrigger
-        fields = "__all__"
+        model = WorkflowTrigger
+        fields = ["enabled", "hmac_secret"]
+        extra_kwargs = {"hmac_secret": {"write_only": True}}
 
+    def update(self, instance, validated_data):
+        new_enabled = validated_data.get("enabled", instance.enabled)
+        if (
+            instance.type == WorkflowTrigger.Type.SCHEDULE
+            and new_enabled != instance.enabled
+        ):
+            from django.utils import timezone
 
-VALID_FILTER_OPS = {choice[0] for choice in Condition.Operator.choices}
-MAX_FILTER_DEPTH = 5
+            from workflows.scheduling import next_occurrence
 
-
-class WorkflowEventTriggerWriteSerializer(BaseModelSerializer):
-    class Meta:
-        model = WorkflowEventTrigger
-        fields = [
-            "name",
-            "description",
-            "workflow",
-            "event_key",
-            "filters",
-            "enabled",
-        ]
-
-    def validate_event_key(self, value):
-        from workflows.events import event_key_catalog
-
-        if value not in {entry["key"] for entry in event_key_catalog()}:
-            raise serializers.ValidationError("invalidEventKey")
-        return value
-
-    def validate_filters(self, value):
-        if value in (None, {}):
-            return {}
-        self._validate_group(value, depth=0)
-        return value
-
-    def _validate_group(self, group, depth):
-        if depth > MAX_FILTER_DEPTH:
-            raise serializers.ValidationError("invalidFieldFilters")
-        if not isinstance(group, dict):
-            raise serializers.ValidationError("invalidFieldFilters")
-        if group.get("operator", "and") not in ("and", "or", "not"):
-            raise serializers.ValidationError("invalidFieldFilters")
-        conditions = group.get("conditions", [])
-        children = group.get("children", [])
-        if not isinstance(conditions, list) or not isinstance(children, list):
-            raise serializers.ValidationError("invalidFieldFilters")
-        for condition in conditions:
-            if (
-                not isinstance(condition, dict)
-                or not isinstance(condition.get("field"), str)
-                or not condition.get("field")
-                or condition.get("op", "eq") not in VALID_FILTER_OPS
-                or not isinstance(condition.get("changed", False), bool)
-            ):
-                raise serializers.ValidationError("invalidFieldFilters")
-        for child in children:
-            self._validate_group(child, depth + 1)
-
-    def validate(self, attrs):
-        attrs = super().validate(attrs)
-        workflow = attrs.get("workflow") or getattr(self.instance, "workflow", None)
-        filters = attrs.get("filters")
-        if workflow is not None and filters:
-            from workflows.events import _workflow_scope
-
-            scope = _workflow_scope(workflow)
-            for condition in _walk_conditions(filters):
-                if condition.get("field") == "folder" and condition.get("op") in (
-                    "eq",
-                    "in",
-                ):
-                    values = str(condition.get("value", "")).split(",")
-                    for folder_value in (v.strip() for v in values):
-                        if folder_value and folder_value not in scope:
-                            raise serializers.ValidationError(
-                                {"filters": "foldersOutsideWorkflowScope"}
-                            )
-        return attrs
-
-
-def _walk_conditions(group):
-    yield from group.get("conditions", [])
-    for child in group.get("children", []):
-        yield from _walk_conditions(child)
+            config = instance.config or {}
+            instance.next_run_at = (
+                next_occurrence(
+                    config.get("cron_expression", ""),
+                    config.get("timezone", "UTC"),
+                    timezone.now(),
+                )
+                if new_enabled
+                else None
+            )
+        return super().update(instance, validated_data)
 
 
 class WorkflowInstanceLogReadSerializer(BaseModelSerializer):

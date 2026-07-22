@@ -75,7 +75,12 @@ def _minimal_graph():
     start, task, end = str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())
     return {
         "nodes": [
-            {"id": start, "type": "start", "position": {"x": 0, "y": 0}},
+            {
+                "id": start,
+                "type": "trigger",
+                "trigger_config": {"type": "manual"},
+                "position": {"x": 0, "y": 0},
+            },
             {
                 "id": task,
                 "type": "action",
@@ -116,7 +121,7 @@ class TestGraphSave:
 
         resp = _get_graph(version, superuser)
         assert resp.status_code == 200
-        assert {n["type"] for n in resp.data["nodes"]} == {"start", "action", "end"}
+        assert {n["type"] for n in resp.data["nodes"]} == {"trigger", "action", "end"}
 
     def test_removed_rows_are_deleted(self, workflow, superuser):
         version = workflow.draft_version
@@ -179,7 +184,7 @@ class TestPublish:
         resp = _publish(workflow.draft_version, superuser)
         assert resp.status_code == 400
         codes = {e["code"] for e in resp.data["errors"]}
-        assert "start_node_count" in codes
+        assert "trigger_node_missing" in codes
         assert "end_node_missing" in codes
 
     def test_unreachable_node_fails_validation(self, workflow, superuser):

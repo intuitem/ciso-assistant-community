@@ -62,51 +62,64 @@ def _zone(tz_name: str):
 
 
 def run_due_schedules(now=None):
-    """One scheduler tick. Claims each due schedule with an optimistic
-    compare-and-swap on next_run_at, so concurrent or replayed ticks (huey
-    enqueues periodic tasks from every consumer's scheduler) fire at most
-    once per occurrence. Returns the instances that were started."""
+    """One scheduler tick. Claims each due schedule registration with an
+    optimistic compare-and-swap on next_run_at, so concurrent or replayed
+    ticks (huey enqueues periodic tasks from every consumer's scheduler) fire
+    at most once per occurrence. Returns the instances that were started."""
     from django.utils import timezone
 
     from .engine import EngineError, create_instance
-    from .models import WorkflowInstance, WorkflowSchedule
+    from .models import WorkflowInstance, WorkflowNode, WorkflowTrigger
     from .tasks import run_instance_task
 
     now = now or timezone.now()
-    due = WorkflowSchedule.objects.filter(
-        enabled=True, next_run_at__lte=now
+    due = WorkflowTrigger.objects.filter(
+        type=WorkflowTrigger.Type.SCHEDULE, enabled=True, next_run_at__lte=now
     ).select_related("workflow")
     started = []
-    for schedule in due:
-        claimed = WorkflowSchedule.objects.filter(
-            id=schedule.id, next_run_at=schedule.next_run_at
+    for registration in due:
+        config = registration.config or {}
+        claimed = WorkflowTrigger.objects.filter(
+            id=registration.id, next_run_at=registration.next_run_at
         ).update(
             next_run_at=next_occurrence(
-                schedule.cron_expression, schedule.timezone, now
+                config.get("cron_expression", ""), config.get("timezone", "UTC"), now
             ),
             last_run_at=now,
         )
         if not claimed:
             continue
-        version = schedule.workflow.published_version
+        version = registration.workflow.published_version
+        entry = None
+        if version is not None:
+            entry = version.nodes.filter(
+                type=WorkflowNode.Type.TRIGGER, ref=registration.node_ref
+            ).first()
         if version is None:
-            result = WorkflowSchedule.Result.SKIPPED_UNPUBLISHED
-        elif schedule.instances.filter(status=WorkflowInstance.Status.ACTIVE).exists():
+            result = WorkflowTrigger.Result.SKIPPED_UNPUBLISHED
+        elif entry is None:
+            # A publish raced the claim and removed the node; the row is on
+            # its way out (or already gone — update below is then a no-op).
+            result = WorkflowTrigger.Result.ERROR
+        elif registration.instances.filter(
+            status=WorkflowInstance.Status.ACTIVE
+        ).exists():
             # concurrencyPolicy: Forbid — an every-minute cron on a slow
             # workflow must not pile up instances.
-            result = WorkflowSchedule.Result.SKIPPED_OVERLAP
+            result = WorkflowTrigger.Result.SKIPPED_OVERLAP
         else:
             try:
                 instance = create_instance(
                     version,
                     trigger=WorkflowInstance.Trigger.SCHEDULED,
-                    schedule=schedule,
+                    entry_node=entry,
+                    trigger_registration=registration,
                 )
             except EngineError:
-                result = WorkflowSchedule.Result.ERROR
+                result = WorkflowTrigger.Result.ERROR
             else:
                 run_instance_task(str(instance.id))
                 started.append(instance)
-                result = WorkflowSchedule.Result.TRIGGERED
-        WorkflowSchedule.objects.filter(id=schedule.id).update(last_result=result)
+                result = WorkflowTrigger.Result.TRIGGERED
+        WorkflowTrigger.objects.filter(id=registration.id).update(last_result=result)
     return started

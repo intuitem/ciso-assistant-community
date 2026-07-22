@@ -30,6 +30,7 @@ NODE_FIELDS = [
     "label",
     "ref",
     "action_config",
+    "trigger_config",
     "input_mapping",
     "output_mapping",
     "event_key",

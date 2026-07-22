@@ -39,6 +39,7 @@ def start_instance(
     initiated_by=None,
     parent_instance=None,
     parent_token=None,
+    entry_node=None,
 ):
     """Create an instance and run it synchronously (tests, subprocesses)."""
     instance = create_instance(
@@ -48,18 +49,32 @@ def start_instance(
         initiated_by=initiated_by,
         parent_instance=parent_instance,
         parent_token=parent_token,
+        entry_node=entry_node,
     )
     run_instance(instance)
     instance.refresh_from_db()
     return instance
 
 
-def trigger_instance(version, *, trigger="manual", payload=None, initiated_by=None):
+def trigger_instance(
+    version,
+    *,
+    trigger="manual",
+    payload=None,
+    initiated_by=None,
+    entry_node=None,
+    trigger_registration=None,
+):
     """Entry point for webhook/manual triggers: honors the async setting."""
     from django.conf import settings
 
     instance = create_instance(
-        version, trigger=trigger, payload=payload, initiated_by=initiated_by
+        version,
+        trigger=trigger,
+        payload=payload,
+        initiated_by=initiated_by,
+        entry_node=entry_node,
+        trigger_registration=trigger_registration,
     )
     if getattr(settings, "WORKFLOWS_ASYNC_EXECUTION", False):
         from .tasks import run_instance_task
@@ -87,6 +102,26 @@ def run_instance(instance):
         current_trigger_depth.reset(depth_token)
 
 
+def default_entry_node(version):
+    """Entry resolution when the caller names no trigger node: the manual
+    trigger when there is exactly one, else the sole trigger node. Used by
+    manual runs without an explicit choice and by subprocess starts (the
+    child version resolves its own entry)."""
+    trigger_nodes = list(version.nodes.filter(type=WorkflowNode.Type.TRIGGER))
+    if not trigger_nodes:
+        raise EngineError("This version has no trigger node")
+    manual = [
+        n
+        for n in trigger_nodes
+        if (n.trigger_config or {}).get("type") == WorkflowNode.TriggerType.MANUAL
+    ]
+    if len(manual) == 1:
+        return manual[0]
+    if len(trigger_nodes) == 1:
+        return trigger_nodes[0]
+    raise EngineError("Ambiguous entry: this version has several trigger nodes")
+
+
 def create_instance(
     version,
     *,
@@ -95,17 +130,16 @@ def create_instance(
     initiated_by=None,
     parent_instance=None,
     parent_token=None,
-    schedule=None,
-    event_trigger=None,
+    trigger_registration=None,
     trigger_depth=0,
+    entry_node=None,
 ):
-    start_node = version.nodes.filter(type=WorkflowNode.Type.START).first()
-    if start_node is None:
-        raise EngineError("This version has no start node")
+    if entry_node is None:
+        entry_node = default_entry_node(version)
 
     payload = payload or {}
     variables = {v.key: v.default_value for v in version.variables.all()}
-    for variable_key, path in (start_node.input_mapping or {}).items():
+    for variable_key, path in (entry_node.input_mapping or {}).items():
         value = dig(payload, path)
         if value is not None:
             variables[variable_key] = value
@@ -125,18 +159,17 @@ def create_instance(
             initiated_by=initiated_by,
             parent_instance=parent_instance,
             parent_token=parent_token,
-            schedule=schedule,
-            event_trigger=event_trigger,
+            trigger_registration=trigger_registration,
             trigger_depth=trigger_depth,
         )
         _log(
             instance,
             WorkflowInstanceLog.EventType.INSTANCE_STARTED,
-            node=start_node,
+            node=entry_node,
             message=f"Triggered by {trigger}",
             data={"variables": variables},
         )
-        WorkflowToken.objects.create(instance=instance, current_node=start_node)
+        WorkflowToken.objects.create(instance=instance, current_node=entry_node)
     return instance
 
 

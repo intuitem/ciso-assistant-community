@@ -21,13 +21,16 @@ from django.utils import timezone
 
 import structlog
 
-from .models import WorkflowEventTrigger, WorkflowInstance
+from .models import Condition, WorkflowInstance, WorkflowNode, WorkflowTrigger
 
 logger = structlog.get_logger(__name__)
 
 MAX_TRIGGER_DEPTH = 5
 
 CUD_ACTIONS = ["created", "updated", "deleted"]
+
+VALID_FILTER_OPS = {choice[0] for choice in Condition.Operator.choices}
+MAX_FILTER_DEPTH = 5
 
 
 def event_key_catalog():
@@ -58,8 +61,8 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
     from .tasks import run_instance_task
 
     started = []
-    triggers = WorkflowEventTrigger.objects.filter(
-        enabled=True, event_key=event_key
+    triggers = WorkflowTrigger.objects.filter(
+        type=WorkflowTrigger.Type.INTERNAL_EVENT, enabled=True, event_key=event_key
     ).select_related("workflow")
     state_cache = {}
     for trigger in triggers:
@@ -69,11 +72,12 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
             trigger.workflow
         ):
             continue
-        if not _filters_match(trigger.filters, payload, state_cache):
+        filters = (trigger.config or {}).get("filters") or {}
+        if not _filters_match(filters, payload, state_cache):
             continue
 
         if origin_depth + 1 > MAX_TRIGGER_DEPTH:
-            _bookkeep(trigger, WorkflowEventTrigger.Result.SKIPPED_DEPTH)
+            _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_DEPTH)
             logger.warning(
                 "event trigger skipped: chain depth exceeded",
                 trigger=str(trigger.id),
@@ -82,22 +86,28 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
             )
             continue
         version = trigger.workflow.published_version
-        if version is None:
-            _bookkeep(trigger, WorkflowEventTrigger.Result.SKIPPED_UNPUBLISHED)
+        entry = None
+        if version is not None:
+            entry = version.nodes.filter(
+                type=WorkflowNode.Type.TRIGGER, ref=trigger.node_ref
+            ).first()
+        if version is None or entry is None:
+            _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_UNPUBLISHED)
             continue
         try:
             instance = create_instance(
                 version,
                 trigger=WorkflowInstance.Trigger.INTERNAL_EVENT,
                 payload=payload,
-                event_trigger=trigger,
+                entry_node=entry,
+                trigger_registration=trigger,
                 trigger_depth=origin_depth + 1,
             )
         except EngineError:
-            _bookkeep(trigger, WorkflowEventTrigger.Result.ERROR)
+            _bookkeep(trigger, WorkflowTrigger.Result.ERROR)
             continue
         run_instance_task(str(instance.id))
-        _bookkeep(trigger, WorkflowEventTrigger.Result.TRIGGERED, fired=True)
+        _bookkeep(trigger, WorkflowTrigger.Result.TRIGGERED, fired=True)
         started.append(instance)
     return started
 
@@ -108,7 +118,7 @@ def _bookkeep(trigger, result, fired=False):
     updates = {"last_result": result, "last_triggered_at": timezone.now()}
     if fired:
         updates["trigger_count"] = F("trigger_count") + 1
-    WorkflowEventTrigger.objects.filter(id=trigger.id).update(**updates)
+    WorkflowTrigger.objects.filter(id=trigger.id).update(**updates)
 
 
 def _workflow_scope(workflow):
@@ -117,6 +127,46 @@ def _workflow_scope(workflow):
     ids = {str(folder.id)}
     ids |= {str(f.id) for f in folder.get_sub_folders()}
     return ids
+
+
+# ---------- filter tree validation ----------
+
+
+def validate_filter_tree(tree):
+    """Shape-check a boolean filter tree. Raises ValueError on bad shape."""
+    if tree in (None, {}):
+        return
+    _validate_group(tree, depth=0)
+
+
+def _validate_group(group, depth):
+    if depth > MAX_FILTER_DEPTH:
+        raise ValueError("filter tree too deep")
+    if not isinstance(group, dict):
+        raise ValueError("group must be a mapping")
+    if group.get("operator", "and") not in ("and", "or", "not"):
+        raise ValueError("invalid operator")
+    conditions = group.get("conditions", [])
+    children = group.get("children", [])
+    if not isinstance(conditions, list) or not isinstance(children, list):
+        raise ValueError("conditions and children must be lists")
+    for condition in conditions:
+        if (
+            not isinstance(condition, dict)
+            or not isinstance(condition.get("field"), str)
+            or not condition.get("field")
+            or condition.get("op", "eq") not in VALID_FILTER_OPS
+            or not isinstance(condition.get("changed", False), bool)
+        ):
+            raise ValueError("invalid condition")
+    for child in children:
+        _validate_group(child, depth + 1)
+
+
+def walk_conditions(group):
+    yield from group.get("conditions", [])
+    for child in group.get("children", []):
+        yield from walk_conditions(child)
 
 
 # ---------- filter tree evaluation ----------
@@ -278,8 +328,8 @@ def forward_log_entry(sender, instance, created, **kwargs):
     event_key = f"{instance.content_type.model}.{action}"
     # Cheap indexed gate: one query per audited save, no enqueue when nothing
     # listens for this key.
-    if not WorkflowEventTrigger.objects.filter(
-        enabled=True, event_key=event_key
+    if not WorkflowTrigger.objects.filter(
+        type=WorkflowTrigger.Type.INTERNAL_EVENT, enabled=True, event_key=event_key
     ).exists():
         return
 

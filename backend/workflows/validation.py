@@ -5,7 +5,13 @@ error carries the offending node/edge id so the canvas can surface it in
 place.
 """
 
-from .models import NodeAssignment, WorkflowNode, WorkflowVersion
+import json
+import re
+
+from .models import NodeAssignment, WorkflowNode, WorkflowSecret, WorkflowVersion
+from .triggers import validate_trigger_config
+
+SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
 
 
 def validate_graph(version):
@@ -14,13 +20,14 @@ def validate_graph(version):
     edges = list(version.edges.all())
     variable_keys = set(version.variables.values_list("key", flat=True))
     nodes_by_id = {node.id: node for node in nodes}
+    existing_secrets = _existing_secret_names(version, nodes)
 
-    start_nodes = [n for n in nodes if n.type == WorkflowNode.Type.START]
+    trigger_nodes = [n for n in nodes if n.type == WorkflowNode.Type.TRIGGER]
     end_nodes = [n for n in nodes if n.type == WorkflowNode.Type.END]
 
-    if len(start_nodes) != 1:
+    if not trigger_nodes:
         errors.append(
-            _error("start_node_count", "The graph needs exactly one start node")
+            _error("trigger_node_missing", "The graph needs at least one trigger node")
         )
     if not end_nodes:
         errors.append(
@@ -33,14 +40,16 @@ def validate_graph(version):
         outgoing[edge.source_node_id].append(edge.target_node_id)
         incoming[edge.target_node_id].append(edge.source_node_id)
 
-    if start_nodes:
-        reachable = _traverse(start_nodes[0].id, outgoing)
+    if trigger_nodes:
+        reachable = set()
+        for trigger_node in trigger_nodes:
+            reachable |= _traverse(trigger_node.id, outgoing)
         for node in nodes:
             if node.id not in reachable:
                 errors.append(
                     _error(
                         "node_unreachable",
-                        "This node cannot be reached from the start node",
+                        "This node cannot be reached from any trigger node",
                         node=node,
                     )
                 )
@@ -68,14 +77,28 @@ def validate_graph(version):
                     node=node,
                 )
             )
-        if node.type == WorkflowNode.Type.START and incoming[node.id]:
-            errors.append(
-                _error(
-                    "start_has_incoming",
-                    "The start node cannot have incoming edges",
-                    node=node,
+        if node.type == WorkflowNode.Type.TRIGGER:
+            if incoming[node.id]:
+                errors.append(
+                    _error(
+                        "trigger_has_incoming",
+                        "Trigger nodes cannot have incoming edges",
+                        node=node,
+                    )
                 )
-            )
+            for code, message in validate_trigger_config(node, version.workflow):
+                errors.append(_error(code, message, node=node))
+        if node.type == WorkflowNode.Type.ACTION:
+            for name in sorted(_referenced_secret_names(node)):
+                if name not in existing_secrets:
+                    errors.append(
+                        _error(
+                            "secret_missing",
+                            f"Secret '{name}' does not exist — add it in the "
+                            "secrets panel before publishing",
+                            node=node,
+                        )
+                    )
         if node.type == WorkflowNode.Type.TASK and not node.task_template_id:
             errors.append(
                 _error(
@@ -112,6 +135,23 @@ def validate_graph(version):
                         node=node,
                     )
                 )
+            else:
+                # Best effort (the child republishes independently, same
+                # TOCTOU as subprocess_unpublished): the child's current
+                # published version must resolve an unambiguous entry.
+                from .engine import EngineError, default_entry_node
+
+                try:
+                    default_entry_node(target.published_version)
+                except EngineError:
+                    errors.append(
+                        _error(
+                            "subprocess_entry_ambiguous",
+                            "The subprocess workflow has no unambiguous entry "
+                            "trigger (give it a single manual trigger node)",
+                            node=node,
+                        )
+                    )
         for assignment in node.assignments.all():
             if (
                 assignment.resolve_type == NodeAssignment.ResolveType.ACTOR
@@ -148,6 +188,29 @@ def validate_graph(version):
             )
 
     return errors
+
+
+def _referenced_secret_names(node):
+    return set(SECRET_NAME_RE.findall(json.dumps(node.action_config or {})))
+
+
+def _existing_secret_names(version, nodes):
+    """Names resolvable at runtime: the engine looks secrets up within the
+    instance folder's ancestors + subtree (actions._secrets_context)."""
+    referenced = set()
+    for node in nodes:
+        if node.type == WorkflowNode.Type.ACTION:
+            referenced |= _referenced_secret_names(node)
+    if not referenced:
+        return set()
+    from .actions import _accessible_folder_ids
+
+    return set(
+        WorkflowSecret.objects.filter(
+            folder_id__in=_accessible_folder_ids(version.folder),
+            name__in=referenced,
+        ).values_list("name", flat=True)
+    )
 
 
 def _traverse(start_id, adjacency):
