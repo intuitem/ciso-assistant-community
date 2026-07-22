@@ -16,6 +16,7 @@ from knox.models import AuthToken
 from rest_framework.test import APIClient
 
 from global_settings.models import GlobalSettings
+
 # from iam.cache_builders import invalidate_assignments_cache, invalidate_groups_cache
 from iam.models import IdPGroup, SCIMToken, User, UserGroup
 

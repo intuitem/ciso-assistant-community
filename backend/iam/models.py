@@ -52,6 +52,7 @@ from auditlog.signals import pre_log
 from allauth.mfa.models import Authenticator
 from core.context import focus_folder_id_var
 from django.shortcuts import get_object_or_404
+
 """from iam.cache_builders import (
     CacheNotReadyError,
     get_folder_state,
@@ -117,6 +118,7 @@ def _get_root_folder() -> Optional[Folder]:
         return None
     except OperationalError, ProgrammingError:
         return None
+
 
 class Folder(NameDescriptionMixin):
     """A folder is a container for other folders or any object
@@ -321,7 +323,7 @@ class Folder(NameDescriptionMixin):
         folders = list(self.get_parent_folders())
         # We use `get_parent_folders` and `folder_map` to be able to get the `self` `Folder` full path with just 1 query.
         # Otherwise we would execute 1 query for each `last_folder.parent_folder` attribute access.
-        folder_map = { folder.id: folder for folder in folders }
+        folder_map = {folder.id: folder for folder in folders}
 
         reversed_folder_path: list[Folder] = [self]
         while True:
@@ -333,7 +335,9 @@ class Folder(NameDescriptionMixin):
 
             parent_folder = folder_map.get(parent_folder_id)
             if parent_folder is None:
-                raise AssertionError(f"parent_folder(id={parent_folder_id}) not found in folder(id={self.id}) ancestors.")
+                raise AssertionError(
+                    f"parent_folder(id={parent_folder_id}) not found in folder(id={self.id}) ancestors."
+                )
 
             reversed_folder_path.append(parent_folder)
 
@@ -1258,7 +1262,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return f"id={self.id}, folders={folder_names}, is_recursive={self.is_recursive}, role={role_name}, {principal_type}: {principal_name}"
 
     @staticmethod
-    def get_role_assignments_from_user(user: AbstractBaseUser | AnonymousUser) -> QuerySet[RoleAssignment]:
+    def get_role_assignments_from_user(
+        user: AbstractBaseUser | AnonymousUser,
+    ) -> QuerySet[RoleAssignment]:
         if not isinstance(user, User):
             return RoleAssignment.objects.none()
 
@@ -1824,7 +1830,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return permission_role_assignments.exists()
 
     @staticmethod
-    def get_permissions(principal: AbstractBaseUser | AnonymousUser | UserGroup) -> dict[str, dict[str, str]]:
+    def get_permissions(
+        principal: AbstractBaseUser | AnonymousUser | UserGroup,
+    ) -> dict[str, dict[str, str]]:
         """Get all permissions attached to a user/group (direct or indirect), using caches.
 
         Returns: {codename: {"str": Permission.name}}
@@ -1833,17 +1841,21 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if isinstance(principal, User):
             user = principal
             role_assigments = RoleAssignment.get_role_assignments_from_user(user)
-            perm_name_pairs = role_assigments.values_list("role__permissions__codename", "role__permissions__name").distinct()
+            perm_name_pairs = role_assigments.values_list(
+                "role__permissions__codename", "role__permissions__name"
+            ).distinct()
 
         elif isinstance(principal, UserGroup):
             user_group = principal
             role_assigments = RoleAssignment.objects.filter(user_group=user_group)
-            perm_name_pairs = role_assigments.values_list("role__permissions__codename", "role__permissions__name").distinct()
+            perm_name_pairs = role_assigments.values_list(
+                "role__permissions__codename", "role__permissions__name"
+            ).distinct()
         else:
             return {}
 
         return {
-            perm_codename: { "str": perm_name }
+            perm_codename: {"str": perm_name}
             for perm_codename, perm_name in perm_name_pairs
         }
 
@@ -1876,12 +1888,16 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         # That's "fine" as a `User`/`UserGroup` never have a big quantity of RoleAssigment)
         # And `RoleAssigment` never even have multiple folders in `perimeter_folders`.
         for role_assignment in role_assignments:
-            codenames = role_assignment.role.permissions.values_list("codename", flat=True)
+            codenames = role_assignment.role.permissions.values_list(
+                "codename", flat=True
+            )
 
             for perimeter_folder in role_assignment.perimeter_folders.all():
                 folders = [perimeter_folder]
                 if is_recursive:
-                    folders = itertools.chain(folders, perimeter_folder.descendants.all())
+                    folders = itertools.chain(
+                        folders, perimeter_folder.descendants.all()
+                    )
 
                 for folder in folders:
                     folder_id_to_codenames[str(folder.id)].update(codenames)

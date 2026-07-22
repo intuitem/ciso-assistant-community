@@ -999,8 +999,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return field_models
 
     def _user_can_view_all(self, model) -> bool:
-        """Return `True` if the user has the `"view_{model.__name__.lower()}"` permission on the root `Folder`, or return `False` otherwise.`
-        """
+        """Return `True` if the user has the `"view_{model.__name__.lower()}"` permission on the root `Folder`, or return `False` otherwise.`"""
         user = self.request.user
         if not getattr(user, "is_authenticated", False):
             return False
@@ -1014,7 +1013,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         role_assignments = RoleAssignment.get_role_assignments_from_user(user)
         root_folder = Folder.get_root_folder()
 
-        view_all_role_assignments = role_assignments.filter(perimeter_folders=root_folder, role__permissions__codename=perm_codename)
+        view_all_role_assignments = role_assignments.filter(
+            perimeter_folders=root_folder, role__permissions__codename=perm_codename
+        )
         can_user_view_all = view_all_role_assignments.exists()
         return can_user_view_all
 
