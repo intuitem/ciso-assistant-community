@@ -1054,7 +1054,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
 		],
-		selectFields: [{ field: 'document_type' }],
 		detailViewFields: [
 			{ field: 'ref_id' },
 			{ field: 'name' },
