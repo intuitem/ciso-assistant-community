@@ -199,8 +199,19 @@ class BaseModelSerializer(serializers.ModelSerializer):
             accessible_ids = accessible_cache[related_model]
             if accessible_ids is None:
                 continue
+            # keeping an already-linked object is not linking a new one
+            current_ids: set = set()
+            if self.instance is not None and not isinstance(self.instance, list):
+                manager = getattr(self.instance, field_name, None)
+                if manager is not None and hasattr(manager, "values_list"):
+                    current_ids = {
+                        str(pk) for pk in manager.values_list("pk", flat=True)
+                    }
             for item in value:
-                if str(item.id) not in accessible_ids:
+                if (
+                    str(item.id) not in accessible_ids
+                    and str(item.id) not in current_ids
+                ):
                     raise PermissionDenied(
                         {
                             field_name: f"You do not have permission to link to this {related_model._meta.model_name}"
