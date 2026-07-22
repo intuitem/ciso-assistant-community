@@ -712,7 +712,9 @@ def validate_related_content_sheet_from_name_key(wb: Workbook, df, sheet_name: s
 
 
 # Check that framework definition keys point to existing meta sheets.
-def _framework_validate_definition_keys(wb: Workbook, df: pd.DataFrame, sheet_name: str, definition_keys: List[str], context: str):
+def _framework_validate_definition_keys(wb: Workbook, df: pd.DataFrame, sheet_name: str, definition_keys: List[str]):
+
+    fct_name = get_current_fct_name()
 
     for def_key in definition_keys:
         matches = df[df.iloc[:, 0] == def_key]
@@ -730,13 +732,15 @@ def _framework_validate_definition_keys(wb: Workbook, df: pd.DataFrame, sheet_na
         row = matches.index[0] + 1
         sheet_type = def_key.removesuffix("_definition")
         raise ValueError(
-            f"({context}) [{sheet_name}] Row #{row}: Key \"{def_key}\" points to missing sheet starting with \"{value}\" (Missing \"{expected_sheet}\")"
+            f"({fct_name}) [{sheet_name}] Row #{row}: Key \"{def_key}\" points to missing sheet starting with \"{value}\" (Missing \"{expected_sheet}\")"
             f"\n> 💡 Tip: Make sure \"{sheet_type}\" sheets start with \"{value}\", set the right value for key \"{def_key}\" or simply remove the key \"{def_key}\"."
         )
 
 
 # Validate optional framework score bounds and ensure min_score <= max_score.
-def _framework_validate_meta_min_max_score(df: pd.DataFrame, sheet_name: str, context: str):
+def _framework_validate_meta_min_max_score(df: pd.DataFrame, sheet_name: str):
+
+    fct_name = get_current_fct_name()
 
     min_score, min_score_row = get_meta_value(df, "min_score", sheet_name, with_row=True)
     max_score, max_score_row = get_meta_value(df, "max_score", sheet_name, with_row=True)
@@ -748,18 +752,18 @@ def _framework_validate_meta_min_max_score(df: pd.DataFrame, sheet_name: str, co
         missing_key = "min_score" if min_score is None else "max_score"
         present_key = "max_score" if min_score is None else "min_score"
         raise ValueError(
-            f"({context}) [{sheet_name}] Missing \"{missing_key}\": it is required when \"{present_key}\" is defined."
+            f"({fct_name}) [{sheet_name}] Missing \"{missing_key}\": it is required when \"{present_key}\" is defined."
             f"\n> 💡 Tip: Define both \"min_score\" and \"max_score\", or remove \"{present_key}\"."
         )
 
-    validate_integer_value(min_score, sheet_name, context=context, row=min_score_row, value_name="min_score", min=0)
-    validate_integer_value(max_score, sheet_name, context=context, row=max_score_row, value_name="max_score", min=0)
+    validate_integer_value(min_score, sheet_name, context=fct_name, row=min_score_row, value_name="min_score", min=0)
+    validate_integer_value(max_score, sheet_name, context=fct_name, row=max_score_row, value_name="max_score", min=0)
 
     min_score = int(min_score)
     max_score = int(max_score)
 
     if min_score > max_score:
-        raise ValueError(f"({context}) [{sheet_name}] Invalid score range: \"min_score\" ({min_score}) must be less than or equal to \"max_score\" ({max_score})")
+        raise ValueError(f"({fct_name}) [{sheet_name}] Invalid score range: \"min_score\" ({min_score}) must be less than or equal to \"max_score\" ({max_score})")
 
 
 
@@ -842,10 +846,10 @@ def validate_framework_meta(wb: Workbook, df, sheet_name: str, verbose: bool = F
     
     # Check that *_definition keys (if present) point to an existing *_meta sheet
     definition_keys = ["implementation_groups_definition", "answers_definition", "scores_definition"]
-    _framework_validate_definition_keys(wb, df, sheet_name, definition_keys, fct_name)
+    _framework_validate_definition_keys(wb, df, sheet_name, definition_keys)
         
     # Validate min_score and max_score if present
-    _framework_validate_meta_min_max_score(df, sheet_name, fct_name)
+    _framework_validate_meta_min_max_score(df, sheet_name)
 
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
@@ -1390,7 +1394,9 @@ def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column
 
 
 # Ensure that at least one implementation group marked as "default_selected" is used in a CONTENT framework sheet 
-def _implementation_groups_check_unused_default_ids_in_frameworks(wb: Workbook, df: pd.DataFrame, frameworks_sheet_names: List[str], sheet_name: str, context: str):
+def _implementation_groups_check_unused_default_ids_in_frameworks(wb: Workbook, df: pd.DataFrame, frameworks_sheet_names: List[str], sheet_name: str):
+
+    fct_name = get_current_fct_name()
 
     if "default_selected" not in df.columns:
         return
@@ -1402,12 +1408,12 @@ def _implementation_groups_check_unused_default_ids_in_frameworks(wb: Workbook, 
     if not default_selected_ids:
         return
 
-    unused_default_ids = check_unused_ids_in_frameworks(wb, default_selected_df, "ref_id", "implementation_groups", frameworks_sheet_names, sheet_name, context, emit_messages=False)
+    unused_default_ids = check_unused_ids_in_frameworks(wb, default_selected_df, "ref_id", "implementation_groups", frameworks_sheet_names, sheet_name, fct_name, emit_messages=False)
 
     if unused_default_ids == default_selected_ids:
         default_ids = ", ".join(f'"{_id}"' for _id in default_selected_ids)
         raise ValueError(
-            f'({context}) [{sheet_name}] None of the implementation groups marked as \"default_selected\" ({default_ids}) are used in a framework content sheet. '
+            f'({fct_name}) [{sheet_name}] None of the implementation groups marked as \"default_selected\" ({default_ids}) are used in a framework content sheet. '
             "This will result in an empty framework in CISO Assistant."
             '\n> 💡 Tip: Add at least one of these \"default_selected\" implementation groups to the "implementation_groups" column of your framework content sheet, or remove the "default_selected" column.'
         )
@@ -1686,7 +1692,9 @@ def _URN_prefix_check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFram
 
 
 # Check whether URN Prefix IDs are used in framework content sheets, or warn if that's not the case.
-def _URN_prefix_validate_ids_usage_in_frameworks(wb: Workbook, df: pd.DataFrame, sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False,):
+def _URN_prefix_validate_ids_usage_in_frameworks(wb: Workbook, df: pd.DataFrame, sheet_name: str, ctx: ConsoleContext = None, verbose: bool = False,):
+
+    fct_name = get_current_fct_name()
 
     # 1. Get "framework" content sheets
     framework_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.FRAMEWORK)
@@ -1694,11 +1702,11 @@ def _URN_prefix_validate_ids_usage_in_frameworks(wb: Workbook, df: pd.DataFrame,
 
     # 2. Check if every Prefix IDs are actually used in "framework" sheets
     if framework_sheets:
-        _URN_prefix_check_unused_ids_in_frameworks(wb, df, framework_sheets, sheet_name, context, ctx, verbose)
+        _URN_prefix_check_unused_ids_in_frameworks(wb, df, framework_sheets, sheet_name, fct_name, ctx, verbose)
         return
 
     msg = (
-        f"⚠️  [WARNING] ({context}) [{sheet_name}] This sheet is not used in any framework sheet"
+        f"⚠️  [WARNING] ({fct_name}) [{sheet_name}] This sheet is not used in any framework sheet"
         "\n> 💡 Tip: You can remove this sheet and its meta sheet if you are not using it"
     )
     print(msg)
@@ -1784,7 +1792,9 @@ def _URN_prefix_classify_prefix_usage(wb: Workbook, df_urn_prefix: pd.DataFrame,
 
 
 # Classify URN prefixes as internal or external and validate the required external library dependencies.
-def _URN_prefix_validate_prefix_values_and_dependencies(wb: Workbook, df: pd.DataFrame, sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False):
+def _URN_prefix_validate_prefix_values_and_dependencies(wb: Workbook, df: pd.DataFrame, sheet_name: str, ctx: ConsoleContext = None, verbose: bool = False):
+
+    fct_name = get_current_fct_name()
 
     # 1. Get "threats" meta sheets
     threats_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.THREATS)
@@ -1799,12 +1809,12 @@ def _URN_prefix_validate_prefix_values_and_dependencies(wb: Workbook, df: pd.Dat
     external_ref_ctrl = []
 
     if threats_sheets:
-        internal_threats, external_threats, _ = _URN_prefix_classify_prefix_usage(wb, df, threats_sheets, MetaTypes.THREATS, sheet_name, context, ctx)
+        internal_threats, external_threats, _ = _URN_prefix_classify_prefix_usage(wb, df, threats_sheets, MetaTypes.THREATS, sheet_name, fct_name, ctx)
     if ref_ctrl_sheets:
-        internal_ref_ctrl, external_ref_ctrl, _ = _URN_prefix_classify_prefix_usage(wb, df, ref_ctrl_sheets, MetaTypes.REFERENCE_CONTROLS, sheet_name, context, ctx)
+        internal_ref_ctrl, external_ref_ctrl, _ = _URN_prefix_classify_prefix_usage(wb, df, ref_ctrl_sheets, MetaTypes.REFERENCE_CONTROLS, sheet_name, fct_name, ctx)
 
     # Info messages for "threats" & "reference_controls"
-    print_info_about_internal_external_URN_prefix(sheet_name, internal_threats, external_threats, internal_ref_ctrl, external_ref_ctrl, context, verbose, ctx)
+    print_info_about_internal_external_URN_prefix(sheet_name, internal_threats, external_threats, internal_ref_ctrl, external_ref_ctrl, fct_name, verbose, ctx)
 
     ### 4. Check if external prefixes are declared in "dependencies" from "library_meta" ###
 
@@ -1834,12 +1844,12 @@ def _URN_prefix_validate_prefix_values_and_dependencies(wb: Workbook, df: pd.Dat
                 for row in rows if row and len(row) >= 2 and row[0] and row[1]
             }
         except Exception as e:
-            raise ValueError(f"({context}) [{sheet_name}] Could not read \"{MandatorySheets.LIBRARY_META.value}\" sheet: {e}")
+            raise ValueError(f"({fct_name}) [{sheet_name}] Could not read \"{MandatorySheets.LIBRARY_META.value}\" sheet: {e}")
 
         # 4. Ensure "dependencies" field exists and is non-empty
         if "dependencies" not in meta_dict or not meta_dict["dependencies"].strip():
             raise ValueError(
-                f"({context}) [{sheet_name}] \"{MandatorySheets.LIBRARY_META.value}\" is missing a non-empty \"dependencies\" field, "
+                f"({fct_name}) [{sheet_name}] \"{MandatorySheets.LIBRARY_META.value}\" is missing a non-empty \"dependencies\" field, "
                 f"required to declare external libraries: {', '.join(f'\"{d}\"' for d in required_dependencies)}"
             )
 
@@ -1857,7 +1867,7 @@ def _URN_prefix_validate_prefix_values_and_dependencies(wb: Workbook, df: pd.Dat
             ref_ctrl_list = ", ".join(f'"{r}"' for r in external_ref_ctrl)
 
             raise ValueError(
-                f"({context}) [{sheet_name}] Missing required dependencies in \"{MandatorySheets.LIBRARY_META.value}\": {missing_list}\n"
+                f"({fct_name}) [{sheet_name}] Missing required dependencies in \"{MandatorySheets.LIBRARY_META.value}\": {missing_list}\n"
                 f"> 💡 Tip: These are required due to the following external prefixes:\n"
                 f"   - External \"threats\": {threat_list or 'None'}\n"
                 f"   - External \"reference_controls\": {ref_ctrl_list or 'None'}"
@@ -1951,12 +1961,12 @@ def print_info_about_internal_external_URN_prefix(sheet_name: str, internal_thre
 
 
 # Check that each (source_node_id, target_node_id) pair is unique. Emits a warning or raises an error depending on "warn_only".
-def _req_map_set_validate_unique_mappings(df, sheet_name: str, context: str = None, warn_only: bool = False, ctx: ConsoleContext = None):
+def _req_map_set_validate_unique_mappings(df, sheet_name: str, warn_only: bool = False, ctx: ConsoleContext = None):
 
-    context = context or "validate_unique_mappings"
+    fct_name = get_current_fct_name()
 
     if "source_node_id" not in df.columns or "target_node_id" not in df.columns:
-        raise ValueError(f"({context}) [{sheet_name}] Columns \"source_node_id\" and/or \"target_node_id\" not found")
+        raise ValueError(f"({fct_name}) [{sheet_name}] Columns \"source_node_id\" and/or \"target_node_id\" not found")
 
     df_clean = df[["source_node_id", "target_node_id"]].dropna()
 
@@ -1975,7 +1985,7 @@ def _req_map_set_validate_unique_mappings(df, sheet_name: str, context: str = No
         quoted_pairs = '\n   - '.join(f'["{s}", "{t}"]' for s, t in duplicate_pairs)
 
         msg = (
-            f"({context}) [{sheet_name}] Duplicate mapping(s) found for [source_node_id + target_node_id] pair(s):\n   - {quoted_pairs}"
+            f"({fct_name}) [{sheet_name}] Duplicate mapping(s) found for [source_node_id + target_node_id] pair(s):\n   - {quoted_pairs}"
             f"\n> Rows: {', '.join(map(str, duplicate_rows))}"
         )
 
@@ -2120,7 +2130,9 @@ def _req_map_set_validate_mapping_node_ids_against_sheets(wb: Workbook, df: pd.D
 
 
 # Additional rule: for non-empty rows, at least "ref_id", "name" or "description" must be filled
-def _framework_validate_minimum_fields_and_ref_id(df: pd.DataFrame, sheet_name: str, context: str):
+def _framework_validate_minimum_fields_and_ref_id(df: pd.DataFrame, sheet_name: str):
+
+    fct_name = get_current_fct_name()
     
     empty_id_name_desc_rows = []
     invalid_ref_ids = []
@@ -2153,14 +2165,14 @@ def _framework_validate_minimum_fields_and_ref_id(df: pd.DataFrame, sheet_name: 
         # Check Ref. IDs
         if ref_id:
             try:
-                validate_ref_id(ref_id, context, idx) #_with_spaces(ref_id, context, idx)
+                validate_ref_id(ref_id, fct_name, idx) #_with_spaces(ref_id, fct_name, idx)
             except Exception as e:
                 invalid_ref_ids.append((ref_id, idx))
 
     # If any, returns an error and print rows with empty Ref. ID, Name and Description 
     if empty_id_name_desc_rows:
         raise ValueError(
-            f"({context}) [{sheet_name}] Invalid rows: \"ref_id\", \"name\" and \"description\" are empty :\n   - "
+            f"({fct_name}) [{sheet_name}] Invalid rows: \"ref_id\", \"name\" and \"description\" are empty :\n   - "
             + "\n   - ".join(f'Row #{idx + 2}' for idx in empty_id_name_desc_rows)
             + "\n> 💡 Tip: For each row, at least one of the values must be filled."
         )
@@ -2168,7 +2180,7 @@ def _framework_validate_minimum_fields_and_ref_id(df: pd.DataFrame, sheet_name: 
     # If any, returns an error and print invalid Ref. IDs
     if invalid_ref_ids:
         raise ValueError(
-            f"({context}) [{sheet_name}] Invalid Ref. IDs found. Only alphanumeric characters, '-', '_', ' ', and '.' are allowed :\n   - "
+            f"({fct_name}) [{sheet_name}] Invalid Ref. IDs found. Only alphanumeric characters, '-', '_', ' ', and '.' are allowed :\n   - "
             + "\n   - ".join(f'Row #{idx + 2}: {value}' for value, idx in invalid_ref_ids)
         )
 
@@ -2632,7 +2644,9 @@ def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, co
 
 
 # Ensure that choice-based question types have a non-empty "question_choices" value.
-def _answers_validate_question_choices(df: pd.DataFrame, sheet_name: str, context: str):
+def _answers_validate_question_choices(df: pd.DataFrame, sheet_name: str):
+
+    fct_name = get_current_fct_name()
 
     question_types_requiring_choices = {"unique_choice", "multiple_choice"}
     problematic_rows = []
@@ -2653,7 +2667,7 @@ def _answers_validate_question_choices(df: pd.DataFrame, sheet_name: str, contex
 
     if problematic_rows:
         raise ValueError(
-            f"({context}) [{sheet_name}] The field \"question_choices\" must not be empty for choice-based question types:\n   - "
+            f"({fct_name}) [{sheet_name}] The field \"question_choices\" must not be empty for choice-based question types:\n   - "
             + "\n   - ".join(f'Row #{row}: question_type "{question_type}"' for row, question_type in problematic_rows)
             + '\n> 💡 Tip: Fill "question_choices" for every "unique_choice" and "multiple_choice" question.'
         )
@@ -2795,9 +2809,11 @@ def validate_min_max_columns(df: pd.DataFrame, min_column: str, max_column: str,
 
 
 # Validate that framework depths start at 1 and never increase by more than one level at a time.
-def _framework_validate_depth_consistency(df: pd.DataFrame, sheet_name: str, context: str):
+def _framework_validate_depth_consistency(df: pd.DataFrame, sheet_name: str):
 
-    validate_integer_value(df, sheet_name, "depth", context, value_name="depth", positive_only=True)
+    fct_name = get_current_fct_name()
+
+    validate_integer_value(df, sheet_name, "depth", fct_name, value_name="depth", positive_only=True)
 
     depth_values = df["depth"].dropna().astype(str).map(str.strip)
     depth_values = depth_values[depth_values != ""]     # Remove empty values
@@ -2821,7 +2837,7 @@ def _framework_validate_depth_consistency(df: pd.DataFrame, sheet_name: str, con
 
     if errors:
         raise ValueError(
-            f'({context}) [{sheet_name}] Inconsistent "depth" values:\n   - '
+            f'({fct_name}) [{sheet_name}] Inconsistent "depth" values:\n   - '
             + "\n   - ".join(errors)
             + '\n> 💡 Tip: Start with "depth" = 1, then keep the same depth, increase it by 1, or use any lower positive depth.'
         )
@@ -2844,7 +2860,7 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
 
     # Check the consistency of the "depth" hierarchy
-    _framework_validate_depth_consistency(df, sheet_name, fct_name)
+    _framework_validate_depth_consistency(df, sheet_name)
 
     # Check that "questions" and "answer" appear together, or not at all
     question_answer_column_names = ["questions", "answer"]
@@ -2863,7 +2879,7 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
 
 
     # Additional rule: for non-empty rows, at least "ref_id", "name" or "description" must be filled
-    _framework_validate_minimum_fields_and_ref_id(df, sheet_name, fct_name)
+    _framework_validate_minimum_fields_and_ref_id(df, sheet_name)
     
     # Ensure that the number of "questions" and "answer" entries match per row (1 or same count), or both are empty
     validate_cell_line_count_alignment(df, "questions", "answer", sheet_name, fct_name, ref_line_break_indicator=CommonLineBreakIndicator.PIPE)
@@ -3013,7 +3029,7 @@ def validate_implementation_groups_content(wb: Workbook, df, sheet_name, verbose
 
     # Check if every implementation groups are actually used in "framework" sheets
     if frameworks_with_imp_grp:
-        _implementation_groups_check_unused_default_ids_in_frameworks(wb, df, frameworks_with_imp_grp, sheet_name, fct_name)
+        _implementation_groups_check_unused_default_ids_in_frameworks(wb, df, frameworks_with_imp_grp, sheet_name)
         check_unused_ids_in_frameworks(wb, df, "ref_id", "implementation_groups", frameworks_with_imp_grp, sheet_name, fct_name, ctx, verbose)
 
     print_sheet_validation(sheet_name, verbose, ctx)
@@ -3037,7 +3053,7 @@ def validate_requirement_mapping_set_content(wb: Workbook, df, sheet_name, verbo
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
 
     # Check if there are duplicated mappings
-    _req_map_set_validate_unique_mappings(df, sheet_name, fct_name, ctx=ctx)
+    _req_map_set_validate_unique_mappings(df, sheet_name, ctx=ctx)
 
     # Check if values in "relationship" and "rationale" columns are valid
     validate_allowed_column_values(df, "relationship", relationship_values, sheet_name, fct_name,ctx=ctx)
@@ -3097,7 +3113,7 @@ def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
 
     # Check that "question_choices" is filled for relevant question types ("unique_choice" & "multiple_choice")
-    _answers_validate_question_choices(df, sheet_name, fct_name)
+    _answers_validate_question_choices(df, sheet_name)
 
     # Check if the "answers" sheet is actually used in a "framework" sheet
     frameworks_with_answers = check_content_sheet_usage_in_frameworks(wb, sheet_name, "answers_definition", fct_name, ctx)
@@ -3123,10 +3139,10 @@ def validate_urn_prefix_content(wb: Workbook, df: pd.DataFrame, sheet_name, verb
     validate_unique_column_values(df, ["prefix_id", "prefix_value"], sheet_name, fct_name, ctx=ctx)
 
     # Check if URN Prefix IDs are used in "framework" sheets
-    _URN_prefix_validate_ids_usage_in_frameworks(wb, df, sheet_name, fct_name, ctx, verbose)
+    _URN_prefix_validate_ids_usage_in_frameworks(wb, df, sheet_name, ctx, verbose)
 
     # Check if "prefix_value" come from internal sheets or external framework
-    _URN_prefix_validate_prefix_values_and_dependencies(wb, df, sheet_name, fct_name, ctx, verbose)
+    _URN_prefix_validate_prefix_values_and_dependencies(wb, df, sheet_name, ctx, verbose)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
