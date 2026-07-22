@@ -19707,6 +19707,21 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             "reviewer_only": True,
             "observation": "clear",
         },
+        # Reviewers can send an assignment back to draft from any non-editable
+        # status to unlock it for editing (e.g. reassigning to another actor),
+        # since update/partial_update/destroy are only allowed in EDITABLE_STATUSES.
+        ("submitted", "draft"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("changes_requested", "draft"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("closed", "draft"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
     }
 
     @action(detail=True, methods=["post"], url_path="set_status")

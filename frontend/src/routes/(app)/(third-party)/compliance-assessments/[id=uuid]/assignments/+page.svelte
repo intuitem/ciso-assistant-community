@@ -1001,6 +1001,7 @@
 										assignment.status === 'draft' ||
 										assignment.status === 'submitted' ||
 										assignment.status === 'closed' ||
+										assignment.status === 'changes_requested' ||
 										canModifyAssignment(assignment.status)}
 									{#if hasActions}
 										<div
@@ -1043,6 +1044,16 @@
 												>
 													<i class="fa-solid fa-lock-open mr-1"></i>
 													{m.reopenAssignment()}
+												</button>
+											{/if}
+											{#if assignment.status === 'submitted' || assignment.status === 'changes_requested' || assignment.status === 'closed'}
+												<button
+													class="btn btn-sm preset-tonal text-xs"
+													onclick={() => handleSetStatus(assignment.id, 'draft')}
+													title={m.reopenAssignmentForEditing()}
+												>
+													<i class="fa-solid fa-pen-to-square mr-1"></i>
+													{m.reopenAssignmentForEditing()}
 												</button>
 											{/if}
 
