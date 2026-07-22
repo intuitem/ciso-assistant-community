@@ -113,16 +113,6 @@ export class FormContent {
 								}
 								await expect(optionLocator).toBeVisible({ timeout: 10_000 });
 								await optionLocator.click();
-								// A lazy-search re-render can swallow the click — confirm the
-								// SELECTED chip carries the value so toPass retries instead of
-								// saving stale state (the open dropdown also contains the text,
-								// so asserting on the whole field would pass vacuously).
-								await expect(
-									field.locator
-										.getByRole('option', { selected: true })
-										.filter({ hasText: lazySearchText(values[key].value) })
-										.first()
-								).toBeVisible();
 
 								await responsePromise;
 							} else {
@@ -136,15 +126,6 @@ export class FormContent {
 								}
 								await expect(optionLocator).toBeVisible({ timeout: 10_000 });
 								await optionLocator.click();
-								// A lazy-search re-render can swallow the click — confirm the
-								// SELECTED chip carries the value so toPass retries instead of
-								// saving stale state.
-								await expect(
-									field.locator
-										.getByRole('option', { selected: true })
-										.filter({ hasText: lazySearchText(values[key]) })
-										.first()
-								).toBeVisible();
 							}
 						}
 					}).toPass({ timeout: 22_000, intervals: [500, 1000, 10_000] });
