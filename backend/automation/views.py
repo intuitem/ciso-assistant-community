@@ -956,7 +956,9 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         requirement = RequirementNode.objects.filter(
             id=request.data.get("requirement"), framework=assessment.framework
         ).first()
-        asset = assessment.assets.filter(id=request.data.get("asset")).first()
+        asset = assessment.assets.filter(
+            id=request.data.get("asset"), id__in=self._viewable_asset_ids()
+        ).first()
         if requirement is None or asset is None:
             return Response(
                 {"error": "requirement and asset must belong to the assessment"},
