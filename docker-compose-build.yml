@@ -5,7 +5,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       args:
-        PYTHON_IMAGE: ${PYTHON_IMAGE:-python:3.14-slim}
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-dhi.io/python:3.14-dev}
     restart: always
     environment:
       - ALLOWED_HOSTS=backend,localhost
@@ -34,7 +34,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       args:
-        PYTHON_IMAGE: ${PYTHON_IMAGE:-python:3.14-slim}
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-dhi.io/python:3.14-dev}
     depends_on:
       - backend
     restart: always
