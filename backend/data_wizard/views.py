@@ -20,11 +20,14 @@ from core.models import (
     ComplianceAssessment,
     Evidence,
     Folder,
+    Framework,
+    LoadedLibrary,
     Perimeter,
     RequirementAssessment,
     RequirementNode,
     RiskAssessment,
     RiskMatrix,
+    StoredLibrary,
     AppliedControl,
     FindingsAssessment,
     RiskScenario,
@@ -81,7 +84,14 @@ from .egerie_xml_helpers import (
     map_egerie_status,
 )
 from core.models import Terminology
+from core.utils import AUDITOR_ONLY
 from data_wizard.arm_helpers import process_arm_file
+from data_wizard.cyfun_helpers import (
+    CYFUN_FRAMEWORK_URN,
+    CYFUN_LIBRARY_URN,
+    LEVEL_TO_GROUP,
+    process_cyfun_file,
+)
 from tprm.models import Entity, Solution, Contract, Representative
 from tprm.serializers import (
     EntityWriteSerializer,
@@ -443,6 +453,7 @@ class ModelType(enum.StrEnum):
     PERIMETER = "Perimeter"
     USER = "User"
     COMPLIANCE_ASSESSMENT = "ComplianceAssessment"
+    CYFUN_ASSESSMENT = "CyFunAssessment"
     FINDINGS_ASSESSMENT = "FindingsAssessment"
     RISK_ASSESSMENT = "RiskAssessment"
     ELEMENTARY_ACTION = "ElementaryAction"
@@ -3442,6 +3453,11 @@ class LoadFileView(APIView):
                             .process_records(df.to_dict(orient="records"))
                             .to_dict()
                         )
+                # Special handling for the official CyFun self-assessment workbook
+                case ModelType.CYFUN_ASSESSMENT:
+                    res = self._process_cyfun_assessment(
+                        request, record_file, folder_id, perimeter_id
+                    )
                 # Special handling for Processing multi-sheet import (record + sub-objects)
                 case ModelType.PROCESSING:
                     if is_excel_file(record_file):
@@ -3759,6 +3775,82 @@ class LoadFileView(APIView):
             )
 
         return results
+
+    def _process_cyfun_assessment(self, request, record_file, folder_id, perimeter_id):
+        results = {"successful": 0, "failed": 0, "errors": []}
+
+        def fail(code):
+            results["failed"] += 1
+            results["errors"].append({"error": code})
+            return results
+
+        try:
+            parsed = process_cyfun_file(record_file.getvalue())
+        except ValueError as e:
+            return fail(e.args[0] if e.args else "UnrecognizedCyfunWorkbook")
+
+        if not LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).exists():
+            stored_library = StoredLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
+            if stored_library is None:
+                return fail("CyfunLibraryNotFound")
+            error = stored_library.load()
+            if error is not None:
+                logger.error("CyFun library import failed", error=error)
+                return fail("CyfunLibraryImportFailed")
+        try:
+            framework = Framework.objects.get(urn=CYFUN_FRAMEWORK_URN)
+        except Framework.DoesNotExist:
+            return fail("CyfunFrameworkNotFound")
+
+        perimeter = None
+        if perimeter_id is not None:
+            try:
+                perimeter = Perimeter.objects.get(id=perimeter_id)
+            except Perimeter.DoesNotExist:
+                return fail(f"Perimeter with ID {perimeter_id} does not exist")
+        if perimeter is not None:
+            folder_id = perimeter.folder.id
+        elif folder_id is None:
+            results["failed"] += 1
+            results["errors"].append(
+                {"error": "A folder must be specified when there's no perimeter!"}
+            )
+            return results
+
+        assessment_data = {
+            "name": resolve_container_name(request, "CyFun_Assessment"),
+            "perimeter": perimeter_id,
+            "framework": framework.id,
+            "folder": folder_id,
+            "score_calculation_method": ComplianceAssessment.CalculationMethod.AVG_OF_AVG,
+            "field_visibility": {
+                "score": dict(AUDITOR_ONLY),
+                "is_scored": dict(AUDITOR_ONLY),
+                "documentation_score": dict(AUDITOR_ONLY),
+            },
+        }
+        level = parsed["assurance_level"]
+        if level:
+            assessment_data["selected_implementation_groups"] = [LEVEL_TO_GROUP[level]]
+
+        serializer = ComplianceAssessmentWriteSerializer(
+            data=assessment_data, context={"request": request}
+        )
+        try:
+            serializer.is_valid(raise_exception=True)
+            compliance_assessment = serializer.save()
+            compliance_assessment.create_requirement_assessments()
+        except Exception as e:
+            logger.error("Failed to create CyFun compliance assessment", error=e)
+            return fail("CyfunAssessmentCreationFailed")
+        logger.info(
+            "Created CyFun compliance assessment",
+            id=compliance_assessment.id,
+            assurance_level=level,
+        )
+        return self._reconcile_compliance_requirements(
+            request, parsed["records"], compliance_assessment, framework.id, results
+        )
 
     @staticmethod
     def _resolve_summary_row_template(
