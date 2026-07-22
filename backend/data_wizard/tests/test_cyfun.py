@@ -179,6 +179,17 @@ class TestProcessCyfunFile:
         )
         assert parsed["records"][1]["compliance_result"] == "not_applicable"
 
+    def test_rejects_workbook_with_unrecognized_sheet_headers(self):
+        content = build_workbook(
+            {"GOVERN": [{6: "GV.RM-01.1: Objectives.", 7: 1, 8: 1}]}
+        )
+        wb = openpyxl.load_workbook(io.BytesIO(content))
+        wb["PROTECT"].cell(2, 6, "Exigence")
+        buf = io.BytesIO()
+        wb.save(buf)
+        with pytest.raises(ValueError, match="UnrecognizedCyfunWorkbook"):
+            process_cyfun_file(buf.getvalue())
+
     def test_rejects_2023_workbook(self):
         wb = openpyxl.Workbook()
         wb.active.title = "BASIC Details"
@@ -261,6 +272,7 @@ class TestCyfunEndpoint:
         assert ca.scoring_enabled
         assert ca.show_documentation_score
         assert ca.min_score == 1 and ca.max_score == 5
+        assert ca.score_calculation_method == "average_of_averages"
 
         scored = RequirementAssessment.objects.get(
             compliance_assessment=ca, requirement__ref_id="GV.OC-01.1"

@@ -81,7 +81,7 @@ def process_cyfun_file(file_content: bytes) -> dict:
         sheet = workbook[sheet_name]
         cols = _detect_columns(sheet)
         if cols is None:
-            continue
+            raise ValueError("UnrecognizedCyfunWorkbook")
         if level is None:
             marker = str(sheet.cell(1, cols["doc_score"]).value or "").strip().lower()
             if marker in LEVELS:

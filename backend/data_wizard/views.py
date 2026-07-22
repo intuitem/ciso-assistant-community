@@ -3797,7 +3797,10 @@ class LoadFileView(APIView):
             if error is not None:
                 logger.error("CyFun library import failed", error=error)
                 return fail("CyfunLibraryImportFailed")
-        framework = Framework.objects.get(urn=CYFUN_FRAMEWORK_URN)
+        try:
+            framework = Framework.objects.get(urn=CYFUN_FRAMEWORK_URN)
+        except Framework.DoesNotExist:
+            return fail("CyfunFrameworkNotFound")
 
         perimeter = None
         if perimeter_id is not None:
@@ -3819,6 +3822,7 @@ class LoadFileView(APIView):
             "perimeter": perimeter_id,
             "framework": framework.id,
             "folder": folder_id,
+            "score_calculation_method": ComplianceAssessment.CalculationMethod.AVG_OF_AVG,
             "field_visibility": {
                 "score": dict(AUDITOR_ONLY),
                 "is_scored": dict(AUDITOR_ONLY),
@@ -3832,9 +3836,13 @@ class LoadFileView(APIView):
         serializer = ComplianceAssessmentWriteSerializer(
             data=assessment_data, context={"request": request}
         )
-        serializer.is_valid(raise_exception=True)
-        compliance_assessment = serializer.save()
-        compliance_assessment.create_requirement_assessments()
+        try:
+            serializer.is_valid(raise_exception=True)
+            compliance_assessment = serializer.save()
+            compliance_assessment.create_requirement_assessments()
+        except Exception as e:
+            logger.error("Failed to create CyFun compliance assessment", error=e)
+            return fail("CyfunAssessmentCreationFailed")
         logger.info(
             "Created CyFun compliance assessment",
             id=compliance_assessment.id,
