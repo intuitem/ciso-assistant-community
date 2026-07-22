@@ -86,9 +86,12 @@ class PostureAssessmentViewSet(BaseModelViewSet):
             )
             if measured:
                 names = ", ".join(
-                    Asset.objects.filter(id__in=measured).values_list("name", flat=True)
+                    Asset.objects.filter(
+                        id__in=measured & set(self._viewable_asset_ids())
+                    ).values_list("name", flat=True)
                 )
-                return f"cannot remove assets with recorded results: {names}"
+                message = "cannot remove assets with recorded results"
+                return f"{message}: {names}" if names else message
         return None
 
     @staticmethod

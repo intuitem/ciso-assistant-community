@@ -61,6 +61,29 @@ class PostureAssessmentWriteSerializer(BaseModelSerializer):
             instance.save(update_fields=["follow_up_assessment"])
         return instance
 
+    def _viewable_asset_ids(self):
+        request = self.context.get("request")
+        if request is None:
+            return None
+        return set(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, Asset
+            )[0]
+        )
+
+    def validate_assets(self, assets):
+        viewable = self._viewable_asset_ids()
+        if viewable is None:
+            return assets
+        current = (
+            set(self.instance.assets.values_list("id", flat=True))
+            if self.instance
+            else set()
+        )
+        if any(a.id not in viewable and a.id not in current for a in assets):
+            raise serializers.ValidationError("permission denied to add this asset")
+        return assets
+
     def update(self, instance, validated_data):
         validated_data.pop("create_follow_up_assessment", None)
         if "assets" in validated_data:
@@ -71,11 +94,15 @@ class PostureAssessmentWriteSerializer(BaseModelSerializer):
             )
             dropped = (current & measured) - kept
             if dropped:
+                viewable = self._viewable_asset_ids()
+                if viewable is not None:
+                    dropped &= viewable
                 names = ", ".join(
                     Asset.objects.filter(id__in=dropped).values_list("name", flat=True)
                 )
+                message = "cannot remove assets with recorded results"
                 raise serializers.ValidationError(
-                    {"assets": f"cannot remove assets with recorded results: {names}"}
+                    {"assets": f"{message}: {names}" if names else message}
                 )
         return super().update(instance, validated_data)
 
