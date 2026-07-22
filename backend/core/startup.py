@@ -69,6 +69,8 @@ READER_PERMISSIONS_LIST = [
     "view_securityexception",
     "view_finding",
     "view_findingsassessment",
+    "view_postureassessment",
+    "view_postureresult",
     "view_incident",
     "view_timelineentry",
     "view_comment",
@@ -199,6 +201,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_securityexception",
     "view_finding",
     "view_findingsassessment",
+    "view_postureassessment",
+    "view_postureresult",
     "view_incident",
     "view_timelineentry",
     "view_tasknode",
@@ -414,6 +418,14 @@ ANALYST_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "change_findingsassessment",
     "delete_findingsassessment",
+    "add_postureassessment",
+    "view_postureassessment",
+    "change_postureassessment",
+    "delete_postureassessment",
+    "add_postureresult",
+    "view_postureresult",
+    "change_postureresult",
+    "delete_postureresult",
     "add_incident",
     "view_incident",
     "change_incident",
@@ -835,6 +847,14 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "change_findingsassessment",
     "delete_findingsassessment",
+    "add_postureassessment",
+    "view_postureassessment",
+    "change_postureassessment",
+    "delete_postureassessment",
+    "add_postureresult",
+    "view_postureresult",
+    "change_postureresult",
+    "delete_postureresult",
     "add_incident",
     "view_incident",
     "change_incident",
@@ -1363,6 +1383,14 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "change_findingsassessment",
     "delete_findingsassessment",
+    "add_postureassessment",
+    "view_postureassessment",
+    "change_postureassessment",
+    "delete_postureassessment",
+    "add_postureresult",
+    "view_postureresult",
+    "change_postureresult",
+    "delete_postureresult",
     # privacy,
     "add_processing",
     "change_processing",
@@ -1671,6 +1699,32 @@ AUDITEE_PERMISSIONS_LIST = [
 ]
 
 
+TECHNICAL_TESTER_PERMISSIONS_LIST = [
+    "add_postureassessment",
+    "view_postureassessment",
+    "change_postureassessment",
+    "delete_postureassessment",
+    "add_postureresult",
+    "view_postureresult",
+    "change_postureresult",
+    "delete_postureresult",
+    "view_asset",
+    "view_framework",
+    "view_requirementnode",
+    "view_folder",
+    "view_perimeter",
+    "view_securityexception",
+    "add_findingsassessment",
+    "view_findingsassessment",
+    "change_findingsassessment",
+    "delete_findingsassessment",
+    "add_finding",
+    "view_finding",
+    "change_finding",
+    "delete_finding",
+]
+
+
 def ensure_admin_user():
     """Ensure the designated superuser exists and is in the admin group.
 
@@ -1768,9 +1822,15 @@ def startup(sender=None, **kwargs):
             THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST,
         ),
         (RoleCodename.AUDITEE.value, AUDITEE_PERMISSIONS_LIST),
+        (RoleCodename.TECHNICAL_TESTER.value, TECHNICAL_TESTER_PERMISSIONS_LIST),
     ):
         role, _ = Role.objects.get_or_create(name=name, builtin=True)
         role.permissions.set(Permission.objects.filter(codename__in=perm_list))
+    # backfill builtin groups (e.g. technical tester) on pre-existing domains
+    for folder in Folder.objects.filter(
+        content_type=Folder.ContentType.DOMAIN, create_iam_groups=True
+    ):
+        Folder.create_default_ug_and_ra(folder)
     # if global administrators user group does not exist, then create it
     if not UserGroup.objects.filter(
         name="BI-UG-ADM", folder=Folder.get_root_folder()

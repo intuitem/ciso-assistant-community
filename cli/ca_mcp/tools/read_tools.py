@@ -1036,8 +1036,11 @@ async def get_requirement_assessments(
             return "No requirement assessments found"
 
         result = f"Found {len(req_assessments)} requirement assessments\n\n"
-        result += "|ID|Ref|Description|Requirement|Assessment|Status|Result|\n"
-        result += "|---|---|---|---|---|---|---|\n"
+        result += "|ID|Ref|Description|Requirement|Assessment|Status|Result|Scored|Score|DocScore|TargetScore|\n"
+        result += "|---|---|---|---|---|---|---|---|---|---|---|\n"
+
+        def _fmt(value):
+            return "N/A" if value is None else value
 
         for req in req_assessments:
             req_id = req.get("id", "N/A")
@@ -1049,8 +1052,15 @@ async def get_requirement_assessments(
             )[:20]
             status = req.get("status", "N/A")
             result_val = req.get("result", "N/A")
+            is_scored = req.get("is_scored", False)
+            score = _fmt(req.get("score"))
+            documentation_score = _fmt(req.get("documentation_score"))
+            target_score = _fmt(req.get("target_score"))
 
-            result += f"|{req_id}|{req_ref_id}|{description}|{requirement}|{comp_assessment}|{status}|{result_val}|\n"
+            result += (
+                f"|{req_id}|{req_ref_id}|{description}|{requirement}|{comp_assessment}"
+                f"|{status}|{result_val}|{is_scored}|{score}|{documentation_score}|{target_score}|\n"
+            )
 
         return result
     except Exception as e:

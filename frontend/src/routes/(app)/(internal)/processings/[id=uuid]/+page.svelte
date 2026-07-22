@@ -50,6 +50,14 @@
 <DetailView {data}>
 	{#snippet actions()}
 		<div class="flex flex-col space-y-2">
+			<a
+				href="/processings/{processing.id}/export/xlsx"
+				class="btn preset-filled-primary-500 h-fit"
+				data-testid="export-processing-button"
+			>
+				<i class="fa-solid fa-download mr-2"></i>
+				{m.exportButton()} XLSX
+			</a>
 			{#if page.data?.featureflags?.validation_flows}
 				<button
 					class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
