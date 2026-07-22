@@ -49,7 +49,7 @@ What counts as **assessed** depends on which fields the audit exposes to the aud
   - otherwise, when the **result** is visible, as soon as it leaves the default **Not assessed** state (**Compliant**, **Partially compliant**, **Non compliant**, or **Not applicable**);
   - otherwise, for **scoring-only** audits, when the score is _strictly above_ the applicable minimum of the scale.
 
-The score threshold matters: enabling scoring pre-fills every requirement at the scale minimum, so a bare minimum score is treated as "not touched yet" and does **not** count. Only a score genuinely moved above the minimum counts as assessed, which stops empty maturity- or scoring-only audits from showing 100%.
+Enabling scoring pre-fills every requirement at the scale minimum, so a bare minimum score is treated as "not touched yet" and does **not** count. Only a score genuinely moved above the minimum counts as assessed, which stops empty maturity- or scoring-only audits from showing 100%.
 
 In other words, **progress is an auditing-activity signal, not a compliance signal**. An audit can be 100% _in progress_ and still be largely non-compliant — the column tells you the team has gone through every requirement and reached a verdict, not that the verdicts are good. The actual compliance picture lives in the donut and score read-outs computed from the [compliance result](#compliance-result) below.
 
