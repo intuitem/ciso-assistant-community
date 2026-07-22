@@ -31,7 +31,7 @@ from ebios_rm.models import ElementaryAction
 from iam.models import Folder, User
 from privacy.models import Processing
 from resilience.models import BusinessImpactAnalysis
-from tprm.models import Contract, Entity, Solution
+from tprm.models import Contract, Entity, Representative, Solution
 
 
 URL = "/api/data-wizard/load-file/"
@@ -367,6 +367,7 @@ class TestMultiSheetTemplates:
         assert results["entities"]["successful"] == 3
         assert results["solutions"]["successful"] == 3
         assert results["contracts"]["successful"] == 3
+        assert results["representatives"]["successful"] == 3
         parent = Entity.objects.get(ref_id="ENT-001")
         assert parent.name == "ACME Corporation"
         europe = Entity.objects.get(ref_id="ENT-002")
@@ -375,6 +376,12 @@ class TestMultiSheetTemplates:
         assert sol.provider_entity == Entity.objects.get(ref_id="ENT-003")
         contract = Contract.objects.get(ref_id="CON-001")
         assert sol in contract.solutions.all()
+        marie = Representative.objects.get(email="marie.durand@techvendor.com")
+        assert marie.first_name == "Marie"
+        assert marie.entity == Entity.objects.get(ref_id="ENT-003")
+        alexandre = Representative.objects.get(email="alexandre.morel@acmecorp.com")
+        assert alexandre.role == "Security Coordinator"
+        assert alexandre.entity == parent
 
 
 @pytest.mark.django_db

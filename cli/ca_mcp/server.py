@@ -37,6 +37,7 @@ from .tools.read_tools import (
 from .tools.analysis_tools import (
     get_all_audits_with_metrics,
     get_audit_gap_analysis,
+    get_audit_global_score,
 )
 
 from .tools.library_tools import (
@@ -163,6 +164,7 @@ mcp.tool()(get_users)
 
 mcp.tool()(get_all_audits_with_metrics)
 mcp.tool()(get_audit_gap_analysis)
+mcp.tool()(get_audit_global_score)
 
 mcp.tool()(get_stored_libraries)
 mcp.tool()(get_loaded_libraries)

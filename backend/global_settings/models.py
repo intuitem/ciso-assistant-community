@@ -1,5 +1,6 @@
 import ipaddress
 
+from auditlog.registry import auditlog
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -60,3 +61,14 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
     def get_daily_rate(cls) -> float:
         gs = cls.objects.filter(name="general").only("value").first()
         return gs.value.get("daily_rate", 500) if gs else 500
+
+
+# value holds all settings/flags; masked to scrub secrets while keeping the diff.
+# ssosettings is the reverse MTI relation to the unmanaged SSOSettings child;
+# tracking it makes auditlog query its non-existent table on create/delete.
+auditlog.register(
+    GlobalSettings,
+    exclude_fields=["created_at", "updated_at", "is_published", "ssosettings"],
+    mask_fields=["value"],
+    mask_callable="global_settings.utils.mask_sensitive_settings",
+)

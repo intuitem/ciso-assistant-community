@@ -1,4 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from core.models import OrganisationObjective
@@ -17,6 +18,25 @@ from metrology.builtin_metrics import get_available_metrics_for_model
 
 # MetricDefinition serializers
 class MetricDefinitionWriteSerializer(BaseModelSerializer):
+    def validate_choices_definition(self, value):
+        if value is None:
+            return value
+
+        if isinstance(value, list):
+            for choice in value:
+                if not isinstance(choice, dict):
+                    raise serializers.ValidationError(
+                        _("Each choice definition must include a non-empty REF_ID.")
+                    )
+
+                ref_id = choice.get("ref_id")
+                if not isinstance(ref_id, str) or not ref_id.strip():
+                    raise serializers.ValidationError(
+                        _("Each choice definition must include a non-empty REF_ID.")
+                    )
+
+        return value
+
     class Meta:
         model = MetricDefinition
         exclude = ["translations"]

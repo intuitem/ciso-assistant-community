@@ -181,6 +181,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "enforce_mfa": False,
             "default_language": "en",
             "default_custom_analytics_dashboard": None,
+            "default_packager": "custom",
             "disable_partially_compliant_result": False,
         }
 

@@ -290,6 +290,16 @@
 		bind:cachedValue={formDataCache['findings_assessment']}
 		label={m.findingsAssessment()}
 	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="findings"
+		optionsExtraFields={[['folder', 'str']]}
+		field="findings"
+		cacheLock={cacheLocks['findings']}
+		bind:cachedValue={formDataCache['findings']}
+		label={m.findings()}
+	/>
 	<MarkdownField
 		{form}
 		field="observation"

@@ -42,14 +42,20 @@ class IntegrationProvider:
         return self.orchestrator_class(configuration)
 
     def create_client(
-        self, configuration: IntegrationConfiguration
+        self,
+        configuration: IntegrationConfiguration,
+        model_key: str = "applied_control",
     ) -> BaseIntegrationClient:
         """Create a client instance for this provider"""
-        return self.client_class(configuration)
+        return self.client_class(configuration, model_key)
 
-    def create_mapper(self, configuration: IntegrationConfiguration) -> BaseFieldMapper:
+    def create_mapper(
+        self,
+        configuration: IntegrationConfiguration,
+        model_key: str = "applied_control",
+    ) -> BaseFieldMapper:
         """Create a mapper instance for this provider"""
-        return self.mapper_class(configuration)
+        return self.mapper_class(configuration, model_key)
 
     def validate_configuration(self, config: dict) -> tuple[bool, list[str]]:
         """Validate configuration against schema
@@ -194,9 +200,11 @@ class IntegrationRegistry:
 
     @classmethod
     def get_client(
-        cls, configuration: IntegrationConfiguration
+        cls,
+        configuration: IntegrationConfiguration,
+        model_key: str = "applied_control",
     ) -> BaseIntegrationClient:
-        """Get a client instance for a configuration"""
+        """Get a client instance for a configuration (bound to a model)"""
         if hasattr(configuration, "provider"):
             provider_name = configuration.provider.name
         else:
@@ -206,11 +214,15 @@ class IntegrationRegistry:
         if not provider:
             raise ValueError(f"Provider {provider_name} is not registered")
 
-        return provider.create_client(configuration)
+        return provider.create_client(configuration, model_key)
 
     @classmethod
-    def get_mapper(cls, configuration: IntegrationConfiguration) -> BaseFieldMapper:
-        """Get a mapper instance for a configuration"""
+    def get_mapper(
+        cls,
+        configuration: IntegrationConfiguration,
+        model_key: str = "applied_control",
+    ) -> BaseFieldMapper:
+        """Get a mapper instance for a configuration (bound to a model)"""
         if hasattr(configuration, "provider"):
             provider_name = configuration.provider.name
         else:
@@ -220,7 +232,7 @@ class IntegrationRegistry:
         if not provider:
             raise ValueError(f"Provider {provider_name} is not registered")
 
-        return provider.create_mapper(configuration)
+        return provider.create_mapper(configuration, model_key)
 
     @classmethod
     def validate_configuration(

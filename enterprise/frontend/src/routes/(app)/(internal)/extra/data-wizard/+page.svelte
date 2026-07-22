@@ -120,6 +120,11 @@
 			description: m.ebiosRMStudyExcelDescription()
 		},
 		{
+			id: 'TaskTemplate',
+			label: m.taskTemplates(),
+			description: m.taskTemplatesDescription()
+		},
+		{
 			id: 'EbiosRMStudyEgerieXML',
 			label: m.ebiosRMStudyEgerieXML(),
 			description: m.ebiosRMStudyEgerieXMLDescription()
@@ -129,8 +134,10 @@
 	// Per-model accepted file extensions. Most importers consume Excel;
 	// Egerie ships an XML export, hence the explicit branch.
 	const XML_MODELS = new Set(['EbiosRMStudyEgerieXML']);
+	const CSV_CAPABLE_MODELS = new Set(['TaskTemplate']);
 	function extensionsFor(modelId: string): string[] {
 		if (XML_MODELS.has(modelId)) return ['.xml'];
+		if (CSV_CAPABLE_MODELS.has(modelId)) return ['.xls', '.xlsx', '.csv'];
 		return ['.xls', '.xlsx'];
 	}
 
@@ -190,6 +197,7 @@
 		'TPRM',
 		'EbiosRMStudyARM',
 		'EbiosRMStudyExcel',
+		'TaskTemplate',
 		'EbiosRMStudyEgerieXML',
 		'Vulnerability'
 	];
@@ -262,7 +270,7 @@
 				</h4>
 				<a
 					class="text-indigo-600 hover:text-indigo-400 dark:text-indigo-300"
-					href="https://intuitem.gitbook.io/ciso-assistant/guide/data-import-wizard"
+					href="https://intuitem.gitbook.io/ciso-assistant/configuration/data-import"
 					>{m.dataWizardTemplatesAndGuidelines()}</a
 				>
 			</div>

@@ -1,4 +1,12 @@
 {
+	"manageMembers": "Gerir membros",
+	"addMembers": "Adicionar membros",
+	"removeFromGroup": "Remover do grupo",
+	"membersAdded": "Membros adicionados",
+	"membersRemoved": "Membros removidos",
+	"includeInactive": "Incluir inativos",
+	"noResults": "Sem resultados. Refine a sua pesquisa.",
+	"nothingSelected": "Nada selecionado ainda.",
 	"licenseExpiresToday": "A sua licença expira hoje.",
 	"licenseExpiresTomorrow": "A sua licença expira amanhã.",
 	"licenseExpiresInDays": "A sua licença expira em {days_left} dias.",
@@ -629,6 +637,7 @@
 	"missingMandatoyObjects2": "Por favor, adicione-os antes de prosseguir",
 	"attemptToDeleteOnlyAdminAccountError": "Você não pode excluir a única conta de administrador do seu aplicativo.",
 	"attemptToRemoveOnlyAdminUserGroup": "Você não pode remover o único usuário administrador do aplicativo do grupo de usuários administradores.",
+	"attemptToRemoveSelfFromDomainAdminGroup": "Não pode remover-se a si próprio de um grupo de administradores de domínio. Peça a outro administrador para o fazer.",
 	"scoringHelpText": "Marque para habilitar a pontuação",
 	"minScore": "Pontuação mínima",
 	"maxScore": "Pontuação máxima",
@@ -1021,6 +1030,8 @@
 	"forceSSOLogin": "Forçar login SSO",
 	"forceSSOLoginHelpText": "Exigir SSO para todos os usuários e redefinir quaisquer senhas salvas. Usuários com 'Excluir do SSO forçado' ativado manterão o acesso de fallback baseado em senha.",
 	"forceSSOLoginHelpText2": "Certifique-se de que seu SSO está funcional ou que você tem uma conta de fallback antes de ativar esta opção.",
+	"enableSpInitiatedSlo": "Ativar logout único iniciado pelo provedor de serviço",
+	"enableSpInitiatedSloHelpText": "Ao sair, encerrar também a sessão no provedor de identidade.",
 	"youCanSetPasswordHere": "Você pode definir sua senha aqui.",
 	"mappingSuggested": "Mapeamento sugerido",
 	"mappingSuggestedHelpText": "Sugestões de mapeamento com base em frameworks carregados",
@@ -1671,5 +1682,6 @@
 	"scimTokenGenerationFailed": "Falha ao gerar o token SCIM",
 	"idpGroup": "Grupo IdP",
 	"idpGroups": "Grupos IdP",
-	"idpGroupsDescription": "Ativar a federação de grupos IdP (provisionamento SCIM, mapeamentos de grupos IdP e associações a grupos IdP nos usuários)."
+	"idpGroupsDescription": "Ativar a federação de grupos IdP (provisionamento SCIM, mapeamentos de grupos IdP e associações a grupos IdP nos usuários).",
+	"ebiosRmStudyDomainHelpText": "Alterar o domínio move o estudo e todos os objetos dos seus workshops para o domínio selecionado."
 }
