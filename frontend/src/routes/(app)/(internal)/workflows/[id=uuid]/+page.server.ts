@@ -60,9 +60,6 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 		versions,
 		activeVersion,
 		graph,
-		hookUrl: workflow.webhook_secret
-			? `${BASE_API_URL}/workflows/hooks/${workflow.id}/${workflow.webhook_secret}/`
-			: null,
 		roles: listResults(roles),
 		actors: listResults(actors),
 		taskTemplates: listResults(taskTemplates),

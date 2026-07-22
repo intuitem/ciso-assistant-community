@@ -79,9 +79,11 @@ export const POST: RequestHandler = async ({ fetch, request, url }) => {
 
 		case 'run': {
 			const versionId = requireUuid(body.version, 'version');
-			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-instances/`, 'POST', {
-				version: versionId
-			});
+			const payload: Record<string, unknown> = { version: versionId };
+			if (typeof body.entry_node_ref === 'string' && body.entry_node_ref) {
+				payload.entry_node_ref = body.entry_node_ref;
+			}
+			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-instances/`, 'POST', payload);
 		}
 
 		case 'list-instances': {
@@ -113,80 +115,43 @@ export const POST: RequestHandler = async ({ fetch, request, url }) => {
 			);
 		}
 
-		case 'list-schedules': {
+		case 'list-triggers': {
 			const workflowId = requireUuid(body.workflow, 'workflow');
 			return proxy(
 				fetch,
-				`${BASE_API_URL}/workflows/workflow-schedules/?workflow=${workflowId}`,
+				`${BASE_API_URL}/workflows/workflow-triggers/?workflow=${workflowId}`,
 				'GET'
 			);
 		}
 
-		case 'create-schedule': {
-			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-schedules/`, 'POST', {
-				name: body.name,
-				workflow: requireUuid(body.workflow, 'workflow'),
-				cron_expression: body.cron_expression,
-				timezone: body.timezone || 'UTC',
-				enabled: body.enabled ?? true
-			});
-		}
-
-		case 'update-schedule': {
+		case 'toggle-trigger': {
 			return proxy(
 				fetch,
-				`${BASE_API_URL}/workflows/workflow-schedules/${requireUuid(body.id, 'id')}/`,
+				`${BASE_API_URL}/workflows/workflow-triggers/${requireUuid(body.id, 'id')}/`,
 				'PATCH',
-				body.patch ?? {}
+				{ enabled: !!body.enabled }
 			);
 		}
 
-		case 'delete-schedule': {
+		case 'set-trigger-hmac': {
 			return proxy(
 				fetch,
-				`${BASE_API_URL}/workflows/workflow-schedules/${requireUuid(body.id, 'id')}/`,
-				'DELETE'
-			);
-		}
-
-		case 'list-event-triggers': {
-			const workflowId = requireUuid(body.workflow, 'workflow');
-			return proxy(
-				fetch,
-				`${BASE_API_URL}/workflows/workflow-event-triggers/?workflow=${workflowId}`,
-				'GET'
-			);
-		}
-
-		case 'create-event-trigger': {
-			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-event-triggers/`, 'POST', {
-				name: body.name,
-				workflow: requireUuid(body.workflow, 'workflow'),
-				event_key: body.event_key,
-				filters: body.filters ?? {},
-				enabled: body.enabled ?? true
-			});
-		}
-
-		case 'update-event-trigger': {
-			return proxy(
-				fetch,
-				`${BASE_API_URL}/workflows/workflow-event-triggers/${requireUuid(body.id, 'id')}/`,
+				`${BASE_API_URL}/workflows/workflow-triggers/${requireUuid(body.id, 'id')}/`,
 				'PATCH',
-				body.patch ?? {}
+				{ hmac_secret: typeof body.hmac_secret === 'string' ? body.hmac_secret : '' }
 			);
 		}
 
-		case 'delete-event-trigger': {
+		case 'rotate-trigger-secret': {
 			return proxy(
 				fetch,
-				`${BASE_API_URL}/workflows/workflow-event-triggers/${requireUuid(body.id, 'id')}/`,
-				'DELETE'
+				`${BASE_API_URL}/workflows/workflow-triggers/${requireUuid(body.id, 'id')}/rotate-secret/`,
+				'POST'
 			);
 		}
 
-		case 'event-trigger-keys': {
-			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-event-triggers/event-keys/`, 'GET');
+		case 'event-keys': {
+			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-triggers/event-keys/`, 'GET');
 		}
 
 		case 'instance-logs': {

@@ -1,8 +1,21 @@
+<script lang="ts" module>
+	// The event catalog is instance-wide and static: fetch it once per page
+	// load, shared across Inspector instances.
+	interface EventKey {
+		key: string;
+		model: string;
+		action: string;
+	}
+	let eventKeysCache: EventKey[] | null = null;
+</script>
+
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import DataBrowser from './DataBrowser.svelte';
 	import { renderTemplate } from './expressions';
+	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
+	import { newCondition, treeToGroups, groupsToTree, type Condition } from './filter-dnf';
 
 	interface Option {
 		id: string;
@@ -21,7 +34,9 @@
 		subprocessCandidates: Option[];
 		creatableModels?: any[];
 		fkOptions?: Record<string, Option[]>;
-		hookUrl?: string | null;
+		workflowId: string;
+		registrationsByRef?: Record<string, any>;
+		onRegistrationsChanged?: () => void;
 		referenceRunId?: string | null;
 		referenceVariables?: Record<string, unknown>;
 		referenceNodes?: { key: string; label: string; output: unknown }[];
@@ -39,7 +54,9 @@
 		subprocessCandidates,
 		creatableModels = [],
 		fkOptions = {},
-		hookUrl = null,
+		workflowId,
+		registrationsByRef = {},
+		onRegistrationsChanged,
 		referenceRunId = null,
 		referenceVariables = {},
 		referenceNodes = [],
@@ -54,8 +71,7 @@
 
 	function isTemplateField(el: EventTarget | null): el is HTMLInputElement | HTMLTextAreaElement {
 		return (
-			(el instanceof HTMLInputElement && el.type === 'text') ||
-			el instanceof HTMLTextAreaElement
+			(el instanceof HTMLInputElement && el.type === 'text') || el instanceof HTMLTextAreaElement
 		);
 	}
 
@@ -96,9 +112,7 @@
 		secrets: Object.fromEntries(secretNames.map((name) => [name, '•••']))
 	});
 	const livePreview = $derived(
-		lastFocusedValue.includes('{{')
-			? renderTemplate(lastFocusedValue, previewContext)
-			: null
+		lastFocusedValue.includes('{{') ? renderTemplate(lastFocusedValue, previewContext) : null
 	);
 
 	// emit_event is hidden pending the event-node redesign (correlation +
@@ -191,8 +205,9 @@
 				if (actionConfig[key] === undefined) actionConfig[key] = value;
 			}
 		}
-		if (nodeDomain?.type === 'start' && !nodeDomain.input_mapping) {
-			nodeDomain.input_mapping = {};
+		if (nodeDomain?.type === 'trigger') {
+			nodeDomain.trigger_config ??= { type: 'manual' };
+			nodeDomain.input_mapping ??= {};
 		}
 		if (['action', 'subprocess'].includes(nodeDomain?.type) && !nodeDomain.output_mapping) {
 			nodeDomain.output_mapping = {};
@@ -215,12 +230,139 @@
 			: (OUTPUT_EXAMPLES[actionConfig?.type] ?? 'created_object_id')
 	);
 
+	// ---------- trigger nodes ----------
+
+	const TRIGGER_LABELS: Record<string, () => string> = {
+		manual: m.triggerManual,
+		webhook: m.triggerWebhook,
+		schedule: m.triggerSchedule,
+		internal_event: m.triggerInternalEvent
+	};
+
+	const triggerConfig = $derived(nodeDomain?.type === 'trigger' ? nodeDomain.trigger_config : null);
+	const triggerRegistration = $derived(
+		nodeDomain?.type === 'trigger' && nodeDomain.ref
+			? (registrationsByRef[nodeDomain.ref] ?? null)
+			: null
+	);
+	const nodeHookUrl = $derived(
+		triggerRegistration && triggerConfig?.type === 'webhook'
+			? `${location.origin}/api/workflows/hooks/${workflowId}/${nodeDomain.ref}/${triggerRegistration.secret}/`
+			: null
+	);
+
+	function triggerOps(action: string, body: Record<string, unknown>) {
+		return fetch(`/workflows/${workflowId}/ops?action=${action}`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(body)
+		});
+	}
+
 	let copiedHook = $state(false);
 	async function copyHookUrl() {
-		if (!hookUrl) return;
-		await navigator.clipboard.writeText(hookUrl);
+		if (!nodeHookUrl) return;
+		await navigator.clipboard.writeText(nodeHookUrl);
 		copiedHook = true;
 		setTimeout(() => (copiedHook = false), 1500);
+	}
+
+	async function rotateSecret() {
+		if (!triggerRegistration) return;
+		const res = await triggerOps('rotate-trigger-secret', { id: triggerRegistration.id });
+		if (res.ok) onRegistrationsChanged?.();
+	}
+
+	// Event catalog, fetched lazily the first time an internal_event trigger
+	// node is selected.
+	let eventKeys = $state<EventKey[]>(eventKeysCache ?? []);
+	let eventKeysFetchInFlight = false;
+	async function loadEventKeys() {
+		if (eventKeysCache) {
+			eventKeys = eventKeysCache;
+			return;
+		}
+		if (eventKeysFetchInFlight) return;
+		eventKeysFetchInFlight = true;
+		try {
+			const res = await triggerOps('event-keys', {});
+			if (!res.ok) return;
+			const data = await res.json().catch(() => null);
+			eventKeysCache = Array.isArray(data) ? data : (data?.results ?? []);
+			eventKeys = eventKeysCache ?? [];
+		} finally {
+			eventKeysFetchInFlight = false;
+		}
+	}
+
+	$effect(() => {
+		if (triggerConfig?.type === 'internal_event') loadEventKeys();
+	});
+
+	const eventKeysByModel = $derived.by(() => {
+		const map = new Map<string, EventKey[]>();
+		for (const ek of eventKeys) {
+			if (!map.has(ek.model)) map.set(ek.model, []);
+			map.get(ek.model)!.push(ek);
+		}
+		return [...map.entries()];
+	});
+
+	// ---------- internal_event DNF filter builder ----------
+
+	const FILTER_OPS = ['eq', 'neq', 'gt', 'lt', 'gte', 'lte', 'in', 'not_in', 'contains', 'is_null'];
+	const FIELD_CHIPS = ['status', 'folder', 'filtering_labels'];
+	const CHANGED_HELP =
+		'Match the transition (field just changed to this value), not the standing state.';
+
+	// The builder edits an entries structure and writes the whole tree back on
+	// every change; rebuilt when the selected node changes (same pattern as
+	// headerEntries above).
+	let filterGroups = $state<Condition[][]>([]);
+	let filterRawMode = $state(false);
+	let filterRawJson = $state('{}');
+	let filterRawError = $state(false);
+	let filterNodeId: string | null = null;
+	$effect(() => {
+		const nodeId =
+			nodeDomain?.type === 'trigger' && triggerConfig?.type === 'internal_event'
+				? selectedNode.id
+				: null;
+		if (nodeId !== filterNodeId) {
+			filterNodeId = nodeId;
+			filterRawError = false;
+			if (!nodeId) {
+				filterGroups = [];
+				filterRawMode = false;
+				filterRawJson = '{}';
+				return;
+			}
+			const dnf = treeToGroups(triggerConfig.filters);
+			if (dnf === null) {
+				filterRawMode = true;
+				filterRawJson = JSON.stringify(triggerConfig.filters ?? {}, null, 2);
+				filterGroups = [];
+			} else {
+				filterRawMode = false;
+				filterRawJson = '{}';
+				filterGroups = dnf;
+			}
+		}
+	});
+
+	function syncFilters() {
+		triggerConfig.filters = groupsToTree(filterGroups);
+		onChange();
+	}
+
+	function syncRawFilters() {
+		try {
+			triggerConfig.filters = JSON.parse(filterRawJson);
+			filterRawError = false;
+			onChange();
+		} catch {
+			filterRawError = true;
+		}
 	}
 
 	function addInputMapping() {
@@ -381,6 +523,14 @@
 						'workflowNode' + nodeDomain.type.charAt(0).toUpperCase() + nodeDomain.type.slice(1)
 					)}
 				</span>
+				{#if nodeDomain.type === 'trigger' && triggerConfig}
+					<!-- The subtype is fixed at drop time: changing it would invalidate the
+					     node's registration; delete and re-add instead. -->
+					<span class="badge preset-tonal-success text-[10px]">
+						<i class="fa-solid {TRIGGER_ICONS[triggerConfig.type] ?? 'fa-bolt'} mr-1"></i>
+						{TRIGGER_LABELS[triggerConfig.type]?.() ?? triggerConfig.type}
+					</span>
+				{/if}
 				{#if nodeDomain.ref}
 					<span class="badge preset-tonal text-[9px] font-mono lowercase" title={m.nodeRef()}>
 						{nodeDomain.ref}
@@ -388,7 +538,7 @@
 				{/if}
 			</div>
 
-			{#if nodeDomain.type !== 'start' && nodeDomain.type !== 'end'}
+			{#if nodeDomain.type !== 'end'}
 				<label>
 					{@render fieldLabel(m.nodeLabel())}
 					<input
@@ -873,30 +1023,244 @@
 				</div>
 			{/if}
 
-			{#if nodeDomain.type === 'start'}
-				{#if hookUrl}
-					<div>
-						{@render fieldLabel(m.webhookTrigger())}
-						<div class="flex items-center gap-1">
-							<input
-								type="text"
-								class="input w-full text-[10px] font-mono"
-								readonly
-								value={hookUrl}
-							/>
+			{#if nodeDomain.type === 'trigger' && triggerConfig}
+				{#if triggerConfig.type === 'schedule'}
+					<label>
+						{@render fieldLabel(m.cronExpression())}
+						<input
+							type="text"
+							class="input w-full text-sm font-mono"
+							placeholder="0 3 * * *"
+							bind:value={triggerConfig.cron_expression}
+							oninput={onChange}
+							data-testid="trigger-cron"
+						/>
+					</label>
+					<label>
+						{@render fieldLabel(m.scheduleTimezone())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder="UTC"
+							bind:value={triggerConfig.timezone}
+							oninput={onChange}
+							data-testid="trigger-timezone"
+						/>
+					</label>
+					<p class="text-[10px] text-surface-500 leading-relaxed">
+						{m.cronExpressionHint()}
+					</p>
+				{:else if triggerConfig.type === 'internal_event'}
+					<label>
+						{@render fieldLabel(m.whenThisHappens())}
+						<select
+							class="select w-full text-sm"
+							bind:value={triggerConfig.event_key}
+							onchange={onChange}
+							data-testid="trigger-event-key"
+						>
+							<option value="" disabled hidden></option>
+							{#each eventKeysByModel as [model, keys] (model)}
+								<optgroup label={safeTranslate(model)}>
+									{#each keys as ek (ek.key)}
+										<option value={ek.key}>{ek.action}</option>
+									{/each}
+								</optgroup>
+							{/each}
+						</select>
+					</label>
+
+					{#if filterRawMode}
+						<label>
+							{@render fieldLabel(m.rawJsonFilters())}
+							<textarea
+								class="textarea text-xs font-mono w-full"
+								rows="6"
+								bind:value={filterRawJson}
+								oninput={syncRawFilters}
+							></textarea>
+						</label>
+						{#if filterRawError}
+							<p class="text-[10px] text-error-500">{m.invalidFieldFilters()}</p>
+						{/if}
+					{:else}
+						<div class="flex flex-col gap-2">
+							<span class="text-[10px] font-semibold uppercase tracking-wide text-surface-600-400">
+								{m.matchAnyGroup()}
+							</span>
+							{#each filterGroups as group, groupIndex (groupIndex)}
+								{#if groupIndex > 0}
+									<div class="flex items-center gap-2">
+										<hr class="grow border-surface-200-800" />
+										<span class="text-[10px] font-semibold uppercase text-surface-500">
+											{m.or()}
+										</span>
+										<hr class="grow border-surface-200-800" />
+									</div>
+								{/if}
+								<div
+									class="flex flex-col gap-2 rounded-base border border-surface-200-800 bg-surface-50-950 p-2"
+								>
+									<div class="flex items-center gap-2">
+										<span class="text-[10px] uppercase tracking-wide text-surface-500">
+											{m.matchAllConditions()}
+										</span>
+										<button
+											type="button"
+											title={m.delete()}
+											class="btn-icon preset-tonal w-5 h-5 text-[9px] ml-auto hover:preset-filled-error-500"
+											onclick={() => {
+												filterGroups.splice(groupIndex, 1);
+												syncFilters();
+											}}
+										>
+											<i class="fa-solid fa-trash"></i>
+										</button>
+									</div>
+									{#each group as condition, conditionIndex (conditionIndex)}
+										<div
+											class="flex flex-col gap-1.5 rounded-base border border-surface-200-800 p-1.5"
+										>
+											<div class="flex gap-1">
+												{#each FIELD_CHIPS as chip (chip)}
+													<button
+														type="button"
+														class="badge preset-tonal text-[9px] cursor-pointer"
+														onclick={() => {
+															condition.field = chip;
+															syncFilters();
+														}}
+													>
+														{chip}
+													</button>
+												{/each}
+												<button
+													type="button"
+													title={m.delete()}
+													aria-label={m.delete()}
+													class="btn-icon preset-tonal w-5 h-5 text-[9px] ml-auto hover:preset-filled-error-500"
+													onclick={() => {
+														group.splice(conditionIndex, 1);
+														syncFilters();
+													}}
+												>
+													<i class="fa-solid fa-xmark"></i>
+												</button>
+											</div>
+											<div class="flex items-center gap-1">
+												<input
+													type="text"
+													class="input text-xs flex-1 min-w-0 font-mono"
+													bind:value={condition.field}
+													oninput={syncFilters}
+												/>
+												<select
+													class="select text-xs w-24 shrink-0"
+													bind:value={condition.op}
+													onchange={syncFilters}
+												>
+													{#each FILTER_OPS as op (op)}
+														<option value={op}>{op}</option>
+													{/each}
+												</select>
+											</div>
+											{#if condition.op !== 'is_null'}
+												{#if condition.field === 'folder'}
+													<select
+														class="select text-xs w-full"
+														bind:value={condition.value}
+														onchange={syncFilters}
+													>
+														{#each fkOptions['folders'] ?? [] as folder (folder.id)}
+															<option value={folder.id}>{optionLabel(folder)}</option>
+														{/each}
+													</select>
+												{:else}
+													<input
+														type="text"
+														class="input text-xs w-full"
+														bind:value={condition.value}
+														oninput={syncFilters}
+													/>
+												{/if}
+											{/if}
+											<label
+												class="flex items-center gap-1 text-[10px] text-surface-500"
+												title={CHANGED_HELP}
+											>
+												<input
+													type="checkbox"
+													class="checkbox scale-75"
+													bind:checked={condition.changed}
+													onchange={syncFilters}
+												/>
+												{m.onlyWhenChanged()}
+											</label>
+										</div>
+									{/each}
+									<button
+										type="button"
+										class="btn preset-tonal text-[10px] self-start"
+										onclick={() => {
+											group.push(newCondition());
+											syncFilters();
+										}}
+									>
+										<i class="fa-solid fa-plus mr-1"></i>{m.addCondition()}
+									</button>
+								</div>
+							{/each}
 							<button
 								type="button"
-								aria-label="Copy webhook URL"
-								class="btn-icon preset-tonal w-7 h-7 text-xs shrink-0"
-								onclick={copyHookUrl}
+								class="btn preset-tonal text-[10px] self-start"
+								onclick={() => {
+									filterGroups.push([newCondition()]);
+									syncFilters();
+								}}
 							>
-								<i class="fa-solid {copiedHook ? 'fa-check text-success-500' : 'fa-copy'}"></i>
+								<i class="fa-solid fa-plus mr-1"></i>{m.addConditionGroup()}
 							</button>
 						</div>
-						<p class="text-[10px] text-surface-500 mt-1 leading-relaxed">
-							{m.webhookUrlHint()}
+					{/if}
+				{:else if triggerConfig.type === 'webhook'}
+					{#if triggerRegistration && nodeHookUrl}
+						<div>
+							{@render fieldLabel(m.webhookTrigger())}
+							<div class="flex items-center gap-1">
+								<input
+									type="text"
+									class="input w-full text-[10px] font-mono"
+									readonly
+									value={nodeHookUrl}
+								/>
+								<button
+									type="button"
+									aria-label="Copy webhook URL"
+									class="btn-icon preset-tonal w-7 h-7 text-xs shrink-0"
+									onclick={copyHookUrl}
+								>
+									<i class="fa-solid {copiedHook ? 'fa-check text-success-500' : 'fa-copy'}"></i>
+								</button>
+								<button
+									type="button"
+									title={m.rotateSecret()}
+									aria-label={m.rotateSecret()}
+									class="btn-icon preset-tonal w-7 h-7 text-xs shrink-0"
+									onclick={rotateSecret}
+									data-testid="rotate-trigger-secret"
+								>
+									<i class="fa-solid fa-rotate"></i>
+								</button>
+							</div>
+							<p class="text-[10px] text-surface-500 mt-1 leading-relaxed">
+								{m.webhookUrlHintNode()}
+							</p>
+						</div>
+					{:else}
+						<p class="text-[10px] text-surface-500 leading-relaxed">
+							<i class="fa-solid fa-satellite-dish mr-1"></i>{m.publishToObtainHookUrl()}
 						</p>
-					</div>
+					{/if}
 				{/if}
 
 				<div>
@@ -967,7 +1331,7 @@
 				</label>
 			{/if}
 
-			{#if !['start', 'end'].includes(nodeDomain.type)}
+			{#if nodeDomain.type !== 'end'}
 				<div class="grid grid-cols-2 gap-2">
 					<label>
 						{@render fieldLabel(m.forkType())}
@@ -980,18 +1344,21 @@
 							<option value="parallel">{m.forkParallel()}</option>
 						</select>
 					</label>
-					<label>
-						{@render fieldLabel(m.joinType())}
-						<select
-							class="select w-full text-xs"
-							bind:value={nodeDomain.join_type}
-							onchange={onChange}
-						>
-							<option value="none">{m.joinNone()}</option>
-							<option value="and">{m.joinAnd()}</option>
-							<option value="or">{m.joinOr()}</option>
-						</select>
-					</label>
+					{#if nodeDomain.type !== 'trigger'}
+						<!-- Trigger nodes cannot have incoming edges, so a join makes no sense. -->
+						<label>
+							{@render fieldLabel(m.joinType())}
+							<select
+								class="select w-full text-xs"
+								bind:value={nodeDomain.join_type}
+								onchange={onChange}
+							>
+								<option value="none">{m.joinNone()}</option>
+								<option value="and">{m.joinAnd()}</option>
+								<option value="or">{m.joinOr()}</option>
+							</select>
+						</label>
+					{/if}
 				</div>
 			{/if}
 

@@ -20,15 +20,16 @@
 	import Palette from './Palette.svelte';
 	import Inspector from './Inspector.svelte';
 	import RunsPanel from './RunsPanel.svelte';
-	import SchedulesPanel from './SchedulesPanel.svelte';
-	import EventTriggersPanel from './EventTriggersPanel.svelte';
+	import TriggersPanel from './TriggersPanel.svelte';
 	import StepNode from './nodes/StepNode.svelte';
 	import TerminalNode from './nodes/TerminalNode.svelte';
+	import TriggerNode, { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 
 	interface Props {
 		graph: any;
 		workflowId: string;
 		versionId: string;
+		versionStatus: string;
 		folderId: string;
 		readonly: boolean;
 		roles: any[];
@@ -37,13 +38,14 @@
 		subprocessCandidates: any[];
 		creatableModels?: any[];
 		fkOptions?: Record<string, any[]>;
-		hookUrl?: string | null;
+		onDraftCreated?: (draft: { id: string; version_number: number }) => void;
 	}
 
 	let {
 		graph,
 		workflowId,
 		versionId,
+		versionStatus,
 		folderId,
 		readonly,
 		roles,
@@ -52,14 +54,19 @@
 		subprocessCandidates,
 		creatableModels = [],
 		fkOptions = {},
-		hookUrl = null
+		onDraftCreated
 	}: Props = $props();
+
+	// A published version is directly editable: the first save transparently
+	// clones it into a draft (ensureDraft) and edits continue there.
+	let activeVersionId = $state(versionId);
+	let status = $state(versionStatus);
 
 	function opsUrl(action: string) {
 		return `/workflows/${workflowId}/ops?action=${action}`;
 	}
 
-	const nodeTypes = { step: StepNode, terminal: TerminalNode };
+	const nodeTypes = { step: StepNode, terminal: TerminalNode, trigger: TriggerNode };
 
 	const EDGE_STYLE = 'stroke: var(--color-surface-500); stroke-width: 2;';
 	const EDGE_MARKER = { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' };
@@ -102,13 +109,26 @@
 				);
 			case 'event':
 				return domain.event_key || null;
+			case 'trigger': {
+				const config = domain.trigger_config ?? {};
+				switch (config.type) {
+					case 'schedule':
+						return config.cron_expression || null;
+					case 'internal_event':
+						return config.event_key || null;
+					case 'webhook':
+						return 'webhook';
+					default:
+						return null;
+				}
+			}
 			default:
 				return null;
 		}
 	}
 
 	const NODE_TYPE_LABELS: Record<string, () => string> = {
-		start: m.workflowNodeStart,
+		trigger: m.workflowNodeTrigger,
 		end: m.workflowNodeEnd,
 		task: m.workflowNodeTask,
 		condition: m.workflowNodeCondition,
@@ -125,6 +145,10 @@
 			forkType: domain.fork_type,
 			joinType: domain.join_type,
 			assignments: domain.assignments ?? [],
+			triggerType:
+				domain.type === 'trigger' ? (domain.trigger_config?.type ?? 'manual') : undefined,
+			registration:
+				domain.type === 'trigger' && domain.ref ? (registrationsByRef[domain.ref] ?? null) : null,
 			error,
 			domain
 		};
@@ -155,10 +179,10 @@
 				: { x: 120 + index * 220, y: 220 };
 		return {
 			id: domain.id,
-			type: domain.type === 'start' || domain.type === 'end' ? 'terminal' : 'step',
+			type: domain.type === 'end' ? 'terminal' : domain.type === 'trigger' ? 'trigger' : 'step',
 			position,
 			draggable: !readonly,
-			deletable: !readonly && domain.type !== 'start',
+			deletable: !readonly,
 			connectable: !readonly,
 			data: visualData(domain)
 		} as Node;
@@ -177,15 +201,35 @@
 		} as Edge;
 	}
 
+	// ---------- trigger registrations (operational state, exists after publish) ----------
+
+	let registrations = $state<any[]>([]);
+	const registrationsByRef = $derived(
+		Object.fromEntries(registrations.map((r: any) => [r.node_ref, r]))
+	);
+
+	async function refreshRegistrations() {
+		const res = await fetch(opsUrl('list-triggers'), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ workflow: workflowId })
+		});
+		if (!res.ok) return;
+		const data = await res.json().catch(() => null);
+		registrations = Array.isArray(data) ? data : (data?.results ?? []);
+		// Node visuals carry the registration (armed/disarmed dot); rebuild them.
+		refreshVisuals();
+	}
+
 	let variables = $state<any[]>(graph.variables ?? []);
 	let nodes = $state<Node[]>((graph.nodes ?? []).map(toFlowNode));
 	let edges = $state<Edge[]>((graph.edges ?? []).map(toFlowEdge));
 
-	// A brand-new draft gets a start and an end waiting to be wired, instead of
-	// an empty void.
+	// A brand-new draft gets a manual trigger and an end waiting to be wired,
+	// instead of an empty void.
 	if (!readonly && nodes.length === 0) {
 		nodes = [
-			toFlowNode(newNodeDomain('start', { x: 120, y: 202 }), 0),
+			toFlowNode(newNodeDomain('trigger', { x: 120, y: 202 }, 'manual'), 0),
 			toFlowNode(newNodeDomain('end', { x: 560, y: 202 }), 1)
 		];
 	}
@@ -431,16 +475,27 @@
 		if (readonly) return true;
 		if (saveTimer) clearTimeout(saveTimer);
 		saveState = 'saving';
+		if (status === 'published' && !(await ensureDraft())) return false;
 		const res = await fetch(opsUrl('save-graph'), {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ version: versionId, graph: serializeGraph() })
+			body: JSON.stringify({ version: activeVersionId, graph: serializeGraph() })
 		});
 		if (!res.ok) {
 			const body = await res.json().catch(() => ({}));
 			saveError = body.error ?? body.detail ?? res.statusText;
 			saveState = 'error';
 			return false;
+		}
+		// The backend assigns refs to new nodes; sync them so run-by-trigger and
+		// the webhook inspector work without a reload.
+		const document = await res.json().catch(() => null);
+		if (Array.isArray(document?.nodes)) {
+			const refsById = new Map(document.nodes.map((n: any) => [n.id, n.ref]));
+			for (const node of nodes) {
+				const domain: any = node.data.domain;
+				if (!domain.ref && refsById.get(domain.id)) domain.ref = refsById.get(domain.id);
+			}
 		}
 		saveError = null;
 		saveState = saveState === 'saving' ? 'saved' : saveState;
@@ -455,9 +510,10 @@
 			const res = await fetch(opsUrl('publish'), {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ version: versionId })
+				body: JSON.stringify({ version: activeVersionId })
 			});
 			if (res.ok) {
+				await refreshRegistrations();
 				await invalidateAll();
 				return;
 			}
@@ -472,29 +528,94 @@
 		}
 	}
 
-	async function newDraft() {
+	async function ensureDraft(): Promise<boolean> {
 		const res = await fetch(opsUrl('new-draft'), {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ version: versionId })
+			body: JSON.stringify({ version: activeVersionId })
 		});
-		if (res.ok) await invalidateAll();
+		if (!res.ok) {
+			const body = await res.json().catch(() => ({}));
+			saveError =
+				body.error === 'draftAlreadyExists'
+					? m.draftAlreadyExistsReload()
+					: (body.error ?? res.statusText);
+			saveState = 'error';
+			return false;
+		}
+		const draft = await res.json();
+		// The server clone has fresh row ids; the canvas keeps ITS state as the
+		// source of truth (the next save wholesale-replaces the clone), so re-id
+		// everything locally to avoid colliding with the published rows.
+		remapGraphIds();
+		activeVersionId = draft.id;
+		status = 'draft';
+		onDraftCreated?.(draft);
+		return true;
+	}
+
+	function remapGraphIds() {
+		const idMap = new Map<string, string>();
+		const fresh = (old: string) => {
+			if (!idMap.has(old)) idMap.set(old, crypto.randomUUID());
+			return idMap.get(old)!;
+		};
+		const remapGroup = (group: any): any => ({
+			...group,
+			conditions: (group.conditions ?? []).map((c: any) => ({
+				...c,
+				variable: fresh(c.variable)
+			})),
+			children: (group.children ?? []).map(remapGroup)
+		});
+		variables = variables.map((v) => ({ ...v, id: fresh(v.id) }));
+		nodes = nodes.map((n) => {
+			const domain: any = { ...(n.data.domain as any), id: fresh(n.id) };
+			return { ...n, id: domain.id, data: { ...n.data, domain } };
+		});
+		edges = edges.map((e) => {
+			const domain: any = { ...(e.data!.domain as any) };
+			domain.id = fresh(e.id);
+			domain.source = fresh(e.source);
+			domain.target = fresh(e.target);
+			if (domain.condition_groups) {
+				domain.condition_groups = domain.condition_groups.map(remapGroup);
+			}
+			return {
+				...e,
+				id: domain.id,
+				source: domain.source,
+				target: domain.target,
+				data: { ...e.data, domain }
+			};
+		});
+		if (selectedNodeId) selectedNodeId = idMap.get(selectedNodeId) ?? null;
+		if (selectedEdgeId) selectedEdgeId = idMap.get(selectedEdgeId) ?? null;
 	}
 
 	let runsOpen = $state(false);
 	let runsPanel = $state<RunsPanel | null>(null);
-	let schedulesOpen = $state(false);
-	let eventTriggersOpen = $state(false);
+	let triggersOpen = $state(false);
 	let running = $state(false);
+	let runPickerOpen = $state(false);
 
-	async function runWorkflow() {
+	const triggerNodes = $derived(nodes.filter((n) => n.data.nodeType === 'trigger'));
+
+	async function startRun(entryNodeRef: string | null) {
+		runPickerOpen = false;
 		running = true;
 		try {
-			if (!readonly && !(await save())) return;
+			// Flush pending edits, but never auto-draft a pristine published
+			// version just because it was run.
+			const pending = saveState === 'dirty' || saveState === 'saving' || saveState === 'error';
+			if (!readonly && pending && !(await save())) return;
 			const res = await fetch(opsUrl('run'), {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ version: versionId })
+				body: JSON.stringify({
+					version: activeVersionId,
+					...(entryNodeRef ? { entry_node_ref: entryNodeRef } : {})
+				})
 			});
 			if (res.ok) {
 				runsOpen = true;
@@ -505,9 +626,31 @@
 		}
 	}
 
+	// Manual trigger present → fire it; exactly one trigger → fire it; else the
+	// entry is ambiguous (the backend would 400) → offer a picker.
+	async function runWorkflow() {
+		const manual = triggerNodes.find(
+			(n) => (n.data.domain as any)?.trigger_config?.type === 'manual'
+		);
+		if (manual) return startRun((manual.data.domain as any).ref ?? null);
+		if (triggerNodes.length <= 1) {
+			return startRun(((triggerNodes[0]?.data.domain as any)?.ref as string) ?? null);
+		}
+		runPickerOpen = !runPickerOpen;
+	}
+
 	// ---------- graph edits ----------
 
-	function newNodeDomain(type: string, position?: { x: number; y: number }) {
+	function newNodeDomain(type: string, position?: { x: number; y: number }, triggerType?: string) {
+		let trigger_config: Record<string, unknown> = {};
+		if (type === 'trigger') {
+			trigger_config = { type: triggerType ?? 'manual' };
+			if (triggerType === 'schedule') {
+				trigger_config = { ...trigger_config, cron_expression: '', timezone: 'UTC' };
+			} else if (triggerType === 'internal_event') {
+				trigger_config = { ...trigger_config, event_key: '', filters: {} };
+			}
+		}
 		return {
 			id: crypto.randomUUID(),
 			type,
@@ -517,6 +660,7 @@
 			task_template: null,
 			subprocess_workflow: null,
 			action_config: type === 'action' ? { type: 'log' } : {},
+			trigger_config,
 			input_mapping: {},
 			output_mapping: {},
 			event_key: '',
@@ -534,10 +678,20 @@
 		setTimeout(() => flowInstance?.fitView({ duration: 200, padding: 0.2, maxZoom: 1 }), 100);
 	}
 
-	function addNode(type: string, position?: { x: number; y: number }) {
-		if (type === 'start' && nodes.some((n) => n.data.nodeType === 'start')) return;
+	function addNode(type: string, triggerType?: string, position?: { x: number; y: number }) {
+		// At most one manual trigger per graph (its entry would be ambiguous).
+		if (
+			type === 'trigger' &&
+			triggerType === 'manual' &&
+			nodes.some(
+				(n) =>
+					n.data.nodeType === 'trigger' && (n.data.domain as any)?.trigger_config?.type === 'manual'
+			)
+		) {
+			return;
+		}
 		const fallback = { x: 200 + Math.random() * 80, y: 160 + Math.random() * 80 };
-		const domain = newNodeDomain(type, position ?? fallback);
+		const domain = newNodeDomain(type, position ?? fallback, triggerType);
 		const flowNode = toFlowNode(domain, 0);
 		flowNode.position = position ?? fallback;
 		nodes = [...nodes, flowNode];
@@ -554,14 +708,21 @@
 	}
 
 	function handleDrop(event: DragEvent) {
-		const type = event.dataTransfer?.getData('application/ciso-workflow-node');
-		if (!type) return;
+		const raw = event.dataTransfer?.getData('application/ciso-workflow-node');
+		if (!raw) return;
+		let payload: { type?: string; triggerType?: string };
+		try {
+			payload = JSON.parse(raw);
+		} catch {
+			return;
+		}
+		if (!payload.type) return;
 		event.preventDefault();
 		const position = flowInstance?.screenToFlowPosition({
 			x: event.clientX,
 			y: event.clientY
 		});
-		addNode(type, position);
+		addNode(payload.type, payload.triggerType, position);
 	}
 
 	function isValidConnection(connection: Connection): boolean {
@@ -569,7 +730,7 @@
 		const source = nodes.find((n) => n.id === connection.source);
 		const target = nodes.find((n) => n.id === connection.target);
 		if (!source || !target) return false;
-		if (source.data.nodeType === 'end' || target.data.nodeType === 'start') return false;
+		if (source.data.nodeType === 'end' || target.data.nodeType === 'trigger') return false;
 		if (edges.some((e) => e.source === connection.source && e.target === connection.target))
 			return false;
 		return true;
@@ -667,6 +828,10 @@
 		if (!readonly) refreshSecrets();
 	});
 
+	$effect(() => {
+		refreshRegistrations();
+	});
+
 	setContext('workflowEditor', {
 		get readonly() {
 			return readonly;
@@ -685,8 +850,6 @@
 		return () => observer.disconnect();
 	});
 
-	const hasStart = $derived(nodes.some((n) => n.data.nodeType === 'start'));
-
 	function focusError(nodeError: any) {
 		if (!nodeError.node_id) return;
 		selectedNodeId = nodeError.node_id;
@@ -700,7 +863,6 @@
 >
 	{#if !readonly}
 		<Palette
-			{hasStart}
 			{variables}
 			{secrets}
 			onAdd={addNode}
@@ -751,25 +913,24 @@
 
 				<Panel position="top-right">
 					<div class="flex items-center gap-2">
-						<button
-							type="button"
+						<a
+							href={`/workflows/${workflowId}/export-yaml`}
 							class="btn preset-tonal text-sm"
-							class:preset-filled-secondary-500={schedulesOpen}
-							onclick={() => (schedulesOpen = !schedulesOpen)}
-							data-testid="toggle-schedules"
+							title={m.exportWorkflowYaml()}
+							aria-label={m.exportWorkflowYaml()}
+							data-testid="export-workflow-yaml"
 						>
-							<i class="fa-solid fa-clock mr-1"></i>
-							{m.workflowSchedules()}
-						</button>
+							<i class="fa-solid fa-download"></i>
+						</a>
 						<button
 							type="button"
 							class="btn preset-tonal text-sm"
-							class:preset-filled-secondary-500={eventTriggersOpen}
-							onclick={() => (eventTriggersOpen = !eventTriggersOpen)}
-							data-testid="toggle-event-triggers"
+							class:preset-filled-secondary-500={triggersOpen}
+							onclick={() => (triggersOpen = !triggersOpen)}
+							data-testid="toggle-triggers"
 						>
 							<i class="fa-solid fa-bolt mr-1"></i>
-							{m.eventTriggers()}
+							{m.workflowTriggers()}
 						</button>
 						<button
 							type="button"
@@ -781,20 +942,58 @@
 							<i class="fa-solid fa-list-check mr-1"></i>
 							{m.workflowRuns()}
 						</button>
-						<button
-							type="button"
-							class="btn preset-tonal text-sm"
-							disabled={running}
-							onclick={runWorkflow}
-							data-testid="run-workflow"
-						>
-							{#if running}
-								<i class="fa-solid fa-spinner fa-spin mr-1"></i>
-							{:else}
-								<i class="fa-solid fa-play mr-1"></i>
+						<div class="relative">
+							<button
+								type="button"
+								class="btn preset-tonal text-sm"
+								class:preset-filled-secondary-500={runPickerOpen}
+								disabled={running}
+								onclick={runWorkflow}
+								data-testid="run-workflow"
+							>
+								{#if running}
+									<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+								{:else}
+									<i class="fa-solid fa-play mr-1"></i>
+								{/if}
+								{m.runWorkflow()}
+							</button>
+							{#if runPickerOpen}
+								<div
+									class="absolute right-0 top-full mt-1 z-10 w-60 rounded-base border border-surface-200-800 bg-surface-50-950 shadow-lg"
+									data-testid="run-trigger-picker"
+								>
+									<p
+										class="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-surface-500 border-b border-surface-200-800"
+									>
+										{m.chooseTriggerToRun()}
+									</p>
+									<ul>
+										{#each triggerNodes as triggerNode (triggerNode.id)}
+											{@const domain = triggerNode.data.domain as any}
+											<li>
+												<button
+													type="button"
+													class="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-surface-800-200 hover:bg-surface-100-900 cursor-pointer text-left"
+													onclick={() => startRun(domain.ref ?? null)}
+												>
+													<i
+														class="fa-solid {TRIGGER_ICONS[domain.trigger_config?.type] ??
+															'fa-bolt'} w-4 text-center text-surface-500"
+													></i>
+													<span class="truncate">{triggerNode.data.label}</span>
+													{#if domain.ref}
+														<span class="ml-auto font-mono text-[9px] text-surface-500 shrink-0">
+															{domain.ref}
+														</span>
+													{/if}
+												</button>
+											</li>
+										{/each}
+									</ul>
+								</div>
 							{/if}
-							{m.runWorkflow()}
-						</button>
+						</div>
 						{#if !readonly}
 							{#if saveState === 'saving' || saveState === 'dirty'}
 								<span class="text-xs text-surface-500 flex items-center gap-1">
@@ -817,30 +1016,22 @@
 									{saveError}
 								</button>
 							{/if}
-							<button
-								type="button"
-								class="btn preset-filled-primary-500 text-sm"
-								disabled={publishing || saveState === 'saving'}
-								onclick={publish}
-								data-testid="publish-workflow"
-							>
-								{#if publishing}
-									<i class="fa-solid fa-spinner fa-spin mr-1"></i>
-								{:else}
-									<i class="fa-solid fa-rocket mr-1"></i>
-								{/if}
-								{m.publishWorkflow()}
-							</button>
-						{:else}
-							<button
-								type="button"
-								class="btn preset-filled-primary-500 text-sm"
-								onclick={newDraft}
-								data-testid="new-draft"
-							>
-								<i class="fa-solid fa-pen mr-1"></i>
-								{m.newDraft()}
-							</button>
+							{#if status === 'draft'}
+								<button
+									type="button"
+									class="btn preset-filled-primary-500 text-sm"
+									disabled={publishing || saveState === 'saving'}
+									onclick={publish}
+									data-testid="publish-workflow"
+								>
+									{#if publishing}
+										<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+									{:else}
+										<i class="fa-solid fa-rocket mr-1"></i>
+									{/if}
+									{m.publishWorkflow()}
+								</button>
+							{/if}
 						{/if}
 					</div>
 				</Panel>
@@ -894,12 +1085,8 @@
 			</SvelteFlow>
 		</div>
 
-		{#if schedulesOpen}
-			<SchedulesPanel {workflowId} />
-		{/if}
-
-		{#if eventTriggersOpen}
-			<EventTriggersPanel {workflowId} folders={fkOptions['folders'] ?? []} />
+		{#if triggersOpen}
+			<TriggersPanel {registrations} {workflowId} onRefresh={refreshRegistrations} />
 		{/if}
 
 		{#if runsOpen}
@@ -925,7 +1112,9 @@
 		{subprocessCandidates}
 		{creatableModels}
 		{fkOptions}
-		{hookUrl}
+		{workflowId}
+		{registrationsByRef}
+		onRegistrationsChanged={refreshRegistrations}
 		referenceRunId={referenceRun?.id ?? null}
 		{referenceVariables}
 		{referenceNodes}

@@ -141,6 +141,13 @@ export const LibraryUploadSchema = z.object({
 	file: z.instanceof(File).optional()
 });
 
+export const WorkflowImportSchema = z.object({
+	file: z.instanceof(File),
+	folder: z.string().uuid().optional(),
+	// JSON object of {secretName: value} typed in the import dialog.
+	secrets: z.string().optional()
+});
+
 export const RiskAssessmentSchema = z.object({
 	...NameDescriptionMixin,
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
