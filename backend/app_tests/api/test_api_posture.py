@@ -1624,6 +1624,45 @@ class TestPosturePermissions:
         assert "hidden-vm" not in str(res.json())
         assert s["pa"].assets.filter(id=hidden.id).exists()
 
+    def test_batch_mutate_visible_asset_while_hidden_linked(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        s["pa"].assets.add(hidden)
+        newcomer = Asset.objects.create(name="vm-new", folder=s["domain"])
+
+        tester = self.make_user("mixed@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.post(
+            "/api/automation/posture-assessments/batch-action/",
+            {
+                "action": "add_m2m",
+                "ids": [str(s["pa"].id)],
+                "field": "assets",
+                "value": [str(newcomer.id)],
+            },
+            format="json",
+        )
+        assert res.json()["failed"] == []
+        assert s["pa"].assets.filter(id=newcomer.id).exists()
+
+        res = tester.post(
+            "/api/automation/posture-assessments/batch-action/",
+            {
+                "action": "remove_m2m",
+                "ids": [str(s["pa"].id)],
+                "field": "assets",
+                "value": [str(newcomer.id)],
+            },
+            format="json",
+        )
+        assert res.json()["failed"] == []
+        assert not s["pa"].assets.filter(id=newcomer.id).exists()
+        assert s["pa"].assets.filter(id=hidden.id).exists()
+
     def test_patch_keeps_invisible_unmeasured_asset(self, setup):
         s = setup
         other = Folder.objects.create(
