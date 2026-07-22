@@ -1416,7 +1416,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if is_accessible:
             return True
 
-        if perm == "view":
+        if perm_prefix == "view":
             has_is_published_field = any(
                 f.name == "is_published" for f in model._meta.get_fields()
             )
@@ -1615,8 +1615,12 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         from tprm.models import Entity
 
         user_folder_ids = RoleAssignment.get_allowed_folder_ids(user, perm_prefix, User)
-        team__folder_ids = RoleAssignment.get_allowed_folder_ids(user, perm_prefix, Team)
-        entity_folder_ids = RoleAssignment.get_allowed_folder_ids(user, perm_prefix, Entity)
+        team__folder_ids = RoleAssignment.get_allowed_folder_ids(
+            user, perm_prefix, Team
+        )
+        entity_folder_ids = RoleAssignment.get_allowed_folder_ids(
+            user, perm_prefix, Entity
+        )
 
         allowed_actors = Actor.objects.annotate(
             iam_folder_id=Case(
@@ -1769,10 +1773,12 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             f.name == "is_published" for f in model._meta.get_fields()
         )
 
+        PERM_PREFIXES: list[NativePermissionPrefix] = ["view", "change", "delete"]
+
         result = []
-        for perm in ["view", "change", "delete"]:
+        for perm_prefix in PERM_PREFIXES:
             allowed_folder_ids = RoleAssignment.get_allowed_folder_ids(
-                user, perm, model, base_folder=folder
+                user, perm_prefix, model, base_folder=folder
             )
             iam_folder_field = RoleAssignment.get_iam_folder_field(model)
 
@@ -1780,7 +1786,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 **{f"{iam_folder_field}__in": allowed_folder_ids}
             )
 
-            if perm == "view" and has_is_published_field:
+            if perm_prefix == "view" and has_is_published_field:
                 ancestor_folder_ids = Folder.objects.filter(
                     ~Q(content_type=Folder.ContentType.ENCLAVE)
                     & Q(descendants__in=allowed_folder_ids)
