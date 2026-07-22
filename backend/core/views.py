@@ -132,6 +132,7 @@ from rest_framework.parsers import (
     JSONParser,
     MultiPartParser,
 )
+from rest_framework.relations import ManyRelatedField
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -1221,7 +1222,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return instance
 
     def perform_destroy(self, instance):
-        serializer = self.get_serializer(instance)
+        # resolve for "destroy" explicitly so batch_action can call this too
+        serializer_class = self.get_serializer_class(action="destroy")
+        serializer = serializer_class(instance, context=self.get_serializer_context())
         serializer.delete(instance)
         try:
             dispatch_webhook_event(instance, "deleted")
@@ -1353,6 +1356,22 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         # Resolve the write serializer once for all update operations
         if action_type != "delete":
             serializer_class = self.get_serializer_class(action="partial_update")
+            target_field = "folder" if action_type == "change_folder" else field_name
+            field = (
+                serializer_class().fields.get(target_field) if target_field else None
+            )
+            if field is None or field.read_only:
+                return Response(
+                    {"error": f"field not editable: {target_field}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if action_type in ("add_m2m", "remove_m2m") and not isinstance(
+                field, ManyRelatedField
+            ):
+                return Response(
+                    {"error": f"not a many-to-many field: {target_field}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         succeeded = []
         failed = []
@@ -1393,13 +1412,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                             }
                         )
                         continue
-                    try:
-                        dispatch_webhook_event(obj, "deleted")
-                    except Exception:
-                        logger.error(
-                            "Webhook dispatch failed on batch delete", exc_info=True
-                        )
-                    obj.delete()
+                    self.perform_destroy(obj)
 
                 else:
                     # Build data dict for the serializer
@@ -1435,20 +1448,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                         partial=True,
                         context=self.get_serializer_context(),
                     )
-                    not_editable = [
-                        k
-                        for k in data
-                        if k not in serializer.fields or serializer.fields[k].read_only
-                    ]
-                    if not_editable:
-                        failed.append(
-                            {
-                                "id": str(obj_id),
-                                "name": str(obj),
-                                "error": f"field not editable: {', '.join(not_editable)}",
-                            }
-                        )
-                        continue
                     if not serializer.is_valid():
                         failed.append(
                             {
