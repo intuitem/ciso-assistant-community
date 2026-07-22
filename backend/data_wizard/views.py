@@ -101,12 +101,10 @@ from resilience.serializers import (
 )
 from privacy.models import (
     Processing,
-    Purpose,
     PersonalData,
     DataSubject,
     DataRecipient,
     DataContractor,
-    DataTransfer,
     ART6_LAWFUL_BASIS_CHOICES,
     ART9_SPECIAL_CATEGORY_CONDITION_CHOICES,
     TRANSFER_MECHANISM_CHOICES,
@@ -2468,6 +2466,15 @@ class ProcessingChildConsumerMixin:
             return None, Error(record=record, error=f"Unknown {field_name} '{raw}'")
         return key, None
 
+    def _accessible_processings(self):
+        ids = getattr(self, "_accessible_processing_ids", None)
+        if ids is None:
+            (ids, _, _) = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), self.request.user, Processing
+            )
+            self._accessible_processing_ids = ids
+        return Processing.objects.filter(id__in=ids)
+
     def _resolve_processing(
         self, record: dict
     ) -> tuple[Optional[Processing], Optional[Error]]:
@@ -2476,13 +2483,16 @@ class ProcessingChildConsumerMixin:
             return None, Error(record=record, error="Processing is mandatory")
 
         try:
-            processing = Processing.objects.filter(id=UUID(str(value))).first()
+            processing = (
+                self._accessible_processings().filter(id=UUID(str(value))).first()
+            )
             if processing:
                 return processing, None
         except ValueError, TypeError:
+            # not a UUID; fall back to ref_id/name lookup
             pass
 
-        queryset = Processing.objects.all()
+        queryset = self._accessible_processings()
         if self.folder_id:
             queryset = queryset.filter(folder_id=self.folder_id)
         processing = (
@@ -2503,6 +2513,7 @@ class ProcessingChildConsumerMixin:
             if entity:
                 return entity, None
         except ValueError, TypeError:
+            # not a UUID; fall back to name lookup
             pass
 
         entity = Entity.objects.filter(name__iexact=str(value)).first()
@@ -4473,12 +4484,21 @@ class LoadFileView(APIView):
             if overall_results["processing"].get("stopped"):
                 return overall_results
 
+            if len(parent_records) > 1:
+                overall_results["warning"] = (
+                    "Multiple rows found on the 'Processing' sheet; "
+                    "sub-object sheets are attached to the first row"
+                )
+
             processing = None
             if parent_records:
                 hint = parent_records[0]
                 domain_name = str(hint.get("domain") or "").lower()
                 scope_folder = folders_map.get(domain_name, folder_id)
-                queryset = Processing.objects.all()
+                (viewable_processings, _, _) = RoleAssignment.get_accessible_object_ids(
+                    Folder.get_root_folder(), request.user, Processing
+                )
+                queryset = Processing.objects.filter(id__in=viewable_processings)
                 if scope_folder:
                     queryset = queryset.filter(folder_id=scope_folder)
                 if hint.get("ref_id"):

@@ -719,6 +719,53 @@ class TestProcessingMultiSheetEndpoint:
         resp = _post(api_client, excel.read(), "a.xlsx", "Processing", domain_folder.id)
         assert "error" in resp.json()["results"]
 
+    def test_multi_row_processing_sheet_warns(
+        self, api_client, domain_folder, all_accessible
+    ):
+        excel = make_excel_file(
+            {
+                "Processing": [
+                    {"name": "First", "ref_id": "PRC-A"},
+                    {"name": "Second", "ref_id": "PRC-B"},
+                ],
+                "Purposes": [{"name": "P1", "legal_basis": "privacy_consent"}],
+            }
+        )
+        resp = _post(api_client, excel.read(), "a.xlsx", "Processing", domain_folder.id)
+        results = resp.json()["results"]
+        assert "warning" in results
+        assert results["processing"]["created"] == 2
+        assert Processing.objects.get(ref_id="PRC-A").purposes.count() == 1
+        assert Processing.objects.get(ref_id="PRC-B").purposes.count() == 0
+
+    def test_uuid_reference_scoped_to_accessible_processings(
+        self, base_context, domain_folder
+    ):
+        from unittest.mock import patch
+
+        from data_wizard.views import PurposeRecordConsumer
+
+        processing = Processing.objects.create(name="Hidden", folder=domain_folder)
+        consumer = PurposeRecordConsumer(base_context)
+        record = {"name": "P", "processing": str(processing.id)}
+
+        with patch(
+            "data_wizard.views.RoleAssignment.get_accessible_object_ids",
+            return_value=([], [], []),
+        ):
+            resolved, error = consumer._resolve_processing(record)
+        assert resolved is None
+        assert "Unknown processing" in error.error
+
+        accessible_consumer = PurposeRecordConsumer(base_context)
+        with patch(
+            "data_wizard.views.RoleAssignment.get_accessible_object_ids",
+            return_value=([processing.id], [], []),
+        ):
+            resolved, error = accessible_consumer._resolve_processing(record)
+        assert error is None
+        assert resolved == processing
+
     def test_export_reimport_round_trip(self, knox_admin_client, domain_folder):
         from core.models import Terminology
         from privacy.models import (

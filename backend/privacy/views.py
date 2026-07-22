@@ -412,17 +412,19 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 "description": txt(processing.description or ""),
                 "domain": txt(processing.folder.name),
                 "status": processing.status,
-                "processing_nature": ",".join(n.name for n in processing.nature.all()),
+                "processing_nature": ",".join(
+                    txt(n.name) for n in processing.nature.all()
+                ),
                 "information_channel": txt(processing.information_channel),
                 "usage_channel": txt(processing.usage_channel),
                 "dpia_required": processing.dpia_required,
                 "dpia_reference": txt(processing.dpia_reference),
                 "assigned_to": ",".join(
-                    a.user.email if a.user else str(a)
+                    txt(a.user.email if a.user else str(a))
                     for a in processing.assigned_to.all()
                 ),
                 "labels": ",".join(
-                    label.label for label in processing.filtering_labels.all()
+                    txt(label.label) for label in processing.filtering_labels.all()
                 ),
             }
         ]
@@ -457,7 +459,7 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                     {
                         "name": txt(item.name or ""),
                         "description": txt(item.description or ""),
-                        "category": item.category.name,
+                        "category": txt(item.category.name),
                         "retention": txt(item.retention),
                         "deletion_policy": item.deletion_policy,
                         "is_sensitive": item.is_sensitive,
