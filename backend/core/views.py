@@ -1296,6 +1296,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         self._process_request_data(request)
         return super().destroy(request, *args, **kwargs)
 
+    def validate_batch_m2m(self, obj, action_type, field_name, ids) -> str | None:
+        return None
+
     @action(detail=False, methods=["post"], url_path="batch-action")
     def batch_action(self, request):
         """
@@ -1403,6 +1406,14 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
                 elif action_type in ("add_m2m", "remove_m2m"):
                     ids_to_modify = value if isinstance(value, list) else [value]
+                    error = self.validate_batch_m2m(
+                        obj, action_type, field_name, ids_to_modify
+                    )
+                    if error:
+                        failed.append(
+                            {"id": str(obj_id), "name": str(obj), "error": error}
+                        )
+                        continue
                     m2m_field = getattr(obj, field_name)
                     if action_type == "add_m2m":
                         m2m_field.add(*ids_to_modify)

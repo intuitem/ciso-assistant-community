@@ -71,6 +71,26 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         )
         return ids
 
+    def validate_batch_m2m(self, obj, action_type, field_name, ids) -> str | None:
+        if field_name != "assets":
+            return None
+        if obj.is_locked:
+            return "cannot modify a locked assessment"
+        if action_type == "add_m2m":
+            viewable = {str(i) for i in self._viewable_asset_ids()}
+            if any(str(i) not in viewable for i in ids):
+                return "permission denied to add this asset"
+        else:
+            measured = set(
+                obj.results.filter(asset_id__in=ids).values_list("asset_id", flat=True)
+            )
+            if measured:
+                names = ", ".join(
+                    Asset.objects.filter(id__in=measured).values_list("name", flat=True)
+                )
+                return f"cannot remove assets with recorded results: {names}"
+        return None
+
     @staticmethod
     def _locked(assessment):
         if assessment.is_locked:
@@ -956,7 +976,9 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         requirement = RequirementNode.objects.filter(
             id=request.data.get("requirement"), framework=assessment.framework
         ).first()
-        asset = assessment.assets.filter(id=request.data.get("asset")).first()
+        asset = assessment.assets.filter(
+            id=request.data.get("asset"), id__in=self._viewable_asset_ids()
+        ).first()
         if requirement is None or asset is None:
             return Response(
                 {"error": "requirement and asset must belong to the assessment"},

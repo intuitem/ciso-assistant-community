@@ -1367,6 +1367,23 @@ class TestBatchAssetMutation:
         assert not s["pa"].assets.filter(id=newcomer.id).exists()
         assert s["pa"].assets.count() == 2
 
+    def test_remove_measured_asset_blocked(self, setup):
+        s = setup
+        upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}])
+        res = self.batch(s, "remove_m2m", s["asset1"])
+        assert res.status_code == 200
+        assert "recorded results" in res.json()["failed"][0]["error"]
+        assert s["pa"].assets.filter(id=s["asset1"].id).exists()
+
+    def test_locked_blocks_batch_mutation(self, setup):
+        s = setup
+        s["pa"].is_locked = True
+        s["pa"].save(update_fields=["is_locked"])
+        newcomer = Asset.objects.create(name="vm-3", folder=s["domain"])
+        res = self.batch(s, "add_m2m", newcomer)
+        assert res.json()["failed"][0]["error"] == "cannot modify a locked assessment"
+        assert not s["pa"].assets.filter(id=newcomer.id).exists()
+
 
 @pytest.mark.django_db
 class TestPosturePermissions:
@@ -1475,6 +1492,75 @@ class TestPosturePermissions:
         assert str(hidden_asset.id) in {
             row["asset"]["id"] for row in admin_body["results"]
         }
+
+    def test_batch_add_invisible_asset_blocked(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        tester = self.make_user("batch-tester@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.post(
+            "/api/automation/posture-assessments/batch-action/",
+            {
+                "action": "add_m2m",
+                "ids": [str(s["pa"].id)],
+                "field": "assets",
+                "value": [str(hidden.id)],
+            },
+            format="json",
+        )
+        assert res.json()["failed"][0]["error"] == "permission denied to add this asset"
+        assert not s["pa"].assets.filter(id=hidden.id).exists()
+
+    def test_hidden_assets_filtered_from_read(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        s["pa"].assets.add(hidden)
+
+        reader = self.make_user("asset-reader@tests.com", "BI-RL-AUD", s["domain"])
+        body = reader.get(f"/api/automation/posture-assessments/{s['pa'].id}/").json()
+        ids = {a["id"] for a in body["assets"]}
+        assert str(hidden.id) not in ids
+        assert {str(s["asset1"].id), str(s["asset2"].id)} <= ids
+
+        admin_body = (
+            s["client"].get(f"/api/automation/posture-assessments/{s['pa'].id}/").json()
+        )
+        assert str(hidden.id) in {a["id"] for a in admin_body["assets"]}
+
+    def test_create_finding_invisible_asset_rejected(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        s["pa"].assets.add(hidden)
+        register = FindingsAssessment.objects.create(
+            name="follow-up",
+            folder=s["pa"].folder,
+            category=FindingsAssessment.Category.POSTURE,
+        )
+        s["pa"].follow_up_assessment = register
+        s["pa"].save(update_fields=["follow_up_assessment"])
+
+        tester = self.make_user("finder@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.post(
+            f"/api/automation/posture-assessments/{s['pa'].id}/create-finding/",
+            {"requirement": str(s["nodes"]["1.1"].id), "asset": str(hidden.id)},
+            format="json",
+        )
+        assert res.status_code == 400
+        assert Finding.objects.count() == 0
 
     def test_cross_domain_follow_up_link_rejected(self, setup):
         s = setup

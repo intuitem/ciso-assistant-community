@@ -88,8 +88,24 @@ class PostureAssessmentReadSerializer(AssessmentReadSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     framework = FieldsRelatedField()
-    assets = FieldsRelatedField(["id", {"folder": ["id"]}], many=True)
+    assets = serializers.SerializerMethodField()
     follow_up_assessment = FieldsRelatedField()
+
+    def get_assets(self, obj):
+        assets = obj.assets.all()
+        request = self.context.get("request")
+        if request:
+            viewable = self.context.get("viewable_asset_ids")
+            if viewable is None:
+                viewable = set(
+                    RoleAssignment.get_accessible_object_ids(
+                        Folder.get_root_folder(), request.user, Asset
+                    )[0]
+                )
+                self.context["viewable_asset_ids"] = viewable
+            assets = [a for a in assets if a.id in viewable]
+        field = FieldsRelatedField(["id", {"folder": ["id"]}])
+        return [field.to_representation(a) for a in assets]
 
     class Meta:
         model = PostureAssessment
