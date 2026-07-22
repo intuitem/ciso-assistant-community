@@ -323,10 +323,20 @@
 				}
 				optionsLoaded = true;
 			}
-			if (initialValue !== undefined && initialValue !== null && initialValue !== '') {
+			// Only seed the selection when the user hasn't picked anything yet:
+			// on edit forms this tail runs after async round-trips (probe +
+			// hydration in lazy mode), and a fast user can change the value
+			// before it lands — seeding then would clobber their choice back
+			// to the initial value, which is what would get saved.
+			if (
+				selected.length === 0 &&
+				initialValue !== undefined &&
+				initialValue !== null &&
+				initialValue !== ''
+			) {
 				const ids = (Array.isArray(initialValue) ? initialValue : [initialValue]).map(String);
 				selected = options.filter((item) => ids.includes(String(item.value)));
-			} else if (options.length === 1 && $constraints?.required) {
+			} else if (selected.length === 0 && options.length === 1 && $constraints?.required) {
 				selected = [options[0]];
 			}
 		} catch (error) {
