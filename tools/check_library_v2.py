@@ -1160,6 +1160,32 @@ def validate_columns_presence_together(df: pd.DataFrame, column_names: List[str]
     )
 
 
+# Ensure that each non-empty cell in a column does not exceed the specified character limit.
+def validate_column_max_length(df: pd.DataFrame, column_name: str, max_length: int, sheet_name: str, context: str = None):
+
+    context = context or "validate_column_max_length"
+
+    if column_name not in df.columns:
+        return
+
+    values_exceeding_limit = []
+
+    for index, value in df[column_name].items():
+        if pd.isna(value) or str(value).strip() == "":
+            continue
+
+        value_length = len(str(value))
+        if value_length > max_length:
+            values_exceeding_limit.append((index + 2, value_length))
+
+    if values_exceeding_limit:
+        raise ValueError(
+            f'({context}) [{sheet_name}] Values in column "{column_name}" exceed the maximum length of {max_length} characters:\n   - '
+            + "\n   - ".join(f"Row #{row}: {length} characters" for row, length in values_exceeding_limit)
+            + f'\n> 💡 Tip: Shorten each "{column_name}" value to {max_length} characters or fewer.'
+        )
+
+
 # Check that values in each column from the given list are unique. Raise error or emit warning if duplicates are found
 def validate_unique_column_values(df, column_names: List[str], sheet_name: str, context: str = None, warn_only: bool = False, ctx: ConsoleContext = None):
 
@@ -2868,6 +2894,9 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
 
     # Check uniqueness of some column values
     validate_unique_column_values(df, ["ref_id"], sheet_name, fct_name, ctx=ctx)
+
+    # Additional rule: Check that "name" values do not exceed 200 characters (in order to avoid issues with PostgreSQL DBs)
+    validate_column_max_length(df, "name", 200, sheet_name, fct_name)
     
     # Enforce presence of "assessable" column (even if values can be empty)
     if "assessable" not in df.columns:
