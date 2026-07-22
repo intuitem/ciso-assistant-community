@@ -456,6 +456,12 @@ Elementary actions are useful to model a killchain during the 4th workshop of an
 
 
 
+## CyFun self-assessment
+
+The official self-assessment Excel workbook published by Belgium's Centre for Cybersecurity for the **CyFun 2025** framework — BASIC, IMPORTANT, and ESSENTIAL editions are all accepted. The import creates a new audit, loads the CyFun 2025 framework automatically if needed, sets the implementation group from the detected assurance level, and carries over documentation/implementation scores, `N/A` markers, and comments. See [CCB CyFun](../features/framework-specific/cyfun.md) for details.
+
+Selected in the wizard as **CyFun self-assessment**; on the CLI: `import-cyfun-assessment`.
+
 ## EBIOS RM Studies
 
 Importing a full EBIOS RM study creates the study itself plus the objects across workshops 1–4 (assets, feared events, RO/TO couples, stakeholders, strategic and operational scenarios, attack paths, elementary actions, operating modes). Three input formats are supported. All three require a **risk matrix** to be selected in the wizard — the probability and impact labels in the source are resolved against that matrix.
@@ -580,7 +586,7 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `email` <mark style="color:$danger;">\*</mark>
 * `first_name`
 * `last_name`
-* `description` 
+* `description`
 * `phone`
 * `role`
 * `provider_entity_ref_id` <mark style="color:$danger;">\*</mark>
@@ -590,28 +596,108 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 
 ## Processings
 
-### Template
+Two file layouts are accepted for privacy processings:
+
+* a **flat sheet** (or CSV) with one row per processing — useful for bulk-creating register entries
+* a **multi-sheet workbook** that carries one processing together with its sub-objects (purposes, personal data, data subjects, data recipients, contractors, transfers)
+
+The multi-sheet workbook is the same format produced by the **Export XLSX** button on a processing's detail page, so a register entry can be exported, edited or moved, and re-imported as-is — sub-objects included. On the CLI, both layouts go through the same `import-processings` command.
+
+### Flat list
+
+#### Template
 
 {% file src="../.gitbook/assets/sample-processings (1).xlsx" %}
 
-### Supported fields
+#### Supported fields
 
 * ref\_id
 * name\*
 * description
-* status
-  * Approved
+* domain
+* status - raw key (e.g. `privacy_draft`) or label
   * Draft
   * In review
+  * Approved
   * Deprecated
-* processing\_nature
-* domain
-* assigned\_to
-* labels
+* processing\_nature - comma-separated processing nature names
+* information\_channel
+* usage\_channel
+* assigned\_to - comma-separated user emails
+* labels - comma-separated label names (created if missing)
 * dpia\_required
   * FALSE
   * TRUE
 * dpia\_reference
+
+> [!NOTE]
+> Conflict detection: by `ref_id` + `domain`, falling back to `name` + `domain`
+
+### Multi-sheet workbook
+
+#### Template
+
+{% file src="../.gitbook/assets/sample_processing_workbook.xlsx" %}
+
+The workbook contains a **Processing** sheet (same columns as the flat list, one row) plus one optional sheet per sub-object type: **Purposes**, **Personal data**, **Data subjects**, **Data recipients**, **Contractors** and **Transfers**. Sheet names are matched case-insensitively; empty sheets are simply skipped.
+
+Every choice column accepts either the raw key (e.g. `privacy_contract`) or its English label (e.g. `Performance of a Contract`), case-insensitively.
+
+#### Purposes sheet
+
+* name
+* description
+* legal\_basis - GDPR Article 6 lawful basis; defaults to `privacy_consent` when blank
+* article\_9\_condition - GDPR Article 9(2) condition, optional
+
+#### Personal data sheet
+
+* name
+* description
+* category\* - name of a personal-data category from the terminology (e.g. `privacy_health_data`)
+* retention
+* deletion\_policy
+* is\_sensitive - `true` / `false`; forced to `true` automatically for GDPR Article 9/10 categories
+* assets - comma-separated asset names; the assets must already exist
+
+#### Data subjects sheet
+
+* name
+* description
+* category\* - e.g. `privacy_employee`, `privacy_customer`
+
+#### Data recipients sheet
+
+* name
+* description
+* category\* - e.g. `privacy_data_processor`, `privacy_regulatory_authority`
+
+#### Contractors sheet
+
+* name
+* description
+* entity - name of an existing third-party entity, optional
+* relationship\_type\* - e.g. `privacy_data_processor`, `privacy_joint_controller`
+* country\* - ISO 3166-1 alpha-2 code (e.g. `FR`) or country name
+* documentation\_link - URL
+
+#### Transfers sheet
+
+* name
+* description
+* entity - name of an existing third-party entity, optional
+* country\* - ISO 3166-1 alpha-2 code or country name
+* transfer\_mechanism - GDPR Chapter V mechanism, optional
+* guarantees
+* documentation\_link - URL
+
+#### Special considerations
+
+* Sub-objects are attached to the processing described on the **Processing** sheet. A `processing` column (name, ref\_id or UUID) on a sub-object row overrides this when present.
+* Sub-objects always land in the same domain as their parent processing.
+* If the `domain` column is filled on the Processing sheet, it takes precedence over the domain selected in the wizard — importing an unedited export therefore restores the processing into its original domain. Clear or change the cell to import elsewhere.
+* Referenced records (entities, assets, terminology categories) are matched by name and must already exist; an unresolved reference fails that row without blocking the rest.
+* Conflict resolution applies to sub-objects too: re-importing the same workbook with **Skip** creates no duplicates, and **Update** refreshes sub-objects whose identifying fields (e.g. name and category, within the same processing) still match; a row whose identifying fields changed is treated as a new record.
 
 
 

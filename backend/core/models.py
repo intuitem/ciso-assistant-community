@@ -652,6 +652,26 @@ class StoredLibrary(LibraryMixin):
             library_label.garbage_collect()
 
 
+def backfill_framework_ref_ids(objects):
+    """Derive missing framework ref_ids from the URN leaf (drafts migrated
+    from the pre-LibraryDraft editor lack them). Used by to_library_dict and
+    librarydraft_fingerprint alike so emission and hash never disagree."""
+    frameworks = (objects or {}).get("frameworks") or []
+    if not any(
+        isinstance(f, dict) and f.get("urn") and not f.get("ref_id") for f in frameworks
+    ):
+        return objects
+    return {
+        **objects,
+        "frameworks": [
+            {**f, "ref_id": str(f["urn"]).rsplit(":", 1)[-1]}
+            if isinstance(f, dict) and f.get("urn") and not f.get("ref_id")
+            else f
+            for f in frameworks
+        ],
+    }
+
+
 def librarydraft_fingerprint(draft) -> str:
     """Stable hash of everything a LibraryDraft publishes (metadata + objects).
 
@@ -677,7 +697,7 @@ def librarydraft_fingerprint(draft) -> str:
         "translations": draft.translations,
         "dependencies": draft.dependencies,
         "labels": draft.labels,
-        "content": draft.content,
+        "content": backfill_framework_ref_ids(draft.content),
     }
     encoded = json.dumps(payload, sort_keys=True, default=str).encode()
     return hashlib.sha256(encoded).hexdigest()
@@ -804,7 +824,7 @@ class LibraryDraft(NameDescriptionMixin, FolderMixin):
             library["dependencies"] = self.dependencies
         if self.labels:
             library["labels"] = self.labels
-        library["objects"] = self.content or {}
+        library["objects"] = backfill_framework_ref_ids(self.content or {})
         return library
 
 
@@ -9435,6 +9455,7 @@ class FindingsAssessment(Assessment):
         RED_TEAMING = "red_teaming", "Red teaming"
         AUDIT = "audit", "Audit"
         SELF_IDENTIFIED = "self_identified", "Self-identified"
+        POSTURE = "posture", "Posture follow-up"
 
     category = models.CharField(
         verbose_name=_("Category"),
@@ -9601,6 +9622,23 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         help_text="Evidences related to the follow-up",
         related_name="findings",
         verbose_name=_("Evidences"),
+    )
+
+    requirement_node = models.ForeignKey(
+        RequirementNode,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="findings",
+        verbose_name=_("Requirement"),
+    )
+    asset = models.ForeignKey(
+        Asset,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="findings",
+        verbose_name=_("Asset"),
     )
 
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
@@ -9862,6 +9900,14 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         verbose_name="Finding assessments",
         blank=True,
         help_text="Finding assessments related to the task",
+        related_name="task_templates",
+    )
+
+    findings = models.ManyToManyField(
+        Finding,
+        verbose_name="Findings",
+        blank=True,
+        help_text="Findings related to the task",
         related_name="task_templates",
     )
 

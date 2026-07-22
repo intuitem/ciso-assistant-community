@@ -42,6 +42,14 @@ export const complianceResultTailwindColorMap: { [key: string]: string } = {
 	not_applicable: 'bg-black text-white'
 };
 
+export const postureResultTailwindColorMap: { [key: string]: string } = {
+	pass: 'bg-green-300 dark:bg-green-700',
+	fail: 'bg-red-300 dark:bg-red-800',
+	error: 'bg-amber-300 dark:bg-amber-600',
+	not_applicable: 'bg-black text-white',
+	not_checked: 'bg-surface-300-700'
+};
+
 export const complianceStatusColorMap: { [key: string]: string } = {
 	to_do: '#9ca3af',
 	in_progress: '#f59e0b',

@@ -378,6 +378,23 @@ DATA_WIZARD_COMMANDS = [
         "supports_conflict": False,
     },
     {
+        "command": "import_cyfun_assessment",
+        "model_type": "CyFunAssessment",
+        "help": (
+            "Import an official CyFun 2025 self-assessment workbook (Excel).\n"
+            "Creates a new assessment on the CyFun 2025 framework (auto-loaded if missing)\n"
+            "with documentation/implementation scores and comments.\n"
+            "\nNote: always creates a new assessment; conflict management is not applicable."
+        ),
+        "requires_folder": False,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+        "supports_conflict": False,
+        "show_folder_option": True,
+        "show_perimeter_option": True,
+    },
+    {
         "command": "import_findings_assessments",
         "model_type": "FindingsAssessment",
         "help": (
@@ -465,10 +482,16 @@ DATA_WIZARD_COMMANDS = [
             "Import privacy processings from CSV/Excel.\n"
             "\nRequired columns: name\n\n"
             "Optional columns: ref_id, description, status, "
+            "information_channel, usage_channel, "
             "dpia_required (true/false), dpia_reference, "
             "processing_nature (comma-separated), "
             "assigned_to (comma-separated user emails), "
             "labels (comma-separated), domain\n"
+            "\nMulti-sheet Excel workbooks (as produced by the processing "
+            "XLSX export) are also supported: a 'Processing' sheet plus "
+            "optional 'Purposes', 'Personal data', 'Data subjects', "
+            "'Data recipients', 'Contractors' and 'Transfers' sheets "
+            "recreate the processing with its sub-objects.\n"
             "\nConflict detection: by name + folder"
         ),
         "requires_folder": True,
@@ -660,6 +683,7 @@ def register_data_wizard_command(config: Dict[str, object]) -> None:
     show_matrix_option = config.get("show_matrix_option", requires_matrix)
     supports_name_option = model_type in {
         "ComplianceAssessment",
+        "CyFunAssessment",
         "RiskAssessment",
         "FindingsAssessment",
         "EbiosRMStudyARM",
