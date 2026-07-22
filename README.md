@@ -333,7 +333,7 @@ Read more here: [AI engine](backend/chat/README.md)
 101. Cahier des charges Label EBIOS RM v3.1 🇫🇷
 102. SecNumCloud v3.2 Annexe 2 : Recommandations aux commanditaires ☁️🇫🇷
 103. CCB CyberFundamentals Small - Self assessment 🇧🇪
-104. Mitre ATT&CK v19.1 - Threat catalog 🌐
+104. Mitre ATT&CK v19.1 - Threats and Mitigations catalog 🌐
 105. Mitre D3FEND - Reference controls 🌐
 106. OWASP Top 10 Web - Threat catalog 🐝🌐
 107. OWASP MAS Threat Modelling Guide - Threat catalog 🐝📱
