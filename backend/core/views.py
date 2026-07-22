@@ -1406,6 +1406,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                     if action_type == "change_folder":
                         data = {"folder": value}
                     elif action_type in ("change_m2m", "add_m2m", "remove_m2m"):
+                        # read-modify-write is racy vs concurrent writers, accepted: serializer validation (IAM/lock) outweighs cbe008798's atomic .add()/.remove()
                         target = {
                             str(i)
                             for i in (value if isinstance(value, list) else [value])
