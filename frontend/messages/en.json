@@ -482,6 +482,8 @@
 	"exportExecutiveSummaryDesc": "Cover page, spider chart, framework tree, scored requirements",
 	"exportCyFunAssessment": "CyFun self-assessment",
 	"exportCyFunAssessmentDesc": "Excel template mapped to CyFun categories",
+	"cyFunAssessment": "CyFun self-assessment",
+	"dataWizardCyFunDescription": "Import an official CyFun 2025 self-assessment workbook; the CyFun 2025 framework is loaded automatically if missing",
 	"exportBundleWithEvidences": "Bundle with evidences",
 	"exportBundleWithEvidencesDesc": "HTML snapshot bundled with all attached evidence files",
 	"exportSoaBuilder": "SoA builder",
