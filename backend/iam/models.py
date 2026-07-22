@@ -1284,7 +1284,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     @staticmethod
     def _get_role_assignments_from_permission(
         user: AbstractBaseUser | AnonymousUser,
-        perm: PermissionPrefix,
+        perm_prefix: PermissionPrefix,
         model: type[models.Model],
     ) -> QuerySet[RoleAssignment]:
         """Return the `RoleAssignment` list (as a `QuerySet`) granting the `perm` permission on the model `model`."""
@@ -1293,11 +1293,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         role_assignments = RoleAssignment.get_role_assignments_from_user(user)
 
-        if model is User and perm in ("backup", "restore"):
-            codename = perm
+        if model is User and perm_prefix in ("backup", "restore"):
+            codename = perm_prefix
         else:
             model_name = model.__name__.lower()
-            codename = f"{perm}_{model_name}"
+            codename = f"{perm_prefix}_{model_name}"
 
         # Using `.order_by()` prevent django from including the "name" column (to avoid problems on queryset unions)
         role_assignments = role_assignments.order_by().filter(
@@ -1348,7 +1348,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     @staticmethod
     def _is_actor_accessible(
         user: AbstractBaseUser | AnonymousUser,
-        perm: NativePermissionPrefix,
+        perm_prefix: NativePermissionPrefix,
         actor: Actor,
     ) -> bool:
         if not isinstance(user, User):
@@ -1359,13 +1359,13 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         iam_scope_folder = specific.folder
 
         return iam_scope_folder.id in RoleAssignment.get_allowed_folder_ids(
-            user, perm, specific_model
+            user, perm_prefix, specific_model
         )
 
     @staticmethod
     def is_object_accessible(
         user: AbstractBaseUser | AnonymousUser,
-        perm: PermissionPrefix,
+        perm_prefix: PermissionPrefix,
         model: type[models.Model],
         id: uuid.UUID,
     ) -> bool:
@@ -1375,17 +1375,17 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return False
 
         if model is Permission:
-            return perm == "view"
+            return perm_prefix == "view"
 
         obj = model.objects.filter(id=id).first()
         if obj is None:
             return False
 
         if model is Actor:
-            return RoleAssignment._is_actor_accessible(user, perm, obj)
+            return RoleAssignment._is_actor_accessible(user, perm_prefix, obj)
 
         user_role_assignments = RoleAssignment._get_role_assignments_from_permission(
-            user, perm, model
+            user, perm_prefix, model
         )
 
         direct_accessible_folder_id_set = set(
@@ -1512,13 +1512,13 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     @staticmethod
     def get_allowed_folder_ids(
         user: AbstractBaseUser | AnonymousUser,
-        perm: PermissionPrefix,
+        perm_prefix: PermissionPrefix,
         model: type[models.Model],
         *,
         base_folder: Optional[Folder] = None,
     ) -> QuerySet[uuid.UUID]:
         """
-        Return the `QuerySet` of accessible folder IDs for a specific permission(`perm`) on a specific model(`model`).
+        Return the `QuerySet` of accessible folder IDs for a specific permission prefix (`perm_prefix` (e.g. `"view"`/`"change"`)) on a specific model (`model`, e.g. `AppliedControl`).
 
         Example:
         ```
@@ -1546,7 +1546,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return Folder.objects.none().values_list("id", flat=True)
 
         user_role_assignments = RoleAssignment._get_role_assignments_from_permission(
-            user, perm, model
+            user, perm_prefix, model
         )
 
         flat_role_assignments = user_role_assignments.filter(is_recursive=False)
@@ -1609,14 +1609,14 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
     @staticmethod
     def _get_actor_accessible_ids_by_perm(
-        user: AbstractBaseUser | AnonymousUser, perm: NativePermissionPrefix
+        user: AbstractBaseUser | AnonymousUser, perm_prefix: NativePermissionPrefix
     ) -> QuerySet[uuid.UUID]:
         from core.models import Actor, Team
         from tprm.models import Entity
 
-        user_folder_ids = RoleAssignment.get_allowed_folder_ids(user, perm, User)
-        team__folder_ids = RoleAssignment.get_allowed_folder_ids(user, perm, Team)
-        entity_folder_ids = RoleAssignment.get_allowed_folder_ids(user, perm, Entity)
+        user_folder_ids = RoleAssignment.get_allowed_folder_ids(user, perm_prefix, User)
+        team__folder_ids = RoleAssignment.get_allowed_folder_ids(user, perm_prefix, Team)
+        entity_folder_ids = RoleAssignment.get_allowed_folder_ids(user, perm_prefix, Entity)
 
         allowed_actors = Actor.objects.annotate(
             iam_folder_id=Case(
@@ -1645,14 +1645,14 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
     @staticmethod
     def _get_filtering_label_ids_by_perm(
-        user: AbstractBaseUser | AnonymousUser, perm: NativePermissionPrefix
+        user: AbstractBaseUser | AnonymousUser, perm_prefix: NativePermissionPrefix
     ) -> QuerySet[uuid.UUID]:
         from core.models import FilteringLabel
 
         # If a user has the `perm` permission on any `Folder` for the `FilteringLabel` model.
         # Then we grant this permission over all the `FilteringLabel` of the DB.
         is_allowed = RoleAssignment._get_role_assignments_from_permission(
-            user, perm, FilteringLabel
+            user, perm_prefix, FilteringLabel
         ).exists()
 
         if is_allowed:
