@@ -1367,6 +1367,25 @@ class TestBatchAssetMutation:
         assert not s["pa"].assets.filter(id=newcomer.id).exists()
         assert s["pa"].assets.count() == 2
 
+    def test_remove_measured_asset_blocked(self, setup):
+        s = setup
+        upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}])
+        res = self.batch(s, "remove_m2m", s["asset1"])
+        assert res.status_code == 200
+        assert "recorded results" in str(res.json()["failed"][0]["error"])
+        assert s["pa"].assets.filter(id=s["asset1"].id).exists()
+
+    def test_locked_blocks_batch_mutation(self, setup):
+        s = setup
+        s["pa"].is_locked = True
+        s["pa"].save(update_fields=["is_locked"])
+        newcomer = Asset.objects.create(name="vm-3", folder=s["domain"])
+        res = self.batch(s, "add_m2m", newcomer)
+        assert "cannot modify a locked assessment" in str(
+            res.json()["failed"][0]["error"]
+        )
+        assert not s["pa"].assets.filter(id=newcomer.id).exists()
+
 
 @pytest.mark.django_db
 class TestPosturePermissions:
@@ -1475,6 +1494,220 @@ class TestPosturePermissions:
         assert str(hidden_asset.id) in {
             row["asset"]["id"] for row in admin_body["results"]
         }
+
+    def test_batch_add_invisible_asset_blocked(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        tester = self.make_user("batch-tester@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.post(
+            "/api/automation/posture-assessments/batch-action/",
+            {
+                "action": "add_m2m",
+                "ids": [str(s["pa"].id)],
+                "field": "assets",
+                "value": [str(hidden.id)],
+            },
+            format="json",
+        )
+        assert "permission denied to add this asset" in str(
+            res.json()["failed"][0]["error"]
+        )
+        assert not s["pa"].assets.filter(id=hidden.id).exists()
+
+    def test_hidden_assets_filtered_from_read(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        s["pa"].assets.add(hidden)
+
+        reader = self.make_user("asset-reader@tests.com", "BI-RL-AUD", s["domain"])
+        body = reader.get(f"/api/automation/posture-assessments/{s['pa'].id}/").json()
+        ids = {a["id"] for a in body["assets"]}
+        assert str(hidden.id) not in ids
+        assert {str(s["asset1"].id), str(s["asset2"].id)} <= ids
+
+        admin_body = (
+            s["client"].get(f"/api/automation/posture-assessments/{s['pa'].id}/").json()
+        )
+        assert str(hidden.id) in {a["id"] for a in admin_body["assets"]}
+
+    def test_patch_add_invisible_asset_blocked(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        tester = self.make_user("patcher@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/",
+            {
+                "assets": [
+                    str(s["asset1"].id),
+                    str(s["asset2"].id),
+                    str(hidden.id),
+                ]
+            },
+            format="json",
+        )
+        assert res.status_code == 400
+        assert "permission denied" in str(res.json())
+        assert not s["pa"].assets.filter(id=hidden.id).exists()
+
+    def test_removal_errors_hide_invisible_asset_names(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        upload(s["client"], s["pa"], hidden, [{"ref_id": "1.1", "result": "fail"}])
+
+        tester = self.make_user("remover@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.post(
+            "/api/automation/posture-assessments/batch-action/",
+            {
+                "action": "remove_m2m",
+                "ids": [str(s["pa"].id)],
+                "field": "assets",
+                "value": [str(hidden.id)],
+            },
+            format="json",
+        )
+        assert res.json()["failed"] == []
+        assert "hidden-vm" not in str(res.json())
+        assert s["pa"].assets.filter(id=hidden.id).exists()
+
+        res = tester.patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/",
+            {"assets": [str(s["asset1"].id), str(s["asset2"].id)]},
+            format="json",
+        )
+        assert res.status_code == 200
+        assert "hidden-vm" not in str(res.json())
+        assert s["pa"].assets.filter(id=hidden.id).exists()
+        assert s["pa"].assets.count() == 3
+
+    def test_batch_remove_invisible_asset_kept(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        s["pa"].assets.add(hidden)
+
+        tester = self.make_user("batch-remover@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.post(
+            "/api/automation/posture-assessments/batch-action/",
+            {
+                "action": "remove_m2m",
+                "ids": [str(s["pa"].id)],
+                "field": "assets",
+                "value": [str(hidden.id)],
+            },
+            format="json",
+        )
+        assert res.json()["failed"] == []
+        assert "hidden-vm" not in str(res.json())
+        assert s["pa"].assets.filter(id=hidden.id).exists()
+
+    def test_batch_mutate_visible_asset_while_hidden_linked(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        s["pa"].assets.add(hidden)
+        newcomer = Asset.objects.create(name="vm-new", folder=s["domain"])
+
+        tester = self.make_user("mixed@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.post(
+            "/api/automation/posture-assessments/batch-action/",
+            {
+                "action": "add_m2m",
+                "ids": [str(s["pa"].id)],
+                "field": "assets",
+                "value": [str(newcomer.id)],
+            },
+            format="json",
+        )
+        assert res.json()["failed"] == []
+        assert s["pa"].assets.filter(id=newcomer.id).exists()
+
+        res = tester.post(
+            "/api/automation/posture-assessments/batch-action/",
+            {
+                "action": "remove_m2m",
+                "ids": [str(s["pa"].id)],
+                "field": "assets",
+                "value": [str(newcomer.id)],
+            },
+            format="json",
+        )
+        assert res.json()["failed"] == []
+        assert not s["pa"].assets.filter(id=newcomer.id).exists()
+        assert s["pa"].assets.filter(id=hidden.id).exists()
+
+    def test_patch_keeps_invisible_unmeasured_asset(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        s["pa"].assets.add(hidden)
+
+        tester = self.make_user("keeper@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/",
+            {"assets": [str(s["asset1"].id)]},
+            format="json",
+        )
+        assert res.status_code == 200
+        remaining = set(s["pa"].assets.values_list("id", flat=True))
+        assert remaining == {s["asset1"].id, hidden.id}
+
+    def test_create_finding_invisible_asset_rejected(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        s["pa"].assets.add(hidden)
+        register = FindingsAssessment.objects.create(
+            name="follow-up",
+            folder=s["pa"].folder,
+            category=FindingsAssessment.Category.POSTURE,
+        )
+        s["pa"].follow_up_assessment = register
+        s["pa"].save(update_fields=["follow_up_assessment"])
+
+        tester = self.make_user("finder@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.post(
+            f"/api/automation/posture-assessments/{s['pa'].id}/create-finding/",
+            {"requirement": str(s["nodes"]["1.1"].id), "asset": str(hidden.id)},
+            format="json",
+        )
+        assert res.status_code == 400
+        assert Finding.objects.count() == 0
 
     def test_cross_domain_follow_up_link_rejected(self, setup):
         s = setup
