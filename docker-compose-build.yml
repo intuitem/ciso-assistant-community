@@ -86,7 +86,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NODE_IMAGE: ${NODE_IMAGE:-node:24-slim}
+        NODE_BUILD_IMAGE: ${NODE_BUILD_IMAGE:-dhi.io/node:24-dev}
+        NODE_RUNTIME_IMAGE: ${NODE_RUNTIME_IMAGE:-dhi.io/node:24}
     depends_on:
       - backend
     restart: always
