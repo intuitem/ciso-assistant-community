@@ -3291,6 +3291,7 @@
 	"dataWizardRiskAssessmentDescription": "Import risk scenarios with the associated controls",
 	"dataWizardFindingsAssessmentDescription": "Import a generic findings tracker (pentest, internal audit, etc.)",
 	"dataWizardElementaryActionDescription": "Import elementary actions for EBIOS RM",
+	"dataWizardProcessingDescription": "Import processings as a flat list, or re-import an exported processing workbook to recreate its purposes, personal data and other sub-objects",
 	"dataWizardOnConflict": "If a record already exists",
 	"dataWizardOnConflictStop": "Stop",
 	"dataWizardOnConflictSkip": "Skip",
