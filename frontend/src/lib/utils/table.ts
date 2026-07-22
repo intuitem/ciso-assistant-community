@@ -1115,7 +1115,7 @@ export const DOC_TEMPLATE_LANGUAGE_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'document-templates/locale',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
-		browserCache: 'force-cache',
+		browserCache: 'no-store',
 		multiple: true
 	}
 };
