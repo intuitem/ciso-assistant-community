@@ -57,7 +57,7 @@ class PostureAssessmentViewSet(BaseModelViewSet):
             super()
             .get_queryset()
             .select_related("folder", "perimeter", "framework")
-            .prefetch_related("assets", "authors")
+            .prefetch_related("assets__folder", "authors")
         )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
