@@ -1372,7 +1372,7 @@ class TestBatchAssetMutation:
         upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}])
         res = self.batch(s, "remove_m2m", s["asset1"])
         assert res.status_code == 200
-        assert "recorded results" in res.json()["failed"][0]["error"]
+        assert "recorded results" in str(res.json()["failed"][0]["error"])
         assert s["pa"].assets.filter(id=s["asset1"].id).exists()
 
     def test_locked_blocks_batch_mutation(self, setup):
@@ -1381,7 +1381,9 @@ class TestBatchAssetMutation:
         s["pa"].save(update_fields=["is_locked"])
         newcomer = Asset.objects.create(name="vm-3", folder=s["domain"])
         res = self.batch(s, "add_m2m", newcomer)
-        assert res.json()["failed"][0]["error"] == "cannot modify a locked assessment"
+        assert "cannot modify a locked assessment" in str(
+            res.json()["failed"][0]["error"]
+        )
         assert not s["pa"].assets.filter(id=newcomer.id).exists()
 
 
@@ -1512,7 +1514,9 @@ class TestPosturePermissions:
             },
             format="json",
         )
-        assert res.json()["failed"][0]["error"] == "permission denied to add this asset"
+        assert "permission denied to add this asset" in str(
+            res.json()["failed"][0]["error"]
+        )
         assert not s["pa"].assets.filter(id=hidden.id).exists()
 
     def test_hidden_assets_filtered_from_read(self, setup):
@@ -1581,8 +1585,8 @@ class TestPosturePermissions:
             },
             format="json",
         )
-        error = res.json()["failed"][0]["error"]
-        assert error == "permission denied to remove this asset"
+        assert res.json()["failed"] == []
+        assert "hidden-vm" not in str(res.json())
         assert s["pa"].assets.filter(id=hidden.id).exists()
 
         res = tester.patch(
@@ -1595,7 +1599,7 @@ class TestPosturePermissions:
         assert s["pa"].assets.filter(id=hidden.id).exists()
         assert s["pa"].assets.count() == 3
 
-    def test_batch_remove_invisible_asset_blocked(self, setup):
+    def test_batch_remove_invisible_asset_kept(self, setup):
         s = setup
         other = Folder.objects.create(
             parent_folder=Folder.get_root_folder(),
@@ -1616,9 +1620,8 @@ class TestPosturePermissions:
             },
             format="json",
         )
-        assert (
-            res.json()["failed"][0]["error"] == "permission denied to remove this asset"
-        )
+        assert res.json()["failed"] == []
+        assert "hidden-vm" not in str(res.json())
         assert s["pa"].assets.filter(id=hidden.id).exists()
 
     def test_patch_keeps_invisible_unmeasured_asset(self, setup):

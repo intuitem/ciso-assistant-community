@@ -1296,9 +1296,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         self._process_request_data(request)
         return super().destroy(request, *args, **kwargs)
 
-    def validate_batch_m2m(self, obj, action_type, field_name, ids) -> str | None:
-        return None
-
     @action(detail=False, methods=["post"], url_path="batch-action")
     def batch_action(self, request):
         """
@@ -1404,38 +1401,28 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                         )
                     obj.delete()
 
-                elif action_type in ("add_m2m", "remove_m2m"):
-                    ids_to_modify = value if isinstance(value, list) else [value]
-                    error = self.validate_batch_m2m(
-                        obj, action_type, field_name, ids_to_modify
-                    )
-                    if error:
-                        failed.append(
-                            {"id": str(obj_id), "name": str(obj), "error": error}
-                        )
-                        continue
-                    m2m_field = getattr(obj, field_name)
-                    if action_type == "add_m2m":
-                        m2m_field.add(*ids_to_modify)
-                    else:
-                        m2m_field.remove(*ids_to_modify)
-                    obj.save(update_fields=["updated_at"])
-                    try:
-                        dispatch_webhook_event(obj, "updated")
-                    except Exception:
-                        logger.error(
-                            "Webhook dispatch failed on batch %s",
-                            action_type,
-                            exc_info=True,
-                        )
-
                 else:
                     # Build data dict for the serializer
                     if action_type == "change_folder":
                         data = {"folder": value}
-                    elif action_type == "change_m2m":
-                        actor_ids = value if isinstance(value, list) else [value]
-                        data = {field_name: actor_ids}
+                    elif action_type in ("change_m2m", "add_m2m", "remove_m2m"):
+                        target = {
+                            str(i)
+                            for i in (value if isinstance(value, list) else [value])
+                        }
+                        if action_type != "change_m2m":
+                            current = {
+                                str(pk)
+                                for pk in getattr(obj, field_name).values_list(
+                                    "pk", flat=True
+                                )
+                            }
+                            target = (
+                                current | target
+                                if action_type == "add_m2m"
+                                else current - target
+                            )
+                        data = {field_name: list(target)}
                     else:  # change_field
                         data = {field_name: value}
 
@@ -1447,6 +1434,20 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                         partial=True,
                         context=self.get_serializer_context(),
                     )
+                    not_editable = [
+                        k
+                        for k in data
+                        if k not in serializer.fields or serializer.fields[k].read_only
+                    ]
+                    if not_editable:
+                        failed.append(
+                            {
+                                "id": str(obj_id),
+                                "name": str(obj),
+                                "error": f"field not editable: {', '.join(not_editable)}",
+                            }
+                        )
+                        continue
                     if not serializer.is_valid():
                         failed.append(
                             {
@@ -1470,6 +1471,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                         else "Permission denied",
                     }
                 )
+            except DRFValidationError as e:
+                failed.append({"id": str(obj_id), "name": str(obj), "error": e.detail})
             except Exception:
                 logger.error("Batch action failed for %s", obj_id, exc_info=True)
                 failed.append(
