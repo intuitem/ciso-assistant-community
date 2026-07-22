@@ -4,10 +4,10 @@ overrides:
   glob: ^10.5.0
   valibot: ^1.2.0
   validator: ^13.15.22
-  js-yaml: ^4.2.0
+  js-yaml: ^4.3.0
   '@eslint/plugin-kit': ^0.5.1
   cookie: ^1.1.1
-  tar: ^7.5.16
+  tar: ^7.5.20
   lodash: ^4.18.1
   lodash-es: ^4.18.1
   minimatch: ^10.2.3
@@ -18,7 +18,7 @@ overrides:
   effect: ^3.21.0
   picomatch: ^4.0.4
   yaml: ^1.10.3
-  brace-expansion: ^5.0.5
+  brace-expansion: ^5.0.7
   postcss: ^8.5.10
 engineStrict: true
 allowBuilds:

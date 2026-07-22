@@ -273,6 +273,39 @@ def test_validation_rejects_cross_framework_parent_urn():
     ), validation["errors"]
 
 
+@pytest.mark.django_db
+def test_validate_backfills_missing_framework_ref_id():
+    """Migrated drafts may lack the framework ref_id; the assembled document
+    derives it from the URN leaf."""
+    draft = LibraryDraft(
+        name="legacy",
+        packager="me",
+        ref_id="legacy",
+        version=1,
+        urn="urn:me:risk:library:legacy",
+        content={
+            "frameworks": [
+                {
+                    "urn": "urn:me:risk:framework:legacy",
+                    "name": "Legacy",
+                    "requirement_nodes": [
+                        {"urn": "urn:me:risk:req_node:legacy:root", "assessable": True}
+                    ],
+                }
+            ]
+        },
+    )
+    assert draft.to_library_dict()["objects"]["frameworks"][0]["ref_id"] == "legacy"
+    validation = builder.validate_draft_document(draft)
+    assert validation["errors"] == []
+    # the stored draft content is left as-is
+    assert "ref_id" not in draft.content["frameworks"][0]
+    # persisting the derived ref_id is hash-neutral
+    before = draft.publish_fingerprint()
+    draft.content["frameworks"][0]["ref_id"] = "legacy"
+    assert draft.publish_fingerprint() == before
+
+
 def test_extract_individual_selection_of_leaf_objects_is_clean():
     result = builder.extract_objects(
         source_content=SOURCE_LIBRARY["objects"],
@@ -993,6 +1026,21 @@ def test_new_choice_urns_avoid_collisions_and_stay_sequential():
     assert by_value["First"] == f"{q_urn}:choice:2"
     assert by_value["Maybe"] == f"{q_urn}:choice:3"
     assert len({choice["urn"] for choice in choices}) == 3
+
+
+def test_editor_doc_backfills_missing_framework_ref_id():
+    from library import framework_editor as fw_editor
+
+    original = builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    stripped = {k: v for k, v in original.items() if k != "ref_id"}
+    doc = fw_editor.framework_to_editor_doc(stripped, locale="en")
+    assert not doc["framework_meta"]["ref_id"]
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=stripped)
+    assert rebuilt["ref_id"] == rebuilt["urn"].rsplit(":", 1)[-1]
+    # a meta-provided ref_id still wins
+    doc["framework_meta"]["ref_id"] = "custom-ref"
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=stripped)
+    assert rebuilt["ref_id"] == "custom-ref"
 
 
 @pytest.mark.django_db

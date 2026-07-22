@@ -44,6 +44,7 @@
 * Compliance
   * [Audits](concepts/audits.md)
     * [Manage extended result](concepts/extended-results.md)
+  * [Technical postures](concepts/technical-postures.md)
   * [Evidence](concepts/evidence.md)
 * Specialised modules
   * [Third-party risk](concepts/third-party-risk.md)

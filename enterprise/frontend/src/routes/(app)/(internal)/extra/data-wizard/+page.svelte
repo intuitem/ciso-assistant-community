@@ -270,7 +270,7 @@
 				</h4>
 				<a
 					class="text-indigo-600 hover:text-indigo-400 dark:text-indigo-300"
-					href="https://intuitem.gitbook.io/ciso-assistant/guide/data-import-wizard"
+					href="https://intuitem.gitbook.io/ciso-assistant/configuration/data-import"
 					>{m.dataWizardTemplatesAndGuidelines()}</a
 				>
 			</div>

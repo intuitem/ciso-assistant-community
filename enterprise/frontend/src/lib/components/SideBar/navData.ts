@@ -356,6 +356,12 @@ export const navData = {
 					exclude: ['BI-RL-ADE']
 				},
 				{
+					name: 'postureAssessments',
+					fa_icon: 'fa-solid fa-list-check',
+					href: '/posture-assessments',
+					permissions: ['view_postureassessment']
+				},
+				{
 					name: 'evidences',
 					fa_icon: 'fa-solid fa-receipt',
 					href: '/evidences'

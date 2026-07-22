@@ -2181,6 +2181,39 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'is_locked' }
 		]
 	},
+	'posture-assessments': {
+		name: 'postureassessment',
+		localName: 'postureAssessment',
+		localNamePlural: 'postureAssessments',
+		verboseName: 'Technical posture',
+		verboseNamePlural: 'Technical postures',
+		endpointUrl: 'automation/posture-assessments',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'perimeter', urlModel: 'perimeters' },
+			{ field: 'framework', urlModel: 'frameworks' },
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'authors', urlModel: 'actors' },
+			{ field: 'follow_up_assessment', urlModel: 'findings-assessments' }
+		],
+		selectFields: [{ field: 'status' }],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'perimeter' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'framework' },
+			{ field: 'follow_up_assessment' },
+			{ field: 'history_depth' },
+			{ field: 'authors' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'status' },
+			{ field: 'observation' }
+		]
+	},
 	findings: {
 		name: 'finding',
 		localName: 'finding',
@@ -2235,6 +2268,10 @@ export const URL_MODEL_MAP: ModelMap = {
 				addExisting: {
 					parentField: 'reference_controls'
 				}
+			},
+			{
+				field: 'findings',
+				urlModel: 'task-templates'
 			}
 		],
 		selectFields: [
@@ -2364,6 +2401,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
+			{ field: 'findings', urlModel: 'findings' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [
