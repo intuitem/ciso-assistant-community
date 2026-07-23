@@ -78,7 +78,7 @@ class ConsoleContext:
             self.warning_messages[sheet_name] = [msg]
         return
     
-    def add_sheet_verbose_msg(self, sheet_name: str, msg):
+    def add_sheet_verbose_msg(self, sheet_name: str, msg: str):
         
         if sheet_name in self.verbose_messages:
             self.verbose_messages[sheet_name].append(msg)
@@ -213,7 +213,7 @@ def check_file_validity(files: List[str] | str, filetype_name: str, valid_file_e
 # it'll be deduced by comparing 2 "threats" (or "reference_controls") URNs.
 # If there's only 1 element in the "threats" (or "reference_controls") list, it'll return "None".
 # It'll also return "None" if nothing matches between the first 2 elements in the list.
-def __calculate_base_urn(items):
+def __calculate_base_urn(items: List[Dict]):
     if len(items) < 2:
         return None
 
@@ -282,7 +282,7 @@ def get_meta_sheets_names_from_type(wb: Workbook, sheet_type: MetaTypes) -> List
 
 
 # Retrieve the value associated with a given key in a meta sheet (2-column format).
-def get_meta_value(df, key_name: str, sheet_name: str, required: bool = False, with_row: bool = False) -> tuple[str | None, int | None]:
+def get_meta_value(df: pd.DataFrame, key_name: str, sheet_name: str, required: bool = False, with_row: bool = False) -> tuple[str | None, int | None]:
     
     """
     If with_row=False (default): returns value
@@ -392,11 +392,11 @@ def validate_urn(urn: str, context: str = None, row: str | int = None):
     if not re.fullmatch(pattern, urn):
         raise ValueError(f"({context if context else 'validate_urn'}){' Row #'+str(row)+':' if row else ""} Invalid URN \"{urn}\" : Only lowercase alphanumeric characters, '-', '_', and '.' are allowed. URNs must begin with \"urn:\"")
 
-def validate_ref_id(ref_id: str, context: str = None, row = None):
+def validate_ref_id(ref_id: str, context: str = None, row: str | int = None):
     if not re.fullmatch(r"[a-zA-Z0-9._-]+", ref_id):
         raise ValueError(f"({context if context else 'validate_ref_id'}){' Row #'+str(row)+':' if row else ""} Invalid Ref. ID \"{ref_id}\" : Only alphanumeric characters, '-', '_', and '.' are allowed")
 
-def validate_ref_id_with_spaces(ref_id: str, context: str = None, row = None):
+def validate_ref_id_with_spaces(ref_id: str, context: str = None, row: str | int = None):
     if not re.fullmatch(r"[a-zA-Z0-9._\- ]+", ref_id):
         raise ValueError(f"({context if context else 'validate_ref_id'}){' Row #'+str(row)+':' if row else ""} Invalid Ref. ID \"{ref_id}\" : Only alphanumeric characters, '-', '_', ' ', and '.' are allowed")
 
@@ -404,7 +404,7 @@ def validate_sheet_name(sheet_name: str, context: str = None):
     if not (sheet_name.endswith(SheetTypes.META.value) or sheet_name.endswith(SheetTypes.CONTENT.value)):
         raise ValueError(f"({context if context else 'validate_sheet_name'}) Invalid sheet name \"{sheet_name}\". Sheet names must end with '{SheetTypes.META.value}' or '{SheetTypes.CONTENT.value}'")
 
-def is_valid_locale(locale_str):
+def is_valid_locale(locale_str: str):
     return bool(re.fullmatch(r"[a-z0-9]{2}", locale_str))
 
 def validate_no_spaces(value: str, value_name: str, context: str = None, row: int = None):
@@ -464,7 +464,7 @@ def validate_labels(labels_value: str, context: str, row: int):
 
 
 def validate_integer_value(
-    value_or_df,
+    value_or_df: pd.DataFrame | str | int | float,
     sheet_name: str = None,
     column_name: str = None,
     context: str = None,
@@ -599,7 +599,7 @@ def validate_integer_value(
 
 
 # Global Checks ("type" value is checked by default)
-def validate_meta_sheet(df, sheet_name: str, expected_keys:List[str], expected_type: MetaTypes, context: str):
+def validate_meta_sheet(df: pd.DataFrame, sheet_name: str, expected_keys:List[str], expected_type: MetaTypes, context: str):
     
     # Validate all required keys (excluding "type" which is handled separately)
     
@@ -630,7 +630,7 @@ def validate_meta_sheet(df, sheet_name: str, expected_keys:List[str], expected_t
         raise ValueError(f"({context}) [{sheet_name}] Row #{type_row_index + 1}: Invalid type \"{type_value}\". Expected \"{expected_type.value}\"")
     
 
-def validate_optional_values_meta_sheet(df, sheet_name: str, optional_keys: List[str], context: str, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_optional_values_meta_sheet(df: pd.DataFrame, sheet_name: str, optional_keys: List[str], context: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     if not optional_keys:
         return
@@ -655,7 +655,7 @@ def validate_optional_values_meta_sheet(df, sheet_name: str, optional_keys: List
                 print(msg)
 
 
-def validate_extra_locales_in_meta(df, sheet_name: str, context: str):
+def validate_extra_locales_in_meta(df: pd.DataFrame, sheet_name: str, context: str):
 
     keys = df.iloc[:, 0].dropna().astype(str)
 
@@ -692,7 +692,7 @@ def validate_extra_locales_in_meta(df, sheet_name: str, context: str):
 
 
 # Check that if the "name" key exists and has a value, and if the corresponding "<name>_content" sheet exists.
-def validate_related_content_sheet_from_name_key(wb: Workbook, df, sheet_name: str, context: str):
+def validate_related_content_sheet_from_name_key(wb: Workbook, df: pd.DataFrame, sheet_name: str, context: str):
 
     key_row = df[df.iloc[:, 0] == "name"]
     if key_row.empty:
@@ -768,7 +768,7 @@ def _framework_validate_meta_min_max_score(df: pd.DataFrame, sheet_name: str):
 
 
 # [META] Library {OK}²
-def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_library_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
     
@@ -814,7 +814,7 @@ def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
 
 
 # [META] Framework {OK}²
-def validate_framework_meta(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_framework_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
 
@@ -858,7 +858,7 @@ def validate_framework_meta(wb: Workbook, df, sheet_name: str, verbose: bool = F
 
 
 # [META] Threats {OK}²
-def validate_threats_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_threats_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
 
@@ -880,7 +880,7 @@ def validate_threats_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
 
 
 # [META] Reference Controls {OK}
-def validate_reference_controls_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_reference_controls_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
 
@@ -902,7 +902,7 @@ def validate_reference_controls_meta(df, sheet_name: str, verbose: bool = False,
 
 
 # [META] Risk Matrix {OK}²
-def validate_risk_matrix_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_risk_matrix_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
 
@@ -928,7 +928,7 @@ def validate_risk_matrix_meta(df, sheet_name: str, verbose: bool = False, ctx: C
 
 
 # [META] Implementation Groups {OK}²
-def validate_implementation_groups_meta(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_implementation_groups_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
 
@@ -948,7 +948,7 @@ def validate_implementation_groups_meta(wb: Workbook, df, sheet_name: str, verbo
 
 
 # [META] Mappings {OK}²
-def validate_requirement_mapping_set_meta(df, sheet_name: str, verbose, ctx: ConsoleContext = None):
+def validate_requirement_mapping_set_meta(df: pd.DataFrame, sheet_name: str, verbose: bool, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
 
@@ -1011,7 +1011,7 @@ def validate_requirement_mapping_set_meta(df, sheet_name: str, verbose, ctx: Con
 
 
 # [META] Scores {OK}²
-def validate_scores_meta(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_scores_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
 
@@ -1031,7 +1031,7 @@ def validate_scores_meta(wb: Workbook, df, sheet_name: str, verbose: bool = Fals
 
 
 # [META] Answers {OK}²
-def validate_answers_meta(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_answers_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
 
@@ -1051,7 +1051,7 @@ def validate_answers_meta(wb: Workbook, df, sheet_name: str, verbose: bool = Fal
 
 
 # [META] URN Prefix {OK}²
-def validate_urn_prefix_meta(df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_urn_prefix_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
 
@@ -1074,7 +1074,7 @@ def validate_urn_prefix_meta(df, sheet_name: str, verbose: bool = False, ctx: Co
 
 
 # Global Checks
-def validate_content_sheet(df, sheet_name: str, required_columns: List[str], context: str):
+def validate_content_sheet(df: pd.DataFrame, sheet_name: str, required_columns: List[str], context: str):
     
     required_values_missing = []
     invalid_ref_ids = []
@@ -1115,7 +1115,7 @@ def validate_content_sheet(df, sheet_name: str, required_columns: List[str], con
                 )
 
 
-def validate_optional_columns_content_sheet(df, sheet_name: str, optional_columns: List[str], context: str, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_optional_columns_content_sheet(df: pd.DataFrame, sheet_name: str, optional_columns: List[str], context: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     for col in optional_columns:
         
@@ -1187,7 +1187,7 @@ def validate_column_max_length(df: pd.DataFrame, column_name: str, max_length: i
 
 
 # Check that values in each column from the given list are unique. Raise error or emit warning if duplicates are found
-def validate_unique_column_values(df, column_names: List[str], sheet_name: str, context: str = None, warn_only: bool = False, ctx: ConsoleContext = None):
+def validate_unique_column_values(df: pd.DataFrame, column_names: List[str], sheet_name: str, context: str = None, warn_only: bool = False, ctx: ConsoleContext = None):
 
     context = context or "validate_unique_column_values"
 
@@ -1224,7 +1224,7 @@ def validate_unique_column_values(df, column_names: List[str], sheet_name: str, 
 
 # Pass "wb" when the sheet requires type-specific validation.
 # It allows the function to retrieve the "_content" sheet type from its corresponding "_meta" sheet and apply the appropriate checks.
-def validate_extra_locales_in_content(df, sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False, wb: Workbook = None):
+def validate_extra_locales_in_content(df: pd.DataFrame, sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False, wb: Workbook = None):
 
     for col in df.columns:
         match = re.fullmatch(r"(.+)\[(.+)\]", str(col))  # Match "column_name[locale]"
@@ -1987,7 +1987,7 @@ def print_info_about_internal_external_URN_prefix(sheet_name: str, internal_thre
 
 
 # Check that each (source_node_id, target_node_id) pair is unique. Emits a warning or raises an error depending on "warn_only".
-def _req_map_set_validate_unique_mappings(df, sheet_name: str, warn_only: bool = False, ctx: ConsoleContext = None):
+def _req_map_set_validate_unique_mappings(df: pd.DataFrame, sheet_name: str, warn_only: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
 
@@ -2871,7 +2871,7 @@ def _framework_validate_depth_consistency(df: pd.DataFrame, sheet_name: str):
 
 
 # [CONTENT] Framework {OK} [Check new optional columns : "scores_definition"]
-def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
     required_columns = ["depth"]  # "assessable" isn't there because it can be empty
@@ -2957,7 +2957,7 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
 
 
 # [CONTENT] Threats {OK}²
-def validate_threats_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_threats_content(df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     required_columns = ["ref_id", "name"]
@@ -2976,7 +2976,7 @@ def validate_threats_content(df, sheet_name, verbose: bool = False, ctx: Console
 
 
 # [CONTENT] Reference Controls {OK}²
-def validate_reference_controls_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_reference_controls_content(df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     required_columns = ["ref_id", "name"]
@@ -3003,7 +3003,7 @@ def validate_reference_controls_content(df, sheet_name, verbose: bool = False, c
 
 
 # [CONTENT] Risk Matrix²
-def validate_risk_matrix_content(df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_risk_matrix_content(df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     required_columns = ["type", "id", "abbreviation", "name", "description"]
@@ -3033,7 +3033,7 @@ def validate_risk_matrix_content(df, sheet_name, verbose: bool = False, ctx: Con
 
 
 # [CONTENT] Implementation Groups {OK}²
-def validate_implementation_groups_content(wb: Workbook, df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_implementation_groups_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     required_columns = ["ref_id", "name"]
@@ -3065,7 +3065,7 @@ def validate_implementation_groups_content(wb: Workbook, df, sheet_name, verbose
 
 
 # [CONTENT] Requirement Mapping Set {OK}²
-def validate_requirement_mapping_set_content(wb: Workbook, df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_requirement_mapping_set_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     required_columns = ["source_node_id", "target_node_id", "relationship"]
@@ -3095,7 +3095,7 @@ def validate_requirement_mapping_set_content(wb: Workbook, df, sheet_name, verbo
 
 
 # [CONTENT] Scores {OK} [Add logic checking sheet presence in CONTENT FRAMEWORK sheet in column "scores_definition"]
-def validate_scores_content(wb: Workbook, df, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_scores_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     required_columns = ["score", "name"]
@@ -3120,7 +3120,7 @@ def validate_scores_content(wb: Workbook, df, sheet_name, verbose: bool = False,
 
 
 # [CONTENT] Answers {OK} [Check new optional column: "description", "select_implementation_groups", "add_score", "compute_result", "color"]
-def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     required_columns = ["id", "question_type"]
@@ -3156,7 +3156,7 @@ def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose
 
 
 # [CONTENT] URN Prefix {OK}²
-def validate_urn_prefix_content(wb: Workbook, df: pd.DataFrame, sheet_name, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_urn_prefix_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     required_columns = ["prefix_id", "prefix_value"]
@@ -3184,7 +3184,7 @@ def validate_urn_prefix_content(wb: Workbook, df: pd.DataFrame, sheet_name, verb
 # DISPATCHING
 # ─────────────────────────────────────────────────────────────
 
-def dispatch_meta_validation(wb: Workbook, df, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+def dispatch_meta_validation(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     
@@ -3216,7 +3216,7 @@ def dispatch_meta_validation(wb: Workbook, df, sheet_name: str, verbose: bool = 
         raise ValueError(f"({fct_name}) [{sheet_name}] Unknown meta type \"{type_value}\"")
 
 
-def dispatch_content_validation(wb: Workbook, df, sheet_name: str, corresponding_meta_type: str, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
+def dispatch_content_validation(wb: Workbook, df: pd.DataFrame, sheet_name: str, corresponding_meta_type: str, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
     
@@ -3246,7 +3246,7 @@ def dispatch_content_validation(wb: Workbook, df, sheet_name: str, corresponding
 # MAIN VALIDATION FUNCTION
 # ─────────────────────────────────────────────────────────────
 
-def validate_excel_structure(filepath, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_excel_structure(filepath: str | Path, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
 
@@ -3395,7 +3395,7 @@ def main():
 
 
 
-def bulk_check(args, external_refs: List[str] = None, enable_ctx: bool = False) -> Tuple[Dict[str, ConsoleContext], List[str]]:
+def bulk_check(args: argparse.Namespace, external_refs: List[str] = None, enable_ctx: bool = False) -> Tuple[Dict[str, ConsoleContext], List[str]]:
     
     ctxs: Dict[str, ConsoleContext] = {}   # List of all contexts
     """
@@ -3484,7 +3484,7 @@ def bulk_check(args, external_refs: List[str] = None, enable_ctx: bool = False) 
     return ctxs, error_files
 
 
-def single_file_check(args, external_refs: List[str] = None, enable_ctx: bool = False) -> Tuple[ConsoleContext, bool]:
+def single_file_check(args: argparse.Namespace, external_refs: List[str] = None, enable_ctx: bool = False) -> Tuple[ConsoleContext, bool]:
     
     ctx = None
     error_encountered = False
