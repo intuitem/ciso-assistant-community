@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
+	import { publicHookUrl } from './hook-url';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 
 	interface Props {
@@ -36,7 +37,7 @@
 	}
 
 	function hookUrl(registration: any): string {
-		return `${location.origin}/api/workflows/hooks/${workflowId}/${registration.node_ref}/${registration.secret}/`;
+		return publicHookUrl(workflowId, registration.node_ref, registration.secret);
 	}
 
 	let copiedId = $state<string | null>(null);

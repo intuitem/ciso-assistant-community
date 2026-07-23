@@ -12,6 +12,7 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { publicHookUrl } from './hook-url';
 	import DataBrowser from './DataBrowser.svelte';
 	import { renderTemplate } from './expressions';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
@@ -247,7 +248,7 @@
 	);
 	const nodeHookUrl = $derived(
 		triggerRegistration && triggerConfig?.type === 'webhook'
-			? `${location.origin}/api/workflows/hooks/${workflowId}/${nodeDomain.ref}/${triggerRegistration.secret}/`
+			? publicHookUrl(workflowId, nodeDomain.ref, triggerRegistration.secret)
 			: null
 	);
 

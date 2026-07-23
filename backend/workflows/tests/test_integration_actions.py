@@ -358,6 +358,20 @@ class TestWebhookHardening:
         )
         assert resp.status_code == 404
 
+    def test_inbound_hooks_kill_switch(self, settings):
+        # D23: environments that want no unauthenticated ingress disable all
+        # hooks uniformly; a valid URL is indistinguishable from a wrong one.
+        workflow = self._hooked_workflow()
+        registration = workflow.triggers.get(node_ref="hook")
+        url = f"/api/workflows/hooks/{workflow.id}/hook/{registration.secret}/"
+        client = APIClient()
+
+        settings.WORKFLOWS_INBOUND_HOOKS = False
+        assert client.post(url, {}, format="json").status_code == 404
+
+        settings.WORKFLOWS_INBOUND_HOOKS = True
+        assert client.post(url, {}, format="json").status_code == 201
+
 
 @pytest.mark.django_db
 class TestSecretApi:

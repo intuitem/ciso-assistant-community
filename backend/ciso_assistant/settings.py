@@ -849,6 +849,13 @@ WORKFLOWS_ASYNC_EXECUTION = (
     os.environ.get("WORKFLOWS_ASYNC_EXECUTION", "").lower() == "true"
 )
 
+# Kill-switch for inbound workflow webhooks (spec D23): when disabled, hook
+# URLs answer 404 uniformly, for environments that want no unauthenticated
+# ingress at all.
+WORKFLOWS_INBOUND_HOOKS = (
+    os.environ.get("WORKFLOWS_INBOUND_HOOKS", "true").lower() != "false"
+)
+
 # Allow outbound server-side requests (webhooks, integrations, LLM URLs) to private/loopback addresses
 ALLOW_PRIVATE_NETWORK_REQUESTS = os.environ.get(
     "ALLOW_PRIVATE_NETWORK_REQUESTS", "False"

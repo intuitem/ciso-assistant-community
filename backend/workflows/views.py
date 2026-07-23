@@ -361,6 +361,10 @@ class WorkflowWebhookView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, workflow_id, node_ref, secret):
+        from django.conf import settings
+
+        if not getattr(settings, "WORKFLOWS_INBOUND_HOOKS", True):
+            return Response(status=status.HTTP_404_NOT_FOUND)
         registration = (
             WorkflowTrigger.objects.filter(
                 workflow_id=workflow_id,
