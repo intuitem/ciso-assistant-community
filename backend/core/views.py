@@ -1401,17 +1401,20 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 )
                 continue
 
+            # Built-in / library objects are immutable through the API (mirrors the
+            # object-permission guard); skip any mutating batch action on them.
+            if getattr(obj, "builtin", False) or getattr(obj, "urn", None):
+                failed.append(
+                    {
+                        "id": str(obj_id),
+                        "name": str(obj),
+                        "error": "Cannot modify builtin object",
+                    }
+                )
+                continue
+
             try:
                 if action_type == "delete":
-                    if getattr(obj, "builtin", False) or getattr(obj, "urn", None):
-                        failed.append(
-                            {
-                                "id": str(obj_id),
-                                "name": str(obj),
-                                "error": "Cannot delete builtin object",
-                            }
-                        )
-                        continue
                     self.perform_destroy(obj)
 
                 else:

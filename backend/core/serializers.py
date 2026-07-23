@@ -84,6 +84,10 @@ class BaseModelSerializer(serializers.ModelSerializer):
             if not ff_is_enabled(flag_name):
                 self.fields.pop(field_name)
 
+        # `builtin` flag must never be writable through the API.
+        if "builtin" in self.fields:
+            self.fields["builtin"].read_only = True
+
     def _strip_respondent_protected_fields(self, attrs: dict) -> dict:
         """Drop `RESPONDENT_PROTECTED_FIELDS` from *attrs* when the requesting
         user is a respondent on the target object's folder.

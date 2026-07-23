@@ -30,6 +30,14 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
         if not request.method:
             return False
 
+        # Built-in objects are code-managed and immutable through the API: they may
+        # be read, but never changed or deleted, regardless of the caller's
+        # permissions.
+        if request.method in ("PUT", "PATCH", "DELETE") and getattr(
+            obj, "builtin", False
+        ):
+            return False
+
         perms = self.get_required_permissions(request.method, type(obj))
         if not perms:
             return False
