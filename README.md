@@ -256,7 +256,7 @@ Read more here: [AI engine](backend/chat/README.md)
 22. Cyber Resilience Act (CRA) 🇪🇺
 23. TIBER-EU 🇪🇺
 24. NIST Privacy Framework 🇺🇸
-25. TISAX (VDA ISA) v5.1 and v6.0 🚘
+25. TISAX (VDA ISA) v5.1, v6.0 and v2027 🚘
 26. ANSSI hygiene guide 🇫🇷
 27. Essential Cybersecurity Controls (ECC) 🇸🇦
 28. CIS Controls v8\* 🌐
