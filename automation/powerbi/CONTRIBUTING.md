@@ -2,7 +2,7 @@
 
 ## Layout
 
-```
+```text
 automation/powerbi/
 ├── DESIGN.md            # architecture decisions — read first
 ├── README.md            # user-facing install/usage doc
@@ -39,10 +39,25 @@ repo mounted via Parallels shared folders.
 2. Install the **Power Query SDK** extension; run its *Setup workspace*
    task if prompted (regenerates `.vscode/settings.json`).
 3. **Set credential** task → auth kind *Key* → paste a PAT from your dev
-   instance.
-4. Edit `CisoAssistant.query.pq` to point at your dev instance URL
-   (`https://localhost:8443` when running the docker compose stack).
-5. *Evaluate current file* task → results appear in the panel.
+   instance. Credentials bind to the exact base URL in the query file —
+   change the URL and the SDK may prompt again (*Clear ALL credentials*
+   resets a confused state).
+4. **Point the test query at your dev instance**: the URL is the literal on
+   the last line of `CisoAssistant.query.pq`. This is a local, uncommitted
+   edit — the repo keeps the neutral `https://localhost:8443` placeholder;
+   never commit your instance URL. From a VM, `localhost` is the VM itself:
+   target the host instead (Parallels: the Mac is `10.211.55.2`; run
+   `ALLOWED_HOSTS=localhost,127.0.0.1,10.211.55.2 python manage.py runserver 0.0.0.0:8000`
+   on the host and use `http://10.211.55.2:8000`). Plain `http://` is
+   accepted for loopback/private hosts only; the connector rejects it for
+   public hosts (PAT travels in a header).
+5. *Evaluate current file* task → results appear in the panel. To inspect a
+   specific table or debug a filter, replace the last line with a drill
+   expression, e.g.
+   `CisoAssistant.Contents("...") {[Name = "Facts"]}[Data] {[Name = "Applied Controls"]}[Data]`
+   (optionally wrapped in `Table.SelectRows(..., each [updated_at] >= #datetime(...))`
+   to watch fold behaviour in the backend logs) — same rule: revert before
+   committing.
 6. *Build* task (pick **MakePQX**, not MSBuild) → `bin/AnyCPU/Debug/connector.mez`.
    MakePQX names the output after the workspace *folder*; the MSBuild path
    (`CisoAssistant.proj`) names it `CisoAssistant.mez` after the project.
@@ -57,6 +72,29 @@ repo mounted via Parallels shared folders.
    Allow uncertified extensions in Power BI Desktop's security options,
    restart Desktop, and test **Get Data → CISO Assistant** end-to-end.
 8. Run *TestConnection* task before touching gateway-related code.
+
+### Testing the signed .pqx locally
+
+Pack + sign with the extension's bundled MakePQX (path under
+`%USERPROFILE%\.vscode\extensions\...powerquery-sdk...\.nuget\...\tools\`),
+then validate through Power BI Desktop, not MakePQX:
+
+1. `MakePQX pack -mz bin\AnyCPU\Debug\connector.mez -t bin\AnyCPU\Debug\CisoAssistant.pqx`
+2. `MakePQX sign <pqx> --certificate <pfx> --password <pwd> --replace`
+3. Put the `.pqx` in the Custom Connectors folder and **remove the `.mez`**
+   there (both present = duplicate connector).
+4. Add the signing thumbprint to
+   `HKLM:\Software\Policies\Microsoft\Power BI Desktop\TrustedCertificateThumbprints`
+   (see `../signing/trust-thumbprint.md`), set Desktop's Data Extensions
+   security to **(Recommended)**, restart. Desktop refusing to load the
+   connector at Recommended = signature or trust problem; loading = the
+   full customer path works.
+
+Known quirk (ARM64 VM): the extension-bundled `MakePQX verify` can crash
+with a `System.Threading.Tasks.Extensions` assembly-binding error while
+printing its report — after a successful `sign`, use the Desktop
+trust test above instead. CI runs verify on an x64 runner with
+NuGet-fresh tools and gates on its exit code.
 
 `.mez` is just a zip of the connector folder contents — CI
 (`.github/workflows/powerbi-connector.yml`) builds it with

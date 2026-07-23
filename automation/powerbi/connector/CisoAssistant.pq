@@ -64,7 +64,28 @@ ContentsImpl = (BaseUrl as text) as table =>
     in
         if check <> null then nav else nav;
 
-NormalizeBaseUrl = (url as text) as text => Text.TrimEnd(url, "/");
+// The PAT travels in a request header, so cleartext HTTP is only allowed
+// toward loopback/private/dev hosts; public instances must use HTTPS.
+NormalizeBaseUrl = (url as text) as text =>
+    let
+        trimmed = Text.TrimEnd(url, "/"),
+        parts = Uri.Parts(trimmed),
+        host = Text.Lower(parts[Host]),
+        octets = Text.Split(host, "."),
+        secondOctet = if List.Count(octets) = 4 then (try Number.FromText(octets{1}) otherwise null) else null,
+        isPrivateHost =
+            host = "localhost"
+            or Text.StartsWith(host, "127.")
+            or Text.StartsWith(host, "10.")
+            or Text.StartsWith(host, "192.168.")
+            or (Text.StartsWith(host, "172.") and secondOctet <> null and secondOctet >= 16 and secondOctet <= 31)
+            or Text.EndsWith(host, ".local"),
+        allowed = parts[Scheme] = "https" or isPrivateHost
+    in
+        if allowed then
+            trimmed
+        else
+            error Error.Record("DataSource.Error", Extension.LoadString("ErrorInsecureUrl"), [Host = host]);
 
 //
 // HTTP + pagination
@@ -123,14 +144,22 @@ GetAllRows = (BaseUrl as text, endpoint as text, extraQuery as record) as list =
     in
         List.Combine({ firstPage[results] } & remaining);
 
-// Single bounded request, used to keep navigator previews cheap (OnTake).
+// Bounded fetch for OnTake: pages up to `count` rows so previews stay
+// cheap while Table.FirstN with count > PageSize remains correct.
 GetTopRows = (BaseUrl as text, endpoint as text, extraQuery as record, count as number) as list =>
     let
         path = "api/" & endpoint & "/",
-        limit = List.Min({ count, PageSize }),
-        page = GetJson(BaseUrl, path, extraQuery & [ limit = Number.ToText(limit), offset = "0" ])
+        pageCount = Number.RoundUp(count / PageSize),
+        pages = List.Transform(
+            { 0 .. pageCount - 1 },
+            (i) =>
+                let
+                    pageLimit = List.Min({ PageSize, count - (i * PageSize) })
+                in
+                    GetJson(BaseUrl, path, extraQuery & [ limit = Number.ToText(pageLimit), offset = Number.ToText(i * PageSize) ])[results]
+        )
     in
-        page[results];
+        List.FirstN(List.Combine(pages), count);
 
 //
 // Schema machinery

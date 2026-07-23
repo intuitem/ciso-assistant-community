@@ -36,6 +36,9 @@
   <data name="ContentsLongDescription" xml:space="preserve">
     <value>Returns the CISO Assistant reporting tables: facts, dimensions and bridge tables, scoped to what your account is allowed to see.</value>
   </data>
+  <data name="ErrorInsecureUrl" xml:space="preserve">
+    <value>For security, plain http:// URLs are only allowed for local or private development hosts. Enter the https:// address of your CISO Assistant instance.</value>
+  </data>
   <data name="ErrorAuth" xml:space="preserve">
     <value>CISO Assistant rejected your Personal Access Token. It may be expired or revoked: create a new token from your profile page, then update the credentials in Power BI (Data source settings).</value>
   </data>

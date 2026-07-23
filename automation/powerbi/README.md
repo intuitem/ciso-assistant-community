@@ -40,31 +40,53 @@ Everything technical is handled for you:
 | Dimensions | Reference Controls | Control catalog (category, CSF function) |
 | Dimensions | Findings Assessments | Findings campaigns (category, treatment progress) |
 | Dimensions | Labels | Your own cross-cutting labels |
-| Bridges | 21 link tables | Many-to-many links (e.g. Requirement Assessment ↔ Applied Control, Risk Scenario ↔ Threat, Vulnerability ↔ Asset, fact ↔ Label) |
+| Bridges | 20 link tables | Many-to-many links (e.g. Requirement Assessment ↔ Applied Control, Risk Scenario ↔ Threat, Vulnerability ↔ Asset, fact ↔ Label) |
 
 Datetime columns are normalised to UTC.
 
 ## Installation (Power BI Desktop)
 
-1. Download `CisoAssistant.mez` (or the signed `CisoAssistant.pqx`) from the
-   release assets.
-2. Copy it to `Documents\Power BI Desktop\Custom Connectors` (create the
-   folder if needed). **Careful**: "Documents" here is the Windows *known
-   folder*, which on OneDrive-connected accounts is
-   `...\OneDrive\Documents`, not `C:\Users\<you>\Documents` — a connector
-   placed in the wrong one is silently ignored. This resolves it reliably:
+Both variants of the connector are attached to each release; pick the
+installation path that fits your environment:
 
-   ```powershell
-   $dir = Join-Path ([Environment]::GetFolderPath("MyDocuments")) "Power BI Desktop\Custom Connectors"
-   New-Item -ItemType Directory -Force $dir | Out-Null
-   Copy-Item .\CisoAssistant.mez $dir -Force
-   ```
-3. `.mez` only: in Power BI Desktop, set **File → Options and settings →
-   Options → Security → Data Extensions** to *Allow any extension to load
-   without validation or warning*, then restart Power BI Desktop.
-   For the signed `.pqx`, keep the *Recommended* level and have your IT team
-   trust the signing certificate instead — see
-   [signing/trust-thumbprint.md](signing/trust-thumbprint.md).
+| | Path A — signed `.pqx` (recommended) | Path B — `.mez` |
+|---|---|---|
+| Security level | Keeps Power BI's **(Recommended)** data-extension security | Requires lowering it to *allow any extension* |
+| Workstation privileges | **Admin required once** (registry entry to trust our certificate, deployable by GPO) | None |
+| Best for | Managed/corporate workstations, gateway servers | Quick evaluation, machines where you can't touch the registry |
+
+Common first step for both — copy the connector file to
+`Documents\Power BI Desktop\Custom Connectors` (create the folder if
+needed). **Careful**: "Documents" here is the Windows *known folder*,
+which on OneDrive-connected accounts is `...\OneDrive\Documents`, not
+`C:\Users\<you>\Documents` — a connector placed in the wrong one is
+silently ignored. This resolves it reliably:
+
+```powershell
+$dir = Join-Path ([Environment]::GetFolderPath("MyDocuments")) "Power BI Desktop\Custom Connectors"
+New-Item -ItemType Directory -Force $dir | Out-Null
+Copy-Item .\CisoAssistant.pqx $dir -Force   # or CisoAssistant.mez for path B
+```
+
+Keep only one of the two files in that folder — both at once makes the
+connector appear twice.
+
+**Path A (signed `.pqx`)**: have IT add our signing certificate's
+thumbprint to the trusted list — one registry value, admin required,
+GPO-deployable for fleets; the runbook with the current thumbprint is
+[signing/trust-thumbprint.md](signing/trust-thumbprint.md). Power BI
+Desktop then loads the connector at the **(Recommended)** security level
+after a restart — no security setting is changed.
+
+**Path B (`.mez`)**: in Power BI Desktop, set **File → Options and
+settings → Options → Security → Data Extensions** to *Allow any extension
+to load without validation or warning*, then restart. Note this setting
+lowers the bar for **every** extension on the machine, not just this one —
+prefer path A where possible.
+
+Switching from B to A later is seamless: swap the file, add the registry
+trust, restore the security level — existing reports and credentials are
+untouched (they bind to the connector's identity, not the file).
 
 ## Creating a Personal Access Token
 
