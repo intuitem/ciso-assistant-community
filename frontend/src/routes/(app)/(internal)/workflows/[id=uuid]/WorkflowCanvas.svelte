@@ -22,6 +22,7 @@
 	import RunsPanel from './RunsPanel.svelte';
 	import TriggersPanel from './TriggersPanel.svelte';
 	import StepNode from './nodes/StepNode.svelte';
+	import ConditionNode from './nodes/ConditionNode.svelte';
 	import TerminalNode from './nodes/TerminalNode.svelte';
 	import TriggerNode, { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 
@@ -66,7 +67,12 @@
 		return `/workflows/${workflowId}/ops?action=${action}`;
 	}
 
-	const nodeTypes = { step: StepNode, terminal: TerminalNode, trigger: TriggerNode };
+	const nodeTypes = {
+		step: StepNode,
+		condition: ConditionNode,
+		terminal: TerminalNode,
+		trigger: TriggerNode
+	};
 
 	const EDGE_STYLE = 'stroke: var(--color-surface-500); stroke-width: 2;';
 	const EDGE_MARKER = { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' };
@@ -145,6 +151,8 @@
 			forkType: domain.fork_type,
 			joinType: domain.join_type,
 			assignments: domain.assignments ?? [],
+			branches: domain.type === 'condition' ? conditionBranches(domain.id) : undefined,
+			default: domain.type === 'condition' ? conditionDefault(domain.id) : undefined,
 			triggerType:
 				domain.type === 'trigger' ? (domain.trigger_config?.type ?? 'manual') : undefined,
 			registration:
@@ -154,8 +162,7 @@
 		};
 	}
 
-	function edgeLabel(domain: any): string {
-		if (domain.label) return domain.label;
+	function conditionSummary(domain: any): string {
 		const conditions = domain.condition_groups?.[0]?.conditions ?? [];
 		if (!conditions.length) return '';
 		if (conditions.length === 1) {
@@ -166,6 +173,61 @@
 				: `${key} ${condition.op} ${condition.value}`;
 		}
 		return `${conditions.length} ${m.edgeConditions().toLowerCase()}`;
+	}
+
+	function edgeLabel(domain: any): string {
+		return domain.label || conditionSummary(domain);
+	}
+
+	function isConditionNodeId(nodeId: string): boolean {
+		return (nodes.find((n) => n.id === nodeId)?.data?.domain as any)?.type === 'condition';
+	}
+
+	// A condition node's branch list IS its outgoing edges, ordered by priority
+	// (edge array order breaks ties for legacy/duplicate priorities).
+	function sortedOutgoingDomains(nodeId: string): any[] {
+		return edges
+			.map((e, index) => ({ domain: e.data?.domain as any, index }))
+			.filter((entry) => entry.domain && entry.domain.source === nodeId)
+			.sort((a, b) => (a.domain.priority ?? 0) - (b.domain.priority ?? 0) || a.index - b.index)
+			.map((entry) => entry.domain);
+	}
+
+	// An edge is "conditional" when it carries at least one condition; an edge
+	// with NO conditions is the node's single default (otherwise) branch.
+	function hasConditions(domain: any): boolean {
+		return !!domain.condition_groups?.some(
+			(group: any) => group.conditions?.length || group.children?.length
+		);
+	}
+
+	// Conditional branches only: outgoing edges WITH conditions, in evaluation
+	// order. The unconditioned default is rendered separately (conditionDefault).
+	function conditionBranches(nodeId: string) {
+		return sortedOutgoingDomains(nodeId)
+			.filter(hasConditions)
+			.map((domain) => ({
+				edgeId: domain.id,
+				name: domain.label || conditionSummary(domain)
+			}));
+	}
+
+	// The default (otherwise) branch: the single outgoing edge WITHOUT conditions,
+	// or {edgeId: null} when the fixed __default__ output is unwired.
+	function conditionDefault(nodeId: string): { edgeId: string | null; name: string } {
+		const domain = sortedOutgoingDomains(nodeId).find((d) => !hasConditions(d));
+		return domain ? { edgeId: domain.id, name: domain.label || '' } : { edgeId: null, name: '' };
+	}
+
+	// Keep the default evaluated last: conditional branches get priorities
+	// 0..n-1 in display order, the default (if any) gets n. Run after every
+	// branch mutation (add/reorder/delete).
+	function renumberBranches(nodeId: string) {
+		const outgoing = sortedOutgoingDomains(nodeId);
+		const conditional = outgoing.filter(hasConditions);
+		conditional.forEach((domain, index) => (domain.priority = index));
+		const fallback = outgoing.find((d) => !hasConditions(d));
+		if (fallback) fallback.priority = conditional.length;
 	}
 
 	function capitalize(s: string) {
@@ -179,7 +241,12 @@
 				: { x: 120 + index * 220, y: 220 };
 		return {
 			id: domain.id,
-			type: domain.type === 'end' ? 'terminal' : domain.type === 'trigger' ? 'trigger' : 'step',
+			type:
+				domain.type === 'end'
+					? 'terminal'
+					: domain.type === 'trigger' || domain.type === 'condition'
+						? domain.type
+						: 'step',
 			position,
 			draggable: !readonly,
 			deletable: !readonly,
@@ -193,6 +260,13 @@
 			id: domain.id,
 			source: domain.source,
 			target: domain.target,
+			// Conditional edges anchor to their per-branch handle (handle id = edge
+			// id); the unconditioned default anchors to the fixed __default__ handle.
+			sourceHandle: isConditionNodeId(domain.source)
+				? hasConditions(domain)
+					? domain.id
+					: '__default__'
+				: undefined,
 			label: edgeLabel(domain) || undefined,
 			deletable: !readonly,
 			markerEnd: EDGE_MARKER,
@@ -222,8 +296,13 @@
 	}
 
 	let variables = $state<any[]>(graph.variables ?? []);
+	// Edges are declared (empty) before nodes so visualData's branch lookup can
+	// read them during the initial node mapping, and filled right after so
+	// toFlowEdge can resolve source node types. The refreshVisuals() below then
+	// backfills condition branch rows once both exist.
+	let edges = $state<Edge[]>([]);
 	let nodes = $state<Node[]>((graph.nodes ?? []).map(toFlowNode));
-	let edges = $state<Edge[]>((graph.edges ?? []).map(toFlowEdge));
+	edges = (graph.edges ?? []).map(toFlowEdge);
 
 	// A brand-new draft gets a manual trigger and an end waiting to be wired,
 	// instead of an empty void.
@@ -233,6 +312,7 @@
 			toFlowNode(newNodeDomain('end', { x: 560, y: 202 }), 1)
 		];
 	}
+	refreshVisuals();
 
 	// ---------- selection ----------
 
@@ -240,6 +320,28 @@
 	let selectedEdgeId = $state<string | null>(null);
 	const selectedNode = $derived(nodes.find((n) => n.id === selectedNodeId) ?? null);
 	const selectedEdge = $derived(edges.find((e) => e.id === selectedEdgeId) ?? null);
+
+	// Conditional-branch list for the Inspector when a condition node is
+	// selected: its outgoing edge domains WITH conditions, in evaluation order,
+	// plus a display placeholder. The default is passed separately.
+	const selectedConditionBranches = $derived.by(() => {
+		const domain: any = selectedNode?.data?.domain;
+		if (!domain || domain.type !== 'condition') return [];
+		return sortedOutgoingDomains(domain.id)
+			.filter(hasConditions)
+			.map((edgeDomain, index) => ({
+				domain: edgeDomain,
+				placeholder: conditionSummary(edgeDomain) || m.branchDefaultName({ number: index + 1 })
+			}));
+	});
+
+	// The selected condition node's default (otherwise) edge domain, or null when
+	// the __default__ output is unwired.
+	const selectedConditionDefault = $derived.by((): { domain: any | null } | null => {
+		const domain: any = selectedNode?.data?.domain;
+		if (!domain || domain.type !== 'condition') return null;
+		return { domain: sortedOutgoingDomains(domain.id).find((d) => !hasConditions(d)) ?? null };
+	});
 
 	// ---------- save machinery ----------
 
@@ -586,6 +688,13 @@
 				id: domain.id,
 				source: domain.source,
 				target: domain.target,
+				// Conditional-branch handles are keyed by edge id (follow the re-id);
+				// the default handle is the fixed __default__ id (unchanged).
+				sourceHandle: e.sourceHandle
+					? hasConditions(domain)
+						? domain.id
+						: '__default__'
+					: undefined,
 				data: { ...e.data, domain }
 			};
 		});
@@ -731,19 +840,68 @@
 		const target = nodes.find((n) => n.id === connection.target);
 		if (!source || !target) return false;
 		if (source.data.nodeType === 'end' || target.data.nodeType === 'trigger') return false;
+		// Condition branch handles carry exactly their one edge (handle id = edge
+		// id); only the ghost "__new__" handle creates conditional branches and the
+		// fixed "__default__" handle wires the single otherwise edge.
+		if (
+			connection.sourceHandle &&
+			connection.sourceHandle !== '__new__' &&
+			connection.sourceHandle !== '__default__'
+		)
+			return false;
+		// Only one default: reject wiring __default__ when an unconditioned edge exists.
+		if (
+			connection.sourceHandle === '__default__' &&
+			sortedOutgoingDomains(connection.source).some((d) => !hasConditions(d))
+		)
+			return false;
 		if (edges.some((e) => e.source === connection.source && e.target === connection.target))
 			return false;
 		return true;
 	}
 
 	function handleConnect(connection: Connection) {
+		const fromCondition = isConditionNodeId(connection.source);
+		const outgoing = sortedOutgoingDomains(connection.source);
+		const conditional = outgoing.filter(hasConditions);
+		const isDefaultBranch = fromCondition && connection.sourceHandle === '__default__';
+
+		// Defensive: only one default edge. isValidConnection already blocks this,
+		// so just drop the phantom edge SvelteFlow appended and bail.
+		if (isDefaultBranch && outgoing.some((d) => !hasConditions(d))) {
+			edges = edges.filter(
+				(e) =>
+					!(e.source === connection.source && e.target === connection.target && !e.data?.domain)
+			);
+			return;
+		}
+
+		// A new conditional branch (via the __new__ ghost handle) is seeded with a
+		// single placeholder condition row so it is structurally conditional. An
+		// edge with NO conditions is the node's default under the backend's
+		// first-match/otherwise rule, so an empty seed would silently become a
+		// second default; the Inspector lets the user fill in the variable.
+		const condition_groups =
+			fromCondition && !isDefaultBranch
+				? [
+						{
+							operator: 'and',
+							order: 0,
+							conditions: [{ variable: variables[0]?.id ?? '', op: 'eq', value: '', order: 0 }],
+							children: []
+						}
+					]
+				: [];
+
 		const domain = {
 			id: crypto.randomUUID(),
 			source: connection.source,
 			target: connection.target,
 			label: '',
-			priority: edges.filter((e) => e.source === connection.source).length,
-			condition_groups: []
+			// Provisional ordering; renumberBranches normalizes right after so the
+			// default always evaluates last.
+			priority: fromCondition ? conditional.length : outgoing.length,
+			condition_groups
 		};
 		// SvelteFlow already appended a default edge for this connection; replace
 		// it with ours so the id is the persisted client UUID.
@@ -752,8 +910,18 @@
 				? toFlowEdge(domain)
 				: e
 		);
-		selectedEdgeId = domain.id;
-		selectedNodeId = null;
+		if (fromCondition) {
+			// A new branch: keep the default last, select the switch block so the
+			// Inspector opens its branch list, and rebuild visuals so the edge
+			// re-anchors from the ghost/default handle to its resolved handle.
+			renumberBranches(connection.source);
+			selectedNodeId = connection.source;
+			selectedEdgeId = null;
+			refreshVisuals();
+		} else {
+			selectedEdgeId = domain.id;
+			selectedNodeId = null;
+		}
 		markDirty();
 	}
 
@@ -761,6 +929,19 @@
 		nodes = nodes.filter((n) => n.id !== id);
 		edges = edges.filter((e) => e.source !== id && e.target !== id);
 		if (selectedNodeId === id) selectedNodeId = null;
+		// Removed edges may have been condition branches: collapse their rows.
+		refreshVisuals();
+		markDirty();
+	}
+
+	function deleteEdge(id: string) {
+		const removed = edges.find((e) => e.id === id);
+		edges = edges.filter((e) => e.id !== id);
+		if (selectedEdgeId === id) selectedEdgeId = null;
+		// Deleting a conditional branch (or the default) closes the gap so the
+		// remaining conditional branches stay 0..n-1 with the default last.
+		if (removed && isConditionNodeId(removed.source)) renumberBranches(removed.source);
+		refreshVisuals();
 		markDirty();
 	}
 
@@ -883,14 +1064,26 @@
 				isValidConnection={readonly ? () => false : isValidConnection}
 				onconnect={readonly ? undefined : handleConnect}
 				onnodedragstop={readonly ? undefined : markDirty}
-				ondelete={readonly ? undefined : markDirty}
+				ondelete={readonly
+					? undefined
+					: () => {
+							// Deleted edges may have been condition branches: collapse rows.
+							refreshVisuals();
+							markDirty();
+						}}
 				onnodeclick={({ node }) => {
 					selectedNodeId = node.id;
 					selectedEdgeId = null;
 				}}
 				onedgeclick={({ edge }) => {
-					selectedEdgeId = edge.id;
-					selectedNodeId = null;
+					// Condition branches are edited on their switch block, not per edge.
+					if (isConditionNodeId(edge.source)) {
+						selectedNodeId = edge.source;
+						selectedEdgeId = null;
+					} else {
+						selectedEdgeId = edge.id;
+						selectedNodeId = null;
+					}
 				}}
 				onpaneclick={() => {
 					selectedNodeId = null;
@@ -1105,6 +1298,9 @@
 	<Inspector
 		selectedNode={readonly ? null : selectedNode}
 		selectedEdge={readonly ? null : selectedEdge}
+		outgoingEdges={readonly ? [] : selectedConditionBranches}
+		defaultBranch={readonly ? null : selectedConditionDefault}
+		onDeleteEdge={deleteEdge}
 		{variables}
 		{roles}
 		{actors}

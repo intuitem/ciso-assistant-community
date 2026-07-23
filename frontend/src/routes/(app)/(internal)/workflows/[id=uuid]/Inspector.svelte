@@ -28,6 +28,14 @@
 	interface Props {
 		selectedNode: any | null;
 		selectedEdge: any | null;
+		// Conditional-branch rows for a selected condition node: its outgoing edge
+		// domains WITH conditions, in evaluation order (the list IS the edges —
+		// nothing new persisted).
+		outgoingEdges?: { domain: any; placeholder: string }[];
+		// The single unconditioned default (otherwise) edge, or null when the
+		// __default__ output is unwired.
+		defaultBranch?: { domain: any | null } | null;
+		onDeleteEdge?: (edgeId: string) => void;
 		variables: { id: string; key: string; type: string }[];
 		roles: Option[];
 		actors: Option[];
@@ -48,6 +56,9 @@
 	let {
 		selectedNode = $bindable(),
 		selectedEdge = $bindable(),
+		outgoingEdges = [],
+		defaultBranch = null,
+		onDeleteEdge,
 		variables,
 		roles,
 		actors,
@@ -478,28 +489,48 @@
 		onChange();
 	}
 
-	function rootGroup() {
-		if (!edgeDomain.condition_groups.length) {
-			edgeDomain.condition_groups = [{ operator: 'and', order: 0, conditions: [], children: [] }];
+	// ---------- condition-node branches (edge condition_groups editor) ----------
+
+	function rootGroup(edge: any) {
+		if (!edge.condition_groups.length) {
+			edge.condition_groups = [{ operator: 'and', order: 0, conditions: [], children: [] }];
 		}
-		return edgeDomain.condition_groups[0];
+		return edge.condition_groups[0];
 	}
 
-	function addCondition() {
-		const group = rootGroup();
+	function addCondition(edge: any) {
+		const group = rootGroup(edge);
 		group.conditions = [
 			...group.conditions,
 			{ variable: variables[0]?.id ?? null, op: 'eq', value: '', order: group.conditions.length }
 		];
-		edgeDomain.condition_groups = [...edgeDomain.condition_groups];
+		edge.condition_groups = [...edge.condition_groups];
 		onChange();
 	}
 
-	function removeCondition(index: number) {
-		const group = rootGroup();
+	function removeCondition(edge: any, index: number) {
+		const group = rootGroup(edge);
+		// A branch here always has conditions (an edge with none is the default,
+		// edited separately); keep at least one row so it can't silently become a
+		// second default. Delete the whole branch to remove it entirely.
+		if (group.conditions.length <= 1) return;
 		group.conditions = group.conditions.filter((_: unknown, i: number) => i !== index);
-		if (!group.conditions.length) edgeDomain.condition_groups = [];
-		else edgeDomain.condition_groups = [...edgeDomain.condition_groups];
+		edge.condition_groups = [...edge.condition_groups];
+		onChange();
+	}
+
+	function moveBranch(index: number, delta: number) {
+		// Snapshot: the prop is derived from the priorities we are about to
+		// mutate, so it must not be re-read mid-swap.
+		const branches = [...outgoingEdges];
+		const target = index + delta;
+		if (target < 0 || target >= branches.length) return;
+		// Normalize first (duplicate/legacy priorities), then swap the two rows.
+		branches.forEach((entry, i) => (entry.domain.priority = i));
+		branches[index].domain.priority = target;
+		branches[target].domain.priority = index;
+		// Keep the default evaluated last, after every conditional branch.
+		if (defaultBranch?.domain) defaultBranch.domain.priority = branches.length;
 		onChange();
 	}
 </script>
@@ -508,6 +539,76 @@
 	<span class="block text-[10px] font-semibold uppercase tracking-wide text-surface-600-400 mb-1">
 		{text}
 	</span>
+{/snippet}
+
+{#snippet branchConditions(edge: any)}
+	<div>
+		<div class="flex items-center justify-between mb-1">
+			{@render fieldLabel(m.edgeConditions())}
+			<button
+				type="button"
+				aria-label={m.addCondition()}
+				class="text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold disabled:opacity-50"
+				onclick={() => addCondition(edge)}
+				disabled={!variables.length}
+			>
+				<i class="fa-solid fa-plus mr-0.5"></i>
+			</button>
+		</div>
+		{#if edge.condition_groups[0]?.conditions.length}
+			<div class="space-y-1.5">
+				{#each edge.condition_groups[0].conditions as condition, index}
+					<div class="flex items-center gap-1">
+						<select
+							class="select text-xs flex-1 min-w-0"
+							bind:value={condition.variable}
+							onchange={onChange}
+						>
+							{#each variables as variable}
+								<option value={variable.id}>{variable.key}</option>
+							{/each}
+						</select>
+						<select
+							class="select text-xs w-20 shrink-0"
+							bind:value={condition.op}
+							onchange={onChange}
+						>
+							{#each CONDITION_OPS as op}
+								<option value={op}>{op}</option>
+							{/each}
+						</select>
+						{#if condition.op !== 'is_null'}
+							<input
+								type="text"
+								class="input text-xs w-16 min-w-0"
+								bind:value={condition.value}
+								oninput={onChange}
+							/>
+						{/if}
+						<button
+							type="button"
+							aria-label="Remove condition"
+							class="text-error-500 hover:text-error-600 cursor-pointer text-xs shrink-0 disabled:opacity-30 disabled:cursor-default"
+							disabled={edge.condition_groups[0].conditions.length <= 1}
+							onclick={() => removeCondition(edge, index)}
+						>
+							<i class="fa-solid fa-xmark"></i>
+						</button>
+					</div>
+				{/each}
+				{#if edge.condition_groups[0]?.conditions.length > 1}
+					<select
+						class="select text-xs w-full"
+						bind:value={edge.condition_groups[0].operator}
+						onchange={onChange}
+					>
+						<option value="and">AND</option>
+						<option value="or">OR</option>
+					</select>
+				{/if}
+			</div>
+		{/if}
+	</div>
 {/snippet}
 
 <aside
@@ -549,6 +650,86 @@
 						oninput={onChange}
 					/>
 				</label>
+			{/if}
+
+			{#if nodeDomain.type === 'condition'}
+				<div data-testid="condition-branch-list">
+					{@render fieldLabel(m.workflowBranches())}
+					<div class="space-y-2">
+						{#each outgoingEdges as branch, index (branch.domain.id)}
+							<div
+								class="rounded-base border border-surface-200-800 bg-surface-50-950 p-2 space-y-1.5"
+								data-testid="inspector-branch-row"
+							>
+								<div class="flex items-center gap-1">
+									<div class="flex flex-col shrink-0">
+										<button
+											type="button"
+											aria-label="Move branch up"
+											class="text-surface-500 hover:text-surface-700-300 cursor-pointer text-[9px] leading-none disabled:opacity-30 disabled:cursor-default"
+											disabled={index === 0}
+											onclick={() => moveBranch(index, -1)}
+										>
+											<i class="fa-solid fa-chevron-up"></i>
+										</button>
+										<button
+											type="button"
+											aria-label="Move branch down"
+											class="text-surface-500 hover:text-surface-700-300 cursor-pointer text-[9px] leading-none disabled:opacity-30 disabled:cursor-default"
+											disabled={index === outgoingEdges.length - 1}
+											onclick={() => moveBranch(index, 1)}
+										>
+											<i class="fa-solid fa-chevron-down"></i>
+										</button>
+									</div>
+									<input
+										type="text"
+										class="input text-xs flex-1 min-w-0"
+										placeholder={branch.placeholder}
+										bind:value={branch.domain.label}
+										oninput={onChange}
+									/>
+									<button
+										type="button"
+										aria-label="Delete branch"
+										class="text-error-500 hover:text-error-600 cursor-pointer text-xs shrink-0"
+										onclick={() => onDeleteEdge?.(branch.domain.id)}
+									>
+										<i class="fa-solid fa-trash"></i>
+									</button>
+								</div>
+								{@render branchConditions(branch.domain)}
+							</div>
+						{/each}
+					</div>
+
+					<!-- Default (otherwise) branch: the single unconditioned output,
+					     evaluated last. No conditions, no reorder, no delete. -->
+					<div
+						class="rounded-base border border-surface-300-700 bg-surface-200-800 p-2 mt-2 space-y-1"
+						data-testid="inspector-default-branch"
+					>
+						{@render fieldLabel(m.branchOtherwise())}
+						{#if defaultBranch?.domain}
+							<input
+								type="text"
+								class="input text-xs w-full"
+								placeholder={m.branchOtherwise()}
+								bind:value={defaultBranch.domain.label}
+								oninput={onChange}
+							/>
+							<p class="text-[10px] text-surface-500 leading-relaxed">{m.branchDefaultRuns()}</p>
+						{:else}
+							<p class="text-[10px] italic text-surface-500 leading-relaxed">
+								{m.branchDefaultUnwired()}
+							</p>
+						{/if}
+					</div>
+
+					<p class="text-[10px] text-surface-500 leading-relaxed mt-1.5">
+						<i class="fa-solid fa-arrow-down-short-wide mr-1"></i>{m.branchesEvaluationHint()}
+					</p>
+				</div>
 			{/if}
 
 			{#if nodeDomain.type === 'task'}
@@ -1472,6 +1653,8 @@
 				<i class="fa-solid fa-arrow-right-long mr-1"></i>{m.edgeLabel()}
 			</span>
 
+			<!-- Condition-sourced edges never reach this block (the canvas redirects
+			     their selection to the switch block), so only the label remains. -->
 			<label>
 				{@render fieldLabel(m.edgeLabel())}
 				<input
@@ -1481,85 +1664,6 @@
 					oninput={onChange}
 				/>
 			</label>
-
-			<label>
-				{@render fieldLabel(m.edgePriority())}
-				<input
-					type="number"
-					class="input w-full text-sm"
-					bind:value={edgeDomain.priority}
-					oninput={onChange}
-				/>
-			</label>
-
-			<div>
-				<div class="flex items-center justify-between mb-1">
-					{@render fieldLabel(m.edgeConditions())}
-					<button
-						type="button"
-						class="text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold disabled:opacity-50"
-						onclick={addCondition}
-						disabled={!variables.length}
-					>
-						<i class="fa-solid fa-plus mr-0.5"></i>
-					</button>
-				</div>
-				{#if !variables.length}
-					<p class="text-[10px] text-surface-500">{m.workflowVariables()}: 0</p>
-				{/if}
-				{#if edgeDomain.condition_groups.length}
-					<div class="space-y-1.5">
-						{#each edgeDomain.condition_groups[0].conditions as condition, index}
-							<div class="flex items-center gap-1">
-								<select
-									class="select text-xs flex-1 min-w-0"
-									bind:value={condition.variable}
-									onchange={onChange}
-								>
-									{#each variables as variable}
-										<option value={variable.id}>{variable.key}</option>
-									{/each}
-								</select>
-								<select
-									class="select text-xs w-20 shrink-0"
-									bind:value={condition.op}
-									onchange={onChange}
-								>
-									{#each CONDITION_OPS as op}
-										<option value={op}>{op}</option>
-									{/each}
-								</select>
-								{#if condition.op !== 'is_null'}
-									<input
-										type="text"
-										class="input text-xs w-16 min-w-0"
-										bind:value={condition.value}
-										oninput={onChange}
-									/>
-								{/if}
-								<button
-									type="button"
-									aria-label="Remove condition"
-									class="text-error-500 hover:text-error-600 cursor-pointer text-xs shrink-0"
-									onclick={() => removeCondition(index)}
-								>
-									<i class="fa-solid fa-xmark"></i>
-								</button>
-							</div>
-						{/each}
-						{#if edgeDomain.condition_groups[0]?.conditions.length > 1}
-							<select
-								class="select text-xs w-full"
-								bind:value={edgeDomain.condition_groups[0].operator}
-								onchange={onChange}
-							>
-								<option value="and">AND</option>
-								<option value="or">OR</option>
-							</select>
-						{/if}
-					</div>
-				{/if}
-			</div>
 		</div>
 	{:else}
 		<div class="p-4 text-center text-surface-500 text-xs mt-8">

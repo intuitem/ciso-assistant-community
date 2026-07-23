@@ -213,6 +213,64 @@ class TestPublish:
         codes = {e["code"] for e in resp.data["errors"]}
         assert "task_template_missing" in codes
 
+    def test_condition_without_default_branch_fails_validation(
+        self, workflow, superuser
+    ):
+        # A branch node whose every outgoing edge carries a condition can strand
+        # a token at runtime; publish must require an "otherwise" branch.
+        version = workflow.draft_version
+        start, cond, end = str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())
+        end2 = str(uuid.uuid4())
+        var = str(uuid.uuid4())
+        conditioned_edge = str(uuid.uuid4())
+        graph = {
+            "variables": [{"id": var, "key": "decision", "type": "string"}],
+            "nodes": [
+                {
+                    "id": start,
+                    "type": "trigger",
+                    "trigger_config": {"type": "manual"},
+                    "position": {"x": 0, "y": 0},
+                },
+                {"id": cond, "type": "condition", "position": {"x": 200, "y": 0}},
+                {"id": end, "type": "end", "position": {"x": 400, "y": 0}},
+                {"id": end2, "type": "end", "position": {"x": 400, "y": 200}},
+            ],
+            "edges": [
+                {"id": str(uuid.uuid4()), "source": start, "target": cond},
+                {
+                    "id": conditioned_edge,
+                    "source": cond,
+                    "target": end,
+                    "condition_groups": [
+                        {
+                            "operator": "and",
+                            "conditions": [
+                                {"variable": var, "op": "eq", "value": '"yes"'}
+                            ],
+                        }
+                    ],
+                },
+            ],
+        }
+        _put_graph(version, graph, superuser)
+        resp = _publish(version, superuser)
+        assert resp.status_code == 400
+        offending = {
+            e["node_id"]
+            for e in resp.data["errors"]
+            if e["code"] == "condition_default_missing"
+        }
+        assert cond in offending
+
+        # Adding an unconditioned (otherwise) edge makes the node exhaustive.
+        graph["edges"].append(
+            {"id": str(uuid.uuid4()), "source": cond, "target": end2, "priority": 1}
+        )
+        _put_graph(version, graph, superuser)
+        resp = _publish(version, superuser)
+        assert resp.status_code == 200, resp.data
+
     def test_publish_archives_previous_version(self, workflow, superuser):
         v1 = workflow.draft_version
         _put_graph(v1, _minimal_graph(), superuser)
