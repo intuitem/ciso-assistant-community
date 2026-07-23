@@ -90,11 +90,14 @@ then validate through Power BI Desktop, not MakePQX:
    connector at Recommended = signature or trust problem; loading = the
    full customer path works.
 
-Known quirk (ARM64 VM): the extension-bundled `MakePQX verify` can crash
-with a `System.Threading.Tasks.Extensions` assembly-binding error while
-printing its report — after a successful `sign`, use the Desktop
-trust test above instead. CI runs verify on an x64 runner with
-NuGet-fresh tools and gates on its exit code.
+Known quirk (SdkTools 2.155.2, any host): `MakePQX verify` crashes with a
+`System.Threading.Tasks.Extensions` assembly-binding error while printing
+its report — the package's `MakePQX.exe.config` lacks binding redirects
+for the System.Text.Json dependency chain. CI patches the redirects into
+the config before running the tools (see the "Patch MakePQX binding
+redirects" step in the workflow); locally, either apply the same patch or
+skip `verify` and use the Desktop trust test above, which is the
+authoritative check anyway.
 
 `.mez` is just a zip of the connector folder contents — CI
 (`.github/workflows/powerbi-connector.yml`) builds it with
