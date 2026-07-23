@@ -6,7 +6,7 @@ framework build instructions, OS-specific custom scripts, libraries, and all
 other file types so the directory can be reviewed before cleanup.
 
 The report is written both to the console and to a log file. Excel files are
-checked for the required ``library_meta`` sheet, while every other file type is
+checked for the required `library_meta` sheet, while every other file type is
 grouped into a dedicated report section.
 """
 
@@ -45,7 +45,7 @@ def get_file_type(path: Path) -> str:
 
 
 def has_required_sheet(path: Path) -> bool:
-    """Return whether an Excel file contains a sheet named ``library_meta``."""
+    """Return whether an Excel file contains a sheet named `library_meta`."""
     keep_vba = path.suffix.lower() == ".xlsm"
     workbook = load_workbook(
         path,
