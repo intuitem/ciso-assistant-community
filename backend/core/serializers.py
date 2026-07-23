@@ -4570,6 +4570,7 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
                 + len(obj.vulnerabilities.all())
                 + len(obj.risk_scenarios.all())
                 + len(obj.requirement_assessments.all())
+                + len(obj.evidences.all())
             )
         except Exception:
             # Fallback: perform DB counts
@@ -4579,6 +4580,7 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
                 + obj.vulnerabilities.count()
                 + obj.risk_scenarios.count()
                 + obj.requirement_assessments.count()
+                + obj.evidences.count()
             )
 
     class Meta:
