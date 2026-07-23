@@ -38,6 +38,7 @@ type SidebarBackendKeys = {
 	cwes: boolean;
 	custom_portals: boolean;
 	idp_groups: boolean;
+	posture_assessments: boolean;
 };
 
 type SidebarFrontendKeys = {
@@ -77,6 +78,7 @@ type SidebarFrontendKeys = {
 	cwes: boolean;
 	managePortals: boolean;
 	idpGroups: boolean;
+	postureAssessments: boolean;
 };
 
 export function getSidebarVisibleItems(
@@ -119,6 +121,7 @@ export function getSidebarVisibleItems(
 		cwes: featureFlags?.cwes ?? true,
 		managePortals: featureFlags?.custom_portals ?? false,
 		idpGroups: featureFlags?.idp_groups ?? false,
+		postureAssessments: featureFlags?.posture_assessments ?? false,
 		documents: featureFlags?.document_management ?? true,
 		documentTemplates: featureFlags?.document_management ?? true,
 		objectClassifications: featureFlags?.document_management ?? true

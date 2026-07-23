@@ -431,6 +431,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     custom_portals = serializers.BooleanField(
         source="value.custom_portals", required=False, default=False
     )
+    posture_assessments = serializers.BooleanField(
+        source="value.posture_assessments", required=False, default=False
+    )
 
     class Meta:
         model = GlobalSettings

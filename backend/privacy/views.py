@@ -1,4 +1,8 @@
+import io
+import re
 import uuid
+
+import pandas as pd
 
 from core.constants import COUNTRY_CHOICES
 from core.models import Actor, Terminology
@@ -9,6 +13,7 @@ from core.views import (
     escape_excel_formula,
 )
 from django_filters.rest_framework import DjangoFilterBackend
+from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -387,6 +392,181 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         "select_related": ["folder"],
         "prefetch_related": ["filtering_labels", "nature", "assigned_to"],
     }
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="export-xlsx",
+        name="Export processing as XLSX",
+    )
+    def export_record_xlsx(self, request, pk):
+        processing = self.get_object()
+
+        def txt(value):
+            return escape_excel_formula(value) if isinstance(value, str) else value
+
+        processing_rows = [
+            {
+                "ref_id": txt(processing.ref_id),
+                "name": txt(processing.name),
+                "description": txt(processing.description or ""),
+                "domain": txt(processing.folder.name),
+                "status": processing.status,
+                "processing_nature": ",".join(
+                    txt(n.name) for n in processing.nature.all()
+                ),
+                "information_channel": txt(processing.information_channel),
+                "usage_channel": txt(processing.usage_channel),
+                "dpia_required": processing.dpia_required,
+                "dpia_reference": txt(processing.dpia_reference),
+                "assigned_to": ",".join(
+                    txt(a.user.email if a.user else str(a))
+                    for a in processing.assigned_to.all()
+                ),
+                "labels": ",".join(
+                    txt(label.label) for label in processing.filtering_labels.all()
+                ),
+            }
+        ]
+
+        sheets = [
+            ("Processing", list(processing_rows[0].keys()), processing_rows),
+            (
+                "Purposes",
+                ["name", "description", "legal_basis", "article_9_condition"],
+                [
+                    {
+                        "name": txt(purpose.name or ""),
+                        "description": txt(purpose.description or ""),
+                        "legal_basis": purpose.legal_basis,
+                        "article_9_condition": purpose.article_9_condition or "",
+                    }
+                    for purpose in processing.purposes.all()
+                ],
+            ),
+            (
+                "Personal data",
+                [
+                    "name",
+                    "description",
+                    "category",
+                    "retention",
+                    "deletion_policy",
+                    "is_sensitive",
+                    "assets",
+                ],
+                [
+                    {
+                        "name": txt(item.name or ""),
+                        "description": txt(item.description or ""),
+                        "category": txt(item.category.name),
+                        "retention": txt(item.retention),
+                        "deletion_policy": item.deletion_policy,
+                        "is_sensitive": item.is_sensitive,
+                        "assets": ",".join(
+                            txt(asset.name) for asset in item.assets.all()
+                        ),
+                    }
+                    for item in processing.personal_data.select_related(
+                        "category"
+                    ).prefetch_related("assets")
+                ],
+            ),
+            (
+                "Data subjects",
+                ["name", "description", "category"],
+                [
+                    {
+                        "name": txt(subject.name or ""),
+                        "description": txt(subject.description or ""),
+                        "category": subject.category,
+                    }
+                    for subject in processing.data_subjects.all()
+                ],
+            ),
+            (
+                "Data recipients",
+                ["name", "description", "category"],
+                [
+                    {
+                        "name": txt(recipient.name or ""),
+                        "description": txt(recipient.description or ""),
+                        "category": recipient.category,
+                    }
+                    for recipient in processing.data_recipients.all()
+                ],
+            ),
+            (
+                "Contractors",
+                [
+                    "name",
+                    "description",
+                    "entity",
+                    "relationship_type",
+                    "country",
+                    "documentation_link",
+                ],
+                [
+                    {
+                        "name": txt(contractor.name or ""),
+                        "description": txt(contractor.description or ""),
+                        "entity": txt(contractor.entity.name)
+                        if contractor.entity
+                        else "",
+                        "relationship_type": contractor.relationship_type,
+                        "country": contractor.country,
+                        "documentation_link": txt(contractor.documentation_link),
+                    }
+                    for contractor in processing.contractors_involved.select_related(
+                        "entity"
+                    )
+                ],
+            ),
+            (
+                "Transfers",
+                [
+                    "name",
+                    "description",
+                    "entity",
+                    "country",
+                    "transfer_mechanism",
+                    "guarantees",
+                    "documentation_link",
+                ],
+                [
+                    {
+                        "name": txt(transfer.name or ""),
+                        "description": txt(transfer.description or ""),
+                        "entity": txt(transfer.entity.name) if transfer.entity else "",
+                        "country": transfer.country,
+                        "transfer_mechanism": transfer.transfer_mechanism,
+                        "guarantees": txt(transfer.guarantees),
+                        "documentation_link": txt(transfer.documentation_link),
+                    }
+                    for transfer in processing.data_transfers.select_related("entity")
+                ],
+            ),
+        ]
+
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            for sheet_name, columns, rows in sheets:
+                pd.DataFrame(rows, columns=columns).to_excel(
+                    writer, sheet_name=sheet_name, index=False
+                )
+        buffer.seek(0)
+
+        slug = re.sub(
+            r"[^A-Za-z0-9_-]+", "-", processing.ref_id or processing.name
+        ).strip("-")[:60] or str(processing.id)
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="processing-{slug}.xlsx"'
+        )
+        return response
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
