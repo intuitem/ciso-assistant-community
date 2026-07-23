@@ -310,8 +310,9 @@ class TestUserGroupMembership:
         assert "d2member@tests.com" in [r["email"] for r in rows]
 
     def test_cannot_rename_builtin_group_via_patch(self, app_config):
-        """A builtin object can't be modified through the API even with
-        change_usergroup — the generic builtin-immutability guard blocks PATCH."""
+        """A builtin group's fields are immutable via the API even with
+        change_usergroup: the name field is read-only, so a rename is ignored
+        (UserGroup has no builtin-editable fields)."""
         domain, _, manager = self._setup_domain()
         builtin_group = UserGroup.objects.create(
             name="D1 anchor", folder=domain, builtin=True
@@ -319,9 +320,8 @@ class TestUserGroupMembership:
         client = _client_for(manager)
 
         url = reverse("user-groups-detail", args=[builtin_group.id])
-        response = client.patch(url, {"name": "renamed"}, format="json")
+        client.patch(url, {"name": "renamed"}, format="json")
 
-        assert response.status_code == status.HTTP_403_FORBIDDEN
         builtin_group.refresh_from_db()
         assert builtin_group.name == "D1 anchor"
 

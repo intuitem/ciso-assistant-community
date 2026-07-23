@@ -7696,14 +7696,7 @@ class UserGroupViewSet(BaseModelViewSet):
     def get_queryset(self):
         return super().get_queryset().select_related("folder")
 
-    def destroy(self, request, *args, **kwargs):
-        user_group = self.get_object()
-        if user_group.builtin:
-            return Response(
-                {"error": "attemptToDeleteBuiltinUserGroup"},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        return super().destroy(request, *args, **kwargs)
+    # Deletion of built-in groups is blocked generically by the permission layer.
 
     MEMBER_BATCH_LIMIT = 100
 

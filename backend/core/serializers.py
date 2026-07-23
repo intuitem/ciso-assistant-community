@@ -77,6 +77,12 @@ class BaseModelSerializer(serializers.ModelSerializer):
     # fields lives in the compliance assessment's `field_visibility`.
     RESPONDENT_PROTECTED_FIELDS: set[str] = set()
 
+    # Built-in objects are immutable by default. A model may keep specific fields
+    # editable on built-in rows by listing them here, or set "__all__" for
+    # built-in rows that are user-owned and fully editable (e.g. the default org
+    # entity). Deletion of built-in objects is blocked at the permission layer.
+    BUILTIN_EDITABLE_FIELDS: "set[str] | str" = set()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -87,6 +93,15 @@ class BaseModelSerializer(serializers.ModelSerializer):
         # `builtin` flag must never be writable through the API.
         if "builtin" in self.fields:
             self.fields["builtin"].read_only = True
+
+        # Enforce built-in immutability field-by-field: on a built-in instance,
+        # every field outside BUILTIN_EDITABLE_FIELDS becomes read-only.
+        if self.BUILTIN_EDITABLE_FIELDS != "__all__" and getattr(
+            self.instance, "builtin", False
+        ):
+            for field_name, field in self.fields.items():
+                if field_name not in self.BUILTIN_EDITABLE_FIELDS:
+                    field.read_only = True
 
     def _strip_respondent_protected_fields(self, attrs: dict) -> dict:
         """Drop `RESPONDENT_PROTECTED_FIELDS` from *attrs* when the requesting
@@ -5366,6 +5381,9 @@ class TerminologyReadSerializer(BaseModelSerializer):
 
 
 class TerminologyWriteSerializer(BaseModelSerializer):
+    # Built-in terminologies are seeded at startup; users may only toggle their
+    # visibility, not rename or otherwise modify them.
+    BUILTIN_EDITABLE_FIELDS = {"is_visible"}
     builtin = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -5383,6 +5401,8 @@ class ClassificationLevelReadSerializer(BaseModelSerializer):
 
 
 class ClassificationLevelWriteSerializer(BaseModelSerializer):
+    # Same as terminologies: built-in levels can only be shown/hidden.
+    BUILTIN_EDITABLE_FIELDS = {"is_visible"}
     builtin = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -5400,6 +5420,8 @@ class ObjectClassificationReadSerializer(BaseModelSerializer):
 
 
 class ObjectClassificationWriteSerializer(BaseModelSerializer):
+    # Built-in classifications (e.g. TLP) can only be shown/hidden.
+    BUILTIN_EDITABLE_FIELDS = {"is_visible"}
     builtin = serializers.BooleanField(read_only=True)
 
     class Meta:
