@@ -128,6 +128,10 @@ jobs:
           [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:PBI_SIGNING_CERT))
           & $env:MAKEPQX sign "dist/CisoAssistant.pqx" --certificate $pfx --password $env:PBI_SIGNING_PASSWORD --replace
           $signExit = $LASTEXITCODE
+          if ($signExit -eq 0) {
+            $certObj = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new($pfx, $env:PBI_SIGNING_PASSWORD)
+            $certObj.Thumbprint | Set-Content "dist/THUMBPRINT.txt"
+          }
           Remove-Item $pfx
           if ($signExit -ne 0) { throw "MakePQX sign failed ($signExit)" }
           & $env:MAKEPQX verify "dist/CisoAssistant.pqx"
@@ -147,6 +151,8 @@ jobs:
           path: |
             dist/CisoAssistant.mez
             dist/CisoAssistant.pqx
+            dist/THUMBPRINT.txt
+          if-no-files-found: warn
 
   release:
     if: startsWith(github.ref, 'refs/tags/powerbi-v')
@@ -159,11 +165,34 @@ jobs:
         with:
           name: powerbi-connector
           path: dist
-      - name: Publish release assets
+      # Releases are immutable once published: assets must be attached in
+      # the create call itself, and an existing release cannot be amended.
+      - name: Publish release with assets
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
           tag="${GITHUB_REF_NAME}"
-          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "Power BI connector $tag" --generate-notes
-          gh release upload "$tag" dist/CisoAssistant.mez dist/CisoAssistant.pqx --clobber
+          # Published releases are immutable and fatal; a leftover DRAFT
+          # (create-with-assets died between upload and publish) is mutable
+          # and must not block the retry — delete it and recreate.
+          existing="$(gh release view "$tag" --json isDraft --jq .isDraft 2>/dev/null || echo missing)"
+          if [ "$existing" = "false" ]; then
+            echo "::error::published release $tag already exists and is immutable — it cannot be amended; delete it and cut a new patch version (its tag name may not be reusable)"
+            exit 1
+          elif [ "$existing" = "true" ]; then
+            echo "deleting leftover draft release for $tag before recreating"
+            gh release delete "$tag" --yes
+          fi
+          thumbprint="$(cat dist/THUMBPRINT.txt 2>/dev/null || echo 'unsigned build')"
+          {
+            echo "Signing certificate thumbprint: \`${thumbprint}\`"
+            echo
+            echo "Install guide: [automation/powerbi/README.md](https://github.com/${GH_REPO}/blob/main/automation/powerbi/README.md) — certificate trust runbook: [signing/trust-thumbprint.md](https://github.com/${GH_REPO}/blob/main/automation/powerbi/signing/trust-thumbprint.md)"
+          } > notes.md
+          gh release create "$tag" \
+            dist/CisoAssistant.mez dist/CisoAssistant.pqx \
+            --title "Power BI connector $tag" \
+            --notes-file notes.md \
+            --generate-notes \
+            --verify-tag
