@@ -1418,17 +1418,20 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 )
                 continue
 
+            # Built-in / library objects are immutable through the API (mirrors the
+            # object-permission guard); skip any mutating batch action on them.
+            if getattr(obj, "builtin", False) or getattr(obj, "urn", None):
+                failed.append(
+                    {
+                        "id": str(obj_id),
+                        "name": str(obj),
+                        "error": "Cannot modify builtin object",
+                    }
+                )
+                continue
+
             try:
                 if action_type == "delete":
-                    if getattr(obj, "builtin", False) or getattr(obj, "urn", None):
-                        failed.append(
-                            {
-                                "id": str(obj_id),
-                                "name": str(obj),
-                                "error": "Cannot delete builtin object",
-                            }
-                        )
-                        continue
                     self.perform_destroy(obj)
 
                 else:
@@ -7712,14 +7715,7 @@ class UserGroupViewSet(BaseModelViewSet):
     def get_queryset(self):
         return super().get_queryset().select_related("folder")
 
-    def destroy(self, request, *args, **kwargs):
-        user_group = self.get_object()
-        if user_group.builtin:
-            return Response(
-                {"error": "attemptToDeleteBuiltinUserGroup"},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        return super().destroy(request, *args, **kwargs)
+    # Deletion of built-in groups is blocked generically by the permission layer.
 
     MEMBER_BATCH_LIMIT = 100
 

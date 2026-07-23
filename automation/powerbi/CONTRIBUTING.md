@@ -129,7 +129,13 @@ line of `CisoAssistant.pq` — semver, aligned with the compatibility policy:
 Release: bump `[Version]` (and `contract.json`/docs if the surface changed),
 merge, then tag `powerbi-v<x.y.z>`. CI refuses tags that don't match the
 `.pq` version, then builds, packs, signs (if the signing secrets are
-present), uploads artifacts, and attaches `CisoAssistant.mez` +
-`CisoAssistant.pqx` to the GitHub Release. Customer upgrade = replace the
+present), uploads artifacts, and creates the GitHub Release with
+`CisoAssistant.mez` + `CisoAssistant.pqx` attached atomically (releases are
+immutable once published — assets cannot be added afterwards).
+
+> **Warning**: deleting a published (immutable) release **permanently
+> reserves its tag name** — GitHub blocks re-creating that tag forever
+> (learned the hard way with `powerbi-v1.0.0`). A botched release is never
+> re-cut under the same version: fix, bump patch, tag the next number. Customer upgrade = replace the
 file, restart Power BI (reports and credentials bind to the data source
 kind, not the file or version).
