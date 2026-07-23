@@ -173,9 +173,16 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           tag="${GITHUB_REF_NAME}"
-          if gh release view "$tag" >/dev/null 2>&1; then
-            echo "::error::release $tag already exists and is immutable — it cannot be amended; delete it and cut a new patch version (its tag name may not be reusable)"
+          # Published releases are immutable and fatal; a leftover DRAFT
+          # (create-with-assets died between upload and publish) is mutable
+          # and must not block the retry — delete it and recreate.
+          existing="$(gh release view "$tag" --json isDraft --jq .isDraft 2>/dev/null || echo missing)"
+          if [ "$existing" = "false" ]; then
+            echo "::error::published release $tag already exists and is immutable — it cannot be amended; delete it and cut a new patch version (its tag name may not be reusable)"
             exit 1
+          elif [ "$existing" = "true" ]; then
+            echo "deleting leftover draft release for $tag before recreating"
+            gh release delete "$tag" --yes
           fi
           thumbprint="$(cat dist/THUMBPRINT.txt 2>/dev/null || echo 'unsigned build')"
           {
@@ -187,4 +194,5 @@ jobs:
             dist/CisoAssistant.mez dist/CisoAssistant.pqx \
             --title "Power BI connector $tag" \
             --notes-file notes.md \
-            --generate-notes
+            --generate-notes \
+            --verify-tag
