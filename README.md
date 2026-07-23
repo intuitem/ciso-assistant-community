@@ -103,7 +103,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 
 <!-- FEATURES:START -->
 <details>
-<summary><strong>📋 Full feature list</strong> — click to expand (searchable, 57 features)</summary>
+<summary><strong>📋 Full feature list</strong> — click to expand (searchable, 59 features)</summary>
 
 **Compliance & frameworks**
 - Audit and campaigns management
@@ -112,6 +112,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Custom frameworks supported
 - +167 frameworks included
 - Policies management
+- Document management
 - Evidence management
 
 **Risk management**
@@ -134,6 +135,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Task management
 - Kanban boards
 - Periodic checks
+- Technical posture management
 - Exceptions tracking
 - Incidents management
 - Validation & approval flows

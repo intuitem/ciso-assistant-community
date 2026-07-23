@@ -3219,6 +3219,7 @@
 	"dataWizardRiskAssessmentDescription": "Importer des scénarios de risque avec les mesures associées",
 	"dataWizardFindingsAssessmentDescription": "Importer un plan de suivi (pentest, audit interne, etc.)",
 	"dataWizardElementaryActionDescription": "Importer des actions élémentaires pour l'EBIOS RM (atelier 4)",
+	"dataWizardProcessingDescription": "Importer une liste de traitements, ou réimporter le classeur exporté d'un traitement pour recréer ses finalités, données personnelles et autres sous-objets",
 	"dataWizardOnConflict": "Si un enregistrement existe déjà",
 	"dataWizardOnConflictStop": "Arrêter",
 	"dataWizardOnConflictSkip": "Ignorer",
