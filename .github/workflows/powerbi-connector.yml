@@ -22,6 +22,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check tag matches connector version
+        if: startsWith(github.ref, 'refs/tags/powerbi-v')
+        shell: pwsh
+        run: |
+          $pq = Get-Content automation/powerbi/connector/CisoAssistant.pq -Raw
+          if ($pq -notmatch '\[Version = "(\d+\.\d+\.\d+)"\]') { throw "no [Version] attribute in CisoAssistant.pq" }
+          $version = $Matches[1]
+          $tag = $env:GITHUB_REF_NAME -replace '^powerbi-v', ''
+          if ($version -ne $tag) { throw "tag $env:GITHUB_REF_NAME does not match connector [Version = `"$version`"]" }
+
       - name: Build .mez (zip of connector sources)
         shell: pwsh
         run: |

@@ -111,7 +111,22 @@ curl -H "Authorization: Token $PAT" \
   "https://localhost:8443/api/applied-controls/?limit=2&offset=0&updated_at__gte=2026-01-01T00:00:00Z" -k
 ```
 
-## Release
+## Versioning & release
 
-Tag `powerbi-v*` → CI builds, packs, signs (if secrets present) and uploads
-`CisoAssistant.mez` + `CisoAssistant.pqx` artifacts.
+The connector version is the `[Version = "x.y.z"]` attribute on the first
+line of `CisoAssistant.pq` — semver, aligned with the compatibility policy:
+
+- **patch** — fixes, no contract change
+- **minor** — additive only (new tables/columns/bridges); never breaks an
+  existing report
+- **major** — renames/removals in the contract, auth or data source kind
+  changes; requires migration notes and should be avoided (`contract.json`
+  + the backend contract test exist to keep changes additive)
+
+Release: bump `[Version]` (and `contract.json`/docs if the surface changed),
+merge, then tag `powerbi-v<x.y.z>`. CI refuses tags that don't match the
+`.pq` version, then builds, packs, signs (if the signing secrets are
+present), uploads artifacts, and attaches `CisoAssistant.mez` +
+`CisoAssistant.pqx` to the GitHub Release. Customer upgrade = replace the
+file, restart Power BI (reports and credentials bind to the data source
+kind, not the file or version).
