@@ -4,9 +4,9 @@ import pytest
 
 from core.models import Policy
 from core.net_safety import BlockedRequestError
-from doc_management.models import DocumentContainer
+from doc_management.models import DocumentContainer, DocumentTemplate
 from doc_management.serializers import ManagedDocumentWriteSerializer
-from doc_management.views import _safe_url_fetcher
+from doc_management.views import DocumentTemplateViewSet, _safe_url_fetcher
 from iam.models import Folder
 
 
@@ -25,6 +25,26 @@ class TestSafeUrlFetcher:
         _safe_url_fetcher(
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wlseKgAAAABJRU5ErkJggg=="
         )
+
+
+class TestDocumentTemplateFilters:
+    def test_locale_choices_use_autocomplete_shape(self, monkeypatch):
+        class LocaleValues(list):
+            def distinct(self):
+                return self
+
+        monkeypatch.setattr(
+            DocumentTemplate.objects,
+            "values_list",
+            lambda *args, **kwargs: LocaleValues(["fr", "", "en", None, "fr"]),
+        )
+
+        choices = DocumentTemplateViewSet().locale(None).data
+
+        assert choices == [
+            {"value": "en", "label": "en"},
+            {"value": "fr", "label": "fr"},
+        ]
 
 
 @pytest.mark.django_db

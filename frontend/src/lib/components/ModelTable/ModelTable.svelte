@@ -502,11 +502,27 @@
 		taintedMessage: false,
 		validationMethod: 'auto'
 	});
+	let filterRefreshVersion = $state(0);
+
+	async function refreshFiltersAfterFormAction() {
+		await tick();
+		const restoredValues = untrack(() =>
+			Object.fromEntries(
+				filteredFields.map((field) => [
+					field,
+					(filterValues[field] ?? []).map((value: Record<string, any>) => value.value)
+				])
+			)
+		);
+		_form.form.update((data) => ({ ...data, ...restoredValues }));
+		filterRefreshVersion += 1;
+		handler.invalidate();
+	}
 
 	$effect(() => {
 		if (page.form?.form?.posted && page.form?.form?.valid) {
 			console.debug('Form posted, invalidating table');
-			handler.invalidate();
+			void refreshFiltersAfterFormAction();
 		}
 	});
 
@@ -819,26 +835,28 @@
 						>
 							<SuperForm {_form} validators={zod(z.object({}))}>
 								{#snippet children({ form })}
-									{#each filteredFields as field}
-										{#if filters[field]?.component}
-											{@const FilterComponent = filters[field].component}
-											<FilterComponent
-												{form}
-												{field}
-												{...filters[field].props}
-												fieldContext="filter"
-												label={safeTranslate(filters[field].props?.label)}
-												onChange={(value) => {
-													const arrayValue = Array.isArray(value) ? value : [value];
-													const sanitizedArrayValue = arrayValue.filter(
-														(v) => v !== null && v !== undefined && v !== ''
-													);
+									{#key filterRefreshVersion}
+										{#each filteredFields as field}
+											{#if filters[field]?.component}
+												{@const FilterComponent = filters[field].component}
+												<FilterComponent
+													{form}
+													{field}
+													{...filters[field].props}
+													fieldContext="filter"
+													label={safeTranslate(filters[field].props?.label)}
+													onChange={(value) => {
+														const arrayValue = Array.isArray(value) ? value : [value];
+														const sanitizedArrayValue = arrayValue.filter(
+															(v) => v !== null && v !== undefined && v !== ''
+														);
 
-													filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
-												}}
-											/>
-										{/if}
-									{/each}
+														filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
+													}}
+												/>
+											{/if}
+										{/each}
+									{/key}
 									{#if filterCount > 0}
 										<div class="flex justify-end pt-1">
 											<button
