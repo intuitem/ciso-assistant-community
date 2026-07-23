@@ -39,3 +39,4 @@ tools/convert_library_v2.bat
 automation/powerbi/**/*.pbix
 automation/powerbi/connector/bin/
 automation/powerbi/connector/obj/
+*.pfx

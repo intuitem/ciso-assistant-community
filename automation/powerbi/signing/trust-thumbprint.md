@@ -8,6 +8,10 @@ workstation (and on gateway machines for scheduled refresh).
 The current thumbprint is published with each release on the GitHub
 releases page.
 
+| Certificate | Thumbprint | Valid until |
+|---|---|---|
+| `CN=intuitem CISO Assistant Connector` (2026) | `AAB77C4E62D72D26F1E05AAA46457D90A653541E` | 2029-07 |
+
 ## Single workstation (Registry)
 
 Add the thumbprint to
