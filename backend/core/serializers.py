@@ -415,7 +415,7 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = Vulnerability
-        exclude = ["created_at", "updated_at", "is_published"]
+        exclude = ["is_published"]
 
 
 class VulnerabilityWriteSerializer(BaseModelSerializer):
@@ -1692,6 +1692,7 @@ class AppliedControlListSerializer(BaseModelSerializer):
             "expiry_date",
             "progress_field",
             "cost",
+            "observation",
             "folder",
             "reference_control",
             "owner",

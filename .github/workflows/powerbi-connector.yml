@@ -1,0 +1,169 @@
+name: Power BI connector
+
+on:
+  pull_request:
+    paths:
+      - "automation/powerbi/**"
+      - ".github/workflows/powerbi-connector.yml"
+  push:
+    branches: [main]
+    paths:
+      - "automation/powerbi/**"
+    tags:
+      - "powerbi-v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Check tag matches connector version
+        if: startsWith(github.ref, 'refs/tags/powerbi-v')
+        shell: pwsh
+        run: |
+          $pq = Get-Content automation/powerbi/connector/CisoAssistant.pq -Raw
+          if ($pq -notmatch '\[Version = "(\d+\.\d+\.\d+)"\]') { throw "no [Version] attribute in CisoAssistant.pq" }
+          $version = $Matches[1]
+          $tag = $env:GITHUB_REF_NAME -replace '^powerbi-v', ''
+          if ($version -ne $tag) { throw "tag $env:GITHUB_REF_NAME does not match connector [Version = `"$version`"]" }
+
+      - name: Build .mez (zip of connector sources)
+        shell: pwsh
+        run: |
+          $connector = "automation/powerbi/connector"
+          $staging = "obj/mez"
+          New-Item -ItemType Directory -Force -Path $staging, "dist" | Out-Null
+          Copy-Item "$connector/CisoAssistant.pq", "$connector/resources.resx", "$connector/*.png" -Destination $staging
+          Compress-Archive -Path "$staging/*" -DestinationPath "dist/CisoAssistant.zip" -Force
+          Move-Item "dist/CisoAssistant.zip" "dist/CisoAssistant.mez"
+
+      - name: Install Power Query SDK tools
+        shell: pwsh
+        run: |
+          # Version-pinned: this tool is handed the signing certificate, so
+          # "latest" is a supply-chain risk. Bump deliberately (and re-check
+          # the binding-redirect patch below still applies).
+          nuget install Microsoft.PowerQuery.SdkTools -Version 2.155.2 -OutputDirectory sdktools -NonInteractive
+          $makepqx = Get-ChildItem -Path sdktools -Recurse -Filter MakePQX.exe | Select-Object -First 1
+          if (-not $makepqx) { throw "MakePQX.exe not found" }
+          Add-Content $env:GITHUB_ENV "MAKEPQX=$($makepqx.FullName)"
+
+      # SdkTools 2.155.2 ships MakePQX.exe.config without binding redirects
+      # for the System.Text.Json dependency chain, so `MakePQX verify`
+      # crashes (FileLoadException on System.Threading.Tasks.Extensions)
+      # while printing its report. Generate the redirects from the DLLs
+      # actually present in the tools folder.
+      - name: Patch MakePQX binding redirects
+        shell: pwsh
+        run: |
+          $toolsDir = Split-Path $env:MAKEPQX
+          $configPath = "$env:MAKEPQX.config"
+          [xml]$cfg = if (Test-Path $configPath) { Get-Content $configPath -Raw } else { "<configuration />" }
+          $ns = "urn:schemas-microsoft-com:asm.v1"
+          $nsm = New-Object System.Xml.XmlNamespaceManager($cfg.NameTable)
+          $nsm.AddNamespace("a", $ns)
+          $runtime = $cfg.SelectSingleNode("/configuration/runtime")
+          if (-not $runtime) { $runtime = $cfg.DocumentElement.AppendChild($cfg.CreateElement("runtime")) }
+          $ab = $runtime.SelectSingleNode("a:assemblyBinding", $nsm)
+          if (-not $ab) { $ab = $runtime.AppendChild($cfg.CreateElement("assemblyBinding", $ns)) }
+          $names = @(
+            "System.Threading.Tasks.Extensions", "System.Runtime.CompilerServices.Unsafe",
+            "System.Memory", "System.Buffers", "System.Numerics.Vectors",
+            "System.Text.Json", "System.Text.Encodings.Web", "Microsoft.Bcl.AsyncInterfaces"
+          )
+          foreach ($name in $names) {
+            $dll = Join-Path $toolsDir "$name.dll"
+            if (-not (Test-Path $dll)) { continue }
+            $an = [Reflection.AssemblyName]::GetAssemblyName($dll)
+            $token = -join ($an.GetPublicKeyToken() | ForEach-Object { $_.ToString("x2") })
+            foreach ($old in @($ab.SelectNodes("a:dependentAssembly[a:assemblyIdentity/@name='$name']", $nsm))) {
+              $ab.RemoveChild($old) | Out-Null
+            }
+            $da = $ab.AppendChild($cfg.CreateElement("dependentAssembly", $ns))
+            $ai = $da.AppendChild($cfg.CreateElement("assemblyIdentity", $ns))
+            $ai.SetAttribute("name", $name)
+            $ai.SetAttribute("publicKeyToken", $token)
+            $ai.SetAttribute("culture", "neutral")
+            $br = $da.AppendChild($cfg.CreateElement("bindingRedirect", $ns))
+            $br.SetAttribute("oldVersion", "0.0.0.0-$($an.Version)")
+            $br.SetAttribute("newVersion", $an.Version.ToString())
+            Write-Host "redirect: $name -> $($an.Version) ($token)"
+          }
+          $cfg.Save($configPath)
+
+      - name: Pack .pqx
+        shell: pwsh
+        run: |
+          & $env:MAKEPQX pack -mz "dist/CisoAssistant.mez" -t "dist/CisoAssistant.pqx"
+          if ($LASTEXITCODE -ne 0) { throw "MakePQX pack failed ($LASTEXITCODE)" }
+          if (-not (Test-Path "dist/CisoAssistant.pqx")) { throw "pack produced no .pqx" }
+
+      - name: Check signing secrets
+        id: signing
+        shell: pwsh
+        env:
+          PBI_SIGNING_CERT: ${{ secrets.PBI_SIGNING_CERT }}
+        run: |
+          if ([string]::IsNullOrEmpty($env:PBI_SIGNING_CERT)) {
+            Add-Content $env:GITHUB_OUTPUT "enabled=false"
+          } else {
+            Add-Content $env:GITHUB_OUTPUT "enabled=true"
+          }
+
+      - name: Sign and verify .pqx
+        if: steps.signing.outputs.enabled == 'true' && github.event_name != 'pull_request'
+        shell: pwsh
+        env:
+          PBI_SIGNING_CERT: ${{ secrets.PBI_SIGNING_CERT }}
+          PBI_SIGNING_PASSWORD: ${{ secrets.PBI_SIGNING_PASSWORD }}
+        run: |
+          $pfx = Join-Path $env:RUNNER_TEMP "signing.pfx"
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:PBI_SIGNING_CERT))
+          & $env:MAKEPQX sign "dist/CisoAssistant.pqx" --certificate $pfx --password $env:PBI_SIGNING_PASSWORD --replace
+          $signExit = $LASTEXITCODE
+          Remove-Item $pfx
+          if ($signExit -ne 0) { throw "MakePQX sign failed ($signExit)" }
+          & $env:MAKEPQX verify "dist/CisoAssistant.pqx"
+          if ($LASTEXITCODE -ne 0) { throw "MakePQX verify failed ($LASTEXITCODE)" }
+
+      - name: Check artifacts exist
+        shell: pwsh
+        run: |
+          foreach ($f in "dist/CisoAssistant.mez", "dist/CisoAssistant.pqx") {
+            if (-not (Test-Path $f) -or (Get-Item $f).Length -eq 0) { throw "missing or empty artifact: $f" }
+          }
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: powerbi-connector
+          path: |
+            dist/CisoAssistant.mez
+            dist/CisoAssistant.pqx
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/powerbi-v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: powerbi-connector
+          path: dist
+      - name: Publish release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "Power BI connector $tag" --generate-notes
+          gh release upload "$tag" dist/CisoAssistant.mez dist/CisoAssistant.pqx --clobber
