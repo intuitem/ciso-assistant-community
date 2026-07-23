@@ -67,7 +67,11 @@ from ebios_rm.models import (
     StrategicScenario,
 )
 from iam.models import Folder, RoleAssignment, User
-from tprm.models import Entity
+from tprm.models import (
+    Contract,
+    Entity,
+    Solution,
+)
 
 from .serializers import ExportSerializer
 from .utils import (
@@ -856,9 +860,95 @@ def process_model_relationships(
 
         case "entity":
             _fields.pop("owned_folders", None)
+            # parent_entity is a self-reference; create_model_objects has
+            # already topo-sorted parents before children, so the mapped id
+            # exists by the time we get here (or the parent was out of scope).
+            parent_id = link_dump_database_ids.get(_fields.get("parent_entity"))
+            _fields["parent_entity"] = (
+                Entity.objects.filter(id=parent_id).first() if parent_id else None
+            )
             many_to_many_map_ids["relationship_ids"] = import_terminologies(
                 _fields.pop("relationship", []),
                 Terminology.FieldPath.ENTITY_RELATIONSHIP,
+            )
+
+        case "solution":
+            _fields["provider_entity"] = Entity.objects.get(
+                id=link_dump_database_ids.get(_fields["provider_entity"])
+            )
+            recipient_id = link_dump_database_ids.get(_fields.get("recipient_entity"))
+            _fields["recipient_entity"] = (
+                Entity.objects.filter(id=recipient_id).first() if recipient_id else None
+            )
+            many_to_many_map_ids["asset_ids"] = get_mapped_ids(
+                _fields.pop("assets", []), link_dump_database_ids
+            )
+
+        case "solutionsubcontractor":
+            _fields["solution"] = Solution.objects.get(
+                id=link_dump_database_ids.get(_fields["solution"])
+            )
+            _fields["subcontractor"] = Entity.objects.get(
+                id=link_dump_database_ids.get(_fields["subcontractor"])
+            )
+            recipient_id = link_dump_database_ids.get(_fields.get("recipient"))
+            _fields["recipient"] = (
+                Entity.objects.filter(id=recipient_id).first() if recipient_id else None
+            )
+
+        case "representative":
+            _fields["entity"] = Entity.objects.get(
+                id=link_dump_database_ids.get(_fields["entity"])
+            )
+
+        case "entityassessment":
+            perimeter_id = link_dump_database_ids.get(_fields.get("perimeter"))
+            _fields["perimeter"] = (
+                Perimeter.objects.filter(id=perimeter_id).first()
+                if perimeter_id
+                else None
+            )
+            _fields["entity"] = Entity.objects.get(
+                id=link_dump_database_ids.get(_fields["entity"])
+            )
+            ca_id = link_dump_database_ids.get(_fields.get("compliance_assessment"))
+            _fields["compliance_assessment"] = (
+                ComplianceAssessment.objects.filter(id=ca_id).first() if ca_id else None
+            )
+            evidence_id = link_dump_database_ids.get(_fields.get("evidence"))
+            _fields["evidence"] = (
+                Evidence.objects.filter(id=evidence_id).first() if evidence_id else None
+            )
+            many_to_many_map_ids["solution_ids"] = get_mapped_ids(
+                _fields.pop("solutions", []), link_dump_database_ids
+            )
+
+        case "contract":
+            provider_id = link_dump_database_ids.get(_fields.get("provider_entity"))
+            _fields["provider_entity"] = (
+                Entity.objects.filter(id=provider_id).first() if provider_id else None
+            )
+            beneficiary_id = link_dump_database_ids.get(
+                _fields.get("beneficiary_entity")
+            )
+            _fields["beneficiary_entity"] = (
+                Entity.objects.filter(id=beneficiary_id).first()
+                if beneficiary_id
+                else None
+            )
+            overarching_id = link_dump_database_ids.get(
+                _fields.get("overarching_contract")
+            )
+            _fields["overarching_contract"] = (
+                Contract.objects.filter(id=overarching_id).first()
+                if overarching_id
+                else None
+            )
+            many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
+                _fields.pop("evidences", []), link_dump_database_ids
+            )
+            many_to_many_map_ids["solution_ids"] = get_mapped_ids(
+                _fields.pop("solutions", []), link_dump_database_ids
             )
 
         case "ebiosrmstudy":
@@ -1198,6 +1288,20 @@ def set_many_to_many_relations(
         case "entity":
             if relationship_ids := many_to_many_map_ids.get("relationship_ids"):
                 obj.relationship.set(relationship_ids)
+
+        case "solution":
+            if asset_ids := many_to_many_map_ids.get("asset_ids"):
+                obj.assets.set(Asset.objects.filter(id__in=asset_ids))
+
+        case "entityassessment":
+            if solution_ids := many_to_many_map_ids.get("solution_ids"):
+                obj.solutions.set(Solution.objects.filter(id__in=solution_ids))
+
+        case "contract":
+            if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
+                obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
+            if solution_ids := many_to_many_map_ids.get("solution_ids"):
+                obj.solutions.set(Solution.objects.filter(id__in=solution_ids))
 
         case "findingsassessment":
             if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
