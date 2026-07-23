@@ -50,6 +50,49 @@ jobs:
           if (-not $makepqx) { throw "MakePQX.exe not found" }
           Add-Content $env:GITHUB_ENV "MAKEPQX=$($makepqx.FullName)"
 
+      # SdkTools 2.155.2 ships MakePQX.exe.config without binding redirects
+      # for the System.Text.Json dependency chain, so `MakePQX verify`
+      # crashes (FileLoadException on System.Threading.Tasks.Extensions)
+      # while printing its report. Generate the redirects from the DLLs
+      # actually present in the tools folder.
+      - name: Patch MakePQX binding redirects
+        shell: pwsh
+        run: |
+          $toolsDir = Split-Path $env:MAKEPQX
+          $configPath = "$env:MAKEPQX.config"
+          [xml]$cfg = if (Test-Path $configPath) { Get-Content $configPath -Raw } else { "<configuration />" }
+          $ns = "urn:schemas-microsoft-com:asm.v1"
+          $nsm = New-Object System.Xml.XmlNamespaceManager($cfg.NameTable)
+          $nsm.AddNamespace("a", $ns)
+          $runtime = $cfg.SelectSingleNode("/configuration/runtime")
+          if (-not $runtime) { $runtime = $cfg.DocumentElement.AppendChild($cfg.CreateElement("runtime")) }
+          $ab = $runtime.SelectSingleNode("a:assemblyBinding", $nsm)
+          if (-not $ab) { $ab = $runtime.AppendChild($cfg.CreateElement("assemblyBinding", $ns)) }
+          $names = @(
+            "System.Threading.Tasks.Extensions", "System.Runtime.CompilerServices.Unsafe",
+            "System.Memory", "System.Buffers", "System.Numerics.Vectors",
+            "System.Text.Json", "System.Text.Encodings.Web", "Microsoft.Bcl.AsyncInterfaces"
+          )
+          foreach ($name in $names) {
+            $dll = Join-Path $toolsDir "$name.dll"
+            if (-not (Test-Path $dll)) { continue }
+            $an = [Reflection.AssemblyName]::GetAssemblyName($dll)
+            $token = -join ($an.GetPublicKeyToken() | ForEach-Object { $_.ToString("x2") })
+            foreach ($old in @($ab.SelectNodes("a:dependentAssembly[a:assemblyIdentity/@name='$name']", $nsm))) {
+              $ab.RemoveChild($old) | Out-Null
+            }
+            $da = $ab.AppendChild($cfg.CreateElement("dependentAssembly", $ns))
+            $ai = $da.AppendChild($cfg.CreateElement("assemblyIdentity", $ns))
+            $ai.SetAttribute("name", $name)
+            $ai.SetAttribute("publicKeyToken", $token)
+            $ai.SetAttribute("culture", "neutral")
+            $br = $da.AppendChild($cfg.CreateElement("bindingRedirect", $ns))
+            $br.SetAttribute("oldVersion", "0.0.0.0-$($an.Version)")
+            $br.SetAttribute("newVersion", $an.Version.ToString())
+            Write-Host "redirect: $name -> $($an.Version) ($token)"
+          }
+          $cfg.Save($configPath)
+
       - name: Pack .pqx
         shell: pwsh
         run: |
