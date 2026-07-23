@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -11,9 +12,10 @@ export const load: PageServerLoad = async ({ fetch, params, url, locals }) => {
 	if (!containerRes.ok) error(404, 'Document not found');
 	const container = await containerRes.json();
 
-	const docsRes = await fetch(`${BASE_API_URL}/managed-documents/?container=${params.id}`);
-	const docsJson = docsRes.ok ? await docsRes.json() : {};
-	const docs: any[] = docsJson.results ?? (Array.isArray(docsJson) ? docsJson : []);
+	const docs: any[] = await fetchAllPages(
+		fetch,
+		`${BASE_API_URL}/managed-documents/?container=${params.id}`
+	).catch(() => []);
 
 	const requested = url.searchParams.get('doc');
 	const selected =

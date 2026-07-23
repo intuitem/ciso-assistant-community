@@ -1,6 +1,7 @@
 import { getModelInfo, urlParamModelSelectFields } from '$lib/utils/crud';
 import { loadDetail, formatSelectFieldData } from '$lib/utils/load';
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { modelSchema } from '$lib/utils/schemas';
 import type { PageServerLoad } from './$types';
 import { type Actions, fail } from '@sveltejs/kit';
@@ -19,10 +20,7 @@ export const load: PageServerLoad = async (event) => {
 
 	// Fetch widgets for this dashboard
 	const widgetsEndpoint = `${BASE_API_URL}/metrology/dashboard-widgets/?dashboard=${event.params.id}`;
-	const widgetsResponse = await event.fetch(widgetsEndpoint);
-	const widgetsData = widgetsResponse.ok ? await widgetsResponse.json() : { results: [] };
-
-	const widgets = widgetsData.results || [];
+	const widgets = await fetchAllPages(event.fetch, widgetsEndpoint).catch(() => []);
 
 	// Calculate the first free row (after all existing widgets)
 	const firstFreeRow =

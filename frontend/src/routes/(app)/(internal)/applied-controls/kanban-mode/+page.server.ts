@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { getSecureRedirect } from '$lib/utils/helpers';
 import type { PageServerLoad } from './$types';
 import type { Actions } from '@sveltejs/kit';
@@ -20,12 +21,10 @@ export const load = (async ({ fetch, url }) => {
 	}
 
 	const fullEndpoint = `${endpoint}?${queryParams.toString()}`;
-	const response = await fetch(fullEndpoint);
-	const appliedControlsData = await response.json();
+	const applied_controls = await fetchAllPages(fetch, fullEndpoint);
 
 	// Fetch folders for swimlanes
-	const foldersResponse = await fetch(`${BASE_API_URL}/folders/`);
-	const foldersData = await foldersResponse.json();
+	const folders = await fetchAllPages(fetch, `${BASE_API_URL}/folders/`);
 
 	// Extract UI parameters for the kanban mode page
 	const backUrl = getSecureRedirect(searchParams.get('backUrl')) || '/applied-controls';
@@ -33,8 +32,8 @@ export const load = (async ({ fetch, url }) => {
 
 	return {
 		URLModel,
-		applied_controls: appliedControlsData.results || appliedControlsData,
-		folders: foldersData.results || foldersData,
+		applied_controls,
+		folders,
 		backUrl,
 		backLabel
 	};

@@ -760,16 +760,34 @@ class SmartOrderingFilter(filters.OrderingFilter):
     case_insensitive_suffixes = ("name",)
 
     def get_ordering(self, request, queryset, view):
-        ordering = super().get_ordering(request, queryset, view)
-        if ordering:
-            return [
-                "folder__name"
-                if f == "folder"
-                else "-folder__name"
-                if f == "-folder"
-                else f
-                for f in ordering
-            ]
+        ordering = super().get_ordering(request, queryset, view) or []
+        # Only rewrite `folder` to the related name when the model really has
+        # a folder relation — views that expose a string `folder` annotation
+        # (e.g. the audit log) must order on the annotation itself.
+        model = getattr(queryset, "model", None)
+        map_folder = True
+        if model is not None:
+            try:
+                folder_field = model._meta.get_field("folder")
+                # concrete excludes reverse accessors that happen to be
+                # named "folder" (e.g. on the Folder model itself).
+                map_folder = folder_field.is_relation and folder_field.concrete
+            except FieldDoesNotExist:
+                map_folder = False
+        ordering = [
+            "folder__name"
+            if f == "folder" and map_folder
+            else "-folder__name"
+            if f == "-folder" and map_folder
+            else f
+            for f in ordering
+        ]
+        # Offset pagination is only lossless over a total order: without a
+        # unique tiebreaker, rows tied on the sort key can swap between the
+        # separate queries that back each page, silently skipping or
+        # duplicating objects.
+        if not any(f.lstrip("-") in ("pk", "id") for f in ordering):
+            ordering = [*ordering, "pk"]
         return ordering
 
     def filter_queryset(self, request, queryset, view):
@@ -853,15 +871,41 @@ class AutocompleteMixin:
     @action(detail=False, name="Lightweight autocomplete search")
     def autocomplete(self, request):
         qs = self.filter_queryset(self.get_queryset())
+        # The autocomplete serializer nests the folder when the model has one.
+        if any(f.name == "folder" and f.is_relation for f in self.model._meta.fields):
+            qs = qs.select_related("folder")
+        # Selected-item hydration passes ?id=a,b,c — honor it even when the
+        # model's filterset does not declare an id filter.
+        ids = request.query_params.get("id")
+        if ids:
+            tokens = [t for t in ids.split(",") if t]
+            try:
+                parsed = [UUID(t) for t in tokens]
+            except ValueError:
+                # Some wrapped models (e.g. auth Permission) use integer pks.
+                try:
+                    parsed = [int(t) for t in tokens]
+                except ValueError:
+                    raise DRFValidationError(
+                        {"id": "expected a comma-separated id list"}
+                    )
+            qs = qs.filter(id__in=parsed)
         page = self.paginate_queryset(qs)
         objects = page if page is not None else qs
         serializer = self.get_autocomplete_serializer_class()(objects, many=True)
+        data = serializer.data
+        # Apply the same related-field IAM masking as list()/retrieve(): the
+        # nested folder must not leak where the user lacks view access.
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
         if page is not None:
-            return self.get_paginated_response(serializer.data)
-        return Response(serializer.data)
+            return self.get_paginated_response(data)
+        return Response(data)
 
 
-class BaseModelViewSet(viewsets.ModelViewSet):
+class BaseModelViewSet(AutocompleteMixin, viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -6063,7 +6107,7 @@ class ActionPlanList(generics.ListAPIView):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        SmartOrderingFilter,
     ]
     ordering_fields = "__all__"
     ordering = ["eta"]
@@ -6334,7 +6378,7 @@ class UserRolesOnFolderList(generics.ListAPIView):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        SmartOrderingFilter,
     ]
     ordering_fields = "__all__"
     ordering = ["email"]
@@ -6441,7 +6485,7 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        SmartOrderingFilter,
     ]
 
     def get_serializer_context(self):
@@ -7452,7 +7496,7 @@ class TeamViewSet(BaseModelViewSet):
         )
 
 
-class UserViewSet(AutocompleteMixin, BaseModelViewSet):
+class UserViewSet(BaseModelViewSet):
     """
     API endpoint that allows users to be viewed or edited
     """
@@ -7546,7 +7590,7 @@ class UserViewSet(AutocompleteMixin, BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-class TranslatedNameOrderingFilter(filters.OrderingFilter):
+class TranslatedNameOrderingFilter(SmartOrderingFilter):
     """
     In-memory ordering filter for models whose __str__() returns a
     locale-translated name (e.g. Role, UserGroup).
@@ -7561,19 +7605,26 @@ class TranslatedNameOrderingFilter(filters.OrderingFilter):
     def sort_key(self, obj):
         return str(obj).casefold()
 
+    def _stable_sort_key(self, obj):
+        # In-memory sorts are re-run per page request, so tied sort keys need
+        # the same pk tiebreak as SQL ordering to keep slices consistent.
+        return (self.sort_key(obj), str(obj.pk))
+
+    def _requested_ordering(self, request, queryset, view):
+        """Ordering terms minus the pk tiebreaker SmartOrderingFilter appends."""
+        ordering = self.get_ordering(request, queryset, view) or []
+        return [f for f in ordering if f.lstrip("-") not in ("pk", "id")]
+
     def filter_queryset(self, request, queryset, view):
         if getattr(view, "action", None) != "list":
             return queryset
 
-        ordering = self.get_ordering(request, queryset, view)
-        if not ordering:
-            return queryset
-
+        ordering = self._requested_ordering(request, queryset, view)
         field = self.translated_ordering_field
         if len(ordering) == 1 and ordering[0].lstrip("-") == field:
             desc = ordering[0].startswith("-")
             data = list(queryset)
-            data.sort(key=self.sort_key, reverse=desc)
+            data.sort(key=self._stable_sort_key, reverse=desc)
             return data
 
         return super().filter_queryset(request, queryset, view)
@@ -7605,17 +7656,16 @@ class RoleFilter(TranslatedNameOrderingFilter):
             ]
 
         # In-memory ordering
-        ordering = self.get_ordering(request, queryset, view)
+        ordering = self._requested_ordering(request, queryset, view)
         if (
-            ordering
-            and len(ordering) == 1
+            len(ordering) == 1
             and ordering[0].lstrip("-") == self.translated_ordering_field
         ):
             desc = ordering[0].startswith("-")
-            data.sort(key=self.sort_key, reverse=desc)
+            data.sort(key=self._stable_sort_key, reverse=desc)
         else:
             # Default: sort by translated name
-            data.sort(key=self.sort_key)
+            data.sort(key=self._stable_sort_key)
 
         return data
 
@@ -7653,17 +7703,16 @@ class UserGroupFilter(TranslatedNameOrderingFilter):
             data = [obj for obj in data if term in self._full_display(obj).casefold()]
 
         # In-memory ordering
-        ordering = self.get_ordering(request, queryset, view)
+        ordering = self._requested_ordering(request, queryset, view)
         if (
-            ordering
-            and len(ordering) == 1
+            len(ordering) == 1
             and ordering[0].lstrip("-") == self.translated_ordering_field
         ):
             desc = ordering[0].startswith("-")
-            data.sort(key=self.sort_key, reverse=desc)
+            data.sort(key=self._stable_sort_key, reverse=desc)
         else:
             # Default: sort by translated name (naturally groups by folder)
-            data.sort(key=self.sort_key)
+            data.sort(key=self._stable_sort_key)
 
         return data
 
@@ -17298,7 +17347,7 @@ class TaskNodeEvidenceList(generics.ListAPIView):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        SmartOrderingFilter,
     ]
 
     def get_serializer_context(self):

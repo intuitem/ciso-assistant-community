@@ -1,6 +1,7 @@
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import { defaultWriteFormAction } from '$lib/utils/actions';
@@ -84,16 +85,12 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	// Fetch users for contact fill helper
 	let userOptions: { id: string; label: string; email: string }[] = [];
 	try {
-		const usersRes = await fetch(`${BASE_API_URL}/users/`);
-		if (usersRes.ok) {
-			const usersData = await usersRes.json();
-			const results = usersData.results ?? usersData ?? [];
-			userOptions = results.map((u: any) => ({
-				id: u.id,
-				label: `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email,
-				email: u.email || ''
-			}));
-		}
+		const results = await fetchAllPages(fetch, `${BASE_API_URL}/users/`);
+		userOptions = results.map((u: any) => ({
+			id: u.id,
+			label: `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email,
+			email: u.email || ''
+		}));
 	} catch {
 		// Optional
 	}

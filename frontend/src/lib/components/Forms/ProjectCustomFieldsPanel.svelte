@@ -4,6 +4,7 @@
 	import { z } from 'zod';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
+	import { fetchAllPages } from '$lib/utils/pagination';
 	import CustomFieldsSection from './CustomFieldsSection.svelte';
 
 	interface Choice {
@@ -55,10 +56,7 @@
 		const params = new URLSearchParams({ model, visible: 'true' });
 		if (folderId) params.set('for_folder', folderId);
 		try {
-			const res = await fetch(`/custom-fields/?${params.toString()}`);
-			if (!res.ok) return;
-			const data = await res.json();
-			definitions = data.results ?? data;
+			definitions = await fetchAllPages<Definition>(fetch, `/custom-fields/?${params.toString()}`);
 		} catch (e) {
 			console.error('Failed to load custom field definitions', e);
 		}

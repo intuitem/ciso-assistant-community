@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { getSecureRedirect } from '$lib/utils/helpers';
 import type { PageServerLoad } from './$types';
 import type { Actions } from '@sveltejs/kit';
@@ -20,8 +21,7 @@ export const load = (async ({ fetch, url }) => {
 	}
 
 	const fullEndpoint = `${endpoint}?${queryParams.toString()}`;
-	const response = await fetch(fullEndpoint);
-	const appliedControlsData = await response.json();
+	const applied_controls = await fetchAllPages(fetch, fullEndpoint);
 
 	// Extract UI parameters for the flash mode page
 	const backUrl = getSecureRedirect(searchParams.get('backUrl')) || '/applied-controls';
@@ -29,7 +29,7 @@ export const load = (async ({ fetch, url }) => {
 
 	return {
 		URLModel,
-		applied_controls: appliedControlsData.results || appliedControlsData,
+		applied_controls,
 		backUrl,
 		backLabel
 	};

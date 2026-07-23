@@ -125,7 +125,7 @@
 		mount = () => null,
 		optionSnippet = undefined,
 		placeholder = '',
-		lazy = false,
+		lazy = true,
 		lazyLimit = 20,
 		lazyThreshold = 50,
 		maxVisibleChips: _maxVisibleChips = 3
@@ -215,11 +215,30 @@
 	let lazyHasSearched = $state(false);
 	let lazyDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 	let lazyInputEl = $state<HTMLInputElement | null>(null);
-	let effectiveLazy = $state(lazy);
+	// Static-options selects have nothing to search server-side.
+	let effectiveLazy = $state(lazy && Boolean(optionsEndpoint));
 	const LAZY_HINT_VALUE = '__lazy_hint__';
 	let multiSelectOpen = $state(false);
 	const passthroughFilter = () => true;
 	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
+
+	function autocompleteBase() {
+		// optionsEndpoint may carry a query string ("folders?content_type=DO"):
+		// the /autocomplete action must be inserted before it.
+		const [path, query] = optionsEndpoint.split('?');
+		return query ? `${path}/autocomplete?${query}` : `${path}/autocomplete`;
+	}
+
+	// Surface suggested options in lazy mode, where no option list is fetched
+	// up front — otherwise suggestions would only appear after typing.
+	function seedSuggestions() {
+		if (!optionsSuggestions?.length) return;
+		const existing = new Set(options.map((o) => o.value));
+		const suggested = processOptions(optionsSuggestions).filter((o) => !existing.has(o.value));
+		if (suggested.length > 0) {
+			options = [...options, ...suggested];
+		}
+	}
 
 	function buildEndpoint(extra?: Record<string, string>, baseOverride?: string) {
 		let endpoint = `/${baseOverride ?? optionsEndpoint}`;
@@ -278,11 +297,13 @@
 							// Large dataset — stay in lazy mode, only fetch selected items
 							effectiveLazy = true;
 							await fetchSelectedItems();
+							seedSuggestions();
 						}
 					} else {
 						// Probe failed — fall back to lazy mode
 						effectiveLazy = true;
 						await fetchSelectedItems();
+						seedSuggestions();
 					}
 				} else {
 					const endpoint = buildEndpoint();
@@ -302,10 +323,20 @@
 				}
 				optionsLoaded = true;
 			}
-			if (initialValue !== undefined && initialValue !== null && initialValue !== '') {
+			// Only seed the selection when the user hasn't picked anything yet:
+			// on edit forms this tail runs after async round-trips (probe +
+			// hydration in lazy mode), and a fast user can change the value
+			// before it lands — seeding then would clobber their choice back
+			// to the initial value, which is what would get saved.
+			if (
+				selected.length === 0 &&
+				initialValue !== undefined &&
+				initialValue !== null &&
+				initialValue !== ''
+			) {
 				const ids = (Array.isArray(initialValue) ? initialValue : [initialValue]).map(String);
 				selected = options.filter((item) => ids.includes(String(item.value)));
-			} else if (options.length === 1 && $constraints?.required) {
+			} else if (selected.length === 0 && options.length === 1 && $constraints?.required) {
 				selected = [options[0]];
 			}
 		} catch (error) {
@@ -320,7 +351,7 @@
 		const ids = Array.isArray(initialValue) ? initialValue : [initialValue];
 		if (ids.length === 0) return;
 
-		const lazyBase = effectiveLazy ? `${optionsEndpoint}/autocomplete` : undefined;
+		const lazyBase = effectiveLazy ? autocompleteBase() : undefined;
 		const endpoint = buildEndpoint({ id: ids.join(',') }, lazyBase);
 		const response = await fetch(endpoint, { cache: browserCache });
 		if (response.ok) {
@@ -334,8 +365,9 @@
 	async function lazySearch(searchTerm: string) {
 		if (!effectiveLazy || !optionsEndpoint) return;
 		if (!searchTerm || searchTerm.length < 2) {
-			// Keep only already-selected options visible
+			// Keep already-selected options and suggestions visible
 			options = selected.length > 0 ? [...selected] : [];
+			seedSuggestions();
 			lazyHasSearched = false;
 			return;
 		}
@@ -343,7 +375,7 @@
 		isLoading = true;
 		lazyHasSearched = true;
 		try {
-			const lazyBase = `${optionsEndpoint}/autocomplete`;
+			const lazyBase = autocompleteBase();
 			const endpoint = buildEndpoint(
 				{
 					search: searchTerm,
@@ -377,10 +409,13 @@
 
 		const processed = objects
 			.map((object) => {
-				const mainLabel =
+				const composedLabel =
 					optionsLabelField === 'auto'
 						? append(object.ref_id, object.name || object.description)
 						: getNestedValue(object, optionsLabelField);
+				// Lightweight payloads (e.g. autocomplete) may lack the label
+				// fields — fall back to the server-side display string.
+				const mainLabel = composedLabel || object.str || '';
 
 				const extraParts = optionsExtraFields.map((fieldPath) => {
 					const value = getNestedValue(object, fieldPath[0], fieldPath[1]);

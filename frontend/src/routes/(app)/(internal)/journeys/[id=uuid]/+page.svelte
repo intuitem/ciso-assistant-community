@@ -4,6 +4,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { getSecureRedirect } from '$lib/utils/helpers';
+	import { fetchAllPages } from '$lib/utils/pagination';
 	import { page } from '$app/stores';
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
@@ -112,18 +113,15 @@
 		if (choicesCache[targetModel] || _loadingChoices.has(targetModel)) return;
 		_loadingChoices.add(targetModel);
 		try {
-			const resp = await fetch(`/${targetModel}`, { headers: { Accept: 'application/json' } });
-			if (resp.ok) {
-				const json = await resp.json();
-				const results = json.results ?? json;
-				choicesCache[targetModel] = Array.isArray(results)
-					? results.map((r: any) => ({
-							id: r.id,
-							str: r.str ?? r.name ?? r.id,
-							folder: r.folder?.str ?? r.folder?.name ?? ''
-						}))
-					: [];
-			}
+			const results = await fetchAllPages(
+				(url) => fetch(url, { headers: { Accept: 'application/json' } }),
+				`/${targetModel}`
+			);
+			choicesCache[targetModel] = results.map((r: any) => ({
+				id: r.id,
+				str: r.str ?? r.name ?? r.id,
+				folder: r.folder?.str ?? r.folder?.name ?? ''
+			}));
 		} catch (e) {
 			console.error('Failed to fetch choices for', targetModel, e);
 		} finally {

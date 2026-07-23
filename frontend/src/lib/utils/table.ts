@@ -2093,7 +2093,7 @@ export const listViewFields = {
 			'name',
 			'description',
 			'locales',
-			'objects_meta',
+			'overview',
 			'publication_date'
 		],
 		filters: {
