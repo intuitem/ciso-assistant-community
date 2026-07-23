@@ -82,7 +82,9 @@ Power BI.
 
 1. **Get Data → CISO Assistant** (category *Online Services*).
 2. Enter the URL you use in your browser, e.g.
-   `https://ciso-assistant.example.com` (no `/api` suffix).
+   `https://ciso-assistant.example.com` (no `/api` suffix). Always use an
+   `https://` URL for real instances — your token is sent with every
+   request; reserve plain `http://` for local development servers.
 3. Paste your Personal Access Token when prompted.
 4. Pick tables in the Navigator (Facts / Dimensions / Bridges) and **Load**.
 

@@ -44,6 +44,8 @@ jobs:
         shell: pwsh
         run: |
           & $env:MAKEPQX pack -mz "dist/CisoAssistant.mez" -t "dist/CisoAssistant.pqx"
+          if ($LASTEXITCODE -ne 0) { throw "MakePQX pack failed ($LASTEXITCODE)" }
+          if (-not (Test-Path "dist/CisoAssistant.pqx")) { throw "pack produced no .pqx" }
 
       - name: Check signing secrets
         id: signing
@@ -67,8 +69,18 @@ jobs:
           $pfx = "signing.pfx"
           [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:PBI_SIGNING_CERT))
           & $env:MAKEPQX sign "dist/CisoAssistant.pqx" --certificate $pfx --password $env:PBI_SIGNING_PASSWORD --replace
+          $signExit = $LASTEXITCODE
           Remove-Item $pfx
+          if ($signExit -ne 0) { throw "MakePQX sign failed ($signExit)" }
           & $env:MAKEPQX verify "dist/CisoAssistant.pqx"
+          if ($LASTEXITCODE -ne 0) { throw "MakePQX verify failed ($LASTEXITCODE)" }
+
+      - name: Check artifacts exist
+        shell: pwsh
+        run: |
+          foreach ($f in "dist/CisoAssistant.mez", "dist/CisoAssistant.pqx") {
+            if (-not (Test-Path $f) -or (Get-Item $f).Length -eq 0) { throw "missing or empty artifact: $f" }
+          }
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

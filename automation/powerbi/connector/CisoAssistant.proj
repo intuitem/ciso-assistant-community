@@ -18,7 +18,7 @@
     <MezContent Include="CisoAssistant80.png" />
     <MezContent Include="resources.resx" />
   </ItemGroup>
-  <Target Name="BuildMez" AfterTargets="Build" Inputs="@(MezContent)" Outputs="$(MezOutputPath)">
+  <Target Name="BuildMez" AfterTargets="Build" Inputs="$(MSBuildProjectFullPath);@(MezContent)" Outputs="$(MezOutputPath)">
     <RemoveDir Directories="$(MezIntermediatePath)" />
     <Copy SourceFiles="@(MezContent)" DestinationFolder="$(MezIntermediatePath)" />
     <MakeDir Directories="$(OutputPath)" Condition="!Exists('$(OutputPath)')" />

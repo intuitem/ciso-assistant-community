@@ -43,7 +43,10 @@ repo mounted via Parallels shared folders.
 4. Edit `CisoAssistant.query.pq` to point at your dev instance URL
    (`https://localhost:8443` when running the docker compose stack).
 5. *Evaluate current file* task → results appear in the panel.
-6. *Build* task → `bin/AnyCPU/Debug/CisoAssistant.mez`.
+6. *Build* task (pick **MakePQX**, not MSBuild) → `bin/AnyCPU/Debug/connector.mez`.
+   MakePQX names the output after the workspace *folder*; the MSBuild path
+   (`CisoAssistant.proj`) names it `CisoAssistant.mez` after the project.
+   `.vscode/settings.json` points at the MakePQX name.
 7. Copy the `.mez` to the Custom Connectors folder — resolve it via the
    known folder (OneDrive may redirect Documents, especially on fresh VMs):
    ```powershell
