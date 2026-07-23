@@ -210,28 +210,30 @@ def check_file_validity(files: List[str] | str, filetype_name: str, valid_file_e
 
 # > Useful for "get_yaml_section_from_files()".
 # As the base_urn of "threats" and "reference_controls" isn't written directly in the YAML file,
-# it'll be deduced by comparing 2 "threats" (or "reference_controls") URNs.
+# it'll be deduced by comparing all "threats" (or "reference_controls") URNs.
 # If there's only 1 element in the "threats" (or "reference_controls") list, it'll return "None".
-# It'll also return "None" if nothing matches between the first 2 elements in the list.
+# It'll also return "None" if nothing matches between all elements in the list.
 def __calculate_base_urn(items: List[Dict]):
     if len(items) < 2:
         return None
 
-    urn1 = items[0].get("urn", "")
-    urn2 = items[1].get("urn", "")
+    common_parts = items[0].get("urn", "").split(":")
 
-    # Find common prefix by parts (split by ':')
-    parts1 = urn1.split(":")
-    parts2 = urn2.split(":")
+    # Reduce the common prefix by comparing it with every URN
+    for item in items[1:]:
+        urn_parts = item.get("urn", "").split(":")
+        matching_parts = []
 
-    common_parts = []
-    for p1, p2 in zip(parts1, parts2):
-        if p1 == p2:
-            common_parts.append(p1)
-        else:
-            break
+        for common_part, urn_part in zip(common_parts, urn_parts):
+            if common_part != urn_part:
+                break
+            matching_parts.append(common_part)
 
-    return ":".join(common_parts) if common_parts else None
+        common_parts = matching_parts
+        if not common_parts:
+            return None
+
+    return ":".join(common_parts)
 
 
 # Get the name of the calling function
@@ -2751,7 +2753,7 @@ def get_yaml_section_from_files(yaml_files: List[str], section_type: YAMLSection
                     if verbose:
                         msg = (
                             f"💬 ℹ️  [INFO] ({fct_name}) [{current_sheet_name}] URN of section \"{section_type.value}\" of the YAML file \"{file}\" couldn't be defined.\n"
-                            f"> 💡 Tip: This is probably because the \"{section_type.value}\" section of the file contains only 1 element (2 elements are required to determine the \"base_urn\" of the \"{section_type.value}\" section in the YAML file)"
+                            f"> 💡 Tip: This is probably because the \"{section_type.value}\" section of the file contains only 1 element (at least 2 elements are required to determine the \"base_urn\" of the \"{section_type.value}\" section in the YAML file)"
                         )
                         print(msg)
                         if ctx:
