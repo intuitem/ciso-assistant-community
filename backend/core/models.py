@@ -4881,9 +4881,9 @@ class Evidence(
         return max(revs, key=lambda r: r.version) if revs else None
 
     def get_folder(self):
-        if self.applied_controls:
+        if self.applied_controls.exists():
             return self.applied_controls.first().folder
-        elif self.requirement_assessments:
+        elif self.requirement_assessments.exists():
             return self.requirement_assessments.first().folder
         elif self.security_exceptions.exists():
             return self.security_exceptions.first().folder
