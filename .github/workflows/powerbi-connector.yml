@@ -1,0 +1,79 @@
+name: Power BI connector
+
+on:
+  pull_request:
+    paths:
+      - "automation/powerbi/**"
+      - ".github/workflows/powerbi-connector.yml"
+  push:
+    branches: [main]
+    paths:
+      - "automation/powerbi/**"
+    tags:
+      - "powerbi-v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build .mez (zip of connector sources)
+        shell: pwsh
+        run: |
+          $connector = "automation/powerbi/connector"
+          $staging = "obj/mez"
+          New-Item -ItemType Directory -Force -Path $staging, "dist" | Out-Null
+          Copy-Item "$connector/CisoAssistant.pq", "$connector/resources.resx", "$connector/*.png" -Destination $staging
+          Compress-Archive -Path "$staging/*" -DestinationPath "dist/CisoAssistant.zip" -Force
+          Move-Item "dist/CisoAssistant.zip" "dist/CisoAssistant.mez"
+
+      - name: Install Power Query SDK tools
+        shell: pwsh
+        run: |
+          nuget install Microsoft.PowerQuery.SdkTools -OutputDirectory sdktools -NonInteractive
+          $makepqx = Get-ChildItem -Path sdktools -Recurse -Filter MakePQX.exe | Select-Object -First 1
+          if (-not $makepqx) { throw "MakePQX.exe not found" }
+          Add-Content $env:GITHUB_ENV "MAKEPQX=$($makepqx.FullName)"
+
+      - name: Pack .pqx
+        shell: pwsh
+        run: |
+          & $env:MAKEPQX pack -mz "dist/CisoAssistant.mez" -t "dist/CisoAssistant.pqx"
+
+      - name: Check signing secrets
+        id: signing
+        shell: pwsh
+        env:
+          PBI_SIGNING_CERT: ${{ secrets.PBI_SIGNING_CERT }}
+        run: |
+          if ([string]::IsNullOrEmpty($env:PBI_SIGNING_CERT)) {
+            Add-Content $env:GITHUB_OUTPUT "enabled=false"
+          } else {
+            Add-Content $env:GITHUB_OUTPUT "enabled=true"
+          }
+
+      - name: Sign and verify .pqx
+        if: steps.signing.outputs.enabled == 'true' && github.event_name != 'pull_request'
+        shell: pwsh
+        env:
+          PBI_SIGNING_CERT: ${{ secrets.PBI_SIGNING_CERT }}
+          PBI_SIGNING_PASSWORD: ${{ secrets.PBI_SIGNING_PASSWORD }}
+        run: |
+          $pfx = "signing.pfx"
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:PBI_SIGNING_CERT))
+          & $env:MAKEPQX sign "dist/CisoAssistant.pqx" --certificate $pfx --password $env:PBI_SIGNING_PASSWORD --replace
+          Remove-Item $pfx
+          & $env:MAKEPQX verify "dist/CisoAssistant.pqx"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: powerbi-connector
+          path: |
+            dist/CisoAssistant.mez
+            dist/CisoAssistant.pqx
