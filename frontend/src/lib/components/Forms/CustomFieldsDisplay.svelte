@@ -73,15 +73,15 @@
 </script>
 
 {#if definitions.length}
-	<div class="card p-4 shadow-lg bg-white mt-8">
+	<div class="card p-4 shadow-lg bg-surface-50-950 mt-8">
 		<Dropdown open={hasValues} icon="fa-solid fa-sliders" header={m.customFields()} style="">
 			<dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 pt-2">
 				{#each definitions as def (def.id)}
-					<div class="border-l-2 border-gray-200 pl-4">
-						<dt class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+					<div class="border-l-2 border-surface-200-800 pl-4">
+						<dt class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide">
 							{def.label_localized}
 						</dt>
-						<dd class="text-sm text-gray-900">{displayValue(def, values?.[def.key])}</dd>
+						<dd class="text-sm text-surface-900-100">{displayValue(def, values?.[def.key])}</dd>
 					</div>
 				{/each}
 			</dl>
