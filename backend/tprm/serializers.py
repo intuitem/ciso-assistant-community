@@ -91,6 +91,10 @@ class EntityReadSerializer(BaseModelSerializer):
 
 
 class EntityWriteSerializer(BaseModelSerializer):
+    # The default "Main" entity is created built-in (so it can't be deleted) but
+    # is user-owned and fully editable — e.g. renamed to the org's name.
+    BUILTIN_EDITABLE_FIELDS = "__all__"
+
     class Meta:
         model = Entity
         exclude = ["owned_folders"]

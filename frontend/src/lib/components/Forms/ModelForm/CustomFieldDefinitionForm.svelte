@@ -34,7 +34,8 @@
 	const modelOptions = [
 		{ label: m.project(), value: 'pmbok.project' },
 		{ label: m.asset(), value: 'core.asset' },
-		{ label: m.appliedControl(), value: 'core.appliedcontrol' }
+		{ label: m.appliedControl(), value: 'core.appliedcontrol' },
+		{ label: m.securityException(), value: 'core.securityexception' }
 	];
 
 	const { value: fieldType } = formFieldProxy(form, 'field_type');
