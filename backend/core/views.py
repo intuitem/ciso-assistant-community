@@ -17680,6 +17680,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         elif to_status == "submitted" and from_status in (
             "in_progress",
             "changes_requested",
+            "closed",
         ):
             from core.tasks import send_assignment_submitted_notification
 
