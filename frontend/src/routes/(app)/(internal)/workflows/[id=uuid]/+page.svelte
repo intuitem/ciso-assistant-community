@@ -13,10 +13,16 @@
 	const hasPublishedFallback = $derived(
 		data.versions.some((v: { status: string }) => v.status === 'published')
 	);
+
+	// Discarding an AUTO-DRAFTED draft is invisible to page data (it loaded the
+	// published version and never learned about the draft), so the {#key} below
+	// wouldn't change and the stale canvas would keep editing a deleted version.
+	// The canvas bumps this epoch after a discard to force its own remount.
+	let canvasEpoch = $state(0);
 </script>
 
 <div class="h-[calc(100vh-7.5rem)]">
-	{#key data.activeVersion.id + data.activeVersion.status}
+	{#key data.activeVersion.id + data.activeVersion.status + canvasEpoch}
 		<WorkflowCanvas
 			workflowName={data.workflow.name}
 			workflowDescription={data.workflow.description}
@@ -32,6 +38,7 @@
 			subprocessCandidates={data.subprocessCandidates}
 			creatableModels={data.creatableModels}
 			fkOptions={data.fkOptions}
+			onDiscarded={() => (canvasEpoch += 1)}
 		/>
 	{/key}
 </div>

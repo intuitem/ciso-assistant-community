@@ -41,6 +41,7 @@
 		folderId: string;
 		readonly: boolean;
 		hasPublishedFallback?: boolean;
+		onDiscarded?: () => void;
 		taskTemplates: any[];
 		subprocessCandidates: any[];
 		creatableModels?: any[];
@@ -58,6 +59,7 @@
 		folderId,
 		readonly,
 		hasPublishedFallback = false,
+		onDiscarded,
 		taskTemplates,
 		subprocessCandidates,
 		creatableModels = [],
@@ -726,7 +728,7 @@
 	}
 
 	async function save(): Promise<boolean> {
-		if (readonly) return true;
+		if (readonly || versionGone) return true;
 		if (saveTimer) clearTimeout(saveTimer);
 		saveState = 'saving';
 		if (status === 'published' && !(await ensureDraft())) return false;
@@ -735,6 +737,16 @@
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ version: activeVersionId, graph: serializeGraph() })
 		});
+		if (res.status === 404) {
+			// The version vanished under us (discarded in another tab, or a
+			// discard race): nothing here is savable anymore — resync to
+			// reality instead of parking on an error the user can't act on.
+			versionGone = true;
+			saveError = m.draftNoLongerExists();
+			saveState = 'error';
+			await invalidateAll();
+			return false;
+		}
 		if (!res.ok) {
 			const body = await res.json().catch(() => ({}));
 			saveError = body.error ?? body.detail ?? res.statusText;
@@ -796,6 +808,12 @@
 		});
 	}
 
+	// Set the moment the backend confirms the draft is gone (or turns out to be
+	// already gone): every save path checks it, so no race — in-flight autosave,
+	// a keystroke during the page reload, a second discard click — can fire
+	// requests at a deleted version.
+	let versionGone = $state(false);
+
 	async function discardDraft() {
 		discarding = true;
 		try {
@@ -804,17 +822,28 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ version: activeVersionId })
 			});
-			if (res.ok) {
-				// Drop any pending autosave: the draft is gone, and the reload below
-				// swaps the page to the published version.
+			// 404 = the draft was already deleted (another tab, an earlier
+			// half-finished discard): the goal state is reached either way,
+			// so resync instead of surfacing the raw error.
+			if (res.ok || res.status === 404) {
+				versionGone = true;
 				if (saveTimer) clearTimeout(saveTimer);
 				await invalidateAll();
+				// Force the remount: when this draft was auto-drafted in-session,
+				// page data (still the published version) is unchanged by the
+				// reload, so the page's {#key} alone would never fire.
+				onDiscarded?.();
+				// Deliberately leave `discarding` true: this instance is about to
+				// be torn down; until then the button stays dead.
 				return;
 			}
 			const body = await res.json().catch(() => ({}));
 			saveError = body.error ?? body.detail ?? res.statusText;
 			saveState = 'error';
-		} finally {
+			discarding = false;
+		} catch (error) {
+			saveError = String(error);
+			saveState = 'error';
 			discarding = false;
 		}
 	}
