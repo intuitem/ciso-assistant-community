@@ -2872,7 +2872,7 @@ def _framework_validate_depth_consistency(df: pd.DataFrame, sheet_name: str):
 
 
 
-# [CONTENT] Framework {OK} [Check new optional columns : "scores_definition"]
+# [CONTENT] Framework {OK} [Check new optional columns : "scores_definition", "depends_on", "condition"]
 def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
@@ -2880,8 +2880,8 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, 
     optional_columns = [
         "implementation_groups", "description", "threats",
         "reference_controls", "typical_evidence", "annotation",
-        "questions", "answer", "urn_id", "importance", "weight",
-        "min_score", "max_score"
+        "questions", "answer", "depends_on", "condition", "urn_id",
+        "importance", "weight", "min_score", "max_score"
     ]
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
@@ -2939,11 +2939,11 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, 
     # Check if values in "condition" columns are valid
     validate_allowed_column_values(df, "condition", condition_values, sheet_name, fct_name, ctx=ctx, split_regex=CommonSeparatorRegex.LF)
     
-    # Check if the number of lines in cells of "depends_on" are coherent with lines in cells of "answer"
-    validate_cell_line_count_alignment(df, "answer", "depends_on", sheet_name, fct_name, cmp_can_be_empty=True)
+    # Check if the number of lines in cells of "questions" are coherent with lines in cells of "answer"
+    validate_cell_line_count_alignment(df, "questions", "depends_on", sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=CommonLineBreakIndicator.PIPE)
     
-    # Check if the number of lines in cells of "condition" are coherent with lines in cells of "depends_on"
-    validate_cell_line_count_alignment(df, "depends_on", "condition", sheet_name, fct_name, cmp_can_be_empty=True)
+    # Check if the number of lines in cells of "questions" are coherent with lines in cells of "depends_on"
+    validate_cell_line_count_alignment(df, "questions", "condition", sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=CommonLineBreakIndicator.PIPE)
     
     # Check if values in "weight" columns are valid
     validate_integer_value(df, sheet_name, "weight", fct_name, value_name="weight", positive_only=True)
