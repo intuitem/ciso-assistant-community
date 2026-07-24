@@ -375,14 +375,6 @@
 		historySizes = { undo: undoStack.length, redo: redoStack.length };
 	}
 
-	function resetHistory() {
-		undoStack = [];
-		redoStack = [];
-		lastSnapshot = takeSnapshot();
-		lastPushAt = 0;
-		syncHistorySizes();
-	}
-
 	function applyDoc(doc: Doc) {
 		restoring = true;
 		// Defeat coalescing for the next real edit: it must push a fresh undo
@@ -845,11 +837,10 @@
 		const draft = await res.json();
 		// The server clone has fresh row ids; the canvas keeps ITS state as the
 		// source of truth (the next save wholesale-replaces the clone), so re-id
-		// everything locally to avoid colliding with the published rows.
+		// everything locally to avoid colliding with the published rows. Undo
+		// history is remapped through the same id map, so ⌘Z can walk back
+		// across the auto-draft boundary to the pre-edit (published) content.
 		remapGraphIds();
-		// History snapshots from before the remap hold stale published-row ids;
-		// undo starts fresh on the new draft.
-		resetHistory();
 		activeVersionId = draft.id;
 		status = 'draft';
 		versionNumber = draft.version_number;
@@ -908,6 +899,36 @@
 		// in place makes every condition edge unresolvable (silently dropped)
 		// until something else happens to refresh visuals.
 		refreshVisuals();
+
+		// Undo snapshots hold pre-remap ids; restoring them verbatim into a
+		// draft save would collide with the published rows' PKs. Walk every
+		// snapshot through the SAME id map instead of wiping history — fresh()
+		// memoizes, so ids of rows deleted before the remap (present only in
+		// old snapshots) still map to stable new ids across all docs.
+		const remapDoc = (doc: Doc): Doc => ({
+			variables: doc.variables.map((v: any) => ({ ...v, id: fresh(v.id) })),
+			nodes: doc.nodes.map((n: any) => ({
+				...n,
+				id: fresh(n.id),
+				branches: Array.isArray(n.branches)
+					? n.branches.map((branch: any) => ({
+							...branch,
+							id: fresh(branch.id),
+							condition_groups: (branch.condition_groups ?? []).map(remapGroup)
+						}))
+					: n.branches
+			})),
+			edges: doc.edges.map((e: any) => ({
+				...e,
+				id: fresh(e.id),
+				source: fresh(e.source),
+				target: fresh(e.target),
+				source_branch: e.source_branch ? fresh(e.source_branch) : null
+			}))
+		});
+		undoStack = undoStack.map(remapDoc);
+		redoStack = redoStack.map(remapDoc);
+		if (lastSnapshot) lastSnapshot = remapDoc(lastSnapshot);
 	}
 
 	let runsOpen = $state(false);
