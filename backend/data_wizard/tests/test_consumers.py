@@ -916,6 +916,24 @@ class TestFolderConsumer:
         assert error is None
         assert record_data["parent_folder"] == domain_folder.id
 
+    def test_iam_group_column_sets_create_iam_groups(self, base_context, root_folder):
+        consumer = FolderRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "TopLevel", "iam_group": "x"}, None
+        )
+        assert error is None
+        assert record_data["create_iam_groups"] is True
+
+    def test_empty_iam_group_column_omits_create_iam_groups(
+        self, base_context, root_folder
+    ):
+        consumer = FolderRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "TopLevel", "iam_group": ""}, None
+        )
+        assert error is None
+        assert "create_iam_groups" not in record_data
+
     def test_find_existing_by_name_and_parent(self, base_context, domain_folder):
         existing = Folder.objects.create(
             name="Existing Sub",
