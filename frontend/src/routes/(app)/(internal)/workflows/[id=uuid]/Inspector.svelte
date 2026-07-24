@@ -14,7 +14,6 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { publicHookUrl } from './hook-url';
 	import DataBrowser from './DataBrowser.svelte';
-	import WorkflowDataPanel from './WorkflowDataPanel.svelte';
 	import { renderTemplate } from './expressions';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 	import { newCondition, treeToGroups, groupsToTree, type Condition } from './filter-dnf';
@@ -39,17 +38,13 @@
 		onAddBranch?: () => void;
 		onDeleteBranch?: (branchId: string) => void;
 		onMoveBranch?: (index: number, delta: number) => void;
-		// Readonly (archived) views still show the Workflow panel, minus its
-		// add/remove controls.
 		readonly?: boolean;
 		variables: { id: string; key: string; type: string }[];
 		secrets?: { id: string; name: string }[];
 		// Creates the variable (or finds the existing one on a duplicate key)
 		// and returns its id, so inline creators can select it right away.
 		onAddVariable?: (key: string, type: string) => string | null;
-		onRemoveVariable?: (id: string) => void;
 		onAddSecret?: (name: string, value: string) => void;
-		onRemoveSecret?: (id: string) => void;
 		taskTemplates: Option[];
 		subprocessCandidates: Option[];
 		creatableModels?: any[];
@@ -76,9 +71,7 @@
 		variables,
 		secrets = [],
 		onAddVariable,
-		onRemoveVariable,
 		onAddSecret,
-		onRemoveSecret,
 		taskTemplates,
 		subprocessCandidates,
 		creatableModels = [],
@@ -1700,28 +1693,6 @@
 					oninput={onChange}
 				/>
 			</label>
-		</div>
-	{:else}
-		<div class="p-3 space-y-4" data-testid="workflow-overview-panel">
-			<div>
-				<h3 class="text-xs font-semibold uppercase tracking-wide text-surface-600-400">
-					{m.workflowOverview()}
-				</h3>
-				<p class="text-[10px] leading-relaxed text-surface-500 mt-1">
-					{m.workflowPanelHint()}
-				</p>
-			</div>
-
-			<WorkflowDataPanel
-				{variables}
-				{secrets}
-				{referenceVariables}
-				{readonly}
-				{onAddVariable}
-				{onRemoveVariable}
-				{onAddSecret}
-				{onRemoveSecret}
-			/>
 		</div>
 	{/if}
 </aside>

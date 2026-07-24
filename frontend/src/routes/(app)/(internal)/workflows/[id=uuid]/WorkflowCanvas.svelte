@@ -556,10 +556,10 @@
 		}
 	}
 
-	// Node selected → the data browser needs it; nothing selected → the
-	// Inspector's Workflow panel shows per-variable reference values.
+	// Node selected → the data browser needs it; data panel open → it shows
+	// per-variable reference values.
 	$effect(() => {
-		if ((selectedNodeId || !selectedEdgeId) && !readonly) ensureReferenceRun();
+		if ((selectedNodeId || dataOpen) && !readonly) ensureReferenceRun();
 	});
 
 	// Upstream nodes only: data available TO the selected node.
@@ -1733,34 +1733,36 @@
 			{/if}
 		</div>
 
-		<Inspector
-			selectedNode={readonly ? null : selectedNode}
-			selectedEdge={readonly ? null : selectedEdge}
-			branches={readonly ? [] : selectedConditionBranches}
-			defaultBranch={readonly ? null : selectedConditionDefault}
-			onAddBranch={() => selectedNode && addBranch(selectedNode.id)}
-			onDeleteBranch={(branchId) => selectedNode && deleteBranch(selectedNode.id, branchId)}
-			onMoveBranch={(index, delta) => selectedNode && moveBranch(selectedNode.id, index, delta)}
-			{readonly}
-			{variables}
-			{secrets}
-			onAddVariable={addVariable}
-			onRemoveVariable={removeVariable}
-			onAddSecret={addSecret}
-			onRemoveSecret={removeSecret}
-			{taskTemplates}
-			{subprocessCandidates}
-			{creatableModels}
-			{fkOptions}
-			{workflowId}
-			{registrationsByRef}
-			onRegistrationsChanged={refreshRegistrations}
-			referenceRunId={referenceRun?.id ?? null}
-			{referenceVariables}
-			{referenceNodes}
-			secretNames={secrets.map((s: any) => s.name)}
-			onChange={handleInspectorChange}
-		/>
+		<!-- No selection → no panel: the canvas takes the full width, and
+		     workflow-scoped data lives in the Variables toggle instead. -->
+		{#if !readonly && (selectedNode || selectedEdge)}
+			<Inspector
+				{selectedNode}
+				{selectedEdge}
+				branches={selectedConditionBranches}
+				defaultBranch={selectedConditionDefault}
+				onAddBranch={() => selectedNode && addBranch(selectedNode.id)}
+				onDeleteBranch={(branchId) => selectedNode && deleteBranch(selectedNode.id, branchId)}
+				onMoveBranch={(index, delta) => selectedNode && moveBranch(selectedNode.id, index, delta)}
+				{readonly}
+				{variables}
+				{secrets}
+				onAddVariable={addVariable}
+				onAddSecret={addSecret}
+				{taskTemplates}
+				{subprocessCandidates}
+				{creatableModels}
+				{fkOptions}
+				{workflowId}
+				{registrationsByRef}
+				onRegistrationsChanged={refreshRegistrations}
+				referenceRunId={referenceRun?.id ?? null}
+				{referenceVariables}
+				{referenceNodes}
+				secretNames={secrets.map((s: any) => s.name)}
+				onChange={handleInspectorChange}
+			/>
+		{/if}
 	</div>
 </div>
 

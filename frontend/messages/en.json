@@ -5311,8 +5311,6 @@
 	"workflowTaskTemplate": "Task template",
 	"workflowRuns": "Runs",
 	"executeWorkflow": "Execute",
-	"workflowOverview": "Workflow",
-	"workflowPanelHint": "Select a node to configure it. Variables and secrets used by this workflow live here.",
 	"noRunsYet": "No runs yet. Run this version manually or POST to its webhook.",
 	"webhookTrigger": "Webhook trigger",
 	"webhookUrlHint": "POST JSON to this URL to trigger the published version.",
