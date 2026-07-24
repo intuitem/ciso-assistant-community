@@ -19,9 +19,35 @@
 	// wouldn't change and the stale canvas would keep editing a deleted version.
 	// The canvas bumps this epoch after a discard to force its own remount.
 	let canvasEpoch = $state(0);
+
+	// The appbar height varies (breadcrumbs, optional description lines), so a
+	// hardcoded calc() either overflows or leaves a gap. Measure the space left
+	// between the container's top edge and the viewport bottom instead, minus
+	// the parent <main>'s bottom padding so the canvas ends flush with the page.
+	let container = $state<HTMLDivElement | null>(null);
+	let canvasHeight = $state<number | null>(null);
+
+	function measure() {
+		if (!container) return;
+		const paddingBottom = container.parentElement
+			? parseFloat(getComputedStyle(container.parentElement).paddingBottom)
+			: 0;
+		const top = container.getBoundingClientRect().top + window.scrollY;
+		canvasHeight = Math.max(400, window.innerHeight - top - paddingBottom);
+	}
+
+	$effect(() => {
+		measure();
+	});
 </script>
 
-<div class="h-[calc(100vh-7.5rem)]">
+<svelte:window onresize={measure} />
+
+<div
+	bind:this={container}
+	class="h-[calc(100vh-12rem)]"
+	style:height={canvasHeight === null ? undefined : `${canvasHeight}px`}
+>
 	{#key data.activeVersion.id + data.activeVersion.status + canvasEpoch}
 		<WorkflowCanvas
 			workflowName={data.workflow.name}

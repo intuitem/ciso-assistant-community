@@ -154,7 +154,9 @@
 </svelte:head>
 
 <!-- App Shell -->
-<div class="overflow-x-clip">
+<!-- min-height and background live here (not on <main>) so appbar + main can
+     add up to exactly one viewport; min-h-screen on <main> alone always overflowed. -->
+<div class="overflow-x-clip min-h-dvh bg-linear-to-br from-surface-200-800 to-surface-150-850">
 	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
 	<AppBar
 		class="sticky top-0 z-50 border-b border-surface-200-800 transition-all duration-300 bg-surface-50-950 w-auto pb-2 px-4 {classesSidebarOpen(
@@ -235,11 +237,7 @@
 	{#if $page.data.featureflags?.chat_mode}
 		<ChatWidget />
 	{/if}
-	<main
-		class="min-h-screen p-8 bg-linear-to-br from-surface-200-800 to-surface-150-850 transition-all duration-300 {classesSidebarOpen(
-			sidebarOpen
-		)}"
-	>
+	<main class="p-8 transition-all duration-300 {classesSidebarOpen(sidebarOpen)}">
 		{@render children?.()}
 	</main>
 	<!-- ---- / ---- -->
