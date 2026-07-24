@@ -14,7 +14,9 @@ Two layers:
 import io
 
 import pytest
+from django.conf import settings
 from django.contrib.auth.models import Permission
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 from serdes.domain_io import export_domain, import_objects, process_uploaded_file
 from serdes.utils import get_domain_export_objects
@@ -235,3 +237,40 @@ class TestTPRMRoundTrip:
         # Contract in the new domain, solutions M2M remapped.
         contract = Contract.objects.get(folder=imported, ref_id="CONTRACT-1")
         assert list(contract.solutions.all()) == [solution]
+
+
+# ============ Import error reporting ============
+
+
+class TestImportValidationErrorReporting:
+    @pytest.mark.django_db
+    def test_validation_errors_are_surfaced_not_swallowed(self, admin_user):
+        """A dump with an invalid object must raise a ValidationError carrying
+        the real per-object errors, not the opaque "errorOccuredDuringImport"
+        the old AttributeError crash degraded into."""
+        parsed = {
+            "meta": {
+                "media_version": settings.VERSION,
+                "schema_version": settings.SCHEMA_VERSION,
+                "exported_at": "2026-01-01T00:00:00Z",
+            },
+            # core.asset with no name fails the ImportExport serializer.
+            "objects": [
+                {"model": "core.asset", "id": "aaaaaaaaaaaa", "fields": {}},
+            ],
+        }
+
+        with pytest.raises(DjangoValidationError) as exc_info:
+            import_objects(
+                parsed,
+                domain_name="Broken Import",
+                load_missing_libraries=True,
+                user=admin_user,
+            )
+
+        message_dict = exc_info.value.message_dict
+        assert "validation_errors" in message_dict
+        assert "non_field_errors" not in message_dict
+        assert any(
+            "core.asset" in msg for msg in message_dict["validation_errors"]
+        )

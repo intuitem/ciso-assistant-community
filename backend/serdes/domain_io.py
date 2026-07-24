@@ -434,7 +434,21 @@ def import_objects(
             logger.error(
                 "Failed to validate objects", validation_errors=validation_errors
             )
-            raise ValidationError({"validation_errors": validation_errors})
+            # Django's ValidationError can't wrap a list of dicts: it tries to
+            # read `.error_list` off each nested entry (which, built from a
+            # dict, only has `.error_dict`) and raises AttributeError. That
+            # AttributeError used to be swallowed by the outer `except
+            # Exception` and reported as an opaque "errorOccuredDuringImport".
+            # Flatten to readable strings so the real per-object errors reach
+            # the caller.
+            raise ValidationError(
+                {
+                    "validation_errors": [
+                        f"{err['model']} ({err['id']}): {err['errors']}"
+                        for err in validation_errors
+                    ]
+                }
+            )
 
         with transaction.atomic():
             base_folder = Folder.objects.create(
