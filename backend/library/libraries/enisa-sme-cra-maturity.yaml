@@ -458,7 +458,7 @@ objects:
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.4:question:1:
           type: unique_choice
-          text: Are vulnerabilities and updates prioritized based on risk, potential
+          text: Are vulnerabilities and updates prioritised based on risk and potential
             impact?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.4:question:1:choice:1
