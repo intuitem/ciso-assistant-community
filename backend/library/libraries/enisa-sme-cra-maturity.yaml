@@ -1,0 +1,793 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:enisa-sme-cra-maturity
+locale: en
+ref_id: ENISA-CRA-Maturity
+name: ENISA SME Cyber Resilience Maturity Assessment (CRA)
+description: 'Based on the ENISA SME Cyber Resilience Maturity Assessment Model (tool
+  v1.1). This self-assessment helps organisations check their current maturity against
+  the Cyber Resilience Act (CRA) across 5 domains: Governance and Documentation; Risk
+  Management and Security by Design and by Default; Vulnerability and Patch Management;
+  Product Lifecycle Management; and Awareness, Competence and Skills. Each question
+  is answered by selecting the description matching current practice, which sets the
+  maturity score (1 Initial to 5 Optimised) automatically. Maturity bands: Basic (1.0-2.5),
+  Intermediate (2.6-3.9), Advanced (4.0-5.0). It is intended as a self-check aid,
+  not a substitute for formal legal or conformity advice.'
+copyright: ENISA
+version: 1
+publication_date: 2026-07-13
+provider: ENISA
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:enisa-sme-cra-maturity
+    ref_id: ENISA-CRA-Maturity
+    name: ENISA SME Cyber Resilience Maturity Assessment (CRA)
+    description: 'Based on the ENISA SME Cyber Resilience Maturity Assessment Model
+      (tool v1.1). This self-assessment helps organisations check their current maturity
+      against the Cyber Resilience Act (CRA) across 5 domains: Governance and Documentation;
+      Risk Management and Security by Design and by Default; Vulnerability and Patch
+      Management; Product Lifecycle Management; and Awareness, Competence and Skills.
+      Each question is answered by selecting the description matching current practice,
+      which sets the maturity score (1 Initial to 5 Optimised) automatically. Maturity
+      bands: Basic (1.0-2.5), Intermediate (2.6-3.9), Advanced (4.0-5.0). It is intended
+      as a self-check aid, not a substitute for formal legal or conformity advice.'
+    min_score: 1
+    max_score: 5
+    field_visibility:
+      score:
+        auditor: edit
+        respondent: hidden
+      is_scored:
+        auditor: edit
+        respondent: hidden
+      result:
+        auditor: hidden
+        respondent: hidden
+      extended_result:
+        auditor: hidden
+        respondent: hidden
+    scores_definition:
+    - score: 1
+      name: Initial
+      description: Not implemented
+    - score: 2
+      name: Basic
+      description: Informal or ad hoc
+    - score: 3
+      name: Developing
+      description: Documented but inconsistently applied
+    - score: 4
+      name: Managed
+      description: Consistently applied and regularly reviewed
+    - score: 5
+      name: Optimised
+      description: Measured, monitored and continuously improved
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Governance and Documentation
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1
+      ref_id: '1.1'
+      name: Product security policies
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.1:question:1:
+          type: unique_choice
+          text: Do you have written and approved product security policies?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.1:question:1:choice:1
+            value: 1 No product security policies or guidelines exist
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.1:question:1:choice:2
+            value: 2 Some basic guidelines exist but are informal or incomplete
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.1:question:1:choice:3
+            value: 3 Documented policies or guidelines exist but are not formally
+              approved or consistently used
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.1:question:1:choice:4
+            value: 4 Policies are formally approved, documented and generally applied
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.1:question:1:choice:5
+            value: 5 Policies are formally approved, consistently applied, regularly
+              reviewed and continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1
+      ref_id: '1.2'
+      name: Roles and responsibilities
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.2:question:1:
+          type: unique_choice
+          text: Are roles and responsibilities clearly defined for product security
+            activities (e.g. development, vulnerability management, updates)?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.2:question:1:choice:1
+            value: 1 No roles or responsibilities are defined
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.2:question:1:choice:2
+            value: 2 Responsibilities exist informally but are unclear or inconsistently
+              assigned
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.2:question:1:choice:3
+            value: 3 Responsibilities are documented but not consistently applied
+              in practice
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.2:question:1:choice:4
+            value: 4 Responsibilities are clearly defined, documented and consistently
+              applied
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.2:question:1:choice:5
+            value: 5 Responsibilities are clearly defined, communicated, consistently
+              applied, regularly reviewed and continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1
+      ref_id: '1.3'
+      name: Product technical documentation
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.3:question:1:
+          type: unique_choice
+          text: Do you maintain product-level technical documentation describing implemented
+            security features, risk assessments, design decisions and update procedures?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.3:question:1:choice:1
+            value: 1 No product security documentation exists
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.3:question:1:choice:2
+            value: 2 Limited or incomplete documentation exists covering only some
+              aspects
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.3:question:1:choice:3
+            value: 3 Documentation covering most required aspects exists but is incomplete
+              or not consistently maintained
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.3:question:1:choice:4
+            value: 4 Documentation is complete for most products and consistently
+              maintained
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.3:question:1:choice:5
+            value: 5 Documentation is complete for all products, formally maintained,
+              regularly reviewed and continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1
+      ref_id: '1.4'
+      name: Product security review process
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.4:question:1:
+          type: unique_choice
+          text: Is there a process to regularly review product security and the quality
+            of related documentation?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.4:question:1:choice:1
+            value: 1 No review process exists
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.4:question:1:choice:2
+            value: 2 Reviews happen informally or occasionally
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.4:question:1:choice:3
+            value: 3 A documented review process exists but is not consistently applied
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.4:question:1:choice:4
+            value: 4 Reviews are consistently performed and documented
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.4:question:1:choice:5
+            value: 5 Reviews are measured, tracked and continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1
+      ref_id: '1.5'
+      name: Authorities and conformity awareness
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.5:question:1:
+          type: unique_choice
+          text: Are you aware of the Market Surveillance Authority responsible for
+            enforcing the CRA, the conformity assessment procedure applicable to your
+            products, and how to interact with relevant authorities if needed?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.5:question:1:choice:1
+            value: 1 No awareness of authorities or obligations
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.5:question:1:choice:2
+            value: 2 Limited awareness but no clear understanding of obligations
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.5:question:1:choice:3
+            value: 3 Authorities and obligations are known but not formally documented
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.5:question:1:choice:4
+            value: 4 Authorities, obligations and interaction processes are defined
+              and followed
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.5:question:1:choice:5
+            value: 5 Awareness and interaction processes are formalised, maintained
+              and regularly reviewed
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Risk Management and Security by Design and by Default
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2
+      ref_id: '2.1'
+      name: Cybersecurity risk assessments
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:
+          type: unique_choice
+          text: Do you perform cybersecurity risk assessments and use the results
+            to guide product design, development, configuration and component management
+            decisions?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:choice:1
+            value: 1 No risk assessments are performed
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:choice:2
+            value: 2 Risk assessments are informal and rarely influence decisions
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:choice:3
+            value: 3 Risk assessments are documented but not consistently used
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:choice:4
+            value: 4 Risk assessments are systematically performed and guide decisions
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:choice:5
+            value: 5 Risk assessments are formal, integrated into processes and continuously
+              improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2
+      ref_id: '2.2'
+      name: Security by design
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.2:question:1:
+          type: unique_choice
+          text: Are products designed using security-by-design principles from the
+            outset?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.2:question:1:choice:1
+            value: 1 Security-by-design is not considered
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.2:question:1:choice:2
+            value: 2 Considered occasionally or late in development
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.2:question:1:choice:3
+            value: 3 Applied during design but not consistently
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.2:question:1:choice:4
+            value: 4 Consistently applied across products and regularly reviewed
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.2:question:1:choice:5
+            value: 5 Fully integrated into development and continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2
+      ref_id: '2.3'
+      name: Secure by default
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:
+          type: unique_choice
+          text: Are products delivered with secure-by-default configurations and settings?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:choice:1
+            value: 1 No secure defaults are defined
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:choice:2
+            value: 2 Secure settings exist but are inconsistent
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:choice:3
+            value: 3 Secure defaults are defined but not consistently applied
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:choice:4
+            value: 4 Secure defaults are consistently applied and reviewed
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:choice:5
+            value: 5 Secure defaults are enforced, tested and continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2
+      ref_id: '2.4'
+      name: Pre-release security testing
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.4:question:1:
+          type: unique_choice
+          text: Do you perform security checks and testing before releasing or updating
+            a product, and to what extent are automated tools used?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.4:question:1:choice:1
+            value: 1 No security testing is performed
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.4:question:1:choice:2
+            value: 2 Testing is occasional and mostly manual
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.4:question:1:choice:3
+            value: 3 Testing is documented and includes some automated tools
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.4:question:1:choice:4
+            value: 4 Testing is systematically integrated into development workflows
+              and regularly reviewed
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.4:question:1:choice:5
+            value: 5 Testing is risk-based, automated where appropriate, monitored
+              and continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2
+      ref_id: '2.5'
+      name: Risk and threat review
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.5:question:1:
+          type: unique_choice
+          text: When risks change or new threats emerge, are risk assessments, configurations
+            and third-party components reviewed and updated?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.5:question:1:choice:1
+            value: 1 No structured review or update process exists
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.5:question:1:choice:2
+            value: 2 Updates are informal or occasional
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.5:question:1:choice:3
+            value: 3 Reviews are documented but not consistently applied
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.5:question:1:choice:4
+            value: 4 Reviews and updates are consistently performed across products
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.5:question:1:choice:5
+            value: 5 Continuous monitoring and structured updates are in place and
+              continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Vulnerability and Patch Management
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3
+      ref_id: '3.1'
+      name: Vulnerability intake and tracking
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.1:question:1:
+          type: unique_choice
+          text: Do you have a process to receive, acknowledge, record and track vulnerabilities
+            reported by customers, researchers or internal staff?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.1:question:1:choice:1
+            value: 1 No vulnerability tracking exists
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.1:question:1:choice:2
+            value: 2 Vulnerabilities are handled informally
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.1:question:1:choice:3
+            value: 3 A documented tracking process exists but is not consistently
+              applied
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.1:question:1:choice:4
+            value: 4 Vulnerabilities are consistently tracked and reviewed
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.1:question:1:choice:5
+            value: 5 Tracking is measured, integrated and continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3
+      ref_id: '3.2'
+      name: Security update process
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:
+          type: unique_choice
+          text: Do you have a defined process for creating, testing, delivering and
+            communicating security updates to customers for supported products?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:choice:1
+            value: 1 No update process exists
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:choice:2
+            value: 2 Updates are handled informally
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:choice:3
+            value: 3 A documented process exists but is not consistently followed
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:choice:4
+            value: 4 Updates are consistently managed, tested and delivered
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:choice:5
+            value: 5 The process is monitored, measured and continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3
+      ref_id: '3.3'
+      name: Software Bill of Materials (SBOM)
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.3:question:1:
+          type: unique_choice
+          text: Do you maintain and use a SBOM to support vulnerability and dependency
+            management?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.3:question:1:choice:1
+            value: 1 No SBOM is created or maintained
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.3:question:1:choice:2
+            value: 2 SBOM is created occasionally or manually
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.3:question:1:choice:3
+            value: 3 SBOM is documented for most products but not consistently maintained
+              or used
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.3:question:1:choice:4
+            value: 4 SBOM is systematically maintained and used in vulnerability management
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.3:question:1:choice:5
+            value: 5 SBOM is integrated, automated where appropriate and continuously
+              improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3
+      ref_id: '3.4'
+      name: Risk-based prioritisation
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.4:question:1:
+          type: unique_choice
+          text: Are vulnerabilities and updates prioritized based on risk, potential
+            impact?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.4:question:1:choice:1
+            value: 1 No prioritisation is performed
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.4:question:1:choice:2
+            value: 2 Prioritisation is informal
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.4:question:1:choice:3
+            value: 3 A documented prioritisation approach exists but is not consistently
+              applied
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.4:question:1:choice:4
+            value: 4 Prioritisation is consistently risk-based and applied
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.4:question:1:choice:5
+            value: 5 Prioritisation is measured, reviewed and continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3
+      ref_id: '3.5'
+      name: Fix verification
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.5:question:1:
+          type: unique_choice
+          text: Do you verify that security updates effectively resolve reported vulnerabilities
+            and maintain evidence of this verification?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.5:question:1:choice:1
+            value: 1 No verification is performed
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.5:question:1:choice:2
+            value: 2 Verification is informal or occasional
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.5:question:1:choice:3
+            value: 3 Verification is documented but not consistently applied
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.5:question:1:choice:4
+            value: 4 Verification is consistently performed and documented
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.5:question:1:choice:5
+            value: 5 Verification is measured, reviewed and continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Product Lifecycle Management
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4
+      ref_id: '4.1'
+      name: Operational-phase security
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.1:question:1:
+          type: unique_choice
+          text: Is there a defined approach to managing product security during the
+            operational phase?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.1:question:1:choice:1
+            value: 1 No structured approach exists
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.1:question:1:choice:2
+            value: 2 Some practices exist but are informal
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.1:question:1:choice:3
+            value: 3 A documented approach exists but is not consistently applied
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.1:question:1:choice:4
+            value: 4 The approach is consistently applied and reviewed
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.1:question:1:choice:5
+            value: 5 The approach is monitored, measured and continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4
+      ref_id: '4.2'
+      name: Support periods and end-of-life
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.2:question:1:
+          type: unique_choice
+          text: Is the product lifecycle management actively managed, including defined
+            support periods, update responsibilities, end-of-life arrangements and
+            communication with customers?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.2:question:1:choice:1
+            value: 1 No lifecycle management exists
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.2:question:1:choice:2
+            value: 2 Lifecycle activities are informal
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.2:question:1:choice:3
+            value: 3 Lifecycle processes are documented but not consistently applied
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.2:question:1:choice:4
+            value: 4 Lifecycle management is consistently applied and communicated
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.2:question:1:choice:5
+            value: 5 Lifecycle management is monitored, reviewed and continuously
+              improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4
+      ref_id: '4.3'
+      name: Continuous product improvement
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.3:question:1:
+          type: unique_choice
+          text: Is experience from product operation, post-incident reviews and customer
+            input used to improve products over time?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.3:question:1:choice:1
+            value: 1 No structured improvement exists
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.3:question:1:choice:2
+            value: 2 Improvements are occasional and informal
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.3:question:1:choice:3
+            value: 3 A documented improvement approach exists but is not consistently
+              applied
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.3:question:1:choice:4
+            value: 4 Improvements are consistently implemented and tracked
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.3:question:1:choice:5
+            value: 5 Continuous improvement is measured and integrated into product
+              management
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4
+      ref_id: '4.4'
+      name: Structured issue handling
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.4:question:1:
+          type: unique_choice
+          text: Is there a structured and tested way to address identified product
+            security issues?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.4:question:1:choice:1
+            value: 1 No defined method exists
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.4:question:1:choice:2
+            value: 2 Issues are handled inconsistently
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.4:question:1:choice:3
+            value: 3 A documented method exists but is not consistently applied or
+              tested
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.4:question:1:choice:4
+            value: 4 Issues are handled through a consistent and reviewed process
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.4:question:1:choice:5
+            value: 5 The process is tested, measured and continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4
+      ref_id: '4.5'
+      name: Operational monitoring
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.5:question:1:
+          type: unique_choice
+          text: Are products monitored during operation to identify security risks,
+            vulnerabilities and emerging threats?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.5:question:1:choice:1
+            value: 1 No monitoring exists
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.5:question:1:choice:2
+            value: 2 Monitoring is informal or occasional
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.5:question:1:choice:3
+            value: 3 Monitoring is documented but not consistently applied
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.5:question:1:choice:4
+            value: 4 Monitoring is consistently performed and results are tracked
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.5:question:1:choice:5
+            value: 5 Monitoring is integrated, risk-based and continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Awareness, Competence and Skills
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5
+      ref_id: '5.1'
+      name: Skills availability
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.1:question:1:
+          type: unique_choice
+          text: Are sufficient skills available to design, develop and maintain products
+            in a secure way, including through external expertise where internal capacity
+            is limited?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.1:question:1:choice:1
+            value: 1 No relevant expertise is available
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.1:question:1:choice:2
+            value: 2 Limited expertise is available and applied informally
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.1:question:1:choice:3
+            value: 3 Skills are documented but not consistently sufficient
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.1:question:1:choice:4
+            value: 4 Skills are sufficient, applied and regularly reviewed
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.1:question:1:choice:5
+            value: 5 Skills are assessed, developed and continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5
+      ref_id: '5.2'
+      name: Role-based training
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.2:question:1:
+          type: unique_choice
+          text: Do relevant staff receive appropriate training on cybersecurity practices
+            relevant to their roles, including product risk management, vulnerability
+            management, and security-by-design?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.2:question:1:choice:1
+            value: 1 No training is provided
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.2:question:1:choice:2
+            value: 2 Training is informal or occasional
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.2:question:1:choice:3
+            value: 3 Training is documented but not consistently delivered
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.2:question:1:choice:4
+            value: 4 Training is regularly delivered and reviewed
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.2:question:1:choice:5
+            value: 5 Training effectiveness is assessed and continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5
+      ref_id: '5.3'
+      name: Security culture
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.3:question:1:
+          type: unique_choice
+          text: Does the organisation promote a culture of responsible product development,
+            open reporting and awareness of product risks?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.3:question:1:choice:1
+            value: 1 No structured support exists
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.3:question:1:choice:2
+            value: 2 Risk and product responsibility are discussed occasionally
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.3:question:1:choice:3
+            value: 3 Expectations are communicated to staff
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.3:question:1:choice:4
+            value: 4 Responsible practices are part of normal product work
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.3:question:1:choice:5
+            value: 5 Product risk considerations influence decisions across the organisation
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5
+      ref_id: '5.4'
+      name: External security information
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.4:question:1:
+          type: unique_choice
+          text: Do you follow relevant external product security information (e.g.
+            advisories, alerts)?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.4:question:1:choice:1
+            value: 1 No external information is followed
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.4:question:1:choice:2
+            value: 2 Information is followed occasionally
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.4:question:1:choice:3
+            value: 3 Sources are documented but not consistently used
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.4:question:1:choice:4
+            value: 4 Information is consistently monitored and used
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.4:question:1:choice:5
+            value: 5 Engagement is active, integrated and continuously improved
+            add_score: 5
+    - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5
+      ref_id: '5.5'
+      name: Competence assessment
+      questions:
+        urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.5:question:1:
+          type: unique_choice
+          text: Do you assess and validate that your team has the required skills
+            and competence to maintain secure products?
+          choices:
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.5:question:1:choice:1
+            value: 1 No assessment exists
+            add_score: 1
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.5:question:1:choice:2
+            value: 2 Assessment is informal
+            add_score: 2
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.5:question:1:choice:3
+            value: 3 Assessment is documented but not consistently applied
+            add_score: 3
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.5:question:1:choice:4
+            value: 4 Assessment is consistently performed and gaps addressed
+            add_score: 4
+          - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.5:question:1:choice:5
+            value: 5 Competence is measured, tracked and continuously improved
+            add_score: 5
