@@ -3801,6 +3801,8 @@
 	"closeAssignment": "닫기",
 	"reopenAssignment": "다시 열기",
 	"reopenAssignmentForEditing": "편집을 위해 다시 열기",
+	"forReview": "검토를 위해",
+	"forEditing": "편집을 위해",
 	"reviewerObservation": "검토자 의견",
 	"reviewerObservationPlaceholder": "어떤 변경이 필요한지 설명하세요...",
 	"assignmentSubmittedBanner": "응답이 제출되었으며 검토 중입니다.",

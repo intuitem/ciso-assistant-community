@@ -4763,6 +4763,8 @@
 	"closeAssignment": "Uzavřít",
 	"reopenAssignment": "Znovu otevřít",
 	"reopenAssignmentForEditing": "Znovu otevřít k úpravě",
+	"forReview": "K revizi",
+	"forEditing": "K úpravě",
 	"reviewerObservation": "Pozorování revidenta",
 	"reviewerObservationPlaceholder": "Popište, jaké změny jsou potřeba...",
 	"assignmentSubmittedBanner": "Vaše odpovědi byly odeslány a aktuálně se kontrolují (revize).",

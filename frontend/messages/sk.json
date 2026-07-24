@@ -4172,6 +4172,8 @@
 	"closeAssignment": "Zavrieť",
 	"reopenAssignment": "Znovu otvorte",
 	"reopenAssignmentForEditing": "Znovu otvorte na úpravu",
+	"forReview": "Na kontrolu",
+	"forEditing": "Na úpravu",
 	"reviewerObservation": "Poznámka recenzenta",
 	"reviewerObservationPlaceholder": "Popíšte, aké zmeny sú potrebné...",
 	"assignmentSubmittedBanner": "Vaše odpovede boli odoslané a prebieha ich opatrenie.",

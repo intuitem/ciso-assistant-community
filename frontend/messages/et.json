@@ -4212,6 +4212,8 @@
 	"closeAssignment": "Sulge",
 	"reopenAssignment": "Ava uuesti",
 	"reopenAssignmentForEditing": "Ava uuesti muutmiseks",
+	"forReview": "Ülevaatuseks",
+	"forEditing": "Muutmiseks",
 	"reviewerObservation": "Ülevaataja märkus",
 	"reviewerObservationPlaceholder": "Kirjelda, milliseid muudatusi on vaja...",
 	"assignmentSubmittedBanner": "Sinu vastused on esitatud ja on ülevaatusel.",

@@ -3993,6 +3993,8 @@
 	"closeAssignment": "Uždaryti",
 	"reopenAssignment": "Atidaryti iš naujo",
 	"reopenAssignmentForEditing": "Atidaryti iš naujo redagavimui",
+	"forReview": "Peržiūrai",
+	"forEditing": "Redagavimui",
 	"reviewerObservation": "Recenzento pastaba",
 	"reviewerObservationPlaceholder": "Aprašykite, kokie pakeitimai reikalingi...",
 	"assignmentSubmittedBanner": "Jūsų atsakymai pateikti ir peržiūrimi.",

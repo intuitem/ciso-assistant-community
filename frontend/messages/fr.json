@@ -4566,6 +4566,8 @@
 	"closeAssignment": "Clôturer",
 	"reopenAssignment": "Rouvrir",
 	"reopenAssignmentForEditing": "Rouvrir pour modification",
+	"forReview": "Pour revue",
+	"forEditing": "Pour modification",
 	"reviewerObservation": "Observation du relecteur",
 	"reviewerObservationPlaceholder": "Décrivez les modifications nécessaires...",
 	"assignmentSubmittedBanner": "Vos réponses ont été soumises et sont en cours de revue.",
