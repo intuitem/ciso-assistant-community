@@ -375,6 +375,23 @@ DATA_WIZARD_COMMANDS = [
         "supports_conflict": False,
     },
     {
+        "command": "import_cyfun_assessment",
+        "model_type": "CyFunAssessment",
+        "help": (
+            "Import an official CyFun 2025 self-assessment workbook (Excel).\n"
+            "Creates a new assessment on the CyFun 2025 framework (auto-loaded if missing)\n"
+            "with documentation/implementation scores and comments.\n"
+            "\nNote: always creates a new assessment; conflict management is not applicable."
+        ),
+        "requires_folder": False,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+        "supports_conflict": False,
+        "show_folder_option": True,
+        "show_perimeter_option": True,
+    },
+    {
         "command": "import_findings_assessments",
         "model_type": "FindingsAssessment",
         "help": (
@@ -663,6 +680,7 @@ def register_data_wizard_command(config: Dict[str, object]) -> None:
     show_matrix_option = config.get("show_matrix_option", requires_matrix)
     supports_name_option = model_type in {
         "ComplianceAssessment",
+        "CyFunAssessment",
         "RiskAssessment",
         "FindingsAssessment",
         "EbiosRMStudyARM",

@@ -20,6 +20,7 @@
     { "name": "Custom frameworks supported", "group": "Compliance & frameworks" },
     { "name": "+167 frameworks included", "group": "Compliance & frameworks" },
     { "name": "Policies management", "group": "Compliance & frameworks" },
+    { "name": "Document management", "group": "Compliance & frameworks" },
     { "name": "Evidence management", "group": "Compliance & frameworks" },
 
     { "name": "Risk assessments and registers", "group": "Risk management" },
@@ -39,6 +40,7 @@
     { "name": "Task management", "group": "Operations & remediation" },
     { "name": "Kanban boards", "group": "Operations & remediation" },
     { "name": "Periodic checks", "group": "Operations & remediation" },
+    { "name": "Technical posture management", "group": "Operations & remediation" },
     { "name": "Exceptions tracking", "group": "Operations & remediation" },
     { "name": "Incidents management", "group": "Operations & remediation" },
     { "name": "Validation & approval flows", "group": "Operations & remediation" },

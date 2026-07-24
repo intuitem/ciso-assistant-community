@@ -41,7 +41,15 @@ A requirement assessment is not a single value — it captures _several dimensio
 
 Every audit in the audit tables (and on dashboards and campaigns) shows a **Progress** percentage. It answers a single question: _how much of the audit has been assessed?_
 
-A requirement assessment counts as **assessed** as soon as it carries _any_ compliance result — **Compliant**, **Partially compliant**, **Non compliant**, or **Not applicable**. Requirements still on the default **Not assessed** state are the only ones that don't count. A requirement that only carries a score (no result) is also treated as assessed, so maturity- or scoring-only audits still show meaningful progress.
+What counts as **assessed** depends on which fields the audit exposes to the auditor. A single rule drives every surface (audit tables, the audit page, journeys, and My assignments), so the number never diverges between views:
+
+- **Status mode** — the default, and active whenever the [workflow status](#analyst-dimension-assignee--workflow-status) field is visible to the auditor. A requirement counts as assessed only once its status is **Done**. Nothing else moves the needle: a requirement can already be _Compliant_ or scored and still not count until it is explicitly marked **Done**. This makes progress the analyst's own "I'm finished with this one" signal.
+- **Content mode** — active when the status field is hidden. A requirement counts as assessed when:
+  - for **questionnaire** requirements, the questionnaire is **fully answered** (every question answered), or it already carries a result or a score;
+  - otherwise, when the **result** is visible, as soon as it leaves the default **Not assessed** state (**Compliant**, **Partially compliant**, **Non compliant**, or **Not applicable**);
+  - otherwise, for **scoring-only** audits, when the score is _strictly above_ the applicable minimum of the scale.
+
+Enabling scoring pre-fills every requirement at the scale minimum, so a bare minimum score is treated as "not touched yet" and does **not** count. Only a score genuinely moved above the minimum counts as assessed, which stops empty maturity- or scoring-only audits from showing 100%.
 
 In other words, **progress is an auditing-activity signal, not a compliance signal**. An audit can be 100% _in progress_ and still be largely non-compliant — the column tells you the team has gone through every requirement and reached a verdict, not that the verdicts are good. The actual compliance picture lives in the donut and score read-outs computed from the [compliance result](#compliance-result) below.
 
