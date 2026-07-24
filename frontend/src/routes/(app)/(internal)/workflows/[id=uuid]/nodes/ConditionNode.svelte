@@ -4,13 +4,10 @@
 	import { getContext } from 'svelte';
 
 	interface Branch {
-		edgeId: string;
+		branchId: string;
 		name: string;
-	}
-
-	interface DefaultBranch {
-		edgeId: string | null;
-		name: string;
+		isDefault: boolean;
+		wired: boolean;
 	}
 
 	interface Props {
@@ -21,7 +18,6 @@
 			label: string;
 			meta?: string | null;
 			branches?: Branch[];
-			default?: DefaultBranch;
 			error?: string | null;
 			runState?: 'visited' | 'active' | 'error' | null;
 		};
@@ -32,26 +28,31 @@
 	const editor = getContext<{
 		readonly: boolean;
 		deleteNode: (id: string) => void;
+		addBranch: (id: string) => void;
 	}>('workflowEditor');
 
 	let hovered = $state(false);
-	const handleClass = $derived(
-		editor?.readonly
-			? '!w-0 !h-0 !border-0 !bg-transparent !pointer-events-none'
-			: '!w-3 !h-3 !bg-surface-50-950 !border-2 !border-surface-600-400'
-	);
+	function handleClass(wired: boolean) {
+		if (editor?.readonly) return '!w-0 !h-0 !border-0 !bg-transparent !pointer-events-none';
+		// Unwired ports read as "open" (dashed, muted) so it's clear they still
+		// need a wire; wired ports are solid.
+		// Larger hit area than the default 12px dot: these ports are the primary
+		// wiring affordance and were easy to miss (grabbing the node instead).
+		return wired
+			? '!w-4 !h-4 !bg-surface-50-950 !border-2 !border-surface-600-400'
+			: '!w-4 !h-4 !bg-transparent !border-2 !border-dashed !border-surface-400-600 hover:!border-primary-500 hover:!bg-primary-500/10';
+	}
 
-	// Branch handles are added/removed as edges come and go; tell Svelte Flow to
-	// re-measure so edges anchor to the fresh handles. The default marker forces a
-	// re-measure when the fixed __default__ handle gets wired/unwired too.
+	// Branches (and thus ports) are added/removed/reordered as node data changes;
+	// tell Svelte Flow to re-measure so edges anchor to the fresh handles.
 	const updateNodeInternals = useUpdateNodeInternals();
 	$effect(() => {
-		void [
-			...(data.branches ?? []).map((branch) => branch.edgeId),
-			`default:${data.default?.edgeId ?? 'none'}`
-		].join('|');
+		void (data.branches ?? []).map((branch) => branch.branchId).join('|');
 		updateNodeInternals(id);
 	});
+
+	const conditionalBranches = $derived((data.branches ?? []).filter((b) => !b.isDefault));
+	const defaultBranch = $derived((data.branches ?? []).find((b) => b.isDefault) ?? null);
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -84,24 +85,25 @@
 	{/if}
 
 	<div class="mt-1.5 space-y-0.5">
-		{#each data.branches ?? [] as branch, index (branch.edgeId)}
+		{#each conditionalBranches as branch, index (branch.branchId)}
 			<div
-				class="relative flex items-center justify-end min-h-[20px] pl-4 pr-3 py-0.5"
+				class="nodrag relative flex items-center justify-end min-h-[22px] pl-4 pr-3 py-0.5"
 				data-testid="condition-branch-row"
+				title={branch.wired ? undefined : m.branchUnwired()}
 			>
 				<span
 					class="text-[10px] leading-tight truncate {branch.name
 						? 'text-surface-700-300'
-						: 'italic text-surface-500'}"
+						: 'italic text-surface-500'} {branch.wired ? '' : 'opacity-70'}"
 				>
 					{branch.name || m.branchDefaultName({ number: index + 1 })}
 				</span>
 				<Handle
-					id={branch.edgeId}
+					id={branch.branchId}
 					type="source"
 					position={Position.Right}
-					isConnectable={false}
-					class={handleClass}
+					isConnectable={!editor?.readonly && !branch.wired}
+					class={handleClass(branch.wired)}
 				/>
 			</div>
 		{/each}
@@ -110,29 +112,43 @@
 				class="relative flex items-center justify-end min-h-[20px] pl-4 pr-3 py-0.5"
 				data-testid="condition-add-branch-row"
 			>
-				<span
-					class="text-[10px] leading-tight text-surface-500 border border-dashed border-surface-400-600 rounded px-1.5 py-0.5 opacity-70"
+				<button
+					type="button"
+					class="nopan nodrag text-[10px] leading-tight text-surface-500 border border-dashed border-surface-400-600 rounded px-1.5 py-0.5 hover:text-primary-500 hover:border-primary-500 cursor-pointer"
+					onclick={(e) => {
+						e.stopPropagation();
+						editor?.addBranch(id);
+					}}
+					data-testid="condition-add-branch"
 				>
 					<i class="fa-solid fa-plus mr-0.5"></i>{m.addBranch()}
-				</span>
-				<Handle id="__new__" type="source" position={Position.Right} class={handleClass} />
+				</button>
 			</div>
 		{/if}
 		<!-- Default (otherwise) output: always present, evaluated last, muted and
 		     neutral (not the warning accent of the conditional rows above). -->
-		<div
-			class="relative flex items-center justify-end min-h-[20px] pl-4 pr-3 py-0.5 mt-1 pt-1 border-t border-surface-200-800"
-			data-testid="condition-default-row"
-		>
-			<span
-				class="text-[10px] leading-tight truncate {data.default?.name
-					? 'text-surface-600-400'
-					: 'italic text-surface-500'}"
+		{#if defaultBranch}
+			<div
+				class="nodrag relative flex items-center justify-end min-h-[22px] pl-4 pr-3 py-0.5 mt-1 pt-1 border-t border-surface-200-800"
+				data-testid="condition-default-row"
+				title={defaultBranch.wired ? undefined : m.branchUnwired()}
 			>
-				{data.default?.name || m.branchOtherwise()}
-			</span>
-			<Handle id="__default__" type="source" position={Position.Right} class={handleClass} />
-		</div>
+				<span
+					class="text-[10px] leading-tight truncate {defaultBranch.name
+						? 'text-surface-600-400'
+						: 'italic text-surface-500'} {defaultBranch.wired ? '' : 'opacity-70'}"
+				>
+					{defaultBranch.name || m.branchOtherwise()}
+				</span>
+				<Handle
+					id={defaultBranch.branchId}
+					type="source"
+					position={Position.Right}
+					isConnectable={!editor?.readonly && !defaultBranch.wired}
+					class={handleClass(defaultBranch.wired)}
+				/>
+			</div>
+		{/if}
 	</div>
 
 	{#if data.error}
@@ -171,5 +187,5 @@
 		</button>
 	{/if}
 
-	<Handle type="target" position={Position.Left} class={handleClass} />
+	<Handle type="target" position={Position.Left} class={handleClass(true)} />
 </div>

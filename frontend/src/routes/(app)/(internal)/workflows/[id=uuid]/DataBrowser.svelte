@@ -13,9 +13,26 @@
 		nodes: NodeData[];
 		secretNames: string[];
 		onInsert: (expression: string) => void;
+		// Present in edit mode only: shows the quick-add affordance on the
+		// secrets group header.
+		onAddSecret?: (name: string, value: string) => void;
 	}
 
-	let { variables, nodes, secretNames, onInsert }: Props = $props();
+	let { variables, nodes, secretNames, onInsert, onAddSecret }: Props = $props();
+
+	let addingSecret = $state(false);
+	let newSecretName = $state('');
+	let newSecretValue = $state('');
+
+	function submitSecret(event: Event) {
+		event.preventDefault();
+		const name = newSecretName.trim();
+		if (!name || !newSecretValue) return;
+		onAddSecret?.(name, newSecretValue);
+		newSecretName = '';
+		newSecretValue = '';
+		addingSecret = false;
+	}
 
 	let expanded = $state<Record<string, boolean>>({});
 
@@ -27,9 +44,7 @@
 
 	async function copyValue(value: unknown, path: string) {
 		const text =
-			value !== null && typeof value === 'object'
-				? JSON.stringify(value, null, 2)
-				: String(value);
+			value !== null && typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
 		await navigator.clipboard.writeText(text);
 		copiedPath = path;
 		setTimeout(() => (copiedPath = null), 1200);
@@ -135,11 +150,54 @@
 		</div>
 	{/each}
 
-	{#if secretNames.length}
+	{#if secretNames.length || onAddSecret}
 		<div>
-			<p class="text-[9px] font-semibold uppercase tracking-wide text-surface-500 mb-0.5">
-				<i class="fa-solid fa-lock mr-1"></i>{m.workflowSecrets()}
-			</p>
+			<div
+				class="flex items-center text-[9px] font-semibold uppercase tracking-wide text-surface-500 mb-0.5"
+			>
+				<span><i class="fa-solid fa-lock mr-1"></i>{m.workflowSecrets()}</span>
+				{#if onAddSecret}
+					<button
+						type="button"
+						aria-label={m.addSecret()}
+						title={m.addSecret()}
+						class="ml-auto text-primary-500 hover:text-primary-600 cursor-pointer px-0.5"
+						onclick={() => (addingSecret = !addingSecret)}
+						data-testid="databrowser-add-secret"
+					>
+						<i class="fa-solid fa-plus"></i>
+					</button>
+				{/if}
+			</div>
+			{#if addingSecret}
+				<form class="flex items-center gap-1 mb-1" autocomplete="off" onsubmit={submitSecret}>
+					<input
+						type="text"
+						class="input text-xs px-1.5 py-1 min-w-0 flex-1"
+						placeholder={m.secretName()}
+						autocomplete="off"
+						bind:value={newSecretName}
+					/>
+					<input
+						type="password"
+						class="input text-xs px-1.5 py-1 min-w-0 flex-1"
+						placeholder={m.secretValue()}
+						autocomplete="new-password"
+						data-1p-ignore
+						data-lpignore="true"
+						bind:value={newSecretValue}
+					/>
+					<button
+						type="submit"
+						aria-label={m.addSecret()}
+						class="btn-icon preset-tonal w-6 h-6 text-xs shrink-0"
+						disabled={!newSecretName.trim() || !newSecretValue}
+						data-testid="databrowser-confirm-secret"
+					>
+						<i class="fa-solid fa-check"></i>
+					</button>
+				</form>
+			{/if}
 			{#each secretNames as name (name)}
 				<button
 					type="button"

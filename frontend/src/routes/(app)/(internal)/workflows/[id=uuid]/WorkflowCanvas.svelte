@@ -2,10 +2,12 @@
 	import { m } from '$paraglide/messages';
 	import { invalidateAll } from '$app/navigation';
 	import { setContext } from 'svelte';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 	import {
 		SvelteFlow,
 		useSvelteFlow,
 		Controls,
+		ControlButton,
 		Background,
 		BackgroundVariant,
 		MiniMap,
@@ -16,11 +18,13 @@
 		MarkerType
 	} from '@xyflow/svelte';
 	import '@xyflow/svelte/dist/style.css';
+	import { computeLayout } from './graph-layout';
 
 	import Palette from './Palette.svelte';
 	import Inspector from './Inspector.svelte';
 	import RunsPanel from './RunsPanel.svelte';
 	import TriggersPanel from './TriggersPanel.svelte';
+	import WorkflowDataPanel from './WorkflowDataPanel.svelte';
 	import StepNode from './nodes/StepNode.svelte';
 	import ConditionNode from './nodes/ConditionNode.svelte';
 	import TerminalNode from './nodes/TerminalNode.svelte';
@@ -28,40 +32,52 @@
 
 	interface Props {
 		graph: any;
+		workflowName: string;
+		workflowDescription?: string | null;
+		initialVersionNumber: number;
 		workflowId: string;
 		versionId: string;
 		versionStatus: string;
 		folderId: string;
 		readonly: boolean;
-		roles: any[];
-		actors: any[];
+		hasPublishedFallback?: boolean;
 		taskTemplates: any[];
 		subprocessCandidates: any[];
 		creatableModels?: any[];
 		fkOptions?: Record<string, any[]>;
-		onDraftCreated?: (draft: { id: string; version_number: number }) => void;
 	}
 
 	let {
 		graph,
+		workflowName,
+		workflowDescription = null,
+		initialVersionNumber,
 		workflowId,
 		versionId,
 		versionStatus,
 		folderId,
 		readonly,
-		roles,
-		actors,
+		hasPublishedFallback = false,
 		taskTemplates,
 		subprocessCandidates,
 		creatableModels = [],
-		fkOptions = {},
-		onDraftCreated
+		fkOptions = {}
 	}: Props = $props();
 
 	// A published version is directly editable: the first save transparently
 	// clones it into a draft (ensureDraft) and edits continue there.
 	let activeVersionId = $state(versionId);
 	let status = $state(versionStatus);
+	let versionNumber = $state(initialVersionNumber);
+
+	const STATUS_BADGE: Record<string, { class: string; label: () => string }> = {
+		draft: { class: 'preset-tonal-warning', label: () => m.draftVersion() },
+		published: { class: 'preset-tonal-success', label: () => m.publishedVersion() },
+		archived: { class: 'preset-tonal', label: () => m.archivedVersion() }
+	};
+	const badge = $derived(STATUS_BADGE[status] ?? STATUS_BADGE.archived);
+
+	const modalStore: ModalStore = getModalStore();
 
 	function opsUrl(action: string) {
 		return `/workflows/${workflowId}/ops?action=${action}`;
@@ -151,8 +167,7 @@
 			forkType: domain.fork_type,
 			joinType: domain.join_type,
 			assignments: domain.assignments ?? [],
-			branches: domain.type === 'condition' ? conditionBranches(domain.id) : undefined,
-			default: domain.type === 'condition' ? conditionDefault(domain.id) : undefined,
+			branches: domain.type === 'condition' ? conditionBranchVisuals(domain) : undefined,
 			triggerType:
 				domain.type === 'trigger' ? (domain.trigger_config?.type ?? 'manual') : undefined,
 			registration:
@@ -162,8 +177,10 @@
 		};
 	}
 
-	function conditionSummary(domain: any): string {
-		const conditions = domain.condition_groups?.[0]?.conditions ?? [];
+	// A short human-readable summary of a branch's conditions, used as the
+	// display name fallback (node port label / Inspector placeholder).
+	function conditionSummary(branch: any): string {
+		const conditions = branch.condition_groups?.[0]?.conditions ?? [];
 		if (!conditions.length) return '';
 		if (conditions.length === 1) {
 			const condition = conditions[0];
@@ -176,58 +193,40 @@
 	}
 
 	function edgeLabel(domain: any): string {
-		return domain.label || conditionSummary(domain);
+		return domain.label || '';
 	}
 
 	function isConditionNodeId(nodeId: string): boolean {
 		return (nodes.find((n) => n.id === nodeId)?.data?.domain as any)?.type === 'condition';
 	}
 
-	// A condition node's branch list IS its outgoing edges, ordered by priority
-	// (edge array order breaks ties for legacy/duplicate priorities).
-	function sortedOutgoingDomains(nodeId: string): any[] {
-		return edges
-			.map((e, index) => ({ domain: e.data?.domain as any, index }))
-			.filter((entry) => entry.domain && entry.domain.source === nodeId)
-			.sort((a, b) => (a.domain.priority ?? 0) - (b.domain.priority ?? 0) || a.index - b.index)
-			.map((entry) => entry.domain);
-	}
-
-	// An edge is "conditional" when it carries at least one condition; an edge
-	// with NO conditions is the node's single default (otherwise) branch.
-	function hasConditions(domain: any): boolean {
-		return !!domain.condition_groups?.some(
-			(group: any) => group.conditions?.length || group.children?.length
+	// The set of branch ids that currently have a wire (an edge whose
+	// source_branch references them). Drives the node's wired/unwired ports.
+	function wiredBranchIds(): Set<string> {
+		return new Set(
+			edges.map((e) => (e.data?.domain as any)?.source_branch).filter(Boolean) as string[]
 		);
 	}
 
-	// Conditional branches only: outgoing edges WITH conditions, in evaluation
-	// order. The unconditioned default is rendered separately (conditionDefault).
-	function conditionBranches(nodeId: string) {
-		return sortedOutgoingDomains(nodeId)
-			.filter(hasConditions)
-			.map((domain) => ({
-				edgeId: domain.id,
-				name: domain.label || conditionSummary(domain)
-			}));
+	// Branches sorted for display/evaluation: conditional branches first by
+	// order, the single default (is_default) pinned last regardless of its
+	// order value.
+	function sortedBranches(domain: any): any[] {
+		return [...(domain.branches ?? [])].sort(
+			(a, b) => Number(!!a.is_default) - Number(!!b.is_default) || (a.order ?? 0) - (b.order ?? 0)
+		);
 	}
 
-	// The default (otherwise) branch: the single outgoing edge WITHOUT conditions,
-	// or {edgeId: null} when the fixed __default__ output is unwired.
-	function conditionDefault(nodeId: string): { edgeId: string | null; name: string } {
-		const domain = sortedOutgoingDomains(nodeId).find((d) => !hasConditions(d));
-		return domain ? { edgeId: domain.id, name: domain.label || '' } : { edgeId: null, name: '' };
-	}
-
-	// Keep the default evaluated last: conditional branches get priorities
-	// 0..n-1 in display order, the default (if any) gets n. Run after every
-	// branch mutation (add/reorder/delete).
-	function renumberBranches(nodeId: string) {
-		const outgoing = sortedOutgoingDomains(nodeId);
-		const conditional = outgoing.filter(hasConditions);
-		conditional.forEach((domain, index) => (domain.priority = index));
-		const fallback = outgoing.find((d) => !hasConditions(d));
-		if (fallback) fallback.priority = conditional.length;
+	// Per-port descriptors the condition node renders: one per branch, in
+	// display order, carrying its wired state so unwired ports stay connectable.
+	function conditionBranchVisuals(domain: any) {
+		const wired = wiredBranchIds();
+		return sortedBranches(domain).map((branch) => ({
+			branchId: branch.id,
+			name: branch.name || conditionSummary(branch),
+			isDefault: !!branch.is_default,
+			wired: wired.has(branch.id)
+		}));
 	}
 
 	function capitalize(s: string) {
@@ -260,13 +259,9 @@
 			id: domain.id,
 			source: domain.source,
 			target: domain.target,
-			// Conditional edges anchor to their per-branch handle (handle id = edge
-			// id); the unconditioned default anchors to the fixed __default__ handle.
-			sourceHandle: isConditionNodeId(domain.source)
-				? hasConditions(domain)
-					? domain.id
-					: '__default__'
-				: undefined,
+			// An edge leaving a condition node anchors to its branch's port; the
+			// handle id on a condition node IS the branch id.
+			sourceHandle: domain.source_branch ?? undefined,
 			label: edgeLabel(domain) || undefined,
 			deletable: !readonly,
 			markerEnd: EDGE_MARKER,
@@ -314,6 +309,146 @@
 	}
 	refreshVisuals();
 
+	// ---------- auto-layout (dagre) ----------
+	// Node movement strategy (empirically validated via the Playwright edge
+	// harness): REPLACE node objects. New identities make xyflow recompute
+	// positionAbsolute (identity-preserving mutation leaves it stale — nodes
+	// only snap into place on click); handleBounds survive replacement since
+	// `measured` rides the spread. The historical vanishing-edge bug was
+	// remapGraphIds leaving stale branch ids in data.branches, not this.
+
+	function applyLayout() {
+		const positions = computeLayout(nodes, edges);
+		nodes = nodes.map((node) => {
+			const position = positions.get(node.id);
+			return position ? { ...node, position } : node;
+		});
+		setTimeout(() => flowInstance?.fitView({ duration: 300, padding: 0.15, maxZoom: 1 }), 50);
+	}
+
+	function tidyUp() {
+		applyLayout();
+		// Through the usual funnel: tidy-up autosaves and is undoable with ⌘Z.
+		markDirty();
+	}
+
+	// Graphs that arrive without positions (imported or hand-written YAML) get
+	// laid out once nodes are measured, so dagre works with real dimensions.
+	// Drafts persist the result via the autosave; published views stay
+	// visual-only (saving would auto-draft a pristine version just for layout).
+	let pendingInitialLayout = (graph.nodes ?? []).some(
+		(n: any) => n.position?.x === undefined && n.position?.y === undefined
+	);
+	$effect(() => {
+		if (!pendingInitialLayout || nodes.length === 0) return;
+		if (!nodes.every((n) => n.measured?.width)) return;
+		pendingInitialLayout = false;
+		applyLayout();
+		if (!readonly && status === 'draft') markDirty();
+	});
+
+	// ---------- undo/redo ----------
+
+	// Snapshot-based history hooked into markDirty (the single funnel every
+	// graph mutation goes through). Docs are plain (non-$state) deep clones of
+	// serializeGraph() output; only the stack sizes are reactive, for the
+	// header buttons' disabled states. Secrets are server-side and never part
+	// of the graph doc, so they are never snapshotted.
+	type Doc = { nodes: any[]; edges: any[]; variables: any[] };
+	let undoStack: Doc[] = [];
+	let redoStack: Doc[] = [];
+	let historySizes = $state({ undo: 0, redo: 0 });
+	let lastSnapshot: Doc; // state as of the LAST capture
+	let lastPushAt = 0;
+	let restoring = false;
+	const HISTORY_LIMIT = 50;
+	const COALESCE_MS = 800;
+
+	// $state.snapshot unwraps the $state proxies nested in the domain objects
+	// (structuredClone alone would throw on them) and deep-clones everything.
+	function takeSnapshot(): Doc {
+		return $state.snapshot(serializeGraph()) as Doc;
+	}
+	lastSnapshot = takeSnapshot();
+
+	function syncHistorySizes() {
+		historySizes = { undo: undoStack.length, redo: redoStack.length };
+	}
+
+	function resetHistory() {
+		undoStack = [];
+		redoStack = [];
+		lastSnapshot = takeSnapshot();
+		lastPushAt = 0;
+		syncHistorySizes();
+	}
+
+	function applyDoc(doc: Doc) {
+		restoring = true;
+		// Defeat coalescing for the next real edit: it must push a fresh undo
+		// step (and clear the redo stack) even right after an undo/redo.
+		lastPushAt = 0;
+		try {
+			// Clone before mapping into live state: the live domain objects get
+			// mutated in place by the Inspector, and the doc also stays on a stack.
+			variables = structuredClone(doc.variables);
+			nodes = structuredClone(doc.nodes).map(toFlowNode);
+			edges = structuredClone(doc.edges).map(toFlowEdge);
+			if (selectedNodeId && !nodes.some((n) => n.id === selectedNodeId)) selectedNodeId = null;
+			if (selectedEdgeId && !edges.some((e) => e.id === selectedEdgeId)) selectedEdgeId = null;
+			refreshVisuals();
+			markDirty(); // reuse the debounce/save path; restoring=true skips the snapshot block
+		} finally {
+			restoring = false;
+		}
+	}
+
+	function undo() {
+		if (!undoStack.length) return;
+		redoStack.push(lastSnapshot);
+		const doc = undoStack.pop()!;
+		lastSnapshot = doc;
+		syncHistorySizes();
+		applyDoc(doc);
+	}
+
+	function redo() {
+		if (!redoStack.length) return;
+		undoStack.push(lastSnapshot);
+		const doc = redoStack.pop()!;
+		lastSnapshot = doc;
+		syncHistorySizes();
+		applyDoc(doc);
+	}
+
+	// ⌘/Ctrl+Z undo, ⇧⌘/Ctrl+Z redo (plus Ctrl+Y). Text controls keep their
+	// native text undo: events targeting them are left alone.
+	$effect(() => {
+		if (readonly) return;
+		const handleKeydown = (event: KeyboardEvent) => {
+			if (!(event.metaKey || event.ctrlKey)) return;
+			const key = event.key.toLowerCase();
+			const isZ = key === 'z';
+			const isY = key === 'y' && event.ctrlKey;
+			if (!isZ && !isY) return;
+			const target = (event.target ?? document.activeElement) as HTMLElement | null;
+			if (
+				target &&
+				(target.tagName === 'INPUT' ||
+					target.tagName === 'TEXTAREA' ||
+					target.tagName === 'SELECT' ||
+					target.isContentEditable)
+			) {
+				return;
+			}
+			event.preventDefault();
+			if (isY || event.shiftKey) redo();
+			else undo();
+		};
+		window.addEventListener('keydown', handleKeydown);
+		return () => window.removeEventListener('keydown', handleKeydown);
+	});
+
 	// ---------- selection ----------
 
 	let selectedNodeId = $state<string | null>(null);
@@ -321,26 +456,30 @@
 	const selectedNode = $derived(nodes.find((n) => n.id === selectedNodeId) ?? null);
 	const selectedEdge = $derived(edges.find((e) => e.id === selectedEdgeId) ?? null);
 
-	// Conditional-branch list for the Inspector when a condition node is
-	// selected: its outgoing edge domains WITH conditions, in evaluation order,
-	// plus a display placeholder. The default is passed separately.
+	// Conditional-branch cards for the Inspector when a condition node is
+	// selected: the node's own branches (minus the default), in evaluation
+	// order, each carrying its wired state and a display placeholder. Edits bind
+	// straight to the branch objects on the node domain.
 	const selectedConditionBranches = $derived.by(() => {
 		const domain: any = selectedNode?.data?.domain;
 		if (!domain || domain.type !== 'condition') return [];
-		return sortedOutgoingDomains(domain.id)
-			.filter(hasConditions)
-			.map((edgeDomain, index) => ({
-				domain: edgeDomain,
-				placeholder: conditionSummary(edgeDomain) || m.branchDefaultName({ number: index + 1 })
+		const wired = wiredBranchIds();
+		return sortedBranches(domain)
+			.filter((branch) => !branch.is_default)
+			.map((branch, index) => ({
+				branch,
+				wired: wired.has(branch.id),
+				placeholder: conditionSummary(branch) || m.branchDefaultName({ number: index + 1 })
 			}));
 	});
 
-	// The selected condition node's default (otherwise) edge domain, or null when
-	// the __default__ output is unwired.
-	const selectedConditionDefault = $derived.by((): { domain: any | null } | null => {
+	// The selected condition node's default (otherwise) branch — always present
+	// (exactly one is_default) — plus its wired state.
+	const selectedConditionDefault = $derived.by((): { branch: any; wired: boolean } | null => {
 		const domain: any = selectedNode?.data?.domain;
 		if (!domain || domain.type !== 'condition') return null;
-		return { domain: sortedOutgoingDomains(domain.id).find((d) => !hasConditions(d)) ?? null };
+		const branch = (domain.branches ?? []).find((b: any) => b.is_default);
+		return branch ? { branch, wired: wiredBranchIds().has(branch.id) } : null;
 	});
 
 	// ---------- save machinery ----------
@@ -353,6 +492,18 @@
 
 	function markDirty() {
 		if (readonly) return;
+		if (!restoring) {
+			const now = Date.now();
+			if (now - lastPushAt >= COALESCE_MS) {
+				// Bursts (typing) coalesce into a single undo step.
+				undoStack.push(lastSnapshot);
+				if (undoStack.length > HISTORY_LIMIT) undoStack.shift();
+				lastPushAt = now;
+				redoStack = [];
+				syncHistorySizes();
+			}
+			lastSnapshot = takeSnapshot(); // always track current state
+		}
 		clearRunView();
 		saveState = 'dirty';
 		validationErrors = [];
@@ -411,8 +562,10 @@
 		}
 	}
 
+	// Node selected → the data browser needs it; nothing selected → the
+	// Inspector's Workflow panel shows per-variable reference values.
 	$effect(() => {
-		if (selectedNodeId && !readonly) ensureReferenceRun();
+		if ((selectedNodeId || !selectedEdgeId) && !readonly) ensureReferenceRun();
 	});
 
 	// Upstream nodes only: data available TO the selected node.
@@ -560,15 +713,22 @@
 
 	function serializeGraph() {
 		return {
+			// A condition node's `branches` (the source of truth for its routing)
+			// ride along on the domain as-is.
 			nodes: nodes.map((n) => ({
 				...(n.data.domain as object),
 				position: { x: Math.round(n.position.x), y: Math.round(n.position.y) }
 			})),
-			edges: edges.map((e) => ({
-				...(e.data!.domain as object),
-				source: e.source,
-				target: e.target
-			})),
+			// Edges carry source_branch (the branch they wire) and never conditions.
+			edges: edges.map((e) => {
+				const { condition_groups: _drop, ...domain } = e.data!.domain as any;
+				return {
+					...domain,
+					source: e.source,
+					target: e.target,
+					source_branch: domain.source_branch ?? null
+				};
+			}),
 			variables
 		};
 	}
@@ -630,6 +790,43 @@
 		}
 	}
 
+	let discarding = $state(false);
+
+	function confirmDiscardDraft() {
+		modalStore.trigger({
+			type: 'confirm',
+			title: m.discardWorkflowDraft(),
+			body: m.discardWorkflowDraftConfirm(),
+			response: async (confirmed: boolean) => {
+				if (!confirmed) return;
+				await discardDraft();
+			}
+		});
+	}
+
+	async function discardDraft() {
+		discarding = true;
+		try {
+			const res = await fetch(opsUrl('discard-draft'), {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ version: activeVersionId })
+			});
+			if (res.ok) {
+				// Drop any pending autosave: the draft is gone, and the reload below
+				// swaps the page to the published version.
+				if (saveTimer) clearTimeout(saveTimer);
+				await invalidateAll();
+				return;
+			}
+			const body = await res.json().catch(() => ({}));
+			saveError = body.error ?? body.detail ?? res.statusText;
+			saveState = 'error';
+		} finally {
+			discarding = false;
+		}
+	}
+
 	async function ensureDraft(): Promise<boolean> {
 		const res = await fetch(opsUrl('new-draft'), {
 			method: 'POST',
@@ -650,9 +847,12 @@
 		// source of truth (the next save wholesale-replaces the clone), so re-id
 		// everything locally to avoid colliding with the published rows.
 		remapGraphIds();
+		// History snapshots from before the remap hold stale published-row ids;
+		// undo starts fresh on the new draft.
+		resetHistory();
 		activeVersionId = draft.id;
 		status = 'draft';
-		onDraftCreated?.(draft);
+		versionNumber = draft.version_number;
 		return true;
 	}
 
@@ -671,8 +871,17 @@
 			children: (group.children ?? []).map(remapGroup)
 		});
 		variables = variables.map((v) => ({ ...v, id: fresh(v.id) }));
+		// Nodes first: this seeds the id map with fresh branch ids so the edges'
+		// source_branch (processed next) resolves to the same new branch ids.
 		nodes = nodes.map((n) => {
 			const domain: any = { ...(n.data.domain as any), id: fresh(n.id) };
+			if (Array.isArray(domain.branches)) {
+				domain.branches = domain.branches.map((branch: any) => ({
+					...branch,
+					id: fresh(branch.id),
+					condition_groups: (branch.condition_groups ?? []).map(remapGroup)
+				}));
+			}
 			return { ...n, id: domain.id, data: { ...n.data, domain } };
 		});
 		edges = edges.map((e) => {
@@ -680,31 +889,31 @@
 			domain.id = fresh(e.id);
 			domain.source = fresh(e.source);
 			domain.target = fresh(e.target);
-			if (domain.condition_groups) {
-				domain.condition_groups = domain.condition_groups.map(remapGroup);
-			}
+			// The wired branch's id was already re-mapped during the node pass.
+			domain.source_branch = domain.source_branch ? fresh(domain.source_branch) : null;
 			return {
 				...e,
 				id: domain.id,
 				source: domain.source,
 				target: domain.target,
-				// Conditional-branch handles are keyed by edge id (follow the re-id);
-				// the default handle is the fixed __default__ id (unchanged).
-				sourceHandle: e.sourceHandle
-					? hasConditions(domain)
-						? domain.id
-						: '__default__'
-					: undefined,
+				sourceHandle: domain.source_branch ?? undefined,
 				data: { ...e.data, domain }
 			};
 		});
 		if (selectedNodeId) selectedNodeId = idMap.get(selectedNodeId) ?? null;
 		if (selectedEdgeId) selectedEdgeId = idMap.get(selectedEdgeId) ?? null;
+		// Rebuild node visuals so data.branches carries the REMAPPED branch ids:
+		// the condition node renders its handle DOM from data.branches, and the
+		// edges now reference the new ids via sourceHandle — leaving the old ids
+		// in place makes every condition edge unresolvable (silently dropped)
+		// until something else happens to refresh visuals.
+		refreshVisuals();
 	}
 
 	let runsOpen = $state(false);
 	let runsPanel = $state<RunsPanel | null>(null);
 	let triggersOpen = $state(false);
+	let dataOpen = $state(false);
 	let running = $state(false);
 	let runPickerOpen = $state(false);
 
@@ -774,6 +983,22 @@
 			output_mapping: {},
 			event_key: '',
 			event_filters: {},
+			// A fresh condition node starts with just the guaranteed default
+			// (otherwise) branch; an if/else emerges once a conditional branch is
+			// added. Branches are the node's source of truth for routing.
+			...(type === 'condition'
+				? {
+						branches: [
+							{
+								id: crypto.randomUUID(),
+								name: '',
+								order: 0,
+								is_default: true,
+								condition_groups: []
+							}
+						]
+					}
+				: {}),
 			position: position ?? {},
 			assignments: [],
 			presentation: null
@@ -840,68 +1065,37 @@
 		const target = nodes.find((n) => n.id === connection.target);
 		if (!source || !target) return false;
 		if (source.data.nodeType === 'end' || target.data.nodeType === 'trigger') return false;
-		// Condition branch handles carry exactly their one edge (handle id = edge
-		// id); only the ghost "__new__" handle creates conditional branches and the
-		// fixed "__default__" handle wires the single otherwise edge.
-		if (
-			connection.sourceHandle &&
-			connection.sourceHandle !== '__new__' &&
-			connection.sourceHandle !== '__default__'
-		)
+		// A condition-node port IS a branch: at most one wire per branch.
+		const sourceBranch = connection.sourceHandle ?? null;
+		if (sourceBranch && edges.some((e) => (e.data?.domain as any)?.source_branch === sourceBranch))
 			return false;
-		// Only one default: reject wiring __default__ when an unconditioned edge exists.
+		// No duplicate wire for the same (source, target, branch); different
+		// branches of a condition node may legitimately point at the same target.
 		if (
-			connection.sourceHandle === '__default__' &&
-			sortedOutgoingDomains(connection.source).some((d) => !hasConditions(d))
+			edges.some(
+				(e) =>
+					e.source === connection.source &&
+					e.target === connection.target &&
+					((e.data?.domain as any)?.source_branch ?? null) === sourceBranch
+			)
 		)
-			return false;
-		if (edges.some((e) => e.source === connection.source && e.target === connection.target))
 			return false;
 		return true;
 	}
 
 	function handleConnect(connection: Connection) {
-		const fromCondition = isConditionNodeId(connection.source);
-		const outgoing = sortedOutgoingDomains(connection.source);
-		const conditional = outgoing.filter(hasConditions);
-		const isDefaultBranch = fromCondition && connection.sourceHandle === '__default__';
-
-		// Defensive: only one default edge. isValidConnection already blocks this,
-		// so just drop the phantom edge SvelteFlow appended and bail.
-		if (isDefaultBranch && outgoing.some((d) => !hasConditions(d))) {
-			edges = edges.filter(
-				(e) =>
-					!(e.source === connection.source && e.target === connection.target && !e.data?.domain)
-			);
-			return;
-		}
-
-		// A new conditional branch (via the __new__ ghost handle) is seeded with a
-		// single placeholder condition row so it is structurally conditional. An
-		// edge with NO conditions is the node's default under the backend's
-		// first-match/otherwise rule, so an empty seed would silently become a
-		// second default; the Inspector lets the user fill in the variable.
-		const condition_groups =
-			fromCondition && !isDefaultBranch
-				? [
-						{
-							operator: 'and',
-							order: 0,
-							conditions: [{ variable: variables[0]?.id ?? '', op: 'eq', value: '', order: 0 }],
-							children: []
-						}
-					]
-				: [];
+		// The source handle id on a condition node IS the branch id being wired;
+		// plain nodes have no handle id, so source_branch stays null.
+		const sourceBranch = connection.sourceHandle ?? null;
+		const outgoing = edges.filter((e) => e.source === connection.source);
 
 		const domain = {
 			id: crypto.randomUUID(),
 			source: connection.source,
 			target: connection.target,
+			source_branch: sourceBranch,
 			label: '',
-			// Provisional ordering; renumberBranches normalizes right after so the
-			// default always evaluates last.
-			priority: fromCondition ? conditional.length : outgoing.length,
-			condition_groups
+			priority: outgoing.length
 		};
 		// SvelteFlow already appended a default edge for this connection; replace
 		// it with ours so the id is the persisted client UUID.
@@ -910,11 +1104,9 @@
 				? toFlowEdge(domain)
 				: e
 		);
-		if (fromCondition) {
-			// A new branch: keep the default last, select the switch block so the
-			// Inspector opens its branch list, and rebuild visuals so the edge
-			// re-anchors from the ghost/default handle to its resolved handle.
-			renumberBranches(connection.source);
+		if (sourceBranch) {
+			// Wiring a branch: select the condition node so the Inspector shows its
+			// branch list, and rebuild visuals so the branch flips to "wired".
 			selectedNodeId = connection.source;
 			selectedEdgeId = null;
 			refreshVisuals();
@@ -929,39 +1121,98 @@
 		nodes = nodes.filter((n) => n.id !== id);
 		edges = edges.filter((e) => e.source !== id && e.target !== id);
 		if (selectedNodeId === id) selectedNodeId = null;
-		// Removed edges may have been condition branches: collapse their rows.
 		refreshVisuals();
 		markDirty();
 	}
 
-	function deleteEdge(id: string) {
-		const removed = edges.find((e) => e.id === id);
-		edges = edges.filter((e) => e.id !== id);
-		if (selectedEdgeId === id) selectedEdgeId = null;
-		// Deleting a conditional branch (or the default) closes the gap so the
-		// remaining conditional branches stay 0..n-1 with the default last.
-		if (removed && isConditionNodeId(removed.source)) renumberBranches(removed.source);
+	// ---------- condition-node branch edits (branches are node data) ----------
+
+	function conditionNodeDomain(nodeId: string): any | null {
+		const domain: any = nodes.find((n) => n.id === nodeId)?.data?.domain;
+		return domain?.type === 'condition' ? domain : null;
+	}
+
+	function addBranch(nodeId: string) {
+		const domain = conditionNodeDomain(nodeId);
+		if (!domain) return;
+		const order = (domain.branches ?? []).filter((b: any) => !b.is_default).length;
+		domain.branches = [
+			...(domain.branches ?? []),
+			{
+				id: crypto.randomUUID(),
+				name: '',
+				order,
+				is_default: false,
+				condition_groups: [
+					{
+						operator: 'and',
+						order: 0,
+						conditions: [{ variable: variables[0]?.id ?? '', op: 'eq', value: '', order: 0 }],
+						children: []
+					}
+				]
+			}
+		];
+		selectedNodeId = nodeId;
+		selectedEdgeId = null;
 		refreshVisuals();
 		markDirty();
 	}
 
-	function addVariable(key: string, type: string) {
-		if (variables.some((v) => v.key === key)) return;
-		variables = [...variables, { id: crypto.randomUUID(), key, type, default_value: null }];
+	function deleteBranch(nodeId: string, branchId: string) {
+		const domain = conditionNodeDomain(nodeId);
+		if (!domain) return;
+		domain.branches = (domain.branches ?? []).filter((b: any) => b.id !== branchId);
+		// Renumber the surviving conditional branches to stay 0..n-1.
+		domain.branches
+			.filter((b: any) => !b.is_default)
+			.sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
+			.forEach((b: any, index: number) => (b.order = index));
+		// A wired branch drops its edge; the default keeps its guaranteed slot.
+		edges = edges.filter((e) => (e.data?.domain as any)?.source_branch !== branchId);
+		refreshVisuals();
 		markDirty();
+	}
+
+	// Swap two conditional branches by order (index within the conditional list,
+	// default excluded — it is pinned last by is_default, not by order value).
+	function moveBranch(nodeId: string, index: number, delta: number) {
+		const domain = conditionNodeDomain(nodeId);
+		if (!domain) return;
+		const conditional = (domain.branches ?? [])
+			.filter((b: any) => !b.is_default)
+			.sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0));
+		const target = index + delta;
+		if (target < 0 || target >= conditional.length) return;
+		conditional.forEach((b: any, i: number) => (b.order = i));
+		conditional[index].order = target;
+		conditional[target].order = index;
+		refreshVisuals();
+		markDirty();
+	}
+
+	// Returns the created variable's id — or the existing one's on a duplicate
+	// key — so inline creators can select it right away.
+	function addVariable(key: string, type: string): string | null {
+		const existing = variables.find((v) => v.key === key);
+		if (existing) return existing.id;
+		const id = crypto.randomUUID();
+		variables = [...variables, { id, key, type, default_value: null }];
+		markDirty();
+		return id;
 	}
 
 	function removeVariable(id: string) {
 		variables = variables.filter((v) => v.id !== id);
-		// Strip conditions that referenced it so the save doesn't 400.
-		for (const edge of edges) {
-			const groups = edge.data?.domain?.condition_groups ?? [];
-			for (const group of groups) {
-				group.conditions = group.conditions.filter((c: any) => c.variable !== id);
+		// Strip branch conditions that referenced it so the save doesn't 400.
+		for (const node of nodes) {
+			const domain: any = node.data?.domain;
+			if (domain?.type !== 'condition') continue;
+			for (const branch of domain.branches ?? []) {
+				for (const group of branch.condition_groups ?? []) {
+					group.conditions = (group.conditions ?? []).filter((c: any) => c.variable !== id);
+				}
 			}
-			edge.data!.domain.condition_groups = groups.filter(
-				(g: any) => g.conditions.length || g.children?.length
-			);
 		}
 		refreshVisuals();
 		markDirty();
@@ -1005,8 +1256,10 @@
 		if (res.ok) await refreshSecrets();
 	}
 
+	// The Workflow panel (Inspector, no selection) lists secret names even in
+	// readonly views; values never leave the backend either way.
 	$effect(() => {
-		if (!readonly) refreshSecrets();
+		refreshSecrets();
 	});
 
 	$effect(() => {
@@ -1017,7 +1270,8 @@
 		get readonly() {
 			return readonly;
 		},
-		deleteNode
+		deleteNode,
+		addBranch
 	});
 
 	// Track app dark mode (`.dark` on <html>) so SvelteFlow follows the theme.
@@ -1039,284 +1293,381 @@
 	}
 </script>
 
-<div
-	class="flex h-full bg-surface-50-950 rounded-base overflow-hidden border border-surface-200-800"
->
-	{#if !readonly}
-		<Palette
+<div class="flex flex-col h-full gap-3">
+	<div class="flex items-center gap-3 shrink-0">
+		<h1 class="text-lg font-semibold text-surface-900-100">{workflowName}</h1>
+		<span class="badge {badge.class} text-xs" data-testid="version-badge">
+			v{versionNumber} · {badge.label()}
+		</span>
+		{#if workflowDescription}
+			<p class="text-sm text-surface-600-400 truncate">{workflowDescription}</p>
+		{/if}
+		<div class="ml-auto flex items-center justify-end gap-2 shrink-0">
+			{#if !readonly}
+				{#if saveState === 'saving' || saveState === 'dirty'}
+					<span class="text-xs text-surface-500 flex items-center gap-1">
+						<i class="fa-solid fa-spinner fa-spin"></i>
+						{m.graphSaving()}
+					</span>
+				{:else if saveState === 'saved'}
+					<span class="text-xs text-success-600 flex items-center gap-1">
+						<i class="fa-solid fa-check"></i>
+						{m.graphSaved()}
+					</span>
+				{:else if saveState === 'error'}
+					<button
+						type="button"
+						class="text-xs text-error-500 flex items-center gap-1 cursor-pointer"
+						title={saveError}
+						onclick={save}
+					>
+						<i class="fa-solid fa-triangle-exclamation"></i>
+						{saveError}
+					</button>
+				{/if}
+			{/if}
+			{#if !readonly}
+				<button
+					type="button"
+					class="btn-icon preset-tonal text-sm"
+					title={m.undo()}
+					aria-label={m.undo()}
+					disabled={!historySizes.undo}
+					onclick={undo}
+					data-testid="undo-graph"
+				>
+					<i class="fa-solid fa-rotate-left"></i>
+				</button>
+				<button
+					type="button"
+					class="btn-icon preset-tonal text-sm"
+					title={m.redo()}
+					aria-label={m.redo()}
+					disabled={!historySizes.redo}
+					onclick={redo}
+					data-testid="redo-graph"
+				>
+					<i class="fa-solid fa-rotate-right"></i>
+				</button>
+			{/if}
+			<a
+				href={`/workflows/${workflowId}/export-yaml`}
+				class="btn preset-tonal text-sm"
+				title={m.exportWorkflowYaml()}
+				aria-label={m.exportWorkflowYaml()}
+				data-testid="export-workflow-yaml"
+			>
+				<i class="fa-solid fa-download"></i> Export
+			</a>
+			{#if !readonly && status === 'draft' && hasPublishedFallback}
+				<button
+					type="button"
+					class="btn preset-tonal text-sm text-error-500"
+					disabled={discarding || saveState === 'saving'}
+					onclick={confirmDiscardDraft}
+					data-testid="discard-draft"
+				>
+					{#if discarding}
+						<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+					{:else}
+						<i class="fa-solid fa-trash-can mr-1"></i>
+					{/if}
+					{m.discardWorkflowDraft()}
+				</button>
+			{/if}
+			{#if !readonly && status === 'draft'}
+				<button
+					type="button"
+					class="btn preset-filled-primary-500 text-sm"
+					disabled={publishing || saveState === 'saving'}
+					onclick={publish}
+					data-testid="publish-workflow"
+				>
+					{#if publishing}
+						<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+					{:else}
+						<i class="fa-solid fa-rocket mr-1"></i>
+					{/if}
+					{m.publishWorkflow()}
+				</button>
+			{/if}
+		</div>
+	</div>
+
+	<div
+		class="flex-1 min-h-0 flex bg-surface-50-950 rounded-base overflow-hidden border border-surface-200-800"
+	>
+		{#if !readonly}
+			<Palette onAdd={addNode} />
+		{/if}
+
+		<div class="flex-1 min-w-0 min-h-0 flex flex-col">
+			<div class="flex-1 min-h-0 relative">
+				<SvelteFlow
+					bind:nodes
+					bind:edges
+					colorMode={isDark ? 'dark' : 'light'}
+					{nodeTypes}
+					isValidConnection={readonly ? () => false : isValidConnection}
+					onconnect={readonly ? undefined : handleConnect}
+					onnodedragstop={readonly ? undefined : markDirty}
+					ondelete={readonly
+						? undefined
+						: () => {
+								// Deleted edges may have been condition branches: collapse rows.
+								refreshVisuals();
+								markDirty();
+							}}
+					onnodeclick={({ node }) => {
+						selectedNodeId = node.id;
+						selectedEdgeId = null;
+					}}
+					onedgeclick={({ edge }) => {
+						// Condition branches are edited on their switch block, not per edge.
+						if (isConditionNodeId(edge.source)) {
+							selectedNodeId = edge.source;
+							selectedEdgeId = null;
+						} else {
+							selectedEdgeId = edge.id;
+							selectedNodeId = null;
+						}
+					}}
+					onpaneclick={() => {
+						selectedNodeId = null;
+						selectedEdgeId = null;
+					}}
+					ondragover={readonly ? undefined : handleDragOver}
+					ondrop={readonly ? undefined : handleDrop}
+					nodesDraggable={!readonly}
+					nodesConnectable={!readonly}
+					elementsSelectable={true}
+					oninit={handleFlowInit}
+					snapGrid={[10, 10]}
+					minZoom={0.2}
+					proOptions={{ hideAttribution: true }}
+					defaultEdgeOptions={{ markerEnd: EDGE_MARKER, style: EDGE_STYLE }}
+				>
+					<Background variant={BackgroundVariant.Dots} gap={20} />
+					<Controls showLock={false}>
+						{#if !readonly}
+							<ControlButton
+								onclick={tidyUp}
+								title={m.tidyUp()}
+								aria-label={m.tidyUp()}
+								data-testid="tidy-up"
+							>
+								<i class="fa-solid fa-wand-magic-sparkles"></i>
+							</ControlButton>
+						{/if}
+					</Controls>
+					<MiniMap />
+
+					<Panel position="top-left">
+						<div class="flex items-center gap-2">
+							<button
+								type="button"
+								class="btn preset-tonal text-sm"
+								class:preset-filled-secondary-500={triggersOpen}
+								onclick={() => (triggersOpen = !triggersOpen)}
+								data-testid="toggle-triggers"
+							>
+								<i class="fa-solid fa-bolt mr-1"></i>
+								{m.workflowTriggers()}
+							</button>
+							<button
+								type="button"
+								class="btn preset-tonal text-sm"
+								class:preset-filled-secondary-500={runsOpen}
+								onclick={() => (runsOpen = !runsOpen)}
+								data-testid="toggle-runs"
+							>
+								<i class="fa-solid fa-list-check mr-1"></i>
+								{m.workflowRuns()}
+							</button>
+							<button
+								type="button"
+								class="btn preset-tonal text-sm"
+								class:preset-filled-secondary-500={dataOpen}
+								onclick={() => (dataOpen = !dataOpen)}
+								data-testid="toggle-data"
+							>
+								<i class="fa-solid fa-cube mr-1"></i>
+								{m.workflowVariables()}
+							</button>
+						</div>
+					</Panel>
+					<Panel position="top-right">
+						<div class="flex items-center gap-2">
+							<div class="relative">
+								<button
+									type="button"
+									class="btn preset-filled-primary-500 text-sm"
+									disabled={running}
+									onclick={runWorkflow}
+									data-testid="run-workflow"
+								>
+									{#if running}
+										<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+									{:else}
+										<i class="fa-solid fa-play mr-1"></i>
+									{/if}
+									{m.executeWorkflow()}
+								</button>
+								{#if runPickerOpen}
+									<div
+										class="absolute right-0 top-full mt-1 z-10 w-60 rounded-base border border-surface-200-800 bg-surface-50-950 shadow-lg"
+										data-testid="run-trigger-picker"
+									>
+										<p
+											class="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-surface-500 border-b border-surface-200-800"
+										>
+											{m.chooseTriggerToRun()}
+										</p>
+										<ul>
+											{#each triggerNodes as triggerNode (triggerNode.id)}
+												{@const domain = triggerNode.data.domain as any}
+												<li>
+													<button
+														type="button"
+														class="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-surface-800-200 hover:bg-surface-100-900 cursor-pointer text-left"
+														onclick={() => startRun(domain.ref ?? null)}
+													>
+														<i
+															class="fa-solid {TRIGGER_ICONS[domain.trigger_config?.type] ??
+																'fa-bolt'} w-4 text-center text-surface-500"
+														></i>
+														<span class="truncate">{triggerNode.data.label}</span>
+														{#if domain.ref}
+															<span class="ml-auto font-mono text-[9px] text-surface-500 shrink-0">
+																{domain.ref}
+															</span>
+														{/if}
+													</button>
+												</li>
+											{/each}
+										</ul>
+									</div>
+								{/if}
+							</div>
+						</div>
+					</Panel>
+
+					{#if runView}
+						<Panel position="top-center">
+							<button
+								type="button"
+								class="btn preset-tonal text-xs shadow-md"
+								title={m.exitRunView()}
+								onclick={clearRunView}
+								data-testid="exit-run-view"
+							>
+								<i class="fa-solid fa-clock-rotate-left mr-1 text-success-500"></i>
+								{String(runView.runId).slice(0, 8)}
+								{#if runView.replaying}
+									<i class="fa-solid fa-circle-notch fa-spin ml-1"></i>
+								{/if}
+								<i class="fa-solid fa-xmark ml-2"></i>
+							</button>
+						</Panel>
+					{/if}
+
+					{#if validationErrors.length}
+						<Panel position="bottom-right">
+							<div
+								class="w-72 max-h-56 overflow-y-auto rounded-base border border-error-300 dark:border-error-700 bg-surface-50-950 shadow-lg"
+							>
+								<p
+									class="px-3 py-2 text-xs font-semibold text-error-600 border-b border-surface-200-800"
+								>
+									<i class="fa-solid fa-triangle-exclamation mr-1"></i>
+									{m.publishValidationFailed()}
+								</p>
+								<ul>
+									{#each validationErrors as validationError}
+										<li>
+											<button
+												type="button"
+												class="w-full text-left px-3 py-1.5 text-xs text-surface-800-200 hover:bg-surface-100-900 cursor-pointer"
+												onclick={() => focusError(validationError)}
+											>
+												{validationError.message}
+											</button>
+										</li>
+									{/each}
+								</ul>
+							</div>
+						</Panel>
+					{/if}
+				</SvelteFlow>
+			</div>
+
+			{#if triggersOpen}
+				<TriggersPanel {registrations} {workflowId} onRefresh={refreshRegistrations} />
+			{/if}
+
+			{#if dataOpen}
+				<aside
+					class="h-60 shrink-0 border-t border-surface-200-800 bg-surface-100-900 overflow-y-auto"
+					data-testid="data-panel"
+				>
+					<div class="p-3 max-w-3xl">
+						<WorkflowDataPanel
+							{variables}
+							{secrets}
+							{referenceVariables}
+							{readonly}
+							columns
+							onAddVariable={addVariable}
+							onRemoveVariable={removeVariable}
+							onAddSecret={addSecret}
+							onRemoveSecret={removeSecret}
+						/>
+					</div>
+				</aside>
+			{/if}
+
+			{#if runsOpen}
+				<RunsPanel
+					bind:this={runsPanel}
+					{workflowId}
+					onShowRun={showRun}
+					onReplayRun={replayRun}
+					onPinReference={pinReference}
+					onRunsRefreshed={handleRunsRefreshed}
+					referenceRunId={referenceRun?.id ?? null}
+				/>
+			{/if}
+		</div>
+
+		<Inspector
+			selectedNode={readonly ? null : selectedNode}
+			selectedEdge={readonly ? null : selectedEdge}
+			branches={readonly ? [] : selectedConditionBranches}
+			defaultBranch={readonly ? null : selectedConditionDefault}
+			onAddBranch={() => selectedNode && addBranch(selectedNode.id)}
+			onDeleteBranch={(branchId) => selectedNode && deleteBranch(selectedNode.id, branchId)}
+			onMoveBranch={(index, delta) => selectedNode && moveBranch(selectedNode.id, index, delta)}
+			{readonly}
 			{variables}
 			{secrets}
-			onAdd={addNode}
 			onAddVariable={addVariable}
 			onRemoveVariable={removeVariable}
 			onAddSecret={addSecret}
 			onRemoveSecret={removeSecret}
+			{taskTemplates}
+			{subprocessCandidates}
+			{creatableModels}
+			{fkOptions}
+			{workflowId}
+			{registrationsByRef}
+			onRegistrationsChanged={refreshRegistrations}
+			referenceRunId={referenceRun?.id ?? null}
+			{referenceVariables}
+			{referenceNodes}
+			secretNames={secrets.map((s: any) => s.name)}
+			onChange={handleInspectorChange}
 		/>
-	{/if}
-
-	<div class="flex-1 min-w-0 min-h-0 flex flex-col">
-		<div class="flex-1 min-h-0 relative">
-			<SvelteFlow
-				bind:nodes
-				bind:edges
-				colorMode={isDark ? 'dark' : 'light'}
-				{nodeTypes}
-				isValidConnection={readonly ? () => false : isValidConnection}
-				onconnect={readonly ? undefined : handleConnect}
-				onnodedragstop={readonly ? undefined : markDirty}
-				ondelete={readonly
-					? undefined
-					: () => {
-							// Deleted edges may have been condition branches: collapse rows.
-							refreshVisuals();
-							markDirty();
-						}}
-				onnodeclick={({ node }) => {
-					selectedNodeId = node.id;
-					selectedEdgeId = null;
-				}}
-				onedgeclick={({ edge }) => {
-					// Condition branches are edited on their switch block, not per edge.
-					if (isConditionNodeId(edge.source)) {
-						selectedNodeId = edge.source;
-						selectedEdgeId = null;
-					} else {
-						selectedEdgeId = edge.id;
-						selectedNodeId = null;
-					}
-				}}
-				onpaneclick={() => {
-					selectedNodeId = null;
-					selectedEdgeId = null;
-				}}
-				ondragover={readonly ? undefined : handleDragOver}
-				ondrop={readonly ? undefined : handleDrop}
-				nodesDraggable={!readonly}
-				nodesConnectable={!readonly}
-				elementsSelectable={true}
-				oninit={handleFlowInit}
-				snapGrid={[10, 10]}
-				minZoom={0.2}
-				proOptions={{ hideAttribution: true }}
-				defaultEdgeOptions={{ markerEnd: EDGE_MARKER, style: EDGE_STYLE }}
-			>
-				<Background variant={BackgroundVariant.Dots} gap={20} />
-				<Controls showLock={false} />
-				<MiniMap />
-
-				<Panel position="top-right">
-					<div class="flex items-center gap-2">
-						<a
-							href={`/workflows/${workflowId}/export-yaml`}
-							class="btn preset-tonal text-sm"
-							title={m.exportWorkflowYaml()}
-							aria-label={m.exportWorkflowYaml()}
-							data-testid="export-workflow-yaml"
-						>
-							<i class="fa-solid fa-download"></i>
-						</a>
-						<button
-							type="button"
-							class="btn preset-tonal text-sm"
-							class:preset-filled-secondary-500={triggersOpen}
-							onclick={() => (triggersOpen = !triggersOpen)}
-							data-testid="toggle-triggers"
-						>
-							<i class="fa-solid fa-bolt mr-1"></i>
-							{m.workflowTriggers()}
-						</button>
-						<button
-							type="button"
-							class="btn preset-tonal text-sm"
-							class:preset-filled-secondary-500={runsOpen}
-							onclick={() => (runsOpen = !runsOpen)}
-							data-testid="toggle-runs"
-						>
-							<i class="fa-solid fa-list-check mr-1"></i>
-							{m.workflowRuns()}
-						</button>
-						<div class="relative">
-							<button
-								type="button"
-								class="btn preset-tonal text-sm"
-								class:preset-filled-secondary-500={runPickerOpen}
-								disabled={running}
-								onclick={runWorkflow}
-								data-testid="run-workflow"
-							>
-								{#if running}
-									<i class="fa-solid fa-spinner fa-spin mr-1"></i>
-								{:else}
-									<i class="fa-solid fa-play mr-1"></i>
-								{/if}
-								{m.runWorkflow()}
-							</button>
-							{#if runPickerOpen}
-								<div
-									class="absolute right-0 top-full mt-1 z-10 w-60 rounded-base border border-surface-200-800 bg-surface-50-950 shadow-lg"
-									data-testid="run-trigger-picker"
-								>
-									<p
-										class="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-surface-500 border-b border-surface-200-800"
-									>
-										{m.chooseTriggerToRun()}
-									</p>
-									<ul>
-										{#each triggerNodes as triggerNode (triggerNode.id)}
-											{@const domain = triggerNode.data.domain as any}
-											<li>
-												<button
-													type="button"
-													class="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-surface-800-200 hover:bg-surface-100-900 cursor-pointer text-left"
-													onclick={() => startRun(domain.ref ?? null)}
-												>
-													<i
-														class="fa-solid {TRIGGER_ICONS[domain.trigger_config?.type] ??
-															'fa-bolt'} w-4 text-center text-surface-500"
-													></i>
-													<span class="truncate">{triggerNode.data.label}</span>
-													{#if domain.ref}
-														<span class="ml-auto font-mono text-[9px] text-surface-500 shrink-0">
-															{domain.ref}
-														</span>
-													{/if}
-												</button>
-											</li>
-										{/each}
-									</ul>
-								</div>
-							{/if}
-						</div>
-						{#if !readonly}
-							{#if saveState === 'saving' || saveState === 'dirty'}
-								<span class="text-xs text-surface-500 flex items-center gap-1">
-									<i class="fa-solid fa-spinner fa-spin"></i>
-									{m.graphSaving()}
-								</span>
-							{:else if saveState === 'saved'}
-								<span class="text-xs text-success-600 flex items-center gap-1">
-									<i class="fa-solid fa-check"></i>
-									{m.graphSaved()}
-								</span>
-							{:else if saveState === 'error'}
-								<button
-									type="button"
-									class="text-xs text-error-500 flex items-center gap-1 cursor-pointer"
-									title={saveError}
-									onclick={save}
-								>
-									<i class="fa-solid fa-triangle-exclamation"></i>
-									{saveError}
-								</button>
-							{/if}
-							{#if status === 'draft'}
-								<button
-									type="button"
-									class="btn preset-filled-primary-500 text-sm"
-									disabled={publishing || saveState === 'saving'}
-									onclick={publish}
-									data-testid="publish-workflow"
-								>
-									{#if publishing}
-										<i class="fa-solid fa-spinner fa-spin mr-1"></i>
-									{:else}
-										<i class="fa-solid fa-rocket mr-1"></i>
-									{/if}
-									{m.publishWorkflow()}
-								</button>
-							{/if}
-						{/if}
-					</div>
-				</Panel>
-
-				{#if runView}
-					<Panel position="top-center">
-						<button
-							type="button"
-							class="btn preset-tonal text-xs shadow-md"
-							title={m.exitRunView()}
-							onclick={clearRunView}
-							data-testid="exit-run-view"
-						>
-							<i class="fa-solid fa-clock-rotate-left mr-1 text-success-500"></i>
-							{String(runView.runId).slice(0, 8)}
-							{#if runView.replaying}
-								<i class="fa-solid fa-circle-notch fa-spin ml-1"></i>
-							{/if}
-							<i class="fa-solid fa-xmark ml-2"></i>
-						</button>
-					</Panel>
-				{/if}
-
-				{#if validationErrors.length}
-					<Panel position="bottom-right">
-						<div
-							class="w-72 max-h-56 overflow-y-auto rounded-base border border-error-300 dark:border-error-700 bg-surface-50-950 shadow-lg"
-						>
-							<p
-								class="px-3 py-2 text-xs font-semibold text-error-600 border-b border-surface-200-800"
-							>
-								<i class="fa-solid fa-triangle-exclamation mr-1"></i>
-								{m.publishValidationFailed()}
-							</p>
-							<ul>
-								{#each validationErrors as validationError}
-									<li>
-										<button
-											type="button"
-											class="w-full text-left px-3 py-1.5 text-xs text-surface-800-200 hover:bg-surface-100-900 cursor-pointer"
-											onclick={() => focusError(validationError)}
-										>
-											{validationError.message}
-										</button>
-									</li>
-								{/each}
-							</ul>
-						</div>
-					</Panel>
-				{/if}
-			</SvelteFlow>
-		</div>
-
-		{#if triggersOpen}
-			<TriggersPanel {registrations} {workflowId} onRefresh={refreshRegistrations} />
-		{/if}
-
-		{#if runsOpen}
-			<RunsPanel
-				bind:this={runsPanel}
-				{workflowId}
-				onShowRun={showRun}
-				onReplayRun={replayRun}
-				onPinReference={pinReference}
-				onRunsRefreshed={handleRunsRefreshed}
-				referenceRunId={referenceRun?.id ?? null}
-			/>
-		{/if}
 	</div>
-
-	<Inspector
-		selectedNode={readonly ? null : selectedNode}
-		selectedEdge={readonly ? null : selectedEdge}
-		outgoingEdges={readonly ? [] : selectedConditionBranches}
-		defaultBranch={readonly ? null : selectedConditionDefault}
-		onDeleteEdge={deleteEdge}
-		{variables}
-		{roles}
-		{actors}
-		{taskTemplates}
-		{subprocessCandidates}
-		{creatableModels}
-		{fkOptions}
-		{workflowId}
-		{registrationsByRef}
-		onRegistrationsChanged={refreshRegistrations}
-		referenceRunId={referenceRun?.id ?? null}
-		{referenceVariables}
-		{referenceNodes}
-		secretNames={secrets.map((s: any) => s.name)}
-		onChange={handleInspectorChange}
-	/>
 </div>
 
 <style>

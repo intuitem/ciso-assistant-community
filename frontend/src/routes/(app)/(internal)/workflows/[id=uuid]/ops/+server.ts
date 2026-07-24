@@ -63,6 +63,15 @@ export const POST: RequestHandler = async ({ fetch, request, url }) => {
 			);
 		}
 
+		case 'discard-draft': {
+			const versionId = requireUuid(body.version, 'version');
+			return proxy(
+				fetch,
+				`${BASE_API_URL}/workflows/workflow-versions/${versionId}/discard/`,
+				'POST'
+			);
+		}
+
 		case 'new-draft': {
 			const versionId = requireUuid(body.version, 'version');
 			return proxy(

@@ -73,6 +73,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@dagrejs/dagre": "^3.0.0",
 		"@floating-ui/dom": "^1.7.1",
 		"@fortawesome/fontawesome-free": "^6.7.2",
 		"@simplewebauthn/browser": "^13.3.0",

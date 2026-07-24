@@ -14,6 +14,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { publicHookUrl } from './hook-url';
 	import DataBrowser from './DataBrowser.svelte';
+	import WorkflowDataPanel from './WorkflowDataPanel.svelte';
 	import { renderTemplate } from './expressions';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 	import { newCondition, treeToGroups, groupsToTree, type Condition } from './filter-dnf';
@@ -28,17 +29,27 @@
 	interface Props {
 		selectedNode: any | null;
 		selectedEdge: any | null;
-		// Conditional-branch rows for a selected condition node: its outgoing edge
-		// domains WITH conditions, in evaluation order (the list IS the edges —
-		// nothing new persisted).
-		outgoingEdges?: { domain: any; placeholder: string }[];
-		// The single unconditioned default (otherwise) edge, or null when the
-		// __default__ output is unwired.
-		defaultBranch?: { domain: any | null } | null;
-		onDeleteEdge?: (edgeId: string) => void;
+		// Conditional-branch cards for a selected condition node: the node's own
+		// branches (default excluded), in evaluation order. Edits bind straight to
+		// the branch objects on the node domain.
+		branches?: { branch: any; wired: boolean; placeholder: string }[];
+		// The guaranteed default (otherwise) branch and its wired state; always
+		// present for a condition node (exactly one is_default).
+		defaultBranch?: { branch: any; wired: boolean } | null;
+		onAddBranch?: () => void;
+		onDeleteBranch?: (branchId: string) => void;
+		onMoveBranch?: (index: number, delta: number) => void;
+		// Readonly (archived) views still show the Workflow panel, minus its
+		// add/remove controls.
+		readonly?: boolean;
 		variables: { id: string; key: string; type: string }[];
-		roles: Option[];
-		actors: Option[];
+		secrets?: { id: string; name: string }[];
+		// Creates the variable (or finds the existing one on a duplicate key)
+		// and returns its id, so inline creators can select it right away.
+		onAddVariable?: (key: string, type: string) => string | null;
+		onRemoveVariable?: (id: string) => void;
+		onAddSecret?: (name: string, value: string) => void;
+		onRemoveSecret?: (id: string) => void;
 		taskTemplates: Option[];
 		subprocessCandidates: Option[];
 		creatableModels?: any[];
@@ -56,12 +67,18 @@
 	let {
 		selectedNode = $bindable(),
 		selectedEdge = $bindable(),
-		outgoingEdges = [],
+		branches = [],
 		defaultBranch = null,
-		onDeleteEdge,
+		onAddBranch,
+		onDeleteBranch,
+		onMoveBranch,
+		readonly = false,
 		variables,
-		roles,
-		actors,
+		secrets = [],
+		onAddVariable,
+		onRemoveVariable,
+		onAddSecret,
+		onRemoveSecret,
 		taskTemplates,
 		subprocessCandidates,
 		creatableModels = [],
@@ -462,75 +479,80 @@
 		return option.name ?? option.str ?? option.id;
 	}
 
-	function addAssignment() {
-		nodeDomain.assignments = [
-			...nodeDomain.assignments,
-			{
-				role: roles[0]?.id ?? null,
-				role_code: roles[0]?.code ?? '',
-				actor: null,
-				resolve_type: 'actor',
-				variable_key: '',
-				is_blocking: true,
-				participation: 'task'
-			}
-		];
-		onChange();
-	}
+	// ---------- inline variable creation (point of use) ----------
 
-	function removeAssignment(index: number) {
-		nodeDomain.assignments = nodeDomain.assignments.filter((_: unknown, i: number) => i !== index);
-		onChange();
-	}
+	const VARIABLE_TYPES = ['string', 'number', 'boolean', 'date', 'json'];
+	const NEW_VARIABLE = '__new__';
 
-	function syncRoleCode(assignment: any) {
-		const role = roles.find((r) => r.id === assignment.role);
-		assignment.role_code = role?.code ?? '';
-		onChange();
-	}
+	// The condition row currently showing the inline creator (at most one at a
+	// time); the select isn't bound, so cancelling just restores it.
+	let inlineCreatorCondition = $state<any | null>(null);
+	let inlineCreatorKey = $state('');
+	let inlineCreatorType = $state('string');
 
-	// ---------- condition-node branches (edge condition_groups editor) ----------
-
-	function rootGroup(edge: any) {
-		if (!edge.condition_groups.length) {
-			edge.condition_groups = [{ operator: 'and', order: 0, conditions: [], children: [] }];
+	function handleConditionVariableSelect(condition: any, select: HTMLSelectElement) {
+		if (select.value === NEW_VARIABLE) {
+			inlineCreatorCondition = condition;
+			inlineCreatorKey = '';
+			inlineCreatorType = 'string';
+			// Restore the visible value; the select is about to be swapped out.
+			select.value = String(condition.variable ?? '');
+			return;
 		}
-		return edge.condition_groups[0];
+		condition.variable = select.value;
+		onChange();
 	}
 
-	function addCondition(edge: any) {
-		const group = rootGroup(edge);
+	function confirmInlineVariable() {
+		const key = inlineCreatorKey.trim();
+		if (!key || !inlineCreatorCondition) return;
+		// A duplicate key returns the existing variable's id: just select it.
+		const id = onAddVariable?.(key, inlineCreatorType) ?? null;
+		if (id) {
+			inlineCreatorCondition.variable = id;
+			onChange();
+		}
+		inlineCreatorCondition = null;
+	}
+
+	function cancelInlineVariable() {
+		inlineCreatorCondition = null;
+	}
+
+	function focusOnMount(node: HTMLElement) {
+		node.focus();
+	}
+
+	function isDeclaredVariable(key: string): boolean {
+		return variables.some((v) => v.key === key);
+	}
+
+	// ---------- condition-node branches (node branch condition_groups editor) ----------
+
+	function rootGroup(branch: any) {
+		if (!branch.condition_groups?.length) {
+			branch.condition_groups = [{ operator: 'and', order: 0, conditions: [], children: [] }];
+		}
+		return branch.condition_groups[0];
+	}
+
+	function addCondition(branch: any) {
+		const group = rootGroup(branch);
 		group.conditions = [
 			...group.conditions,
 			{ variable: variables[0]?.id ?? null, op: 'eq', value: '', order: group.conditions.length }
 		];
-		edge.condition_groups = [...edge.condition_groups];
+		branch.condition_groups = [...branch.condition_groups];
 		onChange();
 	}
 
-	function removeCondition(edge: any, index: number) {
-		const group = rootGroup(edge);
-		// A branch here always has conditions (an edge with none is the default,
-		// edited separately); keep at least one row so it can't silently become a
-		// second default. Delete the whole branch to remove it entirely.
+	function removeCondition(branch: any, index: number) {
+		const group = rootGroup(branch);
+		// Keep at least one condition row on a conditional branch; delete the whole
+		// branch to remove it entirely.
 		if (group.conditions.length <= 1) return;
 		group.conditions = group.conditions.filter((_: unknown, i: number) => i !== index);
-		edge.condition_groups = [...edge.condition_groups];
-		onChange();
-	}
-
-	function moveBranch(index: number, delta: number) {
-		// Snapshot: the prop is derived from the priorities we are about to
-		// mutate, so it must not be re-read mid-swap.
-		const branches = [...outgoingEdges];
-		const target = index + delta;
-		if (target < 0 || target >= branches.length) return;
-		// Normalize first (duplicate/legacy priorities), then swap the two rows.
-		branches.forEach((entry, i) => (entry.domain.priority = i));
-		branches[index].domain.priority = target;
-		branches[target].domain.priority = index;
-		// Keep the default evaluated last, after every conditional branch.
-		if (defaultBranch?.domain) defaultBranch.domain.priority = branches.length;
+		branch.condition_groups = [...branch.condition_groups];
 		onChange();
 	}
 </script>
@@ -541,7 +563,7 @@
 	</span>
 {/snippet}
 
-{#snippet branchConditions(edge: any)}
+{#snippet branchConditions(branch: any)}
 	<div>
 		<div class="flex items-center justify-between mb-1">
 			{@render fieldLabel(m.edgeConditions())}
@@ -549,57 +571,106 @@
 				type="button"
 				aria-label={m.addCondition()}
 				class="text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold disabled:opacity-50"
-				onclick={() => addCondition(edge)}
+				onclick={() => addCondition(branch)}
 				disabled={!variables.length}
 			>
 				<i class="fa-solid fa-plus mr-0.5"></i>
 			</button>
 		</div>
-		{#if edge.condition_groups[0]?.conditions.length}
+		{#if branch.condition_groups[0]?.conditions.length}
 			<div class="space-y-1.5">
-				{#each edge.condition_groups[0].conditions as condition, index}
-					<div class="flex items-center gap-1">
-						<select
-							class="select text-xs flex-1 min-w-0"
-							bind:value={condition.variable}
-							onchange={onChange}
-						>
-							{#each variables as variable}
-								<option value={variable.id}>{variable.key}</option>
-							{/each}
-						</select>
-						<select
-							class="select text-xs w-20 shrink-0"
-							bind:value={condition.op}
-							onchange={onChange}
-						>
-							{#each CONDITION_OPS as op}
-								<option value={op}>{op}</option>
-							{/each}
-						</select>
-						{#if condition.op !== 'is_null'}
+				{#each branch.condition_groups[0].conditions as condition, index}
+					{#if inlineCreatorCondition === condition}
+						<!-- Inline creator swapped in for this row's variable select. -->
+						<div class="flex items-center gap-1" data-testid="inline-variable-creator">
 							<input
 								type="text"
-								class="input text-xs w-16 min-w-0"
-								bind:value={condition.value}
-								oninput={onChange}
+								class="input text-xs flex-1 min-w-0"
+								placeholder={m.variableKey()}
+								bind:value={inlineCreatorKey}
+								use:focusOnMount
+								onkeydown={(e) => {
+									if (e.key === 'Enter') {
+										e.preventDefault();
+										confirmInlineVariable();
+									} else if (e.key === 'Escape') {
+										cancelInlineVariable();
+									}
+								}}
 							/>
-						{/if}
-						<button
-							type="button"
-							aria-label="Remove condition"
-							class="text-error-500 hover:text-error-600 cursor-pointer text-xs shrink-0 disabled:opacity-30 disabled:cursor-default"
-							disabled={edge.condition_groups[0].conditions.length <= 1}
-							onclick={() => removeCondition(edge, index)}
-						>
-							<i class="fa-solid fa-xmark"></i>
-						</button>
-					</div>
+							<select class="select text-xs w-16 shrink-0" bind:value={inlineCreatorType}>
+								{#each VARIABLE_TYPES as t}
+									<option value={t}>{t}</option>
+								{/each}
+							</select>
+							<button
+								type="button"
+								aria-label={m.addVariable()}
+								class="btn-icon preset-tonal w-6 h-6 text-xs shrink-0"
+								disabled={!inlineCreatorKey.trim()}
+								onclick={confirmInlineVariable}
+								data-testid="confirm-inline-variable"
+							>
+								<i class="fa-solid fa-check"></i>
+							</button>
+							<button
+								type="button"
+								aria-label={m.cancel()}
+								class="btn-icon preset-tonal w-6 h-6 text-xs shrink-0"
+								onclick={cancelInlineVariable}
+								data-testid="cancel-inline-variable"
+							>
+								<i class="fa-solid fa-xmark"></i>
+							</button>
+						</div>
+					{:else}
+						<div class="flex items-center gap-1">
+							<select
+								class="select text-xs flex-1 min-w-0"
+								value={condition.variable}
+								onchange={(e) => handleConditionVariableSelect(condition, e.currentTarget)}
+							>
+								{#each variables as variable}
+									<option value={variable.id}>{variable.key}</option>
+								{/each}
+								{#if variables.length}
+									<option disabled>──────────</option>
+								{/if}
+								<option value={NEW_VARIABLE}>+ {m.newVariableOption()}</option>
+							</select>
+							<select
+								class="select text-xs w-20 shrink-0"
+								bind:value={condition.op}
+								onchange={onChange}
+							>
+								{#each CONDITION_OPS as op}
+									<option value={op}>{op}</option>
+								{/each}
+							</select>
+							{#if condition.op !== 'is_null'}
+								<input
+									type="text"
+									class="input text-xs w-16 min-w-0"
+									bind:value={condition.value}
+									oninput={onChange}
+								/>
+							{/if}
+							<button
+								type="button"
+								aria-label="Remove condition"
+								class="text-error-500 hover:text-error-600 cursor-pointer text-xs shrink-0 disabled:opacity-30 disabled:cursor-default"
+								disabled={branch.condition_groups[0].conditions.length <= 1}
+								onclick={() => removeCondition(branch, index)}
+							>
+								<i class="fa-solid fa-xmark"></i>
+							</button>
+						</div>
+					{/if}
 				{/each}
-				{#if edge.condition_groups[0]?.conditions.length > 1}
+				{#if branch.condition_groups[0]?.conditions.length > 1}
 					<select
 						class="select text-xs w-full"
-						bind:value={edge.condition_groups[0].operator}
+						bind:value={branch.condition_groups[0].operator}
 						onchange={onChange}
 					>
 						<option value="and">AND</option>
@@ -654,9 +725,19 @@
 
 			{#if nodeDomain.type === 'condition'}
 				<div data-testid="condition-branch-list">
-					{@render fieldLabel(m.workflowBranches())}
+					<div class="flex items-center justify-between mb-1">
+						{@render fieldLabel(m.workflowBranches())}
+						<button
+							type="button"
+							class="text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold"
+							onclick={() => onAddBranch?.()}
+							data-testid="inspector-add-branch"
+						>
+							<i class="fa-solid fa-plus mr-0.5"></i>{m.addBranch()}
+						</button>
+					</div>
 					<div class="space-y-2">
-						{#each outgoingEdges as branch, index (branch.domain.id)}
+						{#each branches as row, index (row.branch.id)}
 							<div
 								class="rounded-base border border-surface-200-800 bg-surface-50-950 p-2 space-y-1.5"
 								data-testid="inspector-branch-row"
@@ -668,7 +749,7 @@
 											aria-label="Move branch up"
 											class="text-surface-500 hover:text-surface-700-300 cursor-pointer text-[9px] leading-none disabled:opacity-30 disabled:cursor-default"
 											disabled={index === 0}
-											onclick={() => moveBranch(index, -1)}
+											onclick={() => onMoveBranch?.(index, -1)}
 										>
 											<i class="fa-solid fa-chevron-up"></i>
 										</button>
@@ -676,8 +757,8 @@
 											type="button"
 											aria-label="Move branch down"
 											class="text-surface-500 hover:text-surface-700-300 cursor-pointer text-[9px] leading-none disabled:opacity-30 disabled:cursor-default"
-											disabled={index === outgoingEdges.length - 1}
-											onclick={() => moveBranch(index, 1)}
+											disabled={index === branches.length - 1}
+											onclick={() => onMoveBranch?.(index, 1)}
 										>
 											<i class="fa-solid fa-chevron-down"></i>
 										</button>
@@ -685,46 +766,52 @@
 									<input
 										type="text"
 										class="input text-xs flex-1 min-w-0"
-										placeholder={branch.placeholder}
-										bind:value={branch.domain.label}
+										placeholder={row.placeholder}
+										bind:value={row.branch.name}
 										oninput={onChange}
 									/>
 									<button
 										type="button"
 										aria-label="Delete branch"
 										class="text-error-500 hover:text-error-600 cursor-pointer text-xs shrink-0"
-										onclick={() => onDeleteEdge?.(branch.domain.id)}
+										onclick={() => onDeleteBranch?.(row.branch.id)}
 									>
 										<i class="fa-solid fa-trash"></i>
 									</button>
 								</div>
-								{@render branchConditions(branch.domain)}
+								{@render branchConditions(row.branch)}
+								{#if !row.wired}
+									<p class="text-[10px] italic text-surface-500 leading-relaxed">
+										<i class="fa-solid fa-link-slash mr-1"></i>{m.branchUnwired()}
+									</p>
+								{/if}
 							</div>
 						{/each}
 					</div>
 
-					<!-- Default (otherwise) branch: the single unconditioned output,
-					     evaluated last. No conditions, no reorder, no delete. -->
-					<div
-						class="rounded-base border border-surface-300-700 bg-surface-200-800 p-2 mt-2 space-y-1"
-						data-testid="inspector-default-branch"
-					>
-						{@render fieldLabel(m.branchOtherwise())}
-						{#if defaultBranch?.domain}
+					<!-- Default (otherwise) branch: always present, evaluated last.
+					     No conditions, no reorder, no delete. -->
+					{#if defaultBranch}
+						<div
+							class="rounded-base border border-surface-300-700 bg-surface-200-800 p-2 mt-2 space-y-1"
+							data-testid="inspector-default-branch"
+						>
+							{@render fieldLabel(m.branchOtherwise())}
 							<input
 								type="text"
 								class="input text-xs w-full"
 								placeholder={m.branchOtherwise()}
-								bind:value={defaultBranch.domain.label}
+								bind:value={defaultBranch.branch.name}
 								oninput={onChange}
 							/>
 							<p class="text-[10px] text-surface-500 leading-relaxed">{m.branchDefaultRuns()}</p>
-						{:else}
-							<p class="text-[10px] italic text-surface-500 leading-relaxed">
-								{m.branchDefaultUnwired()}
-							</p>
-						{/if}
-					</div>
+							{#if !defaultBranch.wired}
+								<p class="text-[10px] italic text-surface-500 leading-relaxed">
+									<i class="fa-solid fa-link-slash mr-1"></i>{m.branchUnwired()}
+								</p>
+							{/if}
+						</div>
+					{/if}
 
 					<p class="text-[10px] text-surface-500 leading-relaxed mt-1.5">
 						<i class="fa-solid fa-arrow-down-short-wide mr-1"></i>{m.branchesEvaluationHint()}
@@ -1460,6 +1547,25 @@
 					{#each Object.keys(nodeDomain.input_mapping ?? {}) as key (key)}
 						<div class="flex items-center gap-1 mb-1">
 							<span class="text-xs font-mono w-24 truncate shrink-0">{key}</span>
+							{#if !isDeclaredVariable(key)}
+								<!-- Assist, not a blocker: the key maps to no declared variable. -->
+								<span
+									class="flex items-center gap-1 text-[9px] text-warning-600 shrink-0"
+									title={m.undeclaredVariable()}
+									data-testid="undeclared-variable-chip"
+								>
+									<i class="fa-solid fa-circle-exclamation"></i>
+									{m.undeclaredVariable()}
+									<button
+										type="button"
+										class="badge preset-tonal-warning text-[9px] cursor-pointer"
+										onclick={() => onAddVariable?.(key, 'string')}
+										data-testid="declare-variable"
+									>
+										{m.declareVariable()}
+									</button>
+								</span>
+							{/if}
 							<i class="fa-solid fa-arrow-left text-[9px] text-surface-500 shrink-0"></i>
 							<input
 								type="text"
@@ -1544,77 +1650,6 @@
 				</div>
 			{/if}
 
-			{#if ['task', 'action', 'subprocess'].includes(nodeDomain.type)}
-				<div>
-					<div class="flex items-center justify-between mb-1">
-						{@render fieldLabel(m.nodeAssignments())}
-						<button
-							type="button"
-							class="text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold"
-							onclick={addAssignment}
-						>
-							<i class="fa-solid fa-plus mr-0.5"></i>{m.addAssignment()}
-						</button>
-					</div>
-					<div class="space-y-2">
-						{#each nodeDomain.assignments as assignment, index}
-							<div
-								class="rounded-base border border-surface-200-800 bg-surface-50-950 p-2 space-y-1.5"
-							>
-								<div class="flex items-center gap-1.5">
-									<select
-										class="select text-xs w-20 shrink-0"
-										bind:value={assignment.role}
-										onchange={() => syncRoleCode(assignment)}
-									>
-										{#each roles as role}
-											<option value={role.id}>{role.code}</option>
-										{/each}
-									</select>
-									<select
-										class="select text-xs flex-1 min-w-0"
-										bind:value={assignment.actor}
-										onchange={onChange}
-									>
-										<option value={null}>—</option>
-										{#each actors as actor}
-											<option value={actor.id}>{optionLabel(actor)}</option>
-										{/each}
-									</select>
-									<button
-										type="button"
-										aria-label="Remove assignment"
-										class="text-error-500 hover:text-error-600 cursor-pointer text-xs shrink-0"
-										onclick={() => removeAssignment(index)}
-									>
-										<i class="fa-solid fa-xmark"></i>
-									</button>
-								</div>
-								<div class="flex items-center gap-3 text-[10px] text-surface-700-300">
-									<label class="flex items-center gap-1 cursor-pointer">
-										<input
-											type="checkbox"
-											class="checkbox scale-75"
-											bind:checked={assignment.is_blocking}
-											onchange={onChange}
-										/>
-										{m.blockingAssignment()}
-									</label>
-									<select
-										class="select text-[10px] px-1 py-0.5 flex-1"
-										bind:value={assignment.participation}
-										onchange={onChange}
-									>
-										<option value="task">{m.participationTask()}</option>
-										<option value="notification">{m.participationNotification()}</option>
-									</select>
-								</div>
-							</div>
-						{/each}
-					</div>
-				</div>
-			{/if}
-
 			<div class="pt-2 border-t border-surface-200-800">
 				<div class="flex items-center justify-between mb-1">
 					{@render fieldLabel(m.availableData())}
@@ -1636,6 +1671,7 @@
 						nodes={referenceNodes}
 						{secretNames}
 						onInsert={insertExpression}
+						onAddSecret={readonly ? undefined : onAddSecret}
 					/>
 					<p class="text-[9px] text-surface-500 mt-1 leading-relaxed">
 						<i class="fa-solid fa-arrow-pointer mr-1"></i>{m.insertHint()}
@@ -1666,9 +1702,26 @@
 			</label>
 		</div>
 	{:else}
-		<div class="p-4 text-center text-surface-500 text-xs mt-8">
-			<i class="fa-solid fa-arrow-pointer text-lg mb-2 block opacity-50"></i>
-			{m.workflowBuilderHint()}
+		<div class="p-3 space-y-4" data-testid="workflow-overview-panel">
+			<div>
+				<h3 class="text-xs font-semibold uppercase tracking-wide text-surface-600-400">
+					{m.workflowOverview()}
+				</h3>
+				<p class="text-[10px] leading-relaxed text-surface-500 mt-1">
+					{m.workflowPanelHint()}
+				</p>
+			</div>
+
+			<WorkflowDataPanel
+				{variables}
+				{secrets}
+				{referenceVariables}
+				{readonly}
+				{onAddVariable}
+				{onRemoveVariable}
+				{onAddSecret}
+				{onRemoveSecret}
+			/>
 		</div>
 	{/if}
 </aside>
