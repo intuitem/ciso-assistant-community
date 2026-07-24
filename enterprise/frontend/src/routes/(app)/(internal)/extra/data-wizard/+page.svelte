@@ -56,6 +56,7 @@
 	// Composite models: perimeter optional, domain derived from it when set.
 	const ASSESSMENT_MODELS = [
 		'ComplianceAssessment',
+		'CyFunAssessment',
 		'RiskAssessment',
 		'FindingsAssessment',
 		'BusinessImpactAnalysis'
@@ -79,6 +80,11 @@
 		{ id: 'Perimeter', label: m.perimeters(), description: '' },
 		{ id: 'ComplianceAssessment', label: m.complianceAssessment(), description: '' },
 		{
+			id: 'CyFunAssessment',
+			label: m.cyFunAssessment(),
+			description: m.dataWizardCyFunDescription()
+		},
+		{
 			id: 'BusinessImpactAnalysis',
 			label: m.businessImpactAnalysis(),
 			description: m.businessImpactAnalysisDescription()
@@ -101,7 +107,11 @@
 		{ id: 'Vulnerability', label: m.vulnerabilities(), description: '' },
 		{ id: 'ReferenceControl', label: m.referenceControls(), description: '' },
 		{ id: 'Threat', label: m.threats(), description: '' },
-		{ id: 'Processing', label: m.processings(), description: '' },
+		{
+			id: 'Processing',
+			label: m.processings(),
+			description: m.dataWizardProcessingDescription()
+		},
 		{ id: 'SecurityException', label: m.securityExceptions(), description: '' },
 		{ id: 'Incident', label: m.incidents(), description: '' },
 		{
@@ -120,6 +130,11 @@
 			description: m.ebiosRMStudyExcelDescription()
 		},
 		{
+			id: 'TaskTemplate',
+			label: m.taskTemplates(),
+			description: m.taskTemplatesDescription()
+		},
+		{
 			id: 'EbiosRMStudyEgerieXML',
 			label: m.ebiosRMStudyEgerieXML(),
 			description: m.ebiosRMStudyEgerieXMLDescription()
@@ -129,8 +144,10 @@
 	// Per-model accepted file extensions. Most importers consume Excel;
 	// Egerie ships an XML export, hence the explicit branch.
 	const XML_MODELS = new Set(['EbiosRMStudyEgerieXML']);
+	const CSV_CAPABLE_MODELS = new Set(['TaskTemplate', 'Processing']);
 	function extensionsFor(modelId: string): string[] {
 		if (XML_MODELS.has(modelId)) return ['.xml'];
+		if (CSV_CAPABLE_MODELS.has(modelId)) return ['.xls', '.xlsx', '.csv'];
 		return ['.xls', '.xlsx'];
 	}
 
@@ -190,6 +207,7 @@
 		'TPRM',
 		'EbiosRMStudyARM',
 		'EbiosRMStudyExcel',
+		'TaskTemplate',
 		'EbiosRMStudyEgerieXML',
 		'Vulnerability'
 	];
@@ -262,7 +280,7 @@
 				</h4>
 				<a
 					class="text-indigo-600 hover:text-indigo-400 dark:text-indigo-300"
-					href="https://intuitem.gitbook.io/ciso-assistant/guide/data-import-wizard"
+					href="https://intuitem.gitbook.io/ciso-assistant/configuration/data-import"
 					>{m.dataWizardTemplatesAndGuidelines()}</a
 				>
 			</div>

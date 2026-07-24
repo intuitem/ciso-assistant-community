@@ -128,6 +128,11 @@
 					description: m.policyDocumentsFlagDescription()
 				},
 				{
+					field: 'document_management',
+					label: m.documentManagementFlag(),
+					description: m.documentManagementFlagDescription()
+				},
+				{
 					field: 'exceptions',
 					label: m.securityExceptions(),
 					description: m.securityExceptionsDescription()
@@ -162,6 +167,11 @@
 					field: 'audit_tree_inheritance',
 					label: m.auditTreeInheritance(),
 					description: m.auditTreeInheritanceDescription()
+				},
+				{
+					field: 'posture_assessments',
+					label: m.postureAssessments(),
+					description: m.postureAssessmentsDescription()
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		},
@@ -317,6 +327,7 @@
 				'follow_up',
 				'reports',
 				'policy_documents',
+				'document_management',
 				'advanced_analytics',
 				'auditee_mode',
 				'campaigns',

@@ -291,100 +291,48 @@ def test_folder_mismatch_flag(authenticated_client, folder, other_folder):
 # --- managed-document conflict ----------------------------------------------
 
 
-@pytest.mark.django_db
-def test_managed_document_conflict_detected_on_dry_run(authenticated_client, folder):
-    """When two sources each have a managed document, dry-run flags a conflict."""
-    from doc_management.models import ManagedDocument
+def _make_policy(folder, name):
+    from core.models import Policy
 
-    src1 = _make_control(folder, "p1")
-    src2 = _make_control(folder, "p2")
-    target = _make_control(folder, "tgt")
-    doc1 = ManagedDocument.objects.create(name="doc1", policy_id=src1.id, folder=folder)
-    doc2 = ManagedDocument.objects.create(name="doc2", policy_id=src2.id, folder=folder)
+    return Policy.objects.create(name=name, folder=folder)
+
+
+def _make_container(folder, name, *policies):
+    """A document container linked (policies M2M) to the given policies."""
+    from doc_management.models import DocumentContainer
+
+    c = DocumentContainer.objects.create(name=name, folder=folder)
+    for p in policies:
+        c.policies.add(p)
+    return c
+
+
+@pytest.mark.django_db
+def test_policy_documents_union_onto_target(authenticated_client, folder):
+    """Document links are associative: merging two policies that each have a
+    document container leaves the target linked to BOTH (union, no conflict)."""
+    src1 = _make_policy(folder, "p1")
+    src2 = _make_policy(folder, "p2")
+    target = _make_policy(folder, "tgt")
+    c1 = _make_container(folder, "doc1", src1)
+    c2 = _make_container(folder, "doc2", src2)
 
     payload = {
         "source_ids": [str(src1.id), str(src2.id)],
         "target": {"type": "existing", "id": str(target.id)},
-        "dry_run": True,
     }
     resp = authenticated_client.post(MERGE_URL, payload, format="json")
     assert resp.status_code == 200, resp.json()
-    conflict = resp.json()["managed_document_conflict"]
-    assert conflict is not None
-    candidate_ids = {c["id"] for c in conflict["candidates"]}
-    assert {str(doc1.id), str(doc2.id)}.issubset(candidate_ids)
+    assert target.id in set(c1.policies.values_list("id", flat=True))
+    assert target.id in set(c2.policies.values_list("id", flat=True))
+    assert not AppliedControl.objects.filter(id__in=[src1.id, src2.id]).exists()
 
 
 @pytest.mark.django_db
-def test_managed_document_conflict_blocks_real_merge_without_resolution(
-    authenticated_client, folder
-):
-    from doc_management.models import ManagedDocument
-
-    src1 = _make_control(folder, "p1")
-    src2 = _make_control(folder, "p2")
-    target = _make_control(folder, "tgt")
-    ManagedDocument.objects.create(name="doc1", policy_id=src1.id, folder=folder)
-    ManagedDocument.objects.create(name="doc2", policy_id=src2.id, folder=folder)
-
-    payload = {
-        "source_ids": [str(src1.id), str(src2.id)],
-        "target": {"type": "existing", "id": str(target.id)},
-    }
-    resp = authenticated_client.post(MERGE_URL, payload, format="json")
-    assert resp.status_code == 400
-    assert "managed_document" in str(resp.content).lower()
-    # Sources untouched
-    assert AppliedControl.objects.filter(id__in=[src1.id, src2.id]).count() == 2
-
-
-@pytest.mark.django_db
-def test_managed_document_resolution_keeps_one_unlinks_others(
-    authenticated_client, folder
-):
-    from doc_management.models import ManagedDocument
-
-    src1 = _make_control(folder, "p1")
-    src2 = _make_control(folder, "p2")
-    target = _make_control(folder, "tgt")
-    keep_doc = ManagedDocument.objects.create(
-        name="keep", policy_id=src1.id, folder=folder
-    )
-    drop_doc = ManagedDocument.objects.create(
-        name="drop", policy_id=src2.id, folder=folder
-    )
-
-    payload = {
-        "source_ids": [str(src1.id), str(src2.id)],
-        "target": {"type": "existing", "id": str(target.id)},
-        "managed_document_resolution": {"keep": str(keep_doc.id)},
-    }
-    resp = authenticated_client.post(MERGE_URL, payload, format="json")
-    assert resp.status_code == 200, resp.json()
-
-    keep_doc.refresh_from_db()
-    drop_doc.refresh_from_db()
-    assert keep_doc.policy_id == target.id
-    assert drop_doc.policy_id is None  # unlinked, not deleted
-    assert ManagedDocument.objects.filter(id=drop_doc.id).exists()
-
-
-@pytest.mark.django_db
-def test_single_source_with_docs_no_conflict_just_repoints(
-    authenticated_client, folder
-):
-    """1 source with multiple docs is NOT a conflict — siblings stay siblings on target."""
-    from doc_management.models import ManagedDocument
-
-    src = _make_control(folder, "src")
-    target = _make_control(folder, "tgt")
-    # ManagedDocument enforces unique (policy, locale) — different locales to coexist.
-    doc1 = ManagedDocument.objects.create(
-        name="d1", policy_id=src.id, folder=folder, locale="en"
-    )
-    doc2 = ManagedDocument.objects.create(
-        name="d2", policy_id=src.id, folder=folder, locale="fr"
-    )
+def test_single_policy_document_repoints_onto_target(authenticated_client, folder):
+    src = _make_policy(folder, "src")
+    target = _make_policy(folder, "tgt")
+    c = _make_container(folder, "d", src)
 
     payload = {
         "source_ids": [str(src.id)],
@@ -392,10 +340,9 @@ def test_single_source_with_docs_no_conflict_just_repoints(
     }
     resp = authenticated_client.post(MERGE_URL, payload, format="json")
     assert resp.status_code == 200, resp.json()
-    doc1.refresh_from_db()
-    doc2.refresh_from_db()
-    assert doc1.policy_id == target.id
-    assert doc2.policy_id == target.id
+    policy_ids = set(c.policies.values_list("id", flat=True))
+    assert target.id in policy_ids
+    assert src.id not in policy_ids
 
 
 # --- policy proxy path ------------------------------------------------------

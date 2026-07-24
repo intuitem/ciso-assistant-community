@@ -19,6 +19,8 @@ READER_PERMISSIONS_LIST = [
     "view_entityassessment",
     "view_evidence",
     "view_evidencerevision",
+    "view_documentcontainer",
+    "view_documenttemplate",
     "view_manageddocument",
     "view_documentrevision",
     "view_documentattachment",
@@ -61,10 +63,14 @@ READER_PERMISSIONS_LIST = [
     "view_attackpath",
     "view_operationalscenario",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "view_globalsettings",
     "view_securityexception",
     "view_finding",
     "view_findingsassessment",
+    "view_postureassessment",
+    "view_postureresult",
     "view_incident",
     "view_timelineentry",
     "view_comment",
@@ -183,6 +189,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_answer",
     "view_evidence",
     "view_evidencerevision",
+    "view_documentcontainer",
+    "view_documenttemplate",
     "view_manageddocument",
     "view_documentrevision",
     "view_documentattachment",
@@ -202,10 +210,14 @@ APPROVER_PERMISSIONS_LIST = [
     "view_attackpath",
     "view_operationalscenario",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "view_globalsettings",
     "view_securityexception",
     "view_finding",
     "view_findingsassessment",
+    "view_postureassessment",
+    "view_postureresult",
     "view_incident",
     "view_timelineentry",
     "view_tasknode",
@@ -421,6 +433,8 @@ ANALYST_PERMISSIONS_LIST = [
     "change_operationalscenario",
     "delete_operationalscenario",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
@@ -434,6 +448,14 @@ ANALYST_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "change_findingsassessment",
     "delete_findingsassessment",
+    "add_postureassessment",
+    "view_postureassessment",
+    "change_postureassessment",
+    "delete_postureassessment",
+    "add_postureresult",
+    "view_postureresult",
+    "change_postureresult",
+    "delete_postureresult",
     "add_incident",
     "view_incident",
     "change_incident",
@@ -535,6 +557,14 @@ ANALYST_PERMISSIONS_LIST = [
     "change_evidencerevision",
     "delete_evidencerevision",
     # document management
+    "add_documentcontainer",
+    "view_documentcontainer",
+    "change_documentcontainer",
+    "delete_documentcontainer",
+    "add_documenttemplate",
+    "view_documenttemplate",
+    "change_documenttemplate",
+    "delete_documenttemplate",
     "add_manageddocument",
     "view_manageddocument",
     "change_manageddocument",
@@ -881,6 +911,8 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_operationalscenario",
     "delete_operationalscenario",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
@@ -894,6 +926,14 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "change_findingsassessment",
     "delete_findingsassessment",
+    "add_postureassessment",
+    "view_postureassessment",
+    "change_postureassessment",
+    "delete_postureassessment",
+    "add_postureresult",
+    "view_postureresult",
+    "change_postureresult",
+    "delete_postureresult",
     "add_incident",
     "view_incident",
     "change_incident",
@@ -1009,6 +1049,14 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_evidencerevision",
     "delete_evidencerevision",
     # document management
+    "add_documentcontainer",
+    "view_documentcontainer",
+    "change_documentcontainer",
+    "delete_documentcontainer",
+    "add_documenttemplate",
+    "view_documenttemplate",
+    "change_documenttemplate",
+    "delete_documenttemplate",
     "add_manageddocument",
     "view_manageddocument",
     "change_manageddocument",
@@ -1313,6 +1361,14 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_evidencerevision",
     "delete_evidencerevision",
     # document management
+    "add_documentcontainer",
+    "view_documentcontainer",
+    "change_documentcontainer",
+    "delete_documentcontainer",
+    "add_documenttemplate",
+    "view_documenttemplate",
+    "change_documenttemplate",
+    "delete_documenttemplate",
     "add_manageddocument",
     "view_manageddocument",
     "change_manageddocument",
@@ -1349,6 +1405,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_loadedlibrary",
     "add_loadedlibrary",
     "delete_loadedlibrary",
+    "view_librarydraft",
+    "add_librarydraft",
+    "change_librarydraft",
+    "delete_librarydraft",
     "backup",
     "restore",
     "view_globalsettings",
@@ -1361,6 +1421,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_customwordtemplate",
     "change_customwordtemplate",
     "delete_customwordtemplate",
+    "view_customdochtmltemplate",
+    "add_customdochtmltemplate",
+    "change_customdochtmltemplate",
+    "delete_customdochtmltemplate",
     "view_ssosettings",
     "change_ssosettings",
     "view_requirementmappingset",
@@ -1447,6 +1511,14 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "change_findingsassessment",
     "delete_findingsassessment",
+    "add_postureassessment",
+    "view_postureassessment",
+    "change_postureassessment",
+    "delete_postureassessment",
+    "add_postureresult",
+    "view_postureresult",
+    "change_postureresult",
+    "delete_postureresult",
     # privacy,
     "add_processing",
     "change_processing",
@@ -1554,8 +1626,17 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     # terminologies
     "add_terminology",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "change_terminology",
     "delete_terminology",
+    # classifications
+    "add_objectclassification",
+    "change_objectclassification",
+    "delete_objectclassification",
+    "add_classificationlevel",
+    "change_classificationlevel",
+    "delete_classificationlevel",
     # workflows
     "view_workflow",
     "add_workflow",
@@ -1795,6 +1876,32 @@ AUDITEE_PERMISSIONS_LIST = [
 ]
 
 
+TECHNICAL_TESTER_PERMISSIONS_LIST = [
+    "add_postureassessment",
+    "view_postureassessment",
+    "change_postureassessment",
+    "delete_postureassessment",
+    "add_postureresult",
+    "view_postureresult",
+    "change_postureresult",
+    "delete_postureresult",
+    "view_asset",
+    "view_framework",
+    "view_requirementnode",
+    "view_folder",
+    "view_perimeter",
+    "view_securityexception",
+    "add_findingsassessment",
+    "view_findingsassessment",
+    "change_findingsassessment",
+    "delete_findingsassessment",
+    "add_finding",
+    "view_finding",
+    "change_finding",
+    "delete_finding",
+]
+
+
 def ensure_admin_user():
     """Ensure the designated superuser exists and is in the admin group.
 
@@ -1852,7 +1959,12 @@ def startup(sender=None, **kwargs):
 
     from django.contrib.auth.models import Permission
 
-    from core.models import AssetCapability, AssetClass, Terminology
+    from core.models import (
+        AssetCapability,
+        AssetClass,
+        ObjectClassification,
+        Terminology,
+    )
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
     from privacy.models import create_default_privacy_terminologies
@@ -1887,9 +1999,15 @@ def startup(sender=None, **kwargs):
             THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST,
         ),
         (RoleCodename.AUDITEE.value, AUDITEE_PERMISSIONS_LIST),
+        (RoleCodename.TECHNICAL_TESTER.value, TECHNICAL_TESTER_PERMISSIONS_LIST),
     ):
         role, _ = Role.objects.get_or_create(name=name, builtin=True)
         role.permissions.set(Permission.objects.filter(codename__in=perm_list))
+    # backfill builtin groups (e.g. technical tester) on pre-existing domains
+    for folder in Folder.objects.filter(
+        content_type=Folder.ContentType.DOMAIN, create_iam_groups=True
+    ):
+        Folder.create_default_ug_and_ra(folder)
     # if global administrators user group does not exist, then create it
     if not UserGroup.objects.filter(
         name="BI-UG-ADM", folder=Folder.get_root_folder()
@@ -2038,6 +2156,11 @@ def startup(sender=None, **kwargs):
         logger.error("Error creating default Project Health", exc_info=True)
 
     try:
+        ObjectClassification.create_default_classifications()
+    except Exception as e:
+        logger.error("Error creating default classifications", exc_info=True)
+
+    try:
         from pmbok.models import ResponsibilityRole
 
         ResponsibilityRole.create_default_roles()
@@ -2064,6 +2187,13 @@ def startup(sender=None, **kwargs):
     call_command("storelibraries")
     call_command("autoloadlibraries")
     call_command("sync_event_types")
+
+    # Runs here (not in doc_management post_migrate) so the root folder the
+    # template folder FK needs already exists.
+    try:
+        call_command("sync_document_templates")
+    except Exception as e:
+        logger.error("Error syncing built-in document templates", exc_info=True)
 
     try:
         call_command("backfill_builtin_metrics")

@@ -17,6 +17,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import MarkdownField from '../MarkdownField.svelte';
+	import CustomFieldsSection from '../CustomFieldsSection.svelte';
 	import { formFieldProxy } from 'sveltekit-superforms';
 
 	interface Props {
@@ -90,6 +91,7 @@
 	}
 
 	const { value: expirationDate } = formFieldProxy(form, 'expiration_date');
+	const { value: folderId } = formFieldProxy(form, 'folder');
 	const today = getTodayDateString();
 
 	let isExpirationDateInPast = $derived(Boolean($expirationDate) && $expirationDate < today);
@@ -112,14 +114,15 @@
 />
 <AutocompleteSelect
 	{form}
+	disabled={true}
 	optionsEndpoint="users?is_approver=true"
 	optionsLabelField="email"
 	field="approver"
 	cacheLock={cacheLocks['approver']}
 	bind:cachedValue={formDataCache['approver']}
 	nullable={true}
-	label={m.approver()}
-	helpText={m.approverHelpText()}
+	label={`${m.approver()} (${m.deprecated()})`}
+	helpText={m.approverDeprecatedHelpText()}
 />
 <Select
 	{form}
@@ -203,3 +206,5 @@
 		</div>
 	{/if}
 </div>
+
+<CustomFieldsSection {form} model="core.securityexception" folderId={$folderId} />

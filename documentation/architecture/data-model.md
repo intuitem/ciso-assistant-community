@@ -1331,6 +1331,10 @@ Role assignements are described as a table containing the following attributes:
 
 This table is the golden source of all access management in CISO Assistant, no additional information is necessary to know who has access to what.
 
+### Group membership
+
+User groups are attached to a folder (a domain). Their membership — the reverse side of the `User` ↔ `UserGroup` relation — is therefore managed on the **group**, gated by `change_usergroup` on the group's folder, rather than on the globally-scoped `User` object (which would require `change_user`, an administrator-only right). This lets a domain manager add and remove the members of the groups in their domain without being able to edit user accounts: only the membership link is affected, never a user attribute, and the roles a member gains are bounded by the group's own (domain-scoped) role assignments. See [User Group Membership Management](../user-group-membership.md).
+
 ### Published global objects
 
 All objects have a boolean attribute is_published, that specifies if the object is visible in read-only mode in the folder and subfolders from anyone having read access to such local objects. For example, if a reference control F1 is published in the root folder, and a user has read access to reference controls in a domain, this user can use see and use F1 (but not modify it, even if given update access in the domain).

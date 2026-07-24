@@ -7,7 +7,7 @@ from core.serializers import (
     UserWriteSerializer as CommunityUserWriteSerializer,
 )
 from core.serializer_fields import FieldsRelatedField
-from iam.models import Folder, User, Role
+from iam.models import RoleAssignment, User, Role
 from iam.cache_builders import get_folder_path, CacheNotReadyError
 import uuid
 
@@ -16,7 +16,7 @@ from global_settings.serializers import (
     FeatureFlagsSerializer as CommunityFeatureFlagSerializer,
 )
 
-from core.models import CustomEmailTemplate, CustomWordTemplate
+from core.models import CustomEmailTemplate, CustomWordTemplate, CustomDocHtmlTemplate
 from .models import ClientSettings, LogEntryAction
 from auditlog.models import LogEntry
 from global_settings.serializers import (
@@ -72,7 +72,11 @@ class EditorPermissionMixin:
         editors = User.get_editors()
         seats = settings.LICENSE_SEATS
 
-        perms = [p for p in group.permissions if p not in User.NON_SEAT_PERMISSIONS]
+        perms = [
+            p
+            for p in RoleAssignment.get_permissions(group)
+            if p not in User.NON_SEAT_PERMISSIONS
+        ]
         if any(perm.startswith(prefix) for prefix in editor_prefixes for perm in perms):
             logger.info("Adding editor permissions to user", user=instance, group=group)
             if instance not in editors and len(editors) >= seats:
@@ -250,6 +254,35 @@ class CustomWordTemplateReadSerializer(BaseModelSerializer):
 class CustomWordTemplateWriteSerializer(BaseModelSerializer):
     class Meta:
         model = CustomWordTemplate
+        fields = ["id", "template_key", "language", "is_active"]
+        read_only_fields = ["id"]
+
+
+class CustomDocHtmlTemplateReadSerializer(BaseModelSerializer):
+    file = serializers.SerializerMethodField()
+
+    def get_file(self, obj):
+        if obj.file:
+            return obj.file.name.split("/")[-1]
+        return None
+
+    class Meta:
+        model = CustomDocHtmlTemplate
+        fields = [
+            "id",
+            "folder",
+            "template_key",
+            "language",
+            "file",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class CustomDocHtmlTemplateWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = CustomDocHtmlTemplate
         fields = ["id", "template_key", "language", "is_active"]
         read_only_fields = ["id"]
 

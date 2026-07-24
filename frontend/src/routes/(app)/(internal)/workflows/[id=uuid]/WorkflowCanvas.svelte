@@ -698,7 +698,7 @@
 		nodes = nodes.map((n) => ({
 			...n,
 			data: {
-				...visualData(n.data.domain, n.data.error ?? null),
+				...visualData(n.data.domain, (n.data.error as string | null) ?? null),
 				runState: n.data.runState ?? null
 			}
 		}));
@@ -1152,7 +1152,7 @@
 		addNode(payload.type, payload.triggerType, position);
 	}
 
-	function isValidConnection(connection: Connection): boolean {
+	function isValidConnection(connection: Connection | Edge): boolean {
 		if (connection.source === connection.target) return false;
 		const source = nodes.find((n) => n.id === connection.source);
 		const target = nodes.find((n) => n.id === connection.target);

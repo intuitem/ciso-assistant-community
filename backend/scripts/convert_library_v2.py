@@ -21,6 +21,7 @@ Note: the "node_id" column can be defined to force an urn suffix. This can be us
 
 import sys
 import re
+import json
 import yaml
 import datetime
 import argparse
@@ -684,6 +685,9 @@ def parse_risk_matrix(meta, content_ws, wb):
         "grid": [],
     }
 
+    if meta.get("annotation"):
+        risk_matrix["annotation"] = meta.get("annotation")
+
     translations = extract_translations_from_metadata(meta, "risk_matrix")
     if translations:
         risk_matrix["translations"] = translations
@@ -1022,6 +1026,9 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
         "description": meta.get("description"),
     }
 
+    if meta.get("annotation"):
+        framework["annotation"] = meta.get("annotation")
+
     translations = extract_translations_from_metadata(meta, "framework")
     if translations:
         framework["translations"] = translations
@@ -1033,6 +1040,18 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
         framework["min_score"] = int(meta["min_score"])
     if "max_score" in meta:
         framework["max_score"] = int(meta["max_score"])
+
+    if meta.get("field_visibility"):
+        try:
+            field_visibility = json.loads(meta["field_visibility"])
+        except json.JSONDecodeError as e:
+            raise ValueError(f"(framework) Invalid field_visibility JSON: {e}")
+        if not isinstance(field_visibility, dict):
+            raise ValueError(
+                "(framework) field_visibility must be a JSON object "
+                '({"field": {"role": "edit"|"read"|"hidden"}})'
+            )
+        framework["field_visibility"] = field_visibility
 
     score_name = meta.get("scores_definition")
     if score_name and score_name in object_blocks:

@@ -56,6 +56,7 @@
 	import SecurityExceptionForm from './ModelForm/SecurityExceptionForm.svelte';
 	import FindingForm from './ModelForm/FindingForm.svelte';
 	import FindingsAssessmentForm from './ModelForm/FindingsAssessmentForm.svelte';
+	import PostureAssessmentForm from './ModelForm/PostureAssessmentForm.svelte';
 	import IncidentForm from './ModelForm/IncidentForm.svelte';
 	import TimelineEntryForm from './ModelForm/TimelineEntryForm.svelte';
 	import TaskTemplateForm from './ModelForm/TaskTemplateForm.svelte';
@@ -73,10 +74,14 @@
 	import QuantitativeRiskScenarioForm from './ModelForm/QuantitativeRiskScenarioForm.svelte';
 	import QuantitativeRiskHypothesisForm from './ModelForm/QuantitativeRiskHypothesisForm.svelte';
 	import TerminologyForm from './ModelForm/TerminologyForm.svelte';
+	import ObjectClassificationForm from './ModelForm/ObjectClassificationForm.svelte';
+	import ClassificationLevelForm from './ModelForm/ClassificationLevelForm.svelte';
 	import CustomFieldDefinitionForm from './ModelForm/CustomFieldDefinitionForm.svelte';
 	import RoleForm from './ModelForm/RoleForm.svelte';
 	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
 	import GenericCollectionForm from './ModelForm/GenericCollectionForm.svelte';
+	import DocumentContainerForm from './ModelForm/DocumentContainerForm.svelte';
+	import DocumentTemplateForm from './ModelForm/DocumentTemplateForm.svelte';
 	import AccreditationForm from './ModelForm/AccreditationForm.svelte';
 	import ProjectForm from './ModelForm/ProjectForm.svelte';
 	import ResponsibilityMatrixForm from './ModelForm/ResponsibilityMatrixForm.svelte';
@@ -510,6 +515,26 @@
 				{updated_fields}
 				{...rest}
 			/>
+		{:else if URLModel === 'document-containers'}
+			<DocumentContainerForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'document-templates'}
+			<DocumentTemplateForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
 		{:else if URLModel === 'threats'}
 			<ThreatForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'security-advisories'}
@@ -815,6 +840,16 @@
 				{context}
 				{...rest}
 			/>
+		{:else if URLModel === 'posture-assessments'}
+			<PostureAssessmentForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{...rest}
+			/>
 		{:else if URLModel === 'incidents'}
 			<IncidentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} {...rest} />
 		{:else if URLModel === 'timeline-entries'}
@@ -909,6 +944,17 @@
 			<OrganisationObjectiveForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 		{:else if URLModel === 'terminologies'}
 			<TerminologyForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'object-classifications'}
+			<ObjectClassificationForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+			/>
+		{:else if URLModel === 'classification-levels'}
+			<ClassificationLevelForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'custom-fields'}
 			<CustomFieldDefinitionForm
 				{form}

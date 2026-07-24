@@ -96,7 +96,10 @@
 			<AutocompleteSelect
 				{form}
 				optionsEndpoint="folders"
-				optionsUrlParams="content_type=DO&content_type=GL"
+				optionsDetailedUrlParameters={[
+					['content_type', 'DO'],
+					['content_type', 'GL']
+				]}
 				field="folder"
 				label={m.domain()}
 			/>

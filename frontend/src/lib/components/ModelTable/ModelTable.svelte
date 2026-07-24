@@ -44,7 +44,11 @@
 	import Search from './Search.svelte';
 	import Th from './Th.svelte';
 	import ThFilter from './ThFilter.svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import {
+		canPerformAction,
+		canPerformActionOnObject,
+		hasPermissionAnywhere
+	} from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
 	import { tableHandlers, tableStates, tableColumnStates } from '$lib/utils/stores';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
@@ -91,6 +95,7 @@
 		detailQueryParameter?: string;
 		fields?: string[];
 		columnSelector?: boolean;
+		columnStateKey?: string;
 		canSelectObject?: boolean;
 		overrideFilters?: { [key: string]: any[] };
 		defaultFilters?: { [key: string]: any[] };
@@ -110,6 +115,15 @@
 		actionsBody?: import('svelte').Snippet;
 		actionsHead?: import('svelte').Snippet;
 		tail?: import('svelte').Snippet;
+		// Opt-in multi-row selection independent of batch actions. Renders the
+		// checkbox column and exposes the current selection to `selectActions`.
+		selectable?: boolean;
+		// Toolbar rendered when rows are selected (selectable mode). Receives the
+		// selected ids, a clear callback, and a reload callback (to refresh rows
+		// after acting) — e.g. a "remove from group" button.
+		selectActions?: import('svelte').Snippet<
+			[{ ids: string[]; clear: () => void; reload: () => void }]
+		>;
 	}
 
 	let {
@@ -145,6 +159,7 @@
 		detailQueryParameter = $bindable(),
 		fields = [],
 		columnSelector = undefined,
+		columnStateKey = undefined,
 		canSelectObject = false,
 		overrideFilters = {},
 		defaultFilters = {},
@@ -167,7 +182,9 @@
 		actions,
 		actionsBody,
 		actionsHead,
-		tail
+		tail,
+		selectable = false,
+		selectActions
 	}: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
@@ -198,22 +215,27 @@
 		Object.entries(tableSource.head).map(([key, label]) => ({ key, label: label as string }))
 	);
 	const allColumnKeys = $derived(allColumns.map((c) => c.key));
+	// A page-provided `fields` curation is the default visible set; otherwise the generic list-view default.
 	const defaultColumns = $derived(
-		(URLModel && listViewFields[URLModel]?.body
-			? listViewFields[URLModel].body
-			: allColumnKeys
+		(fields.length > 0
+			? fields
+			: URLModel && listViewFields[URLModel]?.body
+				? listViewFields[URLModel].body
+				: allColumnKeys
 		).filter((key) => allColumnKeys.includes(key))
 	);
-	// Selector is offered on standalone list pages only; curated embedded tables pass `fields`.
+	// Offered on standalone list pages, or wherever a page opts in explicitly (even alongside `fields`).
 	const showColumnSelector = $derived(
 		(columnSelector ?? Boolean(deleteForm)) &&
 			Boolean(URLModel) &&
-			isStandaloneTable &&
-			fields.length === 0 &&
+			(columnSelector === true || isStandaloneTable) &&
+			(columnSelector === true || fields.length === 0) &&
 			allColumns.length > 1
 	);
+	// Persistence key: distinct per embedded table when set, else the shared per-model key.
+	const stateKey = $derived(columnStateKey ?? URLModel);
 	// Stored choice, with stale keys dropped and a fallback to defaults so a table is never empty.
-	const storedColumns = $derived(URLModel ? $tableColumnStates[URLModel] : undefined);
+	const storedColumns = $derived(stateKey ? $tableColumnStates[stateKey] : undefined);
 	const sanitizedStored = $derived(storedColumns?.filter((key) => allColumnKeys.includes(key)));
 	const visibleColumns = $derived(sanitizedStored?.length ? sanitizedStored : defaultColumns);
 	// Keys to render, in order. Without the selector, keep natural head order (behaviour unchanged).
@@ -235,18 +257,18 @@
 		cols.length === defaultColumns.length && cols.every((key, i) => defaultColumns[i] === key);
 
 	function setVisibleColumns(visible: string[]) {
-		if (!URLModel) return;
+		if (!stateKey) return;
 		if (sameAsDefault(visible)) {
 			resetColumns();
 			return;
 		}
-		$tableColumnStates = { ...$tableColumnStates, [URLModel]: visible };
+		$tableColumnStates = { ...$tableColumnStates, [stateKey]: visible };
 	}
 
 	function resetColumns() {
-		if (!URLModel) return;
+		if (!stateKey) return;
 		const next = { ...$tableColumnStates };
-		delete next[URLModel];
+		delete next[stateKey];
 		$tableColumnStates = next;
 	}
 
@@ -344,18 +366,20 @@
 			URLModel,
 			endpoint: baseEndpoint,
 			fields:
-				fields.length > 0
-					? { head: fields, body: fields }
-					: {
-							head:
-								typeof tableSource.head[0] === 'string'
-									? Object.values(tableSource.head)
-									: Object.keys(tableSource.head),
-							body:
-								typeof tableSource.body[0] === 'string'
-									? Object.values(tableSource.body)
-									: Object.keys(tableSource.body)
-						},
+				showColumnSelector && allColumnKeys.length > 0
+					? { head: allColumnKeys, body: allColumnKeys }
+					: fields.length > 0
+						? { head: fields, body: fields }
+						: {
+								head:
+									typeof tableSource.head[0] === 'string'
+										? Object.values(tableSource.head)
+										: Object.keys(tableSource.head),
+								body:
+									typeof tableSource.body[0] === 'string'
+										? Object.values(tableSource.body)
+										: Object.keys(tableSource.body)
+							},
 			featureFlags: page.data?.featureflags
 		})
 	);
@@ -377,7 +401,7 @@
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type) ||
 		forcePreventDelete;
-	const preventEdit = (row: TableSource) => forcePreventEdit;
+	const preventEdit = (row: TableSource) => row?.meta?.builtin || forcePreventEdit;
 
 	const tableURLModel = URLModel;
 
@@ -501,24 +525,17 @@
 							page.params.id ||
 							user.root_folder_id
 					})
-				: Object.hasOwn(user.permissions, `add_${model.name}`)
+				: hasPermissionAnywhere(user, `add_${model.name}`)
 			: false
 	);
 	let contextMenuCanEditObject = $derived(
 		(model
-			? page.params.id
-				? canPerformAction({
-						user,
-						action: 'change',
-						model: model.name,
-						domain:
-							model.name === 'folder'
-								? contextMenuOpenRow?.meta.id
-								: (contextMenuOpenRow?.meta.folder?.id ??
-									contextMenuOpenRow?.meta.folder ??
-									user.root_folder_id)
-					})
-				: Object.hasOwn(user.permissions, `change_${model.name}`)
+			? canPerformActionOnObject({
+					user,
+					action: 'change',
+					model: model.name,
+					object: contextMenuOpenRow?.meta
+				})
 			: false) &&
 			(!(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) ||
 				URLModel === 'terminologies' ||
@@ -534,19 +551,12 @@
 	let contextMenuCanDeleteObject = $derived(
 		!preventDelete(contextMenuOpenRow ?? { head: {}, body: [], meta: [] }) &&
 			(model
-				? page.params.id
-					? canPerformAction({
-							user,
-							action: 'delete',
-							model: model.name,
-							domain:
-								model.name === 'folder'
-									? contextMenuOpenRow?.meta.id
-									: (contextMenuOpenRow?.meta.folder?.id ??
-										contextMenuOpenRow?.meta.folder ??
-										user.root_folder_id)
-						})
-					: Object.hasOwn(user.permissions, `delete_${model.name}`)
+				? canPerformActionOnObject({
+						user,
+						action: 'delete',
+						model: model.name,
+						object: contextMenuOpenRow?.meta
+					})
 				: false)
 	);
 
@@ -714,8 +724,8 @@
 		URLModel && model
 			? getBatchActions(URLModel).filter((a) =>
 					a.type === 'delete'
-						? Object.hasOwn(user.permissions, `delete_${model.name}`)
-						: Object.hasOwn(user.permissions, `change_${model.name}`)
+						? hasPermissionAnywhere(user, `delete_${model.name}`)
+						: hasPermissionAnywhere(user, `change_${model.name}`)
 				)
 			: []
 	);
@@ -758,9 +768,11 @@
 		}
 		previousRowSignature = sig;
 	});
+
+	let tableWrapEl: HTMLElement | undefined = $state();
 </script>
 
-<div class="card table-wrap {classesBase}">
+<div class="card table-wrap {classesBase}" bind:this={tableWrapEl}>
 	<header class="flex items-center justify-between gap-2 px-2 h-16">
 		{#if hasBatchActions && selectedIds.size > 0}
 			<BatchActionBar
@@ -770,6 +782,20 @@
 				{handler}
 				onClearSelection={clearSelection}
 			/>
+		{:else if selectable && selectedIds.size > 0}
+			<div class="flex items-center gap-3 px-2">
+				<span class="text-sm text-surface-700-300"
+					>{selectedIds.size} {safeTranslate('selected')}</span
+				>
+				{@render selectActions?.({
+					ids: [...selectedIds],
+					clear: clearSelection,
+					reload: () => handler.invalidate()
+				})}
+				<button type="button" class="btn btn-sm preset-tonal" onclick={clearSelection}
+					>{safeTranslate('cancel')}</button
+				>
+			</div>
 		{:else}
 			{#if !hideFilters}
 				<Popover
@@ -876,7 +902,7 @@
 	>
 		<thead class="table-head {regionHead}">
 			<tr>
-				{#if hasBatchActions}
+				{#if hasBatchActions || selectable}
 					<th
 						class="{regionHeadCell} group/check w-10 text-center cursor-pointer"
 						title={m.selectAll()}
@@ -909,7 +935,7 @@
 			</tr>
 			{#if thFilter}
 				<tr>
-					{#if hasBatchActions}
+					{#if hasBatchActions || selectable}
 						<th></th>
 					{/if}
 					{#each renderColumnKeys as key (key)}
@@ -935,7 +961,7 @@
 								aria-rowindex={rowIndex + 1}
 								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer"
 							>
-								{#if hasBatchActions}
+								{#if hasBatchActions || selectable}
 									<td
 										class="group/check w-10 text-center cursor-pointer"
 										role="gridcell"
@@ -1100,13 +1126,20 @@
 														{:else}
 															--
 														{/if}
-													{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
+													{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.state}
 														<div class="flex items-center space-x-2">
 															<span>{safeTranslate(value ?? '-')}</span>
 															<span
-																class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-sm dark:bg-green-200 dark:text-green-900"
+																class="badge text-xs"
+																class:preset-tonal-success={row.meta.state === 'Accepted'}
+																class:preset-tonal-error={row.meta.state === 'Rejected' ||
+																	row.meta.state === 'Revoked'}
+																class:preset-tonal-primary={row.meta.state === 'Submitted'}
+																class:preset-tonal-secondary={row.meta.state === 'Created'}
 															>
-																{m.accept()}
+																{row.meta.state === 'Created'
+																	? m.draft()
+																	: safeTranslate(row.meta.state)}
 															</span>
 														</div>
 													{:else if (key === 'name' || key === 'str') && row.meta?.is_locked}
@@ -1264,7 +1297,7 @@
 			<RowCount {handler} />
 		{/if}
 		{#if pagination}
-			<Pagination {handler} {URLModel} />
+			<Pagination {handler} {URLModel} scrollTarget={tableWrapEl} />
 		{/if}
 	</footer>
 </div>

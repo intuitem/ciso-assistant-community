@@ -11,7 +11,7 @@ import type { RequestHandler } from './$types';
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 function requireUuid(value: unknown, field: string): string {
 	if (typeof value !== 'string' || !UUID_RE.test(value)) {
-		error(400, { detail: `Invalid UUID for "${field}"` });
+		error(400, `Invalid UUID for "${field}"`);
 	}
 	return value;
 }
@@ -173,6 +173,6 @@ export const POST: RequestHandler = async ({ fetch, request, url }) => {
 		}
 
 		default:
-			error(400, { detail: `unknown action: ${action}` });
+			error(400, `unknown action: ${action}`);
 	}
 };

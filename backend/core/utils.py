@@ -37,74 +37,6 @@ def extract_node_id(urn: str | None) -> str | None:
     return node_id if node_id else None
 
 
-REWRITABLE_URN_TYPES = {"req_node", "question", "question_choice"}
-
-
-def extract_urn_slug(urn) -> str | None:
-    """Return the slug (segment 4) of a proper 6+-segment rewritable URN
-    (`urn:ns:risk:type:slug:node_id`), else None. Legacy 5-segment URNs carry
-    a per-node UUID at segment 4 — not a slug — and yield None."""
-    if not isinstance(urn, str):
-        return None
-    parts = urn.split(":")
-    if (
-        len(parts) >= 6
-        and parts[0] == "urn"
-        and parts[2] == "risk"
-        and parts[3] in REWRITABLE_URN_TYPES
-    ):
-        return parts[4] or None
-    return None
-
-
-def rewrite_child_urns(draft: dict, new_ns: str, new_slug: str) -> None:
-    """Rewrite segment 1 (namespace) and segment 4 (slug) of every child URN in
-    the draft, in place. Idempotent across slugs.
-
-    URN format: `urn:ns:risk:type:slug:node_id` (6+ segments). Segments 5+
-    (node_id) are preserved so CEL expressions keying off node_id keep
-    resolving. URNs with fewer than 6 segments are left untouched — the
-    rename branch in `_reconcile_draft` rejects drafts that contain such
-    legacy URNs before this helper runs, so encountering one here would be
-    a bug.
-
-    Touches: nodes[*].urn, nodes[*].parent_urn, questions[*].urn,
-    questions[*].depends_on.{question, answers}, choices[*].urn.
-    """
-
-    def sub(u):
-        if not isinstance(u, str):
-            return u
-        parts = u.split(":")
-        if (
-            len(parts) >= 6
-            and parts[0] == "urn"
-            and parts[2] == "risk"
-            and parts[3] in REWRITABLE_URN_TYPES
-        ):
-            parts[1] = new_ns
-            parts[4] = new_slug
-            return ":".join(parts)
-        return u
-
-    for n in draft.get("nodes", []) or []:
-        n["urn"] = sub(n.get("urn"))
-        if n.get("parent_urn"):
-            n["parent_urn"] = sub(n.get("parent_urn"))
-    for q in draft.get("questions", []) or []:
-        q["urn"] = sub(q.get("urn"))
-        dep = q.get("depends_on")
-        if isinstance(dep, dict):
-            if isinstance(dep.get("question"), str):
-                dep["question"] = sub(dep["question"])
-            if isinstance(dep.get("answers"), list):
-                dep["answers"] = [
-                    sub(a) if isinstance(a, str) else a for a in dep["answers"]
-                ]
-    for c in draft.get("choices", []) or []:
-        c["urn"] = sub(c.get("urn"))
-
-
 def resolve_compute_result(compute_result: str | None) -> str | None:
     """Map a QuestionChoice.compute_result string to a Result value."""
     if compute_result is None:
@@ -252,6 +184,7 @@ class RoleCodename(Enum):
     READER = "BI-RL-AUD"
     THIRD_PARTY_RESPONDENT = "BI-RL-TPR"
     AUDITEE = "BI-RL-ADE"
+    TECHNICAL_TESTER = "BI-RL-TST"
 
     def __str__(self) -> str:
         return self.value
@@ -268,6 +201,7 @@ class UserGroupCodename(Enum):
     READER = "BI-UG-AUD"
     THIRD_PARTY_RESPONDENT = "BI-UG-TPR"
     AUDITEE = "BI-UG-ADE"
+    TECHNICAL_TESTER = "BI-UG-TST"
 
     def __str__(self) -> str:
         return self.value
@@ -466,6 +400,33 @@ BUILTIN_ROLE_TRANSLATIONS = {
         "ur": {"name": "جواب دہندہ"},
         "zh": {"name": "受访者"},
     },
+    "BI-RL-TST": {
+        "en": {"name": "Technical tester"},
+        "ar": {"name": "مختبِر تقني"},
+        "cs": {"name": "Technický tester"},
+        "da": {"name": "Teknisk tester"},
+        "de": {"name": "Technischer Tester"},
+        "el": {"name": "Τεχνικός δοκιμαστής"},
+        "es": {"name": "Probador técnico"},
+        "et": {"name": "Tehniline testija"},
+        "fr": {"name": "Testeur technique"},
+        "hi": {"name": "तकनीकी परीक्षक"},
+        "hr": {"name": "Tehnički tester"},
+        "hu": {"name": "Műszaki tesztelő"},
+        "id": {"name": "Penguji teknis"},
+        "it": {"name": "Tester tecnico"},
+        "ko": {"name": "기술 테스터"},
+        "lt": {"name": "Techninis testuotojas"},
+        "nl": {"name": "Technisch tester"},
+        "pl": {"name": "Tester techniczny"},
+        "pt": {"name": "Testador técnico"},
+        "ro": {"name": "Tester tehnic"},
+        "sv": {"name": "Teknisk testare"},
+        "tr": {"name": "Teknik test uzmanı"},
+        "uk": {"name": "Технічний тестувальник"},
+        "ur": {"name": "تکنیکی ٹیسٹر"},
+        "zh": {"name": "技术测试员"},
+    },
 }
 
 
@@ -500,6 +461,7 @@ BUILTIN_USERGROUP_CODENAMES = {
         RoleCodename.THIRD_PARTY_RESPONDENT
     ),
     str(UserGroupCodename.AUDITEE): str(RoleCodename.AUDITEE),
+    str(UserGroupCodename.TECHNICAL_TESTER): str(RoleCodename.TECHNICAL_TESTER),
 }
 
 # NOTE: This is set to "Main" now, but will be changed to a unique identifier
