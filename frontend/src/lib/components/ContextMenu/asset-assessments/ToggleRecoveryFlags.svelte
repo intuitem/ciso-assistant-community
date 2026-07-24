@@ -24,6 +24,7 @@
 	const locked = $derived(Boolean(row?.meta?.bia?.is_locked));
 
 	async function toggle(field: string) {
+		if (!row?.meta?.id) return;
 		try {
 			const response = await fetch(`/asset-assessments/${row?.meta?.id}/${field}`, {
 				method: 'PATCH',
