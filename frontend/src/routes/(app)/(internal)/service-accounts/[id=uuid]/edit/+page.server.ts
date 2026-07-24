@@ -30,7 +30,8 @@ export const load: PageServerLoad = async (event) => {
 		description: serviceAccount.description,
 		permissions: serviceAccount.permissions?.map((permission: { id: number }) => permission.id),
 		perimeter_folders: serviceAccount.perimeter_folders?.map((folder: { id: string }) => folder.id),
-		is_recursive: serviceAccount.is_recursive
+		is_recursive: serviceAccount.is_recursive,
+		expiry_date: serviceAccount.expiry_date
 	};
 
 	const form = await superValidate(object, zod(schema), { errors: false });

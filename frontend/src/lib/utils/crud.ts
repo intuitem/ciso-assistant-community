@@ -932,6 +932,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'description' },
 			{ field: 'client_id' },
 			{ field: 'is_active' },
+			{ field: 'expiry_date', type: 'date' },
 			{ field: 'is_recursive' },
 			{ field: 'perimeter_folders' },
 			{ field: 'created_by' },

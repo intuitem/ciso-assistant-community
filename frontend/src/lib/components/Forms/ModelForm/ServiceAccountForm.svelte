@@ -2,6 +2,7 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import ListSelector from '../ListSelector.svelte';
+	import TextField from '$lib/components/Forms/TextField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -51,4 +52,13 @@
 	helpText={m.isRecursiveHelpText()}
 	cacheLock={cacheLocks['is_recursive']}
 	bind:cachedValue={formDataCache['is_recursive']}
+/>
+<TextField
+	type="date"
+	{form}
+	field="expiry_date"
+	label={m.expiryDate()}
+	helpText={m.serviceAccountExpiryHelpText()}
+	cacheLock={cacheLocks['expiry_date']}
+	bind:cachedValue={formDataCache['expiry_date']}
 />

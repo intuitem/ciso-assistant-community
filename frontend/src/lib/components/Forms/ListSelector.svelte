@@ -125,10 +125,16 @@
 
 		const collapsed = new Set<string>();
 
+		// A group stays expanded if it contains any selected option, otherwise it starts collapsed
 		function traverse(groups: NestedGroup, currentPrefix: string) {
 			Object.keys(groups).forEach((key) => {
 				const fullPath = currentPrefix ? `${currentPrefix}>${key}` : key;
-				collapsed.add(fullPath);
+				const hasSelection = getAllOptionsFromGroup(groups[key]).some((opt) =>
+					selected.includes(opt.value)
+				);
+				if (!hasSelection) {
+					collapsed.add(fullPath);
+				}
 
 				// Recursively traverse subgroups
 				if (groups[key].subGroups && Object.keys(groups[key].subGroups).length > 0) {
@@ -156,6 +162,11 @@
 	async function fetchOptions() {
 		isLoading = true;
 		try {
+			// init selection first, collapsed-state initialization below reads it to auto-expand any group holding a selection
+			if ($value) {
+				selected = Array.isArray($value) ? $value : [$value];
+			}
+
 			let endpoint = `/${optionsEndpoint}`;
 			const collected: any[] = [];
 			while (endpoint) {
@@ -200,11 +211,6 @@
 				if (collapsibleGroups && defaultCollapsed) {
 					collapsedGroups = initializeCollapsedGroups(nestedGroups);
 				}
-			}
-
-			// init selection
-			if ($value) {
-				selected = Array.isArray($value) ? $value : [$value];
 			}
 		} catch (err) {
 			console.error('Error fetching options', err);
@@ -332,10 +338,8 @@
 					<button
 						type="button"
 						class="text-xs px-2 py-1 rounded border border-surface-300-700 hover:bg-surface-100-900 transition-colors"
-						class:bg-blue-50={getGroupSelectionState(group) === 'all'}
-						class:border-blue-300={getGroupSelectionState(group) === 'all'}
-						class:bg-blue-25={getGroupSelectionState(group) === 'partial'}
-						class:border-blue-200={getGroupSelectionState(group) === 'partial'}
+						class:preset-tonal-primary={getGroupSelectionState(group) === 'all'}
+						class:preset-tonal-secondary={getGroupSelectionState(group) === 'partial'}
 						onclick={() => selectAllInGroup(group)}
 						{disabled}
 					>

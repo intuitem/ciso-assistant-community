@@ -39,10 +39,14 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "name",
-                    models.CharField(max_length=200, unique=True, verbose_name="Name"),
+                    models.CharField(max_length=100, unique=True, verbose_name="Name"),
                 ),
                 ("description", models.TextField(blank=True, null=True)),
                 ("is_active", models.BooleanField(default=True)),
+                (
+                    "expiry_date",
+                    models.DateField(blank=True, null=True, verbose_name="Expiry date"),
+                ),
                 (
                     "previous_secret_hash",
                     models.CharField(blank=True, max_length=200, null=True),

@@ -40,18 +40,7 @@ from .models import (
 from core.permissions import IsGlobalAdmin, FeatureFlagRequired
 from iam.sso.slo import copy_slo_state_from_session_key
 from .service_accounts import (
-    get_selectable_permissions,
-    provision_service_account,
-    update_service_account,
-)
-from iam.sso.slo import copy_slo_state_from_session_key
-from .service_accounts import (
-    get_selectable_permissions,
-    provision_service_account,
-    update_service_account,
-)
-from iam.sso.slo import copy_slo_state_from_session_key
-from .service_accounts import (
+    UNSET as UNSET_EXPIRY,
     get_selectable_permissions,
     provision_service_account,
     update_service_account,
@@ -622,6 +611,10 @@ class SCIMTokenDeleteView(views.APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+# Grace-period rotation cap: a full month, well past any conceivable credential-rollout window.
+MAX_GRACE_PERIOD_MINUTES = 31 * 24 * 60
+
+
 class ServiceAccountViewSet(viewsets.ModelViewSet):
     """
     Admin-only management of OAuth2 service accounts.
@@ -654,6 +647,7 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
                 folder_ids=data["perimeter_folders"],
                 is_recursive=data["is_recursive"],
                 created_by=request.user,
+                expiry_date=data.get("expiry_date"),
             )
         except DjangoValidationError as e:
             return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
@@ -663,7 +657,9 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         service_account = self.get_object()
-        serializer = ServiceAccountWriteSerializer(data=request.data, partial=True)
+        serializer = ServiceAccountWriteSerializer(
+            data=request.data, partial=True, context={"instance": service_account}
+        )
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         try:
@@ -675,6 +671,9 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
                     permission_ids=data.get("permissions"),
                     folder_ids=data.get("perimeter_folders"),
                     is_recursive=data.get("is_recursive"),
+                    expiry_date=data["expiry_date"]
+                    if "expiry_date" in data
+                    else UNSET_EXPIRY,
                 )
                 if "is_active" in request.data:
                     raw_is_active = request.data["is_active"]
@@ -710,9 +709,13 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
                 {"error": ["grace_period_minutes must be an integer"]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if not 0 <= grace_period_minutes <= 60:
+        if not 0 <= grace_period_minutes <= MAX_GRACE_PERIOD_MINUTES:
             return Response(
-                {"error": ["grace_period_minutes must be between 0 and 60"]},
+                {
+                    "error": [
+                        f"grace_period_minutes must be between 0 and {MAX_GRACE_PERIOD_MINUTES}"
+                    ]
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         grace_period = (

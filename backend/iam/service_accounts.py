@@ -26,6 +26,10 @@ from iam.models import (
 
 SERVICE_ACCOUNT_EMAIL_DOMAIN = "service-accounts.local"
 
+# Distinguishes "expiry_date not sent in this partial update" (leave unchanged)
+# from "expiry_date sent as null" (clear it) — None is a valid target value.
+UNSET = object()
+
 
 def get_selectable_permissions():
     """Permissions a service account may be granted — same catalog RBAC uses."""
@@ -52,6 +56,7 @@ def provision_service_account(
     folder_ids: list,
     is_recursive: bool,
     created_by: User | None,
+    expiry_date=None,
 ) -> tuple[ServiceAccount, str]:
     """Create the full service account bundle. Returns (sa, plaintext_secret);
     the secret is hashed at rest and can never be retrieved again."""
@@ -101,6 +106,7 @@ def provision_service_account(
             user=user,
             role=role,
             created_by=created_by,
+            expiry_date=expiry_date,
         )
     return service_account, plain_secret
 
@@ -113,6 +119,7 @@ def update_service_account(
     permission_ids: list[int] | None = None,
     folder_ids: list | None = None,
     is_recursive: bool | None = None,
+    expiry_date=UNSET,
 ) -> ServiceAccount:
     with transaction.atomic():
         if name is not None:
@@ -121,6 +128,8 @@ def update_service_account(
             service_account.client.save(update_fields=["name"])
         if description is not None:
             service_account.description = description
+        if expiry_date is not UNSET:
+            service_account.expiry_date = expiry_date
         service_account.save()
         if permission_ids is not None:
             service_account.role.permissions.set(_validated_permissions(permission_ids))

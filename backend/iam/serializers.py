@@ -118,6 +118,7 @@ class ServiceAccountReadSerializer(serializers.ModelSerializer):
             "description",
             "client_id",
             "is_active",
+            "expiry_date",
             "created_at",
             "updated_at",
             "created_by",
@@ -158,17 +159,29 @@ class ServiceAccountWriteSerializer(serializers.Serializer):
     ids are re-validated server-side in iam.service_accounts helpers.
     """
 
-    name = serializers.CharField(max_length=200)
+    name = serializers.CharField(max_length=100)
     description = serializers.CharField(
         required=False, allow_blank=True, allow_null=True
     )
     permissions = serializers.ListField(
-        child=serializers.IntegerField(), allow_empty=False
+        child=serializers.IntegerField(), allow_empty=True
     )
     perimeter_folders = serializers.ListField(
         child=serializers.UUIDField(), allow_empty=False
     )
     is_recursive = serializers.BooleanField(default=False)
+    expiry_date = serializers.DateField(required=False, allow_null=True)
+
+    def validate_name(self, value):
+        qs = ServiceAccount.objects.filter(name=value)
+        instance = self.context.get("instance")
+        if instance is not None:
+            qs = qs.exclude(pk=instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(
+                "A service account with this name already exists."
+            )
+        return value
 
 
 class DisableMFASerializer(serializers.Serializer):

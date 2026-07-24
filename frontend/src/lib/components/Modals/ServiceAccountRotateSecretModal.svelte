@@ -12,9 +12,25 @@
 
 	let { parent, onConfirm }: Props = $props();
 
-	let gracePeriodMinutes = $state(0);
+	const MAX_GRACE_PERIOD_MINUTES = 31 * 24 * 60;
+	const UNIT_MINUTES: Record<string, number> = {
+		MINUTES: 1,
+		HOURS: 60,
+		DAYS: 24 * 60,
+		WEEKS: 7 * 24 * 60
+	};
+
+	let hasGracePeriod = $state(false);
+	let interval = $state(1);
+	let unit = $state('HOURS');
+
+	let gracePeriodMinutes = $derived(
+		hasGracePeriod ? Math.max(0, Math.round(interval)) * UNIT_MINUTES[unit] : 0
+	);
+	let tooLong = $derived(gracePeriodMinutes > MAX_GRACE_PERIOD_MINUTES);
 
 	function confirm() {
+		if (tooLong) return;
 		modalStore.close();
 		onConfirm(gracePeriodMinutes);
 	}
@@ -37,18 +53,31 @@
 		<header class={cHeader}>{m.rotateSecret()}</header>
 		<article>{m.rotateSecretConfirm()}</article>
 		<div class="space-y-2">
-			<label class="label font-semibold" for="grace-period-select">{m.gracePeriod()}</label>
-			<select
-				id="grace-period-select"
-				class="select"
-				bind:value={gracePeriodMinutes}
-				data-testid="grace-period-select"
-			>
-				<option value={0}>{m.gracePeriodImmediate()}</option>
-				<option value={15}>{m.gracePeriodMinutesOption({ minutes: 15 })}</option>
-				<option value={30}>{m.gracePeriodMinutesOption({ minutes: 30 })}</option>
-				<option value={60}>{m.gracePeriodMinutesOption({ minutes: 60 })}</option>
-			</select>
+			<label class="flex items-center gap-2 font-semibold">
+				<input type="checkbox" class="checkbox" bind:checked={hasGracePeriod} />
+				{m.gracePeriod()}
+			</label>
+			{#if hasGracePeriod}
+				<div class="flex w-full items-center space-x-3">
+					<span class="font-semibold text-sm text-surface-950-50">{m.each()}</span>
+					<input
+						type="number"
+						min="1"
+						class="input w-24"
+						bind:value={interval}
+						data-testid="grace-period-interval"
+					/>
+					<select class="select" bind:value={unit} data-testid="grace-period-unit-select">
+						<option value="MINUTES">{m.minutes()}</option>
+						<option value="HOURS">{m.hours()}</option>
+						<option value="DAYS">{m.days()}</option>
+						<option value="WEEKS">{m.weeks()}</option>
+					</select>
+				</div>
+				{#if tooLong}
+					<p class="text-sm text-error-500">{m.gracePeriodTooLong()}</p>
+				{/if}
+			{/if}
 			<p class="text-sm opacity-75">{m.gracePeriodHelpText()}</p>
 		</div>
 		<footer class="modal-footer {parent?.regionFooter ?? ''}">
@@ -58,6 +87,7 @@
 			<button
 				class="btn preset-filled-error-500"
 				type="button"
+				disabled={tooLong}
 				onclick={confirm}
 				data-testid="confirm-rotate-secret-button">{m.submit()}</button
 			>

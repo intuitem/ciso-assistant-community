@@ -1729,7 +1729,10 @@ class ServiceAccount(AbstractBaseModel):
     via IGNORED_PERMISSION_MODELS.
     """
 
-    name = models.CharField(max_length=200, unique=True, verbose_name=_("Name"))
+    # Capped at 100 to match allauth's Client.name (copied into it verbatim
+    # on provision/rename) — Client.name isn't guarded by
+    # AbstractBaseModel._validate_char_max_lengths since it's a third-party model.
+    name = models.CharField(max_length=100, unique=True, verbose_name=_("Name"))
     description = models.TextField(blank=True, null=True)
     client = models.OneToOneField(
         Client,
@@ -1754,6 +1757,11 @@ class ServiceAccount(AbstractBaseModel):
         related_name="created_service_accounts",
     )
     is_active = models.BooleanField(default=True)
+    expiry_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Expiry date"),
+    )
     previous_secret_hash = models.CharField(max_length=200, null=True, blank=True)
     previous_secret_expires_at = models.DateTimeField(null=True, blank=True)
 

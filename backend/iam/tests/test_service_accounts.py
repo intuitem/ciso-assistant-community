@@ -173,6 +173,50 @@ class TestServiceAccountProvisioning:
         assert not any(entry["codename"].endswith("_role") for entry in entries)
         assert not any("serviceaccount" in entry["codename"] for entry in entries)
 
+    def test_create_rejects_duplicate_name(self, admin_client, domain_folder):
+        _create_sa(admin_client, domain_folder, name="dup-name")
+        response = admin_client.post(
+            SA_ENDPOINT,
+            {
+                "name": "dup-name",
+                "permissions": _view_folder_permission_ids(),
+                "perimeter_folders": [str(domain_folder.id)],
+            },
+            format="json",
+        )
+        assert response.status_code == 400
+
+    def test_create_rejects_name_over_100_chars(self, admin_client, domain_folder):
+        response = admin_client.post(
+            SA_ENDPOINT,
+            {
+                "name": "x" * 101,
+                "permissions": _view_folder_permission_ids(),
+                "perimeter_folders": [str(domain_folder.id)],
+            },
+            format="json",
+        )
+        assert response.status_code == 400
+
+    def test_rename_to_own_name_is_allowed(self, admin_client, domain_folder):
+        payload = _create_sa(admin_client, domain_folder, name="keep-name")
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"name": "keep-name"},
+            format="json",
+        )
+        assert response.status_code == 200
+
+    def test_rename_to_other_account_name_rejected(self, admin_client, domain_folder):
+        _create_sa(admin_client, domain_folder, name="taken-name")
+        payload = _create_sa(admin_client, domain_folder, name="renamable")
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"name": "taken-name"},
+            format="json",
+        )
+        assert response.status_code == 400
+
 
 @pytest.mark.django_db
 class TestServiceAccountTokenFlow:
@@ -283,11 +327,24 @@ class TestServiceAccountTokenFlow:
         assert _fetch_token(payload["client_id"], old_secret).status_code in (400, 401)
         assert _fetch_token(payload["client_id"], new_secret).status_code == 200
 
-    def test_rotate_secret_grace_period_capped(self, admin_client, domain_folder):
+    def test_rotate_secret_grace_period_within_a_week_allowed(
+        self, admin_client, domain_folder
+    ):
         payload = _create_sa(admin_client, domain_folder)
         response = admin_client.post(
             f"{SA_ENDPOINT}{payload['id']}/rotate-secret/",
-            {"grace_period_minutes": 61},
+            {"grace_period_minutes": 7 * 24 * 60},
+            format="json",
+        )
+        assert response.status_code == 200, response.content
+
+    def test_rotate_secret_grace_period_capped(self, admin_client, domain_folder):
+        from iam.views import MAX_GRACE_PERIOD_MINUTES
+
+        payload = _create_sa(admin_client, domain_folder)
+        response = admin_client.post(
+            f"{SA_ENDPOINT}{payload['id']}/rotate-secret/",
+            {"grace_period_minutes": MAX_GRACE_PERIOD_MINUTES + 1},
             format="json",
         )
         assert response.status_code == 400
@@ -364,3 +421,122 @@ class TestServiceAccountExclusions:
         folder_ids = {row["id"] for row in response.json()["results"]}
         assert str(new_folder.id) in folder_ids
         assert str(domain_folder.id) not in folder_ids
+
+    def test_update_permissions_to_empty_is_allowed(self, admin_client, domain_folder):
+        payload = _create_sa(admin_client, domain_folder)
+        access_token = _fetch_token(
+            payload["client_id"], payload["client_secret"]
+        ).json()["access_token"]
+
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"permissions": []},
+            format="json",
+        )
+        assert response.status_code == 200, response.content
+
+        sa = ServiceAccount.objects.get(id=payload["id"])
+        assert sa.role.permissions.count() == 0
+
+        # the account can still authenticate (it's not deactivated), it just
+        # has no RBAC grants left — list endpoints scope results rather than
+        # 403 outright, so the previously-visible folder now reads as empty
+        assert (
+            _fetch_token(payload["client_id"], payload["client_secret"]).status_code
+            == 200
+        )
+        response = _bearer_client(access_token).get("/api/folders/")
+        assert response.status_code == 200
+        assert response.json()["results"] == []
+
+
+@pytest.mark.django_db
+class TestServiceAccountExpiry:
+    def test_create_with_expiry_date(self, admin_client, domain_folder):
+        response = admin_client.post(
+            SA_ENDPOINT,
+            {
+                "name": "expiring",
+                "permissions": _view_folder_permission_ids(),
+                "perimeter_folders": [str(domain_folder.id)],
+                "expiry_date": "2099-01-01",
+            },
+            format="json",
+        )
+        assert response.status_code == 201, response.content
+        assert response.json()["expiry_date"] == "2099-01-01"
+
+    def test_update_sets_and_clears_expiry_date(self, admin_client, domain_folder):
+        payload = _create_sa(admin_client, domain_folder)
+        assert payload["expiry_date"] is None
+
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"expiry_date": "2099-01-01"},
+            format="json",
+        )
+        assert response.status_code == 200
+        assert response.json()["expiry_date"] == "2099-01-01"
+
+        # a partial update that omits expiry_date leaves it untouched
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"description": "still expiring"},
+            format="json",
+        )
+        assert response.status_code == 200
+        assert response.json()["expiry_date"] == "2099-01-01"
+
+        # explicitly sending null clears it
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"expiry_date": None},
+            format="json",
+        )
+        assert response.status_code == 200
+        assert response.json()["expiry_date"] is None
+
+    def test_expired_service_account_is_deactivated_by_periodic_task(
+        self, admin_client, domain_folder
+    ):
+        from datetime import date, timedelta as td
+
+        from core.tasks import deactivate_expired_service_accounts
+
+        payload = _create_sa(admin_client, domain_folder)
+        access_token = _fetch_token(
+            payload["client_id"], payload["client_secret"]
+        ).json()["access_token"]
+
+        sa = ServiceAccount.objects.get(id=payload["id"])
+        sa.expiry_date = date.today() - td(days=1)
+        sa.save(update_fields=["expiry_date"])
+
+        deactivate_expired_service_accounts.call_local()
+
+        sa.refresh_from_db()
+        assert sa.is_active is False
+        # deactivate() semantics: grant types revoked, outstanding tokens gone
+        assert sa.client.get_grant_types() == []
+        assert _fetch_token(
+            payload["client_id"], payload["client_secret"]
+        ).status_code in (
+            400,
+            401,
+        )
+        assert _bearer_client(access_token).get("/api/folders/").status_code == 401
+
+    def test_future_expiry_date_not_deactivated(self, admin_client, domain_folder):
+        from datetime import date, timedelta as td
+
+        from core.tasks import deactivate_expired_service_accounts
+
+        payload = _create_sa(admin_client, domain_folder)
+        sa = ServiceAccount.objects.get(id=payload["id"])
+        sa.expiry_date = date.today() + td(days=1)
+        sa.save(update_fields=["expiry_date"])
+
+        deactivate_expired_service_accounts.call_local()
+
+        sa.refresh_from_db()
+        assert sa.is_active is True

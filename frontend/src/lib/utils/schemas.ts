@@ -1928,11 +1928,12 @@ export const IdPGroupSchema = z.object({
 });
 
 export const ServiceAccountSchema = z.object({
-	name: z.string().min(1).max(200),
+	name: z.string().min(1).max(100),
 	description: z.string().optional().nullable(),
-	permissions: z.array(z.number()).min(1),
+	permissions: z.array(z.number()),
 	perimeter_folders: z.array(z.string().uuid()).min(1),
-	is_recursive: z.boolean().default(false)
+	is_recursive: z.boolean().default(false),
+	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
 const SCHEMA_MAP: Record<string, ZodSchema> = {
