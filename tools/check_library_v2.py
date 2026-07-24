@@ -230,8 +230,9 @@ class AnswersMetaKeys(MetaKey):
     NAME = "name"
 
 
-# [META] URN Prefix supported keys (None for now)
+# [META] URN Prefix supported keys
 class URNPrefixMetaKeys(MetaKey):
+    # No keys because only "type" is required
     pass
 
 
@@ -963,6 +964,7 @@ def validate_library_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = Fal
     expected_type = MetaTypes.LIBRARY
     schema = META_SHEET_SCHEMAS[expected_type]
 
+    # Check required and optional meta values
     validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
     validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
@@ -1004,7 +1006,8 @@ def validate_framework_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, ver
 
     expected_type = MetaTypes.FRAMEWORK
     schema = META_SHEET_SCHEMAS[expected_type]
-    
+
+    # Check required and optional meta values
     validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
     validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
@@ -1043,6 +1046,7 @@ def validate_threats_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = Fal
     expected_type = MetaTypes.THREATS
     schema = META_SHEET_SCHEMAS[expected_type]
 
+    # Check required and optional meta values
     validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
     validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
@@ -1065,6 +1069,7 @@ def validate_reference_controls_meta(df: pd.DataFrame, sheet_name: str, verbose:
     expected_type = MetaTypes.REFERENCE_CONTROLS
     schema = META_SHEET_SCHEMAS[expected_type]
 
+    # Check required and optional meta values
     validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
     validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
@@ -1087,6 +1092,7 @@ def validate_risk_matrix_meta(df: pd.DataFrame, sheet_name: str, verbose: bool =
     expected_type = MetaTypes.RISK_MATRIX
     schema = META_SHEET_SCHEMAS[expected_type]
 
+    # Check required and optional meta values
     validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
     validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
@@ -1112,7 +1118,8 @@ def validate_implementation_groups_meta(wb: Workbook, df: pd.DataFrame, sheet_na
 
     expected_type = MetaTypes.IMPLEMENTATION_GROUPS
     schema = META_SHEET_SCHEMAS[expected_type]
-    
+
+    # Check required and optional meta values
     validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
     validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
@@ -1133,6 +1140,7 @@ def validate_requirement_mapping_set_meta(df: pd.DataFrame, sheet_name: str, ver
     expected_type = MetaTypes.REQUIREMENT_MAPPING_SET
     schema = META_SHEET_SCHEMAS[expected_type]
 
+    # Check required and optional meta values
     validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
     validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
@@ -1186,7 +1194,8 @@ def validate_scores_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbos
 
     expected_type = MetaTypes.SCORES
     schema = META_SHEET_SCHEMAS[expected_type]
-    
+
+    # Check required and optional meta values
     validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
     validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
@@ -1206,7 +1215,8 @@ def validate_answers_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbo
 
     expected_type = MetaTypes.ANSWERS
     schema = META_SHEET_SCHEMAS[expected_type]
-    
+
+    # Check required and optional meta values
     validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
     validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
@@ -1226,7 +1236,8 @@ def validate_urn_prefix_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = 
 
     expected_type = MetaTypes.URN_PREFIX
     schema = META_SHEET_SCHEMAS[expected_type]
-    
+
+    # Check required and optional meta values
     validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
     validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
