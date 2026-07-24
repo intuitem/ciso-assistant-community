@@ -111,6 +111,20 @@ The donut display in the requirement tree mirrors the same normalisation: every 
 
 When **Anchor N/A to target score** is on and the audit's **Target score** is set, that target is projected onto each N/A requirement's range as a ratio. A target of 4/5 contributes 80% on a 0..5 requirement and 0.8/1 on a binary one — the contribution is consistent regardless of the underlying scale.
 
+### Overriding an automatic score
+
+When a framework ships auto-questions, the requirement's score is computed from the answers and is read-only by default: editing it directly has no effect, since every recompute would overwrite it.
+
+To deviate from the computed value for a specific reason, an auditor can toggle **Override score** on the requirement. Turning it on:
+
+- unlocks the score field so a manual value can be entered;
+- pins that value — subsequent answer changes no longer recompute the score (the result, when it is answer-driven, still follows the answers);
+- keeps the automatic score visible next to the manual one, with a warning when the two diverge, so the deviation stays auditable.
+
+Turning **Override score** back off hands the score back to the questionnaire and immediately recomputes it from the current answers.
+
+On **import**, a score supplied for a question-driven requirement is treated as an override automatically: the imported value is kept instead of being recomputed from the imported answers. This is what lets a filled-in scoring template drive the audit even when the framework defines questions.
+
 ## Lifecycle controls
 
 ### Lock
