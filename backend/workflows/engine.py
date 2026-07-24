@@ -422,16 +422,26 @@ def _advance(token):
     if not edges:
         raise EngineError(f"Node '{node}' has no outgoing edge")
 
-    if node.fork_type == WorkflowNode.ForkType.PARALLEL:
-        chosen = edges
-    else:
+    if node.type == WorkflowNode.Type.CONDITION:
+        # Exclusive routing by branch (spec D25): evaluate branches in order,
+        # default last (always matches), first match wins; follow its wire.
         chosen = []
-        for edge in sorted(edges, key=lambda e: e.priority):
-            if _evaluate_edge(edge, instance.variables):
+        branches = sorted(node.branches.all(), key=lambda b: (b.is_default, b.order))
+        for branch in branches:
+            if _evaluate_branch(branch, instance.variables):
+                edge = branch.edges.first()
+                if edge is None:
+                    raise EngineError(
+                        f"Branch '{branch}' of '{node}' matched but has no wire"
+                    )
                 chosen = [edge]
                 break
         if not chosen:
-            raise EngineError(f"No outgoing edge of '{node}' matched")
+            raise EngineError(f"No branch of '{node}' matched")
+    elif node.fork_type == WorkflowNode.ForkType.PARALLEL:
+        chosen = edges
+    else:
+        chosen = list(edges)[:1]
 
     token.status = WorkflowToken.Status.CONSUMED
     token.save(update_fields=["status", "updated_at"])
@@ -479,8 +489,10 @@ def _arrive(instance, edge):
     WorkflowToken.objects.create(instance=instance, current_node=target)
 
 
-def _evaluate_edge(edge, variables):
-    root_groups = [g for g in edge.condition_groups.all() if g.parent_group_id is None]
+def _evaluate_branch(branch, variables):
+    root_groups = [
+        g for g in branch.condition_groups.all() if g.parent_group_id is None
+    ]
     if not root_groups:
         return True
     return all(_evaluate_group(group, variables) for group in root_groups)

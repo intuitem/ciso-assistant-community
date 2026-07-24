@@ -9,7 +9,6 @@ import json
 import re
 
 from .models import (
-    Condition,
     NodeAssignment,
     WorkflowNode,
     WorkflowSecret,
@@ -22,17 +21,16 @@ SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
 
 def validate_graph(version):
     errors = []
-    nodes = list(version.nodes.prefetch_related("assignments"))
+    nodes = list(version.nodes.prefetch_related("assignments", "branches"))
     edges = list(version.edges.all())
     variable_keys = set(version.variables.values_list("key", flat=True))
     nodes_by_id = {node.id: node for node in nodes}
     existing_secrets = _existing_secret_names(version, nodes)
-    # Edges carrying at least one condition; the rest are "otherwise" branches.
-    conditioned_edge_ids = set(
-        Condition.objects.filter(group__edge__version=version).values_list(
-            "group__edge_id", flat=True
-        )
-    )
+    # Which branches carry a wire (a branch with a condition but no wire is a
+    # defined-but-unrouted case — spec D25).
+    wired_branch_ids = {
+        e.source_branch_id for e in edges if e.source_branch_id is not None
+    }
 
     trigger_nodes = [n for n in nodes if n.type == WorkflowNode.Type.TRIGGER]
     end_nodes = [n for n in nodes if n.type == WorkflowNode.Type.END]
@@ -112,20 +110,26 @@ def validate_graph(version):
                         )
                     )
         if node.type == WorkflowNode.Type.CONDITION:
-            # A condition node is an exclusive fork evaluated first-match-wins;
-            # an unconditioned edge always matches, so requiring one guarantees
-            # the node is exhaustive and can never strand a token at runtime
-            # (engine raises "No outgoing edge matched" otherwise). This is the
-            # "otherwise" branch surfaced as a fixed output in the builder.
-            branch_edges = [e for e in edges if e.source_node_id == node.id]
-            if branch_edges and not any(
-                e.id not in conditioned_edge_ids for e in branch_edges
-            ):
+            branches = list(node.branches.all())
+            # Exactly one default (otherwise) branch guarantees exhaustiveness:
+            # it always matches, so the exclusive fork can never strand a token
+            # at runtime (engine raises "No branch matched" otherwise).
+            if not any(b.is_default for b in branches):
                 errors.append(
                     _error(
                         "condition_default_missing",
                         "This branch node has no default (otherwise) branch — "
-                        "wire the otherwise output so no case is left unhandled",
+                        "add one so no case is left unhandled",
+                        node=node,
+                    )
+                )
+            # A branch that is defined but not wired routes nowhere.
+            if any(b.id not in wired_branch_ids for b in branches):
+                errors.append(
+                    _error(
+                        "branch_unwired",
+                        "A branch is not connected to a next step — wire every "
+                        "branch or remove it",
                         node=node,
                     )
                 )

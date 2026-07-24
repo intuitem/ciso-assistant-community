@@ -256,12 +256,41 @@ class TestRouting:
     def _decision_version(self):
         _, version = make_workflow()
         var_id = str(uuid.uuid4())
+        approved_branch = str(uuid.uuid4())
+        default_branch = str(uuid.uuid4())
         start = node(
             "trigger",
             trigger_config={"type": "manual"},
             input_mapping={"decision": "decision"},
         )
-        gate = node("condition", label="Gate")
+        gate = node(
+            "condition",
+            label="Gate",
+            branches=[
+                {
+                    "id": approved_branch,
+                    "name": "approved",
+                    "order": 0,
+                    "is_default": False,
+                    "condition_groups": [
+                        {
+                            "operator": "and",
+                            "conditions": [
+                                {"variable": var_id, "op": "eq", "value": "approved"}
+                            ],
+                            "children": [],
+                        }
+                    ],
+                },
+                {
+                    "id": default_branch,
+                    "name": "rejected",
+                    "order": 1,
+                    "is_default": True,
+                    "condition_groups": [],
+                },
+            ],
+        )
         approved = node("action", label="A", action_config={"type": "log"})
         rejected = node("action", label="R", action_config={"type": "log"})
         end = node("end")
@@ -271,25 +300,8 @@ class TestRouting:
                 "nodes": [start, gate, approved, rejected, end],
                 "edges": [
                     edge(start, gate),
-                    edge(
-                        gate,
-                        approved,
-                        priority=0,
-                        condition_groups=[
-                            {
-                                "operator": "and",
-                                "conditions": [
-                                    {
-                                        "variable": var_id,
-                                        "op": "eq",
-                                        "value": "approved",
-                                    }
-                                ],
-                                "children": [],
-                            }
-                        ],
-                    ),
-                    edge(gate, rejected, priority=1),
+                    edge(gate, approved, source_branch=approved_branch),
+                    edge(gate, rejected, source_branch=default_branch),
                     edge(approved, end),
                     edge(rejected, end),
                 ],

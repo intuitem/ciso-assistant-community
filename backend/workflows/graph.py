@@ -15,6 +15,7 @@ from django.db.models import ProtectedError
 
 from .models import (
     Condition,
+    ConditionBranch,
     ConditionGroup,
     NodeAssignment,
     NodePresentation,
@@ -59,12 +60,15 @@ PRESENTATION_FIELDS = [
     "instructions",
 ]
 CONDITION_FIELDS = ["op", "value", "order"]
+BRANCH_FIELDS = ["name", "order", "is_default"]
 
 
 def serialize_graph(version):
     nodes = []
     for node in version.nodes.prefetch_related(
-        "assignments__role", "assignments__actor"
+        "assignments__role",
+        "assignments__actor",
+        "branches__condition_groups__conditions",
     ).select_related("presentation", "task_template", "subprocess_workflow"):
         assignments = [
             {
@@ -99,18 +103,28 @@ def serialize_graph(version):
                 else None,
                 "assignments": assignments,
                 "presentation": presentation,
+                "branches": [
+                    {
+                        "id": str(branch.id),
+                        "condition_groups": _serialize_condition_tree(branch),
+                        **{f: getattr(branch, f) for f in BRANCH_FIELDS},
+                    }
+                    for branch in node.branches.all()
+                ],
                 **{f: getattr(node, f) for f in NODE_FIELDS},
             }
         )
 
     edges = []
-    for edge in version.edges.prefetch_related("condition_groups__conditions"):
+    for edge in version.edges.all():
         edges.append(
             {
                 "id": str(edge.id),
                 "source": str(edge.source_node_id),
                 "target": str(edge.target_node_id),
-                "condition_groups": _serialize_condition_tree(edge),
+                "source_branch": str(edge.source_branch_id)
+                if edge.source_branch_id
+                else None,
                 **{f: getattr(edge, f) for f in EDGE_FIELDS},
             }
         )
@@ -133,8 +147,8 @@ def serialize_graph(version):
     }
 
 
-def _serialize_condition_tree(edge):
-    groups = list(edge.condition_groups.all())
+def _serialize_condition_tree(branch):
+    groups = list(branch.condition_groups.all())
     by_parent = {}
     for group in groups:
         by_parent.setdefault(group.parent_group_id, []).append(group)
@@ -172,22 +186,26 @@ def save_graph(version, payload):
     node_ids = {n.get("id") for n in nodes_data}
     edge_ids = {e.get("id") for e in edges_data}
     variable_ids = {v.get("id") for v in variables_data}
-    if None in node_ids | edge_ids | variable_ids:
-        raise GraphValidationError("Every node, edge and variable needs an id")
+    branch_ids = {b.get("id") for n in nodes_data for b in (n.get("branches") or [])}
+    if None in node_ids | edge_ids | variable_ids | branch_ids:
+        raise GraphValidationError("Every node, edge, variable and branch needs an id")
 
     # Deletions FIRST, so a same-key variable (or same-position row) can be
     # dropped and recreated with a new id in a single save without tripping
     # unique constraints. Condition trees are wiped wholesale: they are
-    # recreated for every edge in the payload, and clearing them up front
+    # recreated for every branch in the payload, and clearing them up front
     # releases the PROTECT on removed variables.
-    ConditionGroup.objects.filter(edge__version=version).delete()
+    ConditionGroup.objects.filter(branch__node__version=version).delete()
     version.edges.exclude(id__in=edge_ids).delete()
+    ConditionBranch.objects.filter(node__version=version).exclude(
+        id__in=branch_ids
+    ).delete()
     version.nodes.exclude(id__in=node_ids).delete()
     try:
         version.variables.exclude(id__in=variable_ids).delete()
     except ProtectedError:
         raise GraphValidationError(
-            "A removed variable is still referenced by an edge condition"
+            "A removed variable is still referenced by a branch condition"
         )
 
     # Upsert variables first: conditions reference them.
@@ -204,6 +222,7 @@ def save_graph(version, payload):
         variables[data["id"]] = variable
 
     nodes = {}
+    branches = {}
     seen_refs = set()
     existing_nodes = {str(n.id): n for n in version.nodes.all()}
     for data in nodes_data:
@@ -246,11 +265,31 @@ def save_graph(version, payload):
                     setattr(presentation, field, data["presentation"][field])
             _save_row(presentation)
 
+        # Branches are upserted by id (edges reference them via source_branch);
+        # each branch's condition tree is recreated wholesale.
+        existing_branches = {str(b.id): b for b in node.branches.all()}
+        for branch_data in data.get("branches", []):
+            branch = existing_branches.get(branch_data["id"]) or ConditionBranch(
+                id=branch_data["id"], node=node
+            )
+            for field in BRANCH_FIELDS:
+                if field in branch_data:
+                    setattr(branch, field, branch_data[field])
+            _save_row(branch)
+            branches[branch_data["id"]] = branch
+            for group_data in branch_data.get("condition_groups", []):
+                _save_condition_tree(branch, group_data, None, variables)
+
     edges = {}
     existing_edges = {str(e.id): e for e in version.edges.all()}
     for data in edges_data:
         if data.get("source") not in nodes or data.get("target") not in nodes:
             raise GraphValidationError("Edge references a node absent from the payload")
+        source_branch_id = data.get("source_branch")
+        if source_branch_id is not None and source_branch_id not in branches:
+            raise GraphValidationError(
+                "Edge references a branch absent from the payload"
+            )
         edge = existing_edges.get(data["id"]) or WorkflowEdge(
             id=data["id"], version=version
         )
@@ -259,18 +298,18 @@ def save_graph(version, payload):
                 setattr(edge, field, data[field])
         edge.source_node = nodes[data["source"]]
         edge.target_node = nodes[data["target"]]
+        edge.source_branch = (
+            branches.get(source_branch_id) if source_branch_id else None
+        )
         _save_row(edge)
         edges[data["id"]] = edge
-
-        for group_data in data.get("condition_groups", []):
-            _save_condition_tree(edge, group_data, None, variables)
 
     return serialize_graph(version)
 
 
-def _save_condition_tree(edge, group_data, parent, variables):
+def _save_condition_tree(branch, group_data, parent, variables):
     group = ConditionGroup(
-        edge=edge,
+        branch=branch,
         parent_group=parent,
         operator=group_data.get("operator", ConditionGroup.Operator.AND),
         order=group_data.get("order", 0),
@@ -290,7 +329,7 @@ def _save_condition_tree(edge, group_data, parent, variables):
                 setattr(condition, field, condition_data[field])
         _save_row(condition)
     for child_data in group_data.get("children", []):
-        _save_condition_tree(edge, child_data, group, variables)
+        _save_condition_tree(branch, child_data, group, variables)
 
 
 def _save_row(instance):

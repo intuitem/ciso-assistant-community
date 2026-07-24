@@ -49,12 +49,15 @@ class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
             WorkflowVariable.objects.filter(version__workflow=self).update(
                 folder=self.folder
             )
-            ConditionGroup.objects.filter(edge__version__workflow=self).update(
+            ConditionBranch.objects.filter(node__version__workflow=self).update(
                 folder=self.folder
             )
-            Condition.objects.filter(group__edge__version__workflow=self).update(
+            ConditionGroup.objects.filter(branch__node__version__workflow=self).update(
                 folder=self.folder
             )
+            Condition.objects.filter(
+                group__branch__node__version__workflow=self
+            ).update(folder=self.folder)
             NodeAssignment.objects.filter(node__version__workflow=self).update(
                 folder=self.folder
             )
@@ -149,6 +152,7 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
                 for variable in self.variables.all()
             }
             node_map = {}
+            branch_map = {}
             for node in self.nodes.all():
                 clone = _clone_row(node, version=draft)
                 node_map[node.id] = clone
@@ -156,15 +160,19 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
                     _clone_row(assignment, node=clone)
                 if hasattr(node, "presentation"):
                     _clone_row(node.presentation, node=clone)
+                for branch in node.branches.all():
+                    branch_clone = _clone_row(branch, node=clone)
+                    branch_map[branch.id] = branch_clone
+                    for group in branch.condition_groups.filter(parent_group=None):
+                        _clone_condition_group(group, branch_clone, None, variable_map)
             for edge in self.edges.all():
-                edge_clone = _clone_row(
+                _clone_row(
                     edge,
                     version=draft,
                     source_node=node_map[edge.source_node_id],
                     target_node=node_map[edge.target_node_id],
+                    source_branch=branch_map.get(edge.source_branch_id),
                 )
-                for group in edge.condition_groups.filter(parent_group=None):
-                    _clone_condition_group(group, edge_clone, None, variable_map)
             return draft
 
 
@@ -290,6 +298,15 @@ class WorkflowEdge(AbstractBaseModel, FolderMixin):
         on_delete=models.CASCADE,
         related_name="incoming_edges",
     )
+    # For edges leaving a condition node: the branch this wire belongs to
+    # (spec D25). Deleting the branch removes its wire. Null for plain edges.
+    source_branch = models.ForeignKey(
+        "workflows.ConditionBranch",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="edges",
+    )
     label = models.CharField(max_length=200, blank=True)
     priority = models.IntegerField(default=0)
 
@@ -342,14 +359,42 @@ class WorkflowVariable(AbstractBaseModel, FolderMixin):
         return self.key
 
 
+class ConditionBranch(AbstractBaseModel, FolderMixin):
+    """A named routing branch of a condition node (spec D25). Owns its
+    condition tree relationally (D4 preserved). A branch exists independently
+    of its wire, so the builder can define branches before connecting them
+    ("define now, wire later"); the wire is the WorkflowEdge whose
+    source_branch points here. Exactly one branch per condition node is the
+    default (always matches, evaluated last)."""
+
+    node = models.ForeignKey(
+        WorkflowNode,
+        on_delete=models.CASCADE,
+        related_name="branches",
+    )
+    name = models.CharField(max_length=200, blank=True)
+    order = models.PositiveIntegerField(default=0)
+    is_default = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["order", "created_at"]
+
+    def save(self, *args, **kwargs):
+        self.folder = self.node.folder
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name or ("otherwise" if self.is_default else "branch")
+
+
 class ConditionGroup(AbstractBaseModel, FolderMixin):
     class Operator(models.TextChoices):
         AND = "and", "AND"
         OR = "or", "OR"
         NOT = "not", "NOT"
 
-    edge = models.ForeignKey(
-        WorkflowEdge,
+    branch = models.ForeignKey(
+        ConditionBranch,
         on_delete=models.CASCADE,
         related_name="condition_groups",
     )
@@ -371,7 +416,7 @@ class ConditionGroup(AbstractBaseModel, FolderMixin):
         ordering = ["order", "created_at"]
 
     def save(self, *args, **kwargs):
-        self.folder = self.edge.folder
+        self.folder = self.branch.folder
         super().save(*args, **kwargs)
 
 
@@ -749,8 +794,8 @@ def _clone_row(instance, **overrides):
     return type(instance).objects.create(**data)
 
 
-def _clone_condition_group(group, edge_clone, parent_clone, variable_map):
-    group_clone = _clone_row(group, edge=edge_clone, parent_group=parent_clone)
+def _clone_condition_group(group, branch_clone, parent_clone, variable_map):
+    group_clone = _clone_row(group, branch=branch_clone, parent_group=parent_clone)
     for condition in group.conditions.all():
         _clone_row(
             condition,
@@ -758,7 +803,7 @@ def _clone_condition_group(group, edge_clone, parent_clone, variable_map):
             variable=variable_map[condition.variable_id],
         )
     for child in group.children.all():
-        _clone_condition_group(child, edge_clone, group_clone, variable_map)
+        _clone_condition_group(child, branch_clone, group_clone, variable_map)
 
 
 common_exclude = ["created_at", "updated_at"]
@@ -767,6 +812,7 @@ auditlog.register(WorkflowVersion, exclude_fields=common_exclude)
 auditlog.register(WorkflowNode, exclude_fields=common_exclude)
 auditlog.register(WorkflowEdge, exclude_fields=common_exclude)
 auditlog.register(WorkflowVariable, exclude_fields=common_exclude)
+auditlog.register(ConditionBranch, exclude_fields=common_exclude)
 auditlog.register(ConditionGroup, exclude_fields=common_exclude)
 auditlog.register(Condition, exclude_fields=common_exclude)
 auditlog.register(NodeAssignment, exclude_fields=common_exclude)

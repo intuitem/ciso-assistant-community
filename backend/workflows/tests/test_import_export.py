@@ -36,11 +36,16 @@ def _rich_graph():
             "nightly",
             "incident",
             "fetch",
+            "gate",
             "end",
             "e1",
             "e2",
             "e3",
             "e4",
+            "e5",
+            "e6",
+            "bapp",
+            "bdef",
             "v1",
             "v2",
         ]
@@ -105,26 +110,57 @@ def _rich_graph():
                 "retry_backoff": "exponential",
                 "position": {"x": 200, "y": 120},
             },
-            {"id": n["end"], "type": "end", "position": {"x": 400, "y": 120}},
+            {
+                "id": n["gate"],
+                "type": "condition",
+                "label": "Gate",
+                "position": {"x": 400, "y": 120},
+                # Conditions live on the condition node's branches (spec D25);
+                # edges only reference a branch via source_branch.
+                "branches": [
+                    {
+                        "id": n["bapp"],
+                        "name": "approved",
+                        "order": 0,
+                        "is_default": False,
+                        "condition_groups": [
+                            {
+                                "operator": "and",
+                                "conditions": [
+                                    {"variable": n["v2"], "op": "eq", "value": "true"}
+                                ],
+                                "children": [],
+                            }
+                        ],
+                    },
+                    {
+                        "id": n["bdef"],
+                        "name": "otherwise",
+                        "order": 1,
+                        "is_default": True,
+                        "condition_groups": [],
+                    },
+                ],
+            },
+            {"id": n["end"], "type": "end", "position": {"x": 600, "y": 120}},
         ],
         "edges": [
             {"id": n["e1"], "source": n["hook"], "target": n["fetch"]},
             {"id": n["e2"], "source": n["nightly"], "target": n["fetch"]},
             {"id": n["e3"], "source": n["incident"], "target": n["fetch"]},
+            {"id": n["e4"], "source": n["fetch"], "target": n["gate"]},
             {
-                "id": n["e4"],
-                "source": n["fetch"],
+                "id": n["e5"],
+                "source": n["gate"],
                 "target": n["end"],
                 "label": "approved",
-                "priority": 1,
-                "condition_groups": [
-                    {
-                        "operator": "and",
-                        "conditions": [
-                            {"variable": n["v2"], "op": "eq", "value": "true"}
-                        ],
-                    }
-                ],
+                "source_branch": n["bapp"],
+            },
+            {
+                "id": n["e6"],
+                "source": n["gate"],
+                "target": n["end"],
+                "source_branch": n["bdef"],
             },
         ],
     }
@@ -155,7 +191,14 @@ class TestExport:
         assert "triggers" not in data
 
         refs = [node["ref"] for node in data["graph"]["nodes"]]
-        assert refs == ["hook", "nightly", "on_incident", "fetch_employee", "end"]
+        assert refs == [
+            "hook",
+            "nightly",
+            "on_incident",
+            "fetch_employee",
+            "gate",
+            "end",
+        ]
         dumped = yaml.dump(data)
         for node in data["graph"]["nodes"]:
             assert "id" not in node
@@ -170,10 +213,27 @@ class TestExport:
             {"field": "severity", "op": "lte", "value": "2"}
         ]
 
-        edge = data["graph"]["edges"][3]
-        assert edge["source"] == "fetch_employee"
-        assert edge["target"] == "end"
-        assert edge["condition_groups"][0]["conditions"][0]["variable"] == "approved"
+        # The condition node carries its routing branches inline; the default
+        # is the is_default branch, and its conditions reference the variable
+        # by key. No conditions travel on edges anymore.
+        gate = data["graph"]["nodes"][4]
+        assert gate["type"] == "condition"
+        approved_branch, default_branch = gate["branches"]
+        assert approved_branch["name"] == "approved"
+        assert "is_default" not in approved_branch
+        assert (
+            approved_branch["condition_groups"][0]["conditions"][0]["variable"]
+            == "approved"
+        )
+        assert default_branch["is_default"] is True
+        assert "condition_groups" not in default_branch
+
+        # Edges leaving the condition node reference their branch by index.
+        gate_edges = [e for e in data["graph"]["edges"] if e["source"] == "gate"]
+        assert {e["source_branch"] for e in gate_edges} == {0, 1}
+        for edge in gate_edges:
+            assert edge["target"] == "end"
+            assert "condition_groups" not in edge
 
         fetch = data["graph"]["nodes"][3]
         assert fetch["retry"] == {
@@ -235,7 +295,8 @@ class TestImport:
         approved = version.variables.get(key="approved")
         condition = approved.conditions.get()
         assert condition.value == "true"
-        assert condition.group.edge.version_id == version.id
+        # ConditionGroup now hangs off a branch of a condition node, not an edge.
+        assert condition.group.branch.node.version_id == version.id
 
     def test_missing_secret_warning(self, rich_workflow, root):
         from workflows.models import WorkflowSecret
@@ -356,6 +417,195 @@ class TestImport:
         )
 
 
+def _condition_doc(name="Branchy"):
+    """A portable doc with a condition node: trigger → route(low / else) →
+    {action, end}. Branch order is list order; edges reference a branch by
+    index. Used by the branch edge-case tests."""
+    return {
+        "schema_version": 1,
+        "name": name,
+        "graph": {
+            "variables": [{"key": "lvl", "type": "string"}],
+            "nodes": [
+                {
+                    "ref": "s",
+                    "type": "trigger",
+                    "trigger_config": {"type": "manual"},
+                    "input_mapping": {"lvl": "data.lvl"},
+                },
+                {
+                    "ref": "route",
+                    "type": "condition",
+                    "label": "Route",
+                    "branches": [
+                        {
+                            "name": "low",
+                            "condition_groups": [
+                                {
+                                    "operator": "and",
+                                    "conditions": [
+                                        {"variable": "lvl", "op": "eq", "value": "low"}
+                                    ],
+                                }
+                            ],
+                        },
+                        {"name": "else", "is_default": True},
+                    ],
+                },
+                {"ref": "a", "type": "action", "action_config": {"type": "log"}},
+                {"ref": "e", "type": "end"},
+            ],
+            "edges": [
+                {"source": "s", "target": "route"},
+                {"source": "route", "target": "a", "source_branch": 0},
+                {"source": "route", "target": "e", "source_branch": 1},
+                {"source": "a", "target": "e"},
+            ],
+        },
+    }
+
+
+@pytest.mark.django_db
+class TestBranchEdgeCases:
+    """Adversarial import/export shapes for the D25 node-owned branch model."""
+
+    def _stable(self, data, root):
+        """export∘import is idempotent: importing a doc then re-exporting, and
+        importing that then re-exporting again, yields the same graph."""
+        first, _ = import_workflow(data, root)
+        doc2 = export_workflow(first)
+        second, _ = import_workflow(doc2, root)
+        doc3 = export_workflow(second)
+        assert doc2["graph"] == doc3["graph"]
+        return first, doc2
+
+    def test_single_condition_round_trips(self, root):
+        wf, doc = self._stable(_condition_doc(), root)
+        gate = next(n for n in doc["graph"]["nodes"] if n["type"] == "condition")
+        assert [b.get("is_default") for b in gate["branches"]] == [None, True]
+
+    def test_two_condition_nodes_have_per_node_indices(self, root):
+        # The risky case: source_branch is an index WITHIN the source node's
+        # branch list, so two condition nodes must not cross-resolve.
+        doc = {
+            "schema_version": 1,
+            "name": "TwoConds",
+            "graph": {
+                "variables": [{"key": "k", "type": "string"}],
+                "nodes": [
+                    {
+                        "ref": "s",
+                        "type": "trigger",
+                        "trigger_config": {"type": "manual"},
+                    },
+                    {
+                        "ref": "c1",
+                        "type": "condition",
+                        "branches": [
+                            {
+                                "name": "p",
+                                "condition_groups": [
+                                    {
+                                        "conditions": [
+                                            {"variable": "k", "op": "eq", "value": "p"}
+                                        ]
+                                    }
+                                ],
+                            },
+                            {"name": "pd", "is_default": True},
+                        ],
+                    },
+                    {
+                        "ref": "c2",
+                        "type": "condition",
+                        "branches": [
+                            {
+                                "name": "q",
+                                "condition_groups": [
+                                    {
+                                        "conditions": [
+                                            {"variable": "k", "op": "eq", "value": "q"}
+                                        ]
+                                    }
+                                ],
+                            },
+                            {"name": "qd", "is_default": True},
+                        ],
+                    },
+                    {"ref": "x", "type": "action", "action_config": {"type": "log"}},
+                    {"ref": "e", "type": "end"},
+                ],
+                "edges": [
+                    {"source": "s", "target": "c1"},
+                    {"source": "c1", "target": "c2", "source_branch": 0},
+                    {"source": "c1", "target": "x", "source_branch": 1},
+                    {"source": "c2", "target": "x", "source_branch": 0},
+                    {"source": "c2", "target": "x", "source_branch": 1},
+                    {"source": "x", "target": "e"},
+                ],
+            },
+        }
+        workflow, _ = self._stable(doc, root)
+        version = workflow.draft_version
+        c2 = version.nodes.get(ref="c2")
+        # Every edge leaving c2 must wire to a branch that belongs to c2.
+        for edge in version.edges.filter(source_node=c2):
+            assert edge.source_branch is not None
+            assert edge.source_branch.node_id == c2.id
+        assert sorted(b.name for b in c2.branches.all()) == ["q", "qd"]
+
+    def test_nested_condition_tree_round_trips(self, root):
+        data = _condition_doc("Nested")
+        data["graph"]["variables"].append({"key": "b", "type": "string"})
+        data["graph"]["nodes"][1]["branches"][0]["condition_groups"] = [
+            {
+                "operator": "and",
+                "conditions": [{"variable": "lvl", "op": "eq", "value": "x"}],
+                "children": [
+                    {
+                        "operator": "or",
+                        "conditions": [
+                            {"variable": "b", "op": "eq", "value": "y"},
+                            {"variable": "b", "op": "eq", "value": "z"},
+                        ],
+                    }
+                ],
+            }
+        ]
+        workflow, _ = self._stable(data, root)
+        branch = workflow.draft_version.nodes.get(ref="route").branches.get(name="low")
+        assert branch.condition_groups.filter(parent_group__isnull=True).count() == 1
+        assert branch.condition_groups.filter(parent_group__isnull=False).count() == 1
+
+    def test_unwired_branch_round_trips(self, root):
+        # A branch with no edge (draft state) must survive export/import intact.
+        data = _condition_doc("Unwired")
+        data["graph"]["nodes"][1]["branches"].insert(
+            1, {"name": "orphan"}
+        )  # no edge references index 1
+        # shift the default edge's index (default is now at index 2)
+        for edge in data["graph"]["edges"]:
+            if edge.get("source_branch") == 1:
+                edge["source_branch"] = 2
+        workflow, doc = self._stable(data, root)
+        route = workflow.draft_version.nodes.get(ref="route")
+        assert route.branches.count() == 3
+        assert not route.branches.get(name="orphan").edges.exists()
+
+    def test_only_default_condition_node_round_trips(self, root):
+        data = _condition_doc("OnlyDefault")
+        data["graph"]["nodes"][1]["branches"] = [{"name": "always", "is_default": True}]
+        data["graph"]["edges"] = [
+            {"source": "s", "target": "route"},
+            {"source": "route", "target": "e", "source_branch": 0},
+        ]
+        data["graph"]["nodes"][2:3] = []  # drop the now-unused action node
+        workflow, _ = self._stable(data, root)
+        route = workflow.draft_version.nodes.get(ref="route")
+        assert route.branches.count() == 1
+        assert route.branches.first().is_default is True
+
+
 @pytest.mark.django_db
 class TestImportRejections:
     def _base(self):
@@ -423,17 +673,50 @@ class TestImportRejections:
 
     def test_condition_on_unknown_variable(self, root):
         data = self._base()
-        data["graph"]["nodes"].append({"ref": "end", "type": "end"})
-        data["graph"]["edges"] = [
+        data["graph"]["nodes"].append(
             {
-                "source": "go",
-                "target": "end",
-                "condition_groups": [
-                    {"conditions": [{"variable": "ghost", "op": "eq"}]}
+                "ref": "gate",
+                "type": "condition",
+                "branches": [
+                    {
+                        "name": "x",
+                        "condition_groups": [
+                            {"conditions": [{"variable": "ghost", "op": "eq"}]}
+                        ],
+                    }
                 ],
             }
+        )
+        data["graph"]["nodes"].append({"ref": "end", "type": "end"})
+        data["graph"]["edges"] = [
+            {"source": "go", "target": "gate"},
+            {"source": "gate", "target": "end", "source_branch": 0},
         ]
         with pytest.raises(WorkflowImportError, match="unknown variable"):
+            import_workflow(data, root)
+
+    def test_source_branch_index_out_of_range(self, root):
+        data = _condition_doc()
+        for edge in data["graph"]["edges"]:
+            if edge.get("source_branch") is not None:
+                edge["source_branch"] = 9
+        with pytest.raises(WorkflowImportError, match="branch"):
+            import_workflow(data, root)
+
+    def test_source_branch_on_non_condition_edge(self, root):
+        data = _condition_doc()
+        for edge in data["graph"]["edges"]:
+            if edge["source"] == "s":  # trigger → condition, not a branch edge
+                edge["source_branch"] = 0
+        with pytest.raises(WorkflowImportError, match="source_branch"):
+            import_workflow(data, root)
+
+    def test_condition_edge_without_source_branch(self, root):
+        data = _condition_doc()
+        for edge in data["graph"]["edges"]:
+            if edge["source"] == "route":
+                edge.pop("source_branch", None)
+        with pytest.raises(WorkflowImportError, match="source_branch"):
             import_workflow(data, root)
 
     def test_duplicate_variable_keys_rejected_atomically(self, root):

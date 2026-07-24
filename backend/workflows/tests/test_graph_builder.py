@@ -98,6 +98,91 @@ def _minimal_graph():
     }
 
 
+def _condition_graph(op="eq", value='"approved"', with_default=True, wire_default=True):
+    """trigger -> condition -> {matching branch -> end, default branch -> end2}.
+
+    Conditions live on the condition node's branches (spec D25); edges only
+    reference a branch via ``source_branch``. Returns (graph, ids) so callers
+    can assert on / tweak specific rows.
+    """
+    ids = {
+        k: str(uuid.uuid4())
+        for k in [
+            "start",
+            "cond",
+            "end",
+            "end2",
+            "var",
+            "match_branch",
+            "default_branch",
+        ]
+    }
+    branches = [
+        {
+            "id": ids["match_branch"],
+            "name": "approved",
+            "order": 0,
+            "is_default": False,
+            "condition_groups": [
+                {
+                    "operator": "and",
+                    "conditions": [{"variable": ids["var"], "op": op, "value": value}],
+                    "children": [],
+                }
+            ],
+        }
+    ]
+    if with_default:
+        branches.append(
+            {
+                "id": ids["default_branch"],
+                "name": "otherwise",
+                "order": 1,
+                "is_default": True,
+                "condition_groups": [],
+            }
+        )
+    edges = [
+        {"id": str(uuid.uuid4()), "source": ids["start"], "target": ids["cond"]},
+        {
+            "id": str(uuid.uuid4()),
+            "source": ids["cond"],
+            "target": ids["end"],
+            "source_branch": ids["match_branch"],
+        },
+    ]
+    if with_default and wire_default:
+        edges.append(
+            {
+                "id": str(uuid.uuid4()),
+                "source": ids["cond"],
+                "target": ids["end2"],
+                "source_branch": ids["default_branch"],
+            }
+        )
+    graph = {
+        "variables": [{"id": ids["var"], "key": "decision", "type": "string"}],
+        "nodes": [
+            {
+                "id": ids["start"],
+                "type": "trigger",
+                "trigger_config": {"type": "manual"},
+                "position": {"x": 0, "y": 0},
+            },
+            {
+                "id": ids["cond"],
+                "type": "condition",
+                "branches": branches,
+                "position": {"x": 200, "y": 0},
+            },
+            {"id": ids["end"], "type": "end", "position": {"x": 400, "y": 0}},
+            {"id": ids["end2"], "type": "end", "position": {"x": 400, "y": 200}},
+        ],
+        "edges": edges,
+    }
+    return graph, ids
+
+
 @pytest.mark.django_db
 class TestWorkflowCreation:
     def test_create_auto_creates_draft_v1(self, workflow):
@@ -136,36 +221,34 @@ class TestGraphSave:
 
     def test_variables_and_conditions_roundtrip(self, workflow, superuser):
         version = workflow.draft_version
-        graph = _minimal_graph()
-        var_id = str(uuid.uuid4())
-        graph["variables"] = [{"id": var_id, "key": "decision", "type": "string"}]
-        graph["edges"][1]["condition_groups"] = [
-            {
-                "operator": "and",
-                "conditions": [{"variable": var_id, "op": "eq", "value": '"approved"'}],
-                "children": [],
-            }
-        ]
+        graph, ids = _condition_graph(op="eq", value='"approved"')
         resp = _put_graph(version, graph, superuser)
         assert resp.status_code == 200, resp.data
-        edge = resp.data["edges"][1]
-        assert edge["condition_groups"][0]["conditions"][0]["op"] == "eq"
+
+        # The condition lives on the matching branch of the condition node...
+        cond = next(n for n in resp.data["nodes"] if n["id"] == ids["cond"])
+        branch = next(b for b in cond["branches"] if b["id"] == ids["match_branch"])
+        assert branch["is_default"] is False
+        assert branch["condition_groups"][0]["conditions"][0]["op"] == "eq"
+        assert branch["condition_groups"][0]["conditions"][0]["value"] == '"approved"'
+        default = next(b for b in cond["branches"] if b["id"] == ids["default_branch"])
+        assert default["is_default"] is True
+        assert default["condition_groups"] == []
+
+        # ...and the edge only references the branch — no conditions on edges.
+        wired = next(
+            e for e in resp.data["edges"] if e["source_branch"] == ids["match_branch"]
+        )
+        assert wired["target"] == ids["end"]
+        assert "condition_groups" not in wired
 
     def test_removing_referenced_variable_fails(self, workflow, superuser):
         version = workflow.draft_version
-        graph = _minimal_graph()
-        var_id = str(uuid.uuid4())
-        graph["variables"] = [{"id": var_id, "key": "decision", "type": "string"}]
-        graph["edges"][1]["condition_groups"] = [
-            {
-                "operator": "and",
-                "conditions": [{"variable": var_id, "op": "is_null", "value": ""}],
-                "children": [],
-            }
-        ]
+        graph, _ = _condition_graph(op="is_null", value="")
         assert _put_graph(version, graph, superuser).status_code == 200
-        # Dropping the variable but keeping the edge that references it must 400:
-        # the recreated condition references a variable absent from the payload.
+        # Dropping the variable but keeping the branch that references it must
+        # 400: the recreated condition references a variable absent from the
+        # payload.
         graph["variables"] = []
         resp = _put_graph(version, graph, superuser)
         assert resp.status_code == 400
@@ -216,43 +299,10 @@ class TestPublish:
     def test_condition_without_default_branch_fails_validation(
         self, workflow, superuser
     ):
-        # A branch node whose every outgoing edge carries a condition can strand
-        # a token at runtime; publish must require an "otherwise" branch.
+        # A branch node whose every branch carries a condition can strand a
+        # token at runtime; publish must require a default ("otherwise") branch.
         version = workflow.draft_version
-        start, cond, end = str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())
-        end2 = str(uuid.uuid4())
-        var = str(uuid.uuid4())
-        conditioned_edge = str(uuid.uuid4())
-        graph = {
-            "variables": [{"id": var, "key": "decision", "type": "string"}],
-            "nodes": [
-                {
-                    "id": start,
-                    "type": "trigger",
-                    "trigger_config": {"type": "manual"},
-                    "position": {"x": 0, "y": 0},
-                },
-                {"id": cond, "type": "condition", "position": {"x": 200, "y": 0}},
-                {"id": end, "type": "end", "position": {"x": 400, "y": 0}},
-                {"id": end2, "type": "end", "position": {"x": 400, "y": 200}},
-            ],
-            "edges": [
-                {"id": str(uuid.uuid4()), "source": start, "target": cond},
-                {
-                    "id": conditioned_edge,
-                    "source": cond,
-                    "target": end,
-                    "condition_groups": [
-                        {
-                            "operator": "and",
-                            "conditions": [
-                                {"variable": var, "op": "eq", "value": '"yes"'}
-                            ],
-                        }
-                    ],
-                },
-            ],
-        }
+        graph, ids = _condition_graph(op="eq", value='"yes"', with_default=False)
         _put_graph(version, graph, superuser)
         resp = _publish(version, superuser)
         assert resp.status_code == 400
@@ -261,15 +311,45 @@ class TestPublish:
             for e in resp.data["errors"]
             if e["code"] == "condition_default_missing"
         }
-        assert cond in offending
+        assert ids["cond"] in offending
 
-        # Adding an unconditioned (otherwise) edge makes the node exhaustive.
-        graph["edges"].append(
-            {"id": str(uuid.uuid4()), "source": cond, "target": end2, "priority": 1}
-        )
+        # Adding a wired default branch makes the node exhaustive.
+        graph, ids = _condition_graph(op="eq", value='"yes"', with_default=True)
         _put_graph(version, graph, superuser)
         resp = _publish(version, superuser)
         assert resp.status_code == 200, resp.data
+
+    def test_unwired_branch_fails_validation(self, workflow, superuser):
+        # A defined branch with no outgoing edge routes nowhere; publish must
+        # reject it even when a default branch is present.
+        version = workflow.draft_version
+        graph, ids = _condition_graph(op="eq", value='"yes"', with_default=True)
+        cond = next(n for n in graph["nodes"] if n["id"] == ids["cond"])
+        stray_branch = str(uuid.uuid4())
+        cond["branches"].append(
+            {
+                "id": stray_branch,
+                "name": "stray",
+                "order": 2,
+                "is_default": False,
+                "condition_groups": [
+                    {
+                        "operator": "and",
+                        "conditions": [
+                            {"variable": ids["var"], "op": "eq", "value": '"no"'}
+                        ],
+                        "children": [],
+                    }
+                ],
+            }
+        )
+        _put_graph(version, graph, superuser)
+        resp = _publish(version, superuser)
+        assert resp.status_code == 400
+        offending = {
+            e["node_id"] for e in resp.data["errors"] if e["code"] == "branch_unwired"
+        }
+        assert ids["cond"] in offending
 
     def test_publish_archives_previous_version(self, workflow, superuser):
         v1 = workflow.draft_version
@@ -297,16 +377,7 @@ class TestPublish:
 class TestNewDraft:
     def test_clone_copies_graph(self, workflow, superuser):
         v1 = workflow.draft_version
-        graph = _minimal_graph()
-        var_id = str(uuid.uuid4())
-        graph["variables"] = [{"id": var_id, "key": "decision", "type": "string"}]
-        graph["edges"][1]["condition_groups"] = [
-            {
-                "operator": "and",
-                "conditions": [{"variable": var_id, "op": "is_null", "value": ""}],
-                "children": [],
-            }
-        ]
+        graph, ids = _condition_graph(op="is_null", value="")
         _put_graph(v1, graph, superuser)
         _publish(v1, superuser)
 
@@ -319,13 +390,21 @@ class TestNewDraft:
         assert not set(v2.nodes.values_list("id", flat=True)) & set(
             v1.nodes.values_list("id", flat=True)
         )
-        cloned_condition = (
-            v2.edges.filter(condition_groups__isnull=False)
-            .first()
-            .condition_groups.first()
-            .conditions.first()
-        )
+        # The clone preserves the condition node's branches (with their
+        # condition trees) and the wiring that references them. ConditionGroup
+        # now hangs off the branch/node, not the edge.
+        cond = v2.nodes.get(type="condition")
+        branches = list(cond.branches.all())
+        assert len(branches) == 2
+        assert any(b.is_default for b in branches)
+        matching = next(b for b in branches if not b.is_default)
+        cloned_condition = matching.condition_groups.first().conditions.first()
         assert cloned_condition.variable.version_id == v2.id
+        # Every branch is wired by a cloned edge that carries its source_branch.
+        wired_branch_ids = {
+            e.source_branch_id for e in v2.edges.all() if e.source_branch_id is not None
+        }
+        assert wired_branch_ids == {b.id for b in branches}
 
     def test_second_draft_is_rejected(self, workflow, superuser):
         v1 = workflow.draft_version

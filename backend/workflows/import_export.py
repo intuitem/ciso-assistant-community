@@ -71,10 +71,19 @@ def export_workflow(workflow):
     if secret_names:
         data["requires"] = {"secrets": secret_names}
 
+    # Edges reference their branch by its 0-based position within the source
+    # node's exported `branches` list (branch ids never travel).
+    branch_index = {}
+    for node in document["nodes"]:
+        for i, branch in enumerate(node["branches"]):
+            branch_index[branch["id"]] = i
+
     data["graph"] = {
         "variables": [_export_variable(v) for v in document["variables"]],
-        "nodes": [_export_node(n, refs, taxonomies) for n in document["nodes"]],
-        "edges": [_export_edge(e, refs, variable_keys) for e in document["edges"]],
+        "nodes": [
+            _export_node(n, refs, taxonomies, variable_keys) for n in document["nodes"]
+        ],
+        "edges": [_export_edge(e, refs, branch_index) for e in document["edges"]],
     }
     return data
 
@@ -124,7 +133,7 @@ def _export_variable(variable):
     return out
 
 
-def _export_node(node, refs, taxonomies):
+def _export_node(node, refs, taxonomies, variable_keys):
     out = {"ref": refs[node["id"]], "type": node["type"]}
     if node["label"]:
         out["label"] = node["label"]
@@ -160,6 +169,23 @@ def _export_node(node, refs, taxonomies):
         }
         if presentation:
             out["presentation"] = presentation
+    # Condition nodes own their routing branches (spec D25); the branch order is
+    # the list order, so edges can reference a branch by index.
+    branches = [_export_branch(b, variable_keys) for b in node["branches"]]
+    if branches:
+        out["branches"] = branches
+    return out
+
+
+def _export_branch(branch, variable_keys):
+    out = {}
+    if branch["name"]:
+        out["name"] = branch["name"]
+    if branch["is_default"]:
+        out["is_default"] = True
+    groups = _export_condition_groups(branch["condition_groups"], variable_keys)
+    if groups:
+        out["condition_groups"] = groups
     return out
 
 
@@ -182,15 +208,15 @@ def _export_assignment(assignment, taxonomies):
     return out
 
 
-def _export_edge(edge, refs, variable_keys):
+def _export_edge(edge, refs, branch_index):
     out = {"source": refs[edge["source"]], "target": refs[edge["target"]]}
     if edge["label"]:
         out["label"] = edge["label"]
     if edge["priority"]:
         out["priority"] = edge["priority"]
-    groups = _export_condition_groups(edge["condition_groups"], variable_keys)
-    if groups:
-        out["condition_groups"] = groups
+    # An edge leaving a condition node carries the index of the branch it wires.
+    if edge["source_branch"] is not None:
+        out["source_branch"] = branch_index[edge["source_branch"]]
     return out
 
 
@@ -286,6 +312,8 @@ def _validate_structure(data):
 
     node_types = set(WorkflowNode.Type.values)
     refs = set()
+    node_type = {}
+    branch_count = {}
     for node in nodes:
         if not isinstance(node, dict):
             raise WorkflowImportError("Every node must be a mapping")
@@ -307,6 +335,18 @@ def _validate_structure(data):
             raise WorkflowImportError(
                 f"Node '{ref}' has an unknown type {node.get('type')!r}"
             )
+        node_type[ref] = node.get("type")
+        branches = node.get("branches") or []
+        if not isinstance(branches, list):
+            raise WorkflowImportError(f"Node '{ref}' branches must be a list")
+        for branch in branches:
+            if not isinstance(branch, dict):
+                raise WorkflowImportError(
+                    f"Node '{ref}': every branch must be a mapping"
+                )
+            for group in branch.get("condition_groups") or []:
+                _validate_condition_group(group, keys, depth=0)
+        branch_count[ref] = len(branches)
 
     for edge in edges:
         if not isinstance(edge, dict):
@@ -316,8 +356,29 @@ def _validate_structure(data):
                 raise WorkflowImportError(
                     f"Edge {endpoint} {edge.get(endpoint)!r} is not a node ref"
                 )
-        for group in edge.get("condition_groups") or []:
-            _validate_condition_group(group, keys, depth=0)
+        source = edge.get("source")
+        is_condition = node_type.get(source) == WorkflowNode.Type.CONDITION
+        source_branch = edge.get("source_branch")
+        if source_branch is None:
+            if is_condition:
+                raise WorkflowImportError(
+                    f"Edge from condition node '{source}' has no source_branch"
+                )
+        else:
+            if not is_condition:
+                raise WorkflowImportError(
+                    f"Edge from '{source}' carries a source_branch but its source "
+                    "is not a condition node"
+                )
+            if (
+                not isinstance(source_branch, int)
+                or isinstance(source_branch, bool)
+                or not 0 <= source_branch < branch_count.get(source, 0)
+            ):
+                raise WorkflowImportError(
+                    f"Edge from '{source}' references branch {source_branch!r} "
+                    "outside the node's branch list"
+                )
 
 
 def _validate_condition_group(group, variable_keys, depth):
@@ -350,6 +411,13 @@ def _build_graph_payload(graph, workflow, folder, warnings):
     accessible = _accessible_folder_ids(folder)
     variable_ids = {v["key"]: str(uuid4()) for v in graph.get("variables") or []}
     node_ids = {n["ref"]: str(uuid4()) for n in graph["nodes"]}
+    # (node ref, branch index) → fresh branch uuid, so edges can resolve their
+    # source_branch index to the branch built on the node.
+    branch_ids = {
+        (n["ref"], i): str(uuid4())
+        for n in graph["nodes"]
+        for i, _ in enumerate(n.get("branches") or [])
+    }
 
     variables = []
     variable_types = set(WorkflowVariable.Type.values)
@@ -366,31 +434,34 @@ def _build_graph_payload(graph, workflow, folder, warnings):
         )
 
     nodes = [
-        _build_node(entry, node_ids, workflow, accessible, warnings)
+        _build_node(
+            entry, node_ids, branch_ids, variable_ids, workflow, accessible, warnings
+        )
         for entry in graph["nodes"]
     ]
 
     edges = []
     for entry in graph.get("edges") or []:
-        edge = {
-            "id": str(uuid4()),
-            "source": node_ids[entry["source"]],
-            "target": node_ids[entry["target"]],
-            "label": str(entry.get("label") or ""),
-            "priority": entry.get("priority") or 0,
-        }
-        groups = [
-            _build_condition_group(group, variable_ids)
-            for group in entry.get("condition_groups") or []
-        ]
-        if groups:
-            edge["condition_groups"] = groups
-        edges.append(edge)
+        source_branch = entry.get("source_branch")
+        edges.append(
+            {
+                "id": str(uuid4()),
+                "source": node_ids[entry["source"]],
+                "target": node_ids[entry["target"]],
+                "source_branch": branch_ids.get((entry["source"], source_branch))
+                if source_branch is not None
+                else None,
+                "label": str(entry.get("label") or ""),
+                "priority": entry.get("priority") or 0,
+            }
+        )
 
     return {"variables": variables, "nodes": nodes, "edges": edges}
 
 
-def _build_node(entry, node_ids, workflow, accessible, warnings):
+def _build_node(
+    entry, node_ids, branch_ids, variable_ids, workflow, accessible, warnings
+):
     ref = entry["ref"]
     node = {
         "id": node_ids[ref],
@@ -401,6 +472,22 @@ def _build_node(entry, node_ids, workflow, accessible, warnings):
         "join_type": entry.get("join_type") or WorkflowNode.JoinType.NONE,
         "event_key": str(entry.get("event_key") or ""),
     }
+    branches = []
+    for i, branch in enumerate(entry.get("branches") or []):
+        branches.append(
+            {
+                "id": branch_ids[(ref, i)],
+                "name": str(branch.get("name") or ""),
+                "order": i,
+                "is_default": bool(branch.get("is_default")),
+                "condition_groups": [
+                    _build_condition_group(group, variable_ids)
+                    for group in branch.get("condition_groups") or []
+                ],
+            }
+        )
+    if branches:
+        node["branches"] = branches
     for field in NODE_JSON_FIELDS:
         value = entry.get(field)
         node[field] = value if isinstance(value, dict) else {}
