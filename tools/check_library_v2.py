@@ -144,13 +144,20 @@ class SheetTypes(Enum):
 class MandatorySheets(Enum):
     LIBRARY_META = "library_meta"
 
+
+
+# [META] {ROOT} Base type for all meta sheet keys. For typing purpose only
+class MetaKey(str, Enum):
+    pass
+
+
 # [META] Sheets without these keys are invalid
 # It's different from "MetaSheetSchema.expected_keys", as these keys should be everywhere
-class MandatoryMetaKeys(Enum):
+class MandatoryMetaKeys(MetaKey):
     TYPE = "type"
 
 # [META] Library supported keys
-class LibraryMetaKeys(Enum):
+class LibraryMetaKeys(MetaKey):
     URN = "urn"
     VERSION = "version"
     LOCALE = "locale"
@@ -165,7 +172,7 @@ class LibraryMetaKeys(Enum):
 
 
 # [META] Framework supported keys
-class FrameworkMetaKeys(Enum):
+class FrameworkMetaKeys(MetaKey):
     URN = "urn"
     BASE_URN = "base_urn"
     REF_ID = "ref_id"
@@ -179,17 +186,17 @@ class FrameworkMetaKeys(Enum):
 
 
 # [META] Threats supported keys
-class ThreatsMetaKeys(Enum):
+class ThreatsMetaKeys(MetaKey):
     BASE_URN = "base_urn"
 
 
 # [META] Reference Controls supported keys
-class ReferenceControlsMetaKeys(Enum):
+class ReferenceControlsMetaKeys(MetaKey):
     BASE_URN = "base_urn"
 
 
 # [META] Risk Matrix supported keys
-class RiskMatrixMetaKeys(Enum):
+class RiskMatrixMetaKeys(MetaKey):
     URN = "urn"
     REF_ID = "ref_id"
     NAME = "name"
@@ -197,7 +204,7 @@ class RiskMatrixMetaKeys(Enum):
 
 
 # [META] Requirement Mapping Set supported keys
-class RequirementMappingSetMetaKeys(Enum):
+class RequirementMappingSetMetaKeys(MetaKey):
     URN = "urn"
     REF_ID = "ref_id"
     NAME = "name"
@@ -209,32 +216,32 @@ class RequirementMappingSetMetaKeys(Enum):
 
 
 # [META] Implementation Groups supported keys
-class ImplementationGroupsMetaKeys(Enum):
+class ImplementationGroupsMetaKeys(MetaKey):
     NAME = "name"
 
 
 # [META] Scores supported keys
-class ScoresMetaKeys(Enum):
+class ScoresMetaKeys(MetaKey):
     NAME = "name"
 
 
 # [META] Answers supported keys
-class AnswersMetaKeys(Enum):
+class AnswersMetaKeys(MetaKey):
     NAME = "name"
 
 
 # [META] URN Prefix supported keys (None for now)
-class URNPrefixMetaKeys(Enum):
+class URNPrefixMetaKeys(MetaKey):
     pass
 
 
 # Define the required, optional, and translatable keys of a meta sheet
 @dataclass(frozen=True)
 class MetaSheetSchema:
-    key_enum: type[Enum]
-    expected_keys: tuple[Enum, ...]
-    optional_keys: tuple[Enum, ...] = ()
-    translatable_keys: tuple[Enum, ...] = ()
+    key_enum: type[MetaKey]
+    expected_keys: tuple[MetaKey, ...]
+    optional_keys: tuple[MetaKey, ...] = ()
+    translatable_keys: tuple[MetaKey, ...] = ()
 
     # Check if every keys are from the same Enum family
     def __post_init__(self):
@@ -245,7 +252,7 @@ class MetaSheetSchema:
                 raise TypeError(f"All schema keys must come from {self.key_enum.__name__}")
 
     @staticmethod
-    def _to_values(keys: tuple[Enum, ...]) -> tuple[str, ...]:
+    def _to_values(keys: tuple[MetaKey, ...]) -> tuple[str, ...]:
         return tuple(key.value for key in keys)
 
     @property
