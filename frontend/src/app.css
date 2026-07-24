@@ -83,6 +83,9 @@
 
 /* svelte-multiselect dropdown: align the options panel with the app surface in both
    themes (off-white surface-100 instead of pure white in light, surface-900 in dark). */
+div.multiselect {
+	--sms-open-z-index: 20;
+}
 div.multiselect > ul.options {
 	background-color: var(--color-surface-100-900);
 	color: var(--color-surface-950-50);
@@ -91,6 +94,16 @@ div.multiselect > ul.options > li.active {
 	background-color: var(--color-surface-200-800);
 }
 div.multiselect > ul.options > li:not(.active):hover {
+	background-color: var(--color-surface-200-800);
+}
+/* Portaled to <body>, so the rules above no longer match; theme via the library's vars. */
+ul.options.portaled-options {
+	--sms-options-bg: var(--color-surface-100-900);
+	--sms-li-active-bg: var(--color-surface-200-800);
+	--sms-options-z-index: 30;
+	color: var(--color-surface-950-50);
+}
+ul.options.portaled-options > li:not(.active):hover {
 	background-color: var(--color-surface-200-800);
 }
 /* Selected values/chips: keep text readable in dark mode. Single-select uses a
