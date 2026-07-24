@@ -19,7 +19,7 @@
 
 	let { parent, parentId, urlModel }: Props = $props();
 
-	let options: { label: string; value: string }[] = $state([]);
+	let options: { label: string; value: string; included: boolean }[] = $state([]);
 	let selectedValues: string[] = $state([]);
 	let searchQuery: string = $state('');
 	let loading = $state(true);
@@ -31,16 +31,29 @@
 			: options
 	);
 
+	const selectableCount = $derived(options.filter((o) => !o.included).length);
+
 	const canSubmit = $derived(selectedValues.length > 0 && !submitting);
 
 	onMount(async () => {
 		try {
-			const res = await fetch('/assets');
-			if (res.ok) {
-				const data = await res.json();
-				options = (data.results ?? []).map((a: any) => ({
+			const [assetsRes, existingRes] = await Promise.all([
+				fetch('/assets/autocomplete'),
+				fetch(`/asset-assessments?bia=${parentId}`)
+			]);
+			const included: Set<string> = new Set();
+			if (existingRes.ok) {
+				const data = await existingRes.json();
+				for (const aa of data.results ?? data ?? []) {
+					if (aa.asset?.id) included.add(String(aa.asset.id));
+				}
+			}
+			if (assetsRes.ok) {
+				const data = await assetsRes.json();
+				options = (data.results ?? data ?? []).map((a: any) => ({
 					label: a.folder?.str ? `${a.name} (${a.folder.str})` : a.name,
-					value: String(a.id)
+					value: String(a.id),
+					included: included.has(String(a.id))
 				}));
 			}
 		} catch (e) {
@@ -59,7 +72,12 @@
 	}
 
 	function selectAll() {
-		selectedValues = [...new Set([...selectedValues, ...filteredOptions.map((o) => o.value)])];
+		selectedValues = [
+			...new Set([
+				...selectedValues,
+				...filteredOptions.filter((o) => !o.included).map((o) => o.value)
+			])
+		];
 	}
 
 	function deselectAll() {
@@ -91,7 +109,9 @@
 				parent.onClose();
 			} else {
 				toastStore.trigger({
-					message: data.error || m.anErrorOccurred(),
+					message:
+						data.error ||
+						(data.errors?.length ? `${data.errors.length} error(s)` : m.anErrorOccurred()),
 					background: 'preset-filled-error-500'
 				});
 			}
@@ -129,20 +149,26 @@
 						<button type="button" class="anchor" onclick={selectAll}>{m.selectAll()}</button>
 						<button type="button" class="anchor" onclick={deselectAll}>{m.deselectAll()}</button>
 					</div>
-					<span class="text-surface-600-400">{selectedValues.length} / {options.length}</span>
+					<span class="text-surface-600-400">{selectedValues.length} / {selectableCount}</span>
 				</div>
 				<div class="max-h-64 overflow-y-auto border border-surface-200-800 rounded">
 					{#each filteredOptions as option (option.value)}
 						<label
-							class="flex items-center gap-2 px-3 py-1.5 hover:bg-surface-50-950 cursor-pointer border-b border-surface-100-900 last:border-b-0"
+							class="flex items-center gap-2 px-3 py-1.5 border-b border-surface-100-900 last:border-b-0 {option.included
+								? 'opacity-50'
+								: 'hover:bg-surface-50-950 cursor-pointer'}"
 						>
 							<input
 								type="checkbox"
-								checked={selectedValues.includes(option.value)}
+								checked={option.included || selectedValues.includes(option.value)}
+								disabled={option.included}
 								onchange={() => toggleValue(option.value)}
 								class="checkbox"
 							/>
 							<span class="text-sm">{option.label}</span>
+							{#if option.included}
+								<span class="ml-auto text-xs text-surface-500">{m.alreadyIncluded()}</span>
+							{/if}
 						</label>
 					{/each}
 					{#if filteredOptions.length === 0}

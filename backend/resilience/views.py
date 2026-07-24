@@ -2,6 +2,7 @@ import io
 import re
 import uuid
 
+from django.db import IntegrityError
 from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
@@ -488,6 +489,9 @@ class AssetAssessmentViewSet(BaseModelViewSet):
                 continue
             try:
                 serializer.save()
+            except IntegrityError:
+                skipped += 1
+                continue
             except PermissionDenied:
                 errors.append({"asset": asset_id, "error": "permission denied"})
                 continue
@@ -495,7 +499,7 @@ class AssetAssessmentViewSet(BaseModelViewSet):
 
         return Response(
             {
-                "success": True,
+                "success": created > 0 or skipped > 0,
                 "created": created,
                 "skipped": skipped,
                 "errors": errors,
