@@ -17,6 +17,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import MarkdownField from '../MarkdownField.svelte';
+	import CustomFieldsSection from '../CustomFieldsSection.svelte';
 	import { formFieldProxy } from 'sveltekit-superforms';
 
 	interface Props {
@@ -90,6 +91,7 @@
 	}
 
 	const { value: expirationDate } = formFieldProxy(form, 'expiration_date');
+	const { value: folderId } = formFieldProxy(form, 'folder');
 	const today = getTodayDateString();
 
 	let isExpirationDateInPast = $derived(Boolean($expirationDate) && $expirationDate < today);
@@ -215,3 +217,4 @@
 	bind:cachedValue={formDataCache['evidences']}
 	label={m.evidences()}
 />
+<CustomFieldsSection {form} model="core.securityexception" folderId={$folderId} />

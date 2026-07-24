@@ -1317,7 +1317,8 @@ export const SecurityExceptionSchema = z.object({
 	assets: z.string().uuid().optional().array().optional(),
 	evidences: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
-	link: z.string().url().optional().nullable().or(z.literal(''))
+	link: z.string().url().optional().nullable().or(z.literal('')),
+	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
 export const FindingSchema = z.object({

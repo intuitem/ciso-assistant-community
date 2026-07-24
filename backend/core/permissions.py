@@ -30,6 +30,13 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
         if not request.method:
             return False
 
+        # Built-in objects are code-managed and cannot be deleted through the API,
+        # regardless of the caller's permissions. Update immutability is enforced
+        # field-by-field in the serializer (see BUILTIN_EDITABLE_FIELDS), so that
+        # models may keep specific fields editable on built-in rows.
+        if request.method == "DELETE" and getattr(obj, "builtin", False):
+            return False
+
         perms = self.get_required_permissions(request.method, type(obj))
         if not perms:
             return False
