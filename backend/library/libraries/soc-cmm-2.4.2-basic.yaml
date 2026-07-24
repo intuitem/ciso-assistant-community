@@ -12,7 +12,7 @@ description: 'SOC-CMM is a capability maturity model used to perform a self-asse
   Source: https://www.soc-cmm.com/ (Rob van Os)'
 copyright: Copyright (C) 2025 - SOC-CMM. Licensed under CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/)
 version: 1
-publication_date: 2026-07-21
+publication_date: 2026-07-24
 provider: SOC-CMM (Rob van Os)
 packager: Nadia Qoudhadh
 translations:
@@ -108,6 +108,9 @@ objects:
       depth: 1
       ref_id: Business
       name: Business
+      translations:
+        fr:
+          name: Business
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.1
       assessable: false
       depth: 2
@@ -138,7 +141,11 @@ objects:
         5 - All business drivers are well known within the SOC'
       translations:
         fr:
-          description: "Avez-vous identifi\xE9 les principaux moteurs m\xE9tier?"
+          description: "Avez-vous identifi\xE9 les principaux moteurs m\xE9tier?\n\
+            \nMaturity guidance:\n1 - Business drivers are unknown\n2 - Basic awareness\
+            \ of business drivers\n3 - Some business drivers have been identified\n\
+            4 - Most business drivers have been identified\n5 - All business drivers\
+            \ are well known within the SOC"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.1.2
       assessable: true
       depth: 3
@@ -160,7 +167,11 @@ objects:
         5 - Document completed, approved and formally published'
       translations:
         fr:
-          description: "Avez-vous document\xE9 les principaux moteurs m\xE9tier?"
+          description: "Avez-vous document\xE9 les principaux moteurs m\xE9tier?\n\
+            \nMaturity guidance:\n1 - No documentation in place\n2 - Some ad-hoc information\
+            \ across documents\n3 - Basic documentation of business drivers\n4 - Single\
+            \ document, full description of business drivers\n5 - Document completed,\
+            \ approved and formally published"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.1.3
       assessable: true
       depth: 3
@@ -183,7 +194,11 @@ objects:
       translations:
         fr:
           description: "Utilisez-vous les moteurs m\xE9tier dans le processus de prise\
-            \ de d\xE9cision?"
+            \ de d\xE9cision?\n\nMaturity guidance:\n1 - Business drivers are not\
+            \ part of decision making\n2 - Business drivers are referred to on an\
+            \ ad-hoc basis\n3 - Business drivers are occasionally used in decisions\n\
+            4 - Business drivers are used in most decisions\n5 - Business drivers\
+            \ are used in all relevant decisions"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.1.4
       assessable: true
       depth: 3
@@ -207,7 +222,11 @@ objects:
       translations:
         fr:
           description: "V\xE9rifiez-vous r\xE9guli\xE8rement si le catalogue de services\
-            \ actuel is align\xE9 avec les moteurs m\xE9tier?"
+            \ actuel is align\xE9 avec les moteurs m\xE9tier?\n\nMaturity guidance:\n\
+            1 - Service catalogue has not been checked for alignment\n2 - Alignment\
+            \ is performed on an ad-hoc basis\n3 - Alignment was performed but not\
+            \ maintained\n4 - Alignment is performed and maintained regularly\n5 -\
+            \ Every change in the catalogue is checked against drivers"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.1.5
       assessable: true
       depth: 3
@@ -230,7 +249,11 @@ objects:
       translations:
         fr:
           description: "Les moteurs m\xE9tier ont-ils ont \xE9t\xE9 valid\xE9s avec\
-            \ les parties prenantes m\xE9tier?"
+            \ les parties prenantes m\xE9tier?\n\nMaturity guidance:\n1 - Business\
+            \ drivers have not been validated\n2 - Basic awareness of SOC drivers\
+            \ exists among stakeholders\n3 - Stakeholders informally informed of business\
+            \ drivers\n4 - Alignment of SOC drivers with stakeholders is performed\n\
+            5 - Business drivers are formally validated by stakeholders"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.2
       assessable: false
       depth: 2
@@ -262,7 +285,10 @@ objects:
       translations:
         fr:
           description: "Avez-vous identifi\xE9 les clients & parties prenantes du\
-            \ SOC?"
+            \ SOC?\n\nMaturity guidance:\n1 - SOC customers are not known\n2 - Basic\
+            \ awareness of SOC customers\n3 - Some customers have been identified\n\
+            4 - Customers have mostly been identified\n5 - All customers are identified,\
+            \ including relevance and context"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.2.2
       assessable: false
       depth: 3
@@ -366,7 +392,10 @@ objects:
       translations:
         fr:
           description: "Avez-vous document\xE9 the main SOC les clients & parties\
-            \ prenantes?"
+            \ prenantes?\n\nMaturity guidance:\n1 - No documentation in place\n2 -\
+            \ Some ad-hoc information across documents\n3 - Basic documentation of\
+            \ SOC customers\n4 - Single document, full description of SOC customers\n\
+            5 - Document completed, approved and formally published"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.2.4
       assessable: true
       depth: 3
@@ -390,7 +419,11 @@ objects:
       translations:
         fr:
           description: "Diff\xE9renciez-vous output towards these specific les clients\
-            \ & parties prenantes?"
+            \ & parties prenantes?\n\nMaturity guidance:\n1 - Output is the same for\
+            \ all customers\n2 - Output is somewhat contextualized\n3 - Some customers\
+            \ receive differentiated output\n4 - All important customers receive differentiated\
+            \ output\n5 - All customers receive specific output based on context and\
+            \ type"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.2.5
       assessable: true
       depth: 3
@@ -412,8 +445,21 @@ objects:
         5 - Contract signed, approved by- and regularly reviewed with customers'
       translations:
         fr:
-          description: Avez-vous des accords de niveau de service agreements with
+          description: 'Avez-vous des accords de niveau de service agreements with
             these les clients & parties prenantes?
+
+
+            Maturity guidance:
+
+            1 - Contractual agreements not in place
+
+            2 - No contract in place, ad-hoc agreements made
+
+            3 - Basic contract in place, not formally signed of
+
+            4 - Contract signed, but not regularly reviewed
+
+            5 - Contract signed, approved by- and regularly reviewed with customers'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.2.6
       assessable: true
       depth: 3
@@ -436,7 +482,10 @@ objects:
       translations:
         fr:
           description: "Envoyez-vous r\xE9guli\xE8rement updates to your les clients\
-            \ & parties prenantes?"
+            \ & parties prenantes?\n\nMaturity guidance:\n1 - No updates sent to customers\n\
+            2 - Ad-hoc updates sent to some customers\n3 - Frequent updates sent to\
+            \ most customers\n4 - Periodical updates sent to all customers\n5 - Periodical\
+            \ updates sent and discussed with all customers"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.2.7
       assessable: true
       depth: 3
@@ -459,7 +508,11 @@ objects:
       translations:
         fr:
           description: "Mesurez-vous et g\xE9rez-vous activement and manage customer\
-            \ & stakeholder satisfaction?"
+            \ & stakeholder satisfaction?\n\nMaturity guidance:\n1 - Customer satisfaction\
+            \ not measured or managed\n2 - Customer satisfaction managed in ad-hoc\
+            \ fashion\n3 - Customer satisfaction metrics defined, not applied structurally\n\
+            4 - Customer satisfaction measured structurally, not actively managed\n\
+            5 - Customer satisfaction fully managed and improved over time"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.3
       assessable: false
       depth: 2
@@ -490,7 +543,20 @@ objects:
         5 - Charter completed, approved and formally published'
       translations:
         fr:
-          description: Le SOC have a formal charter document en place?
+          description: 'Le SOC have a formal charter document en place?
+
+
+            Maturity guidance:
+
+            1 - No charter document in place
+
+            2 - Some ad-hoc information across documents
+
+            3 - Basic charter document created
+
+            4 - Single charter, full description of SOC strategic elements
+
+            5 - Charter completed, approved and formally published'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.3.2
       assessable: false
       depth: 3
@@ -620,7 +686,20 @@ objects:
         5 - Charter periodically updated and realigned with business strategy'
       translations:
         fr:
-          description: Le SOC est-il charter document regularly updated?
+          description: 'Le SOC est-il charter document regularly updated?
+
+
+            Maturity guidance:
+
+            1 - Charter is never updated
+
+            2 - Charter is updated on ad-hoc basis
+
+            3 - Charter is updated on major changes in business strategy
+
+            4 - Charter is regularly updated
+
+            5 - Charter periodically updated and realigned with business strategy'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.3.4
       assessable: true
       depth: 3
@@ -642,7 +721,21 @@ objects:
         5 - Charter is formally approved by the business / CISO'
       translations:
         fr:
-          description: Le SOC est-il charter document approved by the business / CISO?
+          description: 'Le SOC est-il charter document approved by the business /
+            CISO?
+
+
+            Maturity guidance:
+
+            1 - Charter is not approved
+
+            2 - Business / CISO has basic awareness of the charter
+
+            3 - Business / CISO has full awareness of the charter
+
+            4 - Business / CISO approves of the content, but not formally
+
+            5 - Charter is formally approved by the business / CISO'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.3.5
       assessable: true
       depth: 3
@@ -664,8 +757,21 @@ objects:
         5 - All Stakeholders are aware of the charter and its contents'
       translations:
         fr:
-          description: Tous les parties prenantes familiar avec le SOC charter document
+          description: 'Tous les parties prenantes familiar avec le SOC charter document
             contents?
+
+
+            Maturity guidance:
+
+            1 - Stakeholders are unfamiliar with the charter
+
+            2 - Some stakeholders are aware of the charter, but not its contents
+
+            3 - Some stakeholders are aware of the charter and its contents
+
+            4 - All stakeholders are aware, not all stakeholders know its contents
+
+            5 - All Stakeholders are aware of the charter and its contents'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.4
       assessable: false
       depth: 2
@@ -696,7 +802,20 @@ objects:
         5 - Formal governance process is in place and covers all SOC aspects'
       translations:
         fr:
-          description: Le SOC have a governance process en place?
+          description: 'Le SOC have a governance process en place?
+
+
+            Maturity guidance:
+
+            1 - SOC governance process is not in place
+
+            2 - SOC governance is done in an ad-hoc fashion
+
+            3 - Several governance elements are in place, but not structurally
+
+            4 - Formal governance process is in place that covers most SOC aspects
+
+            5 - Formal governance process is in place and covers all SOC aspects'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.4.2
       assessable: true
       depth: 3
@@ -718,7 +837,20 @@ objects:
         5 - All elements are identified and actively governed'
       translations:
         fr:
-          description: Have all governance elements been identified?
+          description: 'Have all governance elements been identified?
+
+
+            Maturity guidance:
+
+            1 - No governance elements have been identified
+
+            2 - Some governance elements are identified and governed ad-hoc
+
+            3 - Some governance elements are identified and governed actively
+
+            4 - Most governance elements are identified and actively governed
+
+            5 - All elements are identified and actively governed'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.4.3
       assessable: false
       depth: 3
@@ -876,7 +1008,20 @@ objects:
         5 - Costs fully managed and formally aligned with business stakeholders'
       translations:
         fr:
-          description: Is cost management en place?
+          description: 'Is cost management en place?
+
+
+            Maturity guidance:
+
+            1 - Cost management not in place
+
+            2 - Costs visible, basic budget allocation in place
+
+            3 - Costs fully visible and mostly managed, forecasting in place
+
+            4 - Costs fully managed, not formally aligned with business stakeholders
+
+            5 - Costs fully managed and formally aligned with business stakeholders'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.4.5
       assessable: false
       depth: 3
@@ -979,7 +1124,11 @@ objects:
         5 - Governance document completed, approved and formally published'
       translations:
         fr:
-          description: "Tous les governance elements formellement document\xE9?"
+          description: "Tous les governance elements formellement document\xE9?\n\n\
+            Maturity guidance:\n1 - No governance document in place\n2 - Some ad-hoc\
+            \ information across documents\n3 - Basic governance document created\n\
+            4 - Single document, full description of governance elements\n5 - Governance\
+            \ document completed, approved and formally published"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.4.7
       assessable: true
       depth: 3
@@ -1001,7 +1150,20 @@ objects:
         5 - Governance meetings at different levels scheduled, ToR formalised'
       translations:
         fr:
-          description: Are SOC governance meetings regularly held?
+          description: 'Are SOC governance meetings regularly held?
+
+
+            Maturity guidance:
+
+            1 - No governance meetings held
+
+            2 - Governance meetings held in an ad-hoc fashion
+
+            3 - Governance meetings regularly scheduled
+
+            4 - Governance meetings at different levels scheduled and structured
+
+            5 - Governance meetings at different levels scheduled, ToR formalised'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.4.8
       assessable: true
       depth: 3
@@ -1023,7 +1185,12 @@ objects:
         5 - Process is regularly and formally reviewed and updated with findings'
       translations:
         fr:
-          description: "Is the governance process r\xE9guli\xE8rement revu?"
+          description: "Is the governance process r\xE9guli\xE8rement revu?\n\nMaturity\
+            \ guidance:\n1 - Governance process is not reviewed\n2 - Governance process\
+            \ is reviewed in an ad-hoc fashion\n3 - Process is reviewed using a structured\
+            \ approach in an ad-hoc fashion\n4 - Process is regularly and informally\
+            \ reviewed and updated\n5 - Process is regularly and formally reviewed\
+            \ and updated with findings"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.4.9
       assessable: true
       depth: 3
@@ -1046,7 +1213,11 @@ objects:
       translations:
         fr:
           description: "Is the governance process align\xE9 avec toutes les parties\
-            \ prenantes?"
+            \ prenantes?\n\nMaturity guidance:\n1 - Stakeholders are unfamiliar with\
+            \ the process\n2 - Some stakeholders are aware of the process, but not\
+            \ its details\n3 - Some stakeholders are aware of the process and its\
+            \ details\n4 - All stakeholders are aware, not all stakeholders know its\
+            \ details\n5 - All stakeholders are aware of the process and its details"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.4.10
       assessable: true
       depth: 3
@@ -1068,8 +1239,21 @@ objects:
         5 - The SOC is regularly and formally assessed by a third party'
       translations:
         fr:
-          description: Le SOC est-il regularly audited or subjected to (external)
+          description: 'Le SOC est-il regularly audited or subjected to (external)
             assessments?
+
+
+            Maturity guidance:
+
+            1 - No assessments are performed
+
+            2 - The SOC is assessed in an ad-hoc fashion
+
+            3 - The SOC is assessed using a structured approach in an ad-hoc fashion
+
+            4 - The SOC is regularly and informally assessed
+
+            5 - The SOC is regularly and formally assessed by a third party'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.4.11
       assessable: true
       depth: 3
@@ -1091,7 +1275,20 @@ objects:
         5 - Continuous formalized active cooperation and information exchange'
       translations:
         fr:
-          description: Y a-t-il un(e)n active cooperation with other SOCs (external)?
+          description: 'Y a-t-il un(e)n active cooperation with other SOCs (external)?
+
+
+            Maturity guidance:
+
+            1 - No cooperation with other SOCs
+
+            2 - Some ad-hoc informal information exchange
+
+            3 - Regular exchange with external SOCs, no defined process
+
+            4 - Defined process for information exchange, regular exchange in place
+
+            5 - Continuous formalized active cooperation and information exchange'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.5
       assessable: false
       depth: 2
@@ -1123,8 +1320,21 @@ objects:
         5 - Policy with SOC activities and mandate in place, actively communicated'
       translations:
         fr:
-          description: Y a-t-il un(e)n information security policy en place that supports
-            le SOC activities?
+          description: 'Y a-t-il un(e)n information security policy en place that
+            supports le SOC activities?
+
+
+            Maturity guidance:
+
+            1 - No formal information security policy in place
+
+            2 - Information security policy in place, no mention of SOC activities
+
+            3 - Policy in place, SOC activities mentioned without mandate
+
+            4 - Policy in place, SOC activities mentioned in detail with mandate
+
+            5 - Policy with SOC activities and mandate in place, actively communicated'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.5.2
       assessable: true
       depth: 3
@@ -1146,7 +1356,20 @@ objects:
         5 - SOC policy document completed, approved and formally published'
       translations:
         fr:
-          description: Has a SOC policy been created?
+          description: 'Has a SOC policy been created?
+
+
+            Maturity guidance:
+
+            1 - No SOC policy in place
+
+            2 - Some ad-hoc information across documents
+
+            3 - Basic SOC policy document created
+
+            4 - Single document, full description of SOC policy elements
+
+            5 - SOC policy document completed, approved and formally published'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.5.3
       assessable: false
       depth: 3
@@ -1250,8 +1473,22 @@ objects:
         5 - Full involvement of the SOC in the creation of operational security policy'
       translations:
         fr:
-          description: Le SOC est-il consulted in the creation and updates of operational
+          description: 'Le SOC est-il consulted in the creation and updates of operational
             security policy?
+
+
+            Maturity guidance:
+
+            1 - SOC not consulted or informed of policy creation or policy updates
+
+            2 - SOC informed of policy creation and updates only
+
+            3 - SOC consulted before policy creation and updates, not actively involved
+
+            4 - SOC consulted before policy creation and updates, performs reviews
+
+            5 - Full involvement of the SOC in the creation of operational security
+            policy'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.5.5
       assessable: true
       depth: 3
@@ -1273,7 +1510,20 @@ objects:
         5 - Policy & central point for reporting in place, SOC part of the workflow'
       translations:
         fr:
-          description: Is a reporting policy for security incidents en place?
+          description: 'Is a reporting policy for security incidents en place?
+
+
+            Maturity guidance:
+
+            1 - No reporting policy in place
+
+            2 - Policy in place, no mention of the SOC
+
+            3 - Policy in place, role of the SOC in security incidents mentioned
+
+            4 - Policy in place with all SOC activities, no central point for reporting
+
+            5 - Policy & central point for reporting in place, SOC part of the workflow'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.5.6
       assessable: true
       depth: 3
@@ -1296,8 +1546,21 @@ objects:
         5 - A formal policy exists, its contents are accepted by all employees'
       translations:
         fr:
-          description: Is a privacy policy regarding security monitoring of employees
+          description: 'Is a privacy policy regarding security monitoring of employees
             en place?
+
+
+            Maturity guidance:
+
+            1 - No policy is in place
+
+            2 - Information regarding privacy is scattered across documents
+
+            3 - A policy exists, but has not been accepted formally
+
+            4 - A formal policy exists, its contents are known to all employees
+
+            5 - A formal policy exists, its contents are accepted by all employees'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.5.7
       assessable: true
       depth: 3
@@ -1320,8 +1583,21 @@ objects:
         5 - Regulations are fully known and the SOC is fully compliant'
       translations:
         fr:
-          description: Le SOC operate in compliance with all applicable privacy laws
+          description: 'Le SOC operate in compliance with all applicable privacy laws
             and regulations?
+
+
+            Maturity guidance:
+
+            1 - Regulations are not known and the SOC is non-compliant
+
+            2 - Some regulations are known and the SOC is non-compliant
+
+            3 - Most regulations are known and the SOC is partially compliant
+
+            4 - Regulations are fully known and the SOC is mostly compliant
+
+            5 - Regulations are fully known and the SOC is fully compliant'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.5.8
       assessable: true
       depth: 3
@@ -1344,7 +1620,21 @@ objects:
         5 - Full and regular alignment exists between SOC and legal'
       translations:
         fr:
-          description: Le SOC cooperate with legal departments regarding privacy matters?
+          description: 'Le SOC cooperate with legal departments regarding privacy
+            matters?
+
+
+            Maturity guidance:
+
+            1 - There is no cooperation between the SOC and legal
+
+            2 - There is some ad-hoc cooperation between SOC and legal
+
+            3 - There is structural cooperation between SOC and legal
+
+            4 - Alignment exists between SOC and legal
+
+            5 - Full and regular alignment exists between SOC and legal'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.5.9
       assessable: true
       depth: 3
@@ -1367,8 +1657,21 @@ objects:
         5 - Procedure completed, approved and formally published'
       translations:
         fr:
-          description: Are specific procedures en place for dealing with privacy related
-            investigations?
+          description: 'Are specific procedures en place for dealing with privacy
+            related investigations?
+
+
+            Maturity guidance:
+
+            1 - No privacy procedures in place
+
+            2 - Some ad-hoc information across documents
+
+            3 - Basic privacy procedure created
+
+            4 - Single document, full description of privacy investigations
+
+            5 - Procedure completed, approved and formally published'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business.5.11
       assessable: true
       depth: 3
@@ -1390,12 +1693,28 @@ objects:
         5 - PIAs are conducted formally and regularly'
       translations:
         fr:
-          description: Is a Privacy Impact Assessment (PIA) regularly conducted?
+          description: 'Is a Privacy Impact Assessment (PIA) regularly conducted?
+
+
+            Maturity guidance:
+
+            1 - PIAs are not conducted
+
+            2 - PIAs are conducted in an ad-hoc fashion
+
+            3 - PIAs are conducted using a structured approach in an ad-hoc fashion
+
+            4 - PIAs are conducted informally and regularly
+
+            5 - PIAs are conducted formally and regularly'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people
       assessable: false
       depth: 1
       ref_id: People
       name: People
+      translations:
+        fr:
+          name: People
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.1
       assessable: false
       depth: 2
@@ -1454,7 +1773,20 @@ objects:
         5 - The SOC is staffed to full satisfaction in terms of FTE requirements'
       translations:
         fr:
-          description: La taille actuelle du SOC du SOC meet les exigences en ETP?
+          description: 'La taille actuelle du SOC du SOC meet les exigences en ETP?
+
+
+            Maturity guidance:
+
+            1 - The SOC is either heavily overstaffed or understaffed
+
+            2 - The SOC is overstaffed or understaffed
+
+            3 - The SOC is somewhat overstaffed or understaffed
+
+            4 - The SOC mostly meets FTE requirements
+
+            5 - The SOC is staffed to full satisfaction in terms of FTE requirements'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.1.4
       assessable: true
       depth: 3
@@ -1477,8 +1809,21 @@ objects:
         5 - The external employee ratio meets all requirements'
       translations:
         fr:
-          description: Le SOC respecte-t-il les exigences de ratio to external employee
+          description: 'Le SOC respecte-t-il les exigences de ratio to external employee
             le ratio ETP interne/externe?
+
+
+            Maturity guidance:
+
+            1 - There are either way too few or too many external employees
+
+            2 - There are too few or too many external employees
+
+            3 - The SOC has somewhat too many or too few external employees
+
+            4 - The SOC mostly meets requirements for external employee FTE count
+
+            5 - The external employee ratio meets all requirements'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.1.5
       assessable: true
       depth: 3
@@ -1501,8 +1846,21 @@ objects:
         5 - All required skills are covered with internal employees as well'
       translations:
         fr:
-          description: Le SOC respecte-t-il les exigences de ratio to external employee
+          description: 'Le SOC respecte-t-il les exigences de ratio to external employee
             skillset?
+
+
+            Maturity guidance:
+
+            1 - There are too many skills only present within the external employees
+
+            2 - Some required skills are not present internally, and not transferred
+
+            3 - Some required skills are not present internally, but being transferred
+
+            4 - Most skills are covered with internal employees
+
+            5 - All required skills are covered with internal employees as well'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.1.6
       assessable: true
       depth: 3
@@ -1524,7 +1882,20 @@ objects:
         5 - All positions currently filled, meeting external ratio requirements'
       translations:
         fr:
-          description: Tous les postes sont-ils filled?
+          description: 'Tous les postes sont-ils filled?
+
+
+            Maturity guidance:
+
+            1 - Not all positions filled, service delivery cannot be assured
+
+            2 - Sufficient positions filled to ensure service delivery
+
+            3 - All key positions filled
+
+            4 - All positions currently filled, not meeting external ration requirements
+
+            5 - All positions currently filled, meeting external ratio requirements'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.1.7
       assessable: true
       depth: 3
@@ -1546,7 +1917,20 @@ objects:
         5 - A full recruitment process is in place and performing effectively'
       translations:
         fr:
-          description: Avez-vous un processus de recrutement process en place?
+          description: 'Avez-vous un processus de recrutement process en place?
+
+
+            Maturity guidance:
+
+            1 - There is no recruitment process in place
+
+            2 - Recruitment is performed at an ad-hoc basis
+
+            3 - A basic recruitment process is in place
+
+            4 - A full recruitment process is in place, but not performing effectively
+
+            5 - A full recruitment process is in place and performing effectively'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.1.8
       assessable: true
       depth: 3
@@ -1568,8 +1952,21 @@ objects:
         5 - A full acquisition process is in place and performing effectively'
       translations:
         fr:
-          description: Avez-vous un processus d'acquisition de talents acquisition
+          description: 'Avez-vous un processus d''acquisition de talents acquisition
             process en place?
+
+
+            Maturity guidance:
+
+            1 - No talent acquisition process in place
+
+            2 - Talent acquisition is performed at an ad-hoc basis
+
+            3 - A basic talent acquisition process is in place
+
+            4 - A full acquisition process is in place, but not performing effectively
+
+            5 - A full acquisition process is in place and performing effectively'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.1.9
       assessable: true
       depth: 3
@@ -1592,7 +1989,11 @@ objects:
       translations:
         fr:
           description: "Avez-vous des crit\xE8res sp\xE9cifiques KSAOs established\
-            \ for le personnel du SOC?"
+            \ for le personnel du SOC?\n\nMaturity guidance:\n1 - KSAOs have not been\
+            \ created\n2 - KSOAs are used ad-hoc in staffing activities\n3 - A basic\
+            \ standardized KSAO set is created\n4 - A full KSAO is created, but not\
+            \ actively used in staffing\n5 - A full KSAO is created, regularly updated\
+            \ and actively used in staffing"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.1.10
       assessable: true
       depth: 3
@@ -1616,7 +2017,12 @@ objects:
       translations:
         fr:
           description: "Cherchez-vous activement to create a un environnement psychologiquement\
-            \ s\xFBr pour le personnel du SOC?"
+            \ s\xFBr pour le personnel du SOC?\n\nMaturity guidance:\n1 - A safe environment\
+            \ is not actively created\n2 - Basic awareness of a safe environment exists,\
+            \ but is not implemented\n3 - A safe environment has been established,\
+            \ but not actively managed\n4 - A safe environment has been established,\
+            \ and actively managed\n5 - A safe and actively managed environment exists\
+            \ and is evaluated"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.2
       assessable: false
       depth: 2
@@ -1647,7 +2053,20 @@ objects:
         5 - All roles are fully in use and formalized'
       translations:
         fr:
-          description: Do you formally differentiate roles withdans le SOC?
+          description: 'Do you formally differentiate roles withdans le SOC?
+
+
+            Maturity guidance:
+
+            1 - No roles are used in the SOC
+
+            2 - Some roles exist, but are not actively being used
+
+            3 - Some roles exist, and are actively being used
+
+            4 - All roles are fully in use, but not formalized
+
+            5 - All roles are fully in use and formalized'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.2.2
       assessable: true
       depth: 3
@@ -1804,7 +2223,11 @@ objects:
         5 - All relevant roles are tiered and formalized'
       translations:
         fr:
-          description: "Diff\xE9renciez-vous tiers within these roles?"
+          description: "Diff\xE9renciez-vous tiers within these roles?\n\nMaturity\
+            \ guidance:\n1 - No tiers exist within these roles\n2 - Some tiers exist,\
+            \ but are not actively being used\n3 - Some tiers exist, and are actively\
+            \ being used\n4 - All tiers are fully in use, but not formalized\n5 -\
+            \ All relevant roles are tiered and formalized"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.2.4
       assessable: true
       depth: 3
@@ -1826,7 +2249,20 @@ objects:
         5 - All roles fully meet FTE requirements'
       translations:
         fr:
-          description: Tous les roles sufficiently staffed?
+          description: 'Tous les roles sufficiently staffed?
+
+
+            Maturity guidance:
+
+            1 - None of the roles meets FTE requirements
+
+            2 - Some roles meet FTE requirements
+
+            3 - Vital roles meet FTE requirements
+
+            4 - All vital roles and most other roles meet FTE requirements
+
+            5 - All roles fully meet FTE requirements'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.2.5
       assessable: true
       depth: 3
@@ -1848,7 +2284,20 @@ objects:
         5 - A full hierarchy is in place and formalized'
       translations:
         fr:
-          description: Y a-t-il un(e) role-based hierarchy in your SOC?
+          description: 'Y a-t-il un(e) role-based hierarchy in your SOC?
+
+
+            Maturity guidance:
+
+            1 - No hierarchy exists
+
+            2 - A basic hierarchy exists, but is not fully operational
+
+            3 - A basic hierarchy is in place and fully operational
+
+            4 - A full hierarchy is in place, but not formalized
+
+            5 - A full hierarchy is in place and formalized'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.2.6
       assessable: true
       depth: 3
@@ -1870,7 +2319,20 @@ objects:
         5 - Document completed, approved and formally published'
       translations:
         fr:
-          description: Avez-vous formellement documented all SOC roles?
+          description: 'Avez-vous formellement documented all SOC roles?
+
+
+            Maturity guidance:
+
+            1 - No documentation in place
+
+            2 - Some ad-hoc information across documents
+
+            3 - Basic documentation of SOC roles
+
+            4 - Single document, full description of SOC roles
+
+            5 - Document completed, approved and formally published'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.2.7
       assessable: false
       depth: 3
@@ -1973,7 +2435,20 @@ objects:
         5 - Full understanding of responsibilities formalized in training sessions'
       translations:
         fr:
-          description: Are responsibilities for each role understood?
+          description: 'Are responsibilities for each role understood?
+
+
+            Maturity guidance:
+
+            1 - Responsibilities not understood
+
+            2 - Basic awareness of responsibilities
+
+            3 - Responsibilities for some roles understood and adhered to
+
+            4 - Responsibilities for all roles mostly understood and adhered to
+
+            5 - Full understanding of responsibilities formalized in training sessions'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.2.9
       assessable: true
       depth: 3
@@ -1997,7 +2472,11 @@ objects:
       translations:
         fr:
           description: "Avez-vous document\xE9 career progression requirements for\
-            \ each of these roles?"
+            \ each of these roles?\n\nMaturity guidance:\n1 - No documentation in\
+            \ place\n2 - Some ad-hoc information across documents\n3 - Basic documentation\
+            \ of career progression for roles\n4 - Single document, full description\
+            \ of career progression for roles\n5 - Document completed, approved and\
+            \ formally published"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.2.10
       assessable: true
       depth: 3
@@ -2020,7 +2499,11 @@ objects:
       translations:
         fr:
           description: "Effectuez-vous r\xE9guli\xE8rement revise or update the role\
-            \ descriptions?"
+            \ descriptions?\n\nMaturity guidance:\n1 - Documentation is not reviewed\n\
+            2 - Documentation is reviewed ad-hoc, not using a structured approach\n\
+            3 - Documentation is reviewed ad-hoc, using a structured approach\n4 -\
+            \ Documentation is regularly and informally reviewed and updated\n5 -\
+            \ Documentation is regularly and formally reviewed and updated"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.3
       assessable: false
       depth: 2
@@ -2051,7 +2534,20 @@ objects:
         5 - A plan covering all roles is in place and formalized'
       translations:
         fr:
-          description: Avez-vous un(e) job rotation plan en place?
+          description: 'Avez-vous un(e) job rotation plan en place?
+
+
+            Maturity guidance:
+
+            1 - No plan exists
+
+            2 - A plan covering some roles is in place, but not operational
+
+            3 - A plan covering some roles is in place and operational
+
+            4 - A plan covering all roles is in place, but not formalized
+
+            5 - A plan covering all roles is in place and formalized'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.3.2
       assessable: true
       depth: 3
@@ -2073,7 +2569,20 @@ objects:
         5 - A process covering all roles is in place and formalized'
       translations:
         fr:
-          description: Avez-vous un(e) career progression process en place?
+          description: 'Avez-vous un(e) career progression process en place?
+
+
+            Maturity guidance:
+
+            1 - No career progression process is in place
+
+            2 - A process covering some roles is in place, but not operational
+
+            3 - A process covering some roles is in place and operational
+
+            4 - A process covering all roles is in place, but not formalized
+
+            5 - A process covering all roles is in place and formalized'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.3.3
       assessable: true
       depth: 3
@@ -2095,8 +2604,21 @@ objects:
         5 - A full talent management process is in place and performing effectively'
       translations:
         fr:
-          description: Avez-vous un processus d'acquisition de talents management
+          description: 'Avez-vous un processus d''acquisition de talents management
             process en place?
+
+
+            Maturity guidance:
+
+            1 - No talent management process in place
+
+            2 - Talent management is performed at an ad-hoc basis
+
+            3 - A basic talent management process is in place
+
+            4 - A full process is in place, but not performing effectively
+
+            5 - A full talent management process is in place and performing effectively'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.3.4
       assessable: true
       depth: 3
@@ -2118,7 +2640,20 @@ objects:
         5 - Diversity goals have been formally defined and are met'
       translations:
         fr:
-          description: Do you have team diversity goals?
+          description: 'Do you have team diversity goals?
+
+
+            Maturity guidance:
+
+            1 - No diversity goals exist
+
+            2 - Diversity goals are recognized but not defined
+
+            3 - Diversity goals are defined but not formalized
+
+            4 - Diversity goals have been formally defined and are not met
+
+            5 - Diversity goals have been formally defined and are met'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.3.5
       assessable: true
       depth: 3
@@ -2140,7 +2675,11 @@ objects:
         5 - Team goals are determined, approved and tracked regularly'
       translations:
         fr:
-          description: "Avez-vous \xE9tabli team goals?"
+          description: "Avez-vous \xE9tabli team goals?\n\nMaturity guidance:\n1 -\
+            \ Team goals are not determined\n2 - Team goals are determined, but not\
+            \ formally documented\n3 - Team goals are determined, and formally documented\n\
+            4 - Team goals are determined and documented, but not tracked\n5 - Team\
+            \ goals are determined, approved and tracked regularly"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.3.6
       assessable: true
       depth: 3
@@ -2162,7 +2701,20 @@ objects:
         5 - Individual goals are determined, approved and tracked regularly'
       translations:
         fr:
-          description: Do you document and track individual team member goals?
+          description: 'Do you document and track individual team member goals?
+
+
+            Maturity guidance:
+
+            1 - Individual goals are not determined
+
+            2 - Individual goals are determined, but not formally documented
+
+            3 - Individual goals are determined, and formally documented
+
+            4 - Individual goals are determined and documented, but not tracked
+
+            5 - Individual goals are determined, approved and tracked regularly'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.3.7
       assessable: true
       depth: 3
@@ -2184,7 +2736,12 @@ objects:
         5 - Periodic evaluation is performed, results are used for personal growth'
       translations:
         fr:
-          description: "Do you periodically evaluate les employ\xE9s du SOC?"
+          description: "Do you periodically evaluate les employ\xE9s du SOC?\n\nMaturity\
+            \ guidance:\n1 - No periodic evaluation is performed\n2 - Periodic evaluation\
+            \ is performed in an ad-hoc fashion\n3 - Periodic evaluation is performed\
+            \ in a structured fashion\n4 - Periodic evaluation is performed, but results\
+            \ are not used structurally\n5 - Periodic evaluation is performed, results\
+            \ are used for personal growth"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.3.8
       assessable: true
       depth: 3
@@ -2206,7 +2763,21 @@ objects:
         5 - A formal process covering people, process and technology is in place'
       translations:
         fr:
-          description: Avez-vous un(e) 'new hire' process en place?
+          description: 'Avez-vous un(e) ''new hire'' process en place?
+
+
+            Maturity guidance:
+
+            1 - No new hire process in place
+
+            2 - New hire training is done in an ad-hoc fashion
+
+            3 - A process is in place, but does not cover all aspects
+
+            4 - An informal process covering people, process and technology is in
+            place
+
+            5 - A formal process covering people, process and technology is in place'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.3.9
       assessable: true
       depth: 3
@@ -2228,8 +2799,21 @@ objects:
         5 - Formal screening procedure and background checks applied structurally'
       translations:
         fr:
-          description: Tous les cas d'usage du SOC sont-ils employees subjected to
-            screening?
+          description: 'Tous les cas d''usage du SOC sont-ils employees subjected
+            to screening?
+
+
+            Maturity guidance:
+
+            1 - Screening not performed
+
+            2 - Basic screening performed in ad-hoc fashion
+
+            3 - Basic screening procedure in place, applied structurally
+
+            4 - Full screening procedure in place, applied structurally, not formalized
+
+            5 - Formal screening procedure and background checks applied structurally'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.3.10
       assessable: true
       depth: 3
@@ -2251,7 +2835,20 @@ objects:
         5 - Employee satisfaction measured periodically and used for improvement'
       translations:
         fr:
-          description: Mesurez-vous employee satisfaction for improving le SOC?
+          description: 'Mesurez-vous employee satisfaction for improving le SOC?
+
+
+            Maturity guidance:
+
+            1 - Employee satisfaction is not measured
+
+            2 - Employee satisfaction is measured in an ad-hoc fashion
+
+            3 - Satisfaction is usually measured, but not embedded in processes
+
+            4 - Employee satisfaction is measured, not used for improvement
+
+            5 - Employee satisfaction measured periodically and used for improvement'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.3.11
       assessable: true
       depth: 3
@@ -2274,8 +2871,21 @@ objects:
         5 - 1-on-1 meetings are regularly held and used for coaching and growth'
       translations:
         fr:
-          description: Y a-t-il regular 1-on-1 meetings between le SOC manager and
+          description: 'Y a-t-il regular 1-on-1 meetings between le SOC manager and
             the employees?
+
+
+            Maturity guidance:
+
+            1 - 1-on-1 meetings are not held within the SOC
+
+            2 - 1-on-1 meetings are held on ad-hoc basis
+
+            3 - Informal 1-on-1 meetings are held periodically
+
+            4 - Formal 1-on-1 meetings are regularly held, results are not structured
+
+            5 - 1-on-1 meetings are regularly held and used for coaching and growth'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.3.12
       assessable: true
       depth: 3
@@ -2297,7 +2907,20 @@ objects:
         5 - Exercises are regularly done and focused on improving team dynamics'
       translations:
         fr:
-          description: Effectuez-vous regular teambuilding exercises?
+          description: 'Effectuez-vous regular teambuilding exercises?
+
+
+            Maturity guidance:
+
+            1 - No team building exercises are performed
+
+            2 - Exercises are performed in an ad-hoc fashion
+
+            3 - Exercises are usually performed, but not embedded in processes
+
+            4 - Exercises are regularly done, but not focused on improvement
+
+            5 - Exercises are regularly done and focused on improving team dynamics'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.3.13
       assessable: true
       depth: 3
@@ -2320,8 +2943,21 @@ objects:
         5 - MTS exercises done regularly and focused on improving team dynamics'
       translations:
         fr:
-          description: Effectuez-vous regular teambuilding exercises with other teams
+          description: 'Effectuez-vous regular teambuilding exercises with other teams
             relevant to le SOC?
+
+
+            Maturity guidance:
+
+            1 - No MTS team building exercises are performed
+
+            2 - MTS exercises are performed in an ad-hoc fashion
+
+            3 - MTS exercises are usually performed, but not embedded in processes
+
+            4 - MTS exercises are regularly done, but not focused on improvement
+
+            5 - MTS exercises done regularly and focused on improving team dynamics'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.3.14
       assessable: true
       depth: 3
@@ -2343,7 +2979,20 @@ objects:
         5 - Periodic evaluation is performed, results are used for team growth'
       translations:
         fr:
-          description: Do you periodically evaluate team performance?
+          description: 'Do you periodically evaluate team performance?
+
+
+            Maturity guidance:
+
+            1 - No periodic evaluation is performed
+
+            2 - Periodic evaluation is performed in an ad-hoc fashion
+
+            3 - Periodic evaluation is performed in a structured fashion
+
+            4 - Periodic evaluation is performed, but results are not used structurally
+
+            5 - Periodic evaluation is performed, results are used for team growth'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.4
       assessable: false
       depth: 2
@@ -2374,7 +3023,20 @@ objects:
         5 - A formal process is in place, covering all knowledge aspects'
       translations:
         fr:
-          description: Avez-vous un(e) formal knowledge management process en place?
+          description: 'Avez-vous un(e) formal knowledge management process en place?
+
+
+            Maturity guidance:
+
+            1 - A knowledge management process is not in place
+
+            2 - Knowledge management is done in an ad-hoc fashion
+
+            3 - A basic process is in place, that covers some knowledge aspects
+
+            4 - An informal process is in place that covers most knowledge aspects
+
+            5 - A formal process is in place, covering all knowledge aspects'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.4.2
       assessable: true
       depth: 3
@@ -2396,7 +3058,20 @@ objects:
         5 - A complete skill matrix is in place, approved and regularly updated'
       translations:
         fr:
-          description: Avez-vous un(e) skill matrix en place?
+          description: 'Avez-vous un(e) skill matrix en place?
+
+
+            Maturity guidance:
+
+            1 - A skill matrix is not in place
+
+            2 - A basic skill matrix is in place, but incomplete
+
+            3 - A complete skill matrix is in place, not approved
+
+            4 - A complete skill matrix is in place and approved, not regularly updated
+
+            5 - A complete skill matrix is in place, approved and regularly updated'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.4.3
       assessable: false
       depth: 3
@@ -2463,7 +3138,20 @@ objects:
         5 - Matrix used to improve personal and team results, improvements tracked'
       translations:
         fr:
-          description: Is the skill matrix actively used for team and personal improvement?
+          description: 'Is the skill matrix actively used for team and personal improvement?
+
+
+            Maturity guidance:
+
+            1 - Matrix not used for improvement
+
+            2 - Matrix used for improvement in an ad-hoc fashion
+
+            3 - Matrix used to improve some personal and team results
+
+            4 - Matrix used to improve all personal and team results
+
+            5 - Matrix used to improve personal and team results, improvements tracked'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.4.5
       assessable: true
       depth: 3
@@ -2485,7 +3173,21 @@ objects:
         5 - A complete knowledge matrix is in place, approved and regularly updated'
       translations:
         fr:
-          description: Avez-vous un(e) knowledge matrix en place?
+          description: 'Avez-vous un(e) knowledge matrix en place?
+
+
+            Maturity guidance:
+
+            1 - A knowledge matrix is not in place
+
+            2 - A basic knowledge matrix is in place, but incomplete
+
+            3 - A complete knowledge matrix is in place, not approved
+
+            4 - A complete knowledge matrix is in place and approved, not regularly
+            updated
+
+            5 - A complete knowledge matrix is in place, approved and regularly updated'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.4.6
       assessable: false
       depth: 3
@@ -2544,8 +3246,21 @@ objects:
         5 - Matrix structurally used to identify training needs, training tracked'
       translations:
         fr:
-          description: Is the knowledge matrix actively used to determine training
+          description: 'Is the knowledge matrix actively used to determine training
             and education needs?
+
+
+            Maturity guidance:
+
+            1 - Matrix not used for identification of training needs
+
+            2 - Matrix used for training identification in an ad-hoc fashion
+
+            3 - Matrix used to identify training needs, but not for all employees
+
+            4 - Matrix used to identify all training needs, but not tracked for execution
+
+            5 - Matrix structurally used to identify training needs, training tracked'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.4.8
       assessable: true
       depth: 3
@@ -2567,7 +3282,12 @@ objects:
         5 - All employee abilities documented, and regularly updated'
       translations:
         fr:
-          description: "Avez-vous document\xE9 SOC team member abilities?"
+          description: "Avez-vous document\xE9 SOC team member abilities?\n\nMaturity\
+            \ guidance:\n1 - Documentation is not in place\n2 - Documentation only\
+            \ covers some employees' abilities\n3 - Documentation covers the most\
+            \ relevant abilities for the team\n4 - All employee abilities documented,\
+            \ but is not regularly updated\n5 - All employee abilities documented,\
+            \ and regularly updated"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.4.9
       assessable: true
       depth: 3
@@ -2590,7 +3310,11 @@ objects:
       translations:
         fr:
           description: "Effectuez-vous r\xE9guli\xE8rement assess and revise the knowledge\
-            \ management process?"
+            \ management process?\n\nMaturity guidance:\n1 - Documentation is not\
+            \ reviewed\n2 - Documentation is reviewed ad-hoc, not using a structured\
+            \ approach\n3 - Documentation is reviewed ad-hoc, using a structured approach\n\
+            4 - Documentation is regularly and informally reviewed and updated\n5\
+            \ - Documentation is regularly and formally reviewed and updated"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.4.10
       assessable: true
       depth: 3
@@ -2613,8 +3337,21 @@ objects:
         5 - Tooling is in place and optimized for knowledge management purposes'
       translations:
         fr:
-          description: Existe-t-il effective tooling en place to support knowledge
+          description: 'Existe-t-il effective tooling en place to support knowledge
             documentation and distribution?
+
+
+            Maturity guidance:
+
+            1 - Tooling is not in place
+
+            2 - Tooling is in place, but used in an ad-hoc fashion
+
+            3 - Tooling is in place, and used regularly
+
+            4 - Tooling is in place and use of the tool is embedded in processes
+
+            5 - Tooling is in place and optimized for knowledge management purposes'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.5
       assessable: false
       depth: 2
@@ -2645,7 +3382,20 @@ objects:
         5 - A training program covering all roles is in place and formalized'
       translations:
         fr:
-          description: Avez-vous un(e) training program en place?
+          description: 'Avez-vous un(e) training program en place?
+
+
+            Maturity guidance:
+
+            1 - A training program is not in place
+
+            2 - A training program some roles is in place, but not operational
+
+            3 - A training program covering some roles is in place and operational
+
+            4 - A training program covering all roles is in place, but not formalized
+
+            5 - A training program covering all roles is in place and formalized'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.5.2
       assessable: false
       depth: 3
@@ -2730,7 +3480,20 @@ objects:
         5 - A certification program covering all roles is in place and formalized'
       translations:
         fr:
-          description: Avez-vous un(e) certification program en place?
+          description: 'Avez-vous un(e) certification program en place?
+
+
+            Maturity guidance:
+
+            1 - A certification program is not in place
+
+            2 - A certification program some roles is in place, but not operational
+
+            3 - A certification program covering some roles is in place and operational
+
+            4 - A certification program covering all roles is in place, but not formalized
+
+            5 - A certification program covering all roles is in place and formalized'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.5.4
       assessable: false
       depth: 3
@@ -2789,8 +3552,21 @@ objects:
         5 - The programs are formally embedded in evaluation and progression'
       translations:
         fr:
-          description: Is the training and certification program connected to evaluation
+          description: 'Is the training and certification program connected to evaluation
             and career progression?
+
+
+            Maturity guidance:
+
+            1 - The programs are not connected
+
+            2 - The programs are connected in an ad-hoc fashion
+
+            3 - The programs are regularly used, but not embedded in processes
+
+            4 - The programs are mostly aligned, but not formally
+
+            5 - The programs are formally embedded in evaluation and progression'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.5.6
       assessable: true
       depth: 3
@@ -2812,7 +3588,20 @@ objects:
         5 - Employees have sufficient budget, encouraged to attend training'
       translations:
         fr:
-          description: Y a-t-il un(e) reserved budget for education and training?
+          description: 'Y a-t-il un(e) reserved budget for education and training?
+
+
+            Maturity guidance:
+
+            1 - No budget is allocated
+
+            2 - Insufficient budget is allocated for the team as a whole
+
+            3 - Sufficient budget is allocated for the team as a whole
+
+            4 - Employees have sufficient budget, not encouraged to attend training
+
+            5 - Employees have sufficient budget, encouraged to attend training'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.5.7
       assessable: true
       depth: 3
@@ -2834,7 +3623,20 @@ objects:
         5 - Employees have sufficient time, and encouraged to attend training'
       translations:
         fr:
-          description: Y a-t-il un(e) reserved amount of time for education and training?
+          description: 'Y a-t-il un(e) reserved amount of time for education and training?
+
+
+            Maturity guidance:
+
+            1 - No time is allocated
+
+            2 - Insufficient time is allocated for the team as a whole
+
+            3 - Sufficient time is allocated for the team as a whole
+
+            4 - Employees have sufficient time, but not encouraged to attend training
+
+            5 - Employees have sufficient time, and encouraged to attend training'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.5.8
       assessable: true
       depth: 3
@@ -2856,7 +3658,20 @@ objects:
         5 - Workshops are held regularly and aligned with knowledge & training'
       translations:
         fr:
-          description: Do you have regular workshops for knowledge development?
+          description: 'Do you have regular workshops for knowledge development?
+
+
+            Maturity guidance:
+
+            1 - Workshops are not held
+
+            2 - Workshops are held in an ad-hoc fashion
+
+            3 - Workshops are held periodically
+
+            4 - Workshops are held regularly, not aligned with knowledge & training
+
+            5 - Workshops are held regularly and aligned with knowledge & training'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:people.5.9
       assessable: true
       depth: 3
@@ -2880,12 +3695,19 @@ objects:
       translations:
         fr:
           description: "Effectuez-vous r\xE9guli\xE8rement revise and update the training\
-            \ and certification programs?"
+            \ and certification programs?\n\nMaturity guidance:\n1 - Programs are\
+            \ not reviewed\n2 - Programs are reviewed ad-hoc, not using a structured\
+            \ approach\n3 - Programs are reviewed ad-hoc, using a structured approach\n\
+            4 - Programs are regularly and informally reviewed and updated\n5 - Programs\
+            \ are regularly and formally reviewed and updated"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process
       assessable: false
       depth: 1
       ref_id: Process
       name: Process
+      translations:
+        fr:
+          name: Process
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.1
       assessable: false
       depth: 2
@@ -2916,7 +3738,20 @@ objects:
         5 - A formal process is in place, covering all aspects'
       translations:
         fr:
-          description: Y a-t-il un SOC management process en place?
+          description: 'Y a-t-il un SOC management process en place?
+
+
+            Maturity guidance:
+
+            1 - A SOC management process is not in place
+
+            2 - SOC management is done in an ad-hoc fashion
+
+            3 - A basic process is in place, that covers some aspects
+
+            4 - An informal process is in place that covers most aspects
+
+            5 - A formal process is in place, covering all aspects'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.1.2
       assessable: true
       depth: 3
@@ -2939,7 +3774,11 @@ objects:
       translations:
         fr:
           description: "Les \xE9l\xE9ments de gestion du SOC sont-ils elements formellement\
-            \ identifi\xE9s et document\xE9s?"
+            \ identifi\xE9s et document\xE9s?\n\nMaturity guidance:\n1 - No documentation\
+            \ in place\n2 - Some ad-hoc information across documents\n3 - Basic documentation\
+            \ of SOC management process\n4 - Single document, full description of\
+            \ SOC management process\n5 - Document completed, approved and formally\
+            \ published"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.1.3
       assessable: false
       depth: 3
@@ -3062,7 +3901,11 @@ objects:
       translations:
         fr:
           description: "Le processus de gestion du SOC est-il process r\xE9guli\xE8\
-            rement revu?"
+            rement revu?\n\nMaturity guidance:\n1 - SOC management process is not\
+            \ reviewed\n2 - SOC management process is reviewed in an ad-hoc fashion\n\
+            3 - Process is reviewed using a structured approach in an ad-hoc fashion\n\
+            4 - Process is regularly and informally reviewed and updated\n5 - Process\
+            \ is regularly and formally reviewed and updated with findings"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.1.5
       assessable: true
       depth: 3
@@ -3085,7 +3928,12 @@ objects:
       translations:
         fr:
           description: "Le processus de gestion du SOC est-il process align\xE9 avec\
-            \ toutes les parties prenantes?"
+            \ toutes les parties prenantes?\n\nMaturity guidance:\n1 - Stakeholders\
+            \ are unfamiliar with the process\n2 - Some stakeholders are aware of\
+            \ the process, but not its details\n3 - Some stakeholders are aware of\
+            \ the process and its details\n4 - All stakeholders are aware, not all\
+            \ stakeholders know its details\n5 - All stakeholders are aware of the\
+            \ process and its details"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.1.6
       assessable: true
       depth: 3
@@ -3108,7 +3956,10 @@ objects:
       translations:
         fr:
           description: "Avez-vous mis en place un processus d'am\xE9lioration continue\
-            \ (CI)?"
+            \ (CI)?\n\nMaturity guidance:\n1 - CI process not implemented\n2 - CI\
+            \ conducted in an ad-hoc fashion\n3 - CI conducted structurally, not documented\n\
+            4 - CI conducted structurally, following a defined process\n5 - CI conducted\
+            \ structurally, following an approved and measured process"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.1.7
       assessable: false
       depth: 3
@@ -3283,7 +4134,20 @@ objects:
         5 - SOC architecture process approved and used actively in decision making'
       translations:
         fr:
-          description: Avez-vous mis en place un processus d'architecture SOC?
+          description: 'Avez-vous mis en place un processus d''architecture SOC?
+
+
+            Maturity guidance:
+
+            1 - Architecture process not in place
+
+            2 - Architecture conducted in an ad-hoc fashion
+
+            3 - Basic documentation of SOC architecture, principles defined
+
+            4 - SOC architecture process completed, not used consistently decisions
+
+            5 - SOC architecture process approved and used actively in decision making'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.1.11
       assessable: false
       depth: 3
@@ -3377,7 +4241,20 @@ objects:
         5 - Exercises plan completed, approved and formally published'
       translations:
         fr:
-          description: Avez-vous un(e) documented exercise plan?
+          description: 'Avez-vous un(e) documented exercise plan?
+
+
+            Maturity guidance:
+
+            1 - No exercise plan in place
+
+            2 - Some ad-hoc information across documents
+
+            3 - Basic description of SOC exercises
+
+            4 - Single document, full description of SOC exercises
+
+            5 - Exercises plan completed, approved and formally published'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.1.2
       assessable: false
       depth: 4
@@ -3463,7 +4340,11 @@ objects:
       translations:
         fr:
           description: "Effectuez-vous les op\xE9rations de s\xE9curit\xE9 exercises\
-            \ regularly?"
+            \ regularly?\n\nMaturity guidance:\n1 - No security operations exercises\
+            \ are performed\n2 - Exercises are performed on ad-hoc basis\n3 - Exercises\
+            \ are sometimes performed in a structured manner\n4 - Informal structured\
+            \ exercises are performed regularly\n5 - Formal structured exercises are\
+            \ performed regularly"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.1.4
       assessable: true
       depth: 4
@@ -3485,7 +4366,20 @@ objects:
         5 - Results documented, reviewed and formally approved'
       translations:
         fr:
-          description: Are the results from exercises documented?
+          description: 'Are the results from exercises documented?
+
+
+            Maturity guidance:
+
+            1 - Results not documented
+
+            2 - Results documented in a ad-hoc fashion
+
+            3 - Results documented in a single document
+
+            4 - Results documented using a defined template
+
+            5 - Results documented, reviewed and formally approved'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.1.5
       assessable: true
       depth: 4
@@ -3509,7 +4403,11 @@ objects:
       translations:
         fr:
           description: "Is the output from exercises actively used to improve les\
-            \ op\xE9rations de s\xE9curit\xE9?"
+            \ op\xE9rations de s\xE9curit\xE9?\n\nMaturity guidance:\n1 - Output not\
+            \ used for improvement purposes\n2 - Improvements done in an ad-hoc fashion\n\
+            3 - Improvements determined and documented\n4 - Improvements determined\
+            \ and formally approved\n5 - Improvements determined, formally assigned,\
+            \ implementation tracked"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.2
       assessable: true
       depth: 3
@@ -3540,7 +4438,20 @@ objects:
         5 - All procedures are in place, up to date and optimized for performance'
       translations:
         fr:
-          description: Do you have standard operating procedures?
+          description: 'Do you have standard operating procedures?
+
+
+            Maturity guidance:
+
+            1 - No standard operating procedures are in place
+
+            2 - Only vital procedures are in place
+
+            3 - Most procedures are in place
+
+            4 - All procedures are in place, not optimized through feedback
+
+            5 - All procedures are in place, up to date and optimized for performance'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.2.2
       assessable: true
       depth: 4
@@ -3562,7 +4473,20 @@ objects:
         5 - Checklists are used consistently and formally signed off'
       translations:
         fr:
-          description: Utilisez-vous checklists for recurring activities?
+          description: 'Utilisez-vous checklists for recurring activities?
+
+
+            Maturity guidance:
+
+            1 - No checklists are in place
+
+            2 - A basic checklist is used in an ad-hoc fashion
+
+            3 - Checklists are in place, but not used consistently
+
+            4 - Checklists are used consistently, but not formally signed off
+
+            5 - Checklists are used consistently and formally signed off'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.2.3
       assessable: true
       depth: 4
@@ -3584,7 +4508,20 @@ objects:
         5 - Workflows are completed, approved and formally published'
       translations:
         fr:
-          description: Utilisez-vous documented workflows?
+          description: 'Utilisez-vous documented workflows?
+
+
+            Maturity guidance:
+
+            1 - Workflows are not in place
+
+            2 - Some ad-hoc information across documents
+
+            3 - Basic documentation of workflows
+
+            4 - Single document, full description of workflows
+
+            5 - Workflows are completed, approved and formally published'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.2.4
       assessable: true
       depth: 4
@@ -3606,7 +4543,20 @@ objects:
         5 - Handbook is completed, approved and formally published'
       translations:
         fr:
-          description: Avez-vous un SOC operational handbook?
+          description: 'Avez-vous un SOC operational handbook?
+
+
+            Maturity guidance:
+
+            1 - An operational handbook is not in place
+
+            2 - Some ad-hoc information across documents
+
+            3 - Basic documentation of SOC tasks & rules
+
+            4 - Single document, full description of SOC tasks & rules
+
+            5 - Handbook is completed, approved and formally published'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.2.5
       assessable: true
       depth: 4
@@ -3628,7 +4578,12 @@ objects:
         5 - OPSEC program is formally approved, enforced and regularly maintained'
       translations:
         fr:
-          description: "Avez-vous \xE9tabli an Operational Security (OPSEC) program?"
+          description: "Avez-vous \xE9tabli an Operational Security (OPSEC) program?\n\
+            \nMaturity guidance:\n1 - An OPSEC program is not in place\n2 - Some ad-hoc\
+            \ information across documents regarding OPSEC\n3 - Consistent OPSEC documentation,\
+            \ no program\n4 - Comprehensive OPSEC program exists, not consistently\
+            \ enforced/maintained\n5 - OPSEC program is formally approved, enforced\
+            \ and regularly maintained"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.3
       assessable: true
       depth: 3
@@ -3659,7 +4614,20 @@ objects:
         5 - ITSM processes integrated, executed, and optimized'
       translations:
         fr:
-          description: Are ITSM processes integrated dans le SOC?
+          description: 'Are ITSM processes integrated dans le SOC?
+
+
+            Maturity guidance:
+
+            1 - ITSM processes not integrated
+
+            2 - ITSM process integrations performed in an ad-hoc fashion
+
+            3 - ITSM process integrations in place, not structurally executed
+
+            4 - ITSM process integrations in place, structurally executed
+
+            5 - ITSM processes integrated, executed, and optimized'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.3.2
       assessable: false
       depth: 4
@@ -3735,7 +4703,20 @@ objects:
         5 - ITSM processes integration evaluation in place, aligned with stakeholders'
       translations:
         fr:
-          description: Are ITSM processes integrations regularly evaluated?
+          description: 'Are ITSM processes integrations regularly evaluated?
+
+
+            Maturity guidance:
+
+            1 - ITSM processes integrations not evaluated
+
+            2 - ITSM process integrations evaluated in an ad-hoc fashion
+
+            3 - ITSM process integration evaluation in place, not structurally executed
+
+            4 - ITSM process integration evaluation in place, structurally executed
+
+            5 - ITSM processes integration evaluation in place, aligned with stakeholders'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.4
       assessable: true
       depth: 3
@@ -3766,7 +4747,20 @@ objects:
         5 - Dedicated secure location established, fully optimized for sec ops'
       translations:
         fr:
-          description: Avez-vous un(e) dedicated physical SOC location?
+          description: 'Avez-vous un(e) dedicated physical SOC location?
+
+
+            Maturity guidance:
+
+            1 - No dedicated physical location
+
+            2 - Floorplan in place, not operationalized
+
+            3 - SOC established on single floor, some facilities in place
+
+            4 - Dedicated location established, most facilities in place
+
+            5 - Dedicated secure location established, fully optimized for sec ops'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.4.2
       assessable: false
       depth: 4
@@ -3879,7 +4873,20 @@ objects:
         5 - Shift schedules in place, covering all requirements with full coverage'
       translations:
         fr:
-          description: Avez-vous mis en place shifts dans le SOC?
+          description: 'Avez-vous mis en place shifts dans le SOC?
+
+
+            Maturity guidance:
+
+            1 - Shift schedules not in place
+
+            2 - Basic schedule in place, not applied structurally
+
+            3 - Basic schedule in place, applied structurally
+
+            4 - Shift schedules in place, covering most requirements
+
+            5 - Shift schedules in place, covering all requirements with full coverage'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.5.2
       assessable: true
       depth: 4
@@ -3901,7 +4908,20 @@ objects:
         5 - Shift schedule optimized for vigilance, regularly evaluated and improved'
       translations:
         fr:
-          description: Have schedules been optimized for vigilance during shifts?
+          description: 'Have schedules been optimized for vigilance during shifts?
+
+
+            Maturity guidance:
+
+            1 - Shift schedules not created with vigilance in mind
+
+            2 - Vigilance requirements understood, but not implemented
+
+            3 - Vigilance requirements implemented, but not optimized
+
+            4 - Shift schedule optimized for vigilance, but not regularly improved
+
+            5 - Shift schedule optimized for vigilance, regularly evaluated and improved'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.5.2.1
       assessable: true
       depth: 5
@@ -3996,7 +5016,20 @@ objects:
         5 - DMS in place, fully supporting SOC documentation requirements'
       translations:
         fr:
-          description: Avez-vous un(e) Document Management System en place?
+          description: 'Avez-vous un(e) Document Management System en place?
+
+
+            Maturity guidance:
+
+            1 - No DMS in place
+
+            2 - Documentation centralized on file shares
+
+            3 - DMS in place, documentation updates not enforced
+
+            4 - DMS in place, documentation updates and versions enforced
+
+            5 - DMS in place, fully supporting SOC documentation requirements'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.6.2
       assessable: true
       depth: 4
@@ -4018,7 +5051,20 @@ objects:
         5 - Dedicated platform, fully supporting sec ops, integrated in ITSM process'
       translations:
         fr:
-          description: Avez-vous un(e) knowledge & collaboration platform en place?
+          description: 'Avez-vous un(e) knowledge & collaboration platform en place?
+
+
+            Maturity guidance:
+
+            1 - No knowledge & collaboration platform in place
+
+            2 - Knowledge & collaboration performed in an ad-hoc fashion
+
+            3 - Platform in place, not dedicated, not restricted to SOC
+
+            4 - Platform in place, not dedicated, restricted to SOC
+
+            5 - Dedicated platform, fully supporting sec ops, integrated in ITSM process'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3
       assessable: false
       depth: 2
@@ -4049,7 +5095,20 @@ objects:
         5 - Reports are provided regularly, standardized and regularly optimized'
       translations:
         fr:
-          description: Reports
+          description: 'Reports
+
+
+            Maturity guidance:
+
+            1 - No reports are provided
+
+            2 - Reports are provided in an ad-hoc fashion
+
+            3 - Reports are provided regularly, not standardized
+
+            4 - Reports are provided regularly and standardized using quality criteria
+
+            5 - Reports are provided regularly, standardized and regularly optimized'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3.1.1
       assessable: true
       depth: 4
@@ -4217,7 +5276,11 @@ objects:
         5 - Reports fully tailored to recipients using automated templates'
       translations:
         fr:
-          description: "M\xE9triques"
+          description: "M\xE9triques\n\nMaturity guidance:\n1 - Reports not tailored\n\
+            2 - Only basic customizations for customers applied\n3 - Customizations\
+            \ applied structurally to customer reports\n4 - Reports fully tailored\
+            \ to recipients, manual customization required\n5 - Reports fully tailored\
+            \ to recipients using automated templates"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3.2.1
       assessable: true
       depth: 4
@@ -4311,7 +5374,20 @@ objects:
         5 - Reports regularly reviewed and formally signed off by recipients'
       translations:
         fr:
-          description: Advisories
+          description: 'Advisories
+
+
+            Maturity guidance:
+
+            1 - Reports not approved or reviewed
+
+            2 - Informal report review conducted
+
+            3 - Structural report review conducted
+
+            4 - Reports regularly reviewed, not formally signed off by recipients
+
+            5 - Reports regularly reviewed and formally signed off by recipients'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3.3.1
       assessable: true
       depth: 4
@@ -4362,7 +5438,20 @@ objects:
         5 - Reports dissemination through standard and approved reporting lines'
       translations:
         fr:
-          description: Education and Awareness
+          description: 'Education and Awareness
+
+
+            Maturity guidance:
+
+            1 - No established reporting lines
+
+            2 - Reports have limited dissemination
+
+            3 - Reports have a standard distribution list
+
+            4 - Reports dissemination through standard reporting lines, not approved
+
+            5 - Reports dissemination through standard and approved reporting lines'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3.4.1
       assessable: true
       depth: 4
@@ -4403,7 +5492,20 @@ objects:
         5 - Reports templates regularly updated and formally approved'
       translations:
         fr:
-          description: Communication
+          description: 'Communication
+
+
+            Maturity guidance:
+
+            1 - Report templates not updated
+
+            2 - Report templates updated in an ad-hoc fashion
+
+            3 - Report templates regularly revised and updated
+
+            4 - Report templates revised and updated using customer feedback
+
+            5 - Reports templates regularly updated and formally approved'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3.5.1
       assessable: true
       depth: 4
@@ -4455,6 +5557,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4
       ref_id: Process.4.1
+      name: '[Process.4.1]'
+      translations:
+        fr:
+          name: '[Process.4.1]'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4.1.1
       assessable: true
       depth: 4
@@ -4567,6 +5673,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4
       ref_id: Process.4.2
+      name: '[Process.4.2]'
+      translations:
+        fr:
+          name: '[Process.4.2]'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4.2.1
       assessable: true
       depth: 4
@@ -4581,7 +5691,12 @@ objects:
       translations:
         fr:
           description: "Mesurez-vous les cas d'usage par rapport au r\xE9f\xE9rentiel\
-            \ MITRE ATT&CK\xAE \xE0 des fins d'analyse des \xE9carts?"
+            \ MITRE ATT&CK\xAE \xE0 des fins d'analyse des \xE9carts?\n\nMaturity\
+            \ guidance:\n1 - Use cases not measured against Mitre ATT&CK\n2 - High\
+            \ risk use cases measured against MITRE ATT&CK\xAE\n3 - High- and medium\
+            \ risk use cases measured against MITRE ATT&CK\xAE\n4 - All use cases\
+            \ frequently measured, output used in improvement\n5 - All use cases continuously\
+            \ measured, output used in improvement"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4.2.2
       assessable: true
       depth: 4
@@ -4595,7 +5710,11 @@ objects:
       translations:
         fr:
           description: "Les r\xE8gles de surveillance sont-elles tagged with les identifiants\
-            \ du r\xE9f\xE9rentiel MITRE ATT&CK\xAE? [2]"
+            \ du r\xE9f\xE9rentiel MITRE ATT&CK\xAE? [2]\n\nMaturity guidance:\n1\
+            \ - Monitoring rules not tagged\n2 - High risk monitoring rules tagged\n\
+            3 - High- and medium risk monitoring rules tagged\n4 - All monitoring\
+            \ rules tagged, not regularly revised\n5 - All monitoring rules tagged\
+            \ and regularly revised"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4.2.3
       assessable: true
       depth: 4
@@ -4610,7 +5729,12 @@ objects:
       translations:
         fr:
           description: "Avez-vous cr\xE9\xE9 un profil de risque MITRE ATT&CK\xAE\
-            \ pour votre organisation?"
+            \ pour votre organisation?\n\nMaturity guidance:\n1 - MITRE ATT&CK\xAE\
+            \ profile not created\n2 - MITRE ATT&CK\xAE analysis performed, no formal\
+            \ profile in place\n3 - MITRE ATT&CK\xAE profile created, not validated\
+            \ or maintained\n4 - MITRE ATT&CK\xAE profile created and validated, not\
+            \ regularly maintained\n5 - Mitre ATT&CK profile created, validated and\
+            \ regularly maintained"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4.2.4
       assessable: true
       depth: 4
@@ -4625,7 +5749,11 @@ objects:
       translations:
         fr:
           description: "Avez-vous prioris\xE9 les techniques MITRE ATT&CK\xAE selon\
-            \ la pertinence? [3]"
+            \ la pertinence? [3]\n\nMaturity guidance:\n1 - ATT&CK\xAE techniques\
+            \ not prioritized\n2 - ATT&CK\xAE analysis performed, no formal prioritization\
+            \ created\n3 - ATT&CK\xAE techniques prioritized, not validated or maintained\n\
+            4 - ATT&CK\xAE techniques prioritized and validated, not regularly maintained\n\
+            5 - ATT&CK\xAE techniques prioritized, validated and regularly updated"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4.2.5
       assessable: true
       depth: 4
@@ -4648,7 +5776,12 @@ objects:
       translations:
         fr:
           description: "La sortie des cas d'usage est-elle output (alerts) utilis\xE9\
-            \ dans les activit\xE9s de renseignement sur les menaces?"
+            \ dans les activit\xE9s de renseignement sur les menaces?\n\nMaturity\
+            \ guidance:\n1 - Use case output not used in TI activities\n2 - Use case\
+            \ output used in TI activities in an ad-hoc fashion\n3 - Use case output\
+            \ used in TI activities for high-risk alerts\n4 - Use case output used\
+            \ in TI activities for most alerts, no formal process\n5 - Formal process\
+            \ in place, connecting use case output to TI activities"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4.2.6
       assessable: true
       depth: 4
@@ -4671,13 +5804,31 @@ objects:
         5 - Formal process in place, connecting TI activities to use cases'
       translations:
         fr:
-          description: Is threat intelligence used for the creation and updates of
+          description: 'Is threat intelligence used for the creation and updates of
             use cases?
+
+
+            Maturity guidance:
+
+            1 - TI not used in use case creation / updates
+
+            2 - TI used in use case creation / updates in an ad-hoc fashion
+
+            3 - TI used in use case creation / updates for high-risk threats
+
+            4 - TI used in use case creation / updates for most threats, no formal
+            process
+
+            5 - Formal process in place, connecting TI activities to use cases'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4.3
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4
       ref_id: Process.4.3
+      name: '[Process.4.3]'
+      translations:
+        fr:
+          name: '[Process.4.3]'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4.3.1
       assessable: true
       depth: 4
@@ -4701,7 +5852,11 @@ objects:
       translations:
         fr:
           description: "D\xE9terminez-vous and document visibility requirements for\
-            \ each use case?"
+            \ each use case?\n\nMaturity guidance:\n1 - Visibility requirements not\
+            \ determined\n2 - Visibility requirements determined for some use cases\n\
+            3 - Visibility requirements determined for most use cases, not documented\n\
+            4 - Visibility requirements formally determined and documented, not reviewed\n\
+            5 - Visibility requirements formally determined, documented and reviewed"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4.3.2
       assessable: true
       depth: 4
@@ -4725,7 +5880,11 @@ objects:
       translations:
         fr:
           description: "Mesurez-vous la visibilit\xE9 status pour vos cas d'usage\
-            \ \xE0 des fins d'analyse des \xE9carts?"
+            \ \xE0 des fins d'analyse des \xE9carts?\n\nMaturity guidance:\n1 - Visibility\
+            \ status not measured\n2 - Visibility status measured in an ad-hoc fashion\n\
+            3 - Visibility status measured, not actively used in improvement\n4 -\
+            \ Visibility status measured frequently, output used in improvement\n\
+            5 - Visibility status continuously measured, output used in improvement"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4.3.3
       assessable: true
       depth: 4
@@ -4740,7 +5899,12 @@ objects:
       translations:
         fr:
           description: "Mappez-vous les sources de donn\xE9es source visibility to\
-            \ the le r\xE9f\xE9rentiel MITRE ATT&CK\xAE? [4]"
+            \ the le r\xE9f\xE9rentiel MITRE ATT&CK\xAE? [4]\n\nMaturity guidance:\n\
+            1 - Data sources not mapped to MITRE ATT&CK\xAE\n2 - Data source mapping\
+            \ to ATT&CK\xAE performed in an ad-hoc fashion\n3 - Data sources mapped\
+            \ to ATT&CK\xAE, not actively used in improvement\n4 - Data sources frequently\
+            \ mapped to ATT&CK\xAE, output used in improvement\n5 - Data sources continuously\
+            \ mapped to ATT&CK\xAE, output used in improvement"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5
       assessable: false
       depth: 2
@@ -4755,6 +5919,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5
       ref_id: Process.5.1
+      name: '[Process.5.1]'
+      translations:
+        fr:
+          name: '[Process.5.1]'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.1.1
       assessable: true
       depth: 4
@@ -4777,7 +5945,11 @@ objects:
       translations:
         fr:
           description: "Avez-vous un processus de d\xE9tection engineering process\
-            \ en place?"
+            \ en place?\n\nMaturity guidance:\n1 - A detection engineering process\
+            \ is not in place\n2 - Detection engineering is done in an ad-hoc fashion\n\
+            3 - Basic process in place, not applied to all use cases\n4 - Informal\
+            \ process in place covering all use cases\n5 - Formal process in place,\
+            \ covering all use cases"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.1.2
       assessable: true
       depth: 4
@@ -4800,7 +5972,11 @@ objects:
       translations:
         fr:
           description: "La d\xE9tection est-elle engineering process formellement\
-            \ document\xE9?"
+            \ document\xE9?\n\nMaturity guidance:\n1 - No documentation in place\n\
+            2 - Some ad-hoc information across documents\n3 - Basic documentation\
+            \ of detection engineering process\n4 - Single document, full description\
+            \ of detection engineering process\n5 - Document completed, approved and\
+            \ formally published"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.1.3
       assessable: true
       depth: 4
@@ -4823,7 +5999,11 @@ objects:
       translations:
         fr:
           description: "Y a-t-il des r\xF4les sp\xE9cifiques roles and requirements\
-            \ for detection engineers?"
+            \ for detection engineers?\n\nMaturity guidance:\n1 - No specific roles\
+            \ and requirements\n2 - Requirements identified, not formalised in roles\n\
+            3 - Requirements identified, role defined but not documented\n4 - Requirements\
+            \ identified, role defined and documented\n5 - Roles formally documented,\
+            \ approved and regularly revised"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.1.4
       assessable: true
       depth: 4
@@ -4846,8 +6026,21 @@ objects:
         5 - SOC analyst are actively involved in the detection engineering process'
       translations:
         fr:
-          description: Y a-t-il un(e)ctive cooperation between the les analystes SOC
-            and the detection engineers?
+          description: 'Y a-t-il un(e)ctive cooperation between the les analystes
+            SOC and the detection engineers?
+
+
+            Maturity guidance:
+
+            1 - No cooperation between teams
+
+            2 - Cooperation between teams on an ad-hoc basis
+
+            3 - SOC analysts are informed, no further cooperation
+
+            4 - SOC analysts are informed and review outcomes
+
+            5 - SOC analyst are actively involved in the detection engineering process'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.1.5
       assessable: true
       depth: 4
@@ -4870,8 +6063,22 @@ objects:
         5 - Threat analyst are actively involved in the detection engineering process'
       translations:
         fr:
-          description: Y a-t-il un(e)ctive cooperation between the Threat Intelligence
+          description: 'Y a-t-il un(e)ctive cooperation between the Threat Intelligence
             analysts and detection engineers?
+
+
+            Maturity guidance:
+
+            1 - No cooperation between teams
+
+            2 - Cooperation between teams on an ad-hoc basis
+
+            3 - Threat analysts are informed, no further cooperation
+
+            4 - Threat analysts are informed and review outcomes
+
+            5 - Threat analyst are actively involved in the detection engineering
+            process'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.1.6
       assessable: true
       depth: 4
@@ -4893,7 +6100,20 @@ objects:
         5 - Formal handover procedure in place, documented and regularly evaluated'
       translations:
         fr:
-          description: Y a-t-il des hand-over to the analyst team?
+          description: 'Y a-t-il des hand-over to the analyst team?
+
+
+            Maturity guidance:
+
+            1 - Formal handover not in place
+
+            2 - Handover performed in an ad-hoc manner
+
+            3 - Handover performed, process not documented of formalised
+
+            4 - Handover performed, process documentation in place
+
+            5 - Formal handover procedure in place, documented and regularly evaluated'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.1.7
       assessable: true
       depth: 4
@@ -4917,7 +6137,12 @@ objects:
       translations:
         fr:
           description: "Y a-t-il une proc\xE9dure de test enviroment to test and validate\
-            \ detections before deploying them?"
+            \ detections before deploying them?\n\nMaturity guidance:\n1 - Testing\
+            \ environment not in place\n2 - Testing environment in place, not actively\
+            \ used for detection engineering\n3 - Testing environment used, testing\
+            \ process not documented or formalised\n4 - Testing environment used,\
+            \ testing process documented\n5 - Testing environment used, process documented\
+            \ and regularly evaluated"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.1.8
       assessable: true
       depth: 4
@@ -4939,8 +6164,21 @@ objects:
         5 - Formal release procedure in place, documented and regularly evaluated'
       translations:
         fr:
-          description: Y a-t-il un processus de release formel process en place for
+          description: 'Y a-t-il un processus de release formel process en place for
             new detections?
+
+
+            Maturity guidance:
+
+            1 - Release process not in place
+
+            2 - Releases performed in an ad-hoc manner
+
+            3 - Releases done structurally, process not documented of formalised
+
+            4 - Releases done structurally, process documentation in place
+
+            5 - Formal release procedure in place, documented and regularly evaluated'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.1.9
       assessable: true
       depth: 4
@@ -4962,7 +6200,12 @@ objects:
         5 - Versioning system used for all detections, commit procedure formalised'
       translations:
         fr:
-          description: "Appliquez-vous un syst\xE8me de versionnage to detections?"
+          description: "Appliquez-vous un syst\xE8me de versionnage to detections?\n\
+            \nMaturity guidance:\n1 - Versioning system not in place\n2 - Versioning\
+            \ system in place, not actively used\n3 - Versioning system used for some\
+            \ detections\n4 - Versioning system used for all detections, no formal\
+            \ commit procedure\n5 - Versioning system used for all detections, commit\
+            \ procedure formalised"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.1.10
       assessable: true
       depth: 4
@@ -4986,12 +6229,20 @@ objects:
       translations:
         fr:
           description: "Avez-vous une proc\xE9dure de retour arri\xE8re procedure\
-            \ en place in case of problems with detections?"
+            \ en place in case of problems with detections?\n\nMaturity guidance:\n\
+            1 - Roll-back procedure not in place\n2 - Roll-back procedure requirements\
+            \ understood, but not operationalized\n3 - Roll-back capability in place,\
+            \ but not documented\n4 - Roll-back capability in place and documented\n\
+            5 - Formal roll-back capability in place, documented and regularly tested"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.2
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5
       ref_id: Process.5.2
+      name: '[Process.5.2]'
+      translations:
+        fr:
+          name: '[Process.5.2]'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.2.1
       assessable: true
       depth: 4
@@ -5015,7 +6266,12 @@ objects:
       translations:
         fr:
           description: "Effectuez-vous une \xE9mulation d'adversaire emulation or\
-            \ automated detection testing? [1]"
+            \ automated detection testing? [1]\n\nMaturity guidance:\n1 - Validation\
+            \ activities not performed\n2 - Validation activities performed in an\
+            \ ad-hoc fashion\n3 - Validation activities performed structurally, no\
+            \ documented process\n4 - Validation activities performed structurally\
+            \ following a documented process\n5 - Validation activities fully aligned\
+            \ with TI and continuously improved"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.2.2
       assessable: true
       depth: 4
@@ -5030,7 +6286,12 @@ objects:
       translations:
         fr:
           description: "Testez-vous la d\xE9tection des techniques of les techniques\
-            \ MITRE ATT&CK\xAE?"
+            \ MITRE ATT&CK\xAE?\n\nMaturity guidance:\n1 - Use case testing not in\
+            \ place\n2 - Use case testing performed in ad-hoc fashion, no detection\
+            \ targets set\n3 - Some use case testing performed, detection targets\
+            \ set, no formal process\n4 - All use cases tested, process formalized,\
+            \ detection targets set\n5 - All use cases tested, visibility and detection\
+            \ targets used in improvements"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.2.3
       assessable: true
       depth: 4
@@ -5045,7 +6306,12 @@ objects:
       translations:
         fr:
           description: "Testez-vous les analyses de d\xE9tection analytics not directly\
-            \ associated with MITRE ATT&CK\xAE?"
+            \ associated with MITRE ATT&CK\xAE?\n\nMaturity guidance:\n1 - Use case\
+            \ testing not in place\n2 - Use case testing performed in ad-hoc fashion,\
+            \ no detection targets set\n3 - Some use case testing performed, detection\
+            \ targets set, no formal process\n4 - All use cases tested, process formalized,\
+            \ detection targets set\n5 - All use cases tested, visibility and detection\
+            \ targets used in improvements"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.2.4
       assessable: true
       depth: 4
@@ -5067,7 +6333,12 @@ objects:
         5 - All response playbooks formally tested, output used for improvements'
       translations:
         fr:
-          description: "Testez-vous les playbooks de r\xE9ponse playbooks?"
+          description: "Testez-vous les playbooks de r\xE9ponse playbooks?\n\nMaturity\
+            \ guidance:\n1 - Response playbooks not tested\n2 - Response playbooks\
+            \ tested in an ad-hoc fashion\n3 - Some response playbooks tested, no\
+            \ formal process\n4 - Response playbooks tested structurally following\
+            \ a documented process\n5 - All response playbooks formally tested, output\
+            \ used for improvements"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.2.5
       assessable: true
       depth: 4
@@ -5091,7 +6362,12 @@ objects:
       translations:
         fr:
           description: "La validation de d\xE9tection est-elle validation fully integrated\
-            \ in le processus d'ing\xE9nierie de d\xE9tection / pipeline?"
+            \ in le processus d'ing\xE9nierie de d\xE9tection / pipeline?\n\nMaturity\
+            \ guidance:\n1 - New releases do not trigger ADT/AE\n2 - New releases\
+            \ trigger ADT/AE in an ad-hoc fashion\n3 - Release process triggers ADT/AE\
+            \ for some use cases, not documented\n4 - Releases process triggers ADT/AE\
+            \ for all use cases, documented process\n5 - Full integration into release\
+            \ process, formalized and (partly) automated"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.2.6
       assessable: true
       depth: 4
@@ -5115,7 +6391,11 @@ objects:
       translations:
         fr:
           description: "Is the outcome from detection validation utilis\xE9 comme\
-            \ entr\xE9e dans la surveillance and detection engineering?"
+            \ entr\xE9e dans la surveillance and detection engineering?\n\nMaturity\
+            \ guidance:\n1 - ADT/AE outcome not used\n2 - ADT/AE outcome used in an\
+            \ ad-hoc fashion\n3 - ADT/AE outcome used, no documented process\n4 -\
+            \ ADT/AE outcome used, documented process\n5 - ADT/EA outcome used, process\
+            \ documented and regularly evaluated"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.2.7
       assessable: true
       depth: 4
@@ -5139,7 +6419,12 @@ objects:
       translations:
         fr:
           description: "Surveillez-vous l'\xE9tat d'ingestion des donn\xE9es ingestion\
-            \ status for les sources de donn\xE9es?"
+            \ status for les sources de donn\xE9es?\n\nMaturity guidance:\n1 - Data\
+            \ ingestion status not monitored\n2 - Data ingestion status monitored\
+            \ in an ad-hoc fashion\n3 - Data ingestion status monitored, not complete\
+            \ for all data source types\n4 - Data ingestion status monitored for all\
+            \ log sources, failures result in alerts\n5 - Data ingestion status monitored,\
+            \ following a defined resolution process"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.2.8
       assessable: true
       depth: 4
@@ -5162,7 +6447,11 @@ objects:
       translations:
         fr:
           description: "Mesurez-vous et g\xE9rez-vous activement and improve la couverture\
-            \ des sources de donn\xE9es?"
+            \ des sources de donn\xE9es?\n\nMaturity guidance:\n1 - Data source coverage\
+            \ not measured\n2 - Data source coverage measured in an ad-hoc fashion\n\
+            3 - Data source coverage measured , not complete for all data source types\n\
+            4 - Data source coverage structurally measured and improved on\n5 - Data\
+            \ source coverage structurally improved on following a defined process"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6
       assessable: false
       depth: 2
@@ -5177,6 +6466,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6
       ref_id: Process.6.1
+      name: '[Process.6.1]'
+      translations:
+        fr:
+          name: '[Process.6.1]'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6.1.1
       assessable: true
       depth: 4
@@ -5198,7 +6491,20 @@ objects:
         5 - Formal process in place, covering all task areas'
       translations:
         fr:
-          description: Avez-vous un(e)n automation engineering process en place?
+          description: 'Avez-vous un(e)n automation engineering process en place?
+
+
+            Maturity guidance:
+
+            1 - An automation engineering process is not in place
+
+            2 - Automation engineering is done in an ad-hoc fashion
+
+            3 - Basic process in place, not applied to all task areas
+
+            4 - Informal process in place covering all task areas
+
+            5 - Formal process in place, covering all task areas'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6.1.2
       assessable: true
       depth: 4
@@ -5221,7 +6527,11 @@ objects:
       translations:
         fr:
           description: "L'automatisation est-elle engineering process formellement\
-            \ document\xE9?"
+            \ document\xE9?\n\nMaturity guidance:\n1 - No documentation in place\n\
+            2 - Some ad-hoc information across documents\n3 - Basic documentation\
+            \ of automation engineering process\n4 - Single document, full description\
+            \ of automation engineering process\n5 - Document completed, approved\
+            \ and formally published"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6.1.3
       assessable: false
       depth: 4
@@ -5326,7 +6636,11 @@ objects:
       translations:
         fr:
           description: "Y a-t-il des r\xF4les sp\xE9cifiques roles and requirements\
-            \ for automation engineers?"
+            \ for automation engineers?\n\nMaturity guidance:\n1 - No specific roles\
+            \ and requirements\n2 - Requirements identified, not formalised in roles\n\
+            3 - Requirements identified, role defined but not documented\n4 - Requirements\
+            \ identified, role defined and documented\n5 - Roles formally documented,\
+            \ approved and regularly revised"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6.1.5
       assessable: true
       depth: 4
@@ -5348,8 +6662,21 @@ objects:
         5 - Continuous measurement, connected to continuous improvement'
       translations:
         fr:
-          description: Les automatisations sont-elles tracked and measured using defined
-            metrics?
+          description: 'Les automatisations sont-elles tracked and measured using
+            defined metrics?
+
+
+            Maturity guidance:
+
+            1 - No metrics in place
+
+            2 - Some measurements performed on ad-hoc basis
+
+            3 - Metrics defined, measurements not consistently performed
+
+            4 - Measurements continuously performed, follow-up not consistent
+
+            5 - Continuous measurement, connected to continuous improvement'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6.1.6
       assessable: true
       depth: 4
@@ -5371,8 +6698,22 @@ objects:
         5 - All SOC use cases (+95%) touched or resolved by specific automation'
       translations:
         fr:
-          description: Tous les cas d'usage du SOC sont-ils use cases touched or resolved
-            par automatisation?
+          description: 'Tous les cas d''usage du SOC sont-ils use cases touched or
+            resolved par automatisation?
+
+
+            Maturity guidance:
+
+            1 - No automation applied to SOC use cases
+
+            2 - Automation applied only to selected use cases
+
+            3 - Most SOC use cases applied by generic automation (i.e. enrichment
+            only)
+
+            4 - Most SOC use cases (80%) touched or resolved by specific automation
+
+            5 - All SOC use cases (+95%) touched or resolved by specific automation'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6.1.7
       assessable: true
       depth: 4
@@ -5395,7 +6736,11 @@ objects:
       translations:
         fr:
           description: "Des playbooks d'automatisation personnalis\xE9s automation\
-            \ playbooks d\xE9velopp\xE9s dans le SOC?"
+            \ playbooks d\xE9velopp\xE9s dans le SOC?\n\nMaturity guidance:\n1 - No\
+            \ custom automation development\n2 - Customization of out-of-the-box automation\
+            \ playbooks\n3 - Playbook development in place, limited application\n\
+            4 - Playbooks development process formalised and consistently performed\n\
+            5 - Full playbook development process, measured and improved"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6.1.8
       assessable: true
       depth: 4
@@ -5418,7 +6763,10 @@ objects:
       translations:
         fr:
           description: "Y a-t-il une proc\xE9dure de test procedure to test and validate\
-            \ automations?"
+            \ automations?\n\nMaturity guidance:\n1 - No testing performed\n2 - Testing\
+            \ performed in an ad-hoc manner\n3 - Testing procedure defined, not applied\
+            \ consistently\n4 - Testing procedure fully operational, applied consistently\n\
+            5 - Testing procedure fully operational, documented and regularly evaluated"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6.1.9
       assessable: true
       depth: 4
@@ -5440,13 +6788,30 @@ objects:
         5 - Formal release procedure in place, documented and regularly evaluated'
       translations:
         fr:
-          description: Y a-t-il un processus de release formel process en place for
+          description: 'Y a-t-il un processus de release formel process en place for
             new automations?
+
+
+            Maturity guidance:
+
+            1 - Release process not in place
+
+            2 - Releases performed in an ad-hoc manner
+
+            3 - Releases done structurally, process not documented of formalised
+
+            4 - Releases done structurally, process documentation in place
+
+            5 - Formal release procedure in place, documented and regularly evaluated'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6.2
       assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6
       ref_id: Process.6.2
+      name: '[Process.6.2]'
+      translations:
+        fr:
+          name: '[Process.6.2]'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6.2.1
       assessable: true
       depth: 4
@@ -5469,7 +6834,10 @@ objects:
       translations:
         fr:
           description: "Avez-vous une strat\xE9gie IA adoption strategy pour le SOC\
-            \ en place?"
+            \ en place?\n\nMaturity guidance:\n1 - No AI adoption strategy in place\n\
+            2 - Some ad-hoc information across documents\n3 - Basic documentation\
+            \ of AI adoption strategy\n4 - Single document, full description of AI\
+            \ adoption strategy\n5 - Document completed, approved and formally published"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6.2.2
       assessable: false
       depth: 4
@@ -5568,7 +6936,12 @@ objects:
       translations:
         fr:
           description: "La strat\xE9gie IA est-elle adoption strategy align\xE9e en\
-            \ interne et approuv\xE9e par les parties prenantes?"
+            \ interne et approuv\xE9e par les parties prenantes?\n\nMaturity guidance:\n\
+            1 - No internal alignment or approval\n2 - Initial ad-hoc conversations\
+            \ with internal stakeholders completed\n3 - Some alignment in place, not\
+            \ complete or approved\n4 - SOC AI strategy aligned with stakeholders,\
+            \ not formally approved\n5 - SOC AI strategy fully aligned with broader\
+            \ AI strategy, formally approved"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.7
       assessable: false
       depth: 2
@@ -5599,7 +6972,20 @@ objects:
         5 - Log management process in place, all requirements met, formally approved'
       translations:
         fr:
-          description: Y a-t-il un(e) log management process en place?
+          description: 'Y a-t-il un(e) log management process en place?
+
+
+            Maturity guidance:
+
+            1 - Log management process is not in place
+
+            2 - Log management is done in an ad-hoc fashion
+
+            3 - Log management process in place, but not applied structurally
+
+            4 - Log management process in place addressing most requirements
+
+            5 - Log management process in place, all requirements met, formally approved'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.7.2
       assessable: true
       depth: 3
@@ -5622,7 +7008,11 @@ objects:
       translations:
         fr:
           description: "Are log management elements formellement identifi\xE9s et\
-            \ document\xE9s?"
+            \ document\xE9s?\n\nMaturity guidance:\n1 - No log management elements\
+            \ identified\n2 - Some elements identified, managed in ad-hoc fashion\n\
+            3 - Most elements identified, no structured approach\n4 - Most elements\
+            \ identified, no managed with a structured approach\n5 - All elements\
+            \ identified, and actively managed through a defined process"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.7.3
       assessable: false
       depth: 3
@@ -5744,7 +7134,20 @@ objects:
         5 - A formal policy exists, actively enforced and supported by stakeholders'
       translations:
         fr:
-          description: Is the log management process supported by corporate policy?
+          description: 'Is the log management process supported by corporate policy?
+
+
+            Maturity guidance:
+
+            1 - No policy is in place
+
+            2 - Log management requirements scattered across documents
+
+            3 - A policy exists, but has not been accepted formally
+
+            4 - A formal policy exists, but is not actively enforced
+
+            5 - A formal policy exists, actively enforced and supported by stakeholders'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.7.5
       assessable: true
       depth: 3
@@ -5767,8 +7170,21 @@ objects:
         5 - Centralized tooling in place, managed, and optimized for log management'
       translations:
         fr:
-          description: Is the log management process supported by appropriate centralised
+          description: 'Is the log management process supported by appropriate centralised
             log management tooling?
+
+
+            Maturity guidance:
+
+            1 - No tooling in place
+
+            2 - Log management implemented using a variety of tools
+
+            3 - Centralized tooling in place, configured for basic log management
+
+            4 - Centralized tooling in place, managed and meeting most requirements
+
+            5 - Centralized tooling in place, managed, and optimized for log management'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.7.6
       assessable: true
       depth: 3
@@ -5791,8 +7207,21 @@ objects:
         5 - Regulations are fully known and the process is fully compliant'
       translations:
         fr:
-          description: Is the log management process compliant with applicable standards
+          description: 'Is the log management process compliant with applicable standards
             & regulations?
+
+
+            Maturity guidance:
+
+            1 - Regulations are not known and the process is non-compliant
+
+            2 - Some regulations are known and the process is non-compliant
+
+            3 - Most regulations are known and the process is partially compliant
+
+            4 - Regulations are fully known and the process is mostly compliant
+
+            5 - Regulations are fully known and the process is fully compliant'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.7.7
       assessable: true
       depth: 3
@@ -5815,7 +7244,12 @@ objects:
       translations:
         fr:
           description: "Is the log management process align\xE9 avec toutes les parties\
-            \ prenantes?"
+            \ prenantes?\n\nMaturity guidance:\n1 - Stakeholders are unfamiliar with\
+            \ the process\n2 - Some stakeholders are aware of the process, but not\
+            \ its details\n3 - Process awareness in most stakeholders, but no process\
+            \ alignment\n4 - Process aligned with all relevant stakeholders, no formal\
+            \ approval\n5 - Process aligned with all relevant stakeholders, formal\
+            \ approval in place"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.7.8
       assessable: true
       depth: 3
@@ -5838,7 +7272,22 @@ objects:
         5 - All logging encrypted (rest & transfer), encryption keys centrally managed'
       translations:
         fr:
-          description: Is logging encrypted in transfer, in use, and at rest?
+          description: 'Is logging encrypted in transfer, in use, and at rest?
+
+
+            Maturity guidance:
+
+            1 - No encryption performed
+
+            2 - Some logging encrypted at rest or in transfer
+
+            3 - Most logging encrypted at rest and in transfer
+
+            4 - All logging encrypted (rest & transfer), encryption keys not formally
+            managed
+
+            5 - All logging encrypted (rest & transfer), encryption keys centrally
+            managed'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.7.9
       assessable: true
       depth: 3
@@ -5860,12 +7309,20 @@ objects:
         5 - Granular access rights implemented, monitored and reviewed regularly'
       translations:
         fr:
-          description: "L'acc\xE8s to logging restricted to authorized personnel?"
+          description: "L'acc\xE8s to logging restricted to authorized personnel?\n\
+            \nMaturity guidance:\n1 - Access to the system not restricted\n2 - Basic\
+            \ access control in place\n3 - Granular access rights implemented, not\
+            \ monitored\n4 - Granular access rights implemented and monitored, not\
+            \ reviewed\n5 - Granular access rights implemented, monitored and reviewed\
+            \ regularly"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology
       assessable: false
       depth: 1
       ref_id: Technology
       name: Technology
+      translations:
+        fr:
+          name: Technology
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1
       assessable: false
       depth: 2
@@ -8324,6 +9781,9 @@ objects:
       depth: 1
       ref_id: Services
       name: Services
+      translations:
+        fr:
+          name: Services
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.1
       assessable: false
       depth: 2
@@ -8355,7 +9815,10 @@ objects:
       translations:
         fr:
           description: "Avez-vous formellement described le service de surveillance\
-            \ de s\xE9curit\xE9?"
+            \ de s\xE9curit\xE9?\n\nMaturity guidance:\n1 - No documentation in place\n\
+            2 - Some ad-hoc information across documents\n3 - Basic documentation\
+            \ of service in place\n4 - Single document, full description of service\n\
+            5 - Document completed, approved and formally published"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.1.2
       assessable: false
       depth: 3
@@ -8486,7 +9949,11 @@ objects:
         5 - Formal and approved metrics in place, feedback used for improvement'
       translations:
         fr:
-          description: "Le service est-il mesur\xE9 pour la qualit\xE9?"
+          description: "Le service est-il mesur\xE9 pour la qualit\xE9?\n\nMaturity\
+            \ guidance:\n1 - Service not measured for quality\n2 - Metrics defined,\
+            \ applied in an ad-hoc fashion\n3 - Metrics defined, applied in a structured\
+            \ but informal fashion\n4 - Metrics formalized and used in regular reports\n\
+            5 - Formal and approved metrics in place, feedback used for improvement"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.1.4
       assessable: true
       depth: 3
@@ -8510,7 +9977,11 @@ objects:
       translations:
         fr:
           description: "Le service est-il mesur\xE9 pour la prestation de service\
-            \ in accordance with les niveaux de service?"
+            \ in accordance with les niveaux de service?\n\nMaturity guidance:\n1\
+            \ - Service not measured\n2 - SLA defined, measured in an ad-hoc fashion\n\
+            3 - SLA defined, measured periodically but not reported\n4 - SLA compliance\
+            \ reported periodically, not discussed with customers\n5 - SLA compliance\
+            \ discussed with customers regularly for improvement"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.1.5
       assessable: true
       depth: 3
@@ -8533,8 +10004,21 @@ objects:
         5 - Periodical updates sent and discussed with all customers/stakeholders'
       translations:
         fr:
-          description: Les clients and/or parties prenantes regularly updated about
+          description: 'Les clients and/or parties prenantes regularly updated about
             the service?
+
+
+            Maturity guidance:
+
+            1 - No updates sent to customers/stakeholders
+
+            2 - Ad-hoc updates sent to some customers/stakeholders
+
+            3 - Frequent updates sent to most customers/stakeholders
+
+            4 - Periodical updates sent to all customers/stakeholders
+
+            5 - Periodical updates sent and discussed with all customers/stakeholders'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.1.6
       assessable: true
       depth: 3
@@ -8556,8 +10040,21 @@ objects:
         5 - Contract signed, approved by- and regularly reviewed with customers'
       translations:
         fr:
-          description: Y a-t-il un accord contractuel agreement entre le SOC et les
+          description: 'Y a-t-il un accord contractuel agreement entre le SOC et les
             clients?
+
+
+            Maturity guidance:
+
+            1 - Contractual agreements not in place
+
+            2 - No contract in place, ad-hoc agreements made
+
+            3 - Basic contract in place, not formally signed of
+
+            4 - Contract signed, but not regularly reviewed
+
+            5 - Contract signed, approved by- and regularly reviewed with customers'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.1.7
       assessable: true
       depth: 3
@@ -8581,7 +10078,12 @@ objects:
       translations:
         fr:
           description: "Le personnel est-il suffisant personnel allou\xE9 au processus\
-            \ pour assurer la la prestation de service?"
+            \ pour assurer la la prestation de service?\n\nMaturity guidance:\n1 -\
+            \ No personnel allocated\n2 - Personnel allocated, but not sufficient\
+            \ for required service delivery\n3 - Personnel allocated, not dedicated\
+            \ for this service\n4 - Sufficient dedicated personnel available, not\
+            \ fully trained and capable\n5 - Sufficient dedicated personnel available,\
+            \ trained and fully capable"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.1.8
       assessable: true
       depth: 3
@@ -8603,7 +10105,12 @@ objects:
         5 - Alignment done structurally & regularly with all relevant processes'
       translations:
         fr:
-          description: "Le service est-il align\xE9 avec les autres processus pertinents?"
+          description: "Le service est-il align\xE9 avec les autres processus pertinents?\n\
+            \nMaturity guidance:\n1 - Process not aligned\n2 - Alignment done in an\
+            \ ad-hoc fashion\n3 - Alignment done regularly, but not in a structured\
+            \ fashion\n4 - Alignment done structurally & regularly with most relevant\
+            \ processes\n5 - Alignment done structurally & regularly with all relevant\
+            \ processes"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.1.9
       assessable: true
       depth: 3
@@ -8626,8 +10133,21 @@ objects:
         5 - Full process in place, formally approved by relevant stakeholders'
       translations:
         fr:
-          description: Y a-t-il un processus d'incident resolution / service continuity
+          description: 'Y a-t-il un processus d''incident resolution / service continuity
             process en place pour ce service?
+
+
+            Maturity guidance:
+
+            1 - No such process in place
+
+            2 - Continuity requirements identified, process not yet in place
+
+            3 - Basic service continuity process in place
+
+            4 - Full process in place, not approved by relevant stakeholders
+
+            5 - Full process in place, formally approved by relevant stakeholders'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.1.10
       assessable: true
       depth: 3
@@ -8650,7 +10170,11 @@ objects:
       translations:
         fr:
           description: "Un ensemble de proc\xE9dures a-t-il \xE9t\xE9 cr\xE9\xE9 been\
-            \ created for this service?"
+            \ created for this service?\n\nMaturity guidance:\n1 - No procedures in\
+            \ place\n2 - Basic procedures in place, used in an ad-hoc fashion\n3 -\
+            \ All procedures in place, operational but not used structurally\n4 -\
+            \ Procedures in place, operational and used structurally\n5 - Procedures\
+            \ in place, formally published and regularly reviewed"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.1.11
       assessable: true
       depth: 3
@@ -8672,8 +10196,21 @@ objects:
         5 - Procedures in place, formally published and regularly reviewed'
       translations:
         fr:
-          description: Y a-t-il un(e)n onboarding and offloading procedure for this
+          description: 'Y a-t-il un(e)n onboarding and offloading procedure for this
             service?
+
+
+            Maturity guidance:
+
+            1 - No procedures in place
+
+            2 - Basic procedures in place, used in an ad-hoc fashion
+
+            3 - Full procedures in place, operational but not used structurally
+
+            4 - Procedures in place, operational and used structurally
+
+            5 - Procedures in place, formally published and regularly reviewed'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.1.12
       assessable: true
       depth: 3
@@ -8695,7 +10232,20 @@ objects:
         5 - Best practices applied and adherence checked regularly'
       translations:
         fr:
-          description: Les meilleures pratiques sont-elles applied to the service?
+          description: 'Les meilleures pratiques sont-elles applied to the service?
+
+
+            Maturity guidance:
+
+            1 - Best practices not applied
+
+            2 - Best practices identified, but not applied
+
+            3 - Best practices applied, but not structurally
+
+            4 - Best practices applied to service architecture and service delivery
+
+            5 - Best practices applied and adherence checked regularly'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.1.13
       assessable: true
       depth: 3
@@ -8718,7 +10268,11 @@ objects:
       translations:
         fr:
           description: "Les cas d'usage sont-ils used in le service de surveillance\
-            \ de s\xE9curit\xE9?"
+            \ de s\xE9curit\xE9?\n\nMaturity guidance:\n1 - Use cases not used\n2\
+            \ - Use cases undocumented and used in an ad-hoc fashion\n3 - Use cases\
+            \ documented and applied structurally\n4 - Use cases embedded in the security\
+            \ monitoring processes\n5 - Use cases fully embedded, tuning and Life\
+            \ Cycle Management applied"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.1.14
       assessable: true
       depth: 3
@@ -8741,7 +10295,12 @@ objects:
       translations:
         fr:
           description: "Les donn\xE9es de processus sont-elles data collect\xE9es\
-            \ pour la pr\xE9diction of service performance?"
+            \ pour la pr\xE9diction of service performance?\n\nMaturity guidance:\n\
+            1 - Service performance not measured\n2 - Goals set for service performance,\
+            \ measured ad-hoc\n3 - Goals set for service performance, measured structurally\
+            \ but informally\n4 - Goals set for service performance, measured structurally\
+            \ and formally\n5 - Continuous measurement to determine progress & adjust\
+            \ process"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.1.15
       assessable: true
       depth: 3
@@ -8765,7 +10324,11 @@ objects:
       translations:
         fr:
           description: "Le service est-il continuellement am\xE9lior\xE9 bas\xE9 sur\
-            \ les objectifs d'am\xE9lioration?"
+            \ les objectifs d'am\xE9lioration?\n\nMaturity guidance:\n1 - Improvement\
+            \ not done\n2 - Goals defined, but not pursued\n3 - Goals defined and\
+            \ pursued structurally, but not formalized\n4 - Goals formally defined\
+            \ and pursued structurally and periodically\n5 - Continuous improvement\
+            \ based on targets and feedback loops"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.1.16
       assessable: false
       depth: 3
@@ -9079,8 +10642,21 @@ objects:
         5 - Standard fully adopted, process set up and executed using standard'
       translations:
         fr:
-          description: Avez-vous adopted a standard for the Security Incident Management
+          description: 'Avez-vous adopted a standard for the Security Incident Management
             process?
+
+
+            Maturity guidance:
+
+            1 - Standard not adopted
+
+            2 - Awareness of standards, used in ad-hoc fashion
+
+            3 - Standard used structurally as reference during incident response
+
+            4 - Many elements adopted, not fully aligned
+
+            5 - Standard fully adopted, process set up and executed using standard'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.2.3
       assessable: true
       depth: 3
@@ -9103,7 +10679,10 @@ objects:
       translations:
         fr:
           description: "Avez-vous formellement described l'incident de s\xE9curit\xE9\
-            \ management process?"
+            \ management process?\n\nMaturity guidance:\n1 - No documentation in place\n\
+            2 - Some ad-hoc information across documents\n3 - Basic documentation\
+            \ of service in place\n4 - Single document, full description of service\n\
+            5 - Document completed, approved and formally published"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.2.4
       assessable: false
       depth: 3
@@ -9234,7 +10813,11 @@ objects:
         5 - Formal and approved metrics in place, feedback used for improvement'
       translations:
         fr:
-          description: "Le service est-il mesur\xE9 pour la qualit\xE9?"
+          description: "Le service est-il mesur\xE9 pour la qualit\xE9?\n\nMaturity\
+            \ guidance:\n1 - Service not measured for quality\n2 - Metrics defined,\
+            \ applied in an ad-hoc fashion\n3 - Metrics defined, applied in a structured\
+            \ but informal fashion\n4 - Metrics formalized and used in regular reports\n\
+            5 - Formal and approved metrics in place, feedback used for improvement"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.2.6
       assessable: true
       depth: 3
@@ -9258,7 +10841,11 @@ objects:
       translations:
         fr:
           description: "Le service est-il mesur\xE9 pour la prestation de service\
-            \ in accordance with les niveaux de service?"
+            \ in accordance with les niveaux de service?\n\nMaturity guidance:\n1\
+            \ - Service not measured\n2 - SLA defined, measured in an ad-hoc fashion\n\
+            3 - SLA defined, measured periodically but not reported\n4 - SLA compliance\
+            \ reported periodically, not discussed with customers\n5 - SLA compliance\
+            \ discussed with customers regularly for improvement"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.2.7
       assessable: true
       depth: 3
@@ -9281,8 +10868,21 @@ objects:
         5 - Periodical updates sent and discussed with all customers/stakeholders'
       translations:
         fr:
-          description: Les clients and/or parties prenantes regularly updated about
+          description: 'Les clients and/or parties prenantes regularly updated about
             the service?
+
+
+            Maturity guidance:
+
+            1 - No updates sent to customers/stakeholders
+
+            2 - Ad-hoc updates sent to some customers/stakeholders
+
+            3 - Frequent updates sent to most customers/stakeholders
+
+            4 - Periodical updates sent to all customers/stakeholders
+
+            5 - Periodical updates sent and discussed with all customers/stakeholders'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.2.8
       assessable: true
       depth: 3
@@ -9304,8 +10904,21 @@ objects:
         5 - Contract signed, approved by- and regularly reviewed with customers'
       translations:
         fr:
-          description: Y a-t-il un accord contractuel agreement entre le SOC et les
+          description: 'Y a-t-il un accord contractuel agreement entre le SOC et les
             clients?
+
+
+            Maturity guidance:
+
+            1 - Contractual agreements not in place
+
+            2 - No contract in place, ad-hoc agreements made
+
+            3 - Basic contract in place, not formally signed of
+
+            4 - Contract signed, but not regularly reviewed
+
+            5 - Contract signed, approved by- and regularly reviewed with customers'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.2.9
       assessable: true
       depth: 3
@@ -9329,7 +10942,12 @@ objects:
       translations:
         fr:
           description: "Le personnel est-il suffisant personnel allou\xE9 au processus\
-            \ pour assurer la la prestation de service?"
+            \ pour assurer la la prestation de service?\n\nMaturity guidance:\n1 -\
+            \ No personnel allocated\n2 - Personnel allocated, but not sufficient\
+            \ for required service delivery\n3 - Personnel allocated, not dedicated\
+            \ for this service\n4 - Sufficient dedicated personnel available, not\
+            \ fully trained and capable\n5 - Sufficient dedicated personnel available,\
+            \ trained and fully capable"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.2.10
       assessable: true
       depth: 3
@@ -9351,7 +10969,12 @@ objects:
         5 - Alignment done structurally & regularly with all relevant processes'
       translations:
         fr:
-          description: "Le service est-il align\xE9 avec les autres processus pertinents?"
+          description: "Le service est-il align\xE9 avec les autres processus pertinents?\n\
+            \nMaturity guidance:\n1 - Process not aligned\n2 - Alignment done in an\
+            \ ad-hoc fashion\n3 - Alignment done regularly, but not in a structured\
+            \ fashion\n4 - Alignment done structurally & regularly with most relevant\
+            \ processes\n5 - Alignment done structurally & regularly with all relevant\
+            \ processes"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.2.11
       assessable: true
       depth: 3
@@ -9374,8 +10997,21 @@ objects:
         5 - Full mandate, formally documented, approved and published'
       translations:
         fr:
-          description: Le processus d'incident est-il response team authorized to
+          description: 'Le processus d''incident est-il response team authorized to
             perform (invasive) actions when required?
+
+
+            Maturity guidance:
+
+            1 - No mandate
+
+            2 - Mandate requested in ad-hoc fashion during incident response
+
+            3 - Mandate informally given, not supported by all stakeholders
+
+            4 - Mandate given and supported by all stakeholders, not formalized
+
+            5 - Full mandate, formally documented, approved and published'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.2.12
       assessable: true
       depth: 3
@@ -9397,8 +11033,21 @@ objects:
         5 - Procedures in place, formally published and regularly reviewed'
       translations:
         fr:
-          description: Y a-t-il un(e)n onboarding and offloading procedure for this
+          description: 'Y a-t-il un(e)n onboarding and offloading procedure for this
             service?
+
+
+            Maturity guidance:
+
+            1 - No procedures in place
+
+            2 - Basic procedures in place, used in an ad-hoc fashion
+
+            3 - Full procedures in place, operational but not used structurally
+
+            4 - Procedures in place, operational and used structurally
+
+            5 - Procedures in place, formally published and regularly reviewed'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.2.13
       assessable: true
       depth: 3
@@ -9420,7 +11069,20 @@ objects:
         5 - Best practices applied and adherence checked regularly'
       translations:
         fr:
-          description: Les meilleures pratiques sont-elles applied to the service?
+          description: 'Les meilleures pratiques sont-elles applied to the service?
+
+
+            Maturity guidance:
+
+            1 - Best practices not applied
+
+            2 - Best practices identified, but not applied
+
+            3 - Best practices applied, but not structurally
+
+            4 - Best practices applied to service architecture and service delivery
+
+            5 - Best practices applied and adherence checked regularly'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.2.14
       assessable: true
       depth: 3
@@ -9442,7 +11104,20 @@ objects:
         5 - Formal workflows created, approved & published for all incident types'
       translations:
         fr:
-          description: Le service est-il supported by predefined workflows or scenarios?
+          description: 'Le service est-il supported by predefined workflows or scenarios?
+
+
+            Maturity guidance:
+
+            1 - No workflows or scenarios in place
+
+            2 - Some ad-hoc information across documents
+
+            3 - Basic workflows in place, not covering all incident types
+
+            4 - Workflows created for all incident types, not formalized
+
+            5 - Formal workflows created, approved & published for all incident types'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.2.15
       assessable: true
       depth: 3
@@ -9465,7 +11140,12 @@ objects:
       translations:
         fr:
           description: "Les donn\xE9es de processus sont-elles data collect\xE9es\
-            \ pour la pr\xE9diction of service performance?"
+            \ pour la pr\xE9diction of service performance?\n\nMaturity guidance:\n\
+            1 - Service performance not measured\n2 - Goals set for service performance,\
+            \ measured ad-hoc\n3 - Goals set for service performance, measured structurally\
+            \ but informally\n4 - Goals set for service performance, measured structurally\
+            \ and formally\n5 - Continuous measurement to determine progress & adjust\
+            \ process"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.2.16
       assessable: true
       depth: 3
@@ -9489,7 +11169,11 @@ objects:
       translations:
         fr:
           description: "Le service est-il continuellement am\xE9lior\xE9 bas\xE9 sur\
-            \ les objectifs d'am\xE9lioration?"
+            \ les objectifs d'am\xE9lioration?\n\nMaturity guidance:\n1 - Improvement\
+            \ not done\n2 - Goals defined, but not pursued\n3 - Goals defined and\
+            \ pursued structurally, but not formalized\n4 - Goals formally defined\
+            \ and pursued structurally and periodically\n5 - Continuous improvement\
+            \ based on targets and feedback loops"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.2.17
       assessable: false
       depth: 3
@@ -9855,7 +11539,20 @@ objects:
         5 - Document completed, approved and formally published'
       translations:
         fr:
-          description: Avez-vous formellement described the forensic analysis service?
+          description: 'Avez-vous formellement described the forensic analysis service?
+
+
+            Maturity guidance:
+
+            1 - No documentation in place
+
+            2 - Some ad-hoc information across documents
+
+            3 - Basic documentation of service in place
+
+            4 - Single document, full description of service
+
+            5 - Document completed, approved and formally published'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.2
       assessable: false
       depth: 3
@@ -9986,7 +11683,11 @@ objects:
         5 - Formal and approved metrics in place, feedback used for improvement'
       translations:
         fr:
-          description: "Le service est-il mesur\xE9 pour la qualit\xE9?"
+          description: "Le service est-il mesur\xE9 pour la qualit\xE9?\n\nMaturity\
+            \ guidance:\n1 - Service not measured for quality\n2 - Metrics defined,\
+            \ applied in an ad-hoc fashion\n3 - Metrics defined, applied in a structured\
+            \ but informal fashion\n4 - Metrics formalized and used in regular reports\n\
+            5 - Formal and approved metrics in place, feedback used for improvement"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.4
       assessable: true
       depth: 3
@@ -10010,7 +11711,11 @@ objects:
       translations:
         fr:
           description: "Le service est-il mesur\xE9 pour la prestation de service\
-            \ in accordance with les niveaux de service?"
+            \ in accordance with les niveaux de service?\n\nMaturity guidance:\n1\
+            \ - Service not measured\n2 - SLA defined, measured in an ad-hoc fashion\n\
+            3 - SLA defined, measured periodically but not reported\n4 - SLA compliance\
+            \ reported periodically, not discussed with customers\n5 - SLA compliance\
+            \ discussed with customers regularly for improvement"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.5
       assessable: true
       depth: 3
@@ -10033,8 +11738,21 @@ objects:
         5 - Periodical updates sent and discussed with all customers/stakeholders'
       translations:
         fr:
-          description: Les clients and/or parties prenantes regularly updated about
+          description: 'Les clients and/or parties prenantes regularly updated about
             the service?
+
+
+            Maturity guidance:
+
+            1 - No updates sent to customers/stakeholders
+
+            2 - Ad-hoc updates sent to some customers/stakeholders
+
+            3 - Frequent updates sent to most customers/stakeholders
+
+            4 - Periodical updates sent to all customers/stakeholders
+
+            5 - Periodical updates sent and discussed with all customers/stakeholders'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.6
       assessable: true
       depth: 3
@@ -10056,8 +11774,21 @@ objects:
         5 - Contract signed, approved by- and regularly reviewed with customers'
       translations:
         fr:
-          description: Y a-t-il un accord contractuel agreement entre le SOC et les
+          description: 'Y a-t-il un accord contractuel agreement entre le SOC et les
             clients?
+
+
+            Maturity guidance:
+
+            1 - Contractual agreements not in place
+
+            2 - No contract in place, ad-hoc agreements made
+
+            3 - Basic contract in place, not formally signed of
+
+            4 - Contract signed, but not regularly reviewed
+
+            5 - Contract signed, approved by- and regularly reviewed with customers'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.7
       assessable: true
       depth: 3
@@ -10081,7 +11812,12 @@ objects:
       translations:
         fr:
           description: "Le personnel est-il suffisant personnel allou\xE9 au processus\
-            \ pour assurer la la prestation de service?"
+            \ pour assurer la la prestation de service?\n\nMaturity guidance:\n1 -\
+            \ No personnel allocated\n2 - Personnel allocated, but not sufficient\
+            \ for required service delivery\n3 - Personnel allocated, not dedicated\
+            \ for this service\n4 - Sufficient dedicated personnel available, not\
+            \ fully trained and capable\n5 - Sufficient dedicated personnel available,\
+            \ trained and fully capable"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.8
       assessable: true
       depth: 3
@@ -10103,7 +11839,12 @@ objects:
         5 - Alignment done structurally & regularly with all relevant processes'
       translations:
         fr:
-          description: "Le service est-il align\xE9 avec les autres processus pertinents?"
+          description: "Le service est-il align\xE9 avec les autres processus pertinents?\n\
+            \nMaturity guidance:\n1 - Process not aligned\n2 - Alignment done in an\
+            \ ad-hoc fashion\n3 - Alignment done regularly, but not in a structured\
+            \ fashion\n4 - Alignment done structurally & regularly with most relevant\
+            \ processes\n5 - Alignment done structurally & regularly with all relevant\
+            \ processes"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.9
       assessable: true
       depth: 3
@@ -10126,8 +11867,21 @@ objects:
         5 - Full process in place, formally approved by relevant stakeholders'
       translations:
         fr:
-          description: Y a-t-il un processus d'incident resolution / service continuity
+          description: 'Y a-t-il un processus d''incident resolution / service continuity
             process en place pour ce service?
+
+
+            Maturity guidance:
+
+            1 - No such process in place
+
+            2 - Continuity requirements identified, process not yet in place
+
+            3 - Basic service continuity process in place
+
+            4 - Full process in place, not approved by relevant stakeholders
+
+            5 - Full process in place, formally approved by relevant stakeholders'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.10
       assessable: true
       depth: 3
@@ -10150,7 +11904,11 @@ objects:
       translations:
         fr:
           description: "Un ensemble de proc\xE9dures a-t-il \xE9t\xE9 cr\xE9\xE9 been\
-            \ created for this service?"
+            \ created for this service?\n\nMaturity guidance:\n1 - No procedures in\
+            \ place\n2 - Basic procedures in place, used in an ad-hoc fashion\n3 -\
+            \ All procedures in place, operational but not used structurally\n4 -\
+            \ Procedures in place, operational and used structurally\n5 - Procedures\
+            \ in place, formally published and fully operationalized"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.11
       assessable: true
       depth: 3
@@ -10172,8 +11930,21 @@ objects:
         5 - Procedures in place, formally published and regularly reviewed'
       translations:
         fr:
-          description: Y a-t-il un(e)n onboarding and offloading procedure for this
+          description: 'Y a-t-il un(e)n onboarding and offloading procedure for this
             service?
+
+
+            Maturity guidance:
+
+            1 - No procedures in place
+
+            2 - Basic procedures in place, used in an ad-hoc fashion
+
+            3 - Full procedures in place, operational but not used structurally
+
+            4 - Procedures in place, operational and used structurally
+
+            5 - Procedures in place, formally published and regularly reviewed'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.12
       assessable: true
       depth: 3
@@ -10195,7 +11966,21 @@ objects:
         5 - Formal workflows created, approved and published for all incident types'
       translations:
         fr:
-          description: Les meilleures pratiques sont-elles applied to the service?
+          description: 'Les meilleures pratiques sont-elles applied to the service?
+
+
+            Maturity guidance:
+
+            1 - No workflows or scenarios in place
+
+            2 - Some ad-hoc information across documents
+
+            3 - Basic workflows in place, not covering all incident types
+
+            4 - Workflows created for all incident types, not formalized
+
+            5 - Formal workflows created, approved and published for all incident
+            types'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.13
       assessable: true
       depth: 3
@@ -10217,7 +12002,20 @@ objects:
         5 - Continuous measurement to determine progress & adjust process'
       translations:
         fr:
-          description: Le service est-il supported by predefined workflows or scenarios?
+          description: 'Le service est-il supported by predefined workflows or scenarios?
+
+
+            Maturity guidance:
+
+            1 - Service performance not measured
+
+            2 - Goals set for service performance, measured ad-hoc
+
+            3 - Goals set for service performance, measured structurally but informally
+
+            4 - Goals set for service performance, measured structurally and formally
+
+            5 - Continuous measurement to determine progress & adjust process'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.14
       assessable: true
       depth: 3
@@ -10240,7 +12038,11 @@ objects:
       translations:
         fr:
           description: "Les donn\xE9es de processus sont-elles data collect\xE9es\
-            \ pour la pr\xE9diction of service performance?"
+            \ pour la pr\xE9diction of service performance?\n\nMaturity guidance:\n\
+            1 - Improvement not done\n2 - Goals defined, but not pursued\n3 - Goals\
+            \ defined and pursued structurally, but not formalized\n4 - Goals formally\
+            \ defined and pursued structurally and periodically\n5 - Continuous improvement\
+            \ based on targets and feedback loops"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.15
       assessable: true
       depth: 3
@@ -10508,7 +12310,20 @@ objects:
         5 - Document completed, approved and formally published'
       translations:
         fr:
-          description: Avez-vous formellement described the threat intelligence service?
+          description: 'Avez-vous formellement described the threat intelligence service?
+
+
+            Maturity guidance:
+
+            1 - No documentation in place
+
+            2 - Some ad-hoc information across documents
+
+            3 - Basic documentation of service in place
+
+            4 - Single document, full description of service
+
+            5 - Document completed, approved and formally published'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.4.2
       assessable: false
       depth: 3
@@ -10639,7 +12454,11 @@ objects:
         5 - Formal and approved metrics in place, feedback used for improvement'
       translations:
         fr:
-          description: "Le service est-il mesur\xE9 pour la qualit\xE9?"
+          description: "Le service est-il mesur\xE9 pour la qualit\xE9?\n\nMaturity\
+            \ guidance:\n1 - Service not measured for quality\n2 - Metrics defined,\
+            \ applied in an ad-hoc fashion\n3 - Metrics defined, applied in a structured\
+            \ but informal fashion\n4 - Metrics formalized and used in regular reports\n\
+            5 - Formal and approved metrics in place, feedback used for improvement"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.4.4
       assessable: true
       depth: 3
@@ -10663,7 +12482,11 @@ objects:
       translations:
         fr:
           description: "Le service est-il mesur\xE9 pour la prestation de service\
-            \ in accordance with les niveaux de service?"
+            \ in accordance with les niveaux de service?\n\nMaturity guidance:\n1\
+            \ - Service not measured\n2 - SLA defined, measured in an ad-hoc fashion\n\
+            3 - SLA defined, measured periodically but not reported\n4 - SLA compliance\
+            \ reported periodically, not discussed with customers\n5 - SLA compliance\
+            \ discussed with customers regularly for improvement"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.4.5
       assessable: true
       depth: 3
@@ -10686,8 +12509,21 @@ objects:
         5 - Periodical updates sent and discussed with all customers/stakeholders'
       translations:
         fr:
-          description: Les clients and/or parties prenantes regularly updated about
+          description: 'Les clients and/or parties prenantes regularly updated about
             the service?
+
+
+            Maturity guidance:
+
+            1 - No updates sent to customers/stakeholders
+
+            2 - Ad-hoc updates sent to some customers/stakeholders
+
+            3 - Frequent updates sent to most customers/stakeholders
+
+            4 - Periodical updates sent to all customers/stakeholders
+
+            5 - Periodical updates sent and discussed with all customers/stakeholders'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.4.6
       assessable: true
       depth: 3
@@ -10709,8 +12545,21 @@ objects:
         5 - Contract signed, approved by- and regularly reviewed with customers'
       translations:
         fr:
-          description: Y a-t-il un accord contractuel agreement entre le SOC et les
+          description: 'Y a-t-il un accord contractuel agreement entre le SOC et les
             clients?
+
+
+            Maturity guidance:
+
+            1 - Contractual agreements not in place
+
+            2 - No contract in place, ad-hoc agreements made
+
+            3 - Basic contract in place, not formally signed of
+
+            4 - Contract signed, but not regularly reviewed
+
+            5 - Contract signed, approved by- and regularly reviewed with customers'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.4.7
       assessable: true
       depth: 3
@@ -10734,7 +12583,12 @@ objects:
       translations:
         fr:
           description: "Le personnel est-il suffisant personnel allou\xE9 au processus\
-            \ pour assurer la la prestation de service?"
+            \ pour assurer la la prestation de service?\n\nMaturity guidance:\n1 -\
+            \ No personnel allocated\n2 - Personnel allocated, but not sufficient\
+            \ for required service delivery\n3 - Personnel allocated, not dedicated\
+            \ for this service\n4 - Sufficient dedicated personnel available, not\
+            \ fully trained and capable\n5 - Sufficient dedicated personnel available,\
+            \ trained and fully capable"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.4.8
       assessable: true
       depth: 3
@@ -10756,7 +12610,12 @@ objects:
         5 - Alignment done structurally & regularly with all relevant processes'
       translations:
         fr:
-          description: "Le service est-il align\xE9 avec les autres processus pertinents?"
+          description: "Le service est-il align\xE9 avec les autres processus pertinents?\n\
+            \nMaturity guidance:\n1 - Process not aligned\n2 - Alignment done in an\
+            \ ad-hoc fashion\n3 - Alignment done regularly, but not in a structured\
+            \ fashion\n4 - Alignment done structurally & regularly with most relevant\
+            \ processes\n5 - Alignment done structurally & regularly with all relevant\
+            \ processes"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.4.9
       assessable: true
       depth: 3
@@ -10779,8 +12638,21 @@ objects:
         5 - Full process in place, formally approved by relevant stakeholders'
       translations:
         fr:
-          description: Y a-t-il un processus d'incident resolution / service continuity
+          description: 'Y a-t-il un processus d''incident resolution / service continuity
             process en place pour ce service?
+
+
+            Maturity guidance:
+
+            1 - No such process in place
+
+            2 - Continuity requirements identified, process not yet in place
+
+            3 - Basic service continuity process in place
+
+            4 - Full process in place, not approved by relevant stakeholders
+
+            5 - Full process in place, formally approved by relevant stakeholders'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.4.10
       assessable: true
       depth: 3
@@ -10803,7 +12675,11 @@ objects:
       translations:
         fr:
           description: "Un ensemble de proc\xE9dures a-t-il \xE9t\xE9 cr\xE9\xE9 been\
-            \ created for this service?"
+            \ created for this service?\n\nMaturity guidance:\n1 - No procedures in\
+            \ place\n2 - Basic procedures in place, used in an ad-hoc fashion\n3 -\
+            \ All procedures in place, operational but not used structurally\n4 -\
+            \ Procedures in place, operational and used structurally\n5 - Procedures\
+            \ in place, formally published and fully operationalized"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.4.11
       assessable: true
       depth: 3
@@ -10825,8 +12701,21 @@ objects:
         5 - Procedures in place, formally published and regularly reviewed'
       translations:
         fr:
-          description: Y a-t-il un(e)n onboarding and offloading procedure for this
+          description: 'Y a-t-il un(e)n onboarding and offloading procedure for this
             service?
+
+
+            Maturity guidance:
+
+            1 - No procedures in place
+
+            2 - Basic procedures in place, used in an ad-hoc fashion
+
+            3 - Full procedures in place, operational but not used structurally
+
+            4 - Procedures in place, operational and used structurally
+
+            5 - Procedures in place, formally published and regularly reviewed'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.4.12
       assessable: true
       depth: 3
@@ -10848,7 +12737,20 @@ objects:
         5 - Best practices applied and adherence checked regularly'
       translations:
         fr:
-          description: Les meilleures pratiques sont-elles applied to the service?
+          description: 'Les meilleures pratiques sont-elles applied to the service?
+
+
+            Maturity guidance:
+
+            1 - Best practices not applied
+
+            2 - Best practices identified, but not applied
+
+            3 - Best practices applied, but not structurally
+
+            4 - Best practices applied to service architecture and service delivery
+
+            5 - Best practices applied and adherence checked regularly'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.4.13
       assessable: true
       depth: 3
@@ -10871,7 +12773,12 @@ objects:
       translations:
         fr:
           description: "Les donn\xE9es de processus sont-elles data collect\xE9es\
-            \ pour la pr\xE9diction of service performance?"
+            \ pour la pr\xE9diction of service performance?\n\nMaturity guidance:\n\
+            1 - Service performance not measured\n2 - Goals set for service performance,\
+            \ measured ad-hoc\n3 - Goals set for service performance, measured structurally\
+            \ but informally\n4 - Goals set for service performance, measured structurally\
+            \ and formally\n5 - Continuous measurement to determine progress & adjust\
+            \ process"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.4.14
       assessable: true
       depth: 3
@@ -10895,7 +12802,11 @@ objects:
       translations:
         fr:
           description: "Le service est-il continuellement am\xE9lior\xE9 bas\xE9 sur\
-            \ les objectifs d'am\xE9lioration?"
+            \ les objectifs d'am\xE9lioration?\n\nMaturity guidance:\n1 - Improvement\
+            \ not done\n2 - Goals defined, but not pursued\n3 - Goals defined and\
+            \ pursued structurally, but not formalized\n4 - Goals formally defined\
+            \ and pursued structurally and periodically\n5 - Continuous improvement\
+            \ based on targets and feedback loops"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.4.15
       assessable: false
       depth: 3
@@ -11315,7 +13226,20 @@ objects:
         5 - Methodology fully adopted, process set up and executed accordingly'
       translations:
         fr:
-          description: Utilisez-vous a standardized threat hunting methodology?
+          description: 'Utilisez-vous a standardized threat hunting methodology?
+
+
+            Maturity guidance:
+
+            1 - Methodology not adopted
+
+            2 - Awareness of methodologies, used in ad-hoc fashion
+
+            3 - Methodologies used structurally as reference during hunting activities
+
+            4 - Many elements adopted, not fully aligned
+
+            5 - Methodology fully adopted, process set up and executed accordingly'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.5.2
       assessable: true
       depth: 3
@@ -11337,7 +13261,20 @@ objects:
         5 - Document completed, approved and formally published'
       translations:
         fr:
-          description: Avez-vous formellement described the threat hunting service?
+          description: 'Avez-vous formellement described the threat hunting service?
+
+
+            Maturity guidance:
+
+            1 - No documentation in place
+
+            2 - Some ad-hoc information across documents
+
+            3 - Basic documentation of service in place
+
+            4 - Single document, full description of service
+
+            5 - Document completed, approved and formally published'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.5.3
       assessable: false
       depth: 3
@@ -11468,7 +13405,11 @@ objects:
         5 - Formal and approved metrics in place, feedback used for improvement'
       translations:
         fr:
-          description: "Le service est-il mesur\xE9 pour la qualit\xE9?"
+          description: "Le service est-il mesur\xE9 pour la qualit\xE9?\n\nMaturity\
+            \ guidance:\n1 - Service not measured for quality\n2 - Metrics defined,\
+            \ applied in an ad-hoc fashion\n3 - Metrics defined, applied in a structured\
+            \ but informal fashion\n4 - Metrics formalized and used in regular reports\n\
+            5 - Formal and approved metrics in place, feedback used for improvement"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.5.5
       assessable: true
       depth: 3
@@ -11492,7 +13433,11 @@ objects:
       translations:
         fr:
           description: "Le service est-il mesur\xE9 pour la prestation de service\
-            \ in accordance with les niveaux de service?"
+            \ in accordance with les niveaux de service?\n\nMaturity guidance:\n1\
+            \ - Service not measured\n2 - SLA defined, measured in an ad-hoc fashion\n\
+            3 - SLA defined, measured periodically but not reported\n4 - SLA compliance\
+            \ reported periodically, not discussed with customers\n5 - SLA compliance\
+            \ discussed with customers regularly for improvement"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.5.6
       assessable: true
       depth: 3
@@ -11515,8 +13460,21 @@ objects:
         5 - Periodical updates sent and discussed with all customers/stakeholders'
       translations:
         fr:
-          description: Les clients and/or parties prenantes regularly updated about
+          description: 'Les clients and/or parties prenantes regularly updated about
             the service?
+
+
+            Maturity guidance:
+
+            1 - No updates sent to customers/stakeholders
+
+            2 - Ad-hoc updates sent to some customers/stakeholders
+
+            3 - Frequent updates sent to most customers/stakeholders
+
+            4 - Periodical updates sent to all customers/stakeholders
+
+            5 - Periodical updates sent and discussed with all customers/stakeholders'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.5.7
       assessable: true
       depth: 3
@@ -11538,8 +13496,21 @@ objects:
         5 - Contract signed, approved by- and regularly reviewed with customers'
       translations:
         fr:
-          description: Y a-t-il un accord contractuel agreement entre le SOC et les
+          description: 'Y a-t-il un accord contractuel agreement entre le SOC et les
             clients?
+
+
+            Maturity guidance:
+
+            1 - Contractual agreements not in place
+
+            2 - No contract in place, ad-hoc agreements made
+
+            3 - Basic contract in place, not formally signed of
+
+            4 - Contract signed, but not regularly reviewed
+
+            5 - Contract signed, approved by- and regularly reviewed with customers'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.5.8
       assessable: true
       depth: 3
@@ -11563,7 +13534,12 @@ objects:
       translations:
         fr:
           description: "Le personnel est-il suffisant personnel allou\xE9 au processus\
-            \ pour assurer la la prestation de service?"
+            \ pour assurer la la prestation de service?\n\nMaturity guidance:\n1 -\
+            \ No personnel allocated\n2 - Personnel allocated, but not sufficient\
+            \ for required service delivery\n3 - Personnel allocated, not dedicated\
+            \ for this service\n4 - Sufficient dedicated personnel available, not\
+            \ fully trained and capable\n5 - Sufficient dedicated personnel available,\
+            \ trained and fully capable"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.5.9
       assessable: true
       depth: 3
@@ -11585,7 +13561,12 @@ objects:
         5 - Alignment done structurally & regularly with all relevant processes'
       translations:
         fr:
-          description: "Le service est-il align\xE9 avec les autres processus pertinents?"
+          description: "Le service est-il align\xE9 avec les autres processus pertinents?\n\
+            \nMaturity guidance:\n1 - Process not aligned\n2 - Alignment done in an\
+            \ ad-hoc fashion\n3 - Alignment done regularly, but not in a structured\
+            \ fashion\n4 - Alignment done structurally & regularly with most relevant\
+            \ processes\n5 - Alignment done structurally & regularly with all relevant\
+            \ processes"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.5.10
       assessable: true
       depth: 3
@@ -11608,8 +13589,21 @@ objects:
         5 - Full process in place, formally approved by relevant stakeholders'
       translations:
         fr:
-          description: Y a-t-il un processus d'incident resolution / service continuity
+          description: 'Y a-t-il un processus d''incident resolution / service continuity
             process en place pour ce service?
+
+
+            Maturity guidance:
+
+            1 - No such process in place
+
+            2 - Continuity requirements identified, process not yet in place
+
+            3 - Basic service continuity process in place
+
+            4 - Full process in place, not approved by relevant stakeholders
+
+            5 - Full process in place, formally approved by relevant stakeholders'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.5.11
       assessable: true
       depth: 3
@@ -11632,7 +13626,11 @@ objects:
       translations:
         fr:
           description: "Un ensemble de proc\xE9dures a-t-il \xE9t\xE9 cr\xE9\xE9 been\
-            \ created for this service?"
+            \ created for this service?\n\nMaturity guidance:\n1 - No procedures in\
+            \ place\n2 - Basic procedures in place, used in an ad-hoc fashion\n3 -\
+            \ All procedures in place, operational but not used structurally\n4 -\
+            \ Procedures in place, operational and used structurally\n5 - Procedures\
+            \ in place, formally published and fully operationalized"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.5.12
       assessable: true
       depth: 3
@@ -11654,8 +13652,21 @@ objects:
         5 - Procedures in place, formally published and regularly reviewed'
       translations:
         fr:
-          description: Y a-t-il un(e)n onboarding and offloading procedure for this
+          description: 'Y a-t-il un(e)n onboarding and offloading procedure for this
             service?
+
+
+            Maturity guidance:
+
+            1 - No procedures in place
+
+            2 - Basic procedures in place, used in an ad-hoc fashion
+
+            3 - Full procedures in place, operational but not used structurally
+
+            4 - Procedures in place, operational and used structurally
+
+            5 - Procedures in place, formally published and regularly reviewed'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.5.13
       assessable: true
       depth: 3
@@ -11677,7 +13688,20 @@ objects:
         5 - Best practices applied and adherence checked regularly'
       translations:
         fr:
-          description: Les meilleures pratiques sont-elles applied to the service?
+          description: 'Les meilleures pratiques sont-elles applied to the service?
+
+
+            Maturity guidance:
+
+            1 - Best practices not applied
+
+            2 - Best practices identified, but not applied
+
+            3 - Best practices applied, but not structurally
+
+            4 - Best practices applied to service architecture and service delivery
+
+            5 - Best practices applied and adherence checked regularly'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.5.14
       assessable: true
       depth: 3
@@ -11700,7 +13724,12 @@ objects:
       translations:
         fr:
           description: "Les donn\xE9es de processus sont-elles data collect\xE9es\
-            \ pour la pr\xE9diction of service performance?"
+            \ pour la pr\xE9diction of service performance?\n\nMaturity guidance:\n\
+            1 - Service performance not measured\n2 - Goals set for service performance,\
+            \ measured ad-hoc\n3 - Goals set for service performance, measured structurally\
+            \ but informally\n4 - Goals set for service performance, measured structurally\
+            \ and formally\n5 - Continuous measurement to determine progress & adjust\
+            \ process"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.5.15
       assessable: true
       depth: 3
@@ -11724,7 +13753,11 @@ objects:
       translations:
         fr:
           description: "Le service est-il continuellement am\xE9lior\xE9 bas\xE9 sur\
-            \ les objectifs d'am\xE9lioration?"
+            \ les objectifs d'am\xE9lioration?\n\nMaturity guidance:\n1 - Improvement\
+            \ not done\n2 - Goals defined, but not pursued\n3 - Goals defined and\
+            \ pursued structurally, but not formalized\n4 - Goals formally defined\
+            \ and pursued structurally and periodically\n5 - Continuous improvement\
+            \ based on targets and feedback loops"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.5.16
       assessable: false
       depth: 3
@@ -11954,8 +13987,21 @@ objects:
         5 - Document completed, approved and formally published'
       translations:
         fr:
-          description: Avez-vous formellement described the vulnerability management
+          description: 'Avez-vous formellement described the vulnerability management
             service?
+
+
+            Maturity guidance:
+
+            1 - No documentation in place
+
+            2 - Some ad-hoc information across documents
+
+            3 - Basic documentation of service in place
+
+            4 - Single document, full description of service
+
+            5 - Document completed, approved and formally published'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.6.2
       assessable: false
       depth: 3
@@ -12086,7 +14132,11 @@ objects:
         5 - Formal and approved metrics in place, feedback used for improvement'
       translations:
         fr:
-          description: "Le service est-il mesur\xE9 pour la qualit\xE9?"
+          description: "Le service est-il mesur\xE9 pour la qualit\xE9?\n\nMaturity\
+            \ guidance:\n1 - Service not measured for quality\n2 - Metrics defined,\
+            \ applied in an ad-hoc fashion\n3 - Metrics defined, applied in a structured\
+            \ but informal fashion\n4 - Metrics formalized and used in regular reports\n\
+            5 - Formal and approved metrics in place, feedback used for improvement"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.6.4
       assessable: true
       depth: 3
@@ -12110,7 +14160,11 @@ objects:
       translations:
         fr:
           description: "Le service est-il mesur\xE9 pour la prestation de service\
-            \ in accordance with les niveaux de service?"
+            \ in accordance with les niveaux de service?\n\nMaturity guidance:\n1\
+            \ - Service not measured\n2 - SLA defined, measured in an ad-hoc fashion\n\
+            3 - SLA defined, measured periodically but not reported\n4 - SLA compliance\
+            \ reported periodically, not discussed with customers\n5 - SLA compliance\
+            \ discussed with customers regularly for improvement"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.6.5
       assessable: true
       depth: 3
@@ -12133,8 +14187,21 @@ objects:
         5 - Periodical updates sent and discussed with all customers/stakeholders'
       translations:
         fr:
-          description: Les clients and/or parties prenantes regularly updated about
+          description: 'Les clients and/or parties prenantes regularly updated about
             the service?
+
+
+            Maturity guidance:
+
+            1 - No updates sent to customers/stakeholders
+
+            2 - Ad-hoc updates sent to some customers/stakeholders
+
+            3 - Frequent updates sent to most customers/stakeholders
+
+            4 - Periodical updates sent to all customers/stakeholders
+
+            5 - Periodical updates sent and discussed with all customers/stakeholders'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.6.6
       assessable: true
       depth: 3
@@ -12156,8 +14223,21 @@ objects:
         5 - Contract signed, approved by- and regularly reviewed with customers'
       translations:
         fr:
-          description: Y a-t-il un accord contractuel agreement entre le SOC et les
+          description: 'Y a-t-il un accord contractuel agreement entre le SOC et les
             clients?
+
+
+            Maturity guidance:
+
+            1 - Contractual agreements not in place
+
+            2 - No contract in place, ad-hoc agreements made
+
+            3 - Basic contract in place, not formally signed of
+
+            4 - Contract signed, but not regularly reviewed
+
+            5 - Contract signed, approved by- and regularly reviewed with customers'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.6.7
       assessable: true
       depth: 3
@@ -12181,7 +14261,12 @@ objects:
       translations:
         fr:
           description: "Le personnel est-il suffisant personnel allou\xE9 au processus\
-            \ pour assurer la la prestation de service?"
+            \ pour assurer la la prestation de service?\n\nMaturity guidance:\n1 -\
+            \ No personnel allocated\n2 - Personnel allocated, but not sufficient\
+            \ for required service delivery\n3 - Personnel allocated, not dedicated\
+            \ for this service\n4 - Sufficient dedicated personnel available, not\
+            \ fully trained and capable\n5 - Sufficient dedicated personnel available,\
+            \ trained and fully capable"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.6.8
       assessable: true
       depth: 3
@@ -12203,7 +14288,12 @@ objects:
         5 - Alignment done structurally & regularly with all relevant processes'
       translations:
         fr:
-          description: "Le service est-il align\xE9 avec les autres processus pertinents?"
+          description: "Le service est-il align\xE9 avec les autres processus pertinents?\n\
+            \nMaturity guidance:\n1 - Process not aligned\n2 - Alignment done in an\
+            \ ad-hoc fashion\n3 - Alignment done regularly, but not in a structured\
+            \ fashion\n4 - Alignment done structurally & regularly with most relevant\
+            \ processes\n5 - Alignment done structurally & regularly with all relevant\
+            \ processes"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.6.9
       assessable: true
       depth: 3
@@ -12226,8 +14316,21 @@ objects:
         5 - Full process in place, formally approved by relevant stakeholders'
       translations:
         fr:
-          description: Y a-t-il un processus d'incident resolution / service continuity
+          description: 'Y a-t-il un processus d''incident resolution / service continuity
             process en place pour ce service?
+
+
+            Maturity guidance:
+
+            1 - No such process in place
+
+            2 - Continuity requirements identified, process not yet in place
+
+            3 - Basic service continuity process in place
+
+            4 - Full process in place, not approved by relevant stakeholders
+
+            5 - Full process in place, formally approved by relevant stakeholders'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.6.10
       assessable: true
       depth: 3
@@ -12250,7 +14353,11 @@ objects:
       translations:
         fr:
           description: "Un ensemble de proc\xE9dures a-t-il \xE9t\xE9 cr\xE9\xE9 been\
-            \ created for this service?"
+            \ created for this service?\n\nMaturity guidance:\n1 - No procedures in\
+            \ place\n2 - Basic procedures in place, used in an ad-hoc fashion\n3 -\
+            \ All procedures in place, operational but not used structurally\n4 -\
+            \ Procedures in place, operational and used structurally\n5 - Procedures\
+            \ in place, formally published and fully operationalized"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.6.11
       assessable: true
       depth: 3
@@ -12272,8 +14379,21 @@ objects:
         5 - Procedures in place, formally published and regularly reviewed'
       translations:
         fr:
-          description: Y a-t-il un(e)n onboarding and offloading procedure for this
+          description: 'Y a-t-il un(e)n onboarding and offloading procedure for this
             service?
+
+
+            Maturity guidance:
+
+            1 - No procedures in place
+
+            2 - Basic procedures in place, used in an ad-hoc fashion
+
+            3 - Full procedures in place, operational but not used structurally
+
+            4 - Procedures in place, operational and used structurally
+
+            5 - Procedures in place, formally published and regularly reviewed'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.6.12
       assessable: true
       depth: 3
@@ -12295,7 +14415,20 @@ objects:
         5 - Best practices applied and adherence checked regularly'
       translations:
         fr:
-          description: Les meilleures pratiques sont-elles applied to the service?
+          description: 'Les meilleures pratiques sont-elles applied to the service?
+
+
+            Maturity guidance:
+
+            1 - Best practices not applied
+
+            2 - Best practices identified, but not applied
+
+            3 - Best practices applied, but not structurally
+
+            4 - Best practices applied to service architecture and service delivery
+
+            5 - Best practices applied and adherence checked regularly'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.6.13
       assessable: true
       depth: 3
@@ -12318,7 +14451,12 @@ objects:
       translations:
         fr:
           description: "Les donn\xE9es de processus sont-elles data collect\xE9es\
-            \ pour la pr\xE9diction of service performance?"
+            \ pour la pr\xE9diction of service performance?\n\nMaturity guidance:\n\
+            1 - Service performance not measured\n2 - Goals set for service performance,\
+            \ measured ad-hoc\n3 - Goals set for service performance, measured structurally\
+            \ but informally\n4 - Goals set for service performance, measured structurally\
+            \ and formally\n5 - Continuous measurement to determine progress & adjust\
+            \ process"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.6.14
       assessable: true
       depth: 3
@@ -12342,7 +14480,11 @@ objects:
       translations:
         fr:
           description: "Le service est-il continuellement am\xE9lior\xE9 bas\xE9 sur\
-            \ les objectifs d'am\xE9lioration?"
+            \ les objectifs d'am\xE9lioration?\n\nMaturity guidance:\n1 - Improvement\
+            \ not done\n2 - Goals defined, but not pursued\n3 - Goals defined and\
+            \ pursued structurally, but not formalized\n4 - Goals formally defined\
+            \ and pursued structurally and periodically\n5 - Continuous improvement\
+            \ based on targets and feedback loops"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.6.15
       assessable: false
       depth: 3

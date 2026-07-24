@@ -142,8 +142,14 @@ def parse_guidance(ws):
                 guidance[current_key] = []
             else:
                 current_key = None
-        elif a is None and isinstance(b, int) and current_key and 1 <= b <= 5 and isinstance(c, str):
-            guidance[current_key].append((b, c.strip()))
+        elif (
+            not a
+            and isinstance(b, (int, float))
+            and current_key
+            and 1 <= b <= 5
+            and isinstance(c, str)
+        ):
+            guidance[current_key].append((int(b), c.strip()))
     return guidance
 
 
@@ -181,6 +187,8 @@ def build_rows(scheme: dict, guidance: dict) -> list[dict]:
         meta = control_schemas.get(key)
         if meta is None:
             # synthesized placeholder for a gap in the source numbering
+            row["name"] = f"[{key}]"
+            row["name[fr]"] = f"[{key}]"
             rows.append(row)
             emitted.add(key)
             return
@@ -193,12 +201,15 @@ def build_rows(scheme: dict, guidance: dict) -> list[dict]:
         title_fr = meta.get("title_fr", "")
         if assessable:
             desc = title
+            desc_fr = title_fr
             if key in guidance:
                 lines = "\n".join(f"{lvl} - {txt}" for lvl, txt in guidance[key])
-                desc = f"{title}\n\nMaturity guidance:\n{lines}"
+                guidance_block = f"\n\nMaturity guidance:\n{lines}"
+                desc += guidance_block
+                desc_fr += guidance_block
             row["assessable"] = "x"
             row["description"] = desc
-            row["description[fr]"] = title_fr
+            row["description[fr]"] = desc_fr
         else:
             row["name"] = title
             row["name[fr]"] = title_fr
@@ -226,7 +237,10 @@ def build_rows(scheme: dict, guidance: dict) -> list[dict]:
                 "ref_id": domain,
                 "name": domain,
                 "description": "",
-                "name[fr]": "",
+                # the source scheme has no translated domain-level names (only
+                # aspect names are translated in aspects_fr); fall back to the
+                # English domain name so the FR locale isn't left blank
+                "name[fr]": domain,
                 "description[fr]": "",
             }
         )
