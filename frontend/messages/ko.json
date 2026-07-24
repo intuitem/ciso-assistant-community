@@ -2239,8 +2239,6 @@
 	"deactivate": "비활성화",
 	"deactivateServiceAccountConfirm": "이 서비스 계정을 비활성화하면 대기 중인 모든 액세스 토큰이 즉시 취소되고 새 토큰 발급이 차단됩니다. 계속하시겠습니까?",
 	"gracePeriod": "유예 기간",
-	"gracePeriodImmediate": "즉시 (이전 시크릿이 즉시 작동을 멈춥니다)",
-	"gracePeriodMinutesOption": "{minutes}분",
 	"gracePeriodHelpText": "교체 후에도 현재 시크릿이 이 기간 동안 계속 작동하여 다운타임 없이 통합을 업데이트할 수 있습니다. 최대 1개월로 제한됩니다.",
 	"gracePeriodTooLong": "유예 기간은 1개월을 초과할 수 없습니다.",
 	"previousSecretValidUntil": "이전 클라이언트 시크릿은 {date}까지 유효합니다.",

@@ -2364,8 +2364,6 @@
 	"deactivate": "Išjungti",
 	"deactivateServiceAccountConfirm": "Išjungus šią paslaugos paskyrą, bus iškart panaikinti visi galiojantys prieigos raktai ir blokuojamas naujų išdavimas. Tęsti?",
 	"gracePeriod": "Pereinamasis laikotarpis",
-	"gracePeriodImmediate": "Iš karto (senoji paslaptis iškart nustoja veikti)",
-	"gracePeriodMinutesOption": "{minutes} min.",
 	"gracePeriodHelpText": "Dabartinė paslaptis po pakeitimo veikia dar šį laiką, kad integracijas būtų galima atnaujinti be prastovų. Apribota iki 1 mėnesio.",
 	"gracePeriodTooLong": "Pereinamasis laikotarpis negali būti ilgesnis nei 1 mėnuo.",
 	"previousSecretValidUntil": "Ankstesnė kliento paslaptis galioja iki {date}.",

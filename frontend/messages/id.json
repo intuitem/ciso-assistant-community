@@ -1869,8 +1869,6 @@
 	"deactivate": "Nonaktifkan",
 	"deactivateServiceAccountConfirm": "Menonaktifkan akun layanan ini akan langsung mencabut semua token akses yang tertunda dan memblokir penerbitan token baru. Lanjutkan?",
 	"gracePeriod": "Masa tenggang",
-	"gracePeriodImmediate": "Segera (rahasia lama langsung berhenti berfungsi)",
-	"gracePeriodMinutesOption": "{minutes} menit",
 	"gracePeriodHelpText": "Rahasia saat ini terus berfungsi selama durasi ini setelah rotasi, sehingga integrasi dapat diperbarui tanpa waktu henti. Dibatasi hingga 1 bulan.",
 	"gracePeriodTooLong": "Masa tenggang tidak boleh lebih dari 1 bulan.",
 	"previousSecretValidUntil": "Rahasia klien sebelumnya tetap berlaku hingga {date}."

@@ -2552,8 +2552,6 @@
 	"deactivate": "Deaktiviraj",
 	"deactivateServiceAccountConfirm": "Deaktivacija tega storitvenega računa bo takoj preklicala vse čakajoče dostopne žetone in blokirala izdajo novih. Nadaljevati?",
 	"gracePeriod": "Prehodno obdobje",
-	"gracePeriodImmediate": "Takoj (stara skrivnost takoj preneha delovati)",
-	"gracePeriodMinutesOption": "{minutes} minut",
 	"gracePeriodHelpText": "Trenutna skrivnost po zamenjavi še naprej deluje toliko časa, da je integracije mogoče posodobiti brez izpada. Omejeno na 1 mesec.",
 	"gracePeriodTooLong": "Prehodno obdobje ne sme biti daljše od 1 meseca.",
 	"previousSecretValidUntil": "Prejšnja skrivnost odjemalca ostane veljavna do {date}.",

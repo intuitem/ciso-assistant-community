@@ -496,6 +496,28 @@ class TestServiceAccountExpiry:
         assert response.status_code == 200
         assert response.json()["expiry_date"] is None
 
+    def test_update_sets_and_clears_description(self, admin_client, domain_folder):
+        payload = _create_sa(admin_client, domain_folder)
+        assert payload["description"] == "test service account"
+
+        # a partial update that omits description leaves it untouched
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"name": payload["name"]},
+            format="json",
+        )
+        assert response.status_code == 200
+        assert response.json()["description"] == "test service account"
+
+        # explicitly sending null clears it
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"description": None},
+            format="json",
+        )
+        assert response.status_code == 200
+        assert response.json()["description"] is None
+
     def test_expired_service_account_is_deactivated_by_periodic_task(
         self, admin_client, domain_folder
     ):
@@ -540,3 +562,37 @@ class TestServiceAccountExpiry:
 
         sa.refresh_from_db()
         assert sa.is_active is True
+
+    def test_periodic_task_isolates_per_account_failures(
+        self, admin_client, domain_folder
+    ):
+        from datetime import date, timedelta as td
+        from unittest.mock import patch
+
+        from core.tasks import deactivate_expired_service_accounts
+        from iam.models import ServiceAccount as SAModel
+
+        payload_broken = _create_sa(admin_client, domain_folder, name="broken")
+        payload_ok = _create_sa(admin_client, domain_folder, name="ok")
+
+        for payload in (payload_broken, payload_ok):
+            sa = ServiceAccount.objects.get(id=payload["id"])
+            sa.expiry_date = date.today() - td(days=1)
+            sa.save(update_fields=["expiry_date"])
+
+        original_deactivate = SAModel.deactivate
+
+        def flaky_deactivate(self):
+            if str(self.id) == payload_broken["id"]:
+                raise RuntimeError("boom")
+            return original_deactivate(self)
+
+        with patch.object(SAModel, "deactivate", flaky_deactivate):
+            deactivate_expired_service_accounts.call_local()
+
+        broken = ServiceAccount.objects.get(id=payload_broken["id"])
+        ok = ServiceAccount.objects.get(id=payload_ok["id"])
+        # the failing account's exception doesn't abort the loop
+        assert ok.is_active is False
+        # ...and doesn't leave the failing one silently marked inactive either
+        assert broken.is_active is True

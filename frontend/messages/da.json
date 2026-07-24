@@ -1983,8 +1983,6 @@
 	"deactivate": "Deaktivér",
 	"deactivateServiceAccountConfirm": "Deaktivering af denne servicekonto tilbagekalder øjeblikkeligt alle udestående adgangstokens og blokerer udstedelse af nye. Fortsæt?",
 	"gracePeriod": "Overgangsperiode",
-	"gracePeriodImmediate": "Øjeblikkeligt (den gamle hemmelighed holder straks op med at virke)",
-	"gracePeriodMinutesOption": "{minutes} minutter",
 	"gracePeriodHelpText": "Den nuværende hemmelighed fortsætter med at fungere i denne periode efter rotation, så integrationer kan opdateres uden nedetid. Begrænset til 1 måned.",
 	"gracePeriodTooLong": "Overgangsperioden må ikke være længere end 1 måned.",
 	"previousSecretValidUntil": "Den tidligere klienthemmelighed er fortsat gyldig indtil {date}."

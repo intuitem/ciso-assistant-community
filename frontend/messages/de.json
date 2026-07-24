@@ -2303,8 +2303,6 @@
 	"deactivate": "Deaktivieren",
 	"deactivateServiceAccountConfirm": "Durch das Deaktivieren dieses Dienstkontos werden alle ausstehenden Zugriffstoken sofort widerrufen und die Ausstellung neuer Token blockiert. Fortfahren?",
 	"gracePeriod": "Übergangsfrist",
-	"gracePeriodImmediate": "Sofort (altes Secret funktioniert sofort nicht mehr)",
-	"gracePeriodMinutesOption": "{minutes} Minuten",
 	"gracePeriodHelpText": "Das aktuelle Secret funktioniert nach der Rotation noch für diese Dauer weiter, damit Integrationen ohne Ausfallzeit aktualisiert werden können. Auf 1 Monat begrenzt.",
 	"gracePeriodTooLong": "Die Übergangsfrist darf nicht länger als 1 Monat sein.",
 	"previousSecretValidUntil": "Das vorherige Client-Secret bleibt bis {date} gültig.",

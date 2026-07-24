@@ -1685,8 +1685,6 @@
 	"deactivate": "Letiltás",
 	"deactivateServiceAccountConfirm": "Ennek a szolgáltatásfióknak a letiltása azonnal visszavonja az összes függőben lévő hozzáférési tokent, és blokkolja az újak kiadását. Folytatja?",
 	"gracePeriod": "Türelmi idő",
-	"gracePeriodImmediate": "Azonnal (a régi titkos kulcs azonnal megszűnik működni)",
-	"gracePeriodMinutesOption": "{minutes} perc",
 	"gracePeriodHelpText": "A jelenlegi titkos kulcs a csere után még ennyi ideig működik, hogy az integrációkat leállás nélkül lehessen frissíteni. Legfeljebb 1 hónapra korlátozva.",
 	"gracePeriodTooLong": "A türelmi idő nem lehet hosszabb 1 hónapnál.",
 	"previousSecretValidUntil": "Az előző ügyfél titkos kulcsa {date} időpontig érvényes marad."

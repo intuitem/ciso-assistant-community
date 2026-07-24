@@ -3396,8 +3396,6 @@
 	"deactivate": "Deaktivovat",
 	"deactivateServiceAccountConfirm": "Deaktivace tohoto servisního účtu okamžitě zruší všechny nevyřízené přístupové tokeny a zablokuje vydávání nových. Pokračovat?",
 	"gracePeriod": "Ochranná lhůta",
-	"gracePeriodImmediate": "Okamžitě (starý tajný klíč přestane fungovat ihned)",
-	"gracePeriodMinutesOption": "{minutes} minut",
 	"gracePeriodHelpText": "Současný tajný klíč funguje po tuto dobu i po otočení, aby bylo možné integrace aktualizovat bez výpadku. Omezeno na 1 měsíc.",
 	"gracePeriodTooLong": "Ochranná lhůta nesmí být delší než 1 měsíc.",
 	"previousSecretValidUntil": "Předchozí tajný klíč klienta zůstává platný do {date}.",

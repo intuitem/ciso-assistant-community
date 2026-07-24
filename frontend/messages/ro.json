@@ -1700,8 +1700,6 @@
 	"deactivate": "Dezactivează",
 	"deactivateServiceAccountConfirm": "Dezactivarea acestui cont de serviciu va revoca imediat orice token de acces existent și va bloca emiterea altora noi. Continuați?",
 	"gracePeriod": "Perioadă de grație",
-	"gracePeriodImmediate": "Imediat (secretul vechi încetează să funcționeze imediat)",
-	"gracePeriodMinutesOption": "{minutes} minute",
 	"gracePeriodHelpText": "Secretul curent continuă să funcționeze pe durata aceasta după rotire, astfel încât integrările să poată fi actualizate fără întrerupere. Limitat la 1 lună.",
 	"gracePeriodTooLong": "Perioada de grație nu poate depăși 1 lună.",
 	"previousSecretValidUntil": "Secretul anterior al clientului rămâne valid până la {date}."

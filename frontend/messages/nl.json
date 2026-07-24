@@ -2303,8 +2303,6 @@
 	"deactivate": "Deactiveren",
 	"deactivateServiceAccountConfirm": "Het deactiveren van dit service-account trekt onmiddellijk alle openstaande toegangstokens in en blokkeert de uitgifte van nieuwe tokens. Doorgaan?",
 	"gracePeriod": "Overgangsperiode",
-	"gracePeriodImmediate": "Onmiddellijk (oud secret werkt meteen niet meer)",
-	"gracePeriodMinutesOption": "{minutes} minuten",
 	"gracePeriodHelpText": "Het huidige secret blijft na rotatie nog deze duur werken, zodat integraties zonder downtime kunnen worden bijgewerkt. Beperkt tot 1 maand.",
 	"gracePeriodTooLong": "De overgangsperiode mag niet langer zijn dan 1 maand.",
 	"previousSecretValidUntil": "Het vorige client secret blijft geldig tot {date}.",

@@ -1702,8 +1702,6 @@
 	"deactivate": "Desativar",
 	"deactivateServiceAccountConfirm": "Desativar esta conta de serviço irá revogar imediatamente qualquer token de acesso pendente e bloquear a emissão de novos. Continuar?",
 	"gracePeriod": "Período de carência",
-	"gracePeriodImmediate": "Imediato (o segredo antigo deixa de funcionar de imediato)",
-	"gracePeriodMinutesOption": "{minutes} minutos",
 	"gracePeriodHelpText": "O segredo atual continua a funcionar durante este período após a rotação, para que as integrações possam ser atualizadas sem interrupção. Limitado a 1 mês.",
 	"gracePeriodTooLong": "O período de carência não pode ser superior a 1 mês.",
 	"previousSecretValidUntil": "O segredo do cliente anterior permanece válido até {date}."

@@ -18,7 +18,7 @@ from core.models import (
 from iam.models import ServiceAccount, User
 from django.core.mail import get_connection, EmailMessage
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction
 import logging
 from global_settings.models import GlobalSettings
 
@@ -1483,7 +1483,15 @@ def deactivate_expired_service_accounts():
 
     count = 0
     for service_account in expired_service_accounts:
-        service_account.deactivate()
+        try:
+            with transaction.atomic():
+                service_account.deactivate()
+        except Exception as e:
+            logger.error(
+                f"Failed to deactivate expired service account: {service_account.name} (ID: {service_account.id})",
+                error=str(e),
+            )
+            continue
         count += 1
         logger.info(
             f"Deactivated expired service account: {service_account.name} (ID: {service_account.id}), expiry date: {service_account.expiry_date}"

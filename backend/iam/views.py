@@ -40,7 +40,7 @@ from .models import (
 from core.permissions import IsGlobalAdmin, FeatureFlagRequired
 from iam.sso.slo import copy_slo_state_from_session_key
 from .service_accounts import (
-    UNSET as UNSET_EXPIRY,
+    UNSET as UNSET_FIELD,
     get_selectable_permissions,
     provision_service_account,
     update_service_account,
@@ -667,13 +667,15 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
                 update_service_account(
                     service_account,
                     name=data.get("name"),
-                    description=data.get("description"),
+                    description=data["description"]
+                    if "description" in data
+                    else UNSET_FIELD,
                     permission_ids=data.get("permissions"),
                     folder_ids=data.get("perimeter_folders"),
                     is_recursive=data.get("is_recursive"),
                     expiry_date=data["expiry_date"]
                     if "expiry_date" in data
-                    else UNSET_EXPIRY,
+                    else UNSET_FIELD,
                 )
                 if "is_active" in request.data:
                     raw_is_active = request.data["is_active"]

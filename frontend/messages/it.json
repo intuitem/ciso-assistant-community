@@ -3307,8 +3307,6 @@
 	"deactivate": "Disattiva",
 	"deactivateServiceAccountConfirm": "La disattivazione di questo account di servizio revocherà immediatamente qualsiasi token di accesso in sospeso e impedirà l'emissione di nuovi token. Continuare?",
 	"gracePeriod": "Periodo di tolleranza",
-	"gracePeriodImmediate": "Immediato (il vecchio secret smette subito di funzionare)",
-	"gracePeriodMinutesOption": "{minutes} minuti",
 	"gracePeriodHelpText": "Il secret attuale continua a funzionare per questo periodo dopo la rotazione, in modo che le integrazioni possano essere aggiornate senza interruzioni. Limitato a 1 mese.",
 	"gracePeriodTooLong": "Il periodo di tolleranza non può superare 1 mese.",
 	"previousSecretValidUntil": "Il secret client precedente rimane valido fino al {date}.",

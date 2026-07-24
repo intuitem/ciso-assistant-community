@@ -115,7 +115,7 @@ def update_service_account(
     service_account: ServiceAccount,
     *,
     name: str | None = None,
-    description: str | None = None,
+    description=UNSET,
     permission_ids: list[int] | None = None,
     folder_ids: list | None = None,
     is_recursive: bool | None = None,
@@ -126,7 +126,7 @@ def update_service_account(
             service_account.name = name
             service_account.client.name = name
             service_account.client.save(update_fields=["name"])
-        if description is not None:
+        if description is not UNSET:
             service_account.description = description
         if expiry_date is not UNSET:
             service_account.expiry_date = expiry_date

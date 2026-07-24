@@ -1679,8 +1679,6 @@
 	"deactivate": "تعطيل",
 	"deactivateServiceAccountConfirm": "سيؤدي تعطيل حساب الخدمة هذا إلى إبطال أي رمز وصول معلّق فورًا ومنع إصدار رموز جديدة. هل تريد المتابعة؟",
 	"gracePeriod": "فترة السماح",
-	"gracePeriodImmediate": "فوري (يتوقف السر القديم عن العمل على الفور)",
-	"gracePeriodMinutesOption": "{minutes} دقيقة",
 	"gracePeriodHelpText": "يستمر السر الحالي في العمل لهذه المدة بعد التدوير، حتى يمكن تحديث عمليات التكامل دون توقف. محدد بشهر واحد.",
 	"gracePeriodTooLong": "لا يمكن أن تتجاوز فترة السماح شهرًا واحدًا.",
 	"previousSecretValidUntil": "يظل سر العميل السابق صالحًا حتى {date}."

@@ -1813,8 +1813,6 @@
 	"deactivate": "停用",
 	"deactivateServiceAccountConfirm": "停用此服务账户将立即撤销所有未过期的访问令牌,并阻止签发新令牌。是否继续?",
 	"gracePeriod": "宽限期",
-	"gracePeriodImmediate": "立即(旧密钥立即停止工作)",
-	"gracePeriodMinutesOption": "{minutes} 分钟",
 	"gracePeriodHelpText": "轮换后,当前密钥会在此时长内继续工作,以便在不中断服务的情况下更新集成。最长限制为 1 个月。",
 	"gracePeriodTooLong": "宽限期不能超过 1 个月。",
 	"previousSecretValidUntil": "之前的客户端密钥在 {date} 之前仍然有效。",

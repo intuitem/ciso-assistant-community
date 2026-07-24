@@ -1698,8 +1698,6 @@
 	"deactivate": "Inaktivera",
 	"deactivateServiceAccountConfirm": "Att inaktivera detta tjänstekonto återkallar omedelbart alla utestående åtkomsttoken och blockerar utfärdande av nya. Fortsätta?",
 	"gracePeriod": "Övergångsperiod",
-	"gracePeriodImmediate": "Omedelbart (den gamla hemligheten slutar fungera direkt)",
-	"gracePeriodMinutesOption": "{minutes} minuter",
 	"gracePeriodHelpText": "Den nuvarande hemligheten fortsätter att fungera under denna tid efter rotation, så att integrationer kan uppdateras utan driftstopp. Begränsat till 1 månad.",
 	"gracePeriodTooLong": "Övergångsperioden får inte vara längre än 1 månad.",
 	"previousSecretValidUntil": "Den tidigare klienthemligheten förblir giltig till {date}."

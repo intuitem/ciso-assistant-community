@@ -1658,8 +1658,6 @@
 	"deactivate": "Dezaktywuj",
 	"deactivateServiceAccountConfirm": "Dezaktywacja tego konta usługi natychmiast unieważni wszystkie oczekujące tokeny dostępu i zablokuje wydawanie nowych. Kontynuować?",
 	"gracePeriod": "Okres karencji",
-	"gracePeriodImmediate": "Natychmiast (stary sekret przestaje działać od razu)",
-	"gracePeriodMinutesOption": "{minutes} minut",
 	"gracePeriodHelpText": "Obecny sekret działa jeszcze przez ten czas po rotacji, dzięki czemu integracje można zaktualizować bez przestojów. Ograniczone do 1 miesiąca.",
 	"gracePeriodTooLong": "Okres karencji nie może być dłuższy niż 1 miesiąc.",
 	"previousSecretValidUntil": "Poprzedni sekret klienta pozostaje ważny do {date}.",

@@ -287,6 +287,14 @@
 		} else if (cachedValue?.length) {
 			selected = cachedValue;
 			$value = selected;
+		} else {
+			return;
+		}
+		// The cache can resolve after fetchOptions() already computed collapsedGroups
+		// from the (still empty) selection, so groups holding a cache-restored
+		// selection would otherwise stay collapsed. Recompute now that it's applied.
+		if (collapsibleGroups && defaultCollapsed) {
+			collapsedGroups = initializeCollapsedGroups(nestedGroups);
 		}
 	});
 
