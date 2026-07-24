@@ -14835,6 +14835,10 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
         "updated_at": ["gte", "lt"],
     }
     search_fields = ["name", "description", "ref_id"]
+    filter_backends = [
+        CustomFieldSearchFilter if b is filters.SearchFilter else b
+        for b in BaseModelViewSet.filter_backends
+    ] + [CustomFieldFilterBackend]
 
     export_config = {
         "fields": {
@@ -14896,6 +14900,7 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
                 "risk_scenarios",
                 "requirement_assessments",
                 "owners",
+                "custom_field_values__definition",
                 Prefetch(
                     "validationflow_set",
                     queryset=ValidationFlow.objects.select_related(
