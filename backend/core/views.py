@@ -10962,6 +10962,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 entry["score"] = req.score
 
             if has_questions:
+                # Round-trip the override flag so re-importing this file keeps
+                # a pinned score pinned and an auto score auto.
+                entry["is_score_overridden"] = req.is_score_overridden
                 q_dict = questions_by_node.get(req_node.id)
                 if q_dict:
                     answers = answers_by_req.get(req.id, {})
