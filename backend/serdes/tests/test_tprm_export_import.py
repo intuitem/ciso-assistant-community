@@ -271,6 +271,9 @@ class TestImportValidationErrorReporting:
         message_dict = exc_info.value.message_dict
         assert "validation_errors" in message_dict
         assert "non_field_errors" not in message_dict
+        # The flattened message must keep the model, the offending object id and
+        # the field-level serializer detail so failures stay actionable.
         assert any(
-            "core.asset" in msg for msg in message_dict["validation_errors"]
+            "core.asset" in msg and "aaaaaaaaaaaa" in msg and "name" in msg
+            for msg in message_dict["validation_errors"]
         )
