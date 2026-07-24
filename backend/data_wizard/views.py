@@ -4258,6 +4258,15 @@ class LoadFileView(APIView):
                     elif score not in (None, ""):
                         requirement_data.update({"score": score, "is_scored": True})
 
+                    # An explicit score on a question-driven requirement is a
+                    # manual override: without the flag the write serializer
+                    # drops it in favor of the answer-computed value.
+                    if (
+                        requirement_data.get("score") not in (None, "")
+                        and requirement_assessment.requirement.questions.exists()
+                    ):
+                        requirement_data["is_score_overridden"] = True
+
                     # Build answers from the "answers" cell
                     answers_cell = record.get("answers")
                     questions_dict = build_questions_dict(ReqNode) if ReqNode else None

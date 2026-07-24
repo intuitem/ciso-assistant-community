@@ -11567,16 +11567,29 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
+            # Manual score override: when the auditor pins a manual score via
+            # is_score_overridden, a question-driven RA accepts a directly
+            # written score instead of the answer-computed one.
+            override_value = request.data.get("is_score_overridden")
+            score_overridden = (
+                bool(override_value)
+                if override_value is not None
+                else requirement_assessment.is_score_overridden
+            )
+            was_overridden = requirement_assessment.is_score_overridden
+
             # Question-driven requirements: score and is_scored belong to
             # recompute_assessment (a committed score means "questionnaire
             # complete" for progress). Direct writes are ignored — same
             # contract as the write serializer, so clients that round-trip
-            # the field keep working — and flagged in the response. This must
-            # run before score validation so a round-tripped empty value does
-            # not trip the integer parse.
+            # the field keep working — and flagged in the response. Skipped
+            # when the score is overridden. This must run before score
+            # validation so a round-tripped empty value does not trip the
+            # integer parse.
             score_ignored = (
                 "score" in request.data
                 and requirement_assessment.requirement.questions.exists()
+                and not score_overridden
             )
             if score_ignored:
                 score = None
@@ -11619,6 +11632,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if status_value is not None:
                 requirement_assessment.status = status_value
 
+            # Persist the override flag when the request carries it.
+            if override_value is not None:
+                requirement_assessment.is_score_overridden = score_overridden
+
             # Update score and toggle is_scored accordingly
             if score is not None:
                 requirement_assessment.score = score
@@ -11629,6 +11646,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 requirement_assessment.is_scored = False
 
             requirement_assessment.save()
+
+            # Turning the override off on a question-driven RA hands the score
+            # back to the questionnaire: resync from the current answers.
+            if (
+                was_overridden
+                and not score_overridden
+                and requirement_assessment.requirement.questions.exists()
+            ):
+                requirement_assessment.compute_score_and_result()
 
             response_data = {
                 "message": "Requirement updated successfully",
@@ -11652,6 +11678,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             elif score is None and "score" in request.data and not score_ignored:
                 response_data["score"] = None
                 response_data["is_scored"] = False
+
+            if override_value is not None:
+                response_data["is_score_overridden"] = score_overridden
 
             return Response(response_data, status=status.HTTP_200_OK)
 

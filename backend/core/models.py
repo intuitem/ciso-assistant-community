@@ -8600,6 +8600,14 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         default=False,
         verbose_name=_("Is scored"),
     )
+    is_score_overridden = models.BooleanField(
+        default=False,
+        verbose_name=_("Is score overridden"),
+        help_text=_(
+            "When set, the score is manually pinned and no longer recomputed "
+            "from the questionnaire answers."
+        ),
+    )
     score = models.IntegerField(
         blank=True,
         null=True,
@@ -9223,10 +9231,14 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 }
                 new_result = result_map.get(aggregated, self.Result.NOT_ASSESSED)
 
-        # Update attributes
-        self.score = new_score
+        # Update attributes. When the score is manually overridden, the
+        # auditor's pinned value wins: recompute still drives `result` (so a
+        # result-driven questionnaire stays coherent with the answers), but it
+        # must not touch the score or the is_scored flag.
+        if not self.is_score_overridden:
+            self.score = new_score
+            self.is_scored = new_is_scored
         self.result = new_result
-        self.is_scored = new_is_scored
 
     def compute_score_and_result(self):
         self.recompute_assessment()

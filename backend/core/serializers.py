@@ -3528,14 +3528,40 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
             # Question-driven RAs: score and is_scored belong to
             # recompute_assessment (a committed score means "questionnaire
             # complete" for progress). Forms round-trip every field on save,
-            # so manual writes are dropped rather than rejected.
+            # so manual writes are dropped rather than rejected — UNLESS the
+            # auditor pins a manual score via is_score_overridden, in which case
+            # the direct score write is honored and recompute stops touching it.
+            requirement_has_questions = instance.requirement.questions.exists()
+            override_after = validated_data.get(
+                "is_score_overridden", instance.is_score_overridden
+            )
             if (
-                "score" in validated_data or "is_scored" in validated_data
-            ) and instance.requirement.questions.exists():
+                ("score" in validated_data or "is_scored" in validated_data)
+                and requirement_has_questions
+                and not override_after
+            ):
                 validated_data.pop("score", None)
                 validated_data.pop("is_scored", None)
 
+            was_overridden = instance.is_score_overridden
             instance = super().update(instance, validated_data)
+
+            # Turning the override off resyncs the score from the answers even
+            # when this request carries no answers payload.
+            override_turned_off = (
+                requirement_has_questions and was_overridden and not override_after
+            )
+            score_recomputed = False
+
+            # Override on: is_scored mirrors score presence (a pinned score
+            # counts as assessed, a cleared one does not). recompute is guarded
+            # against touching either field while the override is on, so this is
+            # the authoritative place to keep them consistent.
+            if override_after and requirement_has_questions:
+                new_is_scored = instance.score is not None
+                if instance.is_scored != new_is_scored:
+                    instance.is_scored = new_is_scored
+                    instance.save(update_fields=["is_scored"])
 
             if answers_data and isinstance(answers_data, dict):
                 # Convert incoming answers dict to Answer model updates
@@ -3619,6 +3645,12 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
 
                 if has_score_or_result:
                     instance.compute_score_and_result()
+                    score_recomputed = True
+
+            # Override just turned off with no answers payload (or no scoring
+            # choices to trigger the path above): resync the score explicitly.
+            if override_turned_off and not score_recomputed:
+                instance.compute_score_and_result()
 
             # Auto-map respondent_alignment to result.
             # Skipped when framework questions already drive the result, to avoid
@@ -3629,7 +3661,6 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 "in_progress": RequirementAssessment.Result.PARTIALLY_COMPLIANT,
                 "not_applicable": RequirementAssessment.Result.NOT_APPLICABLE,
             }
-            requirement_has_questions = instance.requirement.questions.exists()
             # Skip auto-map when the auditor explicitly sets result in the same
             # request: SuperForm round-trips the existing respondent_alignment
             # on every submit, and we must not clobber an auditor-edited result
@@ -4057,6 +4088,7 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
             "result",
             "score",
             "is_scored",
+            "is_score_overridden",
             "observation",
             "compliance_assessment",
             "requirement",

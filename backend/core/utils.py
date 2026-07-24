@@ -1350,6 +1350,7 @@ HIDDEN = {"auditor": "hidden", "respondent": "hidden"}
 DEFAULT_VISIBILITY = {
     "score": HIDDEN,
     "is_scored": HIDDEN,
+    "is_score_overridden": HIDDEN,
     "documentation_score": HIDDEN,
     "status": AUDITOR_ONLY,
     "extended_result": AUDITOR_ONLY,
