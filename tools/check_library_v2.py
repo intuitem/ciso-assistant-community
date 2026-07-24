@@ -34,7 +34,9 @@ import argparse
 from enum import Enum
 from pathlib import Path
 from collections import Counter
-from typing import Dict, List, Tuple
+from dataclasses import dataclass
+from types import MappingProxyType  # Prefer over "frozendict" to avoid importing an external library
+from typing import Dict, List, Mapping, Sequence, Tuple
 
 import pandas as pd
 from openpyxl import Workbook, load_workbook
@@ -45,7 +47,7 @@ from openpyxl import Workbook, load_workbook
 # CLASSES
 # ─────────────────────────────────────────────────────────────
 
-class ConsoleContext:
+class ConsoleContext: # Maybe rename it to "Logger" and create a "Context/Config" object to carry compatibility & conversion settings, etc. in one object  
     
     def __init__(self):
         
@@ -118,6 +120,7 @@ class ConsoleContext:
         return {fn: len(self.verbose_messages.get(fn, [])) for fn in self._all_sheet_names}
 
 
+##### Sheet Categories #####
 class MetaTypes(Enum):
     LIBRARY = "library"
     FRAMEWORK = "framework"
@@ -133,16 +136,208 @@ class MetaTypes(Enum):
 class SheetTypes(Enum):
     META = "_meta"
     CONTENT = "_content"
- 
+
+##### Sheet Properties & Schemas #####
+
+
+# Libraries without these sheets are invalid
 class MandatorySheets(Enum):
     LIBRARY_META = "library_meta"
 
+# [META] Sheets without these keys are invalid
+# It's different from "MetaSheetSchema.expected_keys", as these keys should be everywhere
+class MandatoryMetaKeys(Enum):
+    TYPE = "type"
+
+# [META] Library supported keys
+class LibraryMetaKeys(Enum):
+    URN = "urn"
+    VERSION = "version"
+    LOCALE = "locale"
+    REF_ID = "ref_id"
+    NAME = "name"
+    DESCRIPTION = "description"
+    COPYRIGHT = "copyright"
+    PROVIDER = "provider"
+    PACKAGER = "packager"
+    LABELS = "labels"
+    DEPENDENCIES = "dependencies"
+
+
+# [META] Framework supported keys
+class FrameworkMetaKeys(Enum):
+    URN = "urn"
+    BASE_URN = "base_urn"
+    REF_ID = "ref_id"
+    NAME = "name"
+    DESCRIPTION = "description"
+    IMPLEMENTATION_GROUPS_DEFINITION = "implementation_groups_definition"
+    ANSWERS_DEFINITION = "answers_definition"
+    SCORES_DEFINITION = "scores_definition"
+    MIN_SCORE = "min_score"
+    MAX_SCORE = "max_score"
+
+
+# [META] Threats supported keys
+class ThreatsMetaKeys(Enum):
+    BASE_URN = "base_urn"
+
+
+# [META] Reference Controls supported keys
+class ReferenceControlsMetaKeys(Enum):
+    BASE_URN = "base_urn"
+
+
+# [META] Risk Matrix supported keys
+class RiskMatrixMetaKeys(Enum):
+    URN = "urn"
+    REF_ID = "ref_id"
+    NAME = "name"
+    DESCRIPTION = "description"
+
+
+# [META] Requirement Mapping Set supported keys
+class RequirementMappingSetMetaKeys(Enum):
+    URN = "urn"
+    REF_ID = "ref_id"
+    NAME = "name"
+    DESCRIPTION = "description"
+    SOURCE_FRAMEWORK_URN = "source_framework_urn"
+    SOURCE_NODE_BASE_URN = "source_node_base_urn"
+    TARGET_FRAMEWORK_URN = "target_framework_urn"
+    TARGET_NODE_BASE_URN = "target_node_base_urn"
+
+
+# [META] Implementation Groups supported keys
+class ImplementationGroupsMetaKeys(Enum):
+    NAME = "name"
+
+
+# [META] Scores supported keys
+class ScoresMetaKeys(Enum):
+    NAME = "name"
+
+
+# [META] Answers supported keys
+class AnswersMetaKeys(Enum):
+    NAME = "name"
+
+
+# [META] URN Prefix supported keys (None for now)
+class URNPrefixMetaKeys(Enum):
+    pass
+
+
+# Define the required, optional, and translatable keys of a meta sheet
+@dataclass(frozen=True)
+class MetaSheetSchema:
+    key_enum: type[Enum]
+    expected_keys: tuple[Enum, ...]
+    optional_keys: tuple[Enum, ...] = ()
+    translatable_keys: tuple[Enum, ...] = ()
+
+    # Check if every keys are from the same Enum family
+    def __post_init__(self):
+        key_groups = (self.expected_keys, self.optional_keys, self.translatable_keys)
+
+        for keys in key_groups:
+            if not all(isinstance(key, self.key_enum) for key in keys):
+                raise TypeError(f"All schema keys must come from {self.key_enum.__name__}")
+
+    @staticmethod
+    def _to_values(keys: tuple[Enum, ...]) -> tuple[str, ...]:
+        return tuple(key.value for key in keys)
+
+    @property
+    def expected_key_values(self) -> tuple[str, ...]:
+        return self._to_values(self.expected_keys)
+
+    @property
+    def optional_key_values(self) -> tuple[str, ...]:
+        return self._to_values(self.optional_keys)
+
+    @property
+    def translatable_key_values(self) -> tuple[str, ...]:
+        return self._to_values(self.translatable_keys)
+
+
+# Map each meta sheet type to its validation schema
+META_SHEET_SCHEMAS: Mapping[MetaTypes, MetaSheetSchema] = MappingProxyType({
+    MetaTypes.LIBRARY: MetaSheetSchema(
+        key_enum=LibraryMetaKeys,
+        expected_keys=(
+            LibraryMetaKeys.URN, LibraryMetaKeys.VERSION, LibraryMetaKeys.LOCALE,
+            LibraryMetaKeys.REF_ID, LibraryMetaKeys.NAME, LibraryMetaKeys.DESCRIPTION,
+            LibraryMetaKeys.COPYRIGHT, LibraryMetaKeys.PROVIDER, LibraryMetaKeys.PACKAGER,
+        ),
+        optional_keys=(LibraryMetaKeys.LABELS, LibraryMetaKeys.DEPENDENCIES),
+        translatable_keys=(LibraryMetaKeys.NAME, LibraryMetaKeys.DESCRIPTION),
+    ),
+    MetaTypes.FRAMEWORK: MetaSheetSchema(
+        key_enum=FrameworkMetaKeys,
+        expected_keys=(
+            FrameworkMetaKeys.URN, FrameworkMetaKeys.REF_ID, FrameworkMetaKeys.NAME,
+            FrameworkMetaKeys.DESCRIPTION, FrameworkMetaKeys.BASE_URN,
+        ),
+        optional_keys=(
+            FrameworkMetaKeys.MIN_SCORE, FrameworkMetaKeys.MAX_SCORE, FrameworkMetaKeys.SCORES_DEFINITION,
+            FrameworkMetaKeys.IMPLEMENTATION_GROUPS_DEFINITION, FrameworkMetaKeys.ANSWERS_DEFINITION,
+        ),
+        translatable_keys=(FrameworkMetaKeys.NAME, FrameworkMetaKeys.DESCRIPTION),
+    ),
+    MetaTypes.THREATS: MetaSheetSchema(
+        key_enum=ThreatsMetaKeys,
+        expected_keys=(ThreatsMetaKeys.BASE_URN,),
+    ),
+    MetaTypes.REFERENCE_CONTROLS: MetaSheetSchema(
+        key_enum=ReferenceControlsMetaKeys,
+        expected_keys=(ReferenceControlsMetaKeys.BASE_URN,),
+    ),
+    MetaTypes.RISK_MATRIX: MetaSheetSchema(
+        key_enum=RiskMatrixMetaKeys,
+        expected_keys=(
+            RiskMatrixMetaKeys.URN, RiskMatrixMetaKeys.REF_ID, RiskMatrixMetaKeys.NAME,
+            RiskMatrixMetaKeys.DESCRIPTION,
+        ),
+    ),
+    MetaTypes.REQUIREMENT_MAPPING_SET: MetaSheetSchema(
+        key_enum=RequirementMappingSetMetaKeys,
+        expected_keys=(
+            RequirementMappingSetMetaKeys.URN, RequirementMappingSetMetaKeys.REF_ID,
+            RequirementMappingSetMetaKeys.NAME, RequirementMappingSetMetaKeys.DESCRIPTION,
+            RequirementMappingSetMetaKeys.SOURCE_FRAMEWORK_URN, RequirementMappingSetMetaKeys.SOURCE_NODE_BASE_URN,
+            RequirementMappingSetMetaKeys.TARGET_FRAMEWORK_URN, RequirementMappingSetMetaKeys.TARGET_NODE_BASE_URN,
+        ),
+    ),
+    MetaTypes.IMPLEMENTATION_GROUPS: MetaSheetSchema(
+        key_enum=ImplementationGroupsMetaKeys,
+        expected_keys=(ImplementationGroupsMetaKeys.NAME,),
+    ),
+    MetaTypes.SCORES: MetaSheetSchema(
+        key_enum=ScoresMetaKeys,
+        expected_keys=(ScoresMetaKeys.NAME,),
+    ),
+    MetaTypes.ANSWERS: MetaSheetSchema(
+        key_enum=AnswersMetaKeys,
+        expected_keys=(AnswersMetaKeys.NAME,),
+    ),
+    MetaTypes.URN_PREFIX: MetaSheetSchema(
+        key_enum=URNPrefixMetaKeys,
+        expected_keys=(),
+    ),
+})
+
+
+##### YAML Specific #####
 class YAMLSectionTypes(Enum):
     THREATS = "threats"
     REFERENCE_CONTROLS = "reference_controls"
 
-# URN Format : urn:<packager>:risk:<object>:<ref_id>
+
+##### URNs #####
 class URNObjects(Enum):
+    # URN Format : urn:<packager>:risk:<object>:<ref_id>
+    
     URN_BEGGINING = "urn"
     URN_3RD_WORD = "risk"   # Because the format is urn:<packager>:risk:<object>:<ref_id>
 
@@ -176,6 +371,7 @@ class URNMetadataFormat(Enum):
     MATRIX_URN = f"{URNObjects.URN_BEGGINING.value}:{PACKAGER_INDICATOR}:{URNObjects.URN_3RD_WORD.value}:{URNObjects.MATRIX.value}:{ID_INDICATOR}"
 
 
+##### Regex & Characters for Formatting  #####
 class CommonSeparatorRegex(Enum):
     LF = r"\n+"
     SPACE_COMMA_LF = r"[\s,\n]+"
@@ -260,7 +456,7 @@ def get_meta_sheets_with_type(wb: Workbook) -> Dict[str, str]:
             continue  # not enough columns to contain key/value pairs
 
         # Find row where first column == 'type'
-        type_rows = df[df.iloc[:, 0] == "type"]
+        type_rows = df[df.iloc[:, 0] == MandatoryMetaKeys.TYPE.value]
 
         if not type_rows.empty:
             type_value = str(type_rows.iloc[0, 1]).strip()
@@ -601,7 +797,7 @@ def validate_integer_value(
 
 
 # Global Checks ("type" value is checked by default)
-def validate_meta_sheet(df: pd.DataFrame, sheet_name: str, expected_keys:List[str], expected_type: MetaTypes, context: str):
+def validate_meta_sheet(df: pd.DataFrame, sheet_name: str, expected_keys: Sequence[str] | None, expected_type: MetaTypes, context: str):
     
     # Validate all required keys (excluding "type" which is handled separately)
     
@@ -618,7 +814,7 @@ def validate_meta_sheet(df: pd.DataFrame, sheet_name: str, expected_keys:List[st
                 raise ValueError(f"({context}) [{sheet_name}] Row #{row_index + 1}: Key \"{key}\" is present but has no value")
 
     # Validate presence and value of "type" key
-    type_matches = df[df.iloc[:, 0] == "type"]
+    type_matches = df[df.iloc[:, 0] == MandatoryMetaKeys.TYPE.value]
     if type_matches.empty:
         raise ValueError(f"({context}) {sheet_name}: Missing required key \"type\" in meta sheet")
 
@@ -632,7 +828,7 @@ def validate_meta_sheet(df: pd.DataFrame, sheet_name: str, expected_keys:List[st
         raise ValueError(f"({context}) [{sheet_name}] Row #{type_row_index + 1}: Invalid type \"{type_value}\". Expected \"{expected_type.value}\"")
     
 
-def validate_optional_values_meta_sheet(df: pd.DataFrame, sheet_name: str, optional_keys: List[str], context: str, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_optional_values_meta_sheet(df: pd.DataFrame, sheet_name: str, optional_keys: Sequence[str], context: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     if not optional_keys:
         return
@@ -775,14 +971,10 @@ def validate_library_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = Fal
     fct_name = get_current_fct_name()
     
     expected_type = MetaTypes.LIBRARY
-    expected_keys = [
-        "urn", "version", "locale", "ref_id", "name",
-        "description", "copyright", "provider", "packager"
-    ]
-    optional_keys = ["dependencies", "labels"]
+    schema = META_SHEET_SCHEMAS[expected_type]
 
-    validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
-    validate_optional_values_meta_sheet(df, sheet_name, optional_keys, fct_name, verbose, ctx)
+    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
     # URN
     urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True) 
@@ -821,16 +1013,10 @@ def validate_framework_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, ver
     fct_name = get_current_fct_name()
 
     expected_type = MetaTypes.FRAMEWORK
-    expected_keys = [
-        "urn", "ref_id", "name", "description", "base_urn"
-    ]
-    optional_keys = [
-        "min_score", "max_score", "scores_definition",
-        "implementation_groups_definition", "answers_definition"
-    ]
+    schema = META_SHEET_SCHEMAS[expected_type]
     
-    validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
-    validate_optional_values_meta_sheet(df, sheet_name, optional_keys, fct_name, verbose, ctx)
+    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
     # URN
     urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True)
@@ -865,10 +1051,10 @@ def validate_threats_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = Fal
     fct_name = get_current_fct_name()
 
     expected_type = MetaTypes.THREATS
-    expected_keys = ["base_urn"]
-    # No optional keys
+    schema = META_SHEET_SCHEMAS[expected_type]
 
-    validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
+    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
     # base_urn
     base_urn_value, base_urn_row = get_meta_value(df, "base_urn", sheet_name, required=True, with_row=True)
@@ -887,10 +1073,10 @@ def validate_reference_controls_meta(df: pd.DataFrame, sheet_name: str, verbose:
     fct_name = get_current_fct_name()
 
     expected_type = MetaTypes.REFERENCE_CONTROLS
-    expected_keys = ["base_urn"]
-    # No optional keys
+    schema = META_SHEET_SCHEMAS[expected_type]
 
-    validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
+    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
     # base_urn
     base_urn_value, base_urn_row = get_meta_value(df, "base_urn", sheet_name, required=True, with_row=True)
@@ -909,10 +1095,10 @@ def validate_risk_matrix_meta(df: pd.DataFrame, sheet_name: str, verbose: bool =
     fct_name = get_current_fct_name()
 
     expected_type = MetaTypes.RISK_MATRIX
-    expected_keys = ["urn", "ref_id", "name", "description"]
-    # No optional keys
+    schema = META_SHEET_SCHEMAS[expected_type]
 
-    validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
+    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
     # URN
     urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True) 
@@ -935,10 +1121,10 @@ def validate_implementation_groups_meta(wb: Workbook, df: pd.DataFrame, sheet_na
     fct_name = get_current_fct_name()
 
     expected_type = MetaTypes.IMPLEMENTATION_GROUPS
-    expected_keys = ["name"]
-    # No optional keys
+    schema = META_SHEET_SCHEMAS[expected_type]
     
-    validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
+    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
     # name
     validate_related_content_sheet_from_name_key(wb, df, sheet_name, fct_name)
@@ -955,17 +1141,10 @@ def validate_requirement_mapping_set_meta(df: pd.DataFrame, sheet_name: str, ver
     fct_name = get_current_fct_name()
 
     expected_type = MetaTypes.REQUIREMENT_MAPPING_SET
-    expected_keys = [
-        "urn", "ref_id",
-        "name", "description",
-        "source_framework_urn",
-        "source_node_base_urn",
-        "target_framework_urn",
-        "target_node_base_urn"
-    ]
-    # No optional keys
+    schema = META_SHEET_SCHEMAS[expected_type]
 
-    validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
+    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
     # URN
     urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True) 
@@ -1018,10 +1197,10 @@ def validate_scores_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbos
     fct_name = get_current_fct_name()
 
     expected_type = MetaTypes.SCORES
-    expected_keys = ["name"]
-    # No optional keys
+    schema = META_SHEET_SCHEMAS[expected_type]
     
-    validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
+    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
     # name
     validate_related_content_sheet_from_name_key(wb, df, sheet_name, fct_name)
@@ -1038,10 +1217,10 @@ def validate_answers_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbo
     fct_name = get_current_fct_name()
 
     expected_type = MetaTypes.ANSWERS
-    expected_keys = ["name"]
-    # No optional keys
+    schema = META_SHEET_SCHEMAS[expected_type]
     
-    validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
+    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
     # name
     validate_related_content_sheet_from_name_key(wb, df, sheet_name, fct_name)
@@ -1058,10 +1237,10 @@ def validate_urn_prefix_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = 
     fct_name = get_current_fct_name()
 
     expected_type = MetaTypes.URN_PREFIX
-    # No "expected_keys" because only  "type" is required
-    # No optional keys
+    schema = META_SHEET_SCHEMAS[expected_type]
     
-    validate_meta_sheet(df, sheet_name, None, expected_type, fct_name)
+    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
@@ -1720,7 +1899,7 @@ def _URN_prefix_check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFram
 
 
 # Check whether URN Prefix IDs are used in framework content sheets, or warn if that's not the case.
-def _URN_prefix_validate_ids_usage_in_frameworks(wb: Workbook, df: pd.DataFrame, sheet_name: str, ctx: ConsoleContext = None, verbose: bool = False,):
+def _URN_prefix_validate_ids_usage_in_frameworks(wb: Workbook, df: pd.DataFrame, sheet_name: str, ctx: ConsoleContext = None, verbose: bool = False):
 
     fct_name = get_current_fct_name()
 
@@ -3190,7 +3369,7 @@ def dispatch_meta_validation(wb: Workbook, df: pd.DataFrame, sheet_name: str, ve
     
     fct_name = get_current_fct_name()
     
-    type_row = df[df.iloc[:, 0] == "type"]
+    type_row = df[df.iloc[:, 0] == MandatoryMetaKeys.TYPE.value]
     if type_row.empty:
         raise ValueError(f"({fct_name}) [{sheet_name}] Missing or empty \"type\" field in meta sheet")
     type_value = type_row.iloc[0, 1]
@@ -3302,7 +3481,7 @@ def validate_excel_structure(filepath: str | Path, external_refs: List[str] = No
                             f"\n> 💡 Tip: Make sure the corresponding content sheet for \"{sheet_name}\" is named \"{expected_content_sheet}\"")
 
         dispatch_meta_validation(wb, df, sheet_name, verbose, ctx)
-        type_row = df[df.iloc[:, 0] == "type"]
+        type_row = df[df.iloc[:, 0] == MandatoryMetaKeys.TYPE.value]
         meta_types[base_name] = str(type_row.iloc[0, 1]).strip()
 
     # Check "_content" sheets
@@ -3342,7 +3521,7 @@ def validate_excel_structure(filepath: str | Path, external_refs: List[str] = No
 # ─────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="Validate Excel file structure (v2 format)", formatter_class=argparse.RawTextHelpFormatter,)
+    parser = argparse.ArgumentParser(description="Validate Excel file structure (v2 format)", formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument(
         "file_input",
         help="Path to Excel file to validate."
