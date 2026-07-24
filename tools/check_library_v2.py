@@ -437,7 +437,7 @@ def get_current_fct_name():
     return inspect.stack()[1][3]
 
 
-def get_meta_sheets_with_type(wb: Workbook) -> Dict[str, str]:
+def get_meta_sheets_with_type(wb: Workbook, context: str) -> Dict[str, str]:
     """
     Return a dictionary of all sheets ending with '_meta' and their corresponding type value.
     Format: {sheet_name: type_value}
@@ -455,19 +455,16 @@ def get_meta_sheets_with_type(wb: Workbook) -> Dict[str, str]:
         if df.shape[1] < 2:
             continue  # not enough columns to contain key/value pairs
 
-        # Find row where first column == 'type'
-        type_rows = df[df.iloc[:, 0] == MandatoryMetaKeys.TYPE.value]
-
-        if not type_rows.empty:
-            type_value = str(type_rows.iloc[0, 1]).strip()
+        type_value = get_meta_value(df, MandatoryMetaKeys.TYPE.value, sheet_name, context=context)
+        if type_value is not None:
             meta_sheets_with_type[sheet_name] = type_value
 
     return meta_sheets_with_type
 
 
-def get_meta_sheets_names_from_type(wb: Workbook, sheet_type: MetaTypes) -> List[str]:
+def get_meta_sheets_names_from_type(wb: Workbook, sheet_type: MetaTypes, context: str) -> List[str]:
 
-    meta_sheets = get_meta_sheets_with_type(wb)
+    meta_sheets = get_meta_sheets_with_type(wb, context)
     sheets = []
 
     for sheet, sht_type in meta_sheets.items():
@@ -480,27 +477,40 @@ def get_meta_sheets_names_from_type(wb: Workbook, sheet_type: MetaTypes) -> List
 
 
 # Retrieve the value associated with a given key in a meta sheet (2-column format).
-def get_meta_value(df: pd.DataFrame, key_name: str, sheet_name: str, required: bool = False, with_row: bool = False) -> tuple[str | None, int | None]:
+def get_meta_value(df: pd.DataFrame, key_name: str, sheet_name: str, required: bool = False, with_row: bool = False, context: str | None = None) -> str | None | tuple[str | None, int | None]:
     
     """
     If with_row=False (default): returns value
     If with_row=True: returns (value, excel_row_number)
     """
 
+    context_prefix = f"({context}) " if context else ""
+
+    if df.shape[1] == 0:
+        if required:
+            raise ValueError(f"{context_prefix}[{sheet_name}] Missing required key \"{key_name}\" because the meta sheet is empty.")
+        return (None, None) if with_row else None
+
     matches = df[df.iloc[:, 0] == key_name]
 
     if matches.empty:
         if required:
-            raise ValueError(f"[{sheet_name}] Missing required key \"{key_name}\" in meta sheet.")
-        
+            raise ValueError(f"{context_prefix}[{sheet_name}] Missing required key \"{key_name}\" in meta sheet.")
         return (None, None) if with_row else None
 
-    value = matches.iloc[0, 1]
+    if len(matches) > 1:
+        rows = ", ".join(str(index + 1) for index in matches.index)
+        raise ValueError(
+            f"{context_prefix}[{sheet_name}] Key \"{key_name}\" appears multiple times at rows {rows}."
+            f"\n> 💡 Tip: Remove duplicate rows so each key appears only once in the \"{sheet_name}\" sheet."
+        )
+
+    value = matches.iloc[0, 1] if matches.shape[1] > 1 else None    # Return "None" if 2nd column is empty
     row = matches.index[0] + 1  # Excel-style row number
 
     if pd.isna(value) or str(value).strip() == "":
         if required:
-            raise ValueError(f"[{sheet_name}] Row #{row}: Key \"{key_name}\" is present but has an empty value.")
+            raise ValueError(f"{context_prefix}[{sheet_name}] Row #{row}: Key \"{key_name}\" is present but has an empty value.")
         return (None, row) if with_row else None
 
     value = str(value).strip()
@@ -803,29 +813,13 @@ def validate_meta_sheet(df: pd.DataFrame, sheet_name: str, expected_keys: Sequen
     
     if expected_keys:
         for key in expected_keys:
-            matches = df[df.iloc[:, 0] == key]
-            if matches.empty:
-                raise ValueError(f"({context}) [{sheet_name}] Missing required key \"{key}\" in meta sheet")
-            
-            row_index = matches.index[0]
-            value = matches.iloc[0, 1] if matches.shape[1] > 1 else None
-
-            if pd.isna(value) or str(value).strip() == "":
-                raise ValueError(f"({context}) [{sheet_name}] Row #{row_index + 1}: Key \"{key}\" is present but has no value")
+            get_meta_value(df, key, sheet_name, required=True, context=context)
 
     # Validate presence and value of "type" key
-    type_matches = df[df.iloc[:, 0] == MandatoryMetaKeys.TYPE.value]
-    if type_matches.empty:
-        raise ValueError(f"({context}) {sheet_name}: Missing required key \"type\" in meta sheet")
+    type_value, type_row = get_meta_value(df, MandatoryMetaKeys.TYPE.value, sheet_name, required=True, with_row=True, context=context)
 
-    type_row_index = type_matches.index[0]
-    type_value = type_matches.iloc[0, 1] if type_matches.shape[1] > 1 else None
-
-    if pd.isna(type_value) or str(type_value).strip() == "":
-        raise ValueError(f"({context}) [{sheet_name}] Row #{type_row_index + 1}: Key \"type\" is present but has no value")
-
-    if str(type_value).strip() != expected_type.value:
-        raise ValueError(f"({context}) [{sheet_name}] Row #{type_row_index + 1}: Invalid type \"{type_value}\". Expected \"{expected_type.value}\"")
+    if type_value != expected_type.value:
+        raise ValueError(f"({context}) [{sheet_name}] Row #{type_row}: Invalid type \"{type_value}\". Expected \"{expected_type.value}\"")
     
 
 def validate_optional_values_meta_sheet(df: pd.DataFrame, sheet_name: str, optional_keys: Sequence[str], context: str, verbose: bool = False, ctx: ConsoleContext = None):
@@ -834,14 +828,11 @@ def validate_optional_values_meta_sheet(df: pd.DataFrame, sheet_name: str, optio
         return
     
     for key in optional_keys:
-        matches = df[df.iloc[:, 0] == key]
+        value, row = get_meta_value(df, key, sheet_name, with_row=True, context=context)
         
-        if not matches.empty:
-            row_index = matches.index[0]
-            value = matches.iloc[0, 1] if matches.shape[1] > 1 else None
-
-            if pd.isna(value) or str(value).strip() == "":
-                raise ValueError(f"({context}) [{sheet_name}] Row #{row_index + 1}: Optional key \"{key}\" is present but has no value"
+        if row is not None:
+            if value is None:
+                raise ValueError(f"({context}) [{sheet_name}] Row #{row}: Optional key \"{key}\" is present but has no value"
                                   "\n> 💡 Tip: If you don't need this key, you can simply remove it from the sheet.")
 
         else:
@@ -863,28 +854,26 @@ def validate_extra_locales_in_meta(df: pd.DataFrame, sheet_name: str, context: s
             continue
         
         base_key, locale = match.groups()
-        row_index = df[df.iloc[:, 0] == key].index[0]  # Get the row index of the localized key
+        value, row = get_meta_value(df, key, sheet_name, with_row=True, context=context)
 
         # Validate locale format
         if not is_valid_locale(locale):
             raise ValueError(
-                f"({context}) [{sheet_name}] Row #{row_index + 1}: Invalid locale \"{locale}\" in key \"{key}\""
+                f"({context}) [{sheet_name}] Row #{row}: Invalid locale \"{locale}\" in key \"{key}\""
                 "\n> 💡 Tip: Locale setting must comply with ISO 639 Set 1 (e.g., \"en\", \"fr\"). See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes"
             )
 
         # Check if base key exists in the meta sheet
         if base_key not in df.iloc[:, 0].values:
             raise ValueError(
-                f"({context}) [{sheet_name}] Row #{row_index + 1}: Localized key \"{key}\" found, but base key \"{base_key}\" is missing"
+                f"({context}) [{sheet_name}] Row #{row}: Localized key \"{key}\" found, but base key \"{base_key}\" is missing"
                 f"\n> 💡 Tip: Add the base key \"{base_key}\" or simply remove the key \"{key}\"."
             )
 
         # Check that the localized value is not empty
-        row = df[df.iloc[:, 0] == key]
-        value = row.iloc[0, 1] if row.shape[1] > 1 else None
-        if pd.isna(value) or str(value).strip() == "":
+        if value is None:
             raise ValueError(
-                f"({context}) [{sheet_name}] Row #{row_index + 1}: Localized key \"{key}\" is present but has no value"
+                f"({context}) [{sheet_name}] Row #{row}: Localized key \"{key}\" is present but has no value"
                 "\n> 💡 Tip: If you don't need this key, you can simply remove it from the sheet."
             )
 
@@ -892,14 +881,9 @@ def validate_extra_locales_in_meta(df: pd.DataFrame, sheet_name: str, context: s
 # Check that if the "name" key exists and has a value, and if the corresponding "<name>_content" sheet exists.
 def validate_related_content_sheet_from_name_key(wb: Workbook, df: pd.DataFrame, sheet_name: str, context: str):
 
-    key_row = df[df.iloc[:, 0] == "name"]
-    if key_row.empty:
-        return  # 'name' key is not present, skip check
-
-    value = str(key_row.iloc[0, 1]).strip()
-    row = key_row.index[0] + 1
-    if not value:
-        return  # value is empty, skip check
+    value, row = get_meta_value(df, "name", sheet_name, with_row=True, context=context)
+    if value is None:
+        return  # 'name' key is missing or empty, skip check
 
     expected_sheet = f"{value}{SheetTypes.CONTENT.value}"
     if expected_sheet not in wb.sheetnames:
@@ -915,19 +899,14 @@ def _framework_validate_definition_keys(wb: Workbook, df: pd.DataFrame, sheet_na
     fct_name = get_current_fct_name()
 
     for def_key in definition_keys:
-        matches = df[df.iloc[:, 0] == def_key]
-        if matches.empty:
-            continue
-
-        value = str(matches.iloc[0, 1]).strip()
-        if not value:
+        value, row = get_meta_value(df, def_key, sheet_name, with_row=True, context=fct_name)
+        if value is None:
             continue
 
         expected_sheet = f"{value}{SheetTypes.META.value}"
         if expected_sheet in wb.sheetnames:
             continue
 
-        row = matches.index[0] + 1
         sheet_type = def_key.removesuffix("_definition")
         raise ValueError(
             f"({fct_name}) [{sheet_name}] Row #{row}: Key \"{def_key}\" points to missing sheet starting with \"{value}\" (Missing \"{expected_sheet}\")"
@@ -940,8 +919,8 @@ def _framework_validate_meta_min_max_score(df: pd.DataFrame, sheet_name: str):
 
     fct_name = get_current_fct_name()
 
-    min_score, min_score_row = get_meta_value(df, "min_score", sheet_name, with_row=True)
-    max_score, max_score_row = get_meta_value(df, "max_score", sheet_name, with_row=True)
+    min_score, min_score_row = get_meta_value(df, "min_score", sheet_name, with_row=True, context=fct_name)
+    max_score, max_score_row = get_meta_value(df, "max_score", sheet_name, with_row=True, context=fct_name)
 
     if min_score is None and max_score is None:
         return
@@ -977,25 +956,25 @@ def validate_library_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = Fal
     validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
     # URN
-    urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True) 
+    urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True, context=fct_name)
     validate_urn(urn_value, fct_name, urn_row)
     validate_urn_type(urn_value, URNMetadataFormat.LIBRARY_URN, fct_name, urn_row)
 
     # ref_id
-    ref_id_value, ref_id_row = get_meta_value(df, "ref_id", sheet_name, required=True,  with_row=True)
+    ref_id_value, ref_id_row = get_meta_value(df, "ref_id", sheet_name, required=True, with_row=True, context=fct_name)
     validate_ref_id(ref_id_value, fct_name, ref_id_row)
 
     # version
-    version_value, version_row = get_meta_value(df, "version", sheet_name, required=True,  with_row=True)
+    version_value, version_row = get_meta_value(df, "version", sheet_name, required=True, with_row=True, context=fct_name)
     validate_integer_value(version_value, sheet_name, context=fct_name, row=version_row, value_name="version", positive_only=True)
 
     # labels (Optional)
-    labels_value, labels_row = get_meta_value(df, "labels", sheet_name, required=False, with_row=True)
+    labels_value, labels_row = get_meta_value(df, "labels", sheet_name, required=False, with_row=True, context=fct_name)
     if labels_value is not None:
         validate_labels(labels_value, fct_name, labels_row)
 
     # locale
-    locale_value, locale_row = get_meta_value(df, "locale", sheet_name, required=True, with_row=True)
+    locale_value, locale_row = get_meta_value(df, "locale", sheet_name, required=True, with_row=True, context=fct_name)
     if not is_valid_locale(locale_value):
         raise ValueError(
             f"({fct_name}) [{sheet_name}] Row #{locale_row}: Invalid \"locale\" value: \"{locale_value}\""
@@ -1019,17 +998,17 @@ def validate_framework_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, ver
     validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
     # URN
-    urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True)
+    urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True, context=fct_name)
     validate_urn(urn_value, fct_name, urn_row)
     validate_urn_type(urn_value, URNMetadataFormat.FRAMEWORK_URN, fct_name, urn_row)
 
     # base_urn
-    base_urn_value, base_urn_row = get_meta_value(df, "base_urn", sheet_name, required=True, with_row=True)
+    base_urn_value, base_urn_row = get_meta_value(df, "base_urn", sheet_name, required=True, with_row=True, context=fct_name)
     validate_urn(base_urn_value, fct_name, base_urn_row)
     validate_urn_type(base_urn_value, URNMetadataFormat.FRAMEWORK_BASE_URN, fct_name, base_urn_row)
 
     # ref_id
-    ref_id_value, ref_id_row = get_meta_value(df, "ref_id", sheet_name, required=True, with_row=True)
+    ref_id_value, ref_id_row = get_meta_value(df, "ref_id", sheet_name, required=True, with_row=True, context=fct_name)
     validate_ref_id(ref_id_value, fct_name, ref_id_row)
     
     # Check that *_definition keys (if present) point to an existing *_meta sheet
@@ -1057,7 +1036,7 @@ def validate_threats_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = Fal
     validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
     # base_urn
-    base_urn_value, base_urn_row = get_meta_value(df, "base_urn", sheet_name, required=True, with_row=True)
+    base_urn_value, base_urn_row = get_meta_value(df, "base_urn", sheet_name, required=True, with_row=True, context=fct_name)
     validate_urn(base_urn_value, fct_name, base_urn_row)
     validate_urn_type(base_urn_value, URNMetadataFormat.THREATS_BASE_URN, fct_name, base_urn_row)
 
@@ -1079,7 +1058,7 @@ def validate_reference_controls_meta(df: pd.DataFrame, sheet_name: str, verbose:
     validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
     # base_urn
-    base_urn_value, base_urn_row = get_meta_value(df, "base_urn", sheet_name, required=True, with_row=True)
+    base_urn_value, base_urn_row = get_meta_value(df, "base_urn", sheet_name, required=True, with_row=True, context=fct_name)
     validate_urn(base_urn_value, fct_name, base_urn_row)
     validate_urn_type(base_urn_value, URNMetadataFormat.REFERENCE_CONTROLS_BASE_URN, fct_name, base_urn_row)
 
@@ -1101,12 +1080,12 @@ def validate_risk_matrix_meta(df: pd.DataFrame, sheet_name: str, verbose: bool =
     validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
     # URN
-    urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True) 
+    urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True, context=fct_name)
     validate_urn(urn_value, fct_name, urn_row)
     validate_urn_type(urn_value, URNMetadataFormat.MATRIX_URN, fct_name, urn_row)
 
     # ref_id
-    ref_id_value, ref_id_row = get_meta_value(df, "ref_id", sheet_name, required=True, with_row=True)
+    ref_id_value, ref_id_row = get_meta_value(df, "ref_id", sheet_name, required=True, with_row=True, context=fct_name)
     validate_ref_id(ref_id_value, fct_name, ref_id_row)
 
     # Extra locales
@@ -1147,28 +1126,28 @@ def validate_requirement_mapping_set_meta(df: pd.DataFrame, sheet_name: str, ver
     validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
 
     # URN
-    urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True) 
+    urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True, context=fct_name)
     validate_urn(urn_value, fct_name, urn_row)
     validate_urn_type(urn_value, URNMetadataFormat.MAPPING_URN, fct_name, urn_row)
 
     # source_framework_urn
-    source_framework_urn_value, source_framework_urn_row = get_meta_value(df, "source_framework_urn", sheet_name, required=True, with_row=True)
+    source_framework_urn_value, source_framework_urn_row = get_meta_value(df, "source_framework_urn", sheet_name, required=True, with_row=True, context=fct_name)
     validate_urn_type(source_framework_urn_value, URNMetadataFormat.MAPPING_SOURCE_AND_TARGET_FRAMEWORK_URN, fct_name, source_framework_urn_row)
 
     # target_framework_urn
-    target_framework_urn_value, target_framework_urn_row = get_meta_value(df, "target_framework_urn", sheet_name, required=True, with_row=True)
+    target_framework_urn_value, target_framework_urn_row = get_meta_value(df, "target_framework_urn", sheet_name, required=True, with_row=True, context=fct_name)
     validate_urn_type(target_framework_urn_value, URNMetadataFormat.MAPPING_SOURCE_AND_TARGET_FRAMEWORK_URN, fct_name, target_framework_urn_row)
 
     # source_node_base_urn
-    source_node_base_urn_value, source_node_base_urn_row = get_meta_value(df, "source_node_base_urn", sheet_name, required=True, with_row=True)
+    source_node_base_urn_value, source_node_base_urn_row = get_meta_value(df, "source_node_base_urn", sheet_name, required=True, with_row=True, context=fct_name)
     validate_urn_type(source_node_base_urn_value, URNMetadataFormat.MAPPING_SOURCE_AND_TARGET_NODE_BASE_URN, fct_name, source_node_base_urn_row)
 
     # target_node_base_urn
-    target_node_base_urn_value, target_node_base_urn_row = get_meta_value(df, "target_node_base_urn", sheet_name, required=True, with_row=True)
+    target_node_base_urn_value, target_node_base_urn_row = get_meta_value(df, "target_node_base_urn", sheet_name, required=True, with_row=True, context=fct_name)
     validate_urn_type(target_node_base_urn_value, URNMetadataFormat.MAPPING_SOURCE_AND_TARGET_NODE_BASE_URN, fct_name, target_node_base_urn_row)
 
     # ref_id
-    ref_id_value, ref_id_row = get_meta_value(df, "ref_id", sheet_name, required=True, with_row=True)
+    ref_id_value, ref_id_row = get_meta_value(df, "ref_id", sheet_name, required=True, with_row=True, context=fct_name)
     validate_ref_id(ref_id_value, fct_name, ref_id_row)
 
     # Duplicate the list to avoid future modifications of expected_keys affecting the validation
@@ -1181,7 +1160,7 @@ def validate_requirement_mapping_set_meta(df: pd.DataFrame, sheet_name: str, ver
 
     # Validate that the values for specific keys do not contain spaces
     for key in keys_to_check_no_spaces:
-        value, row = get_meta_value(df, key, sheet_name, required=True, with_row=True)
+        value, row = get_meta_value(df, key, sheet_name, required=True, with_row=True, context=fct_name)
         validate_no_spaces(str(value), key, fct_name, row)
 
     # Extra locales
@@ -1442,7 +1421,7 @@ def validate_extra_locales_in_content(df: pd.DataFrame, sheet_name: str, context
 
 
         ##### Specific sheet Checking #####
-        content_sheet_type = get_content_sheet_type(wb, sheet_name) if wb is not None else None
+        content_sheet_type = get_content_sheet_type(wb, sheet_name, context) if wb is not None else None
         
         # In framework sheets, translated questions must contain the same number of elements as the base "questions" value on the same row.
         if content_sheet_type == MetaTypes.FRAMEWORK.value and base_col == "questions":
@@ -1464,19 +1443,19 @@ def get_content_sheet_base_name(content_sheet_name: str) -> str:
 
 
 # Return the type declared in the meta sheet corresponding to a content sheet.
-def get_content_sheet_type(wb: Workbook, content_sheet_name: str) -> str:
+def get_content_sheet_type(wb: Workbook, content_sheet_name: str, context: str) -> str:
     base_name = get_content_sheet_base_name(content_sheet_name)
     meta_sheet_name = f"{base_name}{SheetTypes.META.value}"
 
     if meta_sheet_name not in wb.sheetnames:
         raise ValueError(
-            f"[{content_sheet_name}] No corresponding meta sheet found (Missing \"{meta_sheet_name}\")"
+            f"({context}) [{content_sheet_name}] No corresponding meta sheet found (Missing \"{meta_sheet_name}\")"
         )
 
-    meta_sheets_with_type = get_meta_sheets_with_type(wb)
+    meta_sheets_with_type = get_meta_sheets_with_type(wb, context)
 
     if meta_sheet_name not in meta_sheets_with_type:
-        raise ValueError(f"[{meta_sheet_name}] Missing or empty \"type\" field in meta sheet")
+        raise ValueError(f"({context}) [{meta_sheet_name}] Missing or empty \"type\" field in meta sheet")
 
     return meta_sheets_with_type[meta_sheet_name]
 
@@ -1516,7 +1495,7 @@ def check_content_sheet_usage_in_frameworks(wb: Workbook, sheet_name: str, meta_
     """
 
     sheet_base_name = get_content_sheet_base_name(sheet_name)
-    meta_sheets = get_meta_sheets_with_type(wb)
+    meta_sheets = get_meta_sheets_with_type(wb, fct_name)
     frameworks_with_reference = []
 
     for sheet, sheet_type in meta_sheets.items():
@@ -1524,7 +1503,7 @@ def check_content_sheet_usage_in_frameworks(wb: Workbook, sheet_name: str, meta_
             continue
 
         sheet_df = pd.DataFrame(wb[sheet].values)
-        meta_value = get_meta_value(sheet_df, meta_field, sheet)
+        meta_value = get_meta_value(sheet_df, meta_field, sheet, context=fct_name)
 
         if meta_value == sheet_base_name:
             frameworks_with_reference.append(sheet)
@@ -1904,7 +1883,7 @@ def _URN_prefix_validate_ids_usage_in_frameworks(wb: Workbook, df: pd.DataFrame,
     fct_name = get_current_fct_name()
 
     # 1. Get "framework" content sheets
-    framework_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.FRAMEWORK)
+    framework_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.FRAMEWORK, fct_name)
     framework_sheets = get_corresponding_type_sheet_names(framework_sheets, SheetTypes.CONTENT)
 
     # 2. Check if every Prefix IDs are actually used in "framework" sheets
@@ -2004,10 +1983,10 @@ def _URN_prefix_validate_prefix_values_and_dependencies(wb: Workbook, df: pd.Dat
     fct_name = get_current_fct_name()
 
     # 1. Get "threats" meta sheets
-    threats_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.THREATS)
+    threats_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.THREATS, fct_name)
 
     # 2. Get "reference_controls" sheets
-    ref_ctrl_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.REFERENCE_CONTROLS)
+    ref_ctrl_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.REFERENCE_CONTROLS, fct_name)
 
     # 3. Check whether the values for each "prefix_value" come from internal sheets or external framework
     internal_threats = []
@@ -2417,7 +2396,7 @@ def _framework_validate_column_against_reference_sheet(wb: Workbook, df: pd.Data
 
     # Get the referenced sheet name from meta key
     meta_key = column_to_key_mapping[column_name]
-    ref_base_name = get_meta_value(meta_df, meta_key, meta_sheet_name)
+    ref_base_name = get_meta_value(meta_df, meta_key, meta_sheet_name, context=context)
 
     if not ref_base_name:
         raise ValueError(
@@ -2484,7 +2463,7 @@ def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, co
     # 1st Part: Load and validate all URN_PREFIX sheets
     # ───────────────────────────────────────────────────────────────
 
-    urn_meta_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.URN_PREFIX)
+    urn_meta_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.URN_PREFIX, fct_name)
 
     if not urn_meta_sheets:
         raise ValueError(
@@ -2544,8 +2523,8 @@ def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, co
     # 3rd Part: Determine internal and external prefixes for threats / reference_controls
     # ───────────────────────────────────────────────────────────────
 
-    threats_meta = get_meta_sheets_names_from_type(wb, MetaTypes.THREATS)
-    ref_ctrl_meta = get_meta_sheets_names_from_type(wb, MetaTypes.REFERENCE_CONTROLS)
+    threats_meta = get_meta_sheets_names_from_type(wb, MetaTypes.THREATS, fct_name)
+    ref_ctrl_meta = get_meta_sheets_names_from_type(wb, MetaTypes.REFERENCE_CONTROLS, fct_name)
 
     all_internal_threats = []
     all_external_threats = []
@@ -3369,10 +3348,8 @@ def dispatch_meta_validation(wb: Workbook, df: pd.DataFrame, sheet_name: str, ve
     
     fct_name = get_current_fct_name()
     
-    type_row = df[df.iloc[:, 0] == MandatoryMetaKeys.TYPE.value]
-    if type_row.empty:
-        raise ValueError(f"({fct_name}) [{sheet_name}] Missing or empty \"type\" field in meta sheet")
-    type_value = type_row.iloc[0, 1]
+    type_value = get_meta_value(df, MandatoryMetaKeys.TYPE.value, sheet_name, required=True, context=fct_name)
+
     if type_value == MetaTypes.LIBRARY.value:
         validate_library_meta(df, sheet_name, verbose, ctx)
     elif type_value == MetaTypes.FRAMEWORK.value:
@@ -3481,8 +3458,7 @@ def validate_excel_structure(filepath: str | Path, external_refs: List[str] = No
                             f"\n> 💡 Tip: Make sure the corresponding content sheet for \"{sheet_name}\" is named \"{expected_content_sheet}\"")
 
         dispatch_meta_validation(wb, df, sheet_name, verbose, ctx)
-        type_row = df[df.iloc[:, 0] == MandatoryMetaKeys.TYPE.value]
-        meta_types[base_name] = str(type_row.iloc[0, 1]).strip()
+        meta_types[base_name] = get_meta_value(df, MandatoryMetaKeys.TYPE.value, sheet_name, required=True, context=fct_name)
 
     # Check "_content" sheets
     # As some checks in "_content" sheets need to check the contents of other "_content" sheets, we make sure that all such sheets first have a "_meta" sheet
