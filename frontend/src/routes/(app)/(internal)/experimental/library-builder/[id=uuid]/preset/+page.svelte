@@ -145,7 +145,10 @@
 				body: JSON.stringify({ action: 'start-editing' })
 			});
 			if (!r.ok) {
-				triggerError(m.lbPresetFailedToLoadDraft({ detail: r.status }));
+				const j = await r.json().catch(() => ({}));
+				triggerError(
+					safeTranslate(formatError(j)) || m.lbPresetFailedToLoadDraft({ detail: r.status })
+				);
 				return;
 			}
 			const j = await r.json();
@@ -218,6 +221,7 @@
 		if (!j) return m.lbPresetUnknownError();
 		if (typeof j === 'string') return j;
 		if (j.detail) return j.detail;
+		if (j.error) return j.error;
 		try {
 			return JSON.stringify(j);
 		} catch {
@@ -802,13 +806,13 @@
 					type="text"
 					bind:value={draft.journey_meta.name}
 					placeholder={m.lbPresetNamePlaceholder()}
-					class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1 placeholder:text-surface-500 placeholder:font-normal"
+					class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1 placeholder:text-surface-500 placeholder:font-normal"
 				/>
 				<textarea
 					bind:value={draft.journey_meta.description}
 					placeholder={m.lbPresetDescriptionPlaceholder()}
 					rows="2"
-					class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1 placeholder:text-surface-500"
+					class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1 placeholder:text-surface-500"
 				></textarea>
 				<details class="pt-1" open={Object.keys(draft.journey_meta.translations).length > 0}>
 					<summary class="text-xs text-surface-500 cursor-pointer select-none">
@@ -931,7 +935,7 @@
 										type="text"
 										value={step.title}
 										placeholder={m.lbPresetStepNamePlaceholder()}
-										class="w-full text-base font-semibold bg-transparent border-0 border-b-2 border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-0.5 placeholder:text-surface-500 placeholder:font-normal"
+										class="w-full text-base font-semibold bg-transparent border-0 border-b-2 border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-0.5 placeholder:text-surface-500 placeholder:font-normal"
 										oninput={(e) =>
 											setStepField(i, { title: (e.target as HTMLInputElement).value })}
 									/>
@@ -939,7 +943,7 @@
 										value={step.description ?? ''}
 										placeholder={m.lbPresetDescriptionOptional()}
 										rows="2"
-										class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-200-800 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-0.5 placeholder:text-surface-500"
+										class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-200-800 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-0.5 placeholder:text-surface-500"
 										oninput={(e) =>
 											setStepField(i, { description: (e.target as HTMLTextAreaElement).value })}
 									></textarea>
