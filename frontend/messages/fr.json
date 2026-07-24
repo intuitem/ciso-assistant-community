@@ -4565,6 +4565,7 @@
 	"submitForReviewConfirm": "Êtes-vous sûr de vouloir soumettre vos réponses pour revue ? Vous ne pourrez plus les modifier tant que le relecteur ne les aura pas renvoyées.",
 	"closeAssignment": "Clôturer",
 	"reopenAssignment": "Rouvrir",
+	"reopenAssignmentForEditing": "Rouvrir pour modification",
 	"reviewerObservation": "Observation du relecteur",
 	"reviewerObservationPlaceholder": "Décrivez les modifications nécessaires...",
 	"assignmentSubmittedBanner": "Vos réponses ont été soumises et sont en cours de revue.",

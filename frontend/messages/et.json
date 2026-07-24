@@ -4211,6 +4211,7 @@
 	"submitForReviewConfirm": "Kas soovid kindlasti oma vastused ülevaatuseks esitada? Sa ei saa neid muuta enne, kui ülevaataja need tagasi saadab.",
 	"closeAssignment": "Sulge",
 	"reopenAssignment": "Ava uuesti",
+	"reopenAssignmentForEditing": "Ava uuesti muutmiseks",
 	"reviewerObservation": "Ülevaataja märkus",
 	"reviewerObservationPlaceholder": "Kirjelda, milliseid muudatusi on vaja...",
 	"assignmentSubmittedBanner": "Sinu vastused on esitatud ja on ülevaatusel.",

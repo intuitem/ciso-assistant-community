@@ -3992,6 +3992,7 @@
 	"submitForReviewConfirm": "Ar tikrai norite pateikti savo atsakymus peržiūrai? Negalėsite jų redaguoti, kol recenzentas jų negrąžins.",
 	"closeAssignment": "Uždaryti",
 	"reopenAssignment": "Atidaryti iš naujo",
+	"reopenAssignmentForEditing": "Atidaryti iš naujo redagavimui",
 	"reviewerObservation": "Recenzento pastaba",
 	"reviewerObservationPlaceholder": "Aprašykite, kokie pakeitimai reikalingi...",
 	"assignmentSubmittedBanner": "Jūsų atsakymai pateikti ir peržiūrimi.",
