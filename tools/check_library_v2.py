@@ -818,11 +818,12 @@ def validate_integer_value(
 
 
 # Global Checks ("type" value is checked by default)
-def validate_meta_sheet(df: pd.DataFrame, sheet_name: str, expected_keys: Sequence[str] | None, expected_type: MetaTypes, context: str):
+def validate_meta_sheet(df: pd.DataFrame, sheet_name: str, expected_keys: Sequence[MetaKey | str] | None, expected_type: MetaTypes, context: str):
     
     # Validate all required keys (excluding "type" which is handled separately)
     
     if expected_keys:
+        expected_keys = tuple(key.value if isinstance(key, MetaKey) else key for key in expected_keys)
         for key in expected_keys:
             get_meta_value(df, key, sheet_name, required=True, context=context)
 
@@ -833,11 +834,13 @@ def validate_meta_sheet(df: pd.DataFrame, sheet_name: str, expected_keys: Sequen
         raise ValueError(f"({context}) [{sheet_name}] Row #{type_row}: Invalid type \"{type_value}\". Expected \"{expected_type.value}\"")
     
 
-def validate_optional_values_meta_sheet(df: pd.DataFrame, sheet_name: str, optional_keys: Sequence[str], context: str, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_optional_values_meta_sheet(df: pd.DataFrame, sheet_name: str, optional_keys: Sequence[MetaKey | str], context: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     if not optional_keys:
         return
     
+    optional_keys = tuple(key.value if isinstance(key, MetaKey) else key for key in optional_keys)
+
     for key in optional_keys:
         value, row = get_meta_value(df, key, sheet_name, with_row=True, context=context)
         
@@ -855,8 +858,9 @@ def validate_optional_values_meta_sheet(df: pd.DataFrame, sheet_name: str, optio
                 print(msg)
 
 
-def validate_extra_locales_in_meta(df: pd.DataFrame, sheet_name: str, context: str):
+def validate_extra_locales_in_meta(df: pd.DataFrame, sheet_name: str, translatable_keys: Sequence[MetaKey | str], context: str):
 
+    translatable_keys = tuple(key.value if isinstance(key, MetaKey) else key for key in translatable_keys)
     keys = df.iloc[:, 0].dropna().astype(str)
 
     for key in keys:
@@ -879,6 +883,13 @@ def validate_extra_locales_in_meta(df: pd.DataFrame, sheet_name: str, context: s
             raise ValueError(
                 f"({context}) [{sheet_name}] Row #{row}: Localized key \"{key}\" found, but base key \"{base_key}\" is missing"
                 f"\n> 💡 Tip: Add the base key \"{base_key}\" or simply remove the key \"{key}\"."
+            )
+
+        # Check that the base key can be translated
+        if base_key not in translatable_keys:
+            raise ValueError(
+                f"({context}) [{sheet_name}] Row #{row}: Localized key \"{key}\" is not allowed because base key \"{base_key}\" doesn't support translations"
+                f"\n> 💡 Tip: Remove the localized key \"{key}\"."
             )
 
         # Check that the localized value is not empty
@@ -965,8 +976,8 @@ def validate_library_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = Fal
     schema = META_SHEET_SCHEMAS[expected_type]
 
     # Check required and optional meta values
-    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
-    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
+    validate_meta_sheet(df, sheet_name, schema.expected_keys, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_keys, fct_name, verbose, ctx)
 
     # URN
     urn_value, urn_row = get_meta_value(df, LibraryMetaKeys.URN, sheet_name, required=True, with_row=True, context=fct_name)
@@ -994,7 +1005,7 @@ def validate_library_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = Fal
             "\n> 💡 Tip: Locale setting must comply with ISO 639 Set 1 (e.g., \"en\", \"fr\"). See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes")
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1008,8 +1019,8 @@ def validate_framework_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, ver
     schema = META_SHEET_SCHEMAS[expected_type]
 
     # Check required and optional meta values
-    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
-    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
+    validate_meta_sheet(df, sheet_name, schema.expected_keys, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_keys, fct_name, verbose, ctx)
 
     # URN
     urn_value, urn_row = get_meta_value(df, FrameworkMetaKeys.URN, sheet_name, required=True, with_row=True, context=fct_name)
@@ -1033,7 +1044,7 @@ def validate_framework_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, ver
     _framework_validate_meta_min_max_score(df, sheet_name)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1047,8 +1058,8 @@ def validate_threats_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = Fal
     schema = META_SHEET_SCHEMAS[expected_type]
 
     # Check required and optional meta values
-    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
-    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
+    validate_meta_sheet(df, sheet_name, schema.expected_keys, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_keys, fct_name, verbose, ctx)
 
     # base_urn
     base_urn_value, base_urn_row = get_meta_value(df, ThreatsMetaKeys.BASE_URN, sheet_name, required=True, with_row=True, context=fct_name)
@@ -1056,7 +1067,7 @@ def validate_threats_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = Fal
     validate_urn_type(base_urn_value, URNMetadataFormat.THREATS_BASE_URN, fct_name, base_urn_row)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1070,8 +1081,8 @@ def validate_reference_controls_meta(df: pd.DataFrame, sheet_name: str, verbose:
     schema = META_SHEET_SCHEMAS[expected_type]
 
     # Check required and optional meta values
-    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
-    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
+    validate_meta_sheet(df, sheet_name, schema.expected_keys, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_keys, fct_name, verbose, ctx)
 
     # base_urn
     base_urn_value, base_urn_row = get_meta_value(df, ReferenceControlsMetaKeys.BASE_URN, sheet_name, required=True, with_row=True, context=fct_name)
@@ -1079,7 +1090,7 @@ def validate_reference_controls_meta(df: pd.DataFrame, sheet_name: str, verbose:
     validate_urn_type(base_urn_value, URNMetadataFormat.REFERENCE_CONTROLS_BASE_URN, fct_name, base_urn_row)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1093,8 +1104,8 @@ def validate_risk_matrix_meta(df: pd.DataFrame, sheet_name: str, verbose: bool =
     schema = META_SHEET_SCHEMAS[expected_type]
 
     # Check required and optional meta values
-    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
-    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
+    validate_meta_sheet(df, sheet_name, schema.expected_keys, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_keys, fct_name, verbose, ctx)
 
     # URN
     urn_value, urn_row = get_meta_value(df, RiskMatrixMetaKeys.URN, sheet_name, required=True, with_row=True, context=fct_name)
@@ -1106,7 +1117,7 @@ def validate_risk_matrix_meta(df: pd.DataFrame, sheet_name: str, verbose: bool =
     validate_ref_id(ref_id_value, fct_name, ref_id_row)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1120,14 +1131,14 @@ def validate_implementation_groups_meta(wb: Workbook, df: pd.DataFrame, sheet_na
     schema = META_SHEET_SCHEMAS[expected_type]
 
     # Check required and optional meta values
-    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
-    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
+    validate_meta_sheet(df, sheet_name, schema.expected_keys, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_keys, fct_name, verbose, ctx)
 
     # name
     validate_related_content_sheet_from_name_key(wb, df, sheet_name, ImplementationGroupsMetaKeys.NAME, fct_name)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1141,8 +1152,8 @@ def validate_requirement_mapping_set_meta(df: pd.DataFrame, sheet_name: str, ver
     schema = META_SHEET_SCHEMAS[expected_type]
 
     # Check required and optional meta values
-    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
-    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
+    validate_meta_sheet(df, sheet_name, schema.expected_keys, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_keys, fct_name, verbose, ctx)
 
     # URN
     urn_value, urn_row = get_meta_value(df, RequirementMappingSetMetaKeys.URN, sheet_name, required=True, with_row=True, context=fct_name)
@@ -1181,7 +1192,7 @@ def validate_requirement_mapping_set_meta(df: pd.DataFrame, sheet_name: str, ver
         validate_no_spaces(str(value), key.value, fct_name, row)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1196,14 +1207,14 @@ def validate_scores_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbos
     schema = META_SHEET_SCHEMAS[expected_type]
 
     # Check required and optional meta values
-    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
-    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
+    validate_meta_sheet(df, sheet_name, schema.expected_keys, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_keys, fct_name, verbose, ctx)
 
     # name
     validate_related_content_sheet_from_name_key(wb, df, sheet_name, ScoresMetaKeys.NAME, fct_name)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1217,14 +1228,14 @@ def validate_answers_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbo
     schema = META_SHEET_SCHEMAS[expected_type]
 
     # Check required and optional meta values
-    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
-    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
+    validate_meta_sheet(df, sheet_name, schema.expected_keys, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_keys, fct_name, verbose, ctx)
 
     # name
     validate_related_content_sheet_from_name_key(wb, df, sheet_name, AnswersMetaKeys.NAME, fct_name)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1238,11 +1249,11 @@ def validate_urn_prefix_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = 
     schema = META_SHEET_SCHEMAS[expected_type]
 
     # Check required and optional meta values
-    validate_meta_sheet(df, sheet_name, schema.expected_key_values, expected_type, fct_name)
-    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_key_values, fct_name, verbose, ctx)
+    validate_meta_sheet(df, sheet_name, schema.expected_keys, expected_type, fct_name)
+    validate_optional_values_meta_sheet(df, sheet_name, schema.optional_keys, fct_name, verbose, ctx)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
