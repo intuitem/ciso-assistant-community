@@ -41,6 +41,7 @@
 		computeRequirementScoreAndResult,
 		formatScoreValue,
 		displayScoreColor,
+		hasComputedScore,
 		resultBadgeStyle,
 		filterResultChoices
 	} from '$lib/utils/helpers';
@@ -787,13 +788,13 @@
 						</div>
 					{/if}
 					{#if page.data.compliance_assessment_score.scoring_enabled}
-						{#if computedScore !== null}
+						{#if computedScore !== null || hasComputedScore(page.data.requirementAssessment.requirement.questions)}
 							{#if showScore}
 								<div class="flex flex-row items-center space-x-4">
 									<span class="font-medium">{m.score()}</span>
 									<div class="shrink-0 relative">
 										<Progress
-											value={formatScoreValue(computedScore || 0, resolvedMax, false, resolvedMin)}
+											value={formatScoreValue(computedScore, resolvedMax, false, resolvedMin)}
 											min={0}
 											max={100}
 										>
@@ -804,7 +805,7 @@
 												/>
 											</Progress.Circle>
 											<div class="absolute inset-0 flex items-center justify-center">
-												<span class="text-xs font-bold">{computedScore}</span>
+												<span class="text-xs font-bold">{computedScore ?? '–'}</span>
 											</div>
 										</Progress>
 									</div>
