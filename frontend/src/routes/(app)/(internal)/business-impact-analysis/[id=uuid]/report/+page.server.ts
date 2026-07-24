@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { error, type NumericRange } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, params }) => {
@@ -34,7 +35,9 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 	let count = Infinity;
 	while (assetDetailsById.size < count) {
 		const res = await fetch(`${BASE_API_URL}/assets/full/?bia=${params.id}&offset=${offset}`);
-		if (!res.ok) break;
+		if (!res.ok) {
+			error(res.status as NumericRange<400, 599>, 'Failed to load full asset details');
+		}
 		const data = await res.json();
 		const items = data.results ?? [];
 		if (items.length === 0) break;
