@@ -56,6 +56,7 @@
 	// Composite models: perimeter optional, domain derived from it when set.
 	const ASSESSMENT_MODELS = [
 		'ComplianceAssessment',
+		'CyFunAssessment',
 		'RiskAssessment',
 		'FindingsAssessment',
 		'BusinessImpactAnalysis'
@@ -78,6 +79,11 @@
 		{ id: 'Folder', label: m.domains(), description: '' },
 		{ id: 'Perimeter', label: m.perimeters(), description: '' },
 		{ id: 'ComplianceAssessment', label: m.complianceAssessment(), description: '' },
+		{
+			id: 'CyFunAssessment',
+			label: m.cyFunAssessment(),
+			description: m.dataWizardCyFunDescription()
+		},
 		{
 			id: 'BusinessImpactAnalysis',
 			label: m.businessImpactAnalysis(),

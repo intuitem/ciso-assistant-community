@@ -456,6 +456,12 @@ Elementary actions are useful to model a killchain during the 4th workshop of an
 
 
 
+## CyFun self-assessment
+
+The official self-assessment Excel workbook published by Belgium's Centre for Cybersecurity for the **CyFun 2025** framework — BASIC, IMPORTANT, and ESSENTIAL editions are all accepted. The import creates a new audit, loads the CyFun 2025 framework automatically if needed, sets the implementation group from the detected assurance level, and carries over documentation/implementation scores, `N/A` markers, and comments. See [CCB CyFun](../features/framework-specific/cyfun.md) for details.
+
+Selected in the wizard as **CyFun self-assessment**; on the CLI: `import-cyfun-assessment`.
+
 ## EBIOS RM Studies
 
 Importing a full EBIOS RM study creates the study itself plus the objects across workshops 1–4 (assets, feared events, RO/TO couples, stakeholders, strategic and operational scenarios, attack paths, elementary actions, operating modes). Three input formats are supported. All three require a **risk matrix** to be selected in the wizard — the probability and impact labels in the source are resolved against that matrix.

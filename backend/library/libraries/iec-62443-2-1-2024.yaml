@@ -11,7 +11,7 @@ description: "Outline of IEC 62443-2-1:2024 Edition 2 \u2014 Security for indust
   \ 1-4) per Annex C. 87 sub-elements with paraphrased descriptions in program/policy\
   \ tone; purchase the standard for normative text and ML evaluation guidance."
 copyright: IEC - Purchase the standard for the full normative text.
-version: 1
+version: 2
 publication_date: 2026-04-28
 provider: IEC
 packager: intuitem
@@ -44,10 +44,6 @@ objects:
     - score: 5
       name: Optimizing
       description: Stable and flexible
-    implementation_groups_definition:
-    - ref_id: spe
-      name: Security Program Elements
-      description: All 87 sub-elements across SPE 1-8 (clauses 6-13).
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:6
       assessable: false
@@ -74,8 +70,6 @@ objects:
         is integrated with the organization''s broader ISMS (ISO 27001-aligned acceptable).
         Verify: ISMS scope explicitly covers IACS; governance, roles, and review cycles
         are documented.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1.2
       assessable: true
       depth: 3
@@ -86,8 +80,6 @@ objects:
         to the IACS, proportional to access level and applicable law. Verify: Documented
         background-check policy; records exist for IACS-access personnel; renewal
         cadence is defined.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1.3
       assessable: true
       depth: 3
@@ -98,8 +90,6 @@ objects:
         are documented and assigned (CISO, ICS security lead, system owner, operator
         security duties). Verify: A RACI or role map exists covering IACS cybersecurity;
         gaps are tracked and closed.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1.4
       assessable: true
       depth: 3
@@ -109,8 +99,6 @@ objects:
       description: 'Programme: General cybersecurity awareness training is provided
         to all personnel with IACS access. Verify: Training catalogue exists; completion
         records are maintained; refresh cadence is documented.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1.5
       assessable: true
       depth: 3
@@ -121,8 +109,6 @@ objects:
         personnel with cybersecurity responsibilities (operators, engineers, security
         staff). Verify: Role-specific training records exist; training maps to the
         responsibilities defined in ORG 1.3.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-1.6
       assessable: true
       depth: 3
@@ -133,8 +119,6 @@ objects:
         on suppliers (procurement language, evaluation, periodic review). Verify:
         Procurement contracts include cybersecurity clauses; supplier evaluation records
         exist (e.g. requiring 62443-2-4 / 4-1 certifications, SBOM).'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2
       assessable: false
       depth: 2
@@ -152,8 +136,6 @@ objects:
       description: 'Programme: Cybersecurity risks identified through risk assessments
         (62443-3-2) are tracked through to mitigation. Verify: A risk register exists;
         mitigation actions have owners, dates, and tracked status.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2.2
       assessable: true
       depth: 3
@@ -164,8 +146,6 @@ objects:
         (vulnerability scans, penetration tests, threat hunting, log review). Verify:
         Anomaly-discovery activities are scheduled and produce records; findings are
         routed into the risk register.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2.3
       assessable: true
       depth: 3
@@ -176,8 +156,6 @@ objects:
         the asset owner applies (or requires of contractors) secure development practices.
         Verify: Internal development follows a documented SDLC; contractor work is
         bound to equivalent expectations (e.g. flow-down of 62443-4-1).'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-2.4
       assessable: true
       depth: 3
@@ -187,8 +165,6 @@ objects:
       description: 'Programme: The security programme itself is reviewed periodically
         for adequacy and effectiveness. Verify: Programme reviews are scheduled; review
         records show participants, scope, findings, and corrective actions.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:org-3
       assessable: false
       depth: 2
@@ -206,8 +182,6 @@ objects:
         field cabinets, engineering rooms) is restricted, logged, and monitored. Verify:
         Physical-access policy is documented; access lists are maintained; physical-access
         events are logged where applicable.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:7
       assessable: false
       depth: 1
@@ -233,8 +207,6 @@ objects:
         network communications exists. Verify: Inventory is reconciled with deployed
         reality on a defined cadence; covers hardware, firmware versions, software
         versions, and inter-component communications.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1.2
       assessable: true
       depth: 3
@@ -245,8 +217,6 @@ objects:
         architecture, zone-and-conduit diagrams) are maintained and current. Verify:
         Drawings exist, are version-controlled, and match deployed reality at a defined
         cadence.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1.3
       assessable: true
       depth: 3
@@ -256,8 +226,6 @@ objects:
       description: 'Programme: Configuration settings for IACS components are defined,
         documented, and maintained against secure baselines. Verify: Per-component-type
         baselines are documented and deviations are tracked.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:cm-1.4
       assessable: true
       depth: 3
@@ -268,8 +236,6 @@ objects:
         change-control process covering review, approval, testing, and back-out. Verify:
         Change records show the documented steps; emergency changes have a documented
         after-the-fact review.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:8
       assessable: false
       depth: 1
@@ -294,8 +260,6 @@ objects:
       description: 'Programme: IACS zones are segmented from non-IACS networks (corporate
         IT, Internet) per the documented zone-and-conduit design. Verify: Boundary
         devices match the zone diagram; rules are reviewed periodically.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.2
       assessable: true
       depth: 3
@@ -305,8 +269,6 @@ objects:
       description: 'Programme: Zones and inter-zone connections are documented with
         protocols, directions, and authorized counterparts. Verify: Inter-zone documentation
         matches deployed reality.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.3
       assessable: true
       depth: 3
@@ -317,8 +279,6 @@ objects:
         with safety-specific access controls on connections to non-safety zones. Verify:
         Safety-network segmentation is documented and verifiable; non-safety access
         goes through controlled boundaries.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.4
       assessable: true
       depth: 3
@@ -329,8 +289,6 @@ objects:
         networks during outages of those external networks. Verify: Autonomy testing
         has been performed; documented behavior under loss of upstream connectivity
         is acceptable.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.5
       assessable: true
       depth: 3
@@ -341,8 +299,6 @@ objects:
         from external networks if needed (kill-switch, manual disconnection procedure).
         Verify: Disconnect capability is documented, tested, and authorized for use
         under defined conditions.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.6
       assessable: true
       depth: 3
@@ -352,8 +308,6 @@ objects:
       description: 'Programme: Internal IACS network access is controlled through
         documented access-control mechanisms (NAC, port security, MAC filtering).
         Verify: Internal network access controls are documented and operational.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.7
       assessable: true
       depth: 3
@@ -366,8 +320,6 @@ objects:
         Verify: Per-component allowed-services list is documented; firewall and host-firewall
         rules deny by default; unused services are disabled at the component level
         (defense in depth, not boundary-only).'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.8
       assessable: true
       depth: 3
@@ -377,8 +329,6 @@ objects:
       description: 'Programme: User-messaging facilities (broadcast, multicast operator
         messages) are controlled to prevent abuse. Verify: User-messaging policy is
         documented; abuse-prevention controls are in place.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-1.9
       assessable: true
       depth: 3
@@ -388,8 +338,6 @@ objects:
       description: 'Programme: A documented, secure network time source (NTP, PTP)
         is provided to IACS components. Verify: Time source is authoritative, redundant
         where required, and time synchronization is monitored.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-2
       assessable: false
       depth: 2
@@ -408,8 +356,6 @@ objects:
         encrypted modes (WPA2/WPA3-Enterprise, WirelessHART, ISA100.11a). Verify:
         Wireless protocol inventory exists; legacy/unsecured protocols are not in
         use or are explicitly compensated.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-2.2
       assessable: true
       depth: 3
@@ -419,8 +365,6 @@ objects:
       description: 'Programme: Wireless networks are segmented from wired control
         networks at a documented boundary. Verify: Wireless segmentation matches the
         zone-and-conduit design.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-2.3
       assessable: true
       depth: 3
@@ -430,8 +374,6 @@ objects:
       description: 'Programme: Wireless network identifiers (SSIDs, MAC addresses,
         frequencies) are managed and documented. Verify: Wireless properties are inventoried;
         rogue-AP detection is in place.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-3
       assessable: false
       depth: 2
@@ -449,8 +391,6 @@ objects:
       description: 'Programme: Authorized remote-access applications are documented
         (jump host, VPN client, vendor remote tool). Verify: Remote-access application
         inventory exists; only documented tools are permitted.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-3.2
       assessable: true
       depth: 3
@@ -461,8 +401,6 @@ objects:
         and individually authorized; vendor connections are time-bounded. Verify:
         Connection logs show authenticated identities and durations; vendor sessions
         are recorded or supervised.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:net-3.3
       assessable: true
       depth: 3
@@ -472,8 +410,6 @@ objects:
       description: 'Programme: Remote-access sessions terminate automatically after
         defined inactivity or upon disconnection. Verify: Termination is enforced
         and logged; abandoned sessions are detected.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:9
       assessable: false
       depth: 1
@@ -497,8 +433,6 @@ objects:
       description: 'Programme: IACS components are hardened against documented secure
         baselines (CIS, vendor hardening guides). Verify: Per-component-type hardening
         baselines exist; deployed components conform; deviations are tracked.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-1.2
       assessable: true
       depth: 3
@@ -509,8 +443,6 @@ objects:
         the IACS are dedicated, authorized, and controlled (e.g. scanned at a kiosk
         before use). Verify: Portable-media policy exists; sanitization or scanning
         is performed before use; uncontrolled media are rejected.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-2
       assessable: false
       depth: 2
@@ -528,8 +460,6 @@ objects:
       description: 'Programme: IACS components are commissioned in a known-malware-free
         state. Verify: Pre-commissioning malware scans / integrity checks are performed
         and documented.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-2.2
       assessable: true
       depth: 3
@@ -540,8 +470,6 @@ objects:
         allowlisting, integrity checks) appropriate to each component type are in
         place. Verify: Per-component-type malware-protection approach is documented;
         signatures/baselines are kept current.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-2.3
       assessable: true
       depth: 3
@@ -551,8 +479,6 @@ objects:
       description: 'Programme: Anti-malware software updates and installations are
         validated against IACS compatibility before deployment. Verify: Update-validation
         procedure exists; updates are tested before production rollout.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3
       assessable: false
       depth: 2
@@ -570,8 +496,6 @@ objects:
       description: 'Programme: Patches applied to IACS components are authenticated
         and integrity-verified (signed packages, vendor channels). Verify: Patch-acquisition
         process verifies authenticity; cryptographic signatures are checked.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3.2
       assessable: true
       depth: 3
@@ -581,8 +505,6 @@ objects:
       description: 'Programme: Patches are validated for IACS compatibility before
         installation; installation follows change-control. Verify: Patch-validation
         and installation procedures are documented; change-control records exist.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3.3
       assessable: true
       depth: 3
@@ -592,8 +514,6 @@ objects:
       description: 'Programme: The patch status (applied, pending, deferred, N/A)
         of each IACS component is tracked. Verify: Patch-status dashboard or report
         exists per component class.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3.4
       assessable: true
       depth: 3
@@ -603,8 +523,6 @@ objects:
       description: 'Programme: Patching does not introduce new security weaknesses;
         patch results are checked for regressions. Verify: Post-patch security validation
         is documented.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:comp-3.5
       assessable: true
       depth: 3
@@ -615,8 +533,6 @@ objects:
         (network controls, monitoring, configuration changes) are applied. Verify:
         Deferred-patch register lists each item with the applied mitigation and a
         re-evaluation date.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:10
       assessable: false
       depth: 1
@@ -640,8 +556,6 @@ objects:
       description: 'Programme: A data-classification scheme exists and is applied
         to IACS-related data. Verify: Classification scheme is documented; classified
         data is identified and labeled.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.2
       assessable: true
       depth: 3
@@ -651,8 +565,6 @@ objects:
       description: 'Programme: Confidential IACS data is protected from unauthorized
         disclosure at rest and in transit. Verify: Encryption / access-control mechanisms
         match the classification scheme.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.3
       assessable: true
       depth: 3
@@ -662,8 +574,6 @@ objects:
       description: 'Programme: Safety-system configuration mode is protected against
         unauthorized changes (key-switch, password, hardware lock). Verify: Safety-system
         configuration changes are restricted, documented, and audit-logged.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.4
       assessable: true
       depth: 3
@@ -673,8 +583,6 @@ objects:
       description: 'Programme: Data retention requirements are documented and enforced
         (legal, regulatory, operational). Verify: Retention policy exists per data
         class; lifecycle (retain, archive, delete) is enforced.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.5
       assessable: true
       depth: 3
@@ -684,8 +592,6 @@ objects:
       description: 'Programme: Cryptographic mechanisms used for IACS data follow
         approved algorithms and key lengths. Verify: Cryptographic inventory exists;
         deprecated algorithms are not used or are documented as legacy with mitigations.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.6
       assessable: true
       depth: 3
@@ -695,8 +601,6 @@ objects:
       description: 'Programme: Cryptographic keys are managed throughout their lifecycle
         (generation, distribution, storage, rotation, revocation). Verify: Key-management
         policy is documented; key-access is audit-logged.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:data-1.7
       assessable: true
       depth: 3
@@ -706,8 +610,6 @@ objects:
       description: 'Programme: IACS data integrity is protected (signing, hashing,
         controlled write paths). Verify: Integrity controls are documented per data
         class; integrity events are logged.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:11
       assessable: false
       depth: 1
@@ -732,8 +634,6 @@ objects:
       description: 'Programme: User identities are assigned to specific individuals
         or documented roles. Verify: User-identity records exist with assignment to
         person or named role.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.2
       assessable: true
       depth: 3
@@ -744,8 +644,6 @@ objects:
         needed (offboarding, role change). Verify: Removal SLA is documented; offboarding
         records are cross-checked against active accounts; vendor accounts in particular
         have a documented disable-on-departure step.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.3
       assessable: true
       depth: 3
@@ -755,8 +653,6 @@ objects:
       description: 'Programme: User identities persist over the system lifetime such
         that audit records remain traceable. Verify: Identity-reuse policy is documented;
         post-removal reuse is delayed for the audit-trace window.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.4
       assessable: true
       depth: 3
@@ -766,8 +662,6 @@ objects:
       description: 'Programme: User access rights are assigned per documented role
         definitions. Verify: Role catalog exists; access assignments are reviewed
         periodically; emergency access is documented.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.5
       assessable: true
       depth: 3
@@ -777,8 +671,6 @@ objects:
       description: 'Programme: User access operates at the minimum privileges needed
         for authorized functions. Verify: Privilege reviews are performed; standing
         administrative privileges are limited and time-bounded where possible.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.6
       assessable: true
       depth: 3
@@ -788,8 +680,6 @@ objects:
       description: 'Programme: Software services (background processes, agents) authenticate
         to the system. Verify: Service-account inventory exists; service authentication
         is documented per service.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.7
       assessable: true
       depth: 3
@@ -800,8 +690,6 @@ objects:
         in (or interactive-login is restricted under documented controls). Verify:
         Service accounts are configured non-interactive; exceptions are documented
         and approved.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.8
       assessable: true
       depth: 3
@@ -811,8 +699,6 @@ objects:
       description: 'Programme: Human users authenticate before accessing the IACS.
         Verify: Authentication is enforced on every access path (HMI, EWS, remote,
         configuration tool).'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.9
       assessable: true
       depth: 3
@@ -825,8 +711,6 @@ objects:
         embedded HMIs, physical-access-only consoles), with compensating controls
         and asset-owner approval. Verify: MFA coverage is documented; MFA is in place
         for documented cases; exemptions have documented compensating controls.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.10
       assessable: true
       depth: 3
@@ -836,8 +720,6 @@ objects:
       description: 'Programme: Where session integrity demands it, parties mutually
         authenticate (e.g. mutual TLS for component-to-component). Verify: Mutual-authentication
         scope is documented; mechanisms are in use.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.11
       assessable: true
       depth: 3
@@ -847,8 +729,6 @@ objects:
       description: "Programme: Passwords are protected \u2014 never stored in plaintext,\
         \ never transmitted in clear. Verify: Password storage uses hashing (bcrypt/scrypt/argon2\
         \ or vendor equivalent); transmission is encrypted."
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.12
       assessable: true
       depth: 3
@@ -858,8 +738,6 @@ objects:
       description: 'Programme: Shared passwords are minimized; disclosed/compromised
         passwords are detected and rotated. Verify: Password-sharing policy is documented;
         breach-monitoring or proactive rotation is in place.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.13
       assessable: true
       depth: 3
@@ -869,8 +747,6 @@ objects:
       description: 'Programme: User-login displays do not reveal sensitive information
         (last-login banner, etc., per policy). Verify: Login-display policy is documented
         and enforced.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.14
       assessable: true
       depth: 3
@@ -879,8 +755,6 @@ objects:
       name: User login failure displays
       description: 'Programme: Login-failure displays do not reveal which factor failed.
         Verify: Failure messages are generic and tested.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.15
       assessable: true
       depth: 3
@@ -890,8 +764,6 @@ objects:
       description: 'Programme: Consecutive login failures trigger a documented response
         (lockout, alert) balanced against essential-function continuity. Verify: Threshold
         and response are configurable and tested; recovery procedure is defined.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.16
       assessable: true
       depth: 3
@@ -900,8 +772,6 @@ objects:
       name: Session integrity
       description: 'Programme: Sessions are protected against hijacking and replay.
         Verify: Session-token unpredictability and expiry are documented and tested.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.17
       assessable: true
       depth: 3
@@ -910,8 +780,6 @@ objects:
       name: Concurrent sessions
       description: 'Programme: Concurrent-session limits are configurable and applied.
         Verify: Concurrent-session limits are configured per user/account class.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.18
       assessable: true
       depth: 3
@@ -920,8 +788,6 @@ objects:
       name: Screen lock
       description: 'Programme: Inactive sessions lock automatically after a defined
         period. Verify: Screen-lock timeout is configured; bypass requires re-authentication.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-1.19
       assessable: true
       depth: 3
@@ -931,8 +797,6 @@ objects:
       description: 'Programme: Components authenticate to one another where security
         architecture requires. Verify: Component-authentication scope is documented
         and operational.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2
       assessable: false
       depth: 2
@@ -950,8 +814,6 @@ objects:
       description: "Programme: User authorization is enforced on every protected action\
         \ \u2014 view-only / operate / configure / override / safety-bypass. Verify:\
         \ Authorization decisions match the documented role-action matrix."
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2.2
       assessable: true
       depth: 3
@@ -961,8 +823,6 @@ objects:
       description: 'Programme: Critical actions require separation of duties (e.g.
         configuration change requires reviewer + implementer). Verify: SoD policy
         is documented and enforced for critical actions.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2.3
       assessable: true
       depth: 3
@@ -972,8 +832,6 @@ objects:
       description: 'Programme: High-risk actions require multiple approvals before
         execution. Verify: Multi-approval scope is documented; approval workflow is
         enforced.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:user-2.4
       assessable: true
       depth: 3
@@ -983,8 +841,6 @@ objects:
       description: 'Programme: Privilege elevation (sudo, RunAs) is controlled, logged,
         and time-bounded. Verify: Elevation events are logged; elevation policy is
         documented.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:12
       assessable: false
       depth: 1
@@ -1013,8 +869,6 @@ objects:
         \ OT-relevant signals. Verify: Event-detection coverage matches the auditable-events\
         \ catalog; OT-aware sensors are deployed at zone boundaries; detection mechanisms\
         \ are operational."
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.2
       assessable: true
       depth: 3
@@ -1024,8 +878,6 @@ objects:
       description: 'Programme: Events are reported to designated personnel within
         defined SLAs. Verify: Reporting paths and SLAs are documented; reports are
         produced.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.3
       assessable: true
       depth: 3
@@ -1034,8 +886,6 @@ objects:
       name: Event reporting interfaces
       description: 'Programme: Event reporting interfaces (operator screens, ticketing,
         paging) are documented. Verify: Reporting interfaces are configured and tested.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.4
       assessable: true
       depth: 3
@@ -1045,8 +895,6 @@ objects:
       description: 'Programme: IACS components log security-relevant events. Verify:
         Logging is enabled per the auditable-events catalog; logs are forwarded to
         a central facility.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.5
       assessable: true
       depth: 3
@@ -1056,8 +904,6 @@ objects:
       description: 'Programme: Log entries contain sufficient information for analysis
         (timestamp, identity, action, outcome). Verify: Sample log entries cover the
         required fields per category.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.6
       assessable: true
       depth: 3
@@ -1067,8 +913,6 @@ objects:
       description: 'Programme: Log access is restricted to authorized personnel. Verify:
         Log-access roles are documented and enforced; access events are themselves
         logged.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.7
       assessable: true
       depth: 3
@@ -1077,8 +921,6 @@ objects:
       name: Event analysis
       description: 'Programme: Events are analyzed to detect security incidents. Verify:
         Event-analysis cadence is documented; analyst role and tooling are defined.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.8
       assessable: true
       depth: 3
@@ -1092,8 +934,6 @@ objects:
         implications and vice versa. Verify: IR playbook exists with safety-coordination
         procedures; joint cyber+safety tabletop or live exercises are performed; handoff
         thresholds and authority are documented.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:event-1.9
       assessable: true
       depth: 3
@@ -1103,8 +943,6 @@ objects:
       description: 'Programme: Vulnerabilities discovered or reported are tracked,
         assessed, and remediated. Verify: Vulnerability tracker exists; SLA per severity
         is documented; remediation is tracked.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:13
       assessable: false
       depth: 1
@@ -1129,8 +967,6 @@ objects:
       description: 'Programme: Business and operational continuity for the IACS is
         documented, exercised, and integrated with broader organizational continuity.
         Verify: BCP/DRP exists with IACS scope; exercise records are maintained.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-1.2
       assessable: true
       depth: 3
@@ -1140,8 +976,6 @@ objects:
       description: 'Programme: IACS resources (compute, storage, network) are managed
         to remain available under load and failure. Verify: Resource limits and monitoring
         are documented; alerting is in place.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-1.3
       assessable: true
       depth: 3
@@ -1151,8 +985,6 @@ objects:
       description: 'Programme: Failure-state behavior of IACS components is documented
         and acceptable to the asset owner. Verify: Failure modes are documented per
         component; behavior under failure is predictable and acceptable.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2
       assessable: false
       depth: 2
@@ -1170,8 +1002,6 @@ objects:
         covering documented scope (PLC programs, HMI projects, historian databases,
         engineering tool configs, network device configs). Verify: Backup scope is
         documented and matches the asset inventory; backups are scheduled and completed.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2.2
       assessable: true
       depth: 3
@@ -1180,8 +1010,6 @@ objects:
       name: Backup non-interference
       description: 'Programme: Backup processes do not interfere with IACS operations.
         Verify: Backup-window scheduling is documented; resource impact is monitored.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2.3
       assessable: true
       depth: 3
@@ -1190,8 +1018,6 @@ objects:
       name: Backup verification
       description: 'Programme: Backups are verified for restorability on a defined
         cadence. Verify: Verification records (test restores, integrity checks) exist.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2.4
       assessable: true
       depth: 3
@@ -1201,8 +1027,6 @@ objects:
       description: 'Programme: Backup media are protected against loss, theft, and
         tampering. Verify: Media protection (encryption, physical access control)
         is documented and enforced.'
-      implementation_groups:
-      - spe
     - urn: urn:intuitem:risk:req_node:iec-62443-2-1-2024:avail-2.5
       assessable: true
       depth: 3
@@ -1215,5 +1039,3 @@ objects:
         \ for continuous-process plants RPO often matters more than RTO. Verify: Restoration\
         \ procedures exist, are tested end-to-end, and meet documented RTO and RPO\
         \ targets per asset class."
-      implementation_groups:
-      - spe
