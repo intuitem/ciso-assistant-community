@@ -167,6 +167,11 @@
 					field: 'audit_tree_inheritance',
 					label: m.auditTreeInheritance(),
 					description: m.auditTreeInheritanceDescription()
+				},
+				{
+					field: 'posture_assessments',
+					label: m.postureAssessments(),
+					description: m.postureAssessmentsDescription()
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		},
