@@ -1,5 +1,6 @@
 import io
 import re
+import uuid
 
 from django.http import HttpResponse
 from openpyxl import Workbook
@@ -10,7 +11,9 @@ from core.views import (
     ExportMixin,
     escape_excel_formula,
 )
+from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from core.serializers import RiskMatrixReadSerializer
 from django.utils.decorators import method_decorator
@@ -24,6 +27,7 @@ from .models import (
     EscalationThreshold,
     DoraIncidentReport,
 )
+from .serializers import AssetAssessmentWriteSerializer
 
 SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
@@ -431,6 +435,73 @@ class AssetAssessmentViewSet(BaseModelViewSet):
             return True
 
         return None  # Some are indeterminate
+
+    @action(detail=False, methods=["post"], url_path="batch-create")
+    def batch_create(self, request):
+        bia_id = request.data.get("bia")
+        asset_ids = request.data.get("assets", [])
+        if not bia_id:
+            return Response(
+                {"error": "bia is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if not isinstance(asset_ids, list) or not asset_ids:
+            return Response(
+                {"error": "assets is required and must be a non-empty list"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        (viewable_bias, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, BusinessImpactAnalysis
+        )
+        try:
+            bia = BusinessImpactAnalysis.objects.filter(id__in=viewable_bias).get(
+                id=uuid.UUID(str(bia_id))
+            )
+        except ValueError, AttributeError, BusinessImpactAnalysis.DoesNotExist:
+            return Response(
+                {"error": "BIA not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+        if bia.is_locked:
+            return Response(
+                {"error": "lockedAssessment"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        existing_assets = {
+            str(a)
+            for a in AssetAssessment.objects.filter(bia=bia).values_list(
+                "asset_id", flat=True
+            )
+        }
+        created = 0
+        skipped = 0
+        errors = []
+        for asset_id in dict.fromkeys(str(a) for a in asset_ids):
+            if asset_id in existing_assets:
+                skipped += 1
+                continue
+            serializer = AssetAssessmentWriteSerializer(
+                data={"asset": asset_id, "bia": str(bia.id)},
+                context={"request": request},
+            )
+            if not serializer.is_valid():
+                errors.append({"asset": asset_id, "errors": serializer.errors})
+                continue
+            try:
+                serializer.save()
+            except PermissionDenied:
+                errors.append({"asset": asset_id, "error": "permission denied"})
+                continue
+            created += 1
+
+        return Response(
+            {
+                "success": True,
+                "created": created,
+                "skipped": skipped,
+                "errors": errors,
+            },
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
 
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):

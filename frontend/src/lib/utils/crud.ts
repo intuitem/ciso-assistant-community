@@ -1416,7 +1416,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' }
 		],
-		reverseForeignKeyFields: [{ field: 'bia', urlModel: 'asset-assessments' }],
+		reverseForeignKeyFields: [
+			{
+				field: 'bia',
+				urlModel: 'asset-assessments',
+				batchCreate: {
+					label: 'batchAddAssets'
+				}
+			}
+		],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'perimeter' }, { field: 'auditor' }, { field: 'status' }],
 		detailViewFields: [

@@ -3,6 +3,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import BatchCreatePersonalDataModal from '$lib/components/Modals/BatchCreatePersonalDataModal.svelte';
+	import BatchAddAssetAssessmentsModal from '$lib/components/Modals/BatchAddAssetAssessmentsModal.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import RiskAcceptanceModal from '$lib/components/Modals/RiskAcceptanceModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
@@ -272,12 +273,18 @@
 		modalStore.trigger(modal);
 	}
 
+	const batchCreateModals: Record<string, ModalComponent['ref']> = {
+		'personal-data': BatchCreatePersonalDataModal,
+		'asset-assessments': BatchAddAssetAssessmentsModal
+	};
+
 	function modalBatchCreate(field: ReverseForeignKeyField, parentId: string): void {
-		if (!field.batchCreate) return;
+		const ref = batchCreateModals[field.urlModel];
+		if (!field.batchCreate || !ref) return;
 		const modalComponent: ModalComponent = {
-			ref: BatchCreatePersonalDataModal,
+			ref,
 			props: {
-				processingId: parentId,
+				parentId,
 				urlModel: field.urlModel
 			}
 		};
