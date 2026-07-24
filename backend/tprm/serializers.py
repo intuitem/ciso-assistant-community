@@ -215,6 +215,7 @@ class EntityAssessmentImportExportSerializer(BaseModelSerializer):
 
 class RepresentativeImportExportSerializer(BaseModelSerializer):
     entity = HashSlugRelatedField(slug_field="pk", read_only=True)
+    email = serializers.EmailField(validators=[], required=False, allow_blank=True)
 
     class Meta:
         model = Representative

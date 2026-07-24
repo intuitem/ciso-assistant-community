@@ -369,7 +369,10 @@ def sort_objects_by_self_reference(
     roots = set(object_map.keys())
 
     for obj in objects:
-        parent_ids = obj["fields"].get(self_ref_field, [])
+        # A nullable self-referencing FK (e.g. Entity.parent_entity,
+        # Contract.overarching_contract) serializes to None when unset; treat
+        # that (and a missing key) as "no parent" rather than iterating None.
+        parent_ids = obj["fields"].get(self_ref_field) or []
         if isinstance(parent_ids, str) or isinstance(parent_ids, int):
             parent_ids = [parent_ids]  # Ensure it's a list
 
@@ -570,26 +573,41 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
 
     contracts = Contract.objects.filter(folder__in=folders).distinct()
 
-    # Close the entity loop: any non-builtin entity referenced by an exported
-    # solution / contract / subcontracting link must travel too, so its FKs
-    # resolve on import. Builtin entities (e.g. the main organisation, which
-    # lives in the root folder) are left out on purpose — the target instance
-    # keeps its own.
-    referenced_entities = Entity.objects.filter(
-        Q(provided_solutions__in=solutions)
-        | Q(received_solutions__in=solutions)
+    # Close the entity loop so exported FKs resolve on import.
+    #
+    # Required (non-null) FK targets MUST travel or the import crashes on a
+    # missing lookup: EntityAssessment.entity, Solution.provider_entity and
+    # SolutionSubcontractor.subcontractor. These are exported even when
+    # builtin — correctness wins over the (rare) duplicate main-entity row.
+    required_entity_targets = Entity.objects.filter(
+        Q(pk__in=entity_assessments.values("entity"))
+        | Q(provided_solutions__in=solutions)
+        | Q(subcontracts__solution__in=solutions)
+    )
+
+    # Optional (nullable) FK targets are pulled in for fidelity but skip
+    # builtin entities: the main organisation lives in the root folder and the
+    # target instance keeps its own, so a null on import degrades gracefully
+    # (Contract.save even re-defaults beneficiary to the target main entity).
+    optional_entity_targets = Entity.objects.filter(
+        Q(received_solutions__in=solutions)
         | Q(contracts__in=contracts)
         | Q(beneficiary_contracts__in=contracts)
-        | Q(subcontracts__solution__in=solutions)
         | Q(subcontract_recipients__solution__in=solutions)
     ).exclude(builtin=True)
 
+    # NOTE: parent_entity / overarching_contract ancestor chains are only
+    # preserved when the ancestor is itself in scope (handled by the self-ref
+    # sort at import). Ancestors living outside the exported domain become null
+    # on import — acceptable for a flat single-domain migration; we don't walk
+    # the chain recursively across domains.
     entities = Entity.objects.filter(
         Q(folder__in=folders)
         | Q(stakeholders__in=stakeholders)
         | Q(ebios_rm_studies__in=ebios_rm_studies)
         | Q(incidents__in=incidents)
-        | Q(pk__in=referenced_entities)
+        | Q(pk__in=required_entity_targets)
+        | Q(pk__in=optional_entity_targets)
     ).distinct()
 
     solution_subcontractors = SolutionSubcontractor.objects.filter(

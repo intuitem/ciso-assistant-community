@@ -483,6 +483,7 @@ def import_objects(
                 )
 
             resolve_security_exception_m2m(objects, link_dump_database_ids)
+            resolve_self_referencing_fks(objects, link_dump_database_ids)
 
         return {"message": "Import successful"}
 
@@ -860,13 +861,11 @@ def process_model_relationships(
 
         case "entity":
             _fields.pop("owned_folders", None)
-            # parent_entity is a self-reference; create_model_objects has
-            # already topo-sorted parents before children, so the mapped id
-            # exists by the time we get here (or the parent was out of scope).
-            parent_id = link_dump_database_ids.get(_fields.get("parent_entity"))
-            _fields["parent_entity"] = (
-                Entity.objects.filter(id=parent_id).first() if parent_id else None
-            )
+            # parent_entity is a self-reference; the parent may be created in
+            # the same batch, so link_dump_database_ids isn't populated yet.
+            # Create with no parent and wire it up in the post-pass
+            # resolve_self_referencing_fks once every entity exists.
+            _fields["parent_entity"] = None
             many_to_many_map_ids["relationship_ids"] = import_terminologies(
                 _fields.pop("relationship", []),
                 Terminology.FieldPath.ENTITY_RELATIONSHIP,
@@ -936,14 +935,10 @@ def process_model_relationships(
                 if beneficiary_id
                 else None
             )
-            overarching_id = link_dump_database_ids.get(
-                _fields.get("overarching_contract")
-            )
-            _fields["overarching_contract"] = (
-                Contract.objects.filter(id=overarching_id).first()
-                if overarching_id
-                else None
-            )
+            # overarching_contract is a self-reference; the parent contract may
+            # be created in the same batch. Wire it up in the post-pass
+            # resolve_self_referencing_fks once every contract exists.
+            _fields["overarching_contract"] = None
             many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
                 _fields.pop("evidences", []), link_dump_database_ids
             )
@@ -1408,6 +1403,38 @@ def resolve_security_exception_m2m(
             ]
             if ids:
                 getattr(se, field_name).set(model_cls.objects.filter(id__in=ids))
+
+
+def resolve_self_referencing_fks(
+    objects: List[dict], link_dump_database_ids: dict[str, Any]
+) -> None:
+    """Post-pass: wire up nullable self-referencing FKs once every row exists.
+
+    parent_entity / overarching_contract point at another row of the same
+    model that may be created in the same batch, so they can't be resolved at
+    construction time (link_dump_database_ids is only populated after each
+    batch is created). We create those rows with a null parent and set the
+    link here. Targets outside the exported scope stay null by design.
+
+    Uses .update() so no model save() side effects (e.g. ActorSync) fire and
+    the historical timestamps are left untouched.
+    """
+    self_ref = (
+        ("tprm.entity", Entity, "parent_entity"),
+        ("tprm.contract", Contract, "overarching_contract"),
+    )
+    for model_name, model_cls, field_name in self_ref:
+        for obj in objects:
+            if obj["model"] != model_name:
+                continue
+            db_id = link_dump_database_ids.get(obj["id"])
+            if not db_id:
+                continue
+            parent_hash = obj.get("fields", {}).get(field_name)
+            parent_id = link_dump_database_ids.get(parent_hash) if parent_hash else None
+            if not parent_id:
+                continue
+            model_cls.objects.filter(id=db_id).update(**{f"{field_name}_id": parent_id})
 
 
 def split_uuids_urns(ids: List[str]) -> Tuple[List[UUID], List[str]]:
