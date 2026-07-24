@@ -577,7 +577,7 @@
 	"doraReportingAndRecurring": "Poročanje in ponavljajoči se incidenti",
 	"nextSubmission": "Naslednja oddaja",
 	"fillFromUser": "Izpolni iz uporabnika...",
-	"markAsSubmitted": "Onači kot oddano",
+	"markAsSubmitted": "Označi kot oddano",
 	"submittedReport": "To poročilo je bilo oddano in je zaklenjeno.",
 	"deleteReport": "Izbriši poročilo",
 	"addCriterion": "Dodaj kriterij",
@@ -2177,8 +2177,8 @@
 	"elementaryActionsTechniques": "Enostavna dejanja / Tehnike",
 	"goBackToEbiosRmStudy": "Nazaj na študijo EBIOS RM",
 	"addStrategicScenario": "Dodaj strateški scenarij",
-	"markAsDone": "Onači kot končano",
-	"markAsInProgress": "Onači kot v teku",
+	"markAsDone": "Označi kot končano",
+	"markAsInProgress": "Označi kot v teku",
 	"riskAnalyses": "Analize tveganja",
 	"client": "Stranka",
 	"clients": "Stranke",
@@ -2811,6 +2811,8 @@
 			"selectors": ["count", "countPlural"],
 			"match": {
 				"countPlural=one": "{count} ura",
+				"countPlural=two": "{count} uri",
+				"countPlural=few": "{count} ure",
 				"countPlural=other": "{count} ur"
 			}
 		}
@@ -2821,6 +2823,8 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} minuta",
+				"countPlural=two": "{count} minuti",
+				"countPlural=few": "{count} minute",
 				"countPlural=other": "{count} minut"
 			}
 		}
@@ -2831,6 +2835,8 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} dan",
+				"countPlural=two": "{count} dneva",
+				"countPlural=few": "{count} dnevi",
 				"countPlural=other": "{count} dni"
 			}
 		}
@@ -2841,6 +2847,8 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} objekt je skrit. Povezava se lahko med urejanjem izgubi.",
+				"countPlural=two": "{count} objekta sta skrita. Povezave se lahko med urejanjem izgubijo.",
+				"countPlural=few": "{count} objekti so skriti. Povezave se lahko med urejanjem izgubijo.",
 				"countPlural=other": "{count} objektov je skritih. Povezave se lahko med urejanjem izgubijo."
 			}
 		}
@@ -4510,6 +4518,8 @@
 			"match": {
 				"count=0": "To ne bo vplivalo na druge objekte.",
 				"countPlural=one": "{count} povezani objekt ne bo izbrisan, vendar bo izgubil enega ali več odnosov.",
+				"countPlural=two": "{count} povezana objekta ne bosta izbrisana, vendar bosta izgubila enega ali več odnosov.",
+				"countPlural=few": "{count} povezani objekti ne bodo izbrisani, vendar bodo izgubili enega ali več odnosov.",
 				"countPlural=other": "{count} povezanih objektov ne bo izbrisanih, vendar bodo izgubili enega ali več odnosov."
 			}
 		}
