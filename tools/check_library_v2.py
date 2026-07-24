@@ -898,8 +898,8 @@ def validate_related_content_sheet_from_name_key(wb: Workbook, df: pd.DataFrame,
     expected_sheet = f"{value}{SheetTypes.CONTENT.value}"
     if expected_sheet not in wb.sheetnames:
         raise ValueError(
-            f"({context}) [{sheet_name}] Row #{row}: Key \"name\" points to missing sheet starting with \"{value}\" (Missing \"{expected_sheet}\")"
-            f"\n> 💡 Tip: Make sure the \"{expected_sheet}\" sheet exists or set the right value for key \"name\"."
+            f"({context}) [{sheet_name}] Row #{row}: Key \"{name_key.value}\" points to missing sheet starting with \"{value}\" (Missing \"{expected_sheet}\")"
+            f"\n> 💡 Tip: Make sure the \"{expected_sheet}\" sheet exists or set the right value for key \"{name_key.value}\"."
         )
 
 
@@ -937,21 +937,21 @@ def _framework_validate_meta_min_max_score(df: pd.DataFrame, sheet_name: str):
         return
 
     if min_score is None or max_score is None:
-        missing_key = "min_score" if min_score is None else "max_score"
-        present_key = "max_score" if min_score is None else "min_score"
+        missing_key = FrameworkMetaKeys.MIN_SCORE.value if min_score is None else FrameworkMetaKeys.MAX_SCORE.value
+        present_key = FrameworkMetaKeys.MAX_SCORE.value if min_score is None else FrameworkMetaKeys.MIN_SCORE.value
         raise ValueError(
             f"({fct_name}) [{sheet_name}] Missing \"{missing_key}\": it is required when \"{present_key}\" is defined."
-            f"\n> 💡 Tip: Define both \"min_score\" and \"max_score\", or remove \"{present_key}\"."
+            f"\n> 💡 Tip: Define both \"{FrameworkMetaKeys.MIN_SCORE.value}\" and \"{FrameworkMetaKeys.MAX_SCORE.value}\", or remove \"{present_key}\"."
         )
 
-    validate_integer_value(min_score, sheet_name, context=fct_name, row=min_score_row, value_name="min_score", min=0)
-    validate_integer_value(max_score, sheet_name, context=fct_name, row=max_score_row, value_name="max_score", min=0)
+    validate_integer_value(min_score, sheet_name, context=fct_name, row=min_score_row, value_name=FrameworkMetaKeys.MIN_SCORE.value, min=0)
+    validate_integer_value(max_score, sheet_name, context=fct_name, row=max_score_row, value_name=FrameworkMetaKeys.MAX_SCORE.value, min=0)
 
     min_score = int(min_score)
     max_score = int(max_score)
 
     if min_score > max_score:
-        raise ValueError(f"({fct_name}) [{sheet_name}] Invalid score range: \"min_score\" ({min_score}) must be less than or equal to \"max_score\" ({max_score})")
+        raise ValueError(f"({fct_name}) [{sheet_name}] Invalid score range: \"{FrameworkMetaKeys.MIN_SCORE.value}\" ({min_score}) must be less than or equal to \"{FrameworkMetaKeys.MAX_SCORE.value}\" ({max_score})")
 
 
 
@@ -977,7 +977,7 @@ def validate_library_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = Fal
 
     # version
     version_value, version_row = get_meta_value(df, LibraryMetaKeys.VERSION, sheet_name, required=True, with_row=True, context=fct_name)
-    validate_integer_value(version_value, sheet_name, context=fct_name, row=version_row, value_name="version", positive_only=True)
+    validate_integer_value(version_value, sheet_name, context=fct_name, row=version_row, value_name=LibraryMetaKeys.VERSION.value, positive_only=True)
 
     # labels (Optional)
     labels_value, labels_row = get_meta_value(df, LibraryMetaKeys.LABELS, sheet_name, required=False, with_row=True, context=fct_name)
@@ -988,7 +988,7 @@ def validate_library_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = Fal
     locale_value, locale_row = get_meta_value(df, LibraryMetaKeys.LOCALE, sheet_name, required=True, with_row=True, context=fct_name)
     if not is_valid_locale(locale_value):
         raise ValueError(
-            f"({fct_name}) [{sheet_name}] Row #{locale_row}: Invalid \"locale\" value: \"{locale_value}\""
+            f"({fct_name}) [{sheet_name}] Row #{locale_row}: Invalid \"{LibraryMetaKeys.LOCALE.value}\" value: \"{locale_value}\""
             "\n> 💡 Tip: Locale setting must comply with ISO 639 Set 1 (e.g., \"en\", \"fr\"). See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes")
 
     # Extra locales
