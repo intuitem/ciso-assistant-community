@@ -2,6 +2,7 @@ import io
 import re
 import uuid
 
+from django.conf import settings
 from django.db import IntegrityError
 from django.http import HttpResponse
 from openpyxl import Workbook
@@ -20,7 +21,7 @@ from core.serializers import RiskMatrixReadSerializer
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
-from iam.models import RoleAssignment, Folder
+from iam.models import RoleAssignment, Folder, Permission
 from core.models import Asset
 from .models import (
     BusinessImpactAnalysis,
@@ -450,6 +451,10 @@ class AssetAssessmentViewSet(BaseModelViewSet):
                 {"error": "assets is required and must be a non-empty list"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        if len(asset_ids) > settings.PAGINATE_BY:
+            return Response(
+                {"error": "too many assets"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         (viewable_bias, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, BusinessImpactAnalysis
@@ -466,6 +471,19 @@ class AssetAssessmentViewSet(BaseModelViewSet):
             return Response(
                 {"error": "lockedAssessment"}, status=status.HTTP_400_BAD_REQUEST
             )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_assetassessment"),
+            folder=bia.folder,
+        ):
+            return Response(
+                {"error": "permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        (viewable_assets, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Asset
+        )
+        viewable_asset_ids = {str(a) for a in viewable_assets}
 
         existing_assets = {
             str(a)
@@ -479,6 +497,9 @@ class AssetAssessmentViewSet(BaseModelViewSet):
         for asset_id in dict.fromkeys(str(a) for a in asset_ids):
             if asset_id in existing_assets:
                 skipped += 1
+                continue
+            if asset_id not in viewable_asset_ids:
+                errors.append({"asset": asset_id, "error": "asset not found"})
                 continue
             serializer = AssetAssessmentWriteSerializer(
                 data={"asset": asset_id, "bia": str(bia.id)},

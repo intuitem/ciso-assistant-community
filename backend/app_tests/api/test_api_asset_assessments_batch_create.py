@@ -1,9 +1,23 @@
 import pytest
+from knox.models import AuthToken
+from rest_framework.test import APIClient
 from core.models import Asset, Perimeter, RiskMatrix, StoredLibrary
-from iam.models import Folder
+from iam.models import Folder, User, UserGroup
 from resilience.models import AssetAssessment, BusinessImpactAnalysis
 
 BATCH_CREATE_URL = "/api/resilience/asset-assessments/batch-create/"
+
+
+def client_for(email, group_name, folder):
+    user = User.objects.create_user(email, is_published=True)
+    group = UserGroup.objects.get(name=group_name, folder=folder)
+    user.folder = group.folder
+    user.save()
+    group.user_set.add(user)
+    client = APIClient()
+    token = AuthToken.objects.create(user=user)[1]
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+    return client
 
 
 @pytest.mark.django_db
@@ -14,7 +28,9 @@ class TestAssetAssessmentsBatchCreate:
             name="test-domain",
             content_type=Folder.ContentType.DOMAIN,
             parent_folder=Folder.get_root_folder(),
+            create_iam_groups=True,
         )
+        Folder.create_default_ug_and_ra(folder)
         perimeter = Perimeter.objects.create(name="test", folder=folder)
         StoredLibrary.objects.get(
             urn="urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm"
@@ -104,6 +120,43 @@ class TestAssetAssessmentsBatchCreate:
         assert data["success"] is False
         assert data["created"] == 0
         assert len(data["errors"]) == 1
+
+    def test_batch_create_reader_forbidden(self, authenticated_client, setup):
+        folder, bia, assets = setup
+        reader = client_for("reader@tests.com", "BI-UG-AUD", folder)
+
+        response = reader.post(
+            BATCH_CREATE_URL,
+            {"bia": str(bia.id), "assets": [str(a.id) for a in assets]},
+            format="json",
+        )
+        assert response.status_code == 403
+        assert AssetAssessment.objects.filter(bia=bia).count() == 0
+
+    def test_batch_create_analyst_cannot_reference_foreign_asset(
+        self, authenticated_client, setup
+    ):
+        folder, bia, assets = setup
+        other_folder = Folder.objects.create(
+            name="other-domain",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=Folder.get_root_folder(),
+        )
+        foreign_asset = Asset.objects.create(name="foreign", folder=other_folder)
+        analyst = client_for("analyst@tests.com", "BI-UG-ANA", folder)
+
+        response = analyst.post(
+            BATCH_CREATE_URL,
+            {"bia": str(bia.id), "assets": [str(foreign_asset.id), str(assets[0].id)]},
+            format="json",
+        )
+        assert response.status_code == 201
+        data = response.json()
+        assert data["created"] == 1
+        assert data["errors"] == [
+            {"asset": str(foreign_asset.id), "error": "asset not found"}
+        ]
+        assert not AssetAssessment.objects.filter(asset=foreign_asset).exists()
 
     def test_batch_create_unknown_bia(self, authenticated_client, setup):
         folder, bia, assets = setup

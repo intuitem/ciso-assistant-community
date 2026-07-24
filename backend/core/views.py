@@ -2002,6 +2002,7 @@ class ThreatViewSet(BaseModelViewSet):
 class AssetFilter(TimestampRangeFilterMixin, GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     asset_class = df.ModelMultipleChoiceFilter(queryset=AssetClass.objects.all())
+    bia = df.UUIDFilter(field_name="assetassessment__bia", distinct=True)
 
     exclude_children = df.ModelChoiceFilter(
         queryset=Asset.objects.all(),

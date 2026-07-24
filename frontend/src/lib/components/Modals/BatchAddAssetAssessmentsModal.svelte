@@ -24,6 +24,30 @@
 	let searchQuery: string = $state('');
 	let loading = $state(true);
 	let submitting = $state(false);
+	// Server page size observed on the first assets page; also used as the
+	// submit chunk size so it always matches the backend's batch cap (PAGINATE_BY).
+	let serverPageSize = 0;
+
+	async function fetchAllPages(base: string): Promise<{ items: any[]; pageSize: number }> {
+		const sep = base.includes('?') ? '&' : '?';
+		const acc: any[] = [];
+		let offset = 0;
+		let count = Infinity;
+		let pageSize = 0;
+		while (acc.length < count) {
+			const url = offset ? `${base}${sep}limit=${pageSize}&offset=${offset}` : base;
+			const res = await fetch(url);
+			if (!res.ok) break;
+			const data = await res.json();
+			const items = data.results ?? data ?? [];
+			if (!Array.isArray(items) || items.length === 0) break;
+			acc.push(...items);
+			count = typeof data.count === 'number' ? data.count : items.length;
+			pageSize = pageSize || items.length;
+			offset += items.length;
+		}
+		return { items: acc, pageSize };
+	}
 
 	const filteredOptions = $derived(
 		searchQuery.trim()
@@ -37,25 +61,20 @@
 
 	onMount(async () => {
 		try {
-			const [assetsRes, existingRes] = await Promise.all([
-				fetch('/assets/autocomplete'),
-				fetch(`/asset-assessments?bia=${parentId}`)
+			const [assets, existing] = await Promise.all([
+				fetchAllPages('/assets/autocomplete'),
+				fetchAllPages(`/asset-assessments?bia=${parentId}`)
 			]);
 			const included: Set<string> = new Set();
-			if (existingRes.ok) {
-				const data = await existingRes.json();
-				for (const aa of data.results ?? data ?? []) {
-					if (aa.asset?.id) included.add(String(aa.asset.id));
-				}
+			for (const aa of existing.items) {
+				if (aa.asset?.id) included.add(String(aa.asset.id));
 			}
-			if (assetsRes.ok) {
-				const data = await assetsRes.json();
-				options = (data.results ?? data ?? []).map((a: any) => ({
-					label: a.folder?.str ? `${a.name} (${a.folder.str})` : a.name,
-					value: String(a.id),
-					included: included.has(String(a.id))
-				}));
-			}
+			serverPageSize = assets.pageSize;
+			options = assets.items.map((a: any) => ({
+				label: a.folder?.str ? `${a.name} (${a.folder.str})` : a.name,
+				value: String(a.id),
+				included: included.has(String(a.id))
+			}));
 		} catch (e) {
 			console.error('Failed to fetch assets', e);
 		} finally {
@@ -86,35 +105,43 @@
 
 	async function handleSubmit() {
 		submitting = true;
+		let created = 0;
+		let skipped = 0;
+		let errorCount = 0;
+		let failed = false;
+		let failMessage = '';
 		try {
-			const res = await fetch(`/${urlModel}/batch-create`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ bia: parentId, assets: selectedValues })
-			});
-			const data = await res.json();
-			if (res.ok && data.success) {
-				const messages = [];
-				if (data.created > 0) {
-					messages.push(m.batchAddAssetsCreated({ count: data.created }));
-				}
-				if (data.skipped > 0) {
-					messages.push(m.batchAddAssetsSkipped({ count: data.skipped }));
-				}
-				if (data.errors?.length > 0) {
-					messages.push(`${data.errors.length} error(s)`);
-				}
-				toastStore.trigger({ message: messages.join(', ') });
-				await invalidateAll();
-				parent.onClose();
-			} else {
-				toastStore.trigger({
-					message:
-						data.error ||
-						(data.errors?.length ? `${data.errors.length} error(s)` : m.anErrorOccurred()),
-					background: 'preset-filled-error-500'
+			const chunkSize = serverPageSize > 0 ? serverPageSize : selectedValues.length;
+			for (let i = 0; i < selectedValues.length; i += chunkSize) {
+				const chunk = selectedValues.slice(i, i + chunkSize);
+				const res = await fetch(`/${urlModel}/batch-create`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ bia: parentId, assets: chunk })
 				});
+				const data = await res.json().catch(() => ({}));
+				created += data.created ?? 0;
+				skipped += data.skipped ?? 0;
+				errorCount += data.errors?.length ?? 0;
+				if (!res.ok) {
+					failed = true;
+					failMessage = data.error ?? '';
+					break;
+				}
 			}
+			const messages = [];
+			if (created > 0) messages.push(m.batchAddAssetsCreated({ count: created }));
+			if (skipped > 0) messages.push(m.batchAddAssetsSkipped({ count: skipped }));
+			if (errorCount > 0) messages.push(`${errorCount} error(s)`);
+			if (failed && messages.length === 0) messages.push(failMessage || m.anErrorOccurred());
+			toastStore.trigger({
+				message: messages.join(', '),
+				...(failed || (created === 0 && errorCount > 0)
+					? { background: 'preset-filled-error-500' }
+					: {})
+			});
+			if (created > 0 || skipped > 0) await invalidateAll();
+			if (!failed) parent.onClose();
 		} catch (e) {
 			console.error('Batch add assets failed', e);
 			toastStore.trigger({
