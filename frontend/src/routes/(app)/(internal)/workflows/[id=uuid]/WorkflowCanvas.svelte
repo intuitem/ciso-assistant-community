@@ -727,7 +727,40 @@
 		};
 	}
 
-	async function save(): Promise<boolean> {
+	// Single-flight: exactly one save on the wire at a time. Wholesale graph
+	// PUTs landing out of order would silently revert newer state, so a save
+	// requested mid-flight doesn't send a second racing request — it coalesces
+	// into ONE trailing save that captures the latest canvas state after the
+	// current one lands. Callers awaiting save() therefore always resolve
+	// against a persistence of the state as of their call (or newer).
+	let saveInFlight: Promise<boolean> | null = null;
+	let saveQueued: Promise<boolean> | null = null;
+
+	function save(): Promise<boolean> {
+		if (!saveInFlight) {
+			saveInFlight = doSave()
+				.catch((error) => {
+					saveError = String(error);
+					saveState = 'error';
+					return false;
+				})
+				.finally(() => {
+					saveInFlight = null;
+				});
+			return saveInFlight;
+		}
+		if (!saveQueued) {
+			saveQueued = saveInFlight
+				.catch(() => false)
+				.then(() => {
+					saveQueued = null;
+					return save();
+				});
+		}
+		return saveQueued;
+	}
+
+	async function doSave(): Promise<boolean> {
 		if (readonly || versionGone) return true;
 		if (saveTimer) clearTimeout(saveTimer);
 		saveState = 'saving';
@@ -856,10 +889,20 @@
 		});
 		if (!res.ok) {
 			const body = await res.json().catch(() => ({}));
-			saveError =
-				body.error === 'draftAlreadyExists'
-					? m.draftAlreadyExistsReload()
-					: (body.error ?? res.statusText);
+			if (body.error === 'draftAlreadyExists' && body.draft_id) {
+				// Another tab (or an earlier half-finished attempt) already created
+				// the draft: adopt it instead of erroring. The canvas keeps ITS
+				// state as the source of truth — the next save wholesale-replaces
+				// the adopted draft's content. Re-id first: our rows still carry
+				// the PUBLISHED version's ids, and saving those into the draft
+				// would hijack the published rows' primary keys.
+				remapGraphIds();
+				activeVersionId = body.draft_id;
+				status = 'draft';
+				if (body.draft_version_number) versionNumber = body.draft_version_number;
+				return true;
+			}
+			saveError = body.error ?? res.statusText;
 			saveState = 'error';
 			return false;
 		}
@@ -1368,6 +1411,7 @@
 					<button
 						type="button"
 						class="text-xs text-error-500 flex items-center gap-1 cursor-pointer"
+						data-testid="save-error"
 						title={saveError}
 						onclick={save}
 					>

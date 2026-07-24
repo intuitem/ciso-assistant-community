@@ -243,6 +243,7 @@ class WorkflowVersionViewSet(BaseModelViewSet):
                 {
                     "error": "draftAlreadyExists",
                     "draft_id": str(existing_draft.id),
+                    "draft_version_number": existing_draft.version_number,
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )

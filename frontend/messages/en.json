@@ -5292,7 +5292,6 @@
 	"workflowPublished": "Workflow published",
 	"publishValidationFailed": "The workflow cannot be published yet",
 	"draftNoLongerExists": "This draft no longer exists — showing the latest version",
-	"draftAlreadyExistsReload": "A draft already exists elsewhere — reload the page to edit it",
 	"draftVersion": "Draft",
 	"publishedVersion": "Published",
 	"archivedVersion": "Archived",
