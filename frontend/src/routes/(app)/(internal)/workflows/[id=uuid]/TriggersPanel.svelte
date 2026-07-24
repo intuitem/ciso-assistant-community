@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { m } from '$paraglide/messages';
 	import { publicHookUrl } from './hook-url';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
@@ -107,19 +108,26 @@
 				{@const badge = RESULT_BADGE[registration.last_result]}
 				{@const config = registration.config ?? {}}
 				<li class="flex items-center gap-3 px-4 py-2 text-xs">
-					<button
-						type="button"
-						role="switch"
-						aria-checked={registration.enabled}
-						title={registration.enabled ? m.triggerArmed() : m.triggerDisarmed()}
-						class="btn-icon w-6 h-6 text-[10px] {registration.enabled
-							? 'preset-filled-success-500'
-							: 'preset-tonal'}"
-						onclick={() => toggleEnabled(registration)}
+					<!-- Switch + state word: knob position is the state, so it can't be
+					     misread as an action icon (play/pause was ambiguous both ways). -->
+					<Switch
+						name="trigger-enabled-{registration.id}"
+						checked={registration.enabled}
+						onCheckedChange={() => toggleEnabled(registration)}
 						data-testid="toggle-trigger"
 					>
-						<i class="fa-solid {registration.enabled ? 'fa-play' : 'fa-pause'}"></i>
-					</button>
+						<Switch.Control class="scale-75 -mx-1">
+							<Switch.Thumb />
+						</Switch.Control>
+						<Switch.HiddenInput />
+						<span
+							class="w-14 text-[10px] font-semibold uppercase tracking-wide {registration.enabled
+								? 'text-success-600'
+								: 'text-surface-500'}"
+						>
+							{registration.enabled ? m.triggerEnabled() : m.triggerDisabled()}
+						</span>
+					</Switch>
 					<i
 						class="fa-solid {TRIGGER_ICONS[registration.type] ?? 'fa-bolt'} text-surface-500 w-4
 						text-center shrink-0"

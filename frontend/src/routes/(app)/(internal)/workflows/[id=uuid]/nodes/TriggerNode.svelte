@@ -10,6 +10,7 @@
 <script lang="ts">
 	import { Handle, Position } from '@xyflow/svelte';
 	import { getContext } from 'svelte';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		id: string;
@@ -69,7 +70,8 @@
 				class="ml-auto w-2 h-2 rounded-full shrink-0 {data.registration.enabled
 					? 'bg-success-500 animate-pulse'
 					: 'bg-surface-400-600'}"
-				data-testid="trigger-armed-dot"
+				title={data.registration.enabled ? m.triggerEnabled() : m.triggerDisabled()}
+				data-testid="trigger-enabled-dot"
 			></span>
 		{/if}
 	</div>
