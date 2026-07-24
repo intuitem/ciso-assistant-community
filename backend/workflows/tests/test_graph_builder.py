@@ -426,3 +426,54 @@ class TestNewDraft:
             pk=str(v1.id),
         )
         assert resp.status_code == 400
+
+
+@pytest.mark.django_db
+class TestDiscardDraft:
+    def _discard(self, version, user):
+        return _call(
+            {"post": "discard"},
+            "post",
+            f"/api/workflows/workflow-versions/{version.id}/discard/",
+            user,
+            pk=str(version.id),
+        )
+
+    def test_discard_falls_back_to_published(self, workflow, superuser):
+        v1 = workflow.draft_version
+        _put_graph(v1, _minimal_graph(), superuser)
+        _publish(v1, superuser)
+        _call(
+            {"post": "new_draft"},
+            "post",
+            f"/api/workflows/workflow-versions/{v1.id}/new-draft/",
+            superuser,
+            pk=str(v1.id),
+        )
+        draft = workflow.draft_version
+        # Give the draft a condition node with branches: discarding must clear
+        # the PROTECTed condition tree before the cascade.
+        graph, _ = _condition_graph()
+        _put_graph(draft, graph, superuser)
+
+        resp = self._discard(draft, superuser)
+        assert resp.status_code == 200, resp.data
+        assert resp.data["published_id"] == str(v1.id)
+        workflow.refresh_from_db()
+        assert workflow.draft_version is None
+        assert workflow.published_version.id == v1.id
+
+    def test_discard_refused_without_published_fallback(self, workflow, superuser):
+        draft = workflow.draft_version
+        _put_graph(draft, _minimal_graph(), superuser)
+        resp = self._discard(draft, superuser)
+        assert resp.status_code == 400
+        assert resp.data["error"] == "noPublishedVersionToFallBackTo"
+
+    def test_discard_refused_on_published_version(self, workflow, superuser):
+        v1 = workflow.draft_version
+        _put_graph(v1, _minimal_graph(), superuser)
+        _publish(v1, superuser)
+        resp = self._discard(v1, superuser)
+        assert resp.status_code == 400
+        assert resp.data["error"] == "onlyDraftVersionsCanBeDiscarded"

@@ -40,6 +40,11 @@ NODE_JSON_FIELDS = [
     "position",
 ]
 
+# Positions never travel: the builder auto-lays-out graphs that arrive without
+# them (dagre), so exports stay small and diff-clean. Import still accepts
+# `position` for hand-written files (NODE_JSON_FIELDS keeps it).
+EXPORTED_NODE_JSON_FIELDS = [f for f in NODE_JSON_FIELDS if f != "position"]
+
 
 class WorkflowImportError(Exception):
     def __init__(self, message):
@@ -141,7 +146,7 @@ def _export_node(node, refs, taxonomies, variable_keys):
         out["fork_type"] = node["fork_type"]
     if node["join_type"] != WorkflowNode.JoinType.NONE:
         out["join_type"] = node["join_type"]
-    for field in NODE_JSON_FIELDS:
+    for field in EXPORTED_NODE_JSON_FIELDS:
         if node[field]:
             out[field] = node[field]
     if node["event_key"]:

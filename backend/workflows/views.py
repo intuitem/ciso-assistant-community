@@ -26,6 +26,7 @@ from .engine import EngineError, trigger_instance
 from .graph import GraphValidationError, save_graph, serialize_graph
 from .import_export import WorkflowImportError, export_workflow, import_workflow
 from .models import (
+    ConditionGroup,
     Workflow,
     WorkflowInstance,
     WorkflowNode,
@@ -165,6 +166,8 @@ class WorkflowVersionViewSet(BaseModelViewSet):
     filterset_fields = ["workflow", "status", "folder"]
     search_fields = []
     ordering = ["-version_number"]
+    # POST detail actions map to add_* by default; discarding is a delete.
+    permission_overrides = {"discard": "delete_workflowversion"}
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -206,6 +209,30 @@ class WorkflowVersionViewSet(BaseModelViewSet):
             return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
         version.publish()
         return Response(serialize_graph(version))
+
+    @action(detail=True, methods=["post"])
+    def discard(self, request, pk=None):
+        """Drop a draft and fall back to the published version (framework-
+        builder-style discard). Refused when there is nothing to fall back
+        to — discarding the only version would orphan the workflow."""
+        version = self.get_object()
+        if not version.is_draft:
+            return Response(
+                {"error": "onlyDraftVersionsCanBeDiscarded"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        published = version.workflow.published_version
+        if published is None:
+            return Response(
+                {"error": "noPublishedVersionToFallBackTo"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        with transaction.atomic():
+            # Conditions PROTECT their variables; clear the trees before the
+            # cascade so the version delete cannot trip ProtectedError.
+            ConditionGroup.objects.filter(branch__node__version=version).delete()
+            version.delete()
+        return Response({"published_id": str(published.id)})
 
     @action(detail=True, methods=["post"], url_path="new-draft")
     def new_draft(self, request, pk=None):
