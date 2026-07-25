@@ -411,6 +411,12 @@ def wrap_editing_drafts(apps, schema_editor):
     _wrap_matrix_drafts(apps, root)
     _wrap_preset_drafts(apps, root)
 
+    # The writes above queue deferred FK-constraint trigger events on the
+    # very tables the RemoveField DDL below ALTERs; Postgres refuses to
+    # ALTER a table with pending trigger events, so fire them now.
+    if schema_editor.connection.vendor == "postgresql":
+        schema_editor.execute("SET CONSTRAINTS ALL IMMEDIATE")
+
 
 class Migration(migrations.Migration):
     dependencies = [

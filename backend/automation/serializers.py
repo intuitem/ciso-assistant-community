@@ -61,11 +61,43 @@ class PostureAssessmentWriteSerializer(BaseModelSerializer):
             instance.save(update_fields=["follow_up_assessment"])
         return instance
 
+    def _viewable_asset_ids(self):
+        request = self.context.get("request")
+        if request is None:
+            return None
+        return set(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, Asset
+            )[0]
+        )
+
+    def validate_assets(self, assets):
+        viewable = self._viewable_asset_ids()
+        if viewable is None:
+            return assets
+        current = (
+            set(self.instance.assets.values_list("id", flat=True))
+            if self.instance
+            else set()
+        )
+        if any(a.id not in viewable and a.id not in current for a in assets):
+            raise serializers.ValidationError("permission denied to add this asset")
+        return assets
+
     def update(self, instance, validated_data):
         validated_data.pop("create_follow_up_assessment", None)
         if "assets" in validated_data:
             kept = {asset.id for asset in validated_data["assets"]}
             current = set(instance.assets.values_list("id", flat=True))
+            viewable = self._viewable_asset_ids()
+            if viewable is not None:
+                # the submitted list only covers viewable assets; keep invisible ones linked
+                invisible = current - viewable - kept
+                if invisible:
+                    validated_data["assets"] = list(validated_data["assets"]) + list(
+                        Asset.objects.filter(id__in=invisible)
+                    )
+                    kept |= invisible
             measured = set(
                 instance.results.values_list("asset_id", flat=True).distinct()
             )
@@ -88,8 +120,24 @@ class PostureAssessmentReadSerializer(AssessmentReadSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     framework = FieldsRelatedField()
-    assets = FieldsRelatedField(["id", {"folder": ["id"]}], many=True)
+    assets = serializers.SerializerMethodField()
     follow_up_assessment = FieldsRelatedField()
+
+    def get_assets(self, obj):
+        assets = obj.assets.all()
+        request = self.context.get("request")
+        if request:
+            viewable = self.context.get("viewable_asset_ids")
+            if viewable is None:
+                viewable = set(
+                    RoleAssignment.get_accessible_object_ids(
+                        Folder.get_root_folder(), request.user, Asset
+                    )[0]
+                )
+                self.context["viewable_asset_ids"] = viewable
+            assets = [a for a in assets if a.id in viewable]
+        field = FieldsRelatedField(["id", {"folder": ["id"]}])
+        return [field.to_representation(a) for a in assets]
 
     class Meta:
         model = PostureAssessment

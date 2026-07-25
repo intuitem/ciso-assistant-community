@@ -131,6 +131,7 @@ Supported Data Wizard commands:
 | `import-folders` | Folder | — |
 | `import-perimeters` | Perimeter | `--folder` |
 | `import-compliance-assessments` | ComplianceAssessment | `--perimeter`, `--framework` |
+| `import-cyfun-assessment` | CyFunAssessment | `--folder` or `--perimeter` |
 | `import-findings-assessments` | FindingsAssessment | `--perimeter` |
 | `import-risk-assessment` | RiskAssessment | `--perimeter`, `--matrix` |
 | `import-elementary-actions` | ElementaryAction | `--folder` |

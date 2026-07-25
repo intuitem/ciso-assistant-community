@@ -27,7 +27,8 @@ class TestUserGroups:
             )
 
     def test_cannot_delete_builtin_user_group(self, authenticated_client):
-        """test that a builtin user group cannot be deleted via the API"""
+        """test that a builtin user group cannot be deleted via the API (blocked by
+        the generic builtin-immutability guard in RBACPermissions)"""
 
         builtin_group = UserGroup.objects.filter(builtin=True).first()
         assert builtin_group is not None, "No builtin user group found in DB"
@@ -36,7 +37,6 @@ class TestUserGroups:
         response = authenticated_client.delete(url)
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
-        assert response.data.get("error") == "attemptToDeleteBuiltinUserGroup"
         # Confirm the group still exists
         assert UserGroup.objects.filter(id=builtin_group.id).exists()
 
@@ -308,3 +308,91 @@ class TestUserGroupMembership:
             else response.data
         )
         assert "d2member@tests.com" in [r["email"] for r in rows]
+
+    def test_cannot_rename_builtin_group_via_patch(self, app_config):
+        """A builtin group's fields are immutable via the API even with
+        change_usergroup: the name field is read-only, so a rename is ignored
+        (UserGroup has no builtin-editable fields)."""
+        domain, _, manager = self._setup_domain()
+        builtin_group = UserGroup.objects.create(
+            name="D1 anchor", folder=domain, builtin=True
+        )
+        client = _client_for(manager)
+
+        url = reverse("user-groups-detail", args=[builtin_group.id])
+        client.patch(url, {"name": "renamed"}, format="json")
+
+        builtin_group.refresh_from_db()
+        assert builtin_group.name == "D1 anchor"
+
+    def test_cannot_rename_builtin_group_via_batch_action(self, app_config):
+        """The batch-action path is guarded too (change_field on a builtin object)."""
+        domain, _, manager = self._setup_domain()
+        builtin_group = UserGroup.objects.create(
+            name="D1 anchor", folder=domain, builtin=True
+        )
+        client = _client_for(manager)
+
+        url = reverse("user-groups-batch-action")
+        response = client.post(
+            url,
+            {
+                "action": "change_field",
+                "ids": [str(builtin_group.id)],
+                "field": "name",
+                "value": "renamed",
+            },
+            format="json",
+        )
+
+        builtin_group.refresh_from_db()
+        assert builtin_group.name == "D1 anchor"
+        failed = (
+            response.data.get("failed", []) if isinstance(response.data, dict) else []
+        )
+        assert any("builtin" in str(f.get("error", "")).lower() for f in failed)
+
+    def test_cannot_set_builtin_flag(self, app_config):
+        """The builtin flag is read-only via the API — it can't be toggled on to
+        turn an ordinary object into a protected one."""
+        domain, _, manager = self._setup_domain()
+        group = UserGroup.objects.create(name="D1 custom", folder=domain, builtin=False)
+        client = _client_for(manager)
+
+        batch = client.post(
+            reverse("user-groups-batch-action"),
+            {
+                "action": "change_field",
+                "ids": [str(group.id)],
+                "field": "builtin",
+                "value": True,
+            },
+            format="json",
+        )
+        assert batch.status_code == status.HTTP_400_BAD_REQUEST
+
+        client.patch(
+            reverse("user-groups-detail", args=[group.id]),
+            {"builtin": True},
+            format="json",
+        )
+
+        group.refresh_from_db()
+        assert group.builtin is False
+
+    def test_membership_allowed_on_builtin_group(self, app_config):
+        """The builtin guard blocks field edits (PUT/PATCH/DELETE) but must not block
+        membership — which uses POST add/remove-members. Real per-domain groups are
+        builtin, so this is the common case."""
+        domain, _, manager = self._setup_domain()
+        builtin_group = UserGroup.objects.create(
+            name="D1 anchor", folder=domain, builtin=True
+        )
+        target = User.objects.create_user("member@tests.com", is_published=True)
+        client = _client_for(manager)
+
+        url = reverse("user-groups-add-members", args=[builtin_group.id])
+        response = client.post(url, {"users": [str(target.id)]}, format="json")
+
+        assert response.status_code == status.HTTP_200_OK
+        assert builtin_group.user_set.filter(pk=target.pk).exists()
