@@ -218,36 +218,48 @@
 		modalStore.trigger(modal);
 	}
 
-	async function removeFromParent(
+	function removeFromParent(
 		field: any,
 		ids: string[],
 		clear: () => void,
 		reload: () => void
-	): Promise<void> {
+	): void {
 		if (!field?.removeFromParent || !ids.length) return;
-		const res = await fetch(
-			`/${data.model.urlModel}/${data.data.id}/${field.removeFromParent.action}`,
-			{
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ [field.removeFromParent.payloadField]: ids })
+		modalStore.trigger({
+			type: 'confirm',
+			title: safeTranslate(field.removeFromParent.label ?? 'remove'),
+			body: safeTranslate(field.removeFromParent.confirmMessage ?? 'confirmRemoveSelected', {
+				count: ids.length
+			}),
+			buttonTextConfirm: safeTranslate(field.removeFromParent.label ?? 'remove'),
+			response: async (confirmed: boolean) => {
+				if (!confirmed) return;
+				const res = await fetch(
+					`/${data.model.urlModel}/${data.data.id}/${field.removeFromParent.action}`,
+					{
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ [field.removeFromParent.payloadField]: ids })
+					}
+				);
+				if (res.ok) {
+					clear();
+					reload();
+					await invalidateAll();
+					toastStore.trigger({
+						message: safeTranslate(field.removeFromParent.successMessage ?? 'saved'),
+						background: 'preset-filled-success-500'
+					});
+				} else {
+					const body = await res.json().catch(() => ({}));
+					toastStore.trigger({
+						message:
+							typeof body?.error === 'string' ? safeTranslate(body.error) : m.anErrorOccurred(),
+						background: 'preset-filled-error-500'
+					});
+				}
 			}
-		);
-		if (res.ok) {
-			clear();
-			reload();
-			await invalidateAll();
-			toastStore.trigger({
-				message: safeTranslate(field.removeFromParent.successMessage ?? 'saved'),
-				background: 'preset-filled-success-500'
-			});
-		} else {
-			const body = await res.json().catch(() => ({}));
-			toastStore.trigger({
-				message: typeof body?.error === 'string' ? safeTranslate(body.error) : m.anErrorOccurred(),
-				background: 'preset-filled-error-500'
-			});
-		}
+		});
 	}
 
 	function modalSelectExisting(field: ReverseForeignKeyField): void {
@@ -1011,7 +1023,9 @@
 								expectedCount={getExpectedCount(urlmodel, field)}
 								fields={fieldsToUse}
 								defaultFilters={field.defaultFilters || {}}
-								selectable={Boolean(canEditObject && field?.removeFromParent)}
+								selectable={Boolean(
+									canEditObject && !data.data.is_locked && field?.removeFromParent
+								)}
 							>
 								{#snippet selectActions({ ids, clear, reload })}
 									{#if field?.removeFromParent}
@@ -1020,14 +1034,15 @@
 											class="btn btn-sm preset-filled-error-500"
 											onclick={() => removeFromParent(field, ids, clear, reload)}
 										>
-											<i class="fa-solid fa-user-minus mr-2"></i>{safeTranslate(
-												field.removeFromParent.label ?? 'remove'
-											)}
+											<i class="{field.removeFromParent.icon ?? 'fa-solid fa-user-minus'} mr-2"
+											></i>{safeTranslate(field.removeFromParent.label ?? 'remove')}
 										</button>
 									{/if}
 								{/snippet}
 								{#snippet addButton()}
-									{#if canEditObject && field?.addExisting}
+									{#if data.data.is_locked}
+										<!-- Locked parent: no add affordances, matching the hidden remove selection. -->
+									{:else if canEditObject && field?.addExisting}
 										<span
 											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
 										>

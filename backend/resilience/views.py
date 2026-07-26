@@ -2,6 +2,7 @@ import io
 import re
 import uuid
 
+import structlog
 from django.conf import settings
 from django.db import IntegrityError
 from django.http import HttpResponse
@@ -31,6 +32,8 @@ from .models import (
 )
 from .serializers import AssetAssessmentWriteSerializer
 
+logger = structlog.get_logger(__name__)
+
 SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
@@ -50,6 +53,12 @@ class BusinessImpactAnalysisViewSet(BaseModelViewSet, ExportMixin):
         "risk_matrix",
         "status",
     ]
+
+    # Batch removal deletes AssetAssessment rows, so it is authorized against
+    # delete_assetassessment on the BIA's folder, not against changing the BIA.
+    permission_overrides = {
+        "remove_asset_assessments": "delete_assetassessment",
+    }
 
     export_config = {
         "fields": {
@@ -401,6 +410,49 @@ class BusinessImpactAnalysisViewSet(BaseModelViewSet, ExportMixin):
         bia = self.get_object()
         table = bia.build_table()
         return Response(table)
+
+    @action(detail=True, methods=["post"], url_path="remove-asset-assessments")
+    def remove_asset_assessments(self, request, pk=None):
+        """Remove asset assessments from this BIA (batch). Authorized by
+        delete_assetassessment on the BIA's folder (see permission_overrides).
+        Deleting an assessment cascades to its escalation thresholds."""
+        bia = self.get_object()
+        raw_ids = request.data.get("asset_assessments")
+        if not isinstance(raw_ids, list) or not raw_ids:
+            return Response(
+                {
+                    "error": "asset_assessments is required and must be a non-empty list"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if len(raw_ids) > settings.PAGINATE_BY:
+            return Response(
+                {"error": "too many asset assessments", "max": settings.PAGINATE_BY},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            ids = [uuid.UUID(str(i)) for i in raw_ids]
+        except ValueError:
+            return Response(
+                {"error": "invalid asset assessment id"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if bia.is_locked:
+            return Response(
+                {"error": "lockedAssessment"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        # Scope the deletion to this BIA so ids belonging to another BIA are
+        # ignored rather than deleted through the wrong parent.
+        removed = AssetAssessment.objects.filter(bia=bia, id__in=ids)
+        removed_count = removed.count()
+        removed.delete()
+        logger.info(
+            "asset assessments removed from BIA",
+            bia=bia,
+            count=removed_count,
+            actor=request.user,
+        )
+        return Response({"count": AssetAssessment.objects.filter(bia=bia).count()})
 
 
 class AssetAssessmentViewSet(BaseModelViewSet):

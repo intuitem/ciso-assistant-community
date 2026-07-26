@@ -1,6 +1,7 @@
 <script lang="ts">
 	import EntityPickerModal from './EntityPickerModal.svelte';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { invalidateAll } from '$app/navigation';
 	import { getToastStore } from '$lib/components/Toast/stores';
 
@@ -28,26 +29,32 @@
 		let created = 0;
 		let skipped = 0;
 		let errorCount = 0;
-		const queue: string[][] = [ids];
-		while (queue.length) {
-			const chunk = queue.shift()!;
-			const { ok, data } = await postChunk(chunk);
-			if (!ok && typeof data.max === 'number' && chunk.length > data.max) {
-				for (let i = 0; i < chunk.length; i += data.max) {
-					queue.push(chunk.slice(i, i + data.max));
+		try {
+			const queue: string[][] = [ids];
+			while (queue.length) {
+				const chunk = queue.shift()!;
+				const { ok, data } = await postChunk(chunk);
+				if (!ok && typeof data.max === 'number' && chunk.length > data.max) {
+					for (let i = 0; i < chunk.length; i += data.max) {
+						queue.push(chunk.slice(i, i + data.max));
+					}
+					continue;
 				}
-				continue;
+				if (!ok) {
+					toastStore.trigger({
+						message:
+							typeof data.error === 'string' ? safeTranslate(data.error) : m.anErrorOccurred(),
+						background: 'preset-filled-error-500'
+					});
+					throw new Error('Batch add assets failed');
+				}
+				created += data.created ?? 0;
+				skipped += data.skipped ?? 0;
+				errorCount += data.errors?.length ?? 0;
 			}
-			if (!ok) {
-				toastStore.trigger({
-					message: data.error || m.anErrorOccurred(),
-					background: 'preset-filled-error-500'
-				});
-				throw new Error('Batch add assets failed');
-			}
-			created += data.created ?? 0;
-			skipped += data.skipped ?? 0;
-			errorCount += data.errors?.length ?? 0;
+		} finally {
+			// Earlier chunks may have created rows even when a later one fails.
+			await invalidateAll();
 		}
 		const messages = [];
 		if (created > 0) messages.push(m.batchAddAssetsCreated({ count: created }));
@@ -57,7 +64,6 @@
 			message: messages.join(', ') || m.anErrorOccurred(),
 			...(created === 0 && errorCount > 0 ? { background: 'preset-filled-error-500' } : {})
 		});
-		await invalidateAll();
 	}
 </script>
 

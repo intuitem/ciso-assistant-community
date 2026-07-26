@@ -2002,24 +2002,35 @@ class ThreatViewSet(BaseModelViewSet):
 class AssetFilter(TimestampRangeFilterMixin, GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     asset_class = df.ModelMultipleChoiceFilter(queryset=AssetClass.objects.all())
-    bia = df.UUIDFilter(field_name="assetassessment__bia", distinct=True)
+    # BIA report: only assets assessed in the given BIA.
+    bia = df.UUIDFilter(method="filter_bia")
     # Add-only pickers: drop assets already assessed in the given BIA.
     exclude_bia = df.UUIDFilter(method="filter_exclude_bia")
 
-    def filter_exclude_bia(self, queryset, name, value):
+    def _can_read_bia(self, value) -> bool:
+        # Both BIA filters are only honoured for a BIA the caller can actually
+        # read, so this endpoint can't be used to infer the scope of BIAs they
+        # can't see.
         from resilience.models import BusinessImpactAnalysis
 
-        # Only honour the exclusion for a BIA the caller can actually read, so
-        # this endpoint can't be used to infer the scope of BIAs they can't see.
-        if (
+        return bool(
             value
             and self.request
             and RoleAssignment.is_object_readable(
                 self.request.user, BusinessImpactAnalysis, value
             )
-        ):
-            return queryset.exclude(assetassessment__bia=value)
-        return queryset
+        )
+
+    def filter_bia(self, queryset, name, value):
+        if not self._can_read_bia(value):
+            # Same result as a nonexistent BIA, so the two can't be told apart.
+            return queryset.none()
+        return queryset.filter(assetassessment__bia=value).distinct()
+
+    def filter_exclude_bia(self, queryset, name, value):
+        if not self._can_read_bia(value):
+            return queryset
+        return queryset.exclude(assetassessment__bia=value)
 
     exclude_children = df.ModelChoiceFilter(
         queryset=Asset.objects.all(),

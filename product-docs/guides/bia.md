@@ -90,7 +90,11 @@ To cover a large scope without filling the form once per asset, use the **Batch 
 2. Tick assets to add them to the **Selected** tray. **Select all** ticks the current page, and the selection is kept while you search or change pages.
 3. Click **Batch add assets**. One asset assessment is created per selected asset, and a toast confirms the count.
 
-Batch-added assessments start empty — recovery flags unchecked, no extra dependencies, controls, or evidences — so refine each one afterwards. Duplicates are impossible: assets already covered by the BIA are simply not offered again.
+Batch-added assessments start empty — recovery flags unchecked, no extra dependencies, controls, or evidences — so refine each one afterwards. Duplicates are impossible: assets already covered by the BIA are simply not offered again. On a locked BIA the add buttons are hidden, like the removal checkboxes.
+
+### Remove many assets at once
+
+To shrink the scope, tick rows on the **Asset assessments** table — checkboxes appear when you can edit the BIA — and click **Remove from BIA**. A confirmation dialog recaps how many assets are selected and warns that their assessments and escalation thresholds will be deleted; nothing happens until you confirm. The **Recovery insights** widget refreshes afterwards. On a locked BIA the selection is unavailable.
 
 ### Toggle the recovery flags from the table
 

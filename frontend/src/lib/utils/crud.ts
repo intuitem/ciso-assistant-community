@@ -135,6 +135,8 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 		payloadField: string; // request body key holding the selected ids, e.g. 'users'
 		label?: string; // i18n key for the button (defaults to 'remove')
 		successMessage?: string; // i18n key for the success toast
+		icon?: string; // Font Awesome classes for the button icon (defaults to 'fa-solid fa-user-minus')
+		confirmMessage?: string; // i18n key for the confirm dialog body, receives {count} (defaults to 'confirmRemoveSelected')
 	};
 }
 
@@ -1422,6 +1424,17 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'asset-assessments',
 				batchCreate: {
 					label: 'batchAddAssets'
+				},
+				// Select assessments in the table and remove them from the BIA. Routes
+				// to the BIA's delete_assetassessment-gated endpoint; deleting an
+				// assessment cascades to its escalation thresholds.
+				removeFromParent: {
+					action: 'remove-asset-assessments',
+					payloadField: 'asset_assessments',
+					label: 'removeFromBia',
+					icon: 'fa-solid fa-minus',
+					confirmMessage: 'confirmRemoveAssetAssessments',
+					successMessage: 'assetsRemovedFromBia'
 				}
 			}
 		],
