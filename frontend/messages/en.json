@@ -2383,6 +2383,7 @@
 	"pentest": "Pentest",
 	"audit": "Audit",
 	"selfIdentified": "Self-identified",
+	"responsibleDisclosure": "Responsible disclosure",
 	"identified": "Identified",
 	"confirmed": "Confirmed",
 	"dismissed": "Dismissed",

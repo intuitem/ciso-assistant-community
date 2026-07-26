@@ -1354,6 +1354,8 @@ export const FindingsAssessmentSchema = z.object({
 	observation: z.string().optional().nullable(),
 	category: z.string().default('--'),
 	evidences: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional(),
+	reported_at: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	is_locked: z.boolean().optional().default(false)
 });
 

@@ -2706,10 +2706,15 @@ export const listViewFields = {
 			'folder',
 			'perimeter'
 		],
+		optionalFields: {
+			head: ['filteringLabels', 'reportedAt'],
+			body: ['filtering_labels', 'reported_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
-			category: FINDINGS_ASSESSMENTS_CATEGORY_FILTER
+			category: FINDINGS_ASSESSMENTS_CATEGORY_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'posture-assessments': {
