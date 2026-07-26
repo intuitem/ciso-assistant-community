@@ -14,7 +14,9 @@ BATCH_CREATE_URL = "/api/resilience/asset-assessments/batch-create/"
 
 
 def remove_url(bia_id) -> str:
-    return f"/api/resilience/business-impact-analysis/{bia_id}/remove-asset-assessments/"
+    return (
+        f"/api/resilience/business-impact-analysis/{bia_id}/remove-asset-assessments/"
+    )
 
 
 def client_for(email, group_name, folder):

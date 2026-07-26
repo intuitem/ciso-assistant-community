@@ -420,9 +420,7 @@ class BusinessImpactAnalysisViewSet(BaseModelViewSet, ExportMixin):
         raw_ids = request.data.get("asset_assessments")
         if not isinstance(raw_ids, list) or not raw_ids:
             return Response(
-                {
-                    "error": "asset_assessments is required and must be a non-empty list"
-                },
+                {"error": "asset_assessments is required and must be a non-empty list"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if len(raw_ids) > settings.PAGINATE_BY:
