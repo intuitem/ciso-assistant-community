@@ -6,9 +6,9 @@ export interface EntityPickerOptions {
 	endpoint: string;
 	title?: string;
 	subtitle?: string;
-	/** Object field used as the primary row label (default 'str'). */
+	/** Object field or dot-path used as the primary row label (default 'str'). */
 	labelField?: string;
-	/** Optional secondary text shown after the label (e.g. 'email'). */
+	/** Optional secondary text shown after the label (e.g. 'email', 'folder.str'). */
 	secondaryField?: string;
 	/** Fixed query params applied to every request (e.g. scoping filters). */
 	scopeFilters?: Record<string, string>;

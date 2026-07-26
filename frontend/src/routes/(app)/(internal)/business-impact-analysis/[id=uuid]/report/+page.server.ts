@@ -28,8 +28,7 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 	const assetsData = await assetsResponse.json();
 	const assetAssessments = assetsData.results || [];
 
-	// Fetch full asset details with comparisons in bulk (paginated), instead of
-	// one request per asset assessment
+	// Bulk-fetch full asset details instead of one request per assessment
 	const assetDetailsById = new Map<string, any>();
 	let offset = 0;
 	let count = Infinity;
@@ -52,7 +51,7 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 	}));
 
 	// Sort by asset name
-	assetsWithDetails.sort((a, b) => a.asset.name.localeCompare(b.asset.name));
+	assetsWithDetails.sort((a: any, b: any) => a.asset.name.localeCompare(b.asset.name));
 
 	// Collect all unique applied controls from asset assessments
 	const allControls = new Map();

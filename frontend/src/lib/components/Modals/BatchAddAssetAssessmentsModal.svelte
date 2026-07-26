@@ -1,15 +1,8 @@
 <script lang="ts">
+	import EntityPickerModal from './EntityPickerModal.svelte';
 	import { m } from '$paraglide/messages';
-	import { getModalStore, type ModalStore } from './stores';
 	import { invalidateAll } from '$app/navigation';
 	import { getToastStore } from '$lib/components/Toast/stores';
-	import { onMount } from 'svelte';
-
-	const modalStore: ModalStore = getModalStore();
-	const toastStore = getToastStore();
-
-	const cBase = 'card bg-surface-50-950 p-6 w-modal space-y-6';
-	const cHeader = 'text-xl font-medium text-surface-900-100';
 
 	interface Props {
 		parent: any;
@@ -19,204 +12,61 @@
 
 	let { parent, parentId, urlModel }: Props = $props();
 
-	let options: { label: string; value: string; included: boolean }[] = $state([]);
-	let selectedValues: string[] = $state([]);
-	let searchQuery: string = $state('');
-	let loading = $state(true);
-	let submitting = $state(false);
-	// Server page size observed on the first assets page; also used as the
-	// submit chunk size so it always matches the backend's batch cap (PAGINATE_BY).
-	let serverPageSize = 0;
+	const toastStore = getToastStore();
 
-	async function fetchAllPages(base: string): Promise<{ items: any[]; pageSize: number }> {
-		const sep = base.includes('?') ? '&' : '?';
-		const acc: any[] = [];
-		let offset = 0;
-		let count = Infinity;
-		let pageSize = 0;
-		while (acc.length < count) {
-			const url = offset ? `${base}${sep}limit=${pageSize}&offset=${offset}` : base;
-			const res = await fetch(url);
-			if (!res.ok) break;
-			const data = await res.json();
-			const items = data.results ?? data ?? [];
-			if (!Array.isArray(items) || items.length === 0) break;
-			acc.push(...items);
-			count = typeof data.count === 'number' ? data.count : items.length;
-			pageSize = pageSize || items.length;
-			offset += items.length;
-		}
-		return { items: acc, pageSize };
+	async function postChunk(ids: string[]) {
+		const res = await fetch(`/${urlModel}/batch-create`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ bia: parentId, assets: ids })
+		});
+		const data = await res.json().catch(() => ({}));
+		return { ok: res.ok, data };
 	}
 
-	const filteredOptions = $derived(
-		searchQuery.trim()
-			? options.filter((o) => o.label.toLowerCase().includes(searchQuery.trim().toLowerCase()))
-			: options
-	);
-
-	const selectableCount = $derived(options.filter((o) => !o.included).length);
-
-	const canSubmit = $derived(selectedValues.length > 0 && !submitting);
-
-	onMount(async () => {
-		try {
-			const [assets, existing] = await Promise.all([
-				fetchAllPages('/assets/autocomplete'),
-				fetchAllPages(`/asset-assessments?bia=${parentId}`)
-			]);
-			const included: Set<string> = new Set();
-			for (const aa of existing.items) {
-				if (aa.asset?.id) included.add(String(aa.asset.id));
-			}
-			serverPageSize = assets.pageSize;
-			options = assets.items.map((a: any) => ({
-				label: a.folder?.str ? `${a.name} (${a.folder.str})` : a.name,
-				value: String(a.id),
-				included: included.has(String(a.id))
-			}));
-		} catch (e) {
-			console.error('Failed to fetch assets', e);
-		} finally {
-			loading = false;
-		}
-	});
-
-	function toggleValue(value: string) {
-		if (selectedValues.includes(value)) {
-			selectedValues = selectedValues.filter((v) => v !== value);
-		} else {
-			selectedValues = [...selectedValues, value];
-		}
-	}
-
-	function selectAll() {
-		selectedValues = [
-			...new Set([
-				...selectedValues,
-				...filteredOptions.filter((o) => !o.included).map((o) => o.value)
-			])
-		];
-	}
-
-	function deselectAll() {
-		selectedValues = [];
-	}
-
-	async function handleSubmit() {
-		submitting = true;
+	async function onConfirm(ids: string[]) {
 		let created = 0;
 		let skipped = 0;
 		let errorCount = 0;
-		let failed = false;
-		let failMessage = '';
-		try {
-			const chunkSize = serverPageSize > 0 ? serverPageSize : selectedValues.length;
-			for (let i = 0; i < selectedValues.length; i += chunkSize) {
-				const chunk = selectedValues.slice(i, i + chunkSize);
-				const res = await fetch(`/${urlModel}/batch-create`, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ bia: parentId, assets: chunk })
-				});
-				const data = await res.json().catch(() => ({}));
-				created += data.created ?? 0;
-				skipped += data.skipped ?? 0;
-				errorCount += data.errors?.length ?? 0;
-				if (!res.ok) {
-					failed = true;
-					failMessage = data.error ?? '';
-					break;
+		const queue: string[][] = [ids];
+		while (queue.length) {
+			const chunk = queue.shift()!;
+			const { ok, data } = await postChunk(chunk);
+			if (!ok && typeof data.max === 'number' && chunk.length > data.max) {
+				for (let i = 0; i < chunk.length; i += data.max) {
+					queue.push(chunk.slice(i, i + data.max));
 				}
+				continue;
 			}
-			const messages = [];
-			if (created > 0) messages.push(m.batchAddAssetsCreated({ count: created }));
-			if (skipped > 0) messages.push(m.batchAddAssetsSkipped({ count: skipped }));
-			if (errorCount > 0) messages.push(`${errorCount} error(s)`);
-			if (failed && messages.length === 0) messages.push(failMessage || m.anErrorOccurred());
-			toastStore.trigger({
-				message: messages.join(', '),
-				...(failed || (created === 0 && errorCount > 0)
-					? { background: 'preset-filled-error-500' }
-					: {})
-			});
-			if (created > 0 || skipped > 0) await invalidateAll();
-			if (!failed) parent.onClose();
-		} catch (e) {
-			console.error('Batch add assets failed', e);
-			toastStore.trigger({
-				message: m.anErrorOccurred(),
-				background: 'preset-filled-error-500'
-			});
-		} finally {
-			submitting = false;
+			if (!ok) {
+				toastStore.trigger({
+					message: data.error || m.anErrorOccurred(),
+					background: 'preset-filled-error-500'
+				});
+				throw new Error('Batch add assets failed');
+			}
+			created += data.created ?? 0;
+			skipped += data.skipped ?? 0;
+			errorCount += data.errors?.length ?? 0;
 		}
+		const messages = [];
+		if (created > 0) messages.push(m.batchAddAssetsCreated({ count: created }));
+		if (skipped > 0) messages.push(m.batchAddAssetsSkipped({ count: skipped }));
+		if (errorCount > 0) messages.push(`${errorCount} error(s)`);
+		toastStore.trigger({
+			message: messages.join(', ') || m.anErrorOccurred(),
+			...(created === 0 && errorCount > 0 ? { background: 'preset-filled-error-500' } : {})
+		});
+		await invalidateAll();
 	}
 </script>
 
-{#if $modalStore[0]}
-	<div class={cBase} role="dialog" aria-modal="true" aria-labelledby="modal-title">
-		<header id="modal-title" class={cHeader} data-testid="modal-title">
-			{$modalStore[0].title ?? '(title missing)'}
-		</header>
-
-		{#if loading}
-			<div class="text-sm text-surface-600-400">{m.loading()}...</div>
-		{:else}
-			<div class="space-y-2">
-				<input
-					type="text"
-					class="input w-full border border-surface-300-700 rounded px-3 py-2 text-sm"
-					aria-label={m.search()}
-					placeholder={m.searchPlaceholder()}
-					bind:value={searchQuery}
-				/>
-				<div class="flex items-center justify-between text-sm">
-					<div class="space-x-3">
-						<button type="button" class="anchor" onclick={selectAll}>{m.selectAll()}</button>
-						<button type="button" class="anchor" onclick={deselectAll}>{m.deselectAll()}</button>
-					</div>
-					<span class="text-surface-600-400">{selectedValues.length} / {selectableCount}</span>
-				</div>
-				<div class="max-h-64 overflow-y-auto border border-surface-200-800 rounded">
-					{#each filteredOptions as option (option.value)}
-						<label
-							class="flex items-center gap-2 px-3 py-1.5 border-b border-surface-100-900 last:border-b-0 {option.included
-								? 'opacity-50'
-								: 'hover:bg-surface-50-950 cursor-pointer'}"
-						>
-							<input
-								type="checkbox"
-								checked={option.included || selectedValues.includes(option.value)}
-								disabled={option.included}
-								onchange={() => toggleValue(option.value)}
-								class="checkbox"
-							/>
-							<span class="text-sm">{option.label}</span>
-							{#if option.included}
-								<span class="ml-auto text-xs text-surface-500">{m.alreadyIncluded()}</span>
-							{/if}
-						</label>
-					{/each}
-					{#if filteredOptions.length === 0}
-						<div class="px-3 py-2 text-sm text-surface-400-600">{m.noEntriesFound()}</div>
-					{/if}
-				</div>
-			</div>
-		{/if}
-
-		<footer class="flex gap-3 justify-end pt-4 border-t border-surface-200-800">
-			<button type="button" class="btn preset-outlined-surface-500" onclick={parent.onClose}>
-				{m.cancel()}
-			</button>
-			<button
-				class="btn preset-filled-primary-500"
-				data-testid="batch-add-assets-confirm-button"
-				disabled={!canSubmit}
-				onclick={handleSubmit}
-			>
-				{m.submit()}
-			</button>
-		</footer>
-	</div>
-{/if}
+<EntityPickerModal
+	{parent}
+	endpoint="assets"
+	title={m.batchAddAssets()}
+	scopeFilters={{ exclude_bia: parentId }}
+	secondaryField="folder.str"
+	confirmLabel={m.batchAddAssets()}
+	{onConfirm}
+/>

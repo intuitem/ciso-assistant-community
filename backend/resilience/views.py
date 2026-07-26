@@ -453,7 +453,8 @@ class AssetAssessmentViewSet(BaseModelViewSet):
             )
         if len(asset_ids) > settings.PAGINATE_BY:
             return Response(
-                {"error": "too many assets"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "too many assets", "max": settings.PAGINATE_BY},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         (viewable_bias, _, _) = RoleAssignment.get_accessible_object_ids(

@@ -82,6 +82,20 @@ Each asset assessment surfaces as a row in the BIA's timeline.
 The three recovery checkboxes drive the **Recovery insights** activity tracker on the BIA header. Each one shows a percentage across all assets in the BIA — your dashboard of "how ready are we" at a glance.
 {% endhint %}
 
+### Add many assets at once
+
+To cover a large scope without filling the form once per asset, use the **Batch add assets** button (layer-group icon next to the create button on the **Asset assessments** table):
+
+1. A picker opens, listing only the assets not yet included in this BIA — with search and pagination (**Show** 10 / 25 / 50 / 100 **entries** per page).
+2. Tick assets to add them to the **Selected** tray. **Select all** ticks the current page, and the selection is kept while you search or change pages.
+3. Click **Batch add assets**. One asset assessment is created per selected asset, and a toast confirms the count.
+
+Batch-added assessments start empty — recovery flags unchecked, no extra dependencies, controls, or evidences — so refine each one afterwards. Duplicates are impossible: assets already covered by the BIA are simply not offered again.
+
+### Toggle the recovery flags from the table
+
+Right-click a row of the **Asset assessments** table to flip **Recovery documented**, **Recovery tested**, or **Recovery targets met** without opening the edit form. Each menu entry shows the flag's current state; a click toggles it and refreshes the table and the **Recovery insights** widget. On a locked BIA these entries are disabled.
+
 ## Step 3 — Add escalation thresholds (the time curve)
 
 For each asset assessment, capture how the impact evolves over time. Open the asset assessment's detail page and add thresholds via **Add a step**:

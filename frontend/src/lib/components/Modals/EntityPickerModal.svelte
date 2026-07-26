@@ -127,8 +127,13 @@
 		else rows.forEach((r) => selected.set(r.id, r));
 	}
 
+	function fieldValue(o: any, path?: string) {
+		if (!o || !path) return undefined;
+		return path.split('.').reduce((acc, k) => acc?.[k], o);
+	}
+
 	function label(o: any): string {
-		return o?.[labelField] ?? o?.str ?? o?.email ?? o?.id ?? '';
+		return fieldValue(o, labelField) ?? o?.str ?? o?.email ?? o?.id ?? '';
 	}
 
 	function initials(o: any): string {
@@ -253,6 +258,7 @@
 				</div>
 			{:else}
 				{#each rows as row}
+					{@const secondary = fieldValue(row, secondaryField)}
 					<button
 						type="button"
 						class="w-full flex items-center gap-3 px-2 py-2 rounded text-left hover:bg-surface-100-900 {selected.has(
@@ -273,8 +279,8 @@
 						>
 						<span class="flex-1 min-w-0 flex items-baseline gap-2">
 							<span class="truncate max-w-[45%]">{label(row)}</span>
-							{#if secondaryField && row[secondaryField] && row[secondaryField] !== label(row)}
-								<span class="truncate text-surface-600-400">({row[secondaryField]})</span>
+							{#if secondary && secondary !== label(row)}
+								<span class="truncate text-surface-600-400">({secondary})</span>
 							{/if}
 							{#if activeField && row[activeField] === false}
 								<span

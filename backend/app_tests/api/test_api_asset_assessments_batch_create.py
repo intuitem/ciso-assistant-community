@@ -1,4 +1,5 @@
 import pytest
+from django.conf import settings
 from knox.models import AuthToken
 from rest_framework.test import APIClient
 from core.models import Asset, Perimeter, RiskMatrix, StoredLibrary
@@ -157,6 +158,28 @@ class TestAssetAssessmentsBatchCreate:
             {"asset": str(foreign_asset.id), "error": "asset not found"}
         ]
         assert not AssetAssessment.objects.filter(asset=foreign_asset).exists()
+
+    def test_batch_create_over_cap(self, authenticated_client, setup):
+        folder, bia, assets = setup
+        too_many = [str(assets[0].id)] * (settings.PAGINATE_BY + 1)
+
+        response = authenticated_client.post(
+            BATCH_CREATE_URL, {"bia": str(bia.id), "assets": too_many}, format="json"
+        )
+        assert response.status_code == 400
+        assert response.json()["max"] == settings.PAGINATE_BY
+
+    def test_exclude_bia_asset_filter(self, authenticated_client, setup):
+        folder, bia, assets = setup
+        AssetAssessment.objects.create(bia=bia, asset=assets[0], folder=folder)
+
+        response = authenticated_client.get(
+            f"/api/assets/autocomplete/?exclude_bia={bia.id}"
+        )
+        assert response.status_code == 200
+        ids = {a["id"] for a in response.json()["results"]}
+        assert str(assets[0].id) not in ids
+        assert str(assets[1].id) in ids
 
     def test_batch_create_unknown_bia(self, authenticated_client, setup):
         folder, bia, assets = setup

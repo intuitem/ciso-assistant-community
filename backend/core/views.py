@@ -2003,6 +2003,23 @@ class AssetFilter(TimestampRangeFilterMixin, GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     asset_class = df.ModelMultipleChoiceFilter(queryset=AssetClass.objects.all())
     bia = df.UUIDFilter(field_name="assetassessment__bia", distinct=True)
+    # Add-only pickers: drop assets already assessed in the given BIA.
+    exclude_bia = df.UUIDFilter(method="filter_exclude_bia")
+
+    def filter_exclude_bia(self, queryset, name, value):
+        from resilience.models import BusinessImpactAnalysis
+
+        # Only honour the exclusion for a BIA the caller can actually read, so
+        # this endpoint can't be used to infer the scope of BIAs they can't see.
+        if (
+            value
+            and self.request
+            and RoleAssignment.is_object_readable(
+                self.request.user, BusinessImpactAnalysis, value
+            )
+        ):
+            return queryset.exclude(assetassessment__bia=value)
+        return queryset
 
     exclude_children = df.ModelChoiceFilter(
         queryset=Asset.objects.all(),
