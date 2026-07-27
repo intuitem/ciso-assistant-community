@@ -94,7 +94,7 @@ Batch-added assessments start empty — recovery flags unchecked, no extra depen
 
 ### Remove many assets at once
 
-To shrink the scope, tick rows on the **Asset assessments** table — checkboxes appear when you can edit the BIA — and click **Remove from BIA**. A confirmation dialog recaps how many assets are selected and warns that their assessments and escalation thresholds will be deleted; nothing happens until you confirm. The **Recovery insights** widget refreshes afterwards. On a locked BIA the selection is unavailable.
+To shrink the scope, tick rows on the **Asset assessments** table and click **Delete** in the toolbar that appears — the same batch action available on other tables. The confirmation dialog recaps how many rows are selected and asks you to type _yes_; deleting an assessment also deletes its escalation thresholds. The **Recovery insights** widget refreshes afterwards. On a locked BIA the checkboxes are unavailable.
 
 ### Toggle the recovery flags from the table
 

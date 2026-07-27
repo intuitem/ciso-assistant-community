@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
+	import { invalidateAll } from '$app/navigation';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import {
@@ -130,6 +131,7 @@
 						}
 
 						handler.invalidate();
+						await invalidateAll();
 						onClearSelection();
 					} catch (e) {
 						console.error('Batch action failed', e);

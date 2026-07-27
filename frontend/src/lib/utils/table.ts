@@ -3349,6 +3349,7 @@ export interface BatchActionConfig {
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	'document-templates': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'asset-assessments': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
 	'applied-controls': [
 		{
 			type: 'group',

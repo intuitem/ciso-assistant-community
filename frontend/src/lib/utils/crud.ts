@@ -1424,17 +1424,6 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'asset-assessments',
 				batchCreate: {
 					label: 'batchAddAssets'
-				},
-				// Select assessments in the table and remove them from the BIA. Routes
-				// to the BIA's delete_assetassessment-gated endpoint; deleting an
-				// assessment cascades to its escalation thresholds.
-				removeFromParent: {
-					action: 'remove-asset-assessments',
-					payloadField: 'asset_assessments',
-					label: 'removeFromBia',
-					icon: 'fa-solid fa-minus',
-					confirmMessage: 'confirmRemoveAssetAssessments',
-					successMessage: 'assetsRemovedFromBia'
 				}
 			}
 		],

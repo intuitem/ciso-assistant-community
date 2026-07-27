@@ -11,12 +11,7 @@ from resilience.models import (
 )
 
 BATCH_CREATE_URL = "/api/resilience/asset-assessments/batch-create/"
-
-
-def remove_url(bia_id) -> str:
-    return (
-        f"/api/resilience/business-impact-analysis/{bia_id}/remove-asset-assessments/"
-    )
+BATCH_ACTION_URL = "/api/resilience/asset-assessments/batch-action/"
 
 
 def client_for(email, group_name, folder):
@@ -255,154 +250,103 @@ class TestAssetAssessmentsBatchRemove:
         ]
         return folder, bia, assessments
 
-    def test_remove(self, authenticated_client, setup):
+    def test_batch_delete(self, authenticated_client, setup):
         folder, bia, assessments = setup
         EscalationThreshold.objects.create(
             asset_assessment=assessments[0], point_in_time=3600, folder=folder
         )
 
         response = authenticated_client.post(
-            remove_url(bia.id),
-            {"asset_assessments": [str(assessments[0].id), str(assessments[1].id)]},
+            BATCH_ACTION_URL,
+            {
+                "action": "delete",
+                "ids": [str(assessments[0].id), str(assessments[1].id)],
+            },
             format="json",
         )
         assert response.status_code == 200
-        assert response.json()["count"] == 1
+        data = response.json()
+        assert len(data["succeeded"]) == 2
+        assert data["failed"] == []
         remaining = AssetAssessment.objects.filter(bia=bia)
         assert list(remaining.values_list("id", flat=True)) == [assessments[2].id]
         assert not EscalationThreshold.objects.filter(
             asset_assessment=assessments[0]
         ).exists()
 
-    def test_remove_scoped_to_bia(self, authenticated_client, setup):
-        folder, bia, assessments = setup
-        other_bia = BusinessImpactAnalysis.objects.create(
-            name="other-bia",
-            perimeter=bia.perimeter,
-            folder=folder,
-            risk_matrix=bia.risk_matrix,
-        )
-        foreign = AssetAssessment.objects.create(
-            bia=other_bia, asset=assessments[0].asset, folder=folder
-        )
-
-        response = authenticated_client.post(
-            remove_url(bia.id),
-            {"asset_assessments": [str(foreign.id)]},
-            format="json",
-        )
-        assert response.status_code == 200
-        assert response.json()["count"] == 3
-        assert AssetAssessment.objects.filter(id=foreign.id).exists()
-
-    def test_remove_locked_bia(self, authenticated_client, setup):
+    def test_batch_delete_locked_bia(self, authenticated_client, setup):
         folder, bia, assessments = setup
         bia.is_locked = True
         bia.save()
 
         response = authenticated_client.post(
-            remove_url(bia.id),
-            {"asset_assessments": [str(assessments[0].id)]},
+            BATCH_ACTION_URL,
+            {"action": "delete", "ids": [str(assessments[0].id)]},
             format="json",
         )
-        assert response.status_code == 400
+        assert response.status_code == 200
+        data = response.json()
+        assert data["succeeded"] == []
+        assert len(data["failed"]) == 1
         assert AssetAssessment.objects.filter(bia=bia).count() == 3
 
-    def test_remove_reader_forbidden(self, authenticated_client, setup):
+    def test_batch_delete_reader_forbidden(self, authenticated_client, setup):
         folder, bia, assessments = setup
         reader = client_for("reader@tests.com", "BI-UG-AUD", folder)
 
         response = reader.post(
-            remove_url(bia.id),
-            {"asset_assessments": [str(assessments[0].id)]},
+            BATCH_ACTION_URL,
+            {"action": "delete", "ids": [str(assessments[0].id)]},
             format="json",
         )
-        assert response.status_code == 403
+        assert response.status_code == 200
+        data = response.json()
+        assert data["succeeded"] == []
+        assert len(data["failed"]) == 1
         assert AssetAssessment.objects.filter(bia=bia).count() == 3
 
-    def test_remove_missing_or_invalid_params(self, authenticated_client, setup):
-        folder, bia, assessments = setup
-
-        for payload in (
-            {},
-            {"asset_assessments": []},
-            {"asset_assessments": ["not-a-uuid"]},
-            {"asset_assessments": [None]},
-            {"asset_assessments": 5},
-            {"asset_assessments": "a,b"},
-            {"asset_assessments": {"id": str(assessments[0].id)}},
-        ):
-            response = authenticated_client.post(
-                remove_url(bia.id), payload, format="json"
-            )
-            assert response.status_code == 400, payload
-        assert AssetAssessment.objects.filter(bia=bia).count() == 3
-
-    def test_remove_over_cap(self, authenticated_client, setup):
-        folder, bia, assessments = setup
-        too_many = [str(assessments[0].id)] * (settings.PAGINATE_BY + 1)
-
-        response = authenticated_client.post(
-            remove_url(bia.id), {"asset_assessments": too_many}, format="json"
-        )
-        assert response.status_code == 400
-        assert response.json()["max"] == settings.PAGINATE_BY
-
-    def test_remove_unknown_bia(self, authenticated_client, setup):
-        folder, bia, assessments = setup
-
-        response = authenticated_client.post(
-            remove_url("00000000-0000-0000-0000-000000000000"),
-            {"asset_assessments": [str(assessments[0].id)]},
-            format="json",
-        )
-        assert response.status_code == 404
-
-    def test_remove_authorized_by_delete_assetassessment(self, setup):
-        """The permission override must authorize via delete_assetassessment
-        alone — without add_businessimpactanalysis, the default POST codename.
-        Fails if permission_overrides is silently ignored."""
+    def test_batch_delete_authorized_by_delete_assetassessment(self, setup):
         folder, bia, assessments = setup
         client = client_with_role(
             "deleter@tests.com",
             folder,
             [
                 "view_folder",
-                "view_businessimpactanalysis",
                 "view_assetassessment",
                 "delete_assetassessment",
             ],
         )
 
         response = client.post(
-            remove_url(bia.id),
-            {"asset_assessments": [str(assessments[0].id)]},
+            BATCH_ACTION_URL,
+            {"action": "delete", "ids": [str(assessments[0].id)]},
             format="json",
         )
         assert response.status_code == 200
+        assert len(response.json()["succeeded"]) == 1
         assert AssetAssessment.objects.filter(bia=bia).count() == 2
 
-    def test_remove_not_authorized_by_bia_add_permission(self, setup):
-        """add_businessimpactanalysis (the default POST codename) must NOT
-        authorize removal — only delete_assetassessment does."""
+    def test_batch_delete_not_authorized_without_delete_permission(self, setup):
         folder, bia, assessments = setup
         client = client_with_role(
             "adder@tests.com",
             folder,
             [
                 "view_folder",
-                "view_businessimpactanalysis",
                 "view_assetassessment",
-                "add_businessimpactanalysis",
+                "add_assetassessment",
             ],
         )
 
         response = client.post(
-            remove_url(bia.id),
-            {"asset_assessments": [str(assessments[0].id)]},
+            BATCH_ACTION_URL,
+            {"action": "delete", "ids": [str(assessments[0].id)]},
             format="json",
         )
-        assert response.status_code == 403
+        assert response.status_code == 200
+        data = response.json()
+        assert data["succeeded"] == []
+        assert len(data["failed"]) == 1
         assert AssetAssessment.objects.filter(bia=bia).count() == 3
 
     def test_single_delete_locked_bia(self, authenticated_client, setup):

@@ -724,8 +724,8 @@
 		URLModel && model
 			? getBatchActions(URLModel).filter((a) =>
 					a.type === 'delete'
-						? hasPermissionAnywhere(user, `delete_${model.name}`)
-						: hasPermissionAnywhere(user, `change_${model.name}`)
+						? !disableDelete && hasPermissionAnywhere(user, `delete_${model.name}`)
+						: !disableEdit && hasPermissionAnywhere(user, `change_${model.name}`)
 				)
 			: []
 	);
