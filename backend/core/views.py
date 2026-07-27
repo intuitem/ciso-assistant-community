@@ -6347,9 +6347,6 @@ class UserRolesOnFolderList(generics.ListAPIView):
 
         # authorize
         viewable_ids = RoleAssignment.get_viewable_object_ids(self.request.user, Folder)
-        _updatable_ids = RoleAssignment.get_changeable_object_ids(
-            self.request.user, Folder
-        )
 
         if folder.id not in viewable_ids:
             raise PermissionDenied()
