@@ -9450,6 +9450,9 @@ class Answer(AbstractBaseModel, FolderMixin):
 
 
 class FindingsAssessment(Assessment, FilteringLabelMixin):
+    class Meta(Assessment.Meta, FilteringLabelMixin.Meta):
+        pass
+
     class Category(models.TextChoices):
         UNDEFINED = "--", "Undefined"
         PENTEST = "pentest", "Pentest"

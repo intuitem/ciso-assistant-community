@@ -772,6 +772,7 @@ export const URL_MODEL_MAP: ModelMap = {
 					parentField: 'vulnerabilities'
 				}
 			},
+			{ field: 'assets', urlModel: 'ebios-rm', disableCreate: true, disableDelete: true },
 			{ field: 'assets', urlModel: 'risk-scenarios', disableDelete: true },
 			{
 				field: 'assets',

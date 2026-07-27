@@ -143,6 +143,7 @@
 	cacheLock={cacheLocks['findings_assessment']}
 	bind:cachedValue={formDataCache['findings_assessment']}
 	label={m.findingsAssessment()}
+	helpText={m.findingsAssessmentHelpText()}
 	hidden={initialData.findings_assessment}
 />
 <div class="flex flex-row space-x-2 items-center">

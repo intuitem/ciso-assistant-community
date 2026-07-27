@@ -15010,7 +15010,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "evidences",
                 "authors",
-                "filtering_labels",
+                "filtering_labels__folder",
             )
             .annotate(
                 _total_findings=Count("findings"),

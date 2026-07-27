@@ -82,6 +82,7 @@
 	cacheLock={cacheLocks['bia']}
 	bind:cachedValue={formDataCache['bia']}
 	label={m.bia()}
+	helpText={m.biaHelpText()}
 	hidden={initialData.bia}
 />
 <AutocompleteSelect
