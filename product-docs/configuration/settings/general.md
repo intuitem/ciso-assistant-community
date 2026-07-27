@@ -8,6 +8,7 @@ Instance-wide settings that don't belong to a more specific category. Grouped he
 - **EBIOS radar configuration** — the max radius and the green / yellow / red zone radii used to draw the EBIOS RM radar chart.
 - **Aggregated scenario matrix** — toggles the aggregated view of scenarios on the risk-matrix display.
 - **Risk matrix axis options** — `swap axes`, `flip vertical`, custom axis labels. Cosmetic adjustments to how every risk matrix is rendered.
+- **Display qualifications as risk categories** — swaps the term _qualification_ for _risk category_ throughout the interface: field labels on risk scenarios, incidents, feared events, escalation thresholds and quantitative risk scenarios, plus the matching filters and analytics charts. The values themselves (confidentiality, integrity, …) are managed as [terminology](../../concepts/terminology.md) either way.
 
 ## Language
 

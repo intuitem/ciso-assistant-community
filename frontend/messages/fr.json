@@ -1111,7 +1111,7 @@
 	"showGetStartedButton": "Afficher le bouton « Démarrer »",
 	"showGetStartedButtonHelpText": "Afficher le bouton « Démarrer » en haut à droite pour les administrateurs.",
 	"settingsUseRiskCategoryLabel": "Afficher les qualifications comme des catégories de risque",
-	"settingsUseRiskCategoryLabelHelpText": "Lorsqu'activé, le terme « qualification » est affiché comme « catégorie de risque » dans l'interface (affichage uniquement).",
+	"settingsUseRiskCategoryLabelHelpText": "Lorsqu'activé, le terme « qualification » est affiché comme « catégorie de risque » dans l'interface.",
 	"settingsNotificationsMail": "Activer les emails",
 	"identityProvider": "Fournisseur d'identité",
 	"identityProviders": "Fournisseurs d'identité",

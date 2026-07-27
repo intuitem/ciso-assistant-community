@@ -3133,7 +3133,7 @@
 	"showGetStartedButton": "Show \"Get Started\" button",
 	"showGetStartedButtonHelpText": "Show the \"Get Started\" button in the top-right corner for administrators.",
 	"settingsUseRiskCategoryLabel": "Display qualifications as risk categories",
-	"settingsUseRiskCategoryLabelHelpText": "When enabled, the term 'qualification' is displayed as 'risk category' across the interface (display only).",
+	"settingsUseRiskCategoryLabelHelpText": "When enabled, the term 'qualification' is displayed as 'risk category' across the interface.",
 	"personalFolders": "Personal domains",
 	"personalFoldersDescription": "Let users create objects in their own personal (sandbox) domain, created on first use",
 	"personalFoldersParent": "Personal domains parent",
