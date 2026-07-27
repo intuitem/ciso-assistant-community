@@ -138,6 +138,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="findings-assessments"
+	optionsExtraFields={[['folder', 'str']]}
 	field="findings_assessment"
 	cacheLock={cacheLocks['findings_assessment']}
 	bind:cachedValue={formDataCache['findings_assessment']}
@@ -170,6 +171,17 @@
 	{/if}
 </div>
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<AutocompleteSelect
+		{form}
+		lazy
+		optionsEndpoint="assets"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="asset"
+		cacheLock={cacheLocks['asset']}
+		bind:cachedValue={formDataCache['asset']}
+		label={m.asset()}
+	/>
 	<AutocompleteSelect
 		multiple
 		{form}

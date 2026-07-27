@@ -78,6 +78,7 @@
 	{form}
 	field="bia"
 	optionsEndpoint="business-impact-analysis"
+	optionsExtraFields={[['folder', 'str']]}
 	cacheLock={cacheLocks['bia']}
 	bind:cachedValue={formDataCache['bia']}
 	label={m.bia()}

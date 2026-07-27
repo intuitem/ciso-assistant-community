@@ -15482,6 +15482,7 @@ class FindingViewSet(BaseModelViewSet):
         "severity": ["exact"],
         "priority": ["exact"],
         "findings_assessment": ["exact"],
+        "asset": ["exact"],
         "filtering_labels": ["exact"],
         "applied_controls": ["exact"],
         "evidences": ["exact"],

@@ -762,6 +762,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			},
+			{ field: 'asset', urlModel: 'findings', disableDelete: true },
+			{ field: 'asset', urlModel: 'asset-assessments' },
 			{
 				field: 'assets',
 				urlModel: 'vulnerabilities',
@@ -770,11 +772,10 @@ export const URL_MODEL_MAP: ModelMap = {
 					parentField: 'vulnerabilities'
 				}
 			},
-			{ field: 'assets', urlModel: 'risk-scenarios', disableCreate: true, disableDelete: true },
+			{ field: 'assets', urlModel: 'risk-scenarios', disableDelete: true },
 			{
 				field: 'assets',
 				urlModel: 'quantitative-risk-scenarios',
-				disableCreate: true,
 				disableDelete: true
 			},
 			{
@@ -2221,6 +2222,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Findings',
 		foreignKeyFields: [
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
+			{ field: 'asset', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
