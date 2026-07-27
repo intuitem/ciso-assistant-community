@@ -359,7 +359,9 @@ class WorkflowInstanceViewSet(BaseModelViewSet):
                 version, trigger="manual", initiated_by=request.user, entry_node=entry
             )
         except EngineError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": e.user_message}, status=status.HTTP_400_BAD_REQUEST
+            )
         return Response(
             WorkflowInstanceReadSerializer(instance).data,
             status=status.HTTP_201_CREATED,
@@ -434,7 +436,9 @@ class WorkflowWebhookView(APIView):
                 trigger_registration=registration,
             )
         except EngineError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": e.user_message}, status=status.HTTP_400_BAD_REQUEST
+            )
         return Response(
             {"instance": str(instance.id), "status": instance.status},
             status=status.HTTP_201_CREATED,

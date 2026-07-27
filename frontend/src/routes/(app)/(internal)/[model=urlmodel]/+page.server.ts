@@ -156,7 +156,8 @@ export const actions: Actions = {
 			method: 'POST',
 			body
 		});
-		const res = await response.json();
+		// A non-JSON error body (proxy HTML page) must not crash the action.
+		const res = await response.json().catch(() => ({}));
 
 		if (!response.ok) {
 			setFlash(

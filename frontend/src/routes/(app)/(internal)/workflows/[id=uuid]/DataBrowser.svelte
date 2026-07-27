@@ -53,23 +53,20 @@
 
 {#snippet rowActions(value: unknown, path: string, withInsert: boolean)}
 	{#if withInsert}
-		<span
-			role="button"
-			tabindex="0"
+		<button
+			type="button"
 			title={m.insertReference()}
 			class="ml-auto text-[9px] text-primary-500 opacity-0 group-hover:opacity-100 shrink-0 px-0.5 cursor-pointer"
 			onclick={(e) => {
 				e.stopPropagation();
 				onInsert('{{' + path + '}}');
 			}}
-			onkeydown={(e) => e.key === 'Enter' && onInsert('{{' + path + '}}')}
 		>
 			<i class="fa-solid fa-arrow-right-to-bracket"></i>
-		</span>
+		</button>
 	{/if}
-	<span
-		role="button"
-		tabindex="0"
+	<button
+		type="button"
 		title={m.copyValue()}
 		class="{withInsert
 			? ''
@@ -78,10 +75,9 @@
 			e.stopPropagation();
 			copyValue(value, path);
 		}}
-		onkeydown={(e) => e.key === 'Enter' && copyValue(value, path)}
 	>
 		<i class="fa-solid {copiedPath === path ? 'fa-check text-success-500' : 'fa-copy'}"></i>
-	</span>
+	</button>
 {/snippet}
 
 {#snippet tree(entries: [string, unknown][], basePath: string, depth: number)}
@@ -89,11 +85,15 @@
 		{@const path = basePath ? `${basePath}.${key}` : key}
 		<div style="padding-left: {depth * 12}px">
 			{#if isExpandable(value)}
-				<button
-					type="button"
+				<!-- Rows are divs (not buttons): rowActions renders real <button>
+				     controls inside, and buttons must not nest. -->
+				<div
+					role="button"
+					tabindex="0"
 					class="w-full flex items-center gap-1 py-0.5 text-[11px] hover:bg-surface-100-900 rounded cursor-pointer text-left group"
 					title={'{{' + path + '}}'}
 					onclick={() => toggle(path)}
+					onkeydown={(e) => e.key === 'Enter' && e.target === e.currentTarget && toggle(path)}
 				>
 					<i
 						class="fa-solid fa-chevron-{expanded[path]
@@ -105,16 +105,19 @@
 						{Array.isArray(value) ? `[${value.length}]` : `{…}`}
 					</span>
 					{@render rowActions(value, path, true)}
-				</button>
+				</div>
 				{#if expanded[path]}
 					{@render tree(childEntries(value), path, depth + 1)}
 				{/if}
 			{:else}
-				<button
-					type="button"
+				<div
+					role="button"
+					tabindex="0"
 					class="w-full flex items-center gap-1 py-0.5 text-[11px] hover:bg-primary-50 dark:hover:bg-primary-950 rounded cursor-pointer text-left group"
 					title={'{{' + path + '}}'}
 					onclick={() => onInsert('{{' + path + '}}')}
+					onkeydown={(e) =>
+						e.key === 'Enter' && e.target === e.currentTarget && onInsert('{{' + path + '}}')}
 				>
 					<i class="fa-solid fa-circle text-[4px] text-surface-300-700 w-3 text-center"></i>
 					<span class="font-mono text-surface-800-200 shrink-0">{key}</span>
@@ -125,7 +128,7 @@
 						class="fa-solid fa-arrow-right-to-bracket ml-auto text-[9px] text-primary-500 opacity-0 group-hover:opacity-100 shrink-0"
 					></i>
 					{@render rowActions(value, path, false)}
-				</button>
+				</div>
 			{/if}
 		</div>
 	{/each}

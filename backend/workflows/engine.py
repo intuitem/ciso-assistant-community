@@ -28,7 +28,12 @@ current_trigger_depth = contextvars.ContextVar("workflow_trigger_depth", default
 
 
 class EngineError(Exception):
-    pass
+    """Raised with a deliberate, user-facing message (never internals or
+    stack traces); user_message is what API responses may expose."""
+
+    def __init__(self, user_message: str):
+        super().__init__(user_message)
+        self.user_message = user_message
 
 
 def start_instance(

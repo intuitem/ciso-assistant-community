@@ -107,10 +107,14 @@
 			{#each runs as run (run.id)}
 				{@const style = STATUS_STYLE[run.status] ?? STATUS_STYLE.abandoned}
 				<li>
-					<button
-						type="button"
+					<!-- Row is a div (not a button): it contains real <button> controls,
+					     and interactive elements must not nest inside a button. -->
+					<div
+						role="button"
+						tabindex="0"
 						class="w-full flex items-center gap-3 px-4 py-2 text-xs hover:bg-surface-50-950 cursor-pointer text-left"
 						onclick={() => toggle(run.id)}
+						onkeydown={(e) => e.key === 'Enter' && e.target === e.currentTarget && toggle(run.id)}
 					>
 						<i class="fa-solid {style.icon} {style.class}"></i>
 						<span class="font-mono text-surface-500">{String(run.id).slice(0, 8)}</span>
@@ -135,9 +139,8 @@
 							{relativeTime(run.created_at)}
 						</span>
 						{#if onPinReference}
-							<span
-								role="button"
-								tabindex="0"
+							<button
+								type="button"
 								title={m.useAsReference()}
 								class="btn-icon w-6 h-6 text-[10px] shrink-0 {referenceRunId === run.id
 									? 'preset-filled-secondary-500'
@@ -146,50 +149,45 @@
 									e.stopPropagation();
 									onPinReference(run);
 								}}
-								onkeydown={(e) => e.key === 'Enter' && onPinReference(run)}
 								data-testid="pin-reference"
 							>
 								<i class="fa-solid fa-thumbtack"></i>
-							</span>
+							</button>
 						{/if}
 						{#if onShowRun}
-							<span
-								role="button"
-								tabindex="0"
+							<button
+								type="button"
 								title={m.showRunOnCanvas()}
 								class="btn-icon preset-tonal w-6 h-6 text-[10px] shrink-0"
 								onclick={(e) => {
 									e.stopPropagation();
 									withLogs(run, onShowRun);
 								}}
-								onkeydown={(e) => e.key === 'Enter' && withLogs(run, onShowRun)}
 								data-testid="show-run"
 							>
 								<i class="fa-solid fa-eye"></i>
-							</span>
+							</button>
 						{/if}
 						{#if onReplayRun}
-							<span
-								role="button"
-								tabindex="0"
+							<button
+								type="button"
 								title={m.replayRun()}
 								class="btn-icon preset-tonal w-6 h-6 text-[10px] shrink-0"
 								onclick={(e) => {
 									e.stopPropagation();
 									withLogs(run, onReplayRun);
 								}}
-								onkeydown={(e) => e.key === 'Enter' && withLogs(run, onReplayRun)}
 								data-testid="replay-run"
 							>
 								<i class="fa-solid fa-play"></i>
-							</span>
+							</button>
 						{/if}
 						<i
 							class="fa-solid fa-chevron-{expandedId === run.id
 								? 'up'
 								: 'down'} text-surface-400-600"
 						></i>
-					</button>
+					</div>
 					{#if expandedId === run.id}
 						<div class="px-6 pb-3 bg-surface-50-950">
 							<p class="text-[10px] font-semibold uppercase tracking-wide text-surface-500 py-1">

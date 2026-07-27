@@ -23,6 +23,11 @@ class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
 
     fields_to_check = ["name"]
 
+    # Explicit merge of the base classes' Meta (both abstract-only) so option
+    # resolution is deterministic instead of implicit MRO.
+    class Meta(NameDescriptionFolderMixin.Meta, FilteringLabelMixin.Meta):
+        pass
+
     def save(self, *args, **kwargs):
         # On folder move, propagate to versions and their children — they only
         # inherit folder at create-time, so IAM scoping would drift.
@@ -177,6 +182,9 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
 
 
 class WorkflowNode(AbstractBaseModel, FolderMixin):
+    class Meta(AbstractBaseModel.Meta, FolderMixin.Meta):
+        pass
+
     class Type(models.TextChoices):
         TRIGGER = "trigger", "Trigger"
         END = "end", "End"
@@ -456,6 +464,9 @@ class Condition(AbstractBaseModel, FolderMixin):
 
 
 class NodeAssignment(AbstractBaseModel, FolderMixin):
+    class Meta(AbstractBaseModel.Meta, FolderMixin.Meta):
+        pass
+
     class ResolveType(models.TextChoices):
         ACTOR = "actor", "Actor"
         VARIABLE = "variable", "Variable"
@@ -500,6 +511,9 @@ class NodeAssignment(AbstractBaseModel, FolderMixin):
 
 
 class NodePresentation(AbstractBaseModel, FolderMixin):
+    class Meta(AbstractBaseModel.Meta, FolderMixin.Meta):
+        pass
+
     class Type(models.TextChoices):
         REDIRECT = "redirect", "Redirect"
         EXTERNAL_URL = "external_url", "External URL"
@@ -610,6 +624,9 @@ class WorkflowInstance(AbstractBaseModel, FolderMixin):
 
 
 class WorkflowToken(AbstractBaseModel, FolderMixin):
+    class Meta(AbstractBaseModel.Meta, FolderMixin.Meta):
+        pass
+
     class Status(models.TextChoices):
         ACTIVE = "active", "Active"
         WAITING = "waiting", "Waiting"
