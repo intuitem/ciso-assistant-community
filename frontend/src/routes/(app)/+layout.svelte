@@ -64,9 +64,9 @@
 	// Sync the qualification/risk-category wording flag before children render
 	// (hydration would otherwise flip labels back), then keep it in sync when
 	// settings are invalidated.
-	setUseRiskCategoryLabel(data?.settings?.use_risk_category_label === true);
+	setUseRiskCategoryLabel(data?.settings?.use_risk_category_label);
 	$effect.pre(() => {
-		setUseRiskCategoryLabel(data?.settings?.use_risk_category_label === true);
+		setUseRiskCategoryLabel(data?.settings?.use_risk_category_label);
 	});
 
 	// Display title, model name, and description from either page data or manual store setting

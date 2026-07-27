@@ -193,7 +193,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 				}
 			});
 			event.locals.settings = await generalSettings.json();
-			setUseRiskCategoryLabel(event.locals.settings?.use_risk_category_label === true);
+			setUseRiskCategoryLabel(event.locals.settings?.use_risk_category_label);
 
 			const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/`, {
 				credentials: 'include',

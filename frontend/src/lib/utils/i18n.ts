@@ -17,7 +17,7 @@ const RISK_CATEGORY_KEY_MAP: Record<string, string> = {
 
 let useRiskCategoryLabel = false;
 
-export function setUseRiskCategoryLabel(value: boolean): void {
+export function setUseRiskCategoryLabel(value: unknown): void {
 	useRiskCategoryLabel = value === true;
 }
 
