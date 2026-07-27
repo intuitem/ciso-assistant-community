@@ -650,7 +650,7 @@
 
 	// Helper: can edit/delete this assignment?
 	function canModifyAssignment(assignmentStatus: string): boolean {
-		return assignmentStatus === 'draft' || assignmentStatus === 'in_progress';
+		return assignmentStatus === 'draft';
 	}
 </script>
 
