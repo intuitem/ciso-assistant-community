@@ -858,7 +858,7 @@ def validate_optional_values_meta_sheet(df: pd.DataFrame, sheet_name: str, optio
                 print(msg)
 
 
-def validate_extra_locales_in_meta(df: pd.DataFrame, sheet_name: str, translatable_keys: Sequence[MetaKey | str], context: str):
+def validate_extra_locales_in_meta(df: pd.DataFrame, sheet_name: str, translatable_keys: Sequence[MetaKey | str], context: str, ctx: ConsoleContext = None):
 
     translatable_keys = tuple(key.value if isinstance(key, MetaKey) else key for key in translatable_keys)
     keys = df.iloc[:, 0].dropna().astype(str)
@@ -887,10 +887,14 @@ def validate_extra_locales_in_meta(df: pd.DataFrame, sheet_name: str, translatab
 
         # Check that the base key can be translated
         if base_key not in translatable_keys:
-            raise ValueError(
-                f"({context}) [{sheet_name}] Row #{row}: Localized key \"{key}\" is not allowed because base key \"{base_key}\" doesn't support translations"
+            warn_msg = (
+                f"⚠️  [WARNING] ({context}) [{sheet_name}] Row #{row}: Localized key \"{key}\" is not supported and will be ignored by CISO Assistant because base key \"{base_key}\" doesn't accept translations"
                 f"\n> 💡 Tip: Remove the localized key \"{key}\"."
             )
+            print(warn_msg)
+            if ctx:
+                ctx.add_sheet_warning_msg(sheet_name, warn_msg)
+            continue
 
         # Check that the localized value is not empty
         if value is None:
@@ -1005,7 +1009,7 @@ def validate_library_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = Fal
             "\n> 💡 Tip: Locale setting must comply with ISO 639 Set 1 (e.g., \"en\", \"fr\"). See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes")
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name, ctx)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1044,7 +1048,7 @@ def validate_framework_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, ver
     _framework_validate_meta_min_max_score(df, sheet_name)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name, ctx)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1067,7 +1071,7 @@ def validate_threats_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = Fal
     validate_urn_type(base_urn_value, URNMetadataFormat.THREATS_BASE_URN, fct_name, base_urn_row)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name, ctx)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1090,7 +1094,7 @@ def validate_reference_controls_meta(df: pd.DataFrame, sheet_name: str, verbose:
     validate_urn_type(base_urn_value, URNMetadataFormat.REFERENCE_CONTROLS_BASE_URN, fct_name, base_urn_row)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name, ctx)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1117,7 +1121,7 @@ def validate_risk_matrix_meta(df: pd.DataFrame, sheet_name: str, verbose: bool =
     validate_ref_id(ref_id_value, fct_name, ref_id_row)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name, ctx)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1138,7 +1142,7 @@ def validate_implementation_groups_meta(wb: Workbook, df: pd.DataFrame, sheet_na
     validate_related_content_sheet_from_name_key(wb, df, sheet_name, ImplementationGroupsMetaKeys.NAME, fct_name)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name, ctx)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1192,7 +1196,7 @@ def validate_requirement_mapping_set_meta(df: pd.DataFrame, sheet_name: str, ver
         validate_no_spaces(str(value), key.value, fct_name, row)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name, ctx)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1214,7 +1218,7 @@ def validate_scores_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbos
     validate_related_content_sheet_from_name_key(wb, df, sheet_name, ScoresMetaKeys.NAME, fct_name)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name, ctx)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1235,7 +1239,7 @@ def validate_answers_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbo
     validate_related_content_sheet_from_name_key(wb, df, sheet_name, AnswersMetaKeys.NAME, fct_name)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name, ctx)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -1253,7 +1257,7 @@ def validate_urn_prefix_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = 
     validate_optional_values_meta_sheet(df, sheet_name, schema.optional_keys, fct_name, verbose, ctx)
 
     # Extra locales
-    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name)
+    validate_extra_locales_in_meta(df, sheet_name, schema.translatable_keys, fct_name, ctx)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -3064,16 +3068,16 @@ def _framework_validate_depth_consistency(df: pd.DataFrame, sheet_name: str):
 
 
 
-# [CONTENT] Framework {OK} [Check new optional columns : "scores_definition", "depends_on", "condition"]
+# [CONTENT] Framework {OK} [Check new optional columns : "scores_definition", "depends_on" (Check if actual answer exists in answer sheet), "condition"(Check if condition is valid for "depends_on" values [e.g. no "/" for all depends_on allowed])]
 def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
     required_columns = ["depth"]  # "assessable" isn't there because it can be empty
     optional_columns = [
-        "implementation_groups", "description", "threats",
-        "reference_controls", "typical_evidence", "annotation",
-        "questions", "answer", "depends_on", "condition", "urn_id",
-        "importance", "weight", "min_score", "max_score"
+        "ref_id", "urn_id", "name", "description", "annotation", "typical_evidence",
+        "importance", "weight", "min_score", "max_score", "scores_definition",
+        "implementation_groups", "questions", "answer", "depends_on", "condition",
+        "threats", "reference_controls"
     ]
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
@@ -3136,6 +3140,9 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, 
     
     # Check if the number of lines in cells of "questions" are coherent with lines in cells of "depends_on"
     validate_cell_line_count_alignment(df, "questions", "condition", sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=CommonLineBreakIndicator.PIPE)
+    
+    # Check if "condition" exists when "depends_on" is defined
+    validate_cell_line_count_alignment(df, "depends_on", "condition", sheet_name, fct_name)
     
     # Check if values in "weight" columns are valid
     validate_integer_value(df, sheet_name, "weight", fct_name, value_name="weight", positive_only=True)
