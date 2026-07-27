@@ -398,7 +398,7 @@
 			</div>
 		{/if}
 		{#if hasAssessableChildren}
-			<div class="flex max-w-96 grow items-center space-x-2">
+			<div class="flex max-w-96 grow items-center space-x-2 {showResult ? '' : 'justify-end'}">
 				{#if showResult}
 					<div
 						class="flex max-w-96 grow bg-surface-200-800 rounded-full overflow-hidden h-4 shrink self-center"
