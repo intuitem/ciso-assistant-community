@@ -171,9 +171,7 @@ def resolve_accessible_target(model_class, target_id, user):
     user may change. Returns None when the id is unknown or out of reach."""
     if not target_id:
         return None
-    (_, change_ids, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, model_class
-    )
+    change_ids = RoleAssignment.get_changeable_object_ids(user, model_class)
     return model_class.objects.filter(id=target_id, id__in=change_ids).first()
 
 
@@ -182,9 +180,7 @@ def get_accessible_folders_map(user: User) -> dict[str, UUID]:
     Build a map of folder names to IDs that the provided user can access.
     Used by the data wizard import flow to validate targets.
     """
-    (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, Folder
-    )
+    viewable_folders_ids = RoleAssignment.get_viewable_object_ids(user, Folder)
     folders_map = {
         f.name.lower(): f.id for f in Folder.objects.filter(id__in=viewable_folders_ids)
     }
@@ -667,8 +663,8 @@ class RecordConsumer[Context = None](ABC):
             return results
 
         model_class = self.SERIALIZER_CLASS.Meta.model
-        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.request.user, model_class
+        viewable_ids = RoleAssignment.get_viewable_object_ids(
+            self.request.user, model_class
         )
         viewable_ids = set(viewable_ids)
 
@@ -2480,9 +2476,7 @@ class ProcessingChildConsumerMixin:
     def _accessible_processings(self):
         ids = getattr(self, "_accessible_processing_ids", None)
         if ids is None:
-            (ids, _, _) = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), self.request.user, Processing
-            )
+            ids = RoleAssignment.get_viewable_object_ids(self.request.user, Processing)
             self._accessible_processing_ids = ids
         return Processing.objects.filter(id__in=ids)
 
@@ -4587,9 +4581,10 @@ class LoadFileView(APIView):
                 hint = parent_records[0]
                 domain_name = str(hint.get("domain") or "").lower()
                 scope_folder = folders_map.get(domain_name, folder_id)
-                (viewable_processings, _, _) = RoleAssignment.get_accessible_object_ids(
-                    Folder.get_root_folder(), request.user, Processing
+                viewable_processings = RoleAssignment.get_viewable_object_ids(
+                    request.user, Processing
                 )
+
                 queryset = Processing.objects.filter(id__in=viewable_processings)
                 if scope_folder:
                     queryset = queryset.filter(folder_id=scope_folder)

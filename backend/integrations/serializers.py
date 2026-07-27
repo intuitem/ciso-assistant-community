@@ -105,9 +105,10 @@ class IntegrationConfigurationSerializer(BaseModelSerializer):
         super().__init__(*args, **kwargs)
         request = self.context.get("request")
         if request is not None and "folder_id" in self.fields:
-            accessible_folders = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), request.user, Folder
-            )[0]
+            accessible_folders = RoleAssignment.get_viewable_object_ids(
+                request.user, Folder
+            )
+
             self.fields["folder_id"].queryset = Folder.objects.filter(
                 id__in=accessible_folders
             )

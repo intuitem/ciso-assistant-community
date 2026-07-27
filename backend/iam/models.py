@@ -4,6 +4,7 @@ Inspired from Azure IAM model"""
 from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
+from email.policy import default
 from typing import Any, List, Literal, Optional, Iterable, ClassVar
 from typing import TYPE_CHECKING, cast
 import itertools
@@ -128,6 +129,16 @@ class Folder(NameDescriptionMixin):
 
     _CACHED_ROOT_FOLDER: ClassVar[Optional[Folder]] = None
     """**WARNING:** Caching the root folder assumes it can't be deleted."""
+
+    @staticmethod
+    def _init_root_folder():
+        """Initialize (create) the root `Folder` if it doesn't exist yet."""
+        root_folder, _ = Folder.objects.get_or_create(
+            content_type=Folder.ContentType.ROOT,
+            builtin=True,
+            defaults={"name": "Global"},
+        )
+        Folder._CACHED_ROOT_FOLDER = root_folder
 
     @staticmethod
     def get_root_folder() -> Optional[Folder]:
@@ -1740,70 +1751,115 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return scope_obj.folder_id
 
     @staticmethod
-    def get_accessible_object_ids(
-        folder: Folder,
+    def _get_accessible_ids(
         user: AbstractBaseUser | AnonymousUser,
-        object_type: type[models.Model],
-    ) -> tuple[QuerySet[uuid.UUID], QuerySet[uuid.UUID], QuerySet[uuid.UUID]]:
+        perm_prefix: Literal["view", "change", "delete"],
+        model: type[models.Model],
+        folder: Optional[Folder],
+    ) -> QuerySet[uuid.UUID]:
         """
         Gets all objects of a specified type that a user can reach in a given folder
         Only accessible folders are considered
-        Returns a triplet: (view_objects_list, change_object_list, delete_object_list)
         Assumes that object type follows Django conventions for permissions
         Also retrieve published objects in view
         """
         from core.models import Actor, FilteringLabel
 
-        model = object_type
+        if folder is None:
+            folder = Folder.get_root_folder()
+
+        PERM_PREFIXES: list[NativePermissionPrefix] = ["view", "change", "delete"]
+        try:
+            perm_prefix_index = PERM_PREFIXES.index(perm_prefix)
+        except Exception:
+            raise AssertionError(
+                f"The following permission prefix isn't allowed for this function: {perm_prefix!r}"
+            )
 
         if not isinstance(user, User):
             _none = model.objects.none().values_list("id", flat=True)
-            return (_none, _none, _none)
+            return _none
 
         if model is Permission:
-            return RoleAssignment._get_permission_accessible_ids()
+            return RoleAssignment._get_permission_accessible_ids()[perm_prefix_index]
 
         if model is Actor:
-            return RoleAssignment._get_actor_accessible_ids(user)
+            return RoleAssignment._get_actor_accessible_ids(user)[perm_prefix_index]
 
         if model is FilteringLabel:
-            return RoleAssignment._get_filtering_label_accessible_ids(user)
+            return RoleAssignment._get_filtering_label_accessible_ids(user)[
+                perm_prefix_index
+            ]
 
         has_is_published_field = any(
             f.name == "is_published" for f in model._meta.get_fields()
         )
 
-        PERM_PREFIXES: list[NativePermissionPrefix] = ["view", "change", "delete"]
+        allowed_folder_ids = RoleAssignment.get_allowed_folder_ids(
+            user, perm_prefix, model, base_folder=folder
+        )
+        iam_folder_field = RoleAssignment.get_iam_folder_field(model)
 
-        result = []
-        for perm_prefix in PERM_PREFIXES:
-            allowed_folder_ids = RoleAssignment.get_allowed_folder_ids(
-                user, perm_prefix, model, base_folder=folder
+        accessible_object_ids_query = Q(
+            **{f"{iam_folder_field}__in": allowed_folder_ids}
+        )
+
+        if perm_prefix == "view" and has_is_published_field:
+            ancestor_folder_ids = Folder.objects.filter(
+                ~Q(content_type=Folder.ContentType.ENCLAVE)
+                & Q(descendants__in=allowed_folder_ids)
+            ).distinct()
+            published_objects_query = Q(
+                **{f"{iam_folder_field}__in": ancestor_folder_ids},
+                is_published=True,
             )
-            iam_folder_field = RoleAssignment.get_iam_folder_field(model)
 
-            accessible_object_ids_query = Q(
-                **{f"{iam_folder_field}__in": allowed_folder_ids}
-            )
+            accessible_object_ids_query |= published_objects_query
 
-            if perm_prefix == "view" and has_is_published_field:
-                ancestor_folder_ids = Folder.objects.filter(
-                    ~Q(content_type=Folder.ContentType.ENCLAVE)
-                    & Q(descendants__in=allowed_folder_ids)
-                ).distinct()
-                published_objects_query = Q(
-                    **{f"{iam_folder_field}__in": ancestor_folder_ids},
-                    is_published=True,
-                )
+        accessible_object_ids = model.objects.filter(
+            accessible_object_ids_query
+        ).values_list("id", flat=True)
 
-                accessible_object_ids_query |= published_objects_query
+        return accessible_object_ids
 
-            accessible_object_ids = model.objects.filter(
-                accessible_object_ids_query
-            ).values_list("id", flat=True)
-            result.append(accessible_object_ids)
+    @staticmethod
+    def get_viewable_object_ids(
+        user: AbstractBaseUser | AnonymousUser,
+        model: type[models.Model],
+        folder: Optional[Folder] = None,
+    ) -> QuerySet[uuid.UUID]:
+        """
+        Return the `QuerySet`(iterable) of `model` objects IDs the `user` is allowed to view.
 
-        return tuple(result)
+        The `folder` argument is an optional `Folder` used to only get objects IDs under the `folder` `Folder` subtree.
+        """
+        return RoleAssignment._get_accessible_ids(user, "view", model, folder)
+
+    @staticmethod
+    def get_changeable_object_ids(
+        user: AbstractBaseUser | AnonymousUser,
+        model: type[models.Model],
+        folder: Optional[Folder] = None,
+    ) -> QuerySet[uuid.UUID]:
+        """
+        Return the `QuerySet`(iterable) of `model` objects IDs the `user` is allowed to change(edit).
+
+        The `folder` argument is an optional `Folder` used to only get objects IDs under the `folder` `Folder` subtree.
+        """
+        return RoleAssignment._get_accessible_ids(user, "change", model, folder)
+
+    @staticmethod
+    def get_deletable_object_ids(
+        user: AbstractBaseUser | AnonymousUser,
+        model: type[models.Model],
+        folder: Optional[Folder] = None,
+    ) -> QuerySet[uuid.UUID]:
+        """
+        Return the `QuerySet`(iterable) of `model` objects IDs the `user` is allowed to delete(edit).
+
+        The `folder` argument is an optional `Folder` used to only get objects IDs under the `folder` `Folder` subtree.
+        """
+        return RoleAssignment._get_accessible_ids(user, "delete", model, folder)
 
     def is_user_assigned(self, user: User) -> bool:
         """Determines if a user is assigned to the role assignment"""

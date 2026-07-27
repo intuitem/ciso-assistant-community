@@ -473,9 +473,7 @@ class AssetAssessmentViewSet(BaseModelViewSet):
         all_asset_ids = {a.id for a in all_assets}
 
         # Get viewable asset IDs using the standard pattern
-        viewable_asset_ids = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(), user=request.user, object_type=Asset
-        )[0]
+        viewable_asset_ids = RoleAssignment.get_viewable_object_ids(request.user, Asset)
 
         # Filter to only assets that are both in our tree and viewable
         accessible_asset_ids = all_asset_ids & set(viewable_asset_ids)

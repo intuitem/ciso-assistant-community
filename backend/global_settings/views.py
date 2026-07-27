@@ -263,9 +263,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         """
         from metrology.models import Dashboard
 
-        accessible_ids, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Dashboard
-        )
+        accessible_ids = RoleAssignment.get_viewable_object_ids(request.user, Dashboard)
         dashboards = Dashboard.objects.filter(id__in=accessible_ids).order_by("name")
         choices = {"": "—"}
         for d in dashboards:

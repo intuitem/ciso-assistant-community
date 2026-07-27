@@ -66,9 +66,7 @@ class PostureAssessmentViewSet(BaseModelViewSet):
         return Response(dict(PostureAssessment.Status.choices))
 
     def _viewable_asset_ids(self):
-        (ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.request.user, Asset
-        )
+        ids = RoleAssignment.get_viewable_object_ids(self.request.user, Asset)
         return ids
 
     @staticmethod

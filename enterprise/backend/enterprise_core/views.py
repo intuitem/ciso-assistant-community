@@ -202,13 +202,10 @@ class ClientSettingsViewSet(BaseModelViewSet):
 
     @action(methods=["put"], detail=True, url_path="logo/delete")
     def delete_logo(self, request, pk):
-        (
-            object_ids_view,
-            _,
-            _,
-        ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ClientSettings
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, ClientSettings
         )
+
         response = Response(status=status.HTTP_403_FORBIDDEN)
         if UUID(pk) in object_ids_view:
             settings = self.get_object()
@@ -220,13 +217,10 @@ class ClientSettingsViewSet(BaseModelViewSet):
 
     @action(methods=["put"], detail=True, url_path="favicon/delete")
     def delete_favicon(self, request, pk):
-        (
-            object_ids_view,
-            _,
-            _,
-        ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ClientSettings
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, ClientSettings
         )
+
         response = Response(status=status.HTTP_403_FORBIDDEN)
         if UUID(pk) in object_ids_view:
             settings = self.get_object()

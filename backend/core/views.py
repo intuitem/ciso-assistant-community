@@ -455,8 +455,8 @@ class ExportMixin:
 
     def _get_export_queryset(self):
         """Get filtered queryset with permissions applied."""
-        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.request.user, self.model
+        viewable_ids = RoleAssignment.get_viewable_object_ids(
+            self.request.user, self.model
         )
         queryset = self.model.objects.filter(id__in=viewable_ids)
 
@@ -922,12 +922,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 else:
                     return self.model.objects.none()
 
-        root_folder = Folder.get_root_folder()
-        if root_folder is None:
-            return self.models.objects.none()
-
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            root_folder, self.request.user, self.model
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            self.request.user, self.model
         )
         queryset = self.model.objects.filter(id__in=object_ids_view)
 
@@ -1107,7 +1103,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         Returns `None` for models the user can fully view (post-filter
         skips them) or for models that aren't IAM-scoped at all.
         """
-        root_folder = Folder.get_root_folder()
         allowed = {}
         for model in related_models:
             # Fast path: skip the IAM scan when the user can see every
@@ -1116,9 +1111,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 allowed[model] = None
                 continue
             try:
-                ids = RoleAssignment.get_accessible_object_ids(
-                    root_folder, self.request.user, model
-                )[0]
+                ids = RoleAssignment.get_viewable_object_ids(self.request.user, model)
             except NotImplementedError, Permission.DoesNotExist:
                 # Model does not support IAM scoping; skip filtering
                 allowed[model] = None
@@ -1863,8 +1856,8 @@ class PerimeterViewSet(BaseModelViewSet):
         """
         Returns the quality check of the perimeters
         """
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(), user=request.user, object_type=Perimeter
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, Perimeter
         )
         perimeters = Perimeter.objects.filter(id__in=viewable_objects)
         res = {
@@ -1900,8 +1893,8 @@ class PerimeterViewSet(BaseModelViewSet):
         """
         Returns the quality check of the perimeter
         """
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(), user=request.user, object_type=Perimeter
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, Perimeter
         )
         if UUID(pk) in viewable_objects:
             perimeter = self.get_object()
@@ -1934,11 +1927,7 @@ class PerimeterViewSet(BaseModelViewSet):
     def ids(self, request):
         my_map = dict()
 
-        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Perimeter,
-        )
+        viewable_items = RoleAssignment.get_viewable_object_ids(request.user, Perimeter)
         for item in Perimeter.objects.filter(id__in=viewable_items):
             if my_map.get(item.folder.name) is None:
                 my_map[item.folder.name] = {}
@@ -2002,11 +1991,8 @@ class ThreatViewSet(BaseModelViewSet):
     def ids(self, request):
         my_map = dict()
 
-        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Threat,
-        )
+        viewable_items = RoleAssignment.get_viewable_object_ids(request.user, Threat)
+
         for item in Threat.objects.filter(id__in=viewable_items):
             if my_map.get(item.folder.name) is None:
                 my_map[item.folder.name] = {}
@@ -2489,16 +2475,8 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
             request.query_params.get("hide_domains", "false").lower() == "true"
         )
 
-        (viewable_folders, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Folder,
-        )
-        (viewable_assets, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Asset,
-        )
+        viewable_folders = RoleAssignment.get_viewable_object_ids(request.user, Folder)
+        viewable_assets = RoleAssignment.get_viewable_object_ids(request.user, Asset)
 
         def get_domain_key(domain: Folder) -> str:
             return "/".join(d.name for d in reversed(domain.get_folder_full_path()))
@@ -2611,11 +2589,7 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
     def ids(self, request):
         my_map = dict()
 
-        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Asset,
-        )
+        viewable_items = RoleAssignment.get_viewable_object_ids(request.user, Asset)
         for item in Asset.objects.filter(id__in=viewable_items):
             if my_map.get(item.folder.name) is None:
                 my_map[item.folder.name] = {}
@@ -2950,8 +2924,8 @@ class ReferenceControlViewSet(BaseModelViewSet):
     ) -> list[AppliedControl]:
         """Return the list of syncable `AppliedControl` objects (meaning they are currently unsynced) the `User` can synchronize (based on his permissions)."""
 
-        _, changeable_applied_controls, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, AppliedControl
+        changeable_applied_controls = RoleAssignment.get_changeable_object_ids(
+            user, AppliedControl
         )
 
         syncable_applied_controls = (
@@ -3038,9 +3012,9 @@ class RiskMatrixViewSet(BaseModelViewSet):
     @action(detail=False, name="Get risk level choices")
     def risk(self, request):
         current_language = get_language()
-        viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, RiskMatrix
-        )[0]
+        viewable_matrices = RoleAssignment.get_viewable_object_ids(
+            request.user, RiskMatrix
+        )
         matrices = RiskMatrix.objects.filter(id__in=viewable_matrices)
 
         risk_assessment_id = request.query_params.get("risk_assessment")
@@ -3065,9 +3039,9 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get impact choices")
     def impact(self, request):
-        viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, RiskMatrix
-        )[0]
+        viewable_matrices = RoleAssignment.get_viewable_object_ids(
+            request.user, RiskMatrix
+        )
         undefined = {-1: "--"}
         options = []
         for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
@@ -3085,9 +3059,9 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get probability choices")
     def probability(self, request):
-        viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, RiskMatrix
-        )[0]
+        viewable_matrices = RoleAssignment.get_viewable_object_ids(
+            request.user, RiskMatrix
+        )
         undefined = {-1: "--"}
         options = []
         for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
@@ -3105,12 +3079,12 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get used risk matrices")
     def used(self, request):
-        viewable_matrices = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, RiskMatrix
-        )[0]
-        viewable_assessments = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, RiskAssessment
-        )[0]
+        viewable_matrices = RoleAssignment.get_viewable_object_ids(
+            request.user, RiskMatrix
+        )
+        viewable_assessments = RoleAssignment.get_viewable_object_ids(
+            request.user, RiskAssessment
+        )
         _used_matrices = (
             RiskMatrix.objects.filter(riskassessment__isnull=False)
             .filter(id__in=viewable_matrices)
@@ -3130,10 +3104,8 @@ class RiskMatrixViewSet(BaseModelViewSet):
     def ids(self, request):
         my_map = dict()
 
-        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=RiskMatrix,
+        viewable_items = RoleAssignment.get_viewable_object_ids(
+            request.user, RiskMatrix
         )
         for item in RiskMatrix.objects.filter(id__in=viewable_items):
             if my_map.get(item.folder.name) is None:
@@ -3283,9 +3255,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
 
         sla_anchor = sla_policy.get("sla_anchor", "detected_at")
 
-        (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Vulnerability
-        )
+        object_ids = RoleAssignment.get_viewable_object_ids(request.user, Vulnerability)
         accessible = Vulnerability.objects.filter(id__in=object_ids)
 
         # Backfill missing detected_at from created_at
@@ -3341,8 +3311,8 @@ class VulnerabilityViewSet(BaseModelViewSet):
         scoped_folder = (
             Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
         )
-        (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            scoped_folder, request.user, Vulnerability
+        object_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, Vulnerability, scoped_folder
         )
 
         vulnerabilities = Vulnerability.objects.filter(
@@ -3404,8 +3374,8 @@ class VulnerabilityViewSet(BaseModelViewSet):
         scoped_folder = (
             Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
         )
-        (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            scoped_folder, request.user, Vulnerability
+        object_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, Vulnerability, scoped_folder
         )
 
         vulnerabilities = Vulnerability.objects.filter(
@@ -3753,10 +3723,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         """
         Returns the quality check of the risk assessments
         """
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=RiskAssessment,
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, RiskAssessment
         )
         risk_assessments = RiskAssessment.objects.filter(id__in=viewable_objects)
         res = [
@@ -3770,10 +3738,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         """
         Returns the quality check of the risk_assessment
         """
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=RiskAssessment,
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, RiskAssessment
         )
         if UUID(pk) in viewable_objects:
             risk_assessment = self.get_object()
@@ -3783,8 +3749,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get action plan Excel")
     def action_plan_excel(self, request, pk):
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, RiskAssessment
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, RiskAssessment
         )
         if UUID(pk) not in object_ids_view:
             return Response(
@@ -3878,8 +3844,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get risk assessment CSV")
     def risk_assessment_csv(self, request, pk):
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, RiskAssessment
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, RiskAssessment
         )
         if UUID(pk) in object_ids_view:
             risk_assessment = self.get_object()
@@ -3971,8 +3937,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get risk assessment XLSX")
     def risk_assessment_xlsx(self, request, pk):
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, RiskAssessment
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, RiskAssessment
         )
         if UUID(pk) not in object_ids_view:
             return Response(
@@ -4103,8 +4069,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get risk assessment PDF")
     def risk_assessment_pdf(self, request, pk):
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, RiskAssessment
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, RiskAssessment
         )
         if UUID(pk) in object_ids_view:
             risk_assessment = self.get_object()
@@ -4151,8 +4117,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get action plan PDF")
     def action_plan_pdf(self, request, pk):
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, RiskAssessment
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, RiskAssessment
         )
         if UUID(pk) in object_ids_view:
             context = {
@@ -4207,8 +4173,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, RiskAssessment
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, RiskAssessment
         )
 
         if UUID(pk) in object_ids_view:
@@ -4616,12 +4582,12 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         scoped_folder = risk_assessment.folder
 
         # Get IAM-visible IDs for related objects
-        visible_threat_ids = RoleAssignment.get_accessible_object_ids(
-            scoped_folder, request.user, Threat
-        )[0]
-        visible_asset_ids = RoleAssignment.get_accessible_object_ids(
-            scoped_folder, request.user, Asset
-        )[0]
+        visible_threat_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, Threat, scoped_folder
+        )
+        visible_asset_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, Asset, scoped_folder
+        )
 
         scenarios = RiskScenario.objects.filter(
             risk_assessment=risk_assessment
@@ -5345,8 +5311,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get updatable measures")
     def updatables(self, request):
-        (_, object_ids_change, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, AppliedControl
+        object_ids_change = RoleAssignment.get_changeable_object_ids(
+            request.user, AppliedControl
         )
 
         return Response({"results": list(object_ids_change)})
@@ -5370,8 +5336,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get the ordered todo applied controls")
     def todo(self, request):
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, AppliedControl
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, AppliedControl
         )
 
         measures = sorted(
@@ -5417,14 +5383,14 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
         )
 
-        (view_ac_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            scoped_folder, request.user, AppliedControl
+        view_ac_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, AppliedControl, scoped_folder
         )
-        (view_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            scoped_folder, request.user, ComplianceAssessment
+        view_ca_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment, scoped_folder
         )
-        (view_ra_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            scoped_folder, request.user, RiskAssessment
+        view_ra_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, RiskAssessment, scoped_folder
         )
 
         ac_qs = AppliedControl.objects.filter(id__in=view_ac_ids).only("id", "name")
@@ -5577,8 +5543,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             return datetime.strftime(input, "%Y-%m-%d")
 
         entries = []
-        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, AppliedControl
+        viewable_controls_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, AppliedControl
         )
 
         applied_controls = AppliedControl.objects.filter(
@@ -5611,8 +5577,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
     @action(detail=False, methods=["get"])
     def impact_effort(self, request):
         # TODO consider the case of passing the domain as a filter
-        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, AppliedControl
+        viewable_controls_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, AppliedControl
         )
         viewable_controls_set = set(viewable_controls_ids)
 
@@ -5677,8 +5643,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             "#A698DC",
         ]
         colorMap = {}
-        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, AppliedControl
+        viewable_controls_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, AppliedControl
         )
 
         applied_controls = AppliedControl.objects.filter(
@@ -5720,8 +5686,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, AppliedControl
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, AppliedControl
         )
         if UUID(pk) not in object_ids_view:
             return Response(
@@ -5767,10 +5733,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
     def ids(self, request):
         my_map = dict()
 
-        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=AppliedControl,
+        viewable_items = RoleAssignment.get_viewable_object_ids(
+            request.user, AppliedControl
         )
         for item in AppliedControl.objects.filter(id__in=viewable_items):
             if my_map.get(item.folder.name) is None:
@@ -5781,8 +5745,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Generate data for applied controls impact graph")
     def impact_graph(self, request):
-        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, AppliedControl
+        viewable_controls_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, AppliedControl
         )
         csf_functions_map = dict()
         categories = [{"name": "--"}]
@@ -5877,8 +5841,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get applied controls sunburst data")
     def sunburst_data(self, request):
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, AppliedControl
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, AppliedControl
         )
         queryset = AppliedControl.objects.filter(id__in=viewable_objects)
 
@@ -6382,15 +6346,17 @@ class UserRolesOnFolderList(generics.ListAPIView):
         folder = get_object_or_404(Folder, id=self.kwargs["pk"])
 
         # authorize
-        (viewable_ids, _updatable_ids, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.request.user, Folder
+        viewable_ids = RoleAssignment.get_viewable_object_ids(self.request.user, Folder)
+        _updatable_ids = RoleAssignment.get_changeable_object_ids(
+            self.request.user, Folder
         )
+
         if folder.id not in viewable_ids:
             raise PermissionDenied()
 
         # visibility - get user IDs the current user can see via IAM filtering
-        (visible_user_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.request.user, User
+        visible_user_ids = RoleAssignment.get_viewable_object_ids(
+            self.request.user, User
         )
         visible_ids = set(visible_user_ids) | {
             self.request.user.id
@@ -6452,10 +6418,8 @@ class ComplianceAssessmentActionPlanList(ActionPlanList):
             requirement_assessments__in=requirement_assessments
         ).distinct()
 
-        viewable_controls, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(),
-            self.request.user,
-            AppliedControl,
+        viewable_controls = RoleAssignment.get_viewable_object_ids(
+            self.request.user, AppliedControl
         )
         return qs.filter(id__in=viewable_controls)
 
@@ -6505,8 +6469,8 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
         ).prefetch_related("evidences", "applied_controls__evidences")
 
         # Get visible evidences to filter result
-        viewable_evidences, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.request.user, Evidence
+        viewable_evidences = RoleAssignment.get_viewable_object_ids(
+            self.request.user, Evidence
         )
 
         # Collect evidence IDs from both direct and indirect relationships
@@ -6545,10 +6509,8 @@ class RiskAssessmentActionPlanList(ActionPlanList):
             | Q(risk_scenarios_e__in=risk_scenarios)
         ).distinct()
 
-        viewable_controls, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(),
-            self.request.user,
-            AppliedControl,
+        viewable_controls = RoleAssignment.get_viewable_object_ids(
+            self.request.user, AppliedControl
         )
         return qs.filter(id__in=viewable_controls)
 
@@ -7511,9 +7473,9 @@ class UserViewSet(AutocompleteMixin, BaseModelViewSet):
             return queryset.distinct()
 
         # Add prefetch for user_groups visibility
-        viewable_user_group_ids = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.request.user, UserGroup
-        )[0]
+        viewable_user_group_ids = RoleAssignment.get_viewable_object_ids(
+            self.request.user, UserGroup
+        )
         return (
             queryset.distinct()
             .select_related("folder")  # serialized by UserReadSerializer.folder
@@ -7918,11 +7880,7 @@ class FolderViewSet(BaseModelViewSet):
             "include_enclaves", "False"
         ).lower() in ["true", "1", "yes"]
 
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Folder,
-        )
+        viewable_objects = RoleAssignment.get_viewable_object_ids(request.user, Folder)
 
         # Add ancestors so viewable folders aren't orphaned
         needed_folders = set(viewable_objects)
@@ -8004,11 +7962,7 @@ class FolderViewSet(BaseModelViewSet):
     def ids(self, request):
         my_map = dict()
 
-        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Folder,
-        )
+        viewable_items = RoleAssignment.get_viewable_object_ids(request.user, Folder)
         for item in Folder.objects.filter(id__in=viewable_items):
             my_map[item.name] = item.id
         return Response(my_map)
@@ -8019,12 +7973,10 @@ class FolderViewSet(BaseModelViewSet):
         Enforces RBAC for both folders and assessments.
         """
         # Get viewable assessment IDs for proper RBAC
-        (viewable_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(), user=user, object_type=ComplianceAssessment
+        viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
+            user, ComplianceAssessment
         )
-        (viewable_ra_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(), user=user, object_type=RiskAssessment
-        )
+        viewable_ra_ids = RoleAssignment.get_viewable_object_ids(user, RiskAssessment)
 
         res = {
             str(f.id): {
@@ -8055,9 +8007,7 @@ class FolderViewSet(BaseModelViewSet):
         """
         Returns the quality check of assessments grouped by folder.
         """
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(), user=request.user, object_type=Folder
-        )
+        viewable_objects = RoleAssignment.get_viewable_object_ids(request.user, Folder)
         folders = Folder.objects.filter(id__in=viewable_objects).exclude(
             content_type=Folder.ContentType.ROOT
         )
@@ -8070,9 +8020,7 @@ class FolderViewSet(BaseModelViewSet):
         """
         Returns the quality check of assessments for a specific folder.
         """
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(), user=request.user, object_type=Folder
-        )
+        viewable_objects = RoleAssignment.get_viewable_object_ids(request.user, Folder)
         if UUID(pk) not in viewable_objects:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
@@ -8264,17 +8212,17 @@ class FolderViewSet(BaseModelViewSet):
         Return the list of folders, perimeters, frameworks and risk matrices
         the current user can access, based on their role assignments.
         """
-        (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Folder
+        viewable_folders_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, Folder
         )
-        (viewable_perimeters_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Perimeter
+        viewable_perimeters_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, Perimeter
         )
-        (viewable_frameworks_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Framework
+        viewable_frameworks_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, Framework
         )
-        (viewable_risk_matrices_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, RiskMatrix
+        viewable_risk_matrices_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, RiskMatrix
         )
         res = {
             "folders": [
@@ -8547,7 +8495,7 @@ def get_analytics_export_xlsx(request):
     auto_width(ws3)
 
     # --- Sheet 4: Applied Controls ---
-    (viewable_controls, _, _) = RoleAssignment.get_accessible_object_ids(
+    viewable_controls = RoleAssignment.get_viewable_object_ids(
         Folder.get_root_folder(), user, AppliedControl
     )
     controls_qs = AppliedControl.objects.filter(id__in=viewable_controls).values(
@@ -8569,9 +8517,7 @@ def get_analytics_export_xlsx(request):
     auto_width(ws4)
 
     # --- Sheet 5: Incidents ---
-    (viewable_incidents, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, Incident
-    )
+    viewable_incidents = RoleAssignment.get_viewable_object_ids(user, Incident)
     incidents_qs = Incident.objects.filter(id__in=viewable_incidents)
     ws5 = wb.create_sheet(title="Incidents")
     ws5.append(
@@ -8627,9 +8573,9 @@ def get_analytics_export_xlsx(request):
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def get_agg_data(request):
-    viewable_risk_assessments = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), request.user, RiskAssessment
-    )[0]
+    viewable_risk_assessments = RoleAssignment.get_viewable_object_ids(
+        request.user, RiskAssessment
+    )
     data = risk_status(
         request.user, RiskAssessment.objects.filter(id__in=viewable_risk_assessments)
     )
@@ -8821,8 +8767,8 @@ class FrameworkViewSet(BaseModelViewSet):
 
         ig_filter = request.query_params.get("implementation_group") or None
 
-        (viewable_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
+        viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
         )
 
         # Statuses considered "live" for cross-CA rollups. Planned and
@@ -9020,12 +8966,12 @@ class FrameworkViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get used frameworks")
     def used(self, request):
-        viewable_framework = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Framework
-        )[0]
-        viewable_assessments = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
-        )[0]
+        viewable_framework = RoleAssignment.get_viewable_object_ids(
+            request.user, Framework
+        )
+        viewable_assessments = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
+        )
         _used_frameworks = (
             Framework.objects.filter(complianceassessment__isnull=False)
             .filter(id__in=viewable_framework)
@@ -9254,10 +9200,8 @@ class RequirementViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], name="Inspect specific requirements")
     def inspect_requirement(self, request, pk):
         requirement = RequirementNode.objects.get(id=pk)
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=RequirementAssessment,
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, RequirementAssessment
         )
         requirement_assessments = (
             RequirementAssessment.objects.filter(
@@ -9480,13 +9424,7 @@ class EvidenceViewSet(BaseModelViewSet):
 
     @action(methods=["get"], detail=True)
     def attachment(self, request, pk):
-        (
-            object_ids_view,
-            _,
-            _,
-        ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Evidence
-        )
+        object_ids_view = RoleAssignment.get_viewable_object_ids(request.user, Evidence)
         response = Response(status=status.HTTP_403_FORBIDDEN)
         if UUID(pk) in object_ids_view:
             evidence = self.get_object()
@@ -9851,13 +9789,10 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
 
     @action(methods=["get"], detail=True)
     def attachment(self, request, pk):
-        (
-            object_ids_view,
-            _,
-            _,
-        ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, EvidenceRevision
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, EvidenceRevision
         )
+
         response = Response(status=status.HTTP_403_FORBIDDEN)
         if UUID(pk) in object_ids_view:
             evidence = self.get_object()
@@ -9879,12 +9814,8 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
 
     @action(methods=["post"], detail=True)
     def delete_attachment(self, request, pk):
-        (
-            _,
-            _,
-            object_ids_delete,
-        ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, EvidenceRevision
+        object_ids_delete = RoleAssignment.get_deletable_object_ids(
+            request.user, EvidenceRevision
         )
         response = Response(status=status.HTTP_403_FORBIDDEN)
         if UUID(pk) in object_ids_delete:
@@ -9905,9 +9836,9 @@ class UploadAttachmentView(APIView):
         evidence = None
 
         # RBAC: scope to objects the user has change permission on (upload is a write)
-        accessible_evidence_ids = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Evidence
-        )[1]
+        accessible_evidence_ids = RoleAssignment.get_changeable_object_ids(
+            request.user, Evidence
+        )
 
         try:
             revision = EvidenceRevision.objects.get(
@@ -10264,8 +10195,8 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, OrganisationObjective
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, OrganisationObjective
         )
         if UUID(pk) not in object_ids_view:
             return Response(
@@ -10335,8 +10266,8 @@ class CampaignViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get campaign metrics")
     def metrics(self, request, pk):
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Campaign
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, Campaign
         )
         if UUID(pk) not in viewable_objects:
             return Response(
@@ -10857,8 +10788,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         response["Content-Disposition"] = 'attachment; filename="audit_export.csv"'
         response.write("\ufeff")
 
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
         )
 
         if UUID(pk) in viewable_objects:
@@ -10917,8 +10848,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], name="Audit as an Excel")
     def xlsx(self, request, pk):
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
         )
         if UUID(pk) not in viewable_objects:
             return Response(
@@ -11077,8 +11008,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], name="CyFun Excel Export")
     def cyfun_xlsx(self, request, pk):
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
         )
         if UUID(pk) not in viewable_objects:
             return Response(
@@ -11235,8 +11166,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get action plan CSV")
     def action_plan_csv(self, request, pk):
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
         )
         if UUID(pk) not in object_ids_view:
             return Response(
@@ -11321,8 +11252,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get action plan XLSX")
     def action_plan_xlsx(self, request, pk):
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
         )
         if UUID(pk) not in object_ids_view:
             return Response(
@@ -11418,8 +11349,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get action plan PDF")
     def action_plan_pdf(self, request, pk):
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
         )
         if UUID(pk) in object_ids_view:
             context = {
@@ -11528,10 +11459,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def update_requirement(self, request, pk):
         compliance_assessment = get_object_or_404(self.get_queryset(), pk=pk)
 
-        _, changeable_objects, _ = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=ComplianceAssessment,
+        changeable_objects = RoleAssignment.get_changeable_object_ids(
+            request.user, ComplianceAssessment
         )
         if compliance_assessment.id not in changeable_objects:
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -11872,10 +11801,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         """
         Returns the quality check of every compliance assessment
         """
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=ComplianceAssessment,
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
         )
         compliance_assessments = ComplianceAssessment.objects.filter(
             id__in=viewable_objects
@@ -11921,8 +11848,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         """
         Returns the quality check of a specific assessment
         """
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(), user=request.user, object_type=Assessment
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, Assessment
         )
         if UUID(pk) in viewable_objects:
             compliance_assessment = self.get_object()
@@ -12057,8 +11984,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         tree = filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, compliance_assessment)
 
-        (viewable_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
+        viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
         )
         result = build_overlay_map(
             compliance_assessment, viewable_ca_ids=viewable_ca_ids
@@ -12162,9 +12089,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         # Filter risk assessment IDs by IAM boundaries before any use
         if risk_assessment_ids:
-            viewable_ra_ids = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), request.user, RiskAssessment
-            )[0]
+            viewable_ra_ids = RoleAssignment.get_viewable_object_ids(
+                request.user, RiskAssessment
+            )
             risk_assessment_ids = [
                 uid
                 for uid in risk_assessment_ids
@@ -12413,8 +12340,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         def sanitize_filename(name):
             return regex.sub(r"[^\p{L}\p{N}\p{M}\-_.]+", "_", name)
 
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
         )
         if UUID(pk) in object_ids_view:
             compliance_assessment = self.get_object()
@@ -12562,8 +12489,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         from core.utils import resolve_visibility_from_overrides
 
         # Only include compliance assessments the user can view
-        (viewable_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
+        viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
         )
 
         dashboard_data = []
@@ -12664,8 +12591,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
 
         # Get viewable objects for permission checking
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
         )
 
         # Filter audits: same framework, viewable, exclude current
@@ -12725,8 +12652,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
 
         # Get viewable objects for permission checking
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
         )
 
         # Check permissions for base audit
@@ -13023,9 +12950,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        viewable_objects, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
         )
+
         if source_uuid not in viewable_objects:
             return None, Response(
                 {"error": "Permission denied for source audit"},
@@ -13805,8 +13733,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             ).values_list("securityexception_id", flat=True)
         )
         # IAM: intersect with user-visible exceptions
-        (viewable_exception_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, SecurityException
+        viewable_exception_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, SecurityException
         )
         exception_ids &= set(viewable_exception_ids)
 
@@ -14096,10 +14024,9 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get updatable measures")
     def updatables(self, request):
-        (_, object_ids_change, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, AppliedControl
+        object_ids_change = RoleAssignment.get_changeable_object_ids(
+            request.user, AppliedControl
         )
-
         return Response({"results": list(object_ids_change)})
 
     @action(
@@ -14111,8 +14038,8 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get the ordered todo applied controls")
     def todo(self, request):
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, AppliedControl
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, AppliedControl
         )
 
         measures = sorted(
@@ -14801,13 +14728,10 @@ def export_mp_csv(request):
         "status",
     ]
     writer.writerow(columns)
-    (
-        object_ids_view,
-        _,
-        _,
-    ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), request.user, AppliedControl
+    object_ids_view = RoleAssignment.get_viewable_object_ids(
+        request.user, AppliedControl
     )
+
     for mtg in AppliedControl.objects.filter(id__in=object_ids_view):
         row = [
             mtg.id,
@@ -14923,9 +14847,10 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
     @action(detail=False, name="Get security exception Sankey data")
     def sankey_data(self, request):
         folder_id = request.query_params.get("folder", None)
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, SecurityException
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, SecurityException
         )
+
         queryset = SecurityException.objects.filter(id__in=viewable_objects)
 
         if folder_id:
@@ -15115,8 +15040,8 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], name="Findings Assessment as Excel")
     def xlsx(self, request, pk):
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, FindingsAssessment
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, FindingsAssessment
         )
         if UUID(pk) not in viewable_objects:
             return Response(
@@ -15223,8 +15148,8 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], name="Findings Assessment as Markdown")
     def md(self, request, pk):
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, FindingsAssessment
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, FindingsAssessment
         )
         if UUID(pk) not in viewable_objects:
             return Response(
@@ -15343,8 +15268,8 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], name="Findings Assessment as PDF")
     def pdf(self, request, pk):
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, FindingsAssessment
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, FindingsAssessment
         )
         if UUID(pk) not in viewable_objects:
             return Response(
@@ -15430,8 +15355,8 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         scoped_folder = (
             Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
         )
-        (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            scoped_folder, request.user, FindingsAssessment
+        object_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, FindingsAssessment, scoped_folder
         )
 
         findings_assessments = FindingsAssessment.objects.filter(id__in=object_ids)
@@ -15539,9 +15464,8 @@ class FindingViewSet(BaseModelViewSet):
         Category -> Severity -> Status
         """
         folder_id = request.query_params.get("folder", None)
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Finding
-        )
+        viewable_objects = RoleAssignment.get_viewable_object_ids(request.user, Finding)
+
         queryset = Finding.objects.filter(id__in=viewable_objects).select_related(
             "findings_assessment"
         )
@@ -15802,8 +15726,8 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=True, methods=["get"], name="Incident as PDF")
     def pdf(self, request, pk):
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Incident
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, Incident
         )
         if UUID(pk) not in viewable_objects:
             return Response(
@@ -15851,8 +15775,8 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=True, methods=["get"], name="Incident as Markdown")
     def md(self, request, pk):
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Incident
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, Incident
         )
         if UUID(pk) not in viewable_objects:
             return Response(
@@ -15960,8 +15884,8 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
     @action(detail=False, name="Get incident detection breakdown")
     def detection_breakdown(self, request):
         folder_id = request.query_params.get("folder", None)
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Incident
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, Incident
         )
         queryset = Incident.objects.filter(id__in=viewable_objects)
 
@@ -15989,8 +15913,8 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
     @action(detail=False, name="Get monthly incident metrics")
     def monthly_metrics(self, request):
         folder_id = request.query_params.get("folder", None)
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Incident
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, Incident
         )
         queryset = Incident.objects.filter(id__in=viewable_objects)
 
@@ -16054,8 +15978,8 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
     @action(detail=False, name="Get incident summary statistics")
     def summary_stats(self, request):
         folder_id = request.query_params.get("folder", None)
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Incident
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, Incident
         )
         queryset = Incident.objects.filter(id__in=viewable_objects)
 
@@ -16096,8 +16020,8 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
     @action(detail=False, name="Get incident severity breakdown")
     def severity_breakdown(self, request):
         folder_id = request.query_params.get("folder", None)
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Incident
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, Incident
         )
         queryset = Incident.objects.filter(id__in=viewable_objects)
 
@@ -16133,8 +16057,8 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
     @action(detail=False, name="Get incident qualifications breakdown")
     def qualifications_breakdown(self, request):
         folder_id = request.query_params.get("folder", None)
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Incident
+        viewable_objects = RoleAssignment.get_viewable_object_ids(
+            request.user, Incident
         )
         queryset = Incident.objects.filter(id__in=viewable_objects)
 
@@ -17302,9 +17226,10 @@ class TaskNodeViewSet(BaseModelViewSet):
         task_node = self.get_object()
         evidence_id = request.data.get("evidence_id")
         to_move = request.data.get("move", False)
-        accessible_evidence_ids = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Evidence
-        )[0]
+        accessible_evidence_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, Evidence
+        )
+
         evidence = Evidence.objects.get(id=evidence_id, id__in=accessible_evidence_ids)
         task_node.evidences.remove(evidence)
         if to_move:
@@ -17360,9 +17285,10 @@ class TaskNodeEvidenceList(generics.ListAPIView):
         task_template = task_node.task_template
 
         # Get visible evidences to filter result
-        viewable_evidences, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.request.user, Evidence
+        viewable_evidences = RoleAssignment.get_viewable_object_ids(
+            self.request.user, Evidence
         )
+
         return Evidence.objects.filter(
             id__in=task_template.evidences.filter(
                 id__in=viewable_evidences
@@ -17922,9 +17848,9 @@ def global_search(request):
             continue
 
         # Permission-aware queryset
-        accessible_ids = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, model_class
-        )[0]
+        accessible_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, model_class
+        )
         qs = model_class.objects.filter(id__in=accessible_ids)
 
         # ComplianceAssessment has extra respondent scoping: users who lack the
