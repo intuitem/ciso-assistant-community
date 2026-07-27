@@ -230,7 +230,7 @@ class CreateObjectAction(BaseAction):
                 continue
             try:
                 target = fk_model.objects.filter(id=raw).first()
-            except (ValueError, ValidationError):
+            except ValueError, ValidationError:
                 target = None
             if target is None:
                 raise ActionError(f"create_object: {fk_name} '{raw}' does not exist")
@@ -409,7 +409,7 @@ def json_loads_or_none(value):
 
     try:
         return json.loads(value)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return None
 
 

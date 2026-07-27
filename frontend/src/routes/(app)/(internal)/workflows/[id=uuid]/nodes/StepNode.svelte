@@ -24,41 +24,39 @@
 		deleteNode: (id: string) => void;
 	}>('workflowEditor');
 
-	const TYPE_STYLE: Record<
-		string,
-		{ icon: string; accent: string; border: string; chip: string }
-	> = {
-		task: {
-			icon: 'fa-clipboard-check',
-			accent: 'bg-primary-500',
-			border: 'border-primary-300 dark:border-primary-700',
-			chip: 'preset-tonal-primary'
-		},
-		condition: {
-			icon: 'fa-code-branch',
-			accent: 'bg-warning-500',
-			border: 'border-warning-300 dark:border-warning-700',
-			chip: 'preset-tonal-warning'
-		},
-		action: {
-			icon: 'fa-bolt',
-			accent: 'bg-secondary-500',
-			border: 'border-secondary-300 dark:border-secondary-700',
-			chip: 'preset-tonal-secondary'
-		},
-		subprocess: {
-			icon: 'fa-diagram-project',
-			accent: 'bg-tertiary-500',
-			border: 'border-tertiary-300 dark:border-tertiary-700',
-			chip: 'preset-tonal-tertiary'
-		},
-		event: {
-			icon: 'fa-tower-broadcast',
-			accent: 'bg-surface-500',
-			border: 'border-surface-300-700',
-			chip: 'preset-tonal'
-		}
-	};
+	const TYPE_STYLE: Record<string, { icon: string; accent: string; border: string; chip: string }> =
+		{
+			task: {
+				icon: 'fa-clipboard-check',
+				accent: 'bg-primary-500',
+				border: 'border-primary-300 dark:border-primary-700',
+				chip: 'preset-tonal-primary'
+			},
+			condition: {
+				icon: 'fa-code-branch',
+				accent: 'bg-warning-500',
+				border: 'border-warning-300 dark:border-warning-700',
+				chip: 'preset-tonal-warning'
+			},
+			action: {
+				icon: 'fa-bolt',
+				accent: 'bg-secondary-500',
+				border: 'border-secondary-300 dark:border-secondary-700',
+				chip: 'preset-tonal-secondary'
+			},
+			subprocess: {
+				icon: 'fa-diagram-project',
+				accent: 'bg-tertiary-500',
+				border: 'border-tertiary-300 dark:border-tertiary-700',
+				chip: 'preset-tonal-tertiary'
+			},
+			event: {
+				icon: 'fa-tower-broadcast',
+				accent: 'bg-surface-500',
+				border: 'border-surface-300-700',
+				chip: 'preset-tonal'
+			}
+		};
 
 	const style = $derived(TYPE_STYLE[data.nodeType] ?? TYPE_STYLE.action);
 	let hovered = $state(false);
@@ -73,7 +71,9 @@
 <div
 	class="step-node relative rounded-base border-[1.5px] bg-surface-50-950 px-3 py-2 min-w-[160px] max-w-[220px] select-none transition-shadow
 	{style.border}
-	{selected ? 'ring-2 ring-primary-500 ring-offset-2 ring-offset-surface-50-950 shadow-lg' : 'shadow-sm'}
+	{selected
+		? 'ring-2 ring-primary-500 ring-offset-2 ring-offset-surface-50-950 shadow-lg'
+		: 'shadow-sm'}
 	{data.error ? 'ring-2 ring-error-500' : ''}
 	{data.runState === 'visited' ? 'ring-2 ring-success-400' : ''}
 	{data.runState === 'active' ? 'ring-2 ring-warning-400 animate-pulse' : ''}

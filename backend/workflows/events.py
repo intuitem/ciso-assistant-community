@@ -274,7 +274,7 @@ def _compare(condition, runtime):
     if op in ("gt", "lt", "gte", "lte"):
         try:
             runtime_num, expected_num = float(runtime), float(expected)
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             return False
         return {
             "gt": runtime_num > expected_num,

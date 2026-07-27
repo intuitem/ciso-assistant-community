@@ -17,9 +17,7 @@ def wipe_workflows(apps, schema_editor):
     # Clear the two PROTECT references that would block a plain cascade delete:
     # WorkflowNode.subprocess_workflow (→ Workflow) and Condition.variable
     # (→ WorkflowVariable). Then everything else cascades from Workflow.
-    apps.get_model("workflows", "WorkflowNode").objects.update(
-        subprocess_workflow=None
-    )
+    apps.get_model("workflows", "WorkflowNode").objects.update(subprocess_workflow=None)
     apps.get_model("workflows", "Condition").objects.all().delete()
     apps.get_model("workflows", "ConditionGroup").objects.all().delete()
     apps.get_model("workflows", "Workflow").objects.all().delete()

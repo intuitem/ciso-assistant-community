@@ -50,7 +50,7 @@ def next_occurrence(expression: str, tz_name: str, after: datetime):
     try:
         local = after.astimezone(_zone(tz_name))
         return next(CronSim(expression, local)).astimezone(dt_timezone.utc)
-    except (CronSimError, StopIteration, ValueError, KeyError):
+    except CronSimError, StopIteration, ValueError, KeyError:
         return None
 
 

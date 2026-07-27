@@ -525,7 +525,7 @@ def _evaluate_condition(condition, variables):
     if condition.variable.type == "number":
         try:
             runtime = float(runtime)
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             return False
     if op == "eq":
         return runtime == expected
@@ -558,7 +558,7 @@ def _coerce(value, variable_type):
     if variable_type == "number":
         try:
             return float(value)
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             return None
     if variable_type == "boolean":
         return str(value).strip().lower() in ("true", "1", "yes")

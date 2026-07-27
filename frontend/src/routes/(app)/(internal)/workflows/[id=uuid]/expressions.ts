@@ -34,11 +34,7 @@ export function previewValue(value: unknown, maxLength = 42): string {
 }
 
 export function isExpandable(value: unknown): boolean {
-	return (
-		value !== null &&
-		typeof value === 'object' &&
-		Object.keys(value as object).length > 0
-	);
+	return value !== null && typeof value === 'object' && Object.keys(value as object).length > 0;
 }
 
 export function childEntries(value: unknown): [string, unknown][] {
