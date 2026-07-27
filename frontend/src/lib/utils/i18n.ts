@@ -1,6 +1,26 @@
 import { m } from '$paraglide/messages';
 import { toCamelCase } from '$lib/utils/locales';
 
+// Alternate wording for the "qualification" concept, driven by the
+// use_risk_category_label general setting (display only). The flag is synced
+// from hooks.server.ts on the server and from the (app) layout on the client,
+// so every translation of these keys — table headers, detail fields, filters,
+// direct safeTranslate calls — swaps automatically.
+const RISK_CATEGORY_KEY_MAP: Record<string, string> = {
+	qualification: 'riskCategory',
+	qualifications: 'riskCategories',
+	qualificationsChartTitle: 'riskCategoriesChartTitle',
+	noQualificationsFoundOnRiskScenarios: 'noRiskCategoriesFoundOnRiskScenarios',
+	noQualificationsData: 'noRiskCategoriesData',
+	incidentQualificationsRadar: 'incidentRiskCategoriesRadar'
+};
+
+let useRiskCategoryLabel = false;
+
+export function setUseRiskCategoryLabel(value: boolean): void {
+	useRiskCategoryLabel = value === true;
+}
+
 /**
  * Unafe translate function that doesn't return anything if the key if the translation is not found.
  * @param key The key to translate.
@@ -13,6 +33,13 @@ export function unsafeTranslate(
 	options = {}
 ): string | undefined {
 	try {
+		if (
+			useRiskCategoryLabel &&
+			typeof key === 'string' &&
+			Object.hasOwn(RISK_CATEGORY_KEY_MAP, key)
+		) {
+			key = RISK_CATEGORY_KEY_MAP[key];
+		}
 		if (
 			typeof key === 'object' &&
 			key !== null &&

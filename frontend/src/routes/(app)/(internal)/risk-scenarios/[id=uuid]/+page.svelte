@@ -569,7 +569,7 @@
 	</div>
 	<div class="card px-4 py-2 bg-surface-50-950 shadow-lg space-y-2">
 		<div>
-			<p class="text-sm font-semibold text-surface-400-600">{m.qualifications()}</p>
+			<p class="text-sm font-semibold text-surface-400-600">{safeTranslate('qualifications')}</p>
 			<p>
 				<span class="font-semibold">
 					{#each data.scenario.qualifications.sort( (a, b) => safeTranslate(a.str).localeCompare(safeTranslate(b.str)) ) as qualification, i}

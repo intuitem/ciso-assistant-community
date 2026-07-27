@@ -1,5 +1,5 @@
 import { BASE_API_URL, DEFAULT_LANGUAGE } from '$lib/utils/constants';
-import { safeTranslate } from '$lib/utils/i18n';
+import { safeTranslate, setUseRiskCategoryLabel } from '$lib/utils/i18n';
 import type { User } from '$lib/utils/types';
 import { redirect, type Handle, type HandleFetch, type RequestEvent } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -193,6 +193,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 				}
 			});
 			event.locals.settings = await generalSettings.json();
+			setUseRiskCategoryLabel(event.locals.settings?.use_risk_category_label === true);
 
 			const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/`, {
 				credentials: 'include',
