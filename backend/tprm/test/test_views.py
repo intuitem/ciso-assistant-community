@@ -79,8 +79,8 @@ class EntityDestroyConflictTestCase(TestCase):
 
     @patch(
         "iam.models.RoleAssignment._get_accessible_ids",
-        side_effect=lambda user, perm_prefix, model, folder=None: (
-            list(model.objects.values_list("id", flat=True)),
+        side_effect=lambda user, perm_prefix, model, folder=None: list(
+            model.objects.values_list("id", flat=True)
         ),
     )
     @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
@@ -100,8 +100,8 @@ class EntityDestroyConflictTestCase(TestCase):
 
     @patch(
         "iam.models.RoleAssignment._get_accessible_ids",
-        side_effect=lambda user, perm_prefix, model, folder=None: (
-            list(model.objects.values_list("id", flat=True)),
+        side_effect=lambda user, perm_prefix, model, folder=None: list(
+            model.objects.values_list("id", flat=True)
         ),
     )
     @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
@@ -113,8 +113,8 @@ class EntityDestroyConflictTestCase(TestCase):
 
     @patch(
         "iam.models.RoleAssignment._get_accessible_ids",
-        side_effect=lambda user, perm_prefix, model, folder=None: (
-            list(model.objects.values_list("id", flat=True)),
+        side_effect=lambda user, perm_prefix, model, folder=None: list(
+            model.objects.values_list("id", flat=True)
         ),
     )
     @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
