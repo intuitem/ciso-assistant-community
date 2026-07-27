@@ -239,8 +239,8 @@ class EntityAssessmentSerializersTestCase(TestCase):
         request.user.is_authenticated = True
 
         with patch(
-            "iam.models.RoleAssignment.get_accessible_object_ids",
-            return_value=([new_rep.id], None),
+            "iam.models.RoleAssignment._get_accessible_ids",
+            return_value=([new_rep.id]),
         ):
             serializer = EntityAssessmentWriteSerializer(
                 self.assessment, data=data, partial=True, context={"request": request}
