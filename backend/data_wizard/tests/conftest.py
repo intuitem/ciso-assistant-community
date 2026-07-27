@@ -163,11 +163,11 @@ def all_accessible():
     """Patch RoleAssignment so process_records sees all objects as accessible."""
 
     def _all_ids(root_folder, user, model_class):
-        ids = list(model_class.objects.values_list("id", flat=True))
-        return ids, ids, ids
+        ids = model_class.objects.values_list("id", flat=True)
+        return ids
 
     with patch(
-        "data_wizard.views.RoleAssignment.get_accessible_object_ids",
+        "data_wizard.views.RoleAssignment._get_accessible_ids",
         side_effect=_all_ids,
     ):
         yield
