@@ -57,12 +57,12 @@ from data_wizard.views import (
 def _run(consumer_cls, context, records):
     """Call process_records patching out RoleAssignment permission check."""
 
-    def _all_ids(root_folder, user, model_class):
-        ids = list(model_class.objects.values_list("id", flat=True))
-        return ids, ids, ids
+    def _all_ids(user, perm_prefix, model, folder=None):
+        ids = list(model.objects.values_list("id", flat=True))
+        return ids
 
     with patch(
-        "data_wizard.views.RoleAssignment.get_accessible_object_ids",
+        "data_wizard.views.RoleAssignment._get_accessible_ids",
         side_effect=_all_ids,
     ):
         return consumer_cls(context).process_records(records)

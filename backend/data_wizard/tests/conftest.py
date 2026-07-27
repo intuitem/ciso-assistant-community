@@ -162,8 +162,8 @@ def knox_restricted_client(app_ready, root_folder):
 def all_accessible():
     """Patch RoleAssignment so process_records sees all objects as accessible."""
 
-    def _all_ids(root_folder, user, model_class):
-        ids = model_class.objects.values_list("id", flat=True)
+    def _all_ids(user, perm_prefix, model, folder=None):
+        ids = model.objects.values_list("id", flat=True)
         return ids
 
     with patch(
