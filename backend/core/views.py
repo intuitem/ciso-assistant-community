@@ -133,6 +133,7 @@ from rest_framework.parsers import (
     JSONParser,
     MultiPartParser,
 )
+from rest_framework.relations import ManyRelatedField
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -795,7 +796,24 @@ class GenericFilterSet(df.FilterSet):
                     "queryset": f.remote_field.model.objects.all(),
                 },
             },
+            # ISO 8601 (incl. timezone/Z) parsing for datetime filters,
+            # required by BI clients filtering on created_at/updated_at
+            models.DateTimeField: {
+                "filter_class": df.IsoDateTimeFilter,
+            },
         }
+
+
+class TimestampRangeFilterMixin(df.FilterSet):
+    """ISO-8601 created_at/updated_at range params for BI clients
+    (Power BI incremental refresh). Mix into FilterSets of viewsets
+    that use filterset_class; list-style viewsets declare the same
+    lookups via dict-form filterset_fields."""
+
+    created_at__gte = df.IsoDateTimeFilter(field_name="created_at", lookup_expr="gte")
+    created_at__lt = df.IsoDateTimeFilter(field_name="created_at", lookup_expr="lt")
+    updated_at__gte = df.IsoDateTimeFilter(field_name="updated_at", lookup_expr="gte")
+    updated_at__lt = df.IsoDateTimeFilter(field_name="updated_at", lookup_expr="lt")
 
 
 class SmartOrderingFilter(filters.OrderingFilter):
@@ -1267,7 +1285,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return instance
 
     def perform_destroy(self, instance):
-        serializer = self.get_serializer(instance)
+        # resolve for "destroy" explicitly so batch_action can call this too
+        serializer_class = self.get_serializer_class(action="destroy")
+        serializer = serializer_class(instance, context=self.get_serializer_context())
         serializer.delete(instance)
         try:
             dispatch_webhook_event(instance, "deleted")
@@ -1399,6 +1419,22 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         # Resolve the write serializer once for all update operations
         if action_type != "delete":
             serializer_class = self.get_serializer_class(action="partial_update")
+            target_field = "folder" if action_type == "change_folder" else field_name
+            field = (
+                serializer_class().fields.get(target_field) if target_field else None
+            )
+            if field is None or field.read_only:
+                return Response(
+                    {"error": f"field not editable: {target_field}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if action_type in ("add_m2m", "remove_m2m") and not isinstance(
+                field, ManyRelatedField
+            ):
+                return Response(
+                    {"error": f"not a many-to-many field: {target_field}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         succeeded = []
         failed = []
@@ -1428,49 +1464,45 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 )
                 continue
 
+            # Built-in / library objects are immutable through the API (mirrors the
+            # object-permission guard); skip any mutating batch action on them.
+            if getattr(obj, "builtin", False) or getattr(obj, "urn", None):
+                failed.append(
+                    {
+                        "id": str(obj_id),
+                        "name": str(obj),
+                        "error": "Cannot modify builtin object",
+                    }
+                )
+                continue
+
             try:
                 if action_type == "delete":
-                    if getattr(obj, "builtin", False) or getattr(obj, "urn", None):
-                        failed.append(
-                            {
-                                "id": str(obj_id),
-                                "name": str(obj),
-                                "error": "Cannot delete builtin object",
-                            }
-                        )
-                        continue
-                    try:
-                        dispatch_webhook_event(obj, "deleted")
-                    except Exception:
-                        logger.error(
-                            "Webhook dispatch failed on batch delete", exc_info=True
-                        )
-                    obj.delete()
-
-                elif action_type in ("add_m2m", "remove_m2m"):
-                    ids_to_modify = value if isinstance(value, list) else [value]
-                    m2m_field = getattr(obj, field_name)
-                    if action_type == "add_m2m":
-                        m2m_field.add(*ids_to_modify)
-                    else:
-                        m2m_field.remove(*ids_to_modify)
-                    obj.save(update_fields=["updated_at"])
-                    try:
-                        dispatch_webhook_event(obj, "updated")
-                    except Exception:
-                        logger.error(
-                            "Webhook dispatch failed on batch %s",
-                            action_type,
-                            exc_info=True,
-                        )
+                    self.perform_destroy(obj)
 
                 else:
                     # Build data dict for the serializer
                     if action_type == "change_folder":
                         data = {"folder": value}
-                    elif action_type == "change_m2m":
-                        actor_ids = value if isinstance(value, list) else [value]
-                        data = {field_name: actor_ids}
+                    elif action_type in ("change_m2m", "add_m2m", "remove_m2m"):
+                        # read-modify-write is racy vs concurrent writers, accepted: serializer validation (IAM/lock) outweighs cbe008798's atomic .add()/.remove()
+                        target = {
+                            str(i)
+                            for i in (value if isinstance(value, list) else [value])
+                        }
+                        if action_type != "change_m2m":
+                            current = {
+                                str(pk)
+                                for pk in getattr(obj, field_name).values_list(
+                                    "pk", flat=True
+                                )
+                            }
+                            target = (
+                                current | target
+                                if action_type == "add_m2m"
+                                else current - target
+                            )
+                        data = {field_name: list(target)}
                     else:  # change_field
                         data = {field_name: value}
 
@@ -1505,6 +1537,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                         else "Permission denied",
                     }
                 )
+            except DRFValidationError as e:
+                failed.append({"id": str(obj_id), "name": str(obj), "error": e.detail})
             except Exception:
                 logger.error("Batch action failed for %s", obj_id, exc_info=True)
                 failed.append(
@@ -2011,7 +2045,7 @@ class ThreatViewSet(BaseModelViewSet):
         return Response(my_map)
 
 
-class AssetFilter(GenericFilterSet):
+class AssetFilter(TimestampRangeFilterMixin, GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     asset_class = df.ModelMultipleChoiceFilter(queryset=AssetClass.objects.all())
 
@@ -3213,19 +3247,21 @@ class VulnerabilityViewSet(BaseModelViewSet):
     """
 
     model = Vulnerability
-    filterset_fields = [
-        "folder",
-        "assets",
-        "status",
-        "severity",
-        "risk_scenarios",
-        "applied_controls",
-        "security_exceptions",
-        "filtering_labels",
-        "findings",
-        "security_advisories",
-        "cwes",
-    ]
+    filterset_fields = {
+        "folder": ["exact"],
+        "assets": ["exact"],
+        "status": ["exact"],
+        "severity": ["exact"],
+        "risk_scenarios": ["exact"],
+        "applied_controls": ["exact"],
+        "security_exceptions": ["exact"],
+        "filtering_labels": ["exact"],
+        "findings": ["exact"],
+        "security_advisories": ["exact"],
+        "cwes": ["exact"],
+        "created_at": ["gte", "lt"],
+        "updated_at": ["gte", "lt"],
+    }
     search_fields = ["name", "description", "ref_id"]
 
     @action(detail=False, name="Lightweight autocomplete search")
@@ -4767,7 +4803,7 @@ APPLIED_CONTROL_LINKED_FIELDS = [
 APPLIED_CONTROL_LINKED_FIELD_NAMES = [f[0] for f in APPLIED_CONTROL_LINKED_FIELDS]
 
 
-class AppliedControlFilterSet(GenericFilterSet):
+class AppliedControlFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     reference_control = df.ModelMultipleChoiceFilter(
         queryset=ReferenceControl.objects.all()
@@ -6599,7 +6635,7 @@ class IntegerInFilter(df.BaseInFilter, df.NumberFilter):
     field_class = FormIntegerField
 
 
-class RiskScenarioFilter(GenericFilterSet):
+class RiskScenarioFilter(TimestampRangeFilterMixin, GenericFilterSet):
     risk_assessment = df.ModelMultipleChoiceFilter(
         queryset=RiskAssessment.objects.all()
     )
@@ -7725,14 +7761,7 @@ class UserGroupViewSet(BaseModelViewSet):
     def get_queryset(self):
         return super().get_queryset().select_related("folder")
 
-    def destroy(self, request, *args, **kwargs):
-        user_group = self.get_object()
-        if user_group.builtin:
-            return Response(
-                {"error": "attemptToDeleteBuiltinUserGroup"},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        return super().destroy(request, *args, **kwargs)
+    # Deletion of built-in groups is blocked generically by the permission layer.
 
     MEMBER_BATCH_LIMIT = 100
 
@@ -10815,7 +10844,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         name="Get target frameworks mapping options with compliance distribution",
     )
     def frameworks(self, request, pk):
-        audit = ComplianceAssessment.objects.get(id=pk)
+        audit = self.get_object()
         from core.mappings.engine import engine
 
         audit_from_results = engine.load_audit_fields(audit)
@@ -13361,28 +13390,22 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="progress_ts")
     def progress_ts(self, request, pk):
-        try:
-            raw = (
-                HistoricalMetric.objects.filter(
-                    model="ComplianceAssessment", object_id=pk
-                )
-                .annotate(progress=F("data__reqs__progress_perc"))
-                .values("date", "progress")
-                .order_by("date")
+        compliance_assessment = self.get_object()
+        raw = (
+            HistoricalMetric.objects.filter(
+                model="ComplianceAssessment", object_id=compliance_assessment.id
             )
+            .annotate(progress=F("data__reqs__progress_perc"))
+            .values("date", "progress")
+            .order_by("date")
+        )
 
-            # Transform the data into the required format
-            formatted_data = [
-                [entry["date"].isoformat(), entry["progress"]] for entry in raw
-            ]
+        # Transform the data into the required format
+        formatted_data = [
+            [entry["date"].isoformat(), entry["progress"]] for entry in raw
+        ]
 
-            return Response({"data": formatted_data})
-
-        except HistoricalMetric.DoesNotExist:
-            return Response(
-                {"error": "No metrics found for this assessment"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        return Response({"data": formatted_data})
 
     @action(detail=True, methods=["get"])
     def threats_metrics(self, request, pk=None):
@@ -14043,22 +14066,24 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     """
 
     model = RequirementAssessment
-    filterset_fields = [
-        "folder",
-        "folder__name",
-        "evidences",
-        "compliance_assessment",
-        "applied_controls",
-        "security_exceptions",
-        "requirement__urn",
-        "result",
-        "extended_result",
-        "compliance_assessment__ref_id",
-        "compliance_assessment__perimeter",
-        "compliance_assessment__perimeter__name",
-        "compliance_assessment__assets__ref_id",
-        "requirement__assessable",
-    ]
+    filterset_fields = {
+        "folder": ["exact"],
+        "folder__name": ["exact"],
+        "evidences": ["exact"],
+        "compliance_assessment": ["exact"],
+        "applied_controls": ["exact"],
+        "security_exceptions": ["exact"],
+        "requirement__urn": ["exact"],
+        "result": ["exact"],
+        "extended_result": ["exact"],
+        "compliance_assessment__ref_id": ["exact"],
+        "compliance_assessment__perimeter": ["exact"],
+        "compliance_assessment__perimeter__name": ["exact"],
+        "compliance_assessment__assets__ref_id": ["exact"],
+        "requirement__assessable": ["exact"],
+        "created_at": ["gte", "lt"],
+        "updated_at": ["gte", "lt"],
+    }
     search_fields = [
         "requirement__name",
         "requirement__description",
@@ -14843,19 +14868,25 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
     """
 
     model = SecurityException
-    filterset_fields = [
-        "name",
-        "requirement_assessments",
-        "risk_scenarios",
-        "owners",
-        "approver",
-        "folder",
-        "severity",
-        "status",
-        "genericcollection",
-        "expiration_date",
-    ]
+    filterset_fields = {
+        "name": ["exact"],
+        "requirement_assessments": ["exact"],
+        "risk_scenarios": ["exact"],
+        "owners": ["exact"],
+        "approver": ["exact"],
+        "folder": ["exact"],
+        "severity": ["exact"],
+        "status": ["exact"],
+        "genericcollection": ["exact"],
+        "expiration_date": ["exact"],
+        "created_at": ["gte", "lt"],
+        "updated_at": ["gte", "lt"],
+    }
     search_fields = ["name", "description", "ref_id"]
+    filter_backends = [
+        CustomFieldSearchFilter if b is filters.SearchFilter else b
+        for b in BaseModelViewSet.filter_backends
+    ] + [CustomFieldFilterBackend]
 
     export_config = {
         "fields": {
@@ -14917,6 +14948,7 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
                 "risk_scenarios",
                 "requirement_assessments",
                 "owners",
+                "custom_field_values__definition",
                 Prefetch(
                     "validationflow_set",
                     queryset=ValidationFlow.objects.select_related(
@@ -15488,20 +15520,22 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
 class FindingViewSet(BaseModelViewSet):
     model = Finding
-    filterset_fields = [
-        "name",
-        "owner",
-        "folder",
-        "status",
-        "severity",
-        "priority",
-        "findings_assessment",
-        "filtering_labels",
-        "applied_controls",
-        "evidences",
-        "vulnerabilities",
-        "due_date",
-    ]
+    filterset_fields = {
+        "name": ["exact"],
+        "owner": ["exact"],
+        "folder": ["exact"],
+        "status": ["exact"],
+        "severity": ["exact"],
+        "priority": ["exact"],
+        "findings_assessment": ["exact"],
+        "filtering_labels": ["exact"],
+        "applied_controls": ["exact"],
+        "evidences": ["exact"],
+        "vulnerabilities": ["exact"],
+        "due_date": ["exact"],
+        "created_at": ["gte", "lt"],
+        "updated_at": ["gte", "lt"],
+    }
     ordering = ["ref_id"]
 
     def get_queryset(self) -> models.query.QuerySet:
@@ -15640,20 +15674,22 @@ class FindingViewSet(BaseModelViewSet):
 class IncidentViewSet(ExportMixin, BaseModelViewSet):
     model = Incident
     search_fields = ["name", "description", "ref_id"]
-    filterset_fields = [
-        "folder",
-        "status",
-        "severity",
-        "qualifications",
-        "detection",
-        "owners",
-        "entities",
-        "assets",
-        "applied_controls",
-        "task_templates",
-        "risk_scenarios",
-        "filtering_labels",
-    ]
+    filterset_fields = {
+        "folder": ["exact"],
+        "status": ["exact"],
+        "severity": ["exact"],
+        "qualifications": ["exact"],
+        "detection": ["exact"],
+        "owners": ["exact"],
+        "entities": ["exact"],
+        "assets": ["exact"],
+        "applied_controls": ["exact"],
+        "task_templates": ["exact"],
+        "risk_scenarios": ["exact"],
+        "filtering_labels": ["exact"],
+        "created_at": ["gte", "lt"],
+        "updated_at": ["gte", "lt"],
+    }
 
     export_config = {
         "fields": {

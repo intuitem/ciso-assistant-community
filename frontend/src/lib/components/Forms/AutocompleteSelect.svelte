@@ -77,6 +77,7 @@
 		lazyLimit?: number;
 		lazyThreshold?: number;
 		maxVisibleChips?: number;
+		portalDropdown?: boolean;
 	}
 
 	let {
@@ -128,7 +129,8 @@
 		lazy = false,
 		lazyLimit = 20,
 		lazyThreshold = 50,
-		maxVisibleChips: _maxVisibleChips = 3
+		maxVisibleChips: _maxVisibleChips = 3,
+		portalDropdown = false
 	}: Props = $props();
 
 	// Clamp to supported CSS range (chip-max-1 through chip-max-5 in app.css)
@@ -207,6 +209,7 @@
 			: '!bg-transparent',
 		inputClass: 'focus:ring-0! focus:outline-hidden!',
 		closeDropdownOnSelect: !multiple,
+		...(portalDropdown ? { portal: { active: true }, ulOptionsClass: 'portaled-options' } : {}),
 		...additionalMultiselectOptions
 	};
 
