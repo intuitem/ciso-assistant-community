@@ -194,6 +194,7 @@
 * [Outgoing webhooks](integrations/webhooks.md)
 * [Audit log forwarding](integrations/audit-log-forwarding.md)
 * [MCP setup guide](integrations/mcp.md)
+* [Power BI connector](integrations/powerbi.md)
 * [Third-party integrations](integrations/third-party/README.md)
   * [Jira](integrations/third-party/jira.md)
   * [ServiceNow](integrations/third-party/servicenow.md)
