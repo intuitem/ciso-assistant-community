@@ -134,11 +134,12 @@ const openSidebarSection = async (page: Page, sectionTestId: string | null) => {
 	if (sectionTestId) {
 		const sectionSpan = sidebar(page).getByTestId(sectionTestId);
 		const triggerBtn = sectionSpan.locator('..');
-		const isExpanded = await triggerBtn.getAttribute('aria-expanded').catch(() => null);
-		if (isExpanded !== 'true') {
-			await sectionSpan.click();
-		}
-		await expect(triggerBtn).toHaveAttribute('aria-expanded', 'true');
+		await expect(async () => {
+			if ((await triggerBtn.getAttribute('aria-expanded')) !== 'true') {
+				await sectionSpan.click();
+			}
+			await expect(triggerBtn).toHaveAttribute('aria-expanded', 'true', { timeout: 2000 });
+		}).toPass({ timeout: 20_000 });
 	}
 };
 
