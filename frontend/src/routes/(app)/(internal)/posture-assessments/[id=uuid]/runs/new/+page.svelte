@@ -165,8 +165,10 @@
 							<input
 								type="text"
 								name="comment:{check.ref_id}"
-								class="input w-56 py-1 text-sm"
+								class="input w-56 py-1 text-sm disabled:opacity-40"
 								placeholder={m.comment()}
+								disabled={!values[check.ref_id]}
+								title={values[check.ref_id] ? undefined : m.commentNeedsResult()}
 								aria-label="{check.ref_id} — {m.comment()}"
 							/>
 							<select

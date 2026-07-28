@@ -139,15 +139,16 @@
 						<i class="fa-solid fa-paperclip mr-1"></i>{data.run.attachment}
 					</a>
 					<label class="text-sm flex items-center gap-1 cursor-pointer">
-						<input type="checkbox" name="remove_attachment" value="1" class="checkbox" />
+						<input type="checkbox" name="remove_attachment" value="true" class="checkbox" />
 						{m.removeAttachment()}
 					</label>
-				{:else}
-					<label class="text-sm flex items-center gap-2">
-						<i class="fa-solid fa-paperclip"></i>{m.attachment()}
-						<input type="file" name="attachment" class="input text-sm py-1" />
-					</label>
 				{/if}
+				<label class="text-sm flex items-center gap-2">
+					<i class="fa-solid fa-paperclip"></i>{data.run.attachment
+						? m.replaceAttachment()
+						: m.attachment()}
+					<input type="file" name="attachment" class="input text-sm py-1" />
+				</label>
 				<button type="submit" class="btn btn-sm preset-filled-primary-500 ml-auto">
 					<i class="fa-solid fa-floppy-disk mr-1"></i>{m.save()}
 				</button>

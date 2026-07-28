@@ -317,19 +317,32 @@ class PostureAssessmentViewSet(BaseModelViewSet):
                 run.attachment.delete(save=False)
             run.attachment = request.FILES["attachment"]
             update_fields.append("attachment")
-        elif request.data.get("remove_attachment"):
+        elif str(request.data.get("remove_attachment", "")).lower() in (
+            "true",
+            "1",
+            "yes",
+        ):
             if run.attachment:
                 run.attachment.delete(save=False)
             run.attachment = None
             update_fields.append("attachment")
         if update_fields:
             try:
-                run.full_clean()
+                run.full_clean(
+                    exclude=[
+                        f.name for f in run._meta.fields if f.name not in update_fields
+                    ]
+                )
             except ValidationError as e:
                 return Response(
-                    {"error": e.message_dict}, status=status.HTTP_400_BAD_REQUEST
+                    {
+                        "error": "; ".join(
+                            msg for msgs in e.message_dict.values() for msg in msgs
+                        )
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
-            run.save(update_fields=update_fields)
+            run.save(update_fields=[*update_fields, "updated_at"])
         return Response(
             {
                 "run_id": str(run.id),
@@ -1040,7 +1053,9 @@ class PostureAssessmentViewSet(BaseModelViewSet):
             )
         with transaction.atomic():
             deleted, _ = assessment.results.filter(asset_id=asset_id).delete()
-            assessment.runs.filter(results__isnull=True).delete()
+            assessment.runs.filter(results__isnull=True).filter(
+                Q(observation=""), Q(attachment="") | Q(attachment__isnull=True)
+            ).delete()
             assessment.assets.remove(asset_id)
         return Response({"deleted_results": deleted})
 

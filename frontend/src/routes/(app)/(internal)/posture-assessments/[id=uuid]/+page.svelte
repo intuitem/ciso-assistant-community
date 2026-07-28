@@ -7,7 +7,7 @@
 	import PostureHistoryChart from '$lib/components/Chart/PostureHistoryChart.svelte';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import { deserialize, enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { invalidateAll, replaceState } from '$app/navigation';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/state';
@@ -121,6 +121,13 @@
 			(r: any) => filterStatuses.length === 0 || filterStatuses.includes(r.result)
 		)
 	);
+
+	$effect(() => {
+		const url = new URL(page.url);
+		if (filterAsset) url.searchParams.set('asset', filterAsset);
+		else url.searchParams.delete('asset');
+		if (url.href !== page.url.href) replaceState(url, page.state);
+	});
 
 	const scopedAssets = $derived(data.data?.assets ?? []);
 	const measuredAssets = $derived.by(() => {
@@ -486,25 +493,29 @@
 					{/key}
 				{/if}
 
-				{#if filterAsset && history?.runs?.length}
-					{#key historyResults}
-						<div>
-							<h3 class="text-lg font-semibold mb-2">{m.runHistory()}</h3>
-							<PostureHistoryChart
-								runs={history.runs}
-								results={historyResults}
-								name="posture_history"
-								onCellClick={(row) =>
-									(expandedRow = {
-										...row,
-										asset: {
-											id: filterAsset,
-											str: assetLabel(scopedAssets.find((a: any) => a.id === filterAsset))
-										}
-									})}
-							/>
-						</div>
-					{/key}
+				{#if filterAsset}
+					{#if history?.runs?.length}
+						{#key historyResults}
+							<div>
+								<h3 class="text-lg font-semibold mb-2">{m.runHistory()}</h3>
+								<PostureHistoryChart
+									runs={history.runs}
+									results={historyResults}
+									name="posture_history"
+									onCellClick={(row) =>
+										(expandedRow = {
+											...row,
+											asset: {
+												id: filterAsset,
+												str: assetLabel(scopedAssets.find((a: any) => a.id === filterAsset))
+											}
+										})}
+								/>
+							</div>
+						{/key}
+					{:else if history}
+						<p class="text-sm text-surface-500 p-4">{m.noEntriesFound()}</p>
+					{/if}
 				{:else if filteredResults.length}
 					{#key filteredResults}
 						<div>
@@ -956,9 +967,10 @@
 		class="fixed z-50 inset-0 m-auto h-fit max-h-[80vh] overflow-y-auto card bg-surface-50-950 shadow-lg p-6 max-w-xl w-[90vw] space-y-3"
 		role="dialog"
 		aria-modal="true"
+		aria-labelledby="posture-cell-dialog-title"
 	>
 		<div class="flex items-start justify-between gap-4">
-			<h3 class="text-lg font-semibold">
+			<h3 id="posture-cell-dialog-title" class="text-lg font-semibold">
 				{expandedRow.requirement.ref_id} — {expandedRow.requirement.name ?? ''}
 			</h3>
 			<button
