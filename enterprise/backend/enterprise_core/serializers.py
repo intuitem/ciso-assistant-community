@@ -6,6 +6,7 @@ from core.serializers import (
     FolderWriteSerializer as CommunityFolderWriteSerializer,
     UserWriteSerializer as CommunityUserWriteSerializer,
 )
+from core.context import focus_folder_id_var
 from core.serializer_fields import FieldsRelatedField
 from iam.models import RoleAssignment, User, Role
 from iam.cache_builders import get_folder_path, CacheNotReadyError
@@ -72,11 +73,18 @@ class EditorPermissionMixin:
         editors = User.get_editors()
         seats = settings.LICENSE_SEATS
 
-        perms = [
-            p
-            for p in RoleAssignment.get_permissions(group)
-            if p not in User.NON_SEAT_PERMISSIONS
-        ]
+        # License accounting must be global, even when the current request
+        # is focused on a domain (a group's assignments outside the focus
+        # subtree would otherwise be invisible to get_permissions()).
+        token = focus_folder_id_var.set(None)
+        try:
+            perms = [
+                p
+                for p in RoleAssignment.get_permissions(group)
+                if p not in User.NON_SEAT_PERMISSIONS
+            ]
+        finally:
+            focus_folder_id_var.reset(token)
         if any(perm.startswith(prefix) for prefix in editor_prefixes for perm in perms):
             logger.info("Adding editor permissions to user", user=instance, group=group)
             if instance not in editors and len(editors) >= seats:

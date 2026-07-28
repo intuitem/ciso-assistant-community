@@ -1022,11 +1022,16 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     @classmethod
     def get_editors(cls) -> List["User"]:
-        return [
-            user
-            for user in cls.objects.all()
-            if user.is_editor and not user.is_third_party
-        ]
+        # License accounting is global, even when the current request is focused on a domain.
+        token = focus_folder_id_var.set(None)
+        try:
+            return [
+                user
+                for user in cls.objects.filter(is_third_party=False)
+                if user.is_editor
+            ]
+        finally:
+            focus_folder_id_var.reset(token)
 
     @property
     def is_sso(self) -> bool:
