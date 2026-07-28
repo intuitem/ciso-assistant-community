@@ -9231,10 +9231,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 }
                 new_result = result_map.get(aggregated, self.Result.NOT_ASSESSED)
 
-        # Update attributes. When the score is manually overridden, the
-        # auditor's pinned value wins: recompute still drives `result` (so a
-        # result-driven questionnaire stays coherent with the answers), but it
-        # must not touch the score or the is_scored flag.
+        # Override pins score and is_scored; result still follows answers.
         if not self.is_score_overridden:
             self.score = new_score
             self.is_scored = new_is_scored

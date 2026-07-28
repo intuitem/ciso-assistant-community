@@ -10962,8 +10962,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 entry["score"] = req.score
 
             if has_questions:
-                # Round-trip the override flag so re-importing this file keeps
-                # a pinned score pinned and an auto score auto.
+                # Round-tripped so re-import keeps the override state.
                 entry["is_score_overridden"] = req.is_score_overridden
                 q_dict = questions_by_node.get(req_node.id)
                 if q_dict:
@@ -11570,9 +11569,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-            # Manual score override: when the auditor pins a manual score via
-            # is_score_overridden, a question-driven RA accepts a directly
-            # written score instead of the answer-computed one.
+            # Effective override state for this write.
             override_value = request.data.get("is_score_overridden")
             score_overridden = (
                 bool(override_value)
@@ -11581,14 +11578,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
             was_overridden = requirement_assessment.is_score_overridden
 
-            # Question-driven requirements: score and is_scored belong to
-            # recompute_assessment (a committed score means "questionnaire
-            # complete" for progress). Direct writes are ignored — same
-            # contract as the write serializer, so clients that round-trip
-            # the field keep working — and flagged in the response. Skipped
-            # when the score is overridden. This must run before score
-            # validation so a round-tripped empty value does not trip the
-            # integer parse.
+            # Question-driven score is recompute-owned: ignore direct writes unless overridden.
+            # Runs before validation so a round-tripped empty value doesn't trip int parse.
             score_ignored = (
                 "score" in request.data
                 and requirement_assessment.requirement.questions.exists()
@@ -11650,8 +11641,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             requirement_assessment.save()
 
-            # Turning the override off on a question-driven RA hands the score
-            # back to the questionnaire: resync from the current answers.
+            # Override turned off: resync score from answers.
             if (
                 was_overridden
                 and not score_overridden

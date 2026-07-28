@@ -4321,14 +4321,8 @@ class LoadFileView(APIView):
                         if has_any_answer:
                             requirement_data["answers"] = answers
 
-                    # Manual-override flag for question-driven requirements. An
-                    # explicit `is_score_overridden` column wins; otherwise a
-                    # score provided WITHOUT answers is a manual override (bare
-                    # scoring template), while a score that arrives alongside
-                    # answers is the exported computed value and stays
-                    # answer-driven. This keeps a plain export -> import
-                    # round-trip from silently pinning every auto-scored
-                    # requirement.
+                    # Override flag: explicit column wins; else a score without
+                    # answers is a manual override.
                     if (
                         requirement_data.get("score") not in (None, "")
                         and requirement_assessment.requirement.questions.exists()
