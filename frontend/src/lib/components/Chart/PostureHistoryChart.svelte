@@ -3,8 +3,8 @@
 	import { m } from '$paraglide/messages';
 
 	interface Props {
+		runs?: { run_id: string; started_at: string; tool?: string }[];
 		results?: any[];
-		assets?: { id: string; name: string }[];
 		width?: string;
 		classesContainer?: string;
 		name?: string;
@@ -12,11 +12,11 @@
 	}
 
 	let {
+		runs = [],
 		results = [],
-		assets = [],
 		width = 'w-full',
 		classesContainer = '',
-		name = 'posture_heatmap',
+		name = 'posture_history',
 		onCellClick
 	}: Props = $props();
 
@@ -41,12 +41,6 @@
 		);
 	});
 
-	const columns = $derived(
-		[...assets].sort((a, b) =>
-			(a.name ?? '').localeCompare(b.name ?? '', undefined, { numeric: true })
-		)
-	);
-
 	const Y_WINDOW = 40;
 	const X_WINDOW = 20;
 	const chartHeight = $derived(Math.max(280, Math.min(checks.length, Y_WINDOW) * 24 + 160));
@@ -59,32 +53,35 @@
 			{ renderer: 'svg' }
 		);
 
-		const latestTimestamp = results.reduce((acc, r) => (r.timestamp > acc ? r.timestamp : acc), '');
-		const assetIndex = new Map(columns.map((a, i) => [a.id, i]));
+		const runIndex = new Map(runs.map((r, i) => [r.run_id, i]));
 		const checkIndex = new Map(checks.map((c, i) => [c.id, i]));
 
 		const data = results
-			.filter((r) => assetIndex.has(r.asset.id))
+			.filter((r) => runIndex.has(r.run_id))
 			.map((r) => ({
 				value: [
-					assetIndex.get(r.asset.id),
+					runIndex.get(r.run_id),
 					checkIndex.get(r.requirement.id),
 					RESULT_ORDER.indexOf(r.result)
 				],
-				row: r,
-				itemStyle: r.timestamp < latestTimestamp ? { opacity: 0.55 } : undefined
+				row: r
 			}));
 
+		const columnLabel = (r: { started_at: string; tool?: string }) =>
+			new Date(r.started_at).toLocaleDateString() +
+			' ' +
+			new Date(r.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
 		const dataZoom = [
-			...(columns.length > X_WINDOW
+			...(runs.length > X_WINDOW
 				? [
 						{
 							type: 'slider',
 							xAxisIndex: 0,
 							bottom: 34,
 							height: 16,
-							startValue: 0,
-							endValue: X_WINDOW - 1,
+							startValue: runs.length - X_WINDOW,
+							endValue: runs.length - 1,
 							zoomLock: false
 						}
 					]
@@ -108,7 +105,7 @@
 			grid: {
 				top: 60,
 				right: checks.length > Y_WINDOW ? 40 : 10,
-				bottom: columns.length > X_WINDOW ? 90 : 60,
+				bottom: runs.length > X_WINDOW ? 90 : 60,
 				left: 90
 			},
 			dataZoom,
@@ -116,10 +113,10 @@
 				position: 'top',
 				formatter: (params: any) => {
 					const r = params.data.row;
+					const run = runs[params.data.value[0]];
 					const parts = [
 						`<b>${r.requirement.ref_id}</b> ${r.requirement.name ?? ''}`,
-						`${params.marker}${resultLabels[r.result] ?? r.result} — ${r.asset.str}`,
-						new Date(r.timestamp).toLocaleString()
+						`${params.marker}${resultLabels[r.result] ?? r.result} — ${columnLabel(run)}${run.tool ? ` (${run.tool})` : ''}`
 					];
 					if (r.actual) parts.push(`actual: ${r.actual}`);
 					if (r.expected) parts.push(`expected: ${r.expected}`);
@@ -132,9 +129,9 @@
 			},
 			xAxis: {
 				type: 'category',
-				data: columns.map((a) => a.name),
+				data: runs.map(columnLabel),
 				position: 'top',
-				axisLabel: { rotate: columns.length > 6 ? 30 : 0 },
+				axisLabel: { rotate: runs.length > 6 ? 30 : 0 },
 				splitArea: { show: true }
 			},
 			yAxis: {
