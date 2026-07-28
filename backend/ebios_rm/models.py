@@ -909,6 +909,7 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         EXPLOIT = 3, "ebiosExploitation"
 
     ref_id = models.CharField(max_length=100, blank=True, verbose_name="Reference ID")
+    is_published = models.BooleanField(_("published"), default=True)
     threat = models.ForeignKey(
         Threat,
         on_delete=models.SET_NULL,
