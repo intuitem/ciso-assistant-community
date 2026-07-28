@@ -761,6 +761,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			},
+			{ field: 'asset', urlModel: 'findings', disableDelete: true },
+			{ field: 'asset', urlModel: 'asset-assessments' },
 			{
 				field: 'assets',
 				urlModel: 'vulnerabilities',
@@ -769,11 +771,11 @@ export const URL_MODEL_MAP: ModelMap = {
 					parentField: 'vulnerabilities'
 				}
 			},
-			{ field: 'assets', urlModel: 'risk-scenarios', disableCreate: true, disableDelete: true },
+			{ field: 'assets', urlModel: 'ebios-rm', disableCreate: true, disableDelete: true },
+			{ field: 'assets', urlModel: 'risk-scenarios', disableDelete: true },
 			{
 				field: 'assets',
 				urlModel: 'quantitative-risk-scenarios',
-				disableCreate: true,
 				disableDelete: true
 			},
 			{
@@ -2161,7 +2163,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'authors', urlModel: 'actors' },
 			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
-			{ field: 'owner', urlModel: 'actors', urlParams: 'is_third_party=false' }
+			{ field: 'owner', urlModel: 'actors', urlParams: 'is_third_party=false' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'findings_assessment', urlModel: 'findings' },
@@ -2181,13 +2184,16 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ref_id' },
 			{ field: 'name' },
 			{ field: 'description' },
+			{ field: 'category' },
 			{ field: 'authors' },
 			{ field: 'reviewers' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'reported_at', type: 'date' },
 			{ field: 'version' },
 			{ field: 'status' },
 			{ field: 'observation' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'is_locked' }
 		]
 	},
@@ -2232,6 +2238,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Findings',
 		foreignKeyFields: [
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
+			{ field: 'asset', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },

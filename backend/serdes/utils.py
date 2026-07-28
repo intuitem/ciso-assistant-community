@@ -483,13 +483,6 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         | Q(ebios_rm_studies__in=ebios_rm_studies)
     ).distinct()
 
-    assets = Asset.objects.filter(
-        Q(folder__in=folders)
-        | Q(risk_scenarios__in=risk_scenarios)
-        | Q(ebios_rm_studies__in=ebios_rm_studies)
-        | Q(feared_events__in=feared_events)
-    ).distinct()
-
     vulnerabilities = Vulnerability.objects.filter(
         Q(folder__in=folders) | Q(risk_scenarios__in=risk_scenarios)
     ).distinct()
@@ -530,7 +523,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
 
     incidents = Incident.objects.filter(folder__in=folders).distinct()
     # Close the loop on reverse M2Ms so objects reachable only through
-    # incidents/campaigns still make it into the dump (and into
+    # incidents/campaigns/findings still make it into the dump (and into
     # loaded_libraries). Rebuild with fresh Q filters rather than queryset
     # union so the result plays nicely with .distinct().
     entities = Entity.objects.filter(
@@ -545,6 +538,14 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         Q(folder__in=folders)
         | Q(complianceassessment__in=compliance_assessments)
         | Q(campaigns__in=campaigns)
+        | Q(requirement_nodes__findings__in=findings)
+    ).distinct()
+    assets = Asset.objects.filter(
+        Q(folder__in=folders)
+        | Q(risk_scenarios__in=risk_scenarios)
+        | Q(ebios_rm_studies__in=ebios_rm_studies)
+        | Q(feared_events__in=feared_events)
+        | Q(findings__in=findings)
     ).distinct()
     perimeters = Perimeter.objects.filter(
         Q(folder__in=folders) | Q(campaigns__in=campaigns)
