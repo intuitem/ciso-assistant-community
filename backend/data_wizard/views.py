@@ -2,9 +2,11 @@ import csv
 import io
 import logging
 import structlog
+from pathlib import Path
 from types import MappingProxyType
 import re
 import pandas as pd
+from django.http import FileResponse
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -476,6 +478,47 @@ class ModelType(enum.StrEnum):
             return ModelType(model_type)
         except ValueError:
             return
+
+
+IMPORT_TEMPLATES_DIR = Path(__file__).resolve().parent / "import_templates"
+
+# Models without an entry (ComplianceAssessment, CyFun, EBIOS variants) have no
+# generic template: their file depends on a framework or comes from an external tool.
+IMPORT_TEMPLATES: dict[ModelType, str] = {
+    ModelType.ASSET: "assets_template.xlsx",
+    ModelType.APPLIED_CONTROL: "applied_controls_template.xlsx",
+    ModelType.PERIMETER: "perimeters_template.xlsx",
+    ModelType.USER: "users_template.xlsx",
+    ModelType.ELEMENTARY_ACTION: "elementary_actions_template.xlsx",
+    ModelType.REFERENCE_CONTROL: "reference_controls_template.xlsx",
+    ModelType.THREAT: "threats_template.xlsx",
+    ModelType.FOLDER: "domains_template.xlsx",
+    ModelType.SECURITY_EXCEPTION: "security_exceptions_template.xlsx",
+    ModelType.INCIDENT: "incidents_template.xlsx",
+    ModelType.POLICY: "policies_template.xlsx",
+    ModelType.VULNERABILITY: "vulnerabilities_template.xlsx",
+    ModelType.PROCESSING: "processings_template.xlsx",
+    ModelType.TPRM: "third_parties_template.xlsx",
+    ModelType.FINDINGS_ASSESSMENT: "findings_assessment_template.xlsx",
+    ModelType.RISK_ASSESSMENT: "risk_assessment_template.xlsx",
+    ModelType.BUSINESS_IMPACT_ANALYSIS: "business_impact_analysis_template.xlsx",
+    ModelType.TASK_TEMPLATE: "tasks_template.xlsx",
+}
+
+
+class ImportTemplateView(APIView):
+    def get(self, request, model_type: str):
+        parsed = ModelType.from_string(model_type)
+        filename = IMPORT_TEMPLATES.get(parsed) if parsed else None
+        if filename is None:
+            return Response(
+                {"error": "noTemplateAvailable"}, status=status.HTTP_404_NOT_FOUND
+            )
+        return FileResponse(
+            (IMPORT_TEMPLATES_DIR / filename).open("rb"),
+            as_attachment=True,
+            filename=filename,
+        )
 
 
 @dataclass(frozen=True)
@@ -1510,7 +1553,6 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "name": name,
             "description": record.get("description"),
             "ref_id": record.get("ref_id"),
-            "status": record.get("status"),
             "findings_assessment": context.findings_assessment.id,
             "severity": severity,
             "filtering_labels": filtering_label_ids,
@@ -1519,6 +1561,12 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "observation": record.get("observation", ""),
             "vulnerabilities": vulnerabilities,
         }
+
+        # Only pass status when the source provides one — a None status fails
+        # serializer validation, so files without a status column keep the
+        # model default.
+        if record.get("status"):
+            finding_data["status"] = record.get("status")
 
         if priority is not None:
             finding_data["priority"] = priority

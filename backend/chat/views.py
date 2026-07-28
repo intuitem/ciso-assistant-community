@@ -120,6 +120,23 @@ class ChatSessionViewSet(BaseModelViewSet):
         user_content = _sanitize_user_input(serializer.validated_data["content"])
         page_context = serializer.validated_data.get("page_context", {})
 
+        document_ids = serializer.validated_data.get("document_ids") or []
+        documents = []
+        if document_ids:
+            documents = list(
+                IndexedDocument.objects.filter(
+                    id__in=document_ids,
+                    source_type=IndexedDocument.SourceType.CHAT,
+                    source_content_type=ContentType.objects.get_for_model(ChatSession),
+                    source_object_id=session.id,
+                )
+            )
+            if len(documents) != len(set(document_ids)):
+                return Response(
+                    {"detail": "Unknown document reference."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         # Save user message
         ChatMessage.objects.create(
             session=session,
@@ -172,7 +189,19 @@ class ChatSessionViewSet(BaseModelViewSet):
         # Step 1a: Deterministic pre-routing for workflows.
         # Small LLMs are unreliable at tool selection with 5+ tools,
         # so we match workflows by context + keywords first.
-        pre_routed_workflow = _match_workflow(user_content, parsed_context)
+        # A tabular attachment — or an import already in progress — always
+        # routes to the import workflow: attachment presence is a stronger
+        # signal than any keyword.
+        from .tabular import TABULAR_CONTENT_TYPES
+
+        active_workflow = (session.workflow_state or {}).get("workflow")
+        if (
+            any(d.content_type in TABULAR_CONTENT_TYPES for d in documents)
+            or active_workflow == "import_document"
+        ):
+            pre_routed_workflow = get_workflow_by_tool_name("workflow_import_document")
+        else:
+            pre_routed_workflow = _match_workflow(user_content, parsed_context)
         if pre_routed_workflow:
             logger.info("workflow_pre_routed", workflow=pre_routed_workflow.name)
             tool_response = {"name": f"workflow_{pre_routed_workflow.name}"}
@@ -258,6 +287,8 @@ class ChatSessionViewSet(BaseModelViewSet):
                     history=wf_history,
                     user_lang=request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2],
                     session=session,
+                    documents=documents,
+                    request=request,
                 )
 
                 def stream_workflow():
@@ -796,7 +827,15 @@ class ChatSessionViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="upload")
     def upload_document(self, request, pk=None):
-        """Upload a document to be indexed for RAG in this session's folder context."""
+        """Upload a document to this session, validated and stored in an
+        accessible domain folder so RAG retrieval can actually find it."""
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        from core.validators import validate_file_name, validate_file_size
+
+        from .rag import get_accessible_folder_ids
+        from .upload_validation import validate_chat_upload
+
         session = self.get_object()
         file = request.FILES.get("file")
 
@@ -805,11 +844,35 @@ class ChatSessionViewSet(BaseModelViewSet):
                 {"detail": "No file provided."}, status=status.HTTP_400_BAD_REQUEST
             )
 
+        try:
+            validate_file_size(file)
+            validate_file_name(file)
+            content_type = validate_chat_upload(file)
+        except DjangoValidationError as e:
+            return Response(
+                {"detail": " ".join(e.messages)}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # The session folder defaults to the root folder, which the RAG domain
+        # filter excludes — documents must land in an accessible domain folder.
+        accessible_folders = get_accessible_folder_ids(request.user)
+        if not accessible_folders:
+            return Response(
+                {"detail": "No accessible domain folder to store the document in."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        folder_id = request.data.get("folder_id") or accessible_folders[0]
+        if str(folder_id) not in accessible_folders:
+            return Response(
+                {"detail": "Folder not found or not accessible."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         doc = IndexedDocument.objects.create(
-            folder=session.folder,
+            folder_id=folder_id,
             file=file,
             filename=file.name,
-            content_type=file.content_type or "application/octet-stream",
+            content_type=content_type,
             source_type=IndexedDocument.SourceType.CHAT,
             source_content_type=ContentType.objects.get_for_model(ChatSession),
             source_object_id=session.id,
@@ -821,9 +884,108 @@ class ChatSessionViewSet(BaseModelViewSet):
         ingest_document(str(doc.id))
 
         return Response(
-            {"id": str(doc.id), "filename": doc.filename, "status": doc.status},
+            {
+                "id": str(doc.id),
+                "filename": doc.filename,
+                "content_type": doc.content_type,
+                "status": doc.status,
+            },
             status=status.HTTP_201_CREATED,
         )
+
+    @action(detail=True, methods=["post"], url_path="import")
+    def apply_import(self, request, pk=None):
+        """Apply (or cancel) the import the workflow staged in workflow_state.
+
+        The actual writes go through the data_wizard RecordConsumer for the
+        target inside a single transaction; nothing here can do more than a
+        manual data-wizard import by the same user.
+        """
+        from .importer import run_import
+        from .rag import get_accessible_folder_ids
+        from .tabular import IMPORT_TARGETS
+
+        session = self.get_object()
+        state = session.workflow_state or {}
+        if (
+            state.get("workflow") != "import_document"
+            or state.get("step") != "import_review"
+        ):
+            return Response(
+                {"detail": "No import is awaiting confirmation."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if request.data.get("cancel"):
+            session.workflow_state = {}
+            session.save(update_fields=["workflow_state"])
+            return Response({"detail": "cancelled"})
+
+        data = state.get("data") or {}
+        doc = IndexedDocument.objects.filter(
+            id=data.get("document_id"),
+            source_content_type=ContentType.objects.get_for_model(ChatSession),
+            source_object_id=session.id,
+        ).first()
+        if doc is None:
+            return Response(
+                {"detail": "The uploaded file is no longer available."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        folder_id = str(request.data.get("folder_id") or doc.folder_id)
+        if folder_id not in get_accessible_folder_ids(request.user):
+            return Response(
+                {"detail": "Folder not found or not accessible."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            report = run_import(
+                request,
+                doc,
+                data["mapping"],
+                data["target"],
+                folder_id=folder_id,
+                dry_run=False,
+                target_id=data.get("container_id"),
+            )
+        except Exception as e:
+            logger.error(
+                "chat_import_apply_failed", session_id=str(session.id), error=e
+            )
+            return Response(
+                {"detail": "The import failed and nothing was written."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        session.workflow_state = {}
+        session.save(update_fields=["workflow_state"])
+
+        label = IMPORT_TARGETS[data["target"]]["label"]
+        into = (
+            f" into **{data['container_name']}**"
+            if data.get("container_id") and data.get("container_name")
+            else ""
+        )
+        summary = (
+            f"Imported **{doc.filename}** as {label.lower()}{into}: "
+            f"{report['created']} created, {report['updated']} updated"
+        )
+        if report["skipped"]:
+            summary += f", {report['skipped']} skipped"
+        if report["failed"]:
+            summary += f", {report['failed']} failed"
+        summary += "."
+        if report["errors"]:
+            summary += "\n\nIssues:\n" + "\n".join(f"- {e}" for e in report["errors"])
+        ChatMessage.objects.create(
+            session=session,
+            role=ChatMessage.Role.ASSISTANT,
+            content=summary,
+        )
+
+        return Response({**report, "message": summary})
 
 
 class IndexedDocumentViewSet(BaseModelViewSet):
