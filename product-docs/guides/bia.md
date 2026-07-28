@@ -87,8 +87,8 @@ The three recovery checkboxes drive the **Recovery insights** activity tracker o
 To cover a large scope without filling the form once per asset, use the **Batch add assets** button (layer-group icon next to the create button on the **Asset assessments** table):
 
 1. A picker opens, listing only the assets not yet included in this BIA — with search and pagination (**Show** 10 / 25 / 50 / 100 **entries** per page).
-2. Tick assets to add them to the **Selected** tray. **Select all** ticks the current page, and the selection is kept while you search or change pages.
-3. Click **Batch add assets**. One asset assessment is created per selected asset, and a toast confirms the count.
+2. Tick assets on the current page — **Select all** ticks the visible page. The selection always matches what you see: changing page or search clears it.
+3. Click **Batch add assets**. One asset assessment is created per selected asset and a toast confirms the count. The picker stays open and the added assets drop out of the list, so a larger scope is covered page by page, confirm by confirm — then **Close**.
 
 Batch-added assessments start empty — recovery flags unchecked, no extra dependencies, controls, or evidences — so refine each one afterwards. Duplicates are impossible: assets already covered by the BIA are simply not offered again. On a locked BIA the add buttons are hidden, like the removal checkboxes.
 

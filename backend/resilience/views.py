@@ -2,13 +2,13 @@ import io
 import re
 import uuid
 
-from django.conf import settings
 from django.db import IntegrityError
 from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
 
 from core.views import (
+    BATCH_SIZE_LIMIT,
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
     escape_excel_formula,
@@ -451,9 +451,9 @@ class AssetAssessmentViewSet(BaseModelViewSet):
                 {"error": "assets is required and must be a non-empty list"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if len(asset_ids) > settings.PAGINATE_BY:
+        if len(asset_ids) > BATCH_SIZE_LIMIT:
             return Response(
-                {"error": "too many assets", "max": settings.PAGINATE_BY},
+                {"error": "too many assets", "max": BATCH_SIZE_LIMIT},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

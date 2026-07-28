@@ -1,8 +1,8 @@
 import pytest
-from django.conf import settings
 from knox.models import AuthToken
 from rest_framework.test import APIClient
 from core.models import Asset, Perimeter, RiskMatrix, StoredLibrary
+from core.views import BATCH_SIZE_LIMIT
 from iam.models import Folder, Permission, Role, RoleAssignment, User, UserGroup
 from resilience.models import (
     AssetAssessment,
@@ -185,13 +185,13 @@ class TestAssetAssessmentsBatchCreate:
 
     def test_batch_create_over_cap(self, authenticated_client, setup):
         folder, bia, assets = setup
-        too_many = [str(assets[0].id)] * (settings.PAGINATE_BY + 1)
+        too_many = [str(assets[0].id)] * (BATCH_SIZE_LIMIT + 1)
 
         response = authenticated_client.post(
             BATCH_CREATE_URL, {"bia": str(bia.id), "assets": too_many}, format="json"
         )
         assert response.status_code == 400
-        assert response.json()["max"] == settings.PAGINATE_BY
+        assert response.json()["max"] == BATCH_SIZE_LIMIT
 
     def test_exclude_bia_asset_filter(self, authenticated_client, setup):
         folder, bia, assets = setup
@@ -347,6 +347,17 @@ class TestAssetAssessmentsBatchRemove:
         data = response.json()
         assert data["succeeded"] == []
         assert len(data["failed"]) == 1
+        assert AssetAssessment.objects.filter(bia=bia).count() == 3
+
+    def test_batch_delete_over_cap(self, authenticated_client, setup):
+        folder, bia, assessments = setup
+        too_many = [str(assessments[0].id)] * (BATCH_SIZE_LIMIT + 1)
+
+        response = authenticated_client.post(
+            BATCH_ACTION_URL, {"action": "delete", "ids": too_many}, format="json"
+        )
+        assert response.status_code == 400
+        assert response.json()["max"] == BATCH_SIZE_LIMIT
         assert AssetAssessment.objects.filter(bia=bia).count() == 3
 
     def test_single_delete_locked_bia(self, authenticated_client, setup):

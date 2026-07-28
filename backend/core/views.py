@@ -211,6 +211,12 @@ SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
 
+# Max ids accepted per batch request (batch-action, batch-create, member
+# management). Keep >= the largest table/picker page size (100 — see
+# RowsPerPage options and EntityPickerModal PAGE_SIZE_OPTIONS) so a full-page
+# selection always fits in a single request.
+BATCH_SIZE_LIMIT = 100
+
 
 MAPPING_MAX_DEPTH = 3
 
@@ -1351,10 +1357,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        BATCH_SIZE_LIMIT = 100
         if len(ids) > BATCH_SIZE_LIMIT:
             return Response(
-                {"error": f"Too many ids (max {BATCH_SIZE_LIMIT})"},
+                {"error": "too many ids", "max": BATCH_SIZE_LIMIT},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -7746,7 +7751,7 @@ class UserGroupViewSet(BaseModelViewSet):
 
     # Deletion of built-in groups is blocked generically by the permission layer.
 
-    MEMBER_BATCH_LIMIT = 100
+    MEMBER_BATCH_LIMIT = BATCH_SIZE_LIMIT
 
     def _member_ids(self, request) -> list[str]:
         ids = request.data.get("users")

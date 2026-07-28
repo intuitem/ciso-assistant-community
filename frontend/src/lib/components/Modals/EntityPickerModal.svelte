@@ -18,8 +18,6 @@
 		secondaryField,
 		scopeFilters = {},
 		activeField,
-		initialSelectedIds = [],
-		initialSelectedParams,
 		confirmLabel,
 		onConfirm
 	}: Props = $props();
@@ -55,6 +53,9 @@
 		const seq = ++loadSeq;
 		loading = true;
 		loadError = false;
+		// Selection is scoped to the visible page: any view change (page, search,
+		// page size, filters) clears it, so what you confirm is what you see.
+		selected.clear();
 		try {
 			const p = buildParams({ limit: String(pageSize), offset: String(offset) });
 			const res = await fetch(`/${endpoint}/autocomplete?${p.toString()}`);
@@ -71,30 +72,6 @@
 			if (seq === loadSeq) loadError = true;
 		} finally {
 			if (seq === loadSeq) loading = false;
-		}
-	}
-
-	async function hydrateSelection() {
-		let p: URLSearchParams;
-		if (initialSelectedIds.length) {
-			p = new URLSearchParams({ id: initialSelectedIds.join(','), limit: '10000' });
-		} else if (initialSelectedParams) {
-			p = new URLSearchParams({ ...initialSelectedParams, limit: '10000' });
-		} else {
-			return;
-		}
-		try {
-			const res = await fetch(`/${endpoint}/autocomplete?${p.toString()}`);
-			if (res.ok) {
-				const data = await res.json();
-				for (const o of data?.results ?? data ?? []) selected.set(o.id, o);
-			} else {
-				console.error(`Failed to hydrate ${endpoint} selection:`, res.status);
-				loadError = true;
-			}
-		} catch (e) {
-			console.error(`Failed to hydrate ${endpoint} selection:`, e);
-			loadError = true;
 		}
 	}
 
@@ -119,7 +96,7 @@
 		else selected.set(row.id, row);
 	}
 
-	// Select/deselect all rows on the current page (selection persists across pages).
+	// Select/deselect all rows on the current page.
 	const pageAllSelected = $derived(rows.length > 0 && rows.every((r) => selected.has(r.id)));
 
 	function toggleSelectAllPage() {
@@ -173,8 +150,10 @@
 		saveError = false;
 		try {
 			await onConfirm([...selected.keys()]);
-			// Only close once onConfirm has resolved without throwing.
-			parent?.onClose?.();
+			// Stay open and reload so the confirmed items drop out of the list
+			// (add-only scope filters) and the user can pick the next page —
+			// large selections are composed page by page, confirm by confirm.
+			reloadFromStart();
 		} catch (e) {
 			// Keep the modal open so the selection isn't lost and the failure is visible.
 			saveError = true;
@@ -184,7 +163,6 @@
 		}
 	}
 
-	hydrateSelection();
 	load();
 </script>
 
@@ -339,49 +317,20 @@
 			</span>
 		</div>
 
-		<div class="px-5 py-3">
-			<div class="flex items-center justify-between mb-1">
-				<span class="text-sm text-surface-600-400"
-					>{safeTranslate('selected')} ({selected.size})</span
-				>
-			</div>
-			<div class="flex flex-wrap content-start gap-2 h-[60px] overflow-y-auto">
-				{#if selected.size === 0}
-					<span class="text-xs text-surface-500 py-1">{safeTranslate('nothingSelected')}</span>
-				{:else}
-					{#each [...selected.values()] as row}
-						<span
-							class="inline-flex items-center gap-2 text-xs pl-3 pr-2 py-1 rounded-full bg-surface-100-900 border border-surface-200-800"
-						>
-							<span class="max-w-[200px] truncate" title={label(row)}>{label(row)}</span>
-							<button
-								type="button"
-								aria-label={m.remove()}
-								class="shrink-0"
-								onclick={() => selected.delete(row.id)}
-							>
-								<i class="fa-solid fa-xmark text-surface-500"></i>
-							</button>
-						</span>
-					{/each}
-				{/if}
-			</div>
-		</div>
-
 		<footer class="flex items-center justify-end gap-3 px-5 py-3 border-t border-surface-200-800">
 			{#if saveError}
 				<span class="mr-auto text-sm text-error-500">
 					<i class="fa-solid fa-triangle-exclamation mr-1"></i>{safeTranslate('error')}
 				</span>
 			{/if}
-			<button type="button" class="btn preset-tonal" onclick={parent.onClose}>{m.cancel()}</button>
+			<button type="button" class="btn preset-tonal" onclick={parent.onClose}>{m.close()}</button>
 			<button
 				type="button"
 				class="btn preset-filled-primary-500"
 				disabled={saving || selected.size === 0}
 				onclick={confirm}
 			>
-				{confirmLabel ?? m.save()}
+				{confirmLabel ?? m.save()}{selected.size > 0 ? ` (${selected.size})` : ''}
 			</button>
 		</footer>
 	</div>

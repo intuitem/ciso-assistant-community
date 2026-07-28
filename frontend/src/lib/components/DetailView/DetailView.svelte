@@ -218,48 +218,17 @@
 		modalStore.trigger(modal);
 	}
 
-	function removeFromParent(
-		field: any,
-		ids: string[],
-		clear: () => void,
-		reload: () => void
-	): void {
-		if (!field?.removeFromParent || !ids.length) return;
-		modalStore.trigger({
-			type: 'confirm',
-			title: safeTranslate(field.removeFromParent.label ?? 'remove'),
-			body: safeTranslate(field.removeFromParent.confirmMessage ?? 'confirmRemoveSelected', {
-				count: ids.length
-			}),
-			buttonTextConfirm: safeTranslate(field.removeFromParent.label ?? 'remove'),
-			response: async (confirmed: boolean) => {
-				if (!confirmed) return;
-				const res = await fetch(
-					`/${data.model.urlModel}/${data.data.id}/${field.removeFromParent.action}`,
-					{
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ [field.removeFromParent.payloadField]: ids })
-					}
-				);
-				if (res.ok) {
-					clear();
-					reload();
-					await invalidateAll();
-					toastStore.trigger({
-						message: safeTranslate(field.removeFromParent.successMessage ?? 'saved'),
-						background: 'preset-filled-success-500'
-					});
-				} else {
-					const body = await res.json().catch(() => ({}));
-					toastStore.trigger({
-						message:
-							typeof body?.error === 'string' ? safeTranslate(body.error) : m.anErrorOccurred(),
-						background: 'preset-filled-error-500'
-					});
-				}
-			}
-		});
+	// Table-scoped batch actions for a reverse-FK table, gated by change on the
+	// parent object (so parent_action entries are only offered to users the
+	// parent endpoint would authorize). parent_action endpoints are resolved
+	// here — the only place that knows the parent url and id.
+	function tableBatchActions(field: ReverseForeignKeyField) {
+		if (!field.tableBatchActions || !canEditObject) return [];
+		return field.tableBatchActions.map((a) =>
+			a.type === 'parent_action'
+				? { ...a, endpoint: `/${data.model.urlModel}/${data.data.id}/${a.action}` }
+				: a
+		);
 	}
 
 	function modalSelectExisting(field: ReverseForeignKeyField): void {
@@ -1016,29 +985,15 @@
 								})}
 								source={model.table}
 								disableCreate={disableCreate || model.disableCreate}
-								disableEdit={disableEdit || model.disableEdit}
-								disableDelete={disableDelete || model.disableDelete}
+								disableEdit={disableEdit || model.disableEdit || Boolean(data.data.is_locked)}
+								disableDelete={disableDelete || model.disableDelete || Boolean(data.data.is_locked)}
 								deleteForm={model.deleteForm}
 								URLModel={urlmodel}
 								expectedCount={getExpectedCount(urlmodel, field)}
 								fields={fieldsToUse}
 								defaultFilters={field.defaultFilters || {}}
-								selectable={Boolean(
-									canEditObject && !data.data.is_locked && field?.removeFromParent
-								)}
+								extraBatchActions={tableBatchActions(field)}
 							>
-								{#snippet selectActions({ ids, clear, reload })}
-									{#if field?.removeFromParent}
-										<button
-											type="button"
-											class="btn btn-sm preset-filled-error-500"
-											onclick={() => removeFromParent(field, ids, clear, reload)}
-										>
-											<i class="{field.removeFromParent.icon ?? 'fa-solid fa-user-minus'} mr-2"
-											></i>{safeTranslate(field.removeFromParent.label ?? 'remove')}
-										</button>
-									{/if}
-								{/snippet}
 								{#snippet addButton()}
 									{#if data.data.is_locked}
 										<!-- Locked parent: no add affordances, matching the hidden remove selection. -->

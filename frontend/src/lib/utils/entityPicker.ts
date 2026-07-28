@@ -14,11 +14,14 @@ export interface EntityPickerOptions {
 	scopeFilters?: Record<string, string>;
 	/** Boolean field driving an active/inactive badge + an "include inactive" toggle. */
 	activeField?: string;
-	/** Seed the selection tray from explicit ids, or from a server-side filter. */
-	initialSelectedIds?: string[];
-	initialSelectedParams?: Record<string, string>;
 	confirmLabel?: string;
-	/** Receives the final selected ids on confirm. */
+	/**
+	 * Receives the selected ids on confirm. Selection is scoped to the visible
+	 * page; on success the picker stays open and reloads, so larger scopes are
+	 * composed page by page, confirm by confirm (add-only scope filters drop
+	 * confirmed items from subsequent pages). Throw to keep the selection and
+	 * surface the failure.
+	 */
 	onConfirm: (ids: string[]) => Promise<void> | void;
 }
 
