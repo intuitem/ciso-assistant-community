@@ -804,7 +804,12 @@
 												<Progress.Circle class="[--size:--spacing(10)]">
 													<Progress.CircleTrack />
 													<Progress.CircleRange
-														class={displayScoreColor(computedScore, resolvedMax, false, resolvedMin)}
+														class={displayScoreColor(
+															computedScore,
+															resolvedMax,
+															false,
+															resolvedMin
+														)}
 													/>
 												</Progress.Circle>
 												<div class="absolute inset-0 flex items-center justify-center">

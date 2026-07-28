@@ -11570,9 +11570,23 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
             # Effective override state for this write.
-            override_value = request.data.get("is_score_overridden")
+            override_raw = request.data.get("is_score_overridden")
+            override_value = None
+            if override_raw is not None and str(override_raw).strip() != "":
+                token = str(override_raw).strip().lower()
+                if isinstance(override_raw, bool):
+                    override_value = override_raw
+                elif token in ("true", "1", "yes", "on"):
+                    override_value = True
+                elif token in ("false", "0", "no", "off"):
+                    override_value = False
+                else:
+                    return Response(
+                        {"error": "is_score_overridden must be a boolean"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
             score_overridden = (
-                bool(override_value)
+                override_value
                 if override_value is not None
                 else requirement_assessment.is_score_overridden
             )
@@ -11638,21 +11652,29 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 # Explicitly setting score to null/empty
                 requirement_assessment.score = None
                 requirement_assessment.is_scored = False
-
-            requirement_assessment.save()
-
-            # Override turned off: resync score from answers.
-            if (
-                was_overridden
-                and not score_overridden
+            elif (
+                score_overridden
                 and requirement_assessment.requirement.questions.exists()
             ):
-                requirement_assessment.compute_score_and_result()
+                # Override on, no score in request: keep is_scored in sync.
+                requirement_assessment.is_scored = (
+                    requirement_assessment.score is not None
+                )
+
+            # Save and (on unpin) recompute must commit or roll back together.
+            with transaction.atomic():
+                requirement_assessment.save()
+                if (
+                    was_overridden
+                    and not score_overridden
+                    and requirement_assessment.requirement.questions.exists()
+                ):
+                    requirement_assessment.compute_score_and_result()
 
             response_data = {
                 "message": "Requirement updated successfully",
                 "urn": urn,
-                "result": result,
+                "result": requirement_assessment.result,
             }
             if score_ignored:
                 response_data["score_ignored"] = (
