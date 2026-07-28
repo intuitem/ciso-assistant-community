@@ -9457,7 +9457,10 @@ class Answer(AbstractBaseModel, FolderMixin):
         self._defer_cel_evaluation()
 
 
-class FindingsAssessment(Assessment):
+class FindingsAssessment(Assessment, FilteringLabelMixin):
+    class Meta(Assessment.Meta, FilteringLabelMixin.Meta):
+        pass
+
     class Category(models.TextChoices):
         UNDEFINED = "--", "Undefined"
         PENTEST = "pentest", "Pentest"
@@ -9466,6 +9469,7 @@ class FindingsAssessment(Assessment):
         AUDIT = "audit", "Audit"
         SELF_IDENTIFIED = "self_identified", "Self-identified"
         POSTURE = "posture", "Posture follow-up"
+        RESPONSIBLE_DISCLOSURE = "responsible_disclosure", "Responsible disclosure"
 
     category = models.CharField(
         verbose_name=_("Category"),
@@ -9485,6 +9489,8 @@ class FindingsAssessment(Assessment):
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
+
+    reported_at = models.DateField(null=True, blank=True, verbose_name=_("Reported at"))
 
     def get_findings_metrics(self):
         findings = self.findings.all()

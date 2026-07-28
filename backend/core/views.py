@@ -15028,6 +15028,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "authors",
         "status",
         "evidences",
+        "filtering_labels",
         "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id"]
@@ -15046,6 +15047,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "evidences",
                 "authors",
+                "filtering_labels__folder",
             )
             .annotate(
                 _total_findings=Count("findings"),
@@ -15517,6 +15519,7 @@ class FindingViewSet(BaseModelViewSet):
         "severity": ["exact"],
         "priority": ["exact"],
         "findings_assessment": ["exact"],
+        "asset": ["exact"],
         "filtering_labels": ["exact"],
         "applied_controls": ["exact"],
         "evidences": ["exact"],
