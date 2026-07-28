@@ -7,6 +7,7 @@ import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svel
 import UserGroupNameDisplay from '$lib/components/ModelTable/field/UserGroupNameDisplay.svelte';
 import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
 import { listViewFields } from './table';
+import type { TableBatchAction } from './table';
 import type { urlModel } from './types';
 import LibraryOverview from '$lib/components/ModelTable/field/LibraryOverview.svelte';
 import MarkdownDescription from '$lib/components/ModelTable/field/MarkdownDescription.svelte';
@@ -127,15 +128,13 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 	batchCreate?: {
 		label?: string; // i18n key for button title (defaults to 'batchCreate')
 	};
-	// Enables multi-row selection on the reverse-FK table with an action that POSTs
-	// the selected ids to a parent endpoint (e.g. remove members from a group).
-	// Gated by change permission on the parent's folder.
-	removeFromParent?: {
-		action: string; // parent action url segment, e.g. 'remove-members'
-		payloadField: string; // request body key holding the selected ids, e.g. 'users'
-		label?: string; // i18n key for the button (defaults to 'remove')
-		successMessage?: string; // i18n key for the success toast
-	};
+	// Extra batch actions for this reverse-FK table only, merged into the batch
+	// bar next to the child model's global batchActions. Pre-gated by the
+	// embedding view: DetailView only passes them when the user can change the
+	// parent object (so `parent_action` entries never leak to list pages nor to
+	// users without change on the parent). See TableBatchAction in table.ts for
+	// the row-operation vs parent-mutation decision rule.
+	tableBatchActions?: TableBatchAction[];
 }
 
 interface Field {
@@ -896,12 +895,16 @@ export const URL_MODEL_MAP: ModelMap = {
 				// Select members in the table and remove them from the group. Routes to
 				// the group's change_usergroup-gated endpoint, so a domain manager can
 				// remove members without write access on the (Global) User object.
-				removeFromParent: {
-					action: 'remove-members',
-					payloadField: 'users',
-					label: 'removeFromGroup',
-					successMessage: 'membersRemoved'
-				}
+				tableBatchActions: [
+					{
+						type: 'parent_action',
+						action: 'remove-members',
+						payloadField: 'users',
+						label: 'removeFromGroup',
+						icon: 'fa-solid fa-user-minus',
+						successMessage: 'membersRemoved'
+					}
+				]
 			}
 		],
 		filters: []
@@ -1416,7 +1419,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' }
 		],
-		reverseForeignKeyFields: [{ field: 'bia', urlModel: 'asset-assessments' }],
+		reverseForeignKeyFields: [
+			{
+				field: 'bia',
+				urlModel: 'asset-assessments',
+				batchCreate: {
+					label: 'batchAddAssets'
+				}
+			}
+		],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'perimeter' }, { field: 'auditor' }, { field: 'status' }],
 		detailViewFields: [
