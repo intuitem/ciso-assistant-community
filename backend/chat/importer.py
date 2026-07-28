@@ -11,7 +11,7 @@ from __future__ import annotations
 import structlog
 from django.db import transaction
 
-from .tabular import IMPORT_TARGETS, extract_records
+from .tabular import IMPORT_TARGETS, MAX_COUNTED_ROWS, extract_records
 
 logger = structlog.get_logger(__name__)
 
@@ -60,6 +60,7 @@ def run_import(
         "skipped": result.skipped,
         "failed": result.failed,
         "row_count": len(records),
+        "truncated": len(records) >= MAX_COUNTED_ROWS,
         "errors": [str(e.error) for e in result.errors[:MAX_REPORTED_ERRORS]],
     }
     logger.info(

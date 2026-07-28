@@ -414,6 +414,7 @@ async function streamResponse(userMessage: string, documentIds: string[] = []) {
 									availableFolders: data.available_folders,
 									documentId: data.document_id,
 									targetName: data.target_name,
+									truncated: data.truncated,
 									rowCount: data.row_count,
 									createdCount: data.created,
 									updatedCount: data.updated,
@@ -636,7 +637,7 @@ export async function confirmAction(messageId: string) {
 			const res = await fetch(`/fe-api/chat/sessions/${sessionId}/import`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ folder_id: action.folderId })
+				body: JSON.stringify({})
 			});
 			if (res.ok) {
 				const data = await res.json();

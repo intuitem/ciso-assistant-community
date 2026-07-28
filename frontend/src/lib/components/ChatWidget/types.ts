@@ -22,6 +22,7 @@ export interface PendingAction {
 	// Import-specific fields (dry-run counts)
 	documentId?: string;
 	targetName?: string;
+	truncated?: boolean;
 	rowCount?: number;
 	createdCount?: number;
 	updatedCount?: number;

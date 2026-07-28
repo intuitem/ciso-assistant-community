@@ -1504,6 +1504,7 @@
 	"chatImportNew": "to create",
 	"chatImportUpdated": "to update",
 	"chatImportInvalid": "invalid",
+	"chatImportTruncated": "Only the first {count} rows are covered — split the file to import the rest.",
 	"chatAttachFile": "Attach a file",
 	"chatAttachmentFailed": "The file could not be uploaded",
 	"chatRemoveAttachment": "Remove attachment",

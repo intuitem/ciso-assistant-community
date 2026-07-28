@@ -180,7 +180,7 @@ def test_map_columns_aliases():
     assert unmapped == ["custom col"]
 
 
-def test_extract_records_renames_and_drops():
+def test_extract_records_keeps_source_headers_and_drops_unknown():
     mapped, _ = map_columns(
         ["name", "description", "status", "impact", "ref_id", "custom col"],
         "applied_control",
@@ -188,8 +188,29 @@ def test_extract_records_renames_and_drops():
     records = extract_records(_controls_doc(), mapped)
     assert len(records) == 2
     assert records[0]["name"] == "MFA"
-    assert records[0]["control_impact"] == 3
+    # Source header is preserved — the consumer resolves the alias itself.
+    assert records[0]["impact"] == 3
     assert "custom col" not in records[0]
+
+
+def test_extract_records_keeps_every_cost_column():
+    headers = [
+        "name",
+        "cost_currency",
+        "cost_build_fixed",
+        "cost_run_fixed",
+    ]
+    doc = _StubDocument(
+        _xlsx_bytes([headers, ["MFA", "EUR", 1000, 200]]), XLSX_CT, "cost.xlsx"
+    )
+    mapped, unmapped = map_columns(headers, "applied_control")
+    assert not unmapped
+    record = extract_records(doc, mapped)[0]
+    # All three must survive: they share the canonical key "cost", so renaming
+    # would collapse them into one value and drop the cost data entirely.
+    assert record["cost_currency"] == "EUR"
+    assert record["cost_build_fixed"] == 1000
+    assert record["cost_run_fixed"] == 200
 
 
 def test_detect_target_prefers_applied_control():
@@ -579,3 +600,128 @@ class TestApplyImportGuards:
             f"/api/chat/sessions/{session.id}/import/", {}, format="json"
         )
         assert resp.status_code == 400
+
+
+# ── review fixes: resume gating, container match, folder pinning ─────
+
+
+def test_should_resume_only_intercepts_answering_turns():
+    from chat.workflows.import_document import should_resume
+
+    staged = {"workflow": "import_document", "step": "import_review", "data": {}}
+    asking = {"workflow": "import_document", "step": "awaiting_target", "data": {}}
+
+    # An unrelated question must not re-enter the workflow (and re-run the dry-run).
+    assert not should_resume(staged, "what is ISO 27001?")
+    assert should_resume(staged, "cancel")
+    assert should_resume(asking, "what is ISO 27001?")
+    assert not should_resume(None, "cancel")
+    assert not should_resume({"workflow": "ebios_rm_assist"}, "cancel")
+
+
+def test_is_cancel_requires_whole_word():
+    from chat.workflows.import_document import is_cancel
+
+    assert is_cancel("cancel")
+    assert is_cancel("Annuler s'il te plaît")
+    assert not is_cancel("stopwatch inventory")
+
+
+def test_import_review_turn_does_not_redo_dry_run():
+    session = _StubSession()
+    session.workflow_state = {
+        "workflow": "import_document",
+        "step": "import_review",
+        "data": {"target": "applied_control"},
+    }
+    # No request/document available: a re-run would raise, this must not re-run.
+    events = _run(ImportDocumentWorkflow(), _ctx(message="anything", session=session))
+    assert not any(e.type == "pending_action" for e in events)
+    assert session.workflow_state["step"] == "import_review"
+
+
+@pytest.mark.django_db
+class TestContainerMatching:
+    def _stage_awaiting_container(self, session, candidates):
+        session.workflow_state = {
+            "workflow": "import_document",
+            "step": "awaiting_container",
+            "data": {
+                "target": "finding",
+                "document_id": "00000000-0000-0000-0000-000000000000",
+                "normalized_headers": ["name"],
+                "container_candidates": candidates,
+            },
+        }
+
+    def test_candidate_name_containing_new_wins_over_keyword(
+        self, admin_request, domain, chat_session, controls_document
+    ):
+        from core.models import FindingsAssessment
+
+        assessment = FindingsAssessment.objects.create(name="Renewal Q1", folder=domain)
+        workflow = ImportDocumentWorkflow()
+        self._stage_awaiting_container(
+            chat_session, [{"id": str(assessment.id), "name": "Renewal Q1"}]
+        )
+        chat_session.workflow_state["data"]["document_id"] = str(controls_document.id)
+        chat_session.save(update_fields=["workflow_state"])
+
+        # "Renewal" contains "new" — the assessment must still be selected.
+        list(
+            workflow.run(
+                _ctx(
+                    message="Renewal Q1",
+                    session=chat_session,
+                    request=admin_request,
+                    folder_ids=[str(domain.id)],
+                )
+            )
+        )
+        chat_session.refresh_from_db()
+        assert chat_session.workflow_state["data"]["container_id"] == str(assessment.id)
+
+    def test_explicit_new_creates_container(
+        self, admin_request, domain, chat_session, controls_document
+    ):
+        workflow = ImportDocumentWorkflow()
+        self._stage_awaiting_container(
+            chat_session, [{"id": "abc", "name": "Renewal Q1"}]
+        )
+        chat_session.workflow_state["data"]["document_id"] = str(controls_document.id)
+        chat_session.save(update_fields=["workflow_state"])
+
+        list(
+            workflow.run(
+                _ctx(
+                    message="create a new one",
+                    session=chat_session,
+                    request=admin_request,
+                    folder_ids=[str(domain.id)],
+                )
+            )
+        )
+        chat_session.refresh_from_db()
+        assert chat_session.workflow_state["data"]["container_id"] is None
+
+
+@pytest.mark.django_db
+def test_dry_run_pins_folder_into_state(
+    admin_request, domain, controls_document, chat_session
+):
+    events = _run(
+        ImportDocumentWorkflow(),
+        _ctx(
+            documents=[controls_document],
+            session=chat_session,
+            request=admin_request,
+            folder_ids=[str(domain.id)],
+        ),
+    )
+    chat_session.refresh_from_db()
+    assert chat_session.workflow_state["data"]["folder_id"] == str(domain.id)
+    card = next(e for e in events if e.type == "pending_action").content
+    # No selector: switching folders after the dry-run would invalidate counts.
+    assert card["available_folders"] == []
+    assert card["folder_id"] == str(domain.id)
+    assert card["truncated"] is False

@@ -4824,6 +4824,7 @@
 	"chatImportNew": "à créer",
 	"chatImportUpdated": "à mettre à jour",
 	"chatImportInvalid": "invalides",
+	"chatImportTruncated": "Seules les {count} premières lignes sont prises en compte — découpez le fichier pour importer le reste.",
 	"chatAttachFile": "Joindre un fichier",
 	"chatAttachmentFailed": "Le fichier n'a pas pu être envoyé",
 	"chatRemoveAttachment": "Retirer la pièce jointe",

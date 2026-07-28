@@ -327,7 +327,7 @@
 			</div>
 		</div>
 		<!-- Target folder indicator/selector -->
-		{#if (pa.action === 'create' || pa.action === 'import') && pa.status === 'pending'}
+		{#if pa.action === 'create' && pa.status === 'pending'}
 			<div class="mb-2 flex items-center gap-2 text-[11px]">
 				<i class="fa-solid fa-folder text-surface-500"></i>
 				{#if pa.availableFolders && pa.availableFolders.length > 1}
@@ -373,6 +373,13 @@
 					<span class="font-medium text-red-500">{pa.failedCount} {m.chatImportInvalid()}</span>
 				{/if}
 			</div>
+			{#if pa.truncated}
+				<div class="mb-2 text-[11px] text-amber-600">
+					<i class="fa-solid fa-triangle-exclamation mr-1"></i>{m.chatImportTruncated({
+						count: pa.rowCount ?? 0
+					})}
+				</div>
+			{/if}
 			{#if pa.status === 'creating'}
 				<div class="mb-2 flex items-center gap-2 text-[11px] text-violet-600">
 					<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>

@@ -194,12 +194,11 @@ class ChatSessionViewSet(BaseModelViewSet):
         # routes to the import workflow: attachment presence is a stronger
         # signal than any keyword.
         from .tabular import TABULAR_CONTENT_TYPES
+        from .workflows.import_document import should_resume
 
-        active_workflow = (session.workflow_state or {}).get("workflow")
-        if (
-            any(d.content_type in TABULAR_CONTENT_TYPES for d in documents)
-            or active_workflow == "import_document"
-        ):
+        if any(
+            d.content_type in TABULAR_CONTENT_TYPES for d in documents
+        ) or should_resume(session.workflow_state, user_content):
             pre_routed_workflow = get_workflow_by_tool_name("workflow_import_document")
         else:
             pre_routed_workflow = _match_workflow(user_content, parsed_context)
@@ -944,7 +943,9 @@ class ChatSessionViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        folder_id = str(request.data.get("folder_id") or doc.folder_id)
+        # The folder is pinned by the dry-run — a different one here would make
+        # the previewed counts wrong, since find_existing() is folder-scoped.
+        folder_id = str(data.get("folder_id") or doc.folder_id)
         if folder_id not in get_accessible_folder_ids(request.user):
             return Response(
                 {"detail": "Folder not found or not accessible."},

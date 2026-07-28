@@ -19,6 +19,7 @@ Steps:
     6. Confirmation card; apply happens in views.apply_import atomically
 """
 
+import re
 from collections.abc import Iterator
 
 import structlog
@@ -43,7 +44,27 @@ _MIN_TARGET_MARGIN = 0.15
 
 _CANCEL_WORDS = {"cancel", "stop", "abort", "annuler", "annule", "abandonner"}
 
+_NEW_CONTAINER_WORDS = {"new", "nouvelle", "nouveau", "créer", "creer"}
+
 _MAX_NARRATED_MAPPINGS = 15
+
+
+def _words(message: str) -> set[str]:
+    return set(re.findall(r"\w+", message.casefold(), re.UNICODE))
+
+
+def is_cancel(message: str) -> bool:
+    return bool(_words(message) & _CANCEL_WORDS)
+
+
+def should_resume(state: dict | None, message: str) -> bool:
+    """A staged import only intercepts turns that answer it — otherwise an
+    unrelated question would re-enter the workflow instead of being answered."""
+    if not state or state.get("workflow") != "import_document":
+        return False
+    if state.get("step") in ("awaiting_target", "awaiting_container"):
+        return True
+    return is_cancel(message)
 
 
 class ImportDocumentWorkflow(Workflow):
@@ -71,8 +92,7 @@ class ImportDocumentWorkflow(Workflow):
             )
             return
 
-        message = ctx.user_message.strip().lower()
-        if any(word in message.split() for word in _CANCEL_WORDS):
+        if is_cancel(ctx.user_message):
             self._clear_state(ctx)
             yield self._token("Import cancelled. The file was not imported.")
             return
@@ -85,7 +105,13 @@ class ImportDocumentWorkflow(Workflow):
             yield from self._container_reply_turn(ctx, state)
             return
 
-        # mapping_review / import_review — re-run the dry-run and proposal.
+        if state.get("step") == "import_review":
+            yield self._token(
+                "Your import is still waiting for confirmation — use the card "
+                "above, or say cancel to drop it."
+            )
+            return
+
         yield from self._narrate_mapping(ctx, state["data"])
 
     # ── Turn handlers ────────────────────────────────────────────────
@@ -238,19 +264,17 @@ class ImportDocumentWorkflow(Workflow):
         message = ctx.user_message.strip().casefold()
         candidates = data.get("container_candidates", [])
 
-        if any(word in message for word in ("new", "nouvelle", "nouveau", "créer")):
+        # Names win over the "new" keyword: an assessment called "Renewal Q1"
+        # contains "new".
+        chosen = next(
+            (c for c in candidates if c["name"].casefold() in message),
+            None,
+        )
+        if chosen is None and _words(message) & _NEW_CONTAINER_WORDS:
             data = {**data, "container_id": None}
             yield from self._narrate_mapping(ctx, data)
             return
 
-        chosen = next(
-            (
-                c
-                for c in candidates
-                if c["name"].casefold() == message or c["name"].casefold() in message
-            ),
-            None,
-        )
         if chosen is None:
             yield self._token("I didn't catch which assessment you meant.")
             yield self._pending_choice(
@@ -309,6 +333,10 @@ class ImportDocumentWorkflow(Workflow):
             )
             return
 
+        # The apply reuses this folder: find_existing() is folder-scoped, so a
+        # different folder at confirm time would invalidate these counts.
+        data = {**data, "folder_id": str(doc.folder_id)}
+
         yield self._thinking("Dry-running the import (nothing is written)...")
         try:
             report = run_import(
@@ -316,7 +344,7 @@ class ImportDocumentWorkflow(Workflow):
                 doc,
                 data["mapping"],
                 data["target"],
-                folder_id=str(doc.folder_id),
+                folder_id=data["folder_id"],
                 dry_run=True,
                 target_id=data.get("container_id"),
             )
@@ -349,25 +377,18 @@ class ImportDocumentWorkflow(Workflow):
             summary += "\n\nSample issues:\n" + "\n".join(
                 f"- {e}" for e in report["errors"]
             )
+        if report["truncated"]:
+            summary += (
+                f"\n\n⚠️ Only the first {report['row_count']} rows are covered — "
+                "split the file to import the rest."
+            )
         summary += "\n\nNothing has been written yet — confirm below to import."
         yield self._token(summary)
 
         from iam.models import Folder
 
-        # When updating an existing assessment, the folder is the assessment's
-        # own — no selector, and the card names the update target instead.
         container_name = (
             data.get("container_name") if data.get("container_id") else None
-        )
-        available_folders = (
-            []
-            if container_name
-            else [
-                {"id": str(f["id"]), "name": f["name"]}
-                for f in Folder.objects.filter(id__in=ctx.accessible_folder_ids).values(
-                    "id", "name"
-                )
-            ]
         )
         yield self._pending_action(
             {
@@ -379,17 +400,18 @@ class ImportDocumentWorkflow(Workflow):
                 "updated": report["updated"],
                 "skipped": report["skipped"],
                 "failed": report["failed"],
+                "truncated": report["truncated"],
                 "target_name": container_name,
-                "folder_id": str(doc.folder_id),
+                "folder_id": data["folder_id"],
                 "folder_name": ""
                 if container_name
                 else (
-                    Folder.objects.filter(id=doc.folder_id)
+                    Folder.objects.filter(id=data["folder_id"])
                     .values_list("name", flat=True)
                     .first()
                     or ""
                 ),
-                "available_folders": available_folders,
+                "available_folders": [],
                 "items": [],
             }
         )

@@ -244,10 +244,10 @@ def map_columns(
 
 
 def extract_records(doc, mapping: dict[str, str]) -> list[dict]:
-    """Extract data rows as consumer-ready records: mapped columns renamed to
-    their canonical field, unmapped columns dropped, dates ISO-formatted
-    (mirrors data_wizard's normalize_datetime_columns). Raises on parse
-    failure — callers run this after a successful digest."""
+    """Extract recognized columns as consumer-ready records, keyed by their
+    source header — consumers resolve aliases themselves (a canonical key may
+    stand for several columns, e.g. cost). Dates are ISO-formatted, mirroring
+    data_wizard's normalize_datetime_columns."""
     import datetime
 
     records: list[dict] = []
@@ -262,13 +262,12 @@ def extract_records(doc, mapping: dict[str, str]) -> list[dict]:
 
         record = {}
         for i, header in enumerate(headers):
-            field_name = mapping.get(header)
-            if not field_name:
+            if header not in mapping:
                 continue
             value = values[i] if i < len(values) else ""
             if isinstance(value, (datetime.datetime, datetime.date)):
                 value = value.isoformat()
-            record[field_name] = value
+            record[header] = value
         records.append(record)
         if len(records) >= MAX_COUNTED_ROWS:
             break
