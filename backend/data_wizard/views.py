@@ -4329,9 +4329,16 @@ class LoadFileView(APIView):
                     ):
                         override_cell = record.get("is_score_overridden")
                         if override_cell not in (None, ""):
-                            requirement_data["is_score_overridden"] = (
-                                str(override_cell).strip().lower()
-                                in ("true", "1", "1.0", "yes", "oui", "vrai", "x")
+                            requirement_data["is_score_overridden"] = str(
+                                override_cell
+                            ).strip().lower() in (
+                                "true",
+                                "1",
+                                "1.0",
+                                "yes",
+                                "oui",
+                                "vrai",
+                                "x",
                             )
                         else:
                             requirement_data["is_score_overridden"] = (
