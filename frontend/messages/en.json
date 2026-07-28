@@ -1229,7 +1229,6 @@
 	"resetToDefault": "Reset to default",
 	"customized": "Customized",
 	"defaultTemplate": "Default",
-	"loadDefault": "Load default",
 	"templateSaved": "Template saved successfully",
 	"templateReset": "Template reset to default",
 	"confirmResetTemplate": "Are you sure you want to reset this template to default? Your customization will be lost.",

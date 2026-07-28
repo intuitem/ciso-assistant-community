@@ -1244,7 +1244,6 @@
 	"resetToDefault": "Réinitialiser par défaut",
 	"customized": "Personnalisé",
 	"defaultTemplate": "Par défaut",
-	"loadDefault": "Charger le modèle par défaut",
 	"templateSaved": "Modèle enregistré avec succès",
 	"templateReset": "Modèle réinitialisé par défaut",
 	"confirmResetTemplate": "Êtes-vous sûr de vouloir réinitialiser ce modèle par défaut ? Votre personnalisation sera perdue.",
