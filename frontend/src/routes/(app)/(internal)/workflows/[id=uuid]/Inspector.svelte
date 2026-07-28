@@ -48,6 +48,7 @@
 		taskTemplates: Option[];
 		subprocessCandidates: Option[];
 		creatableModels?: any[];
+		readableModels?: { key: string; fields: string[] }[];
 		fkOptions?: Record<string, Option[]>;
 		workflowId: string;
 		registrationsByRef?: Record<string, any>;
@@ -75,6 +76,7 @@
 		taskTemplates,
 		subprocessCandidates,
 		creatableModels = [],
+		readableModels = [],
 		fkOptions = {},
 		workflowId,
 		registrationsByRef = {},
@@ -141,6 +143,7 @@
 	// buffering); the engine still executes it for graphs that carry it.
 	const ACTION_TYPES = [
 		'create_object',
+		'read_objects',
 		'http_request',
 		'send_email',
 		'provision_folder',
@@ -181,6 +184,13 @@
 		log: { message: '' },
 		set_variables: { variables: {} },
 		create_object: { model: 'applied_control', fields: { name: '' }, upsert: false },
+		read_objects: {
+			model: 'applied_control',
+			mode: 'list',
+			filters: {},
+			order_by: '-created_at',
+			limit: 25
+		},
 		http_request: { method: 'GET', url: '', headers: {}, body: '', timeout: 15 },
 		send_email: { recipients: '', subject: '', body: '' },
 		provision_folder: { name: '', parent: '', create_default_groups: true },
@@ -203,6 +213,7 @@
 	const creatableEntry = $derived(
 		creatableModels.find((entry) => entry.key === actionConfig?.model)
 	);
+	const readableEntry = $derived(readableModels.find((entry) => entry.key === actionConfig?.model));
 
 	function resetCreateFields() {
 		actionConfig.fields = { name: actionConfig.fields?.name ?? '' };
@@ -240,6 +251,7 @@
 	const OUTPUT_EXAMPLES: Record<string, string> = {
 		http_request: 'body.summary',
 		create_object: 'created_object_id',
+		read_objects: 'results.0.name',
 		provision_folder: 'folder_id',
 		provision_user: 'user_id',
 		manage_group_membership: 'group_id',
@@ -385,6 +397,80 @@
 		} catch {
 			filterRawError = true;
 		}
+	}
+
+	// read_objects filter builder (spec D26) — same DNF editor pattern as the
+	// event-trigger filters above, keyed on the selected read node. Trees that
+	// don't fit the DNF shape (e.g. "not" groups from an imported YAML) fall
+	// back to raw JSON editing.
+	let readFilterGroups = $state<Condition[][]>([]);
+	let readFilterRawMode = $state(false);
+	let readFilterRawJson = $state('{}');
+	let readFilterRawError = $state(false);
+	let readFilterNodeId: string | null = null;
+	$effect(() => {
+		const nodeId =
+			nodeDomain?.type === 'action' && actionConfig?.type === 'read_objects'
+				? selectedNode.id
+				: null;
+		if (nodeId !== readFilterNodeId) {
+			readFilterNodeId = nodeId;
+			readFilterRawError = false;
+			if (!nodeId) {
+				readFilterGroups = [];
+				readFilterRawMode = false;
+				readFilterRawJson = '{}';
+				return;
+			}
+			const dnf = treeToGroups(actionConfig.filters);
+			if (dnf === null) {
+				readFilterRawMode = true;
+				readFilterRawJson = JSON.stringify(actionConfig.filters ?? {}, null, 2);
+				readFilterGroups = [];
+			} else {
+				readFilterRawMode = false;
+				readFilterRawJson = '{}';
+				readFilterGroups = dnf;
+			}
+		}
+	});
+
+	function syncReadFilters() {
+		actionConfig.filters = groupsToTree(readFilterGroups);
+		onChange();
+	}
+
+	function syncReadRawFilters() {
+		try {
+			actionConfig.filters = JSON.parse(readFilterRawJson);
+			readFilterRawError = false;
+			onChange();
+		} catch {
+			readFilterRawError = true;
+		}
+	}
+
+	function resetReadModel() {
+		// Field whitelists differ per model: stale filters/ordering would fail
+		// publish validation.
+		actionConfig.filters = {};
+		actionConfig.order_by = '-created_at';
+		readFilterGroups = [];
+		readFilterRawMode = false;
+		onChange();
+	}
+
+	const readOrderDesc = $derived(
+		typeof actionConfig?.order_by === 'string' && actionConfig.order_by.startsWith('-')
+	);
+	const readOrderField = $derived(
+		typeof actionConfig?.order_by === 'string'
+			? actionConfig.order_by.replace(/^-/, '')
+			: 'created_at'
+	);
+	function setReadOrder(field: string, descending: boolean) {
+		actionConfig.order_by = (descending ? '-' : '') + field;
+		onChange();
 	}
 
 	function addInputMapping() {
@@ -926,6 +1012,184 @@
 							</select>
 						</label>
 					{/each}
+				{:else if actionConfig.type === 'read_objects'}
+					<label>
+						{@render fieldLabel(m.objectToRead())}
+						<select
+							class="select w-full text-sm"
+							bind:value={actionConfig.model}
+							onchange={resetReadModel}
+						>
+							{#each readableModels as entry (entry.key)}
+								<option value={entry.key}>{safeTranslate(entry.key)}</option>
+							{/each}
+						</select>
+					</label>
+					<label>
+						{@render fieldLabel(m.readMode())}
+						<select
+							class="select w-full text-sm"
+							bind:value={actionConfig.mode}
+							onchange={onChange}
+						>
+							<option value="list">{m.readModeList()}</option>
+							<option value="first">{m.readModeFirst()}</option>
+						</select>
+					</label>
+
+					{@render fieldLabel(m.readFilters())}
+					{#if readFilterRawMode}
+						<textarea
+							class="textarea text-xs font-mono w-full"
+							rows="6"
+							bind:value={readFilterRawJson}
+							oninput={syncReadRawFilters}
+						></textarea>
+						{#if readFilterRawError}
+							<p class="text-[10px] text-error-500">{m.invalidFieldFilters()}</p>
+						{/if}
+					{:else}
+						<div class="flex flex-col gap-2">
+							{#each readFilterGroups as group, groupIndex (groupIndex)}
+								{#if groupIndex > 0}
+									<div class="flex items-center gap-2">
+										<hr class="grow border-surface-200-800" />
+										<span class="text-[10px] font-semibold uppercase text-surface-500">
+											{m.or()}
+										</span>
+										<hr class="grow border-surface-200-800" />
+									</div>
+								{/if}
+								<div
+									class="flex flex-col gap-2 rounded-base border border-surface-200-800 bg-surface-50-950 p-2"
+								>
+									<div class="flex items-center gap-2">
+										<span class="text-[10px] uppercase tracking-wide text-surface-500">
+											{m.matchAllConditions()}
+										</span>
+										<button
+											type="button"
+											title={m.delete()}
+											class="btn-icon preset-tonal w-5 h-5 text-[9px] ml-auto hover:preset-filled-error-500"
+											onclick={() => {
+												readFilterGroups.splice(groupIndex, 1);
+												syncReadFilters();
+											}}
+										>
+											<i class="fa-solid fa-trash"></i>
+										</button>
+									</div>
+									{#each group as condition, conditionIndex (conditionIndex)}
+										<div
+											class="flex flex-col gap-1.5 rounded-base border border-surface-200-800 p-1.5"
+										>
+											<div class="flex items-center gap-1">
+												<select
+													class="select text-xs flex-1 min-w-0"
+													bind:value={condition.field}
+													onchange={syncReadFilters}
+												>
+													{#if !condition.field}
+														<option value="">—</option>
+													{/if}
+													{#each readableEntry?.fields ?? [] as field (field)}
+														<option value={field}>{field}</option>
+													{/each}
+												</select>
+												<select
+													class="select text-xs w-24 shrink-0"
+													bind:value={condition.op}
+													onchange={syncReadFilters}
+												>
+													{#each FILTER_OPS as op (op)}
+														<option value={op}>{op}</option>
+													{/each}
+												</select>
+												<button
+													type="button"
+													title={m.delete()}
+													aria-label={m.delete()}
+													class="btn-icon preset-tonal w-5 h-5 text-[9px] shrink-0 hover:preset-filled-error-500"
+													onclick={() => {
+														group.splice(conditionIndex, 1);
+														syncReadFilters();
+													}}
+												>
+													<i class="fa-solid fa-xmark"></i>
+												</button>
+											</div>
+											{#if condition.op !== 'is_null'}
+												<input
+													type="text"
+													class="input text-xs w-full"
+													placeholder={'{{payload.id}}'}
+													bind:value={condition.value}
+													oninput={syncReadFilters}
+												/>
+											{/if}
+										</div>
+									{/each}
+									<button
+										type="button"
+										class="btn preset-tonal text-[10px] self-start"
+										onclick={() => {
+											group.push(newCondition());
+											syncReadFilters();
+										}}
+									>
+										<i class="fa-solid fa-plus mr-1"></i>{m.addCondition()}
+									</button>
+								</div>
+							{/each}
+							<button
+								type="button"
+								class="btn preset-tonal text-[10px] self-start"
+								onclick={() => {
+									readFilterGroups.push([newCondition()]);
+									syncReadFilters();
+								}}
+							>
+								<i class="fa-solid fa-plus mr-1"></i>{m.addConditionGroup()}
+							</button>
+						</div>
+					{/if}
+
+					<div class="flex items-end gap-2">
+						<label class="flex-1 min-w-0">
+							{@render fieldLabel(m.orderBy())}
+							<select
+								class="select w-full text-sm"
+								value={readOrderField}
+								onchange={(e) => setReadOrder(e.currentTarget.value, readOrderDesc)}
+							>
+								{#each readableEntry?.fields ?? [] as field (field)}
+									<option value={field}>{field}</option>
+								{/each}
+							</select>
+						</label>
+						{#if actionConfig.mode === 'list'}
+							<label class="w-24 shrink-0">
+								{@render fieldLabel(m.resultLimit())}
+								<input
+									type="number"
+									min="1"
+									max="100"
+									class="input w-full text-sm"
+									bind:value={actionConfig.limit}
+									oninput={onChange}
+								/>
+							</label>
+						{/if}
+					</div>
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							checked={readOrderDesc}
+							onchange={(e) => setReadOrder(readOrderField, e.currentTarget.checked)}
+						/>
+						{m.descending()}
+					</label>
 				{:else if actionConfig.type === 'http_request'}
 					<label>
 						{@render fieldLabel(m.httpMethod())}

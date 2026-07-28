@@ -45,6 +45,7 @@
 		taskTemplates: any[];
 		subprocessCandidates: any[];
 		creatableModels?: any[];
+		readableModels?: any[];
 		fkOptions?: Record<string, any[]>;
 	}
 
@@ -63,6 +64,7 @@
 		taskTemplates,
 		subprocessCandidates,
 		creatableModels = [],
+		readableModels = [],
 		fkOptions = {}
 	}: Props = $props();
 
@@ -109,6 +111,7 @@
 				const config = domain.action_config ?? {};
 				switch (config.type) {
 					case 'create_object':
+					case 'read_objects':
 						return config.model ? `${config.type} · ${config.model}` : config.type;
 					case 'http_request': {
 						const url = (config.url ?? '').replace(/^https?:\/\//, '');
@@ -1752,6 +1755,7 @@
 				{taskTemplates}
 				{subprocessCandidates}
 				{creatableModels}
+				{readableModels}
 				{fkOptions}
 				{workflowId}
 				{registrationsByRef}

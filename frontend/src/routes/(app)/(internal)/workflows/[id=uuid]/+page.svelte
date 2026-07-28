@@ -63,6 +63,7 @@
 			taskTemplates={data.taskTemplates}
 			subprocessCandidates={data.subprocessCandidates}
 			creatableModels={data.creatableModels}
+			readableModels={data.readableModels}
 			fkOptions={data.fkOptions}
 			onDiscarded={() => (canvasEpoch += 1)}
 		/>

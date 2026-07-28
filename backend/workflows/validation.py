@@ -14,6 +14,7 @@ from .models import (
     WorkflowSecret,
     WorkflowVersion,
 )
+from .actions import validate_read_config as _validate_read_config
 from .triggers import validate_trigger_config
 
 SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
@@ -109,6 +110,8 @@ def validate_graph(version):
                             node=node,
                         )
                     )
+            for code, message in _validate_read_config(node):
+                errors.append(_error(code, message, node=node))
         if node.type == WorkflowNode.Type.CONDITION:
             branches = list(node.branches.all())
             # Exactly one default (otherwise) branch guarantees exhaustiveness:

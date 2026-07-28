@@ -6,9 +6,12 @@ output_mapping into instance variables. String config values support
 `{{variable}}` templating with dotted-path lookup (`{{payload.vendor.name}}`).
 """
 
+import datetime
 import re
+import uuid
 
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 
 from core.models import (
     AppliedControl,
@@ -275,6 +278,210 @@ class CreateObjectAction(BaseAction):
             "created_object_model": config.get("model"),
             "created": created,
         }
+
+
+# Explicit registry of models workflows may read (spec D26). Each entry lists
+# the readable simple fields on top of BASE_READ_FIELDS; the combined set is
+# both the serialized output AND the filter/order whitelist — no "__" paths,
+# no relations, so filters cannot tunnel into other objects.
+BASE_READ_FIELDS = ["id", "name", "created_at", "updated_at"]
+
+READABLE_MODELS = {
+    "applied_control": {
+        "model": AppliedControl,
+        "fields": ["description", "ref_id", "status", "eta", "priority", "link"],
+    },
+    "evidence": {
+        "model": Evidence,
+        "fields": ["description", "status"],
+    },
+    "incident": {
+        "model": Incident,
+        "fields": ["description", "ref_id", "status", "severity", "link"],
+    },
+    "asset": {
+        "model": Asset,
+        "fields": ["description", "ref_id", "type", "reference_link"],
+    },
+    "vulnerability": {
+        "model": Vulnerability,
+        "fields": ["description", "ref_id", "status", "severity", "eta", "due_date"],
+    },
+    "security_exception": {
+        "model": SecurityException,
+        "fields": ["description", "ref_id", "status", "severity", "expiration_date"],
+    },
+    "entity": {
+        "model": Entity,
+        "fields": ["description", "ref_id", "mission", "reference_link"],
+    },
+    "findings_assessment": {
+        "model": FindingsAssessment,
+        "fields": ["description", "ref_id", "status", "eta", "due_date"],
+    },
+    "finding": {
+        "model": Finding,
+        "fields": [
+            "description",
+            "ref_id",
+            "status",
+            "severity",
+            "eta",
+            "due_date",
+            "priority",
+        ],
+    },
+    "compliance_assessment": {
+        "model": ComplianceAssessment,
+        "fields": ["description", "ref_id", "status", "eta", "due_date"],
+    },
+    "risk_assessment": {
+        "model": RiskAssessment,
+        "fields": ["description", "ref_id", "status", "eta", "due_date"],
+    },
+    "entity_assessment": {
+        "model": EntityAssessment,
+        "fields": ["description", "status", "eta", "due_date"],
+    },
+}
+
+READ_MAX_LIMIT = 100
+READ_DEFAULT_LIMIT = 25
+
+
+def _read_scope_folder_ids(folder):
+    """Instance folder + subtree ONLY (spec D26) — deliberately narrower than
+    _accessible_folder_ids: reads of ancestor folders would leak parent-domain
+    rows into a child-domain workflow's run log."""
+    return {folder.id, *(f.id for f in folder.get_sub_folders())}
+
+
+_READ_OP_LOOKUPS = {
+    "eq": "exact",
+    "neq": "exact",
+    "gt": "gt",
+    "lt": "lt",
+    "gte": "gte",
+    "lte": "lte",
+    "in": "in",
+    "not_in": "in",
+    "contains": "icontains",
+    "is_null": "isnull",
+}
+
+
+def _read_condition_to_q(condition, allowed_fields, context):
+    field = condition.get("field")
+    if field not in allowed_fields:
+        raise ActionError(f"read_objects: '{field}' is not a filterable field")
+    op = condition.get("op", "eq")
+    lookup = _READ_OP_LOOKUPS.get(op)
+    if lookup is None:
+        raise ActionError(f"read_objects: unknown operator '{op}'")
+    value = render(condition.get("value"), context)
+    if op == "is_null":
+        return Q(**{f"{field}__isnull": _as_bool(value) if value not in (None, "") else True})
+    if op in ("in", "not_in"):
+        if isinstance(value, str):
+            parsed = json_loads_or_none(value)
+            value = (
+                parsed
+                if isinstance(parsed, list)
+                else [item.strip() for item in value.split(",") if item.strip()]
+            )
+        if not isinstance(value, list):
+            raise ActionError(f"read_objects: '{op}' needs a list value")
+        query = Q(**{f"{field}__in": value})
+        return ~query if op == "not_in" else query
+    query = Q(**{f"{field}__{lookup}": value})
+    return ~query if op == "neq" else query
+
+
+def _read_group_to_q(group, allowed_fields, context):
+    operator = group.get("operator", "and")
+    parts = [
+        _read_condition_to_q(condition, allowed_fields, context)
+        for condition in group.get("conditions", [])
+    ]
+    parts += [
+        _read_group_to_q(child, allowed_fields, context)
+        for child in group.get("children", [])
+    ]
+    if not parts:
+        return Q()
+    if operator == "or":
+        combined = parts[0]
+        for part in parts[1:]:
+            combined |= part
+        return combined
+    combined = parts[0]
+    for part in parts[1:]:
+        combined &= part
+    # Same semantics as event filters: NOT(all(results)).
+    return ~combined if operator == "not" else combined
+
+
+def _read_filters_to_q(tree, allowed_fields, context):
+    if tree in (None, {}):
+        return Q()
+    return _read_group_to_q(tree, allowed_fields, context)
+
+
+def _serialize_read_row(obj, fields):
+    row = {}
+    for field in fields:
+        value = getattr(obj, field, None)
+        if isinstance(value, uuid.UUID):
+            value = str(value)
+        elif isinstance(value, (datetime.datetime, datetime.date)):
+            value = value.isoformat()
+        row[field] = value
+    return row
+
+
+@register
+class ReadObjectsAction(BaseAction):
+    action_type = "read_objects"
+
+    def execute(self, config, instance):
+        entry = READABLE_MODELS.get(config.get("model"))
+        if entry is None:
+            raise ActionError(f"read_objects: unknown model '{config.get('model')}'")
+        fields = BASE_READ_FIELDS + entry["fields"]
+        context = _render_context(instance)
+        query = _read_filters_to_q(config.get("filters"), set(fields), context)
+
+        order_by = config.get("order_by") or "-created_at"
+        if order_by.lstrip("-") not in fields:
+            raise ActionError(f"read_objects: '{order_by}' is not an orderable field")
+
+        queryset = (
+            entry["model"]
+            .objects.filter(folder_id__in=_read_scope_folder_ids(instance.folder))
+            .filter(query)
+            .order_by(order_by, "id")  # id tie-break keeps pagination stable
+        )
+        try:
+            if config.get("mode", "list") == "first":
+                obj = queryset.first()
+                return {
+                    "found": obj is not None,
+                    "object": _serialize_read_row(obj, fields) if obj else None,
+                }
+            limit = min(
+                max(int(config.get("limit") or READ_DEFAULT_LIMIT), 1), READ_MAX_LIMIT
+            )
+            return {
+                # Unpaged count so threshold conditions work beyond the page.
+                "count": queryset.count(),
+                "results": [
+                    _serialize_read_row(obj, fields) for obj in queryset[:limit]
+                ],
+            }
+        except (ValidationError, ValueError, TypeError) as e:
+            # Type mismatches only surface when the queryset evaluates
+            # (e.g. "abc" compared against a date field).
+            raise ActionError(f"read_objects: invalid filter value ({e})")
 
 
 @register
@@ -582,11 +789,86 @@ def required_permissions(action_config):
         if action_config.get("upsert"):
             codenames.append(f"change_{model_name}")
         return codenames
+    if action_type == "read_objects":
+        entry = READABLE_MODELS.get(action_config.get("model"))
+        if entry is None:
+            return []
+        return [f"view_{entry['model']._meta.model_name}"]
     return {
         "provision_folder": ["add_folder", "change_folder"],
         "provision_user": ["add_user", "change_user"],
         "manage_group_membership": ["change_user", "change_usergroup"],
     }.get(action_type, [])
+
+
+def validate_read_config(node):
+    """Publish-time checks for read_objects nodes (spec D26): (code, message)
+    tuples, same contract as triggers.validate_trigger_config."""
+    config = node.action_config or {}
+    if config.get("type") != "read_objects":
+        return []
+    errors = []
+    entry = READABLE_MODELS.get(config.get("model"))
+    if entry is None:
+        return [
+            (
+                "action_read_unknown_model",
+                f"Unknown readable model '{config.get('model')}'",
+            )
+        ]
+    fields = set(BASE_READ_FIELDS) | set(entry["fields"])
+
+    from .events import validate_filter_tree, walk_conditions
+
+    tree = config.get("filters")
+    try:
+        validate_filter_tree(tree)
+    except ValueError as e:
+        errors.append(("action_read_invalid_filters", f"Invalid filters: {e}"))
+    else:
+        for condition in walk_conditions(tree or {}):
+            if condition.get("field") not in fields:
+                errors.append(
+                    (
+                        "action_read_invalid_filters",
+                        f"'{condition.get('field')}' is not a filterable field of "
+                        f"'{config.get('model')}'",
+                    )
+                )
+            if condition.get("changed"):
+                errors.append(
+                    (
+                        "action_read_invalid_filters",
+                        "'changed' only applies to event-trigger filters",
+                    )
+                )
+
+    if config.get("mode", "list") not in ("list", "first"):
+        errors.append(
+            ("action_read_invalid_mode", f"Unknown mode '{config.get('mode')}'")
+        )
+    order_by = config.get("order_by") or "-created_at"
+    if not isinstance(order_by, str) or order_by.lstrip("-") not in fields:
+        errors.append(
+            (
+                "action_read_invalid_order",
+                f"'{order_by}' is not an orderable field of '{config.get('model')}'",
+            )
+        )
+    limit = config.get("limit")
+    if limit is not None:
+        try:
+            valid_limit = 1 <= int(limit) <= READ_MAX_LIMIT
+        except (TypeError, ValueError):
+            valid_limit = False
+        if not valid_limit:
+            errors.append(
+                (
+                    "action_read_invalid_limit",
+                    f"Limit must be between 1 and {READ_MAX_LIMIT}",
+                )
+            )
+    return errors
 
 
 def execute_action(node, instance):

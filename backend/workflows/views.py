@@ -90,6 +90,20 @@ class WorkflowViewSet(BaseModelViewSet):
             ]
         )
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get readable models", url_path="readable-models")
+    def readable_models(self, request):
+        """The read_objects registry (spec D26): field lists double as the
+        filter/order whitelist the builder offers."""
+        from .actions import BASE_READ_FIELDS, READABLE_MODELS
+
+        return Response(
+            [
+                {"key": key, "fields": BASE_READ_FIELDS + entry["fields"]}
+                for key, entry in READABLE_MODELS.items()
+            ]
+        )
+
     @action(detail=True, methods=["get"], url_path="export-yaml")
     def export_yaml(self, request, pk=None):
         workflow = self.get_object()
