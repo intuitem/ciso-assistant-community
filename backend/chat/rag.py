@@ -46,7 +46,7 @@ def get_qdrant_client():
 def get_accessible_folder_ids(user) -> list[str]:
     """Get all folder IDs the user has access to (exclusing enclaves), as strings for Qdrant filtering."""
 
-    folder_id_queryset = RoleAssignment.get_allowed_folder_ids(user, "view", Folder)
+    folder_id_queryset = RoleAssignment.get_allowed_folder_ids(user, ("view", Folder))
     non_enclave_folder_ids = Folder.objects.filter(
         Q(id__in=folder_id_queryset) & ~Q(content_type=Folder.ContentType.ENCLAVE)
     )
