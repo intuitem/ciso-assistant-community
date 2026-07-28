@@ -1257,7 +1257,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     @staticmethod
     def is_access_allowed(
         user: AbstractBaseUser | AnonymousUser,
-        permission: Permission,
+        perm: Permission,
         folder: Folder,
     ) -> bool:
         """
@@ -1272,19 +1272,19 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         from core.models import FilteringLabel
 
-        model = permission.content_type.model_class()
+        model = perm.content_type.model_class()
 
         if model is Permission:
             # Everyone can view permissions, no one can add/change/delete them.
-            perm_type = permission.codename.split("_")[0]
+            perm_type = perm.codename.split("_")[0]
             return perm_type == "view"
 
         if model is FilteringLabel:
             return RoleAssignment._get_role_assignments_from_permission(
-                user, permission
+                user, perm
             ).exists()
 
-        allowed_folder_ids = RoleAssignment.get_allowed_folder_ids(user, permission)
+        allowed_folder_ids = RoleAssignment.get_allowed_folder_ids(user, perm)
         return (
             Folder.objects.filter(id__in=allowed_folder_ids)
             .filter(id=folder.id)
