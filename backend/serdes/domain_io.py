@@ -1087,6 +1087,19 @@ def process_model_relationships(
             _fields["findings_assessment"] = FindingsAssessment.objects.get(
                 id=link_dump_database_ids.get(_fields["findings_assessment"])
             )
+            # Optional links: the asset may live outside the exported domain
+            # and the requirement node's framework may not be loaded on the
+            # target instance, so drop the link rather than fail the import.
+            asset_id = link_dump_database_ids.get(_fields.get("asset"))
+            _fields["asset"] = (
+                Asset.objects.filter(id=asset_id).first() if asset_id else None
+            )
+            requirement_node_urn = _fields.get("requirement_node")
+            _fields["requirement_node"] = (
+                RequirementNode.objects.filter(urn=requirement_node_urn).first()
+                if requirement_node_urn
+                else None
+            )
             for field in (
                 "threats",
                 "vulnerabilities",

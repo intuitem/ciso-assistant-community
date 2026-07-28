@@ -3873,6 +3873,7 @@
 	"radarComparisonByTopLevel": "Radar de comparaison",
 	"referenceScale": "Echelle de réference",
 	"requirement": "Exigence",
+	"requirementNode": "Exigence",
 	"requirementDifferences": "Différences",
 	"requirements": "Exigences",
 	"resetSpPrivateKey": "Réinitialiser la clé privée",

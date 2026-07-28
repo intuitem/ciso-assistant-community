@@ -873,6 +873,7 @@
 	"confirmModalMessage": "Are you sure? This action will permanently affect the following object",
 	"submit": "Submit",
 	"requirement": "Requirement",
+	"requirementNode": "Requirement",
 	"requirements": "Requirements",
 	"requirementAssessment": "Requirement assessment",
 	"requirementAssessments": "Requirement assessments",
