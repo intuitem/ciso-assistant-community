@@ -9474,6 +9474,7 @@ class EvidenceViewSet(BaseModelViewSet):
         "filtering_labels": ["exact"],
         "findings": ["exact"],
         "findings_assessments": ["exact"],
+        "security_exceptions": ["exact"],
         "genericcollection": ["exact"],
         "owner": ["exact"],
         "status": ["exact"],
@@ -9486,7 +9487,19 @@ class EvidenceViewSet(BaseModelViewSet):
     }
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related("revisions")
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related(
+                "revisions",
+                "applied_controls",
+                "requirement_assessments",
+                "security_exceptions",
+                "contracts",
+                "filtering_labels",
+                "owner",
+            )
+        )
 
     @action(detail=False, name="Get all evidences owners")
     def owner(self, request):
@@ -14858,6 +14871,7 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
         "name": ["exact"],
         "requirement_assessments": ["exact"],
         "risk_scenarios": ["exact"],
+        "evidences": ["exact"],
         "owners": ["exact"],
         "approver": ["exact"],
         "folder": ["exact"],
@@ -14933,6 +14947,7 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
                 "vulnerabilities",
                 "risk_scenarios",
                 "requirement_assessments",
+                "evidences",
                 "owners",
                 "custom_field_values__definition",
                 Prefetch(

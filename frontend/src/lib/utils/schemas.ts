@@ -555,6 +555,7 @@ export const EvidenceSchema = z.object({
 	findings_assessments: z
 		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
 		.optional(),
+	security_exceptions: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	timeline_entries: z.string().optional().array().optional(),
 	contracts: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
@@ -1315,6 +1316,7 @@ export const SecurityExceptionSchema = z.object({
 	requirement_assessments: z.string().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
+	evidences: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	link: z.string().url().optional().nullable().or(z.literal('')),
 	custom_fields: z.record(z.string(), z.any()).optional()

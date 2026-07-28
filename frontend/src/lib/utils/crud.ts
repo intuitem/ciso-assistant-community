@@ -990,7 +990,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			},
 			{ field: 'evidences', urlModel: 'findings', disableCreate: true, disableDelete: true },
 			{ field: 'evidences', urlModel: 'task-templates', disableCreate: true, disableDelete: true },
-			{ field: 'evidences', urlModel: 'data-breaches', disableCreate: true, disableDelete: true }
+			{ field: 'evidences', urlModel: 'data-breaches', disableCreate: true, disableDelete: true },
+			{
+				field: 'evidences',
+				urlModel: 'security-exceptions',
+				disableCreate: true,
+				disableDelete: true
+			}
 		],
 		selectFields: [{ field: 'status' }],
 		detailViewFields: [
@@ -2112,14 +2118,38 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'securityExceptions',
 		verboseName: 'Security exception',
 		verboseNamePlural: 'Security exceptions',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'folder' },
+			{ field: 'severity' },
+			{ field: 'status' },
+			{ field: 'expiration_date', type: 'date' },
+			{ field: 'owners' },
+			{ field: 'approver' },
+			{ field: 'observation' },
+			{ field: 'link' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
 		foreignKeyFields: [
 			{ field: 'owners', urlModel: 'actors' },
 			{ field: 'approver', urlModel: 'users', urlParams: 'is_approver=true' },
 			{ field: 'folder', urlModel: 'folders' },
-			{ field: 'assets', urlModel: 'assets' }
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
 		reverseForeignKeyFields: [
+			{
+				field: 'security_exceptions',
+				urlModel: 'evidences',
+				disableDelete: false,
+				addExisting: {
+					parentField: 'evidences'
+				}
+			},
 			{
 				field: 'security_exceptions',
 				urlModel: 'applied-controls',

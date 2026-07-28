@@ -3420,6 +3420,12 @@ class SecurityException(
         null=True,
         blank=True,
     )
+    evidences = models.ManyToManyField(
+        "Evidence",
+        blank=True,
+        verbose_name=_("Evidences"),
+        related_name="security_exceptions",
+    )
     is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
     link = models.URLField(
@@ -4875,14 +4881,6 @@ class Evidence(
     def last_revision(self):
         revs = self.revisions.all()
         return max(revs, key=lambda r: r.version) if revs else None
-
-    def get_folder(self):
-        if self.applied_controls:
-            return self.applied_controls.first().folder
-        elif self.requirement_assessments:
-            return self.requirement_assessments.first().folder
-        else:
-            return None
 
     def filename(self) -> str | None:
         return self.last_revision.filename() if self.last_revision else None
