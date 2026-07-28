@@ -2118,6 +2118,21 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'securityExceptions',
 		verboseName: 'Security exception',
 		verboseNamePlural: 'Security exceptions',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'folder' },
+			{ field: 'severity' },
+			{ field: 'status' },
+			{ field: 'expiration_date', type: 'date' },
+			{ field: 'owners' },
+			{ field: 'approver' },
+			{ field: 'observation' },
+			{ field: 'link' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
 		foreignKeyFields: [
 			{ field: 'owners', urlModel: 'actors' },
 			{ field: 'approver', urlModel: 'users', urlParams: 'is_approver=true' },
