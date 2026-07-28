@@ -1,4 +1,11 @@
-import type { ChatMessage, ChatSession, ChatView, PendingAction, SuggestedAction } from './types';
+import type {
+	ChatMessage,
+	ChatSession,
+	ChatView,
+	PendingAction,
+	PendingAttachment,
+	SuggestedAction
+} from './types';
 import { browser } from '$app/environment';
 import { m } from '$paraglide/messages';
 import { getLocale } from '$paraglide/runtime';
@@ -87,6 +94,7 @@ let sessionId = $state<string | null>(restored?.sessionId ?? null);
 let abortController = $state<AbortController | null>(null);
 let sessionHistory = $state<ChatSession[]>([]);
 let loadingHistory = $state(false);
+let pendingAttachment = $state<PendingAttachment | null>(null);
 
 function getDefaultActions(): SuggestedAction[] {
 	return [
@@ -215,11 +223,57 @@ async function ensureSession(): Promise<string> {
 	return data.id;
 }
 
-async function streamResponse(userMessage: string) {
-	isTyping = true;
+export function getPendingAttachment(): PendingAttachment | null {
+	return pendingAttachment;
+}
 
+export function removePendingAttachment() {
+	pendingAttachment = null;
+}
+
+export async function uploadAttachment(file: File) {
+	// Token guard: a removed or superseded attachment must not be resurrected
+	// by its own late response.
+	const slot: PendingAttachment = { id: '', filename: file.name, status: 'uploading' };
+	pendingAttachment = slot;
+	const isCurrent = () => pendingAttachment === slot;
 	try {
 		const sid = await ensureSession();
+		const formData = new FormData();
+		formData.append('file', file, file.name);
+		const response = await fetch(`${CHAT_API}/sessions/${sid}/upload`, {
+			method: 'POST',
+			body: formData
+		});
+		if (!isCurrent()) return;
+		if (!response.ok) {
+			let detail = '';
+			try {
+				detail = (await response.json()).detail ?? '';
+			} catch {
+				// Non-JSON error body — keep the generic message
+			}
+			if (isCurrent()) {
+				pendingAttachment = { id: '', filename: file.name, status: 'error', error: detail };
+			}
+			return;
+		}
+		const data = await response.json();
+		if (!isCurrent()) return;
+		pendingAttachment = { id: data.id, filename: data.filename ?? file.name, status: 'ready' };
+	} catch {
+		if (isCurrent()) {
+			pendingAttachment = { id: '', filename: file.name, status: 'error' };
+		}
+	}
+}
+
+async function streamResponse(userMessage: string, documentIds: string[] = []) {
+	isTyping = true;
+	let sid: string | null = null;
+
+	try {
+		sid = await ensureSession();
 
 		// Cancel any in-flight request
 		if (abortController) {
@@ -234,7 +288,8 @@ async function streamResponse(userMessage: string) {
 			},
 			body: JSON.stringify({
 				content: userMessage,
-				...(currentPageContext && { page_context: currentPageContext })
+				...(currentPageContext && { page_context: currentPageContext }),
+				...(documentIds.length && { document_ids: documentIds })
 			}),
 			signal: abortController.signal
 		});
@@ -347,7 +402,26 @@ async function streamResponse(userMessage: string) {
 					} else if (data.type === 'pending_action') {
 						const msg = messages.find((m) => m.id === assistantMessageId);
 						if (msg) {
-							if (data.action === 'attach') {
+							if (data.action === 'import') {
+								msg.pendingAction = {
+									id: generateId(),
+									action: 'import',
+									displayName: data.display_name,
+									items: [],
+									status: 'pending',
+									folderId: data.folder_id,
+									folderName: data.folder_name,
+									availableFolders: data.available_folders,
+									documentId: data.document_id,
+									targetName: data.target_name,
+									truncated: data.truncated,
+									rowCount: data.row_count,
+									createdCount: data.created,
+									updatedCount: data.updated,
+									skippedCount: data.skipped,
+									failedCount: data.failed
+								};
+							} else if (data.action === 'attach') {
 								const indices = new Set<number>(data.items.map((_: unknown, i: number) => i));
 								msg.pendingAction = {
 									id: generateId(),
@@ -506,17 +580,21 @@ export function collapseChat() {
 
 export function sendMessage(text: string) {
 	const trimmed = text.trim();
-	if (!trimmed) return;
+	const attachment = pendingAttachment?.status === 'ready' ? pendingAttachment : null;
+	if (!trimmed && !attachment) return;
 
+	const content = trimmed || attachment!.filename;
 	messages.push({
 		id: generateId(),
 		role: 'user',
-		content: trimmed,
-		timestamp: new Date()
+		content,
+		timestamp: new Date(),
+		...(attachment && { attachments: [{ id: attachment.id, filename: attachment.filename }] })
 	});
 	inputText = '';
+	pendingAttachment = null;
 	saveState();
-	streamResponse(trimmed);
+	streamResponse(content, attachment ? [attachment.id] : []);
 }
 
 export function retryLastMessage() {
@@ -550,6 +628,45 @@ export async function confirmAction(messageId: string) {
 	if (!msg?.pendingAction || msg.pendingAction.status !== 'pending') return;
 
 	const action = msg.pendingAction;
+
+	if (action.action === 'import') {
+		// Import flow: single server-side atomic apply through the data wizard consumers
+		action.status = 'creating';
+		messages = [...messages];
+		try {
+			const res = await fetch(`/fe-api/chat/sessions/${sessionId}/import`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({})
+			});
+			if (res.ok) {
+				const data = await res.json();
+				action.status = 'created';
+				messages.push({
+					id: generateId(),
+					role: 'assistant',
+					content: data.message ?? 'Import completed.',
+					timestamp: new Date()
+				});
+				messages = [...messages];
+				saveState();
+				window.location.reload();
+			} else {
+				const err = await res.json().catch(() => ({ detail: res.statusText }));
+				action.results = [
+					{ name: action.displayName, error: err.detail || err.error || 'Import failed' }
+				];
+				action.status = 'error';
+			}
+		} catch {
+			action.results = [{ name: action.displayName, error: 'Network error' }];
+			action.status = 'error';
+		}
+		messages = [...messages];
+		saveState();
+		return;
+	}
+
 	const selected = action.selectedIndices ?? new Set(action.items.map((_, i) => i));
 
 	if (selected.size === 0) return; // Nothing selected
@@ -715,6 +832,16 @@ export function rejectAction(messageId: string) {
 	const msg = messages.find((m) => m.id === messageId);
 	if (!msg?.pendingAction || msg.pendingAction.status !== 'pending') return;
 
+	// Imports are staged server-side in the session's workflow state — clear it
+	// so the next message doesn't resume the abandoned import.
+	if (msg.pendingAction.action === 'import' && sessionId) {
+		fetch(`/fe-api/chat/sessions/${sessionId}/import`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ cancel: true })
+		}).catch(() => {});
+	}
+
 	msg.pendingAction.status = 'rejected';
 	messages = [...messages];
 	saveState();
@@ -744,6 +871,7 @@ export function startNewSession() {
 		abortController = null;
 	}
 	isTyping = false;
+	pendingAttachment = null;
 
 	// Clear backend session reference — next message creates a fresh session
 	sessionId = null;
@@ -810,6 +938,7 @@ export async function switchToSession(targetSessionId: string) {
 	}
 	isTyping = false;
 	isStreaming = false;
+	pendingAttachment = null;
 
 	try {
 		const res = await fetch(`${CHAT_API}/sessions/${targetSessionId}`);
