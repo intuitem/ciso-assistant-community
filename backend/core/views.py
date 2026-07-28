@@ -9471,7 +9471,7 @@ class RequirementViewSet(BaseModelViewSet):
         )
 
 
-class EvidenceFilterSet(GenericFilterSet):
+class EvidenceFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
     owner = NullableModelChoiceFilter(queryset=Actor.objects.all())
 
     class Meta:
