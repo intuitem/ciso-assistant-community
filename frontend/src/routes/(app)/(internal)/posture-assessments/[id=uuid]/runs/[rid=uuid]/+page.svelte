@@ -7,6 +7,7 @@
 	import { m } from '$paraglide/messages';
 	import { postureResultTailwindColorMap } from '$lib/utils/constants';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 
 	interface Props {
@@ -16,7 +17,11 @@
 	let { data }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
-	let deleteError = $state('');
+	const toastStore = getToastStore();
+
+	function toastError(message: string) {
+		toastStore.trigger({ message, background: 'preset-filled-error-500' });
+	}
 
 	function confirmDeleteRun() {
 		modalStore.trigger({
@@ -35,7 +40,7 @@
 				if (result.type === 'redirect') {
 					goto(result.location);
 				} else if (result.type === 'failure') {
-					deleteError = (result.data as any)?.error ?? m.error();
+					toastError((result.data as any)?.error ?? m.error());
 				}
 			}
 		});
@@ -99,18 +104,23 @@
 		</div>
 	</div>
 
-	{#if deleteError}
-		<p class="text-sm text-error-600-400 px-2">
-			<i class="fa-solid fa-triangle-exclamation mr-1"></i>{deleteError}
-		</p>
-	{/if}
-
 	<div class="card p-4 bg-surface-50-950 shadow-xs space-y-3">
 		<form
 			method="POST"
 			action="?/updateRun"
 			enctype="multipart/form-data"
-			use:enhance
+			use:enhance={() =>
+				async ({ result, update }) => {
+					if (result.type === 'failure') {
+						toastError((result.data as any)?.error ?? m.error());
+					} else if (result.type === 'success') {
+						toastStore.trigger({
+							message: m.saved(),
+							background: 'preset-filled-success-500'
+						});
+					}
+					await update();
+				}}
 			class="space-y-3"
 		>
 			<div>
@@ -180,7 +190,18 @@
 								row.result
 							]}"
 						></span>
-						<form method="POST" action="?/setResult" use:enhance class="flex items-center gap-2">
+						<form
+							method="POST"
+							action="?/setResult"
+							use:enhance={() =>
+								async ({ result, update }) => {
+									if (result.type === 'failure') {
+										toastError((result.data as any)?.error ?? m.error());
+									}
+									await update();
+								}}
+							class="flex items-center gap-2"
+						>
 							<input type="hidden" name="ref_id" value={row.requirement.ref_id} />
 							<input type="hidden" name="asset" value={group.id} />
 							<input type="hidden" name="actual" value={row.actual ?? ''} />

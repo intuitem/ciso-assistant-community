@@ -304,12 +304,19 @@ def main():
         "benchmark edition under the same ref_id so instances see an update)",
     )
     args = parser.parse_args()
+    if args.library_version < 1:
+        parser.error("--library-version must be at least 1")
 
     doc = fitz.open(args.pdf)
     title, version, pub_date = cover_metadata(doc)
     name = args.name or title
     ref_id = args.ref_id or default_ref_id(title)
-    description = name if f"v{version}" in name else f"{name} v{version}"
+    suffix = f"v{version}"
+    description = (
+        name
+        if name.rstrip().casefold().endswith(suffix.casefold())
+        else f"{name} {suffix}"
+    )
 
     rows, warnings = parse_rows(summary_table_lines(doc))
     doc.close()

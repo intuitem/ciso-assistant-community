@@ -12,6 +12,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/state';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import ImportMappingModal from '$lib/components/Modals/ImportMappingModal.svelte';
 	import { postureResultTailwindColorMap } from '$lib/utils/constants';
@@ -110,6 +111,9 @@
 			.then((res) => (res.ok ? res.json() : null))
 			.then((body) => {
 				if (filterAsset === assetId) history = body;
+			})
+			.catch(() => {
+				if (filterAsset === assetId) history = null;
 			});
 	});
 	const historyResults = $derived(
@@ -169,27 +173,31 @@
 	});
 
 	const modalStore: ModalStore = getModalStore();
+	const toastStore = getToastStore();
 
-	// heatmap tooltip actions
-	let findingMsg = $state('');
+	function toastError(message: string) {
+		toastStore.trigger({ message, background: 'preset-filled-error-500' });
+	}
+
+	// heatmap cell actions
 	let expandedRow: any = $state(null);
 
 	async function requestCreateFinding(row: any) {
-		findingMsg = '';
 		const fd = new FormData();
 		fd.set('requirement', row.requirement.id);
 		fd.set('asset', row.asset.id);
 		const result = await postAction('createFinding', fd);
 		if (result.type === 'success') {
 			const created = (result.data as any)?.createdFinding?.created;
-			findingMsg = created ? m.findingCreated() : m.findingAlreadyExists();
+			toastStore.trigger({
+				message: created ? m.findingCreated() : m.findingAlreadyExists(),
+				background: created ? 'preset-filled-success-500' : 'preset-filled-warning-500'
+			});
 			await invalidateAll();
 		} else {
-			findingMsg = (result as any).data?.error ?? m.error();
+			toastError((result as any).data?.error ?? m.error());
 		}
 	}
-
-	let purgeError = $state('');
 
 	async function confirmPurge(asset: { id: string; name: string }) {
 		let impact = '';
@@ -214,7 +222,9 @@
 				const fd = new FormData();
 				fd.set('asset', asset.id);
 				const result = await postAction('purgeAsset', fd);
-				purgeError = result.type === 'success' ? '' : ((result as any).data?.error ?? m.error());
+				if (result.type !== 'success') {
+					toastError((result as any).data?.error ?? m.error());
+				}
 				await invalidateAll();
 			}
 		});
@@ -476,12 +486,6 @@
 					{/key}
 				{/if}
 
-				{#if findingMsg}
-					<p class="text-sm text-primary-700 dark:text-primary-300">
-						<i class="fa-solid fa-circle-info mr-1"></i>{findingMsg}
-					</p>
-				{/if}
-
 				{#if filterAsset && history?.runs?.length}
 					{#key historyResults}
 						<div>
@@ -533,11 +537,6 @@
 
 			<Tabs.Content value="assets" class="p-4">
 				<div data-testid="posture-assets-card" class="space-y-3">
-					{#if purgeError}
-						<p class="text-sm text-error-600-400">
-							<i class="fa-solid fa-triangle-exclamation mr-1"></i>{purgeError}
-						</p>
-					{/if}
 					<div class="flex items-center justify-between relative">
 						<h3 class="text-lg font-semibold">{m.assets()}</h3>
 						<div class="flex items-center gap-2">
@@ -639,9 +638,8 @@
 											<div class="flex items-center gap-3 justify-end">
 												<button
 													type="button"
-													class="text-surface-500 hover:text-primary-500 {row.measured === 0
-														? 'opacity-40 pointer-events-none'
-														: ''}"
+													class="text-surface-500 hover:text-primary-500 disabled:opacity-40 disabled:pointer-events-none"
+													disabled={row.measured === 0}
 													title={m.runHistory()}
 													onclick={() => {
 														filterAsset = row.id;
@@ -940,6 +938,12 @@
 		</Tabs>
 	</div>
 </div>
+
+<svelte:window
+	onkeydown={(e) => {
+		if (e.key === 'Escape' && expandedRow) expandedRow = null;
+	}}
+/>
 
 {#if expandedRow}
 	<button
