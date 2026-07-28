@@ -5,6 +5,7 @@ import io
 import uuid
 
 import pytest
+from django.contrib.contenttypes.models import ContentType
 from openpyxl import Workbook
 
 from chat.tabular import (
@@ -494,3 +495,88 @@ class TestWorkflowWithDocument:
         assert chat_session.workflow_state["step"] == "import_review"
         assert chat_session.workflow_state["data"]["target"] == "asset"
         assert any(e.type == "pending_action" for e in events)
+
+
+# ── apply endpoint guards (DB) ───────────────────────────────────────
+
+
+@pytest.mark.django_db
+class TestApplyImportGuards:
+    @pytest.fixture
+    def api_client(self, admin_request):
+        from knox.models import AuthToken
+        from rest_framework.test import APIClient
+
+        client = APIClient()
+        client.credentials(
+            HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(admin_request.user)[1]}"
+        )
+        return client
+
+    def _stage(self, session, doc, **overrides):
+        mapped, _ = map_columns(
+            ["name", "description", "status", "impact", "ref_id", "custom col"],
+            "applied_control",
+        )
+        session.workflow_state = {
+            "workflow": "import_document",
+            "step": "import_review",
+            "data": {
+                "document_id": str(doc.id),
+                "target": "applied_control",
+                "mapping": mapped,
+                **overrides,
+            },
+        }
+        session.save(update_fields=["workflow_state"])
+
+    def _session_with_doc(self, chat_session, controls_document):
+        controls_document.source_content_type = ContentType.objects.get_for_model(
+            type(chat_session)
+        )
+        controls_document.source_object_id = chat_session.id
+        controls_document.save()
+        return chat_session
+
+    def test_second_confirm_is_rejected(
+        self, api_client, chat_session, controls_document, domain
+    ):
+        from core.models import AppliedControl
+
+        session = self._session_with_doc(chat_session, controls_document)
+        self._stage(session, controls_document)
+        url = f"/api/chat/sessions/{session.id}/import/"
+
+        first = api_client.post(url, {}, format="json")
+        assert first.status_code == 200, first.data
+        assert AppliedControl.objects.filter(folder=domain).count() == 2
+
+        second = api_client.post(url, {}, format="json")
+        assert second.status_code == 400
+        assert AppliedControl.objects.filter(folder=domain).count() == 2
+
+    def test_malformed_state_returns_400(
+        self, api_client, chat_session, controls_document
+    ):
+        session = self._session_with_doc(chat_session, controls_document)
+        self._stage(session, controls_document)
+        state = session.workflow_state
+        del state["data"]["mapping"]
+        session.workflow_state = state
+        session.save(update_fields=["workflow_state"])
+
+        resp = api_client.post(
+            f"/api/chat/sessions/{session.id}/import/", {}, format="json"
+        )
+        assert resp.status_code == 400
+
+    def test_unknown_target_returns_400(
+        self, api_client, chat_session, controls_document
+    ):
+        session = self._session_with_doc(chat_session, controls_document)
+        self._stage(session, controls_document, target="no_such_model")
+
+        resp = api_client.post(
+            f"/api/chat/sessions/{session.id}/import/", {}, format="json"
+        )
+        assert resp.status_code == 400

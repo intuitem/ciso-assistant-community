@@ -315,17 +315,6 @@ class TestSimpleTemplates:
         assert first.name == "Policy 1"
         assert first.status == "active"
 
-    @pytest.mark.xfail(
-        reason=(
-            "vulnerabilities_template.xlsx ships filtering_labels with newline "
-            "separators (e.g. 'Web\\ncode injection'), but _resolve_filtering_labels "
-            "only splits on '|' or ',' (data_wizard/views.py). The whole string is "
-            "treated as a single label name and fails validation, so neither row is "
-            "created. Either the template should use '|' or the parser should also "
-            "split on newlines."
-        ),
-        strict=True,
-    )
     def test_vulnerabilities_template(self, api_client, domain_folder, all_accessible):
         for asset_name in ("website", "Office", "Wifi"):
             Asset.objects.create(name=asset_name, folder=domain_folder)

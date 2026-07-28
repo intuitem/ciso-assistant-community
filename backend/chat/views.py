@@ -5,6 +5,7 @@ import time
 
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
 from django.http import StreamingHttpResponse
 from django.utils import timezone
 from rest_framework import viewsets, status
@@ -922,6 +923,16 @@ class ChatSessionViewSet(BaseModelViewSet):
             return Response({"detail": "cancelled"})
 
         data = state.get("data") or {}
+        if not data.get("mapping") or data.get("target") not in IMPORT_TARGETS:
+            session.workflow_state = {}
+            session.save(update_fields=["workflow_state"])
+            return Response(
+                {
+                    "detail": "The staged import is no longer valid — attach the file again."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         doc = IndexedDocument.objects.filter(
             id=data.get("document_id"),
             source_content_type=ContentType.objects.get_for_model(ChatSession),
@@ -940,6 +951,17 @@ class ChatSessionViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Claim the staged import so a concurrent confirm can't replay it.
+        with transaction.atomic():
+            locked = ChatSession.objects.select_for_update().get(pk=session.pk)
+            if (locked.workflow_state or {}).get("step") != "import_review":
+                return Response(
+                    {"detail": "This import was already applied."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            locked.workflow_state = {}
+            locked.save(update_fields=["workflow_state"])
+
         try:
             report = run_import(
                 request,
@@ -954,13 +976,12 @@ class ChatSessionViewSet(BaseModelViewSet):
             logger.error(
                 "chat_import_apply_failed", session_id=str(session.id), error=e
             )
+            session.workflow_state = state
+            session.save(update_fields=["workflow_state"])
             return Response(
                 {"detail": "The import failed and nothing was written."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-
-        session.workflow_state = {}
-        session.save(update_fields=["workflow_state"])
 
         label = IMPORT_TARGETS[data["target"]]["label"]
         into = (

@@ -232,7 +232,11 @@ export function removePendingAttachment() {
 }
 
 export async function uploadAttachment(file: File) {
-	pendingAttachment = { id: '', filename: file.name, status: 'uploading' };
+	// Token guard: a removed or superseded attachment must not be resurrected
+	// by its own late response.
+	const slot: PendingAttachment = { id: '', filename: file.name, status: 'uploading' };
+	pendingAttachment = slot;
+	const isCurrent = () => pendingAttachment === slot;
 	try {
 		const sid = await ensureSession();
 		const formData = new FormData();
@@ -241,6 +245,7 @@ export async function uploadAttachment(file: File) {
 			method: 'POST',
 			body: formData
 		});
+		if (!isCurrent()) return;
 		if (!response.ok) {
 			let detail = '';
 			try {
@@ -248,13 +253,18 @@ export async function uploadAttachment(file: File) {
 			} catch {
 				// Non-JSON error body — keep the generic message
 			}
-			pendingAttachment = { id: '', filename: file.name, status: 'error', error: detail };
+			if (isCurrent()) {
+				pendingAttachment = { id: '', filename: file.name, status: 'error', error: detail };
+			}
 			return;
 		}
 		const data = await response.json();
+		if (!isCurrent()) return;
 		pendingAttachment = { id: data.id, filename: data.filename ?? file.name, status: 'ready' };
 	} catch {
-		pendingAttachment = { id: '', filename: file.name, status: 'error' };
+		if (isCurrent()) {
+			pendingAttachment = { id: '', filename: file.name, status: 'error' };
+		}
 	}
 }
 

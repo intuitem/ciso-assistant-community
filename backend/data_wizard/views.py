@@ -368,7 +368,9 @@ def _resolve_filtering_labels(value: Any) -> list[UUID]:
     if not value:
         return []
 
-    label_names = set(name.strip() for name in re.split(r"[|,]", value) if name.strip())
+    label_names = set(
+        name.strip() for name in re.split(r"[|,\n]", value) if name.strip()
+    )
     label_ids: list[UUID] = []
     for label_name in label_names:
         label = FilteringLabel.objects.filter(label=label_name).first()
@@ -396,7 +398,7 @@ def _resolve_vulnerabilities(
     """
     if not value or not isinstance(value, str):
         return [], []
-    tokens = [t.strip() for t in re.split(r"[|,]", value) if t.strip()]
+    tokens = [t.strip() for t in re.split(r"[|,\n]", value) if t.strip()]
     vuln_ids: list[UUID] = []
     failed_tokens: list[str] = []
     for token in tokens:
@@ -1909,7 +1911,7 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
         """
         has_ref_id = any(f.name == "ref_id" for f in model._meta.fields)
         ids = set()
-        for entry in re.split(r"[|,]", raw):
+        for entry in re.split(r"[|,\n]", raw):
             entry = entry.strip()
             if not entry:
                 continue
@@ -2196,7 +2198,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
             status = "--"
 
         applied_controls = []
-        for token in re.split(r"[|,]", record.get("applied_controls") or ""):
+        for token in re.split(r"[|,\n]", record.get("applied_controls") or ""):
             token = token.strip()
             if not token:
                 continue
@@ -2218,7 +2220,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
                 )
 
         assets = []
-        for token in re.split(r"[|,]", record.get("assets") or ""):
+        for token in re.split(r"[|,\n]", record.get("assets") or ""):
             token = token.strip()
             if not token:
                 continue
@@ -2240,7 +2242,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
                 )
 
         security_exceptions = []
-        for token in re.split(r"[|,]", record.get("security_exceptions") or ""):
+        for token in re.split(r"[|,\n]", record.get("security_exceptions") or ""):
             token = token.strip()
             if not token:
                 continue
