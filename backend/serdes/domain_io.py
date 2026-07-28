@@ -67,7 +67,11 @@ from ebios_rm.models import (
     StrategicScenario,
 )
 from iam.models import Folder, RoleAssignment, User
-from tprm.models import Entity
+from tprm.models import (
+    Contract,
+    Entity,
+    Solution,
+)
 
 from .serializers import ExportSerializer
 from .utils import (
@@ -430,7 +434,21 @@ def import_objects(
             logger.error(
                 "Failed to validate objects", validation_errors=validation_errors
             )
-            raise ValidationError({"validation_errors": validation_errors})
+            # Django's ValidationError can't wrap a list of dicts: it tries to
+            # read `.error_list` off each nested entry (which, built from a
+            # dict, only has `.error_dict`) and raises AttributeError. That
+            # AttributeError used to be swallowed by the outer `except
+            # Exception` and reported as an opaque "errorOccuredDuringImport".
+            # Flatten to readable strings so the real per-object errors reach
+            # the caller.
+            raise ValidationError(
+                {
+                    "validation_errors": [
+                        f"{err['model']} ({err['id']}): {err['errors']}"
+                        for err in validation_errors
+                    ]
+                }
+            )
 
         with transaction.atomic():
             base_folder = Folder.objects.create(
@@ -479,6 +497,7 @@ def import_objects(
                 )
 
             resolve_security_exception_m2m(objects, link_dump_database_ids)
+            resolve_self_referencing_fks(objects, link_dump_database_ids)
 
         return {"message": "Import successful"}
 
@@ -856,9 +875,89 @@ def process_model_relationships(
 
         case "entity":
             _fields.pop("owned_folders", None)
+            # parent_entity is a self-reference; the parent may be created in
+            # the same batch, so link_dump_database_ids isn't populated yet.
+            # Create with no parent and wire it up in the post-pass
+            # resolve_self_referencing_fks once every entity exists.
+            _fields["parent_entity"] = None
             many_to_many_map_ids["relationship_ids"] = import_terminologies(
                 _fields.pop("relationship", []),
                 Terminology.FieldPath.ENTITY_RELATIONSHIP,
+            )
+
+        case "solution":
+            _fields["provider_entity"] = Entity.objects.get(
+                id=link_dump_database_ids.get(_fields["provider_entity"])
+            )
+            recipient_id = link_dump_database_ids.get(_fields.get("recipient_entity"))
+            _fields["recipient_entity"] = (
+                Entity.objects.filter(id=recipient_id).first() if recipient_id else None
+            )
+            many_to_many_map_ids["asset_ids"] = get_mapped_ids(
+                _fields.pop("assets", []), link_dump_database_ids
+            )
+
+        case "solutionsubcontractor":
+            _fields["solution"] = Solution.objects.get(
+                id=link_dump_database_ids.get(_fields["solution"])
+            )
+            _fields["subcontractor"] = Entity.objects.get(
+                id=link_dump_database_ids.get(_fields["subcontractor"])
+            )
+            recipient_id = link_dump_database_ids.get(_fields.get("recipient"))
+            _fields["recipient"] = (
+                Entity.objects.filter(id=recipient_id).first() if recipient_id else None
+            )
+
+        case "representative":
+            _fields["entity"] = Entity.objects.get(
+                id=link_dump_database_ids.get(_fields["entity"])
+            )
+
+        case "entityassessment":
+            perimeter_id = link_dump_database_ids.get(_fields.get("perimeter"))
+            _fields["perimeter"] = (
+                Perimeter.objects.filter(id=perimeter_id).first()
+                if perimeter_id
+                else None
+            )
+            _fields["entity"] = Entity.objects.get(
+                id=link_dump_database_ids.get(_fields["entity"])
+            )
+            ca_id = link_dump_database_ids.get(_fields.get("compliance_assessment"))
+            _fields["compliance_assessment"] = (
+                ComplianceAssessment.objects.filter(id=ca_id).first() if ca_id else None
+            )
+            evidence_id = link_dump_database_ids.get(_fields.get("evidence"))
+            _fields["evidence"] = (
+                Evidence.objects.filter(id=evidence_id).first() if evidence_id else None
+            )
+            many_to_many_map_ids["solution_ids"] = get_mapped_ids(
+                _fields.pop("solutions", []), link_dump_database_ids
+            )
+
+        case "contract":
+            provider_id = link_dump_database_ids.get(_fields.get("provider_entity"))
+            _fields["provider_entity"] = (
+                Entity.objects.filter(id=provider_id).first() if provider_id else None
+            )
+            beneficiary_id = link_dump_database_ids.get(
+                _fields.get("beneficiary_entity")
+            )
+            _fields["beneficiary_entity"] = (
+                Entity.objects.filter(id=beneficiary_id).first()
+                if beneficiary_id
+                else None
+            )
+            # overarching_contract is a self-reference; the parent contract may
+            # be created in the same batch. Wire it up in the post-pass
+            # resolve_self_referencing_fks once every contract exists.
+            _fields["overarching_contract"] = None
+            many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
+                _fields.pop("evidences", []), link_dump_database_ids
+            )
+            many_to_many_map_ids["solution_ids"] = get_mapped_ids(
+                _fields.pop("solutions", []), link_dump_database_ids
             )
 
         case "ebiosrmstudy":
@@ -1199,6 +1298,20 @@ def set_many_to_many_relations(
             if relationship_ids := many_to_many_map_ids.get("relationship_ids"):
                 obj.relationship.set(relationship_ids)
 
+        case "solution":
+            if asset_ids := many_to_many_map_ids.get("asset_ids"):
+                obj.assets.set(Asset.objects.filter(id__in=asset_ids))
+
+        case "entityassessment":
+            if solution_ids := many_to_many_map_ids.get("solution_ids"):
+                obj.solutions.set(Solution.objects.filter(id__in=solution_ids))
+
+        case "contract":
+            if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
+                obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
+            if solution_ids := many_to_many_map_ids.get("solution_ids"):
+                obj.solutions.set(Solution.objects.filter(id__in=solution_ids))
+
         case "findingsassessment":
             if evidence_ids := many_to_many_map_ids.get("evidence_ids"):
                 obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
@@ -1304,6 +1417,38 @@ def resolve_security_exception_m2m(
             ]
             if ids:
                 getattr(se, field_name).set(model_cls.objects.filter(id__in=ids))
+
+
+def resolve_self_referencing_fks(
+    objects: List[dict], link_dump_database_ids: dict[str, Any]
+) -> None:
+    """Post-pass: wire up nullable self-referencing FKs once every row exists.
+
+    parent_entity / overarching_contract point at another row of the same
+    model that may be created in the same batch, so they can't be resolved at
+    construction time (link_dump_database_ids is only populated after each
+    batch is created). We create those rows with a null parent and set the
+    link here. Targets outside the exported scope stay null by design.
+
+    Uses .update() so no model save() side effects (e.g. ActorSync) fire and
+    the historical timestamps are left untouched.
+    """
+    self_ref = (
+        ("tprm.entity", Entity, "parent_entity"),
+        ("tprm.contract", Contract, "overarching_contract"),
+    )
+    for model_name, model_cls, field_name in self_ref:
+        for obj in objects:
+            if obj["model"] != model_name:
+                continue
+            db_id = link_dump_database_ids.get(obj["id"])
+            if not db_id:
+                continue
+            parent_hash = obj.get("fields", {}).get(field_name)
+            parent_id = link_dump_database_ids.get(parent_hash) if parent_hash else None
+            if not parent_id:
+                continue
+            model_cls.objects.filter(id=db_id).update(**{f"{field_name}_id": parent_id})
 
 
 def split_uuids_urns(ids: List[str]) -> Tuple[List[UUID], List[str]]:
