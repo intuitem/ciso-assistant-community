@@ -82,7 +82,7 @@ class TestForEach:
                 },
                 {
                     "type": "log",
-                    "for_each": "{{node.step_0.results}}",
+                    "for_each": "{{nodes.step_0.results}}",
                     "message": "#{{index}}: {{item.name}}",
                 },
             ],
@@ -108,12 +108,12 @@ class TestForEach:
                 {"type": "read_objects", "model": "applied_control", "mode": "list"},
                 {
                     "type": "log",
-                    "for_each": "{{node.step_0.results}}",
+                    "for_each": "{{nodes.step_0.results}}",
                     "message": "notified {{item.name}}",
                 },
                 {
                     "type": "log",
-                    "for_each": "{{node.step_1.results}}",
+                    "for_each": "{{nodes.step_1.results}}",
                     "message": "forwarded: {{item.message}}",
                 },
             ],
@@ -185,7 +185,7 @@ class TestForEach:
                 {"type": "read_objects", "model": "applied_control", "mode": "list"},
                 {
                     "type": "log",
-                    "for_each": "{{node.step_0.results}}",
+                    "for_each": "{{nodes.step_0.results}}",
                     "message": "{{item.name}}",
                 },
             ],
@@ -206,7 +206,7 @@ class TestForEach:
                 {"type": "read_objects", "model": "applied_control", "mode": "list"},
                 {
                     "type": "log",
-                    "for_each": "{{node.step_0.count}}",
+                    "for_each": "{{nodes.step_0.count}}",
                     "message": "x",
                 },
             ],
@@ -264,7 +264,7 @@ class TestForEachValidation:
             self._codes(
                 {
                     "type": "log",
-                    "for_each": "{{node.a.results}}",
+                    "for_each": "{{nodes.a.results}}",
                     "on_item_error": "stop",
                     "message": "x",
                 }

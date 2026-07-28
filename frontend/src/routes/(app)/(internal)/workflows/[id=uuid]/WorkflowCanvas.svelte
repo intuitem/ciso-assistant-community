@@ -1343,6 +1343,93 @@
 		markDirty();
 	}
 
+	// ---------- node refs: derived from labels, references rewritten (D28) ----------
+
+	// Refs are slug(label), always — not generated-once. Editing a node's label
+	// re-derives its ref and mechanically rewrites every {{nodes.<old>...}}
+	// reference in sibling configs within the same edit (same debounced save).
+	// Imported refs are respected verbatim until a label edit: the effect below
+	// observes the SELECTED node's label, and only a change while the same node
+	// stays selected counts as an edit (selection alone never rewrites) — this
+	// can't be done in the oninput handler, which races the bind:value update.
+	let refTrack: { id: string; label: string } | null = null;
+
+	$effect(() => {
+		const domain: any = selectedNode?.data?.domain;
+		if (!domain) {
+			refTrack = null;
+			return;
+		}
+		const label = domain.label ?? '';
+		if (!refTrack || refTrack.id !== domain.id) {
+			refTrack = { id: domain.id, label };
+			return;
+		}
+		if (refTrack.label === label) return;
+		refTrack = { id: domain.id, label };
+		if (readonly) return;
+		const newRef = dedupeRef(slugifyRef(label, domain.type), domain.id);
+		if (newRef === domain.ref) return;
+		const oldRef = domain.ref;
+		domain.ref = newRef;
+		if (oldRef) rewriteNodeReferences(oldRef, newRef);
+		refreshVisuals();
+	});
+
+	function slugifyRef(label: string, type: string): string {
+		const base = (label || type)
+			.toLowerCase()
+			.normalize('NFKD')
+			.replace(/[̀-ͯ]/g, '')
+			.replace(/[^a-z0-9]+/g, '_')
+			.replace(/^_+|_+$/g, '')
+			.slice(0, 80);
+		if (!base) return type;
+		// Backend REF_RE requires a leading letter.
+		return /^[a-z]/.test(base) ? base : `${type}_${base}`;
+	}
+
+	function dedupeRef(base: string, ownDomainId: string): string {
+		const taken = new Set(
+			nodes
+				.map((n) => n.data.domain as any)
+				.filter((d) => d.id !== ownDomainId)
+				.map((d) => d.ref)
+				.filter(Boolean)
+		);
+		if (!taken.has(base)) return base;
+		let suffix = 2;
+		while (taken.has(`${base}_${suffix}`)) suffix += 1;
+		return `${base}_${suffix}`;
+	}
+
+	function rewriteRefsInValue(value: any, pattern: RegExp, replacement: string): any {
+		if (typeof value === 'string') return value.replace(pattern, replacement);
+		if (Array.isArray(value)) {
+			for (let i = 0; i < value.length; i += 1)
+				value[i] = rewriteRefsInValue(value[i], pattern, replacement);
+			return value;
+		}
+		if (value && typeof value === 'object') {
+			for (const key of Object.keys(value))
+				value[key] = rewriteRefsInValue(value[key], pattern, replacement);
+			return value;
+		}
+		return value;
+	}
+
+	function rewriteNodeReferences(oldRef: string, newRef: string) {
+		const escaped = oldRef.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		const pattern = new RegExp(`(\\{\\{\\s*nodes\\.)${escaped}(?=[.\\s}])`, 'g');
+		const replacement = `$1${newRef}`;
+		for (const flowNode of nodes) {
+			const domain: any = flowNode.data.domain;
+			for (const field of ['action_config', 'input_mapping', 'output_mapping']) {
+				if (domain[field]) rewriteRefsInValue(domain[field], pattern, replacement);
+			}
+		}
+	}
+
 	function handleInspectorChange() {
 		refreshVisuals();
 		markDirty();

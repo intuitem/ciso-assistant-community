@@ -107,8 +107,8 @@ class TestObjectRendering:
     def test_object_references_render_as_json(self):
         from workflows.actions import render
 
-        context = {"node": {"fetch": {"body": {"a": 1, "items": [1, 2]}}}}
-        rendered = render("payload: {{node.fetch.body}}", context)
+        context = {"nodes": {"fetch": {"body": {"a": 1, "items": [1, 2]}}}}
+        rendered = render("payload: {{nodes.fetch.body}}", context)
         assert rendered == 'payload: {"a": 1, "items": [1, 2]}'
 
 
@@ -149,7 +149,7 @@ class TestNodeOutputReferences:
                 "type": "create_object",
                 "model": "applied_control",
                 # No output_mapping, no declared variables: direct node ref.
-                "fields": {"name": "Onboard {{node.fetch.body.identity.email}}"},
+                "fields": {"name": "Onboard {{nodes.fetch.body.identity.email}}"},
             },
         )
         end = node("end")

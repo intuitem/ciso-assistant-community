@@ -19,6 +19,7 @@ from .actions import validate_read_config as _validate_read_config
 from .triggers import validate_trigger_config
 
 SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
+NODE_REF_RE = re.compile(r"\{\{\s*nodes\.([A-Za-z_]\w*)")
 
 
 def validate_graph(version):
@@ -34,6 +35,7 @@ def validate_graph(version):
         e.source_branch_id for e in edges if e.source_branch_id is not None
     }
 
+    known_refs = {n.ref for n in nodes if n.ref}
     trigger_nodes = [n for n in nodes if n.type == WorkflowNode.Type.TRIGGER]
     end_nodes = [n for n in nodes if n.type == WorkflowNode.Type.END]
 
@@ -115,6 +117,14 @@ def validate_graph(version):
                 errors.append(_error(code, message, node=node))
             for code, message in _validate_iteration_config(node):
                 errors.append(_error(code, message, node=node))
+        for ref in sorted(_referenced_node_refs(node) - known_refs):
+            errors.append(
+                _error(
+                    "node_reference_missing",
+                    f"'{{{{nodes.{ref}}}}}' references a node that does not exist",
+                    node=node,
+                )
+            )
         if node.type == WorkflowNode.Type.CONDITION:
             branches = list(node.branches.all())
             # Exactly one default (otherwise) branch guarantees exhaustiveness:
@@ -232,6 +242,16 @@ def validate_graph(version):
 
 def _referenced_secret_names(node):
     return set(SECRET_NAME_RE.findall(json.dumps(node.action_config or {})))
+
+
+def _referenced_node_refs(node):
+    """Refs named by {{nodes.<ref>...}} anywhere in the node's configs. The
+    builder rewrites references on rename (spec D28); this is the safety net
+    for imports and hand-written documents."""
+    blob = json.dumps(
+        [node.action_config or {}, node.input_mapping or {}, node.output_mapping or {}]
+    )
+    return set(NODE_REF_RE.findall(blob))
 
 
 def _existing_secret_names(version, nodes):

@@ -5414,6 +5414,7 @@
 	"forEachNoCollections": "Run the workflow once to detect collections",
 	"perItemFields": "Per item",
 	"perItemChipsHint": "Click a field to insert it into the focused input.",
+	"renameTriggerWarning": "Renaming this trigger changes its webhook URL and resets its registration state on the next publish.",
 	"addVariable": "Add variable",
 	"variableKey": "Key",
 	"newVariableOption": "New variable…",

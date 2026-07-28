@@ -28,6 +28,12 @@ from .models import (
 SCHEMA_VERSION = 1
 MAX_CONDITION_DEPTH = 5
 
+# Capability manifest (spec D28): the forward-compat gate. Exports tag every
+# semantics-bearing feature the document uses; importers hard-reject unknown
+# tags instead of silently dropping behavior. Every future feature whose
+# absence would silently change execution MUST register a tag here.
+KNOWN_CAPABILITIES = {"read_objects", "for_each"}
+
 SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
 UUID_RE = re.compile(r"\b[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\b")
 
@@ -72,23 +78,28 @@ def export_workflow(workflow):
     if workflow.description:
         data["description"] = workflow.description
 
+    requires = {}
     secret_names = _referenced_secrets(document["nodes"])
     if secret_names:
-        data["requires"] = {"secrets": secret_names}
+        requires["secrets"] = secret_names
+    capabilities = _used_capabilities(document["nodes"])
+    if capabilities:
+        requires["capabilities"] = capabilities
+    if requires:
+        data["requires"] = requires
 
-    # Edges reference their branch by its 0-based position within the source
-    # node's exported `branches` list (branch ids never travel).
-    branch_index = {}
-    for node in document["nodes"]:
-        for i, branch in enumerate(node["branches"]):
-            branch_index[branch["id"]] = i
+    # Edges reference their branch BY NAME (spec D28 — positional references
+    # are where LLM edits silently rewire graphs). The exporter guarantees a
+    # unique-per-node name for every branch, synthesizing one when blank.
+    branch_names = _branch_name_map(document["nodes"])
 
     data["graph"] = {
         "variables": [_export_variable(v) for v in document["variables"]],
         "nodes": [
-            _export_node(n, refs, taxonomies, variable_keys) for n in document["nodes"]
+            _export_node(n, refs, taxonomies, variable_keys, branch_names)
+            for n in document["nodes"]
         ],
-        "edges": [_export_edge(e, refs, branch_index) for e in document["edges"]],
+        "edges": [_export_edge(e, refs, branch_names) for e in document["edges"]],
     }
     return data
 
@@ -131,6 +142,59 @@ def _referenced_secrets(nodes):
     return sorted(set(SECRET_NAME_RE.findall(blob)))
 
 
+def _used_capabilities(nodes):
+    used = set()
+    for node in nodes:
+        config = node["action_config"] or {}
+        if config.get("type") == "read_objects":
+            used.add("read_objects")
+        if config.get("for_each"):
+            used.add("for_each")
+    return sorted(used)
+
+
+def _branch_name_map(nodes):
+    """Branch id → unique-per-node exported name. Blank names synthesize as
+    'otherwise' (default branch) or 'branch_<position>'."""
+    names = {}
+    for node in nodes:
+        taken = set()
+        for position, branch in enumerate(node["branches"]):
+            base = str(branch["name"]).strip() or (
+                "otherwise" if branch["is_default"] else f"branch_{position + 1}"
+            )
+            candidate, suffix = base, 2
+            while candidate in taken:
+                candidate = f"{base}_{suffix}"
+                suffix += 1
+            taken.add(candidate)
+            names[branch["id"]] = candidate
+    return names
+
+
+def _strip_empty(value):
+    """Canonical exports carry no empty values (spec D28): '', None, {} and []
+    are dropped recursively; a filter-tree dict reduced to bare {'operator'}
+    is empty too. Booleans and numbers always survive."""
+    if isinstance(value, dict):
+        cleaned = {}
+        for key, item in value.items():
+            stripped = _strip_empty(item)
+            if stripped in ("", None) or stripped == {} or stripped == []:
+                continue
+            cleaned[key] = stripped
+        if set(cleaned) == {"operator"}:
+            return {}
+        return cleaned
+    if isinstance(value, list):
+        return [
+            stripped
+            for stripped in (_strip_empty(item) for item in value)
+            if not (stripped in ("", None) or stripped == {} or stripped == [])
+        ]
+    return value
+
+
 def _export_variable(variable):
     out = {"key": variable["key"], "type": variable["type"]}
     if variable["default_value"] is not None:
@@ -138,7 +202,7 @@ def _export_variable(variable):
     return out
 
 
-def _export_node(node, refs, taxonomies, variable_keys):
+def _export_node(node, refs, taxonomies, variable_keys, branch_names):
     out = {"ref": refs[node["id"]], "type": node["type"]}
     if node["label"]:
         out["label"] = node["label"]
@@ -147,8 +211,13 @@ def _export_node(node, refs, taxonomies, variable_keys):
     if node["join_type"] != WorkflowNode.JoinType.NONE:
         out["join_type"] = node["join_type"]
     for field in EXPORTED_NODE_JSON_FIELDS:
-        if node[field]:
-            out[field] = node[field]
+        value = _strip_empty(node[field])
+        if value:
+            out[field] = value
+    # on_item_error is meaningless without for_each (spec D27/D28 hygiene).
+    config = out.get("action_config")
+    if config and not config.get("for_each"):
+        config.pop("on_item_error", None)
     if node["event_key"]:
         out["event_key"] = node["event_key"]
     if node["retry_max_attempts"]:
@@ -176,16 +245,16 @@ def _export_node(node, refs, taxonomies, variable_keys):
             out["presentation"] = presentation
     # Condition nodes own their routing branches (spec D25); the branch order is
     # the list order, so edges can reference a branch by index.
-    branches = [_export_branch(b, variable_keys) for b in node["branches"]]
+    branches = [
+        _export_branch(b, variable_keys, branch_names) for b in node["branches"]
+    ]
     if branches:
         out["branches"] = branches
     return out
 
 
-def _export_branch(branch, variable_keys):
-    out = {}
-    if branch["name"]:
-        out["name"] = branch["name"]
+def _export_branch(branch, variable_keys, branch_names):
+    out = {"name": branch_names[branch["id"]]}
     if branch["is_default"]:
         out["is_default"] = True
     groups = _export_condition_groups(branch["condition_groups"], variable_keys)
@@ -213,15 +282,15 @@ def _export_assignment(assignment, taxonomies):
     return out
 
 
-def _export_edge(edge, refs, branch_index):
+def _export_edge(edge, refs, branch_names):
     out = {"source": refs[edge["source"]], "target": refs[edge["target"]]}
     if edge["label"]:
         out["label"] = edge["label"]
     if edge["priority"]:
         out["priority"] = edge["priority"]
-    # An edge leaving a condition node carries the index of the branch it wires.
+    # An edge leaving a condition node names the branch it wires.
     if edge["source_branch"] is not None:
-        out["source_branch"] = branch_index[edge["source_branch"]]
+        out["source_branch"] = branch_names[edge["source_branch"]]
     return out
 
 
@@ -275,6 +344,10 @@ def import_workflow(data, folder, user=None):
             description=str(data.get("description") or ""),
             ref_id=str(data.get("ref_id") or "")[:100],
             folder=folder,
+            # Marketplace/catalog provenance (spec D28): the document divorces
+            # at import, these only record where it came from.
+            source_urn=str(data.get("urn") or "")[:255],
+            source_version=str(data.get("version") or "")[:50],
         )
         version = WorkflowVersion.objects.create(workflow=workflow)
         payload = _build_graph_payload(data["graph"], workflow, folder, warnings)
@@ -292,6 +365,14 @@ def _validate_structure(data):
     if data.get("schema_version") != SCHEMA_VERSION:
         raise WorkflowImportError(
             f"Unsupported schema_version: expected {SCHEMA_VERSION}"
+        )
+    requested = (data.get("requires") or {}).get("capabilities") or []
+    unknown = sorted(set(map(str, requested)) - KNOWN_CAPABILITIES)
+    if unknown:
+        raise WorkflowImportError(
+            f"This document requires capabilities this version of CISO Assistant "
+            f"does not support: {', '.join(unknown)} — update the application "
+            "or re-export from a matching version"
         )
     if not str(data.get("name") or "").strip():
         raise WorkflowImportError("The document needs a non-empty name")
@@ -319,14 +400,15 @@ def _validate_structure(data):
     refs = set()
     node_type = {}
     branch_count = {}
-    for node in nodes:
+    branch_names_by_ref = {}
+    for index, node in enumerate(nodes):
         if not isinstance(node, dict):
-            raise WorkflowImportError("Every node must be a mapping")
+            raise WorkflowImportError(f"graph.nodes[{index}] must be a mapping")
         ref = node.get("ref")
         if not isinstance(ref, str) or not REF_RE.match(ref):
             raise WorkflowImportError(
-                f"Invalid node ref {ref!r}: lowercase letters, digits and "
-                "underscores only, starting with a letter"
+                f"graph.nodes[{index}].ref {ref!r} is invalid: lowercase "
+                "letters, digits and underscores only, starting with a letter"
             )
         if ref in refs:
             raise WorkflowImportError(f"Duplicate node ref '{ref}'")
@@ -352,14 +434,24 @@ def _validate_structure(data):
             for group in branch.get("condition_groups") or []:
                 _validate_condition_group(group, keys, depth=0)
         branch_count[ref] = len(branches)
+        branch_names_by_ref[ref] = [str(b.get("name") or "").strip() for b in branches]
+        named = [n for n in branch_names_by_ref[ref] if n]
+        duplicates = {n for n in named if named.count(n) > 1}
+        if duplicates:
+            raise WorkflowImportError(
+                f"Node '{ref}' has duplicate branch names: "
+                f"{', '.join(sorted(duplicates))} — branch names must be "
+                "unique within a node"
+            )
 
-    for edge in edges:
+    for index, edge in enumerate(edges):
         if not isinstance(edge, dict):
-            raise WorkflowImportError("Every edge must be a mapping")
+            raise WorkflowImportError(f"graph.edges[{index}] must be a mapping")
         for endpoint in ("source", "target"):
             if edge.get(endpoint) not in refs:
                 raise WorkflowImportError(
-                    f"Edge {endpoint} {edge.get(endpoint)!r} is not a node ref"
+                    f"graph.edges[{index}].{endpoint} {edge.get(endpoint)!r} "
+                    "is not the ref of any node in graph.nodes"
                 )
         source = edge.get("source")
         is_condition = node_type.get(source) == WorkflowNode.Type.CONDITION
@@ -375,14 +467,22 @@ def _validate_structure(data):
                     f"Edge from '{source}' carries a source_branch but its source "
                     "is not a condition node"
                 )
-            if (
+            if isinstance(source_branch, str):
+                if source_branch not in branch_names_by_ref.get(source, []):
+                    raise WorkflowImportError(
+                        f"Edge from '{source}' references branch "
+                        f"{source_branch!r}, which is not a branch name of "
+                        "that node"
+                    )
+            elif (
                 not isinstance(source_branch, int)
                 or isinstance(source_branch, bool)
                 or not 0 <= source_branch < branch_count.get(source, 0)
             ):
                 raise WorkflowImportError(
                     f"Edge from '{source}' references branch {source_branch!r} "
-                    "outside the node's branch list"
+                    "outside the node's branch list (use the branch name or a "
+                    "0-based index)"
                 )
 
 
@@ -445,9 +545,16 @@ def _build_graph_payload(graph, workflow, folder, warnings):
         for entry in graph["nodes"]
     ]
 
+    branch_positions = {
+        n["ref"]: [str(b.get("name") or "").strip() for b in (n.get("branches") or [])]
+        for n in graph["nodes"]
+    }
+
     edges = []
     for entry in graph.get("edges") or []:
         source_branch = entry.get("source_branch")
+        if isinstance(source_branch, str):
+            source_branch = branch_positions[entry["source"]].index(source_branch)
         edges.append(
             {
                 "id": str(uuid4()),

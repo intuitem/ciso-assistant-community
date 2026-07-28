@@ -230,7 +230,7 @@ class TestExport:
 
         # Edges leaving the condition node reference their branch by index.
         gate_edges = [e for e in data["graph"]["edges"] if e["source"] == "gate"]
-        assert {e["source_branch"] for e in gate_edges} == {0, 1}
+        assert {e["source_branch"] for e in gate_edges} == {"approved", "otherwise"}
         for edge in gate_edges:
             assert edge["target"] == "end"
             assert "condition_groups" not in edge

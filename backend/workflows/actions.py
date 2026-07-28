@@ -54,7 +54,7 @@ def dig(data, path):
 def render(value, variables):
     """Replace {{path}} placeholders in strings; leave other types alone.
     Objects and lists serialize as JSON so whole-object references
-    ({{node.fetch.body}}) compose into request bodies and fields."""
+    ({{nodes.fetch.body}}) compose into request bodies and fields."""
     if isinstance(value, str):
 
         def substitute(match):
@@ -77,11 +77,11 @@ def render(value, variables):
 
 def _render_context(instance):
     """Template context: instance variables plus the node-output namespace
-    ({{node.<ref>.<path>}}, spec D20). During for_each iteration (spec D27)
+    ({{nodes.<ref>.<path>}}, spec D20). During for_each iteration (spec D27)
     an instance-local overlay adds {{item}}/{{index}}, shadowing same-named
     variables; the attribute is transient, never persisted."""
     overlay = getattr(instance, "_iteration_context", None) or {}
-    return {**instance.variables, "node": instance.node_outputs, **overlay}
+    return {**instance.variables, "nodes": instance.node_outputs, **overlay}
 
 
 ACTION_REGISTRY = {}

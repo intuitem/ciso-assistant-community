@@ -361,7 +361,7 @@ def _start_subprocess(token):
 
 
 def _store_node_output(node, output, instance):
-    """Persist the node's output for {{node.<ref>.<path>}} references and the
+    """Persist the node's output for {{nodes.<ref>.<path>}} references and the
     builder's reference-run data browser (spec D20). Structure-preserving:
     nested JSON stays navigable and referenceable; only oversized leaves and
     collections shrink. The display log truncates flat and harder."""

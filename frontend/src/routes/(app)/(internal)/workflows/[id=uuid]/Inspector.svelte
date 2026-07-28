@@ -136,7 +136,7 @@
 
 	const previewContext = $derived({
 		...referenceVariables,
-		node: Object.fromEntries(referenceNodes.map((n) => [n.key, n.output])),
+		nodes: Object.fromEntries(referenceNodes.map((n) => [n.key, n.output])),
 		secrets: Object.fromEntries(secretNames.map((name) => [name, '•••']))
 	});
 	const livePreview = $derived(
@@ -482,7 +482,7 @@
 	const FOR_EACH_RE = /^\{\{\s*([\w.]+)\s*\}\}$/;
 	const referenceContext = $derived({
 		...referenceVariables,
-		node: Object.fromEntries(referenceNodes.map((n) => [n.key, n.output]))
+		nodes: Object.fromEntries(referenceNodes.map((n) => [n.key, n.output]))
 	});
 	const forEachPreview = $derived.by(() => {
 		const expression = actionConfig?.for_each;
@@ -517,7 +517,7 @@
 			const config = upstream.actionConfig ?? {};
 			const isListRead = config.type === 'read_objects' && (config.mode ?? 'list') === 'list';
 			if (isListRead || config.for_each) {
-				const expr = `{{node.${upstream.ref}.results}}`;
+				const expr = `{{nodes.${upstream.ref}.results}}`;
 				choices.set(expr, { expr, label: `${upstream.label} → results`, count: null });
 			}
 		}
@@ -525,7 +525,7 @@
 			const found: { path: string; count: number }[] = [];
 			collectArrayPaths(nodeData.output, '', 0, found);
 			for (const entry of found) {
-				const expr = `{{node.${nodeData.key}.${entry.path}}}`;
+				const expr = `{{nodes.${nodeData.key}.${entry.path}}}`;
 				choices.set(expr, {
 					expr,
 					label: `${nodeData.label} → ${entry.path}`,
@@ -903,6 +903,11 @@
 						oninput={onChange}
 					/>
 				</label>
+				{#if nodeDomain.type === 'trigger' && triggerRegistration}
+					<p class="text-[10px] text-warning-600 leading-relaxed">
+						<i class="fa-solid fa-triangle-exclamation mr-1"></i>{m.renameTriggerWarning()}
+					</p>
+				{/if}
 			{/if}
 
 			{#if nodeDomain.type === 'condition'}
@@ -1094,7 +1099,7 @@
 							<input
 								type="text"
 								class="input w-full text-sm font-mono mt-1"
-								placeholder={'{{node.list_items.results}}'}
+								placeholder={'{{nodes.list_items.results}}'}
 								bind:value={actionConfig.for_each}
 								oninput={onChange}
 							/>

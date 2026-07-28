@@ -20,6 +20,11 @@ def generate_webhook_secret():
 
 class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
     ref_id = models.CharField(max_length=100, blank=True)
+    # Marketplace/catalog provenance (spec D28): where an imported document
+    # came from. Purely informational — the workflow divorces at import and
+    # owns its own lifecycle; nothing ever syncs back.
+    source_urn = models.CharField(max_length=255, blank=True)
+    source_version = models.CharField(max_length=50, blank=True)
 
     fields_to_check = ["name"]
 
@@ -230,7 +235,7 @@ class WorkflowNode(AbstractBaseModel, FolderMixin):
         default=JoinType.NONE,
     )
     label = models.CharField(max_length=200, blank=True)
-    # Stable slug for {{node.<ref>.<path>}} references (spec D20).
+    # Stable slug for {{nodes.<ref>.<path>}} references (spec D20).
     # Auto-generated from the label on first save, then never regenerated.
     ref = models.CharField(max_length=100, blank=True)
     task_template = models.ForeignKey(
@@ -575,7 +580,7 @@ class WorkflowInstance(AbstractBaseModel, FolderMixin):
     variables = models.JSONField(default=dict, blank=True)
     payload = models.JSONField(default=dict, blank=True)
     # Per-node action outputs keyed by node ref (or node id for pre-ref
-    # graphs), addressable in templates as {{node.<ref>.<path>}} and browsed
+    # graphs), addressable in templates as {{nodes.<ref>.<path>}} and browsed
     # by the builder's reference-run data panel (spec D20).
     node_outputs = models.JSONField(default=dict, blank=True)
     initiated_by = models.ForeignKey(

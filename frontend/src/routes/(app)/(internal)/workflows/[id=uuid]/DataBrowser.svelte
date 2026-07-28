@@ -166,7 +166,7 @@
 			<p class="text-[9px] font-semibold uppercase tracking-wide text-surface-500 mb-0.5">
 				<i class="fa-solid fa-share-nodes mr-1"></i>{nodeData.label}
 			</p>
-			{@render tree(childEntries(nodeData.output), `node.${nodeData.key}`, 0)}
+			{@render tree(childEntries(nodeData.output), `nodes.${nodeData.key}`, 0)}
 		</div>
 	{/each}
 
