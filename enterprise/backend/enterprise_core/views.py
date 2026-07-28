@@ -575,7 +575,7 @@ class CustomEmailTemplateViewSet(BaseModelViewSet):
             return CustomEmailTemplate.objects.none()
         return CustomEmailTemplate.objects.all()
 
-    def get_serializer_class(self):
+    def get_serializer_class(self, **kwargs):
         if self.request.method in ("POST", "PUT", "PATCH"):
             return CustomEmailTemplateWriteSerializer
         return CustomEmailTemplateReadSerializer
