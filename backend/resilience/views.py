@@ -457,7 +457,9 @@ class AssetAssessmentViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        viewable_bias = RoleAssignment.get_viewable_object_ids(request.user, BusinessImpactAnalysis)
+        viewable_bias = RoleAssignment.get_viewable_object_ids(
+            request.user, BusinessImpactAnalysis
+        )
         try:
             bia = BusinessImpactAnalysis.objects.filter(id__in=viewable_bias).get(
                 id=uuid.UUID(str(bia_id))
