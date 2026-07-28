@@ -14,7 +14,7 @@ description: 'Based on the ENISA SME Cyber Resilience Maturity Assessment Model 
   Intermediate (2.6-3.9), Advanced (4.0-5.0). It is intended as a self-check aid,
   not a substitute for formal legal or conformity advice.'
 copyright: ENISA
-version: 1
+version: 2
 publication_date: 2026-07-13
 provider: ENISA
 packager: intuitem
@@ -97,6 +97,8 @@ objects:
             value: 5 Policies are formally approved, consistently applied, regularly
               reviewed and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.secdev
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.2
       assessable: true
       depth: 2
@@ -128,6 +130,8 @@ objects:
             value: 5 Responsibilities are clearly defined, communicated, consistently
               applied, regularly reviewed and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.raci
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.3
       assessable: true
       depth: 2
@@ -159,6 +163,8 @@ objects:
             value: 5 Documentation is complete for all products, formally maintained,
               regularly reviewed and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.product_techdoc
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.4
       assessable: true
       depth: 2
@@ -186,6 +192,9 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.4:question:1:choice:5
             value: 5 Reviews are measured, tracked and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.mgmt_review
+      - urn:intuitem:risk:function:doc-pol:proc.compliance_monitoring
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.5
       assessable: true
       depth: 2
@@ -216,6 +225,8 @@ objects:
             value: 5 Awareness and interaction processes are formalised, maintained
               and regularly reviewed
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.product_conformity
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2
       assessable: false
       depth: 1
@@ -250,6 +261,9 @@ objects:
             value: 5 Risk assessments are formal, integrated into processes and continuously
               improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.2
       assessable: true
       depth: 2
@@ -277,6 +291,9 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.2:question:1:choice:5
             value: 5 Fully integrated into development and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.sdlc
+      - urn:intuitem:risk:function:doc-pol:proc.threat_modeling
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3
       assessable: true
       depth: 2
@@ -303,6 +320,8 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:choice:5
             value: 5 Secure defaults are enforced, tested and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.4
       assessable: true
       depth: 2
@@ -332,6 +351,9 @@ objects:
             value: 5 Testing is risk-based, automated where appropriate, monitored
               and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.sast_dast
+      - urn:intuitem:risk:function:doc-pol:proc.sdlc
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.5
       assessable: true
       depth: 2
@@ -360,6 +382,9 @@ objects:
             value: 5 Continuous monitoring and structured updates are in place and
               continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.threat_intel
+      - urn:intuitem:risk:function:doc-pol:pol.risk
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3
       assessable: false
       depth: 1
@@ -393,6 +418,9 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.1:question:1:choice:5
             value: 5 Tracking is measured, integrated and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.vuln_disclosure
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2
       assessable: true
       depth: 2
@@ -420,6 +448,8 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:choice:5
             value: 5 The process is monitored, measured and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.3
       assessable: true
       depth: 2
@@ -449,6 +479,8 @@ objects:
             value: 5 SBOM is integrated, automated where appropriate and continuously
               improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.sbom
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.4
       assessable: true
       depth: 2
@@ -477,6 +509,8 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.4:question:1:choice:5
             value: 5 Prioritisation is measured, reviewed and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.5
       assessable: true
       depth: 2
@@ -504,6 +538,9 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.5:question:1:choice:5
             value: 5 Verification is measured, reviewed and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:tech.vuln_scanner
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4
       assessable: false
       depth: 1
@@ -536,6 +573,9 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.1:question:1:choice:5
             value: 5 The approach is monitored, measured and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.maintenance
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.2
       assessable: true
       depth: 2
@@ -565,6 +605,9 @@ objects:
             value: 5 Lifecycle management is monitored, reviewed and continuously
               improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.product_support
+      - urn:intuitem:risk:function:doc-pol:proc.software_lifecycle
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.3
       assessable: true
       depth: 2
@@ -594,6 +637,8 @@ objects:
             value: 5 Continuous improvement is measured and integrated into product
               management
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.post_incident
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.4
       assessable: true
       depth: 2
@@ -622,6 +667,9 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.4:question:1:choice:5
             value: 5 The process is tested, measured and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:pol.incident
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.5
       assessable: true
       depth: 2
@@ -649,6 +697,9 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.5:question:1:choice:5
             value: 5 Monitoring is integrated, risk-based and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:proc.logging
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5
       assessable: false
       depth: 1
@@ -682,6 +733,8 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.1:question:1:choice:5
             value: 5 Skills are assessed, developed and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.competency
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.2
       assessable: true
       depth: 2
@@ -710,6 +763,9 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.2:question:1:choice:5
             value: 5 Training effectiveness is assessed and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:train.secdev
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.3
       assessable: true
       depth: 2
@@ -737,6 +793,8 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.3:question:1:choice:5
             value: 5 Product risk considerations influence decisions across the organisation
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.educ
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.4
       assessable: true
       depth: 2
@@ -764,6 +822,9 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.4:question:1:choice:5
             value: 5 Engagement is active, integrated and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.threat_intel
+      - urn:intuitem:risk:function:doc-pol:pol.threat_intel
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.5
       assessable: true
       depth: 2
@@ -791,3 +852,7 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.5:question:1:choice:5
             value: 5 Competence is measured, tracked and continuously improved
             add_score: 5
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.competency
+dependencies:
+- urn:intuitem:risk:library:doc-pol
