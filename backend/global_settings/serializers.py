@@ -494,17 +494,6 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             instance.value = current_value_dict
             instance.save(update_fields=["value"])
 
-        """if idp_groups_changed:
-            # The groups cache bakes in the idp_groups closure at build time, so
-            # toggling the flag must rebuild it for the change to take effect.
-            from iam.cache_builders import (
-                invalidate_assignments_cache,
-                invalidate_groups_cache,
-            )
-
-            invalidate_groups_cache()
-            invalidate_assignments_cache()"""
-
         return instance
 
 

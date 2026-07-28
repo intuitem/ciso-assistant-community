@@ -21,7 +21,6 @@ from django.db.models import Q, F, QuerySet, Case, When
 from knox.models import AuthToken
 
 if TYPE_CHECKING:
-    # from iam.cache_builders import AssignmentLite
     from core.models import Actor
 
 from core.utils import (
@@ -52,22 +51,6 @@ from auditlog.signals import pre_log
 from allauth.mfa.models import Authenticator
 from core.context import focus_folder_id_var
 from django.shortcuts import get_object_or_404
-
-"""from iam.cache_builders import (
-    CacheNotReadyError,
-    get_folder_state,
-    get_roles_state,
-    get_groups_state,
-    get_assignments_state,
-    get_sub_folders_cached,
-    get_parent_folders_cached,
-    get_folder_path,
-    invalidate_folders_cache,
-    invalidate_roles_cache,
-    invalidate_groups_cache,
-    invalidate_assignments_cache,
-    iter_descendant_ids,
-)"""
 
 
 ALLOWED_PERMISSION_APPS = (
@@ -150,24 +133,6 @@ class Folder(NameDescriptionMixin):
         root_folder = _get_root_folder()
         Folder._CACHED_ROOT_FOLDER = root_folder
         return root_folder
-
-        """try:
-            state = get_folder_state()
-        except CacheNotReadyError:
-            # During initial migrations the cache cannot hydrate yet; fall back to the
-            # direct lookup which may still be None until the schema is ready.
-            folder = _get_root_folder()
-            return cast("Folder", folder)  # type: ignore[return-value]
-
-        # Cache is ready, so root folder is already existing
-        # But if the cache is stale, we call the db
-        if state.root_folder_id:
-            cached_root = state.folders.get(state.root_folder_id)
-            if cached_root is not None:
-                return cached_root
-        return Folder.objects.only("id", "content_type").get(
-            content_type=Folder.ContentType.ROOT
-        )"""
 
     @staticmethod
     def get_root_folder_id() -> uuid.UUID | None:
@@ -303,26 +268,19 @@ class Folder(NameDescriptionMixin):
                 self._update_descendants_on_parent_folder_change()
                 super().save(*args, **kwargs)
 
-            # invalidate_folders_cache()
-
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
-        # invalidate_folders_cache()
 
     def get_sub_folders(self) -> QuerySet[Folder]:
         """Return the list of subfolders through the cached tree."""
 
         return self.descendants.all()
 
-        # yield from get_sub_folders_cached(self.id)
-
     # Should we update data-model.md now that this method is a generator ?
     def get_parent_folders(self) -> QuerySet[Folder]:
         """Return the list of parent folders"""
 
         return self.ancestors.all()
-
-        # yield from get_parent_folders_cached(self.id)
 
     def get_folder_full_path(self, *, include_root: bool = False) -> list[Folder]:
         """
@@ -602,13 +560,9 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        # invalidate_groups_cache()
-        # invalidate_assignments_cache()  # because RoleAssignment points to groups
 
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
-        # invalidate_groups_cache()
-        # invalidate_assignments_cache()
 
 
 class UserManager(BaseUserManager):
@@ -1202,11 +1156,9 @@ class Role(NameDescriptionMixin, FolderMixin):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        # invalidate_roles_cache()
 
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
-        # invalidate_roles_cache()
 
     def __str__(self) -> str:
         if self.builtin:
@@ -1214,29 +1166,6 @@ class Role(NameDescriptionMixin, FolderMixin):
         return self.name
 
     fields_to_check = ["name"]
-
-
-"""def _iter_assignment_lites_for_user(user: AbstractBaseUser | AnonymousUser):
-    if isinstance(user, AnonymousUser) or not getattr(user, "is_authenticated", False):
-        return iter(())
-    user_id_opt = cast(Optional[uuid.UUID], getattr(user, "id", None))
-    if user_id_opt is None:
-        return iter(())
-
-    assignments_state = get_assignments_state()
-    groups_state = get_groups_state()
-
-    user_id = cast(uuid.UUID, user_id_opt)
-    group_ids = groups_state.user_group_ids.get(user_id, frozenset())
-
-    # user direct
-    direct = assignments_state.by_user.get(user_id, ())
-    # via groups
-    via_groups: list["AssignmentLite"] = []
-    for gid in group_ids:
-        via_groups.extend(assignments_state.by_group.get(gid, ()))
-
-    return iter((*direct, *via_groups))"""
 
 
 class RoleAssignment(NameDescriptionMixin, FolderMixin):
@@ -1257,11 +1186,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        # invalidate_assignments_cache()
 
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
-        # invalidate_assignments_cache()
 
     def __str__(self) -> str:
         folder_names = list(self.perimeter_folders.values_list("name", flat=True))
@@ -1965,39 +1892,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                     folder_id_to_codenames[str(folder.id)].update(codenames)
 
         return folder_id_to_codenames
-
-        """state = get_folder_state()
-        roles_state = get_roles_state()
-        perms_by_folder: dict[str, set[str]] = defaultdict(set)
-
-        def apply_assignment(a):
-            role_perm_codenames = roles_state.role_permissions.get(
-                a.role_id, frozenset()
-            )
-            if not role_perm_codenames:
-                return
-
-            for folder_id in a.perimeter_folder_ids:
-                perms_by_folder[str(folder_id)].update(role_perm_codenames)
-
-                if recursive and a.is_recursive:
-                    for descendant_id in iter_descendant_ids(
-                        state, folder_id, include_start=False
-                    ):
-                        perms_by_folder[str(descendant_id)].update(role_perm_codenames)
-
-        # --- UserGroup principal
-        if isinstance(principal, UserGroup):
-            assignments_state = get_assignments_state()
-            for a in assignments_state.by_group.get(principal.id, ()):
-                apply_assignment(a)
-            return perms_by_folder
-
-        # --- User principal (user + via groups)
-        for a in _iter_assignment_lites_for_user(principal):
-            apply_assignment(a)
-
-        return perms_by_folder"""
 
 
 @dataclass(frozen=True, slots=True)

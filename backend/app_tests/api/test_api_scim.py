@@ -17,7 +17,6 @@ from rest_framework.test import APIClient
 
 from global_settings.models import GlobalSettings
 
-# from iam.cache_builders import invalidate_assignments_cache, invalidate_groups_cache
 from iam.models import IdPGroup, SCIMToken, User, UserGroup
 
 USERS_URL = "/api/scim/v2/Users"
@@ -30,9 +29,6 @@ def _set_idp_groups_flag(enabled: bool):
     )
     ff.value = {**(ff.value or {}), "idp_groups": enabled}
     ff.save()
-    # The groups cache bakes the flag in at build time.
-    # invalidate_groups_cache()
-    # invalidate_assignments_cache()
 
 
 @pytest.fixture

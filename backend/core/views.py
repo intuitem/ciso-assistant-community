@@ -1062,41 +1062,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         can_user_view_all = view_all_role_assignments.exists()
         return can_user_view_all
 
-        """from iam.cache_builders import (
-            get_folder_state,
-            get_roles_state,
-            iter_descendant_ids,
-        )
-        from iam.models import _iter_assignment_lites_for_user
-
-        roles_state = get_roles_state()
-        view_code = f"view_{name}"
-        if view_code not in roles_state.permission_ids_by_codename:
-            # Mirror get_accessible_object_ids: when the view permission
-            # is not registered for the model, that helper returns
-            # ([], [], []) — i.e. "the user can see nothing", which means
-            # the post-filter MUST mask everything. Returning False here
-            # falls through to the slow path so the masking happens.
-            return False
-
-        state = get_folder_state()
-        all_folder_ids = frozenset(state.folders.keys())
-        covered: set = set()
-        for a in _iter_assignment_lites_for_user(user):
-            role_perms = roles_state.role_permissions.get(a.role_id, frozenset())
-            if "view_folder" not in role_perms or view_code not in role_perms:
-                continue
-            if a.is_recursive:
-                for pf_id in a.perimeter_folder_ids:
-                    covered.update(
-                        iter_descendant_ids(state, pf_id, include_start=True)
-                    )
-            else:
-                covered.update(a.perimeter_folder_ids)
-            if all_folder_ids.issubset(covered):
-                return True
-        return False"""
-
     def _get_accessible_ids_map(self, related_models):
         """Return visible object IDs per related model for the current user.
 
