@@ -330,6 +330,13 @@ class TestSimpleTemplates:
         first = Vulnerability.objects.get(ref_id="Vuln_05")
         assert first.name == "reflected XSS"
         assert first.assets.filter(name="website").exists()
+        # The template separates multi-values with newlines (alt+enter in Excel).
+        assert set(first.filtering_labels.values_list("label", flat=True)) == {
+            "Web",
+            "code-injection",
+        }
+        second = Vulnerability.objects.get(ref_id="Vuln_06")
+        assert set(second.assets.values_list("name", flat=True)) == {"Office", "Wifi"}
 
     def test_processings_template(
         self, api_client, domain_folder, template_domains, all_accessible

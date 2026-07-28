@@ -89,10 +89,11 @@ def _run(workflow, ctx):
 def admin_request(db):
     from core.apps import startup
 
-    startup(sender=None, **{})
+    startup(sender=None)
+
+    from rest_framework.test import APIRequestFactory
 
     from iam.models import User, UserGroup
-    from rest_framework.test import APIRequestFactory
 
     admin = User.objects.create_superuser("admin@chat-import.test")
     UserGroup.objects.get(name="BI-UG-ADM").user_set.add(admin)
@@ -253,9 +254,8 @@ class TestImporter:
     def test_dry_run_counts_without_writing(
         self, admin_request, domain, controls_document
     ):
-        from core.models import AppliedControl
-
         from chat.importer import run_import
+        from core.models import AppliedControl
 
         report = run_import(
             admin_request,
@@ -271,9 +271,8 @@ class TestImporter:
         assert AppliedControl.objects.count() == 0
 
     def test_apply_then_reapply_updates(self, admin_request, domain, controls_document):
-        from core.models import AppliedControl
-
         from chat.importer import run_import
+        from core.models import AppliedControl
 
         report = run_import(
             admin_request,
@@ -302,11 +301,11 @@ class TestImporter:
         assert AppliedControl.objects.filter(folder=domain).count() == 2
 
     def test_findings_update_existing_assessment(self, admin_request, domain):
-        from core.models import Finding, FindingsAssessment
         from django.core.files.uploadedfile import SimpleUploadedFile
 
         from chat.importer import run_import
         from chat.models import IndexedDocument
+        from core.models import Finding, FindingsAssessment
 
         assessment = FindingsAssessment.objects.create(name="Q1 Pentest", folder=domain)
         Finding.objects.create(
