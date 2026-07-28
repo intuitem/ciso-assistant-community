@@ -5,6 +5,9 @@
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { LOCALE_MAP, language } from '$lib/utils/locales';
+	import { getToastStore } from '$lib/components/Toast/stores';
+
+	const toastStore = getToastStore();
 
 	interface Level {
 		id: number;
@@ -117,20 +120,11 @@
 		unsaved = true;
 	}
 
-	let statusMessage = $state('');
-	let statusType: 'success' | 'error' | '' = $state('');
-	let statusTimeout: ReturnType<typeof setTimeout> | null = null;
-
 	function setStatus(message: string, type: 'success' | 'error') {
-		statusMessage = message;
-		statusType = type;
-		if (statusTimeout) clearTimeout(statusTimeout);
-		if (type === 'success') {
-			statusTimeout = setTimeout(() => {
-				statusMessage = '';
-				statusType = '';
-			}, 3000);
-		}
+		toastStore.trigger({
+			message,
+			background: type === 'error' ? 'preset-filled-error-500' : 'preset-filled-success-500'
+		});
 	}
 
 	// Grid synchronization on level changes — same semantics as the live
@@ -261,15 +255,6 @@
 				<p class="text-xs font-mono text-surface-500 mt-1">{matrix.urn}</p>
 			</div>
 			<div class="flex items-center gap-2">
-				{#if statusMessage}
-					<span
-						class="text-xs px-2 py-1 rounded-full {statusType === 'error'
-							? 'bg-red-100 text-red-700'
-							: 'bg-green-100 text-green-700'}"
-					>
-						{statusMessage}
-					</span>
-				{/if}
 				<button
 					type="button"
 					class="btn btn-sm variant-filled-primary"
@@ -345,7 +330,7 @@
 				>
 				{#if isTranslatingMeta}
 					<input
-						class="input"
+						class="input placeholder:text-surface-500"
 						type="text"
 						value={metaTranslations[activeLang]?.name ?? ''}
 						oninput={(e) => setMetaTranslation('name', e.currentTarget.value)}
@@ -367,7 +352,7 @@
 				>
 				{#if isTranslatingMeta}
 					<input
-						class="input"
+						class="input placeholder:text-surface-500"
 						type="text"
 						value={metaTranslations[activeLang]?.description ?? ''}
 						oninput={(e) => setMetaTranslation('description', e.currentTarget.value)}
