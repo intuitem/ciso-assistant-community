@@ -1165,6 +1165,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             focus_ids = set(
                 iter_descendant_ids(state, focus_folder_id, include_start=True)
             )
+            # Root-folder objects (users, roles, groups, IdP settings...) are
+            # global by construction, not domain content: focus must not gate
+            # them, only the domain-scoped content it is meant to narrow.
+            if state.root_folder_id is not None:
+                focus_ids.add(state.root_folder_id)
             if folder.id not in focus_ids:
                 return False
         roles_state = get_roles_state()
@@ -1303,6 +1308,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             focus_ids = set(
                 iter_descendant_ids(state, focus_folder_id, include_start=True)
             )
+            # Root-folder objects (users, roles, groups, IdP settings...) are
+            # global by construction, not domain content: focus must not gate
+            # them, only the domain-scoped content it is meant to narrow.
+            if state.root_folder_id is not None:
+                focus_ids.add(state.root_folder_id)
             perimeter_ids &= focus_ids
 
         # folder_id -> set of granted permission codenames ("view_x", "change_x", "delete_x")
