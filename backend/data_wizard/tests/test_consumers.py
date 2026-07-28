@@ -1085,8 +1085,8 @@ class TestFindingsAssessmentConsumer:
         fa = FindingsAssessment.objects.create(name="Locked", folder=domain_folder)
         ctx = self._findings_context(domain_folder, admin_user, target_id=fa.id)
         with patch(
-            "data_wizard.views.RoleAssignment.get_accessible_object_ids",
-            return_value=([], [], []),
+            "data_wizard.views.RoleAssignment._get_accessible_ids",
+            return_value=[],
         ):
             result = FindingsAssessmentRecordConsumer(ctx).process_records(
                 [{"name": "X", "ref_id": "F-X", "status": "identified"}]

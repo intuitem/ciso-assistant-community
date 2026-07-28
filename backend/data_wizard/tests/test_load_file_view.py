@@ -750,8 +750,8 @@ class TestProcessingMultiSheetEndpoint:
         record = {"name": "P", "processing": str(processing.id)}
 
         with patch(
-            "data_wizard.views.RoleAssignment.get_accessible_object_ids",
-            return_value=([], [], []),
+            "data_wizard.views.RoleAssignment._get_accessible_ids",
+            return_value=[],
         ):
             resolved, error = consumer._resolve_processing(record)
         assert resolved is None
@@ -759,8 +759,8 @@ class TestProcessingMultiSheetEndpoint:
 
         accessible_consumer = PurposeRecordConsumer(base_context)
         with patch(
-            "data_wizard.views.RoleAssignment.get_accessible_object_ids",
-            return_value=([processing.id], [], []),
+            "data_wizard.views.RoleAssignment._get_accessible_ids",
+            return_value=[processing.id],
         ):
             resolved, error = accessible_consumer._resolve_processing(record)
         assert error is None
