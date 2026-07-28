@@ -55,7 +55,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     API endpoint that allows ebios rm studies to be viewed or edited.
     """
 
-    filterset_fields = ["folder", "genericcollection"]
+    filterset_fields = ["folder", "assets", "genericcollection"]
 
     model = EbiosRMStudy
 

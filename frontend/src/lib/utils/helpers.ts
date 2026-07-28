@@ -91,7 +91,7 @@ export function getScoreHexColor(
 }
 
 export function formatScoreValue(
-	value: number,
+	value: number | null,
 	max_score: number,
 	fullDonut = false,
 	min_score = 0

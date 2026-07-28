@@ -240,6 +240,7 @@
 							classes: 'text-blue-500'
 						}}
 						field="assets"
+						portalDropdown
 						optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
 						label={m.assets()}
 					/>
@@ -251,6 +252,7 @@
 						optionsExtraFields={[['folder', 'str']]}
 						optionsLabelField="auto"
 						field="threats"
+						portalDropdown
 						label={m.threats()}
 					/>
 					<AutocompleteSelect
@@ -261,6 +263,7 @@
 						optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
 						optionsExtraFields={[['folder', 'str']]}
 						field="vulnerabilities"
+						portalDropdown
 						label={m.vulnerabilities()}
 					/>
 					<AutocompleteSelect
@@ -271,6 +274,7 @@
 						optionsLabelField="auto"
 						optionsExtraFields={[['folder', 'str']]}
 						field="incidents"
+						portalDropdown
 						label={m.incidents()}
 					/>
 					<AutocompleteSelect
@@ -279,6 +283,7 @@
 						optionsEndpoint="security-exceptions"
 						optionsExtraFields={[['folder', 'str']]}
 						field="security_exceptions"
+						portalDropdown
 						label={m.securityExceptions()}
 					/>
 				</div>

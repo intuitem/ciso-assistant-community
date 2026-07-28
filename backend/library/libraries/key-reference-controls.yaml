@@ -12,8 +12,8 @@ description:
   across CISO Assistant reference these controls to drive applied-control suggestions.
   URN namespace preserved from the legacy `doc-pol` library."
 copyright: "\xA9 intuitem - 2026"
-version: 7
-publication_date: 2026-04-19
+version: 8
+publication_date: 2026-07-28
 provider: intuitem
 packager: intuitem
 translations:
@@ -6317,3 +6317,113 @@ objects:
             \ penales, referencias, cualificaciones e integridad financiera cuando proceda.\n\
             Coordinaci\xF3n con RR.HH., asesor\xEDa jur\xEDdica y requisitos de protecci\xF3\
             n de datos."
+    - urn: urn:intuitem:risk:function:doc-pol:doc.product_techdoc
+      ref_id: DOC.PRODUCT_TECHDOC
+      name: Product technical documentation file
+      category: process
+      csf_function: govern
+      description: 'Per-product technical documentation covering security features and architecture,
+        design and development decisions, cybersecurity risk assessment, vulnerability handling
+        and update procedures, and the support period.
+
+        Kept up to date and retained for the duration of the support period.'
+      typical_evidence:
+      - Technical documentation file per product
+      - Documentation review and update records
+      - Traceability to risk assessment and design decisions
+      annotation: 'cra: Article 31, Annex VII
+
+        iso-27002: 8.25'
+      translations:
+        fr:
+          name: Dossier de documentation technique produit
+          description: "Documentation technique par produit couvrant les fonctions et l'architecture\
+            \ de s\xE9curit\xE9, les d\xE9cisions de conception et de d\xE9veloppement, l'analyse\
+            \ de risque cyber, les proc\xE9dures de traitement des vuln\xE9rabilit\xE9s et de\
+            \ mise \xE0 jour, et la p\xE9riode de support.\nMaintenue \xE0 jour et conserv\xE9\
+            e pendant toute la p\xE9riode de support."
+        de:
+          name: Technische Produktdokumentation
+          description: "Technische Dokumentation je Produkt zu Sicherheitsfunktionen und -architektur,\
+            \ Design- und Entwicklungsentscheidungen, Cyberrisikoanalyse, Schwachstellenbehandlungs-\
+            \ und Update-Verfahren sowie zum Supportzeitraum.\nAktuell gehalten und \xFCber den\
+            \ gesamten Supportzeitraum aufbewahrt."
+        es:
+          name: "Expediente de documentaci\xF3n t\xE9cnica del producto"
+          description: "Documentaci\xF3n t\xE9cnica por producto que cubre las funciones y la\
+            \ arquitectura de seguridad, las decisiones de dise\xF1o y desarrollo, el an\xE1lisis\
+            \ de riesgos cibern\xE9ticos, los procedimientos de gesti\xF3n de vulnerabilidades\
+            \ y de actualizaci\xF3n, y el per\xEDodo de soporte.\nMantenida al d\xEDa y conservada\
+            \ durante todo el per\xEDodo de soporte."
+    - urn: urn:intuitem:risk:function:doc-pol:proc.product_conformity
+      ref_id: PROC.PRODUCT_CONFORMITY
+      name: Product conformity assessment procedure
+      category: procedure
+      csf_function: govern
+      description: 'Determination and execution of the conformity assessment route applicable
+        to each product, drawing up and maintenance of the EU declaration of conformity and CE
+        marking.
+
+        Identification of the competent market surveillance authorities and of interaction and
+        notification duties.'
+      typical_evidence:
+      - Conformity assessment records per product
+      - EU declaration of conformity
+      - Register of applicable authorities and notification channels
+      annotation: 'cra: Articles 28, 30, 32, Annex V, Annex VIII'
+      translations:
+        fr:
+          name: "Proc\xE9dure d'\xE9valuation de la conformit\xE9 produit"
+          description: "D\xE9termination et ex\xE9cution de la proc\xE9dure d'\xE9valuation de\
+            \ la conformit\xE9 applicable \xE0 chaque produit, \xE9tablissement et maintien de\
+            \ la d\xE9claration UE de conformit\xE9 et du marquage CE.\nIdentification des autorit\xE9\
+            s de surveillance du march\xE9 comp\xE9tentes et des obligations d'interaction et\
+            \ de notification."
+        de:
+          name: "Verfahren zur Konformit\xE4tsbewertung von Produkten"
+          description: "Festlegung und Durchf\xFChrung des f\xFCr jedes Produkt geltenden Konformit\xE4\
+            tsbewertungsverfahrens, Erstellung und Pflege der EU-Konformit\xE4tserkl\xE4rung und\
+            \ der CE-Kennzeichnung.\nIdentifikation der zust\xE4ndigen Markt\xFCberwachungsbeh\xF6\
+            rden sowie der Interaktions- und Meldepflichten."
+        es:
+          name: "Procedimiento de evaluaci\xF3n de la conformidad del producto"
+          description: "Determinaci\xF3n y ejecuci\xF3n del procedimiento de evaluaci\xF3n de\
+            \ la conformidad aplicable a cada producto, elaboraci\xF3n y mantenimiento de la declaraci\xF3\
+            n UE de conformidad y del marcado CE.\nIdentificaci\xF3n de las autoridades de vigilancia\
+            \ del mercado competentes y de las obligaciones de interacci\xF3n y notificaci\xF3\
+            n."
+    - urn: urn:intuitem:risk:function:doc-pol:doc.product_support
+      ref_id: DOC.PRODUCT_SUPPORT
+      name: Product support period and end-of-life commitment
+      category: process
+      csf_function: govern
+      description: 'Customer-facing commitment per product on the support period during which
+        security updates are provided, end-of-life dates and lifecycle milestones.
+
+        Communication of end of support and of user obligations at end-of-life.'
+      typical_evidence:
+      - Published support and end-of-life policy per product
+      - Support period register with end dates
+      - Customer end-of-support notifications
+      annotation: 'cra: Article 13, Annex II
+
+        iso-27002: 8.8'
+      translations:
+        fr:
+          name: Engagement de support produit et de fin de vie
+          description: "Engagement par produit, communiqu\xE9 aux clients, sur la p\xE9riode de\
+            \ support pendant laquelle les mises \xE0 jour de s\xE9curit\xE9 sont fournies, les\
+            \ dates de fin de vie et les jalons du cycle de vie.\nCommunication de la fin du support\
+            \ et des obligations des utilisateurs en fin de vie."
+        de:
+          name: Zusage zu Produktsupportzeitraum und End-of-Life
+          description: 'Kundengerichtete Zusage je Produkt zum Supportzeitraum, in dem Sicherheitsupdates
+            bereitgestellt werden, zu End-of-Life-Terminen und Lebenszyklus-Meilensteinen.
+
+            Kommunikation des Supportendes und der Nutzerpflichten am Ende des Lebenszyklus.'
+        es:
+          name: Compromiso de soporte y fin de vida del producto
+          description: "Compromiso por producto, comunicado a los clientes, sobre el per\xEDodo\
+            \ de soporte durante el cual se proporcionan actualizaciones de seguridad, las fechas\
+            \ de fin de vida y los hitos del ciclo de vida.\nComunicaci\xF3n del fin del soporte\
+            \ y de las obligaciones de los usuarios al final de la vida \xFAtil."

@@ -3376,7 +3376,9 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         return self.folder.name + "/" + self.name
 
 
-class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class SecurityException(
+    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, CustomFieldsMixin
+):
     class Status(models.TextChoices):
         DRAFT = "draft", "draft"
         IN_REVIEW = "in_review", "in review"
@@ -3417,6 +3419,12 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+    )
+    evidences = models.ManyToManyField(
+        "Evidence",
+        blank=True,
+        verbose_name=_("Evidences"),
+        related_name="security_exceptions",
     )
     is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
@@ -4873,14 +4881,6 @@ class Evidence(
     def last_revision(self):
         revs = self.revisions.all()
         return max(revs, key=lambda r: r.version) if revs else None
-
-    def get_folder(self):
-        if self.applied_controls:
-            return self.applied_controls.first().folder
-        elif self.requirement_assessments:
-            return self.requirement_assessments.first().folder
-        else:
-            return None
 
     def filename(self) -> str | None:
         return self.last_revision.filename() if self.last_revision else None
@@ -9447,7 +9447,10 @@ class Answer(AbstractBaseModel, FolderMixin):
         self._defer_cel_evaluation()
 
 
-class FindingsAssessment(Assessment):
+class FindingsAssessment(Assessment, FilteringLabelMixin):
+    class Meta(Assessment.Meta, FilteringLabelMixin.Meta):
+        pass
+
     class Category(models.TextChoices):
         UNDEFINED = "--", "Undefined"
         PENTEST = "pentest", "Pentest"
@@ -9456,6 +9459,7 @@ class FindingsAssessment(Assessment):
         AUDIT = "audit", "Audit"
         SELF_IDENTIFIED = "self_identified", "Self-identified"
         POSTURE = "posture", "Posture follow-up"
+        RESPONSIBLE_DISCLOSURE = "responsible_disclosure", "Responsible disclosure"
 
     category = models.CharField(
         verbose_name=_("Category"),
@@ -9475,6 +9479,8 @@ class FindingsAssessment(Assessment):
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
+
+    reported_at = models.DateField(null=True, blank=True, verbose_name=_("Reported at"))
 
     def get_findings_metrics(self):
         findings = self.findings.all()

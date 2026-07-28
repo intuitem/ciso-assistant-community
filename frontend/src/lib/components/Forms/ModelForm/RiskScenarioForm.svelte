@@ -60,6 +60,7 @@
 	cacheLock={cacheLocks['risk_assessment']}
 	bind:cachedValue={formDataCache['risk_assessment']}
 	label={m.riskAssessment()}
+	helpText={m.riskAssessmentHelpText()}
 	hidden={initialData.risk_assessment}
 	onChange={async (e) => {
 		if (e) {
