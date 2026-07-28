@@ -132,6 +132,8 @@ Fact tables support Power BI incremental refresh out of the box:
 The filter is folded into API query parameters — refreshes only transfer
 rows in the window.
 
+For more information, see Microsoft's [documentation on incremental refresh and real-time data](https://learn.microsoft.com/en-us/power-bi/connect-data/incremental-refresh-configure).
+
 ## Scheduled refresh (Power BI Service)
 
 Custom connectors require an **on-premises data gateway**: place the
