@@ -44,6 +44,14 @@ export class FormContent {
 		);
 	}
 
+	// Options may render inside the field or, with portalDropdown, in a listbox portaled to <body>
+	private optionLocator(field: FormField, name: string): Locator {
+		return field.locator
+			.getByRole('option', { name })
+			.or(this.page.locator('ul.portaled-options:visible').getByRole('option', { name }))
+			.first();
+	}
+
 	async fill(values: { [k: string]: any }) {
 		const modal = this.page.getByTestId('modal-backdrop');
 		if (await modal.isVisible({ timeout: 100 }).catch(() => false)) {
@@ -98,20 +106,14 @@ export class FormContent {
 									(resp) => resp.url().includes(values[key].request.url) && resp.status() === 200
 								);
 								await field.locator.click();
-								await expect(
-									field.locator.getByRole('option', { name: values[key].value }).first()
-								).toBeVisible({ timeout: 10_000 });
-								await field.locator
-									.getByRole('option', { name: values[key].value })
-									.first()
-									.click();
+								const optionLocator = this.optionLocator(field, values[key].value);
+								await expect(optionLocator).toBeVisible({ timeout: 10_000 });
+								await optionLocator.click();
 
 								await responsePromise;
 							} else {
 								await field.locator.click();
-								const optionLocator = field.locator
-									.getByRole('option', { name: values[key] })
-									.first();
+								const optionLocator = this.optionLocator(field, values[key]);
 								// If the option isn't immediately visible, type to trigger lazy search
 								if (!(await optionLocator.isVisible())) {
 									await field.locator.getByRole('textbox').fill(values[key]);
@@ -125,7 +127,7 @@ export class FormContent {
 				case FormFieldType.SELECT_MULTIPLE_AUTOCOMPLETE:
 					await field.locator.click();
 					for (const val of values[key]) {
-						const optionLocator = field.locator.getByRole('option', { name: val }).first();
+						const optionLocator = this.optionLocator(field, val);
 						// If the option isn't immediately visible, type to trigger lazy search
 						if (!(await optionLocator.isVisible())) {
 							await field.locator.getByRole('textbox').fill(val);

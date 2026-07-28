@@ -427,6 +427,7 @@ class FrameworkImporter:
                     "implementation_groups_definition"
                 ),
                 outcomes_definition=self.framework_data.get("outcomes_definition", []),
+                field_visibility=self.framework_data.get("field_visibility") or {},
                 provider=library_object.provider,
                 locale=library_object.locale,
                 default_locale=library_object.default_locale,
