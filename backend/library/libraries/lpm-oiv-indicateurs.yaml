@@ -1,0 +1,263 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:lpm-oiv-indicateurs
+locale: fr
+ref_id: LPM-OIV-INDICATEURS
+name: "R\xE8gles OIV - Indicateurs de s\xE9curit\xE9"
+description: "Indicateurs de s\xE9curit\xE9 des syst\xE8mes d'information d'importance\
+  \ vitale (SIIV), pr\xE9vus par les arr\xEAt\xE9s sectoriels fixant les r\xE8gles\
+  \ de s\xE9curit\xE9 applicables aux op\xE9rateurs d'importance vitale (OIV), pris\
+  \ en application des articles R. 1332-41-1 et suivants du code de la d\xE9fense.\n\
+  \nChaque indicateur est un pourcentage \xE9valu\xE9 et tenu \xE0 jour pour chaque\
+  \ SIIV, communiqu\xE9 une fois par an \xE0 l'ANSSI ; une valeur plus faible traduit\
+  \ une meilleure ma\xEEtrise. L'op\xE9rateur pr\xE9cise pour chaque indicateur la\
+  \ m\xE9thode d'\xE9valuation employ\xE9e et, le cas \xE9ch\xE9ant, la marge d'incertitude\
+  \ de son \xE9valuation ; toute \xE9volution significative par rapport \xE0 l'\xE9\
+  valuation pr\xE9c\xE9dente doit \xEAtre justifi\xE9e."
+copyright: "Loi fran\xE7aise"
+version: 1
+publication_date: 2026-07-28
+provider: "Gouvernement fran\xE7ais"
+packager: intuitem
+translations:
+  en:
+    name: OIV Rules - Security indicators
+    description: 'Security indicators for critical information systems (SIIV), defined
+      by the French sectoral orders setting the security rules applicable to operators
+      of vital importance (OIV), pursuant to articles R. 1332-41-1 et seq. of the
+      French Defence Code.
+
+
+      Each indicator is a percentage assessed and kept up to date for each SIIV, reported
+      once a year to ANSSI; lower is better. For each indicator, the operator states
+      the assessment method used and, where applicable, the uncertainty margin of
+      the assessment; any significant change from the previous assessment must be
+      explained.'
+objects:
+  metric_definitions:
+  - urn: urn:intuitem:risk:metric:lpm-oiv:ind-01
+    ref_id: IND-01
+    name: "Pourcentage de postes utilisateurs dont les ressources syst\xE8mes ne sont\
+      \ pas install\xE9es dans une version support\xE9e par le fournisseur ou le fabricant"
+    description: "Indicateur relatif au maintien en conditions de s\xE9curit\xE9 des\
+      \ ressources.\n\nTexte de l'arr\xEAt\xE9 : \xAB le pourcentage de postes utilisateurs\
+      \ dont les ressources syst\xE8mes ne sont pas install\xE9es dans une version\
+      \ support\xE9e par le fournisseur ou le fabricant \xBB"
+    category: quantitative
+    unit: percentage
+    higher_is_better: false
+    default_target: 0.0
+    translations:
+      en:
+        name: Percentage of user workstations whose system resources are not installed
+          in a version supported by the supplier or manufacturer
+        description: 'Indicator relating to maintaining resources in secure conditions.
+
+
+          Order wording (unofficial translation): "the percentage of user workstations
+          whose system resources are not installed in a version supported by the supplier
+          or manufacturer"'
+  - urn: urn:intuitem:risk:metric:lpm-oiv:ind-02
+    ref_id: IND-02
+    name: "Pourcentage de serveurs dont les ressources syst\xE8mes ne sont pas install\xE9\
+      es dans une version support\xE9e par le fournisseur ou le fabricant"
+    description: "Indicateur relatif au maintien en conditions de s\xE9curit\xE9 des\
+      \ ressources.\n\nTexte de l'arr\xEAt\xE9 : \xAB le pourcentage de serveurs dont\
+      \ les ressources syst\xE8mes ne sont pas install\xE9es dans une version support\xE9\
+      e par le fournisseur ou le fabricant \xBB"
+    category: quantitative
+    unit: percentage
+    higher_is_better: false
+    default_target: 0.0
+    translations:
+      en:
+        name: Percentage of servers whose system resources are not installed in a
+          version supported by the supplier or manufacturer
+        description: 'Indicator relating to maintaining resources in secure conditions.
+
+
+          Order wording (unofficial translation): "the percentage of servers whose
+          system resources are not installed in a version supported by the supplier
+          or manufacturer"'
+  - urn: urn:intuitem:risk:metric:lpm-oiv:ind-03
+    ref_id: IND-03
+    name: "Pourcentage de postes utilisateurs dont les ressources syst\xE8mes ne sont\
+      \ pas mises \xE0 jour ou corrig\xE9es du point de vue de la s\xE9curit\xE9 depuis\
+      \ au moins 15 jours"
+    description: "Indicateur relatif au maintien en conditions de s\xE9curit\xE9 des\
+      \ ressources.\n\nTexte de l'arr\xEAt\xE9 : \xAB le pourcentage de postes utilisateurs\
+      \ dont les ressources syst\xE8mes ne sont pas mises \xE0 jour ou corrig\xE9\
+      es du point de vue de la s\xE9curit\xE9 depuis au moins 15 jours \xE0 compter\
+      \ de la disponibilit\xE9 des versions mises \xE0 jour \xBB"
+    category: quantitative
+    unit: percentage
+    higher_is_better: false
+    default_target: 0.0
+    translations:
+      en:
+        name: Percentage of user workstations whose system resources have not been
+          updated or patched from a security standpoint for at least 15 days
+        description: 'Indicator relating to maintaining resources in secure conditions.
+
+
+          Order wording (unofficial translation): "the percentage of user workstations
+          whose system resources have not been updated or patched from a security
+          standpoint for at least 15 days after the updated versions became available"'
+  - urn: urn:intuitem:risk:metric:lpm-oiv:ind-04
+    ref_id: IND-04
+    name: "Pourcentage de serveurs dont les ressources syst\xE8mes ne sont pas mises\
+      \ \xE0 jour ou corrig\xE9es du point de vue de la s\xE9curit\xE9 depuis au moins\
+      \ 15 jours"
+    description: "Indicateur relatif au maintien en conditions de s\xE9curit\xE9 des\
+      \ ressources.\n\nTexte de l'arr\xEAt\xE9 : \xAB le pourcentage de serveurs dont\
+      \ les ressources syst\xE8mes ne sont pas mises \xE0 jour ou corrig\xE9es du\
+      \ point de vue de la s\xE9curit\xE9 depuis au moins 15 jours \xE0 compter de\
+      \ la disponibilit\xE9 des versions mises \xE0 jour \xBB"
+    category: quantitative
+    unit: percentage
+    higher_is_better: false
+    default_target: 0.0
+    translations:
+      en:
+        name: Percentage of servers whose system resources have not been updated or
+          patched from a security standpoint for at least 15 days
+        description: 'Indicator relating to maintaining resources in secure conditions.
+
+
+          Order wording (unofficial translation): "the percentage of servers whose
+          system resources have not been updated or patched from a security standpoint
+          for at least 15 days after the updated versions became available"'
+  - urn: urn:intuitem:risk:metric:lpm-oiv:ind-05
+    ref_id: IND-05
+    name: "Pourcentage d'utilisateurs acc\xE9dant au SIIV au moyen de comptes partag\xE9\
+      s"
+    description: "Indicateur relatif aux droits d'acc\xE8s des utilisateurs et \xE0\
+      \ l'authentification des acc\xE8s aux ressources.\n\nTexte de l'arr\xEAt\xE9\
+      \ : \xAB le pourcentage d'utilisateurs acc\xE9dant au SIIV au moyen de comptes\
+      \ partag\xE9s \xBB"
+    category: quantitative
+    unit: percentage
+    higher_is_better: false
+    default_target: 0.0
+    translations:
+      en:
+        name: Percentage of users accessing the SIIV through shared accounts
+        description: 'Indicator relating to user access rights and authentication
+          of access to resources.
+
+
+          Order wording (unofficial translation): "the percentage of users accessing
+          the SIIV through shared accounts"'
+  - urn: urn:intuitem:risk:metric:lpm-oiv:ind-06
+    ref_id: IND-06
+    name: "Pourcentage d'utilisateurs acc\xE9dant au SIIV au moyen de comptes privil\xE9\
+      gi\xE9s"
+    description: "Indicateur relatif aux droits d'acc\xE8s des utilisateurs et \xE0\
+      \ l'authentification des acc\xE8s aux ressources.\n\nTexte de l'arr\xEAt\xE9\
+      \ : \xAB le pourcentage d'utilisateurs acc\xE9dant au SIIV au moyen de comptes\
+      \ privil\xE9gi\xE9s \xBB"
+    category: quantitative
+    unit: percentage
+    higher_is_better: false
+    default_target: 0.0
+    translations:
+      en:
+        name: Percentage of users accessing the SIIV through privileged accounts
+        description: 'Indicator relating to user access rights and authentication
+          of access to resources.
+
+
+          Order wording (unofficial translation): "the percentage of users accessing
+          the SIIV through privileged accounts"'
+  - urn: urn:intuitem:risk:metric:lpm-oiv:ind-07
+    ref_id: IND-07
+    name: "Pourcentage de ressources dont les \xE9l\xE9ments secrets d'authentification\
+      \ ne peuvent pas \xEAtre modifi\xE9s par l'op\xE9rateur"
+    description: "Indicateur relatif aux droits d'acc\xE8s des utilisateurs et \xE0\
+      \ l'authentification des acc\xE8s aux ressources.\n\nTexte de l'arr\xEAt\xE9\
+      \ : \xAB le pourcentage de ressources dont les \xE9l\xE9ments secrets d'authentification\
+      \ ne peuvent pas \xEAtre modifi\xE9s par l'op\xE9rateur \xBB"
+    category: quantitative
+    unit: percentage
+    higher_is_better: false
+    default_target: 0.0
+    translations:
+      en:
+        name: Percentage of resources whose secret authentication elements cannot
+          be changed by the operator
+        description: 'Indicator relating to user access rights and authentication
+          of access to resources.
+
+
+          Order wording (unofficial translation): "the percentage of resources whose
+          secret authentication elements cannot be changed by the operator"'
+  - urn: urn:intuitem:risk:metric:lpm-oiv:ind-08
+    ref_id: IND-08
+    name: "Pourcentage de ressources administr\xE9es dont l'administration est effectu\xE9\
+      e \xE0 partir d'un compte non sp\xE9cifique d'administration"
+    description: "Indicateur relatif \xE0 l'administration des ressources.\n\nTexte\
+      \ de l'arr\xEAt\xE9 : \xAB le pourcentage de ressources administr\xE9es dont\
+      \ l'administration est effectu\xE9e \xE0 partir d'un compte non sp\xE9cifique\
+      \ d'administration \xBB"
+    category: quantitative
+    unit: percentage
+    higher_is_better: false
+    default_target: 0.0
+    translations:
+      en:
+        name: Percentage of administered resources whose administration is performed
+          from a non-specific administration account
+        description: 'Indicator relating to the administration of resources.
+
+
+          Order wording (unofficial translation): "the percentage of administered
+          resources whose administration is performed from a non-specific administration
+          account"'
+  - urn: urn:intuitem:risk:metric:lpm-oiv:ind-09
+    ref_id: IND-09
+    name: "Pourcentage de ressources administr\xE9es dont l'administration ne peut\
+      \ pas \xEAtre effectu\xE9e au travers d'une liaison r\xE9seau physique ou d'une\
+      \ interface d'administration physique"
+    description: "Indicateur relatif \xE0 l'administration des ressources.\n\nTexte\
+      \ de l'arr\xEAt\xE9 : \xAB le pourcentage de ressources administr\xE9es dont\
+      \ l'administration ne peut pas \xEAtre effectu\xE9e au travers d'une liaison\
+      \ r\xE9seau physique ou d'une interface d'administration physique \xBB"
+    category: quantitative
+    unit: percentage
+    higher_is_better: false
+    default_target: 0.0
+    translations:
+      en:
+        name: Percentage of administered resources whose administration cannot be
+          performed through a physical network link or a physical administration interface
+        description: 'Indicator relating to the administration of resources.
+
+
+          Order wording (unofficial translation): "the percentage of administered
+          resources whose administration cannot be performed through a physical network
+          link or a physical administration interface"'
+  - urn: urn:intuitem:risk:metric:lpm-oiv:ind-10
+    ref_id: IND-10
+    name: "Pourcentage de ressources administr\xE9es dont les flux d'administration\
+      \ ne peuvent pas \xEAtre prot\xE9g\xE9s par des m\xE9canismes de chiffrement\
+      \ et d'authentification"
+    description: "Indicateur relatif \xE0 l'administration des ressources.\n\nTexte\
+      \ de l'arr\xEAt\xE9 : \xAB le pourcentage de ressources administr\xE9es dont\
+      \ les flux d'administration ne peuvent pas \xEAtre prot\xE9g\xE9s par des m\xE9\
+      canismes de chiffrement et d'authentification lorsque ces flux ne circulent\
+      \ pas dans le syst\xE8me d'information d'administration \xBB"
+    category: quantitative
+    unit: percentage
+    higher_is_better: false
+    default_target: 0.0
+    translations:
+      en:
+        name: Percentage of administered resources whose administration flows cannot
+          be protected by encryption and authentication mechanisms
+        description: 'Indicator relating to the administration of resources.
+
+
+          Order wording (unofficial translation): "the percentage of administered
+          resources whose administration flows cannot be protected by encryption and
+          authentication mechanisms when these flows do not travel within the administration
+          information system"'
