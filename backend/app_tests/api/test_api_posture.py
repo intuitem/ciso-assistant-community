@@ -1981,7 +1981,8 @@ class TestRunLifecycle:
         storage, name = run.attachment.storage, run.attachment.name
         assert storage.exists(name)
 
-        assert s["client"].delete(url).status_code == 204
+        deleted = s["client"].delete(url)
+        assert deleted.status_code == 204
         assert not storage.exists(name)
 
     def test_pruning_spares_annotated_runs(self, setup):
