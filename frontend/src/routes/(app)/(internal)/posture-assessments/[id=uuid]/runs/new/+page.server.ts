@@ -71,7 +71,12 @@ export const actions: Actions = {
 		const results = [];
 		for (const [key, value] of formData.entries()) {
 			if (key.startsWith('result:') && value) {
-				results.push({ ref_id: key.slice('result:'.length), result: value });
+				const ref_id = key.slice('result:'.length);
+				results.push({
+					ref_id,
+					result: value,
+					message: formData.get(`comment:${ref_id}`) ?? ''
+				});
 			}
 		}
 		if (!asset || !results.length) {
@@ -86,6 +91,7 @@ export const actions: Actions = {
 			}
 		);
 		if (!res.ok) return fail(res.status, await res.json());
-		redirect(303, `/posture-assessments/${event.params.id}`);
+		const body = await res.json();
+		redirect(303, `/posture-assessments/${event.params.id}/runs/${body.run_id}`);
 	}
 };
