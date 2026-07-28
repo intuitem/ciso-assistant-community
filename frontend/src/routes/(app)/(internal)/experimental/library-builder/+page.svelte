@@ -3,28 +3,22 @@
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { defaultMatrixObject, identitySlug } from './builder-helpers';
+	import { getToastStore } from '$lib/components/Toast/stores';
 
 	$pageTitle = m.lbListLibraryBuilder();
+
+	const toastStore = getToastStore();
 
 	let { data } = $props();
 	let drafts: any[] = $state(data.drafts ?? []);
 	let customLibraries: any[] = $state(data.customLibraries ?? []);
 	let orphanFrameworks: any[] = $state(data.orphanFrameworks ?? []);
 
-	let statusMessage = $state('');
-	let statusType: 'success' | 'error' | '' = $state('');
-	let statusTimeout: ReturnType<typeof setTimeout> | null = null;
-
 	function setStatus(message: string, type: 'success' | 'error') {
-		statusMessage = message;
-		statusType = type;
-		if (statusTimeout) clearTimeout(statusTimeout);
-		if (type === 'success') {
-			statusTimeout = setTimeout(() => {
-				statusMessage = '';
-				statusType = '';
-			}, 3000);
-		}
+		toastStore.trigger({
+			message,
+			background: type === 'error' ? 'preset-filled-error-500' : 'preset-filled-success-500'
+		});
 	}
 
 	// --- Create form -------------------------------------------------------
@@ -366,26 +360,15 @@
 					</button>
 				{/if}
 			</div>
-			{#if statusMessage}
-				<span
-					class="text-xs px-2 py-1 rounded-full transition-opacity {statusType === 'error'
-						? 'bg-red-100 text-red-700'
-						: 'bg-green-100 text-green-700'}"
-				>
-					<i class="fa-solid {statusType === 'error' ? 'fa-circle-xmark' : 'fa-circle-check'} mr-1"
-					></i>
-					{statusMessage}
-				</span>
-			{/if}
 		</div>
 
 		{#if quickKind}
-			<div class="mt-4 border-t border-surface-200-800 pt-4 flex flex-wrap items-end gap-3">
-				<label class="label text-sm grow max-w-md">
+			<div class="mt-4 border-t border-surface-200-800 pt-4 grid grid-cols-1 md:grid-cols-4 gap-3">
+				<label class="label text-sm">
 					<span>{quickKind === 'framework' ? m.lbListFrameworkName() : m.lbListMatrixName()}</span>
 					<!-- svelte-ignore a11y_autofocus -->
 					<input
-						class="input"
+						class="input placeholder:text-surface-500"
 						type="text"
 						bind:value={quickName}
 						placeholder={quickKind === 'framework'
@@ -395,32 +378,34 @@
 						onkeydown={(e) => e.key === 'Enter' && createQuick()}
 					/>
 				</label>
-				<label class="label text-sm w-48">
+				<label class="label text-sm">
 					<span>{m.packager()}</span>
 					<input
-						class="input"
+						class="input placeholder:text-surface-500"
 						type="text"
 						bind:value={quickPackager}
 						placeholder="my-org"
 						onkeydown={(e) => e.key === 'Enter' && createQuick()}
 					/>
 				</label>
-				<button
-					type="button"
-					class="btn btn-sm variant-filled-primary"
-					onclick={createQuick}
-					disabled={quickCreating ||
-						!identitySlug(quickName) ||
-						!IDENTITY_RE.test(quickPackager.trim())}
-				>
-					{#if quickCreating}
-						<i class="fa-solid fa-spinner fa-spin mr-1"></i>
-					{:else}
-						<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>
-					{/if}
-					{m.lbListCreateAndEdit()}
-				</button>
-				<div class="basis-full text-xs space-y-1">
+				<div class="flex items-end">
+					<button
+						type="button"
+						class="btn btn-sm variant-filled-primary"
+						onclick={createQuick}
+						disabled={quickCreating ||
+							!identitySlug(quickName) ||
+							!IDENTITY_RE.test(quickPackager.trim())}
+					>
+						{#if quickCreating}
+							<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+						{:else}
+							<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>
+						{/if}
+						{m.lbListCreateAndEdit()}
+					</button>
+				</div>
+				<div class="md:col-span-4 text-xs space-y-1">
 					{#if quickPackager && !IDENTITY_RE.test(quickPackager.trim())}
 						<p class="text-red-600">{m.lbListPackagerPattern()}</p>
 					{/if}
@@ -441,7 +426,7 @@
 				<label class="label text-sm">
 					<span>{m.name()}</span>
 					<input
-						class="input"
+						class="input placeholder:text-surface-500"
 						type="text"
 						bind:value={newName}
 						placeholder={m.lbListLibraryNamePlaceholder()}
@@ -450,7 +435,7 @@
 				<label class="label text-sm">
 					<span>{m.packager()}</span>
 					<input
-						class="input"
+						class="input placeholder:text-surface-500"
 						type="text"
 						bind:value={newPackager}
 						oninput={scheduleIdentityCheck}
@@ -460,7 +445,7 @@
 				<label class="label text-sm">
 					<span>{m.lbListReferenceId()}</span>
 					<input
-						class="input"
+						class="input placeholder:text-surface-500"
 						type="text"
 						bind:value={newRefId}
 						oninput={scheduleIdentityCheck}
