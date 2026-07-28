@@ -1292,7 +1292,7 @@ class TestRealAuthAndRBAC:
 
     def test_admin_update_mode_sees_existing_record(self, knox_admin_client, app_ready):
         """
-        With real RBAC, the admin's get_accessible_object_ids() returns the
+        With real RBAC, the admin's get_changeable_object_ids() returns the
         existing record so UPDATE mode can find and patch it.
         """
         folder = app_ready
@@ -1322,7 +1322,7 @@ class TestRealAuthAndRBAC:
         on any folder, so PermissionDenied is raised → failed == 1, updated == 0,
         and the record on disk is unchanged.
 
-        This test proves get_accessible_object_ids() / is_access_allowed() are
+        This test proves get_changeable_object_ids() / is_access_allowed() are
         called with the real user and return real results — not a patched shortcut.
         """
         folder = app_ready

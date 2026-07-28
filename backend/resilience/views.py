@@ -457,9 +457,7 @@ class AssetAssessmentViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        (viewable_bias, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, BusinessImpactAnalysis
-        )
+        viewable_bias = RoleAssignment.get_viewable_object_ids(request.user, BusinessImpactAnalysis)
         try:
             bia = BusinessImpactAnalysis.objects.filter(id__in=viewable_bias).get(
                 id=uuid.UUID(str(bia_id))
@@ -481,9 +479,7 @@ class AssetAssessmentViewSet(BaseModelViewSet):
                 {"error": "permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
 
-        (viewable_assets, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Asset
-        )
+        viewable_assets = RoleAssignment.get_viewable_object_ids(request.user, Asset)
         viewable_asset_ids = {str(a) for a in viewable_assets}
 
         existing_assets = {

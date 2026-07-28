@@ -140,7 +140,7 @@ def knox_admin_client(app_ready):
 def knox_restricted_client(app_ready, root_folder):
     """
     Authenticated APIClient for a user with NO role assignments.
-    get_accessible_object_ids() returns [] for this user — used to prove
+    get_viewable_object_ids() returns [] for this user — used to prove
     RBAC filtering is real and not a patch artifact.
     """
     user = User.objects.create_user("restricted@datawizard.test", is_published=True)
