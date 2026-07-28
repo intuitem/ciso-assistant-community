@@ -162,6 +162,13 @@
 									]}"
 								></span>
 							{/if}
+							<input
+								type="text"
+								name="comment:{check.ref_id}"
+								class="input w-56 py-1 text-sm"
+								placeholder={m.comment()}
+								aria-label="{check.ref_id} — {m.comment()}"
+							/>
 							<select
 								name="result:{check.ref_id}"
 								class="select w-40 py-1 text-sm"

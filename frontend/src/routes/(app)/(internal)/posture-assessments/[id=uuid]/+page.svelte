@@ -4,6 +4,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import PostureTrendChart from '$lib/components/Chart/PostureTrendChart.svelte';
 	import PostureHeatmapChart from '$lib/components/Chart/PostureHeatmapChart.svelte';
+	import PostureHistoryChart from '$lib/components/Chart/PostureHistoryChart.svelte';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import { deserialize, enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
@@ -38,7 +39,7 @@
 	const totalChecks = $derived(data.posture?.total_checks ?? 0);
 
 	// overview filters
-	let filterAsset = $state('');
+	let filterAsset = $state(page.url.searchParams.get('asset') ?? '');
 	let filterStatuses = $state<string[]>([]);
 
 	function toggleStatus(status: string) {
@@ -97,6 +98,26 @@
 
 	const trendPoints = $derived(data.trend?.points ?? []);
 
+	// run history for the selected asset (overview)
+	let history: any = $state(null);
+	$effect(() => {
+		const assetId = filterAsset;
+		if (!assetId) {
+			history = null;
+			return;
+		}
+		fetch(`/posture-assessments/${data.data.id}/history?asset=${assetId}`)
+			.then((res) => (res.ok ? res.json() : null))
+			.then((body) => {
+				if (filterAsset === assetId) history = body;
+			});
+	});
+	const historyResults = $derived(
+		(history?.results ?? []).filter(
+			(r: any) => filterStatuses.length === 0 || filterStatuses.includes(r.result)
+		)
+	);
+
 	const scopedAssets = $derived(data.data?.assets ?? []);
 	const measuredAssets = $derived.by(() => {
 		const scoped = new Set(scopedAssets.map((a: any) => a.id));
@@ -148,6 +169,25 @@
 	});
 
 	const modalStore: ModalStore = getModalStore();
+
+	// heatmap tooltip actions
+	let findingMsg = $state('');
+	let expandedRow: any = $state(null);
+
+	async function requestCreateFinding(row: any) {
+		findingMsg = '';
+		const fd = new FormData();
+		fd.set('requirement', row.requirement.id);
+		fd.set('asset', row.asset.id);
+		const result = await postAction('createFinding', fd);
+		if (result.type === 'success') {
+			const created = (result.data as any)?.createdFinding?.created;
+			findingMsg = created ? m.findingCreated() : m.findingAlreadyExists();
+			await invalidateAll();
+		} else {
+			findingMsg = (result as any).data?.error ?? m.error();
+		}
+	}
 
 	let purgeError = $state('');
 
@@ -436,7 +476,32 @@
 					{/key}
 				{/if}
 
-				{#if filteredResults.length}
+				{#if findingMsg}
+					<p class="text-sm text-primary-700 dark:text-primary-300">
+						<i class="fa-solid fa-circle-info mr-1"></i>{findingMsg}
+					</p>
+				{/if}
+
+				{#if filterAsset && history?.runs?.length}
+					{#key historyResults}
+						<div>
+							<h3 class="text-lg font-semibold mb-2">{m.runHistory()}</h3>
+							<PostureHistoryChart
+								runs={history.runs}
+								results={historyResults}
+								name="posture_history"
+								onCellClick={(row) =>
+									(expandedRow = {
+										...row,
+										asset: {
+											id: filterAsset,
+											str: assetLabel(scopedAssets.find((a: any) => a.id === filterAsset))
+										}
+									})}
+							/>
+						</div>
+					{/key}
+				{:else if filteredResults.length}
 					{#key filteredResults}
 						<div>
 							<h3 class="text-lg font-semibold mb-2">{m.currentPosture()}</h3>
@@ -444,6 +509,7 @@
 								results={filteredResults}
 								assets={filterAsset ? assets.filter((a) => a.id === filterAsset) : assets}
 								name="posture_heatmap"
+								onCellClick={(row) => (expandedRow = row)}
 							/>
 						</div>
 					{/key}
@@ -571,6 +637,19 @@
 										</td>
 										<td class="px-2 py-2">
 											<div class="flex items-center gap-3 justify-end">
+												<button
+													type="button"
+													class="text-surface-500 hover:text-primary-500 {row.measured === 0
+														? 'opacity-40 pointer-events-none'
+														: ''}"
+													title={m.runHistory()}
+													onclick={() => {
+														filterAsset = row.id;
+														activeTab = 'overview';
+													}}
+												>
+													<i class="fa-solid fa-clock-rotate-left"></i>
+												</button>
 												<Anchor
 													href="/posture-assessments/{data.data.id}/tree?asset={row.id}"
 													class="text-surface-500 hover:text-primary-500"
@@ -701,7 +780,19 @@
 												{new Date(run.started_at).toLocaleString()}
 											</Anchor>
 										</td>
-										<td class="px-2 py-1">{run.tool || '--'}</td>
+										<td class="px-2 py-1">
+											{run.tool || '--'}
+											{#if run.observation}
+												<i class="fa-solid fa-message text-surface-400 ml-1" title={run.observation}
+												></i>
+											{/if}
+											{#if run.attachment}
+												<i
+													class="fa-solid fa-paperclip text-surface-400 ml-1"
+													title={run.attachment}
+												></i>
+											{/if}
+										</td>
 										<td class="px-2 py-1">{run.source}</td>
 										<td class="px-2 py-1">{run.assets}</td>
 										<td class="px-2 py-1">{run.checks}</td>
@@ -849,3 +940,76 @@
 		</Tabs>
 	</div>
 </div>
+
+{#if expandedRow}
+	<button
+		type="button"
+		class="fixed inset-0 z-40 bg-black/40 cursor-default"
+		aria-label={m.close()}
+		onclick={() => (expandedRow = null)}
+	></button>
+	<div
+		class="fixed z-50 inset-0 m-auto h-fit max-h-[80vh] overflow-y-auto card bg-surface-50-950 shadow-lg p-6 max-w-xl w-[90vw] space-y-3"
+		role="dialog"
+		aria-modal="true"
+	>
+		<div class="flex items-start justify-between gap-4">
+			<h3 class="text-lg font-semibold">
+				{expandedRow.requirement.ref_id} — {expandedRow.requirement.name ?? ''}
+			</h3>
+			<button
+				type="button"
+				class="text-surface-500 hover:text-surface-700-300"
+				aria-label={m.close()}
+				onclick={() => (expandedRow = null)}
+			>
+				<i class="fa-solid fa-xmark"></i>
+			</button>
+		</div>
+		<p class="text-sm flex items-center gap-2">
+			<span
+				class="inline-block w-2.5 h-2.5 rounded-sm {postureResultTailwindColorMap[
+					expandedRow.result
+				]}"
+			></span>
+			{resultLabels[expandedRow.result] ?? expandedRow.result} — {expandedRow.asset?.str ?? ''}
+		</p>
+		<p class="text-sm text-surface-600-400">
+			<i class="fa-solid fa-calendar mr-1"></i>{new Date(expandedRow.timestamp).toLocaleString()}
+			{#if expandedRow.tool}
+				<span class="ml-3"><i class="fa-solid fa-wrench mr-1"></i>{expandedRow.tool}</span>
+			{/if}
+		</p>
+		{#if expandedRow.actual}
+			<p class="text-sm"><b>{m.observedValue()}:</b> {expandedRow.actual}</p>
+		{/if}
+		{#if expandedRow.expected}
+			<p class="text-sm"><b>{m.expected()}:</b> {expandedRow.expected}</p>
+		{/if}
+		{#if expandedRow.message}
+			<p class="text-sm whitespace-pre-wrap">{expandedRow.message}</p>
+		{/if}
+		<div class="flex items-center gap-2 justify-end pt-2">
+			<Anchor
+				href="/posture-assessments/{data.data.id}/runs/{expandedRow.run_id}"
+				class="btn btn-sm preset-tonal"
+				label={m.runDetail()}
+			>
+				<i class="fa-solid fa-clock-rotate-left mr-1"></i>{m.runDetail()}
+			</Anchor>
+			{#if data.data.follow_up_assessment && expandedRow.result !== 'pass' && expandedRow.result !== 'not_applicable'}
+				<button
+					type="button"
+					class="btn btn-sm preset-filled-primary-500"
+					onclick={() => {
+						const row = expandedRow;
+						expandedRow = null;
+						requestCreateFinding(row);
+					}}
+				>
+					<i class="fa-solid fa-clipboard-list mr-1"></i>{m.createFinding()}
+				</button>
+			{/if}
+		</div>
+	</div>
+{/if}

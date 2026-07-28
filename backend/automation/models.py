@@ -8,6 +8,7 @@ from django.db.models.functions import RowNumber
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel
+from core.validators import validate_file_name, validate_file_size
 from core.models import (
     Assessment,
     Asset,
@@ -148,6 +149,14 @@ class PostureRun(AbstractBaseModel):
     )
     started_at = models.DateTimeField()
     tool = models.CharField(max_length=100, blank=True)
+    observation = models.TextField(blank=True, verbose_name=_("Observation"))
+    attachment = models.FileField(
+        blank=True,
+        null=True,
+        max_length=500,
+        verbose_name=_("Attachment"),
+        validators=[validate_file_size, validate_file_name],
+    )
 
     class Meta:
         verbose_name = _("Posture run")

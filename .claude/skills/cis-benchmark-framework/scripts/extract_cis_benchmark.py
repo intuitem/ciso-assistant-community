@@ -200,7 +200,7 @@ def prune_empty_sections(rows):
     return [r for r in rows if r[0] in kept]
 
 
-def write_xlsx(path, ref_id, name, description, pub_date, rows):
+def write_xlsx(path, ref_id, name, description, pub_date, rows, library_version=1):
     wb = Workbook()
 
     ws = wb.active
@@ -208,7 +208,7 @@ def write_xlsx(path, ref_id, name, description, pub_date, rows):
     for row in [
         ("type", "library"),
         ("urn", f"urn:intuitem:risk:library:{ref_id}"),
-        ("version", "1"),
+        ("version", str(library_version)),
         ("publication_date", datetime.datetime.combine(pub_date, datetime.time())),
         ("locale", "en"),
         ("ref_id", ref_id),
@@ -296,13 +296,20 @@ def main():
         help="errata override: replace the extracted title of REF (repeatable); "
         "use when the PDF's summary table contradicts the recommendation body",
     )
+    parser.add_argument(
+        "--library-version",
+        type=int,
+        default=1,
+        help="CISO Assistant library version (bump when re-extracting a newer "
+        "benchmark edition under the same ref_id so instances see an update)",
+    )
     args = parser.parse_args()
 
     doc = fitz.open(args.pdf)
     title, version, pub_date = cover_metadata(doc)
     name = args.name or title
     ref_id = args.ref_id or default_ref_id(title)
-    description = f"{name} v{version}"
+    description = name if f"v{version}" in name else f"{name} v{version}"
 
     rows, warnings = parse_rows(summary_table_lines(doc))
     doc.close()
@@ -329,7 +336,7 @@ def main():
         prev_depth = depth
 
     output = args.output or Path(f"{ref_id}.xlsx")
-    write_xlsx(output, ref_id, name, description, pub_date, rows)
+    write_xlsx(output, ref_id, name, description, pub_date, rows, args.library_version)
 
     n_auto = sum(1 for r in rows if r[3] == "Automated")
     n_manual = sum(1 for r in rows if r[3] == "Manual")
