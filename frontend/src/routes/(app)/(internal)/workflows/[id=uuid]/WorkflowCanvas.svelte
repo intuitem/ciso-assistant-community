@@ -602,6 +602,22 @@
 		return referenceRun.variables ?? {};
 	});
 
+	// Static upstream summaries for the for_each collection picker (spec D27):
+	// lets the Inspector offer known array outputs (list reads, per-item
+	// actions) even before any reference run exists.
+	const upstreamNodes = $derived(
+		nodes
+			.filter((n) => ancestorNodeIds.has(n.id))
+			.map((n) => {
+				const domain: any = n.data.domain;
+				return {
+					ref: domain.ref || domain.id,
+					label: String(n.data.label),
+					actionConfig: domain.action_config ?? {}
+				};
+			})
+	);
+
 	// ---------- run visualization ----------
 
 	type RunState = 'visited' | 'active' | 'error' | 'warning';
@@ -1776,6 +1792,7 @@
 				referenceRunId={referenceRun?.id ?? null}
 				{referenceVariables}
 				{referenceNodes}
+				{upstreamNodes}
 				secretNames={secrets.map((s: any) => s.name)}
 				onChange={handleInspectorChange}
 			/>

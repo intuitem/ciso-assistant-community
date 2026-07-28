@@ -56,6 +56,9 @@
 		referenceRunId?: string | null;
 		referenceVariables?: Record<string, unknown>;
 		referenceNodes?: { key: string; label: string; output: unknown }[];
+		// Static upstream summaries (ref/label/actionConfig) for the for_each
+		// collection picker — available even without a reference run.
+		upstreamNodes?: { ref: string; label: string; actionConfig: any }[];
 		secretNames?: string[];
 		onChange: () => void;
 	}
@@ -84,6 +87,7 @@
 		referenceRunId = null,
 		referenceVariables = {},
 		referenceNodes = [],
+		upstreamNodes = [],
 		secretNames = [],
 		onChange
 	}: Props = $props();
@@ -489,6 +493,87 @@
 		if (resolved === undefined) return null; // no reference data — no verdict
 		if (!Array.isArray(resolved)) return { invalid: true, count: 0, first: undefined };
 		return { invalid: false, count: resolved.length, first: resolved[0] };
+	});
+
+	// Collection picker (spec D27 UX): enumerate candidate arrays instead of
+	// making the user type an expression. Static candidates come from upstream
+	// node shapes we know (list reads, per-item actions); dynamic ones from
+	// whatever actually resolved to an array in the reference run.
+	function collectArrayPaths(value: unknown, base: string, depth: number, out: any[]) {
+		if (depth > 2 || value === null || typeof value !== 'object') return;
+		for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+			const path = base ? `${base}.${key}` : key;
+			if (Array.isArray(child)) {
+				if (child.length) out.push({ path, count: child.length });
+			} else {
+				collectArrayPaths(child, path, depth + 1, out);
+			}
+		}
+	}
+
+	const forEachChoices = $derived.by(() => {
+		const choices = new Map<string, { expr: string; label: string; count: number | null }>();
+		for (const upstream of upstreamNodes) {
+			const config = upstream.actionConfig ?? {};
+			const isListRead = config.type === 'read_objects' && (config.mode ?? 'list') === 'list';
+			if (isListRead || config.for_each) {
+				const expr = `{{node.${upstream.ref}.results}}`;
+				choices.set(expr, { expr, label: `${upstream.label} → results`, count: null });
+			}
+		}
+		for (const nodeData of referenceNodes) {
+			const found: { path: string; count: number }[] = [];
+			collectArrayPaths(nodeData.output, '', 0, found);
+			for (const entry of found) {
+				const expr = `{{node.${nodeData.key}.${entry.path}}}`;
+				choices.set(expr, {
+					expr,
+					label: `${nodeData.label} → ${entry.path}`,
+					count: entry.count
+				});
+			}
+		}
+		for (const [key, value] of Object.entries(referenceVariables)) {
+			if (Array.isArray(value) && value.length) {
+				choices.set(`{{${key}}}`, {
+					expr: `{{${key}}}`,
+					label: key,
+					count: value.length
+				});
+			}
+		}
+		return [...choices.values()];
+	});
+
+	// "Run once / once per item" mode, keyed on the selected node. Flipping it
+	// on with nothing picked keeps for_each empty (the engine treats that as
+	// run-once) until a collection is chosen.
+	let perItemOn = $state(false);
+	let forEachIsCustom = $state(false);
+	let forEachModeNodeId: string | null = null;
+	$effect(() => {
+		const nodeId = nodeDomain?.type === 'action' ? selectedNode.id : null;
+		if (nodeId !== forEachModeNodeId) {
+			forEachModeNodeId = nodeId;
+			perItemOn = !!actionConfig?.for_each;
+			forEachIsCustom =
+				!!actionConfig?.for_each && !forEachChoices.some((c) => c.expr === actionConfig.for_each);
+		}
+	});
+
+	function setPerItem(on: boolean) {
+		perItemOn = on;
+		if (!on) {
+			actionConfig.for_each = '';
+			forEachIsCustom = false;
+			onChange();
+		}
+	}
+
+	const itemChips = $derived.by(() => {
+		const first = forEachPreview && !forEachPreview.invalid ? forEachPreview.first : undefined;
+		if (first === null || typeof first !== 'object' || Array.isArray(first)) return [];
+		return Object.keys(first as Record<string, unknown>).slice(0, 10);
 	});
 
 	function addInputMapping() {
@@ -945,6 +1030,137 @@
 						{/each}
 					</select>
 				</label>
+
+				<div>
+					{@render fieldLabel(m.runMode())}
+					<div class="flex rounded-base border border-surface-200-800 overflow-hidden text-xs">
+						<button
+							type="button"
+							class="flex-1 px-2 py-1.5 cursor-pointer {perItemOn
+								? 'bg-surface-100-900 text-surface-600-400'
+								: 'preset-filled-primary-500'}"
+							onclick={() => setPerItem(false)}
+						>
+							{m.runOnce()}
+						</button>
+						<button
+							type="button"
+							class="flex-1 px-2 py-1.5 cursor-pointer {perItemOn
+								? 'preset-filled-primary-500'
+								: 'bg-surface-100-900 text-surface-600-400'}"
+							onclick={() => setPerItem(true)}
+							data-testid="run-per-item"
+						>
+							<i class="fa-solid fa-rotate mr-1"></i>{m.runPerItem()}
+						</button>
+					</div>
+				</div>
+
+				{#if perItemOn}
+					<div>
+						{@render fieldLabel(m.forEachItemIn())}
+						{#if forEachChoices.length}
+							<select
+								class="select w-full text-sm"
+								value={forEachIsCustom ? '__custom__' : (actionConfig.for_each ?? '')}
+								onchange={(e) => {
+									const chosen = e.currentTarget.value;
+									if (chosen === '__custom__') {
+										forEachIsCustom = true;
+									} else {
+										forEachIsCustom = false;
+										actionConfig.for_each = chosen;
+										onChange();
+									}
+								}}
+								data-testid="for-each-collection"
+							>
+								{#if !actionConfig.for_each && !forEachIsCustom}
+									<option value="">—</option>
+								{/if}
+								{#each forEachChoices as choice (choice.expr)}
+									<option value={choice.expr}>
+										{choice.label}{choice.count === null ? '' : ` (${choice.count})`}
+									</option>
+								{/each}
+								<option value="__custom__">{m.customExpression()}</option>
+							</select>
+						{:else}
+							<select class="select w-full text-sm" disabled>
+								<option>{m.forEachNoCollections()}</option>
+							</select>
+						{/if}
+						{#if forEachIsCustom || (!forEachChoices.length && actionConfig.for_each)}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono mt-1"
+								placeholder={'{{node.list_items.results}}'}
+								bind:value={actionConfig.for_each}
+								oninput={onChange}
+							/>
+						{/if}
+						{#if forEachPreview?.invalid}
+							<p class="text-[10px] text-warning-600 mt-1">
+								<i class="fa-solid fa-triangle-exclamation mr-1"></i>{m.forEachNotAList()}
+							</p>
+						{:else if forEachPreview}
+							<p class="text-[10px] text-success-600 mt-1">
+								<i class="fa-solid fa-rotate mr-1"></i>{m.forEachPreview({
+									count: forEachPreview.count
+								})}
+							</p>
+						{/if}
+					</div>
+
+					{#if actionConfig.for_each}
+						{#if itemChips.length}
+							<div>
+								<span class="text-[10px] font-semibold uppercase tracking-wide text-surface-500">
+									{m.perItemFields()}
+								</span>
+								<div class="flex flex-wrap gap-1 mt-1">
+									{#each itemChips as chip (chip)}
+										<button
+											type="button"
+											class="badge preset-tonal text-[10px] font-mono cursor-pointer hover:preset-filled-primary-500"
+											title={'{{item.' + chip + '}}'}
+											onclick={() => insertExpression('{{item.' + chip + '}}')}
+										>
+											{chip}
+										</button>
+									{/each}
+									<button
+										type="button"
+										class="badge preset-tonal text-[10px] font-mono cursor-pointer hover:preset-filled-primary-500"
+										title={'{{index}}'}
+										onclick={() => insertExpression('{{index}}')}
+									>
+										index
+									</button>
+								</div>
+								<p class="text-[10px] text-surface-500 mt-1">{m.perItemChipsHint()}</p>
+							</div>
+						{:else}
+							<p class="text-[10px] text-surface-500">
+								{m.forEachHint({ item: '{{item}}', index: '{{index}}' })}
+							</p>
+						{/if}
+						<label>
+							{@render fieldLabel(m.onItemFailure())}
+							<select
+								class="select w-full text-sm"
+								value={actionConfig.on_item_error ?? 'continue'}
+								onchange={(e) => {
+									actionConfig.on_item_error = e.currentTarget.value;
+									onChange();
+								}}
+							>
+								<option value="continue">{m.continueCollectErrors()}</option>
+								<option value="stop">{m.stopTheRun()}</option>
+							</select>
+						</label>
+					{/if}
+				{/if}
 
 				{#if actionConfig.type === 'log'}
 					<label>
@@ -1525,51 +1741,6 @@
 						syntax: '{{variable}}'
 					})}
 				</p>
-			{/if}
-
-			{#if nodeDomain.type === 'action'}
-				<div>
-					{@render fieldLabel(m.forEachItemIn())}
-					<input
-						type="text"
-						class="input w-full text-sm font-mono"
-						placeholder={'{{node.list_items.results}}'}
-						bind:value={actionConfig.for_each}
-						oninput={onChange}
-					/>
-					{#if actionConfig.for_each}
-						<p class="text-[10px] text-surface-500 mt-1 leading-relaxed">
-							{m.forEachHint({ item: '{{item}}', index: '{{index}}' })}
-						</p>
-						{#if forEachPreview?.invalid}
-							<p class="text-[10px] text-warning-600 mt-0.5">
-								<i class="fa-solid fa-triangle-exclamation mr-1"></i>{m.forEachNotAList()}
-							</p>
-						{:else if forEachPreview}
-							<p class="text-[10px] text-success-600 mt-0.5">
-								<i class="fa-solid fa-rotate mr-1"></i>{m.forEachPreview({
-									count: forEachPreview.count
-								})}
-							</p>
-						{/if}
-					{/if}
-				</div>
-				{#if actionConfig.for_each}
-					<label>
-						{@render fieldLabel(m.onItemFailure())}
-						<select
-							class="select w-full text-sm"
-							value={actionConfig.on_item_error ?? 'continue'}
-							onchange={(e) => {
-								actionConfig.on_item_error = e.currentTarget.value;
-								onChange();
-							}}
-						>
-							<option value="continue">{m.continueCollectErrors()}</option>
-							<option value="stop">{m.stopTheRun()}</option>
-						</select>
-					</label>
-				{/if}
 			{/if}
 
 			{#if ['action', 'subprocess'].includes(nodeDomain.type)}
