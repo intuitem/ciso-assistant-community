@@ -16,9 +16,13 @@
 		// Present in edit mode only: shows the quick-add affordance on the
 		// secrets group header.
 		onAddSecret?: (name: string, value: string) => void;
+		// First element of the node's for_each collection (spec D27), resolved
+		// against the reference run: rendered as an "item" group whose paths
+		// insert as {{item.*}}.
+		itemPreview?: unknown;
 	}
 
-	let { variables, nodes, secretNames, onInsert, onAddSecret }: Props = $props();
+	let { variables, nodes, secretNames, onInsert, onAddSecret, itemPreview }: Props = $props();
 
 	let addingSecret = $state(false);
 	let newSecretName = $state('');
@@ -135,6 +139,19 @@
 {/snippet}
 
 <div class="space-y-2" data-testid="data-browser">
+	{#if itemPreview !== undefined}
+		<div>
+			<p class="text-[9px] font-semibold uppercase tracking-wide text-surface-500 mb-0.5">
+				<i class="fa-solid fa-rotate mr-1"></i>{m.currentItem()}
+			</p>
+			{#if isExpandable(itemPreview)}
+				{@render tree(childEntries(itemPreview), 'item', 0)}
+			{:else}
+				{@render tree([['item', itemPreview]], '', 0)}
+			{/if}
+		</div>
+	{/if}
+
 	{#if Object.keys(variables).length}
 		<div>
 			<p class="text-[9px] font-semibold uppercase tracking-wide text-surface-500 mb-0.5">

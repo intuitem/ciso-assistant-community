@@ -77,8 +77,11 @@ def render(value, variables):
 
 def _render_context(instance):
     """Template context: instance variables plus the node-output namespace
-    ({{node.<ref>.<path>}}, spec D20)."""
-    return {**instance.variables, "node": instance.node_outputs}
+    ({{node.<ref>.<path>}}, spec D20). During for_each iteration (spec D27)
+    an instance-local overlay adds {{item}}/{{index}}, shadowing same-named
+    variables; the attribute is transient, never persisted."""
+    overlay = getattr(instance, "_iteration_context", None) or {}
+    return {**instance.variables, "node": instance.node_outputs, **overlay}
 
 
 ACTION_REGISTRY = {}
@@ -871,10 +874,77 @@ def validate_read_config(node):
     return errors
 
 
+# A for_each expression is exactly one {{path}} template (spec D27).
+FOR_EACH_RE = re.compile(r"^\{\{\s*([\w.]+)\s*\}\}$")
+FOR_EACH_MAX_ITEMS = 100  # aligned with READ_MAX_LIMIT / MAX_COLLECTION_ITEMS
+
+
+def validate_iteration_config(node):
+    """Publish-time checks for for_each (spec D27): (code, message) tuples."""
+    config = node.action_config or {}
+    errors = []
+    for_each = config.get("for_each")
+    if for_each not in (None, "") and (
+        not isinstance(for_each, str) or not FOR_EACH_RE.match(for_each)
+    ):
+        errors.append(
+            (
+                "for_each_invalid",
+                "for_each must be a single {{path}} expression resolving to a list",
+            )
+        )
+    if config.get("on_item_error", "continue") not in ("continue", "stop"):
+        errors.append(
+            (
+                "for_each_invalid",
+                f"Unknown on_item_error '{config.get('on_item_error')}'",
+            )
+        )
+    return errors
+
+
 def execute_action(node, instance):
     config = node.action_config or {}
     action_type = config.get("type")
     action = ACTION_REGISTRY.get(action_type)
     if action is None:
         raise ActionError(f"Unknown action type '{action_type}'")
-    return action.execute(config, instance)
+
+    for_each = config.get("for_each")
+    if for_each in (None, ""):
+        return action.execute(config, instance)
+
+    # for_each = map (spec D27): resolve the collection with dig(), NOT
+    # render() — render would json.dumps the list into a string.
+    match = FOR_EACH_RE.match(for_each) if isinstance(for_each, str) else None
+    if match is None:
+        raise ActionError("for_each: must be a single {{path}} expression")
+    items = dig(_render_context(instance), match.group(1))
+    if items is None:
+        items = []
+    if not isinstance(items, list):
+        raise ActionError(
+            f"for_each: '{for_each}' did not resolve to a list "
+            f"(got {type(items).__name__})"
+        )
+    if len(items) > FOR_EACH_MAX_ITEMS:
+        # A hard error, not silent truncation: every item is side-effecting work.
+        raise ActionError(
+            f"for_each: {len(items)} items exceeds the {FOR_EACH_MAX_ITEMS} cap"
+        )
+
+    stop_on_error = config.get("on_item_error", "continue") == "stop"
+    results = []
+    errors = []
+    try:
+        for index, item in enumerate(items):
+            instance._iteration_context = {"item": item, "index": index}
+            try:
+                results.append(action.execute(config, instance) or {})
+            except ActionError as e:
+                if stop_on_error:
+                    raise ActionError(f"for_each: item {index}: {e}")
+                errors.append({"index": index, "message": str(e)})
+    finally:
+        instance._iteration_context = None
+    return {"count": len(items), "results": results, "errors": errors}

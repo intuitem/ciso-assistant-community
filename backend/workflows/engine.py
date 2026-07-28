@@ -260,14 +260,24 @@ def _process(token):
             return
 
         if node.type == WorkflowNode.Type.ACTION:
+            config = node.action_config or {}
             output = execute_action(node, instance) or {}
             _store_node_output(node, output, instance)
             _apply_output_mapping(node, output, instance)
+            if config.get("for_each"):
+                # One summary entry, not one per item (spec D27); per-item
+                # detail lives in node_outputs.
+                failed = len(output.get("errors") or [])
+                message = f"{config.get('type', '')}: processed {output.get('count', 0)} items"
+                if failed:
+                    message += f" · {failed} failed"
+            else:
+                message = config.get("type", "")
             _log(
                 instance,
                 WorkflowInstanceLog.EventType.ACTION_EXECUTED,
                 node=node,
-                message=(node.action_config or {}).get("type", ""),
+                message=message,
                 data=_truncate_log_data(output),
             )
 

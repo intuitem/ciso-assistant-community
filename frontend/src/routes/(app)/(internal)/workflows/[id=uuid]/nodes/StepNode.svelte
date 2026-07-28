@@ -12,8 +12,9 @@
 			forkType?: string;
 			joinType?: string;
 			assignments?: { role_code: string; is_blocking: boolean }[];
+			forEach?: boolean;
 			error?: string | null;
-			runState?: 'visited' | 'active' | 'error' | null;
+			runState?: 'visited' | 'active' | 'error' | 'warning' | null;
 		};
 	}
 
@@ -77,7 +78,8 @@
 	{data.error ? 'ring-2 ring-error-500' : ''}
 	{data.runState === 'visited' ? 'ring-2 ring-success-400' : ''}
 	{data.runState === 'active' ? 'ring-2 ring-warning-400 animate-pulse' : ''}
-	{data.runState === 'error' ? 'ring-2 ring-error-500 animate-pulse' : ''}"
+	{data.runState === 'error' ? 'ring-2 ring-error-500 animate-pulse' : ''}
+	{data.runState === 'warning' ? 'ring-2 ring-warning-500' : ''}"
 	title={data.error ?? undefined}
 	onmouseenter={() => (hovered = true)}
 	onmouseleave={() => (hovered = false)}
@@ -90,6 +92,9 @@
 		<span class="text-xs font-semibold leading-tight text-surface-900-100 text-wrap">
 			{data.label}
 		</span>
+		{#if data.forEach}
+			<i class="fa-solid fa-rotate text-[10px] text-surface-500 shrink-0" title="for each"></i>
+		{/if}
 	</div>
 
 	{#if data.meta}
@@ -138,6 +143,12 @@
 			class="absolute -top-2 -left-2 w-4 h-4 rounded-full bg-warning-500 text-white text-[8px] flex items-center justify-center"
 		>
 			<i class="fa-solid fa-circle-notch fa-spin"></i>
+		</span>
+	{:else if data.runState === 'warning'}
+		<span
+			class="absolute -top-2 -left-2 w-4 h-4 rounded-full bg-warning-500 text-white text-[8px] flex items-center justify-center"
+		>
+			!
 		</span>
 	{/if}
 

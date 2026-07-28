@@ -14,7 +14,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { publicHookUrl } from './hook-url';
 	import DataBrowser from './DataBrowser.svelte';
-	import { renderTemplate } from './expressions';
+	import { dig, renderTemplate } from './expressions';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 	import { newCondition, treeToGroups, groupsToTree, type Condition } from './filter-dnf';
 
@@ -472,6 +472,24 @@
 		actionConfig.order_by = (descending ? '-' : '') + field;
 		onChange();
 	}
+
+	// for_each (spec D27): resolve the expression against the reference run so
+	// the builder can preview the iteration count and offer {{item.*}} paths.
+	const FOR_EACH_RE = /^\{\{\s*([\w.]+)\s*\}\}$/;
+	const referenceContext = $derived({
+		...referenceVariables,
+		node: Object.fromEntries(referenceNodes.map((n) => [n.key, n.output]))
+	});
+	const forEachPreview = $derived.by(() => {
+		const expression = actionConfig?.for_each;
+		if (!expression || typeof expression !== 'string') return null;
+		const match = expression.match(FOR_EACH_RE);
+		if (!match) return { invalid: true, count: 0, first: undefined };
+		const resolved = dig(referenceContext, match[1]);
+		if (resolved === undefined) return null; // no reference data — no verdict
+		if (!Array.isArray(resolved)) return { invalid: true, count: 0, first: undefined };
+		return { invalid: false, count: resolved.length, first: resolved[0] };
+	});
 
 	function addInputMapping() {
 		const used = new Set(Object.keys(nodeDomain.input_mapping ?? {}));
@@ -1509,6 +1527,51 @@
 				</p>
 			{/if}
 
+			{#if nodeDomain.type === 'action'}
+				<div>
+					{@render fieldLabel(m.forEachItemIn())}
+					<input
+						type="text"
+						class="input w-full text-sm font-mono"
+						placeholder={'{{node.list_items.results}}'}
+						bind:value={actionConfig.for_each}
+						oninput={onChange}
+					/>
+					{#if actionConfig.for_each}
+						<p class="text-[10px] text-surface-500 mt-1 leading-relaxed">
+							{m.forEachHint({ item: '{{item}}', index: '{{index}}' })}
+						</p>
+						{#if forEachPreview?.invalid}
+							<p class="text-[10px] text-warning-600 mt-0.5">
+								<i class="fa-solid fa-triangle-exclamation mr-1"></i>{m.forEachNotAList()}
+							</p>
+						{:else if forEachPreview}
+							<p class="text-[10px] text-success-600 mt-0.5">
+								<i class="fa-solid fa-rotate mr-1"></i>{m.forEachPreview({
+									count: forEachPreview.count
+								})}
+							</p>
+						{/if}
+					{/if}
+				</div>
+				{#if actionConfig.for_each}
+					<label>
+						{@render fieldLabel(m.onItemFailure())}
+						<select
+							class="select w-full text-sm"
+							value={actionConfig.on_item_error ?? 'continue'}
+							onchange={(e) => {
+								actionConfig.on_item_error = e.currentTarget.value;
+								onChange();
+							}}
+						>
+							<option value="continue">{m.continueCollectErrors()}</option>
+							<option value="stop">{m.stopTheRun()}</option>
+						</select>
+					</label>
+				{/if}
+			{/if}
+
 			{#if ['action', 'subprocess'].includes(nodeDomain.type)}
 				<div>
 					<div class="flex items-center justify-between mb-1">
@@ -1929,6 +1992,9 @@
 						{secretNames}
 						onInsert={insertExpression}
 						onAddSecret={readonly ? undefined : onAddSecret}
+						itemPreview={forEachPreview && !forEachPreview.invalid
+							? forEachPreview.first
+							: undefined}
 					/>
 					<p class="text-[9px] text-surface-500 mt-1 leading-relaxed">
 						<i class="fa-solid fa-arrow-pointer mr-1"></i>{m.insertHint()}

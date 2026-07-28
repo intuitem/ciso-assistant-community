@@ -14,6 +14,7 @@ from .models import (
     WorkflowSecret,
     WorkflowVersion,
 )
+from .actions import validate_iteration_config as _validate_iteration_config
 from .actions import validate_read_config as _validate_read_config
 from .triggers import validate_trigger_config
 
@@ -111,6 +112,8 @@ def validate_graph(version):
                         )
                     )
             for code, message in _validate_read_config(node):
+                errors.append(_error(code, message, node=node))
+            for code, message in _validate_iteration_config(node):
                 errors.append(_error(code, message, node=node))
         if node.type == WorkflowNode.Type.CONDITION:
             branches = list(node.branches.all())

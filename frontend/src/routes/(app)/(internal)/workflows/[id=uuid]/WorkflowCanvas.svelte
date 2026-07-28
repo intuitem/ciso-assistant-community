@@ -172,6 +172,7 @@
 			forkType: domain.fork_type,
 			joinType: domain.join_type,
 			assignments: domain.assignments ?? [],
+			forEach: domain.type === 'action' && !!domain.action_config?.for_each,
 			branches: domain.type === 'condition' ? conditionBranchVisuals(domain) : undefined,
 			triggerType:
 				domain.type === 'trigger' ? (domain.trigger_config?.type ?? 'manual') : undefined,
@@ -603,7 +604,7 @@
 
 	// ---------- run visualization ----------
 
-	type RunState = 'visited' | 'active' | 'error';
+	type RunState = 'visited' | 'active' | 'error' | 'warning';
 	interface RunView {
 		runId: string;
 		nodeStates: Record<string, RunState>;
@@ -655,6 +656,18 @@
 			replaying: false
 		};
 		for (const step of visitedSteps(logs)) markVisited(step.node.id, runView);
+		// Completed-with-item-errors (for_each, continue policy) reads amber —
+		// distinct from red, which means the run stopped there.
+		for (const entry of logs) {
+			if (
+				entry.event_type === 'action_executed' &&
+				entry.node?.id &&
+				Array.isArray(entry.data?.errors) &&
+				entry.data.errors.length
+			) {
+				runView.nodeStates[entry.node.id] = 'warning';
+			}
+		}
 		for (const active of run.active_nodes ?? []) {
 			runView.nodeStates[active.id] = active.status === 'error' ? 'error' : 'active';
 		}
