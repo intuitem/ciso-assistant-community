@@ -582,9 +582,6 @@ def _secrets_context(instance, raw_config):
     return {**_render_context(instance), "secrets": secrets}
 
 
-MAX_HTTP_REDIRECTS = 5
-
-
 @register
 class HttpRequestAction(BaseAction):
     action_type = "http_request"
@@ -601,20 +598,14 @@ class HttpRequestAction(BaseAction):
         url = render(config.get("url", ""), context)
         if not url:
             raise ActionError("http_request: no URL configured")
-
-        def _guard(target):
-            # Redacts the URL from the error: it may carry a secret in the
-            # query string ({{secrets.X}}), and the SSRF verdict is about the
-            # host, not the full URL. (spec D17: secrets never reach logs.)
-            try:
-                assert_public_url_unless_dev(target, allowed_schemes=("https", "http"))
-            except (BlockedRequestError, DnsLookupError) as e:
-                host = urlsplit(target).hostname or "target"
-                # DNS failures are transient-adjacent: ActionError keeps them
-                # on the node's retry path instead of hard-failing the token.
-                raise ActionError(f"http_request: {type(e).__name__} for host '{host}'")
-
-        _guard(url)
+        try:
+            assert_public_url_unless_dev(url, allowed_schemes=("https", "http"))
+        except (BlockedRequestError, DnsLookupError) as e:
+            # Report the host only: the URL may carry a secret in its query
+            # string (spec D17). DNS failures are transient-adjacent, so
+            # ActionError keeps them on the node's retry path.
+            host = urlsplit(url).hostname or "target"
+            raise ActionError(f"http_request: {type(e).__name__} for host '{host}'")
 
         method = (config.get("method") or "GET").upper()
         if method not in ("GET", "POST", "PUT", "PATCH", "DELETE"):
@@ -626,9 +617,9 @@ class HttpRequestAction(BaseAction):
         body = render(config.get("body"), context)
         timeout = min(int(config.get("timeout") or 15), 30)
 
-        # allow_redirects is OFF: requests would otherwise follow a 3xx to an
-        # internal address (metadata service, localhost) that the initial guard
-        # never saw. We re-validate every hop's Location ourselves.
+        # Redirects are NOT followed: only the initial URL is SSRF-checked, so
+        # following a 3xx Location would reach an internal address the guard
+        # never saw. A 3xx is returned as-is for the graph to handle.
         kwargs = {"headers": headers, "timeout": timeout, "allow_redirects": False}
         if body not in (None, ""):
             if isinstance(body, (dict, list)):
@@ -639,32 +630,13 @@ class HttpRequestAction(BaseAction):
                     kwargs["json"] = parsed
                 else:
                     kwargs["data"] = body
-        current_url = url
-        for _hop in range(MAX_HTTP_REDIRECTS + 1):
-            try:
-                response = requests.request(method, current_url, **kwargs)
-            except requests.RequestException as e:
-                # Network-level failures raise so the node's retry policy
-                # applies. requests exceptions stringify with the full URL, so
-                # report the host only (query string may hold a secret).
-                host = urlsplit(current_url).hostname or "target"
-                raise ActionError(f"http_request: request to '{host}' failed")
-            # getattr: a real requests.Response always has is_redirect/next;
-            # test doubles may not, and a non-redirect response ends the loop.
-            next_request = (
-                getattr(response, "next", None)
-                if getattr(response, "is_redirect", False)
-                else None
-            )
-            if next_request is not None:
-                current_url = next_request.url
-                _guard(current_url)
-                continue
-            break
-        else:
-            raise ActionError(
-                f"http_request: exceeded {MAX_HTTP_REDIRECTS} redirects"
-            )
+        try:
+            response = requests.request(method, url, **kwargs)
+        except requests.RequestException:
+            # requests exceptions stringify with the full URL (possible secret),
+            # so report the host only. Network failures stay on the retry path.
+            host = urlsplit(url).hostname or "target"
+            raise ActionError(f"http_request: request to '{host}' failed")
 
         try:
             response_body = response.json()

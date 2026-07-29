@@ -182,40 +182,44 @@ class TestHttpRequest:
         assert scheduled["delay"] == 10
         assert instance.status == WorkflowInstance.Status.ACTIVE
 
-    def test_redirect_to_internal_address_is_blocked(self, monkeypatch):
-        """A public URL that 302s to an internal host must be re-validated on
-        the hop, not blindly followed (SSRF)."""
-        from core.net_safety import BlockedRequestError
-
+    def test_redirects_are_not_followed(self, monkeypatch):
+        """Only the initial URL is SSRF-checked, so a 3xx must NOT be followed
+        to its (unvalidated, possibly internal) Location — it is returned as-is."""
         _, version = make_workflow()
+        requested = []
 
         class Redirect:
             status_code = 302
-            is_redirect = True
+            headers = {"Location": "http://169.254.169.254/latest/meta-data/"}
 
-            class next:  # noqa: N801 — mimics requests' PreparedRequest.next
-                url = "http://169.254.169.254/latest/meta-data/"
+            def json(self):
+                raise ValueError("no body")
+
+            text = ""
 
         def fake_request(method, url, **kwargs):
             assert kwargs["allow_redirects"] is False
+            requested.append(url)
             return Redirect()
 
-        def guard(url, **kw):
-            host = url.split("/")[2]
-            if host.startswith("169.254."):
-                raise BlockedRequestError("non-public address")
-
         monkeypatch.setattr("requests.request", fake_request)
-        monkeypatch.setattr("core.net_safety.assert_public_url_unless_dev", guard)
+        monkeypatch.setattr(
+            "core.net_safety.assert_public_url_unless_dev", lambda url, **kw: None
+        )
 
-        linear_graph(
+        actions = linear_graph(
             version,
             {"type": "http_request", "url": "https://safe.example.com/redir"},
         )
+        version.nodes.filter(id=actions[0]["id"]).update(
+            output_mapping={"code": "status"}
+        )
         instance = start_instance(version)
-        # The redirect to an internal address is re-validated and blocks the
-        # run instead of being followed.
-        assert instance.status == WorkflowInstance.Status.FAILED
+        # The 302 comes back unfollowed: exactly one request, to the public URL,
+        # and the internal Location is never hit.
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert requested == ["https://safe.example.com/redir"]
+        assert instance.variables["code"] == 302
 
     def test_secret_in_url_not_leaked_on_error(self, monkeypatch):
         _, version = make_workflow()
