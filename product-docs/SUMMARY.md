@@ -157,6 +157,7 @@
 * [Kanban mode](features/kanban-mode.md)
 * [Applied controls analytics](features/applied-controls-analytics.md)
 * [Evidences from clipboard](features/evidences-from-clipboard.md)
+* [Evidence preview](features/evidence-preview.md)
 * [Mappings](features/mappings.md)
 * [Mapping explorer](features/mapping-explorer.md)
 * [X-rays](features/x-rays.md)
