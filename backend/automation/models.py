@@ -3,11 +3,14 @@ from collections import Counter
 from auditlog.registry import auditlog
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import F, Window
+from django.db.models import F, Q, Window
 from django.db.models.functions import RowNumber
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel
+from core.validators import validate_file_name, validate_file_size
 from core.models import (
     Assessment,
     Asset,
@@ -139,7 +142,9 @@ class PostureAssessment(Assessment):
         )
         if stale:
             self.results.filter(pk__in=stale).delete()
-            self.runs.filter(results__isnull=True).delete()
+            self.runs.filter(results__isnull=True).filter(
+                Q(observation=""), Q(attachment="") | Q(attachment__isnull=True)
+            ).delete()
 
 
 class PostureRun(AbstractBaseModel):
@@ -148,6 +153,14 @@ class PostureRun(AbstractBaseModel):
     )
     started_at = models.DateTimeField()
     tool = models.CharField(max_length=100, blank=True)
+    observation = models.TextField(blank=True, verbose_name=_("Observation"))
+    attachment = models.FileField(
+        blank=True,
+        null=True,
+        max_length=500,
+        verbose_name=_("Attachment"),
+        validators=[validate_file_size, validate_file_name],
+    )
 
     class Meta:
         verbose_name = _("Posture run")
@@ -207,6 +220,12 @@ class PostureResult(AbstractBaseModel):
 
     def __str__(self):
         return f"{self.requirement.ref_id or self.requirement.urn} on {self.asset}: {self.result}"
+
+
+@receiver(post_delete, sender=PostureRun)
+def delete_run_attachment(sender, instance, **kwargs):
+    if instance.attachment:
+        instance.attachment.delete(save=False)
 
 
 common_exclude = ["created_at", "updated_at"]
