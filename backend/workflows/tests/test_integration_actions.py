@@ -141,7 +141,9 @@ class TestHttpRequest:
         for log in instance.logs.all():
             assert "s3cr3t-value" not in str(log.data) + log.message
 
-    def test_retry_scheduled_on_network_error(self, monkeypatch):
+    def test_retry_scheduled_on_network_error(
+        self, monkeypatch, django_capture_on_commit_callbacks
+    ):
         import requests
 
         _, version = make_workflow()
@@ -171,11 +173,82 @@ class TestHttpRequest:
                 }
             ],
         )
-        instance = start_instance(version)
+        # The retry is scheduled on_commit (so the RETRYING row is visible to
+        # the consumer); capture-and-execute callbacks to observe it.
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
         token = instance.tokens.get(status=WorkflowToken.Status.RETRYING)
         assert token.retry_count == 1
         assert scheduled["delay"] == 10
         assert instance.status == WorkflowInstance.Status.ACTIVE
+
+    def test_redirect_to_internal_address_is_blocked(self, monkeypatch):
+        """A public URL that 302s to an internal host must be re-validated on
+        the hop, not blindly followed (SSRF)."""
+        from core.net_safety import BlockedRequestError
+
+        _, version = make_workflow()
+
+        class Redirect:
+            status_code = 302
+            is_redirect = True
+
+            class next:  # noqa: N801 — mimics requests' PreparedRequest.next
+                url = "http://169.254.169.254/latest/meta-data/"
+
+        def fake_request(method, url, **kwargs):
+            assert kwargs["allow_redirects"] is False
+            return Redirect()
+
+        def guard(url, **kw):
+            host = url.split("/")[2]
+            if host.startswith("169.254."):
+                raise BlockedRequestError("non-public address")
+
+        monkeypatch.setattr("requests.request", fake_request)
+        monkeypatch.setattr("core.net_safety.assert_public_url_unless_dev", guard)
+
+        linear_graph(
+            version,
+            {"type": "http_request", "url": "https://safe.example.com/redir"},
+        )
+        instance = start_instance(version)
+        # The redirect to an internal address is re-validated and blocks the
+        # run instead of being followed.
+        assert instance.status == WorkflowInstance.Status.FAILED
+
+    def test_secret_in_url_not_leaked_on_error(self, monkeypatch):
+        _, version = make_workflow()
+        WorkflowSecret.objects.create(
+            name="api_key", folder=Folder.get_root_folder(), value="leak-me"
+        )
+
+        class ErrorResponse:
+            status_code = 500
+            is_redirect = False
+            next = None
+
+            def json(self):
+                return {"error": "boom"}
+
+        monkeypatch.setattr("requests.request", lambda *a, **k: ErrorResponse())
+        monkeypatch.setattr(
+            "core.net_safety.assert_public_url_unless_dev", lambda url, **kw: None
+        )
+
+        linear_graph(
+            version,
+            {
+                "type": "http_request",
+                "url": "https://api.example.com/x?token={{secrets.api_key}}",
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        for log in instance.logs.all():
+            assert "leak-me" not in str(log.data) + log.message
+        for tok in instance.tokens.all():
+            assert "leak-me" not in (tok.error_message or "")
 
 
 @pytest.mark.django_db
@@ -238,6 +311,33 @@ class TestIamActions:
         assert rerun.status == WorkflowInstance.Status.COMPLETED
         assert Folder.objects.filter(name="HR — Engineering").count() == 1
         assert User.objects.filter(email="ada@example.com").count() == 1
+
+    def test_membership_cannot_target_ancestor_group(self):
+        """A workflow scoped to a child domain must not add a user to a group
+        in an ancestor folder (privilege escalation to root global-admin)."""
+        domain = Folder.objects.create(
+            name="Child domain",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        _, version = make_workflow(folder=domain)
+        User.objects.create_user(email="climber@example.com")
+        root_admins = UserGroup.objects.get(
+            folder=Folder.get_root_folder(), name="BI-UG-ADM"
+        )
+        linear_graph(
+            version,
+            {
+                "type": "manage_group_membership",
+                "user": "climber@example.com",
+                "group": str(root_admins.id),
+                "operation": "add",
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        user = User.objects.get(email="climber@example.com")
+        assert root_admins not in user.user_groups.all()
 
     def test_provision_user_deactivation(self):
         _, version = make_workflow()

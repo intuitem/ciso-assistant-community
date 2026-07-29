@@ -9,6 +9,7 @@ output_mapping into instance variables. String config values support
 import datetime
 import re
 import uuid
+from urllib.parse import urlsplit
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q
@@ -570,12 +571,18 @@ def _secrets_context(instance, raw_config):
         return _render_context(instance)
     from .models import WorkflowSecret
 
-    folder_ids = _accessible_folder_ids(instance.folder)
+    # Subtree-only, NOT ancestors: a secret is a credential, so a child-domain
+    # workflow must not read a parent domain's secret and exfiltrate it. Matches
+    # read_objects (spec D26); mirrored in validation._existing_secret_names.
+    folder_ids = _read_scope_folder_ids(instance.folder)
     secrets = {
         secret.name: secret.value
         for secret in WorkflowSecret.objects.filter(folder_id__in=folder_ids)
     }
     return {**_render_context(instance), "secrets": secrets}
+
+
+MAX_HTTP_REDIRECTS = 5
 
 
 @register
@@ -594,12 +601,20 @@ class HttpRequestAction(BaseAction):
         url = render(config.get("url", ""), context)
         if not url:
             raise ActionError("http_request: no URL configured")
-        try:
-            assert_public_url_unless_dev(url, allowed_schemes=("https", "http"))
-        except (BlockedRequestError, DnsLookupError) as e:
-            # DNS failures are transient-adjacent: ActionError keeps them on
-            # the node's retry path instead of hard-failing the token.
-            raise ActionError(f"http_request: {e}")
+
+        def _guard(target):
+            # Redacts the URL from the error: it may carry a secret in the
+            # query string ({{secrets.X}}), and the SSRF verdict is about the
+            # host, not the full URL. (spec D17: secrets never reach logs.)
+            try:
+                assert_public_url_unless_dev(target, allowed_schemes=("https", "http"))
+            except (BlockedRequestError, DnsLookupError) as e:
+                host = urlsplit(target).hostname or "target"
+                # DNS failures are transient-adjacent: ActionError keeps them
+                # on the node's retry path instead of hard-failing the token.
+                raise ActionError(f"http_request: {type(e).__name__} for host '{host}'")
+
+        _guard(url)
 
         method = (config.get("method") or "GET").upper()
         if method not in ("GET", "POST", "PUT", "PATCH", "DELETE"):
@@ -611,7 +626,10 @@ class HttpRequestAction(BaseAction):
         body = render(config.get("body"), context)
         timeout = min(int(config.get("timeout") or 15), 30)
 
-        kwargs = {"headers": headers, "timeout": timeout}
+        # allow_redirects is OFF: requests would otherwise follow a 3xx to an
+        # internal address (metadata service, localhost) that the initial guard
+        # never saw. We re-validate every hop's Location ourselves.
+        kwargs = {"headers": headers, "timeout": timeout, "allow_redirects": False}
         if body not in (None, ""):
             if isinstance(body, (dict, list)):
                 kwargs["json"] = body
@@ -621,11 +639,32 @@ class HttpRequestAction(BaseAction):
                     kwargs["json"] = parsed
                 else:
                     kwargs["data"] = body
-        try:
-            response = requests.request(method, url, **kwargs)
-        except requests.RequestException as e:
-            # Network-level failures raise so the node's retry policy applies.
-            raise ActionError(f"http_request: {e}")
+        current_url = url
+        for _hop in range(MAX_HTTP_REDIRECTS + 1):
+            try:
+                response = requests.request(method, current_url, **kwargs)
+            except requests.RequestException as e:
+                # Network-level failures raise so the node's retry policy
+                # applies. requests exceptions stringify with the full URL, so
+                # report the host only (query string may hold a secret).
+                host = urlsplit(current_url).hostname or "target"
+                raise ActionError(f"http_request: request to '{host}' failed")
+            # getattr: a real requests.Response always has is_redirect/next;
+            # test doubles may not, and a non-redirect response ends the loop.
+            next_request = (
+                getattr(response, "next", None)
+                if getattr(response, "is_redirect", False)
+                else None
+            )
+            if next_request is not None:
+                current_url = next_request.url
+                _guard(current_url)
+                continue
+            break
+        else:
+            raise ActionError(
+                f"http_request: exceeded {MAX_HTTP_REDIRECTS} redirects"
+            )
 
         try:
             response_body = response.json()
@@ -635,8 +674,9 @@ class HttpRequestAction(BaseAction):
         # instead of letting downstream nodes run on empty variables. Graphs
         # that want to branch on the status opt in via allow_error_status.
         if response.status_code >= 400 and not config.get("allow_error_status"):
+            host = urlsplit(current_url).hostname or "target"
             raise ActionError(
-                f"http_request: HTTP {response.status_code} from {url}: "
+                f"http_request: HTTP {response.status_code} from '{host}': "
                 f"{str(response_body)[:200]}"
             )
         # Secrets never appear here unless the remote echoes them; request
@@ -666,7 +706,9 @@ class ProvisionFolderAction(BaseAction):
         parent_id = render(config.get("parent"), _render_context(instance))
         if parent_id:
             parent = Folder.objects.filter(id=parent_id).first()
-            if parent is None or parent.id not in _accessible_folder_ids(
+            # Subtree-only: creating a domain under root/an ancestor would let a
+            # domain-scoped publisher provision outside their boundary.
+            if parent is None or parent.id not in _read_scope_folder_ids(
                 instance.folder
             ):
                 raise ActionError(
@@ -779,7 +821,9 @@ class ManageGroupMembershipAction(BaseAction):
             ).first()
         if group is None:
             raise ActionError("manage_group_membership: group not found")
-        if group.folder_id not in _accessible_folder_ids(instance.folder):
+        # Subtree-only: an ancestor grant would let a domain admin add a user to
+        # the root global-admin group (BI-UG-ADM) via a workflow they publish.
+        if group.folder_id not in _read_scope_folder_ids(instance.folder):
             raise ActionError(
                 "manage_group_membership: group is outside this workflow's scope"
             )
