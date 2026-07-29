@@ -247,8 +247,8 @@ class ImportDocumentWorkflow(Workflow):
         from core.models import FindingsAssessment
         from iam.models import Folder, RoleAssignment
 
-        (_, change_ids, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), ctx.request.user, FindingsAssessment
+        change_ids = RoleAssignment.get_changeable_object_ids(
+            ctx.request.user, FindingsAssessment
         )
         return [
             {"id": str(fa["id"]), "name": fa["name"]}
