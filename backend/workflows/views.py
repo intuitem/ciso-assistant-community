@@ -99,7 +99,12 @@ class WorkflowViewSet(BaseModelViewSet):
 
         return Response(
             [
-                {"key": key, "fields": BASE_READ_FIELDS + entry["fields"]}
+                {
+                    "key": key,
+                    "fields": BASE_READ_FIELDS + entry["fields"],
+                    # Output-only aggregates; not filterable/orderable.
+                    "computed": sorted((entry.get("computed") or {}).keys()),
+                }
                 for key, entry in READABLE_MODELS.items()
             ]
         )

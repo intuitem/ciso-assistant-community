@@ -15,6 +15,7 @@ from django.db.models import Q
 
 from core.models import (
     AppliedControl,
+    RequirementAssessment,
     Asset,
     ComplianceAssessment,
     Evidence,
@@ -290,6 +291,17 @@ class CreateObjectAction(BaseAction):
 # no relations, so filters cannot tunnel into other objects.
 BASE_READ_FIELDS = ["id", "name", "created_at", "updated_at"]
 
+
+def _requirements_breakdown(assessment):
+    """Total assessable requirement assessments and their count per result —
+    stable shape: every result key present, zeroes included."""
+    by_result = {result: 0 for result in RequirementAssessment.Result.values}
+    total = 0
+    for count, result in assessment.get_requirements_result_count():
+        by_result[result] = count
+        total += count
+    return {"total": total, **by_result}
+
 READABLE_MODELS = {
     "applied_control": {
         "model": AppliedControl,
@@ -338,6 +350,14 @@ READABLE_MODELS = {
     "compliance_assessment": {
         "model": ComplianceAssessment,
         "fields": ["description", "ref_id", "status", "eta", "due_date"],
+        # Output-only values (never filterable/orderable — they don't exist as
+        # queryable columns). Each callable may run its own queries per row,
+        # which the list cap bounds.
+        "computed": {
+            "computed_outcome": lambda ca: ca.computed_outcome,
+            "scores": lambda ca: ca.get_global_score(),
+            "requirements": _requirements_breakdown,
+        },
     },
     "risk_assessment": {
         "model": RiskAssessment,
@@ -431,7 +451,7 @@ def _read_filters_to_q(tree, allowed_fields, context):
     return _read_group_to_q(tree, allowed_fields, context)
 
 
-def _serialize_read_row(obj, fields):
+def _serialize_read_row(obj, fields, computed=None):
     row = {}
     for field in fields:
         value = getattr(obj, field, None)
@@ -440,6 +460,11 @@ def _serialize_read_row(obj, fields):
         elif isinstance(value, (datetime.datetime, datetime.date)):
             value = value.isoformat()
         row[field] = value
+    if computed:
+        import json
+
+        for name, resolve in computed.items():
+            row[name] = json.loads(json.dumps(resolve(obj), default=str))
     return row
 
 
@@ -468,9 +493,12 @@ class ReadObjectsAction(BaseAction):
         try:
             if config.get("mode", "list") == "first":
                 obj = queryset.first()
+                computed = entry.get("computed")
                 return {
                     "found": obj is not None,
-                    "object": _serialize_read_row(obj, fields) if obj else None,
+                    "object": _serialize_read_row(obj, fields, computed)
+                    if obj
+                    else None,
                 }
             limit = min(
                 max(int(config.get("limit") or READ_DEFAULT_LIMIT), 1), READ_MAX_LIMIT
@@ -479,7 +507,8 @@ class ReadObjectsAction(BaseAction):
                 # Unpaged count so threshold conditions work beyond the page.
                 "count": queryset.count(),
                 "results": [
-                    _serialize_read_row(obj, fields) for obj in queryset[:limit]
+                    _serialize_read_row(obj, fields, entry.get("computed"))
+                    for obj in queryset[:limit]
                 ],
             }
         except (ValidationError, ValueError, TypeError) as e:

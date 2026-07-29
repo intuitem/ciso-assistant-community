@@ -218,6 +218,82 @@ class TestReadObjectsAction:
 
 
 @pytest.mark.django_db
+class TestComputedReadFields:
+    def test_compliance_assessment_scores_and_breakdown(self):
+        from core.models import (
+            ComplianceAssessment,
+            Framework,
+            Perimeter,
+            RequirementAssessment,
+            RequirementNode,
+        )
+
+        domain = make_domain("Computed domain")
+        framework = Framework.objects.create(
+            name="FW", urn="urn:test:fw", folder=Folder.get_root_folder()
+        )
+        nodes = [
+            RequirementNode.objects.create(
+                name=f"Req {i}",
+                urn=f"urn:test:fw:req{i}",
+                framework=framework,
+                assessable=True,
+                folder=Folder.get_root_folder(),
+            )
+            for i in range(3)
+        ]
+        perimeter = Perimeter.objects.create(name="P", folder=domain)
+        assessment = ComplianceAssessment.objects.create(
+            name="Audit", framework=framework, perimeter=perimeter, folder=domain
+        )
+        results = ["compliant", "compliant", "non_compliant"]
+        for node_row, result in zip(nodes, results):
+            RequirementAssessment.objects.create(
+                compliance_assessment=assessment,
+                requirement=node_row,
+                folder=domain,
+                result=result,
+                is_scored=True,
+                score=3,
+            )
+
+        version = read_flow(
+            domain, {"model": "compliance_assessment", "mode": "first"}
+        )
+        output = read_output(start_instance(version))
+        assert output["found"] is True
+        row = output["object"]
+        assert row["requirements"]["total"] == 3
+        assert row["requirements"]["compliant"] == 2
+        assert row["requirements"]["non_compliant"] == 1
+        assert row["requirements"]["not_assessed"] == 0
+        assert set(row["scores"]) == {
+            "implementation_score",
+            "documentation_score",
+            "maturity_score",
+        }
+        assert "computed_outcome" in row
+
+    def test_computed_fields_are_not_filterable(self):
+        from workflows.actions import validate_read_config
+
+        domain = make_domain("Computed filter domain")
+        version = read_flow(
+            domain,
+            {
+                "model": "compliance_assessment",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [{"field": "scores", "op": "eq", "value": "x"}],
+                },
+            },
+        )
+        read_node = version.nodes.get(type=WorkflowNode.Type.ACTION)
+        codes = [code for code, _m in validate_read_config(read_node)]
+        assert codes == ["action_read_invalid_filters"]
+
+
+@pytest.mark.django_db
 class TestReadValidation:
     def _version_with_config(self, config):
         domain = make_domain(f"Domain val {uuid.uuid4()}")
