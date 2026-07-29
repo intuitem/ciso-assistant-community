@@ -4,7 +4,7 @@ import pytest
 from rest_framework.test import APIClient, APIRequestFactory, force_authenticate
 
 from core.models import AppliedControl
-from iam.models import Folder, User
+from iam.models import Folder, User, UserGroup
 from workflows.engine import broadcast_event, start_instance
 from workflows.graph import save_graph
 from workflows.models import (
@@ -21,8 +21,10 @@ def superuser(db):
     return User.objects.create_superuser(email="engine_test@example.com", password="x")
 
 
-def make_workflow(name="Test flow"):
-    workflow = Workflow.objects.create(name=name, folder=Folder.get_root_folder())
+def make_workflow(name="Test flow", folder=None):
+    workflow = Workflow.objects.create(
+        name=name, folder=folder or Folder.get_root_folder()
+    )
     version = WorkflowVersion.objects.create(workflow=workflow)
     return workflow, version
 
@@ -536,6 +538,47 @@ class TestSubprocess:
         assert instance.status == WorkflowInstance.Status.FAILED
         assert not instance.tokens.filter(status=WorkflowToken.Status.WAITING).exists()
 
+    def _wire_subprocess(self, version, target_workflow):
+        start = node("trigger", trigger_config={"type": "manual"})
+        sub = node("subprocess", subprocess_workflow=str(target_workflow.id))
+        end = node("end")
+        save_graph(
+            version,
+            {
+                "nodes": [start, sub, end],
+                "edges": [edge(start, sub), edge(sub, end)],
+                "variables": [],
+            },
+        )
+
+    def test_self_reference_fails_publish(self):
+        from workflows.validation import validate_graph
+
+        workflow, version = make_workflow("Selfie")
+        self._wire_subprocess(version, workflow)
+        codes = [e["code"] for e in validate_graph(version)]
+        assert "subprocess_self_reference" in codes
+
+    def test_cross_workflow_cycle_capped_at_runtime(self):
+        # A -> B -> A -> ... dodges the publish-time self-reference check, so
+        # the runtime depth cap must stop it instead of recursing unbounded.
+        a_wf, a_v = make_workflow("Cycle A")
+        b_wf, b_v = make_workflow("Cycle B")
+        self._wire_subprocess(a_v, b_wf)
+        self._wire_subprocess(b_v, a_wf)
+        a_v.publish()
+        b_v.publish()
+        instance = start_instance(a_wf.published_version)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        # The depth cap (not a Python RecursionError) terminated it: the
+        # deepest instance logs "too deep"; the outer ones log "Subprocess
+        # failed", so check across all instances.
+        from workflows.models import WorkflowInstanceLog
+
+        assert WorkflowInstanceLog.objects.filter(
+            event_type="error", message__icontains="too deep"
+        ).exists()
+
 
 @pytest.mark.django_db
 class TestTokenAdmin:
@@ -635,3 +678,179 @@ class TestTokenAdmin:
         instance.refresh_from_db()
         assert instance.status == WorkflowInstance.Status.COMPLETED
         assert calls["n"] == 2
+
+
+@pytest.mark.django_db
+class TestManualRunAuthz:
+    """Manual-run endpoint must be folder-scoped and reject stale versions."""
+
+    def _publish_in(self, folder):
+        workflow, version = make_workflow("Runnable", folder=folder)
+        start = node("trigger", trigger_config={"type": "manual"})
+        log = node("action", action_config={"type": "log", "message": "hi"})
+        end = node("end")
+        save_graph(
+            version,
+            {
+                "nodes": [start, log, end],
+                "edges": [edge(start, log), edge(log, end)],
+                "variables": [],
+            },
+        )
+        version.publish()
+        return workflow
+
+    def _post(self, version_id, user):
+        factory = APIRequestFactory()
+        view = WorkflowInstanceViewSet.as_view({"post": "create"})
+        req = factory.post(
+            "/api/workflows/workflow-instances/",
+            {"version": version_id},
+            format="json",
+        )
+        force_authenticate(req, user=user)
+        return view(req)
+
+    def test_unprivileged_user_forbidden(self):
+        workflow = self._publish_in(Folder.get_root_folder())
+        user = User.objects.create_user(email="nobody@example.com")
+        resp = self._post(str(workflow.published_version.id), user)
+        assert resp.status_code == 403
+
+    def test_analyst_can_run_in_their_domain(self):
+        domain = Folder.objects.create(
+            name="Run domain",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=True,
+        )
+        Folder.create_default_ug_and_ra(domain)
+        workflow = self._publish_in(domain)
+        analyst = User.objects.create_user(email="ana@example.com")
+        analyst.user_groups.add(UserGroup.objects.get(folder=domain, name="BI-UG-ANA"))
+        resp = self._post(str(workflow.published_version.id), analyst)
+        assert resp.status_code == 201, resp.data
+
+    def test_archived_version_rejected(self, superuser):
+        workflow = self._publish_in(Folder.get_root_folder())
+        version = workflow.published_version
+        version.status = WorkflowVersion.Status.ARCHIVED
+        version.save(update_fields=["status"])
+        resp = self._post(str(version.id), superuser)
+        assert resp.status_code == 400
+        assert resp.data["error"] == "onlyCurrentVersionsCanBeRun"
+
+
+@pytest.mark.django_db
+class TestTemplatedConditionOperators:
+    """in/not_in/contains must compare against the RENDERED value, not the
+    literal '{{...}}' string (regression)."""
+
+    def _route(self, op, value, payload):
+        # Unique name: a test calls this twice and workflow names are unique
+        # per folder.
+        _, version = make_workflow(f"Route {uuid.uuid4()}")
+        subject = str(uuid.uuid4())
+        needle = str(uuid.uuid4())
+        match_branch = str(uuid.uuid4())
+        default_branch = str(uuid.uuid4())
+        start = node(
+            "trigger",
+            trigger_config={"type": "manual"},
+            input_mapping={"subject": "subject", "needle": "needle"},
+        )
+        gate = node(
+            "condition",
+            label="Gate",
+            branches=[
+                {
+                    "id": match_branch,
+                    "name": "match",
+                    "order": 0,
+                    "is_default": False,
+                    "condition_groups": [
+                        {
+                            "operator": "and",
+                            "conditions": [
+                                {"variable": subject, "op": op, "value": value}
+                            ],
+                            "children": [],
+                        }
+                    ],
+                },
+                {
+                    "id": default_branch,
+                    "name": "other",
+                    "order": 1,
+                    "is_default": True,
+                    "condition_groups": [],
+                },
+            ],
+        )
+        matched = node(
+            "action",
+            label="M",
+            action_config={"type": "set_variables", "variables": {"result": "matched"}},
+        )
+        other = node(
+            "action",
+            label="O",
+            action_config={"type": "set_variables", "variables": {"result": "default"}},
+        )
+        end = node("end")
+        save_graph(
+            version,
+            {
+                "nodes": [start, gate, matched, other, end],
+                "edges": [
+                    edge(start, gate),
+                    edge(gate, matched, source_branch=match_branch),
+                    edge(gate, other, source_branch=default_branch),
+                    edge(matched, end),
+                    edge(other, end),
+                ],
+                "variables": [
+                    {"id": subject, "key": "subject", "type": "string"},
+                    {"id": needle, "key": "needle", "type": "string"},
+                ],
+            },
+        )
+        instance = start_instance(version, payload=payload)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        return instance.variables.get("result")
+
+    def test_contains_uses_templated_value(self):
+        # Pre-fix, contains compared "hello world" against the literal
+        # "{{needle}}" and fell through to default.
+        assert (
+            self._route(
+                "contains", "{{needle}}", {"subject": "hello world", "needle": "world"}
+            )
+            == "matched"
+        )
+        assert (
+            self._route(
+                "contains", "{{needle}}", {"subject": "hello world", "needle": "zzz"}
+            )
+            == "default"
+        )
+
+    def test_in_uses_templated_value(self):
+        assert (
+            self._route("in", "{{needle}}", {"subject": "b", "needle": "a,b,c"})
+            == "matched"
+        )
+        assert (
+            self._route("in", "{{needle}}", {"subject": "x", "needle": "a,b,c"})
+            == "default"
+        )
+
+    def test_not_in_uses_templated_value(self):
+        assert (
+            self._route("not_in", "{{needle}}", {"subject": "x", "needle": "a,b,c"})
+            == "matched"
+        )
+        assert (
+            self._route("not_in", "{{needle}}", {"subject": "b", "needle": "a,b,c"})
+            == "default"
+        )

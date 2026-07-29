@@ -23,6 +23,12 @@ from .models import (
 # sits far above any legitimate run.
 MAX_STEPS = 5000
 
+# Subprocess calls recurse synchronously (a nested run_instance per level), so
+# a subprocess cycle would blow the Python stack / exhaust DB connections. Cap
+# nesting depth; publish validation catches direct self-reference, this catches
+# cross-workflow cycles that can't be detected statically.
+MAX_SUBPROCESS_DEPTH = 10
+
 # Event-chain depth of the workflow run currently executing in this context;
 # 0 means "not inside a run" (user/API-caused changes). Read by the
 # internal-event producer (workflows/events.py).
@@ -639,6 +645,12 @@ def _start_subprocess(token):
     version = target.published_version if target else None
     if version is None:
         raise EngineError("Subprocess workflow has no published version")
+    # Bound recursion: a subprocess cycle would otherwise nest run_instance
+    # calls until the Python stack blows. Publish validation blocks direct
+    # self-reference; this catches cross-workflow cycles too.
+    depth = instance.trigger_depth + 1
+    if depth > MAX_SUBPROCESS_DEPTH:
+        raise EngineError("Subprocess nesting is too deep (possible recursion)")
     child_payload = {
         child_key: dig(instance.variables, parent_path)
         for child_key, parent_path in (node.input_mapping or {}).items()
@@ -655,9 +667,9 @@ def _start_subprocess(token):
         payload=child_payload,
         parent_instance=instance,
         parent_token=token,
-        # Inherit depth so a workflow that calls itself through a subprocess
-        # still hits MAX_TRIGGER_DEPTH instead of resetting the chain to 0.
-        trigger_depth=instance.trigger_depth,
+        # Increment so nested subprocesses climb toward MAX_SUBPROCESS_DEPTH
+        # and a cycle terminates instead of recursing without bound.
+        trigger_depth=depth,
     )
     if child.status == WorkflowInstance.Status.COMPLETED:
         _store_node_output(node, child.variables, instance)

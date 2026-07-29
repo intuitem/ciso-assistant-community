@@ -1,7 +1,6 @@
 import hashlib
 import hmac
 import json
-import re
 
 import yaml
 from django.contrib.auth.models import Permission
@@ -48,23 +47,6 @@ from .serializers import (
 from .validation import validate_graph
 
 LONG_CACHE_TTL = 60
-
-SECRET_KEY_RE = re.compile(r"^\w{1,100}$")
-
-
-def _upsert_import_secrets(provided, folder):
-    """Secrets typed into the import dialog: create or update them in the
-    target folder. Blank values are 'skip' — the import warning covers them."""
-    if not isinstance(provided, dict):
-        return
-    for name, value in provided.items():
-        if not isinstance(name, str) or not SECRET_KEY_RE.match(name):
-            continue
-        if not isinstance(value, str) or not value:
-            continue
-        WorkflowSecret.objects.update_or_create(
-            folder=folder, name=name, defaults={"value": value}
-        )
 
 
 class WorkflowViewSet(BaseModelViewSet):
@@ -172,12 +154,11 @@ class WorkflowViewSet(BaseModelViewSet):
 
         try:
             with transaction.atomic():
-                # Secrets first, so import_workflow's missing-secrets warning
-                # accounts for them; the atomic block drops them if the
-                # import itself is rejected.
-                _upsert_import_secrets(provided_secrets, folder)
+                # Secrets are workflow-scoped: import_workflow attaches the
+                # dialog-provided values to each new workflow before computing
+                # its missing-secrets warning.
                 workflows, warnings = import_workflow_library(
-                    data, folder, user=request.user
+                    data, folder, user=request.user, secrets=provided_secrets
                 )
         except WorkflowImportError as e:
             return Response({"error": e.message}, status=status.HTTP_400_BAD_REQUEST)
@@ -333,7 +314,7 @@ class WorkflowTriggerViewSet(BaseModelViewSet):
 class WorkflowSecretViewSet(BaseModelViewSet):
     model = WorkflowSecret
     serializers_module = "workflows.serializers"
-    filterset_fields = ["folder"]
+    filterset_fields = ["workflow", "folder"]
     search_fields = ["name"]
     ordering = ["name"]
 
@@ -433,6 +414,24 @@ class WorkflowInstanceViewSet(BaseModelViewSet):
         Without an entry ref the engine's default rule applies (the manual
         trigger node, or the sole trigger node)."""
         version = get_object_or_404(WorkflowVersion, id=request.data.get("version"))
+        # Authorization: starting a run creates a WorkflowInstance in the
+        # version's folder, so require add_workflowinstance there (this custom
+        # create bypasses the base viewset's queryset scoping otherwise).
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_workflowinstance"),
+            folder=version.folder,
+        ):
+            return Response(
+                {"error": "permissionDenied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        # Only the workflow's current draft or published version is runnable;
+        # archived versions are pinned history, not something to launch anew.
+        if version.status == WorkflowVersion.Status.ARCHIVED:
+            return Response(
+                {"error": "onlyCurrentVersionsCanBeRun"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         entry = None
         entry_node_ref = request.data.get("entry_node_ref")
         if entry_node_ref:

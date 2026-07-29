@@ -195,6 +195,15 @@ def validate_graph(version):
                         node=node,
                     )
                 )
+            elif target.id == version.workflow_id:
+                errors.append(
+                    _error(
+                        "subprocess_self_reference",
+                        "A subprocess node cannot call its own workflow "
+                        "(infinite recursion)",
+                        node=node,
+                    )
+                )
             elif not target.versions.filter(
                 status=WorkflowVersion.Status.PUBLISHED
             ).exists():
@@ -387,19 +396,18 @@ def _referenced_node_refs(node):
 
 
 def _existing_secret_names(version, nodes):
-    """Names resolvable at runtime: the engine looks secrets up within the
-    instance folder's subtree only (actions._secrets_context)."""
+    """Names resolvable at runtime: workflow-scoped, so the engine looks secrets
+    up on the version's own workflow (actions._secrets_context)."""
     referenced = set()
     for node in nodes:
         if node.type == WorkflowNode.Type.ACTION:
             referenced |= _referenced_secret_names(node)
     if not referenced:
         return set()
-    from .actions import _read_scope_folder_ids
 
     return set(
         WorkflowSecret.objects.filter(
-            folder_id__in=_read_scope_folder_ids(version.folder),
+            workflow_id=version.workflow_id,
             name__in=referenced,
         ).values_list("name", flat=True)
     )
