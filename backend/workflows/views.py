@@ -24,7 +24,11 @@ from iam.models import Folder, RoleAssignment
 from .actions import required_permissions
 from .engine import EngineError, trigger_instance
 from .graph import GraphValidationError, save_graph, serialize_graph
-from .import_export import WorkflowImportError, export_workflow, import_workflow
+from .import_export import (
+    WorkflowImportError,
+    export_workflow_library,
+    import_workflow_library,
+)
 from .models import (
     ConditionGroup,
     Workflow,
@@ -113,7 +117,7 @@ class WorkflowViewSet(BaseModelViewSet):
     def export_yaml(self, request, pk=None):
         workflow = self.get_object()
         content = yaml.dump(
-            export_workflow(workflow),
+            export_workflow_library(workflow),
             allow_unicode=True,
             default_flow_style=False,
             sort_keys=False,
@@ -170,11 +174,18 @@ class WorkflowViewSet(BaseModelViewSet):
                 # accounts for them; the atomic block drops them if the
                 # import itself is rejected.
                 _upsert_import_secrets(provided_secrets, folder)
-                workflow, warnings = import_workflow(data, folder, user=request.user)
+                workflows, warnings = import_workflow_library(
+                    data, folder, user=request.user
+                )
         except WorkflowImportError as e:
             return Response({"error": e.message}, status=status.HTTP_400_BAD_REQUEST)
         return Response(
-            {"id": str(workflow.id), "name": workflow.name, "warnings": warnings},
+            {
+                "id": str(workflows[0].id),
+                "name": workflows[0].name,
+                "count": len(workflows),
+                "warnings": warnings,
+            },
             status=status.HTTP_201_CREATED,
         )
 

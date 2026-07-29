@@ -1,6 +1,6 @@
 """D28 schema freeze: every export validates against the versioned JSON
-Schema, canonical exports are minimal, capabilities gate forward-compat,
-branches travel by name, provenance is stamped at import."""
+Schema, canonical exports are minimal, branches travel by name, provenance
+is stamped at import."""
 
 import json
 import uuid
@@ -167,16 +167,9 @@ class TestSchemaFreeze:
         assert '"extra": ""' not in blob
         assert '"children": []' not in blob
 
-    def test_capabilities_manifest(self):
+    def test_secrets_manifest(self):
         document = export_workflow(rich_workflow())
-        assert document["requires"]["capabilities"] == ["loop", "read_objects"]
-        assert document["requires"]["secrets"] == ["api_token"]
-
-    def test_unknown_capability_is_rejected(self):
-        document = export_workflow(rich_workflow())
-        document["requires"]["capabilities"].append("quantum_actions")
-        with pytest.raises(WorkflowImportError, match="quantum_actions"):
-            import_workflow(document, Folder.get_root_folder())
+        assert document["requires"] == {"secrets": ["api_token"]}
 
     def test_branches_travel_by_name(self):
         document = export_workflow(rich_workflow())
@@ -218,13 +211,14 @@ class TestSchemaFreeze:
         with pytest.raises(WorkflowImportError, match="duplicate branch names"):
             import_workflow(document, Folder.get_root_folder())
 
-    def test_provenance_stamped_from_envelope(self):
+    def test_provenance_stamped_from_library(self):
         document = export_workflow(rich_workflow())
-        document["urn"] = "urn:intuitem:workflow:overdue-digest"
-        document["version"] = 3
+        document["urn"] = "urn:custom:risk:library:wf:workflow:overdue-digest"
         jsonschema.validate(document, SCHEMA)
-        imported, _ = import_workflow(document, Folder.get_root_folder())
-        assert imported.source_urn == "urn:intuitem:workflow:overdue-digest"
+        imported, _ = import_workflow(
+            document, Folder.get_root_folder(), source_version=3
+        )
+        assert imported.source_urn == "urn:custom:risk:library:wf:workflow:overdue-digest"
         assert imported.source_version == "3"
 
     def test_node_reference_missing_validation(self):

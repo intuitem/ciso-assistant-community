@@ -1,13 +1,17 @@
 """Portable YAML import/export of workflow definitions.
 
-The exported document is meant for humans and cross-instance sharing, so it
-carries no UUIDs: nodes are identified by their ref slug, edge conditions
-reference variables by key, and cross-object links (task templates, subprocess
+Workflows travel as LIBRARIES (spec D31): the exported document is a standard
+library envelope whose `objects.workflows` section carries workflow objects,
+so the same file loads through the library pipeline (catalog/marketplace) or
+through the workflow import dialog (folder-targeted). Workflow objects carry
+no UUIDs: nodes are identified by their ref slug, conditions reference
+variables by key, and cross-object links (task templates, subprocess
 workflows, roles) travel by name. Secrets are referenced by name only — the
-`requires.secrets` manifest lists what the workflow expects without carrying
-values. Import creates a brand-new workflow with a draft v1 and returns
-warnings for anything that could not be resolved on this instance; publish
-validation remains the safety net for incomplete graphs.
+`requires.secrets` manifest lists what a workflow expects without carrying
+values. Import creates brand-new, DIVORCED workflows (draft v1, provenance
+stamped from the library urn/version) and returns warnings for anything that
+could not be resolved on this instance; publish validation remains the safety
+net for incomplete graphs.
 """
 
 import json
@@ -27,12 +31,6 @@ from .models import (
 
 SCHEMA_VERSION = 1
 MAX_CONDITION_DEPTH = 5
-
-# Capability manifest (spec D28): the forward-compat gate. Exports tag every
-# semantics-bearing feature the document uses; importers hard-reject unknown
-# tags instead of silently dropping behavior. Every future feature whose
-# absence would silently change execution MUST register a tag here.
-KNOWN_CAPABILITIES = {"read_objects", "loop"}
 
 SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
 UUID_RE = re.compile(r"\b[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\b")
@@ -79,15 +77,9 @@ def export_workflow(workflow):
     if workflow.description:
         data["description"] = workflow.description
 
-    requires = {}
     secret_names = _referenced_secrets(document["nodes"])
     if secret_names:
-        requires["secrets"] = secret_names
-    capabilities = _used_capabilities(document["nodes"])
-    if capabilities:
-        requires["capabilities"] = capabilities
-    if requires:
-        data["requires"] = requires
+        data["requires"] = {"secrets": secret_names}
 
     # Edges reference their branch BY NAME (spec D28 — positional references
     # are where LLM edits silently rewire graphs). The exporter guarantees a
@@ -103,6 +95,64 @@ def export_workflow(workflow):
         "edges": [_export_edge(e, refs, branch_names) for e in document["edges"]],
     }
     return data
+
+
+def export_workflow_library(workflow):
+    """Wrap the workflow object in a library envelope (spec D31). The urn is
+    minted fresh on every export — an imported workflow divorced at import,
+    so re-exporting it is publishing a NEW document (source_urn stays
+    provenance-only)."""
+    from library.builder import library_urn, urn_safe_leaf
+
+    leaf = urn_safe_leaf(workflow.ref_id or workflow.name) or "workflow"
+    ref_id = f"workflow-{leaf}"
+    urn = library_urn("custom", ref_id)
+
+    workflow_object = export_workflow(workflow)
+    workflow_object["urn"] = f"{urn}:workflow:{leaf}"
+
+    document = {
+        "urn": urn,
+        "locale": "en",
+        "ref_id": ref_id,
+        "name": workflow.name,
+        "version": 1,
+        "objects": {"workflows": [workflow_object]},
+    }
+    if workflow.description:
+        document["description"] = workflow.description
+    return document
+
+
+def import_workflow_library(data, folder, user=None):
+    """Import every workflow of a library document into `folder` (the
+    workflow-dialog path; the library pipeline calls import_workflow per
+    entry itself). Returns (workflows, warnings)."""
+    if not isinstance(data, dict):
+        raise WorkflowImportError("The document must be a mapping")
+    objects = data.get("objects")
+    if not isinstance(objects, dict) or not isinstance(
+        objects.get("workflows"), list
+    ):
+        raise WorkflowImportError(
+            "The file must be a workflow library (an 'objects' section with a "
+            "'workflows' list) — re-export the workflow to get one"
+        )
+    entries = objects["workflows"]
+    if not entries:
+        raise WorkflowImportError("objects.workflows is empty")
+    workflows = []
+    warnings = []
+    for index, entry in enumerate(entries):
+        try:
+            workflow, entry_warnings = import_workflow(
+                entry, folder, user=user, source_version=data.get("version")
+            )
+        except WorkflowImportError as e:
+            raise WorkflowImportError(f"objects.workflows[{index}]: {e.message}")
+        workflows.append(workflow)
+        warnings.extend(entry_warnings)
+    return workflows, warnings
 
 
 def _ref_map(nodes):
@@ -141,17 +191,6 @@ def _role_taxonomies(nodes):
 def _referenced_secrets(nodes):
     blob = json.dumps([n["action_config"] for n in nodes])
     return sorted(set(SECRET_NAME_RE.findall(blob)))
-
-
-def _used_capabilities(nodes):
-    used = set()
-    for node in nodes:
-        config = node["action_config"] or {}
-        if config.get("type") == "read_objects":
-            used.add("read_objects")
-        if node["type"] == "loop":
-            used.add("loop")
-    return sorted(used)
 
 
 def _branch_name_map(nodes):
@@ -317,8 +356,9 @@ def _export_condition_groups(groups, variable_keys):
 # ---------- import ----------
 
 
-def import_workflow(data, folder, user=None):
-    """Create a new workflow in `folder` from an exported document.
+def import_workflow(data, folder, user=None, source_version=None):
+    """Create a new workflow in `folder` from a workflow OBJECT (an entry of
+    a library's objects.workflows).
 
     Returns (workflow, warnings). Structural problems raise WorkflowImportError
     and roll everything back; resolution problems (unknown task template, role,
@@ -341,7 +381,7 @@ def import_workflow(data, folder, user=None):
             # Marketplace/catalog provenance (spec D28): the document divorces
             # at import, these only record where it came from.
             source_urn=str(data.get("urn") or "")[:255],
-            source_version=str(data.get("version") or "")[:50],
+            source_version=str(source_version or data.get("version") or "")[:50],
         )
         version = WorkflowVersion.objects.create(workflow=workflow)
         payload = _build_graph_payload(data["graph"], workflow, folder, warnings)
@@ -359,14 +399,6 @@ def _validate_structure(data):
     if data.get("schema_version") != SCHEMA_VERSION:
         raise WorkflowImportError(
             f"Unsupported schema_version: expected {SCHEMA_VERSION}"
-        )
-    requested = (data.get("requires") or {}).get("capabilities") or []
-    unknown = sorted(set(map(str, requested)) - KNOWN_CAPABILITIES)
-    if unknown:
-        raise WorkflowImportError(
-            f"This document requires capabilities this version of CISO Assistant "
-            f"does not support: {', '.join(unknown)} — update the application "
-            "or re-export from a matching version"
         )
     if not str(data.get("name") or "").strip():
         raise WorkflowImportError("The document needs a non-empty name")
