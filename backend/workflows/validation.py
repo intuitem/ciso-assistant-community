@@ -167,7 +167,7 @@ def validate_graph(version):
                     )
                 )
         if node.type == WorkflowNode.Type.LOOP:
-            for code, message in _validate_loop(node, edges, outgoing):
+            for code, message in _validate_loop(node, edges, outgoing, nodes_by_id):
                 errors.append(_error(code, message, node=node))
         if node.type == WorkflowNode.Type.TASK and not node.task_template_id:
             errors.append(
@@ -267,7 +267,7 @@ def _referenced_secret_names(node):
 LOOP_COLLECTION_RE = re.compile(r"^\{\{\s*[\w.]+\s*\}\}$")
 
 
-def _validate_loop(node, edges, outgoing):
+def _validate_loop(node, edges, outgoing, nodes_by_id):
     """Loop rules (spec D29): a valid collection expression, both ports wired,
     every `each` path returns to the loop, and no `each` path escapes into the
     rest of the graph."""
@@ -334,6 +334,23 @@ def _validate_loop(node, edges, outgoing):
         stack.extend(outgoing.get(current, []))
     if body & done_reachable:
         escapes = True
+    # Parallel fan-out inside the body breaks the controller's per-iteration
+    # accounting (one emitted token, N returning tokens), so forbid it. A
+    # condition node is exempt: exactly one branch fires, so one token returns.
+    for body_id in body:
+        body_node = nodes_by_id.get(body_id)
+        if body_node is None or body_node.type == WorkflowNode.Type.CONDITION:
+            continue
+        if len(outgoing.get(body_id, [])) > 1:
+            results.append(
+                (
+                    "loop_body_fan_out",
+                    "A loop body step branches into parallel paths; parallel "
+                    "fan-out inside a loop body is not supported — use a "
+                    "condition node to choose a single path",
+                )
+            )
+            break
     if not returns:
         results.append(
             (
@@ -356,27 +373,33 @@ def _validate_loop(node, edges, outgoing):
 def _referenced_node_refs(node):
     """Refs named by {{nodes.<ref>...}} anywhere in the node's configs. The
     builder rewrites references on rename (spec D28); this is the safety net
-    for imports and hand-written documents."""
+    for imports and hand-written documents. loop_config is included: a loop's
+    collection/collect expressions hold {{nodes.<ref>...}} too."""
     blob = json.dumps(
-        [node.action_config or {}, node.input_mapping or {}, node.output_mapping or {}]
+        [
+            node.action_config or {},
+            node.input_mapping or {},
+            node.output_mapping or {},
+            node.loop_config or {},
+        ]
     )
     return set(NODE_REF_RE.findall(blob))
 
 
 def _existing_secret_names(version, nodes):
     """Names resolvable at runtime: the engine looks secrets up within the
-    instance folder's ancestors + subtree (actions._secrets_context)."""
+    instance folder's subtree only (actions._secrets_context)."""
     referenced = set()
     for node in nodes:
         if node.type == WorkflowNode.Type.ACTION:
             referenced |= _referenced_secret_names(node)
     if not referenced:
         return set()
-    from .actions import _accessible_folder_ids
+    from .actions import _read_scope_folder_ids
 
     return set(
         WorkflowSecret.objects.filter(
-            folder_id__in=_accessible_folder_ids(version.folder),
+            folder_id__in=_read_scope_folder_ids(version.folder),
             name__in=referenced,
         ).values_list("name", flat=True)
     )

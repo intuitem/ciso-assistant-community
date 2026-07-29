@@ -16,13 +16,14 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.throttling import SimpleRateThrottle
 from rest_framework.views import APIView
 
 from core.views import BaseModelViewSet
 from iam.models import Folder, RoleAssignment
 
 from .actions import required_permissions
-from .engine import EngineError, trigger_instance
+from .engine import EngineError, abort_token, retry_token, skip_token, trigger_instance
 from .graph import GraphValidationError, save_graph, serialize_graph
 from .import_export import (
     WorkflowImportError,
@@ -35,6 +36,7 @@ from .models import (
     WorkflowInstance,
     WorkflowNode,
     WorkflowSecret,
+    WorkflowToken,
     WorkflowTrigger,
     WorkflowVersion,
     generate_webhook_secret,
@@ -336,6 +338,64 @@ class WorkflowSecretViewSet(BaseModelViewSet):
     ordering = ["name"]
 
 
+class WorkflowTokenViewSet(BaseModelViewSet):
+    """Operator recovery for stuck runs (spec D10). Tokens are engine-managed,
+    so the only writes are the retry/skip/abort actions, gated by
+    change_workflowtoken (domain manager / administrator)."""
+
+    model = WorkflowToken
+    serializers_module = "workflows.serializers"
+    filterset_fields = ["instance", "status", "current_node", "folder"]
+    search_fields = []
+    ordering = ["created_at"]
+    permission_overrides = {
+        "retry": "change_workflowtoken",
+        "skip": "change_workflowtoken",
+        "abort": "change_workflowtoken",
+    }
+
+    def create(self, request, *args, **kwargs):
+        return Response(
+            {"error": "tokensAreEngineManaged"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+    def update(self, request, *args, **kwargs):
+        return Response(
+            {"error": "tokensAreEngineManaged"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        return Response(
+            {"error": "tokensAreEngineManaged"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+    def _run_op(self, op):
+        token = self.get_object()
+        try:
+            op(token)
+        except EngineError as e:
+            return Response(
+                {"error": e.user_message}, status=status.HTTP_400_BAD_REQUEST
+            )
+        token.refresh_from_db()
+        return Response(WorkflowInstanceReadSerializer(token.instance).data)
+
+    @action(detail=True, methods=["post"])
+    def retry(self, request, pk=None):
+        return self._run_op(retry_token)
+
+    @action(detail=True, methods=["post"])
+    def skip(self, request, pk=None):
+        return self._run_op(skip_token)
+
+    @action(detail=True, methods=["post"])
+    def abort(self, request, pk=None):
+        return self._run_op(abort_token)
+
+
 def _deputization_errors(user, version):
     """Spec D18: the publisher must hold the permissions the workflow's
     actions exercise. The workflow then acts as its publisher's deputy."""
@@ -407,6 +467,27 @@ class WorkflowInstanceViewSet(BaseModelViewSet):
         )
 
 
+class WebhookRateThrottle(SimpleRateThrottle):
+    """Rate-limit the unauthenticated hook ingress per sender IP. Keyed on the
+    TRAILING X-Forwarded-For entry: the frontend passthrough (spec D23) appends
+    the real client IP last, so the leading (client-supplied) entries are not
+    trusted."""
+
+    scope = "workflow_webhook"
+
+    def get_rate(self):
+        from django.conf import settings
+
+        return getattr(settings, "WORKFLOWS_WEBHOOK_THROTTLE_RATE", "120/min")
+
+    def get_cache_key(self, request, view):
+        xff = request.META.get("HTTP_X_FORWARDED_FOR", "")
+        ident = (
+            xff.split(",")[-1].strip() if xff else request.META.get("REMOTE_ADDR", "")
+        )
+        return self.cache_format % {"scope": self.scope, "ident": ident or "anon"}
+
+
 class WorkflowWebhookView(APIView):
     """Inbound trigger: POST /api/workflows/hooks/{workflow_id}/{node_ref}/{secret}/.
 
@@ -419,6 +500,7 @@ class WorkflowWebhookView(APIView):
 
     authentication_classes = []
     permission_classes = [AllowAny]
+    throttle_classes = [WebhookRateThrottle]
 
     def post(self, request, workflow_id, node_ref, secret):
         from django.conf import settings

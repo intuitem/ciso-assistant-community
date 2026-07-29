@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from workflows.views import (
     WorkflowInstanceViewSet,
     WorkflowSecretViewSet,
+    WorkflowTokenViewSet,
     WorkflowTriggerViewSet,
     WorkflowVersionViewSet,
     WorkflowViewSet,
@@ -19,6 +20,7 @@ router.register(
     "workflow-instances", WorkflowInstanceViewSet, basename="workflow-instances"
 )
 router.register("workflow-secrets", WorkflowSecretViewSet, basename="workflow-secrets")
+router.register("workflow-tokens", WorkflowTokenViewSet, basename="workflow-tokens")
 router.register(
     "workflow-triggers", WorkflowTriggerViewSet, basename="workflow-triggers"
 )

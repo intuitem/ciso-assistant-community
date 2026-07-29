@@ -5,7 +5,7 @@ from rest_framework.test import APIClient, APIRequestFactory, force_authenticate
 
 from core.models import AppliedControl
 from iam.models import Folder, User
-from workflows.engine import start_instance
+from workflows.engine import broadcast_event, start_instance
 from workflows.graph import save_graph
 from workflows.models import (
     Workflow,
@@ -13,7 +13,7 @@ from workflows.models import (
     WorkflowToken,
     WorkflowVersion,
 )
-from workflows.views import WorkflowInstanceViewSet
+from workflows.views import WorkflowInstanceViewSet, WorkflowTokenViewSet
 
 
 @pytest.fixture
@@ -438,3 +438,200 @@ class TestTriggers:
         resp = view(req)
         assert resp.status_code == 201, resp.data
         assert resp.data["trigger"] == "manual"
+
+
+@pytest.mark.django_db
+class TestSubprocess:
+    def _publish_child(self, *, event_key=None, failing=False):
+        child_wf = Workflow.objects.create(
+            name=f"Child {uuid.uuid4()}", folder=Folder.get_root_folder()
+        )
+        cv = WorkflowVersion.objects.create(workflow=child_wf)
+        chain = [node("trigger", trigger_config={"type": "manual"})]
+        if event_key:
+            chain.append(node("event", event_key=event_key))
+        if failing:
+            chain.append(
+                node(
+                    "action",
+                    action_config={
+                        "type": "create_object",
+                        "model": "nonexistent_model",
+                        "fields": {"name": "x"},
+                    },
+                )
+            )
+        else:
+            chain.append(
+                node(
+                    "action",
+                    action_config={
+                        "type": "set_variables",
+                        "variables": {"result": "done"},
+                    },
+                )
+            )
+        chain.append(node("end"))
+        edges = [edge(chain[i], chain[i + 1]) for i in range(len(chain) - 1)]
+        save_graph(cv, {"nodes": chain, "edges": edges, "variables": []})
+        cv.publish()
+        return child_wf
+
+    def _parent(self, child_wf, output_mapping=None):
+        _, pv = make_workflow("Parent")
+        trig = node("trigger", trigger_config={"type": "manual"})
+        sub = node(
+            "subprocess",
+            label="Run child",
+            subprocess_workflow=str(child_wf.id),
+            output_mapping=output_mapping or {},
+        )
+        end = node("end")
+        save_graph(
+            pv,
+            {
+                "nodes": [trig, sub, end],
+                "edges": [edge(trig, sub), edge(sub, end)],
+                "variables": [],
+            },
+        )
+        return pv, sub
+
+    def test_sync_completion_stores_node_output(self):
+        child = self._publish_child()
+        pv, sub = self._parent(child, output_mapping={"child_result": "result"})
+        instance = start_instance(pv)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        ref = pv.nodes.get(id=sub["id"]).ref
+        assert instance.node_outputs[ref]["result"] == "done"
+        assert instance.variables["child_result"] == "done"
+
+    def test_async_completion_hands_back_output(self):
+        child = self._publish_child(event_key="go")
+        pv, sub = self._parent(child, output_mapping={"child_result": "result"})
+        instance = start_instance(pv)
+        # Child parked on its event node, so the parent's subprocess token
+        # parks too (the trigger token is already consumed).
+        assert instance.status == WorkflowInstance.Status.ACTIVE
+        assert instance.tokens.filter(status=WorkflowToken.Status.WAITING).count() == 1
+        child_instance = WorkflowInstance.objects.get(parent_instance=instance)
+        assert child_instance.status == WorkflowInstance.Status.ACTIVE
+        # Waking the child drives it to completion, which must hand the output
+        # back to the waiting parent (regression: node output was dropped).
+        broadcast_event("go", instance)
+        instance.refresh_from_db()
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        ref = pv.nodes.get(id=sub["id"]).ref
+        assert instance.node_outputs[ref]["result"] == "done"
+        assert instance.variables["child_result"] == "done"
+
+    def test_async_failure_propagates_to_parent(self):
+        child = self._publish_child(event_key="go", failing=True)
+        pv, _ = self._parent(child)
+        instance = start_instance(pv)
+        assert instance.status == WorkflowInstance.Status.ACTIVE
+        # A failing child must fail the parent, not leave it waiting forever.
+        broadcast_event("go", instance)
+        instance.refresh_from_db()
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert not instance.tokens.filter(status=WorkflowToken.Status.WAITING).exists()
+
+
+@pytest.mark.django_db
+class TestTokenAdmin:
+    """Operator recovery endpoints for stuck runs (spec D10)."""
+
+    def _errored_instance(self):
+        _, version = make_workflow()
+        start = node("trigger", trigger_config={"type": "manual"})
+        bad = node(
+            "action",
+            label="Bad",
+            action_config={
+                "type": "create_object",
+                "model": "nonexistent_model",
+                "fields": {"name": "x"},
+            },
+        )
+        end = node("end")
+        save_graph(
+            version,
+            {
+                "nodes": [start, bad, end],
+                "edges": [edge(start, bad), edge(bad, end)],
+                "variables": [],
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        token = instance.tokens.get(status=WorkflowToken.Status.ERROR)
+        return instance, token
+
+    def _post(self, token, action_name, user):
+        factory = APIRequestFactory()
+        view = WorkflowTokenViewSet.as_view({"post": action_name})
+        req = factory.post(f"/api/workflows/workflow-tokens/{token.id}/{action_name}/")
+        force_authenticate(req, user=user)
+        return view(req, pk=str(token.id))
+
+    def test_skip_advances_to_completion(self, superuser):
+        instance, token = self._errored_instance()
+        resp = self._post(token, "skip", superuser)
+        assert resp.status_code == 200, resp.data
+        instance.refresh_from_db()
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+
+    def test_abort_marks_abandoned(self, superuser):
+        instance, token = self._errored_instance()
+        resp = self._post(token, "abort", superuser)
+        assert resp.status_code == 200, resp.data
+        instance.refresh_from_db()
+        assert instance.status == WorkflowInstance.Status.ABANDONED
+        assert not instance.tokens.exclude(
+            status=WorkflowToken.Status.CONSUMED
+        ).exists()
+
+    def test_retry_reruns_the_node(self, superuser, monkeypatch):
+        _, version = make_workflow()
+        calls = {"n": 0}
+
+        class Resp:
+            is_redirect = False
+            next = None
+
+            def __init__(self, code):
+                self.status_code = code
+
+            def json(self):
+                return {"ok": True}
+
+        def flaky(method, url, **kw):
+            calls["n"] += 1
+            return Resp(500 if calls["n"] == 1 else 200)
+
+        monkeypatch.setattr("requests.request", flaky)
+        monkeypatch.setattr(
+            "core.net_safety.assert_public_url_unless_dev", lambda u, **k: None
+        )
+        start = node("trigger", trigger_config={"type": "manual"})
+        act = node(
+            "action",
+            action_config={"type": "http_request", "url": "https://api.example.com/x"},
+        )
+        end = node("end")
+        save_graph(
+            version,
+            {
+                "nodes": [start, act, end],
+                "edges": [edge(start, act), edge(act, end)],
+                "variables": [],
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        token = instance.tokens.get(status=WorkflowToken.Status.ERROR)
+        resp = self._post(token, "retry", superuser)
+        assert resp.status_code == 200, resp.data
+        instance.refresh_from_db()
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert calls["n"] == 2

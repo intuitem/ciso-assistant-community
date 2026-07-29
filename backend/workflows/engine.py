@@ -47,6 +47,7 @@ def start_instance(
     parent_instance=None,
     parent_token=None,
     entry_node=None,
+    trigger_depth=0,
 ):
     """Create an instance and run it synchronously (tests, subprocesses)."""
     instance = create_instance(
@@ -57,6 +58,7 @@ def start_instance(
         parent_instance=parent_instance,
         parent_token=parent_token,
         entry_node=entry_node,
+        trigger_depth=trigger_depth,
     )
     run_instance(instance)
     instance.refresh_from_db()
@@ -186,21 +188,119 @@ def resume_token(token):
         instance = WorkflowInstance.objects.select_for_update().get(
             id=token.instance_id
         )
+        # Re-read under the lock: broadcast_event lists waiters without one, so
+        # two concurrent emits could both reach here for the same token. Only
+        # the first (still WAITING) resume is allowed to advance it.
+        token.refresh_from_db()
+        if token.status != WorkflowToken.Status.WAITING:
+            return
         token.status = WorkflowToken.Status.ACTIVE
         token.save(update_fields=["status", "updated_at"])
         _advance(token)
         _run(instance)
 
 
+def _reopen(instance):
+    """A failed/abandoned instance goes back to ACTIVE so _run proceeds after
+    an operator unsticks one of its tokens (spec D10)."""
+    if instance.status != WorkflowInstance.Status.ACTIVE:
+        instance.status = WorkflowInstance.Status.ACTIVE
+        instance.save(update_fields=["status", "updated_at"])
+
+
+def retry_token(token):
+    """Operator recovery (spec D10): re-run an errored token from its node."""
+    with transaction.atomic():
+        instance = WorkflowInstance.objects.select_for_update().get(
+            id=token.instance_id
+        )
+        token.refresh_from_db()
+        if token.status != WorkflowToken.Status.ERROR:
+            raise EngineError("Only an errored token can be retried")
+        token.instance = instance
+        token.status = WorkflowToken.Status.ACTIVE
+        token.retry_count = 0
+        token.error_message = ""
+        token.save(
+            update_fields=["status", "retry_count", "error_message", "updated_at"]
+        )
+        _reopen(instance)
+        _log(
+            instance,
+            WorkflowInstanceLog.EventType.ERROR,
+            node=token.current_node,
+            message="Token retried by operator",
+        )
+        _run(instance)
+
+
+def skip_token(token):
+    """Operator recovery (spec D10): skip an errored node and advance past it."""
+    with transaction.atomic():
+        instance = WorkflowInstance.objects.select_for_update().get(
+            id=token.instance_id
+        )
+        token.refresh_from_db()
+        if token.status != WorkflowToken.Status.ERROR:
+            raise EngineError("Only an errored token can be skipped")
+        token.instance = instance
+        token.status = WorkflowToken.Status.ACTIVE
+        token.error_message = ""
+        token.save(update_fields=["status", "error_message", "updated_at"])
+        _reopen(instance)
+        _log(
+            instance,
+            WorkflowInstanceLog.EventType.ERROR,
+            node=token.current_node,
+            message=f"Node '{token.current_node.label or token.current_node.type}' "
+            "skipped by operator",
+        )
+        try:
+            _advance(token)
+        except EngineError:
+            # A dead-end node (no wired successor) just ends this branch.
+            token.status = WorkflowToken.Status.CONSUMED
+            token.save(update_fields=["status", "updated_at"])
+        _run(instance)
+
+
+def abort_token(token):
+    """Operator recovery (spec D10): abandon the run. Consumes every live token
+    and marks the instance ABANDONED (a manual terminal state)."""
+    with transaction.atomic():
+        instance = WorkflowInstance.objects.select_for_update().get(
+            id=token.instance_id
+        )
+        instance.tokens.filter(
+            status__in=[
+                WorkflowToken.Status.ACTIVE,
+                WorkflowToken.Status.WAITING,
+                WorkflowToken.Status.RETRYING,
+                WorkflowToken.Status.ERROR,
+            ]
+        ).update(status=WorkflowToken.Status.CONSUMED)
+        instance.status = WorkflowInstance.Status.ABANDONED
+        instance.save(update_fields=["status", "updated_at"])
+        _log(
+            instance,
+            WorkflowInstanceLog.EventType.ERROR,
+            node=token.current_node,
+            message="Run abandoned by operator",
+        )
+
+
 def broadcast_event(event_key, emitting_instance):
-    """Wake every waiting event token matching the key in the same folder."""
+    """Wake every waiting event token matching the key within the emitting
+    instance's folder SUBTREE (spec §7), not just its exact folder."""
+    folder = emitting_instance.folder
+    scope_ids = {folder.id, *(f.id for f in folder.get_sub_folders())}
     waiting = list(
         WorkflowToken.objects.filter(
             status=WorkflowToken.Status.WAITING,
             current_node__type=WorkflowNode.Type.EVENT,
             current_node__event_key=event_key,
             instance__status=WorkflowInstance.Status.ACTIVE,
-            instance__folder=emitting_instance.folder,
+            instance__folder_id__in=scope_ids,
         ).exclude(instance=emitting_instance)
     )
     for token in waiting:
@@ -215,12 +315,31 @@ def broadcast_event(event_key, emitting_instance):
 
 
 def _run(instance):
+    # A failed/completed instance must not resume (e.g. a duplicate task
+    # enqueue after a max-steps failure would run another MAX_STEPS).
+    if instance.status != WorkflowInstance.Status.ACTIVE:
+        return
     for _ in range(MAX_STEPS):
-        token = instance.tokens.filter(status=WorkflowToken.Status.ACTIVE).first()
+        # Deterministic pick: an unordered .first() lets SQLite and PG execute
+        # parallel branches in different orders, so the last writer of a shared
+        # variable diverges between backends.
+        token = (
+            instance.tokens.filter(status=WorkflowToken.Status.ACTIVE)
+            .order_by("created_at")
+            .first()
+        )
         if token is None:
             break
         _process(token)
     else:
+        # Leave no ACTIVE/WAITING tokens behind, or a later run resumes them.
+        instance.tokens.filter(
+            status__in=[
+                WorkflowToken.Status.ACTIVE,
+                WorkflowToken.Status.WAITING,
+                WorkflowToken.Status.RETRYING,
+            ]
+        ).update(status=WorkflowToken.Status.ERROR)
         _fail_instance(instance, "Max execution steps exceeded")
         return
     _refresh_status(instance)
@@ -275,20 +394,11 @@ def _process(token):
             output = execute_action(node, instance) or {}
             _store_node_output(node, output, instance)
             _apply_output_mapping(node, output, instance)
-            if config.get("for_each"):
-                # One summary entry, not one per item (spec D27); per-item
-                # detail lives in node_outputs.
-                failed = len(output.get("errors") or [])
-                message = f"{config.get('type', '')}: processed {output.get('count', 0)} items"
-                if failed:
-                    message += f" · {failed} failed"
-            else:
-                message = config.get("type", "")
             _log(
                 instance,
                 WorkflowInstanceLog.EventType.ACTION_EXECUTED,
                 node=node,
-                message=message,
+                message=config.get("type", ""),
                 data=_truncate_log_data(output),
             )
 
@@ -318,28 +428,30 @@ def _handle_failure(token, message):
     )
     if not retryable or token.retry_count >= node.retry_max_attempts:
         controller = token.loop_controller
-        if controller is not None:
+        if controller is not None and controller.status == WorkflowToken.Status.WAITING:
             controller.instance = token.instance
-        if (
-            controller is not None
-            and controller.status == WorkflowToken.Status.WAITING
-            and (controller.current_node.loop_config or {}).get(
+            policy = (controller.current_node.loop_config or {}).get(
                 "on_item_error", "continue"
             )
-            == "continue"
-        ):
-            # continue policy (spec D29): the iteration is recorded as failed
-            # and the loop moves on instead of stalling the run.
-            _log(
-                token.instance,
-                WorkflowInstanceLog.EventType.ERROR,
-                node=node,
-                message=f"{message} — loop continues with the next item",
-            )
-            token.status = WorkflowToken.Status.COMPLETED
-            token.error_message = message
-            token.save(update_fields=["status", "error_message", "updated_at"])
-            _loop_body_returned(controller, failed=message)
+            if policy == "continue":
+                # continue policy (spec D29): the iteration is recorded as
+                # failed and the loop moves on instead of stalling the run.
+                _log(
+                    token.instance,
+                    WorkflowInstanceLog.EventType.ERROR,
+                    node=node,
+                    message=f"{message} — loop continues with the next item",
+                )
+                token.status = WorkflowToken.Status.COMPLETED
+                token.error_message = message
+                token.save(update_fields=["status", "error_message", "updated_at"])
+                _loop_body_returned(controller, failed=message)
+                return
+            # stop policy: fail the body token AND the parked controller, or the
+            # controller waits forever (spec D29). Loop restart-from-item-0 via
+            # controller retry is deliberately out of scope.
+            _fail_token(token, message)
+            _fail_token(controller, f"loop stopped on item error: {message}")
             return
         _fail_token(token, message)
         return
@@ -362,7 +474,12 @@ def _handle_failure(token, message):
     )
     from .tasks import retry_token_task
 
-    retry_token_task.schedule(args=(str(token.id),), delay=delay)
+    # on_commit: the RETRYING row must be visible before the consumer runs, or
+    # a fast (short-delay) task finds nothing to retry and the token strands.
+    token_id = str(token.id)
+    transaction.on_commit(
+        lambda: retry_token_task.schedule(args=(token_id,), delay=delay)
+    )
 
 
 LOOP_MAX_ITEMS = 100
@@ -451,6 +568,11 @@ def _loop_next_iteration(controller):
 
 def _loop_body_returned(controller, failed):
     state = controller.loop_state
+    if not state or "outstanding" not in state:
+        # The controller already finished this loop (publish validation forbids
+        # body fan-out, so a late second return should be unreachable); ignore
+        # rather than KeyError.
+        return
     if failed:
         state["errors"].append({"index": state["index"], "message": failed})
     state["outstanding"] -= 1
@@ -470,8 +592,14 @@ def _loop_body_returned(controller, failed):
             "index": state["index"],
         }
         controller.instance._iteration_context = overlay
-        state["results"].append(render(collect, _render_context(controller.instance)))
+        ctx = _render_context(controller.instance)
+        # A single {{path}} keeps the resolved value's TYPE (dict/list/number);
+        # render() would json.dumps it into a string. Multi-token templates
+        # (e.g. "id-{{item.id}}") still go through render().
+        match = LOOP_TEMPLATE_RE.match(collect) if isinstance(collect, str) else None
+        value = dig(ctx, match.group(1)) if match else render(collect, ctx)
         controller.instance._iteration_context = None
+        state["results"].append(value)
         controller.loop_state = state
         controller.save(update_fields=["loop_state", "updated_at"])
     _loop_next_iteration(controller)
@@ -527,6 +655,9 @@ def _start_subprocess(token):
         payload=child_payload,
         parent_instance=instance,
         parent_token=token,
+        # Inherit depth so a workflow that calls itself through a subprocess
+        # still hits MAX_TRIGGER_DEPTH instead of resetting the chain to 0.
+        trigger_depth=instance.trigger_depth,
     )
     if child.status == WorkflowInstance.Status.COMPLETED:
         _store_node_output(node, child.variables, instance)
@@ -693,8 +824,11 @@ def _evaluate_group(group, variables):
 
 def _evaluate_condition(condition, variables):
     runtime = variables.get(condition.variable.key)
-    # The compared value may itself be a template ({{item.severity}}, spec D29).
-    expected = _coerce(render(condition.value, variables), condition.variable.type)
+    # The compared value may itself be a template ({{item.severity}}, spec D29);
+    # render it ONCE and use it for every operator (in/not_in/contains used to
+    # compare against the raw "{{...}}" string and silently mis-routed).
+    rendered = render(condition.value, variables)
+    expected = _coerce(rendered, condition.variable.type)
     op = condition.op
 
     if op == "is_null":
@@ -706,6 +840,10 @@ def _evaluate_condition(condition, variables):
             runtime = float(runtime)
         except TypeError, ValueError:
             return False
+    elif condition.variable.type == "boolean":
+        # Coerce runtime the same way as expected, so a payload-mapped "true"
+        # string matches the boolean literal.
+        runtime = _coerce(runtime, "boolean")
     if op == "eq":
         return runtime == expected
     if op == "neq":
@@ -721,15 +859,11 @@ def _evaluate_condition(condition, variables):
         except TypeError:
             return False
     if op == "in":
-        return str(runtime) in [
-            part.strip() for part in str(condition.value).split(",")
-        ]
+        return str(runtime) in [part.strip() for part in str(rendered).split(",")]
     if op == "not_in":
-        return str(runtime) not in [
-            part.strip() for part in str(condition.value).split(",")
-        ]
+        return str(runtime) not in [part.strip() for part in str(rendered).split(",")]
     if op == "contains":
-        return str(condition.value) in str(runtime)
+        return str(rendered) in str(runtime)
     return False
 
 
@@ -777,17 +911,41 @@ def _refresh_status(instance):
         _log(instance, WorkflowInstanceLog.EventType.INSTANCE_COMPLETED)
     instance.save(update_fields=["status", "updated_at"])
 
-    # A finished subprocess hands control back to its parent.
-    if (
-        instance.parent_token_id
-        and instance.status == WorkflowInstance.Status.COMPLETED
-    ):
-        parent_token = instance.parent_token
-        if parent_token and parent_token.status == WorkflowToken.Status.WAITING:
-            _apply_output_mapping(
-                parent_token.current_node, instance.variables, parent_token.instance
+    # A finished subprocess hands control back to its parent. Only act on a
+    # parent token that actually parked (async child); the synchronous path
+    # already handed back inside _start_subprocess.
+    if not instance.parent_token_id:
+        return
+    parent_token = instance.parent_token
+    if not parent_token or parent_token.status != WorkflowToken.Status.WAITING:
+        return
+    if instance.status == WorkflowInstance.Status.COMPLETED:
+        # Mirror the synchronous path: store the node output for
+        # {{nodes.<subprocess>.<path>}} refs, THEN apply output_mapping.
+        _store_node_output(
+            parent_token.current_node, instance.variables, parent_token.instance
+        )
+        _apply_output_mapping(
+            parent_token.current_node, instance.variables, parent_token.instance
+        )
+        resume_token(parent_token)
+    elif instance.status == WorkflowInstance.Status.FAILED:
+        # A failed async child must surface on the parent, or the parent token
+        # waits forever. Route through the node's retry policy like the
+        # synchronous EngineError path in _start_subprocess, under the parent
+        # instance lock (mirrors resume_token).
+        with transaction.atomic():
+            parent_instance = WorkflowInstance.objects.select_for_update().get(
+                id=parent_token.instance_id
             )
-            resume_token(parent_token)
+            parent_token.refresh_from_db()
+            if parent_token.status != WorkflowToken.Status.WAITING:
+                return
+            parent_token.instance = parent_instance
+            parent_token.status = WorkflowToken.Status.ACTIVE
+            parent_token.save(update_fields=["status", "updated_at"])
+            _handle_failure(parent_token, f"Subprocess failed ({instance})")
+            _run(parent_instance)
 
 
 def _truncate_log_data(output, limit=2000):

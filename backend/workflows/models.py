@@ -852,3 +852,5 @@ auditlog.register(
         "trigger_count",
     ],
 )
+# value excluded so create/update/delete are audited without leaking the secret.
+auditlog.register(WorkflowSecret, exclude_fields=common_exclude + ["value"])

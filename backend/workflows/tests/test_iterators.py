@@ -276,7 +276,7 @@ class TestLoopNode:
         summary = instance.logs.filter(event_type="loop_completed").last()
         assert "1 failed" in summary.message
 
-    def test_stop_policy_parks_the_run(self):
+    def test_stop_policy_fails_the_run(self):
         domain = make_domain("Stop domain")
         version = loop_flow(
             domain,
@@ -294,7 +294,12 @@ class TestLoopNode:
         instance = start_instance(
             version, payload={"items": [{"name": "Inc A"}, {}, {"name": "Inc B"}]}
         )
-        assert instance.status != WorkflowInstance.Status.COMPLETED
+        # Stop policy fails the controller (spec D29) — no WAITING hang, and the
+        # third item is never processed.
+        assert instance.status == WorkflowInstance.Status.FAILED
+        from workflows.models import WorkflowToken
+
+        assert not instance.tokens.filter(status=WorkflowToken.Status.WAITING).exists()
         assert Incident.objects.filter(folder=domain).count() == 1
 
     def test_zero_items_completes(self):
@@ -444,9 +449,11 @@ class TestLoopNode:
         )
         assert instance.status == WorkflowInstance.Status.COMPLETED
         output = instance.node_outputs["outer"]
+        # collect resolves a single {{path}} with dig(), preserving the list
+        # type instead of JSON-stringifying it (regression fix).
         assert output["results"] == [
-            '["member a", "member b"]',
-            '["member c"]',
+            ["member a", "member b"],
+            ["member c"],
         ]
 
 
@@ -505,3 +512,31 @@ class TestLoopValidation:
             edge_row.save(update_fields=["source_port"])
 
         assert "loop_port_missing" in self._codes(mutate)
+
+    def test_body_fan_out_is_rejected(self):
+        """Parallel fan-out inside a loop body corrupts the controller's
+        per-iteration accounting, so it must be blocked at publish."""
+        domain = make_domain(f"Fanout {uuid.uuid4()}")
+        version = loop_flow(
+            domain,
+            {"collection": "{{items}}"},
+            [{"type": "log", "message": "a"}, {"type": "log", "message": "b"}],
+            variables=items_variable(),
+            input_mapping={"items": "items"},
+        )
+        from workflows.models import WorkflowEdge
+
+        loop = version.nodes.get(type="loop")
+        body0 = version.nodes.get(label="Body 0")
+        # Body 0 now fans out to Body 1 AND straight back to the loop.
+        WorkflowEdge.objects.create(
+            version=version, source_node=body0, target_node=loop
+        )
+        codes = [e["code"] for e in validate_graph(version)]
+        assert "loop_body_fan_out" in codes
+
+    def test_condition_in_body_is_not_fan_out(self):
+        """A condition node in the body fans out edges but fires only one
+        branch, so it must NOT trip the fan-out guard."""
+        codes = self._codes(lambda version: None)
+        assert "loop_body_fan_out" not in codes

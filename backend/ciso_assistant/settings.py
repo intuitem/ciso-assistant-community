@@ -873,6 +873,12 @@ WORKFLOWS_INBOUND_HOOKS = (
     os.environ.get("WORKFLOWS_INBOUND_HOOKS", "true").lower() != "false"
 )
 
+# Per-sender-IP rate limit on the unauthenticated inbound hook endpoint (DRF
+# rate string, e.g. "120/min"). Keyed on the trailing X-Forwarded-For entry.
+WORKFLOWS_WEBHOOK_THROTTLE_RATE = os.environ.get(
+    "WORKFLOWS_WEBHOOK_THROTTLE_RATE", "120/min"
+)
+
 # Allow outbound server-side requests (webhooks, integrations, LLM URLs) to private/loopback addresses
 ALLOW_PRIVATE_NETWORK_REQUESTS = os.environ.get(
     "ALLOW_PRIVATE_NETWORK_REQUESTS", "False"

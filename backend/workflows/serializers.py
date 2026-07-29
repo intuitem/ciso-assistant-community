@@ -150,6 +150,24 @@ class WorkflowTriggerWriteSerializer(BaseModelSerializer):
         return super().update(instance, validated_data)
 
 
+class WorkflowTokenReadSerializer(BaseModelSerializer):
+    instance = FieldsRelatedField(["id", "status"])
+    current_node = FieldsRelatedField(["id", "label", "type"])
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = WorkflowToken
+        fields = "__all__"
+
+
+class WorkflowTokenWriteSerializer(BaseModelSerializer):
+    # Tokens are engine-managed; there is no user-writable state. Recovery
+    # happens through the retry/skip/abort actions, not PATCH.
+    class Meta:
+        model = WorkflowToken
+        fields = []
+
+
 class WorkflowInstanceLogReadSerializer(BaseModelSerializer):
     node = FieldsRelatedField(["id", "label", "type"])
 
