@@ -62,7 +62,8 @@ function color(c: any): string | undefined {
 
 function edge(b: any): string | undefined {
 	if (!b?.style) return undefined;
-	return `${BORDER_WIDTH[b.style] ?? '1px solid'} ${color(b.color) ?? '#9ca3af'}`;
+	const width = Object.hasOwn(BORDER_WIDTH, b.style) ? BORDER_WIDTH[b.style] : '1px solid';
+	return `${width} ${color(b.color) ?? '#9ca3af'}`;
 }
 
 function styleOf(cell: any): CellStyle | undefined {

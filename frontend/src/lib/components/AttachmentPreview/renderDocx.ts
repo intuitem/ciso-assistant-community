@@ -1,3 +1,5 @@
+// docx-preview does not escape styles or theme colours: this output is attacker-controlled
+// markup and must only ever be rendered inside the sandboxed frame.
 export async function renderDocx(blob: Blob): Promise<{ body: string; css: string }> {
 	const { renderAsync } = await import('docx-preview');
 	const doc = document.implementation.createHTMLDocument('');

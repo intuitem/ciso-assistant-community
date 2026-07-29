@@ -39,8 +39,10 @@ function declarations(style: CellStyle): string {
 	if (style.size) out.push(`font-size:${style.size}pt`);
 	if (style.family && /^[\w\s-]+$/.test(style.family))
 		out.push(`font-family:"${style.family}",sans-serif`);
-	if (style.align && ALIGN[style.align]) out.push(`text-align:${ALIGN[style.align]}`);
-	if (style.valign && VALIGN[style.valign]) out.push(`vertical-align:${VALIGN[style.valign]}`);
+	if (style.align && Object.hasOwn(ALIGN, style.align))
+		out.push(`text-align:${ALIGN[style.align]}`);
+	if (style.valign && Object.hasOwn(VALIGN, style.valign))
+		out.push(`vertical-align:${VALIGN[style.valign]}`);
 	if (style.wrap) out.push('white-space:pre-wrap;word-break:break-word');
 	if (style.indent) out.push(`padding-left:${6 + style.indent * 8}px`);
 	if (style.borders) {
