@@ -13,16 +13,26 @@ export function newCondition(): Condition {
 	return { field: '', op: 'eq', value: '', changed: false };
 }
 
+// Render a stored value for the text input such that parseValue() on the way
+// back reproduces it exactly. A string that itself JSON-parses to a non-string
+// (e.g. "5", "true") must be shown QUOTED, or the round-trip would coerce it to
+// a number/boolean and silently change the condition.
+function displayValue(v: unknown): string {
+	if (v === undefined || v === null) return '';
+	if (typeof v !== 'string') return JSON.stringify(v);
+	try {
+		if (typeof JSON.parse(v) !== 'string') return JSON.stringify(v);
+	} catch {
+		/* not JSON — safe to show verbatim */
+	}
+	return v;
+}
+
 function conditionsFrom(list: any[]): Condition[] {
 	return list.map((c: any) => ({
 		field: c.field ?? '',
 		op: c.op ?? 'eq',
-		value:
-			c.value === undefined || c.value === null
-				? ''
-				: typeof c.value === 'string'
-					? c.value
-					: JSON.stringify(c.value),
+		value: displayValue(c.value),
 		changed: !!c.changed
 	}));
 }

@@ -246,10 +246,6 @@
 		}));
 	}
 
-	function capitalize(s: string) {
-		return s.charAt(0).toUpperCase() + s.slice(1);
-	}
-
 	function toFlowNode(domain: any, index: number): Node {
 		const position =
 			domain.position?.x !== undefined
@@ -1494,7 +1490,10 @@
 		const replacement = `$1${newRef}`;
 		for (const flowNode of nodes) {
 			const domain: any = flowNode.data.domain;
-			for (const field of ['action_config', 'input_mapping', 'output_mapping']) {
+			// loop_config holds {{nodes.<ref>...}} in its collection/collect
+			// expressions, so it must be rewritten too (keep in sync with the
+			// backend validator's _referenced_node_refs).
+			for (const field of ['action_config', 'input_mapping', 'output_mapping', 'loop_config']) {
 				if (domain[field]) rewriteRefsInValue(domain[field], pattern, replacement);
 			}
 		}

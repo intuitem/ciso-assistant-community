@@ -28,11 +28,9 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 		versions[0];
 	if (!activeVersion) error(404, 'This workflow has no version');
 
-	const [graph, roles, actors, taskTemplates, workflows, creatableModelsRaw, readableModelsRaw] =
+	const [graph, taskTemplates, workflows, creatableModelsRaw, readableModelsRaw] =
 		await Promise.all([
 			fetchJson(fetch, `${BASE_API_URL}/workflows/workflow-versions/${activeVersion.id}/graph/`),
-			fetchJson(fetch, `${BASE_API_URL}/pmbok/responsibility-roles/?is_visible=true`),
-			fetchJson(fetch, `${BASE_API_URL}/actors/`),
 			fetchJson(fetch, `${BASE_API_URL}/task-templates/`),
 			fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/`),
 			fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/creatable-models/`),
@@ -62,8 +60,6 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 		versions,
 		activeVersion,
 		graph,
-		roles: listResults(roles),
-		actors: listResults(actors),
 		taskTemplates: listResults(taskTemplates),
 		// A workflow can't be its own subprocess.
 		subprocessCandidates: listResults(workflows).filter((w: any) => w.id !== workflow.id),
