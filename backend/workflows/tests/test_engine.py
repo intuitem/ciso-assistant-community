@@ -324,35 +324,37 @@ class TestRouting:
         assert rejected_id in visited
         assert approved_id not in visited
 
-    def test_parallel_fork_and_join(self):
+    def test_parallel_fan_out_runs_converging_node_per_token(self):
+        # Fan-out is always parallel; without a merge node (spec D30) a
+        # converging node runs once per arriving token.
         _, version = make_workflow()
         start = node("trigger", trigger_config={"type": "manual"})
         fork = node("action", label="Fork", action_config={"type": "log"})
         branch_a = node("action", label="A", action_config={"type": "log"})
         branch_b = node("action", label="B", action_config={"type": "log"})
-        join = node(
-            "action", label="Join", action_config={"type": "log"}, join_type="and"
-        )
+        converge = node("action", label="Converge", action_config={"type": "log"})
         end = node("end")
         save_graph(
             version,
             {
-                "nodes": [start, fork, branch_a, branch_b, join, end],
+                "nodes": [start, fork, branch_a, branch_b, converge, end],
                 "edges": [
                     edge(start, fork),
                     edge(fork, branch_a),
                     edge(fork, branch_b),
-                    edge(branch_a, join),
-                    edge(branch_b, join),
-                    edge(join, end),
+                    edge(branch_a, converge),
+                    edge(branch_b, converge),
+                    edge(converge, end),
                 ],
                 "variables": [],
             },
         )
         instance = start_instance(version)
         assert instance.status == WorkflowInstance.Status.COMPLETED
-        fired = instance.logs.filter(event_type="join_fired")
-        assert fired.count() == 1
+        entered = instance.logs.filter(
+            event_type="node_entered", node__label="Converge"
+        ).count()
+        assert entered == 2
 
     def test_task_node_parks_the_run(self):
         _, version = make_workflow()

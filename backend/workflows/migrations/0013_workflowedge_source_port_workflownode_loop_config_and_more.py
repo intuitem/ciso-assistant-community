@@ -5,40 +5,57 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('workflows', '0012_workflow_source_urn_workflow_source_version'),
+        ("workflows", "0012_workflow_source_urn_workflow_source_version"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='workflowedge',
-            name='source_port',
+            model_name="workflowedge",
+            name="source_port",
             field=models.CharField(blank=True, max_length=10),
         ),
         migrations.AddField(
-            model_name='workflownode',
-            name='loop_config',
+            model_name="workflownode",
+            name="loop_config",
             field=models.JSONField(blank=True, default=dict),
         ),
         migrations.AddField(
-            model_name='workflowtoken',
-            name='iteration_context',
+            model_name="workflowtoken",
+            name="iteration_context",
             field=models.JSONField(blank=True, default=list),
         ),
         migrations.AddField(
-            model_name='workflowtoken',
-            name='loop_controller',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='loop_body_tokens', to='workflows.workflowtoken'),
+            model_name="workflowtoken",
+            name="loop_controller",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="loop_body_tokens",
+                to="workflows.workflowtoken",
+            ),
         ),
         migrations.AddField(
-            model_name='workflowtoken',
-            name='loop_state',
+            model_name="workflowtoken",
+            name="loop_state",
             field=models.JSONField(blank=True, default=dict),
         ),
         migrations.AlterField(
-            model_name='workflownode',
-            name='type',
-            field=models.CharField(choices=[('trigger', 'Trigger'), ('end', 'End'), ('task', 'Task'), ('condition', 'Condition'), ('action', 'Action'), ('loop', 'Loop'), ('subprocess', 'Subprocess'), ('event', 'Event')], max_length=20),
+            model_name="workflownode",
+            name="type",
+            field=models.CharField(
+                choices=[
+                    ("trigger", "Trigger"),
+                    ("end", "End"),
+                    ("task", "Task"),
+                    ("condition", "Condition"),
+                    ("action", "Action"),
+                    ("loop", "Loop"),
+                    ("subprocess", "Subprocess"),
+                    ("event", "Event"),
+                ],
+                max_length=20,
+            ),
         ),
     ]

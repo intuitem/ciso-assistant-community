@@ -207,8 +207,6 @@ def _export_node(node, refs, taxonomies, variable_keys, branch_names):
     out = {"ref": refs[node["id"]], "type": node["type"]}
     if node["label"]:
         out["label"] = node["label"]
-    if node["join_type"] != WorkflowNode.JoinType.NONE:
-        out["join_type"] = node["join_type"]
     for field in EXPORTED_NODE_JSON_FIELDS:
         value = _strip_empty(node[field])
         if value:
@@ -588,9 +586,6 @@ def _build_node(
         "ref": ref,
         "type": entry["type"],
         "label": str(entry.get("label") or ""),
-        "join_type": entry.get("join_type")
-        if entry.get("join_type") in WorkflowNode.JoinType.values
-        else WorkflowNode.JoinType.NONE,
         "event_key": str(entry.get("event_key") or ""),
     }
     branches = []

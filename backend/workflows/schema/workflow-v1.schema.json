@@ -138,12 +138,6 @@
         "label": {
           "type": "string"
         },
-        "join_type": {
-          "enum": [
-            "none",
-            "and"
-          ]
-        },
         "action_config": {
           "type": "object"
         },

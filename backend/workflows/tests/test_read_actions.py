@@ -257,9 +257,7 @@ class TestComputedReadFields:
                 score=3,
             )
 
-        version = read_flow(
-            domain, {"model": "compliance_assessment", "mode": "first"}
-        )
+        version = read_flow(domain, {"model": "compliance_assessment", "mode": "first"})
         output = read_output(start_instance(version))
         assert output["found"] is True
         row = output["object"]
@@ -373,6 +371,4 @@ class TestReadValidation:
         assert required_permissions(
             {"type": "read_objects", "model": "applied_control"}
         ) == ["view_appliedcontrol"]
-        assert (
-            required_permissions({"type": "read_objects", "model": "nope"}) == []
-        )
+        assert required_permissions({"type": "read_objects", "model": "nope"}) == []

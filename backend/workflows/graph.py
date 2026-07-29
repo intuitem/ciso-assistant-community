@@ -26,7 +26,6 @@ from .models import (
 
 NODE_FIELDS = [
     "type",
-    "join_type",
     "label",
     "ref",
     "action_config",

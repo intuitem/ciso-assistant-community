@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('workflows', '0011_condition_branches'),
+        ("workflows", "0011_condition_branches"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='workflow',
-            name='source_urn',
+            model_name="workflow",
+            name="source_urn",
             field=models.CharField(blank=True, max_length=255),
         ),
         migrations.AddField(
-            model_name='workflow',
-            name='source_version',
+            model_name="workflow",
+            name="source_version",
             field=models.CharField(blank=True, max_length=50),
         ),
     ]

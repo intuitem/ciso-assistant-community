@@ -656,42 +656,14 @@ def _advance(token):
 def _arrive(instance, edge, iteration_context=None, loop_controller=None):
     # Tokens are per-hop rows: iteration context and the controller pointer
     # travel with the moving token (spec D29).
-    context = {
-        "iteration_context": iteration_context or [],
-        "loop_controller": loop_controller,
-    }
-    target = edge.target_node
-    if target.join_type == WorkflowNode.JoinType.NONE:
-        WorkflowToken.objects.create(
-            instance=instance, current_node=target, arrived_via_edge=edge, **context
-        )
-        return
-
+    # Convergence = run once per arriving token (n8n default). Waiting for all
+    # branches becomes the merge node's job (spec D30).
     WorkflowToken.objects.create(
         instance=instance,
-        current_node=target,
+        current_node=edge.target_node,
         arrived_via_edge=edge,
-        status=WorkflowToken.Status.WAITING,
-        **context,
-    )
-    _log(instance, WorkflowInstanceLog.EventType.JOIN_ARRIVAL, node=target, edge=edge)
-    incoming_count = target.incoming_edges.count()
-    waiting = instance.tokens.filter(
-        status=WorkflowToken.Status.WAITING, current_node=target
-    )
-
-    arrived_edges = set(waiting.values_list("arrived_via_edge_id", flat=True))
-    if len(arrived_edges) < incoming_count:
-        return
-
-    sample = waiting.first()
-    waiting.update(status=WorkflowToken.Status.CONSUMED)
-    _log(instance, WorkflowInstanceLog.EventType.JOIN_FIRED, node=target)
-    WorkflowToken.objects.create(
-        instance=instance,
-        current_node=target,
-        iteration_context=(sample.iteration_context or []) if sample else [],
-        loop_controller=sample.loop_controller if sample else None,
+        iteration_context=iteration_context or [],
+        loop_controller=loop_controller,
     )
 
 

@@ -206,10 +206,6 @@ class WorkflowNode(AbstractBaseModel, FolderMixin):
         SCHEDULE = "schedule", "Schedule"
         INTERNAL_EVENT = "internal_event", "Internal event"
 
-    class JoinType(models.TextChoices):
-        NONE = "none", "None"
-        AND = "and", "AND"
-
     class RetryBackoff(models.TextChoices):
         FIXED = "fixed", "Fixed"
         EXPONENTIAL = "exponential", "Exponential"
@@ -220,11 +216,6 @@ class WorkflowNode(AbstractBaseModel, FolderMixin):
         related_name="nodes",
     )
     type = models.CharField(max_length=20, choices=Type.choices)
-    join_type = models.CharField(
-        max_length=20,
-        choices=JoinType.choices,
-        default=JoinType.NONE,
-    )
     label = models.CharField(max_length=200, blank=True)
     # Stable slug for {{nodes.<ref>.<path>}} references (spec D20).
     # Auto-generated from the label on first save, then never regenerated.
@@ -686,8 +677,6 @@ class WorkflowInstanceLog(AbstractBaseModel, FolderMixin):
         TASK_WAITING = "task_waiting", "Waiting for task"
         EVENT_WAITING = "event_waiting", "Waiting for event"
         EVENT_RECEIVED = "event_received", "Event received"
-        JOIN_ARRIVAL = "join_arrival", "Join arrival"
-        JOIN_FIRED = "join_fired", "Join fired"
         SUBPROCESS_STARTED = "subprocess_started", "Subprocess started"
         LOOP_COMPLETED = "loop_completed", "Loop completed"
         INSTANCE_COMPLETED = "instance_completed", "Instance completed"

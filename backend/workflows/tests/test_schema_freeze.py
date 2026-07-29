@@ -200,9 +200,7 @@ class TestSchemaFreeze:
         for edge_entry in document["graph"]["edges"]:
             if "source_branch" in edge_entry:
                 cond = next(
-                    n
-                    for n in document["graph"]["nodes"]
-                    if n["type"] == "condition"
+                    n for n in document["graph"]["nodes"] if n["type"] == "condition"
                 )
                 names = [b["name"] for b in cond["branches"]]
                 edge_entry["source_branch"] = names.index(edge_entry["source_branch"])

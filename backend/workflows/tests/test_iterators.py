@@ -210,7 +210,9 @@ class TestLoopNode:
                 "fields": {"name": "Escalation {{item.name}}"},
             },
         )
-        skip = node("action", label="Skip", action_config={"type": "log", "message": "-"})
+        skip = node(
+            "action", label="Skip", action_config={"type": "log", "message": "-"}
+        )
         end = node("end")
         save_graph(
             version,
@@ -360,7 +362,9 @@ class TestLoopNode:
             label="Per item",
             loop_config={"collection": "{{items}}", "collect": "{{item}}"},
         )
-        body = node("action", label="Body", action_config={"type": "log", "message": "x"})
+        body = node(
+            "action", label="Body", action_config={"type": "log", "message": "x"}
+        )
         after = node(
             "action",
             label="After",
