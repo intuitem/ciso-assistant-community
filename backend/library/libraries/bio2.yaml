@@ -136,7 +136,7 @@ objects:
         6. the promotion of security awareness."
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: "Verantwoordelijkheden en samenhang voor informatiebeveiliging,\
@@ -303,7 +303,7 @@ objects:
         \ verified at intervals commensurate with the frequency of changes."
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: 'Er is een inventaris van bedrijfsmiddelen die van belang zijn
@@ -329,7 +329,7 @@ objects:
         risk management methodology, shall be applied for this purpose.'
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: 'Informatie in alle informatiesystemen is door middel van een
@@ -437,7 +437,7 @@ objects:
         2. from software operating within a secure enclave.'
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: 'Toegang tot een vertrouwde zone is toegestaan in twee situaties:
@@ -494,7 +494,7 @@ objects:
         \ login attempts."
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: 'Pas multi-factorauthenticatie (MFA) ten minste toe voor het
@@ -588,7 +588,7 @@ objects:
         The information security requirements shall be based on an explicit risk assessment.'
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: 'Bij offerteaanvragen waar informatie(voorziening) een rol
@@ -605,7 +605,7 @@ objects:
         processing.
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: De beveiligingseisen uit de offerteaanvraag worden expliciet
@@ -625,7 +625,7 @@ objects:
         never be accepted.'
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: "Sluit waar mogelijk algemene voorwaarden van leveranciers\
@@ -650,7 +650,7 @@ objects:
         The supplier shall demonstrate this on an annual basis.'
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: 'In het inkoopcontract wordt opgenomen dat de leverancier aantoont
@@ -677,7 +677,7 @@ objects:
         the foregoing by applying its adopted risk management methodology.'
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: "De overheidsorganisatie voert zelfstandig onderzoek uit, ook\
@@ -697,7 +697,7 @@ objects:
         mitigating measures.
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: Onderdeel van de afspraken is dat de leverancier transparant
@@ -716,7 +716,7 @@ objects:
         component of the contract.'
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: 'Voordat een contract wordt afgesloten, wordt in een risicoafweging
@@ -732,7 +732,7 @@ objects:
         ensuring compliance, by its subcontractors, with the specified requirements.
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: In het contract is opgenomen dat de leverancier verantwoordelijk
@@ -746,7 +746,7 @@ objects:
         shall then assess whether those risks are acceptable.
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: "Voorafgaand aan het afsluiten van de overeenkomst geeft de\
@@ -763,7 +763,7 @@ objects:
         \ the nature of the supplier\u2019s services."
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: 'De overheidsorganisatie borgt dat de beveiligingseisen aan
@@ -783,7 +783,7 @@ objects:
         that can affect services to the government organisation.
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: "Gedurende de looptijd geeft de leverancier veranderingen in\
@@ -801,7 +801,7 @@ objects:
         mitigating measures and for accepting residual risks.
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: "Op basis van het door de leverancier aangeleverde bewijsmateriaal,\
@@ -818,7 +818,7 @@ objects:
         be kept.
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: Er is een actuele registratie van leveranciers en afgesloten
@@ -840,7 +840,7 @@ objects:
         be assessed and suitable measures shall be taken.'
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: "Stel beleid op dat toeziet op het inventariseren, classificeren,\
@@ -859,7 +859,7 @@ objects:
         incidents.
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: Er is voor alle interne en externe medewerkers een toegankelijk
@@ -974,7 +974,7 @@ objects:
         (GDPR).
       implementation_groups:
       - "Basishygi\xEBne"
-      - overheidsrisico
+      - Overheidsrisico
       translations:
         nl:
           description: Informatiebeveiligingsincidenten worden afgedaan via het incidentbeheerproces.
@@ -1064,7 +1064,7 @@ objects:
         \ and shall periodically test their effectiveness."
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: 'De proceseigenaar heeft voor alle informatie(systemen) in
@@ -1126,7 +1126,7 @@ objects:
         of Conduct (VOG) may be requested based on a risk assessment.'
       implementation_groups:
       - "Basishygi\xEBne"
-      - overheidsrisico
+      - Overheidsrisico
       translations:
         nl:
           description: 'Elke organisatie heeft een vastgesteld screeningsbeleid.
@@ -1408,7 +1408,7 @@ objects:
         rights have been assigned.
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: Voor het verlenen van toegang tot het netwerk aan externe leveranciers
@@ -1590,7 +1590,7 @@ objects:
         measures taken to preserve the integrity of the back-up.
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: Er is een back-upbeleid waarin de eisen voor het bewaren en
@@ -1606,7 +1606,7 @@ objects:
         assessment.
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: Op basis van een expliciete risicoafweging is bepaald wat het
@@ -1621,7 +1621,7 @@ objects:
         in damage at another location.
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: Het back-upproces voorziet in de opslag van de back-up op een
@@ -1635,7 +1635,7 @@ objects:
         a major change, to ensure its proper functioning in case of an emergency.
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: De herstelprocedure wordt minimaal jaarlijks getest of na een
@@ -1754,7 +1754,7 @@ objects:
         within the applicable legal framework.
       implementation_groups:
       - "Basishygi\xEBne"
-      - overheidsrisico
+      - Overheidsrisico
       translations:
         nl:
           description: Bij ontdekte nieuwe dreigingen (aanvallen) via overheidsmaatregel
@@ -1966,7 +1966,7 @@ objects:
         \ in mutual consultation."
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: "In het cryptografiebeleid zijn minimaal de volgende onderwerpen\
@@ -1988,7 +1988,7 @@ objects:
         are used, who is responsible for them and how they are kept up to date.'
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: 'Cryptografische beheersmaatregelen zijn opgenomen in de inventaris
@@ -2004,7 +2004,7 @@ objects:
         of the Netherlands Standardisation Forum.
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: Cryptografische toepassingen voldoen aan passende standaarden
@@ -2017,7 +2017,7 @@ objects:
         recommendations of the NCSC and the AIVD Resilience Unit.
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: De sterkte van de cryptografie wordt gebaseerd op de actuele
@@ -2031,7 +2031,7 @@ objects:
         as part of business continuity readiness (control measure 5.30).
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: "Er zijn (contractuele) afspraken over reservecertificaten\
@@ -2079,7 +2079,7 @@ objects:
         outsourced development, supplemented with the measures arising from outsourcing.
       implementation_groups:
       - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
+      - "Ketenhygi\xEBne"
       translations:
         nl:
           description: Interne maatregelen voor systeemontwikkeling zijn onverkort
