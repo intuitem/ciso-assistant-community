@@ -298,6 +298,64 @@ class TestImport:
         # ConditionGroup now hangs off a branch of a condition node, not an edge.
         assert condition.group.branch.node.version_id == version.id
 
+    def test_falsy_condition_value_survives_import(self, root):
+        """A boolean condition of `value: false` (or 0) must not collapse to ''
+        on import — the operand would silently change (regression). Document
+        shape uses refs/keys/branch-names, per the exchange format (D28)."""
+        doc = {
+            "schema_version": 1,
+            "name": "Falsy",
+            "graph": {
+                "variables": [
+                    {"key": "flag", "type": "boolean", "default_value": True}
+                ],
+                "nodes": [
+                    {
+                        "ref": "t",
+                        "type": "trigger",
+                        "trigger_config": {"type": "manual"},
+                    },
+                    {
+                        "ref": "gate",
+                        "type": "condition",
+                        "label": "Gate",
+                        "branches": [
+                            {
+                                "name": "off",
+                                "condition_groups": [
+                                    {
+                                        "operator": "and",
+                                        "conditions": [
+                                            {
+                                                "variable": "flag",
+                                                "op": "eq",
+                                                "value": False,
+                                            }
+                                        ],
+                                        "children": [],
+                                    }
+                                ],
+                            },
+                            {
+                                "name": "otherwise",
+                                "is_default": True,
+                                "condition_groups": [],
+                            },
+                        ],
+                    },
+                    {"ref": "end", "type": "end"},
+                ],
+                "edges": [
+                    {"source": "t", "target": "gate"},
+                    {"source": "gate", "target": "end", "source_branch": "off"},
+                    {"source": "gate", "target": "end", "source_branch": "otherwise"},
+                ],
+            },
+        }
+        imported, _ = import_workflow(doc, root)
+        condition = imported.draft_version.variables.get(key="flag").conditions.get()
+        assert condition.value == "false"
+
     def test_missing_secret_warning(self, rich_workflow, root):
         from workflows.models import WorkflowSecret
 

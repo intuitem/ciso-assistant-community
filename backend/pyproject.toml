@@ -21,6 +21,7 @@ dependencies = [
     "structlog>=24.4.0,<25",
     "python-dotenv>=1.2.1,<2",
     "drf-spectacular>=0.29.0,<0.30",
+    "jsonschema>=4.0,<5",
     "django-rest-knox>=5.0.2,<6",
     "django-allauth[socialaccount, saml, mfa, headless]>=65.14.1,<66",
     "python-magic>=0.4.27,<0.5",

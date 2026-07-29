@@ -1102,6 +1102,9 @@ class LibraryImporter:
         if error_msg is not None:
             return error_msg
 
+        from workflows.graph import GraphValidationError
+        from workflows.import_export import WorkflowImportError
+
         for _ in range(10):
             try:
                 self._import_library()
@@ -1111,6 +1114,14 @@ class LibraryImporter:
                     time.sleep(3)
                 else:
                     raise e
+            except (WorkflowImportError, GraphValidationError) as e:
+                # A malformed workflow object must surface as the error-string
+                # contract, not a 500 (structural checks run at init_workflows,
+                # but save_graph can still reject at load).
+                logger.error(
+                    "Workflow library load error", error=e, library=self._library
+                )
+                return getattr(e, "message", str(e))
             except Exception as e:
                 logger.error("Library import error", error=e, library=self._library)
                 raise e

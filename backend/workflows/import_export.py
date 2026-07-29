@@ -131,9 +131,7 @@ def import_workflow_library(data, folder, user=None):
     if not isinstance(data, dict):
         raise WorkflowImportError("The document must be a mapping")
     objects = data.get("objects")
-    if not isinstance(objects, dict) or not isinstance(
-        objects.get("workflows"), list
-    ):
+    if not isinstance(objects, dict) or not isinstance(objects.get("workflows"), list):
         raise WorkflowImportError(
             "The file must be a workflow library (an 'objects' section with a "
             "'workflows' list) — re-export the workflow to get one"
@@ -740,6 +738,18 @@ def _build_assignment(assignment, ref, warnings):
     }
 
 
+def _condition_value(condition):
+    """Condition.value is stored as a string (coerced by the variable's declared
+    type at evaluation). An absent key is ''; falsy literals (false, 0) must
+    SURVIVE rather than collapse to '' — `value or ''` was dropping them."""
+    if "value" not in condition or condition["value"] is None:
+        return ""
+    value = condition["value"]
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return str(value)
+
+
 def _build_condition_group(group, variable_ids):
     out = {
         "operator": group.get("operator", "and"),
@@ -748,7 +758,7 @@ def _build_condition_group(group, variable_ids):
             {
                 "variable": variable_ids[condition["variable"]],
                 "op": condition.get("op", "eq"),
-                "value": str(condition.get("value") or ""),
+                "value": _condition_value(condition),
                 "order": condition.get("order") or 0,
             }
             for condition in group.get("conditions") or []
