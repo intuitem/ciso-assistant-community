@@ -105,13 +105,18 @@ export const POST: RequestHandler = async ({ fetch, request, url }) => {
 		}
 
 		case 'list-secrets': {
-			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-secrets/`, 'GET');
+			const workflowId = requireUuid(body.workflow, 'workflow');
+			return proxy(
+				fetch,
+				`${BASE_API_URL}/workflows/workflow-secrets/?workflow=${workflowId}`,
+				'GET'
+			);
 		}
 
 		case 'create-secret': {
 			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-secrets/`, 'POST', {
 				name: body.name,
-				folder: body.folder,
+				workflow: requireUuid(body.workflow, 'workflow'),
 				value: body.value
 			});
 		}

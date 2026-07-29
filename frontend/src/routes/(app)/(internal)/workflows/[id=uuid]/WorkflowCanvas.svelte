@@ -40,7 +40,6 @@
 		workflowId: string;
 		versionId: string;
 		versionStatus: string;
-		folderId: string;
 		readonly: boolean;
 		hasPublishedFallback?: boolean;
 		onDiscarded?: () => void;
@@ -59,7 +58,6 @@
 		workflowId,
 		versionId,
 		versionStatus,
-		folderId,
 		readonly,
 		hasPublishedFallback = false,
 		onDiscarded,
@@ -1512,7 +1510,7 @@
 		const res = await fetch(opsUrl('list-secrets'), {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({})
+			body: JSON.stringify({ workflow: workflowId })
 		});
 		if (!res.ok) return;
 		const data = await res.json().catch(() => null);
@@ -1523,7 +1521,7 @@
 		const res = await fetch(opsUrl('create-secret'), {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ name, value, folder: folderId })
+			body: JSON.stringify({ name, value, workflow: workflowId })
 		});
 		if (res.ok) await refreshSecrets();
 	}

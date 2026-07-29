@@ -57,7 +57,6 @@
 			workflowId={data.workflow.id}
 			versionId={data.activeVersion.id}
 			versionStatus={data.activeVersion.status}
-			folderId={data.workflow.folder.id}
 			{readonly}
 			{hasPublishedFallback}
 			taskTemplates={data.taskTemplates}

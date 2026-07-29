@@ -571,13 +571,12 @@ def _secrets_context(instance, raw_config):
         return _render_context(instance)
     from .models import WorkflowSecret
 
-    # Subtree-only, NOT ancestors: a secret is a credential, so a child-domain
-    # workflow must not read a parent domain's secret and exfiltrate it. Matches
-    # read_objects (spec D26); mirrored in validation._existing_secret_names.
-    folder_ids = _read_scope_folder_ids(instance.folder)
+    # Workflow-scoped: an instance resolves ONLY its own workflow's secrets.
+    # (workflow, name) is unique, so there is no ambiguity and no cross-workflow
+    # or cross-folder read. Mirrored in validation._existing_secret_names.
     secrets = {
         secret.name: secret.value
-        for secret in WorkflowSecret.objects.filter(folder_id__in=folder_ids)
+        for secret in WorkflowSecret.objects.filter(workflow_id=instance.workflow_id)
     }
     return {**_render_context(instance), "secrets": secrets}
 

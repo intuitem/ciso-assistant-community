@@ -124,10 +124,11 @@ def export_workflow_library(workflow):
     return document
 
 
-def import_workflow_library(data, folder, user=None):
+def import_workflow_library(data, folder, user=None, secrets=None):
     """Import every workflow of a library document into `folder` (the
     workflow-dialog path; the library pipeline calls import_workflow per
-    entry itself). Returns (workflows, warnings)."""
+    entry itself). Dialog-provided `secrets` attach to each imported workflow.
+    Returns (workflows, warnings)."""
     if not isinstance(data, dict):
         raise WorkflowImportError("The document must be a mapping")
     objects = data.get("objects")
@@ -144,7 +145,11 @@ def import_workflow_library(data, folder, user=None):
     for index, entry in enumerate(entries):
         try:
             workflow, entry_warnings = import_workflow(
-                entry, folder, user=user, source_version=data.get("version")
+                entry,
+                folder,
+                user=user,
+                source_version=data.get("version"),
+                secrets=secrets,
             )
         except WorkflowImportError as e:
             raise WorkflowImportError(f"objects.workflows[{index}]: {e.message}")
@@ -354,7 +359,26 @@ def _export_condition_groups(groups, variable_keys):
 # ---------- import ----------
 
 
-def import_workflow(data, folder, user=None, source_version=None):
+SECRET_KEY_RE = re.compile(r"^\w{1,100}$")
+
+
+def _create_import_secrets(workflow, provided):
+    """Attach dialog-provided secret values to the imported workflow (secrets
+    are workflow-scoped). Blank values are skipped — the missing-secrets
+    warning covers them."""
+    if not isinstance(provided, dict):
+        return
+    for name, value in provided.items():
+        if not isinstance(name, str) or not SECRET_KEY_RE.match(name):
+            continue
+        if not isinstance(value, str) or not value:
+            continue
+        WorkflowSecret.objects.update_or_create(
+            workflow=workflow, name=name, defaults={"value": value}
+        )
+
+
+def import_workflow(data, folder, user=None, source_version=None, secrets=None):
     """Create a new workflow in `folder` from a workflow OBJECT (an entry of
     a library's objects.workflows).
 
@@ -381,6 +405,9 @@ def import_workflow(data, folder, user=None, source_version=None):
             source_urn=str(data.get("urn") or "")[:255],
             source_version=str(source_version or data.get("version") or "")[:50],
         )
+        # Dialog-provided secrets attach to the new workflow BEFORE the
+        # missing-secrets warning is computed, so provided names don't warn.
+        _create_import_secrets(workflow, secrets)
         version = WorkflowVersion.objects.create(workflow=workflow)
         payload = _build_graph_payload(data["graph"], workflow, folder, warnings)
         try:
@@ -825,9 +852,6 @@ def _strip_foreign_folder_filters(filters, workflow, label, warnings):
 
 
 def _post_import_warnings(data, workflow, folder, warnings):
-    from .actions import _accessible_folder_ids
-
-    accessible = _accessible_folder_ids(folder)
     configs = {
         node["ref"]: node.get("action_config") or {}
         for node in data["graph"]["nodes"]
@@ -839,9 +863,10 @@ def _post_import_warnings(data, workflow, folder, warnings):
         SECRET_NAME_RE.findall(json.dumps(list(configs.values())))
     )
     if needed:
+        # Workflow-scoped: only this workflow's own secrets satisfy the refs.
         existing = set(
             WorkflowSecret.objects.filter(
-                folder_id__in=accessible, name__in=needed
+                workflow=workflow, name__in=needed
             ).values_list("name", flat=True)
         )
         missing = sorted(needed - existing)

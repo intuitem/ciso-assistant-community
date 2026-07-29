@@ -716,8 +716,18 @@ class WorkflowInstanceLog(AbstractBaseModel, FolderMixin):
 class WorkflowSecret(AbstractBaseModel, FolderMixin):
     """Named credential for http_request, referenced as {{secrets.NAME}}.
     Values are write-only at the API level: never returned in responses,
-    resolved only by the engine at execution time (spec D17)."""
+    resolved only by the engine at execution time (spec D17).
 
+    Workflow-scoped: a secret belongs to one workflow and is only ever
+    resolvable by that workflow's instances (no cross-workflow or cross-folder
+    reads). Shared/reusable secrets are a future additive tier. Folder is
+    propagated from the workflow so RBAC and API scoping keep working."""
+
+    workflow = models.ForeignKey(
+        Workflow,
+        on_delete=models.CASCADE,
+        related_name="secrets",
+    )
     name = models.CharField(max_length=100)
     value = models.TextField(default="")
 
@@ -727,10 +737,21 @@ class WorkflowSecret(AbstractBaseModel, FolderMixin):
         ordering = ["name"]
         constraints = [
             models.UniqueConstraint(
-                fields=["folder", "name"],
+                fields=["workflow", "name"],
                 name="unique_workflow_secret_name",
             )
         ]
+
+    def save(self, *args, **kwargs):
+        self.folder = self.workflow.folder
+        super().save(*args, **kwargs)
+
+    def get_scope(self):
+        # Uniqueness is per-workflow (matches the DB constraint), not per-folder
+        # — two workflows in the same folder may each have a "TOKEN" secret.
+        return self.__class__.objects.filter(workflow=self.workflow).order_by(
+            "created_at", "id"
+        )
 
     def __str__(self):
         return self.name

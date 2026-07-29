@@ -89,17 +89,19 @@ class WorkflowInstanceWriteSerializer(BaseModelSerializer):
 
 class WorkflowSecretReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    workflow = FieldsRelatedField()
 
     class Meta:
         model = WorkflowSecret
         # Write-only store: the value never leaves the server (spec D17).
-        fields = ["id", "name", "folder", "created_at", "updated_at"]
+        fields = ["id", "name", "workflow", "folder", "created_at", "updated_at"]
 
 
 class WorkflowSecretWriteSerializer(BaseModelSerializer):
     class Meta:
         model = WorkflowSecret
-        fields = ["name", "folder", "value"]
+        # Workflow-scoped: folder is derived from the workflow on save.
+        fields = ["name", "workflow", "value"]
         extra_kwargs = {"value": {"write_only": True}}
 
 

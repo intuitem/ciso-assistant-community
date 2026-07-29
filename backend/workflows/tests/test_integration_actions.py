@@ -97,9 +97,9 @@ class TestUpsert:
 @pytest.mark.django_db
 class TestHttpRequest:
     def test_request_with_secret_header(self, monkeypatch):
-        _, version = make_workflow()
+        workflow, version = make_workflow()
         WorkflowSecret.objects.create(
-            name="api_token", folder=Folder.get_root_folder(), value="s3cr3t-value"
+            workflow=workflow, name="api_token", value="s3cr3t-value"
         )
 
         captured = {}
@@ -140,6 +140,46 @@ class TestHttpRequest:
         # The decrypted secret must not leak into the execution log.
         for log in instance.logs.all():
             assert "s3cr3t-value" not in str(log.data) + log.message
+
+    def test_secrets_are_workflow_scoped(self, monkeypatch):
+        """A same-named secret on another workflow must never bleed in: the
+        instance resolves only its own workflow's secret."""
+        workflow, version = make_workflow()
+        WorkflowSecret.objects.create(workflow=workflow, name="api_token", value="mine")
+        # Decoy: same name, different workflow, different value.
+        other, _ = make_workflow(name="Other flow")
+        WorkflowSecret.objects.create(
+            workflow=other, name="api_token", value="not-mine"
+        )
+
+        captured = {}
+
+        class FakeResponse:
+            status_code = 200
+
+            def json(self):
+                return {}
+
+        def fake_request(method, url, **kwargs):
+            captured.update(kwargs)
+            return FakeResponse()
+
+        monkeypatch.setattr("requests.request", fake_request)
+        monkeypatch.setattr(
+            "core.net_safety.assert_public_url_unless_dev", lambda url, **kw: None
+        )
+
+        linear_graph(
+            version,
+            {
+                "type": "http_request",
+                "url": "https://api.example.com/x",
+                "headers": {"Authorization": "Bearer {{secrets.api_token}}"},
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert captured["headers"]["Authorization"] == "Bearer mine"
 
     def test_retry_scheduled_on_network_error(
         self, monkeypatch, django_capture_on_commit_callbacks
@@ -222,9 +262,9 @@ class TestHttpRequest:
         assert instance.variables["code"] == 302
 
     def test_secret_in_url_not_leaked_on_error(self, monkeypatch):
-        _, version = make_workflow()
+        workflow, version = make_workflow()
         WorkflowSecret.objects.create(
-            name="api_key", folder=Folder.get_root_folder(), value="leak-me"
+            workflow=workflow, name="api_key", value="leak-me"
         )
 
         class ErrorResponse:
@@ -483,13 +523,14 @@ class TestSecretApi:
         from workflows.views import WorkflowSecretViewSet
 
         superuser = User.objects.create_superuser(email="secrets@example.com")
+        workflow, _ = make_workflow()
         factory = APIRequestFactory()
         create = WorkflowSecretViewSet.as_view({"post": "create"})
         req = factory.post(
             "/api/workflows/workflow-secrets/",
             {
                 "name": "hris_token",
-                "folder": str(Folder.get_root_folder().id),
+                "workflow": str(workflow.id),
                 "value": "super-secret",
             },
             format="json",

@@ -357,13 +357,14 @@ class TestImport:
         assert condition.value == "false"
 
     def test_missing_secret_warning(self, rich_workflow, root):
-        from workflows.models import WorkflowSecret
-
         _, warnings = import_workflow(export_workflow(rich_workflow), root)
         assert any("hris_token" in w and "Missing secrets" in w for w in warnings)
 
-        WorkflowSecret.objects.create(name="hris_token", value="x", folder=root)
-        _, warnings = import_workflow(export_workflow(rich_workflow), root)
+        # Secrets are workflow-scoped: the dialog value attaches to the new
+        # workflow at import, so the warning no longer fires.
+        _, warnings = import_workflow(
+            export_workflow(rich_workflow), root, secrets={"hris_token": "x"}
+        )
         assert not any("Missing secrets" in w for w in warnings)
 
     def test_publish_blocks_on_missing_secret(self, rich_workflow, root):
@@ -378,7 +379,8 @@ class TestImport:
         fetch = imported.draft_version.nodes.get(ref="fetch_employee")
         assert missing[0]["node_id"] == str(fetch.id)
 
-        WorkflowSecret.objects.create(name="hris_token", value="x", folder=root)
+        # The secret must live on the workflow itself, not merely its folder.
+        WorkflowSecret.objects.create(workflow=imported, name="hris_token", value="x")
         errors = validate_graph(imported.draft_version)
         assert not any(e["code"] == "secret_missing" for e in errors)
 
@@ -852,8 +854,12 @@ class TestApi:
             secrets={"hris_token": "tok-123", "": "junk", "unrelated": ""},
         )
         assert resp.status_code == 201, resp.data
-        secret = WorkflowSecret.objects.get(folder=root, name="hris_token")
+        # Secret is attached to the imported workflow (folder propagated from it).
+        secret = WorkflowSecret.objects.get(
+            workflow_id=resp.data["id"], name="hris_token"
+        )
         assert secret.value == "tok-123"
+        assert secret.folder_id == root.id
         assert not WorkflowSecret.objects.filter(name="unrelated").exists()
         assert not any("Missing secrets" in w for w in resp.data["warnings"])
 
