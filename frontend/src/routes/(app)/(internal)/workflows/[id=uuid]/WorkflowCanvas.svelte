@@ -183,7 +183,6 @@
 			nodeType: domain.type,
 			label: domain.label || NODE_TYPE_LABELS[domain.type]?.() || domain.type,
 			meta: nodeMeta(domain),
-			joinType: domain.join_type,
 			assignments: domain.assignments ?? [],
 			branches: domain.type === 'condition' ? conditionBranchVisuals(domain) : undefined,
 			triggerType:
@@ -1162,7 +1161,6 @@
 			id: crypto.randomUUID(),
 			type,
 			label: '',
-			join_type: 'none',
 			task_template: null,
 			subprocess_workflow: null,
 			action_config: type === 'action' ? { type: 'log' } : {},

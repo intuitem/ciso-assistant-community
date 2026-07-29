@@ -2100,22 +2100,6 @@
 				</label>
 			{/if}
 
-			{#if !['end', 'trigger'].includes(nodeDomain.type)}
-				<!-- Fan-out is always parallel (condition nodes own routing); the only
-				     wiring semantic left to choose is how converging edges join. -->
-				<label>
-					{@render fieldLabel(m.joinType())}
-					<select
-						class="select w-full text-xs"
-						bind:value={nodeDomain.join_type}
-						onchange={onChange}
-					>
-						<option value="none">{m.joinNone()}</option>
-						<option value="and">{m.joinAnd()}</option>
-					</select>
-				</label>
-			{/if}
-
 			<div class="pt-2 border-t border-surface-200-800">
 				<div class="flex items-center justify-between mb-1">
 					{@render fieldLabel(m.availableData())}
