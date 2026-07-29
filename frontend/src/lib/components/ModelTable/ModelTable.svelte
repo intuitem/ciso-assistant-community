@@ -1240,13 +1240,17 @@
 						</ContextMenu.Item>
 						<ContextMenu.Item
 							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
-							onclick={() => {
-								goto(`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`, {
-									breadcrumbAction: 'push'
-								});
-							}}
 						>
-							{m.view()}
+							{#snippet child({ props })}
+								<Anchor
+									{...props}
+									href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`}
+									breadcrumbAction="push"
+									onclick={props.onclick}
+								>
+									{m.view()}
+								</Anchor>
+							{/snippet}
 						</ContextMenu.Item>
 					{/if}
 					{#if contextMenuDisplayDelete}
