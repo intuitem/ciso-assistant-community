@@ -8,10 +8,11 @@ as `waiting`; everything else executes and advances in the same call.
 
 import contextvars
 import math
+import re
 
 from django.db import transaction
 
-from .actions import ActionError, dig, execute_action
+from .actions import ActionError, _render_context, dig, execute_action, render
 from .models import (
     WorkflowInstance,
     WorkflowInstanceLog,
@@ -19,7 +20,9 @@ from .models import (
     WorkflowToken,
 )
 
-MAX_STEPS = 300
+# Loops multiply node visits (100 items x body size), so the runaway guard
+# sits far above any legitimate run.
+MAX_STEPS = 5000
 
 # Event-chain depth of the workflow run currently executing in this context;
 # 0 means "not inside a run" (user/API-caused changes). Read by the
@@ -224,10 +227,19 @@ def _run(instance):
     _refresh_status(instance)
 
 
+def _set_iteration_overlay(token):
+    """Expose the token's innermost iteration context to _render_context
+    (spec D29). Execution is single-token-at-a-time inside a run, so the
+    transient instance attribute is safe."""
+    stack = token.iteration_context or []
+    token.instance._iteration_context = dict(stack[-1]) if stack else None
+
+
 def _process(token):
     node = token.current_node
     instance = token.instance
     _log(instance, WorkflowInstanceLog.EventType.NODE_ENTERED, node=node)
+    _set_iteration_overlay(token)
 
     try:
         if node.type == WorkflowNode.Type.END:
@@ -286,6 +298,10 @@ def _process(token):
             if token.status == WorkflowToken.Status.WAITING:
                 return
 
+        if node.type == WorkflowNode.Type.LOOP:
+            _process_loop(token)
+            return
+
         _advance(token)
     except (ActionError, EngineError) as e:
         _handle_failure(token, str(e))
@@ -302,6 +318,30 @@ def _handle_failure(token, message):
         WorkflowNode.Type.SUBPROCESS,
     )
     if not retryable or token.retry_count >= node.retry_max_attempts:
+        controller = token.loop_controller
+        if controller is not None:
+            controller.instance = token.instance
+        if (
+            controller is not None
+            and controller.status == WorkflowToken.Status.WAITING
+            and (controller.current_node.loop_config or {}).get(
+                "on_item_error", "continue"
+            )
+            == "continue"
+        ):
+            # continue policy (spec D29): the iteration is recorded as failed
+            # and the loop moves on instead of stalling the run.
+            _log(
+                token.instance,
+                WorkflowInstanceLog.EventType.ERROR,
+                node=node,
+                message=f"{message} — loop continues with the next item",
+            )
+            token.status = WorkflowToken.Status.COMPLETED
+            token.error_message = message
+            token.save(update_fields=["status", "error_message", "updated_at"])
+            _loop_body_returned(controller, failed=message)
+            return
         _fail_token(token, message)
         return
 
@@ -324,6 +364,145 @@ def _handle_failure(token, message):
     from .tasks import retry_token_task
 
     retry_token_task.schedule(args=(str(token.id),), delay=delay)
+
+
+LOOP_MAX_ITEMS = 100
+LOOP_TEMPLATE_RE = re.compile(r"^\{\{\s*([\w.]+)\s*\}\}$")
+
+
+def _loop_each_edges(node):
+    return [e for e in node.outgoing_edges.all() if e.source_port == "each"]
+
+
+def _process_loop(token):
+    """Loop node (spec D29). The first token to arrive becomes the CONTROLLER:
+    it parks WAITING holding {items, index, outstanding, results, errors} and
+    emits body tokens through the `each` port. Body tokens return to the loop
+    input; the last return of an iteration collects and advances. Exhausted →
+    the controller stores the loop output and releases through `done`."""
+    node = token.current_node
+    instance = token.instance
+
+    controller = token.loop_controller
+    if controller is not None and controller.current_node_id == node.id:
+        # A body token coming home. Pin the controller to the run's shared
+        # instance object: a lazily-loaded FK copy would carry stale
+        # node_outputs and clobber sibling writes on save.
+        controller.instance = instance
+        token.status = WorkflowToken.Status.COMPLETED
+        token.save(update_fields=["status", "updated_at"])
+        _loop_body_returned(controller, failed=None)
+        return
+
+    # Fresh arrival: this token becomes the controller.
+    config = node.loop_config or {}
+    expression = config.get("collection") or ""
+    match = (
+        LOOP_TEMPLATE_RE.match(expression) if isinstance(expression, str) else None
+    )
+    if match is None:
+        raise ActionError("loop: collection must be a single {{path}} expression")
+    _set_iteration_overlay(token)
+    items = dig(_render_context(instance), match.group(1))
+    if items is None:
+        items = []
+    if not isinstance(items, list):
+        raise ActionError(
+            f"loop: '{expression}' did not resolve to a list "
+            f"(got {type(items).__name__})"
+        )
+    if len(items) > LOOP_MAX_ITEMS:
+        raise ActionError(f"loop: {len(items)} items exceeds the {LOOP_MAX_ITEMS} cap")
+
+    token.status = WorkflowToken.Status.WAITING
+    token.loop_state = {
+        "items": items,
+        "index": -1,
+        "outstanding": 0,
+        "results": [],
+        "errors": [],
+    }
+    token.save(update_fields=["status", "loop_state", "updated_at"])
+    _loop_next_iteration(token)
+
+
+def _loop_next_iteration(controller):
+    node = controller.current_node
+    instance = controller.instance
+    state = controller.loop_state
+    state["index"] += 1
+
+    if state["index"] >= len(state["items"]):
+        _loop_finish(controller)
+        return
+
+    each_edges = _loop_each_edges(node)
+    if not each_edges:
+        raise ActionError("loop: no edge leaves the 'each' port")
+    item = state["items"][state["index"]]
+    state["outstanding"] = len(each_edges)
+    controller.loop_state = state
+    controller.save(update_fields=["loop_state", "updated_at"])
+    stack = list(controller.iteration_context or []) + [
+        {"item": item, "index": state["index"]}
+    ]
+    for edge in each_edges:
+        _arrive(instance, edge, iteration_context=stack, loop_controller=controller)
+
+
+def _loop_body_returned(controller, failed):
+    state = controller.loop_state
+    if failed:
+        state["errors"].append({"index": state["index"], "message": failed})
+    state["outstanding"] -= 1
+    controller.loop_state = state
+    controller.save(update_fields=["loop_state", "updated_at"])
+    if state["outstanding"] > 0:
+        return
+
+    # Iteration complete: collect (unless it failed), then advance.
+    iteration_failed = any(
+        e["index"] == state["index"] for e in state["errors"]
+    )
+    collect = (controller.current_node.loop_config or {}).get("collect")
+    if collect and not iteration_failed:
+        overlay = {
+            "item": state["items"][state["index"]],
+            "index": state["index"],
+        }
+        controller.instance._iteration_context = overlay
+        state["results"].append(render(collect, _render_context(controller.instance)))
+        controller.instance._iteration_context = None
+        controller.loop_state = state
+        controller.save(update_fields=["loop_state", "updated_at"])
+    _loop_next_iteration(controller)
+
+
+def _loop_finish(controller):
+    node = controller.current_node
+    instance = controller.instance
+    state = controller.loop_state
+    output = {
+        "count": len(state["items"]),
+        "results": state["results"],
+        "errors": state["errors"],
+    }
+    _store_node_output(node, output, instance)
+    _apply_output_mapping(node, output, instance)
+    failed = len(state["errors"])
+    message = f"processed {output['count']} items"
+    if failed:
+        message += f" · {failed} failed"
+    _log(
+        instance,
+        WorkflowInstanceLog.EventType.LOOP_COMPLETED,
+        node=node,
+        message=message,
+        data=_truncate_log_data(output),
+    )
+    controller.loop_state = {}
+    controller.save(update_fields=["loop_state", "updated_at"])
+    _advance(controller)
 
 
 def _start_subprocess(token):
@@ -443,7 +622,7 @@ def _advance(token):
         chosen = []
         branches = sorted(node.branches.all(), key=lambda b: (b.is_default, b.order))
         for branch in branches:
-            if _evaluate_branch(branch, instance.variables):
+            if _evaluate_branch(branch, _render_context(instance)):
                 edge = branch.edges.first()
                 if edge is None:
                     raise EngineError(
@@ -453,6 +632,12 @@ def _advance(token):
                 break
         if not chosen:
             raise EngineError(f"No branch of '{node}' matched")
+    elif node.type == WorkflowNode.Type.LOOP:
+        # Controller release: each-port edges are controller-managed; done
+        # fires every wire (n8n semantics).
+        chosen = [e for e in edges if e.source_port == "done"]
+        if not chosen:
+            raise EngineError(f"Loop '{node}' has no edge on its 'done' port")
     elif node.fork_type == WorkflowNode.ForkType.PARALLEL:
         chosen = edges
     else:
@@ -461,14 +646,25 @@ def _advance(token):
     token.status = WorkflowToken.Status.CONSUMED
     token.save(update_fields=["status", "updated_at"])
     for edge in chosen:
-        _arrive(instance, edge)
+        _arrive(
+            instance,
+            edge,
+            iteration_context=token.iteration_context,
+            loop_controller=token.loop_controller,
+        )
 
 
-def _arrive(instance, edge):
+def _arrive(instance, edge, iteration_context=None, loop_controller=None):
+    # Tokens are per-hop rows: iteration context and the controller pointer
+    # travel with the moving token (spec D29).
+    context = {
+        "iteration_context": iteration_context or [],
+        "loop_controller": loop_controller,
+    }
     target = edge.target_node
     if target.join_type == WorkflowNode.JoinType.NONE:
         WorkflowToken.objects.create(
-            instance=instance, current_node=target, arrived_via_edge=edge
+            instance=instance, current_node=target, arrived_via_edge=edge, **context
         )
         return
 
@@ -477,6 +673,7 @@ def _arrive(instance, edge):
         current_node=target,
         arrived_via_edge=edge,
         status=WorkflowToken.Status.WAITING,
+        **context,
     )
     _log(instance, WorkflowInstanceLog.EventType.JOIN_ARRIVAL, node=target, edge=edge)
     incoming_count = target.incoming_edges.count()
@@ -499,9 +696,15 @@ def _arrive(instance, edge):
             waiting.update(status=WorkflowToken.Status.CONSUMED)
             return
 
+    sample = waiting.first()
     waiting.update(status=WorkflowToken.Status.CONSUMED)
     _log(instance, WorkflowInstanceLog.EventType.JOIN_FIRED, node=target)
-    WorkflowToken.objects.create(instance=instance, current_node=target)
+    WorkflowToken.objects.create(
+        instance=instance,
+        current_node=target,
+        iteration_context=(sample.iteration_context or []) if sample else [],
+        loop_controller=sample.loop_controller if sample else None,
+    )
 
 
 def _evaluate_branch(branch, variables):
@@ -530,7 +733,8 @@ def _evaluate_group(group, variables):
 
 def _evaluate_condition(condition, variables):
     runtime = variables.get(condition.variable.key)
-    expected = _coerce(condition.value, condition.variable.type)
+    # The compared value may itself be a template ({{item.severity}}, spec D29).
+    expected = _coerce(render(condition.value, variables), condition.variable.type)
     op = condition.op
 
     if op == "is_null":

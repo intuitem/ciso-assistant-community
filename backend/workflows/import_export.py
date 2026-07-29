@@ -32,13 +32,14 @@ MAX_CONDITION_DEPTH = 5
 # semantics-bearing feature the document uses; importers hard-reject unknown
 # tags instead of silently dropping behavior. Every future feature whose
 # absence would silently change execution MUST register a tag here.
-KNOWN_CAPABILITIES = {"read_objects", "for_each"}
+KNOWN_CAPABILITIES = {"read_objects", "loop"}
 
 SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
 UUID_RE = re.compile(r"\b[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\b")
 
 NODE_JSON_FIELDS = [
     "action_config",
+    "loop_config",
     "trigger_config",
     "input_mapping",
     "output_mapping",
@@ -148,8 +149,8 @@ def _used_capabilities(nodes):
         config = node["action_config"] or {}
         if config.get("type") == "read_objects":
             used.add("read_objects")
-        if config.get("for_each"):
-            used.add("for_each")
+        if node["type"] == "loop":
+            used.add("loop")
     return sorted(used)
 
 
@@ -214,10 +215,7 @@ def _export_node(node, refs, taxonomies, variable_keys, branch_names):
         value = _strip_empty(node[field])
         if value:
             out[field] = value
-    # on_item_error is meaningless without for_each (spec D27/D28 hygiene).
-    config = out.get("action_config")
-    if config and not config.get("for_each"):
-        config.pop("on_item_error", None)
+
     if node["event_key"]:
         out["event_key"] = node["event_key"]
     if node["retry_max_attempts"]:
@@ -291,6 +289,8 @@ def _export_edge(edge, refs, branch_names):
     # An edge leaving a condition node names the branch it wires.
     if edge["source_branch"] is not None:
         out["source_branch"] = branch_names[edge["source_branch"]]
+    if edge["source_port"]:
+        out["source_port"] = edge["source_port"]
     return out
 
 
@@ -454,6 +454,18 @@ def _validate_structure(data):
                     "is not the ref of any node in graph.nodes"
                 )
         source = edge.get("source")
+        source_port = edge.get("source_port")
+        if node_type.get(source) == WorkflowNode.Type.LOOP:
+            if source_port not in ("each", "done"):
+                raise WorkflowImportError(
+                    f"graph.edges[{index}].source_port must be 'each' or "
+                    f"'done' on edges leaving loop node '{source}'"
+                )
+        elif source_port is not None:
+            raise WorkflowImportError(
+                f"graph.edges[{index}].source_port is only valid on edges "
+                "leaving a loop node"
+            )
         is_condition = node_type.get(source) == WorkflowNode.Type.CONDITION
         source_branch = edge.get("source_branch")
         if source_branch is None:
@@ -565,6 +577,7 @@ def _build_graph_payload(graph, workflow, folder, warnings):
                 else None,
                 "label": str(entry.get("label") or ""),
                 "priority": entry.get("priority") or 0,
+                "source_port": str(entry.get("source_port") or ""),
             }
         )
 

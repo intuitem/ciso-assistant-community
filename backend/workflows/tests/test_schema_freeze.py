@@ -65,6 +65,14 @@ def rich_workflow():
         },
         output_mapping={"n": "count"},
     )
+    loop = node(
+        "loop",
+        label="Each control",
+        loop_config={
+            "collection": "{{nodes.list_controls.results}}",
+            "on_item_error": "continue",
+        },
+    )
     notify = node(
         "action",
         label="Notify",
@@ -74,8 +82,6 @@ def rich_workflow():
             "url": "https://example.test/hook",
             "headers": {"Authorization": "Bearer {{secrets.api_token}}"},
             "body": "{{item.name}}",
-            "for_each": "{{nodes.list_controls.results}}",
-            "on_item_error": "continue",
         },
     )
     cond = node(
@@ -111,18 +117,20 @@ def rich_workflow():
     log_b = node(
         "action",
         label="None",
-        action_config={"type": "log", "message": "b", "for_each": ""},
+        action_config={"type": "log", "message": "b", "extra": ""},
     )
     end = node("end")
     branches = cond["branches"]
     save_graph(
         version,
         {
-            "nodes": [trigger, read, notify, cond, log_a, log_b, end],
+            "nodes": [trigger, read, loop, notify, cond, log_a, log_b, end],
             "edges": [
                 edge(trigger, read),
-                edge(read, notify),
-                edge(notify, cond),
+                edge(read, loop),
+                edge(loop, notify, source_port="each"),
+                edge(notify, loop),
+                edge(loop, cond, source_port="done"),
                 edge(cond, log_a, source_branch=branches[0]["id"]),
                 edge(cond, log_b, source_branch=branches[1]["id"]),
                 edge(log_a, end),
@@ -156,18 +164,12 @@ class TestSchemaFreeze:
         for path, value in walk_values(document):
             assert value not in ("", None), f"empty value exported at {path}"
         blob = json.dumps(document)
-        assert '"for_each": ""' not in blob
+        assert '"extra": ""' not in blob
         assert '"children": []' not in blob
-        # on_item_error without for_each was stripped
-        log_b = next(
-            n for n in document["graph"]["nodes"] if n.get("label") == "None"
-        )
-        assert "for_each" not in log_b["action_config"]
-        assert "on_item_error" not in log_b["action_config"]
 
     def test_capabilities_manifest(self):
         document = export_workflow(rich_workflow())
-        assert document["requires"]["capabilities"] == ["for_each", "read_objects"]
+        assert document["requires"]["capabilities"] == ["loop", "read_objects"]
         assert document["requires"]["secrets"] == ["api_token"]
 
     def test_unknown_capability_is_rejected(self):
@@ -233,7 +235,7 @@ class TestSchemaFreeze:
         workflow = rich_workflow()
         version = workflow.versions.first()
         broken = version.nodes.get(label="Notify")
-        broken.action_config["for_each"] = "{{nodes.gone.results}}"
+        broken.action_config["body"] = "{{nodes.gone.results}}"
         broken.save(update_fields=["action_config"])
         codes = [e["code"] for e in validate_graph(version)]
         assert "node_reference_missing" in codes

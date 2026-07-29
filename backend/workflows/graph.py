@@ -31,6 +31,7 @@ NODE_FIELDS = [
     "label",
     "ref",
     "action_config",
+    "loop_config",
     "trigger_config",
     "input_mapping",
     "output_mapping",
@@ -45,7 +46,7 @@ NODE_FIELDS = [
 REF_RE = re.compile(r"^[a-z][a-z0-9_]{0,99}$")
 
 VARIABLE_FIELDS = ["key", "type", "default_value"]
-EDGE_FIELDS = ["label", "priority"]
+EDGE_FIELDS = ["label", "priority", "source_port"]
 ASSIGNMENT_FIELDS = [
     "resolve_type",
     "variable_key",

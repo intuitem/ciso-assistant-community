@@ -29,6 +29,7 @@
 	import ConditionNode from './nodes/ConditionNode.svelte';
 	import TerminalNode from './nodes/TerminalNode.svelte';
 	import TriggerNode, { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
+	import LoopNode from './nodes/LoopNode.svelte';
 
 	interface Props {
 		graph: any;
@@ -91,7 +92,8 @@
 		step: StepNode,
 		condition: ConditionNode,
 		terminal: TerminalNode,
-		trigger: TriggerNode
+		trigger: TriggerNode,
+		loop: LoopNode
 	};
 
 	const EDGE_STYLE = 'stroke: var(--color-surface-500); stroke-width: 2;';
@@ -136,6 +138,10 @@
 				);
 			case 'event':
 				return domain.event_key || null;
+			case 'loop': {
+				const collection = domain.loop_config?.collection ?? '';
+				return collection.replace(/^\{\{\s*|\s*\}\}$/g, '') || null;
+			}
 			case 'trigger': {
 				const config = domain.trigger_config ?? {};
 				switch (config.type) {
@@ -159,6 +165,7 @@
 		end: m.workflowNodeEnd,
 		task: m.workflowNodeTask,
 		condition: m.workflowNodeCondition,
+		loop: m.workflowNodeLoop,
 		action: m.workflowNodeAction,
 		subprocess: m.workflowNodeSubprocess,
 		event: m.workflowNodeEvent
@@ -172,7 +179,6 @@
 			forkType: domain.fork_type,
 			joinType: domain.join_type,
 			assignments: domain.assignments ?? [],
-			forEach: domain.type === 'action' && !!domain.action_config?.for_each,
 			branches: domain.type === 'condition' ? conditionBranchVisuals(domain) : undefined,
 			triggerType:
 				domain.type === 'trigger' ? (domain.trigger_config?.type ?? 'manual') : undefined,
@@ -249,7 +255,7 @@
 			type:
 				domain.type === 'end'
 					? 'terminal'
-					: domain.type === 'trigger' || domain.type === 'condition'
+					: ['trigger', 'condition', 'loop'].includes(domain.type)
 						? domain.type
 						: 'step',
 			position,
@@ -265,9 +271,9 @@
 			id: domain.id,
 			source: domain.source,
 			target: domain.target,
-			// An edge leaving a condition node anchors to its branch's port; the
-			// handle id on a condition node IS the branch id.
-			sourceHandle: domain.source_branch ?? undefined,
+			// Condition edges anchor to their branch's port (handle id = branch
+			// id); loop edges anchor to their 'each'/'done' port (spec D29).
+			sourceHandle: domain.source_branch ?? (domain.source_port || undefined),
 			label: edgeLabel(domain) || undefined,
 			deletable: !readonly,
 			markerEnd: EDGE_MARKER,
@@ -602,9 +608,9 @@
 		return referenceRun.variables ?? {};
 	});
 
-	// Static upstream summaries for the for_each collection picker (spec D27):
-	// lets the Inspector offer known array outputs (list reads, per-item
-	// actions) even before any reference run exists.
+	// Static upstream summaries for the loop collection picker (spec D29):
+	// lets the Inspector offer known array outputs (list reads, loops) even
+	// before any reference run exists.
 	const upstreamNodes = $derived(
 		nodes
 			.filter((n) => ancestorNodeIds.has(n.id))
@@ -613,7 +619,8 @@
 				return {
 					ref: domain.ref || domain.id,
 					label: String(n.data.label),
-					actionConfig: domain.action_config ?? {}
+					actionConfig: domain.action_config ?? {},
+					isLoop: domain.type === 'loop'
 				};
 			})
 	);
@@ -624,6 +631,7 @@
 	interface RunView {
 		runId: string;
 		nodeStates: Record<string, RunState>;
+		visitCounts: Record<string, number>;
 		edgeIds: Set<string>;
 		replaying: boolean;
 	}
@@ -646,7 +654,8 @@
 			...n,
 			data: {
 				...n.data,
-				runState: currentNodeId === n.id ? 'active' : (runView?.nodeStates[n.id] ?? null)
+				runState: currentNodeId === n.id ? 'active' : (runView?.nodeStates[n.id] ?? null),
+				visitCount: runView?.visitCounts[n.id] ?? null
 			}
 		}));
 		edges = edges.map((e) => {
@@ -668,15 +677,26 @@
 		runView = {
 			runId: run.id,
 			nodeStates: {},
+			visitCounts: {},
 			edgeIds: new Set(),
 			replaying: false
 		};
-		for (const step of visitedSteps(logs)) markVisited(step.node.id, runView);
-		// Completed-with-item-errors (for_each, continue policy) reads amber —
-		// distinct from red, which means the run stopped there.
+		for (const step of visitedSteps(logs)) {
+			markVisited(step.node.id, runView);
+			runView.visitCounts[step.node.id] = (runView.visitCounts[step.node.id] ?? 0) + 1;
+		}
+		// The loop node's own visit count is controller entry + one return per
+		// iteration; the iteration count from its summary log is what users mean.
+		for (const entry of logs) {
+			if (entry.event_type === 'loop_completed' && entry.node?.id) {
+				runView.visitCounts[entry.node.id] = entry.data?.count ?? 0;
+			}
+		}
+		// Completed-with-item-errors (continue policy) reads amber — distinct
+		// from red, which means the run stopped there.
 		for (const entry of logs) {
 			if (
-				entry.event_type === 'action_executed' &&
+				['action_executed', 'loop_completed'].includes(entry.event_type) &&
 				entry.node?.id &&
 				Array.isArray(entry.data?.errors) &&
 				entry.data.errors.length
@@ -694,7 +714,13 @@
 		stopReplay();
 		const steps = visitedSteps(logs);
 		if (!steps.length) return showRun(run, logs);
-		runView = { runId: run.id, nodeStates: {}, edgeIds: new Set(), replaying: true };
+		runView = {
+			runId: run.id,
+			nodeStates: {},
+			visitCounts: {},
+			edgeIds: new Set(),
+			replaying: true
+		};
 		applyRunView();
 		let index = 0;
 		const tick = () => {
@@ -752,7 +778,8 @@
 					...domain,
 					source: e.source,
 					target: e.target,
-					source_branch: domain.source_branch ?? null
+					source_branch: domain.source_branch ?? null,
+					source_port: domain.source_port ?? ''
 				};
 			}),
 			variables
@@ -986,12 +1013,13 @@
 			domain.target = fresh(e.target);
 			// The wired branch's id was already re-mapped during the node pass.
 			domain.source_branch = domain.source_branch ? fresh(domain.source_branch) : null;
+			// source_port ('each'/'done') is a constant, never an id — untouched.
 			return {
 				...e,
 				id: domain.id,
 				source: domain.source,
 				target: domain.target,
-				sourceHandle: domain.source_branch ?? undefined,
+				sourceHandle: domain.source_branch ?? (domain.source_port || undefined),
 				data: { ...e.data, domain }
 			};
 		});
@@ -1103,6 +1131,7 @@
 			task_template: null,
 			subprocess_workflow: null,
 			action_config: type === 'action' ? { type: 'log' } : {},
+			loop_config: type === 'loop' ? { collection: '', on_item_error: 'continue' } : {},
 			trigger_config,
 			input_mapping: {},
 			output_mapping: {},
@@ -1190,18 +1219,24 @@
 		const target = nodes.find((n) => n.id === connection.target);
 		if (!source || !target) return false;
 		if (source.data.nodeType === 'end' || target.data.nodeType === 'trigger') return false;
-		// A condition-node port IS a branch: at most one wire per branch.
-		const sourceBranch = connection.sourceHandle ?? null;
-		if (sourceBranch && edges.some((e) => (e.data?.domain as any)?.source_branch === sourceBranch))
+		// A condition-node port IS a branch: at most one wire per branch. Loop
+		// ports ('each'/'done') take any number of wires (spec D29).
+		const handle = connection.sourceHandle ?? null;
+		const isLoopPort = handle === 'each' || handle === 'done';
+		if (
+			handle &&
+			!isLoopPort &&
+			edges.some((e) => (e.data?.domain as any)?.source_branch === handle)
+		)
 			return false;
-		// No duplicate wire for the same (source, target, branch); different
-		// branches of a condition node may legitimately point at the same target.
+		// No duplicate wire for the same (source, target, port/branch).
 		if (
 			edges.some(
 				(e) =>
 					e.source === connection.source &&
 					e.target === connection.target &&
-					((e.data?.domain as any)?.source_branch ?? null) === sourceBranch
+					(((e.data?.domain as any)?.source_branch ?? (e.data?.domain as any)?.source_port) ||
+						null) === handle
 			)
 		)
 			return false;
@@ -1210,8 +1245,10 @@
 
 	function handleConnect(connection: Connection) {
 		// The source handle id on a condition node IS the branch id being wired;
-		// plain nodes have no handle id, so source_branch stays null.
-		const sourceBranch = connection.sourceHandle ?? null;
+		// on a loop node it is the 'each'/'done' port; plain nodes have none.
+		const handle = connection.sourceHandle ?? null;
+		const isLoopPort = handle === 'each' || handle === 'done';
+		const sourceBranch = isLoopPort ? null : handle;
 		const outgoing = edges.filter((e) => e.source === connection.source);
 
 		const domain = {
@@ -1219,6 +1256,7 @@
 			source: connection.source,
 			target: connection.target,
 			source_branch: sourceBranch,
+			source_port: isLoopPort ? handle : '',
 			label: '',
 			priority: outgoing.length
 		};

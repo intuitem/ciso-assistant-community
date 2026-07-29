@@ -2,38 +2,88 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ciso-assistant.com/schemas/workflow-v1.schema.json",
   "title": "CISO Assistant workflow document (schema_version 1)",
-  "description": "FROZEN CONTRACT (spec D28): this schema evolves additively only — new OPTIONAL keys may appear, existing keys are never renamed, repurposed or removed. Features whose absence would silently change execution are gated by requires.capabilities, which importers must hard-reject when unknown. schema_version is reserved for structural breaks we intend never to make. The embedded expression language is frozen too: {{<variable>}}, {{nodes.<ref>.<path>}}, {{secrets.<name>}}, {{item}}/{{item.<path>}}/{{index}} during iteration; dotted paths with numeric list segments; no functions, no operators. Canonical exports are minimal (no empty values, no defaults); importers accept a superset (position, 0-based source_branch index).",
+  "description": "FROZEN CONTRACT (spec D28): this schema evolves additively only \u2014 new OPTIONAL keys may appear, existing keys are never renamed, repurposed or removed. Features whose absence would silently change execution are gated by requires.capabilities, which importers must hard-reject when unknown. schema_version is reserved for structural breaks we intend never to make. The embedded expression language is frozen too: {{<variable>}}, {{nodes.<ref>.<path>}}, {{secrets.<name>}}, {{item}}/{{item.<path>}}/{{index}} during iteration; dotted paths with numeric list segments; no functions, no operators. Canonical exports are minimal (no empty values, no defaults); importers accept a superset (position, 0-based source_branch index).",
   "type": "object",
-  "required": ["schema_version", "name", "graph"],
+  "required": [
+    "schema_version",
+    "name",
+    "graph"
+  ],
   "properties": {
-    "schema_version": { "const": 1 },
-    "name": { "type": "string", "minLength": 1 },
-    "description": { "type": "string" },
-    "ref_id": { "type": "string" },
-    "urn": { "type": "string" },
-    "version": { "type": ["string", "integer"] },
-    "locale": { "type": "string" },
-    "publication_date": { "type": "string" },
+    "schema_version": {
+      "const": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "ref_id": {
+      "type": "string"
+    },
+    "urn": {
+      "type": "string"
+    },
+    "version": {
+      "type": [
+        "string",
+        "integer"
+      ]
+    },
+    "locale": {
+      "type": "string"
+    },
+    "publication_date": {
+      "type": "string"
+    },
     "requires": {
       "type": "object",
       "properties": {
-        "secrets": { "type": "array", "items": { "type": "string" } },
-        "capabilities": { "type": "array", "items": { "type": "string" } }
+        "secrets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       },
       "additionalProperties": false
     },
     "graph": {
       "type": "object",
-      "required": ["nodes"],
+      "required": [
+        "nodes"
+      ],
       "properties": {
         "variables": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["key", "type"],
+            "required": [
+              "key",
+              "type"
+            ],
             "properties": {
-              "key": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$" },
-              "type": { "enum": ["string", "number", "boolean", "date", "json"] },
+              "key": {
+                "type": "string",
+                "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+              },
+              "type": {
+                "enum": [
+                  "string",
+                  "number",
+                  "boolean",
+                  "date",
+                  "json"
+                ]
+              },
               "default_value": {}
             },
             "additionalProperties": false
@@ -42,11 +92,15 @@
         "nodes": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/node" }
+          "items": {
+            "$ref": "#/$defs/node"
+          }
         },
         "edges": {
           "type": "array",
-          "items": { "$ref": "#/$defs/edge" }
+          "items": {
+            "$ref": "#/$defs/edge"
+          }
         }
       },
       "additionalProperties": false
@@ -61,73 +115,165 @@
     },
     "node": {
       "type": "object",
-      "required": ["ref", "type"],
+      "required": [
+        "ref",
+        "type"
+      ],
       "properties": {
-        "ref": { "$ref": "#/$defs/ref" },
-        "type": {
-          "enum": ["trigger", "end", "task", "condition", "action", "subprocess", "event"]
+        "ref": {
+          "$ref": "#/$defs/ref"
         },
-        "label": { "type": "string" },
-        "fork_type": { "enum": ["exclusive", "parallel"] },
-        "join_type": { "enum": ["none", "all", "any"] },
-        "action_config": { "type": "object" },
-        "trigger_config": { "type": "object" },
-        "input_mapping": { "type": "object" },
-        "output_mapping": { "type": "object" },
-        "event_filters": { "type": "object" },
-        "event_key": { "type": "string" },
+        "type": {
+          "enum": [
+            "trigger",
+            "end",
+            "task",
+            "condition",
+            "loop",
+            "action",
+            "subprocess",
+            "event"
+          ]
+        },
+        "label": {
+          "type": "string"
+        },
+        "fork_type": {
+          "enum": [
+            "exclusive",
+            "parallel"
+          ]
+        },
+        "join_type": {
+          "enum": [
+            "none",
+            "all",
+            "any"
+          ]
+        },
+        "action_config": {
+          "type": "object"
+        },
+        "trigger_config": {
+          "type": "object"
+        },
+        "input_mapping": {
+          "type": "object"
+        },
+        "output_mapping": {
+          "type": "object"
+        },
+        "event_filters": {
+          "type": "object"
+        },
+        "event_key": {
+          "type": "string"
+        },
         "position": {
           "type": "object",
-          "properties": { "x": { "type": "number" }, "y": { "type": "number" } }
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            }
+          }
         },
         "retry": {
           "type": "object",
           "properties": {
-            "max_attempts": { "type": "integer" },
-            "delay_seconds": { "type": "integer" },
-            "backoff": { "enum": ["fixed", "exponential"] }
+            "max_attempts": {
+              "type": "integer"
+            },
+            "delay_seconds": {
+              "type": "integer"
+            },
+            "backoff": {
+              "enum": [
+                "fixed",
+                "exponential"
+              ]
+            }
           }
         },
-        "task_template": { "type": "string" },
-        "subprocess_workflow": { "type": "string" },
+        "task_template": {
+          "type": "string"
+        },
+        "subprocess_workflow": {
+          "type": "string"
+        },
         "assignments": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["role"],
+            "required": [
+              "role"
+            ],
             "properties": {
               "role": {
                 "type": "object",
-                "required": ["taxonomy", "code"],
+                "required": [
+                  "taxonomy",
+                  "code"
+                ],
                 "properties": {
-                  "taxonomy": { "type": "string" },
-                  "code": { "type": "string" }
+                  "taxonomy": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  }
                 }
               },
-              "resolve_type": { "type": "string" },
-              "variable_key": { "type": "string" },
-              "is_blocking": { "type": "boolean" },
-              "participation": { "type": "string" }
+              "resolve_type": {
+                "type": "string"
+              },
+              "variable_key": {
+                "type": "string"
+              },
+              "is_blocking": {
+                "type": "boolean"
+              },
+              "participation": {
+                "type": "string"
+              }
             }
           }
         },
-        "presentation": { "type": "object" },
+        "presentation": {
+          "type": "object"
+        },
         "branches": {
           "type": "array",
-          "items": { "$ref": "#/$defs/branch" }
+          "items": {
+            "$ref": "#/$defs/branch"
+          }
+        },
+        "loop_config": {
+          "type": "object"
         }
       },
       "additionalProperties": false
     },
     "branch": {
       "type": "object",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "properties": {
-        "name": { "type": "string", "minLength": 1 },
-        "is_default": { "type": "boolean" },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "is_default": {
+          "type": "boolean"
+        },
         "condition_groups": {
           "type": "array",
-          "items": { "$ref": "#/$defs/condition_group" }
+          "items": {
+            "$ref": "#/$defs/condition_group"
+          }
         }
       },
       "additionalProperties": false
@@ -135,42 +281,91 @@
     "condition_group": {
       "type": "object",
       "properties": {
-        "operator": { "enum": ["and", "or", "not"] },
-        "order": { "type": "integer" },
+        "operator": {
+          "enum": [
+            "and",
+            "or",
+            "not"
+          ]
+        },
+        "order": {
+          "type": "integer"
+        },
         "conditions": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["variable", "op"],
+            "required": [
+              "variable",
+              "op"
+            ],
             "properties": {
-              "variable": { "type": "string" },
+              "variable": {
+                "type": "string"
+              },
               "op": {
-                "enum": ["eq", "neq", "gt", "lt", "gte", "lte", "in", "not_in", "contains", "is_null"]
+                "enum": [
+                  "eq",
+                  "neq",
+                  "gt",
+                  "lt",
+                  "gte",
+                  "lte",
+                  "in",
+                  "not_in",
+                  "contains",
+                  "is_null"
+                ]
               },
               "value": {},
-              "order": { "type": "integer" }
+              "order": {
+                "type": "integer"
+              }
             },
             "additionalProperties": false
           }
         },
         "children": {
           "type": "array",
-          "items": { "$ref": "#/$defs/condition_group" }
+          "items": {
+            "$ref": "#/$defs/condition_group"
+          }
         }
       },
       "additionalProperties": false
     },
     "edge": {
       "type": "object",
-      "required": ["source", "target"],
+      "required": [
+        "source",
+        "target"
+      ],
       "properties": {
-        "source": { "$ref": "#/$defs/ref" },
-        "target": { "$ref": "#/$defs/ref" },
-        "label": { "type": "string" },
-        "priority": { "type": "integer" },
+        "source": {
+          "$ref": "#/$defs/ref"
+        },
+        "target": {
+          "$ref": "#/$defs/ref"
+        },
+        "label": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "integer"
+        },
         "source_branch": {
           "description": "Branch NAME (canonical) or 0-based index (tolerated on import).",
-          "type": ["string", "integer"]
+          "type": [
+            "string",
+            "integer"
+          ]
+        },
+        "source_port": {
+          "description": "Loop-node output port; required on edges leaving a loop node, absent elsewhere.",
+          "enum": [
+            "each",
+            "done"
+          ]
         }
       },
       "additionalProperties": false

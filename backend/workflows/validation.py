@@ -14,7 +14,6 @@ from .models import (
     WorkflowSecret,
     WorkflowVersion,
 )
-from .actions import validate_iteration_config as _validate_iteration_config
 from .actions import validate_read_config as _validate_read_config
 from .triggers import validate_trigger_config
 
@@ -34,6 +33,26 @@ def validate_graph(version):
     wired_branch_ids = {
         e.source_branch_id for e in edges if e.source_branch_id is not None
     }
+
+    loop_ids = {n.id for n in nodes if n.type == WorkflowNode.Type.LOOP}
+    for edge in edges:
+        is_loop_source = edge.source_node_id in loop_ids
+        if is_loop_source and edge.source_port not in ("each", "done"):
+            errors.append(
+                _error(
+                    "loop_port_missing",
+                    "Edges leaving a loop node must use its 'each' or 'done' port",
+                    edge=edge,
+                )
+            )
+        if not is_loop_source and edge.source_port:
+            errors.append(
+                _error(
+                    "loop_port_missing",
+                    "Only edges leaving a loop node may carry a source_port",
+                    edge=edge,
+                )
+            )
 
     known_refs = {n.ref for n in nodes if n.ref}
     trigger_nodes = [n for n in nodes if n.type == WorkflowNode.Type.TRIGGER]
@@ -115,8 +134,6 @@ def validate_graph(version):
                     )
             for code, message in _validate_read_config(node):
                 errors.append(_error(code, message, node=node))
-            for code, message in _validate_iteration_config(node):
-                errors.append(_error(code, message, node=node))
         for ref in sorted(_referenced_node_refs(node) - known_refs):
             errors.append(
                 _error(
@@ -149,6 +166,9 @@ def validate_graph(version):
                         node=node,
                     )
                 )
+        if node.type == WorkflowNode.Type.LOOP:
+            for code, message in _validate_loop(node, edges, outgoing):
+                errors.append(_error(code, message, node=node))
         if node.type == WorkflowNode.Type.TASK and not node.task_template_id:
             errors.append(
                 _error(
@@ -242,6 +262,95 @@ def validate_graph(version):
 
 def _referenced_secret_names(node):
     return set(SECRET_NAME_RE.findall(json.dumps(node.action_config or {})))
+
+
+LOOP_COLLECTION_RE = re.compile(r"^\{\{\s*[\w.]+\s*\}\}$")
+
+
+def _validate_loop(node, edges, outgoing):
+    """Loop rules (spec D29): a valid collection expression, both ports wired,
+    every `each` path returns to the loop, and no `each` path escapes into the
+    rest of the graph."""
+    results = []
+    config = node.loop_config or {}
+    collection = config.get("collection") or ""
+    if not isinstance(collection, str) or not LOOP_COLLECTION_RE.match(collection):
+        results.append(
+            (
+                "loop_collection_invalid",
+                "The loop needs a collection: a single {{path}} expression "
+                "resolving to a list",
+            )
+        )
+    if config.get("on_item_error", "continue") not in ("continue", "stop"):
+        results.append(
+            (
+                "loop_collection_invalid",
+                f"Unknown on_item_error '{config.get('on_item_error')}'",
+            )
+        )
+
+    own_edges = [e for e in edges if e.source_node_id == node.id]
+    each_edges = [e for e in own_edges if e.source_port == "each"]
+    done_edges = [e for e in own_edges if e.source_port == "done"]
+    if not each_edges:
+        results.append(
+            ("loop_body_no_return", "Nothing is wired to the loop's 'each' port")
+        )
+    if not done_edges:
+        results.append(
+            ("loop_body_no_return", "Nothing is wired to the loop's 'done' port")
+        )
+    if not each_edges:
+        return results
+
+    # Walk forward from the each targets; the loop node itself is the only
+    # legal exit. Reaching a dead end (or an end node) without coming home is
+    # an escape; the loop would wait forever.
+    body = set()
+    stack = [e.target_node_id for e in each_edges]
+    escapes = False
+    returns = False
+    while stack:
+        current = stack.pop()
+        if current == node.id:
+            returns = True
+            continue
+        if current in body:
+            continue
+        body.add(current)
+        next_ids = outgoing.get(current, [])
+        if not next_ids:
+            escapes = True
+            continue
+        stack.extend(next_ids)
+    done_reachable = set()
+    stack = [e.target_node_id for e in done_edges]
+    while stack:
+        current = stack.pop()
+        if current in done_reachable or current == node.id:
+            continue
+        done_reachable.add(current)
+        stack.extend(outgoing.get(current, []))
+    if body & done_reachable:
+        escapes = True
+    if not returns:
+        results.append(
+            (
+                "loop_body_no_return",
+                "The loop body never returns to the loop node — wire the last "
+                "step back to the loop",
+            )
+        )
+    if escapes:
+        results.append(
+            (
+                "loop_body_escape",
+                "A path from the loop's 'each' port leaves the body without "
+                "returning to the loop",
+            )
+        )
+    return results
 
 
 def _referenced_node_refs(node):

@@ -56,9 +56,9 @@
 		referenceRunId?: string | null;
 		referenceVariables?: Record<string, unknown>;
 		referenceNodes?: { key: string; label: string; output: unknown }[];
-		// Static upstream summaries (ref/label/actionConfig) for the for_each
-		// collection picker — available even without a reference run.
-		upstreamNodes?: { ref: string; label: string; actionConfig: any }[];
+		// Static upstream summaries for the loop collection picker — available
+		// even without a reference run.
+		upstreamNodes?: { ref: string; label: string; actionConfig: any; isLoop?: boolean }[];
 		secretNames?: string[];
 		onChange: () => void;
 	}
@@ -246,7 +246,11 @@
 			nodeDomain.trigger_config ??= { type: 'manual' };
 			nodeDomain.input_mapping ??= {};
 		}
-		if (['action', 'subprocess'].includes(nodeDomain?.type) && !nodeDomain.output_mapping) {
+		if (nodeDomain?.type === 'loop') {
+			nodeDomain.loop_config ??= { collection: '', on_item_error: 'continue' };
+			nodeDomain.loop_config.collect ??= '';
+		}
+		if (['action', 'subprocess', 'loop'].includes(nodeDomain?.type) && !nodeDomain.output_mapping) {
 			nodeDomain.output_mapping = {};
 		}
 	});
@@ -265,7 +269,9 @@
 	const outputExample = $derived(
 		nodeDomain?.type === 'subprocess'
 			? 'a child workflow variable key'
-			: (OUTPUT_EXAMPLES[actionConfig?.type] ?? 'created_object_id')
+			: nodeDomain?.type === 'loop'
+				? 'count'
+				: (OUTPUT_EXAMPLES[actionConfig?.type] ?? 'created_object_id')
 	);
 
 	// ---------- trigger nodes ----------
@@ -477,17 +483,18 @@
 		onChange();
 	}
 
-	// for_each (spec D27): resolve the expression against the reference run so
-	// the builder can preview the iteration count and offer {{item.*}} paths.
-	const FOR_EACH_RE = /^\{\{\s*([\w.]+)\s*\}\}$/;
+	// Loop node (spec D29): resolve the collection against the reference run
+	// so the builder can preview the iteration count and offer {{item.*}} paths.
+	const COLLECTION_RE = /^\{\{\s*([\w.]+)\s*\}\}$/;
+	const loopConfig = $derived(nodeDomain?.type === 'loop' ? nodeDomain.loop_config : null);
 	const referenceContext = $derived({
 		...referenceVariables,
 		nodes: Object.fromEntries(referenceNodes.map((n) => [n.key, n.output]))
 	});
-	const forEachPreview = $derived.by(() => {
-		const expression = actionConfig?.for_each;
+	const collectionPreview = $derived.by(() => {
+		const expression = loopConfig?.collection;
 		if (!expression || typeof expression !== 'string') return null;
-		const match = expression.match(FOR_EACH_RE);
+		const match = expression.match(COLLECTION_RE);
 		if (!match) return { invalid: true, count: 0, first: undefined };
 		const resolved = dig(referenceContext, match[1]);
 		if (resolved === undefined) return null; // no reference data — no verdict
@@ -511,12 +518,12 @@
 		}
 	}
 
-	const forEachChoices = $derived.by(() => {
+	const collectionChoices = $derived.by(() => {
 		const choices = new Map<string, { expr: string; label: string; count: number | null }>();
 		for (const upstream of upstreamNodes) {
 			const config = upstream.actionConfig ?? {};
 			const isListRead = config.type === 'read_objects' && (config.mode ?? 'list') === 'list';
-			if (isListRead || config.for_each) {
+			if (isListRead || upstream.isLoop) {
 				const expr = `{{nodes.${upstream.ref}.results}}`;
 				choices.set(expr, { expr, label: `${upstream.label} → results`, count: null });
 			}
@@ -545,33 +552,23 @@
 		return [...choices.values()];
 	});
 
-	// "Run once / once per item" mode, keyed on the selected node. Flipping it
-	// on with nothing picked keeps for_each empty (the engine treats that as
-	// run-once) until a collection is chosen.
-	let perItemOn = $state(false);
-	let forEachIsCustom = $state(false);
-	let forEachModeNodeId: string | null = null;
+	// Custom-expression escape hatch, keyed on the selected loop node: stored
+	// expressions that aren't among the detected choices render as custom.
+	let collectionIsCustom = $state(false);
+	let collectionNodeId: string | null = null;
 	$effect(() => {
-		const nodeId = nodeDomain?.type === 'action' ? selectedNode.id : null;
-		if (nodeId !== forEachModeNodeId) {
-			forEachModeNodeId = nodeId;
-			perItemOn = !!actionConfig?.for_each;
-			forEachIsCustom =
-				!!actionConfig?.for_each && !forEachChoices.some((c) => c.expr === actionConfig.for_each);
+		const nodeId = nodeDomain?.type === 'loop' ? selectedNode.id : null;
+		if (nodeId !== collectionNodeId) {
+			collectionNodeId = nodeId;
+			collectionIsCustom =
+				!!loopConfig?.collection &&
+				!collectionChoices.some((c) => c.expr === loopConfig.collection);
 		}
 	});
 
-	function setPerItem(on: boolean) {
-		perItemOn = on;
-		if (!on) {
-			actionConfig.for_each = '';
-			forEachIsCustom = false;
-			onChange();
-		}
-	}
-
 	const itemChips = $derived.by(() => {
-		const first = forEachPreview && !forEachPreview.invalid ? forEachPreview.first : undefined;
+		const first =
+			collectionPreview && !collectionPreview.invalid ? collectionPreview.first : undefined;
 		if (first === null || typeof first !== 'object' || Array.isArray(first)) return [];
 		return Object.keys(first as Record<string, unknown>).slice(0, 10);
 	});
@@ -1022,6 +1019,125 @@
 				</label>
 			{/if}
 
+			{#if nodeDomain.type === 'loop' && loopConfig}
+				<div>
+					{@render fieldLabel(m.forEachItemIn())}
+					{#if collectionChoices.length}
+						<select
+							class="select w-full text-sm"
+							value={collectionIsCustom ? '__custom__' : (loopConfig.collection ?? '')}
+							onchange={(e) => {
+								const chosen = e.currentTarget.value;
+								if (chosen === '__custom__') {
+									collectionIsCustom = true;
+								} else {
+									collectionIsCustom = false;
+									loopConfig.collection = chosen;
+									onChange();
+								}
+							}}
+							data-testid="loop-collection"
+						>
+							{#if !loopConfig.collection && !collectionIsCustom}
+								<option value="">—</option>
+							{/if}
+							{#each collectionChoices as choice (choice.expr)}
+								<option value={choice.expr}>
+									{choice.label}{choice.count === null ? '' : ` (${choice.count})`}
+								</option>
+							{/each}
+							<option value="__custom__">{m.customExpression()}</option>
+						</select>
+					{:else}
+						<select class="select w-full text-sm" disabled>
+							<option>{m.forEachNoCollections()}</option>
+						</select>
+					{/if}
+					{#if collectionIsCustom || (!collectionChoices.length && loopConfig.collection)}
+						<input
+							type="text"
+							class="input w-full text-sm font-mono mt-1"
+							placeholder={'{{nodes.list_items.results}}'}
+							bind:value={loopConfig.collection}
+							oninput={onChange}
+						/>
+					{/if}
+					{#if collectionPreview?.invalid}
+						<p class="text-[10px] text-warning-600 mt-1">
+							<i class="fa-solid fa-triangle-exclamation mr-1"></i>{m.forEachNotAList()}
+						</p>
+					{:else if collectionPreview}
+						<p class="text-[10px] text-success-600 mt-1">
+							<i class="fa-solid fa-rotate mr-1"></i>{m.forEachPreview({
+								count: collectionPreview.count
+							})}
+						</p>
+					{/if}
+				</div>
+
+				{#if loopConfig.collection}
+					{#if itemChips.length}
+						<div>
+							<span class="text-[10px] font-semibold uppercase tracking-wide text-surface-500">
+								{m.perItemFields()}
+							</span>
+							<div class="flex flex-wrap gap-1 mt-1">
+								{#each itemChips as chip (chip)}
+									<button
+										type="button"
+										class="badge preset-tonal text-[10px] font-mono cursor-pointer hover:preset-filled-primary-500"
+										title={'{{item.' + chip + '}}'}
+										onclick={() => insertExpression('{{item.' + chip + '}}')}
+									>
+										{chip}
+									</button>
+								{/each}
+								<button
+									type="button"
+									class="badge preset-tonal text-[10px] font-mono cursor-pointer hover:preset-filled-primary-500"
+									title={'{{index}}'}
+									onclick={() => insertExpression('{{index}}')}
+								>
+									index
+								</button>
+							</div>
+							<p class="text-[10px] text-surface-500 mt-1">{m.perItemChipsHint()}</p>
+						</div>
+					{:else}
+						<p class="text-[10px] text-surface-500">
+							{m.forEachHint({ item: '{{item}}', index: '{{index}}' })}
+						</p>
+					{/if}
+				{/if}
+
+				<label>
+					{@render fieldLabel(m.loopCollect())}
+					<input
+						type="text"
+						class="input w-full text-sm font-mono"
+						placeholder={'{{nodes.create_finding.created_object_id}}'}
+						bind:value={loopConfig.collect}
+						oninput={onChange}
+					/>
+					<span class="text-[10px] text-surface-500">{m.loopCollectHint()}</span>
+				</label>
+
+				<label>
+					{@render fieldLabel(m.onItemFailure())}
+					<select
+						class="select w-full text-sm"
+						value={loopConfig.on_item_error ?? 'continue'}
+						onchange={(e) => {
+							loopConfig.on_item_error = e.currentTarget.value;
+							onChange();
+						}}
+					>
+						<option value="continue">{m.continueCollectErrors()}</option>
+						<option value="stop">{m.stopTheRun()}</option>
+					</select>
+				</label>
+			{/if}
+
 			{#if nodeDomain.type === 'action'}
 				<label>
 					{@render fieldLabel(m.actionType())}
@@ -1035,137 +1151,6 @@
 						{/each}
 					</select>
 				</label>
-
-				<div>
-					{@render fieldLabel(m.runMode())}
-					<div class="flex rounded-base border border-surface-200-800 overflow-hidden text-xs">
-						<button
-							type="button"
-							class="flex-1 px-2 py-1.5 cursor-pointer {perItemOn
-								? 'bg-surface-100-900 text-surface-600-400'
-								: 'preset-filled-primary-500'}"
-							onclick={() => setPerItem(false)}
-						>
-							{m.runOnce()}
-						</button>
-						<button
-							type="button"
-							class="flex-1 px-2 py-1.5 cursor-pointer {perItemOn
-								? 'preset-filled-primary-500'
-								: 'bg-surface-100-900 text-surface-600-400'}"
-							onclick={() => setPerItem(true)}
-							data-testid="run-per-item"
-						>
-							<i class="fa-solid fa-rotate mr-1"></i>{m.runPerItem()}
-						</button>
-					</div>
-				</div>
-
-				{#if perItemOn}
-					<div>
-						{@render fieldLabel(m.forEachItemIn())}
-						{#if forEachChoices.length}
-							<select
-								class="select w-full text-sm"
-								value={forEachIsCustom ? '__custom__' : (actionConfig.for_each ?? '')}
-								onchange={(e) => {
-									const chosen = e.currentTarget.value;
-									if (chosen === '__custom__') {
-										forEachIsCustom = true;
-									} else {
-										forEachIsCustom = false;
-										actionConfig.for_each = chosen;
-										onChange();
-									}
-								}}
-								data-testid="for-each-collection"
-							>
-								{#if !actionConfig.for_each && !forEachIsCustom}
-									<option value="">—</option>
-								{/if}
-								{#each forEachChoices as choice (choice.expr)}
-									<option value={choice.expr}>
-										{choice.label}{choice.count === null ? '' : ` (${choice.count})`}
-									</option>
-								{/each}
-								<option value="__custom__">{m.customExpression()}</option>
-							</select>
-						{:else}
-							<select class="select w-full text-sm" disabled>
-								<option>{m.forEachNoCollections()}</option>
-							</select>
-						{/if}
-						{#if forEachIsCustom || (!forEachChoices.length && actionConfig.for_each)}
-							<input
-								type="text"
-								class="input w-full text-sm font-mono mt-1"
-								placeholder={'{{nodes.list_items.results}}'}
-								bind:value={actionConfig.for_each}
-								oninput={onChange}
-							/>
-						{/if}
-						{#if forEachPreview?.invalid}
-							<p class="text-[10px] text-warning-600 mt-1">
-								<i class="fa-solid fa-triangle-exclamation mr-1"></i>{m.forEachNotAList()}
-							</p>
-						{:else if forEachPreview}
-							<p class="text-[10px] text-success-600 mt-1">
-								<i class="fa-solid fa-rotate mr-1"></i>{m.forEachPreview({
-									count: forEachPreview.count
-								})}
-							</p>
-						{/if}
-					</div>
-
-					{#if actionConfig.for_each}
-						{#if itemChips.length}
-							<div>
-								<span class="text-[10px] font-semibold uppercase tracking-wide text-surface-500">
-									{m.perItemFields()}
-								</span>
-								<div class="flex flex-wrap gap-1 mt-1">
-									{#each itemChips as chip (chip)}
-										<button
-											type="button"
-											class="badge preset-tonal text-[10px] font-mono cursor-pointer hover:preset-filled-primary-500"
-											title={'{{item.' + chip + '}}'}
-											onclick={() => insertExpression('{{item.' + chip + '}}')}
-										>
-											{chip}
-										</button>
-									{/each}
-									<button
-										type="button"
-										class="badge preset-tonal text-[10px] font-mono cursor-pointer hover:preset-filled-primary-500"
-										title={'{{index}}'}
-										onclick={() => insertExpression('{{index}}')}
-									>
-										index
-									</button>
-								</div>
-								<p class="text-[10px] text-surface-500 mt-1">{m.perItemChipsHint()}</p>
-							</div>
-						{:else}
-							<p class="text-[10px] text-surface-500">
-								{m.forEachHint({ item: '{{item}}', index: '{{index}}' })}
-							</p>
-						{/if}
-						<label>
-							{@render fieldLabel(m.onItemFailure())}
-							<select
-								class="select w-full text-sm"
-								value={actionConfig.on_item_error ?? 'continue'}
-								onchange={(e) => {
-									actionConfig.on_item_error = e.currentTarget.value;
-									onChange();
-								}}
-							>
-								<option value="continue">{m.continueCollectErrors()}</option>
-								<option value="stop">{m.stopTheRun()}</option>
-							</select>
-						</label>
-					{/if}
-				{/if}
 
 				{#if actionConfig.type === 'log'}
 					<label>
@@ -1748,7 +1733,7 @@
 				</p>
 			{/if}
 
-			{#if ['action', 'subprocess'].includes(nodeDomain.type)}
+			{#if ['action', 'subprocess', 'loop'].includes(nodeDomain.type)}
 				<div>
 					<div class="flex items-center justify-between mb-1">
 						{@render fieldLabel(m.outputMapping())}
@@ -2168,8 +2153,8 @@
 						{secretNames}
 						onInsert={insertExpression}
 						onAddSecret={readonly ? undefined : onAddSecret}
-						itemPreview={forEachPreview && !forEachPreview.invalid
-							? forEachPreview.first
+						itemPreview={collectionPreview && !collectionPreview.invalid
+							? collectionPreview.first
 							: undefined}
 					/>
 					<p class="text-[9px] text-surface-500 mt-1 leading-relaxed">

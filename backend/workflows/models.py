@@ -196,6 +196,7 @@ class WorkflowNode(AbstractBaseModel, FolderMixin):
         TASK = "task", "Task"
         CONDITION = "condition", "Condition"
         ACTION = "action", "Action"
+        LOOP = "loop", "Loop"
         SUBPROCESS = "subprocess", "Subprocess"
         EVENT = "event", "Event"
 
@@ -246,6 +247,8 @@ class WorkflowNode(AbstractBaseModel, FolderMixin):
         related_name="workflow_nodes",
     )
     action_config = models.JSONField(default=dict, blank=True)
+    # Loop nodes (spec D29): {collection, collect?, on_item_error}.
+    loop_config = models.JSONField(default=dict, blank=True)
     # Definition half of a trigger node (spec D22): {"type": manual|webhook|
     # schedule|internal_event, ...subtype keys}. Operational state (enabled,
     # secrets, bookkeeping) lives on WorkflowTrigger rows synced at publish.
@@ -322,6 +325,8 @@ class WorkflowEdge(AbstractBaseModel, FolderMixin):
     )
     label = models.CharField(max_length=200, blank=True)
     priority = models.IntegerField(default=0)
+    # Loop-node output port ("each"|"done", spec D29); blank elsewhere.
+    source_port = models.CharField(max_length=10, blank=True)
 
     class Meta:
         ordering = ["priority", "created_at"]
@@ -664,6 +669,20 @@ class WorkflowToken(AbstractBaseModel, FolderMixin):
     )
     error_message = models.TextField(blank=True)
     retry_count = models.PositiveIntegerField(default=0)
+    # Iteration context STACK (spec D29): [{item, index}, ...] — nested loops
+    # push/pop; {{item}}/{{index}} resolve to the innermost entry.
+    iteration_context = models.JSONField(default=list, blank=True)
+    # Controller state for a token parked ON a loop node:
+    # {items, index, results, errors}.
+    loop_state = models.JSONField(default=dict, blank=True)
+    # Body tokens point back at the controller token that emitted them.
+    loop_controller = models.ForeignKey(
+        "self",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="loop_body_tokens",
+    )
 
     def save(self, *args, **kwargs):
         self.folder = self.instance.folder
@@ -681,6 +700,7 @@ class WorkflowInstanceLog(AbstractBaseModel, FolderMixin):
         JOIN_ARRIVAL = "join_arrival", "Join arrival"
         JOIN_FIRED = "join_fired", "Join fired"
         SUBPROCESS_STARTED = "subprocess_started", "Subprocess started"
+        LOOP_COMPLETED = "loop_completed", "Loop completed"
         INSTANCE_COMPLETED = "instance_completed", "Instance completed"
         ERROR = "error", "Error"
 

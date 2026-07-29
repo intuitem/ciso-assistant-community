@@ -12,7 +12,6 @@
 			forkType?: string;
 			joinType?: string;
 			assignments?: { role_code: string; is_blocking: boolean }[];
-			forEach?: boolean;
 			error?: string | null;
 			runState?: 'visited' | 'active' | 'error' | 'warning' | null;
 		};
@@ -92,9 +91,6 @@
 		<span class="text-xs font-semibold leading-tight text-surface-900-100 text-wrap">
 			{data.label}
 		</span>
-		{#if data.forEach}
-			<i class="fa-solid fa-rotate text-[10px] text-surface-500 shrink-0" title="for each"></i>
-		{/if}
 	</div>
 
 	{#if data.meta}

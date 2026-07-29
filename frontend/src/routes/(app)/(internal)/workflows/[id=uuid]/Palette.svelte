@@ -36,6 +36,7 @@
 	const STEP_ITEMS = $derived<PaletteItem[]>([
 		{ type: 'condition', icon: 'fa-code-branch', label: m.workflowNodeCondition() },
 		{ type: 'action', icon: 'fa-bolt', label: m.workflowNodeAction() },
+		{ type: 'loop', icon: 'fa-rotate', label: m.workflowNodeLoop() },
 		{ type: 'end', icon: 'fa-flag-checkered', label: m.workflowNodeEnd() }
 	]);
 
