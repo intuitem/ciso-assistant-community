@@ -40,7 +40,13 @@
 			failed = true;
 			worker.terminate();
 		};
-		blob.arrayBuffer().then((buffer) => worker.postMessage({ buffer }, [buffer]));
+		blob.arrayBuffer().then(
+			(buffer) => worker.postMessage({ buffer }, [buffer]),
+			() => {
+				failed = true;
+				worker.terminate();
+			}
+		);
 		return () => worker.terminate();
 	});
 </script>
@@ -66,7 +72,7 @@
 		</div>
 	{/if}
 	<SandboxedHtmlFrame body={rendered.body} css={rendered.css} title={`${title} — ${sheet.name}`} />
-	{#if sheet.truncated || model.hiddenSheets > 0}
+	{#if sheet.truncated || model.omittedSheets > 0}
 		<p class="text-sm text-surface-600-400">{m.previewTruncated()}</p>
 	{/if}
 {:else}

@@ -202,8 +202,9 @@ export async function parseXlsx(buffer: ArrayBuffer): Promise<SheetModel> {
 	const visible = wb.worksheets.filter(
 		(ws: any) => ws.state !== 'hidden' && ws.state !== 'veryHidden'
 	);
+	const kept = visible.slice(0, MAX_SHEETS);
 	return {
-		sheets: visible.slice(0, MAX_SHEETS).map(readSheet),
-		hiddenSheets: wb.worksheets.length - visible.length
+		sheets: kept.map(readSheet),
+		omittedSheets: wb.worksheets.length - kept.length
 	};
 }

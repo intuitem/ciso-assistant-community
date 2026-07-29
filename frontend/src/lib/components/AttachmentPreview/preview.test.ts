@@ -28,7 +28,7 @@ describe('parseXlsx', () => {
 	it('keeps values, formats, merges, freeze panes and skips hidden sheets', async () => {
 		const model = await parseXlsx(await fixture());
 		expect(model.sheets).toHaveLength(1);
-		expect(model.hiddenSheets).toBe(1);
+		expect(model.omittedSheets).toBe(1);
 
 		const sheet = model.sheets[0];
 		expect(sheet.name).toBe('Risks');
@@ -49,12 +49,35 @@ describe('parseXlsx', () => {
 	});
 });
 
+describe('parseXlsx sheet limit', () => {
+	it('counts sheets dropped past the limit so the truncation notice fires', async () => {
+		const wb = new ExcelJS.Workbook();
+		for (let i = 0; i < 52; i++) wb.addWorksheet(`S${i}`).getCell('A1').value = i;
+		const model = await parseXlsx((await wb.xlsx.writeBuffer()) as ArrayBuffer);
+		expect(model.sheets).toHaveLength(50);
+		expect(model.omittedSheets).toBe(2);
+	});
+});
+
 describe('parseCsv', () => {
 	it('handles quoted fields, embedded newlines and doubled quotes', () => {
 		const buffer = new TextEncoder().encode('a,"b,1","say ""hi"""\n"multi\nline",x,y').buffer;
 		const sheet = parseCsv(buffer as ArrayBuffer).sheets[0];
 		expect(sheet.rows[0].map((c) => c!.text)).toEqual(['a', 'b,1', 'say "hi"']);
 		expect(sheet.rows[1][0]!.text).toBe('multi\nline');
+	});
+
+	it('picks one delimiter per file, so decimal commas survive a semicolon export', () => {
+		const buffer = new TextEncoder().encode('Name;Amount;Note\nWidget;1,50;a, b').buffer;
+		const sheet = parseCsv(buffer as ArrayBuffer).sheets[0];
+		expect(sheet.rows[0].map((c) => c!.text)).toEqual(['Name', 'Amount', 'Note']);
+		expect(sheet.rows[1].map((c) => c!.text)).toEqual(['Widget', '1,50', 'a, b']);
+	});
+
+	it('detects tab-delimited files', () => {
+		const buffer = new TextEncoder().encode('a\tb\nc,1\td').buffer;
+		const sheet = parseCsv(buffer as ArrayBuffer).sheets[0];
+		expect(sheet.rows[1].map((c) => c!.text)).toEqual(['c,1', 'd']);
 	});
 });
 

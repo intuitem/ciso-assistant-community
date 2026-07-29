@@ -32,7 +32,7 @@ export interface Sheet {
 
 export interface SheetModel {
 	sheets: Sheet[];
-	hiddenSheets: number;
+	omittedSheets: number;
 }
 
 export type WorkerRequest = { buffer: ArrayBuffer };
