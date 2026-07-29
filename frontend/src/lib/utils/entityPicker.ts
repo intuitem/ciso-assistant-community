@@ -6,19 +6,22 @@ export interface EntityPickerOptions {
 	endpoint: string;
 	title?: string;
 	subtitle?: string;
-	/** Object field used as the primary row label (default 'str'). */
+	/** Object field or dot-path used as the primary row label (default 'str'). */
 	labelField?: string;
-	/** Optional secondary text shown after the label (e.g. 'email'). */
+	/** Optional secondary text shown after the label (e.g. 'email', 'folder.str'). */
 	secondaryField?: string;
 	/** Fixed query params applied to every request (e.g. scoping filters). */
 	scopeFilters?: Record<string, string>;
 	/** Boolean field driving an active/inactive badge + an "include inactive" toggle. */
 	activeField?: string;
-	/** Seed the selection tray from explicit ids, or from a server-side filter. */
-	initialSelectedIds?: string[];
-	initialSelectedParams?: Record<string, string>;
 	confirmLabel?: string;
-	/** Receives the final selected ids on confirm. */
+	/**
+	 * Receives the selected ids on confirm. Selection is scoped to the visible
+	 * page; on success the picker stays open and reloads, so larger scopes are
+	 * composed page by page, confirm by confirm (add-only scope filters drop
+	 * confirmed items from subsequent pages). Throw to keep the selection and
+	 * surface the failure.
+	 */
 	onConfirm: (ids: string[]) => Promise<void> | void;
 }
 

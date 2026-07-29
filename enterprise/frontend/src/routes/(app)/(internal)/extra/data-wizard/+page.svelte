@@ -141,6 +141,30 @@
 		}
 	];
 
+	// Models with a downloadable xlsx template served by the backend
+	// (data_wizard IMPORT_TEMPLATES). The others depend on a framework or an
+	// external tool export, so only the docs link applies.
+	const TEMPLATE_MODELS = new Set([
+		'Asset',
+		'AppliedControl',
+		'Perimeter',
+		'User',
+		'ElementaryAction',
+		'ReferenceControl',
+		'Threat',
+		'Folder',
+		'SecurityException',
+		'Incident',
+		'Policy',
+		'Vulnerability',
+		'Processing',
+		'TPRM',
+		'FindingsAssessment',
+		'RiskAssessment',
+		'BusinessImpactAnalysis',
+		'TaskTemplate'
+	]);
+
 	// Per-model accepted file extensions. Most importers consume Excel;
 	// Egerie ships an XML export, hence the explicit branch.
 	const XML_MODELS = new Set(['EbiosRMStudyEgerieXML']);
@@ -478,6 +502,27 @@
 					>
 						<p class="text-xs text-blue-900 dark:text-blue-300">{selectedModelInfo.description}</p>
 					</div>
+				{/if}
+
+				{#if TEMPLATE_MODELS.has(selectedModel)}
+					<a
+						class="inline-flex items-center gap-1 mt-3 text-sm text-indigo-600 hover:text-indigo-400 dark:text-indigo-300"
+						href={`/extra/data-wizard/template/${selectedModel}`}
+						download
+					>
+						<i class="fa-solid fa-download"></i>
+						{m.dataWizardDownloadTemplate()}
+					</a>
+				{:else if selectedModel === 'ComplianceAssessment' && $scope.framework}
+					<!-- Audit templates are framework-specific: reuse the catalog's generated file -->
+					<a
+						class="inline-flex items-center gap-1 mt-3 text-sm text-indigo-600 hover:text-indigo-400 dark:text-indigo-300"
+						href={`/frameworks/${$scope.framework}/excel-template`}
+						download
+					>
+						<i class="fa-solid fa-download"></i>
+						{m.dataWizardDownloadTemplate()}
+					</a>
 				{/if}
 			</div>
 
