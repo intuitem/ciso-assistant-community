@@ -69,13 +69,14 @@
 		<p class="pl-4 pr-3 mt-1 text-[10px] text-surface-600-400 truncate">{data.meta}</p>
 	{/if}
 
+	<!-- n8n port order: done on top, the loop-back (each) port below it. -->
 	<div class="mt-1.5 space-y-0.5">
 		<div class="nodrag relative flex items-center justify-end min-h-[22px] pl-4 pr-3 py-0.5">
-			<span class="text-[10px] leading-tight text-surface-700-300">
-				<i class="fa-solid fa-rotate mr-1 text-[8px]"></i>{m.loopPortEach()}
+			<span class="text-[10px] leading-tight text-surface-600-400">
+				<i class="fa-solid fa-flag-checkered mr-1 text-[8px]"></i>{m.loopPortDone()}
 			</span>
 			<Handle
-				id="each"
+				id="done"
 				type="source"
 				position={Position.Right}
 				isConnectable={!editor?.readonly}
@@ -85,11 +86,11 @@
 		<div
 			class="nodrag relative flex items-center justify-end min-h-[22px] pl-4 pr-3 py-0.5 mt-1 pt-1 border-t border-surface-200-800"
 		>
-			<span class="text-[10px] leading-tight text-surface-600-400">
-				<i class="fa-solid fa-flag-checkered mr-1 text-[8px]"></i>{m.loopPortDone()}
+			<span class="text-[10px] leading-tight text-surface-700-300">
+				<i class="fa-solid fa-rotate mr-1 text-[8px]"></i>{m.loopPortEach()}
 			</span>
 			<Handle
-				id="done"
+				id="each"
 				type="source"
 				position={Position.Right}
 				isConnectable={!editor?.readonly}

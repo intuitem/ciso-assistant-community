@@ -30,6 +30,7 @@
 	import TerminalNode from './nodes/TerminalNode.svelte';
 	import TriggerNode, { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 	import LoopNode from './nodes/LoopNode.svelte';
+	import WorkflowEdge from './edges/WorkflowEdge.svelte';
 
 	interface Props {
 		graph: any;
@@ -94,6 +95,12 @@
 		terminal: TerminalNode,
 		trigger: TriggerNode,
 		loop: LoopNode
+	};
+
+	// One geometry-aware edge everywhere (bezier forward, step detour when the
+	// target is behind the source) — n8n behavior, see edges/WorkflowEdge.
+	const edgeTypes = {
+		workflow: WorkflowEdge
 	};
 
 	const EDGE_STYLE = 'stroke: var(--color-surface-500); stroke-width: 2;';
@@ -269,6 +276,7 @@
 	function toFlowEdge(domain: any): Edge {
 		return {
 			id: domain.id,
+			type: 'workflow',
 			source: domain.source,
 			target: domain.target,
 			// Condition edges anchor to their branch's port (handle id = branch
@@ -330,7 +338,11 @@
 	// remapGraphIds leaving stale branch ids in data.branches, not this.
 
 	function applyLayout() {
-		const positions = computeLayout(nodes, edges);
+		const returns = loopReturnEdgeIds();
+		const positions = computeLayout(
+			nodes,
+			edges.filter((e) => !returns.has(e.id))
+		);
 		nodes = nodes.map((node) => {
 			const position = positions.get(node.id);
 			return position ? { ...node, position } : node;
@@ -751,6 +763,31 @@
 	}
 
 	$effect(() => () => stopReplay());
+
+	// Loop-return edges (body → loop input) are excluded from auto-layout so
+	// dagre sees a clean DAG (the body lays out to the loop's right). An edge
+	// is a return iff its target is a loop node and its source sits in that
+	// loop's body (reachable from the 'each' port).
+	function loopReturnEdgeIds(): Set<string> {
+		const returns = new Set<string>();
+		const loopIds = nodes.filter((n) => (n.data.domain as any)?.type === 'loop').map((n) => n.id);
+		for (const loopId of loopIds) {
+			const body = new Set<string>();
+			const stack = edges
+				.filter((e) => e.source === loopId && (e.data?.domain as any)?.source_port === 'each')
+				.map((e) => e.target);
+			while (stack.length) {
+				const id = stack.pop()!;
+				if (id === loopId || body.has(id)) continue;
+				body.add(id);
+				for (const e of edges) if (e.source === id) stack.push(e.target);
+			}
+			for (const e of edges) {
+				if (e.target === loopId && body.has(e.source)) returns.add(e.id);
+			}
+		}
+		return returns;
+	}
 
 	function refreshVisuals() {
 		nodes = nodes.map((n) => ({
@@ -1276,6 +1313,7 @@
 		} else {
 			selectedEdgeId = domain.id;
 			selectedNodeId = null;
+			refreshVisuals();
 		}
 		markDirty();
 	}
@@ -1659,6 +1697,7 @@
 					bind:edges
 					colorMode={isDark ? 'dark' : 'light'}
 					{nodeTypes}
+					{edgeTypes}
 					isValidConnection={readonly ? () => false : isValidConnection}
 					onconnect={readonly ? undefined : handleConnect}
 					onnodedragstop={readonly ? undefined : markDirty}
