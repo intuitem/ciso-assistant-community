@@ -275,7 +275,7 @@ objects:
     translations:
       fr:
         name: Maturité de la protection des données
-        description: Maturité de la classification des données, du chiffrement, de la prévention des pertes de données et des contrôles de confidentialité
+        description: Maturité de la classification des données, du chiffrement, de la prévention des pertes de données et des contrôles de protection de la vie privée
     category: qualitative
     higher_is_better: true
     choices_definition:
