@@ -207,8 +207,6 @@ def _export_node(node, refs, taxonomies, variable_keys, branch_names):
     out = {"ref": refs[node["id"]], "type": node["type"]}
     if node["label"]:
         out["label"] = node["label"]
-    if node["fork_type"] != WorkflowNode.ForkType.EXCLUSIVE:
-        out["fork_type"] = node["fork_type"]
     if node["join_type"] != WorkflowNode.JoinType.NONE:
         out["join_type"] = node["join_type"]
     for field in EXPORTED_NODE_JSON_FIELDS:
@@ -284,8 +282,6 @@ def _export_edge(edge, refs, branch_names):
     out = {"source": refs[edge["source"]], "target": refs[edge["target"]]}
     if edge["label"]:
         out["label"] = edge["label"]
-    if edge["priority"]:
-        out["priority"] = edge["priority"]
     # An edge leaving a condition node names the branch it wires.
     if edge["source_branch"] is not None:
         out["source_branch"] = branch_names[edge["source_branch"]]
@@ -576,7 +572,6 @@ def _build_graph_payload(graph, workflow, folder, warnings):
                 if source_branch is not None
                 else None,
                 "label": str(entry.get("label") or ""),
-                "priority": entry.get("priority") or 0,
                 "source_port": str(entry.get("source_port") or ""),
             }
         )
@@ -593,8 +588,9 @@ def _build_node(
         "ref": ref,
         "type": entry["type"],
         "label": str(entry.get("label") or ""),
-        "fork_type": entry.get("fork_type") or WorkflowNode.ForkType.EXCLUSIVE,
-        "join_type": entry.get("join_type") or WorkflowNode.JoinType.NONE,
+        "join_type": entry.get("join_type")
+        if entry.get("join_type") in WorkflowNode.JoinType.values
+        else WorkflowNode.JoinType.NONE,
         "event_key": str(entry.get("event_key") or ""),
     }
     branches = []

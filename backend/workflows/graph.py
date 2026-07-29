@@ -26,7 +26,6 @@ from .models import (
 
 NODE_FIELDS = [
     "type",
-    "fork_type",
     "join_type",
     "label",
     "ref",
@@ -46,7 +45,7 @@ NODE_FIELDS = [
 REF_RE = re.compile(r"^[a-z][a-z0-9_]{0,99}$")
 
 VARIABLE_FIELDS = ["key", "type", "default_value"]
-EDGE_FIELDS = ["label", "priority", "source_port"]
+EDGE_FIELDS = ["label", "source_port"]
 ASSIGNMENT_FIELDS = [
     "resolve_type",
     "variable_key",

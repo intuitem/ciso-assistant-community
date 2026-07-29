@@ -206,14 +206,9 @@ class WorkflowNode(AbstractBaseModel, FolderMixin):
         SCHEDULE = "schedule", "Schedule"
         INTERNAL_EVENT = "internal_event", "Internal event"
 
-    class ForkType(models.TextChoices):
-        EXCLUSIVE = "exclusive", "Exclusive"
-        PARALLEL = "parallel", "Parallel"
-
     class JoinType(models.TextChoices):
         NONE = "none", "None"
         AND = "and", "AND"
-        OR = "or", "OR"
 
     class RetryBackoff(models.TextChoices):
         FIXED = "fixed", "Fixed"
@@ -225,11 +220,6 @@ class WorkflowNode(AbstractBaseModel, FolderMixin):
         related_name="nodes",
     )
     type = models.CharField(max_length=20, choices=Type.choices)
-    fork_type = models.CharField(
-        max_length=20,
-        choices=ForkType.choices,
-        default=ForkType.EXCLUSIVE,
-    )
     join_type = models.CharField(
         max_length=20,
         choices=JoinType.choices,
@@ -324,12 +314,11 @@ class WorkflowEdge(AbstractBaseModel, FolderMixin):
         related_name="edges",
     )
     label = models.CharField(max_length=200, blank=True)
-    priority = models.IntegerField(default=0)
     # Loop-node output port ("each"|"done", spec D29); blank elsewhere.
     source_port = models.CharField(max_length=10, blank=True)
 
     class Meta:
-        ordering = ["priority", "created_at"]
+        ordering = ["created_at"]
 
     def save(self, *args, **kwargs):
         self.folder = self.version.folder

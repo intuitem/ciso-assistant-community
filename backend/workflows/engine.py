@@ -7,7 +7,6 @@ as `waiting`; everything else executes and advances in the same call.
 """
 
 import contextvars
-import math
 import re
 
 from django.db import transaction
@@ -638,10 +637,10 @@ def _advance(token):
         chosen = [e for e in edges if e.source_port == "done"]
         if not chosen:
             raise EngineError(f"Loop '{node}' has no edge on its 'done' port")
-    elif node.fork_type == WorkflowNode.ForkType.PARALLEL:
-        chosen = edges
     else:
-        chosen = list(edges)[:1]
+        # Fan-out is always parallel (n8n semantics): every wired output runs.
+        # Exclusive routing is the condition node's job.
+        chosen = edges
 
     token.status = WorkflowToken.Status.CONSUMED
     token.save(update_fields=["status", "updated_at"])
@@ -681,20 +680,9 @@ def _arrive(instance, edge, iteration_context=None, loop_controller=None):
         status=WorkflowToken.Status.WAITING, current_node=target
     )
 
-    if target.join_type == WorkflowNode.JoinType.AND:
-        arrived_edges = set(waiting.values_list("arrived_via_edge_id", flat=True))
-        if len(arrived_edges) < incoming_count:
-            return
-    else:  # OR: fire once per activation, consume the stragglers
-        arrivals = instance.logs.filter(
-            event_type=WorkflowInstanceLog.EventType.JOIN_ARRIVAL, node=target
-        ).count()
-        fired = instance.logs.filter(
-            event_type=WorkflowInstanceLog.EventType.JOIN_FIRED, node=target
-        ).count()
-        if fired >= math.ceil(arrivals / incoming_count):
-            waiting.update(status=WorkflowToken.Status.CONSUMED)
-            return
+    arrived_edges = set(waiting.values_list("arrived_via_edge_id", flat=True))
+    if len(arrived_edges) < incoming_count:
+        return
 
     sample = waiting.first()
     waiting.update(status=WorkflowToken.Status.CONSUMED)

@@ -138,17 +138,10 @@
         "label": {
           "type": "string"
         },
-        "fork_type": {
-          "enum": [
-            "exclusive",
-            "parallel"
-          ]
-        },
         "join_type": {
           "enum": [
             "none",
-            "all",
-            "any"
+            "and"
           ]
         },
         "action_config": {
@@ -349,9 +342,6 @@
         },
         "label": {
           "type": "string"
-        },
-        "priority": {
-          "type": "integer"
         },
         "source_branch": {
           "description": "Branch NAME (canonical) or 0-based index (tolerated on import).",

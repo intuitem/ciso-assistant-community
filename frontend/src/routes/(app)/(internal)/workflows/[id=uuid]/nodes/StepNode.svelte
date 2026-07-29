@@ -9,7 +9,6 @@
 			nodeType: 'task' | 'condition' | 'action' | 'subprocess' | 'event';
 			label: string;
 			meta?: string | null;
-			forkType?: string;
 			joinType?: string;
 			assignments?: { role_code: string; is_blocking: boolean }[];
 			error?: string | null;
@@ -97,16 +96,11 @@
 		<p class="pl-1 mt-1 text-[10px] text-surface-600-400 truncate">{data.meta}</p>
 	{/if}
 
-	{#if data.assignments?.length || data.forkType === 'parallel' || (data.joinType && data.joinType !== 'none')}
+	{#if data.assignments?.length || (data.joinType && data.joinType !== 'none')}
 		<div class="flex flex-wrap items-center gap-1 pl-1 mt-1.5">
 			{#if data.joinType && data.joinType !== 'none'}
 				<span class="badge preset-tonal text-[9px] px-1.5 py-0.5 font-mono uppercase">
 					<i class="fa-solid fa-arrows-to-dot mr-0.5"></i>{data.joinType}
-				</span>
-			{/if}
-			{#if data.forkType === 'parallel'}
-				<span class="badge preset-tonal text-[9px] px-1.5 py-0.5 uppercase">
-					<i class="fa-solid fa-arrows-split-up-and-left mr-0.5"></i>∥
 				</span>
 			{/if}
 			{#each data.assignments ?? [] as assignment}

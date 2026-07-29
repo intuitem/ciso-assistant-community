@@ -310,14 +310,14 @@ class TestRouting:
         )
         return version, approved["id"], rejected["id"]
 
-    def test_exclusive_fork_takes_matching_edge(self):
+    def test_condition_routes_matching_branch(self):
         version, approved_id, _ = self._decision_version()
         instance = start_instance(version, payload={"decision": "approved"})
         assert instance.status == WorkflowInstance.Status.COMPLETED
         visited = {str(t.current_node_id) for t in instance.tokens.all()}
         assert approved_id in visited
 
-    def test_exclusive_fork_falls_through_by_priority(self):
+    def test_condition_falls_through_to_default_branch(self):
         version, approved_id, rejected_id = self._decision_version()
         instance = start_instance(version, payload={"decision": "nope"})
         visited = {str(t.current_node_id) for t in instance.tokens.all()}
@@ -327,9 +327,7 @@ class TestRouting:
     def test_parallel_fork_and_join(self):
         _, version = make_workflow()
         start = node("trigger", trigger_config={"type": "manual"})
-        fork = node(
-            "action", label="Fork", action_config={"type": "log"}, fork_type="parallel"
-        )
+        fork = node("action", label="Fork", action_config={"type": "log"})
         branch_a = node("action", label="A", action_config={"type": "log"})
         branch_b = node("action", label="B", action_config={"type": "log"})
         join = node(

@@ -2100,35 +2100,20 @@
 				</label>
 			{/if}
 
-			{#if nodeDomain.type !== 'end'}
-				<div class="grid grid-cols-2 gap-2">
-					<label>
-						{@render fieldLabel(m.forkType())}
-						<select
-							class="select w-full text-xs"
-							bind:value={nodeDomain.fork_type}
-							onchange={onChange}
-						>
-							<option value="exclusive">{m.forkExclusive()}</option>
-							<option value="parallel">{m.forkParallel()}</option>
-						</select>
-					</label>
-					{#if nodeDomain.type !== 'trigger'}
-						<!-- Trigger nodes cannot have incoming edges, so a join makes no sense. -->
-						<label>
-							{@render fieldLabel(m.joinType())}
-							<select
-								class="select w-full text-xs"
-								bind:value={nodeDomain.join_type}
-								onchange={onChange}
-							>
-								<option value="none">{m.joinNone()}</option>
-								<option value="and">{m.joinAnd()}</option>
-								<option value="or">{m.joinOr()}</option>
-							</select>
-						</label>
-					{/if}
-				</div>
+			{#if !['end', 'trigger'].includes(nodeDomain.type)}
+				<!-- Fan-out is always parallel (condition nodes own routing); the only
+				     wiring semantic left to choose is how converging edges join. -->
+				<label>
+					{@render fieldLabel(m.joinType())}
+					<select
+						class="select w-full text-xs"
+						bind:value={nodeDomain.join_type}
+						onchange={onChange}
+					>
+						<option value="none">{m.joinNone()}</option>
+						<option value="and">{m.joinAnd()}</option>
+					</select>
+				</label>
 			{/if}
 
 			<div class="pt-2 border-t border-surface-200-800">

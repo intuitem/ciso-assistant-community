@@ -183,7 +183,6 @@
 			nodeType: domain.type,
 			label: domain.label || NODE_TYPE_LABELS[domain.type]?.() || domain.type,
 			meta: nodeMeta(domain),
-			forkType: domain.fork_type,
 			joinType: domain.join_type,
 			assignments: domain.assignments ?? [],
 			branches: domain.type === 'condition' ? conditionBranchVisuals(domain) : undefined,
@@ -1163,7 +1162,6 @@
 			id: crypto.randomUUID(),
 			type,
 			label: '',
-			fork_type: 'exclusive',
 			join_type: 'none',
 			task_template: null,
 			subprocess_workflow: null,
@@ -1286,7 +1284,6 @@
 		const handle = connection.sourceHandle ?? null;
 		const isLoopPort = handle === 'each' || handle === 'done';
 		const sourceBranch = isLoopPort ? null : handle;
-		const outgoing = edges.filter((e) => e.source === connection.source);
 
 		const domain = {
 			id: crypto.randomUUID(),
@@ -1294,8 +1291,7 @@
 			target: connection.target,
 			source_branch: sourceBranch,
 			source_port: isLoopPort ? handle : '',
-			label: '',
-			priority: outgoing.length
+			label: ''
 		};
 		// SvelteFlow already appended a default edge for this connection; replace
 		// it with ours so the id is the persisted client UUID.
