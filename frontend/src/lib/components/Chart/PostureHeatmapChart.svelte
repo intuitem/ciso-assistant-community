@@ -8,6 +8,7 @@
 		width?: string;
 		classesContainer?: string;
 		name?: string;
+		onCellClick?: (row: any) => void;
 	}
 
 	let {
@@ -15,7 +16,8 @@
 		assets = [],
 		width = 'w-full',
 		classesContainer = '',
-		name = 'posture_heatmap'
+		name = 'posture_heatmap',
+		onCellClick
 	}: Props = $props();
 
 	const chart_id = `${name}_div`;
@@ -122,6 +124,9 @@
 					if (r.actual) parts.push(`actual: ${r.actual}`);
 					if (r.expected) parts.push(`expected: ${r.expected}`);
 					if (r.message) parts.push(r.message);
+					if (onCellClick) {
+						parts.push(`<i style="opacity:0.65;font-size:11px">${m.heatmapCellHint()}</i>`);
+					}
 					return parts.join('<br/>');
 				}
 			},
@@ -162,6 +167,11 @@
 		};
 
 		chart.setOption(option);
+		if (onCellClick) {
+			chart.on('click', (params: any) => {
+				if (params.componentType === 'series' && params.data?.row) onCellClick(params.data.row);
+			});
+		}
 		const container = document.getElementById(chart_id);
 		const observer = new ResizeObserver(() => chart.resize());
 		if (container) observer.observe(container);

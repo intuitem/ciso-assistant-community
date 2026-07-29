@@ -53,6 +53,10 @@ class WorkflowContext:
     history: list[dict] = field(default_factory=list)
     user_lang: str = "en"  # ISO language code from Accept-Language
     session: object = None  # ChatSession instance for state persistence
+    documents: list = field(
+        default_factory=list
+    )  # IndexedDocuments attached to this message
+    request: object = None  # DRF request, needed by consumer-backed imports
 
 
 class Workflow:

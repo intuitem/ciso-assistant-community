@@ -2497,6 +2497,7 @@ class EvidenceReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
     requirement_assessments = FieldsRelatedField(many=True)
+    security_exceptions = FieldsRelatedField(many=True)
     contracts = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     owner = FieldsRelatedField(many=True)
@@ -2530,6 +2531,9 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     )
     findings_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=FindingsAssessment.objects.all(), required=False
+    )
+    security_exceptions = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=SecurityException.objects.all(), required=False
     )
     timeline_entries = serializers.PrimaryKeyRelatedField(
         many=True, queryset=TimelineEntry.objects.all(), required=False
@@ -4135,6 +4139,7 @@ class FindingsAssessmentImportExportSerializer(BaseModelSerializer):
             "status",
             "eta",
             "due_date",
+            "reported_at",
             "observation",
             "category",
             "is_locked",
@@ -4149,6 +4154,8 @@ class FindingsAssessmentImportExportSerializer(BaseModelSerializer):
 class FindingImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     findings_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
+    asset = HashSlugRelatedField(slug_field="pk", read_only=True)
+    requirement_node = serializers.SlugRelatedField(slug_field="urn", read_only=True)
     threats = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     vulnerabilities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     reference_controls = HashSlugRelatedField(
@@ -4171,6 +4178,8 @@ class FindingImportExportSerializer(BaseModelSerializer):
             "due_date",
             "folder",
             "findings_assessment",
+            "asset",
+            "requirement_node",
             "threats",
             "vulnerabilities",
             "reference_controls",
@@ -4468,6 +4477,9 @@ class SecurityExceptionWriteSerializer(
     assets = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Asset.objects.all(), required=False
     )
+    evidences = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Evidence.objects.all(), required=False
+    )
 
     def create(self, validated_data):
         owner_data = validated_data.get("owners", [])
@@ -4581,6 +4593,7 @@ class SecurityExceptionReadSerializer(CustomFieldsSerializerMixin, BaseModelSeri
     severity = serializers.CharField(source="get_severity_display")
     associated_objects_count = serializers.SerializerMethodField()
     assets = FieldsRelatedField(many=True)
+    evidences = FieldsRelatedField(many=True)
     validation_flows = FieldsRelatedField(
         many=True,
         fields=[
@@ -4607,6 +4620,7 @@ class SecurityExceptionReadSerializer(CustomFieldsSerializerMixin, BaseModelSeri
                 + len(obj.vulnerabilities.all())
                 + len(obj.risk_scenarios.all())
                 + len(obj.requirement_assessments.all())
+                + len(obj.evidences.all())
             )
         except Exception:
             # Fallback: perform DB counts
@@ -4616,6 +4630,7 @@ class SecurityExceptionReadSerializer(CustomFieldsSerializerMixin, BaseModelSeri
                 + obj.vulnerabilities.count()
                 + obj.risk_scenarios.count()
                 + obj.requirement_assessments.count()
+                + obj.evidences.count()
             )
 
     class Meta:
@@ -4684,6 +4699,7 @@ class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
     findings_count = serializers.IntegerField(source="findings.count")
     treatment_progress = serializers.IntegerField(read_only=True, default=0)
     evidences = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     validation_flows = FieldsRelatedField(
         many=True,
         fields=[
@@ -4731,7 +4747,9 @@ class FindingReadSerializer(FindingWriteSerializer):
     path = PathField(read_only=True)
     owner = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField(["id", "name", "is_locked"])
-    requirement_node = FieldsRelatedField(["id", "ref_id", "name"])
+    # No standalone page exists for requirement nodes: omit "id" so the
+    # generic detail view renders plain text instead of a dead link.
+    requirement_node = FieldsRelatedField(["ref_id", "name"])
     asset = FieldsRelatedField()
     threats = FieldsRelatedField(many=True)
     vulnerabilities = FieldsRelatedField(many=True)
