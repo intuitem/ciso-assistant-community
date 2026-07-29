@@ -17432,7 +17432,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             ).distinct()
         return qs
 
-    EDITABLE_STATUSES = ("draft")
+    EDITABLE_STATUSES = "draft"
 
     def update(self, request, *args, **kwargs):
         assignment = self.get_object()
