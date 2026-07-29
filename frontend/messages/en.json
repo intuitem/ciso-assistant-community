@@ -1442,6 +1442,8 @@
 	"ShowAllNodesMessage": "Show all",
 	"ShowOnlyAssessable": "Only assessable",
 	"NoPreviewMessage": "No preview available.",
+	"previewTooLarge": "File is too large to preview. Download it to view its content.",
+	"previewTruncated": "Preview truncated. Download the file to see everything.",
 	"couldNotFindAttachmentMessage": "Could not find attachment file. Please contact your administrator.",
 	"licenseExpiredMessage": "Your license has expired. Write operations are disabled. Please contact your administrator to renew it.",
 	"experimental": "Experimental",
