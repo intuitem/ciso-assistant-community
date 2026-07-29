@@ -49,7 +49,7 @@ def get_accessible_folder_ids(user) -> list[str]:
     folder_id_queryset = RoleAssignment.get_allowed_folder_ids(user, ("view", Folder))
     non_enclave_folder_ids = Folder.objects.filter(
         Q(id__in=folder_id_queryset) & ~Q(content_type=Folder.ContentType.ENCLAVE)
-    )
+    ).values_list("id", flat=True)
 
     return [str(folder_id) for folder_id in non_enclave_folder_ids]
 
