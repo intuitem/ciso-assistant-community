@@ -1246,7 +1246,6 @@
 									{...props}
 									href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`}
 									breadcrumbAction="push"
-									onclick={props.onclick}
 								>
 									{m.view()}
 								</Anchor>
