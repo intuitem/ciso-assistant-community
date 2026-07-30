@@ -1467,6 +1467,8 @@
 	"ShowAllNodesMessage": "Tout afficher",
 	"ShowOnlyAssessable": "Uniquement évaluables",
 	"NoPreviewMessage": "Aucun aperçu disponible.",
+	"previewTooLarge": "Fichier trop volumineux pour être prévisualisé. Téléchargez-le pour en voir le contenu.",
+	"previewTruncated": "Aperçu tronqué. Téléchargez le fichier pour tout consulter.",
 	"couldNotFindAttachmentMessage": "Impossible de trouver la pièce jointe. Merci de contacter votre administrateur.",
 	"licenseExpiredMessage": "Votre licence a expiré. Les opérations d'écriture sont désactivées. Veuillez contacter votre administrateur pour la renouveler.",
 	"experimental": "Expérimental",
