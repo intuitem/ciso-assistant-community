@@ -194,6 +194,23 @@ class TestWorkflowCreation:
     def test_version_inherits_workflow_folder(self, workflow):
         assert workflow.versions.first().folder_id == workflow.folder_id
 
+    def test_list_filters_by_is_active(self, superuser):
+        root = Folder.get_root_folder()
+        Workflow.objects.create(name="Live", folder=root, is_active=True)
+        Workflow.objects.create(name="Paused", folder=root, is_active=False)
+        factory = APIRequestFactory()
+        view = WorkflowViewSet.as_view({"get": "list"})
+
+        req = factory.get("/api/workflows/workflows/?is_active=false")
+        force_authenticate(req, user=superuser)
+        names = {row["name"] for row in view(req).data["results"]}
+        assert names == {"Paused"}
+
+        req = factory.get("/api/workflows/workflows/?is_active=true")
+        force_authenticate(req, user=superuser)
+        names = {row["name"] for row in view(req).data["results"]}
+        assert names == {"Live"}
+
 
 @pytest.mark.django_db
 class TestGraphSave:

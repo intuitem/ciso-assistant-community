@@ -3086,11 +3086,19 @@ export const listViewFields = {
 		filters: {}
 	},
 	workflows: {
-		head: ['name', 'description', 'folder'],
-		body: ['name', 'description', 'folder'],
+		head: ['name', 'description', 'is_active', 'folder'],
+		body: ['name', 'description', 'is_active', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			is_active: {
+				component: AutocompleteSelect,
+				props: {
+					label: 'isActive',
+					options: YES_NO_OPTIONS,
+					multiple: false
+				}
+			}
 		}
 	},
 	'metric-definitions': {

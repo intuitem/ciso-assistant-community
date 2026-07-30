@@ -52,7 +52,7 @@ LONG_CACHE_TTL = 60
 class WorkflowViewSet(BaseModelViewSet):
     model = Workflow
     serializers_module = "workflows.serializers"
-    filterset_fields = ["folder", "filtering_labels"]
+    filterset_fields = ["folder", "filtering_labels", "is_active"]
     search_fields = ["name", "description", "ref_id"]
     ordering = ["created_at"]
 
