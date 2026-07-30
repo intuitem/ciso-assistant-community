@@ -289,6 +289,9 @@ class TestHttpRequest:
         )
         instance = start_instance(version)
         assert instance.status == WorkflowInstance.Status.FAILED
+        assert instance.tokens.filter(
+            error_message__contains="HTTP 500 from 'api.example.com'"
+        ).exists()
         for log in instance.logs.all():
             assert "leak-me" not in str(log.data) + log.message
         for tok in instance.tokens.all():

@@ -645,7 +645,7 @@ class HttpRequestAction(BaseAction):
         # instead of letting downstream nodes run on empty variables. Graphs
         # that want to branch on the status opt in via allow_error_status.
         if response.status_code >= 400 and not config.get("allow_error_status"):
-            host = urlsplit(current_url).hostname or "target"
+            host = urlsplit(url).hostname or "target"
             raise ActionError(
                 f"http_request: HTTP {response.status_code} from '{host}': "
                 f"{str(response_body)[:200]}"
@@ -926,4 +926,3 @@ def execute_action(node, instance):
     if action is None:
         raise ActionError(f"Unknown action type '{action_type}'")
     return action.execute(config, instance)
-

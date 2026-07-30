@@ -717,7 +717,7 @@ class TestManualRunAuthz:
         resp = self._post(str(workflow.published_version.id), user)
         assert resp.status_code == 403
 
-    def test_analyst_can_run_in_their_domain(self):
+    def test_view_only_analyst_cannot_run_in_their_domain(self):
         domain = Folder.objects.create(
             name="Run domain",
             parent_folder=Folder.get_root_folder(),
@@ -729,7 +729,7 @@ class TestManualRunAuthz:
         analyst = User.objects.create_user(email="ana@example.com")
         analyst.user_groups.add(UserGroup.objects.get(folder=domain, name="BI-UG-ANA"))
         resp = self._post(str(workflow.published_version.id), analyst)
-        assert resp.status_code == 201, resp.data
+        assert resp.status_code == 403
 
     def test_archived_version_rejected(self, superuser):
         workflow = self._publish_in(Folder.get_root_folder())
@@ -737,6 +737,17 @@ class TestManualRunAuthz:
         version.status = WorkflowVersion.Status.ARCHIVED
         version.save(update_fields=["status"])
         resp = self._post(str(version.id), superuser)
+        assert resp.status_code == 400
+        assert resp.data["error"] == "onlyCurrentVersionsCanBeRun"
+
+    def test_stale_draft_rejected(self, superuser):
+        workflow, stale = make_workflow("Multiple drafts")
+        current = WorkflowVersion.objects.create(
+            workflow=workflow,
+            version_number=stale.version_number + 1,
+        )
+        assert workflow.draft_version == current
+        resp = self._post(str(stale.id), superuser)
         assert resp.status_code == 400
         assert resp.data["error"] == "onlyCurrentVersionsCanBeRun"
 

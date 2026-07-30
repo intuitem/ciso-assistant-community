@@ -425,9 +425,18 @@ class WorkflowInstanceViewSet(BaseModelViewSet):
             return Response(
                 {"error": "permissionDenied"}, status=status.HTTP_403_FORBIDDEN
             )
-        # Only the workflow's current draft or published version is runnable;
-        # archived versions are pinned history, not something to launch anew.
-        if version.status == WorkflowVersion.Status.ARCHIVED:
+        # Only the workflow's actual current draft or published version is
+        # runnable. Checking status alone is insufficient if malformed/imported
+        # data contains more than one non-archived version.
+        current_version_ids = {
+            candidate.id
+            for candidate in (
+                version.workflow.draft_version,
+                version.workflow.published_version,
+            )
+            if candidate is not None
+        }
+        if version.id not in current_version_ids:
             return Response(
                 {"error": "onlyCurrentVersionsCanBeRun"},
                 status=status.HTTP_400_BAD_REQUEST,
