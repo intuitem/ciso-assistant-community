@@ -114,6 +114,21 @@ Opening `samples/starter.pbit` instead asks for the same URL up front, as a
 `BaseUrl` parameter. Change it later under **Transform data → Manage
 parameters** to repoint the whole report at another instance.
 
+## Upgrading the connector
+
+Reports keep working across connector upgrades as long as changes are
+additive: credentials bind to the data source kind plus the base URL, and
+queries bind to navigator entry names and column names. Renaming a table or
+column, or renaming the data source kind, is breaking.
+
+One caveat for reports built with connector **1.0.1 or older**: those queries
+navigate by position (`Source{0}[Data]`) rather than by name, because the
+navigator did not declare a key before 1.0.2. Inserting or reordering an entry
+in Facts / Dimensions / Bridges silently repoints such a query at a different
+table. Re-doing the navigation steps against 1.0.2+ produces the name-based
+form and removes the hazard; until then, new entries must be appended to the
+end of their group.
+
 ## Modeling tips
 
 - Relate facts to dimensions on the `*_id` columns

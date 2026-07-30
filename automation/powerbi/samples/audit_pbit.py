@@ -28,6 +28,7 @@ EXPECTED_RELATIONSHIPS = {
 }
 
 URL_LITERAL = re.compile(r"CisoAssistant\.Contents\s*\(\s*\"")
+POSITIONAL_NAV = re.compile(r"\{\d+\}\[Data\]")
 PARAMETER_DEFAULT = re.compile(r'^\s*"([^"]*)"')
 
 ALLOWED_DEFAULTS = {"https://localhost:8443", "https://ciso-assistant.example.com"}
@@ -83,6 +84,13 @@ def main():
         if URL_LITERAL.search(expression):
             errors.append(
                 f"{table}: hardcoded URL in CisoAssistant.Contents — must be CisoAssistant.Contents(BaseUrl)"
+            )
+        positional = POSITIONAL_NAV.search(expression)
+        if positional:
+            errors.append(
+                f"{table}: positional navigation ({positional.group()}) — "
+                'must select by key ({[Name = "..."]}[Data]), or reordering the connector navigator '
+                "silently repoints this query at another table"
             )
 
     found = {

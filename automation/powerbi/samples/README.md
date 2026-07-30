@@ -35,6 +35,14 @@ exposes everything either way.
   users with 12 Advanced Editor edits to make. `audit_pbit.py` fails the build
   on that.
 
+**Navigation:** queries select navigator entries by key
+(`Source{[Name = "Facts"]}[Data]`), never by position (`Source{0}[Data]`).
+Desktop only generates the key form against connector ≥ 1.0.2
+(`Type.AddTableKey` in `ToNavigationTable`); with an older connector
+installed it emits positions, which silently repoint at a different table
+whenever the navigator gains or reorders an entry. `audit_pbit.py` fails on
+any positional step.
+
 **Settings baked into the file:**
 
 - *Autodetect new relationships after data is loaded* is **off** (Options →
