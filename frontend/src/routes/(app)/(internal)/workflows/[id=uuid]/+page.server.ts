@@ -15,14 +15,19 @@ function listResults(data: unknown): any[] {
 	return [];
 }
 
-export const load: PageServerLoad = async ({ fetch, params }) => {
+export const load: PageServerLoad = async ({ fetch, params, url }) => {
 	const workflow = await fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/${params.id}/`);
 	if (!workflow) error(404, 'Workflow not found');
 
 	const versions: { id: string; version_number: number; status: string }[] = (
 		workflow.versions ?? []
 	).sort((a: any, b: any) => b.version_number - a.version_number);
+	// ?version= pins a specific version (versions panel navigation, spec D32);
+	// default stays draft ?? published ?? first.
+	const requestedVersion = url.searchParams.get('version');
+	const pinnedVersion = versions.find((v) => v.id === requestedVersion) ?? null;
 	const activeVersion =
+		pinnedVersion ??
 		versions.find((v) => v.status === 'draft') ??
 		versions.find((v) => v.status === 'published') ??
 		versions[0];
@@ -59,6 +64,7 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 		workflow,
 		versions,
 		activeVersion,
+		versionPinned: pinnedVersion !== null,
 		graph,
 		taskTemplates: listResults(taskTemplates),
 		// A workflow can't be its own subprocess.

@@ -18,7 +18,20 @@ class WorkflowReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
-    versions = FieldsRelatedField(["id", "version_number", "status"], many=True)
+    versions = serializers.SerializerMethodField()
+
+    def get_versions(self, workflow):
+        # Versions-panel rows (spec D32): newest first, with run counts.
+        return [
+            {
+                "id": str(version.id),
+                "version_number": version.version_number,
+                "status": version.status,
+                "published_at": version.published_at,
+                "run_count": version.instances.count(),
+            }
+            for version in workflow.versions.order_by("-version_number")
+        ]
 
     class Meta:
         model = Workflow
@@ -39,6 +52,12 @@ class WorkflowWriteSerializer(BaseModelSerializer):
 class WorkflowVersionReadSerializer(BaseModelSerializer):
     workflow = FieldsRelatedField()
     folder = FieldsRelatedField()
+    # Versions-panel row data (spec D32); versions per workflow are few, the
+    # count query per row is fine.
+    run_count = serializers.SerializerMethodField()
+
+    def get_run_count(self, version):
+        return version.instances.count()
 
     class Meta:
         model = WorkflowVersion

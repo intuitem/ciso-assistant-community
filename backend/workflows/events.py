@@ -62,7 +62,10 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
 
     started = []
     triggers = WorkflowTrigger.objects.filter(
-        type=WorkflowTrigger.Type.INTERNAL_EVENT, enabled=True, event_key=event_key
+        type=WorkflowTrigger.Type.INTERNAL_EVENT,
+        enabled=True,
+        event_key=event_key,
+        workflow__is_active=True,
     ).select_related("workflow")
     state_cache = {}
     for trigger in triggers:

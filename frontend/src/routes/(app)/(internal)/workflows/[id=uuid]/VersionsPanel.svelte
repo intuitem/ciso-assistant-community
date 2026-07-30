@@ -1,0 +1,85 @@
+<script lang="ts">
+	import { m } from '$paraglide/messages';
+
+	interface VersionRow {
+		id: string;
+		version_number: number;
+		status: string;
+		published_at?: string | null;
+		run_count?: number;
+	}
+
+	interface Props {
+		versions: VersionRow[];
+		activeVersionId: string;
+		onSelect: (version: VersionRow) => void;
+		onRestore?: (version: VersionRow) => void;
+	}
+
+	let { versions, activeVersionId, onSelect, onRestore }: Props = $props();
+
+	const STATUS_BADGE: Record<string, { class: string; label: () => string }> = {
+		draft: { class: 'preset-tonal-warning', label: () => m.draftVersion() },
+		published: { class: 'preset-tonal-success', label: () => m.publishedVersion() },
+		archived: { class: 'preset-tonal', label: () => m.archivedVersion() }
+	};
+
+	const hasDraft = $derived(versions.some((v) => v.status === 'draft'));
+
+	function formatWhen(value?: string | null) {
+		if (!value) return '—';
+		return new Date(value).toLocaleString();
+	}
+</script>
+
+<div
+	class="h-60 shrink-0 border-t border-surface-200-800 bg-surface-100-900 overflow-y-auto"
+	data-testid="versions-panel"
+>
+	<ul class="divide-y divide-surface-200-800">
+		{#each versions as version (version.id)}
+			{@const badge = STATUS_BADGE[version.status] ?? STATUS_BADGE.archived}
+			<li>
+				<div
+					role="button"
+					tabindex="0"
+					class="w-full flex items-center gap-3 px-4 py-2 text-xs cursor-pointer text-left
+					{version.id === activeVersionId ? 'bg-surface-50-950' : 'hover:bg-surface-50-950'}"
+					onclick={() => onSelect(version)}
+					onkeydown={(e) => e.key === 'Enter' && e.target === e.currentTarget && onSelect(version)}
+					data-testid="version-row"
+				>
+					<span class="font-mono font-semibold text-surface-800-200 w-8">
+						v{version.version_number}
+					</span>
+					<span class="badge {badge.class} text-[10px]">{badge.label()}</span>
+					<span class="text-surface-500" title={m.publishedVersion()}>
+						{formatWhen(version.published_at)}
+					</span>
+					<span class="ml-auto text-surface-600-400 shrink-0">
+						<i class="fa-solid fa-bolt-lightning mr-1 text-[9px]"></i>{version.run_count ?? 0}
+						{m.workflowRuns().toLowerCase()}
+					</span>
+					{#if version.id === activeVersionId}
+						<span class="badge preset-tonal-primary text-[9px] shrink-0">{m.viewing()}</span>
+					{/if}
+					{#if onRestore && version.status === 'archived'}
+						<button
+							type="button"
+							class="btn-icon preset-tonal w-6 h-6 text-[10px] shrink-0"
+							title={hasDraft ? m.restoreBlockedByDraft() : m.restoreAsDraft()}
+							disabled={hasDraft}
+							onclick={(e) => {
+								e.stopPropagation();
+								onRestore(version);
+							}}
+							data-testid="restore-version"
+						>
+							<i class="fa-solid fa-clock-rotate-left"></i>
+						</button>
+					{/if}
+				</div>
+			</li>
+		{/each}
+	</ul>
+</div>

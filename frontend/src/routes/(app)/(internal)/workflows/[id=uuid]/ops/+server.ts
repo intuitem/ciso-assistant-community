@@ -39,7 +39,7 @@ async function proxy(
 	return json(data, { status: res.status });
 }
 
-export const POST: RequestHandler = async ({ fetch, request, url }) => {
+export const POST: RequestHandler = async ({ fetch, request, url, params }) => {
 	const action = url.searchParams.get('action');
 	const body = await request.json().catch(() => ({}));
 
@@ -93,6 +93,21 @@ export const POST: RequestHandler = async ({ fetch, request, url }) => {
 				payload.entry_node_ref = body.entry_node_ref;
 			}
 			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-instances/`, 'POST', payload);
+		}
+
+		case 'set-active': {
+			return proxy(fetch, `${BASE_API_URL}/workflows/workflows/${params.id}/`, 'PATCH', {
+				is_active: Boolean(body.is_active)
+			});
+		}
+
+		case 'restore-version': {
+			const versionId = requireUuid(body.version, 'version');
+			return proxy(
+				fetch,
+				`${BASE_API_URL}/workflows/workflow-versions/${versionId}/restore/`,
+				'POST'
+			);
 		}
 
 		case 'list-instances': {

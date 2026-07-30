@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
-	import { invalidateAll } from '$app/navigation';
+	import { invalidateAll, goto } from '$app/navigation';
+	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { setContext } from 'svelte';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 	import {
@@ -24,6 +25,7 @@
 	import Inspector from './Inspector.svelte';
 	import RunsPanel from './RunsPanel.svelte';
 	import TriggersPanel from './TriggersPanel.svelte';
+	import VersionsPanel from './VersionsPanel.svelte';
 	import WorkflowDataPanel from './WorkflowDataPanel.svelte';
 	import StepNode from './nodes/StepNode.svelte';
 	import ConditionNode from './nodes/ConditionNode.svelte';
@@ -47,6 +49,9 @@
 		subprocessCandidates: any[];
 		creatableModels?: any[];
 		readableModels?: any[];
+		workflowIsActive?: boolean;
+		versions?: any[];
+		versionPinned?: boolean;
 		fkOptions?: Record<string, any[]>;
 	}
 
@@ -65,6 +70,9 @@
 		subprocessCandidates,
 		creatableModels = [],
 		readableModels = [],
+		workflowIsActive = true,
+		versions = [],
+		versionPinned = false,
 		fkOptions = {}
 	}: Props = $props();
 
@@ -1095,6 +1103,42 @@
 	let runsOpen = $state(false);
 	let runsPanel = $state<RunsPanel | null>(null);
 	let triggersOpen = $state(false);
+	// Props are per-mount constants (the page remounts the canvas via {#key}),
+	// so capturing their initial values is correct.
+	// svelte-ignore state_referenced_locally
+	let versionsOpen = $state(versionPinned);
+
+	// Master switch (spec D32): gates automatic execution; manual runs keep
+	// working, so the builder stays fully usable while paused.
+	// svelte-ignore state_referenced_locally
+	let isActive = $state(workflowIsActive);
+	async function toggleActive() {
+		const next = !isActive;
+		isActive = next;
+		const res = await fetch(opsUrl('set-active'), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ is_active: next })
+		});
+		if (!res.ok) isActive = !next; // revert on failure
+	}
+
+	function selectVersion(version: any) {
+		if (version.id === activeVersionId) return;
+		goto(`/workflows/${workflowId}?version=${version.id}`, { invalidateAll: true });
+	}
+
+	async function restoreVersion(version: any) {
+		const res = await fetch(opsUrl('restore-version'), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ version: version.id })
+		});
+		if (res.ok) {
+			// The new draft becomes the default active version.
+			await goto(`/workflows/${workflowId}`, { invalidateAll: true });
+		}
+	}
 	let dataOpen = $state(false);
 	let running = $state(false);
 	let runPickerOpen = $state(false);
@@ -1578,6 +1622,26 @@
 		<span class="badge {badge.class} text-xs" data-testid="version-badge">
 			v{versionNumber} · {badge.label()}
 		</span>
+		{#if !readonly}
+			<Switch
+				name="workflow-active"
+				checked={isActive}
+				onCheckedChange={toggleActive}
+				data-testid="toggle-workflow-active"
+			>
+				<Switch.Control class="scale-75 -mx-1">
+					<Switch.Thumb />
+				</Switch.Control>
+				<Switch.HiddenInput />
+				<span
+					class="w-14 text-[10px] font-semibold uppercase tracking-wide {isActive
+						? 'text-success-600'
+						: 'text-surface-500'}"
+				>
+					{isActive ? m.triggerEnabled() : m.triggerDisabled()}
+				</span>
+			</Switch>
+		{/if}
 		{#if workflowDescription}
 			<p class="text-sm text-surface-600-400 truncate">{workflowDescription}</p>
 		{/if}
@@ -1775,10 +1839,25 @@
 								<i class="fa-solid fa-cube mr-1"></i>
 								{m.workflowVariables()}
 							</button>
+							<button
+								type="button"
+								class="btn preset-tonal text-sm"
+								class:preset-filled-secondary-500={versionsOpen}
+								onclick={() => (versionsOpen = !versionsOpen)}
+								data-testid="toggle-versions"
+							>
+								<i class="fa-solid fa-code-commit mr-1"></i>
+								{m.workflowVersions()}
+							</button>
 						</div>
 					</Panel>
 					<Panel position="top-right">
 						<div class="flex items-center gap-2">
+							{#if !isActive}
+								<span class="badge preset-tonal-warning text-[10px]" title={m.workflowPausedHint()}>
+									<i class="fa-solid fa-pause mr-1"></i>{m.workflowPaused()}
+								</span>
+							{/if}
 							<div class="relative">
 								<button
 									type="button"
@@ -1886,6 +1965,15 @@
 				<TriggersPanel {registrations} {workflowId} onRefresh={refreshRegistrations} />
 			{/if}
 
+			{#if versionsOpen}
+				<VersionsPanel
+					{versions}
+					activeVersionId={versionId}
+					onSelect={selectVersion}
+					onRestore={restoreVersion}
+				/>
+			{/if}
+
 			{#if dataOpen}
 				<aside
 					class="h-60 shrink-0 border-t border-surface-200-800 bg-surface-100-900 overflow-y-auto"
@@ -1916,6 +2004,7 @@
 					onPinReference={pinReference}
 					onRunsRefreshed={handleRunsRefreshed}
 					referenceRunId={referenceRun?.id ?? null}
+					filterVersionId={versionPinned ? versionId : null}
 				/>
 			{/if}
 		</div>

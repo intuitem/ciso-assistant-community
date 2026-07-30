@@ -63,6 +63,9 @@
 			subprocessCandidates={data.subprocessCandidates}
 			creatableModels={data.creatableModels}
 			readableModels={data.readableModels}
+			workflowIsActive={data.workflow.is_active}
+			versions={data.versions}
+			versionPinned={data.versionPinned}
 			fkOptions={data.fkOptions}
 			onDiscarded={() => (canvasEpoch += 1)}
 		/>

@@ -645,6 +645,10 @@ def _start_subprocess(token):
     version = target.published_version if target else None
     if version is None:
         raise EngineError("Subprocess workflow has no published version")
+    if not version.is_active:
+        # Automatic execution must not tunnel through a paused child
+        # (spec D32); manual-run leniency applies to direct runs only.
+        raise EngineError("Subprocess workflow is inactive")
     # Bound recursion: a subprocess cycle would otherwise nest run_instance
     # calls until the Python stack blows. Publish validation blocks direct
     # self-reference; this catches cross-workflow cycles too.

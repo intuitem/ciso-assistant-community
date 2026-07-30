@@ -20,6 +20,9 @@ def generate_webhook_secret():
 
 class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
     ref_id = models.CharField(max_length=100, blank=True)
+    # Master switch (spec D32): gates AUTOMATIC execution only — manual runs
+    # keep working so a paused workflow stays debuggable. Cascades to versions.
+    is_active = models.BooleanField(default=True)
     # Marketplace/catalog provenance (spec D28): where an imported document
     # came from. Purely informational — the workflow divorces at import and
     # owns its own lifecycle; nothing ever syncs back.
@@ -37,16 +40,24 @@ class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
         # On folder move, propagate to versions and their children — they only
         # inherit folder at create-time, so IAM scoping would drift.
         folder_changed = False
+        active_changed = False
         if self.pk:
-            old_folder_id = (
+            previous = (
                 type(self)
                 .objects.filter(pk=self.pk)
-                .values_list("folder_id", flat=True)
+                .values("folder_id", "is_active")
                 .first()
             )
-            if old_folder_id and old_folder_id != self.folder_id:
-                folder_changed = True
+            if previous:
+                if previous["folder_id"] and previous["folder_id"] != self.folder_id:
+                    folder_changed = True
+                if previous["is_active"] != self.is_active:
+                    active_changed = True
         super().save(*args, **kwargs)
+        if active_changed:
+            # The version flag is the enforcement layer every execution path
+            # checks; not user-toggleable per version in this iteration.
+            self.versions.update(is_active=self.is_active)
         if folder_changed:
             self.versions.update(folder=self.folder)
             self.triggers.update(folder=self.folder)
@@ -96,6 +107,9 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
         related_name="versions",
     )
     version_number = models.PositiveIntegerField(default=1)
+    # Mirrors Workflow.is_active (spec D32) — set by the cascade, checked by
+    # every automatic execution path.
+    is_active = models.BooleanField(default=True)
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
@@ -777,6 +791,7 @@ class WorkflowTrigger(AbstractBaseModel, FolderMixin):
         SKIPPED_OVERLAP = "skipped_overlap", "Skipped (previous run still active)"
         SKIPPED_UNPUBLISHED = "skipped_unpublished", "Skipped (unpublished)"
         SKIPPED_DEPTH = "skipped_depth", "Skipped (chain depth)"
+        SKIPPED_INACTIVE = "skipped_inactive", "Skipped (workflow inactive)"
         ERROR = "error", "Error"
 
     workflow = models.ForeignKey(

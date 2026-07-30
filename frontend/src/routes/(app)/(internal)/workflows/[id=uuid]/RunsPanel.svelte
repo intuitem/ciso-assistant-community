@@ -8,6 +8,8 @@
 		onPinReference?: (run: any) => void;
 		onRunsRefreshed?: (runs: any[]) => void;
 		referenceRunId?: string | null;
+		// Pin the list to one version (versions-panel navigation, spec D32).
+		filterVersionId?: string | null;
 	}
 
 	let {
@@ -16,7 +18,8 @@
 		onReplayRun,
 		onPinReference,
 		onRunsRefreshed,
-		referenceRunId = null
+		referenceRunId = null,
+		filterVersionId = null
 	}: Props = $props();
 
 	async function withLogs(run: any, callback?: (run: any, logs: any[]) => void) {
@@ -104,7 +107,7 @@
 		</p>
 	{:else}
 		<ul class="divide-y divide-surface-200-800">
-			{#each runs as run (run.id)}
+			{#each runs.filter((r) => !filterVersionId || r.version?.id === filterVersionId) as run (run.id)}
 				{@const style = STATUS_STYLE[run.status] ?? STATUS_STYLE.abandoned}
 				<li>
 					<!-- Row is a div (not a button): it contains real <button> controls,

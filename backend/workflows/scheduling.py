@@ -95,7 +95,11 @@ def run_due_schedules(now=None):
             entry = version.nodes.filter(
                 type=WorkflowNode.Type.TRIGGER, ref=registration.node_ref
             ).first()
-        if version is None:
+        if not registration.workflow.is_active:
+            # The CAS claim above already advanced next_run_at, so
+            # reactivation resumes on the next occurrence — no catch-up storm.
+            result = WorkflowTrigger.Result.SKIPPED_INACTIVE
+        elif version is None:
             result = WorkflowTrigger.Result.SKIPPED_UNPUBLISHED
         elif entry is None:
             # A publish raced the claim and removed the node; the row is on

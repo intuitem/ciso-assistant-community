@@ -214,6 +214,15 @@ def validate_graph(version):
                         node=node,
                     )
                 )
+            elif not target.is_active:
+                errors.append(
+                    _error(
+                        "subprocess_inactive",
+                        "The subprocess workflow is inactive — enable it "
+                        "before publishing",
+                        node=node,
+                    )
+                )
             else:
                 # Best effort (the child republishes independently, same
                 # TOCTOU as subprocess_unpublished): the child's current

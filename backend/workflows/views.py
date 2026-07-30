@@ -266,6 +266,32 @@ class WorkflowVersionViewSet(BaseModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
+    @action(detail=True, methods=["post"])
+    def restore(self, request, pk=None):
+        """Clone any archived version into a new draft (spec D32). Blocked
+        while a draft exists — one draft at a time, no silent forking."""
+        version = self.get_object()
+        if version.status != WorkflowVersion.Status.ARCHIVED:
+            return Response(
+                {"error": "onlyArchivedVersionsCanBeRestored"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        existing_draft = version.workflow.draft_version
+        if existing_draft is not None:
+            return Response(
+                {
+                    "error": "draftAlreadyExists",
+                    "draft_id": str(existing_draft.id),
+                    "draft_version_number": existing_draft.version_number,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        draft = version.clone_as_draft()
+        return Response(
+            {"id": str(draft.id), "version_number": draft.version_number},
+            status=status.HTTP_201_CREATED,
+        )
+
 
 class WorkflowTriggerViewSet(BaseModelViewSet):
     """Registration rows are publish-managed (workflows.triggers): the API
@@ -525,8 +551,10 @@ class WorkflowWebhookView(APIView):
             .select_related("workflow")
             .first()
         )
-        if registration is None or not constant_time_compare(
-            secret, registration.secret
+        if (
+            registration is None
+            or not registration.workflow.is_active
+            or not constant_time_compare(secret, registration.secret)
         ):
             return Response(status=status.HTTP_404_NOT_FOUND)
         if registration.hmac_secret and not self._signature_valid(
