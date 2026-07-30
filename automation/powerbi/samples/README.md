@@ -24,6 +24,17 @@ Perimeters, Reference Controls, Findings, Findings Assessments, Labels, and
 the remaining bridges. Lean loads faster and confuses less; the connector
 exposes everything either way.
 
+**Parameter:**
+
+- `BaseUrl` (Text, required) — every one of the 12 queries calls
+  `CisoAssistant.Contents(BaseUrl)`. Power BI prompts for it when the template
+  is opened, and it stays editable afterwards under **Transform data → Manage
+  parameters** (and in the Service, under dataset settings). Never let a
+  literal URL back into the queries: a `.pbit` exported from a report whose
+  queries hardcode an instance both ships the author's hostname and leaves end
+  users with 12 Advanced Editor edits to make. `audit_pbit.py` fails the build
+  on that.
+
 **Settings baked into the file:**
 
 - *Autodetect new relationships after data is loaded* is **off** (Options →
@@ -97,26 +108,31 @@ if a dimension slicer must filter facts through it.
 
 1. Install the current connector (see `../CONTRIBUTING.md`).
 2. New blank report → turn OFF relationship autodetect (above) **before**
-   loading → Get Data → CISO Assistant → load the 12 tables.
-3. Wire the relationships, add the calculated column + measures, build the
+   loading → **Home → Transform data → Manage parameters → New**: name
+   `BaseUrl`, type Text, Required, current value = your instance URL.
+3. Get Data → CISO Assistant → paste `BaseUrl` (not a literal) into the URL
+   box of the connector dialog → load the 12 tables.
+4. Wire the relationships, add the calculated column + measures, build the
    pages, apply the report-level `assessable` filter.
-4. **File → Export → Power BI template** → `starter.pbit` here. Never commit
+5. Set `BaseUrl` back to `https://localhost:8443` before exporting — the
+   template ships whatever the parameter's current value is, and that value is
+   what the next user sees pre-filled in the open dialog.
+6. **File → Export → Power BI template** → `starter.pbit` here. Never commit
    a `.pbix` — it embeds the authoring instance's data (enforced via
-   `.gitignore`); the `.pbit` strips data and prompts for URL + PAT on
+   `.gitignore`); the `.pbit` strips data and prompts for `BaseUrl` + PAT on
    first open.
-5. **Audit the export** — a `.pbit` is a zip whose `DataModelSchema` and
-   `Report/Layout` are UTF-16 JSON. Check tables/relationships/measures
-   against this README before committing; autodetect-phantom relationships
-   (same-named columns like `ref_id`) have slipped into exports before:
+7. **Audit the export** — a `.pbit` is a zip whose `DataModelSchema` and
+   `Report/Layout` are UTF-16 JSON, and Desktop bakes the authoring session
+   into it (hardcoded URLs, autodetect-phantom relationships on same-named
+   columns like `ref_id` — both have slipped into exports before):
 
    ```bash
-   unzip -o starter.pbit -d /tmp/pbit
-   python3 -c "
-   import json
-   m = json.loads(open('/tmp/pbit/DataModelSchema','rb').read().decode('utf-16-le'))['model']
-   [print(r['fromTable'],r['fromColumn'],'->',r['toTable'],r['toColumn'])
-    for r in m['relationships'] if 'LocalDateTable' not in r['toTable']]"
+   python3 audit_pbit.py
    ```
+
+   The same script runs in the `Power BI connector` workflow on every change
+   under `automation/powerbi/`, so a bad export fails CI rather than reaching
+   a user. Still eyeball tables and measures against this README by hand.
 
 Ideas validated but intentionally left out of v1 (add when asked for):
 framework-level drill page (`framework_name` → folder → audit; caveat:

@@ -110,6 +110,10 @@ Power BI.
 3. Paste your Personal Access Token when prompted.
 4. Pick tables in the Navigator (Facts / Dimensions / Bridges) and **Load**.
 
+Opening `samples/starter.pbit` instead asks for the same URL up front, as a
+`BaseUrl` parameter. Change it later under **Transform data → Manage
+parameters** to repoint the whole report at another instance.
+
 ## Modeling tips
 
 - Relate facts to dimensions on the `*_id` columns

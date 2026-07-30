@@ -34,6 +34,10 @@ jobs:
           $tag = $env:GITHUB_REF_NAME -replace '^powerbi-v', ''
           if ($version -ne $tag) { throw "tag $env:GITHUB_REF_NAME does not match connector [Version = `"$version`"]" }
 
+      - name: Audit starter template
+        shell: pwsh
+        run: python automation/powerbi/samples/audit_pbit.py
+
       - name: Build .mez (zip of connector sources)
         shell: pwsh
         run: |
