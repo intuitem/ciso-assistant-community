@@ -5,9 +5,10 @@ import uuid
 
 import pytest
 import yaml
+from rest_framework.test import APIClient
 
 from core.models import StoredLibrary, LoadedLibrary
-from iam.models import Folder
+from iam.models import Folder, User
 from workflows.graph import save_graph
 from workflows.import_export import export_workflow_library, import_workflow_library
 from workflows.models import Workflow, WorkflowVersion
@@ -50,6 +51,59 @@ def simple_workflow(name="Escalation runbook"):
         },
     )
     return workflow
+
+
+@pytest.fixture
+def superuser(db):
+    return User.objects.create_superuser(email="libtest@example.com", password="x")
+
+
+@pytest.mark.django_db
+class TestInstantiateFromLoadedLibrary:
+    def test_instantiate_repeatedly_into_folder(self, superuser):
+        document = export_workflow_library(simple_workflow("Instantiable"))
+        stored, error = StoredLibrary.store_library_content(
+            yaml.safe_dump(document).encode()
+        )
+        assert error is None
+        assert stored.load() is None
+        loaded = LoadedLibrary.objects.get(urn=document["urn"])
+
+        domain = Folder.objects.create(
+            name="Target domain",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        client = APIClient()
+        client.force_authenticate(superuser)
+        for _ in range(2):
+            resp = client.post(
+                f"/api/loaded-libraries/{loaded.id}/instantiate-workflows/",
+                {"folder": str(domain.id)},
+                format="json",
+            )
+            assert resp.status_code == 200, resp.data
+        created = Workflow.objects.filter(folder=domain)
+        assert created.count() == 2
+        assert all(
+            w.source_urn == document["objects"]["workflows"][0]["urn"] for w in created
+        )
+
+    def test_instantiate_requires_valid_folder(self, superuser):
+        document = export_workflow_library(simple_workflow("Instantiable 2"))
+        stored, _ = StoredLibrary.store_library_content(
+            yaml.safe_dump(document).encode()
+        )
+        assert stored.load() is None
+        loaded = LoadedLibrary.objects.get(urn=document["urn"])
+        client = APIClient()
+        client.force_authenticate(superuser)
+        resp = client.post(
+            f"/api/loaded-libraries/{loaded.id}/instantiate-workflows/",
+            {"folder": "not-a-folder"},
+            format="json",
+        )
+        assert resp.status_code == 400
 
 
 @pytest.mark.django_db

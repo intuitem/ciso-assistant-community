@@ -11,8 +11,63 @@
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 
+	import { getFlash } from 'sveltekit-flash-message';
+	import { page } from '$app/stores';
+
 	let { data } = $props();
 	let expandedNodes: string[] = $state([]);
+	const flash = getFlash(page);
+
+	// Workflow libraries (spec D31): loaded workflows are divorced rows, so the
+	// library only carries a count (objects_meta) — instantiation reads the
+	// stored content server-side and can be repeated at will.
+	const workflowCount = $derived(data.library.objects_meta?.workflows ?? 0);
+	let instantiating = $state(false);
+	let instantiateFolder = $state('');
+	let folderOptions = $state<{ id: string; name?: string; str?: string }[]>([]);
+	let instantiateBusy = $state(false);
+
+	async function openInstantiate() {
+		instantiating = !instantiating;
+		if (instantiating && folderOptions.length === 0) {
+			const res = await fetch(
+				'/folders/org_tree/?include_perimeters=false&write_perm=add_workflow'
+			);
+			const tree = await res.json().catch(() => null);
+			const flat: { id: string; name: string }[] = [];
+			const visit = (node: any, depth: number) => {
+				if (!node) return;
+				const allowed = !node.content_type || ['DO', 'GL'].includes(node.content_type);
+				if (allowed && node.writable !== false)
+					flat.push({ id: node.uuid ?? node.id, name: `${'  '.repeat(depth)}${node.name}` });
+				(node.children ?? []).forEach((child: any) => visit(child, depth + 1));
+			};
+			visit(tree, 0);
+			folderOptions = flat;
+		}
+	}
+
+	async function instantiateWorkflows() {
+		if (!instantiateFolder) return;
+		instantiateBusy = true;
+		try {
+			const res = await fetch(`/loaded-libraries/${data.library.id}/instantiate-workflows`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ folder: instantiateFolder })
+			});
+			const body = await res.json().catch(() => ({}));
+			if (!res.ok) {
+				flash.set({ type: 'error', message: String(body.error ?? res.statusText) });
+				return;
+			}
+			const names = (body.workflows ?? []).map((w: any) => w.name).join(', ');
+			flash.set({ type: 'success', message: m.workflowInstantiated({ names }) });
+			instantiating = false;
+		} finally {
+			instantiateBusy = false;
+		}
+	}
 
 	const showRisks = true;
 
@@ -122,6 +177,51 @@
 			{/if}
 		</div>
 	</div>
+
+	{#if workflowCount > 0}
+		<div class="space-y-2">
+			<div class="flex items-center gap-3">
+				<span class="font-medium">
+					<i class="fa-solid fa-diagram-project mr-2"></i>{workflowCount}
+					{m.workflows()}
+				</span>
+				<button
+					type="button"
+					class="btn preset-filled-primary-500 text-sm"
+					onclick={openInstantiate}
+					data-testid="instantiate-workflows"
+				>
+					<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>{m.instantiateWorkflow()}
+				</button>
+			</div>
+			{#if instantiating}
+				<div class="flex items-center gap-2">
+					<select
+						class="select w-64 text-sm"
+						bind:value={instantiateFolder}
+						data-testid="instantiate-folder"
+					>
+						<option value="">{m.domain()}…</option>
+						{#each folderOptions as folder (folder.id)}
+							<option value={folder.id}>{folder.name ?? folder.str}</option>
+						{/each}
+					</select>
+					<button
+						type="button"
+						class="btn preset-tonal text-sm"
+						disabled={!instantiateFolder || instantiateBusy}
+						onclick={instantiateWorkflows}
+						data-testid="instantiate-confirm"
+					>
+						{#if instantiateBusy}
+							<i class="fa-solid fa-circle-notch fa-spin mr-1"></i>
+						{/if}
+						{m.instantiateHere()}
+					</button>
+				</div>
+			{/if}
+		</div>
+	{/if}
 
 	{#if riskMatrices.length > 0}
 		<Dropdown
