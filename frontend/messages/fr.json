@@ -5655,5 +5655,15 @@
 	"record": "Enregistrement",
 	"unpublishedDocumentsNotice": "{count} document(s) rédigé(s) mais pas encore publié(s) — visibles dans la vue de gestion.",
 	"authored": "Rédigé",
-	"uploaded": "Téléversé"
+	"uploaded": "Téléversé",
+	"generic": "Générique",
+	"technique": "Technique",
+	"platform": "Plateforme",
+	"tactic": "Tactique",
+	"threatCatalog": "Catalogue de menaces",
+	"threatCatalogs": "Catalogues de menaces",
+	"matrixView": "Vue matricielle",
+	"noThreatCatalogMatrix": "Ce catalogue ne comporte pas de matrice : aucun regroupement ne déclare la dimension tactique.",
+	"threatGroupsTooltip": "Facettes rattachées à cette menace : les plateformes concernées et les tactiques de la matrice auxquelles elle contribue.",
+	"threatReferenceControlsTooltip": "Mesures de référence habituellement mises en œuvre face à cette menace. Il s'agit d'une suggestion, pas d'une garantie de couverture."
 }
