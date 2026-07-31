@@ -1,0 +1,3105 @@
+urn: urn:intuitem:risk:library:lgpd
+locale: pt-BR
+ref_id: LGPD
+name: Lei Geral de Proteção de Dados Pessoais (LGPD)
+description: Lei nº 13.709, de 14 de agosto de 2018. Dispõe sobre a proteção de dados pessoais e altera
+  a Lei nº 12.965, de 23 de abril de 2014 (Marco Civil da Internet). Texto consolidado, consultado em
+  planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm.
+copyright: Presidência da República do Brasil - domínio público (texto de lei federal)
+version: 1
+publication_date: '2018-08-14'
+provider: Governo Federal do Brasil
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:lgpd
+    ref_id: LGPD
+    name: Lei Geral de Proteção de Dados Pessoais (LGPD)
+    description: Lei nº 13.709, de 14 de agosto de 2018 - Lei Geral de Proteção de Dados Pessoais.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:lgpd:chapter-1
+      assessable: false
+      depth: 1
+      ref_id: Capítulo I
+      name: Disposições Preliminares
+    - urn: urn:intuitem:risk:req_node:lgpd:1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-1
+      ref_id: Art. 1º
+      description: Esta Lei dispõe sobre o tratamento de dados pessoais, inclusive nos meios digitais,
+        por pessoa natural ou por pessoa jurídica de direito público ou privado, com o objetivo de proteger
+        os direitos fundamentais de liberdade e de privacidade e o livre desenvolvimento da personalidade
+        da pessoa natural.
+    - urn: urn:intuitem:risk:req_node:lgpd:1-pu
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:1
+      ref_id: Art. 1º, parágrafo único
+      description: As normas gerais contidas nesta Lei são de interesse nacional e devem ser observadas
+        pela União, Estados, Distrito Federal e Municípios.
+    - urn: urn:intuitem:risk:req_node:lgpd:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-1
+      ref_id: Art. 2º
+      description: 'A disciplina da proteção de dados pessoais tem como fundamentos:'
+    - urn: urn:intuitem:risk:req_node:lgpd:2-i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:2
+      ref_id: Art. 2º, I
+      description: o respeito à privacidade;
+    - urn: urn:intuitem:risk:req_node:lgpd:2-ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:2
+      ref_id: Art. 2º, II
+      description: a autodeterminação informativa;
+    - urn: urn:intuitem:risk:req_node:lgpd:2-iii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:2
+      ref_id: Art. 2º, III
+      description: a liberdade de expressão, de informação, de comunicação e de opinião;
+    - urn: urn:intuitem:risk:req_node:lgpd:2-iv
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:2
+      ref_id: Art. 2º, IV
+      description: a inviolabilidade da intimidade, da honra e da imagem;
+    - urn: urn:intuitem:risk:req_node:lgpd:2-v
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:2
+      ref_id: Art. 2º, V
+      description: o desenvolvimento econômico e tecnológico e a inovação;
+    - urn: urn:intuitem:risk:req_node:lgpd:2-vi
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:2
+      ref_id: Art. 2º, VI
+      description: a livre iniciativa, a livre concorrência e a defesa do consumidor; e
+    - urn: urn:intuitem:risk:req_node:lgpd:2-vii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:2
+      ref_id: Art. 2º, VII
+      description: os direitos humanos, o livre desenvolvimento da personalidade, a dignidade e o exercício
+        da cidadania pelas pessoas naturais.
+    - urn: urn:intuitem:risk:req_node:lgpd:3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-1
+      ref_id: Art. 3º
+      description: 'Esta Lei aplica-se a qualquer operação de tratamento realizada por pessoa natural
+        ou por pessoa jurídica de direito público ou privado, independentemente do meio, do país de sua
+        sede ou do país onde estejam localizados os dados, desde que:'
+    - urn: urn:intuitem:risk:req_node:lgpd:3-i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:3
+      ref_id: Art. 3º, I
+      description: a operação de tratamento seja realizada no território nacional;
+    - urn: urn:intuitem:risk:req_node:lgpd:3-ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:3
+      ref_id: Art. 3º, II
+      description: a atividade de tratamento tenha por objetivo a oferta ou o fornecimento de bens ou
+        serviços ou o tratamento de dados de indivíduos localizados no território nacional; ou
+    - urn: urn:intuitem:risk:req_node:lgpd:3-iii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:3
+      ref_id: Art. 3º, III
+      description: os dados pessoais objeto do tratamento tenham sido coletados no território nacional.
+    - urn: urn:intuitem:risk:req_node:lgpd:3-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:3
+      ref_id: Art. 3º, § 1º
+      description: Consideram-se coletados no território nacional os dados pessoais cujo titular nele
+        se encontre no momento da coleta.
+    - urn: urn:intuitem:risk:req_node:lgpd:3-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:3
+      ref_id: Art. 3º, § 2º
+      description: Excetua-se do disposto no inciso I deste artigo o tratamento de dados previsto no inciso
+        IV do caput do art. 4º desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-1
+      ref_id: Art. 4º
+      description: 'Esta Lei não se aplica ao tratamento de dados pessoais:'
+    - urn: urn:intuitem:risk:req_node:lgpd:4-i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:4
+      ref_id: Art. 4º, I
+      description: realizado por pessoa natural para fins exclusivamente particulares e não econômicos;
+    - urn: urn:intuitem:risk:req_node:lgpd:4-ii
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:4
+      ref_id: Art. 4º, II
+      description: 'realizado para fins exclusivamente:'
+    - urn: urn:intuitem:risk:req_node:lgpd:4-ii-a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:4-ii
+      ref_id: Art. 4º, II, a
+      description: jornalístico e artísticos; ou
+    - urn: urn:intuitem:risk:req_node:lgpd:4-ii-b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:4-ii
+      ref_id: Art. 4º, II, b
+      description: acadêmicos, aplicando-se a esta hipótese os arts. 7º e 11 desta Lei;
+    - urn: urn:intuitem:risk:req_node:lgpd:4-iii
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:4
+      ref_id: Art. 4º, III
+      description: 'realizado para fins exclusivos de:'
+    - urn: urn:intuitem:risk:req_node:lgpd:4-iii-a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:4-iii
+      ref_id: Art. 4º, III, a
+      description: segurança pública;
+    - urn: urn:intuitem:risk:req_node:lgpd:4-iii-b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:4-iii
+      ref_id: Art. 4º, III, b
+      description: defesa nacional;
+    - urn: urn:intuitem:risk:req_node:lgpd:4-iii-c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:4-iii
+      ref_id: Art. 4º, III, c
+      description: segurança do Estado; ou
+    - urn: urn:intuitem:risk:req_node:lgpd:4-iii-d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:4-iii
+      ref_id: Art. 4º, III, d
+      description: atividades de investigação e repressão de infrações penais; ou
+    - urn: urn:intuitem:risk:req_node:lgpd:4-iv
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:4
+      ref_id: Art. 4º, IV
+      description: provenientes de fora do território nacional e que não sejam objeto de comunicação,
+        uso compartilhado de dados com agentes de tratamento brasileiros ou objeto de transferência internacional
+        de dados com outro país que não o de proveniência, desde que o país de proveniência proporcione
+        grau de proteção de dados pessoais adequado ao previsto nesta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:4-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:4
+      ref_id: Art. 4º, § 1º
+      description: O tratamento de dados pessoais previsto no inciso III será regido por legislação específica,
+        que deverá prever medidas proporcionais e estritamente necessárias ao atendimento do interesse
+        público, observados o devido processo legal, os princípios gerais de proteção e os direitos do
+        titular previstos nesta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:4-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:4
+      ref_id: Art. 4º, § 2º
+      description: É vedado o tratamento dos dados a que se refere o inciso III do caput deste artigo
+        por pessoa de direito privado, exceto em procedimentos sob tutela de pessoa jurídica de direito
+        público, que serão objeto de informe específico à autoridade nacional e que deverão observar a
+        limitação imposta no § 4º deste artigo.
+    - urn: urn:intuitem:risk:req_node:lgpd:4-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:4
+      ref_id: Art. 4º, § 3º
+      description: A autoridade nacional emitirá opiniões técnicas ou recomendações referentes às exceções
+        previstas no inciso III do caput deste artigo e deverá solicitar aos responsáveis relatórios de
+        impacto à proteção de dados pessoais.
+    - urn: urn:intuitem:risk:req_node:lgpd:4-p4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:4
+      ref_id: Art. 4º, § 4º
+      description: Em nenhum caso a totalidade dos dados pessoais de banco de dados de que trata o inciso
+        III do caput deste artigo poderá ser tratada por pessoa de direito privado, salvo por aquela que
+        possua capital integralmente constituído pelo poder público.
+    - urn: urn:intuitem:risk:req_node:lgpd:5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-1
+      ref_id: Art. 5º
+      description: 'Para os fins desta Lei, considera-se:'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, I
+      description: 'dado pessoal: informação relacionada a pessoa natural identificada ou identificável;'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, II
+      description: 'dado pessoal sensível: dado pessoal sobre origem racial ou étnica, convicção religiosa,
+        opinião política, filiação a sindicato ou a organização de caráter religioso, filosófico ou político,
+        dado referente à saúde ou à vida sexual, dado genético ou biométrico, quando vinculado a uma pessoa
+        natural;'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-iii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, III
+      description: 'dado anonimizado: dado relativo a titular que não possa ser identificado, considerando
+        a utilização de meios técnicos razoáveis e disponíveis na ocasião de seu tratamento;'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-iv
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, IV
+      description: 'banco de dados: conjunto estruturado de dados pessoais, estabelecido em um ou em vários
+        locais, em suporte eletrônico ou físico;'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-v
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, V
+      description: 'titular: pessoa natural a quem se referem os dados pessoais que são objeto de tratamento;'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-vi
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, VI
+      description: 'controlador: pessoa natural ou jurídica, de direito público ou privado, a quem competem
+        as decisões referentes ao tratamento de dados pessoais;'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-vii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, VII
+      description: 'operador: pessoa natural ou jurídica, de direito público ou privado, que realiza o
+        tratamento de dados pessoais em nome do controlador;'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-viii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, VIII
+      description: 'encarregado: pessoa indicada pelo controlador e operador para atuar como canal de
+        comunicação entre o controlador, os titulares dos dados e a Agência Nacional de Proteção de Dados
+        (ANPD);'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-ix
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, IX
+      description: 'agentes de tratamento: o controlador e o operador;'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-x
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, X
+      description: 'tratamento: toda operação realizada com dados pessoais, como as que se referem a coleta,
+        produção, recepção, classificação, utilização, acesso, reprodução, transmissão, distribuição,
+        processamento, arquivamento, armazenamento, eliminação, avaliação ou controle da informação, modificação,
+        comunicação, transferência, difusão ou extração;'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-xi
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, XI
+      description: 'anonimização: utilização de meios técnicos razoáveis e disponíveis no momento do tratamento,
+        por meio dos quais um dado perde a possibilidade de associação, direta ou indireta, a um indivíduo;'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-xii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, XII
+      description: 'consentimento: manifestação livre, informada e inequívoca pela qual o titular concorda
+        com o tratamento de seus dados pessoais para uma finalidade determinada;'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-xiii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, XIII
+      description: 'bloqueio: suspensão temporária de qualquer operação de tratamento, mediante guarda
+        do dado pessoal ou do banco de dados;'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-xiv
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, XIV
+      description: 'eliminação: exclusão de dado ou de conjunto de dados armazenados em banco de dados,
+        independentemente do procedimento empregado;'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-xv
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, XV
+      description: 'transferência internacional de dados: transferência de dados pessoais para país estrangeiro
+        ou organismo internacional do qual o país seja membro;'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-xvi
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, XVI
+      description: 'uso compartilhado de dados: comunicação, difusão, transferência internacional, interconexão
+        de dados pessoais ou tratamento compartilhado de bancos de dados pessoais por órgãos e entidades
+        públicos no cumprimento de suas competências legais, ou entre esses e entes privados, reciprocamente,
+        com autorização específica, para uma ou mais modalidades de tratamento permitidas por esses entes
+        públicos, ou entre entes privados;'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-xvii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, XVII
+      description: 'relatório de impacto à proteção de dados pessoais: documentação do controlador que
+        contém a descrição dos processos de tratamento de dados pessoais que podem gerar riscos às liberdades
+        civis e aos direitos fundamentais, bem como medidas, salvaguardas e mecanismos de mitigação de
+        risco;'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-xviii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, XVIII
+      description: 'órgão de pesquisa: órgão ou entidade da administração pública direta ou indireta ou
+        pessoa jurídica de direito privado sem fins lucrativos legalmente constituída sob as leis brasileiras,
+        com sede e foro no País, que inclua em sua missão institucional ou em seu objetivo social ou estatutário
+        a pesquisa básica ou aplicada de caráter histórico, científico, tecnológico ou estatístico; e'
+    - urn: urn:intuitem:risk:req_node:lgpd:5-xix
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:5
+      ref_id: Art. 5º, XIX
+      description: 'autoridade nacional: entidade da administração pública responsável por zelar, implementar
+        e fiscalizar o cumprimento desta Lei em todo o território nacional.'
+    - urn: urn:intuitem:risk:req_node:lgpd:6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-1
+      ref_id: Art. 6º
+      description: 'As atividades de tratamento de dados pessoais deverão observar a boa-fé e os seguintes
+        princípios:'
+    - urn: urn:intuitem:risk:req_node:lgpd:6-i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:6
+      ref_id: Art. 6º, I
+      description: 'finalidade: realização do tratamento para propósitos legítimos, específicos, explícitos
+        e informados ao titular, sem possibilidade de tratamento posterior de forma incompatível com essas
+        finalidades;'
+    - urn: urn:intuitem:risk:req_node:lgpd:6-ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:6
+      ref_id: Art. 6º, II
+      description: 'adequação: compatibilidade do tratamento com as finalidades informadas ao titular,
+        de acordo com o contexto do tratamento;'
+    - urn: urn:intuitem:risk:req_node:lgpd:6-iii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:6
+      ref_id: Art. 6º, III
+      description: 'necessidade: limitação do tratamento ao mínimo necessário para a realização de suas
+        finalidades, com abrangência dos dados pertinentes, proporcionais e não excessivos em relação
+        às finalidades do tratamento de dados;'
+    - urn: urn:intuitem:risk:req_node:lgpd:6-iv
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:6
+      ref_id: Art. 6º, IV
+      description: 'livre acesso: garantia, aos titulares, de consulta facilitada e gratuita sobre a forma
+        e a duração do tratamento, bem como sobre a integralidade de seus dados pessoais;'
+    - urn: urn:intuitem:risk:req_node:lgpd:6-v
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:6
+      ref_id: Art. 6º, V
+      description: 'qualidade dos dados: garantia, aos titulares, de exatidão, clareza, relevância e atualização
+        dos dados, de acordo com a necessidade e para o cumprimento da finalidade de seu tratamento;'
+    - urn: urn:intuitem:risk:req_node:lgpd:6-vi
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:6
+      ref_id: Art. 6º, VI
+      description: 'transparência: garantia, aos titulares, de informações claras, precisas e facilmente
+        acessíveis sobre a realização do tratamento e os respectivos agentes de tratamento, observados
+        os segredos comercial e industrial;'
+    - urn: urn:intuitem:risk:req_node:lgpd:6-vii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:6
+      ref_id: Art. 6º, VII
+      description: 'segurança: utilização de medidas técnicas e administrativas aptas a proteger os dados
+        pessoais de acessos não autorizados e de situações acidentais ou ilícitas de destruição, perda,
+        alteração, comunicação ou difusão;'
+    - urn: urn:intuitem:risk:req_node:lgpd:6-viii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:6
+      ref_id: Art. 6º, VIII
+      description: 'prevenção: adoção de medidas para prevenir a ocorrência de danos em virtude do tratamento
+        de dados pessoais;'
+    - urn: urn:intuitem:risk:req_node:lgpd:6-ix
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:6
+      ref_id: Art. 6º, IX
+      description: 'não discriminação: impossibilidade de realização do tratamento para fins discriminatórios
+        ilícitos ou abusivos;'
+    - urn: urn:intuitem:risk:req_node:lgpd:6-x
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:6
+      ref_id: Art. 6º, X
+      description: 'responsabilização e prestação de contas: demonstração, pelo agente, da adoção de medidas
+        eficazes e capazes de comprovar a observância e o cumprimento das normas de proteção de dados
+        pessoais e, inclusive, da eficácia dessas medidas.'
+    - urn: urn:intuitem:risk:req_node:lgpd:chapter-2
+      assessable: false
+      depth: 1
+      ref_id: Capítulo II
+      name: Do Tratamento de Dados Pessoais
+    - urn: urn:intuitem:risk:req_node:lgpd:cap2-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-2
+      ref_id: Seção I
+      name: Dos Requisitos para o Tratamento de Dados Pessoais
+    - urn: urn:intuitem:risk:req_node:lgpd:7
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap2-sec1
+      ref_id: Art. 7º
+      description: 'O tratamento de dados pessoais somente poderá ser realizado nas seguintes hipóteses:'
+    - urn: urn:intuitem:risk:req_node:lgpd:7-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:7
+      ref_id: Art. 7º, I
+      description: mediante o fornecimento de consentimento pelo titular;
+    - urn: urn:intuitem:risk:req_node:lgpd:7-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:7
+      ref_id: Art. 7º, II
+      description: para o cumprimento de obrigação legal ou regulatória pelo controlador;
+    - urn: urn:intuitem:risk:req_node:lgpd:7-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:7
+      ref_id: Art. 7º, III
+      description: pela administração pública, para o tratamento e uso compartilhado de dados necessários
+        à execução de políticas públicas previstas em leis e regulamentos ou respaldadas em contratos,
+        convênios ou instrumentos congêneres, observadas as disposições do Capítulo IV desta Lei;
+    - urn: urn:intuitem:risk:req_node:lgpd:7-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:7
+      ref_id: Art. 7º, IV
+      description: para a realização de estudos por órgão de pesquisa, garantida, sempre que possível,
+        a anonimização dos dados pessoais;
+    - urn: urn:intuitem:risk:req_node:lgpd:7-v
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:7
+      ref_id: Art. 7º, V
+      description: quando necessário para a execução de contrato ou de procedimentos preliminares relacionados
+        a contrato do qual seja parte o titular, a pedido do titular dos dados;
+    - urn: urn:intuitem:risk:req_node:lgpd:7-vi
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:7
+      ref_id: Art. 7º, VI
+      description: para o exercício regular de direitos em processo judicial, administrativo ou arbitral,
+        esse último nos termos da Lei nº 9.307, de 23 de setembro de 1996 (Lei de Arbitragem);
+    - urn: urn:intuitem:risk:req_node:lgpd:7-vii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:7
+      ref_id: Art. 7º, VII
+      description: para a proteção da vida ou da incolumidade física do titular ou de terceiro;
+    - urn: urn:intuitem:risk:req_node:lgpd:7-viii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:7
+      ref_id: Art. 7º, VIII
+      description: para a tutela da saúde, exclusivamente, em procedimento realizado por profissionais
+        de saúde, serviços de saúde ou autoridade sanitária;
+    - urn: urn:intuitem:risk:req_node:lgpd:7-ix
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:7
+      ref_id: Art. 7º, IX
+      description: quando necessário para atender aos interesses legítimos do controlador ou de terceiro,
+        exceto no caso de prevalecerem direitos e liberdades fundamentais do titular que exijam a proteção
+        dos dados pessoais; ou
+    - urn: urn:intuitem:risk:req_node:lgpd:7-x
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:7
+      ref_id: Art. 7º, X
+      description: para a proteção do crédito, inclusive quanto ao disposto na legislação pertinente.
+    - urn: urn:intuitem:risk:req_node:lgpd:7-p3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:7
+      ref_id: Art. 7º, § 3º
+      description: O tratamento de dados pessoais cujo acesso é público deve considerar a finalidade,
+        a boa-fé e o interesse público que justificaram sua disponibilização.
+    - urn: urn:intuitem:risk:req_node:lgpd:7-p4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:7
+      ref_id: Art. 7º, § 4º
+      description: É dispensada a exigência do consentimento previsto no caput deste artigo para os dados
+        tornados manifestamente públicos pelo titular, resguardados os direitos do titular e os princípios
+        previstos nesta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:7-p5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:7
+      ref_id: Art. 7º, § 5º
+      description: O controlador que obteve o consentimento referido no inciso I do caput deste artigo
+        que necessitar comunicar ou compartilhar dados pessoais com outros controladores deverá obter
+        consentimento específico do titular para esse fim, ressalvadas as hipóteses de dispensa do consentimento
+        previstas nesta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:7-p6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:7
+      ref_id: Art. 7º, § 6º
+      description: A eventual dispensa da exigência do consentimento não desobriga os agentes de tratamento
+        das demais obrigações previstas nesta Lei, especialmente da observância dos princípios gerais
+        e da garantia dos direitos do titular.
+    - urn: urn:intuitem:risk:req_node:lgpd:7-p7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:7
+      ref_id: Art. 7º, § 7º
+      description: O tratamento posterior dos dados pessoais a que se referem os §§ 3º e 4º deste artigo
+        poderá ser realizado para novas finalidades, desde que observados os propósitos legítimos e específicos
+        para o novo tratamento e a preservação dos direitos do titular, assim como os fundamentos e os
+        princípios previstos nesta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap2-sec1
+      ref_id: Art. 8º
+      description: O consentimento previsto no inciso I do art. 7º desta Lei deverá ser fornecido por
+        escrito ou por outro meio que demonstre a manifestação de vontade do titular.
+    - urn: urn:intuitem:risk:req_node:lgpd:8-p1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:8
+      ref_id: Art. 8º, § 1º
+      description: Caso o consentimento seja fornecido por escrito, esse deverá constar de cláusula destacada
+        das demais cláusulas contratuais.
+    - urn: urn:intuitem:risk:req_node:lgpd:8-p2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:8
+      ref_id: Art. 8º, § 2º
+      description: Cabe ao controlador o ônus da prova de que o consentimento foi obtido em conformidade
+        com o disposto nesta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:8-p3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:8
+      ref_id: Art. 8º, § 3º
+      description: É vedado o tratamento de dados pessoais mediante vício de consentimento.
+    - urn: urn:intuitem:risk:req_node:lgpd:8-p4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:8
+      ref_id: Art. 8º, § 4º
+      description: O consentimento deverá referir-se a finalidades determinadas, e as autorizações genéricas
+        para o tratamento de dados pessoais serão nulas.
+    - urn: urn:intuitem:risk:req_node:lgpd:8-p5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:8
+      ref_id: Art. 8º, § 5º
+      description: O consentimento pode ser revogado a qualquer momento mediante manifestação expressa
+        do titular, por procedimento gratuito e facilitado, ratificados os tratamentos realizados sob
+        amparo do consentimento anteriormente manifestado enquanto não houver requerimento de eliminação,
+        nos termos do inciso VI do caput do art. 18 desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:8-p6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:8
+      ref_id: Art. 8º, § 6º
+      description: Em caso de alteração de informação referida nos incisos I, II, III ou V do art. 9º
+        desta Lei, o controlador deverá informar ao titular, com destaque de forma específica do teor
+        das alterações, podendo o titular, nos casos em que o seu consentimento é exigido, revogá-lo caso
+        discorde da alteração.
+    - urn: urn:intuitem:risk:req_node:lgpd:9
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap2-sec1
+      ref_id: Art. 9º
+      description: 'O titular tem direito ao acesso facilitado às informações sobre o tratamento de seus
+        dados, que deverão ser disponibilizadas de forma clara, adequada e ostensiva acerca de, entre
+        outras características previstas em regulamentação para o atendimento do princípio do livre acesso:'
+    - urn: urn:intuitem:risk:req_node:lgpd:9-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:9
+      ref_id: Art. 9º, I
+      description: finalidade específica do tratamento;
+    - urn: urn:intuitem:risk:req_node:lgpd:9-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:9
+      ref_id: Art. 9º, II
+      description: forma e duração do tratamento, observados os segredos comercial e industrial;
+    - urn: urn:intuitem:risk:req_node:lgpd:9-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:9
+      ref_id: Art. 9º, III
+      description: identificação do controlador;
+    - urn: urn:intuitem:risk:req_node:lgpd:9-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:9
+      ref_id: Art. 9º, IV
+      description: informações de contato do controlador;
+    - urn: urn:intuitem:risk:req_node:lgpd:9-v
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:9
+      ref_id: Art. 9º, V
+      description: informações acerca do uso compartilhado de dados pelo controlador e a finalidade;
+    - urn: urn:intuitem:risk:req_node:lgpd:9-vi
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:9
+      ref_id: Art. 9º, VI
+      description: responsabilidades dos agentes que realizarão o tratamento; e
+    - urn: urn:intuitem:risk:req_node:lgpd:9-vii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:9
+      ref_id: Art. 9º, VII
+      description: direitos do titular, com menção explícita aos direitos contidos no art. 18 desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:9-p1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:9
+      ref_id: Art. 9º, § 1º
+      description: Na hipótese em que o consentimento é requerido, esse será considerado nulo caso as
+        informações fornecidas ao titular tenham conteúdo enganoso ou abusivo ou não tenham sido apresentadas
+        previamente com transparência, de forma clara e inequívoca.
+    - urn: urn:intuitem:risk:req_node:lgpd:9-p2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:9
+      ref_id: Art. 9º, § 2º
+      description: Na hipótese em que o consentimento é requerido, se houver mudanças da finalidade para
+        o tratamento de dados pessoais não compatíveis com o consentimento original, o controlador deverá
+        informar previamente o titular sobre as mudanças de finalidade, podendo o titular revogar o consentimento,
+        caso discorde das alterações.
+    - urn: urn:intuitem:risk:req_node:lgpd:9-p3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:9
+      ref_id: Art. 9º, § 3º
+      description: Quando o tratamento de dados pessoais for condição para o fornecimento de produto ou
+        de serviço ou para o exercício de direito, o titular será informado com destaque sobre esse fato
+        e sobre os meios pelos quais poderá exercer os direitos do titular elencados no art. 18 desta
+        Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:10
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap2-sec1
+      ref_id: Art. 10
+      description: 'O legítimo interesse do controlador somente poderá fundamentar tratamento de dados
+        pessoais para finalidades legítimas, consideradas a partir de situações concretas, que incluem,
+        mas não se limitam a:'
+    - urn: urn:intuitem:risk:req_node:lgpd:10-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:10
+      ref_id: Art. 10, I
+      description: apoio e promoção de atividades do controlador; e
+    - urn: urn:intuitem:risk:req_node:lgpd:10-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:10
+      ref_id: Art. 10, II
+      description: proteção, em relação ao titular, do exercício regular de seus direitos ou prestação
+        de serviços que o beneficiem, respeitadas as legítimas expectativas dele e os direitos e liberdades
+        fundamentais, nos termos desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:10-p1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:10
+      ref_id: Art. 10, § 1º
+      description: Quando o tratamento for baseado no legítimo interesse do controlador, somente os dados
+        pessoais estritamente necessários para a finalidade pretendida poderão ser tratados.
+    - urn: urn:intuitem:risk:req_node:lgpd:10-p2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:10
+      ref_id: Art. 10, § 2º
+      description: O controlador deverá adotar medidas para garantir a transparência do tratamento de
+        dados baseado em seu legítimo interesse.
+    - urn: urn:intuitem:risk:req_node:lgpd:10-p3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:10
+      ref_id: Art. 10, § 3º
+      description: A autoridade nacional poderá solicitar ao controlador relatório de impacto à proteção
+        de dados pessoais, quando o tratamento tiver como fundamento seu interesse legítimo, observados
+        os segredos comercial e industrial.
+    - urn: urn:intuitem:risk:req_node:lgpd:cap2-sec2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-2
+      ref_id: Seção II
+      name: Do Tratamento de Dados Pessoais Sensíveis
+    - urn: urn:intuitem:risk:req_node:lgpd:11
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap2-sec2
+      ref_id: Art. 11
+      description: 'O tratamento de dados pessoais sensíveis somente poderá ocorrer nas seguintes hipóteses:'
+    - urn: urn:intuitem:risk:req_node:lgpd:11-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:11
+      ref_id: Art. 11, I
+      description: quando o titular ou seu responsável legal consentir, de forma específica e destacada,
+        para finalidades específicas;
+    - urn: urn:intuitem:risk:req_node:lgpd:11-ii
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:11
+      ref_id: Art. 11, II
+      description: 'sem fornecimento de consentimento do titular, nas hipóteses em que for indispensável
+        para:'
+    - urn: urn:intuitem:risk:req_node:lgpd:11-ii-a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:11-ii
+      ref_id: Art. 11, II, a
+      description: cumprimento de obrigação legal ou regulatória pelo controlador;
+    - urn: urn:intuitem:risk:req_node:lgpd:11-ii-b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:11-ii
+      ref_id: Art. 11, II, b
+      description: tratamento compartilhado de dados necessários à execução, pela administração pública,
+        de políticas públicas previstas em leis ou regulamentos;
+    - urn: urn:intuitem:risk:req_node:lgpd:11-ii-c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:11-ii
+      ref_id: Art. 11, II, c
+      description: realização de estudos por órgão de pesquisa, garantida, sempre que possível, a anonimização
+        dos dados pessoais sensíveis;
+    - urn: urn:intuitem:risk:req_node:lgpd:11-ii-d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:11-ii
+      ref_id: Art. 11, II, d
+      description: exercício regular de direitos, inclusive em contrato e em processo judicial, administrativo
+        e arbitral, este último nos termos da Lei nº 9.307, de 23 de setembro de 1996 (Lei de Arbitragem);
+    - urn: urn:intuitem:risk:req_node:lgpd:11-ii-e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:11-ii
+      ref_id: Art. 11, II, e
+      description: proteção da vida ou da incolumidade física do titular ou de terceiro;
+    - urn: urn:intuitem:risk:req_node:lgpd:11-ii-f
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:11-ii
+      ref_id: Art. 11, II, f
+      description: tutela da saúde, exclusivamente, em procedimento realizado por profissionais de saúde,
+        serviços de saúde ou autoridade sanitária; ou
+    - urn: urn:intuitem:risk:req_node:lgpd:11-ii-g
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:11-ii
+      ref_id: Art. 11, II, g
+      description: garantia da prevenção à fraude e à segurança do titular, nos processos de identificação
+        e autenticação de cadastro em sistemas eletrônicos, resguardados os direitos mencionados no art.
+        9º desta Lei e exceto no caso de prevalecerem direitos e liberdades fundamentais do titular que
+        exijam a proteção dos dados pessoais.
+    - urn: urn:intuitem:risk:req_node:lgpd:11-p1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:11
+      ref_id: Art. 11, § 1º
+      description: Aplica-se o disposto neste artigo a qualquer tratamento de dados pessoais que revele
+        dados pessoais sensíveis e que possa causar dano ao titular, ressalvado o disposto em legislação
+        específica.
+    - urn: urn:intuitem:risk:req_node:lgpd:11-p2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:11
+      ref_id: Art. 11, § 2º
+      description: Nos casos de aplicação do disposto nas alíneas “a” e “b” do inciso II do caput deste
+        artigo pelos órgãos e pelas entidades públicas, será dada publicidade à referida dispensa de consentimento,
+        nos termos do inciso I do caput do art. 23 desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:11-p3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:11
+      ref_id: Art. 11, § 3º
+      description: A comunicação ou o uso compartilhado de dados pessoais sensíveis entre controladores
+        com objetivo de obter vantagem econômica poderá ser objeto de vedação ou de regulamentação por
+        parte da autoridade nacional, ouvidos os órgãos setoriais do Poder Público, no âmbito de suas
+        competências.
+    - urn: urn:intuitem:risk:req_node:lgpd:11-p4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:11
+      ref_id: Art. 11, § 4º
+      description: 'É vedada a comunicação ou o uso compartilhado entre controladores de dados pessoais
+        sensíveis referentes à saúde com objetivo de obter vantagem econômica, exceto nas hipóteses relativas
+        a prestação de serviços de saúde, de assistência farmacêutica e de assistência à saúde, desde
+        que observado o § 5º deste artigo, incluídos os serviços auxiliares de diagnose e terapia, em
+        benefício dos interesses dos titulares de dados, e para permitir:'
+    - urn: urn:intuitem:risk:req_node:lgpd:11-p4-i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:11-p4
+      ref_id: Art. 11, § 4º, I
+      description: a portabilidade de dados quando solicitada pelo titular; ou
+    - urn: urn:intuitem:risk:req_node:lgpd:11-p4-ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:11-p4
+      ref_id: Art. 11, § 4º, II
+      description: as transações financeiras e administrativas resultantes do uso e da prestação dos serviços
+        de que trata este parágrafo.
+    - urn: urn:intuitem:risk:req_node:lgpd:11-p5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:11
+      ref_id: Art. 11, § 5º
+      description: É vedado às operadoras de planos privados de assistência à saúde o tratamento de dados
+        de saúde para a prática de seleção de riscos na contratação de qualquer modalidade, assim como
+        na contratação e exclusão de beneficiários.
+    - urn: urn:intuitem:risk:req_node:lgpd:12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap2-sec2
+      ref_id: Art. 12
+      description: Os dados anonimizados não serão considerados dados pessoais para os fins desta Lei,
+        salvo quando o processo de anonimização ao qual foram submetidos for revertido, utilizando exclusivamente
+        meios próprios, ou quando, com esforços razoáveis, puder ser revertido.
+    - urn: urn:intuitem:risk:req_node:lgpd:12-p1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:12
+      ref_id: Art. 12, § 1º
+      description: A determinação do que seja razoável deve levar em consideração fatores objetivos, tais
+        como custo e tempo necessários para reverter o processo de anonimização, de acordo com as tecnologias
+        disponíveis, e a utilização exclusiva de meios próprios.
+    - urn: urn:intuitem:risk:req_node:lgpd:12-p2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:12
+      ref_id: Art. 12, § 2º
+      description: Poderão ser igualmente considerados como dados pessoais, para os fins desta Lei, aqueles
+        utilizados para formação do perfil comportamental de determinada pessoa natural, se identificada.
+    - urn: urn:intuitem:risk:req_node:lgpd:12-p3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:12
+      ref_id: Art. 12, § 3º
+      description: A autoridade nacional poderá dispor sobre padrões e técnicas utilizados em processos
+        de anonimização e realizar verificações acerca de sua segurança, ouvido o Conselho Nacional de
+        Proteção de Dados Pessoais.
+    - urn: urn:intuitem:risk:req_node:lgpd:13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap2-sec2
+      ref_id: Art. 13
+      description: Na realização de estudos em saúde pública, os órgãos de pesquisa poderão ter acesso
+        a bases de dados pessoais, que serão tratados exclusivamente dentro do órgão e estritamente para
+        a finalidade de realização de estudos e pesquisas e mantidos em ambiente controlado e seguro,
+        conforme práticas de segurança previstas em regulamento específico e que incluam, sempre que possível,
+        a anonimização ou pseudonimização dos dados, bem como considerem os devidos padrões éticos relacionados
+        a estudos e pesquisas.
+    - urn: urn:intuitem:risk:req_node:lgpd:13-p1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:13
+      ref_id: Art. 13, § 1º
+      description: A divulgação dos resultados ou de qualquer excerto do estudo ou da pesquisa de que
+        trata o caput deste artigo em nenhuma hipótese poderá revelar dados pessoais.
+    - urn: urn:intuitem:risk:req_node:lgpd:13-p2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:13
+      ref_id: Art. 13, § 2º
+      description: O órgão de pesquisa será o responsável pela segurança da informação prevista no caput
+        deste artigo, não permitida, em circunstância alguma, a transferência dos dados a terceiro.
+    - urn: urn:intuitem:risk:req_node:lgpd:13-p3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:13
+      ref_id: Art. 13, § 3º
+      description: O acesso aos dados de que trata este artigo será objeto de regulamentação por parte
+        da autoridade nacional e das autoridades da área de saúde e sanitárias, no âmbito de suas competências.
+    - urn: urn:intuitem:risk:req_node:lgpd:13-p4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:13
+      ref_id: Art. 13, § 4º
+      description: Para os efeitos deste artigo, a pseudonimização é o tratamento por meio do qual um
+        dado perde a possibilidade de associação, direta ou indireta, a um indivíduo, senão pelo uso de
+        informação adicional mantida separadamente pelo controlador em ambiente controlado e seguro.
+    - urn: urn:intuitem:risk:req_node:lgpd:cap2-sec3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-2
+      ref_id: Seção III
+      name: Do Tratamento de Dados Pessoais de Crianças e de Adolescentes
+    - urn: urn:intuitem:risk:req_node:lgpd:14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap2-sec3
+      ref_id: Art. 14
+      description: O tratamento de dados pessoais de crianças e de adolescentes deverá ser realizado em
+        seu melhor interesse, nos termos deste artigo e da legislação pertinente.
+    - urn: urn:intuitem:risk:req_node:lgpd:14-p1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:14
+      ref_id: Art. 14, § 1º
+      description: O tratamento de dados pessoais de crianças deverá ser realizado com o consentimento
+        específico e em destaque dado por pelo menos um dos pais ou pelo responsável legal.
+    - urn: urn:intuitem:risk:req_node:lgpd:14-p2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:14
+      ref_id: Art. 14, § 2º
+      description: No tratamento de dados de que trata o § 1º deste artigo, os controladores deverão manter
+        pública a informação sobre os tipos de dados coletados, a forma de sua utilização e os procedimentos
+        para o exercício dos direitos a que se refere o art. 18 desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:14-p3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:14
+      ref_id: Art. 14, § 3º
+      description: Poderão ser coletados dados pessoais de crianças sem o consentimento a que se refere
+        o § 1º deste artigo quando a coleta for necessária para contatar os pais ou o responsável legal,
+        utilizados uma única vez e sem armazenamento, ou para sua proteção, e em nenhum caso poderão ser
+        repassados a terceiro sem o consentimento de que trata o § 1º deste artigo.
+    - urn: urn:intuitem:risk:req_node:lgpd:14-p4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:14
+      ref_id: Art. 14, § 4º
+      description: Os controladores não deverão condicionar a participação dos titulares de que trata
+        o § 1º deste artigo em jogos, aplicações de internet ou outras atividades ao fornecimento de informações
+        pessoais além das estritamente necessárias à atividade.
+    - urn: urn:intuitem:risk:req_node:lgpd:14-p5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:14
+      ref_id: Art. 14, § 5º
+      description: O controlador deve realizar todos os esforços razoáveis para verificar que o consentimento
+        a que se refere o § 1º deste artigo foi dado pelo responsável pela criança, consideradas as tecnologias
+        disponíveis.
+    - urn: urn:intuitem:risk:req_node:lgpd:14-p6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:14
+      ref_id: Art. 14, § 6º
+      description: As informações sobre o tratamento de dados referidas neste artigo deverão ser fornecidas
+        de maneira simples, clara e acessível, consideradas as características físico-motoras, perceptivas,
+        sensoriais, intelectuais e mentais do usuário, com uso de recursos audiovisuais quando adequado,
+        de forma a proporcionar a informação necessária aos pais ou ao responsável legal e adequada ao
+        entendimento da criança.
+    - urn: urn:intuitem:risk:req_node:lgpd:cap2-sec4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-2
+      ref_id: Seção IV
+      name: Do Término do Tratamento de Dados
+    - urn: urn:intuitem:risk:req_node:lgpd:15
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap2-sec4
+      ref_id: Art. 15
+      description: 'O término do tratamento de dados pessoais ocorrerá nas seguintes hipóteses:'
+    - urn: urn:intuitem:risk:req_node:lgpd:15-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:15
+      ref_id: Art. 15, I
+      description: verificação de que a finalidade foi alcançada ou de que os dados deixaram de ser necessários
+        ou pertinentes ao alcance da finalidade específica almejada;
+    - urn: urn:intuitem:risk:req_node:lgpd:15-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:15
+      ref_id: Art. 15, II
+      description: fim do período de tratamento;
+    - urn: urn:intuitem:risk:req_node:lgpd:15-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:15
+      ref_id: Art. 15, III
+      description: comunicação do titular, inclusive no exercício de seu direito de revogação do consentimento
+        conforme disposto no § 5º do art. 8º desta Lei, resguardado o interesse público; ou
+    - urn: urn:intuitem:risk:req_node:lgpd:15-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:15
+      ref_id: Art. 15, IV
+      description: determinação da autoridade nacional, quando houver violação ao disposto nesta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:16
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap2-sec4
+      ref_id: Art. 16
+      description: 'Os dados pessoais serão eliminados após o término de seu tratamento, no âmbito e nos
+        limites técnicos das atividades, autorizada a conservação para as seguintes finalidades:'
+    - urn: urn:intuitem:risk:req_node:lgpd:16-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:16
+      ref_id: Art. 16, I
+      description: cumprimento de obrigação legal ou regulatória pelo controlador;
+    - urn: urn:intuitem:risk:req_node:lgpd:16-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:16
+      ref_id: Art. 16, II
+      description: estudo por órgão de pesquisa, garantida, sempre que possível, a anonimização dos dados
+        pessoais;
+    - urn: urn:intuitem:risk:req_node:lgpd:16-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:16
+      ref_id: Art. 16, III
+      description: transferência a terceiro, desde que respeitados os requisitos de tratamento de dados
+        dispostos nesta Lei; ou
+    - urn: urn:intuitem:risk:req_node:lgpd:16-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:16
+      ref_id: Art. 16, IV
+      description: uso exclusivo do controlador, vedado seu acesso por terceiro, e desde que anonimizados
+        os dados.
+    - urn: urn:intuitem:risk:req_node:lgpd:chapter-3
+      assessable: false
+      depth: 1
+      ref_id: Capítulo III
+      name: Dos Direitos do Titular
+    - urn: urn:intuitem:risk:req_node:lgpd:17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-3
+      ref_id: Art. 17
+      description: Toda pessoa natural tem assegurada a titularidade de seus dados pessoais e garantidos
+        os direitos fundamentais de liberdade, de intimidade e de privacidade, nos termos desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:18
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-3
+      ref_id: Art. 18
+      description: 'O titular dos dados pessoais tem direito a obter do controlador, em relação aos dados
+        do titular por ele tratados, a qualquer momento e mediante requisição:'
+    - urn: urn:intuitem:risk:req_node:lgpd:18-i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18
+      ref_id: Art. 18, I
+      description: confirmação da existência de tratamento;
+    - urn: urn:intuitem:risk:req_node:lgpd:18-ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18
+      ref_id: Art. 18, II
+      description: acesso aos dados;
+    - urn: urn:intuitem:risk:req_node:lgpd:18-iii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18
+      ref_id: Art. 18, III
+      description: correção de dados incompletos, inexatos ou desatualizados;
+    - urn: urn:intuitem:risk:req_node:lgpd:18-iv
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18
+      ref_id: Art. 18, IV
+      description: anonimização, bloqueio ou eliminação de dados desnecessários, excessivos ou tratados
+        em desconformidade com o disposto nesta Lei;
+    - urn: urn:intuitem:risk:req_node:lgpd:18-v
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18
+      ref_id: Art. 18, V
+      description: portabilidade dos dados a outro fornecedor de serviço ou produto, mediante requisição
+        expressa, de acordo com a regulamentação da autoridade nacional, observados os segredos comercial
+        e industrial;
+    - urn: urn:intuitem:risk:req_node:lgpd:18-vi
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18
+      ref_id: Art. 18, VI
+      description: eliminação dos dados pessoais tratados com o consentimento do titular, exceto nas hipóteses
+        previstas no art. 16 desta Lei;
+    - urn: urn:intuitem:risk:req_node:lgpd:18-vii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18
+      ref_id: Art. 18, VII
+      description: informação das entidades públicas e privadas com as quais o controlador realizou uso
+        compartilhado de dados;
+    - urn: urn:intuitem:risk:req_node:lgpd:18-viii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18
+      ref_id: Art. 18, VIII
+      description: informação sobre a possibilidade de não fornecer consentimento e sobre as consequências
+        da negativa;
+    - urn: urn:intuitem:risk:req_node:lgpd:18-ix
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18
+      ref_id: Art. 18, IX
+      description: revogação do consentimento, nos termos do § 5º do art. 8º desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:18-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18
+      ref_id: Art. 18, § 1º
+      description: O titular dos dados pessoais tem o direito de peticionar em relação aos seus dados
+        contra o controlador perante a autoridade nacional.
+    - urn: urn:intuitem:risk:req_node:lgpd:18-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18
+      ref_id: Art. 18, § 2º
+      description: O titular pode opor-se a tratamento realizado com fundamento em uma das hipóteses de
+        dispensa de consentimento, em caso de descumprimento ao disposto nesta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:18-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18
+      ref_id: Art. 18, § 3º
+      description: Os direitos previstos neste artigo serão exercidos mediante requerimento expresso do
+        titular ou de representante legalmente constituído, a agente de tratamento.
+    - urn: urn:intuitem:risk:req_node:lgpd:18-p4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18
+      ref_id: Art. 18, § 4º
+      description: 'Em caso de impossibilidade de adoção imediata da providência de que trata o § 3º deste
+        artigo, o controlador enviará ao titular resposta em que poderá:'
+    - urn: urn:intuitem:risk:req_node:lgpd:18-p4-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18-p4
+      ref_id: Art. 18, § 4º, I
+      description: comunicar que não é agente de tratamento dos dados e indicar, sempre que possível,
+        o agente; ou
+    - urn: urn:intuitem:risk:req_node:lgpd:18-p4-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18-p4
+      ref_id: Art. 18, § 4º, II
+      description: indicar as razões de fato ou de direito que impedem a adoção imediata da providência.
+    - urn: urn:intuitem:risk:req_node:lgpd:18-p5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18
+      ref_id: Art. 18, § 5º
+      description: O requerimento referido no § 3º deste artigo será atendido sem custos para o titular,
+        nos prazos e nos termos previstos em regulamento.
+    - urn: urn:intuitem:risk:req_node:lgpd:18-p6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18
+      ref_id: Art. 18, § 6º
+      description: O responsável deverá informar, de maneira imediata, aos agentes de tratamento com os
+        quais tenha realizado uso compartilhado de dados a correção, a eliminação, a anonimização ou o
+        bloqueio dos dados, para que repitam idêntico procedimento, exceto nos casos em que esta comunicação
+        seja comprovadamente impossível ou implique esforço desproporcional.
+    - urn: urn:intuitem:risk:req_node:lgpd:18-p7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18
+      ref_id: Art. 18, § 7º
+      description: A portabilidade dos dados pessoais a que se refere o inciso V do caput deste artigo
+        não inclui dados que já tenham sido anonimizados pelo controlador.
+    - urn: urn:intuitem:risk:req_node:lgpd:18-p8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:18
+      ref_id: Art. 18, § 8º
+      description: O direito a que se refere o § 1º deste artigo também poderá ser exercido perante os
+        organismos de defesa do consumidor.
+    - urn: urn:intuitem:risk:req_node:lgpd:19
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-3
+      ref_id: Art. 19
+      description: 'A confirmação de existência ou o acesso a dados pessoais serão providenciados, mediante
+        requisição do titular:'
+    - urn: urn:intuitem:risk:req_node:lgpd:19-i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:19
+      ref_id: Art. 19, I
+      description: em formato simplificado, imediatamente; ou
+    - urn: urn:intuitem:risk:req_node:lgpd:19-ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:19
+      ref_id: Art. 19, II
+      description: por meio de declaração clara e completa, que indique a origem dos dados, a inexistência
+        de registro, os critérios utilizados e a finalidade do tratamento, observados os segredos comercial
+        e industrial, fornecida no prazo de até 15 (quinze) dias, contado da data do requerimento do titular.
+    - urn: urn:intuitem:risk:req_node:lgpd:19-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:19
+      ref_id: Art. 19, § 1º
+      description: Os dados pessoais serão armazenados em formato que favoreça o exercício do direito
+        de acesso.
+    - urn: urn:intuitem:risk:req_node:lgpd:19-p2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:19
+      ref_id: Art. 19, § 2º
+      description: 'As informações e os dados poderão ser fornecidos, a critério do titular:'
+    - urn: urn:intuitem:risk:req_node:lgpd:19-p2-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:19-p2
+      ref_id: Art. 19, § 2º, I
+      description: por meio eletrônico, seguro e idôneo para esse fim; ou
+    - urn: urn:intuitem:risk:req_node:lgpd:19-p2-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:19-p2
+      ref_id: Art. 19, § 2º, II
+      description: sob forma impressa.
+    - urn: urn:intuitem:risk:req_node:lgpd:19-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:19
+      ref_id: Art. 19, § 3º
+      description: Quando o tratamento tiver origem no consentimento do titular ou em contrato, o titular
+        poderá solicitar cópia eletrônica integral de seus dados pessoais, observados os segredos comercial
+        e industrial, nos termos de regulamentação da autoridade nacional, em formato que permita a sua
+        utilização subsequente, inclusive em outras operações de tratamento.
+    - urn: urn:intuitem:risk:req_node:lgpd:19-p4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:19
+      ref_id: Art. 19, § 4º
+      description: A autoridade nacional poderá dispor de forma diferenciada acerca dos prazos previstos
+        nos incisos I e II do caput deste artigo para os setores específicos.
+    - urn: urn:intuitem:risk:req_node:lgpd:20
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-3
+      ref_id: Art. 20
+      description: O titular dos dados tem direito a solicitar a revisão de decisões tomadas unicamente
+        com base em tratamento automatizado de dados pessoais que afetem seus interesses, incluídas as
+        decisões destinadas a definir o seu perfil pessoal, profissional, de consumo e de crédito ou os
+        aspectos de sua personalidade.
+    - urn: urn:intuitem:risk:req_node:lgpd:20-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:20
+      ref_id: Art. 20, § 1º
+      description: O controlador deverá fornecer, sempre que solicitadas, informações claras e adequadas
+        a respeito dos critérios e dos procedimentos utilizados para a decisão automatizada, observados
+        os segredos comercial e industrial.
+    - urn: urn:intuitem:risk:req_node:lgpd:20-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:20
+      ref_id: Art. 20, § 2º
+      description: Em caso de não oferecimento de informações de que trata o § 1º deste artigo baseado
+        na observância de segredo comercial e industrial, a autoridade nacional poderá realizar auditoria
+        para verificação de aspectos discriminatórios em tratamento automatizado de dados pessoais.
+    - urn: urn:intuitem:risk:req_node:lgpd:21
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-3
+      ref_id: Art. 21
+      description: Os dados pessoais referentes ao exercício regular de direitos pelo titular não podem
+        ser utilizados em seu prejuízo.
+    - urn: urn:intuitem:risk:req_node:lgpd:22
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-3
+      ref_id: Art. 22
+      description: A defesa dos interesses e dos direitos dos titulares de dados poderá ser exercida em
+        juízo, individual ou coletivamente, na forma do disposto na legislação pertinente, acerca dos
+        instrumentos de tutela individual e coletiva.
+    - urn: urn:intuitem:risk:req_node:lgpd:chapter-4
+      assessable: false
+      depth: 1
+      ref_id: Capítulo IV
+      name: Do Tratamento de Dados Pessoais pelo Poder Público
+    - urn: urn:intuitem:risk:req_node:lgpd:cap4-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-4
+      ref_id: Seção I
+      name: Das Regras
+    - urn: urn:intuitem:risk:req_node:lgpd:23
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap4-sec1
+      ref_id: Art. 23
+      description: 'O tratamento de dados pessoais pelas pessoas jurídicas de direito público referidas
+        no parágrafo único do art. 1º da Lei nº 12.527, de 18 de novembro de 2011 (Lei de Acesso à Informação),
+        deverá ser realizado para o atendimento de sua finalidade pública, na persecução do interesse
+        público, com o objetivo de executar as competências legais ou cumprir as atribuições legais do
+        serviço público, desde que:'
+    - urn: urn:intuitem:risk:req_node:lgpd:23-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:23
+      ref_id: Art. 23, I
+      description: sejam informadas as hipóteses em que, no exercício de suas competências, realizam o
+        tratamento de dados pessoais, fornecendo informações claras e atualizadas sobre a previsão legal,
+        a finalidade, os procedimentos e as práticas utilizadas para a execução dessas atividades, em
+        veículos de fácil acesso, preferencialmente em seus sítios eletrônicos;
+    - urn: urn:intuitem:risk:req_node:lgpd:23-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:23
+      ref_id: Art. 23, III
+      description: seja indicado um encarregado quando realizarem operações de tratamento de dados pessoais,
+        nos termos do art. 39 desta Lei; e
+    - urn: urn:intuitem:risk:req_node:lgpd:23-p1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:23
+      ref_id: Art. 23, § 1º
+      description: A autoridade nacional poderá dispor sobre as formas de publicidade das operações de
+        tratamento.
+    - urn: urn:intuitem:risk:req_node:lgpd:23-p2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:23
+      ref_id: Art. 23, § 2º
+      description: O disposto nesta Lei não dispensa as pessoas jurídicas mencionadas no caput deste artigo
+        de instituir as autoridades de que trata a Lei nº 12.527, de 18 de novembro de 2011 (Lei de Acesso
+        à Informação).
+    - urn: urn:intuitem:risk:req_node:lgpd:23-p3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:23
+      ref_id: Art. 23, § 3º
+      description: Os prazos e procedimentos para exercício dos direitos do titular perante o Poder Público
+        observarão o disposto em legislação específica, em especial as disposições constantes da Lei nº
+        9.507, de 12 de novembro de 1997 (Lei do Habeas Data), da Lei nº 9.784, de 29 de janeiro de 1999
+        (Lei Geral do Processo Administrativo), e da Lei nº 12.527, de 18 de novembro de 2011 (Lei de
+        Acesso à Informação).
+    - urn: urn:intuitem:risk:req_node:lgpd:23-p4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:23
+      ref_id: Art. 23, § 4º
+      description: Os serviços notariais e de registro exercidos em caráter privado, por delegação do
+        Poder Público, terão o mesmo tratamento dispensado às pessoas jurídicas referidas no caput deste
+        artigo, nos termos desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:23-p5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:23
+      ref_id: Art. 23, § 5º
+      description: Os órgãos notariais e de registro devem fornecer acesso aos dados por meio eletrônico
+        para a administração pública, tendo em vista as finalidades de que trata o caput deste artigo.
+    - urn: urn:intuitem:risk:req_node:lgpd:24
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap4-sec1
+      ref_id: Art. 24
+      description: As empresas públicas e as sociedades de economia mista que atuam em regime de concorrência,
+        sujeitas ao disposto no art. 173 da Constituição Federal, terão o mesmo tratamento dispensado
+        às pessoas jurídicas de direito privado particulares, nos termos desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:24-pu
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:24
+      ref_id: Art. 24, Parágrafo único
+      description: As empresas públicas e as sociedades de economia mista, quando estiverem operacionalizando
+        políticas públicas e no âmbito da execução delas, terão o mesmo tratamento dispensado aos órgãos
+        e às entidades do Poder Público, nos termos deste Capítulo.
+    - urn: urn:intuitem:risk:req_node:lgpd:25
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap4-sec1
+      ref_id: Art. 25
+      description: Os dados deverão ser mantidos em formato interoperável e estruturado para o uso compartilhado,
+        com vistas à execução de políticas públicas, à prestação de serviços públicos, à descentralização
+        da atividade pública e à disseminação e ao acesso das informações pelo público em geral.
+    - urn: urn:intuitem:risk:req_node:lgpd:26
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap4-sec1
+      ref_id: Art. 26
+      description: O uso compartilhado de dados pessoais pelo Poder Público deve atender a finalidades
+        específicas de execução de políticas públicas e atribuição legal pelos órgãos e pelas entidades
+        públicas, respeitados os princípios de proteção de dados pessoais elencados no art. 6º desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:26-p1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:26
+      ref_id: Art. 26, § 1º
+      description: 'É vedado ao Poder Público transferir a entidades privadas dados pessoais constantes
+        de bases de dados a que tenha acesso, exceto:'
+    - urn: urn:intuitem:risk:req_node:lgpd:26-p1-i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:26-p1
+      ref_id: Art. 26, § 1º, I
+      description: em casos de execução descentralizada de atividade pública que exija a transferência,
+        exclusivamente para esse fim específico e determinado, observado o disposto na Lei nº 12.527,
+        de 18 de novembro de 2011 (Lei de Acesso à Informação);
+    - urn: urn:intuitem:risk:req_node:lgpd:26-p1-iii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:26-p1
+      ref_id: Art. 26, § 1º, III
+      description: nos casos em que os dados forem acessíveis publicamente, observadas as disposições
+        desta Lei;
+    - urn: urn:intuitem:risk:req_node:lgpd:26-p1-iv
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:26-p1
+      ref_id: Art. 26, § 1º, IV
+      description: quando houver previsão legal ou a transferência for respaldada em contratos, convênios
+        ou instrumentos congêneres; ou
+    - urn: urn:intuitem:risk:req_node:lgpd:26-p1-v
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:26-p1
+      ref_id: Art. 26, § 1º, V
+      description: na hipótese de a transferência dos dados objetivar exclusivamente a prevenção de fraudes
+        e irregularidades, ou proteger e resguardar a segurança e a integridade do titular dos dados,
+        desde que vedado o tratamento para outras finalidades.
+    - urn: urn:intuitem:risk:req_node:lgpd:26-p2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:26
+      ref_id: Art. 26, § 2º
+      description: Os contratos e convênios de que trata o § 1º deste artigo deverão ser comunicados à
+        autoridade nacional.
+    - urn: urn:intuitem:risk:req_node:lgpd:27
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap4-sec1
+      ref_id: Art. 27
+      description: 'A comunicação ou o uso compartilhado de dados pessoais de pessoa jurídica de direito
+        público a pessoa de direito privado será informado à autoridade nacional e dependerá de consentimento
+        do titular, exceto:'
+    - urn: urn:intuitem:risk:req_node:lgpd:27-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:27
+      ref_id: Art. 27, I
+      description: nas hipóteses de dispensa de consentimento previstas nesta Lei;
+    - urn: urn:intuitem:risk:req_node:lgpd:27-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:27
+      ref_id: Art. 27, II
+      description: nos casos de uso compartilhado de dados, em que será dada publicidade nos termos do
+        inciso I do caput do art. 23 desta Lei; ou
+    - urn: urn:intuitem:risk:req_node:lgpd:27-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:27
+      ref_id: Art. 27, III
+      description: nas exceções constantes do § 1º do art. 26 desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:27-pu
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:27
+      ref_id: Art. 27, Parágrafo único
+      description: A informação à autoridade nacional de que trata o caput deste artigo será objeto de
+        regulamentação.
+    - urn: urn:intuitem:risk:req_node:lgpd:29
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap4-sec1
+      ref_id: Art. 29
+      description: A autoridade nacional poderá solicitar, a qualquer momento, aos órgãos e às entidades
+        do poder público a realização de operações de tratamento de dados pessoais, informações específicas
+        sobre o âmbito e a natureza dos dados e outros detalhes do tratamento realizado e poderá emitir
+        parecer técnico complementar para garantir o cumprimento desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:30
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap4-sec1
+      ref_id: Art. 30
+      description: A autoridade nacional poderá estabelecer normas complementares para as atividades de
+        comunicação e de uso compartilhado de dados pessoais.
+    - urn: urn:intuitem:risk:req_node:lgpd:cap4-sec2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-4
+      ref_id: Seção II
+      name: Da Responsabilidade
+    - urn: urn:intuitem:risk:req_node:lgpd:31
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap4-sec2
+      ref_id: Art. 31
+      description: Quando houver infração a esta Lei em decorrência do tratamento de dados pessoais por
+        órgãos públicos, a autoridade nacional poderá enviar informe com medidas cabíveis para fazer cessar
+        a violação.
+    - urn: urn:intuitem:risk:req_node:lgpd:32
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap4-sec2
+      ref_id: Art. 32
+      description: A autoridade nacional poderá solicitar a agentes do Poder Público a publicação de relatórios
+        de impacto à proteção de dados pessoais e sugerir a adoção de padrões e de boas práticas para
+        os tratamentos de dados pessoais pelo Poder Público.
+    - urn: urn:intuitem:risk:req_node:lgpd:chapter-5
+      assessable: false
+      depth: 1
+      ref_id: Capítulo V
+      name: Da Transferência Internacional de Dados
+    - urn: urn:intuitem:risk:req_node:lgpd:33
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-5
+      ref_id: Art. 33
+      description: 'A transferência internacional de dados pessoais somente é permitida nos seguintes
+        casos:'
+    - urn: urn:intuitem:risk:req_node:lgpd:33-i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:33
+      ref_id: Art. 33, I
+      description: para países ou organismos internacionais que proporcionem grau de proteção de dados
+        pessoais adequado ao previsto nesta Lei;
+    - urn: urn:intuitem:risk:req_node:lgpd:33-ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:33
+      ref_id: Art. 33, II
+      description: 'quando o controlador oferecer e comprovar garantias de cumprimento dos princípios,
+        dos direitos do titular e do regime de proteção de dados previstos nesta Lei, na forma de: a)
+        cláusulas contratuais específicas para determinada transferência; b) cláusulas-padrão contratuais;
+        c) normas corporativas globais; d) selos, certificados e códigos de conduta regularmente emitidos;'
+    - urn: urn:intuitem:risk:req_node:lgpd:33-iii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:33
+      ref_id: Art. 33, III
+      description: quando a transferência for necessária para a cooperação jurídica internacional entre
+        órgãos públicos de inteligência, de investigação e de persecução, de acordo com os instrumentos
+        de direito internacional;
+    - urn: urn:intuitem:risk:req_node:lgpd:33-iv
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:33
+      ref_id: Art. 33, IV
+      description: quando a transferência for necessária para a proteção da vida ou da incolumidade física
+        do titular ou de terceiro;
+    - urn: urn:intuitem:risk:req_node:lgpd:33-v
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:33
+      ref_id: Art. 33, V
+      description: quando a autoridade nacional autorizar a transferência;
+    - urn: urn:intuitem:risk:req_node:lgpd:33-vi
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:33
+      ref_id: Art. 33, VI
+      description: quando a transferência resultar em compromisso assumido em acordo de cooperação internacional;
+    - urn: urn:intuitem:risk:req_node:lgpd:33-vii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:33
+      ref_id: Art. 33, VII
+      description: quando a transferência for necessária para a execução de política pública ou atribuição
+        legal do serviço público, sendo dada publicidade nos termos do inciso I do caput do art. 23 desta
+        Lei;
+    - urn: urn:intuitem:risk:req_node:lgpd:33-viii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:33
+      ref_id: Art. 33, VIII
+      description: quando o titular tiver fornecido o seu consentimento específico e em destaque para
+        a transferência, com informação prévia sobre o caráter internacional da operação, distinguindo
+        claramente esta de outras finalidades; ou
+    - urn: urn:intuitem:risk:req_node:lgpd:33-ix
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:33
+      ref_id: Art. 33, IX
+      description: quando necessário para atender as hipóteses previstas nos incisos II, V e VI do art.
+        7º desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:33-pu
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:33
+      ref_id: Art. 33, Parágrafo único
+      description: Para os fins do inciso I deste artigo, as pessoas jurídicas de direito público referidas
+        no parágrafo único do art. 1º da Lei nº 12.527, de 18 de novembro de 2011 (Lei de Acesso à Informação),
+        no âmbito de suas competências legais, e responsáveis, no âmbito de suas atividades, poderão requerer
+        à autoridade nacional a avaliação do nível de proteção a dados pessoais conferido por país ou
+        organismo internacional.
+    - urn: urn:intuitem:risk:req_node:lgpd:34
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-5
+      ref_id: Art. 34
+      description: 'O nível de proteção de dados do país estrangeiro ou do organismo internacional mencionado
+        no inciso I do caput do art. 33 desta Lei será avaliado pela autoridade nacional, que levará em
+        consideração:'
+    - urn: urn:intuitem:risk:req_node:lgpd:34-i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:34
+      ref_id: Art. 34, I
+      description: as normas gerais e setoriais da legislação em vigor no país de destino ou no organismo
+        internacional;
+    - urn: urn:intuitem:risk:req_node:lgpd:34-ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:34
+      ref_id: Art. 34, II
+      description: a natureza dos dados;
+    - urn: urn:intuitem:risk:req_node:lgpd:34-iii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:34
+      ref_id: Art. 34, III
+      description: a observância dos princípios gerais de proteção de dados pessoais e direitos dos titulares
+        previstos nesta Lei;
+    - urn: urn:intuitem:risk:req_node:lgpd:34-iv
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:34
+      ref_id: Art. 34, IV
+      description: a adoção de medidas de segurança previstas em regulamento;
+    - urn: urn:intuitem:risk:req_node:lgpd:34-v
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:34
+      ref_id: Art. 34, V
+      description: a existência de garantias judiciais e institucionais para o respeito aos direitos de
+        proteção de dados pessoais; e
+    - urn: urn:intuitem:risk:req_node:lgpd:34-vi
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:34
+      ref_id: Art. 34, VI
+      description: outras circunstâncias específicas relativas à transferência.
+    - urn: urn:intuitem:risk:req_node:lgpd:35
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-5
+      ref_id: Art. 35
+      description: A definição do conteúdo de cláusulas-padrão contratuais, bem como a verificação de
+        cláusulas contratuais específicas para uma determinada transferência, normas corporativas globais
+        ou selos, certificados e códigos de conduta, a que se refere o inciso II do caput do art. 33 desta
+        Lei, será realizada pela autoridade nacional.
+    - urn: urn:intuitem:risk:req_node:lgpd:35-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:35
+      ref_id: Art. 35, § 1º
+      description: Para a verificação do disposto no caput deste artigo, deverão ser considerados os requisitos,
+        as condições e as garantias mínimas para a transferência que observem os direitos, as garantias
+        e os princípios desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:35-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:35
+      ref_id: Art. 35, § 2º
+      description: Na análise de cláusulas contratuais, de documentos ou de normas corporativas globais
+        submetidas à aprovação da autoridade nacional, poderão ser requeridas informações suplementares
+        ou realizadas diligências de verificação quanto às operações de tratamento, quando necessário.
+    - urn: urn:intuitem:risk:req_node:lgpd:35-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:35
+      ref_id: Art. 35, § 3º
+      description: A autoridade nacional poderá designar organismos de certificação para a realização
+        do previsto no caput deste artigo, que permanecerão sob sua fiscalização nos termos definidos
+        em regulamento.
+    - urn: urn:intuitem:risk:req_node:lgpd:35-p4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:35
+      ref_id: Art. 35, § 4º
+      description: Os atos realizados por organismo de certificação poderão ser revistos pela autoridade
+        nacional e, caso em desconformidade com esta Lei, submetidos a revisão ou anulados.
+    - urn: urn:intuitem:risk:req_node:lgpd:35-p5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:35
+      ref_id: Art. 35, § 5º
+      description: As garantias suficientes de observância dos princípios gerais de proteção e dos direitos
+        do titular referidas no caput deste artigo serão também analisadas de acordo com as medidas técnicas
+        e organizacionais adotadas pelo operador, de acordo com o previsto nos §§ 1º e 2º do art. 46 desta
+        Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:36
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-5
+      ref_id: Art. 36
+      description: As alterações nas garantias apresentadas como suficientes de observância dos princípios
+        gerais de proteção e dos direitos do titular referidas no inciso II do art. 33 desta Lei deverão
+        ser comunicadas à autoridade nacional.
+    - urn: urn:intuitem:risk:req_node:lgpd:chapter-6
+      assessable: false
+      depth: 1
+      ref_id: Capítulo VI
+      name: Dos Agentes de Tratamento de Dados Pessoais
+    - urn: urn:intuitem:risk:req_node:lgpd:cap6-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-6
+      ref_id: Seção I
+      name: Do Controlador e do Operador
+    - urn: urn:intuitem:risk:req_node:lgpd:37
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap6-sec1
+      ref_id: Art. 37
+      description: O controlador e o operador devem manter registro das operações de tratamento de dados
+        pessoais que realizarem, especialmente quando baseado no legítimo interesse.
+    - urn: urn:intuitem:risk:req_node:lgpd:38
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap6-sec1
+      ref_id: Art. 38
+      description: A autoridade nacional poderá determinar ao controlador que elabore relatório de impacto
+        à proteção de dados pessoais, inclusive de dados sensíveis, referente a suas operações de tratamento
+        de dados, nos termos de regulamento, observados os segredos comercial e industrial.
+    - urn: urn:intuitem:risk:req_node:lgpd:38-pu
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:38
+      ref_id: Art. 38, Parágrafo único
+      description: Observado o disposto no caput deste artigo, o relatório deverá conter, no mínimo, a
+        descrição dos tipos de dados coletados, a metodologia utilizada para a coleta e para a garantia
+        da segurança das informações e a análise do controlador com relação a medidas, salvaguardas e
+        mecanismos de mitigação de risco adotados.
+    - urn: urn:intuitem:risk:req_node:lgpd:39
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap6-sec1
+      ref_id: Art. 39
+      description: O operador deverá realizar o tratamento segundo as instruções fornecidas pelo controlador,
+        que verificará a observância das próprias instruções e das normas sobre a matéria.
+    - urn: urn:intuitem:risk:req_node:lgpd:40
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap6-sec1
+      ref_id: Art. 40
+      description: A autoridade nacional poderá dispor sobre padrões de interoperabilidade para fins de
+        portabilidade, livre acesso aos dados e segurança, assim como sobre o tempo de guarda dos registros,
+        tendo em vista especialmente a necessidade e a transparência.
+    - urn: urn:intuitem:risk:req_node:lgpd:cap6-sec2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-6
+      ref_id: Seção II
+      name: Do Encarregado pelo Tratamento de Dados Pessoais
+    - urn: urn:intuitem:risk:req_node:lgpd:41
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap6-sec2
+      ref_id: Art. 41
+      description: O controlador deverá indicar encarregado pelo tratamento de dados pessoais.
+    - urn: urn:intuitem:risk:req_node:lgpd:41-p1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:41
+      ref_id: Art. 41, § 1º
+      description: A identidade e as informações de contato do encarregado deverão ser divulgadas publicamente,
+        de forma clara e objetiva, preferencialmente no sítio eletrônico do controlador.
+    - urn: urn:intuitem:risk:req_node:lgpd:41-p2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:41
+      ref_id: Art. 41, § 2º
+      description: 'As atividades do encarregado consistem em:'
+    - urn: urn:intuitem:risk:req_node:lgpd:41-p2-i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:41-p2
+      ref_id: Art. 41, § 2º, I
+      description: aceitar reclamações e comunicações dos titulares, prestar esclarecimentos e adotar
+        providências;
+    - urn: urn:intuitem:risk:req_node:lgpd:41-p2-ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:41-p2
+      ref_id: Art. 41, § 2º, II
+      description: receber comunicações da autoridade nacional e adotar providências;
+    - urn: urn:intuitem:risk:req_node:lgpd:41-p2-iii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:41-p2
+      ref_id: Art. 41, § 2º, III
+      description: orientar os funcionários e os contratados da entidade a respeito das práticas a serem
+        tomadas em relação à proteção de dados pessoais; e
+    - urn: urn:intuitem:risk:req_node:lgpd:41-p2-iv
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:41-p2
+      ref_id: Art. 41, § 2º, IV
+      description: executar as demais atribuições determinadas pelo controlador ou estabelecidas em normas
+        complementares.
+    - urn: urn:intuitem:risk:req_node:lgpd:41-p3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:41
+      ref_id: Art. 41, § 3º
+      description: A autoridade nacional poderá estabelecer normas complementares sobre a definição e
+        as atribuições do encarregado, inclusive hipóteses de dispensa da necessidade de sua indicação,
+        conforme a natureza e o porte da entidade ou o volume de operações de tratamento de dados.
+    - urn: urn:intuitem:risk:req_node:lgpd:cap6-sec3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-6
+      ref_id: Seção III
+      name: Da Responsabilidade e do Ressarcimento de Danos
+    - urn: urn:intuitem:risk:req_node:lgpd:42
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap6-sec3
+      ref_id: Art. 42
+      description: O controlador ou o operador que, em razão do exercício de atividade de tratamento de
+        dados pessoais, causar a outrem dano patrimonial, moral, individual ou coletivo, em violação à
+        legislação de proteção de dados pessoais, é obrigado a repará-lo.
+    - urn: urn:intuitem:risk:req_node:lgpd:42-p1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:42
+      ref_id: Art. 42, § 1º
+      description: 'A fim de assegurar a efetiva indenização ao titular dos dados:'
+    - urn: urn:intuitem:risk:req_node:lgpd:42-p1-i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:42-p1
+      ref_id: Art. 42, § 1º, I
+      description: o operador responde solidariamente pelos danos causados pelo tratamento quando descumprir
+        as obrigações da legislação de proteção de dados ou quando não tiver seguido as instruções lícitas
+        do controlador, hipótese em que o operador equipara-se ao controlador, salvo nos casos de exclusão
+        previstos no art. 43 desta Lei;
+    - urn: urn:intuitem:risk:req_node:lgpd:42-p1-ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:42-p1
+      ref_id: Art. 42, § 1º, II
+      description: os controladores que estiverem diretamente envolvidos no tratamento do qual decorreram
+        danos ao titular dos dados respondem solidariamente, salvo nos casos de exclusão previstos no
+        art. 43 desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:42-p2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:42
+      ref_id: Art. 42, § 2º
+      description: O juiz, no processo civil, poderá inverter o ônus da prova a favor do titular dos dados
+        quando, a seu juízo, for verossímil a alegação, houver hipossuficiência para fins de produção
+        de prova ou quando a produção de prova pelo titular resultar-lhe excessivamente onerosa.
+    - urn: urn:intuitem:risk:req_node:lgpd:42-p3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:42
+      ref_id: Art. 42, § 3º
+      description: As ações de reparação por danos coletivos que tenham por objeto a responsabilização
+        nos termos do caput deste artigo podem ser exercidas coletivamente em juízo, observado o disposto
+        na legislação pertinente.
+    - urn: urn:intuitem:risk:req_node:lgpd:42-p4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:42
+      ref_id: Art. 42, § 4º
+      description: Aquele que reparar o dano ao titular tem direito de regresso contra os demais responsáveis,
+        na medida de sua participação no evento danoso.
+    - urn: urn:intuitem:risk:req_node:lgpd:43
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap6-sec3
+      ref_id: Art. 43
+      description: 'Os agentes de tratamento só não serão responsabilizados quando provarem:'
+    - urn: urn:intuitem:risk:req_node:lgpd:43-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:43
+      ref_id: Art. 43, I
+      description: que não realizaram o tratamento de dados pessoais que lhes é atribuído;
+    - urn: urn:intuitem:risk:req_node:lgpd:43-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:43
+      ref_id: Art. 43, II
+      description: que, embora tenham realizado o tratamento de dados pessoais que lhes é atribuído, não
+        houve violação à legislação de proteção de dados; ou
+    - urn: urn:intuitem:risk:req_node:lgpd:43-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:43
+      ref_id: Art. 43, III
+      description: que o dano é decorrente de culpa exclusiva do titular dos dados ou de terceiro.
+    - urn: urn:intuitem:risk:req_node:lgpd:44
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap6-sec3
+      ref_id: Art. 44
+      description: 'O tratamento de dados pessoais será irregular quando deixar de observar a legislação
+        ou quando não fornecer a segurança que o titular dele pode esperar, consideradas as circunstâncias
+        relevantes, entre as quais:'
+    - urn: urn:intuitem:risk:req_node:lgpd:44-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:44
+      ref_id: Art. 44, I
+      description: o modo pelo qual é realizado;
+    - urn: urn:intuitem:risk:req_node:lgpd:44-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:44
+      ref_id: Art. 44, II
+      description: o resultado e os riscos que razoavelmente dele se esperam;
+    - urn: urn:intuitem:risk:req_node:lgpd:44-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:44
+      ref_id: Art. 44, III
+      description: as técnicas de tratamento de dados pessoais disponíveis à época em que foi realizado.
+    - urn: urn:intuitem:risk:req_node:lgpd:44-pu
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:44
+      ref_id: Art. 44, Parágrafo único
+      description: Responde pelos danos decorrentes da violação da segurança dos dados o controlador ou
+        o operador que, ao deixar de adotar as medidas de segurança previstas no art. 46 desta Lei, der
+        causa ao dano.
+    - urn: urn:intuitem:risk:req_node:lgpd:45
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap6-sec3
+      ref_id: Art. 45
+      description: As hipóteses de violação do direito do titular no âmbito das relações de consumo permanecem
+        sujeitas às regras de responsabilidade previstas na legislação pertinente.
+    - urn: urn:intuitem:risk:req_node:lgpd:chapter-7
+      assessable: false
+      depth: 1
+      ref_id: Capítulo VII
+      name: Da Segurança e das Boas Práticas
+    - urn: urn:intuitem:risk:req_node:lgpd:cap7-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-7
+      ref_id: Seção I
+      name: Da Segurança e do Sigilo de Dados
+    - urn: urn:intuitem:risk:req_node:lgpd:46
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap7-sec1
+      ref_id: Art. 46
+      description: Os agentes de tratamento devem adotar medidas de segurança, técnicas e administrativas
+        aptas a proteger os dados pessoais de acessos não autorizados e de situações acidentais ou ilícitas
+        de destruição, perda, alteração, comunicação ou qualquer forma de tratamento inadequado ou ilícito.
+    - urn: urn:intuitem:risk:req_node:lgpd:46-p1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:46
+      ref_id: Art. 46, § 1º
+      description: A autoridade nacional poderá dispor sobre padrões técnicos mínimos para tornar aplicável
+        o disposto no caput deste artigo, considerados a natureza das informações tratadas, as características
+        específicas do tratamento e o estado atual da tecnologia, especialmente no caso de dados pessoais
+        sensíveis, assim como os princípios previstos no caput do art. 6º desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:46-p2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:46
+      ref_id: Art. 46, § 2º
+      description: As medidas de que trata o caput deste artigo deverão ser observadas desde a fase de
+        concepção do produto ou do serviço até a sua execução.
+    - urn: urn:intuitem:risk:req_node:lgpd:47
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap7-sec1
+      ref_id: Art. 47
+      description: Os agentes de tratamento ou qualquer outra pessoa que intervenha em uma das fases do
+        tratamento obriga-se a garantir a segurança da informação prevista nesta Lei em relação aos dados
+        pessoais, mesmo após o seu término.
+    - urn: urn:intuitem:risk:req_node:lgpd:48
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap7-sec1
+      ref_id: Art. 48
+      description: O controlador deverá comunicar à autoridade nacional e ao titular a ocorrência de incidente
+        de segurança que possa acarretar risco ou dano relevante aos titulares.
+    - urn: urn:intuitem:risk:req_node:lgpd:48-p1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:48
+      ref_id: Art. 48, § 1º
+      description: 'A comunicação será feita em prazo razoável, conforme definido pela autoridade nacional,
+        e deverá mencionar, no mínimo:'
+    - urn: urn:intuitem:risk:req_node:lgpd:48-p1-i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:48-p1
+      ref_id: Art. 48, § 1º, I
+      description: a descrição da natureza dos dados pessoais afetados;
+    - urn: urn:intuitem:risk:req_node:lgpd:48-p1-ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:48-p1
+      ref_id: Art. 48, § 1º, II
+      description: as informações sobre os titulares envolvidos;
+    - urn: urn:intuitem:risk:req_node:lgpd:48-p1-iii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:48-p1
+      ref_id: Art. 48, § 1º, III
+      description: a indicação das medidas técnicas e de segurança utilizadas para a proteção dos dados,
+        observados os segredos comercial e industrial;
+    - urn: urn:intuitem:risk:req_node:lgpd:48-p1-iv
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:48-p1
+      ref_id: Art. 48, § 1º, IV
+      description: os riscos relacionados ao incidente;
+    - urn: urn:intuitem:risk:req_node:lgpd:48-p1-v
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:48-p1
+      ref_id: Art. 48, § 1º, V
+      description: os motivos da demora, no caso de a comunicação não ter sido imediata; e
+    - urn: urn:intuitem:risk:req_node:lgpd:48-p1-vi
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:48-p1
+      ref_id: Art. 48, § 1º, VI
+      description: as medidas que foram ou que serão adotadas para reverter ou mitigar os efeitos do prejuízo.
+    - urn: urn:intuitem:risk:req_node:lgpd:48-p2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:48
+      ref_id: Art. 48, § 2º
+      description: 'A autoridade nacional verificará a gravidade do incidente e poderá, caso necessário
+        para a salvaguarda dos direitos dos titulares, determinar ao controlador a adoção de providências,
+        tais como:'
+    - urn: urn:intuitem:risk:req_node:lgpd:48-p2-i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:48-p2
+      ref_id: Art. 48, § 2º, I
+      description: ampla divulgação do fato em meios de comunicação; e
+    - urn: urn:intuitem:risk:req_node:lgpd:48-p2-ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:48-p2
+      ref_id: Art. 48, § 2º, II
+      description: medidas para reverter ou mitigar os efeitos do incidente.
+    - urn: urn:intuitem:risk:req_node:lgpd:48-p3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:48
+      ref_id: Art. 48, § 3º
+      description: No juízo de gravidade do incidente, será avaliada eventual comprovação de que foram
+        adotadas medidas técnicas adequadas que tornem os dados pessoais afetados ininteligíveis, no âmbito
+        e nos limites técnicos de seus serviços, para terceiros não autorizados a acessá-los.
+    - urn: urn:intuitem:risk:req_node:lgpd:49
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap7-sec1
+      ref_id: Art. 49
+      description: Os sistemas utilizados para o tratamento de dados pessoais devem ser estruturados de
+        forma a atender aos requisitos de segurança, aos padrões de boas práticas e de governança e aos
+        princípios gerais previstos nesta Lei e às demais normas regulamentares.
+    - urn: urn:intuitem:risk:req_node:lgpd:cap7-sec2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-7
+      ref_id: Seção II
+      name: Das Boas Práticas e da Governança
+    - urn: urn:intuitem:risk:req_node:lgpd:50
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap7-sec2
+      ref_id: Art. 50
+      description: Os controladores e operadores, no âmbito de suas competências, pelo tratamento de dados
+        pessoais, individualmente ou por meio de associações, poderão formular regras de boas práticas
+        e de governança que estabeleçam as condições de organização, o regime de funcionamento, os procedimentos,
+        incluindo reclamações e petições de titulares, as normas de segurança, os padrões técnicos, as
+        obrigações específicas para os diversos envolvidos no tratamento, as ações educativas, os mecanismos
+        internos de supervisão e de mitigação de riscos e outros aspectos relacionados ao tratamento de
+        dados pessoais.
+    - urn: urn:intuitem:risk:req_node:lgpd:50-p1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:50
+      ref_id: Art. 50, § 1º
+      description: Ao estabelecer regras de boas práticas, o controlador e o operador levarão em consideração,
+        em relação ao tratamento e aos dados, a natureza, o escopo, a finalidade e a probabilidade e a
+        gravidade dos riscos e dos benefícios decorrentes de tratamento de dados do titular.
+    - urn: urn:intuitem:risk:req_node:lgpd:50-p2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:50
+      ref_id: Art. 50, § 2º
+      description: 'Na aplicação dos princípios indicados nos incisos VII e VIII do caput do art. 6º desta
+        Lei, o controlador, observados a estrutura, a escala e o volume de suas operações, bem como a
+        sensibilidade dos dados tratados e a probabilidade e a gravidade dos danos para os titulares dos
+        dados, poderá:'
+    - urn: urn:intuitem:risk:req_node:lgpd:50-p2-i
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:50-p2
+      ref_id: Art. 50, § 2º, I
+      description: 'implementar programa de governança em privacidade que, no mínimo:'
+    - urn: urn:intuitem:risk:req_node:lgpd:50-p2-i-a
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:lgpd:50-p2-i
+      ref_id: Art. 50, § 2º, I, a
+      description: demonstre o comprometimento do controlador em adotar processos e políticas internas
+        que assegurem o cumprimento, de forma abrangente, de normas e boas práticas relativas à proteção
+        de dados pessoais;
+    - urn: urn:intuitem:risk:req_node:lgpd:50-p2-i-b
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:lgpd:50-p2-i
+      ref_id: Art. 50, § 2º, I, b
+      description: seja aplicável a todo o conjunto de dados pessoais que estejam sob seu controle, independentemente
+        do modo como se realizou sua coleta;
+    - urn: urn:intuitem:risk:req_node:lgpd:50-p2-i-c
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:lgpd:50-p2-i
+      ref_id: Art. 50, § 2º, I, c
+      description: seja adaptado à estrutura, à escala e ao volume de suas operações, bem como à sensibilidade
+        dos dados tratados;
+    - urn: urn:intuitem:risk:req_node:lgpd:50-p2-i-d
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:lgpd:50-p2-i
+      ref_id: Art. 50, § 2º, I, d
+      description: estabeleça políticas e salvaguardas adequadas com base em processo de avaliação sistemática
+        de impactos e riscos à privacidade;
+    - urn: urn:intuitem:risk:req_node:lgpd:50-p2-i-e
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:lgpd:50-p2-i
+      ref_id: Art. 50, § 2º, I, e
+      description: tenha o objetivo de estabelecer relação de confiança com o titular, por meio de atuação
+        transparente e que assegure mecanismos de participação do titular;
+    - urn: urn:intuitem:risk:req_node:lgpd:50-p2-i-f
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:lgpd:50-p2-i
+      ref_id: Art. 50, § 2º, I, f
+      description: esteja integrado a sua estrutura geral de governança e estabeleça e aplique mecanismos
+        de supervisão internos e externos;
+    - urn: urn:intuitem:risk:req_node:lgpd:50-p2-i-g
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:lgpd:50-p2-i
+      ref_id: Art. 50, § 2º, I, g
+      description: conte com planos de resposta a incidentes e remediação; e
+    - urn: urn:intuitem:risk:req_node:lgpd:50-p2-i-h
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:lgpd:50-p2-i
+      ref_id: Art. 50, § 2º, I, h
+      description: seja atualizado constantemente com base em informações obtidas a partir de monitoramento
+        contínuo e avaliações periódicas;
+    - urn: urn:intuitem:risk:req_node:lgpd:50-p2-ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:50-p2
+      ref_id: Art. 50, § 2º, II
+      description: demonstrar a efetividade de seu programa de governança em privacidade quando apropriado
+        e, em especial, a pedido da autoridade nacional ou de outra entidade responsável por promover
+        o cumprimento de boas práticas ou códigos de conduta, os quais, de forma independente, promovam
+        o cumprimento desta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:50-p3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:50
+      ref_id: Art. 50, § 3º
+      description: As regras de boas práticas e de governança deverão ser publicadas e atualizadas periodicamente
+        e poderão ser reconhecidas e divulgadas pela autoridade nacional.
+    - urn: urn:intuitem:risk:req_node:lgpd:51
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap7-sec2
+      ref_id: Art. 51
+      description: A autoridade nacional estimulará a adoção de padrões técnicos que facilitem o controle
+        pelos titulares dos seus dados pessoais.
+    - urn: urn:intuitem:risk:req_node:lgpd:chapter-8
+      assessable: false
+      depth: 1
+      ref_id: Capítulo VIII
+      name: Da Fiscalização
+    - urn: urn:intuitem:risk:req_node:lgpd:cap8-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-8
+      ref_id: Seção I
+      name: Das Sanções Administrativas
+    - urn: urn:intuitem:risk:req_node:lgpd:52
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap8-sec1
+      ref_id: Art. 52
+      description: 'Os agentes de tratamento de dados, em razão das infrações cometidas às normas previstas
+        nesta Lei, ficam sujeitos às seguintes sanções administrativas aplicáveis pela autoridade nacional:'
+    - urn: urn:intuitem:risk:req_node:lgpd:52-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52
+      ref_id: Art. 52, I
+      description: advertência, com indicação de prazo para adoção de medidas corretivas;
+    - urn: urn:intuitem:risk:req_node:lgpd:52-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52
+      ref_id: Art. 52, II
+      description: multa simples, de até 2% (dois por cento) do faturamento da pessoa jurídica de direito
+        privado, grupo ou conglomerado no Brasil no seu último exercício, excluídos os tributos, limitada,
+        no total, a R$ 50.000.000,00 (cinquenta milhões de reais) por infração;
+    - urn: urn:intuitem:risk:req_node:lgpd:52-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52
+      ref_id: Art. 52, III
+      description: multa diária, observado o limite total a que se refere o inciso II;
+    - urn: urn:intuitem:risk:req_node:lgpd:52-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52
+      ref_id: Art. 52, IV
+      description: publicização da infração após devidamente apurada e confirmada a sua ocorrência;
+    - urn: urn:intuitem:risk:req_node:lgpd:52-v
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52
+      ref_id: Art. 52, V
+      description: bloqueio dos dados pessoais a que se refere a infração até a sua regularização;
+    - urn: urn:intuitem:risk:req_node:lgpd:52-vi
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52
+      ref_id: Art. 52, VI
+      description: eliminação dos dados pessoais a que se refere a infração;
+    - urn: urn:intuitem:risk:req_node:lgpd:52-x
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52
+      ref_id: Art. 52, X
+      description: suspensão parcial do funcionamento do banco de dados a que se refere a infração pelo
+        período máximo de 6 (seis) meses, prorrogável por igual período, até a regularização da atividade
+        de tratamento pelo controlador;
+    - urn: urn:intuitem:risk:req_node:lgpd:52-xi
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52
+      ref_id: Art. 52, XI
+      description: suspensão do exercício da atividade de tratamento dos dados pessoais a que se refere
+        a infração pelo período máximo de 6 (seis) meses, prorrogável por igual período;
+    - urn: urn:intuitem:risk:req_node:lgpd:52-xii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52
+      ref_id: Art. 52, XII
+      description: proibição parcial ou total do exercício de atividades relacionadas a tratamento de
+        dados.
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52
+      ref_id: Art. 52, § 1º
+      description: 'As sanções serão aplicadas após procedimento administrativo que possibilite a oportunidade
+        da ampla defesa, de forma gradativa, isolada ou cumulativa, de acordo com as peculiaridades do
+        caso concreto e considerados os seguintes parâmetros e critérios:'
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p1-i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52-p1
+      ref_id: Art. 52, § 1º, I
+      description: a gravidade e a natureza das infrações e dos direitos pessoais afetados;
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p1-ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52-p1
+      ref_id: Art. 52, § 1º, II
+      description: a boa-fé do infrator;
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p1-iii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52-p1
+      ref_id: Art. 52, § 1º, III
+      description: a vantagem auferida ou pretendida pelo infrator;
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p1-iv
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52-p1
+      ref_id: Art. 52, § 1º, IV
+      description: a condição econômica do infrator;
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p1-v
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52-p1
+      ref_id: Art. 52, § 1º, V
+      description: a reincidência;
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p1-vi
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52-p1
+      ref_id: Art. 52, § 1º, VI
+      description: o grau do dano;
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p1-vii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52-p1
+      ref_id: Art. 52, § 1º, VII
+      description: a cooperação do infrator;
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p1-viii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52-p1
+      ref_id: Art. 52, § 1º, VIII
+      description: a adoção reiterada e demonstrada de mecanismos e procedimentos internos capazes de
+        minimizar o dano, voltados ao tratamento seguro e adequado de dados, em consonância com o disposto
+        no inciso II do § 2º do art. 48 desta Lei;
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p1-ix
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52-p1
+      ref_id: Art. 52, § 1º, IX
+      description: a adoção de política de boas práticas e governança;
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p1-x
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52-p1
+      ref_id: Art. 52, § 1º, X
+      description: a pronta adoção de medidas corretivas; e
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p1-xi
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52-p1
+      ref_id: Art. 52, § 1º, XI
+      description: a proporcionalidade entre a gravidade da falta e a intensidade da sanção.
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52
+      ref_id: Art. 52, § 2º
+      description: O disposto neste artigo não substitui a aplicação de sanções administrativas, civis
+        ou penais definidas na Lei nº 8.078, de 11 de setembro de 1990, e em legislação específica.
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52
+      ref_id: Art. 52, § 3º
+      description: O disposto nos incisos I, IV, V, VI, X, XI e XII do caput deste artigo poderá ser aplicado
+        às entidades e aos órgãos públicos, sem prejuízo do disposto na Lei nº 8.112, de 11 de dezembro
+        de 1990, na Lei nº 8.429, de 2 de junho de 1992, e na Lei nº 12.527, de 18 de novembro de 2011.
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52
+      ref_id: Art. 52, § 4º
+      description: No cálculo do valor da multa de que trata o inciso II do caput deste artigo, a autoridade
+        nacional poderá considerar o faturamento total da empresa ou grupo de empresas, quando não dispuser
+        do valor do faturamento no ramo de atividade empresarial em que ocorreu a infração, definido pela
+        autoridade nacional, ou quando o valor for apresentado de forma incompleta ou não for demonstrado
+        de forma inequívoca e idônea.
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52
+      ref_id: Art. 52, § 5º
+      description: O produto da arrecadação das multas aplicadas pela ANPD, inscritas ou não em dívida
+        ativa, será destinado ao Fundo de Defesa de Direitos Difusos de que tratam o art. 13 da Lei nº
+        7.347, de 24 de julho de 1985, e a Lei nº 9.008, de 21 de março de 1995.
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p6
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52
+      ref_id: Art. 52, § 6º
+      description: 'As sanções previstas nos incisos X, XI e XII do caput deste artigo serão aplicadas:'
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p6-i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52-p6
+      ref_id: Art. 52, § 6º, I
+      description: somente após já ter sido imposta ao menos 1 (uma) das sanções de que tratam os incisos
+        II, III, IV, V e VI do caput deste artigo para o mesmo caso concreto; e
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p6-ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52-p6
+      ref_id: Art. 52, § 6º, II
+      description: em caso de controladores submetidos a outros órgãos e entidades com competências sancionatórias,
+        ouvidos esses órgãos.
+    - urn: urn:intuitem:risk:req_node:lgpd:52-p7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:52
+      ref_id: Art. 52, § 7º
+      description: Os vazamentos individuais ou os acessos não autorizados de que trata o caput do art.
+        46 desta Lei poderão ser objeto de conciliação direta entre controlador e titular e, caso não
+        haja acordo, o controlador estará sujeito à aplicação das penalidades de que trata este artigo.
+    - urn: urn:intuitem:risk:req_node:lgpd:53
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap8-sec1
+      ref_id: Art. 53
+      description: A autoridade nacional definirá, por meio de regulamento próprio sobre sanções administrativas
+        a infrações a esta Lei, que deverá ser objeto de consulta pública, as metodologias que orientarão
+        o cálculo do valor-base das sanções de multa.
+    - urn: urn:intuitem:risk:req_node:lgpd:53-p1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:53
+      ref_id: Art. 53, § 1º
+      description: As metodologias a que se refere o caput deste artigo devem ser previamente publicadas,
+        para ciência dos agentes de tratamento, e devem apresentar objetivamente as formas e dosimetrias
+        para o cálculo do valor-base das sanções de multa, que deverão conter fundamentação detalhada
+        de todos os seus elementos, demonstrando a observância dos critérios previstos nesta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:53-p2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:53
+      ref_id: Art. 53, § 2º
+      description: O regulamento de sanções e metodologias correspondentes deve estabelecer as circunstâncias
+        e as condições para a adoção de multa simples ou diária.
+    - urn: urn:intuitem:risk:req_node:lgpd:54
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap8-sec1
+      ref_id: Art. 54
+      description: O valor da sanção de multa diária aplicável às infrações a esta Lei deve observar a
+        gravidade da falta e a extensão do dano ou prejuízo causado e ser fundamentado pela autoridade
+        nacional.
+    - urn: urn:intuitem:risk:req_node:lgpd:54-pu
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:54
+      ref_id: Art. 54, Parágrafo único
+      description: A intimação da sanção de multa diária deverá conter, no mínimo, a descrição da obrigação
+        imposta, o prazo razoável e estipulado pelo órgão para o seu cumprimento e o valor da multa diária
+        a ser aplicada pelo seu descumprimento.
+    - urn: urn:intuitem:risk:req_node:lgpd:chapter-9
+      assessable: false
+      depth: 1
+      ref_id: Capítulo IX
+      name: Da Autoridade Nacional de Proteção de Dados (ANPD) e do Conselho Nacional de Proteção de Dados
+        Pessoais e da Privacidade
+    - urn: urn:intuitem:risk:req_node:lgpd:cap9-sec1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-9
+      ref_id: Seção I
+      name: Da Autoridade Nacional de Proteção de Dados (ANPD)
+    - urn: urn:intuitem:risk:req_node:lgpd:55-a
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap9-sec1
+      ref_id: Art. 55-A
+      description: Fica criada a Agência Nacional de Proteção de Dados – ANPD, autarquia de natureza especial
+        vinculada ao Ministério da Justiça e Segurança Pública, dotada de autonomia funcional, técnica,
+        decisória, administrativa e financeira, com patrimônio próprio e com sede e foro no Distrito Federal,
+        nos termos do disposto na Lei nº 13.848, de 25 de junho de 2019.
+    - urn: urn:intuitem:risk:req_node:lgpd:55-c
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap9-sec1
+      ref_id: Art. 55-C
+      description: 'A ANPD é composta de: I - Conselho Diretor, órgão máximo de direção; II - Conselho
+        Nacional de Proteção de Dados Pessoais e da Privacidade; III - Corregedoria; IV - Ouvidoria; V-A
+        - Procuradoria; V-B - Auditoria; e VI - unidades administrativas e unidades especializadas.'
+    - urn: urn:intuitem:risk:req_node:lgpd:55-d
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap9-sec1
+      ref_id: Art. 55-D
+      description: O Conselho Diretor da ANPD será composto de 5 (cinco) diretores, incluído o Diretor-Presidente,
+        escolhidos e nomeados pelo Presidente da República após aprovação pelo Senado Federal, com mandato
+        de 4 (quatro) anos.
+    - urn: urn:intuitem:risk:req_node:lgpd:55-e
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap9-sec1
+      ref_id: Art. 55-E
+      description: Os membros do Conselho Diretor somente perderão seus cargos em virtude de renúncia,
+        condenação judicial transitada em julgado ou pena de demissão decorrente de processo administrativo
+        disciplinar.
+    - urn: urn:intuitem:risk:req_node:lgpd:55-f
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap9-sec1
+      ref_id: Art. 55-F
+      description: Aplica-se aos membros do Conselho Diretor, após o exercício do cargo, o disposto no
+        art. 6º da Lei nº 12.813, de 16 de maio de 2013 (quarentena); a infração caracteriza ato de improbidade
+        administrativa.
+    - urn: urn:intuitem:risk:req_node:lgpd:55-g
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap9-sec1
+      ref_id: Art. 55-G
+      description: Ato do Presidente da República disporá sobre a estrutura regimental da ANPD; o Conselho
+        Diretor disporá sobre o regimento interno da ANPD.
+    - urn: urn:intuitem:risk:req_node:lgpd:55-h
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap9-sec1
+      ref_id: Art. 55-H
+      description: Os cargos em comissão e as funções de confiança da ANPD serão remanejados de outros
+        órgãos e entidades do Poder Executivo federal.
+    - urn: urn:intuitem:risk:req_node:lgpd:55-i
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap9-sec1
+      ref_id: Art. 55-I
+      description: Os ocupantes dos cargos em comissão e das funções de confiança da ANPD serão indicados
+        pelo Conselho Diretor e nomeados ou designados pelo Diretor-Presidente.
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap9-sec1
+      ref_id: Art. 55-J
+      description: 'Compete à ANPD:'
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, I
+      description: zelar pela proteção dos dados pessoais, nos termos da legislação;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, II
+      description: zelar pela observância dos segredos comercial e industrial, observada a proteção de
+        dados pessoais e do sigilo das informações quando protegido por lei ou quando a quebra do sigilo
+        violar os fundamentos do art. 2º desta Lei;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, III
+      description: elaborar diretrizes para a Política Nacional de Proteção de Dados Pessoais e da Privacidade;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, IV
+      description: fiscalizar e aplicar sanções em caso de tratamento de dados realizado em descumprimento
+        à legislação, mediante processo administrativo que assegure o contraditório, a ampla defesa e
+        o direito de recurso;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-v
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, V
+      description: apreciar petições de titular contra controlador após comprovada pelo titular a apresentação
+        de reclamação ao controlador não solucionada no prazo estabelecido em regulamentação;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-vi
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, VI
+      description: promover na população o conhecimento das normas e das políticas públicas sobre proteção
+        de dados pessoais e das medidas de segurança;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-vii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, VII
+      description: promover e elaborar estudos sobre as práticas nacionais e internacionais de proteção
+        de dados pessoais e privacidade;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-viii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, VIII
+      description: estimular a adoção de padrões para serviços e produtos que facilitem o exercício de
+        controle dos titulares sobre seus dados pessoais, os quais deverão levar em consideração as especificidades
+        das atividades e o porte dos responsáveis;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-ix
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, IX
+      description: promover ações de cooperação com autoridades de proteção de dados pessoais de outros
+        países, de natureza internacional ou transnacional;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-x
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, X
+      description: dispor sobre as formas de publicidade das operações de tratamento de dados pessoais,
+        respeitados os segredos comercial e industrial;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-xi
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, XI
+      description: solicitar, a qualquer momento, às entidades do poder público que realizem operações
+        de tratamento de dados pessoais informe específico sobre o âmbito, a natureza dos dados e os demais
+        detalhes do tratamento realizado, com a possibilidade de emitir parecer técnico complementar para
+        garantir o cumprimento desta Lei;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-xii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, XII
+      description: elaborar relatórios de gestão anuais acerca de suas atividades;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-xiii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, XIII
+      description: editar regulamentos e procedimentos sobre proteção de dados pessoais e privacidade,
+        bem como sobre relatórios de impacto à proteção de dados pessoais para os casos em que o tratamento
+        representar alto risco à garantia dos princípios gerais de proteção de dados pessoais previstos
+        nesta Lei;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-xiv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, XIV
+      description: ouvir os agentes de tratamento e a sociedade em matérias de interesse relevante e prestar
+        contas sobre suas atividades e planejamento;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-xv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, XV
+      description: arrecadar e aplicar suas receitas e publicar, no relatório de gestão a que se refere
+        o inciso XII do caput deste artigo, o detalhamento de suas receitas e despesas;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-xvi
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, XVI
+      description: realizar auditorias, ou determinar sua realização, no âmbito da atividade de fiscalização
+        de que trata o inciso IV e com a devida observância do disposto no inciso II do caput deste artigo,
+        sobre o tratamento de dados pessoais efetuado pelos agentes de tratamento, incluído o poder público;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-xvii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, XVII
+      description: celebrar, a qualquer momento, compromisso com agentes de tratamento para eliminar irregularidade,
+        incerteza jurídica ou situação contenciosa no âmbito de processos administrativos, de acordo com
+        o previsto no Decreto-Lei nº 4.657, de 4 de setembro de 1942;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-xviii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, XVIII
+      description: editar normas, orientações e procedimentos simplificados e diferenciados, inclusive
+        quanto aos prazos, para que microempresas e empresas de pequeno porte, bem como iniciativas empresariais
+        de caráter incremental ou disruptivo que se autodeclarem startups ou empresas de inovação, possam
+        adequar-se a esta Lei;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-xix
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, XIX
+      description: garantir que o tratamento de dados de idosos seja efetuado de maneira simples, clara,
+        acessível e adequada ao seu entendimento, nos termos desta Lei e da Lei nº 10.741, de 1º de outubro
+        de 2003 (Estatuto do Idoso);
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-xx
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, XX
+      description: deliberar, na esfera administrativa, em caráter terminativo, sobre a interpretação
+        desta Lei, as suas competências e os casos omissos;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-xxi
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, XXI
+      description: comunicar às autoridades competentes as infrações penais das quais tiver conhecimento;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-xxii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, XXII
+      description: comunicar aos órgãos de controle interno o descumprimento do disposto nesta Lei por
+        órgãos e entidades da administração pública federal;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-xxiii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, XXIII
+      description: articular-se com as autoridades reguladoras públicas para exercer suas competências
+        em setores específicos de atividades econômicas e governamentais sujeitas à regulação; e
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-xxiv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, XXIV
+      description: implementar mecanismos simplificados, inclusive por meio eletrônico, para o registro
+        de reclamações sobre o tratamento de dados pessoais em desconformidade com esta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-p1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, § 1º
+      description: Ao impor condicionantes administrativas ao tratamento de dados pessoais por agente
+        de tratamento privado, sejam eles limites, encargos ou sujeições, a ANPD deve observar a exigência
+        de mínima intervenção, assegurados os fundamentos, os princípios e os direitos dos titulares previstos
+        no art. 170 da Constituição Federal e nesta Lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-p2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, § 2º
+      description: Os regulamentos e as normas editados pela ANPD devem ser precedidos de consulta e audiência
+        públicas, bem como de análises de impacto regulatório.
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-p5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, § 5º
+      description: No exercício das competências de que trata o caput deste artigo, a autoridade competente
+        deverá zelar pela preservação do segredo empresarial e do sigilo das informações, nos termos da
+        lei.
+    - urn: urn:intuitem:risk:req_node:lgpd:55-j-p6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-j
+      ref_id: Art. 55-J, § 6º
+      description: As reclamações colhidas conforme o disposto no inciso V do caput deste artigo poderão
+        ser analisadas de forma agregada, e as eventuais providências delas decorrentes poderão ser adotadas
+        de forma padronizada.
+    - urn: urn:intuitem:risk:req_node:lgpd:55-k
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap9-sec1
+      ref_id: Art. 55-K
+      description: A aplicação das sanções previstas nesta Lei compete exclusivamente à ANPD, e suas competências
+        prevalecerão, no que se refere à proteção de dados pessoais, sobre as competências correlatas
+        de outras entidades ou órgãos da administração pública.
+    - urn: urn:intuitem:risk:req_node:lgpd:55-k-pu
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-k
+      ref_id: Art. 55-K, Parágrafo único
+      description: A ANPD articulará sua atuação com outros órgãos e entidades com competências sancionatórias
+        e normativas afetas ao tema de proteção de dados pessoais e será o órgão central de interpretação
+        desta Lei e do estabelecimento de normas e diretrizes para a sua implementação.
+    - urn: urn:intuitem:risk:req_node:lgpd:55-l
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap9-sec1
+      ref_id: Art. 55-L
+      description: 'Constituem receitas da ANPD:'
+    - urn: urn:intuitem:risk:req_node:lgpd:55-l-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-l
+      ref_id: Art. 55-L, I
+      description: as dotações, consignadas no orçamento geral da União, os créditos especiais, os créditos
+        adicionais, as transferências e os repasses que lhe forem conferidos;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-l-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-l
+      ref_id: Art. 55-L, II
+      description: as doações, os legados, as subvenções e outros recursos que lhe forem destinados;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-l-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-l
+      ref_id: Art. 55-L, III
+      description: os valores apurados na venda ou aluguel de bens móveis e imóveis de sua propriedade;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-l-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-l
+      ref_id: Art. 55-L, IV
+      description: os valores apurados em aplicações no mercado financeiro das receitas previstas neste
+        artigo;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-l-vi
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-l
+      ref_id: Art. 55-L, VI
+      description: os recursos provenientes de acordos, convênios ou contratos celebrados com entidades,
+        organismos ou empresas, públicos ou privados, nacionais ou internacionais;
+    - urn: urn:intuitem:risk:req_node:lgpd:55-l-vii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-l
+      ref_id: Art. 55-L, VII
+      description: o produto da venda de publicações, material técnico, dados e informações, inclusive
+        para fins de licitação pública.
+    - urn: urn:intuitem:risk:req_node:lgpd:55-m
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap9-sec1
+      ref_id: Art. 55-M
+      description: 'Constituem o patrimônio da ANPD os bens e os direitos:'
+    - urn: urn:intuitem:risk:req_node:lgpd:55-m-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-m
+      ref_id: Art. 55-M, I
+      description: que lhe forem transferidos pelos órgãos da Presidência da República; e
+    - urn: urn:intuitem:risk:req_node:lgpd:55-m-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:55-m
+      ref_id: Art. 55-M, II
+      description: que venha a adquirir ou a incorporar.
+    - urn: urn:intuitem:risk:req_node:lgpd:cap9-sec2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-9
+      ref_id: Seção II
+      name: Do Conselho Nacional de Proteção de Dados Pessoais e da Privacidade
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap9-sec2
+      ref_id: Art. 58-A
+      description: 'O Conselho Nacional de Proteção de Dados Pessoais e da Privacidade será composto de
+        23 (vinte e três) representantes, titulares e suplentes, dos seguintes órgãos:'
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a
+      ref_id: Art. 58-A, I
+      description: 5 (cinco) do Poder Executivo federal;
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a
+      ref_id: Art. 58-A, II
+      description: 1 (um) do Senado Federal;
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a
+      ref_id: Art. 58-A, III
+      description: 1 (um) da Câmara dos Deputados;
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a
+      ref_id: Art. 58-A, IV
+      description: 1 (um) do Conselho Nacional de Justiça;
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-v
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a
+      ref_id: Art. 58-A, V
+      description: 1 (um) do Conselho Nacional do Ministério Público;
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-vi
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a
+      ref_id: Art. 58-A, VI
+      description: 1 (um) do Comitê Gestor da Internet no Brasil;
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-vii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a
+      ref_id: Art. 58-A, VII
+      description: 3 (três) de entidades da sociedade civil com atuação relacionada a proteção de dados
+        pessoais;
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-viii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a
+      ref_id: Art. 58-A, VIII
+      description: 3 (três) de instituições científicas, tecnológicas e de inovação;
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-ix
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a
+      ref_id: Art. 58-A, IX
+      description: 3 (três) de confederações sindicais representativas das categorias econômicas do setor
+        produtivo;
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-x
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a
+      ref_id: Art. 58-A, X
+      description: 2 (dois) de entidades representativas do setor empresarial relacionado à área de tratamento
+        de dados pessoais; e
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-xi
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a
+      ref_id: Art. 58-A, XI
+      description: 2 (dois) de entidades representativas do setor laboral.
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-p1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a
+      ref_id: Art. 58-A, § 1º
+      description: Os representantes serão designados por ato do Presidente da República, permitida a
+        delegação.
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-p2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a
+      ref_id: Art. 58-A, § 2º
+      description: Os representantes de que tratam os incisos I, II, III, IV, V e VI do caput deste artigo
+        e seus suplentes serão indicados pelos titulares dos respectivos órgãos e entidades da administração
+        pública.
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-p3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a
+      ref_id: Art. 58-A, § 3º
+      description: 'Os representantes de que tratam os incisos VII, VIII, IX, X e XI do caput deste artigo
+        e seus suplentes:'
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-p3-i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a-p3
+      ref_id: Art. 58-A, § 3º, I
+      description: serão indicados na forma de regulamento;
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-p3-ii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a-p3
+      ref_id: Art. 58-A, § 3º, II
+      description: não poderão ser membros do Comitê Gestor da Internet no Brasil;
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-p3-iii
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a-p3
+      ref_id: Art. 58-A, § 3º, III
+      description: terão mandato de 2 (dois) anos, permitida 1 (uma) recondução.
+    - urn: urn:intuitem:risk:req_node:lgpd:58-a-p4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-a
+      ref_id: Art. 58-A, § 4º
+      description: A participação no Conselho Nacional de Proteção de Dados Pessoais e da Privacidade
+        será considerada prestação de serviço público relevante, não remunerada.
+    - urn: urn:intuitem:risk:req_node:lgpd:58-b
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:lgpd:cap9-sec2
+      ref_id: Art. 58-B
+      description: 'Compete ao Conselho Nacional de Proteção de Dados Pessoais e da Privacidade:'
+    - urn: urn:intuitem:risk:req_node:lgpd:58-b-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-b
+      ref_id: Art. 58-B, I
+      description: propor diretrizes estratégicas e fornecer subsídios para a elaboração da Política Nacional
+        de Proteção de Dados Pessoais e da Privacidade e para a atuação da ANPD;
+    - urn: urn:intuitem:risk:req_node:lgpd:58-b-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-b
+      ref_id: Art. 58-B, II
+      description: elaborar relatórios anuais de avaliação da execução das ações da Política Nacional
+        de Proteção de Dados Pessoais e da Privacidade;
+    - urn: urn:intuitem:risk:req_node:lgpd:58-b-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-b
+      ref_id: Art. 58-B, III
+      description: sugerir ações a serem realizadas pela ANPD;
+    - urn: urn:intuitem:risk:req_node:lgpd:58-b-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-b
+      ref_id: Art. 58-B, IV
+      description: elaborar estudos e realizar debates e audiências públicas sobre a proteção de dados
+        pessoais e da privacidade; e
+    - urn: urn:intuitem:risk:req_node:lgpd:58-b-v
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:lgpd:58-b
+      ref_id: Art. 58-B, V
+      description: disseminar o conhecimento sobre a proteção de dados pessoais e da privacidade à população.
+    - urn: urn:intuitem:risk:req_node:lgpd:chapter-10
+      assessable: false
+      depth: 1
+      ref_id: Capítulo X
+      name: Disposições Finais e Transitórias
+    - urn: urn:intuitem:risk:req_node:lgpd:60
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-10
+      ref_id: Art. 60
+      description: A Lei nº 12.965, de 23 de abril de 2014 (Marco Civil da Internet), passa a vigorar
+        com alterações nos arts. 7º e 16, para prever a exclusão definitiva de dados pessoais fornecidos
+        a aplicações de internet a requerimento do titular ao término da relação entre as partes, e a
+        vedação à guarda de dados excessivos em relação à finalidade do consentimento, ressalvadas as
+        hipóteses previstas na legislação de proteção de dados pessoais.
+    - urn: urn:intuitem:risk:req_node:lgpd:61
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-10
+      ref_id: Art. 61
+      description: A empresa estrangeira será notificada e intimada de todos os atos processuais previstos
+        nesta Lei, independentemente de procuração ou de disposição contratual ou estatutária, na pessoa
+        do agente ou representante ou pessoa responsável por sua filial, agência, sucursal, estabelecimento
+        ou escritório instalado no Brasil.
+    - urn: urn:intuitem:risk:req_node:lgpd:62
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-10
+      ref_id: Art. 62
+      description: A autoridade nacional e o Instituto Nacional de Estudos e Pesquisas Educacionais Anísio
+        Teixeira (Inep), no âmbito de suas competências, editarão regulamentos específicos para o acesso
+        a dados tratados pela União para o cumprimento do disposto no § 2º do art. 9º da Lei nº 9.394,
+        de 20 de dezembro de 1996 (Lei de Diretrizes e Bases da Educação Nacional), e aos referentes ao
+        Sistema Nacional de Avaliação da Educação Superior (Sinaes), de que trata a Lei nº 10.861, de
+        14 de abril de 2004.
+    - urn: urn:intuitem:risk:req_node:lgpd:63
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-10
+      ref_id: Art. 63
+      description: A autoridade nacional estabelecerá normas sobre a adequação progressiva de bancos de
+        dados constituídos até a data de entrada em vigor desta Lei, consideradas a complexidade das operações
+        de tratamento e a natureza dos dados.
+    - urn: urn:intuitem:risk:req_node:lgpd:64
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-10
+      ref_id: Art. 64
+      description: Os direitos e princípios expressos nesta Lei não excluem outros previstos no ordenamento
+        jurídico pátrio relacionados à matéria ou nos tratados internacionais em que a República Federativa
+        do Brasil seja parte.
+    - urn: urn:intuitem:risk:req_node:lgpd:65
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:lgpd:chapter-10
+      ref_id: Art. 65
+      description: 'Vigência: os arts. 55-A, 55-B, 55-C, 55-D, 55-E, 55-F, 55-G, 55-H, 55-I, 55-J, 55-K,
+        55-L, 58-A e 58-B entraram em vigor em 28 de dezembro de 2018; os arts. 52, 53 e 54 entraram em
+        vigor em 1º de agosto de 2021 (redação dada pela Lei nº 14.010, de 2020); os demais artigos entraram
+        em vigor em 3 de maio de 2021 (redação dada pela Medida Provisória nº 959, de 2020, convertida
+        na Lei nº 14.058, de 2020). A Lei encontra-se integralmente em vigor.'
