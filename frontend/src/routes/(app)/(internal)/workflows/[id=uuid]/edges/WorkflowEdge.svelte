@@ -1,5 +1,13 @@
 <script lang="ts">
-	import { BaseEdge, getBezierPath, useInternalNode, type EdgeProps } from '@xyflow/svelte';
+	import {
+		BaseEdge,
+		EdgeLabel,
+		getBezierPath,
+		useInternalNode,
+		useSvelteFlow,
+		type EdgeProps
+	} from '@xyflow/svelte';
+	import { m } from '$paraglide/messages';
 
 	// The one edge used everywhere (n8n behavior): a plain bezier while the
 	// target sits forward of the source, switching to a rounded step detour
@@ -8,6 +16,7 @@
 	// node rectangles (through the vertical gap between them when one exists,
 	// otherwise around the outside), so it never crosses itself.
 	let {
+		id,
 		source,
 		target,
 		sourceX,
@@ -17,7 +26,9 @@
 		sourcePosition,
 		targetPosition,
 		markerEnd,
-		style
+		style,
+		selected,
+		deletable
 	}: EdgeProps = $props();
 
 	// An edge instance's endpoints never change (edges are keyed by id), so
@@ -26,6 +37,9 @@
 	const sourceNode = useInternalNode(source);
 	// svelte-ignore state_referenced_locally
 	const targetNode = useInternalNode(target);
+
+	const { deleteElements } = useSvelteFlow();
+	let hovered = $state(false);
 
 	const RADIUS = 12;
 	const OFFSET = 28;
@@ -45,9 +59,9 @@
 		};
 	}
 
-	const path = $derived.by(() => {
+	const geometry = $derived.by(() => {
 		if (targetX >= sourceX + OFFSET) {
-			const [bezier] = getBezierPath({
+			const [bezier, labelX, labelY] = getBezierPath({
 				sourceX,
 				sourceY,
 				sourcePosition,
@@ -55,7 +69,7 @@
 				targetY,
 				targetPosition
 			});
-			return bezier;
+			return { path: bezier, labelX, labelY };
 		}
 
 		const sourceRect = rect(sourceNode, sourceX, sourceY);
@@ -80,7 +94,7 @@
 		);
 		const downFirst = channelY > sourceY ? 1 : -1;
 		const upLast = targetY > channelY ? 1 : -1;
-		return [
+		const path = [
 			`M ${sourceX} ${sourceY}`,
 			`H ${outX - r}`,
 			`Q ${outX} ${sourceY} ${outX} ${sourceY + r * downFirst}`,
@@ -92,7 +106,34 @@
 			`Q ${inX} ${targetY} ${inX + r} ${targetY}`,
 			`L ${targetX} ${targetY}`
 		].join(' ');
+		// Midpoint of the horizontal channel segment.
+		return { path, labelX: (outX + inX) / 2, labelY: channelY };
 	});
 </script>
 
-<BaseEdge {path} {markerEnd} {style} />
+<BaseEdge
+	path={geometry.path}
+	{markerEnd}
+	{style}
+	onmouseenter={() => (hovered = true)}
+	onmouseleave={() => (hovered = false)}
+/>
+
+{#if deletable && (hovered || selected)}
+	<EdgeLabel x={geometry.labelX} y={geometry.labelY}>
+		<button
+			type="button"
+			class="nopan nodrag flex h-5 w-5 items-center justify-center rounded-full bg-surface-200-800 text-surface-600-400 shadow-sm hover:bg-error-500 hover:text-white"
+			title={m.delete()}
+			data-testid="edge-delete"
+			onmouseenter={() => (hovered = true)}
+			onmouseleave={() => (hovered = false)}
+			onclick={(e) => {
+				e.stopPropagation();
+				deleteElements({ edges: [{ id }] });
+			}}
+		>
+			<i class="fa-solid fa-xmark text-[10px]"></i>
+		</button>
+	</EdgeLabel>
+{/if}

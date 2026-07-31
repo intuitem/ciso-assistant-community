@@ -1786,6 +1786,7 @@
 					nodesDraggable={!readonly}
 					nodesConnectable={!readonly}
 					elementsSelectable={true}
+					deleteKey={['Backspace', 'Delete']}
 					oninit={handleFlowInit}
 					snapGrid={[10, 10]}
 					minZoom={0.2}

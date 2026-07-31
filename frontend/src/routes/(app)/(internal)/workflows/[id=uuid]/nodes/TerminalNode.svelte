@@ -14,7 +14,11 @@
 
 	let { id, selected = false, data }: Props = $props();
 
-	const editor = getContext<{ readonly: boolean }>('workflowEditor');
+	const editor = getContext<{ readonly: boolean; deleteNode: (id: string) => void }>(
+		'workflowEditor'
+	);
+
+	let hovered = $state(false);
 
 	const handleClass = $derived(
 		editor?.readonly
@@ -32,8 +36,24 @@
 	{data.runState === 'active' ? 'ring-2 ring-warning-400 animate-pulse' : ''}"
 	title={data.error ?? undefined}
 	data-testid="workflow-node-{data.nodeType}"
+	onmouseenter={() => (hovered = true)}
+	onmouseleave={() => (hovered = false)}
 >
 	<i class="fa-solid fa-flag-checkered text-sm"></i>
+
+	{#if hovered && !editor?.readonly && !data.error}
+		<button
+			type="button"
+			aria-label="Delete node"
+			class="nopan nodrag absolute -top-2 -right-2 w-4 h-4 rounded-full bg-error-500 text-white text-[8px] flex items-center justify-center hover:bg-error-600 cursor-pointer"
+			onclick={(e) => {
+				e.stopPropagation();
+				editor?.deleteNode(id);
+			}}
+		>
+			✕
+		</button>
+	{/if}
 
 	{#if data.error}
 		<span
