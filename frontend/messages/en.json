@@ -5670,5 +5670,7 @@
 	"matrixView": "Matrix view",
 	"noThreatCatalogMatrix": "This catalog has no matrix layout: no grouping entry declares the tactic dimension.",
 	"threatGroupsTooltip": "Facets this threat belongs to: platforms it applies to, and the matrix tactics it achieves.",
-	"threatReferenceControlsTooltip": "Controls typically implemented against this threat. A suggestion, not a coverage claim."
+	"threatReferenceControlsTooltip": "Controls typically implemented against this threat. A suggestion, not a coverage claim.",
+	"parentThreat": "Parent threat",
+	"selectable": "Selectable"
 }

@@ -76,7 +76,11 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		optionsEndpoint="threats"
+		optionsEndpoint="threats?type=technique&type=generic"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
 		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
 		field="threats"

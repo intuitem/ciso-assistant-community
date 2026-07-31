@@ -1198,6 +1198,38 @@ export const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const THREAT_TYPE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'threats/type',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'type',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+// The threats endpoint hides non-selectable and deprecated rows unless the
+// query asks for them, so these two filters are the only way to reach them.
+export const THREAT_SELECTABLE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'selectable',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
+export const THREAT_DEPRECATED_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'deprecated',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
 export const APPLIED_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1552,8 +1584,8 @@ export const listViewFields = {
 		}
 	},
 	threats: {
-		head: ['ref_id', 'name', 'description', 'library', 'domain', 'labels'],
-		body: ['ref_id', 'name', 'description', 'library', 'folder', 'filtering_labels'],
+		head: ['ref_id', 'name', 'type', 'description', 'library', 'domain', 'labels'],
+		body: ['ref_id', 'name', 'type', 'description', 'library', 'folder', 'filtering_labels'],
 		optionalFields: {
 			head: ['provider', 'createdAt', 'updatedAt'],
 			body: ['provider', 'created_at', 'updated_at']
@@ -1561,6 +1593,9 @@ export const listViewFields = {
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
+			type: THREAT_TYPE_FILTER,
+			selectable: THREAT_SELECTABLE_FILTER,
+			is_deprecated: THREAT_DEPRECATED_FILTER,
 			provider: {
 				...PROVIDER_FILTER,
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'threats/provider' }

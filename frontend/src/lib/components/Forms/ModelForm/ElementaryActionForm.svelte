@@ -34,7 +34,11 @@
 />
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="threats"
+	optionsEndpoint="threats?type=technique&type=generic"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
 	field="threat"
 	optionsLabelField="auto"
 	cacheLock={cacheLocks['threat']}

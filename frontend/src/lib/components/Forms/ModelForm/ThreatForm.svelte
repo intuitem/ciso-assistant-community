@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import Select from '$lib/components/Forms/Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -23,6 +24,39 @@
 	}: Props = $props();
 </script>
 
+<Select
+	{form}
+	options={model.selectOptions['type']}
+	field="type"
+	label={m.type()}
+	cacheLock={cacheLocks['type']}
+	bind:cachedValue={formDataCache['type']}
+/>
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="threat-catalogs"
+	field="catalog"
+	label={m.threatCatalog()}
+	cacheLock={cacheLocks['catalog']}
+	bind:cachedValue={formDataCache['catalog']}
+/>
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="threats"
+	field="parent"
+	label={m.parentThreat()}
+	cacheLock={cacheLocks['parent']}
+	bind:cachedValue={formDataCache['parent']}
+/>
+<AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="reference-controls"
+	field="reference_controls"
+	label={m.referenceControls()}
+	cacheLock={cacheLocks['reference_controls']}
+	bind:cachedValue={formDataCache['reference_controls']}
+/>
 <MarkdownField
 	{form}
 	field="annotation"

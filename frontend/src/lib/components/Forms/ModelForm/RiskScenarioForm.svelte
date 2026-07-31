@@ -103,7 +103,11 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	optionsEndpoint="threats"
+	optionsEndpoint="threats?type=event&type=generic"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
 	optionsExtraFields={[['folder', 'str']]}
 	optionsDetailedUrlParameters={[
 		scopeFolder?.id ? ['scope_folder_id', scopeFolder.id] : ['', undefined]

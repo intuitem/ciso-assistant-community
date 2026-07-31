@@ -5665,5 +5665,7 @@
 	"matrixView": "Vue matricielle",
 	"noThreatCatalogMatrix": "Ce catalogue ne comporte pas de matrice : aucun regroupement ne déclare la dimension tactique.",
 	"threatGroupsTooltip": "Facettes rattachées à cette menace : les plateformes concernées et les tactiques de la matrice auxquelles elle contribue.",
-	"threatReferenceControlsTooltip": "Mesures de référence habituellement mises en œuvre face à cette menace. Il s'agit d'une suggestion, pas d'une garantie de couverture."
+	"threatReferenceControlsTooltip": "Mesures de référence habituellement mises en œuvre face à cette menace. Il s'agit d'une suggestion, pas d'une garantie de couverture.",
+	"parentThreat": "Menace parente",
+	"selectable": "Sélectionnable"
 }

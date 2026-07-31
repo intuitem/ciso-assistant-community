@@ -186,7 +186,11 @@
 	<AutocompleteSelect
 		multiple
 		{form}
-		optionsEndpoint="threats"
+		optionsEndpoint="threats?type=event&type=generic"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
 		field="threats"
 		label={m.threats()}
 	/>
