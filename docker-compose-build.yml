@@ -99,7 +99,7 @@ services:
     volumes:
       - qdrant_data:/qdrant/storage
     ports:
-      - 127.0.0.1:6333:6333
+      - 127.0.0.1:16333:6333
 
   caddy:
     container_name: caddy
