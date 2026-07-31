@@ -2,9 +2,11 @@ import csv
 import io
 import logging
 import structlog
+from pathlib import Path
 from types import MappingProxyType
 import re
 import pandas as pd
+from django.http import FileResponse
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -20,11 +22,14 @@ from core.models import (
     ComplianceAssessment,
     Evidence,
     Folder,
+    Framework,
+    LoadedLibrary,
     Perimeter,
     RequirementAssessment,
     RequirementNode,
     RiskAssessment,
     RiskMatrix,
+    StoredLibrary,
     AppliedControl,
     FindingsAssessment,
     RiskScenario,
@@ -81,7 +86,14 @@ from .egerie_xml_helpers import (
     map_egerie_status,
 )
 from core.models import Terminology
+from core.utils import AUDITOR_ONLY
 from data_wizard.arm_helpers import process_arm_file
+from data_wizard.cyfun_helpers import (
+    CYFUN_FRAMEWORK_URN,
+    CYFUN_LIBRARY_URN,
+    LEVEL_TO_GROUP,
+    process_cyfun_file,
+)
 from tprm.models import Entity, Solution, Contract, Representative
 from tprm.serializers import (
     EntityWriteSerializer,
@@ -99,8 +111,26 @@ from resilience.serializers import (
     AssetAssessmentWriteSerializer,
     EscalationThresholdWriteSerializer,
 )
-from privacy.models import Processing
-from privacy.serializers import ProcessingWriteSerializer
+from privacy.models import (
+    Processing,
+    PersonalData,
+    DataSubject,
+    DataRecipient,
+    DataContractor,
+    ART6_LAWFUL_BASIS_CHOICES,
+    ART9_SPECIAL_CATEGORY_CONDITION_CHOICES,
+    TRANSFER_MECHANISM_CHOICES,
+)
+from privacy.serializers import (
+    ProcessingWriteSerializer,
+    PurposeWriteSerializer,
+    PersonalDataWriteSerializer,
+    DataSubjectWriteSerializer,
+    DataRecipientWriteSerializer,
+    DataContractorWriteSerializer,
+    DataTransferWriteSerializer,
+)
+from core.constants import COUNTRY_CHOICES
 from iam.models import RoleAssignment, User
 from core.models import FilteringLabel
 from core.utils import get_global_currency
@@ -338,7 +368,9 @@ def _resolve_filtering_labels(value: Any) -> list[UUID]:
     if not value:
         return []
 
-    label_names = set(name.strip() for name in re.split(r"[|,]", value) if name.strip())
+    label_names = set(
+        name.strip() for name in re.split(r"[|,\n]", value) if name.strip()
+    )
     label_ids: list[UUID] = []
     for label_name in label_names:
         label = FilteringLabel.objects.filter(label=label_name).first()
@@ -366,7 +398,7 @@ def _resolve_vulnerabilities(
     """
     if not value or not isinstance(value, str):
         return [], []
-    tokens = [t.strip() for t in re.split(r"[|,]", value) if t.strip()]
+    tokens = [t.strip() for t in re.split(r"[|,\n]", value) if t.strip()]
     vuln_ids: list[UUID] = []
     failed_tokens: list[str] = []
     for token in tokens:
@@ -425,6 +457,7 @@ class ModelType(enum.StrEnum):
     PERIMETER = "Perimeter"
     USER = "User"
     COMPLIANCE_ASSESSMENT = "ComplianceAssessment"
+    CYFUN_ASSESSMENT = "CyFunAssessment"
     FINDINGS_ASSESSMENT = "FindingsAssessment"
     RISK_ASSESSMENT = "RiskAssessment"
     ELEMENTARY_ACTION = "ElementaryAction"
@@ -447,6 +480,47 @@ class ModelType(enum.StrEnum):
             return ModelType(model_type)
         except ValueError:
             return
+
+
+IMPORT_TEMPLATES_DIR = Path(__file__).resolve().parent / "import_templates"
+
+# Models without an entry (ComplianceAssessment, CyFun, EBIOS variants) have no
+# generic template: their file depends on a framework or comes from an external tool.
+IMPORT_TEMPLATES: dict[ModelType, str] = {
+    ModelType.ASSET: "assets_template.xlsx",
+    ModelType.APPLIED_CONTROL: "applied_controls_template.xlsx",
+    ModelType.PERIMETER: "perimeters_template.xlsx",
+    ModelType.USER: "users_template.xlsx",
+    ModelType.ELEMENTARY_ACTION: "elementary_actions_template.xlsx",
+    ModelType.REFERENCE_CONTROL: "reference_controls_template.xlsx",
+    ModelType.THREAT: "threats_template.xlsx",
+    ModelType.FOLDER: "domains_template.xlsx",
+    ModelType.SECURITY_EXCEPTION: "security_exceptions_template.xlsx",
+    ModelType.INCIDENT: "incidents_template.xlsx",
+    ModelType.POLICY: "policies_template.xlsx",
+    ModelType.VULNERABILITY: "vulnerabilities_template.xlsx",
+    ModelType.PROCESSING: "processings_template.xlsx",
+    ModelType.TPRM: "third_parties_template.xlsx",
+    ModelType.FINDINGS_ASSESSMENT: "findings_assessment_template.xlsx",
+    ModelType.RISK_ASSESSMENT: "risk_assessment_template.xlsx",
+    ModelType.BUSINESS_IMPACT_ANALYSIS: "business_impact_analysis_template.xlsx",
+    ModelType.TASK_TEMPLATE: "tasks_template.xlsx",
+}
+
+
+class ImportTemplateView(APIView):
+    def get(self, request, model_type: str):
+        parsed = ModelType.from_string(model_type)
+        filename = IMPORT_TEMPLATES.get(parsed) if parsed else None
+        if filename is None:
+            return Response(
+                {"error": "noTemplateAvailable"}, status=status.HTTP_404_NOT_FOUND
+            )
+        return FileResponse(
+            (IMPORT_TEMPLATES_DIR / filename).open("rb"),
+            as_attachment=True,
+            filename=filename,
+        )
 
 
 @dataclass(frozen=True)
@@ -1481,7 +1555,6 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "name": name,
             "description": record.get("description"),
             "ref_id": record.get("ref_id"),
-            "status": record.get("status"),
             "findings_assessment": context.findings_assessment.id,
             "severity": severity,
             "filtering_labels": filtering_label_ids,
@@ -1490,6 +1563,12 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "observation": record.get("observation", ""),
             "vulnerabilities": vulnerabilities,
         }
+
+        # Only pass status when the source provides one — a None status fails
+        # serializer validation, so files without a status column keep the
+        # model default.
+        if record.get("status"):
+            finding_data["status"] = record.get("status")
 
         if priority is not None:
             finding_data["priority"] = priority
@@ -1832,7 +1911,7 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
         """
         has_ref_id = any(f.name == "ref_id" for f in model._meta.fields)
         ids = set()
-        for entry in re.split(r"[|,]", raw):
+        for entry in re.split(r"[|,\n]", raw):
             entry = entry.strip()
             if not entry:
                 continue
@@ -2119,7 +2198,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
             status = "--"
 
         applied_controls = []
-        for token in re.split(r"[|,]", record.get("applied_controls") or ""):
+        for token in re.split(r"[|,\n]", record.get("applied_controls") or ""):
             token = token.strip()
             if not token:
                 continue
@@ -2141,7 +2220,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
                 )
 
         assets = []
-        for token in re.split(r"[|,]", record.get("assets") or ""):
+        for token in re.split(r"[|,\n]", record.get("assets") or ""):
             token = token.strip()
             if not token:
                 continue
@@ -2163,7 +2242,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
                 )
 
         security_exceptions = []
-        for token in re.split(r"[|,]", record.get("security_exceptions") or ""):
+        for token in re.split(r"[|,\n]", record.get("security_exceptions") or ""):
             token = token.strip()
             if not token:
                 continue
@@ -2369,6 +2448,8 @@ class ProcessingRecordConsumer(RecordConsumer):
             "ref_id": record.get("ref_id", ""),
             "folder": domain,
             "status": status_value,
+            "information_channel": record.get("information_channel", ""),
+            "usage_channel": record.get("usage_channel", ""),
             "dpia_required": record.get("dpia_required", False),
             "dpia_reference": record.get("dpia_reference", ""),
         }
@@ -2403,6 +2484,357 @@ class ProcessingRecordConsumer(RecordConsumer):
             data["filtering_labels"] = label_ids
 
         return data, None
+
+
+class ProcessingChildConsumerMixin:
+    """Shared resolution logic for Processing sub-object consumers."""
+
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {"processing": ["processing", "processing_name"]}
+    )
+
+    def create_context(self):
+        return None, None
+
+    @staticmethod
+    def _parse_bool(value: object) -> bool:
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, (int, float)):
+            return value != 0
+        if isinstance(value, str):
+            return value.strip().lower() in {"true", "yes", "y", "1"}
+        return False
+
+    @staticmethod
+    def _choice_key(value: object, choices) -> Optional[str]:
+        if value in (None, ""):
+            return None
+        lowered = str(value).strip().lower()
+        for key, label in choices:
+            if lowered == str(key).lower() or lowered == str(label).lower():
+                return key
+        return None
+
+    def _resolve_choice(
+        self, record: dict, field_name: str, choices, default: str = ""
+    ) -> tuple[Optional[str], Optional[Error]]:
+        raw = record.get(field_name)
+        if raw in (None, ""):
+            return default, None
+        key = self._choice_key(raw, choices)
+        if key is None:
+            return None, Error(record=record, error=f"Unknown {field_name} '{raw}'")
+        return key, None
+
+    def _accessible_processings(self):
+        ids = getattr(self, "_accessible_processing_ids", None)
+        if ids is None:
+            (ids, _, _) = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), self.request.user, Processing
+            )
+            self._accessible_processing_ids = ids
+        return Processing.objects.filter(id__in=ids)
+
+    def _resolve_processing(
+        self, record: dict
+    ) -> tuple[Optional[Processing], Optional[Error]]:
+        value = record.get("processing") or record.get("processing_name")
+        if not value:
+            return None, Error(record=record, error="Processing is mandatory")
+
+        try:
+            processing = (
+                self._accessible_processings().filter(id=UUID(str(value))).first()
+            )
+            if processing:
+                return processing, None
+        except ValueError, TypeError:
+            # not a UUID; fall back to ref_id/name lookup
+            pass
+
+        queryset = self._accessible_processings()
+        if self.folder_id:
+            queryset = queryset.filter(folder_id=self.folder_id)
+        processing = (
+            queryset.filter(ref_id=value).first()
+            or queryset.filter(name__iexact=str(value)).first()
+        )
+        if processing is None:
+            return None, Error(record=record, error=f"Unknown processing '{value}'")
+        return processing, None
+
+    def _resolve_entity(self, record: dict) -> tuple[Optional[Entity], Optional[Error]]:
+        value = record.get("entity")
+        if value in (None, ""):
+            return None, None
+
+        try:
+            entity = Entity.objects.filter(id=UUID(str(value))).first()
+            if entity:
+                return entity, None
+        except ValueError, TypeError:
+            # not a UUID; fall back to name lookup
+            pass
+
+        entity = Entity.objects.filter(name__iexact=str(value)).first()
+        if entity is None:
+            return None, Error(record=record, error=f"Unknown entity '{value}'")
+        return entity, None
+
+    def find_existing(self, record_data: dict):
+        model_class = self.SERIALIZER_CLASS.Meta.model
+        processing_id = record_data.get("processing")
+        if not processing_id:
+            return None
+        query = {"processing_id": processing_id}
+        for field_name in model_class.fields_to_check:
+            if field_name == "processing":
+                continue
+            value = record_data.get(field_name)
+            if value in (None, ""):
+                continue
+            if isinstance(value, str):
+                query[f"{field_name}__iexact"] = value
+            else:
+                query[field_name] = value
+        if len(query) == 1:
+            return None
+        return model_class.objects.filter(**query).first()
+
+
+class PurposeRecordConsumer(ProcessingChildConsumerMixin, RecordConsumer):
+    SERIALIZER_CLASS = PurposeWriteSerializer
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        processing, error = self._resolve_processing(record)
+        if error:
+            return {}, error
+
+        legal_basis, error = self._resolve_choice(
+            record, "legal_basis", ART6_LAWFUL_BASIS_CHOICES, default="privacy_consent"
+        )
+        if error:
+            return {}, error
+
+        article_9_condition, error = self._resolve_choice(
+            record, "article_9_condition", ART9_SPECIAL_CATEGORY_CONDITION_CHOICES
+        )
+        if error:
+            return {}, error
+
+        data = {
+            "name": record.get("name", ""),
+            "description": record.get("description", ""),
+            "processing": processing.id,
+            "legal_basis": legal_basis,
+        }
+        if article_9_condition:
+            data["article_9_condition"] = article_9_condition
+        return data, None
+
+
+class PersonalDataRecordConsumer(ProcessingChildConsumerMixin, RecordConsumer):
+    SERIALIZER_CLASS = PersonalDataWriteSerializer
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        processing, error = self._resolve_processing(record)
+        if error:
+            return {}, error
+
+        category_value = record.get("category")
+        if category_value in (None, ""):
+            return {}, Error(record=record, error="Category is mandatory")
+        category = Terminology.objects.filter(
+            field_path=Terminology.FieldPath.PERSONAL_DATA_CATEGORY,
+            name__iexact=str(category_value).strip(),
+        ).first()
+        if category is None:
+            return {}, Error(
+                record=record,
+                error=f"Unknown personal data category '{category_value}'",
+            )
+
+        deletion_policy, error = self._resolve_choice(
+            record, "deletion_policy", PersonalData.DELETION_POLICY_CHOICES
+        )
+        if error:
+            return {}, error
+
+        data = {
+            "name": record.get("name", ""),
+            "description": record.get("description", ""),
+            "processing": processing.id,
+            "category": category.id,
+            "retention": record.get("retention", ""),
+            "deletion_policy": deletion_policy,
+            "is_sensitive": self._parse_bool(record.get("is_sensitive")),
+        }
+
+        asset_names = record.get("assets")
+        if asset_names:
+            names = [n.strip() for n in str(asset_names).split(",") if n.strip()]
+            assets = []
+            for asset_name in names:
+                asset = Asset.objects.filter(name__iexact=asset_name).first()
+                if asset is None:
+                    return {}, Error(
+                        record=record, error=f"Unknown asset '{asset_name}'"
+                    )
+                assets.append(asset.id)
+            data["assets"] = assets
+
+        return data, None
+
+
+class DataSubjectRecordConsumer(ProcessingChildConsumerMixin, RecordConsumer):
+    SERIALIZER_CLASS = DataSubjectWriteSerializer
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        processing, error = self._resolve_processing(record)
+        if error:
+            return {}, error
+
+        category = self._choice_key(
+            record.get("category"), DataSubject.CATEGORY_CHOICES
+        )
+        if category is None:
+            return {}, Error(
+                record=record,
+                error=f"Unknown data subject category '{record.get('category')}'",
+            )
+
+        return {
+            "name": record.get("name", ""),
+            "description": record.get("description", ""),
+            "processing": processing.id,
+            "category": category,
+        }, None
+
+
+class DataRecipientRecordConsumer(ProcessingChildConsumerMixin, RecordConsumer):
+    SERIALIZER_CLASS = DataRecipientWriteSerializer
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        processing, error = self._resolve_processing(record)
+        if error:
+            return {}, error
+
+        category = self._choice_key(
+            record.get("category"), DataRecipient.CATEGORY_CHOICES
+        )
+        if category is None:
+            return {}, Error(
+                record=record,
+                error=f"Unknown data recipient category '{record.get('category')}'",
+            )
+
+        return {
+            "name": record.get("name", ""),
+            "description": record.get("description", ""),
+            "processing": processing.id,
+            "category": category,
+        }, None
+
+
+class DataContractorRecordConsumer(ProcessingChildConsumerMixin, RecordConsumer):
+    SERIALIZER_CLASS = DataContractorWriteSerializer
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        processing, error = self._resolve_processing(record)
+        if error:
+            return {}, error
+
+        entity, error = self._resolve_entity(record)
+        if error:
+            return {}, error
+
+        relationship_type = self._choice_key(
+            record.get("relationship_type"), DataContractor.RELATIONSHIP_TYPE_CHOICES
+        )
+        if relationship_type is None:
+            return {}, Error(
+                record=record,
+                error=f"Unknown relationship type '{record.get('relationship_type')}'",
+            )
+
+        country = self._choice_key(record.get("country"), COUNTRY_CHOICES)
+        if country is None:
+            return {}, Error(
+                record=record, error=f"Unknown country '{record.get('country')}'"
+            )
+
+        data = {
+            "name": record.get("name", ""),
+            "description": record.get("description", ""),
+            "processing": processing.id,
+            "relationship_type": relationship_type,
+            "country": country,
+            "documentation_link": record.get("documentation_link", ""),
+        }
+        if entity:
+            data["entity"] = entity.id
+        return data, None
+
+
+class DataTransferRecordConsumer(ProcessingChildConsumerMixin, RecordConsumer):
+    SERIALIZER_CLASS = DataTransferWriteSerializer
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        processing, error = self._resolve_processing(record)
+        if error:
+            return {}, error
+
+        entity, error = self._resolve_entity(record)
+        if error:
+            return {}, error
+
+        country = self._choice_key(record.get("country"), COUNTRY_CHOICES)
+        if country is None:
+            return {}, Error(
+                record=record, error=f"Unknown country '{record.get('country')}'"
+            )
+
+        transfer_mechanism, error = self._resolve_choice(
+            record, "transfer_mechanism", TRANSFER_MECHANISM_CHOICES
+        )
+        if error:
+            return {}, error
+
+        data = {
+            "name": record.get("name", ""),
+            "description": record.get("description", ""),
+            "processing": processing.id,
+            "country": country,
+            "transfer_mechanism": transfer_mechanism,
+            "guarantees": record.get("guarantees", ""),
+            "documentation_link": record.get("documentation_link", ""),
+        }
+        if entity:
+            data["entity"] = entity.id
+        return data, None
+
+
+PROCESSING_CHILD_SHEETS = {
+    "purposes": ("purposes", PurposeRecordConsumer),
+    "personal data": ("personal_data", PersonalDataRecordConsumer),
+    "data subjects": ("data_subjects", DataSubjectRecordConsumer),
+    "data recipients": ("data_recipients", DataRecipientRecordConsumer),
+    "contractors": ("contractors", DataContractorRecordConsumer),
+    "transfers": ("transfers", DataTransferRecordConsumer),
+}
 
 
 class BusinessImpactAnalysisRecordConsumer(RecordConsumer):
@@ -3071,6 +3503,47 @@ class LoadFileView(APIView):
                             .process_records(df.to_dict(orient="records"))
                             .to_dict()
                         )
+                # Special handling for the official CyFun self-assessment workbook
+                case ModelType.CYFUN_ASSESSMENT:
+                    res = self._process_cyfun_assessment(
+                        request, record_file, folder_id, perimeter_id
+                    )
+                # Special handling for Processing multi-sheet import (record + sub-objects)
+                case ModelType.PROCESSING:
+                    if is_excel_file(record_file):
+                        res = self._process_processing_excel(
+                            request,
+                            record_file,
+                            folders_map,
+                            folder_id,
+                            on_conflict,
+                        )
+                    else:
+                        # CSV: flat single-sheet import of processings only
+                        file_type = RecordFileType.CSV
+                        df = read_csv_file(record_file)
+                        try:
+                            df = normalize_df_columns(df)
+                        except ValueError:
+                            logger.warning(
+                                "Invalid import file structure during column normalization",
+                                exc_info=True,
+                            )
+                            return Response(
+                                {"error": "Invalid file format or columns."},
+                                status=status.HTTP_400_BAD_REQUEST,
+                            )
+                        base_context = BaseContext(
+                            request,
+                            folders_map=folders_map,
+                            folder_id=folder_id,
+                            on_conflict=on_conflict,
+                        )
+                        res = (
+                            ProcessingRecordConsumer(base_context)
+                            .process_records(df.to_dict(orient="records"))
+                            .to_dict()
+                        )
                 case _:
                     is_excel = is_excel_file(record_file)
                     if is_excel:
@@ -3194,12 +3667,6 @@ class LoadFileView(APIView):
                         case ModelType.ELEMENTARY_ACTION:
                             res = (
                                 ElementaryActionRecordConsumer(base_context)
-                                .process_records(records)
-                                .to_dict()
-                            )
-                        case ModelType.PROCESSING:
-                            res = (
-                                ProcessingRecordConsumer(base_context)
                                 .process_records(records)
                                 .to_dict()
                             )
@@ -3358,6 +3825,82 @@ class LoadFileView(APIView):
             )
 
         return results
+
+    def _process_cyfun_assessment(self, request, record_file, folder_id, perimeter_id):
+        results = {"successful": 0, "failed": 0, "errors": []}
+
+        def fail(code):
+            results["failed"] += 1
+            results["errors"].append({"error": code})
+            return results
+
+        try:
+            parsed = process_cyfun_file(record_file.getvalue())
+        except ValueError as e:
+            return fail(e.args[0] if e.args else "UnrecognizedCyfunWorkbook")
+
+        if not LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).exists():
+            stored_library = StoredLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
+            if stored_library is None:
+                return fail("CyfunLibraryNotFound")
+            error = stored_library.load()
+            if error is not None:
+                logger.error("CyFun library import failed", error=error)
+                return fail("CyfunLibraryImportFailed")
+        try:
+            framework = Framework.objects.get(urn=CYFUN_FRAMEWORK_URN)
+        except Framework.DoesNotExist:
+            return fail("CyfunFrameworkNotFound")
+
+        perimeter = None
+        if perimeter_id is not None:
+            try:
+                perimeter = Perimeter.objects.get(id=perimeter_id)
+            except Perimeter.DoesNotExist:
+                return fail(f"Perimeter with ID {perimeter_id} does not exist")
+        if perimeter is not None:
+            folder_id = perimeter.folder.id
+        elif folder_id is None:
+            results["failed"] += 1
+            results["errors"].append(
+                {"error": "A folder must be specified when there's no perimeter!"}
+            )
+            return results
+
+        assessment_data = {
+            "name": resolve_container_name(request, "CyFun_Assessment"),
+            "perimeter": perimeter_id,
+            "framework": framework.id,
+            "folder": folder_id,
+            "score_calculation_method": ComplianceAssessment.CalculationMethod.AVG_OF_AVG,
+            "field_visibility": {
+                "score": dict(AUDITOR_ONLY),
+                "is_scored": dict(AUDITOR_ONLY),
+                "documentation_score": dict(AUDITOR_ONLY),
+            },
+        }
+        level = parsed["assurance_level"]
+        if level:
+            assessment_data["selected_implementation_groups"] = [LEVEL_TO_GROUP[level]]
+
+        serializer = ComplianceAssessmentWriteSerializer(
+            data=assessment_data, context={"request": request}
+        )
+        try:
+            serializer.is_valid(raise_exception=True)
+            compliance_assessment = serializer.save()
+            compliance_assessment.create_requirement_assessments()
+        except Exception as e:
+            logger.error("Failed to create CyFun compliance assessment", error=e)
+            return fail("CyfunAssessmentCreationFailed")
+        logger.info(
+            "Created CyFun compliance assessment",
+            id=compliance_assessment.id,
+            assurance_level=level,
+        )
+        return self._reconcile_compliance_requirements(
+            request, parsed["records"], compliance_assessment, framework.id, results
+        )
 
     @staticmethod
     def _resolve_summary_row_template(
@@ -4019,6 +4562,130 @@ class LoadFileView(APIView):
                 },
                 "asset_assessments": {"successful": 0, "failed": 0, "errors": []},
                 "escalation_thresholds": {"successful": 0, "failed": 0, "errors": []},
+            }
+
+    def _process_processing_excel(
+        self,
+        request,
+        excel_file: io.BytesIO,
+        folders_map,
+        folder_id,
+        on_conflict=ConflictMode.STOP,
+    ):
+        try:
+            excel_data = pd.ExcelFile(excel_file)
+            sheet_names = excel_data.sheet_names
+
+            base_context = BaseContext(
+                request,
+                folders_map=folders_map,
+                folder_id=folder_id,
+                on_conflict=on_conflict,
+            )
+
+            parent_sheet = next(
+                (s for s in sheet_names if s.strip().lower() == "processing"), None
+            )
+            has_child_sheets = any(
+                s.strip().lower() in PROCESSING_CHILD_SHEETS for s in sheet_names
+            )
+
+            if parent_sheet is None and not has_child_sheets:
+                # Flat list of processings (legacy single-sheet format)
+                df = normalize_df_columns(
+                    normalize_datetime_columns(pd.read_excel(excel_file)).fillna("")
+                )
+                return (
+                    ProcessingRecordConsumer(base_context)
+                    .process_records(df.to_dict(orient="records"))
+                    .to_dict()
+                )
+
+            if parent_sheet is None:
+                return {
+                    "error": (
+                        "Invalid processing workbook: expected a 'Processing' sheet but only found: "
+                        + ", ".join(sheet_names)
+                    )
+                }
+
+            parent_df = normalize_df_columns(
+                normalize_datetime_columns(
+                    pd.read_excel(excel_file, sheet_name=parent_sheet)
+                ).fillna("")
+            )
+            parent_records = parent_df.to_dict(orient="records")
+
+            overall_results = {
+                "processing": (
+                    ProcessingRecordConsumer(base_context)
+                    .process_records(parent_records)
+                    .to_dict()
+                )
+            }
+            if overall_results["processing"].get("stopped"):
+                return overall_results
+
+            if len(parent_records) > 1:
+                overall_results["warning"] = (
+                    "Multiple rows found on the 'Processing' sheet; "
+                    "sub-object sheets are attached to the first row"
+                )
+
+            processing = None
+            if parent_records:
+                hint = parent_records[0]
+                domain_name = str(hint.get("domain") or "").lower()
+                scope_folder = folders_map.get(domain_name, folder_id)
+                (viewable_processings, _, _) = RoleAssignment.get_accessible_object_ids(
+                    Folder.get_root_folder(), request.user, Processing
+                )
+                queryset = Processing.objects.filter(id__in=viewable_processings)
+                if scope_folder:
+                    queryset = queryset.filter(folder_id=scope_folder)
+                if hint.get("ref_id"):
+                    processing = queryset.filter(ref_id=hint["ref_id"]).first()
+                if processing is None and hint.get("name"):
+                    processing = queryset.filter(name__iexact=str(hint["name"])).first()
+
+            if processing is None:
+                overall_results["error"] = (
+                    "Could not resolve the processing record; sub-object sheets were not imported"
+                )
+                return overall_results
+
+            for sheet_name in sheet_names:
+                key = sheet_name.strip().lower()
+                if sheet_name == parent_sheet or key not in PROCESSING_CHILD_SHEETS:
+                    continue
+
+                result_key, consumer_class = PROCESSING_CHILD_SHEETS[key]
+                sheet_df = normalize_df_columns(
+                    normalize_datetime_columns(
+                        pd.read_excel(excel_file, sheet_name=sheet_name)
+                    ).fillna("")
+                )
+                sheet_records = sheet_df.to_dict(orient="records")
+                for record in sheet_records:
+                    if not record.get("processing") and not record.get(
+                        "processing_name"
+                    ):
+                        record["processing"] = str(processing.id)
+
+                child_result = (
+                    consumer_class(base_context)
+                    .process_records(sheet_records)
+                    .to_dict()
+                )
+                overall_results[result_key] = child_result
+                if child_result.get("stopped"):
+                    return overall_results
+
+            return overall_results
+        except Exception as e:
+            logger.error("Error processing Processing Excel file", exc_info=e)
+            return {
+                "error": "Failed to process the processing Excel file",
             }
 
     def _process_tprm_file(

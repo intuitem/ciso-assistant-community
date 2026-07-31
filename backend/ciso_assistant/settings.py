@@ -255,7 +255,7 @@ EXPOSE_METRICS = os.environ.get("EXPOSE_METRICS", "False").strip().lower() in (
 )
 logger.info("EXPOSE_METRICS: %s", EXPOSE_METRICS)
 
-ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 25)
+ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 50)
 
 USE_S3 = os.getenv("USE_S3", "False").lower() in ("true", "1", "yes")
 USE_AZURE = os.getenv("USE_AZURE", "False").lower() in ("true", "1", "yes")
@@ -459,6 +459,7 @@ INSTALLED_APPS = [
     "tprm",
     "privacy",
     "resilience",
+    "automation",
     "crq",
     "custom_fields",
     "metrology",
@@ -718,6 +719,7 @@ LANGUAGES = [
     ("ko", "Korean"),
     ("et", "Estonian"),
     ("sk", "Slovak"),
+    ("sl", "Slovenian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -820,6 +822,8 @@ HEADLESS_TOKEN_STRATEGY = "iam.utils.KnoxTokenStrategy"
 HEADLESS_FRONTEND_URLS = {
     "socialaccount_login_error": CISO_ASSISTANT_URL + "/login",
 }
+
+ACCOUNT_LOGOUT_REDIRECT_URL = CISO_ASSISTANT_URL + "/login"
 
 SOCIALACCOUNT_PROVIDERS = {
     "saml": {

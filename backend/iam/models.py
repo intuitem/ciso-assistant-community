@@ -340,6 +340,7 @@ class Folder(NameDescriptionMixin):
             (UserGroupCodename.ANALYST, RoleCodename.ANALYST),
             (UserGroupCodename.DOMAIN_MANAGER, RoleCodename.DOMAIN_MANAGER),
             (UserGroupCodename.AUDITEE, RoleCodename.AUDITEE),
+            (UserGroupCodename.TECHNICAL_TESTER, RoleCodename.TECHNICAL_TESTER),
         ]
 
         for ug_codename, role_codename in builtin_pairs:

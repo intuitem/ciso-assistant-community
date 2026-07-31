@@ -5,7 +5,7 @@
 	import { getModalStore, type ModalStore } from './stores';
 	import { m } from '$paraglide/messages';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -70,7 +70,7 @@
 			}}
 		>
 			{#snippet children({ form })}
-				<TextArea
+				<MarkdownField
 					{form}
 					field="justification"
 					label={m.riskAcceptanceJustificationLabel()}

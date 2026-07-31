@@ -910,7 +910,8 @@ def validate_draft_document(draft, *, user=None) -> dict:
         errors.append("libraryHoldsNoObjects")
 
     if draft.content:
-        normalized = normalize_objects(draft.content)
+        # validate the assembled document — what publish/export will emit
+        normalized = normalize_objects(library["objects"])
         # Shape gate: the deeper checks (and the loader shim) assume a
         # well-formed structure; report structural garbage as errors
         # instead of crashing on it.

@@ -1,12 +1,13 @@
 // define the content of forms
 
-import EvidenceFilePreview from '$lib/components/ModelTable/field/EvidenceFilePreview.svelte';
+import EvidenceFileName from '$lib/components/ModelTable/field/EvidenceFileName.svelte';
 import LanguageDisplay from '$lib/components/ModelTable/field/LanguageDisplay.svelte';
 import FrameworkName from '$lib/components/ModelTable/field/FrameworkName.svelte';
 import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/field/UserGroupNameDisplay.svelte';
 import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
 import { listViewFields } from './table';
+import type { TableBatchAction } from './table';
 import type { urlModel } from './types';
 import LibraryOverview from '$lib/components/ModelTable/field/LibraryOverview.svelte';
 import MarkdownDescription from '$lib/components/ModelTable/field/MarkdownDescription.svelte';
@@ -127,6 +128,13 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 	batchCreate?: {
 		label?: string; // i18n key for button title (defaults to 'batchCreate')
 	};
+	// Extra batch actions for this reverse-FK table only, merged into the batch
+	// bar next to the child model's global batchActions. Pre-gated by the
+	// embedding view: DetailView only passes them when the user can change the
+	// parent object (so `parent_action` entries never leak to list pages nor to
+	// users without change on the parent). See TableBatchAction in table.ts for
+	// the row-operation vs parent-mutation decision rule.
+	tableBatchActions?: TableBatchAction[];
 }
 
 interface Field {
@@ -169,6 +177,11 @@ export interface ModelMapEntry {
 	path?: string;
 	endpointUrl?: string;
 	customNameDescription?: boolean;
+	/**
+	 * Fields (in addition to `DEFAULT_MARKDOWN_FIELDS`) whose content is edited and
+	 * rendered as Markdown for this model.
+	 */
+	markdownFields?: string[];
 }
 
 type ModelMap = {
@@ -748,6 +761,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			},
+			{ field: 'asset', urlModel: 'findings', disableDelete: true },
+			{ field: 'asset', urlModel: 'asset-assessments' },
 			{
 				field: 'assets',
 				urlModel: 'vulnerabilities',
@@ -756,11 +771,11 @@ export const URL_MODEL_MAP: ModelMap = {
 					parentField: 'vulnerabilities'
 				}
 			},
-			{ field: 'assets', urlModel: 'risk-scenarios', disableCreate: true, disableDelete: true },
+			{ field: 'assets', urlModel: 'ebios-rm', disableCreate: true, disableDelete: true },
+			{ field: 'assets', urlModel: 'risk-scenarios', disableDelete: true },
 			{
 				field: 'assets',
 				urlModel: 'quantitative-risk-scenarios',
-				disableCreate: true,
 				disableDelete: true
 			},
 			{
@@ -878,7 +893,20 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'users',
 				disableCreate: true,
 				disableDelete: true,
-				folderPermsNeeded: [{ model: 'folder', action: 'change' }]
+				folderPermsNeeded: [{ model: 'folder', action: 'change' }],
+				// Select members in the table and remove them from the group. Routes to
+				// the group's change_usergroup-gated endpoint, so a domain manager can
+				// remove members without write access on the (Global) User object.
+				tableBatchActions: [
+					{
+						type: 'parent_action',
+						action: 'remove-members',
+						payloadField: 'users',
+						label: 'removeFromGroup',
+						icon: 'fa-solid fa-user-minus',
+						successMessage: 'membersRemoved'
+					}
+				]
 			}
 		],
 		filters: []
@@ -962,7 +990,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			},
 			{ field: 'evidences', urlModel: 'findings', disableCreate: true, disableDelete: true },
 			{ field: 'evidences', urlModel: 'task-templates', disableCreate: true, disableDelete: true },
-			{ field: 'evidences', urlModel: 'data-breaches', disableCreate: true, disableDelete: true }
+			{ field: 'evidences', urlModel: 'data-breaches', disableCreate: true, disableDelete: true },
+			{
+				field: 'evidences',
+				urlModel: 'security-exceptions',
+				disableCreate: true,
+				disableDelete: true
+			}
 		],
 		selectFields: [{ field: 'status' }],
 		detailViewFields: [
@@ -1031,7 +1065,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
 		],
-		selectFields: [{ field: 'document_type' }],
 		detailViewFields: [
 			{ field: 'ref_id' },
 			{ field: 'name' },
@@ -1394,7 +1427,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' }
 		],
-		reverseForeignKeyFields: [{ field: 'bia', urlModel: 'asset-assessments' }],
+		reverseForeignKeyFields: [
+			{
+				field: 'bia',
+				urlModel: 'asset-assessments',
+				batchCreate: {
+					label: 'batchAddAssets'
+				}
+			}
+		],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'perimeter' }, { field: 'auditor' }, { field: 'status' }],
 		detailViewFields: [
@@ -1634,6 +1675,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'dataBreaches',
 		verboseName: 'data breach',
 		verboseNamePlural: 'data breaches',
+		markdownFields: ['potential_consequences'],
 		selectFields: [{ field: 'breach_type' }, { field: 'risk_level' }, { field: 'status' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
@@ -1955,6 +1997,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'strategic_scenario' },
 			{ field: 'ro_to_couple' },
 			{ field: 'is_selected' },
+			{ field: 'justification' },
 			{ field: 'stakeholders' },
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'ebios_rm_study' }
@@ -1967,6 +2010,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'operationalScenarios',
 		verboseName: 'Operational scenario',
 		verboseNamePlural: 'Operational scenarios',
+		markdownFields: ['operating_modes_description'],
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
 			{ field: 'threats', urlModel: 'threats' },
@@ -2074,14 +2118,38 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'securityExceptions',
 		verboseName: 'Security exception',
 		verboseNamePlural: 'Security exceptions',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'folder' },
+			{ field: 'severity' },
+			{ field: 'status' },
+			{ field: 'expiration_date', type: 'date' },
+			{ field: 'owners' },
+			{ field: 'approver' },
+			{ field: 'observation' },
+			{ field: 'link' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
 		foreignKeyFields: [
 			{ field: 'owners', urlModel: 'actors' },
 			{ field: 'approver', urlModel: 'users', urlParams: 'is_approver=true' },
 			{ field: 'folder', urlModel: 'folders' },
-			{ field: 'assets', urlModel: 'assets' }
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
 		reverseForeignKeyFields: [
+			{
+				field: 'security_exceptions',
+				urlModel: 'evidences',
+				disableDelete: false,
+				addExisting: {
+					parentField: 'evidences'
+				}
+			},
 			{
 				field: 'security_exceptions',
 				urlModel: 'applied-controls',
@@ -2125,7 +2193,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'authors', urlModel: 'actors' },
 			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
-			{ field: 'owner', urlModel: 'actors', urlParams: 'is_third_party=false' }
+			{ field: 'owner', urlModel: 'actors', urlParams: 'is_third_party=false' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'findings_assessment', urlModel: 'findings' },
@@ -2145,14 +2214,50 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ref_id' },
 			{ field: 'name' },
 			{ field: 'description' },
+			{ field: 'category' },
 			{ field: 'authors' },
 			{ field: 'reviewers' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'reported_at', type: 'date' },
 			{ field: 'version' },
 			{ field: 'status' },
 			{ field: 'observation' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'is_locked' }
+		]
+	},
+	'posture-assessments': {
+		name: 'postureassessment',
+		localName: 'postureAssessment',
+		localNamePlural: 'postureAssessments',
+		verboseName: 'Technical posture',
+		verboseNamePlural: 'Technical postures',
+		endpointUrl: 'automation/posture-assessments',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'perimeter', urlModel: 'perimeters' },
+			{ field: 'framework', urlModel: 'frameworks' },
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'authors', urlModel: 'actors' },
+			{ field: 'follow_up_assessment', urlModel: 'findings-assessments' }
+		],
+		selectFields: [{ field: 'status' }],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'perimeter' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'framework' },
+			{ field: 'follow_up_assessment' },
+			{ field: 'history_depth' },
+			{ field: 'authors' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'status' },
+			{ field: 'observation' }
 		]
 	},
 	findings: {
@@ -2163,6 +2268,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Findings',
 		foreignKeyFields: [
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
+			{ field: 'asset', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
@@ -2209,6 +2315,10 @@ export const URL_MODEL_MAP: ModelMap = {
 				addExisting: {
 					parentField: 'reference_controls'
 				}
+			},
+			{
+				field: 'findings',
+				urlModel: 'task-templates'
 			}
 		],
 		selectFields: [
@@ -2234,6 +2344,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'incidents',
 		verboseName: 'Incident',
 		verboseNamePlural: 'Incidents',
+		markdownFields: ['resolution'],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'threats', urlModel: 'threats' },
@@ -2337,6 +2448,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
+			{ field: 'findings', urlModel: 'findings' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [
@@ -3230,10 +3342,10 @@ export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
 
 const FIELD_COMPONENT_MAP = {
 	evidences: {
-		attachment: EvidenceFilePreview
+		attachment: EvidenceFileName
 	},
 	'evidence-revisions': {
-		attachment: EvidenceFilePreview
+		attachment: EvidenceFileName
 	},
 	'stored-libraries': {
 		locales: LanguageDisplay,
@@ -3256,12 +3368,26 @@ const FIELD_COMPONENT_MAP = {
 	}
 };
 
+/**
+ * Default fields rendered and edited as Markdown.
+ * Model-specific fields can be added through `markdownFields`.
+ */
+const DEFAULT_MARKDOWN_FIELDS = ['description', 'observation', 'annotation', 'justification'];
+
+export function getMarkdownFields(model: urlModel | string | undefined): Set<string> {
+	const modelSpecific = (model ? getModelInfo(model)?.markdownFields : undefined) ?? [];
+	return new Set([...DEFAULT_MARKDOWN_FIELDS, ...modelSpecific]);
+}
+
 export function getFieldComponentMap(URLModel: string) {
 	const fieldComponentMap = FIELD_COMPONENT_MAP[URLModel] ?? {};
 	const listViewConfig = listViewFields[URLModel] ?? { body: [] };
 
-	if (listViewConfig.body.findIndex((field) => field === 'description') >= 0) {
-		fieldComponentMap.description = MarkdownDescription;
+	const markdownFields = getMarkdownFields(URLModel);
+	for (const field of listViewConfig.body) {
+		if (markdownFields.has(field) && !fieldComponentMap[field]) {
+			fieldComponentMap[field] = MarkdownDescription;
+		}
 	}
 	return fieldComponentMap;
 }

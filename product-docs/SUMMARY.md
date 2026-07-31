@@ -44,6 +44,7 @@
 * Compliance
   * [Audits](concepts/audits.md)
     * [Manage extended result](concepts/extended-results.md)
+  * [Technical postures](concepts/technical-postures.md)
   * [Evidence](concepts/evidence.md)
 * Specialised modules
   * [Third-party risk](concepts/third-party-risk.md)
@@ -156,6 +157,7 @@
 * [Kanban mode](features/kanban-mode.md)
 * [Applied controls analytics](features/applied-controls-analytics.md)
 * [Evidences from clipboard](features/evidences-from-clipboard.md)
+* [Evidence preview](features/evidence-preview.md)
 * [Mappings](features/mappings.md)
 * [Mapping explorer](features/mapping-explorer.md)
 * [X-rays](features/x-rays.md)
@@ -193,6 +195,7 @@
 * [Outgoing webhooks](integrations/webhooks.md)
 * [Audit log forwarding](integrations/audit-log-forwarding.md)
 * [MCP setup guide](integrations/mcp.md)
+* [Power BI connector](integrations/powerbi.md)
 * [Third-party integrations](integrations/third-party/README.md)
   * [Jira](integrations/third-party/jira.md)
   * [ServiceNow](integrations/third-party/servicenow.md)

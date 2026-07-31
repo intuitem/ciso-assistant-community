@@ -40,6 +40,7 @@ class SSOSettingsQuerySet(QuerySet):
                     is_published=_settings.is_published,
                     is_enabled=_settings.value.get("is_enabled"),
                     force_sso=_settings.value.get("force_sso"),
+                    slo_enabled=_settings.value.get("slo_enabled", False),
                     provider=_settings.value.get("provider"),
                     client_id=_settings.value.get("client_id"),
                     provider_id=_settings.value.get("provider_id"),
@@ -75,6 +76,10 @@ class SSOSettings(GlobalSettings):
         default=False,
     )
     force_sso = models.BooleanField(verbose_name=_("Force SSO Login"), default=False)
+    slo_enabled = models.BooleanField(
+        verbose_name=_("Enable service provider-initiated single logout"),
+        default=False,
+    )
 
     provider = models.CharField(
         verbose_name=_("provider"),

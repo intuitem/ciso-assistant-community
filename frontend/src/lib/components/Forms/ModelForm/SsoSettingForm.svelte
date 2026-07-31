@@ -80,6 +80,13 @@
 	<span class="text-orange-500 italic text-sm"
 		><i class="fa-solid fa-circle-exclamation mr-1"></i>{m.forceSSOLoginHelpText2()}</span
 	>
+	<Checkbox
+		{form}
+		field="slo_enabled"
+		label={m.enableSpInitiatedSlo()}
+		helpText={m.enableSpInitiatedSloHelpText()}
+		disabled={!data.is_enabled}
+	/>
 	<RadioGroup
 		{form}
 		hidden={model.selectOptions['provider'].length < 2}

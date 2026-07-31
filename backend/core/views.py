@@ -132,6 +132,7 @@ from rest_framework.parsers import (
     JSONParser,
     MultiPartParser,
 )
+from rest_framework.relations import ManyRelatedField
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -209,6 +210,12 @@ logger = structlog.get_logger(__name__)
 SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
+
+# Max ids accepted per batch request (batch-action, batch-create, member
+# management). Keep >= the largest table/picker page size (100 — see
+# RowsPerPage options and EntityPickerModal PAGE_SIZE_OPTIONS) so a full-page
+# selection always fits in a single request.
+BATCH_SIZE_LIMIT = 100
 
 
 MAPPING_MAX_DEPTH = 3
@@ -749,7 +756,24 @@ class GenericFilterSet(df.FilterSet):
                     "queryset": f.remote_field.model.objects.all(),
                 },
             },
+            # ISO 8601 (incl. timezone/Z) parsing for datetime filters,
+            # required by BI clients filtering on created_at/updated_at
+            models.DateTimeField: {
+                "filter_class": df.IsoDateTimeFilter,
+            },
         }
+
+
+class TimestampRangeFilterMixin(df.FilterSet):
+    """ISO-8601 created_at/updated_at range params for BI clients
+    (Power BI incremental refresh). Mix into FilterSets of viewsets
+    that use filterset_class; list-style viewsets declare the same
+    lookups via dict-form filterset_fields."""
+
+    created_at__gte = df.IsoDateTimeFilter(field_name="created_at", lookup_expr="gte")
+    created_at__lt = df.IsoDateTimeFilter(field_name="created_at", lookup_expr="lt")
+    updated_at__gte = df.IsoDateTimeFilter(field_name="updated_at", lookup_expr="gte")
+    updated_at__lt = df.IsoDateTimeFilter(field_name="updated_at", lookup_expr="lt")
 
 
 class SmartOrderingFilter(filters.OrderingFilter):
@@ -829,6 +853,35 @@ def get_or_create_personal_folder(user):
         user.preferences = prefs
         user.save(update_fields=["preferences"])
     return folder
+
+
+class AutocompleteMixin:
+    """Adds a lightweight, server-paginated ``autocomplete`` action for entity
+    pickers (search/ordering/filtering come from the viewset's existing filter
+    backends). A model becomes pickable by mixing this in and either setting
+    ``autocomplete_fields`` (extra fields beyond id/str) or overriding
+    ``autocomplete_serializer_class``. The frontend proxies ``/{model}/autocomplete``
+    generically (see [model]/autocomplete/+server.ts)."""
+
+    autocomplete_serializer_class = None
+    autocomplete_fields: list[str] = []
+
+    def get_autocomplete_serializer_class(self):
+        if self.autocomplete_serializer_class:
+            return self.autocomplete_serializer_class
+        from core.serializers import build_autocomplete_serializer
+
+        return build_autocomplete_serializer(self.model, self.autocomplete_fields)
+
+    @action(detail=False, name="Lightweight autocomplete search")
+    def autocomplete(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(qs)
+        objects = page if page is not None else qs
+        serializer = self.get_autocomplete_serializer_class()(objects, many=True)
+        if page is not None:
+            return self.get_paginated_response(serializer.data)
+        return Response(serializer.data)
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
@@ -1192,7 +1245,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return instance
 
     def perform_destroy(self, instance):
-        serializer = self.get_serializer(instance)
+        # resolve for "destroy" explicitly so batch_action can call this too
+        serializer_class = self.get_serializer_class(action="destroy")
+        serializer = serializer_class(instance, context=self.get_serializer_context())
         serializer.delete(instance)
         try:
             dispatch_webhook_event(instance, "deleted")
@@ -1302,10 +1357,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        BATCH_SIZE_LIMIT = 100
         if len(ids) > BATCH_SIZE_LIMIT:
             return Response(
-                {"error": f"Too many ids (max {BATCH_SIZE_LIMIT})"},
+                {"error": "too many ids", "max": BATCH_SIZE_LIMIT},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -1324,6 +1378,22 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         # Resolve the write serializer once for all update operations
         if action_type != "delete":
             serializer_class = self.get_serializer_class(action="partial_update")
+            target_field = "folder" if action_type == "change_folder" else field_name
+            field = (
+                serializer_class().fields.get(target_field) if target_field else None
+            )
+            if field is None or field.read_only:
+                return Response(
+                    {"error": f"field not editable: {target_field}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if action_type in ("add_m2m", "remove_m2m") and not isinstance(
+                field, ManyRelatedField
+            ):
+                return Response(
+                    {"error": f"not a many-to-many field: {target_field}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         succeeded = []
         failed = []
@@ -1353,49 +1423,45 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 )
                 continue
 
+            # Built-in / library objects are immutable through the API (mirrors the
+            # object-permission guard); skip any mutating batch action on them.
+            if getattr(obj, "builtin", False) or getattr(obj, "urn", None):
+                failed.append(
+                    {
+                        "id": str(obj_id),
+                        "name": str(obj),
+                        "error": "Cannot modify builtin object",
+                    }
+                )
+                continue
+
             try:
                 if action_type == "delete":
-                    if getattr(obj, "builtin", False) or getattr(obj, "urn", None):
-                        failed.append(
-                            {
-                                "id": str(obj_id),
-                                "name": str(obj),
-                                "error": "Cannot delete builtin object",
-                            }
-                        )
-                        continue
-                    try:
-                        dispatch_webhook_event(obj, "deleted")
-                    except Exception:
-                        logger.error(
-                            "Webhook dispatch failed on batch delete", exc_info=True
-                        )
-                    obj.delete()
-
-                elif action_type in ("add_m2m", "remove_m2m"):
-                    ids_to_modify = value if isinstance(value, list) else [value]
-                    m2m_field = getattr(obj, field_name)
-                    if action_type == "add_m2m":
-                        m2m_field.add(*ids_to_modify)
-                    else:
-                        m2m_field.remove(*ids_to_modify)
-                    obj.save(update_fields=["updated_at"])
-                    try:
-                        dispatch_webhook_event(obj, "updated")
-                    except Exception:
-                        logger.error(
-                            "Webhook dispatch failed on batch %s",
-                            action_type,
-                            exc_info=True,
-                        )
+                    self.perform_destroy(obj)
 
                 else:
                     # Build data dict for the serializer
                     if action_type == "change_folder":
                         data = {"folder": value}
-                    elif action_type == "change_m2m":
-                        actor_ids = value if isinstance(value, list) else [value]
-                        data = {field_name: actor_ids}
+                    elif action_type in ("change_m2m", "add_m2m", "remove_m2m"):
+                        # read-modify-write is racy vs concurrent writers, accepted: serializer validation (IAM/lock) outweighs cbe008798's atomic .add()/.remove()
+                        target = {
+                            str(i)
+                            for i in (value if isinstance(value, list) else [value])
+                        }
+                        if action_type != "change_m2m":
+                            current = {
+                                str(pk)
+                                for pk in getattr(obj, field_name).values_list(
+                                    "pk", flat=True
+                                )
+                            }
+                            target = (
+                                current | target
+                                if action_type == "add_m2m"
+                                else current - target
+                            )
+                        data = {field_name: list(target)}
                     else:  # change_field
                         data = {field_name: value}
 
@@ -1430,6 +1496,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                         else "Permission denied",
                     }
                 )
+            except DRFValidationError as e:
+                failed.append({"id": str(obj_id), "name": str(obj), "error": e.detail})
             except Exception:
                 logger.error("Batch action failed for %s", obj_id, exc_info=True)
                 failed.append(
@@ -1936,9 +2004,38 @@ class ThreatViewSet(BaseModelViewSet):
         return Response(my_map)
 
 
-class AssetFilter(GenericFilterSet):
+class AssetFilter(TimestampRangeFilterMixin, GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     asset_class = df.ModelMultipleChoiceFilter(queryset=AssetClass.objects.all())
+    # BIA report: only assets assessed in the given BIA.
+    bia = df.UUIDFilter(method="filter_bia")
+    # Add-only pickers: drop assets already assessed in the given BIA.
+    exclude_bia = df.UUIDFilter(method="filter_exclude_bia")
+
+    def _can_read_bia(self, value) -> bool:
+        # Both BIA filters are only honoured for a BIA the caller can actually
+        # read, so this endpoint can't be used to infer the scope of BIAs they
+        # can't see.
+        from resilience.models import BusinessImpactAnalysis
+
+        return bool(
+            value
+            and self.request
+            and RoleAssignment.is_object_readable(
+                self.request.user, BusinessImpactAnalysis, value
+            )
+        )
+
+    def filter_bia(self, queryset, name, value):
+        if not self._can_read_bia(value):
+            # Same result as a nonexistent BIA, so the two can't be told apart.
+            return queryset.none()
+        return queryset.filter(assetassessment__bia=value).distinct()
+
+    def filter_exclude_bia(self, queryset, name, value):
+        if not self._can_read_bia(value):
+            return queryset
+        return queryset.exclude(assetassessment__bia=value)
 
     exclude_children = df.ModelChoiceFilter(
         queryset=Asset.objects.all(),
@@ -3138,19 +3235,21 @@ class VulnerabilityViewSet(BaseModelViewSet):
     """
 
     model = Vulnerability
-    filterset_fields = [
-        "folder",
-        "assets",
-        "status",
-        "severity",
-        "risk_scenarios",
-        "applied_controls",
-        "security_exceptions",
-        "filtering_labels",
-        "findings",
-        "security_advisories",
-        "cwes",
-    ]
+    filterset_fields = {
+        "folder": ["exact"],
+        "assets": ["exact"],
+        "status": ["exact"],
+        "severity": ["exact"],
+        "risk_scenarios": ["exact"],
+        "applied_controls": ["exact"],
+        "security_exceptions": ["exact"],
+        "filtering_labels": ["exact"],
+        "findings": ["exact"],
+        "security_advisories": ["exact"],
+        "cwes": ["exact"],
+        "created_at": ["gte", "lt"],
+        "updated_at": ["gte", "lt"],
+    }
     search_fields = ["name", "description", "ref_id"]
 
     @action(detail=False, name="Lightweight autocomplete search")
@@ -4692,7 +4791,7 @@ APPLIED_CONTROL_LINKED_FIELDS = [
 APPLIED_CONTROL_LINKED_FIELD_NAMES = [f[0] for f in APPLIED_CONTROL_LINKED_FIELDS]
 
 
-class AppliedControlFilterSet(GenericFilterSet):
+class AppliedControlFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     reference_control = df.ModelMultipleChoiceFilter(
         queryset=ReferenceControl.objects.all()
@@ -6524,7 +6623,7 @@ class IntegerInFilter(df.BaseInFilter, df.NumberFilter):
     field_class = FormIntegerField
 
 
-class RiskScenarioFilter(GenericFilterSet):
+class RiskScenarioFilter(TimestampRangeFilterMixin, GenericFilterSet):
     risk_assessment = df.ModelMultipleChoiceFilter(
         queryset=RiskAssessment.objects.all()
     )
@@ -7107,6 +7206,28 @@ class UserFilter(GenericFilterSet):
     exclude_current = df.BooleanFilter(
         method="filter_exclude_current", label="Exclude current user"
     )
+    # Per-column partial-match search for pickers (the exact-match email/
+    # first_name/last_name filters from Meta.fields are kept alongside these).
+    email__icontains = df.CharFilter(field_name="email", lookup_expr="icontains")
+    first_name__icontains = df.CharFilter(
+        field_name="first_name", lookup_expr="icontains"
+    )
+    last_name__icontains = df.CharFilter(
+        field_name="last_name", lookup_expr="icontains"
+    )
+    # Add-only member pickers: drop users already in the given group.
+    exclude_user_groups = df.UUIDFilter(method="filter_exclude_user_groups")
+
+    def filter_exclude_user_groups(self, queryset, name, value):
+        # Only honour the exclusion for a group the caller can actually read, so
+        # this endpoint can't be used to infer membership of groups they can't see.
+        if (
+            value
+            and self.request
+            and RoleAssignment.is_object_readable(self.request.user, UserGroup, value)
+        ):
+            return queryset.exclude(user_groups__id=value)
+        return queryset
 
     def filter_approver(self, queryset, name, value):
         """we don't know yet which folders will be used, so filter on any folder"""
@@ -7387,7 +7508,7 @@ class TeamViewSet(BaseModelViewSet):
         )
 
 
-class UserViewSet(BaseModelViewSet):
+class UserViewSet(AutocompleteMixin, BaseModelViewSet):
     """
     API endpoint that allows users to be viewed or edited
     """
@@ -7396,11 +7517,17 @@ class UserViewSet(BaseModelViewSet):
     ordering = ["-is_active", "-is_superuser", "email", "id"]
     filterset_class = UserFilter
     search_fields = ["email", "first_name", "last_name"]
+    autocomplete_fields = ["first_name", "last_name", "email", "is_active"]
 
     def get_queryset(self):
         # Use base IAM filtering
         # but ensure current user is always included
         queryset = super().get_queryset() | User.objects.filter(pk=self.request.user.pk)
+
+        # The autocomplete path serializes only id/name/email — skip the
+        # user_groups prefetch so it stays lightweight at scale.
+        if self.action == "autocomplete":
+            return queryset.distinct()
 
         # Add prefetch for user_groups visibility
         viewable_user_group_ids = RoleAssignment.get_accessible_object_ids(
@@ -7432,17 +7559,25 @@ class UserViewSet(BaseModelViewSet):
             "user_groups" in request.data
             and user.user_groups.filter(name="BI-UG-ADM").exists()
         ):
-            direct_admin_count = User.objects.filter(
-                user_groups__name="BI-UG-ADM"
-            ).count()
-            if direct_admin_count == 1:
-                admin_group = UserGroup.objects.get(name="BI-UG-ADM")
-                new_user_groups = set(request.data["user_groups"])
-                if str(admin_group.pk) not in new_user_groups:
-                    return Response(
-                        {"error": "attemptToRemoveOnlyAdminUserGroup"},
-                        status=status.HTTP_403_FORBIDDEN,
-                    )
+            with transaction.atomic():
+                # Lock the admin group row so this check-then-act can't race a
+                # concurrent admin-membership change into a zero-admin lockout.
+                admin_group = (
+                    UserGroup.objects.select_for_update()
+                    .filter(name="BI-UG-ADM")
+                    .first()
+                )
+                direct_admin_count = User.objects.filter(
+                    user_groups__name="BI-UG-ADM"
+                ).count()
+                if direct_admin_count == 1 and admin_group is not None:
+                    new_user_groups = set(request.data["user_groups"])
+                    if str(admin_group.pk) not in new_user_groups:
+                        return Response(
+                            {"error": "attemptToRemoveOnlyAdminUserGroup"},
+                            status=status.HTTP_403_FORBIDDEN,
+                        )
+                return super().update(request, *args, **kwargs)
 
         return super().update(request, *args, **kwargs)
 
@@ -7450,14 +7585,19 @@ class UserViewSet(BaseModelViewSet):
         user = self.get_object()
         # Protect the last direct (locally-managed) administrator — see update().
         if user.user_groups.filter(name="BI-UG-ADM").exists():
-            direct_admin_count = User.objects.filter(
-                user_groups__name="BI-UG-ADM"
-            ).count()
-            if direct_admin_count == 1:
-                return Response(
-                    {"error": "attemptToDeleteOnlyAdminAccountError"},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
+            with transaction.atomic():
+                # Lock the admin group row so this check-then-act can't race a
+                # concurrent admin removal into a zero-admin lockout.
+                UserGroup.objects.select_for_update().filter(name="BI-UG-ADM").first()
+                direct_admin_count = User.objects.filter(
+                    user_groups__name="BI-UG-ADM"
+                ).count()
+                if direct_admin_count == 1:
+                    return Response(
+                        {"error": "attemptToDeleteOnlyAdminAccountError"},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+                return super().destroy(request, *args, **kwargs)
 
         return super().destroy(request, *args, **kwargs)
 
@@ -7596,18 +7736,116 @@ class UserGroupViewSet(BaseModelViewSet):
         DjangoFilterBackend,
         UserGroupFilter,
     ]
+    # Membership is a property of the *group* (folder = its domain), not of the
+    # globally-scoped User. Authorizing add/remove members on change_usergroup —
+    # checked against the group's folder by has_object_permission — lets a domain
+    # manager manage the membership of groups in their domain (and subdomains, via
+    # folder recursion) without holding change_user, which is Global-only.
+    permission_overrides = {
+        "add_members": "change_usergroup",
+        "remove_members": "change_usergroup",
+    }
 
     def get_queryset(self):
         return super().get_queryset().select_related("folder")
 
-    def destroy(self, request, *args, **kwargs):
-        user_group = self.get_object()
-        if user_group.builtin:
+    # Deletion of built-in groups is blocked generically by the permission layer.
+
+    MEMBER_BATCH_LIMIT = BATCH_SIZE_LIMIT
+
+    def _member_ids(self, request) -> list[str]:
+        ids = request.data.get("users")
+        if isinstance(ids, str):
+            ids = [i for i in ids.split(",") if i]
+        ids = [i for i in (ids or []) if i]
+        if not ids:
+            raise DRFValidationError({"users": ["This field is required."]})
+        if len(ids) > self.MEMBER_BATCH_LIMIT:
+            raise DRFValidationError(
+                {"users": [f"Too many ids (max {self.MEMBER_BATCH_LIMIT})"]}
+            )
+        return ids
+
+    @action(detail=True, methods=["post"], url_path="add-members")
+    def add_members(self, request, pk=None):
+        """Add users to this group. Only the M2M through-rows are written — no User
+        attribute is touched — so membership management is granted without leaking
+        change_user. Authorized on the group's folder (see permission_overrides)."""
+        group = self.get_object()
+        users = User.objects.filter(pk__in=self._member_ids(request))
+        group.user_set.add(*users)
+        logger.info(
+            "users added to user group",
+            user_group=group,
+            users=list(users),
+            actor=request.user,
+        )
+        return Response({"count": group.user_set.count()})
+
+    def _blocks_domain_admin_self_removal(self, actor, group, ids) -> bool:
+        """A user may not strip their own domain-admin entitlement by removing
+        themselves from a group that grants Domain Manager (BI-RL-DMA) — that would
+        be a self-lockout. Exempt when the actor still administers the domain from a
+        higher level (a global admin, or a parent-domain manager); removal by anyone
+        else is unaffected."""
+        if str(actor.pk) not in {str(i) for i in ids}:
+            return False  # not removing self
+        grants_domain_admin = RoleAssignment.objects.filter(
+            user_group=group, role__name="BI-RL-DMA"
+        ).exists()
+        if not grants_domain_admin:
+            return False
+        # is_access_allowed walks up from the PARENT folder, so a match means the
+        # actor holds group-management rights at a strictly higher level (global or
+        # parent domain) — never via this group's own scope.
+        parent = group.folder.parent_folder
+        if parent is not None and RoleAssignment.is_access_allowed(
+            actor,
+            Permission.objects.get(codename="change_usergroup"),
+            parent,
+        ):
+            return False
+        return True
+
+    @action(detail=True, methods=["post"], url_path="remove-members")
+    def remove_members(self, request, pk=None):
+        """Remove users from this group (batch). Same authorization as add_members.
+        Protects the last direct BI-UG-ADM administrator, mirroring UserViewSet, so
+        membership management can never strip the lockout-proof admin anchor."""
+        group = self.get_object()
+        ids = self._member_ids(request)
+        users = User.objects.filter(pk__in=ids)
+
+        if group.name == "BI-UG-ADM":
+            with transaction.atomic():
+                # Lock the admin group row so concurrent removals serialize; without
+                # it the last-admin check is a TOCTOU that can strip every admin.
+                UserGroup.objects.select_for_update().get(pk=group.pk)
+                direct_admin_count = User.objects.filter(
+                    user_groups__name="BI-UG-ADM"
+                ).count()
+                removing = group.user_set.filter(pk__in=ids).count()
+                if direct_admin_count - removing < 1:
+                    return Response(
+                        {"error": "attemptToRemoveOnlyAdminUserGroup"},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+                group.user_set.remove(*users)
+        elif self._blocks_domain_admin_self_removal(request.user, group, ids):
             return Response(
-                {"error": "attemptToDeleteBuiltinUserGroup"},
+                {"error": "attemptToRemoveSelfFromDomainAdminGroup"},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        return super().destroy(request, *args, **kwargs)
+        else:
+            group.user_set.remove(*users)
+
+        logger.info(
+            "users removed from user group",
+            user_group=group,
+            users=list(users),
+            actor=request.user,
+        )
+        return Response({"count": group.user_set.count()})
 
 
 class IdPGroupViewSet(BaseModelViewSet):
@@ -9227,23 +9465,41 @@ class EvidenceViewSet(BaseModelViewSet):
     """
 
     model = Evidence
-    filterset_fields = [
-        "folder",
-        "applied_controls",
-        "requirement_assessments",
-        "name",
-        "timeline_entries",
-        "filtering_labels",
-        "findings",
-        "findings_assessments",
-        "genericcollection",
-        "owner",
-        "status",
-        "expiry_date",
-        "contracts",
-        "processings",
-        "data_breaches",
-    ]
+    filterset_fields = {
+        "folder": ["exact"],
+        "applied_controls": ["exact"],
+        "requirement_assessments": ["exact"],
+        "name": ["exact"],
+        "timeline_entries": ["exact"],
+        "filtering_labels": ["exact"],
+        "findings": ["exact"],
+        "findings_assessments": ["exact"],
+        "security_exceptions": ["exact"],
+        "genericcollection": ["exact"],
+        "owner": ["exact"],
+        "status": ["exact"],
+        "expiry_date": ["exact"],
+        "contracts": ["exact"],
+        "processings": ["exact"],
+        "data_breaches": ["exact"],
+        "created_at": ["gte", "lt"],
+        "updated_at": ["gte", "lt"],
+    }
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related(
+                "revisions",
+                "applied_controls",
+                "requirement_assessments",
+                "security_exceptions",
+                "contracts",
+                "filtering_labels",
+                "owner",
+            )
+        )
 
     @action(detail=False, name="Get all evidences owners")
     def owner(self, request):
@@ -9981,14 +10237,13 @@ class JourneyViewSet(BaseModelViewSet):
         for ref_name, obj_id in (journey.object_refs or {}).items():
             try:
                 ca = readable_ca_qs.get(id=obj_id, folder=folder)
-                total_ra = ca.requirement_assessments.count()
-                assessed_ra = ca.requirement_assessments.exclude(status="to_do").count()
+                total_ra, assessed_ra = ca._get_progress_counts()
                 compliance_stats[ref_name] = {
                     "name": ca.name,
                     "total": total_ra,
                     "assessed": assessed_ra,
                     "percent": (
-                        round(assessed_ra / total_ra * 100) if total_ra > 0 else 0
+                        int(assessed_ra / total_ra * 100) if total_ra > 0 else 0
                     ),
                 }
             except ComplianceAssessment.DoesNotExist, ValueError:
@@ -10336,41 +10591,178 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         return qs
 
     def _get_optimized_object_data(self, queryset):
-        """Compute per-page requirement counts in one bounded GROUP BY,
+        """Compute per-page requirement counts for EVERY audit of the page,
         replacing the Count(distinct=True) annotations dropped from the
         list queryset. Bounded by `len(queryset)` (≤ page size), so the
         cost is independent of the total RA table size.
 
-        Only the no-implementation-groups case is computed here; audits
-        with `selected_implementation_groups` still rely on the prefetched
-        `requirement_assessments` for in-Python IG filtering inside
-        `ComplianceAssessmentListSerializer.get_progress`.
+        Audits without implementation groups go through per-mode GROUP BY
+        buckets; audits with implementation groups share one scalar
+        `.values()` scan for the whole page (their IG filtering intersects
+        two JSON lists, which SQL can't do).
         """
+        from core.models import Question
+
         optimized_data = super()._get_optimized_object_data(queryset)
         audit_ids = [a.id for a in queryset]
         if not audit_ids:
             return optimized_data
 
-        not_assessed = RequirementAssessment.Result.NOT_ASSESSED
-        rows = (
-            RequirementAssessment.objects.filter(
-                compliance_assessment_id__in=audit_ids,
+        # The progress mode (status visible = status-driven) and the content
+        # branches are audit-level facts known before querying, so audits are
+        # bucketed by (status_driven, result_visible, framework_has_questions)
+        # and each bucket runs the cheapest GROUP BY variant — status-driven
+        # and result-visible buckets are purely scalar (no Exists, no extra
+        # joins), i.e. the same cost profile as before the cascade.
+        audit_meta = ComplianceAssessment.objects.filter(id__in=audit_ids).values_list(
+            "id",
+            "field_visibility",
+            "framework_id",
+            "selected_implementation_groups",
+            "min_score",
+            "framework__min_score",
+            "framework__field_visibility",
+        )
+        frameworks_with_questions = set(
+            Question.objects.filter(
+                requirement_node__framework_id__in={m[2] for m in audit_meta}
+            )
+            .values_list("requirement_node__framework_id", flat=True)
+            .distinct()
+        )
+        # Audits with no RA rows must still resolve to 0%, so seed the maps.
+        total_map: dict = {ca_id: 0 for ca_id in audit_ids}
+        assessed_map: dict = {ca_id: 0 for ca_id in audit_ids}
+        buckets: dict = {}
+        ig_meta: dict = {}
+        for (
+            ca_id,
+            field_visibility,
+            framework_id,
+            igs,
+            ca_min,
+            fw_min,
+            fw_fv,
+        ) in audit_meta:
+            status_driven, result_visible = (
+                ComplianceAssessment.progress_mode_from_visibility(
+                    field_visibility, fw_fv
+                )
+            )
+            has_questions = (
+                not status_driven and framework_id in frameworks_with_questions
+            )
+            if igs:
+                min_score_fallback = ca_min if ca_min is not None else (fw_min or 0)
+                ig_meta[ca_id] = (
+                    set(igs),
+                    status_driven,
+                    result_visible,
+                    has_questions,
+                    min_score_fallback,
+                )
+                continue
+            buckets.setdefault(
+                (status_driven, result_visible, has_questions), []
+            ).append(ca_id)
+
+        for (
+            status_driven,
+            result_visible,
+            has_questions,
+        ), bucket_ids in buckets.items():
+            ras = RequirementAssessment.objects.filter(
+                compliance_assessment_id__in=bucket_ids,
                 requirement__assessable=True,
             )
-            .values("compliance_assessment_id")
-            .annotate(
+            if has_questions:
+                from django.db.models import Exists, OuterRef
+
+                from core.models import Answer
+
+                ras = ras.annotate(
+                    _has_questions=RequirementAssessment.has_questions_subquery(),
+                    _has_answers=Exists(
+                        Answer.objects.filter(requirement_assessment=OuterRef("pk"))
+                    ),
+                    _has_unanswered=Exists(
+                        RequirementAssessment._unanswered_answers_subquery()
+                    ),
+                )
+            rows = ras.values("compliance_assessment_id").annotate(
                 total=Count("id"),
                 assessed=Count(
                     "id",
-                    filter=~Q(result=not_assessed) | Q(score__isnull=False),
+                    filter=RequirementAssessment.progress_assessed_q(
+                        status_driven=status_driven,
+                        result_visible=result_visible,
+                        has_questions_annotation=has_questions,
+                    ),
                 ),
             )
-        )
-        total_map: dict = {}
-        assessed_map: dict = {}
-        for r in rows:
-            total_map[r["compliance_assessment_id"]] = r["total"]
-            assessed_map[r["compliance_assessment_id"]] = r["assessed"]
+            for r in rows:
+                total_map[r["compliance_assessment_id"]] = r["total"]
+                assessed_map[r["compliance_assessment_id"]] = r["assessed"]
+
+        if ig_meta:
+            # One scalar scan for all IG audits of the page (no ORM
+            # instantiation, no per-audit query); IG membership and the
+            # cascade are evaluated in Python via progress_assessed_scalar.
+            ig_rows = RequirementAssessment.objects.filter(
+                compliance_assessment_id__in=ig_meta.keys(),
+                requirement__assessable=True,
+            )
+            row_fields = [
+                "compliance_assessment_id",
+                "status",
+                "result",
+                "score",
+                "requirement__implementation_groups",
+                "requirement__min_score",
+            ]
+            if any(meta[3] for meta in ig_meta.values()):
+                from core.models import Answer
+                from django.db.models import Exists, OuterRef
+
+                ig_rows = ig_rows.annotate(
+                    _has_questions=RequirementAssessment.has_questions_subquery(),
+                    _has_answers=Exists(
+                        Answer.objects.filter(requirement_assessment=OuterRef("pk"))
+                    ),
+                    _has_unanswered=Exists(
+                        RequirementAssessment._unanswered_answers_subquery()
+                    ),
+                )
+                row_fields += ["_has_questions", "_has_answers", "_has_unanswered"]
+            for row in ig_rows.values(*row_fields).iterator():
+                ca_id = row["compliance_assessment_id"]
+                selected, status_driven, result_visible, has_questions, min_fb = (
+                    ig_meta[ca_id]
+                )
+                groups = set(row["requirement__implementation_groups"] or [])
+                if selected.isdisjoint(groups):
+                    continue
+                total_map[ca_id] += 1
+                if RequirementAssessment.progress_assessed_scalar(
+                    row["status"],
+                    row["result"],
+                    row["score"],
+                    row["requirement__min_score"],
+                    status_driven=status_driven,
+                    has_questions=(
+                        row.get("_has_questions", False) if has_questions else False
+                    ),
+                    result_visible=result_visible,
+                    min_score_fallback=min_fb,
+                    questionnaire_fully_answered=(
+                        row.get("_has_answers", False)
+                        and not row.get("_has_unanswered", True)
+                        if has_questions
+                        else False
+                    ),
+                ):
+                    assessed_map[ca_id] += 1
+
         optimized_data["total_requirements"] = total_map
         optimized_data["assessed_requirements"] = assessed_map
         return optimized_data
@@ -10394,17 +10786,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
         )
 
-        if self.action == "list":
-            # List view: lightweight prefetch for progress with implementation groups
-            qs = qs.prefetch_related(
-                Prefetch(
-                    "requirement_assessments",
-                    queryset=RequirementAssessment.objects.filter(
-                        requirement__assessable=True
-                    ).select_related("requirement"),
-                ),
-            )
-        elif self.action == "retrieve":
+        # No requirement_assessments prefetch on the list action: progress is
+        # served by `_get_optimized_object_data` (no-IG audits) or the model's
+        # scalar-only counts (IG audits); nothing else in the list serializer
+        # reads RAs, and the prefetch used to hydrate ~page x framework-size
+        # ORM objects per request for nothing.
+        if self.action == "retrieve":
             # Detail view only: full prefetches for the read serializer
             qs = qs.select_related(
                 "framework__library",  # For framework.has_update property
@@ -10431,36 +10818,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         # Custom detail actions (tree, global_score, donut_data, etc.)
         # use lightweight querysets — they don't need full prefetches.
 
-        # The `total_requirements` / `assessed_requirements` Count(distinct=True)
-        # annotations are catastrophic on the list path: each one forces
-        # SQLite to materialise a temp B-tree over the full LEFT JOIN of
-        # the requirement_assessments table per row, and the two together
-        # account for the ~2.7s single-query cost on /compliance-assessments/.
-        # On the list path we compute the same numbers in `_get_optimized_object_data`
-        # via a single GROUP BY bounded by the page (≤ page_size audits).
-        # Retrieve still uses the annotations because the cost is trivial
-        # at one row.
-        if self.action != "list":
-            qs = qs.annotate(
-                total_requirements=Count(
-                    "requirement_assessments",
-                    filter=Q(requirement_assessments__requirement__assessable=True),
-                    distinct=True,
-                ),
-                assessed_requirements=Count(
-                    "requirement_assessments",
-                    filter=Q(
-                        Q(
-                            ~Q(
-                                requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
-                            )
-                        )
-                        | Q(requirement_assessments__score__isnull=False),
-                        requirement_assessments__requirement__assessable=True,
-                    ),
-                    distinct=True,
-                ),
-            )
+        # Progress is computed through the model's cascade counts
+        # (`ComplianceAssessment._get_progress_counts`): one GROUP BY bounded
+        # by the page on the list path (`_get_optimized_object_data`), one
+        # scalar aggregate per object on detail paths. The former
+        # total/assessed `Count(distinct=True)` annotations were catastrophic
+        # on SQLite (temp B-tree over the full RA LEFT JOIN per row, ~2.7s on
+        # /compliance-assessments/) and must not come back.
 
         return qs
 
@@ -10479,7 +10843,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         name="Get target frameworks mapping options with compliance distribution",
     )
     def frameworks(self, request, pk):
-        audit = ComplianceAssessment.objects.get(id=pk)
+        audit = self.get_object()
         from core.mappings.engine import engine
 
         audit_from_results = engine.load_audit_fields(audit)
@@ -11250,6 +11614,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
+            # Question-driven requirements: score and is_scored belong to
+            # recompute_assessment (a committed score means "questionnaire
+            # complete" for progress). Direct writes are ignored — same
+            # contract as the write serializer, so clients that round-trip
+            # the field keep working — and flagged in the response. This must
+            # run before score validation so a round-tripped empty value does
+            # not trip the integer parse.
+            score_ignored = (
+                "score" in request.data
+                and requirement_assessment.requirement.questions.exists()
+            )
+            if score_ignored:
+                score = None
+
             # validate if score value is within the resolved scale
             if score is not None:
                 try:
@@ -11292,7 +11670,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if score is not None:
                 requirement_assessment.score = score
                 requirement_assessment.is_scored = True
-            elif score is None and "score" in request.data:
+            elif score is None and "score" in request.data and not score_ignored:
                 # Explicitly setting score to null/empty
                 requirement_assessment.score = None
                 requirement_assessment.is_scored = False
@@ -11304,6 +11682,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "urn": urn,
                 "result": result,
             }
+            if score_ignored:
+                response_data["score_ignored"] = (
+                    "This requirement is question-driven: its score is computed "
+                    "from the questionnaire answers, the provided value was ignored."
+                )
 
             # Include status in response if it was updated
             if status_value is not None:
@@ -11313,7 +11696,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if score is not None:
                 response_data["score"] = score
                 response_data["is_scored"] = True
-            elif score is None and "score" in request.data:
+            elif score is None and "score" in request.data and not score_ignored:
                 response_data["score"] = None
                 response_data["is_scored"] = False
 
@@ -12181,6 +12564,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def auditee_dashboard(self, request):
         """Returns per-assignment progress data for the auditee's dashboard."""
         user_actors = Actor.get_all_for_user(request.user)
+        # Prefetch each assignment's assessable requirement assessments with
+        # everything get_visible_questions_counts() needs, so the per-assignment
+        # loop below reads from cache (no per-assignment queries).
+        assessable_ras = (
+            RequirementAssessment.objects.filter(requirement__assessable=True)
+            .select_related("requirement")
+            .prefetch_related(
+                "requirement__questions",
+                "answers",
+                "answers__question",
+                "answers__selected_choices",
+            )
+        )
         assignments = (
             RequirementAssignment.objects.filter(actor__in=user_actors)
             .select_related(
@@ -12188,9 +12584,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "compliance_assessment__framework",
                 "compliance_assessment__folder",
             )
-            .prefetch_related("requirement_assessments", "actor")
+            .prefetch_related(
+                Prefetch("requirement_assessments", queryset=assessable_ras),
+                "actor",
+            )
             .distinct()
         )
+
+        from core.utils import resolve_visibility_from_overrides
 
         # Only include compliance assessments the user can view
         (viewable_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
@@ -12203,40 +12604,63 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 continue
 
             ca = assignment.compliance_assessment
-            ra_ids = assignment.requirement_assessments.values_list("id", flat=True)
-            ras = RequirementAssessment.objects.filter(
-                id__in=ra_ids, requirement__assessable=True
-            )
-            total = ras.count()
-            done = ras.exclude(result="not_assessed").count()
+            # Prefetched above (filtered to assessable), so this hits the cache.
+            ras = list(assignment.requirement_assessments.all())
+            # Respect the audit's implementation-groups scope: out-of-scope
+            # requirements are hidden from the audit and must not weigh on
+            # the respondent's progress either.
+            if ca.selected_implementation_groups:
+                selected_groups = set(ca.selected_implementation_groups)
+                ras = [
+                    ra
+                    for ra in ras
+                    if selected_groups & set(ra.requirement.implementation_groups or [])
+                ]
+            total = len(ras)
 
-            # Use question-based progress when framework has questions
-            has_questions = (
-                Question.objects.filter(
-                    requirement_node__framework=ca.framework
-                ).exists()
-                if ca.framework
-                else False
+            # Respondent-facing progress: track the respondent's own work, not
+            # the audit-level progress mode (the status field may not even be
+            # visible to them). Identical computation to the frontend
+            # assessment page: per requirement, share of answered VISIBLE
+            # questions (get_visible_questions_counts resolves depends_on, so
+            # conditional and informational questionnaires are correct); a
+            # requirement with no questions counts as one virtual unit,
+            # answered via the respondent's alignment answer when that field
+            # is in use, else the result. The Python walk is bounded by the
+            # respondent's own assignments, so its cost stays small.
+            alignment_pair = resolve_visibility_from_overrides(
+                ca.field_visibility
+                or (
+                    getattr(ca.framework, "field_visibility", None)
+                    if ca.framework_id
+                    else None
+                ),
+                "respondent_alignment",
             )
+            alignment_in_use = alignment_pair.get("respondent", "edit") != "hidden"
 
-            if has_questions:
-                total_q = 0
-                answered_q = 0
-                for ra in ras.prefetch_related(
-                    "answers",
-                    "answers__question",
-                    "answers__selected_choices",
-                    "requirement__questions",
-                    "requirement__questions__choices",
-                ):
-                    v, a = ra.get_visible_questions_counts()
-                    total_q += v
-                    answered_q += a
-                progress_percent = (
-                    round(answered_q / total_q * 100) if total_q > 0 else 0
+            total_q = 0
+            answered_q = 0
+            done = 0
+            for ra in ras:
+                visible, answered = ra.get_visible_questions_counts()
+                if visible > 0:
+                    total_q += visible
+                    answered_q += answered
+                    if answered >= visible:
+                        done += 1
+                    continue
+                # No visible questions: one virtual unit, respondent-driven.
+                total_q += 1
+                unit_done = (
+                    bool(ra.respondent_alignment)
+                    if alignment_in_use
+                    else ra.result != RequirementAssessment.Result.NOT_ASSESSED
                 )
-            else:
-                progress_percent = round(done / total * 100) if total > 0 else 0
+                if unit_done:
+                    answered_q += 1
+                    done += 1
+            progress_percent = int(answered_q / total_q * 100) if total_q else 0
 
             actor_names = ", ".join(str(a) for a in assignment.actor.all())
 
@@ -12965,28 +13389,22 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="progress_ts")
     def progress_ts(self, request, pk):
-        try:
-            raw = (
-                HistoricalMetric.objects.filter(
-                    model="ComplianceAssessment", object_id=pk
-                )
-                .annotate(progress=F("data__reqs__progress_perc"))
-                .values("date", "progress")
-                .order_by("date")
+        compliance_assessment = self.get_object()
+        raw = (
+            HistoricalMetric.objects.filter(
+                model="ComplianceAssessment", object_id=compliance_assessment.id
             )
+            .annotate(progress=F("data__reqs__progress_perc"))
+            .values("date", "progress")
+            .order_by("date")
+        )
 
-            # Transform the data into the required format
-            formatted_data = [
-                [entry["date"].isoformat(), entry["progress"]] for entry in raw
-            ]
+        # Transform the data into the required format
+        formatted_data = [
+            [entry["date"].isoformat(), entry["progress"]] for entry in raw
+        ]
 
-            return Response({"data": formatted_data})
-
-        except HistoricalMetric.DoesNotExist:
-            return Response(
-                {"error": "No metrics found for this assessment"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        return Response({"data": formatted_data})
 
     @action(detail=True, methods=["get"])
     def threats_metrics(self, request, pk=None):
@@ -13647,22 +14065,24 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     """
 
     model = RequirementAssessment
-    filterset_fields = [
-        "folder",
-        "folder__name",
-        "evidences",
-        "compliance_assessment",
-        "applied_controls",
-        "security_exceptions",
-        "requirement__urn",
-        "result",
-        "extended_result",
-        "compliance_assessment__ref_id",
-        "compliance_assessment__perimeter",
-        "compliance_assessment__perimeter__name",
-        "compliance_assessment__assets__ref_id",
-        "requirement__assessable",
-    ]
+    filterset_fields = {
+        "folder": ["exact"],
+        "folder__name": ["exact"],
+        "evidences": ["exact"],
+        "compliance_assessment": ["exact"],
+        "applied_controls": ["exact"],
+        "security_exceptions": ["exact"],
+        "requirement__urn": ["exact"],
+        "result": ["exact"],
+        "extended_result": ["exact"],
+        "compliance_assessment__ref_id": ["exact"],
+        "compliance_assessment__perimeter": ["exact"],
+        "compliance_assessment__perimeter__name": ["exact"],
+        "compliance_assessment__assets__ref_id": ["exact"],
+        "requirement__assessable": ["exact"],
+        "created_at": ["gte", "lt"],
+        "updated_at": ["gte", "lt"],
+    }
     search_fields = [
         "requirement__name",
         "requirement__description",
@@ -14447,19 +14867,26 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
     """
 
     model = SecurityException
-    filterset_fields = [
-        "name",
-        "requirement_assessments",
-        "risk_scenarios",
-        "owners",
-        "approver",
-        "folder",
-        "severity",
-        "status",
-        "genericcollection",
-        "expiration_date",
-    ]
+    filterset_fields = {
+        "name": ["exact"],
+        "requirement_assessments": ["exact"],
+        "risk_scenarios": ["exact"],
+        "evidences": ["exact"],
+        "owners": ["exact"],
+        "approver": ["exact"],
+        "folder": ["exact"],
+        "severity": ["exact"],
+        "status": ["exact"],
+        "genericcollection": ["exact"],
+        "expiration_date": ["exact"],
+        "created_at": ["gte", "lt"],
+        "updated_at": ["gte", "lt"],
+    }
     search_fields = ["name", "description", "ref_id"]
+    filter_backends = [
+        CustomFieldSearchFilter if b is filters.SearchFilter else b
+        for b in BaseModelViewSet.filter_backends
+    ] + [CustomFieldFilterBackend]
 
     export_config = {
         "fields": {
@@ -14520,7 +14947,9 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
                 "vulnerabilities",
                 "risk_scenarios",
                 "requirement_assessments",
+                "evidences",
                 "owners",
+                "custom_field_values__definition",
                 Prefetch(
                     "validationflow_set",
                     queryset=ValidationFlow.objects.select_related(
@@ -14611,6 +15040,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "authors",
         "status",
         "evidences",
+        "filtering_labels",
         "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id"]
@@ -14629,6 +15059,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "evidences",
                 "authors",
+                "filtering_labels__folder",
             )
             .annotate(
                 _total_findings=Count("findings"),
@@ -15092,20 +15523,23 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
 class FindingViewSet(BaseModelViewSet):
     model = Finding
-    filterset_fields = [
-        "name",
-        "owner",
-        "folder",
-        "status",
-        "severity",
-        "priority",
-        "findings_assessment",
-        "filtering_labels",
-        "applied_controls",
-        "evidences",
-        "vulnerabilities",
-        "due_date",
-    ]
+    filterset_fields = {
+        "name": ["exact"],
+        "owner": ["exact"],
+        "folder": ["exact"],
+        "status": ["exact"],
+        "severity": ["exact"],
+        "priority": ["exact"],
+        "findings_assessment": ["exact"],
+        "asset": ["exact"],
+        "filtering_labels": ["exact"],
+        "applied_controls": ["exact"],
+        "evidences": ["exact"],
+        "vulnerabilities": ["exact"],
+        "due_date": ["exact"],
+        "created_at": ["gte", "lt"],
+        "updated_at": ["gte", "lt"],
+    }
     ordering = ["ref_id"]
 
     def get_queryset(self) -> models.query.QuerySet:
@@ -15244,20 +15678,22 @@ class FindingViewSet(BaseModelViewSet):
 class IncidentViewSet(ExportMixin, BaseModelViewSet):
     model = Incident
     search_fields = ["name", "description", "ref_id"]
-    filterset_fields = [
-        "folder",
-        "status",
-        "severity",
-        "qualifications",
-        "detection",
-        "owners",
-        "entities",
-        "assets",
-        "applied_controls",
-        "task_templates",
-        "risk_scenarios",
-        "filtering_labels",
-    ]
+    filterset_fields = {
+        "folder": ["exact"],
+        "status": ["exact"],
+        "severity": ["exact"],
+        "qualifications": ["exact"],
+        "detection": ["exact"],
+        "owners": ["exact"],
+        "entities": ["exact"],
+        "assets": ["exact"],
+        "applied_controls": ["exact"],
+        "task_templates": ["exact"],
+        "risk_scenarios": ["exact"],
+        "filtering_labels": ["exact"],
+        "created_at": ["gte", "lt"],
+        "updated_at": ["gte", "lt"],
+    }
 
     export_config = {
         "fields": {
@@ -15875,6 +16311,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "evidences",
             "objectives",
             "incidents",
+            "findings",
             "filtering_labels",
         ]
 

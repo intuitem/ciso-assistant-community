@@ -3,6 +3,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import BatchCreatePersonalDataModal from '$lib/components/Modals/BatchCreatePersonalDataModal.svelte';
+	import BatchAddAssetAssessmentsModal from '$lib/components/Modals/BatchAddAssetAssessmentsModal.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import RiskAcceptanceModal from '$lib/components/Modals/RiskAcceptanceModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
@@ -12,7 +13,7 @@
 	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
-	import { getModelInfo } from '$lib/utils/crud.js';
+	import { getModelInfo, getMarkdownFields } from '$lib/utils/crud';
 	import { formatDate, formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -25,7 +26,7 @@
 
 	import { onMount } from 'svelte';
 
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getListViewFields } from '$lib/utils/table';
 	import { canPerformActionOnObject, resolveObjectDomain } from '$lib/utils/access-control';
@@ -36,8 +37,10 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
 
 	const modalStore: ModalStore = getModalStore();
+	const toastStore = getToastStore();
 
 	const defaultExcludes = ['id', 'is_published', 'str', 'path', 'sync_mappings'];
 
@@ -112,6 +115,8 @@
 	}: Props = $props();
 
 	exclude = [...exclude, ...defaultExcludes];
+
+	const markdownFieldSet = $derived(getMarkdownFields(data.urlModel));
 
 	const getRelatedModelIndex = (model: ModelMapEntry, relatedModel: Record<string, string>) => {
 		if (!model.reverseForeignKeyFields) return -1;
@@ -213,6 +218,19 @@
 		modalStore.trigger(modal);
 	}
 
+	// Table-scoped batch actions for a reverse-FK table, gated by change on the
+	// parent object (so parent_action entries are only offered to users the
+	// parent endpoint would authorize). parent_action endpoints are resolved
+	// here — the only place that knows the parent url and id.
+	function tableBatchActions(field: ReverseForeignKeyField) {
+		if (!field.tableBatchActions || !canEditObject) return [];
+		return field.tableBatchActions.map((a) =>
+			a.type === 'parent_action'
+				? { ...a, endpoint: `/${data.model.urlModel}/${data.data.id}/${a.action}` }
+				: a
+		);
+	}
+
 	function modalSelectExisting(field: ReverseForeignKeyField): void {
 		if (!field.addExisting || !data.updateForm) return;
 		const addExisting = field.addExisting;
@@ -236,12 +254,18 @@
 		modalStore.trigger(modal);
 	}
 
+	const batchCreateModals: Record<string, ModalComponent['ref']> = {
+		'personal-data': BatchCreatePersonalDataModal,
+		'asset-assessments': BatchAddAssetAssessmentsModal
+	};
+
 	function modalBatchCreate(field: ReverseForeignKeyField, parentId: string): void {
-		if (!field.batchCreate) return;
+		const ref = batchCreateModals[field.urlModel];
+		if (!field.batchCreate || !ref) return;
 		const modalComponent: ModalComponent = {
-			ref: BatchCreatePersonalDataModal,
+			ref,
 			props: {
-				processingId: parentId,
+				parentId,
 				urlModel: field.urlModel
 			}
 		};
@@ -751,7 +775,7 @@
 												>
 											{:else if ISO_8601_REGEX.test(value) && dateFieldsToFormat.includes(key)}
 												{formatDateOrDateTime(value, getLocale())}
-											{:else if key === 'description' || key === 'observation' || key === 'annotation' || key === 'justification'}
+											{:else if markdownFieldSet.has(key)}
 												<MarkdownRenderer content={value} />
 											{:else if typeof value === 'boolean'}
 												{@const bd = booleanDisplay(value, key, data.urlModel)}
@@ -961,16 +985,19 @@
 								})}
 								source={model.table}
 								disableCreate={disableCreate || model.disableCreate}
-								disableEdit={disableEdit || model.disableEdit}
-								disableDelete={disableDelete || model.disableDelete}
+								disableEdit={disableEdit || model.disableEdit || Boolean(data.data.is_locked)}
+								disableDelete={disableDelete || model.disableDelete || Boolean(data.data.is_locked)}
 								deleteForm={model.deleteForm}
 								URLModel={urlmodel}
 								expectedCount={getExpectedCount(urlmodel, field)}
 								fields={fieldsToUse}
 								defaultFilters={field.defaultFilters || {}}
+								extraBatchActions={tableBatchActions(field)}
 							>
 								{#snippet addButton()}
-									{#if canEditObject && field?.addExisting}
+									{#if data.data.is_locked}
+										<!-- Locked parent: no add affordances, matching the hidden remove selection. -->
+									{:else if canEditObject && field?.addExisting}
 										<span
 											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
 										>

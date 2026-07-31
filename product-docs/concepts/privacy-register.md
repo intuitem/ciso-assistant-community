@@ -14,6 +14,10 @@ CISO Assistant models the register as a graph of typed objects so it stays query
 - **Data contractor** — third parties that process data on your behalf — a TPRM entity surfaced here with a privacy-specific lens.
 - **Data transfer** — flows of data to entities outside the original jurisdiction.
 
+{% hint style="info" %}
+Personal data entries can be created in batch from a processing's detail page: the **Batch create personal data** button (layer-group icon on the **Personal Data** table) opens a picker of categories grouped by theme — drawn from the [terminology](terminology.md) layer — and applies the same **Retention**, **Deletion Policy**, and **Is sensitive** values to every entry it creates. Categories the processing already records are skipped.
+{% endhint %}
+
 ## Event objects
 
 Privacy operations also need to record events as they happen:
@@ -27,6 +31,7 @@ Privacy operations also need to record events as they happen:
 - Findings from GDPR audits surface in the register as actions on processings.
 - Data contractors cross-reference TPRM entities, so a sub-processor's security review feeds both worlds.
 - A processing's **nature** and its personal-data **categories** draw from the [terminology](terminology.md) layer, so you can align them to your own internal vocabulary.
+- A processing can be exported as a multi-sheet Excel workbook from its detail page and re-imported — through the data import wizard or the CLI — to recreate it with all its sub-objects. See [Data import](../configuration/data-import.md#processings).
 
 ## Related
 

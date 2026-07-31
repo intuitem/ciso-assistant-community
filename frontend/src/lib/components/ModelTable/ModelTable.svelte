@@ -115,6 +115,13 @@
 		actionsBody?: import('svelte').Snippet;
 		actionsHead?: import('svelte').Snippet;
 		tail?: import('svelte').Snippet;
+		// Table-scoped batch actions merged into the batch bar next to the child
+		// model's global batchActions. The caller pre-gates them (DetailView only
+		// passes them when the user can change the parent object); this component
+		// only applies the disableDelete/disableEdit filters — never the
+		// child-model permission filter, which would ask the wrong question for
+		// parent_action entries.
+		extraBatchActions?: import('$lib/utils/table').TableBatchAction[];
 	}
 
 	let {
@@ -173,7 +180,8 @@
 		actions,
 		actionsBody,
 		actionsHead,
-		tail
+		tail,
+		extraBatchActions = []
 	}: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
@@ -713,12 +721,21 @@
 		URLModel && model
 			? getBatchActions(URLModel).filter((a) =>
 					a.type === 'delete'
-						? hasPermissionAnywhere(user, `delete_${model.name}`)
-						: hasPermissionAnywhere(user, `change_${model.name}`)
+						? !disableDelete && hasPermissionAnywhere(user, `delete_${model.name}`)
+						: !disableEdit && hasPermissionAnywhere(user, `change_${model.name}`)
 				)
 			: []
 	);
-	const hasBatchActions = $derived(currentBatchActions.length > 0 && deleteForm !== undefined);
+	// Table-scoped extras are pre-gated by the caller (change on the parent);
+	// only the lock/disable filters apply here — the child-model permission
+	// filter above would ask the wrong question for parent_action entries.
+	const extraActions = $derived(
+		extraBatchActions.filter((a) => (a.type === 'delete' ? !disableDelete : !disableEdit))
+	);
+	const allBatchActions = $derived([...currentBatchActions, ...extraActions]);
+	const hasBatchActions = $derived(
+		(currentBatchActions.length > 0 && deleteForm !== undefined) || extraActions.length > 0
+	);
 
 	let selectAllChecked = $derived.by(() => {
 		const pageIds = $rows.filter((r: any) => r.meta?.id).map((r: any) => r.meta.id);
@@ -766,7 +783,7 @@
 		{#if hasBatchActions && selectedIds.size > 0}
 			<BatchActionBar
 				{selectedIds}
-				actions={currentBatchActions}
+				actions={allBatchActions}
 				{URLModel}
 				{handler}
 				onClearSelection={clearSelection}

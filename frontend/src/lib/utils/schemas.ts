@@ -555,6 +555,7 @@ export const EvidenceSchema = z.object({
 	findings_assessments: z
 		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
 		.optional(),
+	security_exceptions: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	timeline_entries: z.string().optional().array().optional(),
 	contracts: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
@@ -693,7 +694,8 @@ export const FeatureFlagsSchema = z.object({
 	security_advisories: z.boolean().optional(),
 	cwes: z.boolean().optional(),
 	object_audit_trail: z.boolean().optional(),
-	custom_portals: z.boolean().optional()
+	custom_portals: z.boolean().optional(),
+	posture_assessments: z.boolean().optional()
 });
 
 export const PortalSettingsSchema = z.object({
@@ -729,6 +731,7 @@ export const SnapshotEditSchema = z.object({
 export const SSOSettingsSchema = z.object({
 	is_enabled: z.boolean().default(false).optional(),
 	force_sso: z.boolean().default(false).optional(),
+	slo_enabled: z.boolean().default(false).optional(),
 	provider: z.string().default('saml'),
 	provider_id: z.string().optional(),
 	provider_name: z.string().optional(),
@@ -1313,8 +1316,10 @@ export const SecurityExceptionSchema = z.object({
 	requirement_assessments: z.string().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
+	evidences: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
-	link: z.string().url().optional().nullable().or(z.literal(''))
+	link: z.string().url().optional().nullable().or(z.literal('')),
+	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
 export const FindingSchema = z.object({
@@ -1327,6 +1332,7 @@ export const FindingSchema = z.object({
 	applied_controls: z.string().uuid().optional().array().optional(),
 	reference_controls: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string(),
+	asset: z.string().optional().nullable(),
 	severity: z.number().default(-1),
 	priority: z.number().optional().nullable(),
 	filtering_labels: z.string().optional().array().optional(),
@@ -1351,7 +1357,24 @@ export const FindingsAssessmentSchema = z.object({
 	observation: z.string().optional().nullable(),
 	category: z.string().default('--'),
 	evidences: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional(),
+	reported_at: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	is_locked: z.boolean().optional().default(false)
+});
+
+export const PostureAssessmentSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
+	status: z.string().optional().nullable(),
+	framework: z.string(),
+	selected_implementation_groups: z.array(z.string().optional()).optional(),
+	history_depth: z.number().int().min(1).optional().default(10),
+	authors: z.array(z.string().optional()).optional(),
+	observation: z.string().optional().nullable(),
+	follow_up_assessment: z.string().optional().nullable(),
+	create_follow_up_assessment: z.boolean().optional().default(true)
 });
 
 export const IncidentSchema = z.object({
@@ -1483,6 +1506,7 @@ export const TaskTemplateSchema = z.object({
 	compliance_assessments: z.string().uuid().optional().array().optional(),
 	risk_assessments: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string().uuid().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional(),
 	objectives: z.string().uuid().optional().array().optional(),
 	incidents: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional(),
@@ -1966,6 +1990,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'security-exceptions': SecurityExceptionSchema,
 	findings: FindingSchema,
 	'findings-assessments': FindingsAssessmentSchema,
+	'posture-assessments': PostureAssessmentSchema,
 	incidents: IncidentSchema,
 	'timeline-entries': TimelineEntrySchema,
 	'dora-incident-reports': DoraIncidentReportSchema,

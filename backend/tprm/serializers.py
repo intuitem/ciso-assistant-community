@@ -91,6 +91,10 @@ class EntityReadSerializer(BaseModelSerializer):
 
 
 class EntityWriteSerializer(BaseModelSerializer):
+    # The default "Main" entity is created built-in (so it can't be deleted) but
+    # is user-owned and fully editable — e.g. renamed to the org's name.
+    BUILTIN_EDITABLE_FIELDS = "__all__"
+
     class Meta:
         model = Entity
         exclude = ["owned_folders"]
@@ -136,6 +140,7 @@ class EntityWriteSerializer(BaseModelSerializer):
 class EntityImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     owned_folders = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+    parent_entity = HashSlugRelatedField(slug_field="pk", read_only=True)
     relationship = serializers.SlugRelatedField(
         slug_field="name", read_only=True, many=True
     )
@@ -143,21 +148,179 @@ class EntityImportExportSerializer(BaseModelSerializer):
     class Meta:
         model = Entity
         fields = [
+            "ref_id",
             "name",
             "description",
             "folder",
+            "is_active",
             "mission",
             "reference_link",
             "owned_folders",
+            "parent_entity",
+            "default_dependency",
+            "default_penetration",
+            "default_maturity",
+            "default_trust",
+            "legal_identifiers",
             "country",
             "currency",
             "dora_entity_type",
             "dora_entity_hierarchy",
             "dora_assets_value",
             "dora_competent_authority",
+            "dora_provider_person_type",
             "created_at",
             "updated_at",
             "relationship",
+        ]
+
+
+class EntityAssessmentImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
+    entity = HashSlugRelatedField(slug_field="pk", read_only=True)
+    compliance_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
+    evidence = HashSlugRelatedField(slug_field="pk", read_only=True)
+    solutions = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+
+    class Meta:
+        model = EntityAssessment
+        # authors / reviewers / representatives are User/Actor relations that
+        # are not part of a domain export, so they are intentionally omitted.
+        fields = [
+            "name",
+            "description",
+            "folder",
+            "perimeter",
+            "version",
+            "status",
+            "observation",
+            "eta",
+            "due_date",
+            "criticality",
+            "penetration",
+            "dependency",
+            "maturity",
+            "trust",
+            "conclusion",
+            "reference_link",
+            "entity",
+            "compliance_assessment",
+            "evidence",
+            "solutions",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class RepresentativeImportExportSerializer(BaseModelSerializer):
+    entity = HashSlugRelatedField(slug_field="pk", read_only=True)
+    email = serializers.EmailField(validators=[], required=False, allow_blank=True)
+
+    class Meta:
+        model = Representative
+        # user (FK to iam.User) is intentionally omitted: users are not exported.
+        fields = [
+            "ref_id",
+            "entity",
+            "email",
+            "first_name",
+            "last_name",
+            "phone",
+            "role",
+            "description",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class SolutionImportExportSerializer(BaseModelSerializer):
+    provider_entity = HashSlugRelatedField(slug_field="pk", read_only=True)
+    recipient_entity = HashSlugRelatedField(slug_field="pk", read_only=True)
+    assets = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+
+    class Meta:
+        model = Solution
+        # owner (M2M to core.Actor) is intentionally omitted.
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "provider_entity",
+            "recipient_entity",
+            "is_active",
+            "reference_link",
+            "criticality",
+            "assets",
+            "dora_ict_service_type",
+            "storage_of_data",
+            "data_location_storage",
+            "data_location_processing",
+            "dora_data_sensitiveness",
+            "dora_reliance_level",
+            "dora_substitutability",
+            "dora_non_substitutability_reason",
+            "dora_has_exit_plan",
+            "dora_reintegration_possibility",
+            "dora_discontinuing_impact",
+            "dora_alternative_providers_identified",
+            "dora_alternative_providers",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class SolutionSubcontractorImportExportSerializer(BaseModelSerializer):
+    solution = HashSlugRelatedField(slug_field="pk", read_only=True)
+    subcontractor = HashSlugRelatedField(slug_field="pk", read_only=True)
+    recipient = HashSlugRelatedField(slug_field="pk", read_only=True)
+
+    class Meta:
+        model = SolutionSubcontractor
+        fields = [
+            "solution",
+            "subcontractor",
+            "recipient",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class ContractImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    provider_entity = HashSlugRelatedField(slug_field="pk", read_only=True)
+    beneficiary_entity = HashSlugRelatedField(slug_field="pk", read_only=True)
+    overarching_contract = HashSlugRelatedField(slug_field="pk", read_only=True)
+    evidences = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+    solutions = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+
+    class Meta:
+        model = Contract
+        # owner (M2M to core.Actor) is intentionally omitted.
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "folder",
+            "provider_entity",
+            "beneficiary_entity",
+            "overarching_contract",
+            "evidences",
+            "solutions",
+            "status",
+            "start_date",
+            "end_date",
+            "dora_contractual_arrangement",
+            "currency",
+            "annual_expense",
+            "termination_reason",
+            "is_intragroup",
+            "dora_exclude",
+            "governing_law_country",
+            "notice_period_entity",
+            "notice_period_provider",
+            "created_at",
+            "updated_at",
         ]
 
 

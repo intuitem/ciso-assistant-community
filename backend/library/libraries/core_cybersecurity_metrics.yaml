@@ -8,7 +8,7 @@ description: A curated set of 25 essential cybersecurity metrics for organizatio
   of all sizes and industries. Covers governance, vulnerabilities, incidents, access,
   awareness, third-party risk, assets, and resilience.
 copyright: intuitem
-version: 1
+version: 2
 publication_date: 2025-12-13
 provider: intuitem
 packager: intuitem
@@ -19,6 +19,10 @@ objects:
     name: Compliance Score
     description: Overall compliance percentage across applicable security frameworks
       and regulatory requirements
+    translations:
+      fr:
+        name: Score de conformité
+        description: Pourcentage global de conformité au regard des référentiels de sécurité et des exigences réglementaires applicables
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -28,6 +32,10 @@ objects:
     name: Security Program Maturity
     description: Overall maturity of the organization's cybersecurity program based
       on people, process, and technology capabilities
+    translations:
+      fr:
+        name: Maturité du programme de sécurité
+        description: Maturité globale du programme de cybersécurité de l'organisation fondée sur les capacités humaines, les processus et les technologies
     category: qualitative
     higher_is_better: true
     choices_definition:
@@ -47,6 +55,10 @@ objects:
     name: Risk Management Maturity
     description: Maturity of risk identification, assessment, treatment, and monitoring
       processes
+    translations:
+      fr:
+        name: Maturité de la gestion des risques
+        description: Maturité des processus d'identification, d'évaluation, de traitement et de surveillance des risques
     category: qualitative
     higher_is_better: true
     choices_definition:
@@ -67,6 +79,10 @@ objects:
     name: Open Critical/High Vulnerabilities
     description: Total count of unresolved critical and high severity vulnerabilities
       across all systems
+    translations:
+      fr:
+        name: Vulnérabilités critiques/élevées ouvertes
+        description: Nombre total de vulnérabilités critiques et de gravité élevée non résolues sur l'ensemble des systèmes
     category: quantitative
     unit: count
     higher_is_better: false
@@ -76,6 +92,10 @@ objects:
     name: Vulnerability Remediation Time
     description: Average number of days to remediate identified vulnerabilities from
       discovery to resolution
+    translations:
+      fr:
+        name: Délai de remédiation des vulnérabilités
+        description: Nombre moyen de jours nécessaires pour remédier aux vulnérabilités identifiées, de leur découverte à leur résolution
     category: quantitative
     unit: days
     higher_is_better: false
@@ -85,6 +105,10 @@ objects:
     name: Patch Coverage
     description: Percentage of systems with security patches applied within defined
       SLA timeframes
+    translations:
+      fr:
+        name: Couverture des correctifs
+        description: Pourcentage de systèmes sur lesquels les correctifs de sécurité ont été appliqués dans les délais SLA définis
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -94,6 +118,10 @@ objects:
     name: Security Incidents Count
     description: Total number of confirmed security incidents during the measurement
       period
+    translations:
+      fr:
+        name: Nombre d'incidents de sécurité
+        description: Nombre total d'incidents de sécurité confirmés au cours de la période de mesure
     category: quantitative
     unit: count
     higher_is_better: false
@@ -103,6 +131,10 @@ objects:
     name: Mean Time to Detect
     description: Average time in hours from when a security incident occurs to when
       it is detected
+    translations:
+      fr:
+        name: Temps moyen de détection
+        description: Temps moyen en heures entre la survenue d'un incident de sécurité et sa détection
     category: quantitative
     unit: hours
     higher_is_better: false
@@ -112,6 +144,10 @@ objects:
     name: Mean Time to Respond
     description: Average time in hours from incident detection to initial containment
       response
+    translations:
+      fr:
+        name: Temps moyen de réponse
+        description: Temps moyen en heures entre la détection d'un incident et la réponse initiale de confinement
     category: quantitative
     unit: hours
     higher_is_better: false
@@ -121,6 +157,10 @@ objects:
     name: Incident Response Readiness
     description: Assessment of the organization's preparedness to detect, respond
       to, and recover from security incidents
+    translations:
+      fr:
+        name: Préparation à la réponse aux incidents
+        description: Évaluation de la capacité de l'organisation à détecter les incidents de sécurité, à y répondre et à s'en remettre
     category: qualitative
     higher_is_better: true
     choices_definition:
@@ -141,6 +181,10 @@ objects:
     name: MFA Adoption Rate
     description: Percentage of user accounts and critical systems protected by multi-factor
       authentication
+    translations:
+      fr:
+        name: Taux d'adoption de l'authentification multi-facteurs
+        description: Pourcentage de comptes utilisateurs et de systèmes critiques protégés par une authentification multi-facteurs
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -150,6 +194,10 @@ objects:
     name: Privileged Access Coverage
     description: Percentage of privileged accounts managed through privileged access
       management (PAM) controls
+    translations:
+      fr:
+        name: Couverture des accès privilégiés
+        description: Pourcentage de comptes privilégiés gérés au moyen de contrôles de gestion des accès privilégiés (PAM)
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -159,6 +207,10 @@ objects:
     name: Dormant Account Rate
     description: Percentage of user accounts that have been inactive beyond the defined
       threshold and not yet disabled
+    translations:
+      fr:
+        name: Taux de comptes inactifs
+        description: Pourcentage de comptes utilisateurs inactifs au-delà du seuil défini et qui n'ont pas encore été désactivés
     category: quantitative
     unit: percentage
     higher_is_better: false
@@ -168,6 +220,10 @@ objects:
     name: Security Training Completion
     description: Percentage of employees who have completed mandatory security awareness
       training within the required timeframe
+    translations:
+      fr:
+        name: Achèvement de la formation à la sécurité
+        description: Pourcentage d'employés ayant terminé la formation obligatoire de sensibilisation à la sécurité dans le délai requis
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -177,6 +233,10 @@ objects:
     name: Phishing Click Rate
     description: Percentage of employees who clicked on simulated phishing emails
       during awareness testing campaigns
+    translations:
+      fr:
+        name: Taux de clics d'hameçonnage
+        description: Pourcentage d'employés ayant cliqué sur des e-mails d'hameçonnage simulés lors des campagnes de test de sensibilisation
     category: quantitative
     unit: percentage
     higher_is_better: false
@@ -186,6 +246,10 @@ objects:
     name: Vendor Assessment Coverage
     description: Percentage of critical and high-risk vendors that have completed
       security assessments within the required period
+    translations:
+      fr:
+        name: Couverture des évaluations des fournisseurs
+        description: Pourcentage de fournisseurs critiques et à haut risque ayant réalisé les évaluations de sécurité dans la période requise
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -195,6 +259,10 @@ objects:
     name: Asset Inventory Coverage
     description: Percentage of IT assets (hardware, software, cloud resources) documented
       in the asset inventory
+    translations:
+      fr:
+        name: Couverture de l'inventaire des actifs
+        description: Pourcentage d'actifs informatiques (matériel, logiciels, ressources cloud) documentés dans l'inventaire des actifs
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -204,6 +272,10 @@ objects:
     name: Data Protection Maturity
     description: Maturity of data classification, encryption, data loss prevention,
       and privacy controls
+    translations:
+      fr:
+        name: Maturité de la protection des données
+        description: Maturité de la classification des données, du chiffrement, de la prévention des pertes de données et des contrôles de protection de la vie privée
     category: qualitative
     higher_is_better: true
     choices_definition:
@@ -223,6 +295,10 @@ objects:
     name: Security Monitoring Maturity
     description: Maturity of security monitoring, logging, SIEM capabilities, and
       threat detection
+    translations:
+      fr:
+        name: Maturité de la surveillance de la sécurité
+        description: Maturité de la surveillance de la sécurité, de la journalisation, des capacités SIEM et de la détection des menaces
     category: qualitative
     higher_is_better: true
     choices_definition:
@@ -243,6 +319,10 @@ objects:
     name: Backup Coverage
     description: Percentage of critical systems and data with regular automated backups
       configured
+    translations:
+      fr:
+        name: Couverture des sauvegardes
+        description: Pourcentage de systèmes critiques et de données pour lesquels des sauvegardes automatisées régulières sont configurées
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -252,6 +332,10 @@ objects:
     name: Immutable Backup Coverage
     description: Percentage of critical systems with air-gapped or immutable backups
       protected against ransomware
+    translations:
+      fr:
+        name: Couverture des sauvegardes immuables
+        description: Pourcentage de systèmes critiques disposant de sauvegardes isolées ou immuables protégées contre les rançongiciels
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -261,6 +345,10 @@ objects:
     name: Backup Test Success Rate
     description: Percentage of backup restoration tests completed successfully within
       defined RTO
+    translations:
+      fr:
+        name: Taux de réussite des tests de sauvegarde
+        description: Pourcentage de tests de restauration des sauvegardes réalisés avec succès dans le délai RTO défini
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -270,6 +358,10 @@ objects:
     name: Recovery Objectives Compliance
     description: Percentage of critical systems meeting their defined Recovery Time
       Objective (RTO) and Recovery Point Objective (RPO)
+    translations:
+      fr:
+        name: Conformité aux objectifs de reprise
+        description: Pourcentage de systèmes critiques respectant leurs objectifs de délai de reprise (RTO) et de point de reprise (RPO) définis
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -279,6 +371,10 @@ objects:
     name: BCP/DRP Coverage
     description: Percentage of critical business processes with documented and tested
       business continuity and disaster recovery plans
+    translations:
+      fr:
+        name: Couverture du PCA/PRA
+        description: Pourcentage de processus métiers critiques disposant de plans de continuité d'activité et de reprise après sinistre documentés et testés
     category: quantitative
     unit: percentage
     higher_is_better: true
@@ -288,6 +384,10 @@ objects:
     name: Mean Time to Recovery
     description: Average time in hours to fully restore critical business operations
       after a major incident or disaster
+    translations:
+      fr:
+        name: Temps moyen de reprise
+        description: Temps moyen en heures nécessaire pour rétablir complètement les opérations métiers critiques après un incident majeur ou un sinistre
     category: quantitative
     unit: hours
     higher_is_better: false
