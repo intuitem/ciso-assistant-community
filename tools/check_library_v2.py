@@ -474,7 +474,7 @@ FRAMEWORK_CONTENT_COLUMN_CONSTRAINTS: Mapping[ContentColumn, ContentColumnConstr
     FrameworkContentColumns.DEPTH: ContentColumnConstraints(integer_only=True, min_value=1),
     FrameworkContentColumns.REF_ID: ContentColumnConstraints(unique=True),
     FrameworkContentColumns.NAME: ContentColumnConstraints(max_length=200),
-    FrameworkContentColumns.ASSESSABLE: ContentColumnConstraints(allowed_values=("x")),
+    FrameworkContentColumns.ASSESSABLE: ContentColumnConstraints(allowed_values=("x", "X")),
     FrameworkContentColumns.IMPORTANCE: ContentColumnConstraints(
         allowed_values=("mandatory", "recommended", "nice_to_have"),
     ),
@@ -520,7 +520,7 @@ RISK_MATRIX_CONTENT_COLUMN_CONSTRAINTS: Mapping[ContentColumn, ContentColumnCons
 # [CONTENT] Implementation Groups column constraints
 IMPLEMENTATION_GROUPS_CONTENT_COLUMN_CONSTRAINTS: Mapping[ContentColumn, ContentColumnConstraints] = MappingProxyType({
     ImplementationGroupsContentColumns.REF_ID: ContentColumnConstraints(unique=True),
-    ImplementationGroupsContentColumns.DEFAULT_SELECTED: ContentColumnConstraints(allowed_values=("x")),
+    ImplementationGroupsContentColumns.DEFAULT_SELECTED: ContentColumnConstraints(allowed_values=("x", "X")),
 })
 
 
@@ -1846,10 +1846,11 @@ def validate_extra_locales_in_content(df: pd.DataFrame, sheet_name: str, context
         
         # In framework sheets, translated questions must contain the same number of elements as the base "questions" value on the same row.
         if content_sheet_type == MetaTypes.FRAMEWORK.value and base_col == FrameworkContentColumns.QUESTIONS.value:
+            questions_constraints = CONTENT_SHEET_SCHEMAS[MetaTypes.FRAMEWORK].column_constraints[FrameworkContentColumns.QUESTIONS]
             validate_cell_line_count_alignment(df, base_col, col, sheet_name, context,
                 cmp_can_be_empty=True,
-                ref_line_break_indicator=CommonLineBreakIndicator.PIPE,
-                cmp_line_break_indicator=CommonLineBreakIndicator.PIPE,
+                ref_line_break_indicator=questions_constraints.line_break_indicator,
+                cmp_line_break_indicator=questions_constraints.line_break_indicator,
                 allow_single_cmp=False,
             )
 
@@ -2038,7 +2039,7 @@ def _implementation_groups_check_unused_default_ids_in_frameworks(wb: Workbook, 
 def validate_allowed_column_values(
     df: pd.DataFrame,
     column_name: ContentColumn | str,
-    allowed_values: List[str],
+    allowed_values: Sequence[str],
     sheet_name: str,
     context: str = None,
     warn_only: bool = False,
@@ -3391,7 +3392,7 @@ def get_yaml_section_from_files(yaml_files: List[str], section_type: YAMLSection
 
 
 # Validate paired minimum and maximum columns and ensure each minimum is less than or equal to its maximum.
-def validate_min_max_columns(df: pd.DataFrame, min_column: ContentColumn | str, max_column: ContentColumn | str, sheet_name: str, context: str):
+def validate_min_max_columns(df: pd.DataFrame, min_column: ContentColumn | str, max_column: ContentColumn | str, sheet_name: str, context: str, min_column_constraints: ContentColumnConstraints | None = None, max_column_constraints: ContentColumnConstraints | None = None):
 
     if isinstance(min_column, ContentColumn):
         min_column = min_column.value
@@ -3404,8 +3405,11 @@ def validate_min_max_columns(df: pd.DataFrame, min_column: ContentColumn | str, 
     if min_column not in df.columns:
         return
 
-    validate_integer_value(df, sheet_name, min_column, context, value_name=min_column, min=0)
-    validate_integer_value(df, sheet_name, max_column, context, value_name=max_column, min=0)
+    min_column_min = min_column_constraints.min_value if min_column_constraints and min_column_constraints.min_value is not None else 0
+    max_column_min = max_column_constraints.min_value if max_column_constraints and max_column_constraints.min_value is not None else 0
+
+    validate_integer_value(df, sheet_name, min_column, context, value_name=min_column, min=min_column_min)
+    validate_integer_value(df, sheet_name, max_column, context, value_name=max_column, min=max_column_min)
 
     incomplete_rows = []
     invalid_ranges = []
@@ -3459,20 +3463,20 @@ def _framework_validate_depth_consistency(df: pd.DataFrame, sheet_name: str):
 
     first_row, first_depth = depths[0]
     if first_depth != 1:
-        errors.append(f'Row #{first_row}: The first "depth" value must be 1. Found \"{first_depth}\" instead.')
+        errors.append(f'Row #{first_row}: The first "{FrameworkContentColumns.DEPTH.value}" value must be 1. Found \"{first_depth}\" instead.')
 
     for (previous_row, previous_depth), (current_row, current_depth) in zip(depths, depths[1:]):
         if current_depth > previous_depth + 1:
             errors.append(
-                f'Row #{current_row}: "depth" ({current_depth}) cannot follow Row #{previous_row} '
-                f'with "depth" ({previous_depth}). Maximum allowed value is "{previous_depth + 1}".'
+                f'Row #{current_row}: "{FrameworkContentColumns.DEPTH.value}" ({current_depth}) cannot follow Row #{previous_row} '
+                f'with "{FrameworkContentColumns.DEPTH.value}" ({previous_depth}). Maximum allowed value is "{previous_depth + 1}".'
             )
 
     if errors:
         raise ValueError(
-            f'({fct_name}) [{sheet_name}] Inconsistent "depth" values:\n   - '
+            f'({fct_name}) [{sheet_name}] Inconsistent "{FrameworkContentColumns.DEPTH.value}" values:\n   - '
             + "\n   - ".join(errors)
-            + '\n> 💡 Tip: Start with "depth" = 1, then keep the same depth, increase it by 1, or use any lower positive depth.'
+            + f'\n> 💡 Tip: Start with "{FrameworkContentColumns.DEPTH.value}" = 1, then keep the same depth, increase it by 1, or use any lower positive depth.'
         )
 
 
@@ -3481,8 +3485,20 @@ def _framework_validate_depth_consistency(df: pd.DataFrame, sheet_name: str):
 def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
+
+    # Get required, optional, and translatable columns, along with validation constraints
     content_type = MetaTypes.FRAMEWORK
     schema = CONTENT_SHEET_SCHEMAS[content_type]
+    column_constraints = schema.column_constraints
+
+    name_constraints = column_constraints[FrameworkContentColumns.NAME]
+    assessable_constraints = column_constraints[FrameworkContentColumns.ASSESSABLE]
+    importance_constraints = column_constraints[FrameworkContentColumns.IMPORTANCE]
+    weight_constraints = column_constraints[FrameworkContentColumns.WEIGHT]
+    min_score_constraints = column_constraints[FrameworkContentColumns.MIN_SCORE]
+    max_score_constraints = column_constraints[FrameworkContentColumns.MAX_SCORE]
+    questions_constraints = column_constraints[FrameworkContentColumns.QUESTIONS]
+    condition_constraints = column_constraints[FrameworkContentColumns.CONDITION]
 
     validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, schema.optional_columns, fct_name, verbose, ctx)
@@ -3497,23 +3513,22 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, 
     # Check uniqueness of some column values
     validate_unique_column_values(df, [FrameworkContentColumns.REF_ID], sheet_name, fct_name, ctx=ctx)
 
-    # Additional rule: Check that "name" values do not exceed 200 characters (in order to avoid issues with PostgreSQL DBs)
-    validate_column_max_length(df, FrameworkContentColumns.NAME, 200, sheet_name, fct_name)
+    # Additional rule: Check that "name" values do not exceed the configured character limit (in order to avoid issues with PostgreSQL DBs)
+    validate_column_max_length(df, FrameworkContentColumns.NAME, name_constraints.max_length, sheet_name, fct_name)
     
     # Enforce presence of "assessable" column (even if values can be empty)
     if FrameworkContentColumns.ASSESSABLE.value not in df.columns:
-        raise ValueError(f"[{fct_name}] [{sheet_name}] Missing required column \"assessable\"")
+        raise ValueError(f"[{fct_name}] [{sheet_name}] Missing required column \"{FrameworkContentColumns.ASSESSABLE.value}\"")
     
     # Check "assessable" values
-    assessable_values = ["x", "X"]
-    validate_allowed_column_values(df, FrameworkContentColumns.ASSESSABLE, assessable_values, sheet_name, fct_name, ctx=ctx)
+    validate_allowed_column_values(df, FrameworkContentColumns.ASSESSABLE, assessable_constraints.allowed_values, sheet_name, fct_name, ctx=ctx)
 
 
     # Additional rule: for non-empty rows, at least "ref_id", "name" or "description" must be filled
     _framework_validate_minimum_fields_and_ref_id(df, sheet_name)
     
     # Ensure that the number of "questions" and "answer" entries match per row (1 or same count), or both are empty
-    validate_cell_line_count_alignment(df, FrameworkContentColumns.QUESTIONS, FrameworkContentColumns.ANSWER, sheet_name, fct_name, ref_line_break_indicator=CommonLineBreakIndicator.PIPE)
+    validate_cell_line_count_alignment(df, FrameworkContentColumns.QUESTIONS, FrameworkContentColumns.ANSWER, sheet_name, fct_name, ref_line_break_indicator=questions_constraints.line_break_indicator)
 
     # Validate columns that reference other sheets (only if they contain non-empty values)
     for column in [FrameworkContentColumns.IMPLEMENTATION_GROUPS.value, FrameworkContentColumns.ANSWER.value]:
@@ -3529,30 +3544,26 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, 
             if not non_empty_values[non_empty_values != ""].empty:
                 _framework_validate_framework_column_urns(wb, df, column, sheet_name, external_refs, verbose, ctx)
 
-    # Special values
-    importance_values = ["mandatory", "recommended", "nice_to_have"]
-    condition_values = ["any", "all", "/"]
-
     # Check if values in "importance" columns are valid
-    validate_allowed_column_values(df, FrameworkContentColumns.IMPORTANCE, importance_values, sheet_name, fct_name, ctx=ctx)
+    validate_allowed_column_values(df, FrameworkContentColumns.IMPORTANCE, importance_constraints.allowed_values, sheet_name, fct_name, ctx=ctx)
     
     # Check if values in "condition" columns are valid
-    validate_allowed_column_values(df, FrameworkContentColumns.CONDITION, condition_values, sheet_name, fct_name, ctx=ctx, split_regex=CommonSeparatorRegex.LF)
+    validate_allowed_column_values(df, FrameworkContentColumns.CONDITION, condition_constraints.allowed_values, sheet_name, fct_name, ctx=ctx, split_regex=condition_constraints.split_regex)
     
     # Check if the number of lines in cells of "questions" are coherent with lines in cells of "answer"
-    validate_cell_line_count_alignment(df, FrameworkContentColumns.QUESTIONS, FrameworkContentColumns.DEPENDS_ON, sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=CommonLineBreakIndicator.PIPE)
+    validate_cell_line_count_alignment(df, FrameworkContentColumns.QUESTIONS, FrameworkContentColumns.DEPENDS_ON, sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=questions_constraints.line_break_indicator)
     
     # Check if the number of lines in cells of "questions" are coherent with lines in cells of "depends_on"
-    validate_cell_line_count_alignment(df, FrameworkContentColumns.QUESTIONS, FrameworkContentColumns.CONDITION, sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=CommonLineBreakIndicator.PIPE)
+    validate_cell_line_count_alignment(df, FrameworkContentColumns.QUESTIONS, FrameworkContentColumns.CONDITION, sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=questions_constraints.line_break_indicator)
     
     # Check if "condition" exists when "depends_on" is defined
     validate_cell_line_count_alignment(df, FrameworkContentColumns.DEPENDS_ON, FrameworkContentColumns.CONDITION, sheet_name, fct_name)
     
     # Check if values in "weight" columns are valid
-    validate_integer_value(df, sheet_name, FrameworkContentColumns.WEIGHT, fct_name, value_name=FrameworkContentColumns.WEIGHT, positive_only=True)
+    validate_integer_value(df, sheet_name, FrameworkContentColumns.WEIGHT, fct_name, value_name=FrameworkContentColumns.WEIGHT, min=weight_constraints.min_value, max=weight_constraints.max_value)
     
     # Validate "min_score" and "max_score" values if columns are present
-    validate_min_max_columns(df, FrameworkContentColumns.MIN_SCORE, FrameworkContentColumns.MAX_SCORE, sheet_name, fct_name)
+    validate_min_max_columns(df, FrameworkContentColumns.MIN_SCORE, FrameworkContentColumns.MAX_SCORE, sheet_name, fct_name, min_score_constraints, max_score_constraints)
 
 
     # Extra locales
@@ -3565,6 +3576,8 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, 
 def validate_threats_content(df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
+
+    # Get required, optional, and translatable columns, along with validation constraints
     content_type = MetaTypes.THREATS
     schema = CONTENT_SHEET_SCHEMAS[content_type]
 
@@ -3584,12 +3597,14 @@ def validate_threats_content(df: pd.DataFrame, sheet_name: str, verbose: bool = 
 def validate_reference_controls_content(df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
+
+    # Get required, optional, and translatable columns, along with validation constraints
     content_type = MetaTypes.REFERENCE_CONTROLS
     schema = CONTENT_SHEET_SCHEMAS[content_type]
+    column_constraints = schema.column_constraints
 
-    # Special values
-    category_values = ["policy", "process", "technical", "physical", "procedure"]
-    csf_function_values = ["govern", "identify", "protect", "detect", "respond", "recover"]
+    category_constraints = column_constraints[ReferenceControlsContentColumns.CATEGORY]
+    csf_function_constraints = column_constraints[ReferenceControlsContentColumns.CSF_FUNCTION]
 
     validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, schema.optional_columns, fct_name, verbose, ctx)
@@ -3598,8 +3613,8 @@ def validate_reference_controls_content(df: pd.DataFrame, sheet_name: str, verbo
     validate_unique_column_values(df, [ReferenceControlsContentColumns.REF_ID], sheet_name, fct_name, ctx=ctx)
 
     # Check if values in "category" and "csf_function" columns are valid
-    validate_allowed_column_values(df, ReferenceControlsContentColumns.CATEGORY, category_values, sheet_name, fct_name, ctx=ctx)
-    validate_allowed_column_values(df, ReferenceControlsContentColumns.CSF_FUNCTION, csf_function_values, sheet_name, fct_name, ctx=ctx)
+    validate_allowed_column_values(df, ReferenceControlsContentColumns.CATEGORY, category_constraints.allowed_values, sheet_name, fct_name, ctx=ctx)
+    validate_allowed_column_values(df, ReferenceControlsContentColumns.CSF_FUNCTION, csf_function_constraints.allowed_values, sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
@@ -3611,17 +3626,19 @@ def validate_reference_controls_content(df: pd.DataFrame, sheet_name: str, verbo
 def validate_risk_matrix_content(df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
+
+    # Get required, optional, and translatable columns, along with validation constraints
     content_type = MetaTypes.RISK_MATRIX
     schema = CONTENT_SHEET_SCHEMAS[content_type]
+    column_constraints = schema.column_constraints
 
-    # Special values
-    type_values = ["probability", "impact", "risk"]
+    type_constraints = column_constraints[RiskMatrixContentColumns.TYPE]
 
     validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, schema.optional_columns, fct_name, verbose, ctx)
 
     # Check if values in "type" column are valid
-    validate_allowed_column_values(df, RiskMatrixContentColumns.TYPE, type_values, sheet_name, fct_name, ctx=ctx)
+    validate_allowed_column_values(df, RiskMatrixContentColumns.TYPE, type_constraints.allowed_values, sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
@@ -3642,8 +3659,13 @@ def validate_risk_matrix_content(df: pd.DataFrame, sheet_name: str, verbose: boo
 def validate_implementation_groups_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
+
+    # Get required, optional, and translatable columns, along with validation constraints
     content_type = MetaTypes.IMPLEMENTATION_GROUPS
     schema = CONTENT_SHEET_SCHEMAS[content_type]
+    column_constraints = schema.column_constraints
+
+    default_selected_constraints = column_constraints[ImplementationGroupsContentColumns.DEFAULT_SELECTED]
 
     validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, schema.optional_columns, fct_name, verbose, ctx)
@@ -3652,8 +3674,7 @@ def validate_implementation_groups_content(wb: Workbook, df: pd.DataFrame, sheet
     validate_unique_column_values(df, [ImplementationGroupsContentColumns.REF_ID], sheet_name, fct_name, ctx=ctx)
     
     # Check "default_selected" values
-    default_selected_values = ["x", "X"]
-    validate_allowed_column_values(df, ImplementationGroupsContentColumns.DEFAULT_SELECTED, default_selected_values, sheet_name, fct_name, ctx=ctx)
+    validate_allowed_column_values(df, ImplementationGroupsContentColumns.DEFAULT_SELECTED, default_selected_constraints.allowed_values, sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
@@ -3674,12 +3695,14 @@ def validate_implementation_groups_content(wb: Workbook, df: pd.DataFrame, sheet
 def validate_requirement_mapping_set_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
+
+    # Get required, optional, and translatable columns, along with validation constraints
     content_type = MetaTypes.REQUIREMENT_MAPPING_SET
     schema = CONTENT_SHEET_SCHEMAS[content_type]
-    
-    # Special values
-    relationship_values = ["subset", "intersect", "equal", "superset", "not_related"]
-    rationale_values = ["syntactic", "semantic", "functional"]
+    column_constraints = schema.column_constraints
+
+    relationship_constraints = column_constraints[RequirementMappingSetContentColumns.RELATIONSHIP]
+    rationale_constraints = column_constraints[RequirementMappingSetContentColumns.RATIONALE]
 
     validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, schema.optional_columns, fct_name, verbose, ctx)
@@ -3691,8 +3714,8 @@ def validate_requirement_mapping_set_content(wb: Workbook, df: pd.DataFrame, she
     _req_map_set_validate_unique_mappings(df, sheet_name, ctx=ctx)
 
     # Check if values in "relationship" and "rationale" columns are valid
-    validate_allowed_column_values(df, RequirementMappingSetContentColumns.RELATIONSHIP, relationship_values, sheet_name, fct_name, ctx=ctx)
-    validate_allowed_column_values(df, RequirementMappingSetContentColumns.RATIONALE, rationale_values, sheet_name, fct_name, ctx=ctx)
+    validate_allowed_column_values(df, RequirementMappingSetContentColumns.RELATIONSHIP, relationship_constraints.allowed_values, sheet_name, fct_name, ctx=ctx)
+    validate_allowed_column_values(df, RequirementMappingSetContentColumns.RATIONALE, rationale_constraints.allowed_values, sheet_name, fct_name, ctx=ctx)
 
     # Check mapping validity using the "source" and "target" sheets
     _req_map_set_validate_mapping_node_ids_against_sheets(wb, df, sheet_name, fct_name, ctx, verbose)
@@ -3704,14 +3727,19 @@ def validate_requirement_mapping_set_content(wb: Workbook, df: pd.DataFrame, she
 def validate_scores_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
+
+    # Get required, optional, and translatable columns, along with validation constraints
     content_type = MetaTypes.SCORES
     schema = CONTENT_SHEET_SCHEMAS[content_type]
+    column_constraints = schema.column_constraints
+
+    score_constraints = column_constraints[ScoresContentColumns.SCORE]
 
     validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, schema.optional_columns, fct_name, verbose, ctx)
 
     # Validate each "score" value is a non-negative integer
-    validate_integer_value(df, sheet_name, ScoresContentColumns.SCORE, fct_name, value_name=ScoresContentColumns.SCORE, min=0)
+    validate_integer_value(df, sheet_name, ScoresContentColumns.SCORE, fct_name, value_name=ScoresContentColumns.SCORE, min=score_constraints.min_value, max=score_constraints.max_value)
 
     # Check uniqueness of some column values
     validate_unique_column_values(df, [ScoresContentColumns.SCORE], sheet_name, fct_name, ctx=ctx)
@@ -3729,11 +3757,13 @@ def validate_scores_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, ver
 def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
+
+    # Get required, optional, and translatable columns, along with validation constraints
     content_type = MetaTypes.ANSWERS
     schema = CONTENT_SHEET_SCHEMAS[content_type]
+    column_constraints = schema.column_constraints
 
-    # Special values
-    question_type_values = ["unique_choice", "multiple_choice", "text", "date"]
+    question_type_constraints = column_constraints[AnswersContentColumns.QUESTION_TYPE]
 
     validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, schema.optional_columns, fct_name, verbose, ctx)
@@ -3742,7 +3772,7 @@ def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, ve
     validate_unique_column_values(df, [AnswersContentColumns.ID], sheet_name, fct_name, ctx=ctx)
 
     # Check if values in "question_type" column are valid
-    validate_allowed_column_values(df, AnswersContentColumns.QUESTION_TYPE, question_type_values, sheet_name, fct_name, ctx=ctx)
+    validate_allowed_column_values(df, AnswersContentColumns.QUESTION_TYPE, question_type_constraints.allowed_values, sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
@@ -3765,6 +3795,8 @@ def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, ve
 def validate_urn_prefix_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
+
+    # Get required, optional, and translatable columns, along with validation constraints
     content_type = MetaTypes.URN_PREFIX
     schema = CONTENT_SHEET_SCHEMAS[content_type]
 
