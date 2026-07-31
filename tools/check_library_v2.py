@@ -123,7 +123,8 @@ class ConsoleContext: # Maybe rename it to "Logger" and create a "Context/Config
 ##### Regex & Characters for Formatting  #####
 class CommonSeparatorRegex(Enum):
     LF = r"\n+"
-    SPACE_COMMA_LF = r"[\s,\n]+"
+    COMMA_LF = r"[,\n]+"
+    SPACE_COMMA_LF = r"[\s,]+"
 
 class CommonLineBreakIndicator(Enum):
     PIPE = "|"
@@ -745,10 +746,15 @@ class URNMetadataFormat(Enum):
 # MISC
 # ─────────────────────────────────────────────────────────────
 
+# Convert a sequence of Enum members or strings into a tuple of string values.
+def enum_sequence_to_strings(values: Sequence[Enum | str]) -> tuple[str, ...]:
+    return tuple(str(value.value) if isinstance(value, Enum) else value for value in values)
+
+
 def check_file_validity(files: List[str] | str, filetype_name: str, valid_file_extensions: Tuple[str] = None, file_context: str = None):
     
     fct_name = get_current_fct_name()
-    
+
     if type(files) == str:
         files = [files]
 
@@ -883,7 +889,10 @@ def get_meta_value(df: pd.DataFrame, key_name: MetaKey | str, sheet_name: str, r
 
 
 # Return a list of non-empty, stripped string values from a specified column in a DataFrame.
-def get_non_empty_column_values(df: pd.DataFrame, column_name: str) -> List[str]:
+def get_non_empty_column_values(df: pd.DataFrame, column_name: ContentColumn | str) -> List[str]:
+
+    if isinstance(column_name, ContentColumn):
+        column_name = column_name.value
 
     if column_name not in df.columns:
         raise ValueError(f"Column \"{column_name}\" not found in DataFrame")
@@ -1039,10 +1048,10 @@ def validate_labels(labels_value: str, context: str, row: int):
 def validate_integer_value(
     value_or_df: pd.DataFrame | str | int | float,
     sheet_name: str = None,
-    column_name: str = None,
+    column_name: ContentColumn | str = None,
     context: str = None,
     row: int = None,
-    value_name: str = "value",
+    value_name: ContentColumn | str = "value",
     positive_only: bool = False,
     min: int = None,
     max: int = None,
@@ -1091,6 +1100,11 @@ def validate_integer_value(
 
     Collects all invalid values and raises ONE ValueError at the end.
     """
+
+    if isinstance(column_name, ContentColumn):
+        column_name = column_name.value
+    if isinstance(value_name, ContentColumn):
+        value_name = value_name.value
 
     # --- resolve values list ---
     if column_name is not None:
@@ -1623,10 +1637,17 @@ def validate_urn_prefix_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = 
 
 
 # Global Checks
-def validate_content_sheet(df: pd.DataFrame, sheet_name: str, required_columns: List[str], context: str):
+def validate_content_sheet(df: pd.DataFrame, sheet_name: str, required_columns: Sequence[ContentColumn | str], context: str):
+
+    required_columns = enum_sequence_to_strings(required_columns)
     
     required_values_missing = []
     invalid_ref_ids = []
+    # Created a tuple on purpose, as some "ref_id" columns might be renamed in the future
+    reference_id_columns = {
+        FrameworkContentColumns.REF_ID.value, ThreatsContentColumns.REF_ID.value, ReferenceControlsContentColumns.REF_ID.value,
+        RiskMatrixContentColumns.ID.value, ImplementationGroupsContentColumns.REF_ID.value, AnswersContentColumns.ID.value,
+    }
     
     if required_columns:
         # Check that all required columns are present
@@ -1645,7 +1666,7 @@ def validate_content_sheet(df: pd.DataFrame, sheet_name: str, required_columns: 
                     required_values_missing.append(idx)
                     # raise ValueError(f"({context}) [{sheet_name}] Row #{idx + 2}: Required value missing in column \"{col}\"")
 
-                if col in ["ref_id", "id"]:
+                if col in reference_id_columns:
                     try:
                         validate_ref_id(str(value), context, idx)
                     except Exception as e:
@@ -1664,7 +1685,9 @@ def validate_content_sheet(df: pd.DataFrame, sheet_name: str, required_columns: 
                 )
 
 
-def validate_optional_columns_content_sheet(df: pd.DataFrame, sheet_name: str, optional_columns: List[str], context: str, verbose: bool = False, ctx: ConsoleContext = None):
+def validate_optional_columns_content_sheet(df: pd.DataFrame, sheet_name: str, optional_columns: Sequence[ContentColumn | str], context: str, verbose: bool = False, ctx: ConsoleContext = None):
+
+    optional_columns = enum_sequence_to_strings(optional_columns)
     
     for col in optional_columns:
         
@@ -1692,9 +1715,10 @@ def validate_optional_columns_content_sheet(df: pd.DataFrame, sheet_name: str, o
 
 
 # Ensure that either all columns from the given list are present or none of them are.
-def validate_columns_presence_together(df: pd.DataFrame, column_names: List[str], sheet_name: str, context: str = None):
+def validate_columns_presence_together(df: pd.DataFrame, column_names: Sequence[ContentColumn | str], sheet_name: str, context: str = None):
 
     context = context or "validate_columns_presence_together"
+    column_names = enum_sequence_to_strings(column_names)
     present_columns = [column for column in column_names if column in df.columns]
 
     if not present_columns or len(present_columns) == len(column_names):
@@ -1710,9 +1734,11 @@ def validate_columns_presence_together(df: pd.DataFrame, column_names: List[str]
 
 
 # Ensure that each non-empty cell in a column does not exceed the specified character limit.
-def validate_column_max_length(df: pd.DataFrame, column_name: str, max_length: int, sheet_name: str, context: str = None):
+def validate_column_max_length(df: pd.DataFrame, column_name: ContentColumn | str, max_length: int, sheet_name: str, context: str = None):
 
     context = context or "validate_column_max_length"
+    if isinstance(column_name, ContentColumn):
+        column_name = column_name.value
 
     if column_name not in df.columns:
         return
@@ -1736,9 +1762,10 @@ def validate_column_max_length(df: pd.DataFrame, column_name: str, max_length: i
 
 
 # Check that values in each column from the given list are unique. Raise error or emit warning if duplicates are found
-def validate_unique_column_values(df: pd.DataFrame, column_names: List[str], sheet_name: str, context: str = None, warn_only: bool = False, ctx: ConsoleContext = None):
+def validate_unique_column_values(df: pd.DataFrame, column_names: Sequence[ContentColumn | str], sheet_name: str, context: str = None, warn_only: bool = False, ctx: ConsoleContext = None):
 
     context = context or "validate_unique_column_values"
+    column_names = enum_sequence_to_strings(column_names)
 
     for column_name in column_names:
         if column_name not in df.columns:
@@ -1813,7 +1840,7 @@ def validate_extra_locales_in_content(df: pd.DataFrame, sheet_name: str, context
         content_sheet_type = get_content_sheet_type(wb, sheet_name, context) if wb is not None else None
         
         # In framework sheets, translated questions must contain the same number of elements as the base "questions" value on the same row.
-        if content_sheet_type == MetaTypes.FRAMEWORK.value and base_col == "questions":
+        if content_sheet_type == MetaTypes.FRAMEWORK.value and base_col == FrameworkContentColumns.QUESTIONS.value:
             validate_cell_line_count_alignment(df, base_col, col, sheet_name, context,
                 cmp_can_be_empty=True,
                 ref_line_break_indicator=CommonLineBreakIndicator.PIPE,
@@ -1825,7 +1852,7 @@ def validate_extra_locales_in_content(df: pd.DataFrame, sheet_name: str, context
 # Return the name of a "_content" sheet by removing the trailing "_content" in the given sheet name.
 def get_content_sheet_base_name(content_sheet_name: str) -> str:
     if not content_sheet_name.endswith(SheetTypes.CONTENT.value):
-        raise ValueError(f"Invalid sheet name: \"{content_sheet_name}\" does not end with \"_content\"")
+        raise ValueError(f"Invalid sheet name: \"{content_sheet_name}\" does not end with \"{SheetTypes.CONTENT.value}\"")
 
     base_name = re.sub(r'_content$', '', content_sheet_name)
     return base_name
@@ -1844,7 +1871,7 @@ def get_content_sheet_type(wb: Workbook, content_sheet_name: str, context: str) 
     meta_sheets_with_type = get_meta_sheets_with_type(wb, context)
 
     if meta_sheet_name not in meta_sheets_with_type:
-        raise ValueError(f"({context}) [{meta_sheet_name}] Missing or empty \"type\" field in meta sheet")
+        raise ValueError(f"({context}) [{meta_sheet_name}] Missing or empty \"{MandatoryMetaKeys.TYPE.value}\" field in meta sheet")
 
     return meta_sheets_with_type[meta_sheet_name]
 
@@ -1904,7 +1931,7 @@ def check_content_sheet_usage_in_frameworks(wb: Workbook, sheet_name: str, meta_
         print(f"ℹ️  [INFO] ({fct_name}) [{sheet_name}] Sheet referenced by the sheet(s): {', '.join(f'\"{s}\"' for s in frameworks_with_reference)}")
     else:
         warn_msg = (
-            f"⚠️  [WARNING] ({fct_name}) [{sheet_name}] This sheet is not referenced in any \"framework\" sheet via the field \"{meta_field}\""
+            f"⚠️  [WARNING] ({fct_name}) [{sheet_name}] This sheet is not referenced in any sheets of type \"{MetaTypes.FRAMEWORK.value}\" via the field \"{meta_field}\""
             f"\n> 💡 Tip: Set \"{meta_field}\" in your framework meta sheet to \"{sheet_base_name}\" if needed."
         )
         print(warn_msg)
@@ -1915,7 +1942,12 @@ def check_content_sheet_usage_in_frameworks(wb: Workbook, sheet_name: str, meta_
 
 
 # Check whether each ID is used in at least one framework sheet. Emit a warning if any IDs are unused.
-def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column: str, target_column: str, frameworks_sheet_names: List[str], sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False, emit_messages: bool = True) -> List[str]:
+def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column: ContentColumn | str, target_column: ContentColumn | str, frameworks_sheet_names: List[str], sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False, emit_messages: bool = True) -> List[str]:
+
+    if isinstance(id_column, ContentColumn):
+        id_column = id_column.value
+    if isinstance(target_column, ContentColumn):
+        target_column = target_column.value
 
     ids_to_check = get_non_empty_column_values(df_ids, id_column)
     unused_ids = []
@@ -1941,7 +1973,7 @@ def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column
                 if pd.isna(cell):
                     continue
 
-                entries = [entry.strip() for entry in re.split(r'[,\n]', str(cell)) if entry.strip()]
+                entries = [entry.strip() for entry in re.split(CommonSeparatorRegex.COMMA_LF.value, str(cell)) if entry.strip()]
 
                 if _id in entries:
                     found = True
@@ -1976,31 +2008,31 @@ def _implementation_groups_check_unused_default_ids_in_frameworks(wb: Workbook, 
 
     fct_name = get_current_fct_name()
 
-    if "default_selected" not in df.columns:
+    if ImplementationGroupsContentColumns.DEFAULT_SELECTED.value not in df.columns:
         return
 
-    default_selected_mask = (df["default_selected"].fillna("").astype(str).str.strip().isin(["x", "X"]))
+    default_selected_mask = (df[ImplementationGroupsContentColumns.DEFAULT_SELECTED.value].fillna("").astype(str).str.strip().isin(["x", "X"]))
     default_selected_df = df.loc[default_selected_mask].copy()
-    default_selected_ids = get_non_empty_column_values(default_selected_df, "ref_id")
+    default_selected_ids = get_non_empty_column_values(default_selected_df, ImplementationGroupsContentColumns.REF_ID)
 
     if not default_selected_ids:
         return
 
-    unused_default_ids = check_unused_ids_in_frameworks(wb, default_selected_df, "ref_id", "implementation_groups", frameworks_sheet_names, sheet_name, fct_name, emit_messages=False)
+    unused_default_ids = check_unused_ids_in_frameworks(wb, default_selected_df, ImplementationGroupsContentColumns.REF_ID, FrameworkContentColumns.IMPLEMENTATION_GROUPS, frameworks_sheet_names, sheet_name, fct_name, emit_messages=False)
 
     if unused_default_ids == default_selected_ids:
         default_ids = ", ".join(f'"{_id}"' for _id in default_selected_ids)
         raise ValueError(
-            f'({fct_name}) [{sheet_name}] None of the implementation groups marked as \"default_selected\" ({default_ids}) are used in a framework content sheet. '
+            f'({fct_name}) [{sheet_name}] None of the implementation groups marked as \"{ImplementationGroupsContentColumns.DEFAULT_SELECTED.value}\" ({default_ids}) are used in a framework content sheet. '
             "This will result in an empty framework in CISO Assistant."
-            '\n> 💡 Tip: Add at least one of these \"default_selected\" implementation groups to the "implementation_groups" column of your framework content sheet, or remove the "default_selected" column.'
+            f'\n> 💡 Tip: Add at least one of these \"{ImplementationGroupsContentColumns.DEFAULT_SELECTED.value}\" implementation groups to the "{FrameworkContentColumns.IMPLEMENTATION_GROUPS.value}" column of your framework content sheet, or remove the "{ImplementationGroupsContentColumns.DEFAULT_SELECTED.value}" column.'
         )
 
 
 # Validate that all non-empty values in a specific column are in the allowed list. Ignores blank or whitespace-only cells.
 def validate_allowed_column_values(
     df: pd.DataFrame,
-    column_name: str,
+    column_name: ContentColumn | str,
     allowed_values: List[str],
     sheet_name: str,
     context: str = None,
@@ -2022,6 +2054,8 @@ def validate_allowed_column_values(
     """
 
     context = context or "validate_allowed_column_values"
+    if isinstance(column_name, ContentColumn):
+        column_name = column_name.value
 
     if column_name not in df.columns:
         return
@@ -2110,8 +2144,8 @@ def validate_allowed_column_values(
 # Validate that two columns have coherent internal line counts (split by regex) and are both empty or both filled.
 def validate_cell_line_count_alignment(
     df: pd.DataFrame,
-    ref_column: str,
-    cmp_column: str,
+    ref_column: ContentColumn | str,
+    cmp_column: ContentColumn | str,
     sheet_name: str,
     context: str = None,
     split_regex: str | CommonSeparatorRegex = CommonSeparatorRegex.LF,
@@ -2137,6 +2171,10 @@ def validate_cell_line_count_alignment(
     """
 
     context = context or "validate_cell_line_count_alignment"
+    if isinstance(ref_column, ContentColumn):
+        ref_column = ref_column.value
+    if isinstance(cmp_column, ContentColumn):
+        cmp_column = cmp_column.value
 
     # Skip if columns are missing (consistent with other validators)
     if ref_column not in df.columns or cmp_column not in df.columns:
@@ -2213,8 +2251,8 @@ def validate_cell_line_count_alignment(
 # Check whether each Prefix URN ID is used in at least one framework sheet. Emit a warning if any IDs are unused.
 def _URN_prefix_check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, frameworks_sheet_names: List[str], sheet_name: str, context: str, ctx: ConsoleContext = None, verbose: bool = False):
 
-    target_columns = ["threats", "reference_controls"]
-    id_column = "prefix_id"
+    target_columns = [FrameworkContentColumns.THREATS.value, FrameworkContentColumns.REFERENCE_CONTROLS.value]
+    id_column = URNPrefixContentColumns.PREFIX_ID.value
     ids_to_check = get_non_empty_column_values(df_ids, id_column)
     unused_ids = []
 
@@ -2309,13 +2347,13 @@ def _URN_prefix_classify_prefix_usage(wb: Workbook, df_urn_prefix: pd.DataFrame,
 
     # Define expected type_object depending on the meta_type
     if meta_type == MetaTypes.THREATS:
-        expected_type_object = "threat"
+        expected_type_object = URNObjects.THREAT.value
     elif meta_type == MetaTypes.REFERENCE_CONTROLS:
-        expected_type_object = "function"
+        expected_type_object = URNObjects.REFERENCE_CONTROL.value
     else:
-        raise ValueError(f"({fct_name}) [{sheet_name}] Unsupported meta_type: {meta_type}")
+        raise ValueError(f"({fct_name}) [{sheet_name}] Unsupported Meta type: {meta_type}")
 
-    prefix_values = df_urn_prefix["prefix_value"].dropna().astype(str).str.strip().unique()
+    prefix_values = df_urn_prefix[URNPrefixContentColumns.PREFIX_VALUE.value].dropna().astype(str).str.strip().unique()
     internal_prefixes = []
     external_prefixes = []
     internal_meta_sheets = []
@@ -2543,18 +2581,21 @@ def _req_map_set_validate_unique_mappings(df: pd.DataFrame, sheet_name: str, war
 
     fct_name = get_current_fct_name()
 
-    if "source_node_id" not in df.columns or "target_node_id" not in df.columns:
-        raise ValueError(f"({fct_name}) [{sheet_name}] Columns \"source_node_id\" and/or \"target_node_id\" not found")
+    source_column = RequirementMappingSetContentColumns.SOURCE_NODE_ID.value
+    target_column = RequirementMappingSetContentColumns.TARGET_NODE_ID.value
 
-    df_clean = df[["source_node_id", "target_node_id"]].dropna()
+    if source_column not in df.columns or target_column not in df.columns:
+        raise ValueError(f"({fct_name}) [{sheet_name}] Columns \"{source_column}\" and/or \"{target_column}\" not found")
 
-    df_clean["source_node_id"] = df_clean["source_node_id"].map(lambda x: str(x).strip())
-    df_clean["target_node_id"] = df_clean["target_node_id"].map(lambda x: str(x).strip())
+    df_clean = df[[source_column, target_column]].dropna()
+
+    df_clean[source_column] = df_clean[source_column].map(lambda x: str(x).strip())
+    df_clean[target_column] = df_clean[target_column].map(lambda x: str(x).strip())
 
     # Remove rows with empty values
-    df_clean = df_clean[(df_clean["source_node_id"] != "") & (df_clean["target_node_id"] != "")]
+    df_clean = df_clean[(df_clean[source_column] != "") & (df_clean[target_column] != "")]
 
-    duplicates = df_clean[df_clean.duplicated(subset=["source_node_id", "target_node_id"], keep=False)]
+    duplicates = df_clean[df_clean.duplicated(subset=[source_column, target_column], keep=False)]
 
 
     if not duplicates.empty:
@@ -2633,25 +2674,21 @@ def _req_map_set_validate_mapping_node_ids_against_sheets(wb: Workbook, df: pd.D
 
 
     if not source_sheet_available:
-        msg = f'⚠️  [WARNING] ({fct_name}) [{sheet_name}] Invalid or missing "source" sheet. The "source_node_id" column cannot be checked.'
+        msg = f'⚠️  [WARNING] ({fct_name}) [{sheet_name}] Invalid or missing "source" sheet. The "{RequirementMappingSetContentColumns.SOURCE_NODE_ID.value}" column cannot be checked.'
         print(msg)
         if ctx:
             ctx.add_sheet_warning_msg(sheet_name, msg)
 
     if not target_sheet_available:
-        msg = f'⚠️  [WARNING] ({fct_name}) [{sheet_name}] Invalid or missing "target" sheet. The "target_node_id" column cannot be checked.'
+        msg = f'⚠️  [WARNING] ({fct_name}) [{sheet_name}] Invalid or missing "target" sheet. The "{RequirementMappingSetContentColumns.TARGET_NODE_ID.value}" column cannot be checked.'
         print(msg)
         if ctx:
             ctx.add_sheet_warning_msg(sheet_name, msg)
 
 
     # Used IDs
-    used_source_ids = [
-        str(val).split(":")[-1] for val in df["source_node_id"].dropna()
-    ]
-    used_target_ids = [
-        str(val).split(":")[-1] for val in df["target_node_id"].dropna()
-    ]
+    used_source_ids = [str(val).split(":")[-1] for val in df[RequirementMappingSetContentColumns.SOURCE_NODE_ID.value].dropna()]
+    used_target_ids = [str(val).split(":")[-1] for val in df[RequirementMappingSetContentColumns.TARGET_NODE_ID.value].dropna()]
 
     source_missing_counts = Counter(
         node_id for node_id in used_source_ids
@@ -2719,19 +2756,19 @@ def _framework_validate_minimum_fields_and_ref_id(df: pd.DataFrame, sheet_name: 
         if row.dropna().empty:
             continue  # skip completely empty rows
 
-        ref_id = row.get("ref_id", "")
+        ref_id = row.get(FrameworkContentColumns.REF_ID.value, "")
         if pd.isna(ref_id):
             ref_id = ""
         else:
             ref_id = str(ref_id).strip()
 
-        name = row.get("name", "")
+        name = row.get(FrameworkContentColumns.NAME.value, "")
         if pd.isna(name):
             name = ""
         else:
             name = str(name).strip()
             
-        description = row.get("description", "")
+        description = row.get(FrameworkContentColumns.DESCRIPTION.value, "")
         if pd.isna(description):
             description = ""
         else:
@@ -2750,7 +2787,7 @@ def _framework_validate_minimum_fields_and_ref_id(df: pd.DataFrame, sheet_name: 
     # If any, returns an error and print rows with empty Ref. ID, Name and Description 
     if empty_id_name_desc_rows:
         raise ValueError(
-            f"({fct_name}) [{sheet_name}] Invalid rows: \"ref_id\", \"name\" and \"description\" are empty :\n   - "
+            f"({fct_name}) [{sheet_name}] Invalid rows: \"{FrameworkContentColumns.REF_ID.value}\", \"{FrameworkContentColumns.NAME.value}\" and \"{FrameworkContentColumns.DESCRIPTION.value}\" are empty :\n   - "
             + "\n   - ".join(f'Row #{idx + 2}' for idx in empty_id_name_desc_rows)
             + "\n> 💡 Tip: For each row, at least one of the values must be filled."
         )
@@ -2763,13 +2800,16 @@ def _framework_validate_minimum_fields_and_ref_id(df: pd.DataFrame, sheet_name: 
         )
 
 
-def _framework_validate_column_against_reference_sheet(wb: Workbook, df: pd.DataFrame, column_name: str, current_sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
+def _framework_validate_column_against_reference_sheet(wb: Workbook, df: pd.DataFrame, column_name: FrameworkContentColumns | str, current_sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     context = get_current_fct_name()
 
+    if isinstance(column_name, ContentColumn):
+        column_name = column_name.value
+
     column_to_key_mapping: Dict[str, FrameworkMetaKeys] = {
-        "implementation_groups": FrameworkMetaKeys.IMPLEMENTATION_GROUPS_DEFINITION,
-        "answer": FrameworkMetaKeys.ANSWERS_DEFINITION,
+        FrameworkContentColumns.IMPLEMENTATION_GROUPS.value: FrameworkMetaKeys.IMPLEMENTATION_GROUPS_DEFINITION,
+        FrameworkContentColumns.ANSWER.value: FrameworkMetaKeys.ANSWERS_DEFINITION,
     }
 
     if column_name not in column_to_key_mapping:
@@ -2806,11 +2846,11 @@ def _framework_validate_column_against_reference_sheet(wb: Workbook, df: pd.Data
     ref_df.columns = ref_df.iloc[0]
     ref_df = ref_df.drop(index=0).reset_index(drop=True)
 
-    if column_name == "implementation_groups":
-        ref_column = "ref_id"
+    if column_name == FrameworkContentColumns.IMPLEMENTATION_GROUPS.value:
+        ref_column = ImplementationGroupsContentColumns.REF_ID.value
         separator = ","
-    elif column_name == "answer":
-        ref_column = "id"
+    elif column_name == FrameworkContentColumns.ANSWER.value:
+        ref_column = AnswersContentColumns.ID.value
         separator = "\n"
     else:
         raise RuntimeError(f"({context}) [{current_sheet_name}] Unexpected internal error: invalid column dispatch")
@@ -2844,11 +2884,14 @@ def _framework_validate_column_against_reference_sheet(wb: Workbook, df: pd.Data
 
 
 # Validate that all URNs in the column use defined prefix_ids and reference existing ref_ids when required
-def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, column_name: str, current_sheet_name: str, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
+def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, column_name: FrameworkContentColumns | str, current_sheet_name: str, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
 
-    if column_name not in ("threats", "reference_controls"):
+    if isinstance(column_name, ContentColumn):
+        column_name = column_name.value
+
+    if column_name not in (FrameworkContentColumns.THREATS.value, FrameworkContentColumns.REFERENCE_CONTROLS.value):
         raise ValueError(f"({fct_name}) [{current_sheet_name}] Column \"{column_name}\" is not supported for URN validation")
 
     # ───────────────────────────────────────────────────────────────
@@ -2876,12 +2919,12 @@ def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, co
         content_df = content_df.drop(index=0).reset_index(drop=True)
 
         # Filter out rows where both 'prefix_id' and 'prefix_value' are empty or null
-        content_df = content_df.dropna(subset=["prefix_id", "prefix_value"], how='all')
-        content_df = content_df[(content_df["prefix_id"].astype(str).str.strip() != "") | (content_df["prefix_value"].astype(str).str.strip() != "")]
+        content_df = content_df.dropna(subset=[URNPrefixContentColumns.PREFIX_ID.value, URNPrefixContentColumns.PREFIX_VALUE.value], how='all')
+        content_df = content_df[(content_df[URNPrefixContentColumns.PREFIX_ID.value].astype(str).str.strip() != "") | (content_df[URNPrefixContentColumns.PREFIX_VALUE.value].astype(str).str.strip() != "")]
 
         for _, row in content_df.iterrows():
-            prefix_id = str(row.get("prefix_id", "")).strip()
-            prefix_value = str(row.get("prefix_value", "")).strip()
+            prefix_id = str(row.get(URNPrefixContentColumns.PREFIX_ID.value, "")).strip()
+            prefix_value = str(row.get(URNPrefixContentColumns.PREFIX_VALUE.value, "")).strip()
             if not prefix_id:
                 continue
             if prefix_id in seen_prefix_ids:
@@ -2899,7 +2942,7 @@ def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, co
     # ───────────────────────────────────────────────────────────────
 
     for idx, value in df[column_name].dropna().astype(str).items():
-        elements = re.split(r"[\n,]", value)
+        elements = re.split(CommonSeparatorRegex.COMMA_LF.value, value)
         for i, raw in enumerate(elements, start=1):
             raw = raw.strip()
             if not raw or ":" not in raw:
@@ -2971,15 +3014,15 @@ def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, co
     forbidden_prefix_ids = set()
 
     # We must use prefix_id (not URNs) to detect valid or invalid use
-    if column_name == "threats":
+    if column_name == FrameworkContentColumns.THREATS.value:
         allowed_prefix_ids = {pid for pid, (pval, _) in urn_prefix_map.items() if pval in all_internal_threats or pval in all_external_threats}
         forbidden_prefix_ids = {pid for pid, (pval, _) in urn_prefix_map.items() if pval in all_internal_ref_ctrl or pval in all_external_ref_ctrl}
-    elif column_name == "reference_controls":
+    elif column_name == FrameworkContentColumns.REFERENCE_CONTROLS.value:
         allowed_prefix_ids = {pid for pid, (pval, _) in urn_prefix_map.items() if pval in all_internal_ref_ctrl or pval in all_external_ref_ctrl}
         forbidden_prefix_ids = {pid for pid, (pval, _) in urn_prefix_map.items() if pval in all_internal_threats or pval in all_external_threats}
 
     for idx, value in df[column_name].dropna().astype(str).items():
-        elements = re.split(r"[\n,]", value)
+        elements = re.split(CommonSeparatorRegex.COMMA_LF.value, value)
         for i, raw in enumerate(elements, start=1):
             raw = raw.strip()
             if not raw:
@@ -3016,7 +3059,7 @@ def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, co
     # 5th Part: Validate that internal URN values exist in ref_id column only
     # ───────────────────────────────────────────────────────────────
 
-    if column_name == "threats":
+    if column_name == FrameworkContentColumns.THREATS.value:
         internal_prefix_ids = {pid for pid, (pval, _) in urn_prefix_map.items() if pval in all_internal_threats}
     else:  # reference_controls
         internal_prefix_ids = {pid for pid, (pval, _) in urn_prefix_map.items() if pval in all_internal_ref_ctrl}
@@ -3028,7 +3071,7 @@ def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, co
         # Get the actual content sheet name based on the column type
         content_sheet = None
 
-        if column_name == "threats":
+        if column_name == FrameworkContentColumns.THREATS.value:
             content_sheet = prefix_to_threats_content_sheet.get(prefix_value)
         else:  # reference_controls
             content_sheet = prefix_to_refctrl_content_sheet.get(prefix_value)
@@ -3048,19 +3091,21 @@ def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, co
         content_df.columns = content_df.iloc[0]
         content_df = content_df.drop(index=0).reset_index(drop=True)
 
+        ref_id_column = ThreatsContentColumns.REF_ID.value if column_name == FrameworkContentColumns.THREATS.value else ReferenceControlsContentColumns.REF_ID.value
+
         # Only check "ref_id" column of the reference sheet
-        if "ref_id" not in content_df.columns:
+        if ref_id_column not in content_df.columns:
             raise ValueError(
                 f"({fct_name}) [{current_sheet_name}] Sheet \"{content_sheet}\" has no \"ref_id\" column"
             )
 
-        valid_ref_ids = set(content_df["ref_id"].astype(str).str.strip())
+        valid_ref_ids = set(content_df[ref_id_column].astype(str).str.strip())
 
         verification_errors = []
 
         # Check Ref. IDs validity
         for idx, value in df[column_name].dropna().astype(str).items():
-            elements = re.split(r"[\n,]", value)
+            elements = re.split(CommonSeparatorRegex.COMMA_LF.value, value)
             for i, raw in enumerate(elements, start=1):
                 raw = raw.strip()
                 if not raw:
@@ -3089,13 +3134,13 @@ def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, co
     # 6th Part: Validate that external URN values exist in external references from YAML files only
     # ───────────────────────────────────────────────────────────────
 
-    if column_name == "threats":
+    if column_name == FrameworkContentColumns.THREATS.value:
         external_prefix_ids = {pid for pid, (pval, _) in urn_prefix_map.items() if pval in all_external_threats}
     else:  # reference_controls
         external_prefix_ids = {pid for pid, (pval, _) in urn_prefix_map.items() if pval in all_external_ref_ctrl}
 
     yaml_section_type = None
-    if column_name == "threats":
+    if column_name == FrameworkContentColumns.THREATS.value:
         yaml_section_type = YAMLSectionTypes.THREATS
     else:  # reference_controls
         yaml_section_type = YAMLSectionTypes.REFERENCE_CONTROLS
@@ -3177,7 +3222,7 @@ def _framework_validate_framework_column_urns(wb: Workbook, df: pd.DataFrame, co
             verification_errors = []
 
             for idx, value in df[column_name].dropna().astype(str).items():
-                elements = re.split(r"[\n,]", value)
+                elements = re.split(CommonSeparatorRegex.COMMA_LF.value, value)
                 for i, raw in enumerate(elements, start=1):
                     raw = raw.strip()
                     if not raw:
@@ -3230,12 +3275,12 @@ def _answers_validate_question_choices(df: pd.DataFrame, sheet_name: str):
     problematic_rows = []
 
     for row_idx, row in df.iterrows():
-        question_type_raw = row.get("question_type", "")
+        question_type_raw = row.get(AnswersContentColumns.QUESTION_TYPE.value, "")
         if pd.isna(question_type_raw):
             continue
 
         question_type = str(question_type_raw).strip().lower()
-        question_choices = row.get("question_choices", "")
+        question_choices = row.get(AnswersContentColumns.QUESTION_CHOICES.value, "")
 
         if (
             question_type in question_types_requiring_choices
@@ -3341,7 +3386,12 @@ def get_yaml_section_from_files(yaml_files: List[str], section_type: YAMLSection
 
 
 # Validate paired minimum and maximum columns and ensure each minimum is less than or equal to its maximum.
-def validate_min_max_columns(df: pd.DataFrame, min_column: str, max_column: str, sheet_name: str, context: str):
+def validate_min_max_columns(df: pd.DataFrame, min_column: ContentColumn | str, max_column: ContentColumn | str, sheet_name: str, context: str):
+
+    if isinstance(min_column, ContentColumn):
+        min_column = min_column.value
+    if isinstance(max_column, ContentColumn):
+        max_column = max_column.value
 
     validate_columns_presence_together(df, [min_column, max_column], sheet_name, context)
 
@@ -3391,9 +3441,9 @@ def _framework_validate_depth_consistency(df: pd.DataFrame, sheet_name: str):
 
     fct_name = get_current_fct_name()
 
-    validate_integer_value(df, sheet_name, "depth", fct_name, value_name="depth", positive_only=True)
+    validate_integer_value(df, sheet_name, FrameworkContentColumns.DEPTH, fct_name, value_name=FrameworkContentColumns.DEPTH, positive_only=True)
 
-    depth_values = df["depth"].dropna().astype(str).map(str.strip)
+    depth_values = df[FrameworkContentColumns.DEPTH.value].dropna().astype(str).map(str.strip)
     depth_values = depth_values[depth_values != ""]     # Remove empty values
 
     if depth_values.empty:
@@ -3426,54 +3476,49 @@ def _framework_validate_depth_consistency(df: pd.DataFrame, sheet_name: str):
 def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
-    required_columns = ["depth"]  # "assessable" isn't there because it can be empty
-    optional_columns = [
-        "ref_id", "urn_id", "name", "description", "annotation", "typical_evidence",
-        "importance", "weight", "min_score", "max_score", "scores_definition",
-        "implementation_groups", "questions", "answer", "depends_on", "condition",
-        "threats", "reference_controls"
-    ]
+    content_type = MetaTypes.FRAMEWORK
+    schema = CONTENT_SHEET_SCHEMAS[content_type]
 
-    validate_content_sheet(df, sheet_name, required_columns, fct_name)
-    validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
+    validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
+    validate_optional_columns_content_sheet(df, sheet_name, schema.optional_columns, fct_name, verbose, ctx)
 
     # Check the consistency of the "depth" hierarchy
     _framework_validate_depth_consistency(df, sheet_name)
 
     # Check that "questions" and "answer" appear together, or not at all
-    question_answer_column_names = ["questions", "answer"]
+    question_answer_column_names = [FrameworkContentColumns.QUESTIONS, FrameworkContentColumns.ANSWER]
     validate_columns_presence_together(df, question_answer_column_names, sheet_name, fct_name)
 
     # Check uniqueness of some column values
-    validate_unique_column_values(df, ["ref_id"], sheet_name, fct_name, ctx=ctx)
+    validate_unique_column_values(df, [FrameworkContentColumns.REF_ID], sheet_name, fct_name, ctx=ctx)
 
     # Additional rule: Check that "name" values do not exceed 200 characters (in order to avoid issues with PostgreSQL DBs)
-    validate_column_max_length(df, "name", 200, sheet_name, fct_name)
+    validate_column_max_length(df, FrameworkContentColumns.NAME, 200, sheet_name, fct_name)
     
     # Enforce presence of "assessable" column (even if values can be empty)
-    if "assessable" not in df.columns:
+    if FrameworkContentColumns.ASSESSABLE.value not in df.columns:
         raise ValueError(f"[{fct_name}] [{sheet_name}] Missing required column \"assessable\"")
     
     # Check "assessable" values
     assessable_values = ["x", "X"]
-    validate_allowed_column_values(df, "assessable", assessable_values, sheet_name, fct_name, ctx=ctx)
+    validate_allowed_column_values(df, FrameworkContentColumns.ASSESSABLE, assessable_values, sheet_name, fct_name, ctx=ctx)
 
 
     # Additional rule: for non-empty rows, at least "ref_id", "name" or "description" must be filled
     _framework_validate_minimum_fields_and_ref_id(df, sheet_name)
     
     # Ensure that the number of "questions" and "answer" entries match per row (1 or same count), or both are empty
-    validate_cell_line_count_alignment(df, "questions", "answer", sheet_name, fct_name, ref_line_break_indicator=CommonLineBreakIndicator.PIPE)
+    validate_cell_line_count_alignment(df, FrameworkContentColumns.QUESTIONS, FrameworkContentColumns.ANSWER, sheet_name, fct_name, ref_line_break_indicator=CommonLineBreakIndicator.PIPE)
 
     # Validate columns that reference other sheets (only if they contain non-empty values)
-    for column in ["implementation_groups", "answer"]:
+    for column in [FrameworkContentColumns.IMPLEMENTATION_GROUPS.value, FrameworkContentColumns.ANSWER.value]:
         if column in df.columns:
             non_empty_values = df[column].dropna().astype(str).map(str.strip)
             if not non_empty_values[non_empty_values != ""].empty:
                 _framework_validate_column_against_reference_sheet(wb, df, column, sheet_name, verbose, ctx)
 
     # Validate URN-related columns only if they contain non-empty values
-    for column in ["threats", "reference_controls"]:
+    for column in [FrameworkContentColumns.THREATS.value, FrameworkContentColumns.REFERENCE_CONTROLS.value]:
         if column in df.columns:
             non_empty_values = df[column].dropna().astype(str).map(str.strip)
             if not non_empty_values[non_empty_values != ""].empty:
@@ -3484,25 +3529,25 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, 
     condition_values = ["any", "all", "/"]
 
     # Check if values in "importance" columns are valid
-    validate_allowed_column_values(df, "importance", importance_values, sheet_name, fct_name, ctx=ctx)
+    validate_allowed_column_values(df, FrameworkContentColumns.IMPORTANCE, importance_values, sheet_name, fct_name, ctx=ctx)
     
     # Check if values in "condition" columns are valid
-    validate_allowed_column_values(df, "condition", condition_values, sheet_name, fct_name, ctx=ctx, split_regex=CommonSeparatorRegex.LF)
+    validate_allowed_column_values(df, FrameworkContentColumns.CONDITION, condition_values, sheet_name, fct_name, ctx=ctx, split_regex=CommonSeparatorRegex.LF)
     
     # Check if the number of lines in cells of "questions" are coherent with lines in cells of "answer"
-    validate_cell_line_count_alignment(df, "questions", "depends_on", sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=CommonLineBreakIndicator.PIPE)
+    validate_cell_line_count_alignment(df, FrameworkContentColumns.QUESTIONS, FrameworkContentColumns.DEPENDS_ON, sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=CommonLineBreakIndicator.PIPE)
     
     # Check if the number of lines in cells of "questions" are coherent with lines in cells of "depends_on"
-    validate_cell_line_count_alignment(df, "questions", "condition", sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=CommonLineBreakIndicator.PIPE)
+    validate_cell_line_count_alignment(df, FrameworkContentColumns.QUESTIONS, FrameworkContentColumns.CONDITION, sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=CommonLineBreakIndicator.PIPE)
     
     # Check if "condition" exists when "depends_on" is defined
-    validate_cell_line_count_alignment(df, "depends_on", "condition", sheet_name, fct_name)
+    validate_cell_line_count_alignment(df, FrameworkContentColumns.DEPENDS_ON, FrameworkContentColumns.CONDITION, sheet_name, fct_name)
     
     # Check if values in "weight" columns are valid
-    validate_integer_value(df, sheet_name, "weight", fct_name, value_name="weight", positive_only=True)
+    validate_integer_value(df, sheet_name, FrameworkContentColumns.WEIGHT, fct_name, value_name=FrameworkContentColumns.WEIGHT, positive_only=True)
     
     # Validate "min_score" and "max_score" values if columns are present
-    validate_min_max_columns(df, "min_score", "max_score", sheet_name, fct_name)
+    validate_min_max_columns(df, FrameworkContentColumns.MIN_SCORE, FrameworkContentColumns.MAX_SCORE, sheet_name, fct_name)
 
 
     # Extra locales
@@ -3515,14 +3560,14 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, 
 def validate_threats_content(df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
-    required_columns = ["ref_id", "name"]
-    optional_columns = ["description", "annotation"]
+    content_type = MetaTypes.THREATS
+    schema = CONTENT_SHEET_SCHEMAS[content_type]
 
-    validate_content_sheet(df, sheet_name, required_columns, fct_name)
-    validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
+    validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
+    validate_optional_columns_content_sheet(df, sheet_name, schema.optional_columns, fct_name, verbose, ctx)
 
     # Check uniqueness of some column values
-    validate_unique_column_values(df, ["ref_id"], sheet_name, fct_name, ctx=ctx)
+    validate_unique_column_values(df, [ThreatsContentColumns.REF_ID], sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
@@ -3534,22 +3579,22 @@ def validate_threats_content(df: pd.DataFrame, sheet_name: str, verbose: bool = 
 def validate_reference_controls_content(df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
-    required_columns = ["ref_id", "name"]
-    optional_columns = ["category", "description", "csf_function", "annotation"]
+    content_type = MetaTypes.REFERENCE_CONTROLS
+    schema = CONTENT_SHEET_SCHEMAS[content_type]
 
     # Special values
     category_values = ["policy", "process", "technical", "physical", "procedure"]
     csf_function_values = ["govern", "identify", "protect", "detect", "respond", "recover"]
 
-    validate_content_sheet(df, sheet_name, required_columns, fct_name)
-    validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
+    validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
+    validate_optional_columns_content_sheet(df, sheet_name, schema.optional_columns, fct_name, verbose, ctx)
 
     # Check uniqueness of some column values
-    validate_unique_column_values(df, ["ref_id"], sheet_name, fct_name, ctx=ctx)
+    validate_unique_column_values(df, [ReferenceControlsContentColumns.REF_ID], sheet_name, fct_name, ctx=ctx)
 
     # Check if values in "category" and "csf_function" columns are valid
-    validate_allowed_column_values(df, "category", category_values, sheet_name, fct_name,ctx=ctx)
-    validate_allowed_column_values(df, "csf_function", csf_function_values, sheet_name, fct_name,ctx=ctx)
+    validate_allowed_column_values(df, ReferenceControlsContentColumns.CATEGORY, category_values, sheet_name, fct_name, ctx=ctx)
+    validate_allowed_column_values(df, ReferenceControlsContentColumns.CSF_FUNCTION, csf_function_values, sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
@@ -3561,16 +3606,17 @@ def validate_reference_controls_content(df: pd.DataFrame, sheet_name: str, verbo
 def validate_risk_matrix_content(df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
-    required_columns = ["type", "id", "abbreviation", "name", "description"]
-    # No optional columns
+    content_type = MetaTypes.RISK_MATRIX
+    schema = CONTENT_SHEET_SCHEMAS[content_type]
 
     # Special values
     type_values = ["probability", "impact", "risk"]
 
-    validate_content_sheet(df, sheet_name, required_columns, fct_name)
+    validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
+    validate_optional_columns_content_sheet(df, sheet_name, schema.optional_columns, fct_name, verbose, ctx)
 
     # Check if values in "type" column are valid
-    validate_allowed_column_values(df, "type", type_values, sheet_name, fct_name,ctx=ctx)
+    validate_allowed_column_values(df, RiskMatrixContentColumns.TYPE, type_values, sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
@@ -3591,18 +3637,18 @@ def validate_risk_matrix_content(df: pd.DataFrame, sheet_name: str, verbose: boo
 def validate_implementation_groups_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
-    required_columns = ["ref_id", "name"]
-    optional_columns = ["description", "default_selected"]
+    content_type = MetaTypes.IMPLEMENTATION_GROUPS
+    schema = CONTENT_SHEET_SCHEMAS[content_type]
 
-    validate_content_sheet(df, sheet_name, required_columns, fct_name)
-    validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
+    validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
+    validate_optional_columns_content_sheet(df, sheet_name, schema.optional_columns, fct_name, verbose, ctx)
 
     # Check uniqueness of some column values
-    validate_unique_column_values(df, ["ref_id"], sheet_name, fct_name, ctx=ctx)
+    validate_unique_column_values(df, [ImplementationGroupsContentColumns.REF_ID], sheet_name, fct_name, ctx=ctx)
     
     # Check "default_selected" values
     default_selected_values = ["x", "X"]
-    validate_allowed_column_values(df, "default_selected", default_selected_values, sheet_name, fct_name, ctx=ctx)
+    validate_allowed_column_values(df, ImplementationGroupsContentColumns.DEFAULT_SELECTED, default_selected_values, sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
@@ -3614,7 +3660,7 @@ def validate_implementation_groups_content(wb: Workbook, df: pd.DataFrame, sheet
     # Check if every implementation groups are actually used in "framework" sheets
     if frameworks_with_imp_grp:
         _implementation_groups_check_unused_default_ids_in_frameworks(wb, df, frameworks_with_imp_grp, sheet_name)
-        check_unused_ids_in_frameworks(wb, df, "ref_id", "implementation_groups", frameworks_with_imp_grp, sheet_name, fct_name, ctx, verbose)
+        check_unused_ids_in_frameworks(wb, df, ImplementationGroupsContentColumns.REF_ID, FrameworkContentColumns.IMPLEMENTATION_GROUPS, frameworks_with_imp_grp, sheet_name, fct_name, ctx, verbose)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -3623,15 +3669,15 @@ def validate_implementation_groups_content(wb: Workbook, df: pd.DataFrame, sheet
 def validate_requirement_mapping_set_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
-    required_columns = ["source_node_id", "target_node_id", "relationship"]
-    optional_columns = ["rationale", "strength_of_relationship"]
+    content_type = MetaTypes.REQUIREMENT_MAPPING_SET
+    schema = CONTENT_SHEET_SCHEMAS[content_type]
     
     # Special values
     relationship_values = ["subset", "intersect", "equal", "superset", "not_related"]
     rationale_values = ["syntactic", "semantic", "functional"]
 
-    validate_content_sheet(df, sheet_name, required_columns, fct_name)
-    validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
+    validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
+    validate_optional_columns_content_sheet(df, sheet_name, schema.optional_columns, fct_name, verbose, ctx)
 
     # Extra locales (Not needed for mappings, but added just in case)
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
@@ -3640,8 +3686,8 @@ def validate_requirement_mapping_set_content(wb: Workbook, df: pd.DataFrame, she
     _req_map_set_validate_unique_mappings(df, sheet_name, ctx=ctx)
 
     # Check if values in "relationship" and "rationale" columns are valid
-    validate_allowed_column_values(df, "relationship", relationship_values, sheet_name, fct_name,ctx=ctx)
-    validate_allowed_column_values(df, "rationale", rationale_values, sheet_name, fct_name,ctx=ctx)
+    validate_allowed_column_values(df, RequirementMappingSetContentColumns.RELATIONSHIP, relationship_values, sheet_name, fct_name, ctx=ctx)
+    validate_allowed_column_values(df, RequirementMappingSetContentColumns.RATIONALE, rationale_values, sheet_name, fct_name, ctx=ctx)
 
     # Check mapping validity using the "source" and "target" sheets
     _req_map_set_validate_mapping_node_ids_against_sheets(wb, df, sheet_name, fct_name, ctx, verbose)
@@ -3653,17 +3699,17 @@ def validate_requirement_mapping_set_content(wb: Workbook, df: pd.DataFrame, she
 def validate_scores_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
-    required_columns = ["score", "name"]
-    optional_columns = ["description", "description_doc"]
+    content_type = MetaTypes.SCORES
+    schema = CONTENT_SHEET_SCHEMAS[content_type]
 
-    validate_content_sheet(df, sheet_name, required_columns, fct_name)
-    validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
+    validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
+    validate_optional_columns_content_sheet(df, sheet_name, schema.optional_columns, fct_name, verbose, ctx)
 
     # Validate each "score" value is a non-negative integer
-    validate_integer_value(df, sheet_name, "score", fct_name, value_name="score", min=0)
+    validate_integer_value(df, sheet_name, ScoresContentColumns.SCORE, fct_name, value_name=ScoresContentColumns.SCORE, min=0)
 
     # Check uniqueness of some column values
-    validate_unique_column_values(df, ["score"], sheet_name, fct_name, ctx=ctx)
+    validate_unique_column_values(df, [ScoresContentColumns.SCORE], sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
@@ -3678,23 +3724,20 @@ def validate_scores_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, ver
 def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
-    required_columns = ["id", "question_type"]
-    optional_columns = [
-        "question_choices", "description", "select_implementation_groups",
-        "add_score", "compute_result", "color"
-    ]
+    content_type = MetaTypes.ANSWERS
+    schema = CONTENT_SHEET_SCHEMAS[content_type]
 
     # Special values
     question_type_values = ["unique_choice", "multiple_choice", "text", "date"]
 
-    validate_content_sheet(df, sheet_name, required_columns, fct_name)
-    validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
+    validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
+    validate_optional_columns_content_sheet(df, sheet_name, schema.optional_columns, fct_name, verbose, ctx)
 
     # Check uniqueness of some column values
-    validate_unique_column_values(df, ["id"], sheet_name, fct_name, ctx=ctx)
+    validate_unique_column_values(df, [AnswersContentColumns.ID], sheet_name, fct_name, ctx=ctx)
 
     # Check if values in "question_type" column are valid
-    validate_allowed_column_values(df, "question_type", question_type_values, sheet_name, fct_name,ctx=ctx)
+    validate_allowed_column_values(df, AnswersContentColumns.QUESTION_TYPE, question_type_values, sheet_name, fct_name, ctx=ctx)
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
@@ -3708,7 +3751,7 @@ def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, ve
 
     # Check if every answers are actually used in "framework" sheets
     if frameworks_with_answers:
-        check_unused_ids_in_frameworks(wb, df, "id", "answer", frameworks_with_answers, sheet_name, fct_name, ctx, verbose)
+        check_unused_ids_in_frameworks(wb, df, AnswersContentColumns.ID, FrameworkContentColumns.ANSWER, frameworks_with_answers, sheet_name, fct_name, ctx, verbose)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
@@ -3717,13 +3760,14 @@ def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, ve
 def validate_urn_prefix_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
-    required_columns = ["prefix_id", "prefix_value"]
-    # No optional columns
+    content_type = MetaTypes.URN_PREFIX
+    schema = CONTENT_SHEET_SCHEMAS[content_type]
 
-    validate_content_sheet(df, sheet_name, required_columns, fct_name)
+    validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
+    validate_optional_columns_content_sheet(df, sheet_name, schema.optional_columns, fct_name, verbose, ctx)
 
     # Check uniqueness of some column values
-    validate_unique_column_values(df, ["prefix_id", "prefix_value"], sheet_name, fct_name, ctx=ctx)
+    validate_unique_column_values(df, [URNPrefixContentColumns.PREFIX_ID, URNPrefixContentColumns.PREFIX_VALUE], sheet_name, fct_name, ctx=ctx)
 
     # Check if URN Prefix IDs are used in "framework" sheets
     _URN_prefix_validate_ids_usage_in_frameworks(wb, df, sheet_name, ctx, verbose)
