@@ -1989,6 +1989,41 @@ class ThreatViewSet(BaseModelViewSet):
     def type(self, request):
         return Response(dict(Threat.Type.choices))
 
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            Threat.objects.filter(provider__isnull=False).values_list(
+                "provider", flat=True
+            )
+        )
+        return Response({p: p for p in providers})
+
+    @action(detail=False, name="Get threats count")
+    def threats_count(self, request):
+        folder_id = request.query_params.get("folder", None)
+        return Response({"results": threats_count_per_name(request.user, folder_id)})
+
+    @action(detail=False, methods=["get"])
+    def ids(self, request):
+        my_map = dict()
+
+        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Threat,
+        )
+        for item in Threat.objects.filter(id__in=viewable_items):
+            if my_map.get(item.folder.name) is None:
+                my_map[item.folder.name] = {}
+            my_map[item.folder.name].update({item.name: item.id})
+        return Response(my_map)
+
 
 class ThreatCatalogViewSet(BaseModelViewSet):
     """
@@ -2061,41 +2096,6 @@ class ThreatCatalogViewSet(BaseModelViewSet):
                 "cells": cells,
             }
         )
-
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-    @action(detail=False, name="Get provider choices")
-    def provider(self, request):
-        providers = set(
-            Threat.objects.filter(provider__isnull=False).values_list(
-                "provider", flat=True
-            )
-        )
-        return Response({p: p for p in providers})
-
-    @action(detail=False, name="Get threats count")
-    def threats_count(self, request):
-        folder_id = request.query_params.get("folder", None)
-        return Response({"results": threats_count_per_name(request.user, folder_id)})
-
-    @action(detail=False, methods=["get"])
-    def ids(self, request):
-        my_map = dict()
-
-        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Threat,
-        )
-        for item in Threat.objects.filter(id__in=viewable_items):
-            if my_map.get(item.folder.name) is None:
-                my_map[item.folder.name] = {}
-            my_map[item.folder.name].update({item.name: item.id})
-        return Response(my_map)
 
 
 class AssetFilter(TimestampRangeFilterMixin, GenericFilterSet):

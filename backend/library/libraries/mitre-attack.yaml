@@ -51,10 +51,10 @@ objects:
       name: Containers
       dimension: platform
     - ref_id: esxi
-      name: Esxi
+      name: ESXi
       dimension: platform
     - ref_id: iaas
-      name: Iaas
+      name: IaaS
       dimension: platform
     - ref_id: identity-provider
       name: Identity Provider
@@ -63,7 +63,7 @@ objects:
       name: Linux
       dimension: platform
     - ref_id: macos
-      name: Macos
+      name: macOS
       dimension: platform
     - ref_id: network-devices
       name: Network Devices
@@ -72,10 +72,10 @@ objects:
       name: Office Suite
       dimension: platform
     - ref_id: pre
-      name: Pre
+      name: PRE
       dimension: platform
     - ref_id: saas
-      name: Saas
+      name: SaaS
       dimension: platform
     - ref_id: windows
       name: Windows

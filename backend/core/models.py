@@ -948,15 +948,34 @@ class LibraryUpdater:
         deferred_keys = ("catalog_urn", "parent_urn", "reference_controls")
         pending_links = {}
 
+        def resolve(model, urn, field, referrer):
+            # Absent means "clear it"; present but unresolvable is a data bug and
+            # must fail loudly, matching ThreatImporter on the import path.
+            if not urn:
+                return None
+            obj = model.objects.filter(urn=urn.lower()).first()
+            if obj is None:
+                raise ValueError(
+                    f"Unknown {field} '{urn}' referenced in threat '{referrer}'."
+                )
+            return obj
+
         for index, threat in enumerate(self.threats):
             normalized_urn = threat["urn"].lower()
             deferred = {key: threat.get(key) for key in deferred_keys}
             fields = {k: v for k, v in threat.items() if k not in deferred_keys}
             fields.setdefault("order_id", index)
-            if catalog_urn := deferred["catalog_urn"]:
-                fields["catalog"] = ThreatCatalog.objects.filter(
-                    urn=catalog_urn.lower()
-                ).first()
+            # Fields the document can omit must be reset, not left stale — the
+            # same convention as clearable_requirement_node_fields. is_deprecated
+            # is never carried in YAML, so a row that reappears upstream would
+            # otherwise stay flagged and hidden from every picker forever.
+            fields.setdefault("is_deprecated", False)
+            fields["catalog"] = resolve(
+                ThreatCatalog,
+                deferred["catalog_urn"],
+                "threat catalog",
+                threat.get("ref_id", normalized_urn),
+            )
 
             obj, _ = Threat.objects.update_or_create(
                 urn=normalized_urn,
@@ -971,9 +990,10 @@ class LibraryUpdater:
             pending_links[obj] = deferred
 
         for obj, deferred in pending_links.items():
-            if parent_urn := deferred["parent_urn"]:
-                obj.parent = Threat.objects.filter(urn=parent_urn.lower()).first()
-                obj.save(update_fields=["parent"])
+            obj.parent = resolve(
+                Threat, deferred["parent_urn"], "parent threat", obj.ref_id or obj.urn
+            )
+            obj.save(update_fields=["parent"])
             controls = ReferenceControl.objects.filter(
                 urn__in=[urn.lower() for urn in deferred["reference_controls"] or []]
             )

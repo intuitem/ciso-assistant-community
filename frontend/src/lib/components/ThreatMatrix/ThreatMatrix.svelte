@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 
@@ -36,6 +37,18 @@
 	let activeFacets = $state<string[]>([]);
 	let expanded = $state<Record<string, boolean>>({});
 	let query = $state('');
+
+	// SvelteKit reuses this component when only the route parameter changes, so
+	// filters chosen on one catalog would otherwise carry over to the next.
+	$effect(() => {
+		void columns;
+		void cells;
+		untrack(() => {
+			activeFacets = [];
+			expanded = {};
+			query = '';
+		});
+	});
 
 	// Facets are OR within a dimension, AND across dimensions: picking two
 	// platforms widens, picking a platform and a maturity narrows.

@@ -3913,9 +3913,9 @@ objects:
 
       The crafted content can be combined with a prompt injection. It can also stand
       alone in a separate document or email. The adversary must get the crafted content
-      into the victim\u0027s database, such as a vector database used in a retrieval
-      augmented generation (RAG) system. This may be accomplished via cyber access,
-      or by abusing the ingestion mechanisms common in RAG systems (see [RAG Poisoning](https://atlas.mitre.org/techniques/AML.T0070)).
+      into the victim''s database, such as a vector database used in a retrieval augmented
+      generation (RAG) system. This may be accomplished via cyber access, or by abusing
+      the ingestion mechanisms common in RAG systems (see [RAG Poisoning](https://atlas.mitre.org/techniques/AML.T0070)).
 
 
       Large language models may be used as an assistant to aid an adversary in crafting
