@@ -8,6 +8,7 @@ as `waiting`; everything else executes and advances in the same call.
 
 import contextvars
 import re
+from datetime import date
 
 from django.db import transaction
 
@@ -17,6 +18,7 @@ from .models import (
     WorkflowInstanceLog,
     WorkflowNode,
     WorkflowToken,
+    WorkflowVariable,
 )
 
 # Loops multiply node visits (100 items x body size), so the runaway guard
@@ -79,6 +81,7 @@ def trigger_instance(
     initiated_by=None,
     entry_node=None,
     trigger_registration=None,
+    initial_variables=None,
 ):
     """Entry point for webhook/manual triggers: honors the async setting."""
     from django.conf import settings
@@ -90,6 +93,7 @@ def trigger_instance(
         initiated_by=initiated_by,
         entry_node=entry_node,
         trigger_registration=trigger_registration,
+        initial_variables=initial_variables,
     )
     if getattr(settings, "WORKFLOWS_ASYNC_EXECUTION", False):
         from .tasks import run_instance_task
@@ -137,6 +141,35 @@ def default_entry_node(version):
     raise EngineError("Ambiguous entry: this version has several trigger nodes")
 
 
+def coerce_variable_value(value, variable_type):
+    """Validate/coerce a user-supplied initial value against the declared
+    variable type (spec D33). Raises ValueError on mismatch. Dates stay ISO
+    strings (variables live in a JSONField)."""
+    if variable_type == WorkflowVariable.Type.STRING:
+        if isinstance(value, str):
+            return value
+    elif variable_type == WorkflowVariable.Type.NUMBER:
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            try:
+                return int(value)
+            except ValueError:
+                return float(value)
+    elif variable_type == WorkflowVariable.Type.BOOLEAN:
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str) and value.lower() in ("true", "false"):
+            return value.lower() == "true"
+    elif variable_type == WorkflowVariable.Type.DATE:
+        if isinstance(value, str):
+            date.fromisoformat(value)
+            return value
+    elif variable_type == WorkflowVariable.Type.JSON:
+        return value
+    raise ValueError(f"not a valid {variable_type} value")
+
+
 def create_instance(
     version,
     *,
@@ -148,6 +181,7 @@ def create_instance(
     trigger_registration=None,
     trigger_depth=0,
     entry_node=None,
+    initial_variables=None,
 ):
     if entry_node is None:
         entry_node = default_entry_node(version)
@@ -158,6 +192,10 @@ def create_instance(
         value = dig(payload, path)
         if value is not None:
             variables[variable_key] = value
+    # Explicit debug seeds (spec D33) beat defaults and input mapping. The
+    # caller (manual-run endpoint) validates keys and types beforehand.
+    if initial_variables:
+        variables.update(initial_variables)
     if payload:
         variables["payload"] = payload
 
@@ -182,7 +220,15 @@ def create_instance(
             WorkflowInstanceLog.EventType.INSTANCE_STARTED,
             node=entry_node,
             message=f"Triggered by {trigger}",
-            data={"variables": variables},
+            # seeded_variables keeps debugged runs distinguishable (spec D33).
+            data={
+                "variables": variables,
+                **(
+                    {"seeded_variables": initial_variables}
+                    if initial_variables
+                    else {}
+                ),
+            },
         )
         WorkflowToken.objects.create(instance=instance, current_node=entry_node)
     return instance

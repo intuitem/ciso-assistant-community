@@ -755,6 +755,103 @@ class TestManualRunAuthz:
 
 
 @pytest.mark.django_db
+class TestInitialVariables:
+    """Manual runs can seed declared variables (spec D33)."""
+
+    def _version(self):
+        _, version = make_workflow(f"Seeded {uuid.uuid4()}")
+        start = node("trigger", trigger_config={"type": "manual"})
+        log = node(
+            "action", action_config={"type": "log", "message": "subject={{subject}}"}
+        )
+        end = node("end")
+        save_graph(
+            version,
+            {
+                "nodes": [start, log, end],
+                "edges": [edge(start, log), edge(log, end)],
+                "variables": [
+                    {
+                        "id": str(uuid.uuid4()),
+                        "key": "subject",
+                        "type": "string",
+                        "default_value": "default subject",
+                    },
+                    {"id": str(uuid.uuid4()), "key": "count", "type": "number"},
+                    {"id": str(uuid.uuid4()), "key": "urgent", "type": "boolean"},
+                ],
+            },
+        )
+        version.publish()
+        return version
+
+    def _post(self, version_id, user, **extra):
+        factory = APIRequestFactory()
+        view = WorkflowInstanceViewSet.as_view({"post": "create"})
+        req = factory.post(
+            "/api/workflows/workflow-instances/",
+            {"version": version_id, **extra},
+            format="json",
+        )
+        force_authenticate(req, user=user)
+        return view(req)
+
+    def test_seeds_override_defaults_and_are_logged(self, superuser):
+        from workflows.models import WorkflowInstance, WorkflowInstanceLog
+
+        version = self._version()
+        resp = self._post(
+            str(version.id),
+            superuser,
+            initial_variables={"subject": "seeded", "count": "42", "urgent": "true"},
+        )
+        assert resp.status_code == 201, resp.data
+        instance = WorkflowInstance.objects.get(id=resp.data["id"])
+        assert instance.variables["subject"] == "seeded"
+        assert instance.variables["count"] == 42  # numeric string coerced
+        assert instance.variables["urgent"] is True
+        started = instance.logs.get(
+            event_type=WorkflowInstanceLog.EventType.INSTANCE_STARTED
+        )
+        assert started.data["seeded_variables"] == {
+            "subject": "seeded",
+            "count": 42,
+            "urgent": True,
+        }
+
+    def test_untouched_variables_keep_defaults(self, superuser):
+        from workflows.models import WorkflowInstance
+
+        version = self._version()
+        resp = self._post(str(version.id), superuser, initial_variables={"count": 3})
+        assert resp.status_code == 201, resp.data
+        instance = WorkflowInstance.objects.get(id=resp.data["id"])
+        assert instance.variables["subject"] == "default subject"
+
+    def test_unknown_variable_rejected(self, superuser):
+        version = self._version()
+        resp = self._post(str(version.id), superuser, initial_variables={"nope": "x"})
+        assert resp.status_code == 400
+        assert resp.data["error"] == "unknownVariable"
+        assert resp.data["variable"] == "nope"
+
+    def test_type_mismatch_rejected(self, superuser):
+        version = self._version()
+        resp = self._post(
+            str(version.id), superuser, initial_variables={"count": "not a number"}
+        )
+        assert resp.status_code == 400
+        assert resp.data["error"] == "variableTypeMismatch"
+        assert resp.data["variable"] == "count"
+
+    def test_non_object_rejected(self, superuser):
+        version = self._version()
+        resp = self._post(str(version.id), superuser, initial_variables=["a"])
+        assert resp.status_code == 400
+        assert resp.data["error"] == "initialVariablesInvalid"
+
+
+@pytest.mark.django_db
 class TestTemplatedConditionOperators:
     """in/not_in/contains must compare against the RENDERED value, not the
     literal '{{...}}' string (regression)."""

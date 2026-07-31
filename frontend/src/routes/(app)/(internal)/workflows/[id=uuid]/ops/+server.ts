@@ -92,6 +92,13 @@ export const POST: RequestHandler = async ({ fetch, request, url, params }) => {
 			if (typeof body.entry_node_ref === 'string' && body.entry_node_ref) {
 				payload.entry_node_ref = body.entry_node_ref;
 			}
+			if (
+				body.initial_variables &&
+				typeof body.initial_variables === 'object' &&
+				!Array.isArray(body.initial_variables)
+			) {
+				payload.initial_variables = body.initial_variables;
+			}
 			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-instances/`, 'POST', payload);
 		}
 

@@ -1142,45 +1142,121 @@
 	let dataOpen = $state(false);
 	let running = $state(false);
 	let runPickerOpen = $state(false);
+	// Run-with-variables (spec D33): raw form values + touched tracking so
+	// only fields the user actually edited are sent as seeds.
+	let runMenuOpen = $state(false);
+	let runVarsOpen = $state(false);
+	let varSeeds = $state<Record<string, string>>({});
+	let varTouched = $state<Record<string, boolean>>({});
+	let runVarsError = $state('');
 
 	const triggerNodes = $derived(nodes.filter((n) => n.data.nodeType === 'trigger'));
 
-	async function startRun(entryNodeRef: string | null) {
+	async function startRun(
+		entryNodeRef: string | null,
+		initialVariables?: Record<string, unknown>
+	): Promise<boolean> {
 		runPickerOpen = false;
 		running = true;
 		try {
 			// Flush pending edits, but never auto-draft a pristine published
 			// version just because it was run.
 			const pending = saveState === 'dirty' || saveState === 'saving' || saveState === 'error';
-			if (!readonly && pending && !(await save())) return;
+			if (!readonly && pending && !(await save())) return false;
 			const res = await fetch(opsUrl('run'), {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					version: activeVersionId,
-					...(entryNodeRef ? { entry_node_ref: entryNodeRef } : {})
+					...(entryNodeRef ? { entry_node_ref: entryNodeRef } : {}),
+					...(initialVariables && Object.keys(initialVariables).length
+						? { initial_variables: initialVariables }
+						: {})
 				})
 			});
 			if (res.ok) {
 				runsOpen = true;
 				await runsPanel?.refresh();
+				return true;
 			}
+			const body = await res.json().catch(() => ({}));
+			runVarsError = String(body.error ?? res.statusText);
+			return false;
 		} finally {
 			running = false;
 		}
 	}
 
-	// Manual trigger present → fire it; exactly one trigger → fire it; else the
-	// entry is ambiguous (the backend would 400) → offer a picker.
-	async function runWorkflow() {
+	// Manual trigger present → fire it; exactly one trigger → fire it; else
+	// the entry is ambiguous (the backend would 400) → null (plain Execute
+	// offers a picker instead).
+	function defaultEntryRef(): string | null {
 		const manual = triggerNodes.find(
 			(n) => (n.data.domain as any)?.trigger_config?.type === 'manual'
 		);
-		if (manual) return startRun((manual.data.domain as any).ref ?? null);
+		if (manual) return ((manual.data.domain as any).ref as string) ?? null;
 		if (triggerNodes.length <= 1) {
-			return startRun(((triggerNodes[0]?.data.domain as any)?.ref as string) ?? null);
+			return ((triggerNodes[0]?.data.domain as any)?.ref as string) ?? null;
 		}
-		runPickerOpen = !runPickerOpen;
+		return null;
+	}
+
+	async function runWorkflow() {
+		runMenuOpen = false;
+		if (triggerNodes.length > 1) {
+			const manual = triggerNodes.find(
+				(n) => (n.data.domain as any)?.trigger_config?.type === 'manual'
+			);
+			if (!manual) {
+				runPickerOpen = !runPickerOpen;
+				return;
+			}
+		}
+		return startRun(defaultEntryRef());
+	}
+
+	function openRunVars() {
+		runMenuOpen = false;
+		runPickerOpen = false;
+		varSeeds = Object.fromEntries(
+			variables.map((v) => {
+				const preset = v.default_value;
+				if (preset === null || preset === undefined) return [v.key, ''];
+				return [v.key, typeof preset === 'string' ? preset : JSON.stringify(preset)];
+			})
+		);
+		varTouched = {};
+		runVarsError = '';
+		runVarsOpen = true;
+	}
+
+	async function runWithVariables() {
+		const seeds: Record<string, unknown> = {};
+		for (const variable of variables) {
+			if (!varTouched[variable.key]) continue;
+			const raw = varSeeds[variable.key] ?? '';
+			if (variable.type === 'number') {
+				const parsed = Number(raw);
+				if (raw.trim() === '' || Number.isNaN(parsed)) {
+					runVarsError = m.variableValueInvalid({ key: variable.key });
+					return;
+				}
+				seeds[variable.key] = parsed;
+			} else if (variable.type === 'boolean') {
+				seeds[variable.key] = raw === 'true';
+			} else if (variable.type === 'json') {
+				try {
+					seeds[variable.key] = JSON.parse(raw);
+				} catch {
+					runVarsError = m.variableValueInvalid({ key: variable.key });
+					return;
+				}
+			} else {
+				seeds[variable.key] = raw;
+			}
+		}
+		runVarsError = '';
+		if (await startRun(defaultEntryRef(), seeds)) runVarsOpen = false;
 	}
 
 	// ---------- graph edits ----------
@@ -1860,20 +1936,156 @@
 								</span>
 							{/if}
 							<div class="relative">
-								<button
-									type="button"
-									class="btn preset-filled-primary-500 text-sm"
-									disabled={running}
-									onclick={runWorkflow}
-									data-testid="run-workflow"
-								>
-									{#if running}
-										<i class="fa-solid fa-spinner fa-spin mr-1"></i>
-									{:else}
-										<i class="fa-solid fa-play mr-1"></i>
-									{/if}
-									{m.executeWorkflow()}
-								</button>
+								<div class="flex items-stretch">
+									<button
+										type="button"
+										class="btn preset-filled-primary-500 text-sm rounded-r-none"
+										disabled={running}
+										onclick={runWorkflow}
+										data-testid="run-workflow"
+									>
+										{#if running}
+											<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+										{:else}
+											<i class="fa-solid fa-play mr-1"></i>
+										{/if}
+										{m.executeWorkflow()}
+									</button>
+									<button
+										type="button"
+										class="btn preset-filled-primary-500 text-sm rounded-l-none border-l border-primary-400 px-2"
+										disabled={running}
+										onclick={() => {
+											runMenuOpen = !runMenuOpen;
+											runPickerOpen = false;
+										}}
+										aria-label={m.runWithVariables()}
+										data-testid="run-workflow-menu"
+									>
+										<i class="fa-solid fa-chevron-down text-xs"></i>
+									</button>
+								</div>
+								{#if runMenuOpen}
+									<div
+										class="absolute right-0 top-full mt-1 z-10 w-60 rounded-base border border-surface-200-800 bg-surface-50-950 shadow-lg"
+										data-testid="run-menu"
+									>
+										<button
+											type="button"
+											class="w-full flex items-center gap-2 px-3 py-2 text-xs text-surface-800-200 hover:bg-surface-100-900 cursor-pointer text-left disabled:opacity-50 disabled:cursor-not-allowed"
+											disabled={variables.length === 0}
+											title={variables.length === 0 ? m.noVariablesToSeed() : undefined}
+											onclick={openRunVars}
+											data-testid="run-with-variables"
+										>
+											<i class="fa-solid fa-flask w-4 text-center text-surface-500"></i>
+											{m.runWithVariables()}
+										</button>
+									</div>
+								{/if}
+								{#if runVarsOpen}
+									<div
+										class="absolute right-0 top-full mt-1 z-10 w-80 rounded-base border border-surface-200-800 bg-surface-50-950 shadow-lg"
+										data-testid="run-vars-panel"
+									>
+										<p
+											class="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-surface-500 border-b border-surface-200-800"
+										>
+											{m.runWithVariables()}
+										</p>
+										<div class="max-h-72 overflow-y-auto p-3 space-y-2">
+											<p class="text-[11px] text-surface-500">{m.runWithVariablesHint()}</p>
+											{#each variables as variable (variable.id)}
+												<label class="block">
+													<span
+														class="flex items-center gap-1.5 text-xs text-surface-700-300 mb-0.5"
+													>
+														<span class="font-mono">{variable.key}</span>
+														<span class="badge preset-tonal-surface text-[9px]"
+															>{variable.type}</span
+														>
+													</span>
+													{#if variable.type === 'boolean'}
+														<select
+															class="select w-full text-xs"
+															value={varSeeds[variable.key]}
+															onchange={(e) => {
+																varSeeds[variable.key] = e.currentTarget.value;
+																varTouched[variable.key] = true;
+															}}
+															data-testid="seed-{variable.key}"
+														>
+															<option value="">--</option>
+															<option value="true">true</option>
+															<option value="false">false</option>
+														</select>
+													{:else if variable.type === 'json'}
+														<textarea
+															class="textarea w-full text-xs font-mono"
+															rows="2"
+															value={varSeeds[variable.key]}
+															oninput={(e) => {
+																varSeeds[variable.key] = e.currentTarget.value;
+																varTouched[variable.key] = true;
+															}}
+															data-testid="seed-{variable.key}"
+														></textarea>
+													{:else}
+														<input
+															class="input w-full text-xs"
+															type={variable.type === 'number'
+																? 'number'
+																: variable.type === 'date'
+																	? 'date'
+																	: 'text'}
+															value={varSeeds[variable.key]}
+															oninput={(e) => {
+																varSeeds[variable.key] = e.currentTarget.value;
+																varTouched[variable.key] = true;
+															}}
+															data-testid="seed-{variable.key}"
+														/>
+													{/if}
+												</label>
+											{/each}
+										</div>
+										<div
+											class="flex items-center justify-between gap-2 px-3 py-2 border-t border-surface-200-800"
+										>
+											{#if runVarsError}
+												<span
+													class="text-[11px] text-error-500 truncate"
+													data-testid="run-vars-error">{runVarsError}</span
+												>
+											{:else}
+												<span></span>
+											{/if}
+											<div class="flex items-center gap-1.5 shrink-0">
+												<button
+													type="button"
+													class="btn preset-tonal text-xs"
+													onclick={() => (runVarsOpen = false)}
+												>
+													{m.cancel()}
+												</button>
+												<button
+													type="button"
+													class="btn preset-filled-primary-500 text-xs"
+													disabled={running}
+													onclick={runWithVariables}
+													data-testid="run-vars-confirm"
+												>
+													{#if running}
+														<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+													{:else}
+														<i class="fa-solid fa-play mr-1"></i>
+													{/if}
+													{m.executeWorkflow()}
+												</button>
+											</div>
+										</div>
+									</div>
+								{/if}
 								{#if runPickerOpen}
 									<div
 										class="absolute right-0 top-full mt-1 z-10 w-60 rounded-base border border-surface-200-800 bg-surface-50-950 shadow-lg"

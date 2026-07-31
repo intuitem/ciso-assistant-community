@@ -3,8 +3,8 @@ import hmac
 import json
 
 import yaml
-import django_filters as df
 from django.contrib.auth.models import Permission
+import django_filters as df
 from django.db import transaction
 from django.db.models import Prefetch
 from django.http import HttpResponse
@@ -24,7 +24,14 @@ from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import Folder, RoleAssignment
 
 from .actions import required_permissions
-from .engine import EngineError, abort_token, retry_token, skip_token, trigger_instance
+from .engine import (
+    EngineError,
+    abort_token,
+    coerce_variable_value,
+    retry_token,
+    skip_token,
+    trigger_instance,
+)
 from .graph import GraphValidationError, save_graph, serialize_graph
 from .import_export import (
     WorkflowImportError,
@@ -530,9 +537,39 @@ class WorkflowInstanceViewSet(BaseModelViewSet):
                     {"error": "unknownTriggerNode"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+        # Debug seeds (spec D33): only declared variables, values checked
+        # against the declared type.
+        initial_variables = request.data.get("initial_variables")
+        if initial_variables is not None:
+            if not isinstance(initial_variables, dict):
+                return Response(
+                    {"error": "initialVariablesInvalid"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            declared = {v.key: v for v in version.variables.all()}
+            seeded = {}
+            for key, value in initial_variables.items():
+                variable = declared.get(key)
+                if variable is None:
+                    return Response(
+                        {"error": "unknownVariable", "variable": key},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                try:
+                    seeded[key] = coerce_variable_value(value, variable.type)
+                except ValueError:
+                    return Response(
+                        {"error": "variableTypeMismatch", "variable": key},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            initial_variables = seeded
         try:
             instance = trigger_instance(
-                version, trigger="manual", initiated_by=request.user, entry_node=entry
+                version,
+                trigger="manual",
+                initiated_by=request.user,
+                entry_node=entry,
+                initial_variables=initial_variables,
             )
         except EngineError as e:
             return Response(
