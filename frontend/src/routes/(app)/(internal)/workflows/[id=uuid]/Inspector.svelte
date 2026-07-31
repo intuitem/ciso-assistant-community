@@ -601,6 +601,49 @@
 		onChange();
 	}
 
+	// Mapping rows key on a variable; the row's select swaps which one while
+	// keeping the entered path/value and the row's position.
+	function renameMappingKey(
+		map: Record<string, string>,
+		oldKey: string,
+		newKey: string
+	): Record<string, string> {
+		const out: Record<string, string> = {};
+		for (const [k, v] of Object.entries(map)) out[k === oldKey ? newKey : k] = v;
+		return out;
+	}
+
+	// Selectable targets for a mapping row: every declared variable not
+	// already used by a sibling row, plus the row's current key (which may be
+	// undeclared on imported graphs — it must stay visible).
+	function mappingKeyOptions(map: Record<string, unknown> | undefined, current: string) {
+		const used = new Set(Object.keys(map ?? {}));
+		const keys = variables.map((v) => v.key).filter((k) => k === current || !used.has(k));
+		if (!keys.includes(current)) keys.unshift(current);
+		return keys;
+	}
+
+	function renameOutputMapping(oldKey: string, newKey: string) {
+		if (!newKey || newKey === oldKey || (nodeDomain.output_mapping ?? {})[newKey] !== undefined)
+			return;
+		nodeDomain.output_mapping = renameMappingKey(nodeDomain.output_mapping, oldKey, newKey);
+		onChange();
+	}
+
+	function renameInputMapping(oldKey: string, newKey: string) {
+		if (!newKey || newKey === oldKey || (nodeDomain.input_mapping ?? {})[newKey] !== undefined)
+			return;
+		nodeDomain.input_mapping = renameMappingKey(nodeDomain.input_mapping, oldKey, newKey);
+		onChange();
+	}
+
+	function renameSetVariableRow(oldKey: string, newKey: string) {
+		if (!newKey || newKey === oldKey || (actionConfig.variables ?? {})[newKey] !== undefined)
+			return;
+		actionConfig.variables = renameMappingKey(actionConfig.variables, oldKey, newKey);
+		onChange();
+	}
+
 	function addSetVariableRow() {
 		const used = new Set(Object.keys(actionConfig.variables ?? {}));
 		const candidate = variables.find((v) => !used.has(v.key));
@@ -1707,7 +1750,16 @@
 						</div>
 						{#each Object.keys(actionConfig.variables) as key (key)}
 							<div class="flex items-center gap-1 mb-1">
-								<span class="text-xs font-mono w-24 truncate shrink-0">{key}</span>
+								<select
+									class="select text-xs font-mono w-24 shrink-0 px-1 py-0.5"
+									value={key}
+									onchange={(e) => renameSetVariableRow(key, e.currentTarget.value)}
+									data-testid="set-variable-key"
+								>
+									{#each mappingKeyOptions(actionConfig.variables, key) as option (option)}
+										<option value={option}>{option}</option>
+									{/each}
+								</select>
 								<input
 									type="text"
 									class="input text-xs flex-1 min-w-0"
@@ -1748,7 +1800,16 @@
 					</div>
 					{#each Object.keys(nodeDomain.output_mapping ?? {}) as key (key)}
 						<div class="flex items-center gap-1 mb-1">
-							<span class="text-xs font-mono w-24 truncate shrink-0">{key}</span>
+							<select
+								class="select text-xs font-mono w-24 shrink-0 px-1 py-0.5"
+								value={key}
+								onchange={(e) => renameOutputMapping(key, e.currentTarget.value)}
+								data-testid="output-mapping-variable"
+							>
+								{#each mappingKeyOptions(nodeDomain.output_mapping, key) as option (option)}
+									<option value={option}>{option}</option>
+								{/each}
+							</select>
 							<i class="fa-solid fa-arrow-left text-[9px] text-surface-500 shrink-0"></i>
 							<input
 								type="text"
@@ -2027,7 +2088,16 @@
 					</div>
 					{#each Object.keys(nodeDomain.input_mapping ?? {}) as key (key)}
 						<div class="flex items-center gap-1 mb-1">
-							<span class="text-xs font-mono w-24 truncate shrink-0">{key}</span>
+							<select
+								class="select text-xs font-mono w-24 shrink-0 px-1 py-0.5"
+								value={key}
+								onchange={(e) => renameInputMapping(key, e.currentTarget.value)}
+								data-testid="input-mapping-variable"
+							>
+								{#each mappingKeyOptions(nodeDomain.input_mapping, key) as option (option)}
+									<option value={option}>{option}</option>
+								{/each}
+							</select>
 							{#if !isDeclaredVariable(key)}
 								<!-- Assist, not a blocker: the key maps to no declared variable. -->
 								<span
