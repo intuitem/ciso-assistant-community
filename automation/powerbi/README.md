@@ -104,7 +104,11 @@ Power BI.
 
 1. **Get Data → CISO Assistant** (category *Online Services*).
 2. Enter the URL you use in your browser, e.g.
-   `https://ciso-assistant.example.com` (no `/api` suffix). Always use an
+   `https://ciso-assistant.example.com` — **no `/api` suffix and no trailing
+   slash**. The connector strips a trailing slash before calling the API, so
+   data loads either way, but Power BI keys your saved credential on the
+   string you typed: `https://host` and `https://host/` become two separate
+   credential entries, and you get asked for the PAT again. Always use an
    `https://` URL for real instances — your token is sent with every
    request; reserve plain `http://` for local development servers.
 3. Paste your Personal Access Token when prompted.
@@ -174,6 +178,22 @@ connectors in the gateway settings. See Microsoft's
   name is exactly `Power BI Desktop\Custom Connectors` (no "Microsoft").
 - **"CISO Assistant rejected your Personal Access Token"** — the token is
   expired or revoked. Create a new one and update the credential.
+- **Power BI keeps asking for a PAT, or for a URL you no longer use** —
+  credentials bind to (connector, URL), and changing the URL does not retract
+  the entry Power BI already recorded. Typical after repointing a report at
+  another instance, or after opening the starter template, where the first
+  evaluation can register the parameter's default URL before your own value
+  takes effect. Reset it:
+  1. **File → Options and settings → Data source settings**.
+  2. The dialog has two scopes, and the stale entry can live in either:
+     **Data sources in current file** and **Global permissions**. Check both.
+  3. Select the stale entry → **Clear permissions** (or **Delete**, which
+     drops the source entirely rather than only its credential).
+  4. **Restart Power BI Desktop.** The pending credential dialog caches its
+     request and survives the clear — without a restart you keep being asked
+     for the same dead URL.
+  5. Still stuck: **Global permissions → Clear All Permissions**, restart,
+     then enter the PAT once for the correct URL.
 - **Columns show null that have values in the app** — some audit fields
   (e.g. scores) are hidden per-audit via field visibility; hidden fields
   arrive as null, mirroring what the app shows your role.
