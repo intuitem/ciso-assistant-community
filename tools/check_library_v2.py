@@ -453,11 +453,117 @@ class URNPrefixContentColumns(ContentColumn):
     PREFIX_VALUE = "prefix_value"
 
 
-# Define the required, optional, and translatable columns of a content sheet
+# > [CONTENT] Constraints
+
+# Define the validation constraints that can be applied to a content column
+@dataclass(frozen=True)
+class ContentColumnConstraints:
+    allowed_values: tuple[str, ...] | None = None
+    split_regex: str | CommonSeparatorRegex | None = None
+    line_break_indicator: str | CommonLineBreakIndicator | None = None
+    max_length: int | None = None
+    integer_only: bool = False
+    min_value: int | None = None
+    max_value: int | None = None
+    unique: bool = False
+
+
+# [CONTENT] Framework column constraints
+FRAMEWORK_CONTENT_COLUMN_CONSTRAINTS: Mapping[ContentColumn, ContentColumnConstraints] = MappingProxyType({
+    FrameworkContentColumns.DEPTH: ContentColumnConstraints(integer_only=True, min_value=1),
+    FrameworkContentColumns.REF_ID: ContentColumnConstraints(unique=True),
+    FrameworkContentColumns.NAME: ContentColumnConstraints(max_length=200),
+    FrameworkContentColumns.ASSESSABLE: ContentColumnConstraints(allowed_values=("x")),
+    FrameworkContentColumns.IMPORTANCE: ContentColumnConstraints(
+        allowed_values=("mandatory", "recommended", "nice_to_have"),
+    ),
+    FrameworkContentColumns.WEIGHT: ContentColumnConstraints(integer_only=True, min_value=1),
+    FrameworkContentColumns.MIN_SCORE: ContentColumnConstraints(integer_only=True, min_value=0),
+    FrameworkContentColumns.MAX_SCORE: ContentColumnConstraints(integer_only=True, min_value=0),
+    FrameworkContentColumns.QUESTIONS: ContentColumnConstraints(
+        line_break_indicator=CommonLineBreakIndicator.PIPE,
+    ),
+    FrameworkContentColumns.CONDITION: ContentColumnConstraints(
+        allowed_values=("any", "all", "/"),
+        split_regex=CommonSeparatorRegex.LF,
+    ),
+})
+
+
+# [CONTENT] Threats column constraints
+THREATS_CONTENT_COLUMN_CONSTRAINTS: Mapping[ContentColumn, ContentColumnConstraints] = MappingProxyType({
+    ThreatsContentColumns.REF_ID: ContentColumnConstraints(unique=True),
+})
+
+
+# [CONTENT] Reference Controls column constraints
+REFERENCE_CONTROLS_CONTENT_COLUMN_CONSTRAINTS: Mapping[ContentColumn, ContentColumnConstraints] = MappingProxyType({
+    ReferenceControlsContentColumns.REF_ID: ContentColumnConstraints(unique=True),
+    ReferenceControlsContentColumns.CATEGORY: ContentColumnConstraints(
+        allowed_values=("policy", "process", "technical", "physical", "procedure"),
+    ),
+    ReferenceControlsContentColumns.CSF_FUNCTION: ContentColumnConstraints(
+        allowed_values=("govern", "identify", "protect", "detect", "respond", "recover"),
+    ),
+})
+
+
+# [CONTENT] Risk Matrix column constraints
+RISK_MATRIX_CONTENT_COLUMN_CONSTRAINTS: Mapping[ContentColumn, ContentColumnConstraints] = MappingProxyType({
+    RiskMatrixContentColumns.TYPE: ContentColumnConstraints(
+        allowed_values=("probability", "impact", "risk"),
+    ),
+})
+
+
+# [CONTENT] Implementation Groups column constraints
+IMPLEMENTATION_GROUPS_CONTENT_COLUMN_CONSTRAINTS: Mapping[ContentColumn, ContentColumnConstraints] = MappingProxyType({
+    ImplementationGroupsContentColumns.REF_ID: ContentColumnConstraints(unique=True),
+    ImplementationGroupsContentColumns.DEFAULT_SELECTED: ContentColumnConstraints(allowed_values=("x")),
+})
+
+
+# [CONTENT] Requirement Mapping Set column constraints
+REQUIREMENT_MAPPING_SET_CONTENT_COLUMN_CONSTRAINTS: Mapping[ContentColumn, ContentColumnConstraints] = MappingProxyType({
+    RequirementMappingSetContentColumns.RELATIONSHIP: ContentColumnConstraints(
+        allowed_values=("subset", "intersect", "equal", "superset", "not_related"),
+    ),
+    RequirementMappingSetContentColumns.RATIONALE: ContentColumnConstraints(
+        allowed_values=("syntactic", "semantic", "functional"),
+    ),
+})
+
+
+# [CONTENT] Scores column constraints
+SCORES_CONTENT_COLUMN_CONSTRAINTS: Mapping[ContentColumn, ContentColumnConstraints] = MappingProxyType({
+    ScoresContentColumns.SCORE: ContentColumnConstraints(integer_only=True, min_value=0, unique=True),
+})
+
+
+# [CONTENT] Answers column constraints
+ANSWERS_CONTENT_COLUMN_CONSTRAINTS: Mapping[ContentColumn, ContentColumnConstraints] = MappingProxyType({
+    AnswersContentColumns.ID: ContentColumnConstraints(unique=True),
+    AnswersContentColumns.QUESTION_TYPE: ContentColumnConstraints(
+        allowed_values=("unique_choice", "multiple_choice", "text", "date"),
+    ),
+})
+
+
+# [CONTENT] URN Prefix column constraints
+URN_PREFIX_CONTENT_COLUMN_CONSTRAINTS: Mapping[ContentColumn, ContentColumnConstraints] = MappingProxyType({
+    URNPrefixContentColumns.PREFIX_ID: ContentColumnConstraints(unique=True),
+    URNPrefixContentColumns.PREFIX_VALUE: ContentColumnConstraints(unique=True),
+})
+
+
+# > [CONTENT] Schemas
+
+# Define the required, optional, and translatable columns and their constraints
 @dataclass(frozen=True)
 class ContentSheetSchema:
     column_enum: type[ContentColumn]
     required_columns: tuple[ContentColumn, ...]
+    column_constraints: Mapping[ContentColumn, ContentColumnConstraints]
     optional_columns: tuple[ContentColumn, ...] = ()
     translatable_columns: tuple[ContentColumn, ...] = ()
 
@@ -468,6 +574,9 @@ class ContentSheetSchema:
         for columns in column_groups:
             if not all(isinstance(column, self.column_enum) for column in columns):
                 raise TypeError(f"All schema columns must come from {self.column_enum.__name__}")
+
+        if not all(isinstance(column, self.column_enum) for column in self.column_constraints):
+            raise TypeError(f"All constraint columns must come from {self.column_enum.__name__}")
 
     @staticmethod
     def _to_values(columns: tuple[ContentColumn, ...]) -> tuple[str, ...]:
@@ -491,6 +600,7 @@ CONTENT_SHEET_SCHEMAS: Mapping[MetaTypes, ContentSheetSchema] = MappingProxyType
     MetaTypes.FRAMEWORK: ContentSheetSchema(
         column_enum=FrameworkContentColumns,
         required_columns=(FrameworkContentColumns.DEPTH,),  # "assessable" isn't there because it has a special behavior (column is mandatory, but not the value in column)
+        column_constraints=FRAMEWORK_CONTENT_COLUMN_CONSTRAINTS,
         optional_columns=(
             FrameworkContentColumns.REF_ID, FrameworkContentColumns.URN_ID, FrameworkContentColumns.NAME,
             FrameworkContentColumns.DESCRIPTION, FrameworkContentColumns.ANNOTATION, FrameworkContentColumns.TYPICAL_EVIDENCE,
@@ -507,6 +617,7 @@ CONTENT_SHEET_SCHEMAS: Mapping[MetaTypes, ContentSheetSchema] = MappingProxyType
     MetaTypes.THREATS: ContentSheetSchema(
         column_enum=ThreatsContentColumns,
         required_columns=(ThreatsContentColumns.REF_ID, ThreatsContentColumns.NAME),
+        column_constraints=THREATS_CONTENT_COLUMN_CONSTRAINTS,
         optional_columns=(ThreatsContentColumns.DESCRIPTION, ThreatsContentColumns.ANNOTATION),
         translatable_columns=(
             ThreatsContentColumns.NAME, ThreatsContentColumns.DESCRIPTION, ThreatsContentColumns.ANNOTATION,
@@ -515,6 +626,7 @@ CONTENT_SHEET_SCHEMAS: Mapping[MetaTypes, ContentSheetSchema] = MappingProxyType
     MetaTypes.REFERENCE_CONTROLS: ContentSheetSchema(
         column_enum=ReferenceControlsContentColumns,
         required_columns=(ReferenceControlsContentColumns.REF_ID, ReferenceControlsContentColumns.NAME),
+        column_constraints=REFERENCE_CONTROLS_CONTENT_COLUMN_CONSTRAINTS,
         optional_columns=(
             ReferenceControlsContentColumns.CATEGORY, ReferenceControlsContentColumns.CSF_FUNCTION, 
             ReferenceControlsContentColumns.DESCRIPTION, ReferenceControlsContentColumns.ANNOTATION,
@@ -530,6 +642,7 @@ CONTENT_SHEET_SCHEMAS: Mapping[MetaTypes, ContentSheetSchema] = MappingProxyType
             RiskMatrixContentColumns.TYPE, RiskMatrixContentColumns.ID, RiskMatrixContentColumns.ABBREVIATION,
             RiskMatrixContentColumns.NAME, RiskMatrixContentColumns.DESCRIPTION,
         ),
+        column_constraints=RISK_MATRIX_CONTENT_COLUMN_CONSTRAINTS,
         translatable_columns=(
             RiskMatrixContentColumns.ABBREVIATION, RiskMatrixContentColumns.NAME, RiskMatrixContentColumns.DESCRIPTION,
         ),
@@ -537,6 +650,7 @@ CONTENT_SHEET_SCHEMAS: Mapping[MetaTypes, ContentSheetSchema] = MappingProxyType
     MetaTypes.IMPLEMENTATION_GROUPS: ContentSheetSchema(
         column_enum=ImplementationGroupsContentColumns,
         required_columns=(ImplementationGroupsContentColumns.REF_ID, ImplementationGroupsContentColumns.NAME),
+        column_constraints=IMPLEMENTATION_GROUPS_CONTENT_COLUMN_CONSTRAINTS,
         optional_columns=(
             ImplementationGroupsContentColumns.DESCRIPTION, ImplementationGroupsContentColumns.DEFAULT_SELECTED,
         ),
@@ -550,6 +664,7 @@ CONTENT_SHEET_SCHEMAS: Mapping[MetaTypes, ContentSheetSchema] = MappingProxyType
             RequirementMappingSetContentColumns.SOURCE_NODE_ID, RequirementMappingSetContentColumns.TARGET_NODE_ID,
             RequirementMappingSetContentColumns.RELATIONSHIP,
         ),
+        column_constraints=REQUIREMENT_MAPPING_SET_CONTENT_COLUMN_CONSTRAINTS,
         optional_columns=(
             RequirementMappingSetContentColumns.RATIONALE, RequirementMappingSetContentColumns.STRENGTH_OF_RELATIONSHIP,
         ),
@@ -557,6 +672,7 @@ CONTENT_SHEET_SCHEMAS: Mapping[MetaTypes, ContentSheetSchema] = MappingProxyType
     MetaTypes.SCORES: ContentSheetSchema(
         column_enum=ScoresContentColumns,
         required_columns=(ScoresContentColumns.SCORE, ScoresContentColumns.NAME),
+        column_constraints=SCORES_CONTENT_COLUMN_CONSTRAINTS,
         optional_columns=(ScoresContentColumns.DESCRIPTION, ScoresContentColumns.DESCRIPTION_DOC),
         translatable_columns=(
             ScoresContentColumns.NAME, ScoresContentColumns.DESCRIPTION, ScoresContentColumns.DESCRIPTION_DOC,
@@ -565,6 +681,7 @@ CONTENT_SHEET_SCHEMAS: Mapping[MetaTypes, ContentSheetSchema] = MappingProxyType
     MetaTypes.ANSWERS: ContentSheetSchema(
         column_enum=AnswersContentColumns,
         required_columns=(AnswersContentColumns.ID, AnswersContentColumns.QUESTION_TYPE),
+        column_constraints=ANSWERS_CONTENT_COLUMN_CONSTRAINTS,
         optional_columns=(
             AnswersContentColumns.QUESTION_CHOICES, AnswersContentColumns.DESCRIPTION,
             AnswersContentColumns.SELECT_IMPLEMENTATION_GROUPS, AnswersContentColumns.ADD_SCORE,
@@ -575,6 +692,7 @@ CONTENT_SHEET_SCHEMAS: Mapping[MetaTypes, ContentSheetSchema] = MappingProxyType
     MetaTypes.URN_PREFIX: ContentSheetSchema(
         column_enum=URNPrefixContentColumns,
         required_columns=(URNPrefixContentColumns.PREFIX_ID, URNPrefixContentColumns.PREFIX_VALUE),
+        column_constraints=URN_PREFIX_CONTENT_COLUMN_CONSTRAINTS,
     ),
 })
 
