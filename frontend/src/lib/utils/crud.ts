@@ -290,10 +290,54 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'threats',
 		verboseName: 'Threat',
 		verboseNamePlural: 'Threats',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'annotation' },
+			{ field: 'description' },
+			{ field: 'type' },
+			{ field: 'parent' },
+			{ field: 'catalog' },
+			{ field: 'groups', tooltip: 'threatGroupsTooltip' },
+			{ field: 'reference_controls', tooltip: 'threatReferenceControlsTooltip' },
+			{ field: 'is_deprecated' },
+			{ field: 'provider' },
+			{ field: 'folder' },
+			{ field: 'filtering_labels' },
+			{ field: 'library' }
+		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'library', urlModel: 'loaded-libraries' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'parent', urlModel: 'threats' },
+			{ field: 'catalog', urlModel: 'threat-catalogs' },
+			{ field: 'reference_controls', urlModel: 'reference-controls' }
+		],
+		selectFields: [{ field: 'type' }],
+		filters: [{ field: 'folder' }]
+	},
+	'threat-catalogs': {
+		name: 'threatcatalog',
+		localName: 'threatCatalog',
+		localNamePlural: 'threatCatalogs',
+		verboseName: 'Threat catalog',
+		verboseNamePlural: 'Threat catalogs',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'annotation' },
+			{ field: 'description' },
+			{ field: 'provider' },
+			{ field: 'folder' },
+			{ field: 'library' }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'loaded-libraries' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'catalog', urlModel: 'threats', disableCreate: true, disableDelete: true }
 		]
 	},
 	'security-advisories': {

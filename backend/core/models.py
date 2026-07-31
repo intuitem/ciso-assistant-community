@@ -891,6 +891,7 @@ class LibraryUpdater:
         if isinstance(self.new_requirement_mapping_sets, dict):
             self.new_requirement_mapping_sets = [self.new_requirement_mapping_sets]
 
+        self.threat_catalogs = new_library_content.get("threat_catalogs", [])
         self.threats = new_library_content.get("threats", [])
         self.reference_controls = new_library_content.get("reference_controls", [])
         self.metric_definitions = new_library_content.get("metric_definitions", [])
@@ -927,19 +928,65 @@ class LibraryUpdater:
             ]:
                 return error_msg
 
-    def update_threats(self):
-        for threat in self.threats:
-            normalized_urn = threat["urn"].lower()
-            Threat.objects.update_or_create(
+    def update_threat_catalogs(self):
+        for catalog in self.threat_catalogs:
+            normalized_urn = catalog["urn"].lower()
+            ThreatCatalog.objects.update_or_create(
                 urn=normalized_urn,
-                defaults=threat,
+                defaults=catalog,
                 create_defaults={
                     **self.referential_object_dict,
                     **self.i18n_object_dict,
-                    **threat,
+                    **catalog,
                     "library": self.old_library,
                 },
             )
+
+    def update_threats(self):
+        # urn-valued keys and the m2m cannot go through update_or_create():
+        # they are not concrete fields on the model.
+        deferred_keys = ("catalog_urn", "parent_urn", "reference_controls")
+        pending_links = {}
+
+        for index, threat in enumerate(self.threats):
+            normalized_urn = threat["urn"].lower()
+            deferred = {key: threat.get(key) for key in deferred_keys}
+            fields = {k: v for k, v in threat.items() if k not in deferred_keys}
+            fields.setdefault("order_id", index)
+            if catalog_urn := deferred["catalog_urn"]:
+                fields["catalog"] = ThreatCatalog.objects.filter(
+                    urn=catalog_urn.lower()
+                ).first()
+
+            obj, _ = Threat.objects.update_or_create(
+                urn=normalized_urn,
+                defaults=fields,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **fields,
+                    "library": self.old_library,
+                },
+            )
+            pending_links[obj] = deferred
+
+        for obj, deferred in pending_links.items():
+            if parent_urn := deferred["parent_urn"]:
+                obj.parent = Threat.objects.filter(urn=parent_urn.lower()).first()
+                obj.save(update_fields=["parent"])
+            controls = ReferenceControl.objects.filter(
+                urn__in=[urn.lower() for urn in deferred["reference_controls"] or []]
+            )
+            if controls.exists() or obj.reference_controls.exists():
+                obj.reference_controls.set(controls)
+
+        # Threats are never deleted on update: seven user-data relations point at
+        # them. Rows dropped upstream are flagged so pickers can exclude them
+        # while risk scenarios and kill chains keep their referents.
+        incoming = {threat["urn"].lower() for threat in self.threats}
+        Threat.objects.filter(library=self.old_library).exclude(
+            urn__in=incoming
+        ).update(is_deprecated=True)
 
     def update_reference_controls(self):
         for reference_control in self.reference_controls:
@@ -1715,8 +1762,9 @@ class LibraryUpdater:
         for new_dependency in new_dependencies:
             self.old_library.dependencies.add(new_dependency)
 
-        self.update_threats()
+        self.update_threat_catalogs()
         self.update_reference_controls()
+        self.update_threats()
         self.update_metric_definitions()
 
         if self.new_frameworks is not None:
@@ -2513,12 +2561,38 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         )
 
 
+class ThreatCatalog(ReferentialObjectMixin, I18nObjectMixin):
+    """Organizing structure for threats. Framework's sibling, minus assessment."""
+
+    library = models.ForeignKey(
+        LoadedLibrary,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="threat_catalogs",
+    )
+    grouping_definition = models.JSONField(
+        blank=True, null=True, verbose_name=_("Grouping definition")
+    )
+
+    fields_to_check = ["ref_id", "name"]
+
+    class Meta:
+        verbose_name = _("Threat catalog")
+        verbose_name_plural = _("Threat catalogs")
+
+
 class Threat(
     ReferentialObjectMixin,
     I18nObjectMixin,
     PublishInRootFolderMixin,
     FilteringLabelMixin,
 ):
+    class Type(models.TextChoices):
+        GENERIC = "generic", _("Generic")
+        EVENT = "event", _("Event")
+        TECHNIQUE = "technique", _("Technique")
+
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -2528,6 +2602,39 @@ class Threat(
     )
 
     is_published = models.BooleanField(_("published"), default=True)
+
+    type = models.CharField(
+        max_length=20,
+        choices=Type.choices,
+        default=Type.GENERIC,
+        verbose_name=_("Type"),
+    )
+    selectable = models.BooleanField(default=True, verbose_name=_("Selectable"))
+    is_deprecated = models.BooleanField(default=False, verbose_name=_("Deprecated"))
+    catalog = models.ForeignKey(
+        ThreatCatalog,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="threats",
+        verbose_name=_("Catalog"),
+    )
+    parent = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="children",
+        verbose_name=_("Parent"),
+    )
+    order_id = models.IntegerField(null=True, verbose_name=_("Order ID"))
+    groups = models.JSONField(null=True, blank=True, verbose_name=_("Groups"))
+    reference_controls = models.ManyToManyField(
+        "ReferenceControl",
+        blank=True,
+        related_name="threats",
+        verbose_name=_("Reference controls"),
+    )
 
     fields_to_check = ["ref_id", "name"]
 
@@ -2547,8 +2654,14 @@ class Threat(
     def frameworks(self):
         return Framework.objects.filter(requirement__threats=self).distinct()
 
-    def __str__(self):
-        return self.name
+    @property
+    def display_short(self) -> str:
+        if self.parent_id is None:
+            return super().display_short
+        return (
+            f"{self.ref_id} - {self.parent.get_name_translated}: "
+            f"{self.get_name_translated}"
+        )
 
 
 class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMixin):

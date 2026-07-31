@@ -60,6 +60,37 @@ def print_error(message: str) -> None:
 # --- Translation helpers ------------------------------------------------------
 
 
+_UNEVALUATED_FORMULA_COUNT = 0
+
+
+def is_unevaluated_formula(value) -> bool:
+    """A spreadsheet formula that was never evaluated to a value.
+
+    Translation columns are authored as formulas (e.g. =TRADUIRE(B2,"en","fr"))
+    which must be evaluated in the spreadsheet and pasted back as values before
+    conversion. Exporting the formula text itself yields a "translation" that
+    renders as '=TRADUIRE(...)' in the UI, silently replacing real content.
+    """
+    return isinstance(value, str) and value.lstrip().startswith("=")
+
+
+def _clean_translation(value):
+    global _UNEVALUATED_FORMULA_COUNT
+    if is_unevaluated_formula(value):
+        _UNEVALUATED_FORMULA_COUNT += 1
+        return None
+    return str(value).strip()
+
+
+def report_unevaluated_formulas():
+    if _UNEVALUATED_FORMULA_COUNT:
+        print(
+            f"⚠️  [WARNING] Skipped {_UNEVALUATED_FORMULA_COUNT} translation cell(s) "
+            "holding unevaluated formulas. Evaluate them in the spreadsheet and "
+            "paste back as values, or the library ships without those translations."
+        )
+
+
 def extract_translations_from_row(header, row):
     translations = {}
     for i, col_name in enumerate(header):
@@ -67,8 +98,8 @@ def extract_translations_from_row(header, row):
         if match and i < len(row):
             base_key, lang = match.groups()
             value = row[i].value
-            if value:
-                translations.setdefault(lang, {})[base_key] = str(value).strip()
+            if value and (cleaned := _clean_translation(value)):
+                translations.setdefault(lang, {})[base_key] = cleaned
     return translations
 
 
@@ -77,9 +108,9 @@ def extract_translations_from_metadata(meta_dict, prefix):
     pattern = re.compile(r"(\w+)\[(\w+)\]")
     for key, value in meta_dict.items():
         match = pattern.match(key)
-        if match and value:
+        if match and value and (cleaned := _clean_translation(value)):
             base_key, lang = match.groups()
-            translations.setdefault(lang, {})[base_key] = str(value).strip()
+            translations.setdefault(lang, {})[base_key] = cleaned
     return translations
 
 
@@ -797,7 +828,13 @@ def _per_choice_lines(data: dict, col: str, n_choices: int, answer_id: str):
 
 # --- Object type handlers -----------------------------------------------------
 
-_SKIPPED_TYPES = {"answers", "implementation_groups", "scores", "urn_prefix"}
+_SKIPPED_TYPES = {
+    "answers",
+    "implementation_groups",
+    "scores",
+    "urn_prefix",
+    "threat_groups",  # consumed via threat_catalog meta.grouping_definition
+}
 
 
 def _handle_reference_controls(obj, library, compat_mode, verbose):
@@ -846,10 +883,54 @@ def _handle_reference_controls(obj, library, compat_mode, verbose):
     extend_or_set(library["objects"], "reference_controls", controls)
 
 
-def _handle_threats(obj, library, compat_mode, verbose):
+def _handle_threat_catalog(obj, library, object_blocks, compat_mode, verbose):
+    """Process a threat_catalog object block into the library."""
+    catalogs = []
+    meta = obj["meta"]
+    base_urn = meta.get("base_urn")
+    header, rows_with_data = parse_content_rows(obj["content_sheet"])
+    if not header:
+        return
+
+    # Named block of facet definitions, as framework does for
+    # implementation_groups_definition.
+    grouping_defs = []
+    grouping_name = meta.get("grouping_definition")
+    if grouping_name and grouping_name in object_blocks:
+        g_header, g_rows = parse_content_rows(
+            object_blocks[grouping_name]["content_sheet"]
+        )
+        for row, data in g_rows:
+            entry = {
+                "ref_id": str(data.get("ref_id", "")).strip(),
+                "name": str(data.get("name", "")).strip(),
+            }
+            set_optional_fields(entry, data, ["description", "dimension"])
+            attach_translations_from_row(entry, g_header, row)
+            grouping_defs.append(entry)
+
+    for row, data in rows_with_data:
+        ref_id = str(data.get("ref_id", "")).strip()
+        if not ref_id:
+            continue
+
+        entry = {"urn": f"{base_urn}:{ref_id.lower()}", "ref_id": ref_id}
+        set_optional_fields(entry, data, ["name", "description", "annotation"])
+        if grouping_defs:
+            entry["grouping_definition"] = grouping_defs
+        attach_translations_from_row(entry, header, row)
+        catalogs.append(entry)
+
+    extend_or_set(library["objects"], "threat_catalogs", catalogs)
+
+
+def _handle_threats(obj, library, prefix_to_urn, compat_mode, verbose):
     """Process a threats object block into the library."""
     threats = []
-    base_urn = obj["meta"].get("base_urn")
+    meta = obj["meta"]
+    base_urn = meta.get("base_urn")
+    # A threats sheet belongs to at most one catalog.
+    catalog_urn = meta.get("catalog_urn")
     header, rows_with_data = parse_content_rows(obj["content_sheet"])
     if not header:
         return
@@ -867,7 +948,38 @@ def _handle_threats(obj, library, compat_mode, verbose):
             urn_suffix = ref_id.lower()
 
         entry = {"urn": f"{base_urn}:{urn_suffix}", "ref_id": ref_id}
-        set_optional_fields(entry, data, ["name", "description", "annotation"])
+        set_optional_fields(entry, data, ["name", "description", "annotation", "type"])
+        if catalog_urn:
+            entry["catalog_urn"] = catalog_urn
+
+        # Explicit parent_ref_id rather than the positional `depth` column
+        # frameworks use: threat sheets get sorted.
+        parent_ref_id = data.get("parent_ref_id")
+        if parent_ref_id and str(parent_ref_id).strip():
+            entry["parent_urn"] = f"{base_urn}:{str(parent_ref_id).strip().lower()}"
+
+        selectable = data.get("selectable")
+        if selectable is not None and str(selectable).strip() != "":
+            entry["selectable"] = str(selectable).strip().lower() not in (
+                "false",
+                "no",
+                "0",
+            )
+
+        if groups := data.get("groups"):
+            entry["groups"] = [
+                item.strip()
+                for item in re.split(r"\s*,\s*", str(groups))
+                if item.strip()
+            ]
+
+        if data.get("reference_controls"):
+            controls = expand_urns_from_prefixed_list(
+                data["reference_controls"], prefix_to_urn, compat_mode, verbose
+            )
+            if controls:
+                entry["reference_controls"] = controls
+
         attach_translations_from_row(entry, header, row)
         threats.append(entry)
 
@@ -1732,6 +1844,7 @@ def validate_name_lengths(library: dict) -> list:
     # Check list-based object types
     for obj_type in (
         "threats",
+        "threat_catalogs",
         "reference_controls",
         "risk_matrix",
         "metric_definitions",
@@ -1890,8 +2003,9 @@ def create_library(
 
     print(f"📦 Found {len(object_blocks)} objects.")
 
-    # Step 5: Ordered object insertion (reference_controls before threats)
-    priority_order = ["reference_controls", "threats"]
+    # Step 5: Ordered object insertion. Threats reference both, so the catalog
+    # and the reference controls have to be emitted first.
+    priority_order = ["threat_catalog", "reference_controls", "threats"]
 
     sorted_object_names = sorted(
         object_blocks.keys(),
@@ -1907,7 +2021,12 @@ def create_library(
         "reference_controls": lambda obj: _handle_reference_controls(
             obj, library, compat_mode, verbose
         ),
-        "threats": lambda obj: _handle_threats(obj, library, compat_mode, verbose),
+        "threat_catalog": lambda obj: _handle_threat_catalog(
+            obj, library, object_blocks, compat_mode, verbose
+        ),
+        "threats": lambda obj: _handle_threats(
+            obj, library, prefix_to_urn, compat_mode, verbose
+        ),
         "framework": lambda obj: _handle_framework(
             obj, library, object_blocks, prefix_to_urn, compat_mode, verbose
         ),
@@ -1944,6 +2063,7 @@ def create_library(
         )
 
     # Step 7: Export to YAML
+    report_unevaluated_formulas()
     print(f'✅ YAML saved as: "{output_file}"')
     if not verbose:
         print(

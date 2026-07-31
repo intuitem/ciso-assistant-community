@@ -645,8 +645,10 @@
 																	>
 																{:else if val.str}
 																	{safeTranslate(val.str)}
+																{:else if typeof val === 'string'}
+																	{safeTranslate(val)}
 																{:else}
-																	{value}
+																	{val}
 																{/if}
 															</li>
 														{/each}
@@ -720,8 +722,10 @@
 																	{val.str}
 																{:else if val.str}
 																	{safeTranslate(val.str)}
+																{:else if typeof val === 'string'}
+																	{safeTranslate(val)}
 																{:else}
-																	{value}
+																	{val}
 																{/if}
 															</li>
 														{/each}

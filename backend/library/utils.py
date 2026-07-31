@@ -19,6 +19,7 @@ from core.models import (
     ReferenceControl,
     Terminology,
     Threat,
+    ThreatCatalog,
     _sync_questions_from_data,
 )
 from metrology.models import MetricDefinition
@@ -447,31 +448,106 @@ class FrameworkImporter:
             ).delete()
 
 
+class ThreatCatalogImporter:
+    REQUIRED_FIELDS = {"ref_id", "urn"}
+
+    def __init__(self, catalog_data: dict):
+        self.catalog_data = catalog_data
+
+    def is_valid(self) -> Union[str, None]:
+        if missing_fields := self.REQUIRED_FIELDS - set(self.catalog_data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+
+    def import_threat_catalog(self, library_object: LoadedLibrary):
+        ThreatCatalog.objects.create(
+            library=library_object,
+            urn=self.catalog_data["urn"].lower(),
+            ref_id=self.catalog_data["ref_id"],
+            name=self.catalog_data.get("name"),
+            description=self.catalog_data.get("description"),
+            annotation=self.catalog_data.get("annotation"),
+            grouping_definition=self.catalog_data.get("grouping_definition"),
+            provider=library_object.provider,
+            is_published=True,
+            locale=library_object.locale,
+            translations=self.catalog_data.get("translations", {}),
+            default_locale=library_object.default_locale,
+        )
+
+
 class ThreatImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
 
-    def __init__(self, threat_data: dict):
+    def __init__(self, threat_data: dict, index: int = 0):
         self.threat_data = threat_data
+        self.index = index
         self._object = None
 
     def is_valid(self) -> Union[str, None]:
         if missing_fields := self.REQUIRED_FIELDS - set(self.threat_data.keys()):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
 
+    def _resolve(self, model, urn: str, field: str):
+        try:
+            return model.objects.get(urn=urn.lower())
+        except model.DoesNotExist as exc:
+            identifier = self.threat_data.get("ref_id", self.threat_data.get("urn"))
+            error_message = (
+                f"Unknown {field} '{urn or 'unknown'}' "
+                f"referenced in threat '{identifier}'."
+            )
+            logger.error(error_message)
+            raise ValueError(error_message) from exc
+
     def import_threat(self, library_object: LoadedLibrary):
-        Threat.objects.create(
+        catalog = None
+        if catalog_urn := self.threat_data.get("catalog_urn"):
+            catalog = self._resolve(ThreatCatalog, catalog_urn, "threat catalog")
+
+        self._object = Threat.objects.create(
             library=library_object,
             urn=self.threat_data["urn"].lower(),
             ref_id=self.threat_data["ref_id"],
             name=self.threat_data.get("name"),
             description=self.threat_data.get("description"),
             annotation=self.threat_data.get("annotation"),
+            type=self.threat_data.get("type", Threat.Type.GENERIC),
+            selectable=self.threat_data.get("selectable", True),
+            is_deprecated=self.threat_data.get("is_deprecated", False),
+            catalog=catalog,
+            order_id=self.threat_data.get("order_id", self.index),
+            groups=self.threat_data.get("groups"),
             provider=library_object.provider,
             is_published=True,
             locale=library_object.locale,
             translations=self.threat_data.get("translations", {}),
             default_locale=library_object.default_locale,  # Change this in the future ?
         )
+
+    def link_threat(self):
+        """Second pass: resolve links whose targets may not exist at create time.
+
+        `parent` because YAML order does not guarantee parents precede children,
+        `reference_controls` because import_objects loads threats before them.
+        """
+        if self._object is None:
+            return
+
+        changed = False
+        if parent_urn := self.threat_data.get("parent_urn"):
+            self._object.parent = self._resolve(Threat, parent_urn, "parent threat")
+            changed = True
+        if changed:
+            self._object.save(update_fields=["parent"])
+
+        reference_controls = [
+            self._resolve(ReferenceControl, urn, "reference control")
+            for urn in self.threat_data.get("reference_controls", [])
+        ]
+        # .set() rather than .add(): a link removed from the document must be
+        # removed from the live row on the re-import path.
+        if reference_controls or self._object.reference_controls.exists():
+            self._object.reference_controls.set(reference_controls)
 
 
 # The couple (URN, locale) is unique. ===> Check it in the future
@@ -650,6 +726,7 @@ class LibraryImporter:
 
     REQUIRED_FIELDS = {"ref_id", "urn", "locale", "objects", "version"}
     OBJECT_FIELDS = [
+        "threat_catalogs",
         "threats",
         "reference_controls",
         "metric_definitions",
@@ -670,17 +747,39 @@ class LibraryImporter:
     def __init__(self, library: StoredLibrary):
         self._library = library
         self._frameworks = []
+        self._threat_catalogs = []
         self._threats = []
         self._reference_controls = []
         self._metric_definitions = []
         self._risk_matrices = []
         self._requirement_mapping_sets = []
 
+    def init_threat_catalogs(self, threat_catalogs: List[dict]) -> Union[str, None]:
+        catalog_importers = []
+        import_errors = []
+        for index, catalog_data in enumerate(threat_catalogs):
+            catalog_importer = ThreatCatalogImporter(catalog_data)
+            catalog_importers.append(catalog_importer)
+            if (catalog_error := catalog_importer.is_valid()) is not None:
+                import_errors.append((index, catalog_error))
+
+        self._threat_catalogs = catalog_importers
+
+        if import_errors:
+            invalid_index, invalid_error = import_errors[0]
+            return "[THREAT_CATALOG_ERROR] {} invalid threat catalog{} detected, the {}{} has the following error : {}".format(
+                len(import_errors),
+                "s" if len(import_errors) > 1 else "",
+                invalid_index + 1,
+                {1: "st", 2: "nd", 3: "rd"}.get(invalid_index + 1, "th"),
+                invalid_error,
+            )
+
     def init_threats(self, threats: List[dict]) -> Union[str, None]:
         threat_importers = []
         import_errors = []
         for index, threat_data in enumerate(threats):
-            threat_importer = ThreatImporter(threat_data)
+            threat_importer = ThreatImporter(threat_data, index)
             threat_importers.append(threat_importer)
             if (threat_error := threat_importer.is_valid()) is not None:
                 import_errors.append((index, threat_error))
@@ -906,6 +1005,14 @@ class LibraryImporter:
                 )
                 return requirement_mapping_set_import_error
 
+        if "threat_catalogs" in library_objects:
+            catalog_data = library_objects["threat_catalogs"]
+            if (
+                catalog_import_error := self.init_threat_catalogs(catalog_data)
+            ) is not None:
+                logger.error("Threat catalog import error", error=catalog_import_error)
+                return catalog_import_error
+
         if "threats" in library_objects:
             threat_data = library_objects["threats"]
             if (threat_import_error := self.init_threats(threat_data)) is not None:
@@ -1018,11 +1125,19 @@ class LibraryImporter:
     def import_objects(self, library_object: LoadedLibrary):
         """Import library objects."""
 
+        for threat_catalog in self._threat_catalogs:
+            threat_catalog.import_threat_catalog(library_object)
+
         for threat in self._threats:
             threat.import_threat(library_object)
 
         for reference_control in self._reference_controls:
             reference_control.import_reference_control(library_object)
+
+        # After reference controls: threats link to them, and to parent threats
+        # whose rows are only guaranteed to exist once the loop above is done.
+        for threat in self._threats:
+            threat.link_threat()
 
         for metric_definition in self._metric_definitions:
             metric_definition.import_metric_definition(library_object)

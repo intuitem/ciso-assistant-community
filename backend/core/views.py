@@ -1951,21 +1951,115 @@ class ThreatViewSet(BaseModelViewSet):
         "findings",
         "filtering_labels",
         "urn",
+        "type",
+        "selectable",
+        "is_deprecated",
+        "catalog",
+        "parent",
     ]
     search_fields = ["ref_id", "name", "provider", "description"]
 
     def get_queryset(self):
-        return (
+        queryset = (
             super()
             .get_queryset()
             .select_related(
                 "folder",
                 "folder__parent_folder",  # For get_folder_full_path() optimization
                 "library",  # FieldsRelatedField includes library
+                "parent",  # display_short composes the parent name
+                "catalog",
             )
             .prefetch_related(
                 "filtering_labels__folder",  # FieldsRelatedField includes folder
+                "reference_controls",
             )
+        )
+        # Structural rows (matrix columns) and retired ones are not attachable,
+        # so they stay out of every picker unless asked for explicitly. All seven
+        # threat pickers share this endpoint, hence one filter rather than seven.
+        params = self.request.query_params
+        if "selectable" not in params and "catalog" not in params:
+            queryset = queryset.filter(selectable=True)
+        if "is_deprecated" not in params:
+            queryset = queryset.filter(is_deprecated=False)
+        return queryset
+
+    @action(detail=False, name="Get type choices")
+    def type(self, request):
+        return Response(dict(Threat.Type.choices))
+
+
+class ThreatCatalogViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows threat catalogs to be viewed or edited.
+    """
+
+    model = ThreatCatalog
+    filterset_fields = ["folder", "provider", "library", "urn"]
+    search_fields = ["ref_id", "name", "provider", "description"]
+
+    @action(detail=True, name="Get the catalog rendered as a matrix")
+    def matrix(self, request, pk):
+        catalog = self.get_object()
+        grouping = catalog.grouping_definition or []
+        # The column axis is whichever grouping entries declare dimension
+        # "tactic"; their order in the JSON array is the column order.
+        columns = [entry for entry in grouping if entry.get("dimension") == "tactic"]
+
+        threats = (
+            Threat.objects.filter(catalog=catalog, selectable=True)
+            .select_related("parent")
+            .order_by(F("order_id").asc(nulls_last=True))
+        )
+
+        children = {}
+        cells = []
+        for threat in threats:
+            payload = {
+                "id": threat.id,
+                "ref_id": threat.ref_id,
+                "name": threat.get_name_translated,
+                "groups": threat.groups or [],
+                "is_deprecated": threat.is_deprecated,
+            }
+            if threat.parent_id:
+                children.setdefault(str(threat.parent_id), []).append(payload)
+            else:
+                cells.append(payload)
+
+        # Matching the published matrices, verified against attack.mitre.org
+        # 2026-07-30: techniques within a tactic are ordered by NAME, while
+        # sub-techniques under a parent stay in ref_id order. `order_id` orders
+        # the tactic columns, not the cells inside them.
+        for cell in cells:
+            cell["children"] = sorted(
+                children.pop(str(cell["id"]), []), key=lambda item: item["ref_id"]
+            )
+
+        # A sub-technique whose parent is not itself selectable would otherwise
+        # vanish from the matrix entirely.
+        for orphans in children.values():
+            cells.extend(orphans)
+
+        cells.sort(key=lambda item: item["name"].casefold())
+
+        return Response(
+            {
+                "catalog": {
+                    "id": catalog.id,
+                    "ref_id": catalog.ref_id,
+                    "name": catalog.get_name_translated,
+                    "description": catalog.get_description_translated,
+                },
+                "columns": columns,
+                "facets": [
+                    entry
+                    for entry in grouping
+                    if entry.get("dimension") not in (None, "tactic")
+                ],
+                "cells": cells,
+            }
         )
 
     def list(self, request, *args, **kwargs):

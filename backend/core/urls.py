@@ -41,6 +41,7 @@ router.register(r"risk-matrices", RiskMatrixViewSet, basename="risk-matrices")
 router.register(r"vulnerabilities", VulnerabilityViewSet, basename="vulnerabilities")
 router.register(r"risk-assessments", RiskAssessmentViewSet, basename="risk-assessments")
 router.register(r"threats", ThreatViewSet, basename="threats")
+router.register(r"threat-catalogs", ThreatCatalogViewSet, basename="threat-catalogs")
 router.register(
     r"security-advisories", SecurityAdvisoryViewSet, basename="security-advisories"
 )

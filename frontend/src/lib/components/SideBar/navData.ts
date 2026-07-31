@@ -115,6 +115,11 @@ export const navData = {
 					href: '/threats'
 				},
 				{
+					name: 'threatCatalogs',
+					fa_icon: 'fa-solid fa-table-cells',
+					href: '/threat-catalogs'
+				},
+				{
 					name: 'securityAdvisories',
 					fa_icon: 'fa-solid fa-shield-virus',
 					href: '/security-advisories'

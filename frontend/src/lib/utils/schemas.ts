@@ -168,7 +168,21 @@ export const ThreatSchema = z.object({
 	ref_id: z.string().optional(),
 	annotation: z.string().optional().nullable(),
 	filtering_labels: z.string().optional().array().optional(),
-	findings: z.string().uuid().optional().array().optional()
+	findings: z.string().uuid().optional().array().optional(),
+	type: z.string().optional(),
+	selectable: z.boolean().optional(),
+	is_deprecated: z.boolean().optional(),
+	catalog: z.string().uuid().optional().nullable(),
+	parent: z.string().uuid().optional().nullable(),
+	reference_controls: z.string().uuid().optional().array().optional()
+});
+
+export const ThreatCatalogSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	provider: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
+	annotation: z.string().optional().nullable()
 });
 
 export const SecurityAdvisorySchema = z.object({
@@ -1938,6 +1952,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'risk-matrices': RiskMatrixSchema,
 	'risk-assessments': RiskAssessmentSchema,
 	threats: ThreatSchema,
+	'threat-catalogs': ThreatCatalogSchema,
 	'security-advisories': SecurityAdvisorySchema,
 	cwes: CWESchema,
 	'risk-scenarios': RiskScenarioSchema,

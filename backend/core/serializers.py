@@ -1157,19 +1157,36 @@ class ThreatReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    catalog = FieldsRelatedField()
+    parent = FieldsRelatedField()
+    reference_controls = FieldsRelatedField(many=True)
 
     class Meta:
         model = Threat
         exclude = ["translations"]
 
 
-class ThreatImportExportSerializer(BaseModelSerializer):
-    library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+class ThreatCatalogWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = ThreatCatalog
+        exclude = ["translations"]
 
+
+class ThreatCatalogReadSerializer(ReferentialSerializer):
+    folder = FieldsRelatedField()
+    library = FieldsRelatedField(["name", "id"])
+
+    class Meta:
+        model = ThreatCatalog
+        exclude = ["translations"]
+
+
+class ThreatCatalogImportExportSerializer(BaseModelSerializer):
+    library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
 
     class Meta:
-        model = Threat
+        model = ThreatCatalog
         fields = [
             "created_at",
             "updated_at",
@@ -1184,6 +1201,45 @@ class ThreatImportExportSerializer(BaseModelSerializer):
             "locale",
             "default_locale",
             "library",
+            "grouping_definition",
+        ]
+
+
+class ThreatImportExportSerializer(BaseModelSerializer):
+    library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    catalog = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+    parent = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+    reference_controls = serializers.SlugRelatedField(
+        slug_field="urn", read_only=True, many=True
+    )
+
+    class Meta:
+        model = Threat
+        # Explicit list: any new field must be added here or serdes drops it.
+        fields = [
+            "created_at",
+            "updated_at",
+            "folder",
+            "urn",
+            "ref_id",
+            "provider",
+            "name",
+            "description",
+            "annotation",
+            "translations",
+            "locale",
+            "default_locale",
+            "library",
+            "type",
+            "selectable",
+            "is_deprecated",
+            "catalog",
+            "parent",
+            "order_id",
+            "groups",
+            "reference_controls",
         ]
 
 
