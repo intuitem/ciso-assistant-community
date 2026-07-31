@@ -13,6 +13,10 @@
 
 	import { getFlash } from 'sveltekit-flash-message';
 	import { page } from '$app/stores';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 
 	let { data } = $props();
 	let expandedNodes: string[] = $state([]);
@@ -24,28 +28,19 @@
 	const workflowCount = $derived(data.library.objects_meta?.workflows ?? 0);
 	let instantiating = $state(false);
 	let instantiateFolder = $state('');
-	let folderOptions = $state<{ id: string; name?: string; str?: string }[]>([]);
 	let instantiateBusy = $state(false);
 
-	async function openInstantiate() {
-		instantiating = !instantiating;
-		if (instantiating && folderOptions.length === 0) {
-			const res = await fetch(
-				'/folders/org_tree/?include_perimeters=false&write_perm=add_workflow'
-			);
-			const tree = await res.json().catch(() => null);
-			const flat: { id: string; name: string }[] = [];
-			const visit = (node: any, depth: number) => {
-				if (!node) return;
-				const allowed = !node.content_type || ['DO', 'GL'].includes(node.content_type);
-				if (allowed && node.writable !== false)
-					flat.push({ id: node.uuid ?? node.id, name: `${'  '.repeat(depth)}${node.name}` });
-				(node.children ?? []).forEach((child: any) => visit(child, depth + 1));
-			};
-			visit(tree, 0);
-			folderOptions = flat;
-		}
-	}
+	// Standalone SPA form backing the hierarchical domain picker
+	// (FolderTreeSelect requires a SuperForm); the picked id mirrors into
+	// instantiateFolder via onChange. Field is target_folder (not "folder")
+	// so the personal-space option never appears.
+	const folderSchema = z.object({ target_folder: z.string() });
+	const _folderForm = superForm(defaults({ target_folder: '' }, zod(folderSchema)), {
+		dataType: 'json',
+		taintedMessage: false,
+		validators: zod(folderSchema),
+		SPA: true
+	});
 
 	async function instantiateWorkflows() {
 		if (!instantiateFolder) return;
@@ -188,24 +183,23 @@
 				<button
 					type="button"
 					class="btn preset-filled-primary-500 text-sm"
-					onclick={openInstantiate}
+					onclick={() => (instantiating = !instantiating)}
 					data-testid="instantiate-workflows"
 				>
 					<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>{m.instantiateWorkflow()}
 				</button>
 			</div>
 			{#if instantiating}
-				<div class="flex items-center gap-2">
-					<select
-						class="select w-64 text-sm"
-						bind:value={instantiateFolder}
-						data-testid="instantiate-folder"
-					>
-						<option value="">{m.domain()}…</option>
-						{#each folderOptions as folder (folder.id)}
-							<option value={folder.id}>{folder.name ?? folder.str}</option>
-						{/each}
-					</select>
+				<div class="flex items-end gap-2">
+					<div class="w-64" data-testid="instantiate-folder">
+						<FolderTreeSelect
+							form={_folderForm}
+							field="target_folder"
+							label={m.domain()}
+							writePermission="add_workflow"
+							onChange={(value: any) => (instantiateFolder = value ?? '')}
+						/>
+					</div>
 					<button
 						type="button"
 						class="btn preset-tonal text-sm"
