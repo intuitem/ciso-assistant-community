@@ -439,7 +439,15 @@ class WorkflowInstanceViewSet(BaseModelViewSet):
         """Launching a run: POST {version: uuid, entry_node_ref?: str}.
         Without an entry ref the engine's default rule applies (the manual
         trigger node, or the sole trigger node)."""
-        version = get_object_or_404(WorkflowVersion, id=request.data.get("version"))
+        # Scope the lookup to versions the user can view, so out-of-scope
+        # UUIDs 404 like everywhere else instead of confirming existence.
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, WorkflowVersion
+        )
+        version = get_object_or_404(
+            WorkflowVersion.objects.filter(id__in=viewable_ids),
+            id=request.data.get("version"),
+        )
         # Authorization: starting a run creates a WorkflowInstance in the
         # version's folder, so require add_workflowinstance there (this custom
         # create bypasses the base viewset's queryset scoping otherwise).

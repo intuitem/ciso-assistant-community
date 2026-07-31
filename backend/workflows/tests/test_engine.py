@@ -711,11 +711,13 @@ class TestManualRunAuthz:
         force_authenticate(req, user=user)
         return view(req)
 
-    def test_unprivileged_user_forbidden(self):
+    def test_unprivileged_user_gets_404(self):
+        # The version lookup is scoped to viewable objects, so a user with no
+        # access can't even confirm the version exists (404, not 403).
         workflow = self._publish_in(Folder.get_root_folder())
         user = User.objects.create_user(email="nobody@example.com")
         resp = self._post(str(workflow.published_version.id), user)
-        assert resp.status_code == 403
+        assert resp.status_code == 404
 
     def test_view_only_analyst_cannot_run_in_their_domain(self):
         domain = Folder.objects.create(
