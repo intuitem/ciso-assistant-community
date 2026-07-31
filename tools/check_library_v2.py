@@ -120,6 +120,15 @@ class ConsoleContext: # Maybe rename it to "Logger" and create a "Context/Config
         return {fn: len(self.verbose_messages.get(fn, [])) for fn in self._all_sheet_names}
 
 
+##### Regex & Characters for Formatting  #####
+class CommonSeparatorRegex(Enum):
+    LF = r"\n+"
+    SPACE_COMMA_LF = r"[\s,\n]+"
+
+class CommonLineBreakIndicator(Enum):
+    PIPE = "|"
+
+
 ##### Sheet Categories #####
 class MetaTypes(Enum):
     LIBRARY = "library"
@@ -145,6 +154,9 @@ class MandatorySheets(Enum):
     LIBRARY_META = "library_meta"
 
 
+## > [META]
+
+# > [META] Keys
 
 # [META] {ROOT} Base type for all meta sheet keys. For typing purpose only
 class MetaKey(str, Enum):
@@ -235,6 +247,8 @@ class URNPrefixMetaKeys(MetaKey):
     # No keys because only "type" is required
     pass
 
+
+# > [META] Schemas
 
 # Define the required, optional, and translatable keys of a meta sheet
 @dataclass(frozen=True)
@@ -336,6 +350,235 @@ META_SHEET_SCHEMAS: Mapping[MetaTypes, MetaSheetSchema] = MappingProxyType({
 })
 
 
+
+## > [CONTENT]
+
+# [CONTENT] {ROOT} Base type for all content sheet columns. For typing purpose only
+class ContentColumn(str, Enum):
+    pass
+
+# > [CONTENT] Columns
+
+# [CONTENT] Framework supported columns
+class FrameworkContentColumns(ContentColumn):
+    ASSESSABLE = "assessable"
+    DEPTH = "depth"
+    REF_ID = "ref_id"
+    URN_ID = "urn_id"
+    NAME = "name"
+    DESCRIPTION = "description"
+    ANNOTATION = "annotation"
+    TYPICAL_EVIDENCE = "typical_evidence"
+    IMPORTANCE = "importance"
+    WEIGHT = "weight"
+    MIN_SCORE = "min_score"
+    MAX_SCORE = "max_score"
+    SCORES_DEFINITION = "scores_definition"
+    IMPLEMENTATION_GROUPS = "implementation_groups"
+    QUESTIONS = "questions"
+    ANSWER = "answer"
+    DEPENDS_ON = "depends_on"
+    CONDITION = "condition"
+    THREATS = "threats"
+    REFERENCE_CONTROLS = "reference_controls"
+
+
+# [CONTENT] Threats supported columns
+class ThreatsContentColumns(ContentColumn):
+    REF_ID = "ref_id"
+    NAME = "name"
+    DESCRIPTION = "description"
+    ANNOTATION = "annotation"
+
+
+# [CONTENT] Reference Controls supported columns
+class ReferenceControlsContentColumns(ContentColumn):
+    REF_ID = "ref_id"
+    NAME = "name"
+    CATEGORY = "category"
+    CSF_FUNCTION = "csf_function"
+    DESCRIPTION = "description"
+    ANNOTATION = "annotation"
+
+
+# [CONTENT] Risk Matrix supported columns
+class RiskMatrixContentColumns(ContentColumn):
+    TYPE = "type"
+    ID = "id"
+    ABBREVIATION = "abbreviation"
+    NAME = "name"
+    DESCRIPTION = "description"
+
+
+# [CONTENT] Implementation Groups supported columns
+class ImplementationGroupsContentColumns(ContentColumn):
+    REF_ID = "ref_id"
+    NAME = "name"
+    DESCRIPTION = "description"
+    DEFAULT_SELECTED = "default_selected"
+
+
+# [CONTENT] Requirement Mapping Set supported columns
+class RequirementMappingSetContentColumns(ContentColumn):
+    SOURCE_NODE_ID = "source_node_id"
+    TARGET_NODE_ID = "target_node_id"
+    RELATIONSHIP = "relationship"
+    RATIONALE = "rationale"
+    STRENGTH_OF_RELATIONSHIP = "strength_of_relationship"
+
+
+# [CONTENT] Scores supported columns
+class ScoresContentColumns(ContentColumn):
+    SCORE = "score"
+    NAME = "name"
+    DESCRIPTION = "description"
+    DESCRIPTION_DOC = "description_doc"
+
+
+# [CONTENT] Answers supported columns
+class AnswersContentColumns(ContentColumn):
+    ID = "id"
+    QUESTION_TYPE = "question_type"
+    QUESTION_CHOICES = "question_choices"
+    DESCRIPTION = "description"
+    SELECT_IMPLEMENTATION_GROUPS = "select_implementation_groups"
+    ADD_SCORE = "add_score"
+    COMPUTE_RESULT = "compute_result"
+    COLOR = "color"
+
+
+# [CONTENT] URN Prefix supported columns
+class URNPrefixContentColumns(ContentColumn):
+    PREFIX_ID = "prefix_id"
+    PREFIX_VALUE = "prefix_value"
+
+
+# Define the required, optional, and translatable columns of a content sheet
+@dataclass(frozen=True)
+class ContentSheetSchema:
+    column_enum: type[ContentColumn]
+    required_columns: tuple[ContentColumn, ...]
+    optional_columns: tuple[ContentColumn, ...] = ()
+    translatable_columns: tuple[ContentColumn, ...] = ()
+
+    # Check if every column is from the same Enum family
+    def __post_init__(self):
+        column_groups = (self.required_columns, self.optional_columns, self.translatable_columns)
+
+        for columns in column_groups:
+            if not all(isinstance(column, self.column_enum) for column in columns):
+                raise TypeError(f"All schema columns must come from {self.column_enum.__name__}")
+
+    @staticmethod
+    def _to_values(columns: tuple[ContentColumn, ...]) -> tuple[str, ...]:
+        return tuple(column.value for column in columns)
+
+    @property
+    def required_column_values(self) -> tuple[str, ...]:
+        return self._to_values(self.required_columns)
+
+    @property
+    def optional_column_values(self) -> tuple[str, ...]:
+        return self._to_values(self.optional_columns)
+
+    @property
+    def translatable_column_values(self) -> tuple[str, ...]:
+        return self._to_values(self.translatable_columns)
+
+
+# Map each content sheet type to its validation schema
+CONTENT_SHEET_SCHEMAS: Mapping[MetaTypes, ContentSheetSchema] = MappingProxyType({
+    MetaTypes.FRAMEWORK: ContentSheetSchema(
+        column_enum=FrameworkContentColumns,
+        required_columns=(FrameworkContentColumns.DEPTH,),  # "assessable" isn't there because it has a special behavior (column is mandatory, but not the value in column)
+        optional_columns=(
+            FrameworkContentColumns.REF_ID, FrameworkContentColumns.URN_ID, FrameworkContentColumns.NAME,
+            FrameworkContentColumns.DESCRIPTION, FrameworkContentColumns.ANNOTATION, FrameworkContentColumns.TYPICAL_EVIDENCE,
+            FrameworkContentColumns.IMPORTANCE, FrameworkContentColumns.WEIGHT, FrameworkContentColumns.MIN_SCORE,
+            FrameworkContentColumns.MAX_SCORE, FrameworkContentColumns.SCORES_DEFINITION, FrameworkContentColumns.IMPLEMENTATION_GROUPS,
+            FrameworkContentColumns.QUESTIONS, FrameworkContentColumns.ANSWER, FrameworkContentColumns.DEPENDS_ON,
+            FrameworkContentColumns.CONDITION, FrameworkContentColumns.THREATS, FrameworkContentColumns.REFERENCE_CONTROLS,
+        ),
+        translatable_columns=(
+            FrameworkContentColumns.NAME, FrameworkContentColumns.DESCRIPTION, FrameworkContentColumns.ANNOTATION,
+            FrameworkContentColumns.TYPICAL_EVIDENCE, FrameworkContentColumns.QUESTIONS,
+        ),
+    ),
+    MetaTypes.THREATS: ContentSheetSchema(
+        column_enum=ThreatsContentColumns,
+        required_columns=(ThreatsContentColumns.REF_ID, ThreatsContentColumns.NAME),
+        optional_columns=(ThreatsContentColumns.DESCRIPTION, ThreatsContentColumns.ANNOTATION),
+        translatable_columns=(
+            ThreatsContentColumns.NAME, ThreatsContentColumns.DESCRIPTION, ThreatsContentColumns.ANNOTATION,
+        ),
+    ),
+    MetaTypes.REFERENCE_CONTROLS: ContentSheetSchema(
+        column_enum=ReferenceControlsContentColumns,
+        required_columns=(ReferenceControlsContentColumns.REF_ID, ReferenceControlsContentColumns.NAME),
+        optional_columns=(
+            ReferenceControlsContentColumns.CATEGORY, ReferenceControlsContentColumns.CSF_FUNCTION, 
+            ReferenceControlsContentColumns.DESCRIPTION, ReferenceControlsContentColumns.ANNOTATION,
+        ),
+        translatable_columns=(
+            ReferenceControlsContentColumns.NAME, ReferenceControlsContentColumns.DESCRIPTION,
+            ReferenceControlsContentColumns.ANNOTATION,
+        ),
+    ),
+    MetaTypes.RISK_MATRIX: ContentSheetSchema(
+        column_enum=RiskMatrixContentColumns,
+        required_columns=(
+            RiskMatrixContentColumns.TYPE, RiskMatrixContentColumns.ID, RiskMatrixContentColumns.ABBREVIATION,
+            RiskMatrixContentColumns.NAME, RiskMatrixContentColumns.DESCRIPTION,
+        ),
+        translatable_columns=(
+            RiskMatrixContentColumns.ABBREVIATION, RiskMatrixContentColumns.NAME, RiskMatrixContentColumns.DESCRIPTION,
+        ),
+    ),
+    MetaTypes.IMPLEMENTATION_GROUPS: ContentSheetSchema(
+        column_enum=ImplementationGroupsContentColumns,
+        required_columns=(ImplementationGroupsContentColumns.REF_ID, ImplementationGroupsContentColumns.NAME),
+        optional_columns=(
+            ImplementationGroupsContentColumns.DESCRIPTION, ImplementationGroupsContentColumns.DEFAULT_SELECTED,
+        ),
+        translatable_columns=(
+            ImplementationGroupsContentColumns.NAME, ImplementationGroupsContentColumns.DESCRIPTION,
+        ),
+    ),
+    MetaTypes.REQUIREMENT_MAPPING_SET: ContentSheetSchema(
+        column_enum=RequirementMappingSetContentColumns,
+        required_columns=(
+            RequirementMappingSetContentColumns.SOURCE_NODE_ID, RequirementMappingSetContentColumns.TARGET_NODE_ID,
+            RequirementMappingSetContentColumns.RELATIONSHIP,
+        ),
+        optional_columns=(
+            RequirementMappingSetContentColumns.RATIONALE, RequirementMappingSetContentColumns.STRENGTH_OF_RELATIONSHIP,
+        ),
+    ),
+    MetaTypes.SCORES: ContentSheetSchema(
+        column_enum=ScoresContentColumns,
+        required_columns=(ScoresContentColumns.SCORE, ScoresContentColumns.NAME),
+        optional_columns=(ScoresContentColumns.DESCRIPTION, ScoresContentColumns.DESCRIPTION_DOC),
+        translatable_columns=(
+            ScoresContentColumns.NAME, ScoresContentColumns.DESCRIPTION, ScoresContentColumns.DESCRIPTION_DOC,
+        ),
+    ),
+    MetaTypes.ANSWERS: ContentSheetSchema(
+        column_enum=AnswersContentColumns,
+        required_columns=(AnswersContentColumns.ID, AnswersContentColumns.QUESTION_TYPE),
+        optional_columns=(
+            AnswersContentColumns.QUESTION_CHOICES, AnswersContentColumns.DESCRIPTION,
+            AnswersContentColumns.SELECT_IMPLEMENTATION_GROUPS, AnswersContentColumns.ADD_SCORE,
+            AnswersContentColumns.COMPUTE_RESULT, AnswersContentColumns.COLOR,
+        ),
+        translatable_columns=(AnswersContentColumns.QUESTION_CHOICES, AnswersContentColumns.DESCRIPTION),
+    ),
+    MetaTypes.URN_PREFIX: ContentSheetSchema(
+        column_enum=URNPrefixContentColumns,
+        required_columns=(URNPrefixContentColumns.PREFIX_ID, URNPrefixContentColumns.PREFIX_VALUE),
+    ),
+})
+
+
 ##### YAML Specific #####
 class YAMLSectionTypes(Enum):
     THREATS = "threats"
@@ -379,13 +622,6 @@ class URNMetadataFormat(Enum):
     MATRIX_URN = f"{URNObjects.URN_BEGGINING.value}:{PACKAGER_INDICATOR}:{URNObjects.URN_3RD_WORD.value}:{URNObjects.MATRIX.value}:{ID_INDICATOR}"
 
 
-##### Regex & Characters for Formatting  #####
-class CommonSeparatorRegex(Enum):
-    LF = r"\n+"
-    SPACE_COMMA_LF = r"[\s,\n]+"
-
-class CommonLineBreakIndicator(Enum):
-    PIPE = "|"
 
 # ─────────────────────────────────────────────────────────────
 # MISC
@@ -3181,7 +3417,7 @@ def validate_reference_controls_content(df: pd.DataFrame, sheet_name: str, verbo
     
     fct_name = get_current_fct_name()
     required_columns = ["ref_id", "name"]
-    optional_columns = ["description", "category", "csf_function", "annotation"]
+    optional_columns = ["category", "description", "csf_function", "annotation"]
 
     # Special values
     category_values = ["policy", "process", "technical", "physical", "procedure"]
@@ -3300,7 +3536,7 @@ def validate_scores_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, ver
     
     fct_name = get_current_fct_name()
     required_columns = ["score", "name"]
-    optional_columns = ["description_doc", "description"]
+    optional_columns = ["description", "description_doc"]
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, optional_columns, fct_name, verbose, ctx)
@@ -3325,7 +3561,10 @@ def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, ve
     
     fct_name = get_current_fct_name()
     required_columns = ["id", "question_type"]
-    optional_columns = ["question_choices"]
+    optional_columns = [
+        "question_choices", "description", "select_implementation_groups",
+        "add_score", "compute_result", "color"
+    ]
 
     # Special values
     question_type_values = ["unique_choice", "multiple_choice", "text", "date"]
