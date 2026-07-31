@@ -1616,7 +1616,7 @@
 	}
 </script>
 
-<div class="flex flex-col h-full gap-3">
+<div class="workflow-builder flex flex-col h-full gap-3">
 	<div class="flex items-center gap-3 shrink-0">
 		<h1 class="text-lg font-semibold text-surface-900-100">{workflowName}</h1>
 		<span class="badge {badge.class} text-xs" data-testid="version-badge">
@@ -2085,5 +2085,13 @@
 	}
 	:global(.dark .svelte-flow .svelte-flow__edge-text) {
 		fill: var(--color-surface-300);
+	}
+	/* The theme's default placeholder color is nearly the input text color;
+	   builder fields lean on placeholders for {{...}} examples, so make them
+	   read as hints, not values. */
+	.workflow-builder :global(.input::placeholder),
+	.workflow-builder :global(.textarea::placeholder) {
+		color: var(--color-surface-400);
+		opacity: 1;
 	}
 </style>
