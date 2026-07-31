@@ -6,6 +6,7 @@ import FrameworkName from '$lib/components/ModelTable/field/FrameworkName.svelte
 import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/field/UserGroupNameDisplay.svelte';
 import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
+import TriggerTypesDisplay from '$lib/components/ModelTable/field/TriggerTypesDisplay.svelte';
 import { listViewFields } from './table';
 import type { urlModel } from './types';
 import LibraryOverview from '$lib/components/ModelTable/field/LibraryOverview.svelte';
@@ -3341,6 +3342,9 @@ const FIELD_COMPONENT_MAP = {
 	},
 	frameworks: {
 		name: FrameworkName
+	},
+	workflows: {
+		trigger_types: TriggerTypesDisplay
 	}
 };
 

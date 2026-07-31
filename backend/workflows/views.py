@@ -3,8 +3,10 @@ import hmac
 import json
 
 import yaml
+import django_filters as df
 from django.contrib.auth.models import Permission
 from django.db import transaction
+from django.db.models import Prefetch
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.crypto import constant_time_compare
@@ -18,7 +20,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import SimpleRateThrottle
 from rest_framework.views import APIView
 
-from core.views import BaseModelViewSet
+from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import Folder, RoleAssignment
 
 from .actions import required_permissions
@@ -49,12 +51,54 @@ from .validation import validate_graph
 LONG_CACHE_TTL = 60
 
 
+class WorkflowFilterSet(GenericFilterSet):
+    trigger_type = df.MultipleChoiceFilter(
+        choices=WorkflowNode.TriggerType.choices, method="filter_trigger_type"
+    )
+
+    def filter_trigger_type(self, queryset, name, value):
+        # Matches trigger nodes of non-archived versions. Slightly wider than
+        # the displayed trigger_types (published else draft) when a draft
+        # diverges from the published version, which is the useful behavior
+        # for "find my schedule workflows".
+        return queryset.filter(
+            versions__status__in=[
+                WorkflowVersion.Status.DRAFT,
+                WorkflowVersion.Status.PUBLISHED,
+            ],
+            versions__nodes__type=WorkflowNode.Type.TRIGGER,
+            versions__nodes__trigger_config__type__in=value,
+        ).distinct()
+
+    class Meta:
+        model = Workflow
+        fields = ["folder", "filtering_labels", "is_active"]
+
+
 class WorkflowViewSet(BaseModelViewSet):
     model = Workflow
     serializers_module = "workflows.serializers"
-    filterset_fields = ["folder", "filtering_labels", "is_active"]
+    filterset_class = WorkflowFilterSet
     search_fields = ["name", "description", "ref_id"]
     ordering = ["created_at"]
+
+    def get_queryset(self):
+        # trigger_types/versions are serialized per row; prefetch so the list
+        # view doesn't re-query per workflow.
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related(
+                "versions",
+                Prefetch(
+                    "versions__nodes",
+                    queryset=WorkflowNode.objects.filter(
+                        type=WorkflowNode.Type.TRIGGER
+                    ),
+                    to_attr="trigger_nodes",
+                ),
+            )
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get creatable models", url_path="creatable-models")

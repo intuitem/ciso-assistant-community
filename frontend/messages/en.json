@@ -5340,6 +5340,8 @@
 	"archivedVersion": "Archived",
 	"nodePalette": "Add a step",
 	"workflowNodeTrigger": "Trigger",
+	"triggerTypes": "Triggers",
+	"triggerType": "Trigger type",
 	"triggerManual": "Manual",
 	"triggerWebhook": "Webhook",
 	"triggerSchedule": "Schedule",

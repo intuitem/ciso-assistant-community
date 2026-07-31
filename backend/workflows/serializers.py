@@ -7,6 +7,7 @@ from workflows.models import (
     Workflow,
     WorkflowInstance,
     WorkflowInstanceLog,
+    WorkflowNode,
     WorkflowSecret,
     WorkflowToken,
     WorkflowTrigger,
@@ -19,6 +20,32 @@ class WorkflowReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     versions = serializers.SerializerMethodField()
+    trigger_types = serializers.SerializerMethodField()
+
+    def get_trigger_types(self, workflow):
+        # Trigger kinds of the current version (published, else draft), for
+        # the list view. Iterates the versions relation in Python so the
+        # viewset's prefetch is honored; uses the trigger_nodes prefetch when
+        # present and falls back to a query for routes without it.
+        versions = list(workflow.versions.all())
+        version = next(
+            (v for v in versions if v.status == WorkflowVersion.Status.PUBLISHED),
+            None,
+        ) or next(
+            (v for v in versions if v.status == WorkflowVersion.Status.DRAFT), None
+        )
+        if version is None:
+            return []
+        nodes = getattr(version, "trigger_nodes", None)
+        if nodes is None:
+            nodes = version.nodes.filter(type=WorkflowNode.Type.TRIGGER)
+        return sorted(
+            {
+                node.trigger_config.get("type")
+                for node in nodes
+                if node.trigger_config.get("type")
+            }
+        )
 
     def get_versions(self, workflow):
         # Versions-panel rows (spec D32): newest first, with run counts.

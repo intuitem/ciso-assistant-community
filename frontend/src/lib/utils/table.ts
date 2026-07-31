@@ -58,6 +58,13 @@ const YES_NO_OPTIONS = [
 	{ label: 'no', value: 'false' }
 ];
 
+const TRIGGER_TYPE_OPTIONS = [
+	{ label: 'triggerManual', value: 'manual' },
+	{ label: 'triggerWebhook', value: 'webhook' },
+	{ label: 'triggerSchedule', value: 'schedule' },
+	{ label: 'triggerInternalEvent', value: 'internal_event' }
+];
+
 const SOLUTION_CRITICALITY_OPTIONS = [
 	{ label: '1', value: '1' },
 	{ label: '2', value: '2' },
@@ -3086,11 +3093,19 @@ export const listViewFields = {
 		filters: {}
 	},
 	workflows: {
-		head: ['name', 'description', 'is_active', 'folder'],
-		body: ['name', 'description', 'is_active', 'folder'],
+		head: ['name', 'description', 'triggerTypes', 'is_active', 'folder'],
+		body: ['name', 'description', 'trigger_types', 'is_active', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,
+			trigger_type: {
+				component: AutocompleteSelect,
+				props: {
+					label: 'triggerType',
+					options: TRIGGER_TYPE_OPTIONS,
+					multiple: true
+				}
+			},
 			is_active: {
 				component: AutocompleteSelect,
 				props: {

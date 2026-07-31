@@ -211,6 +211,35 @@ class TestWorkflowCreation:
         names = {row["name"] for row in view(req).data["results"]}
         assert names == {"Live"}
 
+    def test_list_shows_and_filters_trigger_types(self, superuser):
+        root = Folder.get_root_folder()
+        manual_wf = Workflow.objects.create(name="Manual only", folder=root)
+        _put_graph(
+            WorkflowVersion.objects.create(workflow=manual_wf),
+            _minimal_graph(),
+            superuser,
+        )
+        sched_wf = Workflow.objects.create(name="Nightly", folder=root)
+        graph = _minimal_graph()
+        graph["nodes"][0]["trigger_config"] = {
+            "type": "schedule",
+            "cron_expression": "0 9 * * 1",
+        }
+        _put_graph(WorkflowVersion.objects.create(workflow=sched_wf), graph, superuser)
+
+        factory = APIRequestFactory()
+        view = WorkflowViewSet.as_view({"get": "list"})
+        req = factory.get("/api/workflows/workflows/")
+        force_authenticate(req, user=superuser)
+        rows = {row["name"]: row["trigger_types"] for row in view(req).data["results"]}
+        assert rows["Manual only"] == ["manual"]
+        assert rows["Nightly"] == ["schedule"]
+
+        req = factory.get("/api/workflows/workflows/?trigger_type=schedule")
+        force_authenticate(req, user=superuser)
+        names = {row["name"] for row in view(req).data["results"]}
+        assert names == {"Nightly"}
+
 
 @pytest.mark.django_db
 class TestGraphSave:
