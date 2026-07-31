@@ -129,6 +129,10 @@ class CommonSeparatorRegex(Enum):
 class CommonLineBreakIndicator(Enum):
     PIPE = "|"
 
+class CommonPatternRegex(Enum):
+    HEX_COLOR_OR_NONE = r"(?:#[0-9a-fA-F]{6}|/)"
+
+
 
 ##### Sheet Categories #####
 class MetaTypes(Enum):
@@ -459,7 +463,7 @@ class URNPrefixContentColumns(ContentColumn):
 # Define the validation constraints that can be applied to a content column
 @dataclass(frozen=True)
 class ContentColumnConstraints:
-    allowed_values: tuple[str, ...] | None = None
+    allowed_values: tuple[str, ...] | CommonPatternRegex | None = None
     split_regex: str | CommonSeparatorRegex | None = None
     line_break_indicator: str | CommonLineBreakIndicator | None = None
     max_length: int | None = None
@@ -547,6 +551,30 @@ ANSWERS_CONTENT_COLUMN_CONSTRAINTS: Mapping[ContentColumn, ContentColumnConstrai
     AnswersContentColumns.QUESTION_TYPE: ContentColumnConstraints(
         allowed_values=("unique_choice", "multiple_choice", "text", "date"),
     ),
+    AnswersContentColumns.QUESTION_CHOICES: ContentColumnConstraints(
+        split_regex=CommonSeparatorRegex.LF,
+        line_break_indicator=CommonLineBreakIndicator.PIPE
+    ),
+    AnswersContentColumns.DESCRIPTION: ContentColumnConstraints(
+        split_regex=CommonSeparatorRegex.LF,
+        line_break_indicator=CommonLineBreakIndicator.PIPE
+    ),
+    AnswersContentColumns.SELECT_IMPLEMENTATION_GROUPS: ContentColumnConstraints(
+        split_regex=CommonSeparatorRegex.COMMA_LF,
+    ),
+    AnswersContentColumns.ADD_SCORE: ContentColumnConstraints(
+        integer_only=True,
+        split_regex=CommonSeparatorRegex.LF,
+        min_value=0
+    ),
+    AnswersContentColumns.COMPUTE_RESULT: ContentColumnConstraints(
+        split_regex=CommonSeparatorRegex.LF,
+        allowed_values=("compliant", "partially_compliant", "non_compliant", "not_applicable")
+    ),
+    AnswersContentColumns.COLOR: ContentColumnConstraints(
+        allowed_values=CommonPatternRegex.HEX_COLOR_OR_NONE,
+        split_regex=CommonSeparatorRegex.LF,
+    )
 })
 
 
@@ -1060,6 +1088,7 @@ def validate_integer_value(
     positive_only: bool = False,
     min: int = None,
     max: int = None,
+    split_regex: str | CommonSeparatorRegex = None,
 ):
     """
     Validate integer(s) from:
@@ -1098,6 +1127,9 @@ def validate_integer_value(
         - max (int, optional):
             Maximum allowed integer value (inclusive).
 
+        - split_regex (str or CommonSeparatorRegex, optional):
+            Regex used to split a cell containing multiple integer values.
+
     Rules:
         - Always checks "is integer" (default behavior)
         - If positive_only=True -> checks > 0
@@ -1110,6 +1142,8 @@ def validate_integer_value(
         column_name = column_name.value
     if isinstance(value_name, ContentColumn):
         value_name = value_name.value
+    if isinstance(split_regex, CommonSeparatorRegex):
+        split_regex = split_regex.value
 
     # --- resolve values list ---
     if column_name is not None:
@@ -1120,25 +1154,33 @@ def validate_integer_value(
             )
 
         values = []
-        rows = []
         for idx, v in df[column_name].items():
             if v is None or (isinstance(v, float) and pd.isna(v)):
                 continue
             s = str(v).strip()
             if s == "":
                 continue
-            values.append(s)
-            rows.append(idx + 2)  # Excel-like row number for content sheet
+            entries = re.split(split_regex, s) if split_regex else [s]
+            for cell_line, entry in enumerate(entries, start=1):
+                entry = entry.strip()
+                if not entry:
+                    continue
+                values.append((entry, idx + 2, cell_line if split_regex else None))
             
     # --- [OR] validate single value ---
     else:
-        values = [value_or_df]
-        rows = [row]
+        entries = re.split(split_regex, str(value_or_df)) if split_regex else [value_or_df]
+        values = []
+        for cell_line, entry in enumerate(entries, start=1):
+            entry = entry.strip() if isinstance(entry, str) else entry
+            if isinstance(entry, str) and not entry:
+                continue
+            values.append((entry, row, cell_line if split_regex else None))
 
     invalid_values = []
 
     # --- validate each value ---
-    for v, r in zip(values, rows):
+    for v, r, cell_line in values:
         try:
             v_str = str(v).strip()
             v_int = int(v_str)
@@ -1155,7 +1197,7 @@ def validate_integer_value(
                 raise ValueError
 
         except Exception:
-            invalid_values.append((v, r))
+            invalid_values.append((v, r, cell_line))
 
     # --- raise grouped error if needed ---
     if invalid_values:
@@ -1170,9 +1212,12 @@ def validate_integer_value(
         bounds_str = f" ({', '.join(bounds)})" if bounds else ""
 
         details = []
-        for v, r in invalid_values:
+        for v, r, cell_line in invalid_values:
             if r is not None:
-                details.append(f"Row #{r}: {v}")
+                cell_line_details = f" (Cell element #{cell_line})" if cell_line is not None else ""
+                details.append(f"Row #{r}{cell_line_details}: {v}")
+            elif cell_line is not None:
+                details.append(f"Cell line #{cell_line}: {v}")
             else:
                 details.append(str(v))
 
@@ -1858,10 +1903,23 @@ def validate_extra_locales_in_content(df: pd.DataFrame, sheet_name: str, context
         if content_sheet_type == MetaTypes.FRAMEWORK.value and base_col == FrameworkContentColumns.QUESTIONS.value:
             questions_constraints = CONTENT_SHEET_SCHEMAS[MetaTypes.FRAMEWORK].column_constraints[FrameworkContentColumns.QUESTIONS]
             validate_cell_line_count_alignment(df, base_col, col, sheet_name, context,
+                split_regex=questions_constraints.split_regex,
                 cmp_can_be_empty=True,
                 ref_line_break_indicator=questions_constraints.line_break_indicator,
                 cmp_line_break_indicator=questions_constraints.line_break_indicator,
                 allow_single_cmp=False,
+            )
+
+        # In answers sheets, translated question choices and descriptions must contain the same number of elements as their base value on the same row.
+        elif content_sheet_type == MetaTypes.ANSWERS.value and base_col in (AnswersContentColumns.QUESTION_CHOICES.value, AnswersContentColumns.DESCRIPTION.value):
+            answer_column = AnswersContentColumns(base_col)
+            answer_constraints = CONTENT_SHEET_SCHEMAS[MetaTypes.ANSWERS].column_constraints[answer_column]
+            validate_cell_line_count_alignment(df, base_col, col, sheet_name, context,
+                split_regex=answer_constraints.split_regex,
+                cmp_can_be_empty=True,
+                ref_line_break_indicator=answer_constraints.line_break_indicator,
+                cmp_line_break_indicator=answer_constraints.line_break_indicator,
+                allow_single_cmp=False
             )
 
 
@@ -2045,11 +2103,11 @@ def _implementation_groups_check_unused_default_ids_in_frameworks(wb: Workbook, 
         )
 
 
-# Validate that all non-empty values in a specific column are in the allowed list. Ignores blank or whitespace-only cells.
+# Validate that all non-empty values in a specific column are allowed values or match an allowed pattern.
 def validate_allowed_column_values(
     df: pd.DataFrame,
     column_name: ContentColumn | str,
-    allowed_values: Sequence[str],
+    allowed_values: Sequence[str] | CommonPatternRegex,
     sheet_name: str,
     context: str = None,
     warn_only: bool = False,
@@ -2060,7 +2118,7 @@ def validate_allowed_column_values(
     Args:
         df: The DataFrame to validate.
         column_name: The name of the column to check.
-        allowed_values: A list of allowed string values.
+        allowed_values: A list of allowed string values, a regex string, or a CommonPatternRegex.
         sheet_name: Name of the Excel sheet.
         context: Optional context string (e.g., function name).
         warn_only: If True, warnings are printed instead of raising errors.
@@ -2072,6 +2130,11 @@ def validate_allowed_column_values(
     context = context or "validate_allowed_column_values"
     if isinstance(column_name, ContentColumn):
         column_name = column_name.value
+    if isinstance(allowed_values, CommonPatternRegex):
+        allowed_values = allowed_values.value
+
+    allowed_pattern = allowed_values if isinstance(allowed_values, str) else None
+    allowed_values_tip = f'Allowed pattern is: "{allowed_pattern}"' if allowed_pattern is not None else f"Allowed values are: {', '.join(f'\"{v}\"' for v in allowed_values)}"
 
     if column_name not in df.columns:
         return
@@ -2085,7 +2148,7 @@ def validate_allowed_column_values(
         cleaned_series = df[column_name].dropna().map(lambda x: str(x).strip())
         cleaned_series = cleaned_series[cleaned_series != ""]
 
-        invalid_mask = ~cleaned_series.isin(allowed_values)
+        invalid_mask = ~cleaned_series.map(lambda value: bool(re.fullmatch(allowed_pattern, value))) if allowed_pattern is not None else ~cleaned_series.isin(allowed_values)
 
         if invalid_mask.any():
             invalid_series = cleaned_series[invalid_mask]
@@ -2101,7 +2164,7 @@ def validate_allowed_column_values(
             msg = (
                 f"({context}) [{sheet_name}] Invalid value(s) found in column \"{column_name}\": {quoted_values}"
                 f"{details}"
-                f"\n> Allowed values are: {', '.join(f'\"{v}\"' for v in allowed_values)}"
+                f"\n> {allowed_values_tip}"
             )
 
             if warn_only:
@@ -2129,7 +2192,7 @@ def validate_allowed_column_values(
         entries = [x.strip() for x in re.split(split_regex, cell_str) if x.strip()]
 
         for i, entry in enumerate(entries, start=1):
-            if entry not in allowed_values:
+            if (allowed_pattern is not None and not re.fullmatch(allowed_pattern, entry)) or (allowed_pattern is None and entry not in allowed_values):
                 invalid_values.append((idx, i, entry))
 
     if invalid_values:
@@ -2138,14 +2201,14 @@ def validate_allowed_column_values(
         quoted_values = ", ".join(f'"{v}"' for v in invalid_entries)
 
         details = "\n   - " + "\n   - ".join(
-            f"Row #{idx + 2} ; Cell line #{line_idx} : \"{value}\""
+            f"Row #{idx + 2} (Cell element #{line_idx}): {value}"
             for idx, line_idx, value in invalid_values
         )
 
         msg = (
             f"({context}) [{sheet_name}] Invalid value(s) found in column \"{column_name}\": {quoted_values}"
             f"{details}"
-            f"\n> Allowed values are: {', '.join(f'\"{v}\"' for v in allowed_values)}"
+            f"\n> {allowed_values_tip}"
         )
 
         if warn_only:
@@ -3287,7 +3350,7 @@ def _answers_validate_question_choices(df: pd.DataFrame, sheet_name: str):
 
     fct_name = get_current_fct_name()
 
-    question_types_requiring_choices = {"unique_choice", "multiple_choice"}
+    question_types_requiring_choices = ("unique_choice", "multiple_choice")
     problematic_rows = []
 
     for row_idx, row in df.iterrows():
@@ -3306,11 +3369,67 @@ def _answers_validate_question_choices(df: pd.DataFrame, sheet_name: str):
 
     if problematic_rows:
         raise ValueError(
-            f"({fct_name}) [{sheet_name}] The field \"question_choices\" must not be empty for choice-based question types:\n   - "
-            + "\n   - ".join(f'Row #{row}: question_type "{question_type}"' for row, question_type in problematic_rows)
-            + '\n> 💡 Tip: Fill "question_choices" for every "unique_choice" and "multiple_choice" question.'
+            f"({fct_name}) [{sheet_name}] The field \"{AnswersContentColumns.QUESTION_CHOICES.value}\" must not be empty for choice-based question types:\n   - "
+            + "\n   - ".join(f'Row #{row}: {AnswersContentColumns.QUESTION_TYPE.value} "{question_type}"' for row, question_type in problematic_rows)
+            + f'\n> 💡 Tip: Fill "{AnswersContentColumns.QUESTION_CHOICES.value}" for every "unique_choice" and "multiple_choice" question.'
         )
 
+
+# Check that "select_implementation_groups" IDs exist in any implementation groups content sheet.
+def _answers_validate_select_implementation_groups(wb: Workbook, df: pd.DataFrame, sheet_name: str, split_regex: str | CommonSeparatorRegex = None):
+
+    fct_name = get_current_fct_name()
+    column_name = AnswersContentColumns.SELECT_IMPLEMENTATION_GROUPS.value
+    ref_column = ImplementationGroupsContentColumns.REF_ID.value
+
+    # Skip validation if the optional column is missing or empty
+    if column_name not in df.columns:
+        return
+
+    non_empty_values = df[column_name].dropna().astype(str).map(str.strip)
+    if non_empty_values[non_empty_values != ""].empty:
+        return
+
+    # Split cell values and ignore "/" when checking if at least one ID is present
+    split_pattern = split_regex.value if isinstance(split_regex, CommonSeparatorRegex) else split_regex or CommonSeparatorRegex.LF.value
+    selected_values = []
+    for value in non_empty_values:
+        selected_values.extend(item.strip() for item in re.split(split_pattern, value) if item.strip())
+
+    if not any(value != "/" for value in selected_values):
+        return
+
+    # Get all implementation groups content sheets
+    implementation_groups_meta_sheets = get_meta_sheets_names_from_type(wb, MetaTypes.IMPLEMENTATION_GROUPS, fct_name)
+    implementation_groups_content_sheets = get_corresponding_type_sheet_names(implementation_groups_meta_sheets, SheetTypes.CONTENT)
+
+    if not implementation_groups_content_sheets:
+        raise ValueError(
+            f"({fct_name}) [{sheet_name}] Column \"{column_name}\" cannot be validated because no \"{MetaTypes.IMPLEMENTATION_GROUPS.value}\" sheet exists.\n"
+            f"> 💡 Tip: Add a sheet of type \"{MetaTypes.IMPLEMENTATION_GROUPS.value}\" containing the referenced IDs or remove the values from column \"{column_name}\"."
+        )
+
+    # Collect valid Ref. IDs from every implementation groups content sheet
+    valid_implementation_groups = {"/"}
+
+    for content_sheet in implementation_groups_content_sheets:
+        if content_sheet not in wb.sheetnames:
+            raise ValueError(f"({fct_name}) [{sheet_name}] Missing referenced content sheet \"{content_sheet}\"")
+
+        content_df = pd.DataFrame(wb[content_sheet].values)
+        if content_df.empty:
+            raise ValueError(f"({fct_name}) [{sheet_name}] Referenced sheet \"{content_sheet}\" is empty")
+
+        content_df.columns = content_df.iloc[0]
+        content_df = content_df.drop(index=0).reset_index(drop=True)
+
+        if ref_column not in content_df.columns:
+            raise ValueError(f"({fct_name}) [{sheet_name}] Referenced sheet \"{content_sheet}\" does not contain required column \"{ref_column}\"")
+
+        valid_implementation_groups.update(content_df[ref_column].dropna().astype(str).map(str.strip))
+
+    # Check selected implementation group IDs against the collected Ref. IDs
+    validate_allowed_column_values(df, AnswersContentColumns.SELECT_IMPLEMENTATION_GROUPS, tuple(sorted(valid_implementation_groups)), sheet_name, fct_name, split_regex=split_pattern)
 
 
 # Get the "threats" or "reference_controls" section from a YAML Framework file passed as argument
@@ -3764,7 +3883,7 @@ def validate_scores_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, ver
     print_sheet_validation(sheet_name, verbose, ctx)
 
 
-# [CONTENT] Answers {OK} [Check new optional column: "description", "select_implementation_groups", "add_score", "compute_result", "color"]
+# [CONTENT] Answers {OK}²
 def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
     
     fct_name = get_current_fct_name()
@@ -3775,6 +3894,12 @@ def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, ve
     column_constraints = schema.column_constraints
 
     question_type_constraints = column_constraints[AnswersContentColumns.QUESTION_TYPE]
+    question_choices_constraints = column_constraints[AnswersContentColumns.QUESTION_CHOICES]
+    description_constraints = column_constraints[AnswersContentColumns.DESCRIPTION]
+    select_implementation_groups_constraints = column_constraints[AnswersContentColumns.SELECT_IMPLEMENTATION_GROUPS]
+    add_score_constraints = column_constraints[AnswersContentColumns.ADD_SCORE]
+    compute_result_contraints = column_constraints[AnswersContentColumns.COMPUTE_RESULT]
+    color_constraints = column_constraints[AnswersContentColumns.COLOR]
 
     validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
     validate_optional_columns_content_sheet(df, sheet_name, schema.optional_columns, fct_name, verbose, ctx)
@@ -3784,9 +3909,19 @@ def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, ve
 
     # Check if values in "question_type" column are valid
     validate_allowed_column_values(df, AnswersContentColumns.QUESTION_TYPE, question_type_constraints.allowed_values, sheet_name, fct_name, ctx=ctx)
+    
+    # Check if values in "compute_result" column are valid
+    validate_allowed_column_values(df, AnswersContentColumns.COMPUTE_RESULT, compute_result_contraints.allowed_values, sheet_name, fct_name, ctx=ctx, split_regex=compute_result_contraints.split_regex)
+    
+    # Check if values in "color" column are valid
+    validate_allowed_column_values(df, AnswersContentColumns.COLOR, color_constraints.allowed_values, sheet_name, fct_name, ctx=ctx, split_regex=color_constraints.split_regex)
+    
+    # Check if values in "add_score" columns are valid
+    validate_integer_value(df, sheet_name, AnswersContentColumns.ADD_SCORE, fct_name, value_name=AnswersContentColumns.ADD_SCORE, min=add_score_constraints.min_value, split_regex=add_score_constraints.split_regex)
 
-    # Extra locales
-    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
+    # Check if values in "select_implementation_groups" exist in an implementation groups sheet
+    _answers_validate_select_implementation_groups(wb, df, sheet_name, select_implementation_groups_constraints.split_regex)
+        
 
     # Check that "question_choices" is filled for relevant question types ("unique_choice" & "multiple_choice")
     _answers_validate_question_choices(df, sheet_name)
@@ -3798,6 +3933,25 @@ def validate_answers_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, ve
     # Check if every answers are actually used in "framework" sheets
     if frameworks_with_answers:
         check_unused_ids_in_frameworks(wb, df, AnswersContentColumns.ID, FrameworkContentColumns.ANSWER, frameworks_with_answers, sheet_name, fct_name, ctx, verbose)
+
+    # Check if the number of lines in cells of "question_choices" are coherent with lines in cells of "description"
+    validate_cell_line_count_alignment(df, AnswersContentColumns.QUESTION_CHOICES, AnswersContentColumns.DESCRIPTION, sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=question_choices_constraints.line_break_indicator, cmp_line_break_indicator=description_constraints.line_break_indicator)
+
+    # Check if the number of lines in cells of "question_choices" are coherent with lines in cells of "select_implementation_groups"
+    validate_cell_line_count_alignment(df, AnswersContentColumns.QUESTION_CHOICES, AnswersContentColumns.SELECT_IMPLEMENTATION_GROUPS, sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=question_choices_constraints.line_break_indicator)
+    
+    # Check if the number of lines in cells of "question_choices" are coherent with lines in cells of "add_score"
+    validate_cell_line_count_alignment(df, AnswersContentColumns.QUESTION_CHOICES, AnswersContentColumns.ADD_SCORE, sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=question_choices_constraints.line_break_indicator)
+
+    # Check if the number of lines in cells of "question_choices" are coherent with lines in cells of "compute_result"
+    validate_cell_line_count_alignment(df, AnswersContentColumns.QUESTION_CHOICES, AnswersContentColumns.COMPUTE_RESULT, sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=question_choices_constraints.line_break_indicator)
+
+    # Check if the number of lines in cells of "question_choices" are coherent with lines in cells of "color"
+    validate_cell_line_count_alignment(df, AnswersContentColumns.QUESTION_CHOICES, AnswersContentColumns.COLOR, sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=question_choices_constraints.line_break_indicator)
+
+
+    # Extra locales
+    validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose, wb)
 
     print_sheet_validation(sheet_name, verbose, ctx)
 
