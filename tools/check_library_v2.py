@@ -36,7 +36,7 @@ from pathlib import Path
 from collections import Counter
 from dataclasses import dataclass
 from types import MappingProxyType  # Prefer over "frozendict" to avoid importing an external library
-from typing import Dict, List, Mapping, Sequence, Tuple
+from typing import Dict, List, Mapping, Sequence
 
 import pandas as pd
 from openpyxl import Workbook, load_workbook
@@ -741,6 +741,11 @@ class URNMetadataFormat(Enum):
     MATRIX_URN = f"{URNObjects.URN_BEGGINING.value}:{PACKAGER_INDICATOR}:{URNObjects.URN_3RD_WORD.value}:{URNObjects.MATRIX.value}:{ID_INDICATOR}"
 
 
+##### Accepted File Types #####
+class ValidFileTypes(Enum):
+    EXCEL = (".xlsx", ".xlsm", ".xltx", ".xltm")
+    YAML = (".yaml", ".yml")
+
 
 # ─────────────────────────────────────────────────────────────
 # MISC
@@ -751,7 +756,7 @@ def enum_sequence_to_strings(values: Sequence[Enum | str]) -> tuple[str, ...]:
     return tuple(str(value.value) if isinstance(value, Enum) else value for value in values)
 
 
-def check_file_validity(files: List[str] | str, filetype_name: str, valid_file_extensions: Tuple[str] = None, file_context: str = None):
+def check_file_validity(files: List[str] | str, filetype_name: str, valid_file_extensions: tuple[str, ...] | None = None, file_context: str = None):
     
     fct_name = get_current_fct_name()
 
@@ -1931,7 +1936,7 @@ def check_content_sheet_usage_in_frameworks(wb: Workbook, sheet_name: str, meta_
         print(f"ℹ️  [INFO] ({fct_name}) [{sheet_name}] Sheet referenced by the sheet(s): {', '.join(f'\"{s}\"' for s in frameworks_with_reference)}")
     else:
         warn_msg = (
-            f"⚠️  [WARNING] ({fct_name}) [{sheet_name}] This sheet is not referenced in any sheets of type \"{MetaTypes.FRAMEWORK.value}\" via the field \"{meta_field}\""
+            f"⚠️  [WARNING] ({fct_name}) [{sheet_name}] This sheet is not referenced in any sheet of type \"{MetaTypes.FRAMEWORK.value}\" via the field \"{meta_field}\""
             f"\n> 💡 Tip: Set \"{meta_field}\" in your framework meta sheet to \"{sheet_base_name}\" if needed."
         )
         print(warn_msg)
@@ -2331,7 +2336,7 @@ def _URN_prefix_validate_ids_usage_in_frameworks(wb: Workbook, df: pd.DataFrame,
 
 
 #  Classify each prefix_value as 'internal' or 'external' depending on whether it's used in the base_urn field of the corresponding *_meta sheets.
-def _URN_prefix_classify_prefix_usage(wb: Workbook, df_urn_prefix: pd.DataFrame, meta_sheets: List[str], meta_type: MetaTypes, sheet_name: str, fct_name: str, ctx: ConsoleContext = None) -> Tuple[List[str], List[str], List[str]]:
+def _URN_prefix_classify_prefix_usage(wb: Workbook, df_urn_prefix: pd.DataFrame, meta_sheets: List[str], meta_type: MetaTypes, sheet_name: str, fct_name: str, ctx: ConsoleContext = None) -> tuple[List[str], List[str], List[str]]:
     """
     Args:
         wb: Workbook object.
@@ -2342,7 +2347,7 @@ def _URN_prefix_classify_prefix_usage(wb: Workbook, df_urn_prefix: pd.DataFrame,
         fct_name: Name of the calling validation function (for error formatting).
         ctx: Optional ConsoleContext to store warnings/info messages.
     Returns:
-        Tuple of (internal_prefixes, external_prefixes)
+        tuple of (internal_prefixes, external_prefixes)
     """
 
     # Define expected type_object depending on the meta_type
@@ -3852,10 +3857,10 @@ def validate_excel_structure(filepath: str | Path, external_refs: List[str] = No
 
     # Check provided YAML external reference
     if external_refs:
-        check_file_validity(external_refs, "YAML", (".yaml", "yml"), "External Reference")
+        check_file_validity(external_refs, "YAML", ValidFileTypes.YAML.value, "External Reference")
 
     # Check Excel file
-    check_file_validity(filepath, "Excel", (".xlsx", ".xlsm", ".xltx", ".xltm"))
+    check_file_validity(filepath, "Excel", ValidFileTypes.EXCEL.value)
 
 
     print(f"⌛ Parsing \"{os.path.basename(filepath)}\"...")
@@ -3994,7 +3999,7 @@ def main():
 
 
 
-def bulk_check(args: argparse.Namespace, external_refs: List[str] = None, enable_ctx: bool = False) -> Tuple[Dict[str, ConsoleContext], List[str]]:
+def bulk_check(args: argparse.Namespace, external_refs: List[str] = None, enable_ctx: bool = False) -> tuple[Dict[str, ConsoleContext], List[str]]:
     
     ctxs: Dict[str, ConsoleContext] = {}   # List of all contexts
     """
@@ -4014,7 +4019,7 @@ def bulk_check(args: argparse.Namespace, external_refs: List[str] = None, enable
     error_files = []  # Collect names of files that failed
     
     # Find all Excel files in the input directory (temp Excel files starting with "~$" are excluded)
-    valid_exts = {".xlsx", ".xlsm", ".xltx", ".xltm"}       # Excel Extensions allowed
+    valid_exts = ValidFileTypes.EXCEL.value
     excel_files = [
         f for f in input_path.iterdir()
         if f.suffix.lower() in valid_exts and not f.name.startswith("~$")
@@ -4083,7 +4088,7 @@ def bulk_check(args: argparse.Namespace, external_refs: List[str] = None, enable
     return ctxs, error_files
 
 
-def single_file_check(args: argparse.Namespace, external_refs: List[str] = None, enable_ctx: bool = False) -> Tuple[ConsoleContext, bool]:
+def single_file_check(args: argparse.Namespace, external_refs: List[str] = None, enable_ctx: bool = False) -> tuple[ConsoleContext, bool]:
     
     ctx = None
     error_encountered = False
