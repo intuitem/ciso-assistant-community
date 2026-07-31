@@ -943,14 +943,12 @@ class LibraryUpdater:
             )
 
     def update_threats(self):
-        # urn-valued keys and the m2m cannot go through update_or_create():
-        # they are not concrete fields on the model.
+        # not concrete fields, so they cannot go through update_or_create()
         deferred_keys = ("catalog_urn", "parent_urn", "reference_controls")
         pending_links = {}
 
         def resolve(model, urn, field, referrer):
-            # Absent means "clear it"; present but unresolvable is a data bug and
-            # must fail loudly, matching ThreatImporter on the import path.
+            # absent clears the link; unresolvable is a data bug
             if not urn:
                 return None
             obj = model.objects.filter(urn=urn.lower()).first()
@@ -965,10 +963,7 @@ class LibraryUpdater:
             deferred = {key: threat.get(key) for key in deferred_keys}
             fields = {k: v for k, v in threat.items() if k not in deferred_keys}
             fields.setdefault("order_id", index)
-            # Fields the document can omit must be reset, not left stale — the
-            # same convention as clearable_requirement_node_fields. is_deprecated
-            # is never carried in YAML, so a row that reappears upstream would
-            # otherwise stay flagged and hidden from every picker forever.
+            # omitted fields must reset, not stay stale (cf. clearable_requirement_node_fields)
             fields.setdefault("is_deprecated", False)
             fields["catalog"] = resolve(
                 ThreatCatalog,
@@ -1000,9 +995,7 @@ class LibraryUpdater:
             if controls.exists() or obj.reference_controls.exists():
                 obj.reference_controls.set(controls)
 
-        # Threats are never deleted on update: seven user-data relations point at
-        # them. Rows dropped upstream are flagged so pickers can exclude them
-        # while risk scenarios and kill chains keep their referents.
+        # flagged rather than deleted: user data points at these
         incoming = {threat["urn"].lower() for threat in self.threats}
         Threat.objects.filter(library=self.old_library).exclude(
             urn__in=incoming

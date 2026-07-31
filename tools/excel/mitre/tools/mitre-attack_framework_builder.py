@@ -75,13 +75,11 @@ MEASURES_PATH = SCRIPT_DIR / "measures.xlsx"
 
 LIBRARY_URN = "urn:intuitem:risk:library:mitre-attack"
 THREATS_BASE_URN = "urn:intuitem:risk:threat:mitre-attack"
-# The catalog ref_id is the library slug, so the base stops before it.
 THREAT_CATALOG_BASE_URN = "urn:intuitem:risk:threat_catalog"
 CATALOG_REF_ID = "mitre-attack"
 CATALOG_NAME = "MITRE ATT&CK Enterprise Matrix"
 MITIGATIONS_BASE_URN = "urn:intuitem:risk:function:mitre-attack"
-# 5 is what shipped; the constant said "1", so regenerating used to regress
-# every installed library. Bump on each release that changes library content.
+# Must exceed the shipped version or installs never pull the update.
 LIBRARY_VERSION = "6"
 LIBRARY_LOCALE = "en"
 LIBRARY_REF_ID = "mitre-attack"
@@ -159,8 +157,7 @@ class AttackRecord:
     ref_id: str
     name: str
     description: str
-    # Threat-only. `selectable` is False for tactics, which carry the matrix
-    # columns and are never attached to anything.
+    # threat-only; selectable=False for tactics
     type: str | None = None
     selectable: bool = True
     parent_ref_id: str | None = None
@@ -417,13 +414,7 @@ def slugify_group(value: str) -> str:
 
 
 def load_shipped_translations(path: Path, section: str) -> dict[str, dict[str, str]]:
-    """ref_id -> {"name": fr, "description": fr} from the shipped library.
-
-    Translations are produced by evaluating the =TRADUIRE formulas in Excel and
-    pasting the results back as values — a manual step. Re-emitting bare
-    formulas on every rebuild would discard that work, so existing translations
-    are carried forward and formulas are only written for genuinely new rows.
-    """
+    """Carry shipped translations forward; they cost a manual Excel pass."""
     if not path.exists():
         return {}
     import yaml
@@ -450,8 +441,7 @@ def extract_attack_records(
     raw_techniques = attack_data.get_techniques(remove_revoked_deprecated=True)
     raw_mitigations = attack_data.get_mitigations(remove_revoked_deprecated=True)
 
-    # Column order is the matrix's tactic_refs, NOT ref_id order: the enterprise
-    # matrix opens on TA0043 Reconnaissance, then TA0042, then TA0001.
+    # column order is tactic_refs, NOT ref_id order
     matrices = attack_data.get_objects_by_type("x-mitre-matrix")
     if not matrices:
         raise ValueError("No x-mitre-matrix object in the ATT&CK bundle")
@@ -468,7 +458,6 @@ def extract_attack_records(
     if missing:
         raise ValueError(f"Tactics absent from the matrix order: {sorted(missing)}")
 
-    # kill_chain_phases carries shortnames ("initial-access"), not TA ref_ids.
     shortname_to_ref_id = {
         tactic["x_mitre_shortname"]: get_external_reference(tactic)[0]
         for tactic in ordered_tactics
@@ -539,7 +528,6 @@ def extract_attack_records(
         (to_attack_record(item) for item in raw_mitigations),
         key=lambda item: item.ref_id,
     )
-    # Tactics first so their rows take the low order_ids the columns need.
     return tactics + techniques, mitigations, platform_labels
 
 
@@ -696,13 +684,12 @@ def build_final_workbook(
         (("type", "threat_groups"), ("name", "attack_groups")),
     )
     groups_content.append(("ref_id", "name", "dimension"))
-    # Display names come from MITRE verbatim (ESXi, IaaS, macOS, PRE, SaaS);
-    # deriving them from the slug mangles the casing.
+    # names verbatim from MITRE: slug-derived casing is wrong (ESXi, IaaS, macOS)
     for slug, label in sorted(
         platform_labels.items(), key=lambda item: item[1].lower()
     ):
         groups_content.append((slug, label, "platform"))
-    # Tactic entries stay in matrix order: this list is the column axis.
+    # matrix order: this list is the column axis
     for item in techniques:
         if not item.selectable:
             groups_content.append((item.ref_id, item.name, "tactic"))

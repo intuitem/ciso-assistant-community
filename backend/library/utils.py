@@ -525,11 +525,7 @@ class ThreatImporter:
         )
 
     def link_threat(self):
-        """Second pass: resolve links whose targets may not exist at create time.
-
-        `parent` because YAML order does not guarantee parents precede children,
-        `reference_controls` because import_objects loads threats before them.
-        """
+        """Resolve links whose targets may not exist at create time."""
         if self._object is None:
             return
 
@@ -544,8 +540,7 @@ class ThreatImporter:
             self._resolve(ReferenceControl, urn, "reference control")
             for urn in self.threat_data.get("reference_controls", [])
         ]
-        # .set() rather than .add(): a link removed from the document must be
-        # removed from the live row on the re-import path.
+        # .set() not .add(): links removed from the document must be dropped
         if reference_controls or self._object.reference_controls.exists():
             self._object.reference_controls.set(reference_controls)
 
@@ -1134,8 +1129,7 @@ class LibraryImporter:
         for reference_control in self._reference_controls:
             reference_control.import_reference_control(library_object)
 
-        # After reference controls: threats link to them, and to parent threats
-        # whose rows are only guaranteed to exist once the loop above is done.
+        # after reference controls: threats link to them and to parent threats
         for threat in self._threats:
             threat.link_threat()
 

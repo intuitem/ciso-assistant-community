@@ -38,8 +38,7 @@
 	let expanded = $state<Record<string, boolean>>({});
 	let query = $state('');
 
-	// SvelteKit reuses this component when only the route parameter changes, so
-	// filters chosen on one catalog would otherwise carry over to the next.
+	// the component is reused across catalogs, so filters must not carry over
 	$effect(() => {
 		void columns;
 		void cells;
@@ -50,8 +49,7 @@
 		});
 	});
 
-	// Facets are OR within a dimension, AND across dimensions: picking two
-	// platforms widens, picking a platform and a maturity narrows.
+	// OR within a dimension, AND across dimensions
 	const facetsByDimension = $derived(
 		facets.reduce<Record<string, MatrixFacet[]>>((acc, facet) => {
 			const dimension = facet.dimension ?? 'other';
@@ -63,7 +61,6 @@
 	function matches(cell: MatrixCell): boolean {
 		const needle = query.trim().toLowerCase();
 		if (needle && !`${cell.ref_id} ${cell.name}`.toLowerCase().includes(needle)) {
-			// A parent stays visible when one of its sub-techniques matches.
 			if (!(cell.children ?? []).some((child) => matches(child))) return false;
 		}
 		for (const [dimension, group] of Object.entries(facetsByDimension)) {
@@ -132,7 +129,6 @@
 		<span class="ml-auto text-sm text-surface-600-400">{total}</span>
 	</div>
 
-	<!-- The grid is the wide element, so it owns the horizontal scroll. -->
 	<div class="overflow-x-auto pb-2">
 		<div class="flex items-start gap-2 min-w-max">
 			{#each grid as { column, items } (column.ref_id)}
@@ -146,8 +142,7 @@
 					</div>
 					{#each items as cell (cell.id)}
 						{@const children = cell.children ?? []}
-						<!-- Keyed by column too: a technique can sit in several tactics, and
-						     keying on cell.id alone expands every copy at once. -->
+						<!-- keyed by column: a technique can sit in several tactics -->
 						{@const cellKey = `${column.ref_id}:${cell.id}`}
 						{@const isOpen = expanded[cellKey] ?? false}
 						<div

@@ -64,13 +64,7 @@ _UNEVALUATED_FORMULA_COUNT = 0
 
 
 def is_unevaluated_formula(value) -> bool:
-    """A spreadsheet formula that was never evaluated to a value.
-
-    Translation columns are authored as formulas (e.g. =TRADUIRE(B2,"en","fr"))
-    which must be evaluated in the spreadsheet and pasted back as values before
-    conversion. Exporting the formula text itself yields a "translation" that
-    renders as '=TRADUIRE(...)' in the UI, silently replacing real content.
-    """
+    """A spreadsheet formula that was never evaluated to a value."""
     return isinstance(value, str) and value.lstrip().startswith("=")
 
 
@@ -892,8 +886,7 @@ def _handle_threat_catalog(obj, library, object_blocks, compat_mode, verbose):
     if not header:
         return
 
-    # Named block of facet definitions, as framework does for
-    # implementation_groups_definition.
+    # named block, as framework does for implementation_groups_definition
     grouping_defs = []
     grouping_name = meta.get("grouping_definition")
     if grouping_name and grouping_name in object_blocks:
@@ -929,7 +922,6 @@ def _handle_threats(obj, library, prefix_to_urn, compat_mode, verbose):
     threats = []
     meta = obj["meta"]
     base_urn = meta.get("base_urn")
-    # A threats sheet belongs to at most one catalog.
     catalog_urn = meta.get("catalog_urn")
     header, rows_with_data = parse_content_rows(obj["content_sheet"])
     if not header:
@@ -952,8 +944,7 @@ def _handle_threats(obj, library, prefix_to_urn, compat_mode, verbose):
         if catalog_urn:
             entry["catalog_urn"] = catalog_urn
 
-        # Explicit parent_ref_id rather than the positional `depth` column
-        # frameworks use: threat sheets get sorted.
+        # explicit ref_id, not the positional `depth`: threat sheets get sorted
         parent_ref_id = data.get("parent_ref_id")
         if parent_ref_id and str(parent_ref_id).strip():
             entry["parent_urn"] = f"{base_urn}:{str(parent_ref_id).strip().lower()}"
@@ -2003,8 +1994,7 @@ def create_library(
 
     print(f"📦 Found {len(object_blocks)} objects.")
 
-    # Step 5: Ordered object insertion. Threats reference both, so the catalog
-    # and the reference controls have to be emitted first.
+    # Step 5: Ordered object insertion (threats reference the other two)
     priority_order = ["threat_catalog", "reference_controls", "threats"]
 
     sorted_object_names = sorted(

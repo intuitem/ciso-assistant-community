@@ -1210,8 +1210,7 @@ export const THREAT_TYPE_FILTER: ListViewFilterConfig = {
 	}
 };
 
-// The threats endpoint hides non-selectable and deprecated rows unless the
-// query asks for them, so these two filters are the only way to reach them.
+// the endpoint hides these rows unless asked, so the filters are the only way in
 export const THREAT_SELECTABLE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {

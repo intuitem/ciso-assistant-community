@@ -169,7 +169,7 @@ export const ThreatSchema = z.object({
 	annotation: z.string().optional().nullable(),
 	filtering_labels: z.string().optional().array().optional(),
 	findings: z.string().uuid().optional().array().optional(),
-	type: z.string().optional(),
+	type: z.string().optional().default('generic'),
 	selectable: z.boolean().optional(),
 	is_deprecated: z.boolean().optional(),
 	catalog: z.string().uuid().optional().nullable(),

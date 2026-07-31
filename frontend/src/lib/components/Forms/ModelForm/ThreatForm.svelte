@@ -29,6 +29,7 @@
 	options={model.selectOptions['type']}
 	field="type"
 	label={m.type()}
+	disableDoubleDash={true}
 	cacheLock={cacheLocks['type']}
 	bind:cachedValue={formDataCache['type']}
 />

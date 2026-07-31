@@ -1975,9 +1975,7 @@ class ThreatViewSet(BaseModelViewSet):
                 "reference_controls",
             )
         )
-        # Structural rows (matrix columns) and retired ones are not attachable,
-        # so they stay out of every picker unless asked for explicitly. All seven
-        # threat pickers share this endpoint, hence one filter rather than seven.
+        # structural and retired rows are not attachable, so pickers exclude them
         params = self.request.query_params
         if "selectable" not in params and "catalog" not in params:
             queryset = queryset.filter(selectable=True)
@@ -2038,8 +2036,7 @@ class ThreatCatalogViewSet(BaseModelViewSet):
     def matrix(self, request, pk):
         catalog = self.get_object()
         grouping = catalog.grouping_definition or []
-        # The column axis is whichever grouping entries declare dimension
-        # "tactic"; their order in the JSON array is the column order.
+        # array order is the column order
         columns = [entry for entry in grouping if entry.get("dimension") == "tactic"]
 
         threats = (
@@ -2063,17 +2060,13 @@ class ThreatCatalogViewSet(BaseModelViewSet):
             else:
                 cells.append(payload)
 
-        # Matching the published matrices, verified against attack.mitre.org
-        # 2026-07-30: techniques within a tactic are ordered by NAME, while
-        # sub-techniques under a parent stay in ref_id order. `order_id` orders
-        # the tactic columns, not the cells inside them.
+        # published matrices order cells by name, sub-techniques by ref_id
         for cell in cells:
             cell["children"] = sorted(
                 children.pop(str(cell["id"]), []), key=lambda item: item["ref_id"]
             )
 
-        # A sub-technique whose parent is not itself selectable would otherwise
-        # vanish from the matrix entirely.
+        # keep children whose parent is not selectable
         for orphans in children.values():
             cells.extend(orphans)
 
