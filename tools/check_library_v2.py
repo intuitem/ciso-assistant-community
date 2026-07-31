@@ -1349,6 +1349,7 @@ def validate_library_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = Fal
 
     fct_name = get_current_fct_name()
     
+    # Get required, optional, and translatable keys
     expected_type = MetaTypes.LIBRARY
     schema = META_SHEET_SCHEMAS[expected_type]
 
@@ -1392,6 +1393,7 @@ def validate_framework_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, ver
 
     fct_name = get_current_fct_name()
 
+    # Get required, optional, and translatable keys
     expected_type = MetaTypes.FRAMEWORK
     schema = META_SHEET_SCHEMAS[expected_type]
 
@@ -1431,6 +1433,7 @@ def validate_threats_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = Fal
 
     fct_name = get_current_fct_name()
 
+    # Get required, optional, and translatable keys
     expected_type = MetaTypes.THREATS
     schema = META_SHEET_SCHEMAS[expected_type]
 
@@ -1454,6 +1457,7 @@ def validate_reference_controls_meta(df: pd.DataFrame, sheet_name: str, verbose:
 
     fct_name = get_current_fct_name()
 
+    # Get required, optional, and translatable keys
     expected_type = MetaTypes.REFERENCE_CONTROLS
     schema = META_SHEET_SCHEMAS[expected_type]
 
@@ -1477,6 +1481,7 @@ def validate_risk_matrix_meta(df: pd.DataFrame, sheet_name: str, verbose: bool =
 
     fct_name = get_current_fct_name()
 
+    # Get required, optional, and translatable keys
     expected_type = MetaTypes.RISK_MATRIX
     schema = META_SHEET_SCHEMAS[expected_type]
 
@@ -1504,6 +1509,7 @@ def validate_implementation_groups_meta(wb: Workbook, df: pd.DataFrame, sheet_na
 
     fct_name = get_current_fct_name()
 
+    # Get required, optional, and translatable keys
     expected_type = MetaTypes.IMPLEMENTATION_GROUPS
     schema = META_SHEET_SCHEMAS[expected_type]
 
@@ -1525,6 +1531,7 @@ def validate_requirement_mapping_set_meta(df: pd.DataFrame, sheet_name: str, ver
 
     fct_name = get_current_fct_name()
 
+    # Get required, optional, and translatable keys
     expected_type = MetaTypes.REQUIREMENT_MAPPING_SET
     schema = META_SHEET_SCHEMAS[expected_type]
 
@@ -1580,6 +1587,7 @@ def validate_scores_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbos
 
     fct_name = get_current_fct_name()
 
+    # Get required, optional, and translatable keys
     expected_type = MetaTypes.SCORES
     schema = META_SHEET_SCHEMAS[expected_type]
 
@@ -1601,6 +1609,7 @@ def validate_answers_meta(wb: Workbook, df: pd.DataFrame, sheet_name: str, verbo
 
     fct_name = get_current_fct_name()
 
+    # Get required, optional, and translatable keys
     expected_type = MetaTypes.ANSWERS
     schema = META_SHEET_SCHEMAS[expected_type]
 
@@ -1622,6 +1631,7 @@ def validate_urn_prefix_meta(df: pd.DataFrame, sheet_name: str, verbose: bool = 
 
     fct_name = get_current_fct_name()
 
+    # Get required, optional, and translatable keys
     expected_type = MetaTypes.URN_PREFIX
     schema = META_SHEET_SCHEMAS[expected_type]
 
@@ -3556,8 +3566,9 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, 
     # Check if the number of lines in cells of "questions" are coherent with lines in cells of "depends_on"
     validate_cell_line_count_alignment(df, FrameworkContentColumns.QUESTIONS, FrameworkContentColumns.CONDITION, sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=questions_constraints.line_break_indicator)
     
+    ### A SPECIFIC CHECK FUNCTION SHOULD BE CREATED
     # Check if "condition" exists when "depends_on" is defined
-    validate_cell_line_count_alignment(df, FrameworkContentColumns.DEPENDS_ON, FrameworkContentColumns.CONDITION, sheet_name, fct_name)
+    # validate_cell_line_count_alignment(df, FrameworkContentColumns.DEPENDS_ON, FrameworkContentColumns.CONDITION, sheet_name, fct_name)
     
     # Check if values in "weight" columns are valid
     validate_integer_value(df, sheet_name, FrameworkContentColumns.WEIGHT, fct_name, value_name=FrameworkContentColumns.WEIGHT, min=weight_constraints.min_value, max=weight_constraints.max_value)
