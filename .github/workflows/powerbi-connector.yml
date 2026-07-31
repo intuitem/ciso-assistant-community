@@ -201,7 +201,7 @@ jobs:
             echo
             echo "Install guide: [automation/powerbi/README.md](https://github.com/${GH_REPO}/blob/main/automation/powerbi/README.md) — certificate trust runbook: [signing/trust-thumbprint.md](https://github.com/${GH_REPO}/blob/main/automation/powerbi/signing/trust-thumbprint.md)"
             echo
-            echo "\`CisoAssistant-starter.pbit\` is the starter report for this exact connector version: install the connector first, then open the template and enter your instance URL when prompted for \`BaseUrl\`."
+            echo "\`CisoAssistant-starter.pbit\` is the starter report, shipped with every connector release: install the connector first, then open the template and enter your instance URL when prompted for \`BaseUrl\`."
           } > notes.md
           gh release create "$tag" \
             dist/CisoAssistant.mez dist/CisoAssistant.pqx dist/CisoAssistant-starter.pbit \
