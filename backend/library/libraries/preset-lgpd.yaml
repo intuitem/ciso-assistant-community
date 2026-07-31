@@ -1,0 +1,299 @@
+urn: urn:intuitem:risk:preset:lgpd
+locale: pt-BR
+ref_id: preset-lgpd
+name: Empresa Brasileira - LGPD
+description: Parcurso de conformidade guiado com a LGPD (Lei Geral de Proteção de Dados Pessoais) para organizações brasileiras. Inclui a nomeação do encarregado (DPO), o mapeamento das operações de tratamento, a due diligence de operadores/fornecedores e um caminho guiado pelo framework da LGPD.
+version: 1
+provider: intuitem
+packager: intuitem
+
+translations:
+  en:
+    name: "Brazilian Organisation - LGPD"
+    description: "Guided LGPD (Lei Geral de Proteção de Dados) compliance journey for Brazilian organisations. Includes appointing the encarregado (DPO), mapping processing activities, vendor/operator due diligence, and a guided path through the LGPD framework."
+
+dependencies:
+  - urn:intuitem:risk:library:lgpd
+  - urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+  - urn:intuitem:risk:library:vendor-due-diligence
+  - urn:intuitem:risk:library:intuitem-common-catalog
+
+objects:
+  preset:
+    profile:
+      company_size:
+        - startup
+        - sme
+        - large
+      industry:
+        - general
+      region:
+        - br
+      goal: lgpd-compliance
+
+    feature_flags:
+      enable:
+        - compliance
+        - privacy
+        - tprm
+        - organisation_objectives
+        - tasks
+        - follow_up
+
+    scaffolded_objects:
+      - type: risk_assessment
+        name: "Avaliação de Riscos de Segurança da Informação"
+        risk_matrix: urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+        ref: main_ra
+        translations:
+          en:
+            name: "Information Security Risk Assessment"
+
+      - type: compliance_assessment
+        name: "Avaliação de Conformidade com a LGPD"
+        framework: urn:intuitem:risk:library:lgpd
+        create_suggested_controls: true
+        ref: lgpd_audit
+        translations:
+          en:
+            name: "LGPD Compliance Assessment"
+
+      - type: responsibility_matrix
+        name: "Matriz de Responsabilidades - Encarregado (DPO) e Agentes de Tratamento"
+        description: "Papéis e responsabilidades do controlador, do operador e do encarregado (DPO) nas atividades de tratamento de dados pessoais, nos termos do art. 41 da LGPD."
+        matrix_preset: raci
+        ref: dpo_matrix
+        translations:
+          en:
+            name: "Responsibility Matrix - Data Protection Officer (DPO) and Processing Agents"
+            description: "Roles and responsibilities of the controller, operator, and encarregado (DPO) for personal data processing activities, per LGPD art. 41."
+
+      # --- Registro das operações de tratamento (LGPD Art. 37) ---
+      - type: processing
+        name: "Gestão de dados de clientes e usuários"
+        description: "Coleta e tratamento de dados pessoais para cadastro, comunicação e prestação de serviços a clientes e usuários."
+        translations:
+          en:
+            name: "Customer and user data management"
+            description: "Collection and processing of personal data for customer/user registration, communication, and service delivery."
+      - type: processing
+        name: "Gestão de dados de colaboradores (RH)"
+        description: "Tratamento de dados pessoais de colaboradores para folha de pagamento, contratos, gestão de desempenho e cumprimento de obrigações legais e trabalhistas."
+        translations:
+          en:
+            name: "Employee and HR data management"
+            description: "Processing of employee personal data for payroll, contracts, performance management, and legal/labor obligations."
+      - type: processing
+        name: "Marketing e comunicações"
+        description: "Tratamento de dados de contato para newsletters, campanhas de marketing e comunicações institucionais."
+        translations:
+          en:
+            name: "Marketing and communications"
+            description: "Processing of contact data for newsletters, marketing campaigns, and institutional communications."
+      - type: processing
+        name: "Cookies e analytics do site"
+        description: "Uso de cookies, pixels de rastreamento e ferramentas de análise no site da organização para mensuração de audiência e personalização."
+        translations:
+          en:
+            name: "Website cookies and analytics"
+            description: "Use of cookies, tracking pixels, and analytics tools on the organisation's website for audience measurement and personalisation."
+
+      # --- Operadores e fornecedores típicos (LGPD Art. 39, Cap. VI) ---
+      - type: entity
+        name: "Provedor de infraestrutura em nuvem"
+        description: "Plataforma de nuvem principal (ex. AWS, GCP, Azure) que hospeda a aplicação e os dados de clientes."
+        translations:
+          en:
+            name: "Cloud infrastructure provider"
+            description: "Primary cloud platform (e.g. AWS, GCP, Azure) hosting the application and customer data."
+      - type: entity
+        name: "Provedor de folha de pagamento e RH"
+        description: "Sistema ou prestador de serviços de folha de pagamento e gestão de recursos humanos, operador de dados de colaboradores."
+        translations:
+          en:
+            name: "Payroll and HR provider"
+            description: "Payroll and HR management system or service provider, operator of employee data."
+      - type: entity
+        name: "Provedor de e-mail e colaboração"
+        description: "Fornecedor de ferramentas de e-mail, mensageria e colaboração (ex. Microsoft 365, Google Workspace)."
+        translations:
+          en:
+            name: "Email and collaboration provider"
+            description: "Provider of email, messaging, and collaboration tools (e.g. Microsoft 365, Google Workspace)."
+      - type: entity
+        name: "Processador de pagamentos"
+        description: "Prestador de serviços de pagamento (ex. gateways de pagamento) que trata dados de cobrança e pagamento de clientes."
+        translations:
+          en:
+            name: "Payment processor"
+            description: "Payment service provider (e.g. payment gateways) processing customer billing and payment data."
+
+      # --- Objetivos organizacionais ---
+      - type: organisation_objective
+        name: "Nomear encarregado (DPO) pelo tratamento de dados pessoais"
+        description: "Indicar formalmente o encarregado (DPO) nos termos do art. 41 da LGPD e divulgar publicamente sua identidade e informações de contato."
+        status: in_progress
+        translations:
+          en:
+            name: "Appoint a Data Protection Officer (encarregado)"
+            description: "Formally appoint the encarregado (DPO) per LGPD art. 41 and publicly disclose their identity and contact information."
+      - type: organisation_objective
+        name: "Adequar-se integralmente à LGPD"
+        description: "Alcançar e manter conformidade com a Lei Geral de Proteção de Dados Pessoais em todas as atividades de tratamento da organização."
+        status: draft
+        translations:
+          en:
+            name: "Achieve full LGPD compliance"
+            description: "Achieve and maintain compliance with the LGPD across all of the organisation's data processing activities."
+
+      # --- Modelos de tarefas recorrentes ---
+      - type: task_template
+        name: "Revisão de direitos de acesso"
+        description: "Revisar os direitos de acesso dos usuários aos sistemas críticos, garantindo o mínimo privilégio e a revogação tempestiva (LGPD art. 46)."
+        is_recurrent: true
+        schedule:
+          interval: 3
+          frequency: MONTHLY
+        translations:
+          en:
+            name: "Access rights review"
+            description: "Review user access rights across critical systems to ensure least-privilege and timely revocation (LGPD art. 46)."
+      - type: task_template
+        name: "Revisão de operadores e fornecedores"
+        description: "Revisar a postura de segurança e privacidade dos operadores e fornecedores críticos que tratam dados pessoais em nome da organização (LGPD art. 39)."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: YEARLY
+        translations:
+          en:
+            name: "Vendor and operator security review"
+            description: "Review the security and privacy posture of critical vendors/operators processing personal data on the organisation's behalf (LGPD art. 39)."
+      - type: task_template
+        name: "Teste do plano de resposta a incidentes"
+        description: "Testar o plano de resposta a incidentes de segurança por meio de exercícios simulados, validando a capacidade de comunicar incidentes à ANPD e aos titulares em prazo razoável (LGPD art. 48)."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: YEARLY
+        translations:
+          en:
+            name: "Incident response plan test"
+            description: "Test the incident response plan through simulated exercises, validating the ability to notify the ANPD and data subjects within a reasonable time (LGPD art. 48)."
+      - type: task_template
+        name: "Revisão do registro de operações de tratamento"
+        description: "Revisar e atualizar o registro das operações de tratamento de dados pessoais mantido pelo controlador e pelo operador (LGPD art. 37)."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: YEARLY
+        translations:
+          en:
+            name: "Processing register review"
+            description: "Review and update the register of personal data processing operations maintained by the controller and operator (LGPD art. 37)."
+
+      # --- Política ---
+      - type: policy
+        name: "Política de Privacidade e Proteção de Dados Pessoais"
+        description: "Política interna que documenta os princípios, papéis, bases legais e procedimentos de tratamento de dados pessoais adotados pela organização, em conformidade com a LGPD."
+        status: to_do
+        translations:
+          en:
+            name: "Privacy and Personal Data Protection Policy"
+            description: "Internal policy documenting the principles, roles, legal bases, and procedures for personal data processing adopted by the organisation, in line with the LGPD."
+
+      # --- Achados de testes/auditorias ---
+      - type: findings_assessment
+        name: "Achados de Testes de Segurança"
+        category: pentest
+        ref: pentest_findings
+        translations:
+          en:
+            name: "Security Testing Findings"
+
+    journey:
+      steps:
+        - key: processings
+          title: "Mapeie seus tratamentos de dados pessoais"
+          description: "Documente as atividades de tratamento de dados pessoais da organização — quais dados são tratados, com qual finalidade e base legal, conforme exigido pelo art. 37 da LGPD."
+          target_model: processings
+          translations:
+            en:
+              title: "Map your data processing activities"
+              description: "Document the organisation's personal data processing activities — what data is processed, for what purpose, and under which legal basis, as required by LGPD art. 37."
+        - key: dpo
+          title: "Nomeie o encarregado (DPO)"
+          description: "Indique o encarregado pelo tratamento de dados pessoais e defina os papéis e responsabilidades do controlador, do operador e do encarregado (LGPD art. 41)."
+          target_model: responsibility-matrices
+          target_ref: dpo_matrix
+          translations:
+            en:
+              title: "Appoint the Data Protection Officer (encarregado)"
+              description: "Appoint the encarregado for personal data processing and define the roles and responsibilities of the controller, operator, and encarregado (LGPD art. 41)."
+        - key: lgpd_compliance
+          title: "Avalie a conformidade com a LGPD"
+          description: "Percorra os requisitos da LGPD, revise os controles sugeridos automaticamente e avalie o estado atual de conformidade da organização."
+          target_model: compliance-assessments
+          target_ref: lgpd_audit
+          translations:
+            en:
+              title: "Assess LGPD compliance"
+              description: "Walk through the LGPD requirements, review the auto-suggested controls, and assess the organisation's current compliance status."
+        - key: risk_assessment
+          title: "Realize uma avaliação de riscos"
+          description: "Identifique ameaças e vulnerabilidades relacionadas ao tratamento de dados pessoais, crie cenários de risco e avalie probabilidade e impacto para priorizar a remediação."
+          target_model: risk-assessments
+          target_ref: main_ra
+          translations:
+            en:
+              title: "Conduct a risk assessment"
+              description: "Identify threats and vulnerabilities related to personal data processing, create risk scenarios, and assess likelihood and impact to prioritise remediation."
+        - key: controls
+          title: "Implemente controles de segurança"
+          description: "Revise os controles sugeridos a partir da avaliação da LGPD, atribua responsáveis, defina o status de implementação e documente as medidas de segurança adotadas (LGPD art. 46)."
+          target_model: applied-controls
+          translations:
+            en:
+              title: "Implement security controls"
+              description: "Review the controls suggested from the LGPD assessment, assign owners, set implementation status, and document the security measures adopted (LGPD art. 46)."
+        - key: vendors
+          title: "Gerencie seus operadores e fornecedores"
+          description: "Revise as entidades fornecedoras, adicione as que faltam e realize avaliações de due diligence dos operadores que tratam dados pessoais em seu nome (LGPD art. 39)."
+          target_model: entities
+          translations:
+            en:
+              title: "Manage your vendors and operators"
+              description: "Review vendor entities, add missing ones, and perform due diligence assessments of operators processing personal data on your behalf (LGPD art. 39)."
+        - key: policies
+          title: "Redija e aprove sua política de privacidade"
+          description: "Elabore e aprove a política de privacidade e proteção de dados pessoais, documentando princípios, bases legais e procedimentos de tratamento."
+          target_model: policies
+          translations:
+            en:
+              title: "Write and approve your privacy policy"
+              description: "Draft and approve the privacy and personal data protection policy, documenting principles, legal bases, and processing procedures."
+        - key: evidences
+          title: "Colete evidências de conformidade"
+          description: "Reúna e organize evidências da efetividade dos controles — capturas de tela, configurações, registros e documentação de processos."
+          target_model: evidences
+          translations:
+            en:
+              title: "Collect compliance evidence"
+              description: "Gather and organise evidence of control effectiveness — screenshots, configurations, logs, and process documentation."
+        - key: findings
+          title: "Acompanhe achados de testes e auditorias"
+          description: "Importe ou crie achados de testes de segurança, varreduras de vulnerabilidade e auditorias. Atribua responsáveis, defina prioridades e acompanhe a remediação."
+          target_model: findings-assessments
+          target_ref: pentest_findings
+          translations:
+            en:
+              title: "Track testing and audit findings"
+              description: "Import or create findings from security tests, vulnerability scans, and audits. Assign owners, set priorities, and track remediation."
+        - key: ongoing_tasks
+          title: "Configure tarefas recorrentes"
+          description: "Revise os modelos de tarefas periódicas (revisão de acessos, revisão de operadores, teste de resposta a incidentes, revisão do registro de tratamento) e ajuste os cronogramas."
+          target_model: task-templates
+          translations:
+            en:
+              title: "Configure recurring tasks"
+              description: "Review the periodic task templates (access reviews, operator reviews, incident response tests, processing register review) and adjust schedules."
