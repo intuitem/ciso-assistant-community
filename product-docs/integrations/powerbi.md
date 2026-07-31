@@ -71,7 +71,7 @@ Some audit fields (e.g. scores) can be hidden per audit by its field visibility 
 
 ### Start from the template
 
-`starter.pbit` ([automation/powerbi/samples](https://github.com/intuitem/ciso-assistant-community/tree/main/automation/powerbi/samples)) is a template with a curated set of tables, correct relationships, base measures and four ready-made pages (compliance results, control status, threat coverage, incidents & vulnerabilities). It is the fastest way to a working report and a reference for how the model is meant to be wired.
+Every connector release also ships `CisoAssistant-starter.pbit`, a template with a curated set of tables, correct relationships, base measures and four ready-made pages (compliance results, control status, threat coverage, incidents & vulnerabilities). It is the fastest way to a working report and a reference for how the model is meant to be wired. It needs the connector installed, but is not tied to a particular version of it.
 
 Opening it asks for a `BaseUrl` parameter — enter your instance URL, the same one you would type in the connector dialog — then for your token, and the report loads against your data. To point an existing report at another instance later, use **Transform data → Manage parameters** and change `BaseUrl`; every query follows.
 

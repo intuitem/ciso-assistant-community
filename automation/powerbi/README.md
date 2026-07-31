@@ -114,9 +114,15 @@ Power BI.
 3. Paste your Personal Access Token when prompted.
 4. Pick tables in the Navigator (Facts / Dimensions / Bridges) and **Load**.
 
-Opening `samples/starter.pbit` instead asks for the same URL up front, as a
+Opening the starter template instead asks for the same URL up front, as a
 `BaseUrl` parameter. Change it later under **Transform data → Manage
 parameters** to repoint the whole report at another instance.
+
+`CisoAssistant-starter.pbit` is attached to every connector release so both
+files come from one place (the source of truth is `samples/starter.pbit`). Its
+queries select navigator entries by name, so it works with any connector
+version that exposes the tables it names — newer templates may use tables an
+older connector lacks, but there is no version lock.
 
 ## Upgrading the connector
 

@@ -141,10 +141,16 @@ jobs:
           & $env:MAKEPQX verify "dist/CisoAssistant.pqx"
           if ($LASTEXITCODE -ne 0) { throw "MakePQX verify failed ($LASTEXITCODE)" }
 
+      # Convenience: both files from one place. The template selects navigator
+      # entries by name, so it is not pinned to this connector version.
+      - name: Stage starter template
+        shell: pwsh
+        run: Copy-Item automation/powerbi/samples/starter.pbit dist/CisoAssistant-starter.pbit
+
       - name: Check artifacts exist
         shell: pwsh
         run: |
-          foreach ($f in "dist/CisoAssistant.mez", "dist/CisoAssistant.pqx") {
+          foreach ($f in "dist/CisoAssistant.mez", "dist/CisoAssistant.pqx", "dist/CisoAssistant-starter.pbit") {
             if (-not (Test-Path $f) -or (Get-Item $f).Length -eq 0) { throw "missing or empty artifact: $f" }
           }
 
@@ -155,6 +161,7 @@ jobs:
           path: |
             dist/CisoAssistant.mez
             dist/CisoAssistant.pqx
+            dist/CisoAssistant-starter.pbit
             dist/THUMBPRINT.txt
           if-no-files-found: warn
 
@@ -193,9 +200,11 @@ jobs:
             echo "Signing certificate thumbprint: \`${thumbprint}\`"
             echo
             echo "Install guide: [automation/powerbi/README.md](https://github.com/${GH_REPO}/blob/main/automation/powerbi/README.md) — certificate trust runbook: [signing/trust-thumbprint.md](https://github.com/${GH_REPO}/blob/main/automation/powerbi/signing/trust-thumbprint.md)"
+            echo
+            echo "\`CisoAssistant-starter.pbit\` is the starter report for this exact connector version: install the connector first, then open the template and enter your instance URL when prompted for \`BaseUrl\`."
           } > notes.md
           gh release create "$tag" \
-            dist/CisoAssistant.mez dist/CisoAssistant.pqx \
+            dist/CisoAssistant.mez dist/CisoAssistant.pqx dist/CisoAssistant-starter.pbit \
             --title "Power BI connector $tag" \
             --notes-file notes.md \
             --generate-notes \
