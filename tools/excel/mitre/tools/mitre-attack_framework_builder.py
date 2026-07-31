@@ -55,6 +55,10 @@ except ModuleNotFoundError:  # pragma: no cover
 # ---------------------------------------------------------------------------
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+COMMUNITY_ROOT = SCRIPT_DIR.parents[3]
+SHIPPED_LIBRARY_PATH = (
+    COMMUNITY_ROOT / "backend" / "library" / "libraries" / "mitre-attack.yaml"
+)
 
 RAW_BASE_URL = "https://raw.githubusercontent.com/mitre/cti/master"
 README_URL = f"{RAW_BASE_URL}/README.md"
@@ -71,14 +75,24 @@ MEASURES_PATH = SCRIPT_DIR / "measures.xlsx"
 
 LIBRARY_URN = "urn:intuitem:risk:library:mitre-attack"
 THREATS_BASE_URN = "urn:intuitem:risk:threat:mitre-attack"
+# The catalog ref_id is the library slug, so the base stops before it.
+THREAT_CATALOG_BASE_URN = "urn:intuitem:risk:threat_catalog"
+CATALOG_REF_ID = "mitre-attack"
+CATALOG_NAME = "MITRE ATT&CK Enterprise Matrix"
 MITIGATIONS_BASE_URN = "urn:intuitem:risk:function:mitre-attack"
-LIBRARY_VERSION = "1"
+# 5 is what shipped; the constant said "1", so regenerating used to regress
+# every installed library. Bump on each release that changes library content.
+LIBRARY_VERSION = "6"
 LIBRARY_LOCALE = "en"
 LIBRARY_REF_ID = "mitre-attack"
 LIBRARY_PROVIDER = "Mitre ATT&CK"
 LIBRARY_PACKAGER = "intuitem"
 
 LIBRARY_META_SHEET = "library_meta"
+CATALOG_META_SHEET = "catalog_meta"
+CATALOG_CONTENT_SHEET = "catalog_content"
+GROUPS_META_SHEET = "groups_meta"
+GROUPS_CONTENT_SHEET = "groups_content"
 THREATS_META_SHEET = "threats_meta"
 THREATS_CONTENT_SHEET = "threats_content"
 MITIGATIONS_META_SHEET = "mitigations_meta"
@@ -145,6 +159,13 @@ class AttackRecord:
     ref_id: str
     name: str
     description: str
+    # Threat-only. `selectable` is False for tactics, which carry the matrix
+    # columns and are never attached to anything.
+    type: str | None = None
+    selectable: bool = True
+    parent_ref_id: str | None = None
+    groups: tuple[str, ...] = ()
+    reference_controls: tuple[str, ...] = ()
 
 
 # ---------------------------------------------------------------------------
@@ -391,25 +412,135 @@ def to_attack_record(stix_object: object) -> AttackRecord:
     return AttackRecord(ref_id=ref_id, name=name, description=description)
 
 
+def slugify_group(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", str(value).strip().lower()).strip("-")
+
+
+def load_shipped_translations(path: Path, section: str) -> dict[str, dict[str, str]]:
+    """ref_id -> {"name": fr, "description": fr} from the shipped library.
+
+    Translations are produced by evaluating the =TRADUIRE formulas in Excel and
+    pasting the results back as values — a manual step. Re-emitting bare
+    formulas on every rebuild would discard that work, so existing translations
+    are carried forward and formulas are only written for genuinely new rows.
+    """
+    if not path.exists():
+        return {}
+    import yaml
+
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    shipped = {}
+    for entry in (data.get("objects", {}) or {}).get(section, []) or []:
+        french = (entry.get("translations") or {}).get("fr") or {}
+        french = {
+            key: value
+            for key, value in french.items()
+            if value and not str(value).lstrip().startswith("=")
+        }
+        if french:
+            shipped[entry["ref_id"]] = french
+    return shipped
+
+
 def extract_attack_records(
     source: Path,
-) -> tuple[list[AttackRecord], list[AttackRecord]]:
+) -> tuple[list[AttackRecord], list[AttackRecord], dict[str, str]]:
     attack_data = MitreAttackData(str(source))
-    techniques = sorted(
-        (
-            to_attack_record(item)
-            for item in attack_data.get_techniques(remove_revoked_deprecated=True)
-        ),
-        key=lambda item: item.ref_id,
-    )
+
+    raw_techniques = attack_data.get_techniques(remove_revoked_deprecated=True)
+    raw_mitigations = attack_data.get_mitigations(remove_revoked_deprecated=True)
+
+    # Column order is the matrix's tactic_refs, NOT ref_id order: the enterprise
+    # matrix opens on TA0043 Reconnaissance, then TA0042, then TA0001.
+    matrices = attack_data.get_objects_by_type("x-mitre-matrix")
+    if not matrices:
+        raise ValueError("No x-mitre-matrix object in the ATT&CK bundle")
+    tactic_by_stix_id = {
+        tactic.id: tactic
+        for tactic in attack_data.get_tactics(remove_revoked_deprecated=True)
+    }
+    ordered_tactics = [
+        tactic_by_stix_id[stix_id]
+        for stix_id in matrices[0]["tactic_refs"]
+        if stix_id in tactic_by_stix_id
+    ]
+    missing = set(tactic_by_stix_id) - set(matrices[0]["tactic_refs"])
+    if missing:
+        raise ValueError(f"Tactics absent from the matrix order: {sorted(missing)}")
+
+    # kill_chain_phases carries shortnames ("initial-access"), not TA ref_ids.
+    shortname_to_ref_id = {
+        tactic["x_mitre_shortname"]: get_external_reference(tactic)[0]
+        for tactic in ordered_tactics
+    }
+
+    stix_id_to_ref_id = {
+        item.id: get_external_reference(item)[0] for item in raw_techniques
+    }
+    parents: dict[str, str] = {}
+    for item in raw_techniques:
+        if not getattr(item, "x_mitre_is_subtechnique", False):
+            continue
+        parent = attack_data.get_parent_technique_of_subtechnique(item.id)
+        if parent:
+            parents[stix_id_to_ref_id[item.id]] = get_external_reference(
+                parent[0]["object"]
+            )[0]
+
+    mitigated_by: dict[str, list[str]] = {}
+    for (
+        mitigation_stix_id,
+        entries,
+    ) in attack_data.get_all_techniques_mitigated_by_all_mitigations().items():
+        mitigation = attack_data.get_object_by_stix_id(mitigation_stix_id)
+        mitigation_ref_id = get_external_reference(mitigation)[0]
+        for entry in entries:
+            technique_ref_id = stix_id_to_ref_id.get(entry["object"].id)
+            if technique_ref_id:
+                mitigated_by.setdefault(technique_ref_id, []).append(mitigation_ref_id)
+
+    tactics = [
+        AttackRecord(
+            **to_attack_record(item).__dict__ | {"selectable": False, "type": None}
+        )
+        for item in ordered_tactics
+    ]
+
+    platform_labels: dict[str, str] = {}
+    techniques = []
+    for item in raw_techniques:
+        base = to_attack_record(item)
+        for platform in getattr(item, "x_mitre_platforms", ()):
+            platform_labels[slugify_group(platform)] = str(platform).strip()
+        groups = [
+            slugify_group(platform)
+            for platform in getattr(item, "x_mitre_platforms", ())
+        ]
+        groups.extend(
+            shortname_to_ref_id[phase["phase_name"]]
+            for phase in getattr(item, "kill_chain_phases", ())
+            if phase["kill_chain_name"] == "mitre-attack"
+            and phase["phase_name"] in shortname_to_ref_id
+        )
+        techniques.append(
+            AttackRecord(
+                ref_id=base.ref_id,
+                name=base.name,
+                description=base.description,
+                type="technique",
+                parent_ref_id=parents.get(base.ref_id),
+                groups=tuple(groups),
+                reference_controls=tuple(sorted(mitigated_by.get(base.ref_id, ()))),
+            )
+        )
+    techniques.sort(key=lambda item: item.ref_id)
+
     mitigations = sorted(
-        (
-            to_attack_record(item)
-            for item in attack_data.get_mitigations(remove_revoked_deprecated=True)
-        ),
+        (to_attack_record(item) for item in raw_mitigations),
         key=lambda item: item.ref_id,
     )
-    return techniques, mitigations
+    # Tactics first so their rows take the low order_ids the columns need.
+    return tactics + techniques, mitigations, platform_labels
 
 
 # ---------------------------------------------------------------------------
@@ -505,7 +636,9 @@ def build_final_workbook(
     copyright_text: str,
     techniques: Sequence[AttackRecord],
     mitigations: Sequence[AttackRecord],
+    platform_labels: dict[str, str] | None = None,
 ) -> None:
+    platform_labels = platform_labels or {}
     workbook = Workbook()
     library_meta = workbook.active
     library_meta.title = LIBRARY_META_SHEET
@@ -513,6 +646,10 @@ def build_final_workbook(
     threats_content = workbook.create_sheet(THREATS_CONTENT_SHEET)
     mitigations_meta = workbook.create_sheet(MITIGATIONS_META_SHEET)
     mitigations_content = workbook.create_sheet(MITIGATIONS_CONTENT_SHEET)
+    catalog_meta = workbook.create_sheet(CATALOG_META_SHEET)
+    catalog_content = workbook.create_sheet(CATALOG_CONTENT_SHEET)
+    groups_meta = workbook.create_sheet(GROUPS_META_SHEET)
+    groups_content = workbook.create_sheet(GROUPS_CONTENT_SHEET)
 
     library_name = f"Mitre ATT&CK v{version} - Threats and Mitigations"
     # See the module docstring for the manual steps required to activate the
@@ -530,29 +667,91 @@ def build_final_workbook(
             ("copyright", copyright_text),
             ("provider", LIBRARY_PROVIDER),
             ("packager", LIBRARY_PACKAGER),
-            ("name[fr]", "=TRADUIRE(B6,\"en\",\"fr\")"),
-            ("description[fr]", "=TRADUIRE(B7,\"en\",\"fr\")"),
+            ("name[fr]", '=TRADUIRE(B6,"en","fr")'),
+            ("description[fr]", '=TRADUIRE(B7,"en","fr")'),
         ),
     )
 
     append_meta_rows(
+        catalog_meta,
+        (
+            ("type", "threat_catalog"),
+            ("base_urn", THREAT_CATALOG_BASE_URN),
+            ("grouping_definition", "attack_groups"),
+        ),
+    )
+    catalog_content.append(("ref_id", "name", "description"))
+    catalog_content.append(
+        (
+            CATALOG_REF_ID,
+            CATALOG_NAME,
+            "Tactics and techniques of the MITRE ATT&CK Enterprise matrix.\n"
+            "https://attack.mitre.org",
+        )
+    )
+    style_content_sheet(catalog_content, (18, 48, 100))
+
+    append_meta_rows(
+        groups_meta,
+        (("type", "threat_groups"), ("name", "attack_groups")),
+    )
+    groups_content.append(("ref_id", "name", "dimension"))
+    # Display names come from MITRE verbatim (ESXi, IaaS, macOS, PRE, SaaS);
+    # deriving them from the slug mangles the casing.
+    for slug, label in sorted(
+        platform_labels.items(), key=lambda item: item[1].lower()
+    ):
+        groups_content.append((slug, label, "platform"))
+    # Tactic entries stay in matrix order: this list is the column axis.
+    for item in techniques:
+        if not item.selectable:
+            groups_content.append((item.ref_id, item.name, "tactic"))
+    style_content_sheet(groups_content, (24, 32, 18))
+
+    append_meta_rows(
         threats_meta,
-        (("type", "threats"), ("base_urn", THREATS_BASE_URN)),
+        (
+            ("type", "threats"),
+            ("base_urn", THREATS_BASE_URN),
+            ("catalog_urn", f"{THREAT_CATALOG_BASE_URN}:{CATALOG_REF_ID}"),
+        ),
     )
     threats_content.append(
-        ("ref_id", "name", "description", "name[fr]", "description[fr]")
+        (
+            "ref_id",
+            "name",
+            "type",
+            "selectable",
+            "parent_ref_id",
+            "groups",
+            "reference_controls",
+            "description",
+            "name[fr]",
+            "description[fr]",
+        )
     )
+    shipped_threats = load_shipped_translations(SHIPPED_LIBRARY_PATH, "threats")
     for row_number, item in enumerate(techniques, start=2):
+        existing = shipped_threats.get(item.ref_id, {})
         threats_content.append(
             (
                 item.ref_id,
                 item.name,
+                item.type,
+                "false" if not item.selectable else None,
+                item.parent_ref_id,
+                ", ".join(item.groups) or None,
+                ", ".join(
+                    f"{MITIGATIONS_BASE_URN}:{ref.lower()}"
+                    for ref in item.reference_controls
+                )
+                or None,
                 item.description,
-                f"=TRADUIRE(B{row_number},\"en\",\"fr\")",
-                f"=TRADUIRE(C{row_number},\"en\",\"fr\")",
+                existing.get("name") or f'=TRADUIRE(B{row_number},"en","fr")',
+                existing.get("description") or f'=TRADUIRE(H{row_number},"en","fr")',
             )
         )
-    style_content_sheet(threats_content, (14, 48, 100, 48, 100))
+    style_content_sheet(threats_content, (14, 48, 12, 12, 18, 40, 40, 100, 48, 100))
 
     append_meta_rows(
         mitigations_meta,
@@ -571,11 +770,15 @@ def build_final_workbook(
     )
 
     missing_csf_mappings: list[str] = []
+    shipped_controls = load_shipped_translations(
+        SHIPPED_LIBRARY_PATH, "reference_controls"
+    )
     for row_number, item in enumerate(mitigations, start=2):
         csf_function = MITIGATION_CSF_FUNCTIONS.get(item.ref_id)
         if csf_function is None:
             csf_function = "protect"
             missing_csf_mappings.append(item.ref_id)
+        existing = shipped_controls.get(item.ref_id, {})
         mitigations_content.append(
             (
                 item.ref_id,
@@ -583,8 +786,8 @@ def build_final_workbook(
                 csf_function,
                 "technical",
                 item.description,
-                f"=TRADUIRE(B{row_number},\"en\",\"fr\")",
-                f"=TRADUIRE(E{row_number},\"en\",\"fr\")",
+                existing.get("name") or f'=TRADUIRE(B{row_number},"en","fr")',
+                existing.get("description") or f'=TRADUIRE(E{row_number},"en","fr")',
             )
         )
     style_content_sheet(
@@ -656,9 +859,18 @@ def main() -> None:
             print(f"✅ [OK] Detected ATT&CK Enterprise version: v{version}")
 
         print_step_banner(3, "Extract techniques and mitigations")
-        techniques, mitigations = extract_attack_records(ENTERPRISE_ATTACK_PATH)
-        print(f"✅ [OK] Retrieved {len(techniques)} ATT&CK techniques.")
+        techniques, mitigations, platform_labels = extract_attack_records(
+            ENTERPRISE_ATTACK_PATH
+        )
+        tactic_count = sum(1 for item in techniques if not item.selectable)
+        subtechnique_count = sum(1 for item in techniques if item.parent_ref_id)
+        control_links = sum(len(item.reference_controls) for item in techniques)
+        print(
+            f"✅ [OK] Retrieved {len(techniques) - tactic_count} ATT&CK techniques "
+            f"({subtechnique_count} sub-techniques) and {tactic_count} tactics."
+        )
         print(f"✅ [OK] Retrieved {len(mitigations)} ATT&CK mitigations.")
+        print(f"✅ [OK] Resolved {control_links} technique→mitigation links.")
 
         print_step_banner(4, "Build intermediate Excel workbooks")
         generated_intermediates.extend(
@@ -676,6 +888,7 @@ def main() -> None:
             copyright_text=copyright_text,
             techniques=techniques,
             mitigations=mitigations,
+            platform_labels=platform_labels,
         )
         print(f'✅ [OK] Created: "{display_path(output)}"')
 
