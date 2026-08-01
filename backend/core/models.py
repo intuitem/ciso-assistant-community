@@ -971,7 +971,7 @@ class LibraryUpdater:
             )
 
     def update_techniques(self):
-        # urn-valued keys and m2m are not concrete fields on the model
+        # not concrete fields, so they cannot go through update_or_create()
         deferred_keys = ("catalog_urn", "parent_urn", "tactics", "reference_controls")
         pending = {}
 
@@ -979,7 +979,7 @@ class LibraryUpdater:
             deferred = {key: technique.get(key) for key in deferred_keys}
             fields = {k: v for k, v in technique.items() if k not in deferred_keys}
             fields.setdefault("order_id", index)
-            # omitted fields must reset, not stay stale (cf. clearable_requirement_node_fields)
+            # omitted fields must reset, not stay stale
             fields.setdefault("is_deprecated", False)
             for clearable in ("description", "annotation", "groups"):
                 fields.setdefault(clearable, None)
@@ -2648,12 +2648,6 @@ class Threat(
 
 
 class TTPCatalog(ReferentialObjectMixin, I18nObjectMixin):
-    """Adversary tactics and techniques, e.g. MITRE ATT&CK or ATLAS.
-
-    Distinct from Threat: these are TTPs, an input to threat modeling rather
-    than threats. See docs/ttp_catalog_shaping.md.
-    """
-
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -2673,8 +2667,6 @@ class TTPCatalog(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class Tactic(ReferentialObjectMixin, I18nObjectMixin):
-    """The adversary's goal — the "why". Carries the matrix column axis."""
-
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -2688,7 +2680,7 @@ class Tactic(ReferentialObjectMixin, I18nObjectMixin):
         related_name="tactics",
         verbose_name=_("Catalog"),
     )
-    # positional, from the source matrix order — never ref_id order
+    # source matrix order, never ref_id order
     order_id = models.IntegerField(null=True, verbose_name=_("Order ID"))
 
     fields_to_check = ["ref_id", "name"]
@@ -2704,8 +2696,6 @@ class Technique(
     PublishInRootFolderMixin,
     FilteringLabelMixin,
 ):
-    """How an adversary achieves a tactical goal."""
-
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,
@@ -2721,11 +2711,11 @@ class Technique(
         related_name="techniques",
         verbose_name=_("Catalog"),
     )
-    # many-to-many, not a hierarchy: 145 of 697 ATT&CK techniques sit in 2-4 tactics
+    # not a hierarchy: 145 of 697 ATT&CK techniques sit in 2-4 tactics
     tactics = models.ManyToManyField(
         Tactic, blank=True, related_name="techniques", verbose_name=_("Tactics")
     )
-    # sub-techniques are a strict tree: 0 of 475 have more than one parent
+    # strict tree: 0 of 475 sub-techniques have more than one parent
     parent = models.ForeignKey(
         "self",
         on_delete=models.SET_NULL,

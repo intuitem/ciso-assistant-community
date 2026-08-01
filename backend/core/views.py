@@ -1937,9 +1937,7 @@ class PerimeterViewSet(BaseModelViewSet):
         return Response(my_map)
 
 
-# MITRE content now ships as TTPs (TTPCatalog/Tactic/Technique). The legacy
-# Threat rows from these libraries stay for the links that already point at
-# them, but are kept out of pickers. See docs/ttp_catalog_shaping.md.
+# superseded by the TTP catalog; kept out of pickers, not deleted
 LEGACY_TTP_LIBRARIES = {
     "urn:intuitem:risk:library:mitre-attack",
     "urn:intuitem:risk:library:mitre-atlas",
@@ -1976,8 +1974,7 @@ class ThreatViewSet(BaseModelViewSet):
                 "filtering_labels__folder",  # FieldsRelatedField includes folder
             )
         )
-        # pickers ask for exclude_legacy_ttp; the list page does not, so the
-        # rows stay auditable where user data still links to them
+        # opt-in: the list page keeps them so existing links stay auditable
         if self.request.query_params.get("exclude_legacy_ttp") == "true":
             queryset = queryset.exclude(library__urn__in=LEGACY_TTP_LIBRARIES)
         return queryset

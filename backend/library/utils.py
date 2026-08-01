@@ -451,8 +451,6 @@ class FrameworkImporter:
 
 
 class ReferentialImporterMixin:
-    """Shared shape for referential objects imported from a library."""
-
     REQUIRED_FIELDS = {"ref_id", "urn"}
 
     def __init__(self, data: dict, index: int = 0):
@@ -524,12 +522,7 @@ class TechniqueImporter(ReferentialImporterMixin):
         )
 
     def link_object(self):
-        """Second pass: targets that need not exist at create time.
-
-        `parent` because document order does not guarantee parents precede
-        children, `reference_controls` because import_objects loads techniques
-        before them.
-        """
+        """Resolve links whose targets may not exist at create time."""
         if self._object is None:
             return
 
@@ -1182,8 +1175,7 @@ class LibraryImporter:
         for reference_control in self._reference_controls:
             reference_control.import_reference_control(library_object)
 
-        # after reference controls: techniques link to them, and to parent
-        # techniques whose rows only exist once the loop above is done
+        # after reference controls: techniques link to them and to parents
         for technique in self._techniques:
             technique.link_object()
 

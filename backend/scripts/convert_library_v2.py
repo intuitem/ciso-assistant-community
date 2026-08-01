@@ -64,12 +64,7 @@ _UNEVALUATED_FORMULA_COUNT = 0
 
 
 def is_unevaluated_formula(value) -> bool:
-    """A spreadsheet formula that was never evaluated to a value.
-
-    Translation columns are authored as formulas which must be evaluated in the
-    spreadsheet and pasted back as values; exporting the formula text ships
-    '=TRADUIRE(...)' to the UI in place of a real translation.
-    """
+    """A spreadsheet formula that was never evaluated to a value."""
     return isinstance(value, str) and value.lstrip().startswith("=")
 
 
@@ -891,8 +886,7 @@ def _handle_ttp_catalog(obj, library, object_blocks, compat_mode, verbose):
     if not header:
         return
 
-    # named block of facet definitions, as framework does for
-    # implementation_groups_definition
+    # named block, as framework does for implementation_groups_definition
     grouping_defs = []
     grouping_name = meta.get("grouping_definition")
     if grouping_name and grouping_name in object_blocks:
@@ -923,7 +917,7 @@ def _handle_ttp_catalog(obj, library, object_blocks, compat_mode, verbose):
 
 
 def _handle_tactics(obj, library, compat_mode, verbose):
-    """Process a tactics object block. Sheet order is the matrix column order."""
+    """Process a tactics object block. Sheet order is the column order."""
     tactics = []
     meta = obj["meta"]
     base_urn = meta.get("base_urn")
