@@ -5668,5 +5668,11 @@
 	"technique": "Technique",
 	"techniques": "Techniques",
 	"parentTechnique": "Technique parente",
-	"noTTPCatalogMatrix": "Ce catalogue ne comporte pas de matrice : aucune tactique n'est déclarée."
+	"noTTPCatalogMatrix": "Ce catalogue ne comporte pas de matrice : aucune tactique n'est déclarée.",
+	"threatModel": "Modèle de menaces",
+	"threatModels": "Modèles de menaces",
+	"threatModelCatalogLocked": "Le catalogue ne peut plus être modifié après la création.",
+	"nodeCount": "Techniques",
+	"selectTechniques": "Sélectionner les techniques",
+	"techniquesSelected": "sélectionnée(s)"
 }

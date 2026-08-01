@@ -2751,6 +2751,77 @@ class Technique(
         )
 
 
+class ThreatModel(NameDescriptionMixin, FolderMixin):
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+    catalog = models.ForeignKey(
+        TTPCatalog,
+        on_delete=models.PROTECT,
+        related_name="threat_models",
+        verbose_name=_("TTP catalog"),
+    )
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name = _("Threat model")
+        verbose_name_plural = _("Threat models")
+        ordering = ["created_at"]
+
+
+class ThreatModelNode(AbstractBaseModel, FolderMixin):
+    threat_model = models.ForeignKey(
+        ThreatModel, on_delete=models.CASCADE, related_name="nodes"
+    )
+    technique = models.ForeignKey(
+        Technique,
+        on_delete=models.CASCADE,
+        related_name="threat_model_nodes",
+        verbose_name=_("Technique"),
+    )
+    label = models.CharField(max_length=255, blank=True, verbose_name=_("Label"))
+    position_x = models.FloatField(default=0)
+    position_y = models.FloatField(default=0)
+
+    class Meta:
+        verbose_name = _("Threat model node")
+        verbose_name_plural = _("Threat model nodes")
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return self.label or str(self.technique)
+
+    def save(self, *args, **kwargs):
+        self.folder = self.threat_model.folder
+        super().save(*args, **kwargs)
+
+
+class ThreatModelEdge(AbstractBaseModel, FolderMixin):
+    threat_model = models.ForeignKey(
+        ThreatModel, on_delete=models.CASCADE, related_name="edges"
+    )
+    source = models.ForeignKey(
+        ThreatModelNode, on_delete=models.CASCADE, related_name="outgoing"
+    )
+    target = models.ForeignKey(
+        ThreatModelNode, on_delete=models.CASCADE, related_name="incoming"
+    )
+    label = models.CharField(max_length=255, blank=True, verbose_name=_("Label"))
+
+    class Meta:
+        verbose_name = _("Threat model edge")
+        verbose_name_plural = _("Threat model edges")
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.source} → {self.target}"
+
+    def save(self, *args, **kwargs):
+        self.folder = self.threat_model.folder
+        super().save(*args, **kwargs)
+
+
 class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMixin):
     CATEGORY = [
         ("policy", _("Policy")),

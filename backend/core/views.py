@@ -2076,6 +2076,59 @@ class TechniqueViewSet(BaseModelViewSet):
         return Response({p: p for p in providers})
 
 
+def build_catalog_matrix(catalog) -> dict:
+    columns = [
+        {
+            "id": tactic.id,
+            "ref_id": tactic.ref_id,
+            "name": tactic.get_name_translated,
+            "description": tactic.get_description_translated,
+        }
+        for tactic in catalog.tactics.order_by(F("order_id").asc(nulls_last=True))
+    ]
+
+    techniques = (
+        Technique.objects.filter(catalog=catalog, is_deprecated=False)
+        .select_related("parent")
+        .prefetch_related("tactics")
+    )
+
+    children, cells = {}, []
+    for technique in techniques:
+        payload = {
+            "id": technique.id,
+            "ref_id": technique.ref_id,
+            "name": technique.get_name_translated,
+            "tactics": [str(t.id) for t in technique.tactics.all()],
+            "groups": technique.groups or [],
+        }
+        if technique.parent_id:
+            children.setdefault(str(technique.parent_id), []).append(payload)
+        else:
+            cells.append(payload)
+
+    # published matrices order cells by name, sub-techniques by ref_id
+    for cell in cells:
+        cell["children"] = sorted(
+            children.pop(str(cell["id"]), []), key=lambda item: item["ref_id"]
+        )
+    for orphans in children.values():
+        cells.extend(orphans)
+    cells.sort(key=lambda item: item["name"].casefold())
+
+    return {
+        "catalog": {
+            "id": catalog.id,
+            "ref_id": catalog.ref_id,
+            "name": catalog.get_name_translated,
+            "description": catalog.get_description_translated,
+        },
+        "columns": columns,
+        "facets": catalog.grouping_definition or [],
+        "cells": cells,
+    }
+
+
 class TTPCatalogViewSet(BaseModelViewSet):
     """
     API endpoint that allows TTP catalogs to be viewed or edited.
@@ -2087,60 +2140,86 @@ class TTPCatalogViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get the catalog rendered as a matrix")
     def matrix(self, request, pk):
-        catalog = self.get_object()
-        columns = [
-            {
-                "id": tactic.id,
-                "ref_id": tactic.ref_id,
-                "name": tactic.get_name_translated,
-                "description": tactic.get_description_translated,
-            }
-            for tactic in catalog.tactics.order_by(F("order_id").asc(nulls_last=True))
-        ]
+        return Response(build_catalog_matrix(self.get_object()))
 
-        techniques = (
-            Technique.objects.filter(catalog=catalog, is_deprecated=False)
-            .select_related("parent")
-            .prefetch_related("tactics")
-        )
 
-        children, cells = {}, []
-        for technique in techniques:
-            payload = {
-                "id": technique.id,
-                "ref_id": technique.ref_id,
-                "name": technique.get_name_translated,
-                "tactics": [str(t.id) for t in technique.tactics.all()],
-                "groups": technique.groups or [],
-            }
-            if technique.parent_id:
-                children.setdefault(str(technique.parent_id), []).append(payload)
-            else:
-                cells.append(payload)
+class ThreatModelViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows threat models to be viewed or edited.
+    """
 
-        # published matrices order cells by name, sub-techniques by ref_id
-        for cell in cells:
-            cell["children"] = sorted(
-                children.pop(str(cell["id"]), []), key=lambda item: item["ref_id"]
+    model = ThreatModel
+    filterset_fields = ["folder", "catalog"]
+    search_fields = ["ref_id", "name", "description"]
+
+    @action(detail=True, name="Get the catalog matrix with the selection applied")
+    def matrix(self, request, pk):
+        threat_model = self.get_object()
+        payload = build_catalog_matrix(threat_model.catalog)
+        payload["selected"] = [
+            str(technique_id)
+            for technique_id in threat_model.nodes.values_list(
+                "technique_id", flat=True
             )
-        for orphans in children.values():
-            cells.extend(orphans)
-        cells.sort(key=lambda item: item["name"].casefold())
+        ]
+        return Response(payload)
 
-        grouping = catalog.grouping_definition or []
-        return Response(
-            {
-                "catalog": {
-                    "id": catalog.id,
-                    "ref_id": catalog.ref_id,
-                    "name": catalog.get_name_translated,
-                    "description": catalog.get_description_translated,
-                },
-                "columns": columns,
-                "facets": grouping,
-                "cells": cells,
-            }
+    @action(detail=True, methods=["post"], url_path="set-techniques")
+    def set_techniques(self, request, pk):
+        threat_model = self.get_object()
+        raw = request.data.get("technique_ids")
+        if not isinstance(raw, list):
+            return Response(
+                {"errors": ["technique_ids must be an array."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            requested = {uuid.UUID(str(value)) for value in raw}
+        except ValueError, AttributeError:
+            return Response(
+                {"errors": ["technique_ids must contain UUIDs."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        in_catalog = set(
+            Technique.objects.filter(
+                id__in=requested, catalog=threat_model.catalog
+            ).values_list("id", flat=True)
         )
+        foreign = requested - in_catalog
+        if foreign:
+            refs = sorted(
+                Technique.objects.filter(id__in=foreign).values_list(
+                    "ref_id", flat=True
+                )
+            )
+            return Response(
+                {
+                    "errors": [
+                        f"Techniques outside the model's catalog: {', '.join(refs) or 'unknown'}"
+                    ]
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        with transaction.atomic():
+            current = dict(threat_model.nodes.values_list("technique_id", "id"))
+            threat_model.nodes.filter(
+                technique_id__in=set(current) - in_catalog
+            ).delete()
+            ThreatModelNode.objects.bulk_create(
+                [
+                    ThreatModelNode(
+                        threat_model=threat_model,
+                        technique_id=technique_id,
+                        folder=threat_model.folder,
+                    )
+                    for technique_id in in_catalog - set(current)
+                ]
+            )
+
+        return Response({"count": threat_model.nodes.count()})
 
 
 class AssetFilter(TimestampRangeFilterMixin, GenericFilterSet):

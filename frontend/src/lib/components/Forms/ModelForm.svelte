@@ -66,6 +66,7 @@
 	import EscalationThresholdForm from './ModelForm/EscalationThresholdForm.svelte';
 	import CampaignForm from './ModelForm/CampaignForm.svelte';
 	import ElementaryActionForm from './ModelForm/ElementaryActionForm.svelte';
+	import ThreatModelForm from './ModelForm/ThreatModelForm.svelte';
 	import OperatingModeForm from './ModelForm/OperatingModeForm.svelte';
 	import KillChainForm from './ModelForm/KillChainForm.svelte';
 	import OrganisationIssueForm from './ModelForm/OrganisationIssueForm.svelte';
@@ -873,6 +874,16 @@
 			/>
 		{:else if URLModel === 'task-nodes'}
 			<TaskNodeForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+		{:else if URLModel === 'threat-models'}
+			<ThreatModelForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{...rest}
+			/>
 		{:else if URLModel === 'elementary-actions'}
 			<ElementaryActionForm
 				{form}

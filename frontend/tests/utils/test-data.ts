@@ -625,8 +625,7 @@ export default {
 		},
 		urn: 'urn:intuitem:risk:function:DOC.CONTROLS'
 	},
-	// MITRE ships as TTPs now, and its legacy Threat rows are excluded from
-	// pickers (exclude_legacy_ttp), so these cannot be ATT&CK entries.
+	// legacy MITRE threats are excluded from pickers, so these cannot be ATT&CK
 	threat: {
 		name: 'Ransomware',
 		library: {

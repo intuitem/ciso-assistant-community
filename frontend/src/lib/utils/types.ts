@@ -48,6 +48,7 @@ export const URL_MODEL = [
 	'ttp-catalogs',
 	'tactics',
 	'techniques',
+	'threat-models',
 	'risk-scenarios',
 	'applied-controls',
 	'policies',

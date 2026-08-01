@@ -5673,5 +5673,11 @@
 	"technique": "Technique",
 	"techniques": "Techniques",
 	"parentTechnique": "Parent technique",
-	"noTTPCatalogMatrix": "This catalog has no matrix layout: it declares no tactics."
+	"noTTPCatalogMatrix": "This catalog has no matrix layout: it declares no tactics.",
+	"threatModel": "Threat model",
+	"threatModels": "Threat models",
+	"threatModelCatalogLocked": "The catalog cannot be changed after creation.",
+	"nodeCount": "Techniques",
+	"selectTechniques": "Select techniques",
+	"techniquesSelected": "selected"
 }

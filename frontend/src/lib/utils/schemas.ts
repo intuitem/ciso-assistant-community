@@ -189,6 +189,13 @@ export const TacticSchema = z.object({
 	order_id: z.number().optional().nullable()
 });
 
+export const ThreatModelSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	catalog: z.string().uuid({ message: 'Select a TTP catalog' })
+});
+
 export const TechniqueSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -1973,6 +1980,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'ttp-catalogs': TTPCatalogSchema,
 	tactics: TacticSchema,
 	techniques: TechniqueSchema,
+	'threat-models': ThreatModelSchema,
 	'security-advisories': SecurityAdvisorySchema,
 	cwes: CWESchema,
 	'risk-scenarios': RiskScenarioSchema,

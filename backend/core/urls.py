@@ -44,6 +44,7 @@ router.register(r"threats", ThreatViewSet, basename="threats")
 router.register(r"ttp-catalogs", TTPCatalogViewSet, basename="ttp-catalogs")
 router.register(r"tactics", TacticViewSet, basename="tactics")
 router.register(r"techniques", TechniqueViewSet, basename="techniques")
+router.register(r"threat-models", ThreatModelViewSet, basename="threat-models")
 router.register(
     r"security-advisories", SecurityAdvisoryViewSet, basename="security-advisories"
 )

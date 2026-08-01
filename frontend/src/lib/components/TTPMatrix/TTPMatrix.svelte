@@ -31,9 +31,21 @@
 		facets?: MatrixFacet[];
 		/** Link target for a cell. Omit to render cells as plain text. */
 		href?: (cell: MatrixCell) => string;
+		/** Selection mode: cells become toggles instead of links. */
+		selectable?: boolean;
+		selected?: Set<string>;
+		onToggle?: (cell: MatrixCell) => void;
 	}
 
-	let { columns, cells, facets = [], href }: Props = $props();
+	let {
+		columns,
+		cells,
+		facets = [],
+		href,
+		selectable = false,
+		selected = new Set<string>(),
+		onToggle
+	}: Props = $props();
 
 	let activeFacets = $state<string[]>([]);
 	let expanded = $state<Record<string, boolean>>({});
@@ -147,10 +159,22 @@
 						{@const cellKey = `${column.ref_id}:${cell.id}`}
 						{@const isOpen = expanded[cellKey] ?? false}
 						<div
-							class="rounded border border-surface-300-700 bg-surface-50-950 px-2 py-1 text-xs hover:border-primary-500"
+							class="rounded border px-2 py-1 text-xs hover:border-primary-500 {selectable &&
+							selected.has(cell.id)
+								? 'border-primary-500 bg-primary-500/15'
+								: 'border-surface-300-700 bg-surface-50-950'}"
 						>
 							<div class="flex items-start gap-1">
-								{#if href}
+								{#if selectable}
+									<button
+										type="button"
+										class="grow text-left leading-snug"
+										aria-pressed={selected.has(cell.id)}
+										onclick={() => onToggle?.(cell)}
+									>
+										{cell.name}
+									</button>
+								{:else if href}
 									<a class="anchor grow leading-snug" href={href(cell)}>{cell.name}</a>
 								{:else}
 									<span class="grow leading-snug">{cell.name}</span>
@@ -171,8 +195,21 @@
 							{#if isOpen}
 								<ul class="mt-1 space-y-0.5 border-t border-surface-300-700 pt-1 pl-2">
 									{#each children as child (child.id)}
-										<li class="leading-snug">
-											{#if href}
+										<li
+											class="leading-snug {selectable && selected.has(child.id)
+												? 'rounded bg-primary-500/15 px-1 font-medium'
+												: ''}"
+										>
+											{#if selectable}
+												<button
+													type="button"
+													class="w-full text-left"
+													aria-pressed={selected.has(child.id)}
+													onclick={() => onToggle?.(child)}
+												>
+													{child.name}
+												</button>
+											{:else if href}
 												<a class="anchor" href={href(child)}>{child.name}</a>
 											{:else}
 												{child.name}

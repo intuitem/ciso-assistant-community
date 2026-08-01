@@ -339,6 +339,24 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'library', urlModel: 'loaded-libraries' }
 		]
 	},
+	'threat-models': {
+		name: 'threatmodel',
+		localName: 'threatModel',
+		localNamePlural: 'threatModels',
+		verboseName: 'Threat model',
+		verboseNamePlural: 'Threat models',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'catalog' },
+			{ field: 'folder' }
+		],
+		foreignKeyFields: [
+			{ field: 'catalog', urlModel: 'ttp-catalogs' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		]
+	},
 	techniques: {
 		name: 'technique',
 		localName: 'technique',

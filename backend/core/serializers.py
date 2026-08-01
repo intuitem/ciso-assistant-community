@@ -1254,6 +1254,22 @@ class TacticImportExportSerializer(BaseModelSerializer):
         fields = REFERENTIAL_IMPORT_EXPORT_FIELDS + ["catalog", "order_id"]
 
 
+class ThreatModelWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = ThreatModel
+        fields = "__all__"
+
+
+class ThreatModelReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    catalog = FieldsRelatedField()
+    node_count = serializers.IntegerField(source="nodes.count", read_only=True)
+
+    class Meta:
+        model = ThreatModel
+        fields = "__all__"
+
+
 class TechniqueWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Technique

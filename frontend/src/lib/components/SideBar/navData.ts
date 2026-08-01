@@ -281,6 +281,12 @@ export const navData = {
 					href: '/ebios-rm'
 				},
 				{
+					name: 'threatModels',
+					fa_icon: 'fa-solid fa-diagram-project',
+					href: '/threat-models',
+					permissions: ['view_threatmodel']
+				},
+				{
 					name: 'quantitativeRiskStudies',
 					fa_icon: 'fa-solid fa-calculator',
 					href: '/quantitative-risk-studies',
