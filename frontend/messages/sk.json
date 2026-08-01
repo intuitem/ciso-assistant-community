@@ -3624,7 +3624,7 @@
 	"impactRequirements": "Všetky hodnoty musia byť zadané a musia byť väčšie ako 0. Hodnoty sa musia zvyšovať zhora nadol (napr. Vedľajšie: 5 000 → Hlavné: 50 000 → Kritické: 500 000).",
 	"scoreChangeDetected": "Bola zistená zmena skóre",
 	"scoreChangeDetectedDescription": "Bola zistená zmena skóre. Zvoliť spôsob spracovania aktualizácií skóre pre súvisiace audity.",
-	"clamp": "Ohraničenie"
+	"clamp": "Ohraničenie",
 	"clampDescription": "Ohraničte hodnotu v rámci definovaných hraníc",
 	"resetDescription": "Resetovať skóre auditov",
 	"ruleOfThree": "Pravidlo troch",
