@@ -1937,6 +1937,15 @@ class PerimeterViewSet(BaseModelViewSet):
         return Response(my_map)
 
 
+# MITRE content now ships as TTPs (TTPCatalog/Tactic/Technique). The legacy
+# Threat rows from these libraries stay for the links that already point at
+# them, but are kept out of pickers. See docs/ttp_catalog_shaping.md.
+LEGACY_TTP_LIBRARIES = {
+    "urn:intuitem:risk:library:mitre-attack",
+    "urn:intuitem:risk:library:mitre-atlas",
+}
+
+
 class ThreatViewSet(BaseModelViewSet):
     """
     API endpoint that allows threats to be viewed or edited.
@@ -1955,7 +1964,7 @@ class ThreatViewSet(BaseModelViewSet):
     search_fields = ["ref_id", "name", "provider", "description"]
 
     def get_queryset(self):
-        return (
+        queryset = (
             super()
             .get_queryset()
             .select_related(
@@ -1967,6 +1976,11 @@ class ThreatViewSet(BaseModelViewSet):
                 "filtering_labels__folder",  # FieldsRelatedField includes folder
             )
         )
+        # pickers ask for exclude_legacy_ttp; the list page does not, so the
+        # rows stay auditable where user data still links to them
+        if self.request.query_params.get("exclude_legacy_ttp") == "true":
+            queryset = queryset.exclude(library__urn__in=LEGACY_TTP_LIBRARIES)
+        return queryset
 
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
@@ -2002,6 +2016,134 @@ class ThreatViewSet(BaseModelViewSet):
                 my_map[item.folder.name] = {}
             my_map[item.folder.name].update({item.name: item.id})
         return Response(my_map)
+
+
+class TacticViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows tactics to be viewed or edited.
+    """
+
+    model = Tactic
+    filterset_fields = ["folder", "provider", "library", "catalog", "urn"]
+    search_fields = ["ref_id", "name", "description"]
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("folder", "library", "catalog")
+
+
+class TechniqueViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows techniques to be viewed or edited.
+    """
+
+    model = Technique
+    filterset_fields = [
+        "folder",
+        "provider",
+        "library",
+        "catalog",
+        "tactics",
+        "parent",
+        "is_deprecated",
+        "filtering_labels",
+        "urn",
+    ]
+    search_fields = ["ref_id", "name", "provider", "description"]
+
+    def get_queryset(self):
+        queryset = (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "folder__parent_folder",
+                "library",
+                "parent",  # display_short composes the parent name
+                "catalog",
+            )
+            .prefetch_related(
+                "filtering_labels__folder", "tactics", "reference_controls"
+            )
+        )
+        if "is_deprecated" not in self.request.query_params:
+            queryset = queryset.filter(is_deprecated=False)
+        return queryset
+
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            Technique.objects.filter(provider__isnull=False).values_list(
+                "provider", flat=True
+            )
+        )
+        return Response({p: p for p in providers})
+
+
+class TTPCatalogViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows TTP catalogs to be viewed or edited.
+    """
+
+    model = TTPCatalog
+    filterset_fields = ["folder", "provider", "library", "urn"]
+    search_fields = ["ref_id", "name", "provider", "description"]
+
+    @action(detail=True, name="Get the catalog rendered as a matrix")
+    def matrix(self, request, pk):
+        catalog = self.get_object()
+        columns = [
+            {
+                "id": tactic.id,
+                "ref_id": tactic.ref_id,
+                "name": tactic.get_name_translated,
+                "description": tactic.get_description_translated,
+            }
+            for tactic in catalog.tactics.order_by(F("order_id").asc(nulls_last=True))
+        ]
+
+        techniques = (
+            Technique.objects.filter(catalog=catalog, is_deprecated=False)
+            .select_related("parent")
+            .prefetch_related("tactics")
+        )
+
+        children, cells = {}, []
+        for technique in techniques:
+            payload = {
+                "id": technique.id,
+                "ref_id": technique.ref_id,
+                "name": technique.get_name_translated,
+                "tactics": [str(t.id) for t in technique.tactics.all()],
+                "groups": technique.groups or [],
+            }
+            if technique.parent_id:
+                children.setdefault(str(technique.parent_id), []).append(payload)
+            else:
+                cells.append(payload)
+
+        # published matrices order cells by name, sub-techniques by ref_id
+        for cell in cells:
+            cell["children"] = sorted(
+                children.pop(str(cell["id"]), []), key=lambda item: item["ref_id"]
+            )
+        for orphans in children.values():
+            cells.extend(orphans)
+        cells.sort(key=lambda item: item["name"].casefold())
+
+        grouping = catalog.grouping_definition or []
+        return Response(
+            {
+                "catalog": {
+                    "id": catalog.id,
+                    "ref_id": catalog.ref_id,
+                    "name": catalog.get_name_translated,
+                    "description": catalog.get_description_translated,
+                },
+                "columns": columns,
+                "facets": grouping,
+                "cells": cells,
+            }
+        )
 
 
 class AssetFilter(TimestampRangeFilterMixin, GenericFilterSet):

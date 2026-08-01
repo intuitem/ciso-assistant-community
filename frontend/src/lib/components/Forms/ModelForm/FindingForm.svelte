@@ -186,7 +186,7 @@
 	<AutocompleteSelect
 		multiple
 		{form}
-		optionsEndpoint="threats"
+		optionsEndpoint="threats?exclude_legacy_ttp=true"
 		field="threats"
 		label={m.threats()}
 	/>

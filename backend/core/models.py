@@ -891,6 +891,9 @@ class LibraryUpdater:
         if isinstance(self.new_requirement_mapping_sets, dict):
             self.new_requirement_mapping_sets = [self.new_requirement_mapping_sets]
 
+        self.ttp_catalogs = new_library_content.get("ttp_catalogs", [])
+        self.tactics = new_library_content.get("tactics", [])
+        self.techniques = new_library_content.get("techniques", [])
         self.threats = new_library_content.get("threats", [])
         self.reference_controls = new_library_content.get("reference_controls", [])
         self.metric_definitions = new_library_content.get("metric_definitions", [])
@@ -926,6 +929,96 @@ class LibraryUpdater:
                 "libraryHasNoUpdate",
             ]:
                 return error_msg
+
+    def _resolve_ref(self, model, urn, field, referrer):
+        # absent clears the link; unresolvable is a data bug
+        if not urn:
+            return None
+        obj = model.objects.filter(urn=urn.lower()).first()
+        if obj is None:
+            raise ValueError(f"Unknown {field} '{urn}' referenced in '{referrer}'.")
+        return obj
+
+    def update_ttp_catalogs(self):
+        for catalog in self.ttp_catalogs:
+            TTPCatalog.objects.update_or_create(
+                urn=catalog["urn"].lower(),
+                defaults=catalog,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **catalog,
+                    "library": self.old_library,
+                },
+            )
+
+    def update_tactics(self):
+        for index, tactic in enumerate(self.tactics):
+            fields = {k: v for k, v in tactic.items() if k != "catalog_urn"}
+            fields.setdefault("order_id", index)
+            fields["catalog"] = self._resolve_ref(
+                TTPCatalog, tactic.get("catalog_urn"), "TTP catalog", tactic["urn"]
+            )
+            Tactic.objects.update_or_create(
+                urn=tactic["urn"].lower(),
+                defaults=fields,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **fields,
+                    "library": self.old_library,
+                },
+            )
+
+    def update_techniques(self):
+        # urn-valued keys and m2m are not concrete fields on the model
+        deferred_keys = ("catalog_urn", "parent_urn", "tactics", "reference_controls")
+        pending = {}
+
+        for index, technique in enumerate(self.techniques):
+            deferred = {key: technique.get(key) for key in deferred_keys}
+            fields = {k: v for k, v in technique.items() if k not in deferred_keys}
+            fields.setdefault("order_id", index)
+            # omitted fields must reset, not stay stale (cf. clearable_requirement_node_fields)
+            fields.setdefault("is_deprecated", False)
+            for clearable in ("description", "annotation", "groups"):
+                fields.setdefault(clearable, None)
+            fields["catalog"] = self._resolve_ref(
+                TTPCatalog, deferred["catalog_urn"], "TTP catalog", technique["urn"]
+            )
+            obj, _ = Technique.objects.update_or_create(
+                urn=technique["urn"].lower(),
+                defaults=fields,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **fields,
+                    "library": self.old_library,
+                },
+            )
+            pending[obj] = deferred
+
+        for obj, deferred in pending.items():
+            obj.parent = self._resolve_ref(
+                Technique, deferred["parent_urn"], "parent technique", obj.urn
+            )
+            obj.save(update_fields=["parent"])
+            for field, model in (
+                ("tactics", Tactic),
+                ("reference_controls", ReferenceControl),
+            ):
+                targets = model.objects.filter(
+                    urn__in=[u.lower() for u in deferred[field] or []]
+                )
+                if targets.exists() or getattr(obj, field).exists():
+                    getattr(obj, field).set(targets)
+
+        # flagged rather than deleted: user data may point at these
+        incoming = {t["urn"].lower() for t in self.techniques}
+        if incoming:
+            Technique.objects.filter(library=self.old_library).exclude(
+                urn__in=incoming
+            ).update(is_deprecated=True)
 
     def update_threats(self):
         for threat in self.threats:
@@ -1715,8 +1808,11 @@ class LibraryUpdater:
         for new_dependency in new_dependencies:
             self.old_library.dependencies.add(new_dependency)
 
+        self.update_ttp_catalogs()
+        self.update_tactics()
         self.update_threats()
         self.update_reference_controls()
+        self.update_techniques()
         self.update_metric_definitions()
 
         if self.new_frameworks is not None:
@@ -2549,6 +2645,120 @@ class Threat(
 
     def __str__(self):
         return self.name
+
+
+class TTPCatalog(ReferentialObjectMixin, I18nObjectMixin):
+    """Adversary tactics and techniques, e.g. MITRE ATT&CK or ATLAS.
+
+    Distinct from Threat: these are TTPs, an input to threat modeling rather
+    than threats. See docs/ttp_catalog_shaping.md.
+    """
+
+    library = models.ForeignKey(
+        LoadedLibrary,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="ttp_catalogs",
+    )
+    grouping_definition = models.JSONField(
+        blank=True, null=True, verbose_name=_("Grouping definition")
+    )
+
+    fields_to_check = ["ref_id", "name"]
+
+    class Meta:
+        verbose_name = _("TTP catalog")
+        verbose_name_plural = _("TTP catalogs")
+
+
+class Tactic(ReferentialObjectMixin, I18nObjectMixin):
+    """The adversary's goal — the "why". Carries the matrix column axis."""
+
+    library = models.ForeignKey(
+        LoadedLibrary,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="tactics",
+    )
+    catalog = models.ForeignKey(
+        TTPCatalog,
+        on_delete=models.CASCADE,
+        related_name="tactics",
+        verbose_name=_("Catalog"),
+    )
+    # positional, from the source matrix order — never ref_id order
+    order_id = models.IntegerField(null=True, verbose_name=_("Order ID"))
+
+    fields_to_check = ["ref_id", "name"]
+
+    class Meta:
+        verbose_name = _("Tactic")
+        verbose_name_plural = _("Tactics")
+
+
+class Technique(
+    ReferentialObjectMixin,
+    I18nObjectMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
+):
+    """How an adversary achieves a tactical goal."""
+
+    library = models.ForeignKey(
+        LoadedLibrary,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="techniques",
+    )
+    catalog = models.ForeignKey(
+        TTPCatalog,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="techniques",
+        verbose_name=_("Catalog"),
+    )
+    # many-to-many, not a hierarchy: 145 of 697 ATT&CK techniques sit in 2-4 tactics
+    tactics = models.ManyToManyField(
+        Tactic, blank=True, related_name="techniques", verbose_name=_("Tactics")
+    )
+    # sub-techniques are a strict tree: 0 of 475 have more than one parent
+    parent = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="children",
+        verbose_name=_("Parent"),
+    )
+    order_id = models.IntegerField(null=True, verbose_name=_("Order ID"))
+    groups = models.JSONField(null=True, blank=True, verbose_name=_("Groups"))
+    reference_controls = models.ManyToManyField(
+        "ReferenceControl",
+        blank=True,
+        related_name="techniques",
+        verbose_name=_("Reference controls"),
+    )
+    is_deprecated = models.BooleanField(default=False, verbose_name=_("Deprecated"))
+    is_published = models.BooleanField(_("published"), default=True)
+
+    fields_to_check = ["ref_id", "name"]
+
+    class Meta:
+        verbose_name = _("Technique")
+        verbose_name_plural = _("Techniques")
+
+    @property
+    def display_short(self) -> str:
+        if self.parent_id is None:
+            return super().display_short
+        return (
+            f"{self.ref_id} - {self.parent.get_name_translated}: "
+            f"{self.get_name_translated}"
+        )
 
 
 class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMixin):

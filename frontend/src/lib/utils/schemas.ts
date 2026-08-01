@@ -171,6 +171,38 @@ export const ThreatSchema = z.object({
 	findings: z.string().uuid().optional().array().optional()
 });
 
+export const TTPCatalogSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	provider: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
+	annotation: z.string().optional().nullable()
+});
+
+export const TacticSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	provider: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
+	annotation: z.string().optional().nullable(),
+	catalog: z.string().uuid(),
+	order_id: z.number().optional().nullable()
+});
+
+export const TechniqueSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	provider: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
+	annotation: z.string().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional(),
+	catalog: z.string().uuid().optional().nullable(),
+	parent: z.string().uuid().optional().nullable(),
+	tactics: z.string().uuid().optional().array().optional(),
+	reference_controls: z.string().uuid().optional().array().optional(),
+	is_deprecated: z.boolean().optional()
+});
+
 export const SecurityAdvisorySchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -1938,6 +1970,9 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'risk-matrices': RiskMatrixSchema,
 	'risk-assessments': RiskAssessmentSchema,
 	threats: ThreatSchema,
+	'ttp-catalogs': TTPCatalogSchema,
+	tactics: TacticSchema,
+	techniques: TechniqueSchema,
 	'security-advisories': SecurityAdvisorySchema,
 	cwes: CWESchema,
 	'risk-scenarios': RiskScenarioSchema,

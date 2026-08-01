@@ -75,7 +75,7 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	optionsEndpoint="threats"
+	optionsEndpoint="threats?exclude_legacy_ttp=true"
 	optionsExtraFields={[['folder', 'str']]}
 	optionsLabelField="auto"
 	field="threats"

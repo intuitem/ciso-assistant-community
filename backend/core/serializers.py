@@ -1187,6 +1187,118 @@ class ThreatImportExportSerializer(BaseModelSerializer):
         ]
 
 
+REFERENTIAL_IMPORT_EXPORT_FIELDS = [
+    "created_at",
+    "updated_at",
+    "folder",
+    "urn",
+    "ref_id",
+    "provider",
+    "name",
+    "description",
+    "annotation",
+    "translations",
+    "locale",
+    "default_locale",
+    "library",
+]
+
+
+class TTPCatalogWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = TTPCatalog
+        exclude = ["translations"]
+
+
+class TTPCatalogReadSerializer(ReferentialSerializer):
+    folder = FieldsRelatedField()
+    library = FieldsRelatedField(["name", "id"])
+
+    class Meta:
+        model = TTPCatalog
+        exclude = ["translations"]
+
+
+class TTPCatalogImportExportSerializer(BaseModelSerializer):
+    library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+
+    class Meta:
+        model = TTPCatalog
+        fields = REFERENTIAL_IMPORT_EXPORT_FIELDS + ["grouping_definition"]
+
+
+class TacticWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Tactic
+        exclude = ["translations"]
+
+
+class TacticReadSerializer(ReferentialSerializer):
+    folder = FieldsRelatedField()
+    library = FieldsRelatedField(["name", "id"])
+    catalog = FieldsRelatedField()
+
+    class Meta:
+        model = Tactic
+        exclude = ["translations"]
+
+
+class TacticImportExportSerializer(BaseModelSerializer):
+    library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    catalog = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    class Meta:
+        model = Tactic
+        fields = REFERENTIAL_IMPORT_EXPORT_FIELDS + ["catalog", "order_id"]
+
+
+class TechniqueWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Technique
+        exclude = ["translations"]
+
+
+class TechniqueReadSerializer(ReferentialSerializer):
+    path = PathField(read_only=True)
+    folder = FieldsRelatedField()
+    library = FieldsRelatedField(["name", "id"])
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    catalog = FieldsRelatedField()
+    parent = FieldsRelatedField()
+    tactics = FieldsRelatedField(many=True)
+    reference_controls = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = Technique
+        exclude = ["translations"]
+
+
+class TechniqueImportExportSerializer(BaseModelSerializer):
+    library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    catalog = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+    parent = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+    tactics = serializers.SlugRelatedField(slug_field="urn", read_only=True, many=True)
+    reference_controls = serializers.SlugRelatedField(
+        slug_field="urn", read_only=True, many=True
+    )
+
+    class Meta:
+        model = Technique
+        # explicit list: a new field must be added here or serdes drops it
+        fields = REFERENTIAL_IMPORT_EXPORT_FIELDS + [
+            "catalog",
+            "parent",
+            "tactics",
+            "order_id",
+            "groups",
+            "reference_controls",
+            "is_deprecated",
+        ]
+
+
 class RiskScenarioWriteSerializer(BaseModelSerializer):
     # Note: Inherent risk fields are always accepted for writing,
     # but only displayed when inherent_risk feature flag is enabled

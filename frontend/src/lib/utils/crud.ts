@@ -296,6 +296,81 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		]
 	},
+	'ttp-catalogs': {
+		name: 'ttpcatalog',
+		localName: 'ttpCatalog',
+		localNamePlural: 'ttpCatalogs',
+		verboseName: 'TTP catalog',
+		verboseNamePlural: 'TTP catalogs',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'annotation' },
+			{ field: 'description' },
+			{ field: 'provider' },
+			{ field: 'folder' },
+			{ field: 'library' }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'loaded-libraries' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'catalog', urlModel: 'techniques', disableCreate: true, disableDelete: true }
+		]
+	},
+	tactics: {
+		name: 'tactic',
+		localName: 'tactic',
+		localNamePlural: 'tactics',
+		verboseName: 'Tactic',
+		verboseNamePlural: 'Tactics',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'catalog' },
+			{ field: 'folder' },
+			{ field: 'library' }
+		],
+		foreignKeyFields: [
+			{ field: 'catalog', urlModel: 'ttp-catalogs' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'loaded-libraries' }
+		]
+	},
+	techniques: {
+		name: 'technique',
+		localName: 'technique',
+		localNamePlural: 'techniques',
+		verboseName: 'Technique',
+		verboseNamePlural: 'Techniques',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'annotation' },
+			{ field: 'description' },
+			{ field: 'catalog' },
+			{ field: 'tactics' },
+			{ field: 'parent' },
+			{ field: 'reference_controls' },
+			{ field: 'groups' },
+			{ field: 'is_deprecated' },
+			{ field: 'provider' },
+			{ field: 'folder' },
+			{ field: 'filtering_labels' },
+			{ field: 'library' }
+		],
+		foreignKeyFields: [
+			{ field: 'catalog', urlModel: 'ttp-catalogs' },
+			{ field: 'tactics', urlModel: 'tactics' },
+			{ field: 'parent', urlModel: 'techniques' },
+			{ field: 'reference_controls', urlModel: 'reference-controls' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'loaded-libraries' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		]
+	},
 	'security-advisories': {
 		name: 'securityadvisory',
 		localName: 'securityAdvisory',

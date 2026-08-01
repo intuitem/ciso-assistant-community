@@ -5665,5 +5665,13 @@
 	"importTemplatesSingleNote": "Importing just one template? It's quicker to create it directly from the Templates list.",
 	"unpublishedDocumentsNotice": "{count} document(s) drafted but not yet published — visible in the manage view.",
 	"authored": "Authored",
-	"uploaded": "Uploaded"
+	"uploaded": "Uploaded",
+	"ttpCatalog": "TTP catalog",
+	"ttpCatalogs": "TTP catalogs",
+	"tactic": "Tactic",
+	"tactics": "Tactics",
+	"technique": "Technique",
+	"techniques": "Techniques",
+	"parentTechnique": "Parent technique",
+	"noTTPCatalogMatrix": "This catalog has no matrix layout: it declares no tactics."
 }

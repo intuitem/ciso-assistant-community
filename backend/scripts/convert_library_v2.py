@@ -60,6 +60,36 @@ def print_error(message: str) -> None:
 # --- Translation helpers ------------------------------------------------------
 
 
+_UNEVALUATED_FORMULA_COUNT = 0
+
+
+def is_unevaluated_formula(value) -> bool:
+    """A spreadsheet formula that was never evaluated to a value.
+
+    Translation columns are authored as formulas which must be evaluated in the
+    spreadsheet and pasted back as values; exporting the formula text ships
+    '=TRADUIRE(...)' to the UI in place of a real translation.
+    """
+    return isinstance(value, str) and value.lstrip().startswith("=")
+
+
+def _clean_translation(value):
+    global _UNEVALUATED_FORMULA_COUNT
+    if is_unevaluated_formula(value):
+        _UNEVALUATED_FORMULA_COUNT += 1
+        return None
+    return str(value).strip()
+
+
+def report_unevaluated_formulas():
+    if _UNEVALUATED_FORMULA_COUNT:
+        print(
+            f"⚠️  [WARNING] Skipped {_UNEVALUATED_FORMULA_COUNT} translation cell(s) "
+            "holding unevaluated formulas. Evaluate them in the spreadsheet and "
+            "paste back as values, or the library ships without those translations."
+        )
+
+
 def extract_translations_from_row(header, row):
     translations = {}
     for i, col_name in enumerate(header):
@@ -67,8 +97,8 @@ def extract_translations_from_row(header, row):
         if match and i < len(row):
             base_key, lang = match.groups()
             value = row[i].value
-            if value:
-                translations.setdefault(lang, {})[base_key] = str(value).strip()
+            if value and (cleaned := _clean_translation(value)):
+                translations.setdefault(lang, {})[base_key] = cleaned
     return translations
 
 
@@ -77,9 +107,9 @@ def extract_translations_from_metadata(meta_dict, prefix):
     pattern = re.compile(r"(\w+)\[(\w+)\]")
     for key, value in meta_dict.items():
         match = pattern.match(key)
-        if match and value:
+        if match and value and (cleaned := _clean_translation(value)):
             base_key, lang = match.groups()
-            translations.setdefault(lang, {})[base_key] = str(value).strip()
+            translations.setdefault(lang, {})[base_key] = cleaned
     return translations
 
 
@@ -797,7 +827,13 @@ def _per_choice_lines(data: dict, col: str, n_choices: int, answer_id: str):
 
 # --- Object type handlers -----------------------------------------------------
 
-_SKIPPED_TYPES = {"answers", "implementation_groups", "scores", "urn_prefix"}
+_SKIPPED_TYPES = {
+    "answers",
+    "implementation_groups",
+    "scores",
+    "urn_prefix",
+    "ttp_groups",  # consumed via ttp_catalog meta.grouping_definition
+}
 
 
 def _handle_reference_controls(obj, library, compat_mode, verbose):
@@ -844,6 +880,129 @@ def _handle_reference_controls(obj, library, compat_mode, verbose):
         controls.append(entry)
 
     extend_or_set(library["objects"], "reference_controls", controls)
+
+
+def _handle_ttp_catalog(obj, library, object_blocks, compat_mode, verbose):
+    """Process a ttp_catalog object block into the library."""
+    catalogs = []
+    meta = obj["meta"]
+    base_urn = meta.get("base_urn")
+    header, rows_with_data = parse_content_rows(obj["content_sheet"])
+    if not header:
+        return
+
+    # named block of facet definitions, as framework does for
+    # implementation_groups_definition
+    grouping_defs = []
+    grouping_name = meta.get("grouping_definition")
+    if grouping_name and grouping_name in object_blocks:
+        g_header, g_rows = parse_content_rows(
+            object_blocks[grouping_name]["content_sheet"]
+        )
+        for row, data in g_rows:
+            entry = {
+                "ref_id": str(data.get("ref_id", "")).strip(),
+                "name": str(data.get("name", "")).strip(),
+            }
+            set_optional_fields(entry, data, ["description", "dimension"])
+            attach_translations_from_row(entry, g_header, row)
+            grouping_defs.append(entry)
+
+    for row, data in rows_with_data:
+        ref_id = str(data.get("ref_id", "")).strip()
+        if not ref_id:
+            continue
+        entry = {"urn": f"{base_urn}:{ref_id.lower()}", "ref_id": ref_id}
+        set_optional_fields(entry, data, ["name", "description", "annotation"])
+        if grouping_defs:
+            entry["grouping_definition"] = grouping_defs
+        attach_translations_from_row(entry, header, row)
+        catalogs.append(entry)
+
+    extend_or_set(library["objects"], "ttp_catalogs", catalogs)
+
+
+def _handle_tactics(obj, library, compat_mode, verbose):
+    """Process a tactics object block. Sheet order is the matrix column order."""
+    tactics = []
+    meta = obj["meta"]
+    base_urn = meta.get("base_urn")
+    catalog_urn = meta.get("catalog_urn")
+    header, rows_with_data = parse_content_rows(obj["content_sheet"])
+    if not header:
+        return
+
+    for row, data in rows_with_data:
+        ref_id = str(data.get("ref_id", "")).strip()
+        if not ref_id:
+            continue
+        entry = {"urn": f"{base_urn}:{ref_id.lower()}", "ref_id": ref_id}
+        if catalog_urn:
+            entry["catalog_urn"] = catalog_urn
+        set_optional_fields(entry, data, ["name", "description", "annotation"])
+        attach_translations_from_row(entry, header, row)
+        tactics.append(entry)
+
+    extend_or_set(library["objects"], "tactics", tactics)
+
+
+def _handle_techniques(obj, library, prefix_to_urn, compat_mode, verbose):
+    """Process a techniques object block into the library."""
+    techniques = []
+    meta = obj["meta"]
+    base_urn = meta.get("base_urn")
+    catalog_urn = meta.get("catalog_urn")
+    tactics_base_urn = meta.get("tactics_base_urn")
+    header, rows_with_data = parse_content_rows(obj["content_sheet"])
+    if not header:
+        return
+
+    for row, data in rows_with_data:
+        ref_id = str(data.get("ref_id", "")).strip()
+        if not ref_id:
+            continue
+
+        node_id_raw = data.get("node_id")
+        urn_suffix = (
+            str(node_id_raw).strip().lower()
+            if node_id_raw and str(node_id_raw).strip()
+            else ref_id.lower()
+        )
+        entry = {"urn": f"{base_urn}:{urn_suffix}", "ref_id": ref_id}
+        set_optional_fields(entry, data, ["name", "description", "annotation"])
+        if catalog_urn:
+            entry["catalog_urn"] = catalog_urn
+
+        # explicit ref_id, not the positional `depth`: technique sheets get sorted
+        parent_ref_id = data.get("parent_ref_id")
+        if parent_ref_id and str(parent_ref_id).strip():
+            entry["parent_urn"] = f"{base_urn}:{str(parent_ref_id).strip().lower()}"
+
+        if tactic_ref_ids := data.get("tactic_ref_ids"):
+            entry["tactics"] = [
+                f"{tactics_base_urn}:{item.strip().lower()}"
+                for item in re.split(r"\s*,\s*", str(tactic_ref_ids))
+                if item.strip()
+            ]
+
+        if groups := data.get("groups"):
+            entry["groups"] = [
+                item.strip()
+                for item in re.split(r"\s*,\s*", str(groups))
+                if item.strip()
+            ]
+
+        if data.get("reference_controls"):
+            controls = expand_urns_from_prefixed_list(
+                data["reference_controls"], prefix_to_urn, compat_mode, verbose
+            )
+            if controls:
+                entry["reference_controls"] = controls
+
+        attach_translations_from_row(entry, header, row)
+        techniques.append(entry)
+
+    extend_or_set(library["objects"], "techniques", techniques)
 
 
 def _handle_threats(obj, library, compat_mode, verbose):
@@ -1732,6 +1891,9 @@ def validate_name_lengths(library: dict) -> list:
     # Check list-based object types
     for obj_type in (
         "threats",
+        "ttp_catalogs",
+        "tactics",
+        "techniques",
         "reference_controls",
         "risk_matrix",
         "metric_definitions",
@@ -1891,7 +2053,13 @@ def create_library(
     print(f"📦 Found {len(object_blocks)} objects.")
 
     # Step 5: Ordered object insertion (reference_controls before threats)
-    priority_order = ["reference_controls", "threats"]
+    priority_order = [
+        "ttp_catalog",
+        "tactics",
+        "reference_controls",
+        "techniques",
+        "threats",
+    ]
 
     sorted_object_names = sorted(
         object_blocks.keys(),
@@ -1906,6 +2074,13 @@ def create_library(
     handler_map = {
         "reference_controls": lambda obj: _handle_reference_controls(
             obj, library, compat_mode, verbose
+        ),
+        "ttp_catalog": lambda obj: _handle_ttp_catalog(
+            obj, library, object_blocks, compat_mode, verbose
+        ),
+        "tactics": lambda obj: _handle_tactics(obj, library, compat_mode, verbose),
+        "techniques": lambda obj: _handle_techniques(
+            obj, library, prefix_to_urn, compat_mode, verbose
         ),
         "threats": lambda obj: _handle_threats(obj, library, compat_mode, verbose),
         "framework": lambda obj: _handle_framework(
@@ -1944,6 +2119,7 @@ def create_library(
         )
 
     # Step 7: Export to YAML
+    report_unevaluated_formulas()
     print(f'✅ YAML saved as: "{output_file}"')
     if not verbose:
         print(

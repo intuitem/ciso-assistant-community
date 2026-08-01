@@ -5660,5 +5660,13 @@
 	"record": "Enregistrement",
 	"unpublishedDocumentsNotice": "{count} document(s) rédigé(s) mais pas encore publié(s) — visibles dans la vue de gestion.",
 	"authored": "Rédigé",
-	"uploaded": "Téléversé"
+	"uploaded": "Téléversé",
+	"ttpCatalog": "Catalogue de TTP",
+	"ttpCatalogs": "Catalogues de TTP",
+	"tactic": "Tactique",
+	"tactics": "Tactiques",
+	"technique": "Technique",
+	"techniques": "Techniques",
+	"parentTechnique": "Technique parente",
+	"noTTPCatalogMatrix": "Ce catalogue ne comporte pas de matrice : aucune tactique n'est déclarée."
 }

@@ -34,7 +34,7 @@
 />
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="threats"
+	optionsEndpoint="threats?exclude_legacy_ttp=true"
 	field="threat"
 	optionsLabelField="auto"
 	cacheLock={cacheLocks['threat']}
