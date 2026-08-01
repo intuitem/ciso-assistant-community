@@ -397,10 +397,6 @@
 					<i class="fa-solid fa-check mr-1"></i>
 					{m.save()}
 				</button>
-				<button class="btn preset-outlined-surface-500" type="button" onclick={loadDefault}>
-					<i class="fa-solid fa-file-lines mr-1 text-xs"></i>
-					{m.loadDefault()}
-				</button>
 				<div class="flex-1"></div>
 				<button class="btn preset-outlined-surface-500" type="button" onclick={cancelEdit}>
 					{m.cancel()}
