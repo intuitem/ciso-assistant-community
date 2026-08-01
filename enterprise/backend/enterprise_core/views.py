@@ -666,7 +666,7 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
             return CustomWordTemplate.objects.none()
         return CustomWordTemplate.objects.all()
 
-    def get_serializer_class(self):
+    def get_serializer_class(self, **kwargs):
         if self.request.method in ("POST", "PUT", "PATCH"):
             return CustomWordTemplateWriteSerializer
         return CustomWordTemplateReadSerializer
