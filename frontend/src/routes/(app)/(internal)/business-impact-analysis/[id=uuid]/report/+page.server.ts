@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { error, type NumericRange } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, params }) => {
@@ -27,20 +28,30 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 	const assetsData = await assetsResponse.json();
 	const assetAssessments = assetsData.results || [];
 
-	// Fetch full asset details with comparisons for each asset assessment
-	const assetsWithDetails = await Promise.all(
-		assetAssessments.map(async (assetAssessment: any) => {
-			const assetResponse = await fetch(`${BASE_API_URL}/assets/${assetAssessment.asset.id}/`);
-			const assetDetails = await assetResponse.json();
-			return {
-				...assetAssessment,
-				asset: assetDetails
-			};
-		})
-	);
+	// Bulk-fetch full asset details instead of one request per assessment
+	const assetDetailsById = new Map<string, any>();
+	let offset = 0;
+	let count = Infinity;
+	while (assetDetailsById.size < count) {
+		const res = await fetch(`${BASE_API_URL}/assets/full/?bia=${params.id}&offset=${offset}`);
+		if (!res.ok) {
+			error(res.status as NumericRange<400, 599>, 'Failed to load full asset details');
+		}
+		const data = await res.json();
+		const items = data.results ?? [];
+		if (items.length === 0) break;
+		for (const asset of items) assetDetailsById.set(asset.id, asset);
+		count = typeof data.count === 'number' ? data.count : items.length;
+		offset += items.length;
+	}
+
+	const assetsWithDetails = assetAssessments.map((assetAssessment: any) => ({
+		...assetAssessment,
+		asset: assetDetailsById.get(assetAssessment.asset.id) ?? assetAssessment.asset
+	}));
 
 	// Sort by asset name
-	assetsWithDetails.sort((a, b) => a.asset.name.localeCompare(b.asset.name));
+	assetsWithDetails.sort((a: any, b: any) => a.asset.name.localeCompare(b.asset.name));
 
 	// Collect all unique applied controls from asset assessments
 	const allControls = new Map();

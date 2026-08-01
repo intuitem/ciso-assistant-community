@@ -1,4 +1,4 @@
-[Version = "1.0.1"]
+[Version = "1.0.2"]
 section CisoAssistant;
 
 //
@@ -771,10 +771,14 @@ Navigator = (base as text) as table =>
     in
         ToNavigationTable(root);
 
+// The "Name" key is what makes Power BI Desktop generate key-based
+// navigation steps ({[Name = "Applied Controls"]}) instead of positional
+// ones ({1}). Without it, inserting or reordering a navigator entry silently
+// repoints every existing report's query at a different table.
 ToNavigationTable = (tbl as table) as table =>
     let
         tableType = Value.Type(tbl),
-        newTableType = tableType meta [
+        newTableType = Type.AddTableKey(tableType, { "Name" }, true) meta [
             NavigationTable.NameColumn = "Name",
             NavigationTable.DataColumn = "Data",
             NavigationTable.ItemKindColumn = "ItemKind",

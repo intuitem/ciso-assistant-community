@@ -16,6 +16,7 @@ import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWit
 import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
 import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
 import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
+import ToggleRecoveryFlags from '$lib/components/ContextMenu/asset-assessments/ToggleRecoveryFlags.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -2706,10 +2707,15 @@ export const listViewFields = {
 			'folder',
 			'perimeter'
 		],
+		optionalFields: {
+			head: ['filteringLabels', 'reportedAt'],
+			body: ['filtering_labels', 'reported_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
-			category: FINDINGS_ASSESSMENTS_CATEGORY_FILTER
+			category: FINDINGS_ASSESSMENTS_CATEGORY_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'posture-assessments': {
@@ -2785,8 +2791,8 @@ export const listViewFields = {
 			'updated_at'
 		],
 		optionalFields: {
-			head: ['createdAt'],
-			body: ['created_at']
+			head: ['createdAt', 'labels'],
+			body: ['created_at', 'filtering_labels']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -3320,10 +3326,22 @@ export const contextMenuActions = {
 	vulnerabilities: [
 		{ component: VulnerabilityChangeStatus, props: {} },
 		{ component: VulnerabilityChangeSeverity, props: {} }
-	]
+	],
+	'asset-assessments': [{ component: ToggleRecoveryFlags, props: {} }]
 };
 
-// Batch action configuration
+// Batch action configuration.
+//
+// Two shapes, discriminated by `type`, matching two kinds of relationships:
+// - Row operations (BatchActionConfig): act on the selected objects themselves.
+//   Use these when the relationship is REIFIED — it has its own model,
+//   permissions and data (e.g. AssetAssessment), so re-adding does NOT restore
+//   what removing destroyed. Per-row child-model permissions, per-row results.
+// - Parent mutations (ParentActionConfig): the selection only parameterizes an
+//   edit of the PARENT object. Use these for ANONYMOUS links (e.g. group
+//   membership, a bare M2M), where removal loses nothing but the link itself.
+//   Authorized by `change` on the parent via the endpoint's
+//   permission_overrides; single {count} response, no per-row results.
 export interface BatchActionConfig {
 	type:
 		| 'delete'
@@ -3343,10 +3361,36 @@ export interface BatchActionConfig {
 	children?: BatchActionConfig[];
 	minSelection?: number;
 	maxSelection?: number;
+	confirmMessage?: string; // i18n key for an extra confirm warning, receives {count}
 }
+
+export interface ParentActionConfig {
+	type: 'parent_action';
+	action: string; // parent action url segment, e.g. 'remove-members'
+	payloadField: string; // request body key holding the selected ids, e.g. 'users'
+	label: string; // i18n key for the button
+	icon?: string;
+	confirmMessage?: string; // i18n key for the confirm body, receives {count} (defaults to 'confirmRemoveSelected')
+	successMessage?: string; // i18n key for the success toast (defaults to 'saved')
+	// Resolved at runtime by the embedding view (parent url + id + action);
+	// never set in static config.
+	endpoint?: string;
+}
+
+export type TableBatchAction = BatchActionConfig | ParentActionConfig;
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	'document-templates': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'asset-assessments': [
+		{
+			type: 'delete',
+			label: 'delete',
+			icon: 'fa-solid fa-trash',
+			// Removing an asset from a BIA deletes its assessment — a reified
+			// association — so the confirm must disclose the cascade.
+			confirmMessage: 'confirmRemoveAssetAssessments'
+		}
+	],
 	'applied-controls': [
 		{
 			type: 'group',

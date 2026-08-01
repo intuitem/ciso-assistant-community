@@ -1107,7 +1107,6 @@
 	"resetToDefault": "Obnoviť predvolené nastavenie",
 	"customized": "Prispôsobené",
 	"defaultTemplate": "Predvolené",
-	"loadDefault": "Načítať predvolené",
 	"templateSaved": "Šablóna bola úspešne uložená",
 	"templateReset": "Obnovenie predvolenej šablóny",
 	"confirmResetTemplate": "Naozaj chcete obnoviť túto šablónu do predvoleného stavu? Všetky vykonané úpravy budú stratené.",

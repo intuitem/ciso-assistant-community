@@ -47,6 +47,7 @@
 	cacheLock={cacheLocks['quantitative_risk_study']}
 	bind:cachedValue={formDataCache['quantitative_risk_study']}
 	label="Quantitative Risk Study"
+	helpText={m.quantitativeRiskStudyHelpText()}
 	hidden={initialData.quantitative_risk_study}
 />
 
