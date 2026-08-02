@@ -33,6 +33,7 @@
 		technique: string;
 		ref_id: string;
 		name: string;
+		parent_name: string | null;
 		tactic: string;
 		label: string;
 		position_x: number;
@@ -144,11 +145,19 @@
 				draggable: !readonly,
 				deletable: !readonly,
 				connectable: !readonly,
-				data: { label: node.label || node.name, refId: node.ref_id }
+				data: {
+					label: node.label || node.name,
+					// the stored label, kept apart from the fallback so saving cannot
+					// overwrite it with the technique name
+					customLabel: node.label,
+					refId: node.ref_id,
+					parentName: node.parent_name
+				}
 			} as Node);
 			perLane[parentId] = index + 1;
 		}
 
+		dirty = false;
 		nodes = [...buildLaneNodes(techniqueNodes), ...techniqueNodes];
 		edges = graphEdges.map((edge) => ({
 			id: `e-${edge.source}-${edge.target}`,
@@ -275,6 +284,7 @@
 			ref_id: string;
 			name: string;
 			tactics: string[];
+			parentName?: string | null;
 		};
 		const cellId = `${technique.id}:${tacticOf(lane.id)}`;
 		if (placedIds.has(cellId)) return;
@@ -294,7 +304,12 @@
 				draggable: true,
 				deletable: true,
 				connectable: true,
-				data: { label: technique.name, refId: technique.ref_id }
+				data: {
+					label: technique.name,
+					customLabel: '',
+					refId: technique.ref_id,
+					parentName: technique.parentName ?? null
+				}
 			} as Node
 		];
 		dirty = true;
@@ -356,6 +371,7 @@
 				.filter((node) => node.type === 'technique')
 				.map((node) => ({
 					id: node.id,
+					label: (node.data as any).customLabel ?? '',
 					position_x: node.position.x,
 					position_y: node.position.y
 				})),
@@ -367,24 +383,34 @@
 	async function save() {
 		saving = true;
 		errorMessage = '';
-		const res = await fetch(`/threat-models/${threatModelId}/save-graph`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(buildPayload())
-		});
-		const payload = await res.json();
-		if (res.ok) {
-			dirty = false;
-		} else {
-			errorMessage = (payload.errors ?? [m.anErrorOccurred()]).join(' ');
+		try {
+			const res = await fetch(`/threat-models/${threatModelId}/save-graph`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(buildPayload())
+			});
+			const payload = await res.json().catch(() => ({}));
+			if (res.ok) {
+				dirty = false;
+			} else {
+				errorMessage = (payload.errors ?? [m.anErrorOccurred()]).join(' ');
+			}
+		} catch {
+			errorMessage = m.anErrorOccurred();
+		} finally {
+			saving = false;
 		}
-		saving = false;
 	}
 </script>
 
 <div class="flex h-full w-full overflow-hidden">
 	{#if !readonly}
-		<TechniquePalette lanes={tactics} techniques={paletteTechniques} {placedIds} />
+		<TechniquePalette
+			lanes={tactics}
+			techniques={paletteTechniques}
+			{placedIds}
+			onDragStateChange={(tactics) => (dragTactics = tactics)}
+		/>
 	{/if}
 
 	<div class="relative flex-1" ondragover={handleDragOver} ondrop={handleDrop} role="application">

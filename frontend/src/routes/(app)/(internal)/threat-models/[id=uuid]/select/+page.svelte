@@ -2,6 +2,7 @@
 	import TTPMatrix from '$lib/components/TTPMatrix/TTPMatrix.svelte';
 	import type { MatrixCell } from '$lib/components/TTPMatrix/TTPMatrix.svelte';
 	import { m } from '$paraglide/messages';
+	import { untrack } from 'svelte';
 	import ViewSwitch from '../ViewSwitch.svelte';
 	import type { PageData } from './$types';
 
@@ -16,6 +17,17 @@
 
 	let selected = $state(new Set<string>(data.matrix.selected ?? []));
 	let saved = $state(new Set<string>(data.matrix.selected ?? []));
+
+	// the component is reused when navigating between threat models, so the
+	// selection must follow the loaded data rather than stick from the first one
+	$effect(() => {
+		const fresh = new Set<string>(data.matrix.selected ?? []);
+		untrack(() => {
+			selected = fresh;
+			saved = new Set(fresh);
+			errorMessage = '';
+		});
+	});
 	let saving = $state(false);
 	let errorMessage = $state('');
 
@@ -34,23 +46,28 @@
 	async function save() {
 		saving = true;
 		errorMessage = '';
-		const res = await fetch(`/threat-models/${threatModel.id}/set-techniques`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				selections: [...selected].map((key) => {
-					const [technique, tactic] = key.split(':');
-					return { technique, tactic };
+		try {
+			const res = await fetch(`/threat-models/${threatModel.id}/set-techniques`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					selections: [...selected].map((key) => {
+						const [technique, tactic] = key.split(':');
+						return { technique, tactic };
+					})
 				})
-			})
-		});
-		const payload = await res.json();
-		if (res.ok) {
-			saved = new Set(selected);
-		} else {
-			errorMessage = (payload.errors ?? [m.anErrorOccurred()]).join(' ');
+			});
+			const payload = await res.json().catch(() => ({}));
+			if (res.ok) {
+				saved = new Set(selected);
+			} else {
+				errorMessage = (payload.errors ?? [m.anErrorOccurred()]).join(' ');
+			}
+		} catch {
+			errorMessage = m.anErrorOccurred();
+		} finally {
+			saving = false;
 		}
-		saving = false;
 	}
 </script>
 

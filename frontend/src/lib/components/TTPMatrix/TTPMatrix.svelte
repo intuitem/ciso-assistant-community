@@ -72,17 +72,21 @@
 		}, {})
 	);
 
-	function matches(cell: MatrixCell): boolean {
+	// both filters keep a parent whose sub-technique matches, so a cell never
+	// disappears because only its children qualify
+	function matchesSelf(cell: MatrixCell): boolean {
 		const needle = query.trim().toLowerCase();
-		if (needle && !`${cell.ref_id} ${cell.name}`.toLowerCase().includes(needle)) {
-			if (!(cell.children ?? []).some((child) => matches(child))) return false;
-		}
+		if (needle && !`${cell.ref_id} ${cell.name}`.toLowerCase().includes(needle)) return false;
 		for (const [dimension, group] of Object.entries(facetsByDimension)) {
 			const selected = group.filter((facet) => activeFacets.includes(facet.ref_id));
 			if (!selected.length) continue;
 			if (!selected.some((facet) => cell.groups.includes(facet.ref_id))) return false;
 		}
 		return true;
+	}
+
+	function matches(cell: MatrixCell): boolean {
+		return matchesSelf(cell) || (cell.children ?? []).some((child) => matchesSelf(child));
 	}
 
 	const grid = $derived(

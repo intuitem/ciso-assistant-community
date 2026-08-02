@@ -2174,6 +2174,13 @@ class ThreatModelViewSet(BaseModelViewSet):
     API endpoint that allows threat models to be viewed or edited.
     """
 
+    # both are POST, which RBACPermissions maps to add_*; they mutate an
+    # existing model, so they belong to change_*
+    permission_overrides = {
+        "save_graph": "change_threatmodel",
+        "set_techniques": "change_threatmodel",
+    }
+
     model = ThreatModel
     filterset_fields = ["folder", "catalog"]
     search_fields = ["ref_id", "name", "description"]
@@ -2197,7 +2204,9 @@ class ThreatModelViewSet(BaseModelViewSet):
     @action(detail=True, name="Get the graph")
     def graph(self, request, pk):
         threat_model = self.get_object()
-        nodes = threat_model.nodes.select_related("technique", "tactic")
+        nodes = threat_model.nodes.select_related(
+            "technique", "technique__parent", "tactic"
+        )
         return Response(
             {
                 "tactics": [
@@ -2216,6 +2225,12 @@ class ThreatModelViewSet(BaseModelViewSet):
                         "technique": node.technique_id,
                         "ref_id": node.technique.ref_id,
                         "name": node.technique.get_name_translated,
+                        # a sub-technique name alone ("Employee Names") is meaningless
+                        "parent_name": (
+                            node.technique.parent.get_name_translated
+                            if node.technique.parent_id
+                            else None
+                        ),
                         "tactic": node.tactic_id,
                         "label": node.label,
                         "position_x": node.position_x,
@@ -2263,10 +2278,16 @@ class ThreatModelViewSet(BaseModelViewSet):
             except ValueError, AttributeError:
                 errors.append(f"Node {index}: invalid cell id.")
                 continue
+            try:
+                position_x = float(node.get("position_x") or 0)
+                position_y = float(node.get("position_y") or 0)
+            except ValueError, TypeError:
+                errors.append(f"Node {index}: position must be a number.")
+                continue
             parsed[key] = {
                 "label": str(node.get("label") or "")[:255],
-                "position_x": node.get("position_x") or 0,
-                "position_y": node.get("position_y") or 0,
+                "position_x": position_x,
+                "position_y": position_y,
             }
 
         errors.extend(validate_placements(threat_model, set(parsed)))

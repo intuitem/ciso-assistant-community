@@ -2801,6 +2801,12 @@ class ThreatModelNode(AbstractBaseModel, FolderMixin):
         verbose_name = _("Threat model node")
         verbose_name_plural = _("Threat model nodes")
         ordering = ["created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["threat_model", "technique", "tactic"],
+                name="unique_threat_model_node_placement",
+            )
+        ]
 
     def __str__(self):
         return self.label or str(self.technique)

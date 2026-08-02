@@ -478,13 +478,15 @@ class ReferentialImporterMixin:
         )
 
     def _resolve(self, model, urn: str, field: str):
+        identifier = self.data.get("ref_id", self.data.get("urn"))
+        if not urn:
+            message = f"Missing {field} reference in '{identifier}'."
+            logger.error(message)
+            raise ValueError(message)
         try:
             return model.objects.get(urn=urn.lower())
         except model.DoesNotExist as exc:
-            identifier = self.data.get("ref_id", self.data.get("urn"))
-            message = (
-                f"Unknown {field} '{urn or 'unknown'}' referenced in '{identifier}'."
-            )
+            message = f"Unknown {field} '{urn}' referenced in '{identifier}'."
             logger.error(message)
             raise ValueError(message) from exc
 

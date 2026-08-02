@@ -4,7 +4,7 @@
 
 	interface Props {
 		id: string;
-		data: { label: string; refId: string };
+		data: { label: string; refId: string; parentName?: string | null };
 	}
 
 	let { id, data }: Props = $props();
@@ -26,7 +26,10 @@
 	<div class="absolute left-0 top-0 bottom-0 w-1 rounded-l-base bg-primary-400"></div>
 
 	<p class="text-[10px] font-mono text-surface-600-400 leading-none">{data.refId}</p>
-	<p class="text-[11px] font-semibold leading-tight text-surface-900-100 text-wrap mt-1">
+	{#if data.parentName}
+		<p class="text-[10px] text-surface-600-400 leading-tight text-wrap mt-1">{data.parentName}:</p>
+	{/if}
+	<p class="text-[11px] font-semibold leading-tight text-surface-900-100 text-wrap mt-0.5">
 		{data.label}
 	</p>
 

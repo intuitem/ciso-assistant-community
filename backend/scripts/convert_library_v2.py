@@ -76,6 +76,11 @@ def _clean_translation(value):
     return str(value).strip()
 
 
+def reset_unevaluated_formula_count():
+    global _UNEVALUATED_FORMULA_COUNT
+    _UNEVALUATED_FORMULA_COUNT = 0
+
+
 def report_unevaluated_formulas():
     if _UNEVALUATED_FORMULA_COUNT:
         print(
@@ -951,17 +956,27 @@ def _handle_techniques(obj, library, prefix_to_urn, compat_mode, verbose):
     if not header:
         return
 
+    def suffix_for(ref_id: str, node_id_raw) -> str:
+        if node_id_raw and str(node_id_raw).strip():
+            return str(node_id_raw).strip().lower()
+        return ref_id.lower()
+
+    # parent_urn must use the same rule as the parent's own urn, so a sheet
+    # overriding node_id does not break the parent links
+    suffix_by_ref_id = {
+        str(data.get("ref_id", "")).strip(): suffix_for(
+            str(data.get("ref_id", "")).strip(), data.get("node_id")
+        )
+        for _, data in rows_with_data
+        if str(data.get("ref_id", "")).strip()
+    }
+
     for row, data in rows_with_data:
         ref_id = str(data.get("ref_id", "")).strip()
         if not ref_id:
             continue
 
-        node_id_raw = data.get("node_id")
-        urn_suffix = (
-            str(node_id_raw).strip().lower()
-            if node_id_raw and str(node_id_raw).strip()
-            else ref_id.lower()
-        )
+        urn_suffix = suffix_for(ref_id, data.get("node_id"))
         entry = {"urn": f"{base_urn}:{urn_suffix}", "ref_id": ref_id}
         set_optional_fields(entry, data, ["name", "description", "annotation"])
         if catalog_urn:
@@ -970,7 +985,9 @@ def _handle_techniques(obj, library, prefix_to_urn, compat_mode, verbose):
         # explicit ref_id, not the positional `depth`: technique sheets get sorted
         parent_ref_id = data.get("parent_ref_id")
         if parent_ref_id and str(parent_ref_id).strip():
-            entry["parent_urn"] = f"{base_urn}:{str(parent_ref_id).strip().lower()}"
+            parent_ref_id = str(parent_ref_id).strip()
+            parent_suffix = suffix_by_ref_id.get(parent_ref_id, parent_ref_id.lower())
+            entry["parent_urn"] = f"{base_urn}:{parent_suffix}"
 
         if tactic_ref_ids := data.get("tactic_ref_ids"):
             entry["tactics"] = [
@@ -1912,6 +1929,7 @@ def validate_name_lengths(library: dict) -> list:
 def create_library(
     input_file: str, output_file: str, compat_mode: int = 0, verbose: bool = False
 ):
+    reset_unevaluated_formula_count()
     wb = openpyxl.load_workbook(input_file)
     sheets = wb.sheetnames
     object_blocks = {}

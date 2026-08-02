@@ -7,6 +7,8 @@
 		name: string;
 		tactics: string[];
 		children?: PaletteTechnique[];
+		/** set on sub-techniques when dragged, so the node can show its parent */
+		parentName?: string | null;
 	}
 
 	export interface PaletteLane {
@@ -60,13 +62,17 @@
 
 	function handleDragStart(event: DragEvent, technique: PaletteTechnique) {
 		if (!event.dataTransfer) return;
+		// sub-technique rows are nested inside the parent's draggable element, so
+		// without this the parent's handler overwrites the payload and you drop the parent
+		event.stopPropagation();
 		event.dataTransfer.setData(
 			'application/json',
 			JSON.stringify({
 				id: technique.id,
 				ref_id: technique.ref_id,
 				name: technique.name,
-				tactics: technique.tactics
+				tactics: technique.tactics,
+				parentName: technique.parentName ?? null
 			})
 		);
 		event.dataTransfer.effectAllowed = 'move';
@@ -152,7 +158,8 @@
 											{@const childPlaced = placedIds.has(`${child.id}:${lane.id}`)}
 											{@const childDrag = {
 												...child,
-												tactics: child.tactics.length ? child.tactics : technique.tactics
+												tactics: child.tactics.length ? child.tactics : technique.tactics,
+												parentName: technique.name
 											}}
 											<li
 												class="leading-snug {childPlaced
