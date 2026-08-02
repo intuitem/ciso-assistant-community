@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { marked } from 'marked';
 	import sanitizeHtml from 'sanitize-html';
+	import { sanitizeConfig } from '$lib/utils/markdown';
 	import * as m from '$paraglide/messages';
 
 	interface Props {
@@ -9,52 +10,6 @@
 	}
 
 	let { content, class: className = '' }: Props = $props();
-
-	const sanitizeConfig: sanitizeHtml.IOptions = {
-		allowedTags: [
-			'p',
-			'blockquote',
-			'h1',
-			'h2',
-			'h3',
-			'h4',
-			'h5',
-			'h6',
-			'ul',
-			'ol',
-			'li',
-			'strong',
-			'em',
-			'a',
-			'code',
-			'pre',
-			'table',
-			'thead',
-			'tbody',
-			'tr',
-			'th',
-			'td',
-			'img',
-			'hr',
-			'br',
-			'input',
-			'abbr',
-			'sup'
-		],
-		allowedAttributes: {
-			a: ['href', 'name', 'target', 'rel'],
-			img: ['src', 'alt', 'title', 'width', 'height', 'loading'],
-			code: ['class'],
-			input: ['type', 'checked', 'disabled'],
-			li: ['class'],
-			ul: ['class'],
-			abbr: ['title']
-		},
-		allowedSchemes: ['http', 'https'],
-		transformTags: {
-			a: sanitizeHtml.simpleTransform('a', { rel: 'noopener noreferrer', target: '_blank' }, true)
-		}
-	};
 
 	// Matches only our internal image-serving proxy URLs:
 	// /frameworks/{uuid}/builder?_action=serve-image&...
@@ -66,7 +21,13 @@
 	function processContent(content: string | null | undefined): string {
 		if (!content || content.trim() === '') return '';
 
-		let html = marked(content) as string;
+		// Resolve canonical document links [label](document:<uuid>) to the reader.
+		const src = content.replace(
+			/\]\(document:([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\)/g,
+			'](/documents/$1/read)'
+		);
+
+		let html = marked(src) as string;
 
 		// Temporarily give internal image URLs an https scheme so they survive
 		// sanitize-html's allowedSchemes check, then strip the fake origin after.

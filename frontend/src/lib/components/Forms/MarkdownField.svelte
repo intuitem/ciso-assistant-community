@@ -86,6 +86,70 @@
 	let currentConstraints = $derived(
 		formCoupled && proxyConstraints ? $proxyConstraints : undefined
 	);
+
+	// --- Formatting toolbar helpers -------------------------------------------
+	function setValue(v: string) {
+		if (formCoupled && proxyValue) $proxyValue = v;
+		else value = v;
+	}
+
+	function restore(el: HTMLTextAreaElement, start: number, end: number) {
+		requestAnimationFrame(() => {
+			el.focus();
+			el.setSelectionRange(start, end);
+			adaptTextAreaSize(el);
+		});
+	}
+
+	function surround(before: string, after: string = before) {
+		const el = textareaElem;
+		if (!el) return;
+		const s = el.selectionStart;
+		const e = el.selectionEnd;
+		const val = currentValue ?? '';
+		const selected = val.slice(s, e) || 'text';
+		setValue(val.slice(0, s) + before + selected + after + val.slice(e));
+		restore(el, s + before.length, s + before.length + selected.length);
+	}
+
+	function linePrefix(prefix: string) {
+		const el = textareaElem;
+		if (!el) return;
+		const s = el.selectionStart;
+		const val = currentValue ?? '';
+		const lineStart = val.lastIndexOf('\n', s - 1) + 1;
+		setValue(val.slice(0, lineStart) + prefix + val.slice(lineStart));
+		restore(el, s + prefix.length, s + prefix.length);
+	}
+
+	function insertText(text: string) {
+		const el = textareaElem;
+		const val = currentValue ?? '';
+		if (!el) {
+			setValue(val + text);
+			return;
+		}
+		const s = el.selectionStart;
+		const e = el.selectionEnd;
+		setValue(val.slice(0, s) + text + val.slice(e));
+		restore(el, s + text.length, s + text.length);
+	}
+
+	const TOOLBAR = [
+		{ icon: 'fa-bold', label: () => m.bold(), action: () => surround('**') },
+		{ icon: 'fa-italic', label: () => m.italic(), action: () => surround('*') },
+		{ icon: 'fa-heading', label: () => m.formatHeading(), action: () => linePrefix('## ') },
+		{ icon: 'fa-list-ul', label: () => m.bulletList(), action: () => linePrefix('- ') },
+		{ icon: 'fa-list-ol', label: () => m.numberedList(), action: () => linePrefix('1. ') },
+		{ icon: 'fa-quote-right', label: () => m.quote(), action: () => linePrefix('> ') },
+		{ icon: 'fa-code', label: () => m.code(), action: () => surround('`') },
+		{ icon: 'fa-link', label: () => m.insertLink(), action: () => surround('[', '](url)') },
+		{
+			icon: 'fa-table',
+			label: () => m.insertTable(),
+			action: () => insertText('\n| Column 1 | Column 2 |\n| --- | --- |\n| Cell | Cell |\n')
+		}
+	];
 </script>
 
 <div class={classesDisabled(disabled)}>
@@ -123,6 +187,21 @@
 		<div>
 			{#each currentErrors as error}
 				<p class="text-error-500 text-xs font-medium">{error}</p>
+			{/each}
+		</div>
+	{/if}
+	{#if !showPreview && !disabled}
+		<div class="mb-1 flex flex-wrap gap-1">
+			{#each TOOLBAR as btn (btn.icon)}
+				<button
+					type="button"
+					class="btn btn-sm variant-soft px-2"
+					title={btn.label()}
+					aria-label={btn.label()}
+					onclick={btn.action}
+				>
+					<i class="fa-solid {btn.icon} text-xs"></i>
+				</button>
 			{/each}
 		</div>
 	{/if}

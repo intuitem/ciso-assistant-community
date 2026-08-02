@@ -30,7 +30,7 @@
 
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import RingProgress from '$lib/components/DataViz/RingProgress.svelte';
-	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud';
+	import { URL_MODEL_MAP, getModelInfo, getMarkdownFields } from '$lib/utils/crud';
 	import type { Node } from './types';
 
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -50,7 +50,7 @@
 	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
 	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 	import { derived } from 'svelte/store';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
@@ -69,20 +69,21 @@
 
 	const user = page.data.user;
 	const model = URL_MODEL_MAP['compliance-assessments'];
-	const canEditObject: boolean = canPerformAction({
+	const markdownFields = getMarkdownFields('compliance-assessments');
+	const canEditObject: boolean = canPerformActionOnObject({
 		user,
 		action: 'change',
 		model: model.name,
-		domain: compliance_assessment.folder.id
+		object: compliance_assessment
 	});
 	const requirementAssessmentModel = URL_MODEL_MAP['requirement-assessments'];
 	const canEditRequirementAssessment: boolean =
 		!data.compliance_assessment.is_locked &&
-		canPerformAction({
+		canPerformActionOnObject({
 			user,
 			action: 'change',
 			model: requirementAssessmentModel.name,
-			domain: data.compliance_assessment.folder.id
+			object: data.compliance_assessment
 		});
 
 	const viewerRole: 'auditor' | 'respondent' = page.data.user.is_third_party
@@ -696,7 +697,7 @@
 		<div class="flex flex-row justify-between">
 			<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
 				{#each Object.entries(data.compliance_assessment).filter(([key, value]) => {
-					const fieldsToShow = ['ref_id', 'name', 'description', 'version', 'folder', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'campaign'];
+					const fieldsToShow = ['ref_id', 'name', 'description', 'observation', 'version', 'folder', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'campaign'];
 					if (!fieldsToShow.includes(key)) return false;
 					// Hide selected_implementation_groups if framework doesn't support implementation groups
 					if (key === 'selected_implementation_groups' && (!data.compliance_assessment.framework.implementation_groups_definition || !Array.isArray(data.compliance_assessment.framework.implementation_groups_definition) || data.compliance_assessment.framework.implementation_groups_definition.length === 0)) return false;
@@ -774,7 +775,7 @@
 										{/if}
 									{:else if isMaskedPlaceholder(value)}
 										<p class="text-xs text-yellow-700">{objectsNotVisibleLabel(1)}</p>
-									{:else if key === 'description'}
+									{:else if markdownFields.has(key)}
 										<MarkdownRenderer content={value} />
 									{:else}
 										{safeTranslate(value.str ?? value)}
@@ -940,6 +941,7 @@
 					<AuditTrailButton
 						model="compliance-assessments"
 						objectId={data.compliance_assessment.id}
+						folderId={data.compliance_assessment.folder?.id ?? user.root_folder_id}
 					/>
 				{/if}
 				<!-- Power-ups Command Palette Grid -->
@@ -1055,7 +1057,7 @@
 										{/if}
 										<span class="text-sm font-medium">{m.syncToAppliedControls()}</span>
 									</button>
-									{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
+									{#if canPerformActionOnObject( { user: page.data.user, action: 'add', model: 'appliedcontrol', object: data.compliance_assessment } ) && data.compliance_assessment.framework.reference_controls.length > 0}
 										<button
 											class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 											onclick={() => {

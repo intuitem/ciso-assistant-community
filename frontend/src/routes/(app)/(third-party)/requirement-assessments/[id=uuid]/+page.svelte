@@ -189,7 +189,11 @@
 			{/if}
 		{/if}
 		<div class="ml-auto shrink-0 self-center">
-			<AuditTrailButton model="requirement-assessments" objectId={data.requirementAssessment.id} />
+			<AuditTrailButton
+				model="requirement-assessments"
+				objectId={data.requirementAssessment.id}
+				folderId={data.requirementAssessment.folder?.id ?? page.data.user.root_folder_id}
+			/>
 		</div>
 	</div>
 	{#if data.requirement.description}
@@ -228,7 +232,7 @@
 								<ul class="list-disc ml-4">
 									{#each reference_controls as func}
 										<li>
-											{#if func.id}
+											{#if func.id && !page.data.user.is_third_party}
 												<a class="anchor" href="/reference-controls/{func.id}">
 													{func.str}
 												</a>
@@ -249,7 +253,7 @@
 								<ul class="list-disc ml-4">
 									{#each threats as threat}
 										<li>
-											{#if threat.id}
+											{#if threat.id && !page.data.user.is_third_party}
 												<a class="anchor" href="/threats/{threat.id}">
 													{threat.str}
 												</a>

@@ -88,6 +88,15 @@ class AssetAssessmentWriteSerializer(BaseModelSerializer):
 
         return super().create(validated_data)
 
+    def delete(self, instance):
+        # validate() only guards create/update — deletes skip validation, so the
+        # lock must be enforced here for the destroy flow as well.
+        if instance.bia.is_locked:
+            raise serializers.ValidationError(
+                "⚠️ Cannot delete asset assessments when the business impact analysis is locked."
+            )
+        super().delete(instance)
+
 
 class EscalationThresholdReadSerializer(BaseModelSerializer):
     asset_assessment = FieldsRelatedField()

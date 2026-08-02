@@ -26,6 +26,9 @@
 		optionsEndpoint?: string;
 		enableDoubleDash?: boolean;
 		multiSelect?: boolean;
+		// Optional i18n key for an action-specific warning (receives {count}),
+		// e.g. a cascade disclosure on delete.
+		confirmMessage?: string;
 		onConfirm: (value?: string | string[]) => void;
 	}
 
@@ -36,6 +39,7 @@
 		optionsEndpoint,
 		enableDoubleDash = false,
 		multiSelect = false,
+		confirmMessage = undefined,
 		onConfirm
 	}: Props = $props();
 
@@ -143,19 +147,29 @@
 
 		{#if actionType === 'delete'}
 			<article>{m.batchActionConfirmDelete({ count })}</article>
+			{#if confirmMessage}
+				<article class="text-sm font-medium text-amber-600">
+					{safeTranslate(confirmMessage, { count })}
+				</article>
+			{/if}
 			<div class="space-y-2">
-				<p class="text-sm font-medium text-red-600">{m.confirmYes()}</p>
+				<p class="text-sm font-medium text-red-600">{m.confirmYes({ word: m.yes() })}</p>
 				<input
 					type="text"
 					data-testid="batch-delete-confirm-textfield"
 					bind:value={deleteConfirmInput}
-					placeholder={m.confirmYesPlaceHolder()}
+					placeholder={m.confirmYesPlaceHolder({ word: m.yes() })}
 					class="input w-full"
-					aria-label={m.confirmYes()}
+					aria-label={m.confirmYes({ word: m.yes() })}
 				/>
 			</div>
 		{:else}
 			<article>{m.batchActionConfirmChange({ count })}</article>
+			{#if confirmMessage}
+				<article class="text-sm font-medium text-amber-600">
+					{safeTranslate(confirmMessage, { count })}
+				</article>
+			{/if}
 
 			{#if loading}
 				<div class="text-sm text-surface-600-400">Loading...</div>

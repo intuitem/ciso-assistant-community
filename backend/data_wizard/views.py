@@ -1,8 +1,12 @@
+import csv
 import io
 import logging
+import structlog
+from pathlib import Path
 from types import MappingProxyType
 import re
 import pandas as pd
+from django.http import FileResponse
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,21 +17,27 @@ from core.base_models import AbstractBaseModel
 from core.utils import build_questions_dict
 from core.models import (
     Actor,
+    Assessment,
     Asset,
     ComplianceAssessment,
     Evidence,
     Folder,
+    Framework,
+    LoadedLibrary,
     Perimeter,
     RequirementAssessment,
     RequirementNode,
     RiskAssessment,
     RiskMatrix,
+    StoredLibrary,
     AppliedControl,
     FindingsAssessment,
     RiskScenario,
     Policy,
     SecurityException,
     Incident,
+    TaskTemplate,
+    TaskNode,
     Vulnerability,
 )
 from core.serializers import (
@@ -49,6 +59,7 @@ from core.serializers import (
     PolicyWriteSerializer,
     SecurityExceptionWriteSerializer,
     IncidentWriteSerializer,
+    TaskTemplateWriteSerializer,
     VulnerabilityWriteSerializer,
 )
 from ebios_rm.models import (
@@ -75,12 +86,20 @@ from .egerie_xml_helpers import (
     map_egerie_status,
 )
 from core.models import Terminology
+from core.utils import AUDITOR_ONLY
 from data_wizard.arm_helpers import process_arm_file
-from tprm.models import Entity, Solution, Contract
+from data_wizard.cyfun_helpers import (
+    CYFUN_FRAMEWORK_URN,
+    CYFUN_LIBRARY_URN,
+    LEVEL_TO_GROUP,
+    process_cyfun_file,
+)
+from tprm.models import Entity, Solution, Contract, Representative
 from tprm.serializers import (
     EntityWriteSerializer,
     SolutionWriteSerializer,
     ContractWriteSerializer,
+    RepresentativeWriteSerializer,
 )
 from resilience.models import (
     BusinessImpactAnalysis,
@@ -92,8 +111,26 @@ from resilience.serializers import (
     AssetAssessmentWriteSerializer,
     EscalationThresholdWriteSerializer,
 )
-from privacy.models import Processing, ProcessingNature
-from privacy.serializers import ProcessingWriteSerializer
+from privacy.models import (
+    Processing,
+    PersonalData,
+    DataSubject,
+    DataRecipient,
+    DataContractor,
+    ART6_LAWFUL_BASIS_CHOICES,
+    ART9_SPECIAL_CATEGORY_CONDITION_CHOICES,
+    TRANSFER_MECHANISM_CHOICES,
+)
+from privacy.serializers import (
+    ProcessingWriteSerializer,
+    PurposeWriteSerializer,
+    PersonalDataWriteSerializer,
+    DataSubjectWriteSerializer,
+    DataRecipientWriteSerializer,
+    DataContractorWriteSerializer,
+    DataTransferWriteSerializer,
+)
+from core.constants import COUNTRY_CHOICES
 from iam.models import RoleAssignment, User
 from core.models import FilteringLabel
 from core.utils import get_global_currency
@@ -101,13 +138,16 @@ from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
 from django.db.models import Q
 from django.http import HttpRequest
-from datetime import datetime
+from django.utils import timezone
+from django.db import models, IntegrityError
+from django.core.exceptions import ValidationError
+from datetime import datetime, date
 from typing import Optional, Final, ClassVar, Mapping, Any
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import enum
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 def resolve_container_name(request, default_prefix: str) -> str:
@@ -155,12 +195,33 @@ def get_accessible_folders_map(user: User) -> dict[str, UUID]:
 
 ZIP_MAGIC_NUMBER: Final[bytes] = bytes([0x50, 0x4B, 0x03, 0x04])
 
+# Characters Excel forbids in sheet names, stripped by the task export
+# (mirror of INVALID_CHARS in TaskTemplateViewSet.export_xlsx).
+SHEET_NAME_INVALID_CHARS: Final[str] = r"[\\\/\?\*\[\]:]"
+
 
 def is_excel_file(file: io.BytesIO) -> bool:
     file_data = file.read(len(ZIP_MAGIC_NUMBER))
     is_excel = file_data == ZIP_MAGIC_NUMBER
     file.seek(0)
     return is_excel
+
+
+def read_csv_file(file: io.BytesIO) -> pd.DataFrame:
+    """Read a CSV, detecting the delimiter among ``, ; \\t |`` (defaults to comma).
+
+    Avoids pandas' ``sep=None`` sniffing, which treats any character as a
+    candidate and misreads single-column files (e.g. picking ``n`` in ``name``).
+    utf-8-sig transparently strips the BOM our CSV exports prepend for Excel,
+    so the first column header is not corrupted.
+    """
+    sample = file.read(8192).decode("utf-8-sig", errors="replace")
+    file.seek(0)
+    try:
+        sep = csv.Sniffer().sniff(sample, delimiters=",;\t|").delimiter
+    except csv.Error:
+        sep = ","
+    return pd.read_csv(file, sep=sep, encoding="utf-8-sig").fillna("")
 
 
 def normalize_datetime_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -180,15 +241,17 @@ def normalize_datetime_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def _parse_date(value) -> Optional[str]:
+def _parse_date(value: "datetime | date | str | int | bool | None") -> Optional[str]:
     """Normalize a value to a YYYY-MM-DD string for DRF DateField."""
     if not value or value == "":
         return None
-    if isinstance(value, datetime):
+    if isinstance(value, datetime):  # datetime first — it is a subclass of date
+        return value.strftime("%Y-%m-%d")
+    if isinstance(value, date):
         return value.strftime("%Y-%m-%d")
     if isinstance(value, str) and "T" in value:
         return value.split("T")[0]
-    return value
+    return str(value)
 
 
 def _parse_datetime(value) -> Optional[str]:
@@ -305,7 +368,9 @@ def _resolve_filtering_labels(value: Any) -> list[UUID]:
     if not value:
         return []
 
-    label_names = set(name.strip() for name in re.split(r"[|,]", value) if name.strip())
+    label_names = set(
+        name.strip() for name in re.split(r"[|,\n]", value) if name.strip()
+    )
     label_ids: list[UUID] = []
     for label_name in label_names:
         label = FilteringLabel.objects.filter(label=label_name).first()
@@ -333,7 +398,7 @@ def _resolve_vulnerabilities(
     """
     if not value or not isinstance(value, str):
         return [], []
-    tokens = [t.strip() for t in re.split(r"[|,]", value) if t.strip()]
+    tokens = [t.strip() for t in re.split(r"[|,\n]", value) if t.strip()]
     vuln_ids: list[UUID] = []
     failed_tokens: list[str] = []
     for token in tokens:
@@ -392,6 +457,7 @@ class ModelType(enum.StrEnum):
     PERIMETER = "Perimeter"
     USER = "User"
     COMPLIANCE_ASSESSMENT = "ComplianceAssessment"
+    CYFUN_ASSESSMENT = "CyFunAssessment"
     FINDINGS_ASSESSMENT = "FindingsAssessment"
     RISK_ASSESSMENT = "RiskAssessment"
     ELEMENTARY_ACTION = "ElementaryAction"
@@ -403,6 +469,7 @@ class ModelType(enum.StrEnum):
     POLICY = "Policy"
     SECURITY_EXCEPTION = "SecurityException"
     INCIDENT = "Incident"
+    TASK_TEMPLATE = "TaskTemplate"
     VULNERABILITY = "Vulnerability"
     BUSINESS_IMPACT_ANALYSIS = "BusinessImpactAnalysis"
 
@@ -413,6 +480,47 @@ class ModelType(enum.StrEnum):
             return ModelType(model_type)
         except ValueError:
             return
+
+
+IMPORT_TEMPLATES_DIR = Path(__file__).resolve().parent / "import_templates"
+
+# Models without an entry (ComplianceAssessment, CyFun, EBIOS variants) have no
+# generic template: their file depends on a framework or comes from an external tool.
+IMPORT_TEMPLATES: dict[ModelType, str] = {
+    ModelType.ASSET: "assets_template.xlsx",
+    ModelType.APPLIED_CONTROL: "applied_controls_template.xlsx",
+    ModelType.PERIMETER: "perimeters_template.xlsx",
+    ModelType.USER: "users_template.xlsx",
+    ModelType.ELEMENTARY_ACTION: "elementary_actions_template.xlsx",
+    ModelType.REFERENCE_CONTROL: "reference_controls_template.xlsx",
+    ModelType.THREAT: "threats_template.xlsx",
+    ModelType.FOLDER: "domains_template.xlsx",
+    ModelType.SECURITY_EXCEPTION: "security_exceptions_template.xlsx",
+    ModelType.INCIDENT: "incidents_template.xlsx",
+    ModelType.POLICY: "policies_template.xlsx",
+    ModelType.VULNERABILITY: "vulnerabilities_template.xlsx",
+    ModelType.PROCESSING: "processings_template.xlsx",
+    ModelType.TPRM: "third_parties_template.xlsx",
+    ModelType.FINDINGS_ASSESSMENT: "findings_assessment_template.xlsx",
+    ModelType.RISK_ASSESSMENT: "risk_assessment_template.xlsx",
+    ModelType.BUSINESS_IMPACT_ANALYSIS: "business_impact_analysis_template.xlsx",
+    ModelType.TASK_TEMPLATE: "tasks_template.xlsx",
+}
+
+
+class ImportTemplateView(APIView):
+    def get(self, request, model_type: str):
+        parsed = ModelType.from_string(model_type)
+        filename = IMPORT_TEMPLATES.get(parsed) if parsed else None
+        if filename is None:
+            return Response(
+                {"error": "noTemplateAvailable"}, status=status.HTTP_404_NOT_FOUND
+            )
+        return FileResponse(
+            (IMPORT_TEMPLATES_DIR / filename).open("rb"),
+            as_attachment=True,
+            filename=filename,
+        )
 
 
 @dataclass(frozen=True)
@@ -1447,7 +1555,6 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "name": name,
             "description": record.get("description"),
             "ref_id": record.get("ref_id"),
-            "status": record.get("status"),
             "findings_assessment": context.findings_assessment.id,
             "severity": severity,
             "filtering_labels": filtering_label_ids,
@@ -1456,6 +1563,12 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "observation": record.get("observation", ""),
             "vulnerabilities": vulnerabilities,
         }
+
+        # Only pass status when the source provides one — a None status fails
+        # serializer validation, so files without a status column keep the
+        # model default.
+        if record.get("status"):
+            finding_data["status"] = record.get("status")
 
         if priority is not None:
             finding_data["priority"] = priority
@@ -1685,6 +1798,297 @@ class IncidentRecordConsumer(RecordConsumer):
         return data, None
 
 
+class TaskTemplateRecordConsumer(RecordConsumer[None]):
+    """Consumer for importing TaskTemplate records (with optional task-node fields)."""
+
+    SERIALIZER_CLASS = TaskTemplateWriteSerializer
+
+    TASK_STATUS_MAP: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "pending": "pending",
+            "in_progress": "in_progress",
+            "in progress": "in_progress",
+            "completed": "completed",
+            "cancelled": "cancelled",
+        }
+    )
+
+    # The prepared "schedule" dict is assembled from these columns; without this
+    # mapping, UPDATE mode would look for a "schedule" column and never update it.
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {
+            "schedule": [
+                "schedule_frequency",
+                "schedule_interval",
+                "schedule_days_of_week",
+                "schedule_weeks_of_month",
+                "schedule_months_of_year",
+                "schedule_end_date",
+                "schedule_occurrences",
+                "schedule_overdue_behavior",
+            ],
+        }
+    )
+
+    _M2M_CLEARABLE: ClassVar[frozenset[str]] = frozenset(
+        {
+            "assigned_to",
+            "assets",
+            "applied_controls",
+            "evidences",
+            "compliance_assessments",
+            "risk_assessments",
+            "findings_assessment",
+        }
+    )
+
+    def create_context(self):
+        return None, None
+
+    def _build_update_data(self, record: dict, record_data: dict) -> dict:
+        update_data = super()._build_update_data(record, record_data)
+        for key in self._M2M_CLEARABLE:
+            if key in record_data and key in record:
+                update_data[key] = record_data[key]
+        return update_data
+
+    def find_existing(self, record_data: dict) -> Optional[TaskTemplate]:
+        folder_id = record_data.get("folder")
+        ref_id = record_data.get("ref_id")
+        if ref_id:
+            existing = TaskTemplate.objects.filter(
+                ref_id=ref_id, folder_id=folder_id
+            ).first()
+            if existing:
+                return existing
+        return TaskTemplate.objects.filter(
+            name=record_data.get("name"), folder_id=folder_id
+        ).first()
+
+    @staticmethod
+    def _resolve_actors(raw: str, unresolved: list[str]) -> list[UUID]:
+        """Resolve comma/semicolon-separated user emails or team names to Actor IDs.
+
+        Entries that cannot be matched are collected into ``unresolved`` and
+        reported back as a row warning.
+        """
+        actor_ids = set()
+        for entry in re.split(r"[|,;]", raw):
+            entry = entry.strip()
+            if not entry:
+                continue
+            actor = Actor.objects.filter(user__email__iexact=entry).first()
+            if actor is None:
+                actor = Actor.objects.filter(team__name__iexact=entry).first()
+            if actor is not None:
+                actor_ids.add(actor.id)
+            else:
+                unresolved.append(f"assigned_to '{entry}'")
+                # Mask the value to avoid leaking PII (emails) into application logs.
+                logger.warning(
+                    "Task import: could not resolve assigned_to entry (masked: %s***); skipping.",
+                    entry[:4],
+                )
+        return list(actor_ids)
+
+    @staticmethod
+    def _resolve_m2m_by_name(
+        model: type[models.Model],
+        raw: str,
+        accessible_folder_ids: set,
+        preferred_folder_id,
+        unresolved: list[str],
+    ) -> list[UUID]:
+        """Resolve comma/pipe-separated names or ref_ids to model IDs.
+
+        Lookups are scoped to the user's accessible folders; when several
+        folders hold an object with the same name, an exact ref_id match wins,
+        then the record's own folder. Assessments are also matched against
+        their ``str()`` form, so versioned exports resolve back (currently
+        only RiskAssessment renders ``"{name} - {version}"``; the other
+        assessments export their plain name). Entries that cannot be matched
+        are collected into ``unresolved`` and reported back as a row warning.
+        """
+        has_ref_id = any(f.name == "ref_id" for f in model._meta.fields)
+        ids = set()
+        for entry in re.split(r"[|,\n]", raw):
+            entry = entry.strip()
+            if not entry:
+                continue
+            name_query = Q(name__iexact=entry)
+            if has_ref_id:
+                name_query |= Q(ref_id=entry)
+            candidates = list(
+                model.objects.filter(name_query, folder_id__in=accessible_folder_ids)
+            )
+            obj = (
+                next((c for c in candidates if c.ref_id == entry), None)
+                if has_ref_id
+                else None
+            )
+            if obj is None:
+                obj = next(
+                    (
+                        c
+                        for c in candidates
+                        if str(c.folder_id) == str(preferred_folder_id)
+                    ),
+                    None,
+                ) or (candidates[0] if candidates else None)
+            if obj is None and issubclass(model, Assessment):
+                # Assessments export as "{name} - {version}".
+                name_part = entry.rsplit(" - ", 1)[0].strip()
+                for candidate in model.objects.filter(
+                    name__iexact=name_part, folder_id__in=accessible_folder_ids
+                ):
+                    if str(candidate) == entry:
+                        obj = candidate
+                        break
+            if obj is not None:
+                ids.add(obj.id)
+            else:
+                unresolved.append(f"{model._meta.model_name} '{entry}'")
+                logger.warning(
+                    "Task import: could not resolve %s '%s'; skipping.",
+                    model._meta.model_name,
+                    entry,
+                )
+        return list(ids)
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        folder_id = self.folder_id
+        folder_name = record.get("folder")
+        if folder_name:
+            folder_id = self.folders_map.get(str(folder_name).lower(), self.folder_id)
+
+        raw_recurrent = record.get("is_recurrent", "")
+        if isinstance(raw_recurrent, bool):
+            is_recurrent = raw_recurrent
+        else:
+            is_recurrent = str(raw_recurrent).strip().lower() in {"yes", "true", "1"}
+
+        raw_enabled = record.get("enabled", "Yes")
+        if isinstance(raw_enabled, bool):
+            enabled = raw_enabled
+        else:
+            enabled = str(raw_enabled).strip().lower() not in {"no", "false", "0"}
+
+        schedule = None
+        freq = str(record.get("schedule_frequency") or "").strip().upper()
+        interval_raw = record.get("schedule_interval")
+        has_interval = str(interval_raw or "").strip() != ""
+        if bool(freq) != has_interval:
+            return {}, Error(
+                record=record,
+                error="schedule_frequency and schedule_interval must be provided together",
+            )
+        if freq and has_interval:
+            try:
+                interval = int(interval_raw)
+            except ValueError, TypeError:
+                return {}, Error(
+                    record=record,
+                    error=f"Invalid schedule_interval value: '{interval_raw}'",
+                )
+            schedule = {"frequency": freq, "interval": interval}
+            for opt_key, col in [
+                ("end_date", "schedule_end_date"),
+                ("overdue_behavior", "schedule_overdue_behavior"),
+                ("occurrences", "schedule_occurrences"),
+            ]:
+                raw_val = str(record.get(col) or "").strip()
+                if raw_val:
+                    if opt_key == "occurrences":
+                        try:
+                            schedule[opt_key] = int(raw_val)
+                        except ValueError, TypeError:
+                            return {}, Error(
+                                record=record,
+                                error=f"Invalid schedule_occurrences value: '{raw_val}'",
+                            )
+                    else:
+                        schedule[opt_key] = raw_val
+            for opt_key, col in [
+                ("days_of_week", "schedule_days_of_week"),
+                ("weeks_of_month", "schedule_weeks_of_month"),
+                ("months_of_year", "schedule_months_of_year"),
+            ]:
+                raw_val = str(record.get(col) or "").strip()
+                if raw_val:
+                    try:
+                        schedule[opt_key] = [
+                            int(v.strip()) for v in raw_val.split(",") if v.strip()
+                        ]
+                    except ValueError, TypeError:
+                        return {}, Error(
+                            record=record,
+                            error=f"Invalid {col} value: '{raw_val}' (expected comma-separated integers)",
+                        )
+
+        data: dict = {
+            "ref_id": record.get("ref_id") or "",
+            "name": name,
+            "description": record.get("description") or "",
+            "folder": folder_id,
+            "is_recurrent": is_recurrent,
+            "task_date": _parse_date(record.get("task_date")),
+            "enabled": enabled,
+            "link": record.get("link", ""),
+        }
+        if schedule is not None:
+            data["schedule"] = schedule
+
+        raw_status = str(record.get("status", "")).lower().strip()
+        status = self.TASK_STATUS_MAP.get(raw_status)
+        if status:
+            data["status"] = status
+        observation = record.get("observation")
+        if observation:
+            data["observation"] = str(observation)
+
+        accessible_folder_ids = set(self.folders_map.values())
+        if self.folder_id:
+            accessible_folder_ids.add(self.folder_id)
+        unresolved: list[str] = []
+
+        assigned_raw = record.get("assigned_to") or ""
+        data["assigned_to"] = (
+            self._resolve_actors(assigned_raw, unresolved) if assigned_raw else []
+        )
+
+        for col_name, model in [
+            ("assets", Asset),
+            ("applied_controls", AppliedControl),
+            ("evidences", Evidence),
+            ("compliance_assessments", ComplianceAssessment),
+            ("risk_assessments", RiskAssessment),
+            ("findings_assessment", FindingsAssessment),
+        ]:
+            raw = record.get(col_name) or ""
+            data[col_name] = (
+                self._resolve_m2m_by_name(
+                    model, raw, accessible_folder_ids, folder_id, unresolved
+                )
+                if raw
+                else []
+            )
+
+        if unresolved:
+            return data, Error(
+                record=record,
+                error="Unresolved linked records were skipped: "
+                + "; ".join(unresolved),
+                is_warning=True,
+            )
+        return data, None
+
+
 class FolderRecordConsumer(RecordConsumer):
     """
     Consumer for importing Folder (domain) records.
@@ -1794,7 +2198,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
             status = "--"
 
         applied_controls = []
-        for token in re.split(r"[|,]", record.get("applied_controls") or ""):
+        for token in re.split(r"[|,\n]", record.get("applied_controls") or ""):
             token = token.strip()
             if not token:
                 continue
@@ -1816,7 +2220,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
                 )
 
         assets = []
-        for token in re.split(r"[|,]", record.get("assets") or ""):
+        for token in re.split(r"[|,\n]", record.get("assets") or ""):
             token = token.strip()
             if not token:
                 continue
@@ -1838,7 +2242,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
                 )
 
         security_exceptions = []
-        for token in re.split(r"[|,]", record.get("security_exceptions") or ""):
+        for token in re.split(r"[|,\n]", record.get("security_exceptions") or ""):
             token = token.strip()
             if not token:
                 continue
@@ -2044,6 +2448,8 @@ class ProcessingRecordConsumer(RecordConsumer):
             "ref_id": record.get("ref_id", ""),
             "folder": domain,
             "status": status_value,
+            "information_channel": record.get("information_channel", ""),
+            "usage_channel": record.get("usage_channel", ""),
             "dpia_required": record.get("dpia_required", False),
             "dpia_reference": record.get("dpia_reference", ""),
         }
@@ -2056,9 +2462,10 @@ class ProcessingRecordConsumer(RecordConsumer):
                 for nature_name in str(record_processing_nature).split(",")
             ]
             data["nature"] = list(
-                ProcessingNature.objects.filter(name__in=nature_names).values_list(
-                    "id", flat=True
-                )
+                Terminology.objects.filter(
+                    field_path=Terminology.FieldPath.PROCESSING_NATURE,
+                    name__in=nature_names,
+                ).values_list("id", flat=True)
             )
 
         # Resolve M2M: assigned_to (by user email → Actor)
@@ -2077,6 +2484,357 @@ class ProcessingRecordConsumer(RecordConsumer):
             data["filtering_labels"] = label_ids
 
         return data, None
+
+
+class ProcessingChildConsumerMixin:
+    """Shared resolution logic for Processing sub-object consumers."""
+
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {"processing": ["processing", "processing_name"]}
+    )
+
+    def create_context(self):
+        return None, None
+
+    @staticmethod
+    def _parse_bool(value: object) -> bool:
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, (int, float)):
+            return value != 0
+        if isinstance(value, str):
+            return value.strip().lower() in {"true", "yes", "y", "1"}
+        return False
+
+    @staticmethod
+    def _choice_key(value: object, choices) -> Optional[str]:
+        if value in (None, ""):
+            return None
+        lowered = str(value).strip().lower()
+        for key, label in choices:
+            if lowered == str(key).lower() or lowered == str(label).lower():
+                return key
+        return None
+
+    def _resolve_choice(
+        self, record: dict, field_name: str, choices, default: str = ""
+    ) -> tuple[Optional[str], Optional[Error]]:
+        raw = record.get(field_name)
+        if raw in (None, ""):
+            return default, None
+        key = self._choice_key(raw, choices)
+        if key is None:
+            return None, Error(record=record, error=f"Unknown {field_name} '{raw}'")
+        return key, None
+
+    def _accessible_processings(self):
+        ids = getattr(self, "_accessible_processing_ids", None)
+        if ids is None:
+            (ids, _, _) = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), self.request.user, Processing
+            )
+            self._accessible_processing_ids = ids
+        return Processing.objects.filter(id__in=ids)
+
+    def _resolve_processing(
+        self, record: dict
+    ) -> tuple[Optional[Processing], Optional[Error]]:
+        value = record.get("processing") or record.get("processing_name")
+        if not value:
+            return None, Error(record=record, error="Processing is mandatory")
+
+        try:
+            processing = (
+                self._accessible_processings().filter(id=UUID(str(value))).first()
+            )
+            if processing:
+                return processing, None
+        except ValueError, TypeError:
+            # not a UUID; fall back to ref_id/name lookup
+            pass
+
+        queryset = self._accessible_processings()
+        if self.folder_id:
+            queryset = queryset.filter(folder_id=self.folder_id)
+        processing = (
+            queryset.filter(ref_id=value).first()
+            or queryset.filter(name__iexact=str(value)).first()
+        )
+        if processing is None:
+            return None, Error(record=record, error=f"Unknown processing '{value}'")
+        return processing, None
+
+    def _resolve_entity(self, record: dict) -> tuple[Optional[Entity], Optional[Error]]:
+        value = record.get("entity")
+        if value in (None, ""):
+            return None, None
+
+        try:
+            entity = Entity.objects.filter(id=UUID(str(value))).first()
+            if entity:
+                return entity, None
+        except ValueError, TypeError:
+            # not a UUID; fall back to name lookup
+            pass
+
+        entity = Entity.objects.filter(name__iexact=str(value)).first()
+        if entity is None:
+            return None, Error(record=record, error=f"Unknown entity '{value}'")
+        return entity, None
+
+    def find_existing(self, record_data: dict):
+        model_class = self.SERIALIZER_CLASS.Meta.model
+        processing_id = record_data.get("processing")
+        if not processing_id:
+            return None
+        query = {"processing_id": processing_id}
+        for field_name in model_class.fields_to_check:
+            if field_name == "processing":
+                continue
+            value = record_data.get(field_name)
+            if value in (None, ""):
+                continue
+            if isinstance(value, str):
+                query[f"{field_name}__iexact"] = value
+            else:
+                query[field_name] = value
+        if len(query) == 1:
+            return None
+        return model_class.objects.filter(**query).first()
+
+
+class PurposeRecordConsumer(ProcessingChildConsumerMixin, RecordConsumer):
+    SERIALIZER_CLASS = PurposeWriteSerializer
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        processing, error = self._resolve_processing(record)
+        if error:
+            return {}, error
+
+        legal_basis, error = self._resolve_choice(
+            record, "legal_basis", ART6_LAWFUL_BASIS_CHOICES, default="privacy_consent"
+        )
+        if error:
+            return {}, error
+
+        article_9_condition, error = self._resolve_choice(
+            record, "article_9_condition", ART9_SPECIAL_CATEGORY_CONDITION_CHOICES
+        )
+        if error:
+            return {}, error
+
+        data = {
+            "name": record.get("name", ""),
+            "description": record.get("description", ""),
+            "processing": processing.id,
+            "legal_basis": legal_basis,
+        }
+        if article_9_condition:
+            data["article_9_condition"] = article_9_condition
+        return data, None
+
+
+class PersonalDataRecordConsumer(ProcessingChildConsumerMixin, RecordConsumer):
+    SERIALIZER_CLASS = PersonalDataWriteSerializer
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        processing, error = self._resolve_processing(record)
+        if error:
+            return {}, error
+
+        category_value = record.get("category")
+        if category_value in (None, ""):
+            return {}, Error(record=record, error="Category is mandatory")
+        category = Terminology.objects.filter(
+            field_path=Terminology.FieldPath.PERSONAL_DATA_CATEGORY,
+            name__iexact=str(category_value).strip(),
+        ).first()
+        if category is None:
+            return {}, Error(
+                record=record,
+                error=f"Unknown personal data category '{category_value}'",
+            )
+
+        deletion_policy, error = self._resolve_choice(
+            record, "deletion_policy", PersonalData.DELETION_POLICY_CHOICES
+        )
+        if error:
+            return {}, error
+
+        data = {
+            "name": record.get("name", ""),
+            "description": record.get("description", ""),
+            "processing": processing.id,
+            "category": category.id,
+            "retention": record.get("retention", ""),
+            "deletion_policy": deletion_policy,
+            "is_sensitive": self._parse_bool(record.get("is_sensitive")),
+        }
+
+        asset_names = record.get("assets")
+        if asset_names:
+            names = [n.strip() for n in str(asset_names).split(",") if n.strip()]
+            assets = []
+            for asset_name in names:
+                asset = Asset.objects.filter(name__iexact=asset_name).first()
+                if asset is None:
+                    return {}, Error(
+                        record=record, error=f"Unknown asset '{asset_name}'"
+                    )
+                assets.append(asset.id)
+            data["assets"] = assets
+
+        return data, None
+
+
+class DataSubjectRecordConsumer(ProcessingChildConsumerMixin, RecordConsumer):
+    SERIALIZER_CLASS = DataSubjectWriteSerializer
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        processing, error = self._resolve_processing(record)
+        if error:
+            return {}, error
+
+        category = self._choice_key(
+            record.get("category"), DataSubject.CATEGORY_CHOICES
+        )
+        if category is None:
+            return {}, Error(
+                record=record,
+                error=f"Unknown data subject category '{record.get('category')}'",
+            )
+
+        return {
+            "name": record.get("name", ""),
+            "description": record.get("description", ""),
+            "processing": processing.id,
+            "category": category,
+        }, None
+
+
+class DataRecipientRecordConsumer(ProcessingChildConsumerMixin, RecordConsumer):
+    SERIALIZER_CLASS = DataRecipientWriteSerializer
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        processing, error = self._resolve_processing(record)
+        if error:
+            return {}, error
+
+        category = self._choice_key(
+            record.get("category"), DataRecipient.CATEGORY_CHOICES
+        )
+        if category is None:
+            return {}, Error(
+                record=record,
+                error=f"Unknown data recipient category '{record.get('category')}'",
+            )
+
+        return {
+            "name": record.get("name", ""),
+            "description": record.get("description", ""),
+            "processing": processing.id,
+            "category": category,
+        }, None
+
+
+class DataContractorRecordConsumer(ProcessingChildConsumerMixin, RecordConsumer):
+    SERIALIZER_CLASS = DataContractorWriteSerializer
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        processing, error = self._resolve_processing(record)
+        if error:
+            return {}, error
+
+        entity, error = self._resolve_entity(record)
+        if error:
+            return {}, error
+
+        relationship_type = self._choice_key(
+            record.get("relationship_type"), DataContractor.RELATIONSHIP_TYPE_CHOICES
+        )
+        if relationship_type is None:
+            return {}, Error(
+                record=record,
+                error=f"Unknown relationship type '{record.get('relationship_type')}'",
+            )
+
+        country = self._choice_key(record.get("country"), COUNTRY_CHOICES)
+        if country is None:
+            return {}, Error(
+                record=record, error=f"Unknown country '{record.get('country')}'"
+            )
+
+        data = {
+            "name": record.get("name", ""),
+            "description": record.get("description", ""),
+            "processing": processing.id,
+            "relationship_type": relationship_type,
+            "country": country,
+            "documentation_link": record.get("documentation_link", ""),
+        }
+        if entity:
+            data["entity"] = entity.id
+        return data, None
+
+
+class DataTransferRecordConsumer(ProcessingChildConsumerMixin, RecordConsumer):
+    SERIALIZER_CLASS = DataTransferWriteSerializer
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        processing, error = self._resolve_processing(record)
+        if error:
+            return {}, error
+
+        entity, error = self._resolve_entity(record)
+        if error:
+            return {}, error
+
+        country = self._choice_key(record.get("country"), COUNTRY_CHOICES)
+        if country is None:
+            return {}, Error(
+                record=record, error=f"Unknown country '{record.get('country')}'"
+            )
+
+        transfer_mechanism, error = self._resolve_choice(
+            record, "transfer_mechanism", TRANSFER_MECHANISM_CHOICES
+        )
+        if error:
+            return {}, error
+
+        data = {
+            "name": record.get("name", ""),
+            "description": record.get("description", ""),
+            "processing": processing.id,
+            "country": country,
+            "transfer_mechanism": transfer_mechanism,
+            "guarantees": record.get("guarantees", ""),
+            "documentation_link": record.get("documentation_link", ""),
+        }
+        if entity:
+            data["entity"] = entity.id
+        return data, None
+
+
+PROCESSING_CHILD_SHEETS = {
+    "purposes": ("purposes", PurposeRecordConsumer),
+    "personal data": ("personal_data", PersonalDataRecordConsumer),
+    "data subjects": ("data_subjects", DataSubjectRecordConsumer),
+    "data recipients": ("data_recipients", DataRecipientRecordConsumer),
+    "contractors": ("contractors", DataContractorRecordConsumer),
+    "transfers": ("transfers", DataTransferRecordConsumer),
+}
 
 
 class BusinessImpactAnalysisRecordConsumer(RecordConsumer):
@@ -2706,6 +3464,86 @@ class LoadFileView(APIView):
                         matrix_id,
                         on_conflict,
                     )
+                # Special handling for TaskTemplate multi-sheet import (summary + task nodes)
+                case ModelType.TASK_TEMPLATE:
+                    if is_excel_file(record_file):
+                        res = self._process_task_template_excel(
+                            request,
+                            record_file,
+                            folders_map,
+                            folder_id,
+                            on_conflict,
+                        )
+                    else:
+                        # CSV: flat single-sheet import of task templates only
+                        file_type = RecordFileType.CSV
+                        df = read_csv_file(record_file)
+                        try:
+                            df = normalize_df_columns(df)
+                        except ValueError:
+                            logger.warning(
+                                "Invalid import file structure during column normalization",
+                                exc_info=True,
+                            )
+                            return Response(
+                                {"error": "Invalid file format or columns."},
+                                status=status.HTTP_400_BAD_REQUEST,
+                            )
+                        base_context = BaseContext(
+                            request,
+                            folders_map=folders_map,
+                            folder_id=folder_id,
+                            perimeter_id=None,
+                            matrix_id=None,
+                            framework_id=None,
+                            on_conflict=on_conflict,
+                        )
+                        res = (
+                            TaskTemplateRecordConsumer(base_context)
+                            .process_records(df.to_dict(orient="records"))
+                            .to_dict()
+                        )
+                # Special handling for the official CyFun self-assessment workbook
+                case ModelType.CYFUN_ASSESSMENT:
+                    res = self._process_cyfun_assessment(
+                        request, record_file, folder_id, perimeter_id
+                    )
+                # Special handling for Processing multi-sheet import (record + sub-objects)
+                case ModelType.PROCESSING:
+                    if is_excel_file(record_file):
+                        res = self._process_processing_excel(
+                            request,
+                            record_file,
+                            folders_map,
+                            folder_id,
+                            on_conflict,
+                        )
+                    else:
+                        # CSV: flat single-sheet import of processings only
+                        file_type = RecordFileType.CSV
+                        df = read_csv_file(record_file)
+                        try:
+                            df = normalize_df_columns(df)
+                        except ValueError:
+                            logger.warning(
+                                "Invalid import file structure during column normalization",
+                                exc_info=True,
+                            )
+                            return Response(
+                                {"error": "Invalid file format or columns."},
+                                status=status.HTTP_400_BAD_REQUEST,
+                            )
+                        base_context = BaseContext(
+                            request,
+                            folders_map=folders_map,
+                            folder_id=folder_id,
+                            on_conflict=on_conflict,
+                        )
+                        res = (
+                            ProcessingRecordConsumer(base_context)
+                            .process_records(df.to_dict(orient="records"))
+                            .to_dict()
+                        )
                 case _:
                     is_excel = is_excel_file(record_file)
                     if is_excel:
@@ -2829,12 +3667,6 @@ class LoadFileView(APIView):
                         case ModelType.ELEMENTARY_ACTION:
                             res = (
                                 ElementaryActionRecordConsumer(base_context)
-                                .process_records(records)
-                                .to_dict()
-                            )
-                        case ModelType.PROCESSING:
-                            res = (
-                                ProcessingRecordConsumer(base_context)
                                 .process_records(records)
                                 .to_dict()
                             )
@@ -2993,6 +3825,419 @@ class LoadFileView(APIView):
             )
 
         return results
+
+    def _process_cyfun_assessment(self, request, record_file, folder_id, perimeter_id):
+        results = {"successful": 0, "failed": 0, "errors": []}
+
+        def fail(code):
+            results["failed"] += 1
+            results["errors"].append({"error": code})
+            return results
+
+        try:
+            parsed = process_cyfun_file(record_file.getvalue())
+        except ValueError as e:
+            return fail(e.args[0] if e.args else "UnrecognizedCyfunWorkbook")
+
+        if not LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).exists():
+            stored_library = StoredLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
+            if stored_library is None:
+                return fail("CyfunLibraryNotFound")
+            error = stored_library.load()
+            if error is not None:
+                logger.error("CyFun library import failed", error=error)
+                return fail("CyfunLibraryImportFailed")
+        try:
+            framework = Framework.objects.get(urn=CYFUN_FRAMEWORK_URN)
+        except Framework.DoesNotExist:
+            return fail("CyfunFrameworkNotFound")
+
+        perimeter = None
+        if perimeter_id is not None:
+            try:
+                perimeter = Perimeter.objects.get(id=perimeter_id)
+            except Perimeter.DoesNotExist:
+                return fail(f"Perimeter with ID {perimeter_id} does not exist")
+        if perimeter is not None:
+            folder_id = perimeter.folder.id
+        elif folder_id is None:
+            results["failed"] += 1
+            results["errors"].append(
+                {"error": "A folder must be specified when there's no perimeter!"}
+            )
+            return results
+
+        assessment_data = {
+            "name": resolve_container_name(request, "CyFun_Assessment"),
+            "perimeter": perimeter_id,
+            "framework": framework.id,
+            "folder": folder_id,
+            "score_calculation_method": ComplianceAssessment.CalculationMethod.AVG_OF_AVG,
+            "field_visibility": {
+                "score": dict(AUDITOR_ONLY),
+                "is_scored": dict(AUDITOR_ONLY),
+                "documentation_score": dict(AUDITOR_ONLY),
+            },
+        }
+        level = parsed["assurance_level"]
+        if level:
+            assessment_data["selected_implementation_groups"] = [LEVEL_TO_GROUP[level]]
+
+        serializer = ComplianceAssessmentWriteSerializer(
+            data=assessment_data, context={"request": request}
+        )
+        try:
+            serializer.is_valid(raise_exception=True)
+            compliance_assessment = serializer.save()
+            compliance_assessment.create_requirement_assessments()
+        except Exception as e:
+            logger.error("Failed to create CyFun compliance assessment", error=e)
+            return fail("CyfunAssessmentCreationFailed")
+        logger.info(
+            "Created CyFun compliance assessment",
+            id=compliance_assessment.id,
+            assurance_level=level,
+        )
+        return self._reconcile_compliance_requirements(
+            request, parsed["records"], compliance_assessment, framework.id, results
+        )
+
+    @staticmethod
+    def _resolve_summary_row_template(
+        rec: dict, folders_map, folder_id
+    ) -> Optional[TaskTemplate]:
+        """Resolve the TaskTemplate targeted by a summary row (ref_id first, then name)."""
+        rec_name = str(rec.get("name", "")).strip()
+        if not rec_name:
+            return None
+        row_folder_name = str(rec.get("folder", "")).lower()
+        row_folder_id = (
+            folders_map.get(row_folder_name, folder_id)
+            if row_folder_name
+            else folder_id
+        )
+        ref_id = str(rec.get("ref_id", "")).strip()
+        tmpl = None
+        if ref_id:
+            tmpl = TaskTemplate.objects.filter(
+                ref_id=ref_id, folder_id=row_folder_id
+            ).first()
+        if tmpl is None:
+            tmpl = TaskTemplate.objects.filter(
+                name=rec_name, folder_id=row_folder_id
+            ).first()
+        return tmpl
+
+    def _process_task_template_excel(
+        self,
+        request,
+        excel_file: io.BytesIO,
+        folders_map,
+        folder_id,
+        on_conflict=ConflictMode.STOP,
+    ):
+        """Import TaskTemplates from a multi-sheet XLSX.
+
+        Sheet layout (matches the export produced by TaskTemplateViewSet.export_xlsx):
+          - "Summary" sheet: one row per TaskTemplate
+          - Per-template sheets named "{N}-{template_name}": past TaskNode occurrences
+
+        A single-sheet file is treated as a Summary-only import (no task nodes).
+        """
+        task_nodes_result = Result()
+        overall_results: dict = {"templates": {}}
+        try:
+            excel_data = pd.ExcelFile(excel_file)
+            sheet_names = excel_data.sheet_names
+
+            base_context = BaseContext(
+                request,
+                folders_map=folders_map,
+                folder_id=folder_id,
+                perimeter_id=None,
+                matrix_id=None,
+                framework_id=None,
+                on_conflict=on_conflict,
+            )
+
+            summary_sheet = "Summary" if "Summary" in sheet_names else sheet_names[0]
+
+            summary_df = normalize_df_columns(
+                normalize_datetime_columns(
+                    pd.read_excel(excel_data, sheet_name=summary_sheet)
+                )
+            ).fillna("")
+            summary_records = summary_df.to_dict(orient="records")
+
+            # Rows whose template exists before this import: node-sheet conflicts on
+            # them are real. Templates created by this run auto-sync a node from
+            # task_date (non-recurrent), which the node sheets legitimately update.
+            preexisting_rows = {
+                idx
+                for idx, rec in enumerate(summary_records, start=1)
+                if self._resolve_summary_row_template(rec, folders_map, folder_id)
+                is not None
+            }
+
+            template_results = (
+                TaskTemplateRecordConsumer(base_context)
+                .process_records(summary_records)
+                .to_dict()
+            )
+            overall_results["templates"] = template_results
+
+            if len(sheet_names) > 1 and not template_results.get("stopped"):
+                self._import_task_node_sheets(
+                    excel_data,
+                    sheet_names,
+                    summary_sheet,
+                    summary_records,
+                    preexisting_rows,
+                    folders_map,
+                    folder_id,
+                    on_conflict,
+                    task_nodes_result,
+                )
+        except Exception as exc:
+            logger.error("Task template import failed", exc_info=True)
+            task_nodes_result.add_error(
+                Error(record={}, error=f"Import aborted: {exc}")
+            )
+
+        overall_results["task_nodes"] = task_nodes_result.to_dict()
+        return overall_results
+
+    def _import_task_node_sheets(
+        self,
+        excel_data: pd.ExcelFile,
+        sheet_names: list[str],
+        summary_sheet: str,
+        summary_records: list[dict],
+        preexisting_rows: set[int],
+        folders_map,
+        folder_id,
+        on_conflict: ConflictMode,
+        result: Result,
+    ) -> None:
+        """Import past TaskNode occurrences from the per-template sheets."""
+        # Build counter → TaskTemplate map resolving each row's actual folder,
+        # so multi-folder imports match nodes to the correct template.
+        template_map: dict[int, TaskTemplate] = {}
+        for idx, rec in enumerate(summary_records, start=1):
+            tmpl = self._resolve_summary_row_template(rec, folders_map, folder_id)
+            if tmpl is not None:
+                template_map[idx] = tmpl
+
+        today = timezone.localdate()
+        collision_suffix = re.compile(r" \(\d+\)$")
+
+        def _matches_hint(tmpl: TaskTemplate, hint: str) -> bool:
+            sanitized = re.sub(SHEET_NAME_INVALID_CHARS, "", tmpl.name or "")
+            return sanitized.lower().startswith(hint.lower())
+
+        for sheet_name in sheet_names:
+            if sheet_name == summary_sheet:
+                continue
+
+            # Sheet names are exported as "{counter}-{name}" truncated to 31 chars,
+            # with an optional " (n)" suffix on name collisions.
+            dash_pos = sheet_name.find("-")
+            if dash_pos < 1:
+                continue
+            try:
+                counter = int(sheet_name[:dash_pos])
+            except ValueError:
+                continue
+
+            name_hint = collision_suffix.sub("", sheet_name[dash_pos + 1 :]).strip()
+
+            mapped = template_map.get(counter)
+            template = mapped
+            if (
+                template is not None
+                and name_hint
+                and not _matches_hint(template, name_hint)
+            ):
+                # Counter and sheet name disagree: files exported before sheet
+                # numbering was aligned with summary rows skipped templates
+                # without nodes. Prefer the name match, keep the counter as a
+                # last resort (the template may have been renamed in Summary).
+                by_name = next(
+                    (t for t in template_map.values() if _matches_hint(t, name_hint)),
+                    None,
+                )
+                if by_name is not None and by_name.pk != template.pk:
+                    result.warnings.append(
+                        Error(
+                            record={"sheet": sheet_name},
+                            error=(
+                                f"Sheet '{sheet_name}' does not match summary row"
+                                f" #{counter} ('{template.name}'); its task nodes were"
+                                f" imported into '{by_name.name}' based on the sheet name."
+                            ),
+                            is_warning=True,
+                        )
+                    )
+                    template = by_name
+            elif template is None:
+                if name_hint:
+                    template = next(
+                        (
+                            t
+                            for t in template_map.values()
+                            if _matches_hint(t, name_hint)
+                        ),
+                        None,
+                    )
+                if template is None:
+                    template = TaskTemplate.objects.filter(
+                        name__istartswith=sheet_name[dash_pos + 1 :].strip(),
+                        folder_id=folder_id,
+                    ).first()
+
+            if template is None:
+                result.add_error(
+                    Error(
+                        record={"sheet": sheet_name},
+                        error=f"TaskTemplate not found for sheet '{sheet_name}'; skipped.",
+                    )
+                )
+                continue
+
+            row_idx = next(
+                (i for i, t in template_map.items() if t.pk == template.pk), None
+            )
+            template_created = row_idx is not None and row_idx not in preexisting_rows
+
+            sheet_df = normalize_df_columns(
+                normalize_datetime_columns(
+                    pd.read_excel(excel_data, sheet_name=sheet_name)
+                )
+            ).fillna("")
+
+            for row in sheet_df.to_dict(orient="records"):
+                due_date_raw = _parse_date(row.get("due_date"))
+                if not due_date_raw:
+                    continue
+                try:
+                    due_date = date.fromisoformat(str(due_date_raw))
+                except ValueError, TypeError:
+                    result.add_error(
+                        Error(
+                            record={"sheet": sheet_name, "due_date": str(due_date_raw)},
+                            error=f"Invalid due_date '{due_date_raw}' (expected YYYY-MM-DD)",
+                        )
+                    )
+                    continue
+                if due_date > today:
+                    # Future nodes are regenerated from the schedule.
+                    continue
+
+                raw_status = str(row.get("status", "")).lower().strip()
+                status_val = TaskTemplateRecordConsumer.TASK_STATUS_MAP.get(
+                    raw_status, "pending"
+                )
+                observation = str(row.get("observation", ""))
+                scheduled_raw = _parse_date(row.get("scheduled_date"))
+                try:
+                    scheduled_date = (
+                        date.fromisoformat(str(scheduled_raw))
+                        if scheduled_raw
+                        else due_date
+                    )
+                except ValueError, TypeError:
+                    logger.debug(
+                        "Falling back to due_date for unparsable scheduled_date",
+                        scheduled_date=str(scheduled_raw),
+                        sheet_name=sheet_name,
+                    )
+                    scheduled_date = due_date
+
+                existing_node = TaskNode.objects.filter(
+                    task_template=template, folder=template.folder, due_date=due_date
+                ).first()
+
+                # A node on a template created by this very import is the one
+                # auto-synced from task_date, not a pre-existing record: apply
+                # the row to it instead of treating it as a conflict.
+                if existing_node is not None and not template_created:
+                    match on_conflict:
+                        case ConflictMode.SKIP:
+                            result.add_skipped()
+                            continue
+                        case ConflictMode.STOP:
+                            result.add_error(
+                                Error(
+                                    record={"due_date": str(due_date)},
+                                    error=(
+                                        f"Task node for '{template.name}' on"
+                                        f" {due_date} already exists"
+                                    ),
+                                )
+                            )
+                            result.stopped = True
+                            break
+                        case ConflictMode.UPDATE:
+                            self._save_task_node_row(
+                                existing_node,
+                                status_val,
+                                observation,
+                                scheduled_date,
+                                result,
+                                created=False,
+                            )
+                elif existing_node is not None:
+                    self._save_task_node_row(
+                        existing_node,
+                        status_val,
+                        observation,
+                        scheduled_date,
+                        result,
+                        created=False,
+                    )
+                else:
+                    node = TaskNode(
+                        task_template=template,
+                        due_date=due_date,
+                        folder=template.folder,
+                        to_delete=False,
+                    )
+                    self._save_task_node_row(
+                        node,
+                        status_val,
+                        observation,
+                        scheduled_date,
+                        result,
+                        created=True,
+                    )
+
+            if result.stopped:
+                break
+
+    @staticmethod
+    def _save_task_node_row(
+        node: TaskNode,
+        status_val: str,
+        observation: str,
+        scheduled_date: date,
+        result: Result,
+        created: bool,
+    ) -> None:
+        node.status = status_val
+        node.observation = observation
+        node.scheduled_date = scheduled_date
+        node.to_delete = False
+        try:
+            node.save()
+        except (IntegrityError, ValidationError) as exc:
+            result.add_error(
+                Error(record={"due_date": str(node.due_date)}, error=str(exc))
+            )
+            return
+        if created:
+            result.add_created()
+        else:
+            result.add_updated()
 
     def _reconcile_compliance_requirements(
         self, request, records, compliance_assessment, framework_id, results
@@ -3319,6 +4564,130 @@ class LoadFileView(APIView):
                 "escalation_thresholds": {"successful": 0, "failed": 0, "errors": []},
             }
 
+    def _process_processing_excel(
+        self,
+        request,
+        excel_file: io.BytesIO,
+        folders_map,
+        folder_id,
+        on_conflict=ConflictMode.STOP,
+    ):
+        try:
+            excel_data = pd.ExcelFile(excel_file)
+            sheet_names = excel_data.sheet_names
+
+            base_context = BaseContext(
+                request,
+                folders_map=folders_map,
+                folder_id=folder_id,
+                on_conflict=on_conflict,
+            )
+
+            parent_sheet = next(
+                (s for s in sheet_names if s.strip().lower() == "processing"), None
+            )
+            has_child_sheets = any(
+                s.strip().lower() in PROCESSING_CHILD_SHEETS for s in sheet_names
+            )
+
+            if parent_sheet is None and not has_child_sheets:
+                # Flat list of processings (legacy single-sheet format)
+                df = normalize_df_columns(
+                    normalize_datetime_columns(pd.read_excel(excel_file)).fillna("")
+                )
+                return (
+                    ProcessingRecordConsumer(base_context)
+                    .process_records(df.to_dict(orient="records"))
+                    .to_dict()
+                )
+
+            if parent_sheet is None:
+                return {
+                    "error": (
+                        "Invalid processing workbook: expected a 'Processing' sheet but only found: "
+                        + ", ".join(sheet_names)
+                    )
+                }
+
+            parent_df = normalize_df_columns(
+                normalize_datetime_columns(
+                    pd.read_excel(excel_file, sheet_name=parent_sheet)
+                ).fillna("")
+            )
+            parent_records = parent_df.to_dict(orient="records")
+
+            overall_results = {
+                "processing": (
+                    ProcessingRecordConsumer(base_context)
+                    .process_records(parent_records)
+                    .to_dict()
+                )
+            }
+            if overall_results["processing"].get("stopped"):
+                return overall_results
+
+            if len(parent_records) > 1:
+                overall_results["warning"] = (
+                    "Multiple rows found on the 'Processing' sheet; "
+                    "sub-object sheets are attached to the first row"
+                )
+
+            processing = None
+            if parent_records:
+                hint = parent_records[0]
+                domain_name = str(hint.get("domain") or "").lower()
+                scope_folder = folders_map.get(domain_name, folder_id)
+                (viewable_processings, _, _) = RoleAssignment.get_accessible_object_ids(
+                    Folder.get_root_folder(), request.user, Processing
+                )
+                queryset = Processing.objects.filter(id__in=viewable_processings)
+                if scope_folder:
+                    queryset = queryset.filter(folder_id=scope_folder)
+                if hint.get("ref_id"):
+                    processing = queryset.filter(ref_id=hint["ref_id"]).first()
+                if processing is None and hint.get("name"):
+                    processing = queryset.filter(name__iexact=str(hint["name"])).first()
+
+            if processing is None:
+                overall_results["error"] = (
+                    "Could not resolve the processing record; sub-object sheets were not imported"
+                )
+                return overall_results
+
+            for sheet_name in sheet_names:
+                key = sheet_name.strip().lower()
+                if sheet_name == parent_sheet or key not in PROCESSING_CHILD_SHEETS:
+                    continue
+
+                result_key, consumer_class = PROCESSING_CHILD_SHEETS[key]
+                sheet_df = normalize_df_columns(
+                    normalize_datetime_columns(
+                        pd.read_excel(excel_file, sheet_name=sheet_name)
+                    ).fillna("")
+                )
+                sheet_records = sheet_df.to_dict(orient="records")
+                for record in sheet_records:
+                    if not record.get("processing") and not record.get(
+                        "processing_name"
+                    ):
+                        record["processing"] = str(processing.id)
+
+                child_result = (
+                    consumer_class(base_context)
+                    .process_records(sheet_records)
+                    .to_dict()
+                )
+                overall_results[result_key] = child_result
+                if child_result.get("stopped"):
+                    return overall_results
+
+            return overall_results
+        except Exception as e:
+            logger.error("Error processing Processing Excel file", exc_info=e)
+            return {
+                "error": "Failed to process the processing Excel file",
+            }
+
     def _process_tprm_file(
         self,
         request,
@@ -3339,6 +4708,7 @@ class LoadFileView(APIView):
                 "entities": {"successful": 0, "failed": 0, "errors": []},
                 "solutions": {"successful": 0, "failed": 0, "errors": []},
                 "contracts": {"successful": 0, "failed": 0, "errors": []},
+                "representatives": {"successful": 0, "failed": 0, "errors": []},
             }
 
             # Track ref_id to actual ID mappings
@@ -3371,8 +4741,6 @@ class LoadFileView(APIView):
                 solutions_result, solution_ref_map = self._process_solutions(
                     request,
                     solutions_records,
-                    folders_map,
-                    folder_id,
                     entity_ref_map,
                     on_conflict,
                 )
@@ -3399,19 +4767,40 @@ class LoadFileView(APIView):
                     on_conflict,
                 )
                 overall_results["contracts"] = contracts_result
+                if contracts_result.get("stopped"):
+                    return overall_results
             else:
                 logger.warning("No 'Contracts' sheet found in Excel file")
+
+            # Process Representatives sheet last (requires entities to exist)
+            if "Representatives" in excel_data.sheet_names:
+                logger.info("Processing Representatives sheet")
+                representatives_df = normalize_datetime_columns(
+                    pd.read_excel(excel_file, sheet_name="Representatives")
+                ).fillna("")
+                representatives_records = representatives_df.to_dict(orient="records")
+                representatives_result = self._process_representatives(
+                    request,
+                    representatives_records,
+                    entity_ref_map,
+                    on_conflict,
+                )
+                overall_results["representatives"] = representatives_result
+            else:
+                logger.warning("No 'Representatives' sheet found in Excel file")
 
             # Calculate totals
             total_successful = (
                 overall_results["entities"]["successful"]
                 + overall_results["solutions"]["successful"]
                 + overall_results["contracts"]["successful"]
+                + overall_results["representatives"]["successful"]
             )
             total_failed = (
                 overall_results["entities"]["failed"]
                 + overall_results["solutions"]["failed"]
                 + overall_results["contracts"]["failed"]
+                + overall_results["representatives"]["failed"]
             )
 
             logger.info(
@@ -3430,38 +4819,115 @@ class LoadFileView(APIView):
                 },
                 "solutions": {"successful": 0, "failed": 0, "errors": []},
                 "contracts": {"successful": 0, "failed": 0, "errors": []},
+                "representatives": {"successful": 0, "failed": 0, "errors": []},
             }
 
-    def _process_entities(
-        self, request, records, folders_map, folder_id, on_conflict=ConflictMode.STOP
-    ):
-        """Process entities from TPRM import"""
-        results = {
+    def _empty_tprm_results(self) -> dict[str, Any]:
+        return {
             "successful": 0,
             "failed": 0,
             "skipped": 0,
             "updated": 0,
             "errors": [],
         }
+
+    def _add_tprm_record_error(self, results, record, error) -> None:
+        results["failed"] += 1
+        results["errors"].append({"record": record, "error": error})
+
+    def _check_missing_tprm_required_fields(self, record, required_fields) -> list[str]:
+        missing_fields = []
+        for field in required_fields:
+            value = record.get(field, "")
+            if value is None or not str(value).strip():
+                missing_fields.append(field)
+        return missing_fields
+
+    def _add_tprm_missing_fields_error(self, results, record, missing_fields) -> None:
+        if len(missing_fields) == 1:
+            error = f"{missing_fields[0]} field is mandatory"
+        else:
+            error = "Missing mandatory fields: " + ", ".join(missing_fields)
+        self._add_tprm_record_error(results, record, error)
+
+    def _log_tprm_import_results(self, label, results) -> None:
+        logger.info(
+            f"{label} import complete. "
+            f"Success: {results['successful']}, Failed: {results['failed']}"
+        )
+
+    def _handle_tprm_conflict(
+        self,
+        request,
+        results,
+        record,
+        on_conflict,
+        label,
+        serializer_class,
+        instance,
+        data,
+        post_update=None,
+    ) -> str:
+        """Apply the conflict policy to an existing record.
+
+        Returns the action taken: "skipped", "stopped", "updated" or "failed".
+        """
+        match on_conflict:
+            case ConflictMode.SKIP:
+                results["skipped"] += 1
+                return "skipped"
+            case ConflictMode.STOP:
+                self._add_tprm_record_error(
+                    results,
+                    record,
+                    f"{label} already exists (conflict policy: stop)",
+                )
+                results["stopped"] = True
+                return "stopped"
+            case ConflictMode.UPDATE:
+                serializer = serializer_class(
+                    instance=instance,
+                    data=data,
+                    partial=True,
+                    context={"request": request},
+                )
+                if not serializer.is_valid():
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+                    return "failed"
+                updated_instance = serializer.save()
+                if post_update:
+                    post_update(updated_instance)
+                results["updated"] += 1
+                return "updated"
+            case _:
+                self._add_tprm_record_error(
+                    results,
+                    record,
+                    f"Unsupported conflict policy: {on_conflict}",
+                )
+                results["stopped"] = True
+                return "stopped"
+
+    def _process_entities(
+        self, request, records, folders_map, folder_id, on_conflict=ConflictMode.STOP
+    ):
+        """Process entities from TPRM import"""
+        results = self._empty_tprm_results()
         ref_id_map = {}  # Map ref_id to actual UUID
 
         for record in records:
             try:
-                ref_id = record.get("ref_id", "").strip()
-                if not ref_id:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "ref_id field is mandatory"}
-                    )
+                missing_fields = self._check_missing_tprm_required_fields(
+                    record, ["ref_id", "name"]
+                )
+                if missing_fields:
+                    self._add_tprm_missing_fields_error(results, record, missing_fields)
                     continue
 
-                # Check if name is provided
-                if not record.get("name"):
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "name field is mandatory"}
-                    )
-                    continue
+                ref_id = record.get("ref_id", "").strip()
 
                 # Get domain from record or use fallback
                 domain = folder_id
@@ -3470,78 +4936,7 @@ class LoadFileView(APIView):
                         str(record.get("domain")).lower(), folder_id
                     )
 
-                # Check for existing entity by ref_id or name
-                existing_entity = Entity.objects.filter(ref_id=ref_id).first()
-                if not existing_entity:
-                    existing_entity = Entity.objects.filter(
-                        name__iexact=record.get("name"),
-                        folder_id=domain,
-                    ).first()
-
-                if existing_entity:
-                    ref_id_map[ref_id] = str(existing_entity.id)
-                    match on_conflict:
-                        case ConflictMode.SKIP:
-                            results["skipped"] += 1
-                            continue
-                        case ConflictMode.STOP:
-                            results["failed"] += 1
-                            results["errors"].append(
-                                {
-                                    "record": record,
-                                    "error": "Entity already exists (conflict policy: stop)",
-                                }
-                            )
-                            results["stopped"] = True
-                            break
-                        case ConflictMode.UPDATE:
-                            update_data = {
-                                "ref_id": ref_id,
-                                "name": record.get("name"),
-                                "description": record.get("description", ""),
-                                "mission": record.get("mission", ""),
-                                "folder": domain,
-                            }
-                            if record.get("country"):
-                                update_data["country"] = record.get("country")
-                            if record.get("currency"):
-                                update_data["currency"] = record.get("currency")
-                            for field in [
-                                "dependency",
-                                "penetration",
-                                "maturity",
-                                "trust",
-                            ]:
-                                value = record.get(field)
-                                if value != "" and value is not None:
-                                    try:
-                                        update_data[f"default_{field}"] = int(value)
-                                    except ValueError, TypeError:
-                                        pass
-                            legal_ids = {}
-                            for id_type in ["lei", "euid", "duns", "vat"]:
-                                value = record.get(id_type, "")
-                                if value and str(value).strip():
-                                    legal_ids[id_type.upper()] = str(value).strip()
-                            if legal_ids:
-                                update_data["legal_identifiers"] = legal_ids
-                            serializer = EntityWriteSerializer(
-                                instance=existing_entity,
-                                data=update_data,
-                                partial=True,
-                                context={"request": request},
-                            )
-                            if serializer.is_valid():
-                                serializer.save()
-                                results["updated"] += 1
-                            else:
-                                results["failed"] += 1
-                                results["errors"].append(
-                                    {"record": record, "errors": serializer.errors}
-                                )
-                            continue
-
-                # Prepare entity data
+                # Prepare entity data (used by both update and create)
                 entity_data = {
                     "ref_id": ref_id,
                     "name": record.get("name"),
@@ -3575,26 +4970,44 @@ class LoadFileView(APIView):
                 if legal_identifiers:
                     entity_data["legal_identifiers"] = legal_identifiers
 
+                # Check for existing entity by ref_id or name
+                existing_entity = Entity.objects.filter(ref_id=ref_id).first()
+                if not existing_entity:
+                    existing_entity = Entity.objects.filter(
+                        name__iexact=record.get("name"),
+                        folder_id=domain,
+                    ).first()
+
+                if existing_entity:
+                    ref_id_map[ref_id] = str(existing_entity.id)
+                    action = self._handle_tprm_conflict(
+                        request,
+                        results,
+                        record,
+                        on_conflict,
+                        label="Entity",
+                        serializer_class=EntityWriteSerializer,
+                        instance=existing_entity,
+                        data=entity_data,
+                    )
+                    if action == "stopped":
+                        break
+                    continue
+
                 # Create the entity first, then handle parent relationship
                 serializer = EntityWriteSerializer(
                     data=entity_data, context={"request": request}
                 )
 
-                if serializer.is_valid(raise_exception=True):
-                    entity = serializer.save()
-                    ref_id_map[ref_id] = str(entity.id)
-                    results["successful"] += 1
-                    logger.debug(f"Created entity: {entity.name} with ref_id: {ref_id}")
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
-                    )
+                serializer.is_valid(raise_exception=True)
+                entity = serializer.save()
+                ref_id_map[ref_id] = str(entity.id)
+                results["successful"] += 1
+                logger.debug(f"Created entity: {entity.name} with ref_id: {ref_id}")
 
             except Exception as e:
                 logger.warning(f"Error creating entity: {str(e)}")
-                results["failed"] += 1
-                results["errors"].append({"record": record, "error": str(e)})
+                self._add_tprm_record_error(results, record, str(e))
 
         # Second pass: handle parent_entity relationships
         for record in records:
@@ -3617,130 +5030,44 @@ class LoadFileView(APIView):
             except Exception as e:
                 logger.warning(f"Error linking parent entity: {str(e)}")
 
-        logger.info(
-            f"Entity import complete. Success: {results['successful']}, Failed: {results['failed']}"
-        )
+        self._log_tprm_import_results("Entity", results)
         return results, ref_id_map
 
     def _process_solutions(
         self,
         request,
         records,
-        folders_map,
-        folder_id,
         entity_ref_map,
         on_conflict=ConflictMode.STOP,
     ):
         """Process solutions from TPRM import"""
-        results = {
-            "successful": 0,
-            "failed": 0,
-            "skipped": 0,
-            "updated": 0,
-            "errors": [],
-        }
+        results = self._empty_tprm_results()
         ref_id_map = {}  # Map ref_id to actual UUID
 
         for record in records:
             try:
+                missing_fields = self._check_missing_tprm_required_fields(
+                    record, ["ref_id", "name", "provider_entity_ref_id"]
+                )
+                if missing_fields:
+                    self._add_tprm_missing_fields_error(results, record, missing_fields)
+                    continue
+
                 ref_id = record.get("ref_id", "").strip()
-                if not ref_id:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "ref_id field is mandatory"}
-                    )
-                    continue
-
-                # Check if name is provided
-                if not record.get("name"):
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "name field is mandatory"}
-                    )
-                    continue
-
-                # Check provider_entity_ref_id
                 provider_ref_id = record.get("provider_entity_ref_id", "").strip()
-                if not provider_ref_id:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": "provider_entity_ref_id field is mandatory",
-                        }
-                    )
-                    continue
 
                 # Lookup provider entity UUID
                 if provider_ref_id not in entity_ref_map:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": f"Provider entity with ref_id '{provider_ref_id}' not found",
-                        }
+                    self._add_tprm_record_error(
+                        results,
+                        record,
+                        f"Provider entity with ref_id '{provider_ref_id}' not found",
                     )
                     continue
 
                 provider_entity_id = entity_ref_map[provider_ref_id]
 
-                # Check for existing solution by ref_id or name
-                existing_solution = Solution.objects.filter(ref_id=ref_id).first()
-                if not existing_solution:
-                    existing_solution = Solution.objects.filter(
-                        name__iexact=record.get("name"),
-                    ).first()
-
-                if existing_solution:
-                    ref_id_map[ref_id] = str(existing_solution.id)
-                    match on_conflict:
-                        case ConflictMode.SKIP:
-                            results["skipped"] += 1
-                            continue
-                        case ConflictMode.STOP:
-                            results["failed"] += 1
-                            results["errors"].append(
-                                {
-                                    "record": record,
-                                    "error": "Solution already exists (conflict policy: stop)",
-                                }
-                            )
-                            results["stopped"] = True
-                            break
-                        case ConflictMode.UPDATE:
-                            update_data = {
-                                "ref_id": ref_id,
-                                "name": record.get("name"),
-                                "description": record.get("description", ""),
-                                "provider_entity": provider_entity_id,
-                            }
-                            if (
-                                record.get("criticality") != ""
-                                and record.get("criticality") is not None
-                            ):
-                                try:
-                                    update_data["criticality"] = int(
-                                        record.get("criticality")
-                                    )
-                                except ValueError, TypeError:
-                                    pass
-                            serializer = SolutionWriteSerializer(
-                                instance=existing_solution,
-                                data=update_data,
-                                partial=True,
-                                context={"request": request},
-                            )
-                            if serializer.is_valid():
-                                serializer.save()
-                                results["updated"] += 1
-                            else:
-                                results["failed"] += 1
-                                results["errors"].append(
-                                    {"record": record, "errors": serializer.errors}
-                                )
-                            continue
-
-                # Prepare solution data
+                # Prepare solution data (used by both update and create)
                 solution_data = {
                     "ref_id": ref_id,
                     "name": record.get("name"),
@@ -3758,32 +5085,45 @@ class LoadFileView(APIView):
                     except ValueError, TypeError:
                         pass
 
+                # Check for existing solution by ref_id or name
+                existing_solution = Solution.objects.filter(ref_id=ref_id).first()
+                if not existing_solution:
+                    existing_solution = Solution.objects.filter(
+                        name__iexact=record.get("name"),
+                    ).first()
+
+                if existing_solution:
+                    ref_id_map[ref_id] = str(existing_solution.id)
+                    action = self._handle_tprm_conflict(
+                        request,
+                        results,
+                        record,
+                        on_conflict,
+                        label="Solution",
+                        serializer_class=SolutionWriteSerializer,
+                        instance=existing_solution,
+                        data=solution_data,
+                    )
+                    if action == "stopped":
+                        break
+                    continue
+
                 # Create the solution
                 serializer = SolutionWriteSerializer(
                     data=solution_data, context={"request": request}
                 )
 
-                if serializer.is_valid(raise_exception=True):
-                    solution = serializer.save()
-                    ref_id_map[ref_id] = str(solution.id)
-                    results["successful"] += 1
-                    logger.debug(
-                        f"Created solution: {solution.name} with ref_id: {ref_id}"
-                    )
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
-                    )
+                serializer.is_valid(raise_exception=True)
+                solution = serializer.save()
+                ref_id_map[ref_id] = str(solution.id)
+                results["successful"] += 1
+                logger.debug(f"Created solution: {solution.name} with ref_id: {ref_id}")
 
             except Exception as e:
                 logger.warning(f"Error creating solution: {str(e)}")
-                results["failed"] += 1
-                results["errors"].append({"record": record, "error": str(e)})
+                self._add_tprm_record_error(results, record, str(e))
 
-        logger.info(
-            f"Solution import complete. Success: {results['successful']}, Failed: {results['failed']}"
-        )
+        self._log_tprm_import_results("Solution", results)
         return results, ref_id_map
 
     def _process_contracts(
@@ -3797,52 +5137,26 @@ class LoadFileView(APIView):
         on_conflict=ConflictMode.STOP,
     ):
         """Process contracts from TPRM import"""
-        results = {
-            "successful": 0,
-            "failed": 0,
-            "skipped": 0,
-            "updated": 0,
-            "errors": [],
-        }
+        results = self._empty_tprm_results()
 
         for record in records:
             try:
+                missing_fields = self._check_missing_tprm_required_fields(
+                    record, ["ref_id", "name", "provider_entity_ref_id"]
+                )
+                if missing_fields:
+                    self._add_tprm_missing_fields_error(results, record, missing_fields)
+                    continue
+
                 ref_id = record.get("ref_id", "").strip()
-                if not ref_id:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "ref_id field is mandatory"}
-                    )
-                    continue
-
-                # Check if name is provided
-                if not record.get("name"):
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "name field is mandatory"}
-                    )
-                    continue
-
-                # Check provider_entity_ref_id
                 provider_ref_id = record.get("provider_entity_ref_id", "").strip()
-                if not provider_ref_id:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": "provider_entity_ref_id field is mandatory",
-                        }
-                    )
-                    continue
 
                 # Lookup provider entity UUID
                 if provider_ref_id not in entity_ref_map:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": f"Provider entity with ref_id '{provider_ref_id}' not found",
-                        }
+                    self._add_tprm_record_error(
+                        results,
+                        record,
+                        f"Provider entity with ref_id '{provider_ref_id}' not found",
                     )
                     continue
 
@@ -3917,6 +5231,10 @@ class LoadFileView(APIView):
                 if record.get("currency"):
                     contract_data["currency"] = record.get("currency")
 
+                def link_solutions(contract):
+                    if solution_ids:
+                        contract.solutions.set(solution_ids)
+
                 # Check for existing contract by ref_id or name
                 existing_contract = Contract.objects.filter(ref_id=ref_id).first()
                 if not existing_contract:
@@ -3926,66 +5244,115 @@ class LoadFileView(APIView):
                     ).first()
 
                 if existing_contract:
-                    match on_conflict:
-                        case ConflictMode.SKIP:
-                            results["skipped"] += 1
-                            continue
-                        case ConflictMode.STOP:
-                            results["failed"] += 1
-                            results["errors"].append(
-                                {
-                                    "record": record,
-                                    "error": "Contract already exists (conflict policy: stop)",
-                                }
-                            )
-                            results["stopped"] = True
-                            break
-                        case ConflictMode.UPDATE:
-                            serializer = ContractWriteSerializer(
-                                instance=existing_contract,
-                                data=contract_data,
-                                partial=True,
-                                context={"request": request},
-                            )
-                            if serializer.is_valid():
-                                contract = serializer.save()
-                                if solution_ids:
-                                    contract.solutions.set(solution_ids)
-                                results["updated"] += 1
-                            else:
-                                results["failed"] += 1
-                                results["errors"].append(
-                                    {"record": record, "errors": serializer.errors}
-                                )
-                            continue
+                    action = self._handle_tprm_conflict(
+                        request,
+                        results,
+                        record,
+                        on_conflict,
+                        label="Contract",
+                        serializer_class=ContractWriteSerializer,
+                        instance=existing_contract,
+                        data=contract_data,
+                        post_update=link_solutions,
+                    )
+                    if action == "stopped":
+                        break
+                    continue
 
                 # Create the contract
                 serializer = ContractWriteSerializer(
                     data=contract_data, context={"request": request}
                 )
 
-                if serializer.is_valid(raise_exception=True):
-                    contract = serializer.save()
-                    if solution_ids:
-                        contract.solutions.set(solution_ids)
-                    results["successful"] += 1
-                    logger.debug(
-                        f"Created contract: {contract.name} with ref_id: {ref_id}"
-                    )
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
-                    )
+                serializer.is_valid(raise_exception=True)
+                contract = serializer.save()
+                link_solutions(contract)
+                results["successful"] += 1
+                logger.debug(f"Created contract: {contract.name} with ref_id: {ref_id}")
 
             except Exception as e:
                 logger.warning(f"Error creating contract: {str(e)}")
-                results["failed"] += 1
-                results["errors"].append({"record": record, "error": str(e)})
+                self._add_tprm_record_error(results, record, str(e))
 
-        logger.info(
-            f"Contract import complete. Success: {results['successful']}, Failed: {results['failed']}"
-        )
+        self._log_tprm_import_results("Contract", results)
+        return results
+
+    def _process_representatives(
+        self,
+        request,
+        records,
+        entity_ref_map,
+        on_conflict=ConflictMode.STOP,
+    ):
+        """Process representatives from TPRM import."""
+        results = self._empty_tprm_results()
+
+        for record in records:
+            try:
+                missing_fields = self._check_missing_tprm_required_fields(
+                    record, ["email", "provider_entity_ref_id"]
+                )
+                if missing_fields:
+                    self._add_tprm_missing_fields_error(results, record, missing_fields)
+                    continue
+
+                email = str(record.get("email", "")).strip()
+                provider_ref_id = str(record.get("provider_entity_ref_id", "")).strip()
+                provider_entity_id = entity_ref_map.get(provider_ref_id)
+
+                if not provider_entity_id:
+                    self._add_tprm_record_error(
+                        results,
+                        record,
+                        f"Provider entity with ref_id '{provider_ref_id}' not found",
+                    )
+                    continue
+
+                representative_data = {
+                    "email": email,
+                    "entity": provider_entity_id,
+                    "first_name": str(record.get("first_name", "")).strip(),
+                    "last_name": str(record.get("last_name", "")).strip(),
+                    "description": str(record.get("description", "")).strip(),
+                    "phone": str(record.get("phone", "")).strip(),
+                    "role": str(record.get("role", "")).strip(),
+                }
+
+                existing_representative = Representative.objects.filter(
+                    email__iexact=email
+                ).first()
+
+                if existing_representative:
+                    action = self._handle_tprm_conflict(
+                        request,
+                        results,
+                        record,
+                        on_conflict,
+                        label="Representative",
+                        serializer_class=RepresentativeWriteSerializer,
+                        instance=existing_representative,
+                        data=representative_data,
+                    )
+                    if action == "stopped":
+                        break
+                    continue
+
+                serializer = RepresentativeWriteSerializer(
+                    data=representative_data, context={"request": request}
+                )
+
+                serializer.is_valid(raise_exception=True)
+                representative = serializer.save()
+                results["successful"] += 1
+                logger.debug(
+                    f"Created representative: {representative.email} for entity ref_id: {provider_ref_id}"
+                )
+
+            except Exception as e:
+                logger.warning(f"Error creating representative: {str(e)}")
+                self._add_tprm_record_error(results, record, str(e))
+
+        self._log_tprm_import_results("Representative", results)
         return results
 
     def post(self, request, *args, **kwargs) -> Response:

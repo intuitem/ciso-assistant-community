@@ -33,6 +33,20 @@ export function unsafeTranslate(
 		if (Object.hasOwn(m, key) && typeof m[key] === 'function') {
 			return m[key](params, options);
 		}
+		// Choice labels containing a colon (e.g. DORA termination reasons) would be
+		// captured by the prefix:suffix branch below before reaching the camelCase
+		// lookup; try a punctuation-stripped camelCase key first so they can translate.
+		if (typeof key === 'string' && key.includes(':')) {
+			const sanitizedKey = toCamelCase(
+				key
+					.replace(/[^\w\s]/g, ' ')
+					.replace(/\s+/g, ' ')
+					.trim()
+			);
+			if (sanitizedKey && Object.hasOwn(m, sanitizedKey) && typeof m[sanitizedKey] === 'function') {
+				return m[sanitizedKey](params, options);
+			}
+		}
 		if (typeof key === 'string' && key) {
 			let res = key.match('^([^:]+):([^:]+)$');
 			if (res) {

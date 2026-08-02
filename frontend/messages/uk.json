@@ -1,5 +1,4 @@
-{
-	"mapToFramework": "Зіставити з фреймворком",
+{"mapToFramework": "Зіставити з фреймворком",
 	"mapToFrameworkDescription": "Створити новий аудит в іншому фреймворку, зіставлений із цього.",
 	"mapFromAudit": "Зіставити з аудиту",
 	"mapFromAuditDescription": "Перенести зіставлені результати з іншого аудиту в цей.",
@@ -879,8 +878,8 @@
 	"expirationDateMustBeOnOrAfterStartDate": "Дата завершення має бути такою ж або пізнішою за дату початку",
 	"backupLoadingError": "Під час завантаження резервної копії сталася помилка.",
 	"backupVersionError": "Не вдається завантажити резервну копію, версія резервної копії недійсна",
-	"confirmYes": "Підтвердіть, ввівши «так» нижче:",
-	"confirmYesPlaceHolder": "Введіть «так» для підтвердження",
+	"confirmYes": "Підтвердіть, ввівши «{word}» нижче:",
+	"confirmYesPlaceHolder": "Введіть «{word}» для підтвердження",
 	"backupGreaterVersionError": "Не вдається завантажити резервну копію, версія резервної копії вища за поточну версію вашої програми.",
 	"backupLowerVersionError": "Сталася помилка. Можливо, резервна версія занадто стара. Якщо так, її потрібно оновити перед повторною спробою.",
 	"entityAssessmentEvidenceHelpText": "Зовнішня анкета",
@@ -1652,30 +1651,21 @@
 	"cascadeDeleteWarning": "Увага: Видалення цього також призведе до постійного видалення {count} пов'язаних об'єктів:",
 	"errorFetching": "Не вдалося завантажити інформацію про каскад. Будь ласка, спробуйте ще раз.",
 	"info": "Інформація",
-	"cascadeAffectedNotice": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
-			"match": {
-				"count=0": "Жоден інший об'єкт не буде зачеплений.",
-				"countPlural=one": "{count} пов'язаний об'єкт не буде видалений, але втратить одне або кілька зв'язків.",
-				"countPlural=other": "{count} пов'язаних об'єктів не буде видалено, але втратить одне або кілька зв'язків."
-			}
-		}
-	],
+	"cascadeAffectedNotice": [{"declarations": ["input count",
+	"local countPlural = count: plural"],
+	"selectors": ["count",
+	"countPlural"],
+	"match": {"count=0": "Жоден інший об'єкт не буде зачеплений.",
+	"countPlural=one": "{count} пов'язаний об'єкт не буде видалений, але втратить одне або кілька зв'язків.",
+	"countPlural=other": "{count} пов'язаних об'єктів не буде видалено, але втратить одне або кілька зв'язків."}}],
 	"cascadeAffectedHint": "Елементи нижче залишаються в системі, але їхні посилання на цей об'єкт будуть видалені.",
 	"libraryFilteringLabels": "Мітки бібліотеки",
 	"campaignsDescription": "Керування кампаніями аудиту",
-	"objectsNotVisible": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} об'єкт невидимий.",
-				"countPlural=other": "{count} об'єкти невидимі."
-			}
-		}
-	],
+	"objectsNotVisible": [{"declarations": ["input count",
+	"local countPlural = count: plural"],
+	"selectors": ["countPlural"],
+	"match": {"countPlural=one": "{count} об'єкт невидимий.",
+	"countPlural=other": "{count} об'єкти невидимі."}}],
 	"appliedControlsPlaceholder": "Виберіть застосовані контролі...",
 	"assignmentSettings": "Налаштування призначень",
 	"allowAssignmentsToEntities": "Дозволити призначення для сутностей",
@@ -1758,19 +1748,12 @@
 	"builderRequirementHint": "Оцінюється, може мати дочірні елементи",
 	"builderSplashScreen": "Заставка",
 	"builderSplashScreenHint": "Презентаційний, не оцінюється",
-	"builderStatusLive": "В ефірі",
-	"builderStatusLiveTitle": "Чернетка відповідає тому, що бачать респонденти аудиту.",
-	"builderStatusUnpublishedChanges": "Неопубліковані зміни",
-	"builderStatusUnpublishedChangesTitle": "У чернетці є зміни, які ще не видно респондентам аудиту. Опублікуйте, щоб застосувати.",
-	"builderStatusDraftNothingLive": "Чернетка — нічого не опубліковано",
-	"builderStatusDraftNothingLiveTitle": "У чернетці є вміст, але нічого ще не опубліковано. Нові аудити нічого не побачать, доки ви не опублікуєте.",
 	"builderStatusEmpty": "Порожньо",
 	"builderStatusEmptyTitle": "Поки що немає вимог. Нові аудити, побудовані на цьому фреймворку, не матимуть на що відповідати.",
 	"builderPreview": "Попередній перегляд",
 	"builderPreviewSaveFirst": "Спочатку збережіть чернетку для попереднього перегляду",
 	"builderPreviewAsRespondent": "Попередній перегляд як респондент (відкривається у новій вкладці)",
 	"builderExportYamlTitle": "Експортувати фреймворк як YAML-файл бібліотеки",
-	"builderExportYamlUnpublishedWarning": "Неопубліковані зміни не будуть включені. Спочатку опублікуйте, щоб експортувати останні правки.",
 	"builderCopyBase": "Копіювати базу",
 	"builderCopyBaseTitle": "Копіювати текст базової мови до {lang} (не перезаписує наявні переклади)",
 	"builderCopyBaseQuestion": "Копіювати базовий текст?",
@@ -1780,82 +1763,7 @@
 	"builderExpandAllCards": "Розгорнути всі картки",
 	"builderCollapseAllCards": "Згорнути всі картки",
 	"builderSaveFailed": "Не вдалося зберегти",
-	"builderPublishedFlash": "Опубліковано!",
 	"builderSaveDraftTitle": "Зберегти чернетку (Ctrl+S)",
-	"builderDiscardDraftTitle": "Відхилити чернетку",
-	"builderDiscard": "Відхилити",
-	"builderDiscardAllChangesQuestion": "Відхилити всі зміни?",
-	"builderYesDiscard": "Так, відхилити",
-	"builderPublishDraftToLiveTitle": "Опублікувати чернетку в робочий фреймворк",
-	"builderPublishing": "Публікація...",
-	"builderPublishModalTitle": "Опублікувати чернетку",
-	"builderPublishModalDescription": "Це оновить робочий фреймворк. Перегляньте зміни нижче.",
-	"builderRequirementAdded": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} вимог додано",
-				"countPlural=other": "{count} вимог додано"
-			}
-		}
-	],
-	"builderQuestionsAddedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} питань",
-				"countPlural=other": "{count} питань"
-			}
-		}
-	],
-	"builderRequirementRemoved": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} вимог видалено",
-				"countPlural=other": "{count} вимог видалено"
-			}
-		}
-	],
-	"builderQuestionsRemovedSuffix": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} питань",
-				"countPlural=other": "{count} питань"
-			}
-		}
-	],
-	"builderNoStructuralChanges": "Структурних змін не виявлено (лише метадані).",
-	"builderBreakingChangesDetected": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "Виявлено {count} критичних змін",
-				"countPlural=other": "Виявлено {count} критичних змін"
-			}
-		}
-	],
-	"builderBreakingChangesHint": "Ці зміни можуть вплинути на оцінювання, видимість або результати відповідності в наявних аудитах.",
-	"builderAffectedAudits": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} наявних аудитів буде зачеплено",
-				"countPlural=other": "{count} наявних аудитів буде зачеплено"
-			}
-		}
-	],
-	"builderAffectedAuditsAddedHint": "Нові вимоги будуть додані до цих аудитів.",
-	"builderAffectedAuditsRemovedHint": "Видалені вимоги та їхні дані оцінювання будуть стерті з цих аудитів.",
-	"builderCouldNotLoadPreview": "Не вдалося завантажити попередній перегляд впливу. Дійте обережно.",
-	"builderConfirmPublish": "Підтвердити публікацію",
 	"builderSearchNodes": "Пошук вузлів...",
 	"builderExpandSidebar": "Розгорнути бічну панель",
 	"builderCollapseSidebar": "Згорнути бічну панель",
@@ -1881,40 +1789,25 @@
 	"builderTranslateQuestion": "Перекласти питання...",
 	"builderFrameworkSettings": "Налаштування фреймворку",
 	"builderNoRulesOrGroupsConfigured": "Не налаштовано правил або груп",
-	"builderOutcomeRuleSummary": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} правил результату",
-				"countPlural=other": "{count} правил результату"
-			}
-		}
-	],
-	"builderImplementationGroupsSummaryShort": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} груп",
-				"countPlural=other": "{count} груп"
-			}
-		}
-	],
+	"builderOutcomeRuleSummary": [{"declarations": ["input count",
+	"local countPlural = count: plural"],
+	"selectors": ["countPlural"],
+	"match": {"countPlural=one": "{count} правил результату",
+	"countPlural=other": "{count} правил результату"}}],
+	"builderImplementationGroupsSummaryShort": [{"declarations": ["input count",
+	"local countPlural = count: plural"],
+	"selectors": ["countPlural"],
+	"match": {"countPlural=one": "{count} груп",
+	"countPlural=other": "{count} груп"}}],
 	"builderUrnNamespace": "Простір імен URN",
 	"builderScoringSettings": "Налаштування оцінювання",
 	"builderAggregationHint": "Середнє ділить загальний бал на кількість питань. Сума додає всі бали безпосередньо. Використовуйте Суму для бінарного (0/1) оцінювання.",
 	"builderScoreScale": "Шкала оцінок",
-	"builderScaleLevel": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} рівнів",
-				"countPlural=other": "{count} рівнів"
-			}
-		}
-	],
+	"builderScaleLevel": [{"declarations": ["input count",
+	"local countPlural = count: plural"],
+	"selectors": ["countPlural"],
+	"match": {"countPlural=one": "{count} рівнів",
+	"countPlural=other": "{count} рівнів"}}],
 	"builderAddScaleLevel": "Додати рівень шкали",
 	"builderScaleNamePlaceholder": "напр. Частково",
 	"builderScaleDescriptionPlaceholder": "Необов'язково",
@@ -1976,26 +1869,16 @@
 	"builderDefaultMode": "За замовчуванням",
 	"builderSplashMode": "Заставка",
 	"builderAssessableLeaf": "Оцінюваний листок",
-	"builderAssessableWithChildren": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "Оцінюване · {count} дочірній",
-				"countPlural=other": "Оцінюване · {count} дочірніх"
-			}
-		}
-	],
-	"builderGroupWithChildren": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "Група · {count} дочірній",
-				"countPlural=other": "Група · {count} дочірніх"
-			}
-		}
-	],
+	"builderAssessableWithChildren": [{"declarations": ["input count",
+	"local countPlural = count: plural"],
+	"selectors": ["countPlural"],
+	"match": {"countPlural=one": "Оцінюване · {count} дочірній",
+	"countPlural=other": "Оцінюване · {count} дочірніх"}}],
+	"builderGroupWithChildren": [{"declarations": ["input count",
+	"local countPlural = count: plural"],
+	"selectors": ["countPlural"],
+	"match": {"countPlural=one": "Група · {count} дочірній",
+	"countPlural=other": "Група · {count} дочірніх"}}],
 	"builderEmptyNode": "Порожній вузол",
 	"builderSplashScreenStatus": "Заставка",
 	"builderNestedUnder": "вкладено під {parent}",
@@ -2014,16 +1897,11 @@
 	"builderVisibilityExpressionPlaceholder": "напр. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Групи впровадження:",
 	"builderAddQuestion": "Додати питання",
-	"builderChildrenHidden": [
-		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "{count} дочірній прихований",
-				"countPlural=other": "{count} дочірніх приховано"
-			}
-		}
-	],
+	"builderChildrenHidden": [{"declarations": ["input count",
+	"local countPlural = count: plural"],
+	"selectors": ["countPlural"],
+	"match": {"countPlural=one": "{count} дочірній прихований",
+	"countPlural=other": "{count} дочірніх приховано"}}],
 	"builderSplashSource": "Джерело",
 	"builderSplashNoSourceContent": "Немає вихідного вмісту.",
 	"builderSplashEditPlaceholder": "Введіть markdown-вміст для вашої заставки...",
@@ -2035,7 +1913,6 @@
 	"builderSplashNumberedList": "Нумерований список",
 	"builderSplashLink": "Посилання",
 	"builderSplashTable": "Таблиця",
-	"builderSplashInsertImage": "Вставити зображення",
 	"builderUntitledQuestion": "Питання без назви",
 	"builderNotTranslated": "Не перекладено",
 	"builderQuestionTextPlaceholder": "Введіть ваше питання...",
@@ -2043,16 +1920,12 @@
 	"builderAnnotationOptional": "Необов'язкова нотатка...",
 	"builderDeleteThisQuestion": "Видалити це питання?",
 	"builderChangeTypeWarning": "Зміна типу видалить наявні варіанти. Продовжити?",
-	"builderShownWhenAnswers": [
-		{
-			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
-			"match": {
-				"countPlural=one": "Показується, коли {ref} = {count} відповідей",
-				"countPlural=other": "Показується, коли {ref} = {count} відповідей"
-			}
-		}
-	],
+	"builderShownWhenAnswers": [{"declarations": ["input count",
+	"input ref",
+	"local countPlural = count: plural"],
+	"selectors": ["countPlural"],
+	"match": {"countPlural=one": "Показується, коли {ref} = {count} відповідей",
+	"countPlural=other": "Показується, коли {ref} = {count} відповідей"}}],
 	"builderChoices": "Варіанти",
 	"builderAddChoice": "Додати варіант",
 	"builderChoicePlaceholder": "Текст варіанту...",
@@ -2080,27 +1953,12 @@
 	"builderKbSaveDraft": "Зберегти чернетку",
 	"builderKbShowCheatsheet": "Показати цю шпаргалку",
 	"builderKbCloseDialog": "Закрити діалог або випадаюче меню",
-	"builderImportedFramework": "Імпортований фреймворк",
-	"builderImportedFrameworkDescription": "Цей фреймворк було імпортовано з бібліотеки і його не можна редагувати безпосередньо. Щоб внести зміни, створіть редаговану копію.",
-	"builderCreateCopyAndEdit": "Створити копію та редагувати",
-	"builderCreatingCopy": "Створення копії...",
-	"builderLoadingEditor": "Завантаження редактора...",
-	"builderFailedToStartEditor": "Не вдалося запустити редактор",
-	"builderBackToFramework": "Назад до фреймворку",
-	"builderBackToBuilder": "Назад до конструктора",
-	"builderFailedToLoadDraft": "Не вдалося завантажити чернетку",
-	"builderImplementationGroupsHeader": "Групи впровадження",
-	"builderNoItemsToPreview": "Немає елементів для попереднього перегляду.",
-	"builderNoItemsToPreviewHint": "Додайте оцінювані вимоги або заставки в конструкторі.",
-	"builderBaseLanguageOption": "Базова мова",
 	"builderFrameworkNameRequired": "Назва фреймворку є обов'язковою.",
 	"builderFrameworkNameTooLong": "Назва фреймворку має {length} символів (макс. 200).",
 	"builderNodeNameTooLong": "Назва перевищує 200 символів ({length}/200). Перенесіть довгий текст у поле опису.",
 	"builderRefIdTooLong": "«{label}»: ref_id має {length} символів (макс. 100).",
 	"builderUrnTooLong": "«{label}»: URN має {length} символів (макс. 255).",
-	"builderFailedToSaveDraftBeforePublish": "Не вдалося зберегти чернетку перед публікацією.",
 	"builderUnsavedChangesNavigation": "У вас є незбережені зміни, які буде втрачено. Все одно вийти?",
-	"builderUnpublishedChangesNavigation": "У вас є неопубліковані зміни. Ваша чернетка збережена, ви зможете продовжити пізніше. Все одно вийти?",
 	"fieldVisibility": "Видимість полів",
 	"fieldVisibilityHelpText": "Контролюйте, які поля може бачити та редагувати кожна роль.",
 	"visibilityAuditorRespondent": "Аудитор + Респондент",
@@ -2133,7 +1991,6 @@
 	"mfaDisabledSuccessfully": "MFA вимкнено для цього користувача",
 	"errorDisablingMFA": "Не вдалося вимкнути MFA для цього користувача",
 	"userHasNoMFAEnabled": "У цього користувача не ввімкнено MFA",
-	"builderChangedOn": "змінено в",
 	"requirementWeight": "Вага",
 	"scim": "SCIM",
 	"scimDescription": "Налаштуйте провізіонування SCIM 2.0. Спрямуйте свого постачальника ідентифікації на наведену нижче кінцеву точку та автентифікуйте його за допомогою bearer-токена, згенерованого тут.",
@@ -2542,7 +2399,6 @@
 	"resetToDefault": "Скинути до типового",
 	"customized": "Налаштовано",
 	"defaultTemplate": "Типовий",
-	"loadDefault": "Завантажити типовий",
 	"templateSaved": "Шаблон успішно збережено",
 	"templateReset": "Шаблон скинуто до типового",
 	"confirmResetTemplate": "Ви впевнені, що хочете скинути цей шаблон до типового? Ваші налаштування буде втрачено.",
@@ -3523,9 +3379,21 @@
 	"averageProgress": "Середній прогрес",
 	"daysRemaining": "Залишилось днів",
 	"associatedFindingsAssessments": "Пов'язані подальші оцінювання",
-	"hourCount": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} година", "countPlural=other": "{count} годин"}}],
-	"minuteCount": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} хвилина", "countPlural=other": "{count} хвилин"}}],
-	"dayCount": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} день", "countPlural=other": "{count} днів"}}],
+	"hourCount": [{"declarations": ["input count",
+	"local countPlural = count: plural"],
+	"selectors": ["countPlural"],
+	"match": {"countPlural=one": "{count} година",
+	"countPlural=other": "{count} годин"}}],
+	"minuteCount": [{"declarations": ["input count",
+	"local countPlural = count: plural"],
+	"selectors": ["countPlural"],
+	"match": {"countPlural=one": "{count} хвилина",
+	"countPlural=other": "{count} хвилин"}}],
+	"dayCount": [{"declarations": ["input count",
+	"local countPlural = count: plural"],
+	"selectors": ["countPlural"],
+	"match": {"countPlural=one": "{count} день",
+	"countPlural=other": "{count} днів"}}],
 	"serverURL": "URL сервера",
 	"oidcConfiguration": "openid-configuration",
 	"tokenAuthMethod": "Метод автентифікації токена",
@@ -3622,9 +3490,6 @@
 	"fromLibrary": "Бібліотека",
 	"remove": "Видалити",
 	"custom": "Нестандартний",
-	"builderFieldLabelAssessable": "Оцінюване",
-	"builderFieldLabelWeight": "Вага",
-	"builderFieldLabelImplementationGroups": "Групи впровадження",
 	"revisions": "Версії",
 	"skip": "Пропустити",
 	"addThreshold": "Додати",
@@ -5121,17 +4986,6 @@
 	"requiresChangeGlobalSettings": "Потребує повноваження на зміну глобальних налаштувань.",
 	"clearDefault": "Скинути значення за замовчуванням",
 	"noDashboardSelected": "Панель моніторингу не обрано",
-	"builderFixValidationErrorsBeforePublish": "Деякі елементи мають помилки валідації. Виправте виділені поля перед публікацією.",
-	"builderPublishedWithWarnings": "Опубліковано з попередженнями:",
-	"builderChangeTypeRequirement": "вимога",
-	"builderChangeTypeQuestion": "питання",
-	"builderChangeTypeChoice": "варіант відповіді",
-	"builderFieldLabelVisibilityExpression": "Умова видимості",
-	"builderFieldLabelType": "Тип питання",
-	"builderFieldLabelDependsOn": "Умовне відображення",
-	"builderFieldLabelAddScore": "Внесок до оцінки",
-	"builderFieldLabelComputeResult": "Враховується в результаті",
-	"builderFieldLabelSelectImplementationGroups": "Обирає групи впровадження",
 	"bulkEvidenceUpload": "Масове завантаження доказів",
 	"bulkEvidenceUploadDescription": "Завантажте кілька файлів (або директорію) як докази за один раз. Дублікати файлів (однаковий SHA-256 у межах цільового домену) виявляються автоматично. Конфлікти назв вирішуються за стратегією, обраною нижче.",
 	"targetDomain": "Цільовий домен",
@@ -5231,5 +5085,16 @@
 	"downloadExcelTemplate": "Завантажити шаблон Excel",
 	"frameworkActionsHelp": "Шаблон Excel призначений для заповнення офлайн сторонніми чи зовнішніми сутностями, з подальшим повторним імпортом результатів через {dataWizard}.",
 	"decisionNotes": "Примітки до рішення",
-	"addIdpGroup": "Додати групу IdP"
-}
+	"addIdpGroup": "Додати групу IdP",
+	"addMembers": "Додати учасників",
+	"attemptToRemoveSelfFromDomainAdminGroup": "Ви не можете видалити себе з групи адміністраторів домену. Попросіть іншого адміністратора зробити це.",
+	"ebiosRmStudyDomainHelpText": "Зміна домену переміщує дослідження та всі об'єкти його семінарів до вибраного домену.",
+	"enableSpInitiatedSlo": "Увімкнути єдиний вихід, ініційований постачальником послуг",
+	"enableSpInitiatedSloHelpText": "Під час виходу також завершувати сеанс у постачальника ідентифікації.",
+	"includeInactive": "Включити неактивних",
+	"manageMembers": "Керувати учасниками",
+	"membersAdded": "Учасників додано",
+	"membersRemoved": "Учасників видалено",
+	"noResults": "Немає результатів. Уточніть пошук.",
+	"nothingSelected": "Ще нічого не вибрано.",
+	"removeFromGroup": "Видалити з групи"}

@@ -769,9 +769,9 @@
 									<span class="font-semibold text-surface-700-300"
 										>{m.operatingModesDescription()}:</span
 									>
-									<p class="ml-2 text-surface-700-300 mt-1">
-										{opScenario.operating_modes_description}
-									</p>
+									<div class="ml-2 text-surface-700-300 mt-1">
+										<MarkdownRenderer content={opScenario.operating_modes_description} />
+									</div>
 								</div>
 							{/if}
 							<div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">

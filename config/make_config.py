@@ -194,9 +194,9 @@ def get_config():
     else:
         config["kafka_dispatcher"] = {"enabled": False}
 
-    # Debug mode for local development
+    # Debug mode should be explicitly opted into, even for SQLite deployments.
     config["enable_debug"] = questionary.confirm(
-        "Enable debug mode?", default=True if config["db"] == "sqlite" else False
+        "Enable debug mode?", default=False
     ).ask()
 
     return config

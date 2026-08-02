@@ -344,7 +344,7 @@
 							></i>
 							<input
 								type="text"
-								class="w-full pl-6 pr-2 py-1 text-sm border border-surface-200-800 bg-surface-50-950 text-surface-900-100 rounded focus:outline-none focus:ring-1 focus:ring-indigo-300"
+								class="input w-full pl-6 pr-2 py-1 text-sm border border-surface-200-800 rounded focus:outline-hidden focus:ring-1 focus:ring-indigo-300"
 								placeholder={m.searchPlaceholder()}
 								bind:value={searchQuery}
 								bind:this={searchInputEl}

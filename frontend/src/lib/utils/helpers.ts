@@ -91,7 +91,7 @@ export function getScoreHexColor(
 }
 
 export function formatScoreValue(
-	value: number,
+	value: number | null,
 	max_score: number,
 	fullDonut = false,
 	min_score = 0
@@ -134,6 +134,22 @@ export function stringify(value: string | number | boolean | null = null) {
 		.toLowerCase()
 		.normalize('NFD')
 		.replace(/[\u0300-\u036f]/g, '');
+}
+
+/**
+ * Best-effort display name for an actor/approver: "First Last", else email, else
+ * its string representation. Returns '' when none is available so callers can
+ * fall back to their own placeholder.
+ */
+export function formatActorName(
+	actor:
+		| { first_name?: string; last_name?: string; email?: string; str?: string }
+		| null
+		| undefined
+): string {
+	if (!actor) return '';
+	const full = `${actor.first_name || ''} ${actor.last_name || ''}`.trim();
+	return full || actor.email || actor.str || '';
 }
 
 export function isDark(hexcolor: string | undefined): boolean {

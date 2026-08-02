@@ -57,9 +57,18 @@ services:
         condition: service_healthy
     user: "1001:1001"
 
+  qdrant:
+    container_name: qdrant
+    image: qdrant/qdrant:v1.14.0
+    restart: unless-stopped
+    volumes:
+      - qdrant_data:/qdrant/storage
+    ports:
+      - 127.0.0.1:6333:6333
+
   caddy:
     container_name: caddy
-    image: caddy:2.11.2
+    image: caddy:2.11.4
     environment:
       - CISO_ASSISTANT_URL=https://localhost:8443
     depends_on:
@@ -67,7 +76,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     ports:
-      - 8443:8443
+      - 127.0.0.1:8443:8443
     volumes:
       - ./db/caddy:/data/caddy
     command: |
@@ -77,3 +86,5 @@ services:
       tls internal
       }" > Caddyfile && caddy run'
 
+volumes:
+  qdrant_data:
