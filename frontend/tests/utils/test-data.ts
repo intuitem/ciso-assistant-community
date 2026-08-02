@@ -627,7 +627,7 @@ export default {
 	},
 	// legacy MITRE threats are excluded from pickers, so these cannot be ATT&CK
 	threat: {
-		name: 'Ransomware',
+		name: 'ICT-001 - Ransomware',
 		library: {
 			name: 'INTUITEM Common Catalog',
 			ref: 'intuitem-common-catalog',
@@ -636,7 +636,7 @@ export default {
 		urn: 'urn:intuitem:risk:threat:intuitem-common-catalog:ict-001'
 	},
 	threat2: {
-		name: 'Phishing and Spear Phishing',
+		name: 'ICT-002 - Phishing and Spear Phishing',
 		library: {
 			name: 'INTUITEM Common Catalog',
 			ref: 'intuitem-common-catalog',

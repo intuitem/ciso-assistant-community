@@ -34,8 +34,8 @@ copyright: "## License\n\nThe MITRE Corporation (MITRE) hereby grants you a non-
   \ LIMITED TO ANY WARRANTY THAT THE\nUSE OF THE INFORMATION THEREIN WILL NOT INFRINGE\
   \ ANY RIGHTS OR ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS\nFOR A PARTICULAR\
   \ PURPOSE."
-version: 6
-publication_date: 2026-08-01
+version: 7
+publication_date: 2026-08-02
 provider: Mitre ATT&CK
 packager: intuitem
 objects:
@@ -98,6 +98,18 @@ objects:
       and lead further Reconnaissance efforts.
 
       https://attack.mitre.org/tactics/TA0043'
+    translations:
+      fr:
+        name: Reconnaissance
+        description: "L'adversaire cherche \xE0 recueillir des informations qui lui\
+          \ serviront \xE0 pr\xE9parer ses op\xE9rations futures.\n\nLa reconnaissance\
+          \ regroupe les techniques par lesquelles un adversaire collecte, activement\
+          \ ou passivement, des informations utiles au ciblage : d\xE9tails sur l'organisation\
+          \ vis\xE9e, son infrastructure ou son personnel. Ces informations peuvent\
+          \ servir \xE0 d'autres phases du cycle d'attaque, par exemple pour pr\xE9\
+          parer et ex\xE9cuter l'acc\xE8s initial, pour d\xE9limiter et hi\xE9rarchiser\
+          \ les objectifs apr\xE8s compromission, ou pour orienter la suite des travaux\
+          \ de reconnaissance.\nhttps://attack.mitre.org/tactics/TA0043"
   - urn: urn:intuitem:risk:tactic:mitre-attack:ta0042
     ref_id: TA0042
     catalog_urn: urn:intuitem:risk:ttp_catalog:mitre-attack
@@ -115,6 +127,18 @@ objects:
       to help with Defense Evasion.
 
       https://attack.mitre.org/tactics/TA0042'
+    translations:
+      fr:
+        name: "D\xE9veloppement de ressources"
+        description: "L'adversaire cherche \xE0 se doter des ressources n\xE9cessaires\
+          \ \xE0 ses op\xE9rations.\n\nLe d\xE9veloppement de ressources regroupe\
+          \ les techniques par lesquelles un adversaire cr\xE9e, ach\xE8te, compromet\
+          \ ou d\xE9robe des ressources utiles au ciblage : infrastructures, comptes\
+          \ ou capacit\xE9s. Ces ressources peuvent servir \xE0 d'autres phases du\
+          \ cycle d'attaque : des domaines achet\xE9s pour la commande et contr\xF4\
+          le, des comptes de messagerie pour l'hame\xE7onnage lors de l'acc\xE8s initial,\
+          \ ou des certificats de signature de code d\xE9rob\xE9s pour gagner en furtivit\xE9\
+          .\nhttps://attack.mitre.org/tactics/TA0042"
   - urn: urn:intuitem:risk:tactic:mitre-attack:ta0001
     ref_id: TA0001
     catalog_urn: urn:intuitem:risk:ttp_catalog:mitre-attack
@@ -130,6 +154,16 @@ objects:
       due to changing passwords.
 
       https://attack.mitre.org/tactics/TA0001'
+    translations:
+      fr:
+        name: "Acc\xE8s initial"
+        description: "L'adversaire cherche \xE0 p\xE9n\xE9trer dans votre r\xE9seau.\n\
+          \nL'acc\xE8s initial regroupe les techniques qui exploitent diff\xE9rents\
+          \ vecteurs d'entr\xE9e pour prendre pied dans un r\xE9seau, comme l'hame\xE7\
+          onnage cibl\xE9 ou l'exploitation de faiblesses sur des serveurs web expos\xE9\
+          s. Le point d'appui ainsi obtenu peut ouvrir un acc\xE8s durable \u2014\
+          \ comptes valides, services d'acc\xE8s distant \u2014 ou rester \xE9ph\xE9\
+          m\xE8re, par exemple si les mots de passe sont chang\xE9s.\nhttps://attack.mitre.org/tactics/TA0001"
   - urn: urn:intuitem:risk:tactic:mitre-attack:ta0002
     ref_id: TA0002
     catalog_urn: urn:intuitem:risk:ttp_catalog:mitre-attack
@@ -144,6 +178,17 @@ objects:
       tool to run a PowerShell script that does Remote System Discovery.
 
       https://attack.mitre.org/tactics/TA0002'
+    translations:
+      fr:
+        name: "Ex\xE9cution"
+        description: "L'adversaire cherche \xE0 faire ex\xE9cuter du code malveillant.\n\
+          \nL'ex\xE9cution regroupe les techniques qui aboutissent \xE0 faire tourner,\
+          \ sur un syst\xE8me local ou distant, du code contr\xF4l\xE9 par l'adversaire.\
+          \ Elles sont souvent combin\xE9es \xE0 des techniques d'autres tactiques\
+          \ pour atteindre des objectifs plus larges, comme explorer un r\xE9seau\
+          \ ou d\xE9rober des donn\xE9es. Un adversaire peut par exemple utiliser\
+          \ un outil d'acc\xE8s distant pour lancer un script PowerShell qui d\xE9\
+          couvre les syst\xE8mes distants.\nhttps://attack.mitre.org/tactics/TA0002"
   - urn: urn:intuitem:risk:tactic:mitre-attack:ta0003
     ref_id: TA0003
     catalog_urn: urn:intuitem:risk:ttp_catalog:mitre-attack
@@ -158,6 +203,16 @@ objects:
       as replacing or hijacking legitimate code or adding startup code.
 
       https://attack.mitre.org/tactics/TA0003'
+    translations:
+      fr:
+        name: Persistance
+        description: "L'adversaire cherche \xE0 conserver son point d'appui.\n\nLa\
+          \ persistance regroupe les techniques employ\xE9es pour conserver un acc\xE8\
+          s aux syst\xE8mes malgr\xE9 les red\xE9marrages, les changements d'identifiants\
+          \ et les autres interruptions susceptibles de le couper. Elle recouvre tout\
+          \ acc\xE8s, action ou modification de configuration permettant de se maintenir\
+          \ : remplacement ou d\xE9tournement de code l\xE9gitime, ajout de code au\
+          \ d\xE9marrage, etc.\nhttps://attack.mitre.org/tactics/TA0003"
   - urn: urn:intuitem:risk:tactic:mitre-attack:ta0004
     ref_id: TA0004
     catalog_urn: urn:intuitem:risk:ttp_catalog:mitre-attack
@@ -173,6 +228,22 @@ objects:
       \ specific function\n\nThese techniques often overlap with Persistence techniques,\
       \ as OS features that let an adversary persist can execute in an elevated context.\n\
       https://attack.mitre.org/tactics/TA0004"
+    translations:
+      fr:
+        name: "\xC9l\xE9vation de privil\xE8ges"
+        description: "L'adversaire cherche \xE0 obtenir des droits plus \xE9lev\xE9\
+          s.\n\nL'\xE9l\xE9vation de privil\xE8ges regroupe les techniques permettant\
+          \ d'obtenir des droits sup\xE9rieurs sur un syst\xE8me ou un r\xE9seau.\
+          \ Un adversaire peut souvent entrer et progresser avec un acc\xE8s non privil\xE9\
+          gi\xE9, mais a besoin de droits \xE9tendus pour mener ses objectifs \xE0\
+          \ terme. Les voies habituelles sont l'exploitation de faiblesses, d'erreurs\
+          \ de configuration et de vuln\xE9rabilit\xE9s. Exemples d'acc\xE8s privil\xE9\
+          gi\xE9 :\n\n* niveau SYSTEM/root\n* administrateur local\n* compte utilisateur\
+          \ dot\xE9 de droits proches de l'administration\n* comptes utilisateurs\
+          \ ayant acc\xE8s \xE0 un syst\xE8me pr\xE9cis ou exer\xE7ant une fonction\
+          \ pr\xE9cise\n\nCes techniques recoupent souvent celles de persistance,\
+          \ car les fonctions du syst\xE8me d'exploitation qui permettent de se maintenir\
+          \ peuvent s'ex\xE9cuter dans un contexte privil\xE9gi\xE9.\nhttps://attack.mitre.org/tactics/TA0004"
   - urn: urn:intuitem:risk:tactic:mitre-attack:ta0005
     ref_id: TA0005
     catalog_urn: urn:intuitem:risk:ttp_catalog:mitre-attack
@@ -189,6 +260,18 @@ objects:
       benign activity while leaving defensive systems intact.
 
       https://attack.mitre.org/tactics/TA0005'
+    translations:
+      fr:
+        name: "Furtivit\xE9"
+        description: "L'adversaire cherche \xE0 dissimuler ses actions en se fondant\
+          \ dans l'activit\xE9 normale.\n\nLa furtivit\xE9 regroupe les techniques\
+          \ qui r\xE9duisent le risque de d\xE9tection en imitant l'activit\xE9 l\xE9\
+          gitime ou en limitant les signaux observables. Elles se caract\xE9risent\
+          \ par des comportements de dissimulation \u2014 \xE9viter, brouiller ou\
+          \ imiter les op\xE9rations normales \u2014 sans modifier les mesures de\
+          \ s\xE9curit\xE9 ni alt\xE9rer les flux de collecte et de surveillance.\
+          \ L'objectif est de rester indiscernable de l'activit\xE9 l\xE9gitime tout\
+          \ en laissant les syst\xE8mes de d\xE9fense intacts.\nhttps://attack.mitre.org/tactics/TA0005"
   - urn: urn:intuitem:risk:tactic:mitre-attack:ta0112
     ref_id: TA0112
     catalog_urn: urn:intuitem:risk:ttp_catalog:mitre-attack
@@ -200,6 +283,18 @@ objects:
       \ mechanisms. These techniques are characterized by direct interference with\
       \ defensive systems. The goal is to reduce defenders\u2019 ability to detect,\
       \ interpret, or respond to adversary activity.\nhttps://attack.mitre.org/tactics/TA0112"
+    translations:
+      fr:
+        name: "Neutralisation des d\xE9fenses"
+        description: "L'adversaire cherche \xE0 casser les m\xE9canismes de s\xE9\
+          curit\xE9, les cha\xEEnes de traitement et l'outillage, afin que les d\xE9\
+          fenseurs ne puissent plus voir ce qui se passe ni s'y fier.\n\nLa neutralisation\
+          \ des d\xE9fenses regroupe les techniques qui d\xE9gradent, d\xE9sactivent\
+          \ ou minent l'efficacit\xE9 et la fiabilit\xE9 des mesures de s\xE9curit\xE9\
+          \ et des dispositifs de surveillance. Elles se caract\xE9risent par une\
+          \ interf\xE9rence directe avec les syst\xE8mes de d\xE9fense. L'objectif\
+          \ est de r\xE9duire la capacit\xE9 des d\xE9fenseurs \xE0 d\xE9tecter, interpr\xE9\
+          ter ou traiter l'activit\xE9 de l'adversaire.\nhttps://attack.mitre.org/tactics/TA0112"
   - urn: urn:intuitem:risk:tactic:mitre-attack:ta0006
     ref_id: TA0006
     catalog_urn: urn:intuitem:risk:ttp_catalog:mitre-attack
@@ -214,6 +309,16 @@ objects:
       more accounts to help achieve their goals.
 
       https://attack.mitre.org/tactics/TA0006'
+    translations:
+      fr:
+        name: "Acc\xE8s aux identifiants"
+        description: "L'adversaire cherche \xE0 d\xE9rober des noms de comptes et\
+          \ des mots de passe.\n\nL'acc\xE8s aux identifiants regroupe les techniques\
+          \ de vol d'identifiants tels que noms de comptes et mots de passe, par exemple\
+          \ l'enregistrement des frappes clavier ou l'extraction d'identifiants. Se\
+          \ servir d'identifiants l\xE9gitimes permet \xE0 l'adversaire d'acc\xE9\
+          der aux syst\xE8mes, de se rendre plus difficile \xE0 d\xE9tecter et de\
+          \ cr\xE9er d'autres comptes au service de ses objectifs.\nhttps://attack.mitre.org/tactics/TA0006"
   - urn: urn:intuitem:risk:tactic:mitre-attack:ta0007
     ref_id: TA0007
     catalog_urn: urn:intuitem:risk:ttp_catalog:mitre-attack
@@ -226,6 +331,16 @@ objects:
       \ in order to discover how it could benefit their current objective. Native\
       \ operating system tools are often used toward this post-compromise information-gathering\
       \ objective.\nhttps://attack.mitre.org/tactics/TA0007"
+    translations:
+      fr:
+        name: "D\xE9couverte"
+        description: "L'adversaire cherche \xE0 comprendre votre environnement.\n\n\
+          La d\xE9couverte regroupe les techniques permettant d'acqu\xE9rir des connaissances\
+          \ sur le syst\xE8me et le r\xE9seau interne. Elles aident l'adversaire \xE0\
+          \ observer l'environnement et \xE0 s'orienter avant de d\xE9cider comment\
+          \ agir, et \xE0 explorer ce qu'il contr\xF4le et ce qui entoure son point\
+          \ d'entr\xE9e pour en tirer parti. Les outils natifs du syst\xE8me d'exploitation\
+          \ sont souvent employ\xE9s \xE0 cette fin apr\xE8s compromission.\nhttps://attack.mitre.org/tactics/TA0007"
   - urn: urn:intuitem:risk:tactic:mitre-attack:ta0008
     ref_id: TA0008
     catalog_urn: urn:intuitem:risk:ttp_catalog:mitre-attack
@@ -241,6 +356,18 @@ objects:
       with native network and operating system tools, which may be stealthier.
 
       https://attack.mitre.org/tactics/TA0008'
+    translations:
+      fr:
+        name: "D\xE9placement lat\xE9ral"
+        description: "L'adversaire cherche \xE0 circuler dans votre environnement.\n\
+          \nLe d\xE9placement lat\xE9ral regroupe les techniques permettant d'atteindre\
+          \ et de contr\xF4ler des syst\xE8mes distants sur un r\xE9seau. Mener l'objectif\
+          \ principal \xE0 terme suppose souvent d'explorer le r\xE9seau pour trouver\
+          \ la cible, puis de rebondir de syst\xE8me en syst\xE8me et de compte en\
+          \ compte pour l'atteindre. L'adversaire peut installer ses propres outils\
+          \ d'acc\xE8s distant, ou utiliser des identifiants l\xE9gitimes avec les\
+          \ outils natifs du r\xE9seau et du syst\xE8me d'exploitation, ce qui est\
+          \ plus discret.\nhttps://attack.mitre.org/tactics/TA0008"
   - urn: urn:intuitem:risk:tactic:mitre-attack:ta0009
     ref_id: TA0009
     catalog_urn: urn:intuitem:risk:ttp_catalog:mitre-attack
@@ -257,6 +384,18 @@ objects:
       capturing screenshots and keyboard input.
 
       https://attack.mitre.org/tactics/TA0009'
+    translations:
+      fr:
+        name: Collecte
+        description: "L'adversaire cherche \xE0 rassembler les donn\xE9es utiles \xE0\
+          \ son objectif.\n\nLa collecte regroupe les techniques de rassemblement\
+          \ d'informations, ainsi que les sources dont elles proviennent, pertinentes\
+          \ pour mener les objectifs de l'adversaire \xE0 terme. Apr\xE8s la collecte,\
+          \ l'\xE9tape suivante consiste g\xE9n\xE9ralement \xE0 exfiltrer les donn\xE9\
+          es ou \xE0 les exploiter pour mieux conna\xEEtre l'environnement vis\xE9\
+          . Les sources habituelles sont les disques, les navigateurs, l'audio, la\
+          \ vid\xE9o et la messagerie ; les m\xE9thodes habituelles, la capture d'\xE9\
+          cran et l'enregistrement des frappes clavier.\nhttps://attack.mitre.org/tactics/TA0009"
   - urn: urn:intuitem:risk:tactic:mitre-attack:ta0011
     ref_id: TA0011
     catalog_urn: urn:intuitem:risk:ttp_catalog:mitre-attack
@@ -268,6 +407,17 @@ objects:
       \ There are many ways an adversary can establish command and control with various\
       \ levels of stealth depending on the victim\u2019s network structure and defenses.\n\
       https://attack.mitre.org/tactics/TA0011"
+    translations:
+      fr:
+        name: "Commande et contr\xF4le"
+        description: "L'adversaire cherche \xE0 communiquer avec les syst\xE8mes compromis\
+          \ pour les piloter.\n\nLa commande et contr\xF4le regroupe les techniques\
+          \ permettant de communiquer avec les syst\xE8mes sous contr\xF4le de l'adversaire\
+          \ au sein du r\xE9seau de la victime. Celui-ci cherche g\xE9n\xE9ralement\
+          \ \xE0 imiter le trafic normal et attendu pour \xE9viter la d\xE9tection.\
+          \ Il existe de nombreuses fa\xE7ons d'\xE9tablir une commande et contr\xF4\
+          le, plus ou moins discr\xE8tes selon la structure et les d\xE9fenses du\
+          \ r\xE9seau vis\xE9.\nhttps://attack.mitre.org/tactics/TA0011"
   - urn: urn:intuitem:risk:tactic:mitre-attack:ta0010
     ref_id: TA0010
     catalog_urn: urn:intuitem:risk:ttp_catalog:mitre-attack
@@ -279,6 +429,16 @@ objects:
       \ for getting data out of a target network typically include transferring it\
       \ over their command and control channel or an alternate channel and may also\
       \ include putting size limits on the transmission.\nhttps://attack.mitre.org/tactics/TA0010"
+    translations:
+      fr:
+        name: Exfiltration
+        description: "L'adversaire cherche \xE0 d\xE9rober des donn\xE9es.\n\nL'exfiltration\
+          \ regroupe les techniques permettant de sortir des donn\xE9es de votre r\xE9\
+          seau. Une fois les donn\xE9es collect\xE9es, l'adversaire les conditionne\
+          \ souvent pour \xE9viter la d\xE9tection lors de leur extraction, par exemple\
+          \ par compression et chiffrement. Les techniques de sortie passent g\xE9\
+          n\xE9ralement par le canal de commande et contr\xF4le ou par un canal secondaire,\
+          \ et peuvent inclure une limitation de la taille des transmissions.\nhttps://attack.mitre.org/tactics/TA0010"
   - urn: urn:intuitem:risk:tactic:mitre-attack:ta0040
     ref_id: TA0040
     catalog_urn: urn:intuitem:risk:ttp_catalog:mitre-attack
@@ -291,6 +451,18 @@ objects:
       \ may have been altered to benefit the adversaries\u2019 goals. These techniques\
       \ might be used by adversaries to follow through on their end goal or to provide\
       \ cover for a confidentiality breach.\nhttps://attack.mitre.org/tactics/TA0040"
+    translations:
+      fr:
+        name: Impact
+        description: "L'adversaire cherche \xE0 manipuler, interrompre ou d\xE9truire\
+          \ vos syst\xE8mes et vos donn\xE9es.\n\nL'impact regroupe les techniques\
+          \ employ\xE9es pour compromettre la disponibilit\xE9 ou l'int\xE9grit\xE9\
+          \ en manipulant les processus m\xE9tier et op\xE9rationnels, notamment la\
+          \ destruction ou l'alt\xE9ration de donn\xE9es. Dans certains cas, les processus\
+          \ m\xE9tier peuvent sembler normaux tout en ayant \xE9t\xE9 modifi\xE9s\
+          \ au profit de l'adversaire. Ces techniques peuvent servir \xE0 mener l'objectif\
+          \ final \xE0 terme ou \xE0 masquer une atteinte \xE0 la confidentialit\xE9\
+          .\nhttps://attack.mitre.org/tactics/TA0040"
   reference_controls:
   - urn: urn:intuitem:risk:function:mitre-attack:m1013
     ref_id: M1013

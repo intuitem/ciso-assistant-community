@@ -33,8 +33,9 @@
 		href?: (cell: MatrixCell) => string;
 		/** Selection mode: cells become toggles instead of links. */
 		selectable?: boolean;
+		/** Keys are `techniqueId:tacticId` — the same technique in two columns is two cells. */
 		selected?: Set<string>;
-		onToggle?: (cell: MatrixCell) => void;
+		onToggle?: (cell: MatrixCell, column: MatrixColumn) => void;
 	}
 
 	let {
@@ -146,8 +147,10 @@
 		<div class="flex items-start gap-2 min-w-max">
 			{#each grid as { column, items } (column.ref_id)}
 				<div class="flex w-56 shrink-0 flex-col gap-1">
+					<!-- fixed height: a name that wraps to two lines (common in French)
+					     would otherwise push its column's cells out of alignment -->
 					<div
-						class="rounded-t bg-surface-200-800 px-2 py-2 text-center"
+						class="flex min-h-[4.25rem] flex-col items-center justify-center rounded-t bg-surface-200-800 px-2 py-2 text-center"
 						title={column.description ?? column.name}
 					>
 						<p class="text-sm font-semibold leading-tight">{column.name}</p>
@@ -160,7 +163,7 @@
 						{@const isOpen = expanded[cellKey] ?? false}
 						<div
 							class="rounded border px-2 py-1 text-xs hover:border-primary-500 {selectable &&
-							selected.has(cell.id)
+							selected.has(`${cell.id}:${column.id}`)
 								? 'border-primary-500 bg-primary-500/15'
 								: 'border-surface-300-700 bg-surface-50-950'}"
 						>
@@ -169,8 +172,8 @@
 									<button
 										type="button"
 										class="grow text-left leading-snug"
-										aria-pressed={selected.has(cell.id)}
-										onclick={() => onToggle?.(cell)}
+										aria-pressed={selected.has(`${cell.id}:${column.id}`)}
+										onclick={() => onToggle?.(cell, column)}
 									>
 										{cell.name}
 									</button>
@@ -196,7 +199,7 @@
 								<ul class="mt-1 space-y-0.5 border-t border-surface-300-700 pt-1 pl-2">
 									{#each children as child (child.id)}
 										<li
-											class="leading-snug {selectable && selected.has(child.id)
+											class="leading-snug {selectable && selected.has(`${child.id}:${column.id}`)
 												? 'rounded bg-primary-500/15 px-1 font-medium'
 												: ''}"
 										>
@@ -204,8 +207,8 @@
 												<button
 													type="button"
 													class="w-full text-left"
-													aria-pressed={selected.has(child.id)}
-													onclick={() => onToggle?.(child)}
+													aria-pressed={selected.has(`${child.id}:${column.id}`)}
+													onclick={() => onToggle?.(child, column)}
 												>
 													{child.name}
 												</button>

@@ -1,0 +1,58 @@
+<script lang="ts">
+	import { Handle, Position } from '@xyflow/svelte';
+	import { getContext } from 'svelte';
+
+	interface Props {
+		id: string;
+		data: { label: string; refId: string };
+	}
+
+	let { id, data }: Props = $props();
+
+	const editor = getContext<{
+		deleteNode: (id: string) => void;
+		readonly: boolean;
+	}>('threatModelEditor');
+
+	let hovered = $state(false);
+</script>
+
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div
+	class="relative rounded-base border-[1.5px] border-surface-300-700 bg-surface-50-950 px-3 py-2 min-w-[150px] max-w-[190px] select-none"
+	onmouseenter={() => (hovered = true)}
+	onmouseleave={() => (hovered = false)}
+>
+	<div class="absolute left-0 top-0 bottom-0 w-1 rounded-l-base bg-primary-400"></div>
+
+	<p class="text-[10px] font-mono text-surface-600-400 leading-none">{data.refId}</p>
+	<p class="text-[11px] font-semibold leading-tight text-surface-900-100 text-wrap mt-1">
+		{data.label}
+	</p>
+
+	{#if hovered && !editor?.readonly}
+		<button
+			type="button"
+			aria-label="Remove from graph"
+			class="nopan nodrag absolute -top-2 -left-2 w-4 h-4 rounded-full bg-error-500 text-white text-[8px] flex items-center justify-center hover:bg-error-600 cursor-pointer"
+			onclick={() => editor?.deleteNode(id)}
+		>
+			✕
+		</button>
+	{/if}
+
+	<Handle
+		type="target"
+		position={Position.Left}
+		class={editor?.readonly
+			? '!w-0 !h-0 !border-0 !bg-transparent !pointer-events-none'
+			: '!w-3 !h-3 !bg-surface-50-950 !border-2 !border-surface-600-400'}
+	/>
+	<Handle
+		type="source"
+		position={Position.Right}
+		class={editor?.readonly
+			? '!w-0 !h-0 !border-0 !bg-transparent !pointer-events-none'
+			: '!w-3 !h-3 !bg-surface-50-950 !border-2 !border-surface-600-400'}
+	/>
+</div>

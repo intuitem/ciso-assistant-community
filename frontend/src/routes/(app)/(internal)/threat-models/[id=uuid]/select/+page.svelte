@@ -2,6 +2,7 @@
 	import TTPMatrix from '$lib/components/TTPMatrix/TTPMatrix.svelte';
 	import type { MatrixCell } from '$lib/components/TTPMatrix/TTPMatrix.svelte';
 	import { m } from '$paraglide/messages';
+	import ViewSwitch from '../ViewSwitch.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -22,9 +23,11 @@
 		selected.size !== saved.size || [...selected].some((id) => !saved.has(id))
 	);
 
-	function toggle(cell: MatrixCell) {
+	// keyed per cell: the same technique in two tactic columns is two selections
+	function toggle(cell: MatrixCell, column: { id: string }) {
+		const key = `${cell.id}:${column.id}`;
 		const next = new Set(selected);
-		next.has(cell.id) ? next.delete(cell.id) : next.add(cell.id);
+		next.has(key) ? next.delete(key) : next.add(key);
 		selected = next;
 	}
 
@@ -34,13 +37,18 @@
 		const res = await fetch(`/threat-models/${threatModel.id}/set-techniques`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ technique_ids: [...selected] })
+			body: JSON.stringify({
+				selections: [...selected].map((key) => {
+					const [technique, tactic] = key.split(':');
+					return { technique, tactic };
+				})
+			})
 		});
 		const payload = await res.json();
 		if (res.ok) {
 			saved = new Set(selected);
 		} else {
-			errorMessage = (payload.errors ?? [m.errorOccurred()]).join(' ');
+			errorMessage = (payload.errors ?? [m.anErrorOccurred()]).join(' ');
 		}
 		saving = false;
 	}
@@ -53,11 +61,12 @@
 			<p class="text-sm text-surface-600-400">{matrix.catalog.name}</p>
 		</div>
 		<div class="flex items-center gap-3">
+			<ViewSwitch threatModelId={threatModel.id} active="select" />
 			<span class="text-sm text-surface-600-400">
 				{selected.size}
 				{m.techniquesSelected()}
 			</span>
-			<a class="btn preset-tonal-surface" href="/threat-models/{threatModel.id}">{m.cancel()}</a>
+			<a class="btn preset-tonal-surface" href="/threat-models/{threatModel.id}">{m.details()}</a>
 			<button
 				type="button"
 				class="btn preset-filled-primary-500"

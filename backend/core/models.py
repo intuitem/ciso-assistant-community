@@ -2761,6 +2761,9 @@ class ThreatModel(NameDescriptionMixin, FolderMixin):
         related_name="threat_models",
         verbose_name=_("TTP catalog"),
     )
+    graph_columns = models.JSONField(
+        default=dict, blank=True, help_text="Lane positions and sizes in the editor"
+    )
 
     fields_to_check = ["name"]
 
@@ -2779,6 +2782,16 @@ class ThreatModelNode(AbstractBaseModel, FolderMixin):
         on_delete=models.CASCADE,
         related_name="threat_model_nodes",
         verbose_name=_("Technique"),
+    )
+    # which lane the analyst dropped it in: 145 of 697 techniques sit in >1 tactic,
+    # so this is stored, not derived
+    tactic = models.ForeignKey(
+        Tactic,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="threat_model_nodes",
+        verbose_name=_("Tactic"),
     )
     label = models.CharField(max_length=255, blank=True, verbose_name=_("Label"))
     position_x = models.FloatField(default=0)

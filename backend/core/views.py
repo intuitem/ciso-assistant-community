@@ -2143,6 +2143,32 @@ class TTPCatalogViewSet(BaseModelViewSet):
         return Response(build_catalog_matrix(self.get_object()))
 
 
+def validate_placements(threat_model, placements) -> list[str]:
+    """Check (technique, tactic) pairs against the model's catalog."""
+    technique_ids = {technique_id for technique_id, _ in placements}
+    in_catalog = set(
+        Technique.objects.filter(
+            id__in=technique_ids, catalog=threat_model.catalog
+        ).values_list("id", flat=True)
+    )
+
+    allowed = defaultdict(set)
+    for technique_id, tactic_id in Technique.tactics.through.objects.filter(
+        technique_id__in=in_catalog
+    ).values_list("technique_id", "tactic_id"):
+        allowed[technique_id].add(tactic_id)
+
+    errors = []
+    for technique_id, tactic_id in sorted(placements):
+        if technique_id not in in_catalog:
+            errors.append(f"Technique {technique_id} is outside the model's catalog.")
+        elif tactic_id not in allowed[technique_id]:
+            errors.append(
+                f"Technique {technique_id} does not belong to tactic {tactic_id}."
+            )
+    return errors
+
+
 class ThreatModelViewSet(BaseModelViewSet):
     """
     API endpoint that allows threat models to be viewed or edited.
@@ -2156,66 +2182,210 @@ class ThreatModelViewSet(BaseModelViewSet):
     def matrix(self, request, pk):
         threat_model = self.get_object()
         payload = build_catalog_matrix(threat_model.catalog)
+        # a technique shown in several tactic columns is selected per cell, not
+        # globally: "T1078 for persistence" is a different claim from
+        # "T1078 for privilege escalation"
         payload["selected"] = [
-            str(technique_id)
-            for technique_id in threat_model.nodes.values_list(
-                "technique_id", flat=True
+            f"{technique_id}:{tactic_id}"
+            for technique_id, tactic_id in threat_model.nodes.values_list(
+                "technique_id", "tactic_id"
             )
+            if tactic_id
         ]
         return Response(payload)
+
+    @action(detail=True, name="Get the graph")
+    def graph(self, request, pk):
+        threat_model = self.get_object()
+        nodes = threat_model.nodes.select_related("technique", "tactic")
+        return Response(
+            {
+                "tactics": [
+                    {
+                        "id": tactic.id,
+                        "ref_id": tactic.ref_id,
+                        "name": tactic.get_name_translated,
+                    }
+                    for tactic in threat_model.catalog.tactics.order_by(
+                        F("order_id").asc(nulls_last=True)
+                    )
+                ],
+                "nodes": [
+                    {
+                        "id": f"{node.technique_id}:{node.tactic_id}",
+                        "technique": node.technique_id,
+                        "ref_id": node.technique.ref_id,
+                        "name": node.technique.get_name_translated,
+                        "tactic": node.tactic_id,
+                        "label": node.label,
+                        "position_x": node.position_x,
+                        "position_y": node.position_y,
+                    }
+                    for node in nodes
+                    if node.tactic_id
+                ],
+                "edges": [
+                    {
+                        "source": f"{edge.source.technique_id}:{edge.source.tactic_id}",
+                        "target": f"{edge.target.technique_id}:{edge.target.tactic_id}",
+                    }
+                    for edge in threat_model.edges.select_related("source", "target")
+                    if edge.source.tactic_id and edge.target.tactic_id
+                ],
+                "graph_columns": threat_model.graph_columns or {},
+            }
+        )
+
+    @action(detail=True, methods=["post"], url_path="save-graph")
+    def save_graph(self, request, pk):
+        threat_model = self.get_object()
+        raw_nodes = request.data.get("nodes")
+        raw_edges = request.data.get("edges", [])
+        if not isinstance(raw_nodes, list) or not isinstance(raw_edges, list):
+            return Response(
+                {"errors": ["nodes and edges must be arrays."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        errors = []
+        parsed = {}
+
+        def parse_cell(value):
+            technique_id, _, tactic_id = str(value).partition(":")
+            return uuid.UUID(technique_id), uuid.UUID(tactic_id)
+
+        for index, node in enumerate(raw_nodes):
+            if not isinstance(node, dict):
+                errors.append(f"Node {index}: invalid payload.")
+                continue
+            try:
+                key = parse_cell(node.get("id"))
+            except ValueError, AttributeError:
+                errors.append(f"Node {index}: invalid cell id.")
+                continue
+            parsed[key] = {
+                "label": str(node.get("label") or "")[:255],
+                "position_x": node.get("position_x") or 0,
+                "position_y": node.get("position_y") or 0,
+            }
+
+        errors.extend(validate_placements(threat_model, set(parsed)))
+
+        edges = []
+        for index, edge in enumerate(raw_edges):
+            if not isinstance(edge, dict):
+                errors.append(f"Edge {index}: invalid payload.")
+                continue
+            try:
+                source = parse_cell(edge.get("source"))
+                target = parse_cell(edge.get("target"))
+            except ValueError, AttributeError:
+                errors.append(f"Edge {index}: invalid endpoint id.")
+                continue
+            if source == target:
+                errors.append(f"Edge {index}: an edge cannot loop on a single node.")
+                continue
+            if source not in parsed or target not in parsed:
+                errors.append(f"Edge {index}: endpoint is not on the graph.")
+                continue
+            edges.append((source, target))
+
+        if errors:
+            return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            existing = {
+                (node.technique_id, node.tactic_id): node
+                for node in threat_model.nodes.select_for_update()
+            }
+            for key, node in existing.items():
+                if key not in parsed:
+                    node.delete()
+
+            for key, payload in parsed.items():
+                technique_id, tactic_id = key
+                node = existing.get(key)
+                if node is None:
+                    existing[key] = ThreatModelNode.objects.create(
+                        threat_model=threat_model,
+                        technique_id=technique_id,
+                        tactic_id=tactic_id,
+                        **payload,
+                    )
+                    continue
+                for field, value in payload.items():
+                    setattr(node, field, value)
+                node.save()
+
+            threat_model.edges.all().delete()
+            ThreatModelEdge.objects.bulk_create(
+                [
+                    ThreatModelEdge(
+                        threat_model=threat_model,
+                        source=existing[source],
+                        target=existing[target],
+                        folder=threat_model.folder,
+                    )
+                    for source, target in dict.fromkeys(edges)
+                ]
+            )
+
+            threat_model.graph_columns = request.data.get("graph_columns") or {}
+            threat_model.save()
+
+        return Response({"nodes": len(parsed), "edges": len(set(edges))})
 
     @action(detail=True, methods=["post"], url_path="set-techniques")
     def set_techniques(self, request, pk):
         threat_model = self.get_object()
-        raw = request.data.get("technique_ids")
+        raw = request.data.get("selections")
         if not isinstance(raw, list):
             return Response(
-                {"errors": ["technique_ids must be an array."]},
+                {"errors": ["selections must be an array."]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        try:
-            requested = {uuid.UUID(str(value)) for value in raw}
-        except ValueError, AttributeError:
-            return Response(
-                {"errors": ["technique_ids must contain UUIDs."]},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        in_catalog = set(
-            Technique.objects.filter(
-                id__in=requested, catalog=threat_model.catalog
-            ).values_list("id", flat=True)
-        )
-        foreign = requested - in_catalog
-        if foreign:
-            refs = sorted(
-                Technique.objects.filter(id__in=foreign).values_list(
-                    "ref_id", flat=True
+        requested = set()
+        for index, item in enumerate(raw):
+            if not isinstance(item, dict):
+                return Response(
+                    {"errors": [f"Selection {index}: invalid payload."]},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
-            )
-            return Response(
-                {
-                    "errors": [
-                        f"Techniques outside the model's catalog: {', '.join(refs) or 'unknown'}"
-                    ]
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            try:
+                requested.add(
+                    (
+                        uuid.UUID(str(item.get("technique"))),
+                        uuid.UUID(str(item.get("tactic"))),
+                    )
+                )
+            except ValueError, AttributeError:
+                return Response(
+                    {"errors": [f"Selection {index}: invalid technique or tactic id."]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        errors = validate_placements(threat_model, requested)
+        if errors:
+            return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
 
         with transaction.atomic():
-            current = dict(threat_model.nodes.values_list("technique_id", "id"))
-            threat_model.nodes.filter(
-                technique_id__in=set(current) - in_catalog
-            ).delete()
+            current = {
+                (node.technique_id, node.tactic_id): node
+                for node in threat_model.nodes.all()
+            }
+            for key, node in current.items():
+                if key not in requested:
+                    node.delete()
             ThreatModelNode.objects.bulk_create(
                 [
                     ThreatModelNode(
                         threat_model=threat_model,
                         technique_id=technique_id,
+                        tactic_id=tactic_id,
                         folder=threat_model.folder,
                     )
-                    for technique_id in in_catalog - set(current)
+                    for technique_id, tactic_id in requested - set(current)
                 ]
             )
 
