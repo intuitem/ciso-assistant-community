@@ -51,8 +51,7 @@ class ThreatModelViewSet(BaseModelViewSet):
     API endpoint that allows threat models to be viewed or edited.
     """
 
-    # both are POST, which RBACPermissions maps to add_*; they mutate an
-    # existing model, so they belong to change_*
+    # POST maps to add_* by default, but both mutate an existing model
     permission_overrides = {
         "save_graph": "change_threatmodel",
         "set_techniques": "change_threatmodel",
@@ -66,9 +65,7 @@ class ThreatModelViewSet(BaseModelViewSet):
     def matrix(self, request, pk):
         threat_model = self.get_object()
         payload = build_catalog_matrix(threat_model.catalog)
-        # a technique shown in several tactic columns is selected per cell, not
-        # globally: "T1078 for persistence" is a different claim from
-        # "T1078 for privilege escalation"
+        # per cell, not per technique: a tactic changes what the technique means
         payload["selected"] = [
             f"{technique_id}:{tactic_id}"
             for technique_id, tactic_id in threat_model.nodes.filter(
@@ -108,7 +105,7 @@ class ThreatModelViewSet(BaseModelViewSet):
                             if node.technique_id
                             else None
                         ),
-                        # a sub-technique name alone ("Employee Names") is meaningless
+                        # a sub-technique name alone is meaningless
                         "parent_name": (
                             node.technique.parent.get_name_translated
                             if node.technique_id and node.technique.parent_id
@@ -163,7 +160,7 @@ class ThreatModelViewSet(BaseModelViewSet):
                 errors.append(f"Node {index}: invalid payload.")
                 continue
             try:
-                # the editor mints the row's UUID on drop, so there are no temp ids
+                # the editor mints the row's UUID on drop
                 node_id = as_uuid(node.get("id"))
             except ValueError, AttributeError:
                 errors.append(f"Node {index}: invalid node id.")
@@ -191,7 +188,7 @@ class ThreatModelViewSet(BaseModelViewSet):
                 if operator not in ThreatModelNode.Operator.values:
                     errors.append(f"Node {index}: operator must be AND or OR.")
                     continue
-                # an operator sits in its target's lane so it moves with the columns
+                # operators sit in their target's lane
                 try:
                     tactic_id = (
                         as_uuid(node.get("tactic")) if node.get("tactic") else None
@@ -284,7 +281,7 @@ class ThreatModelViewSet(BaseModelViewSet):
                 ]
             )
 
-            # lane x is derived from the visible set, so only sizes are persisted
+            # lane x is derived; only sizes are persisted
             threat_model.graph_columns = request.data.get("graph_columns") or {}
             threat_model.save()
 
@@ -325,8 +322,7 @@ class ThreatModelViewSet(BaseModelViewSet):
             return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
 
         with transaction.atomic():
-            # only technique nodes are addressable from the matrix; operator and
-            # custom nodes are left alone
+            # the matrix only addresses technique nodes
             technique_nodes = threat_model.nodes.filter(
                 kind=ThreatModelNode.Kind.TECHNIQUE
             )

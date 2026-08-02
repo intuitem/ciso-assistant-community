@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0186_remove_tactic_catalog_remove_tactic_folder_and_more"),
+        ("core", "0180_securityexception_evidences"),
         ("iam", "0023_alter_folder_content_type"),
         ("sec_intel", "0001_initial"),
     ]

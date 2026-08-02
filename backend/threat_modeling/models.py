@@ -26,6 +26,12 @@ class ThreatModel(NameDescriptionMixin, FolderMixin):
         related_name="threat_models",
         verbose_name=_("Risk scenarios"),
     )
+    quantitative_risk_scenarios = models.ManyToManyField(
+        "crq.QuantitativeRiskScenario",
+        blank=True,
+        related_name="threat_models",
+        verbose_name=_("Quantitative risk scenarios"),
+    )
 
     fields_to_check = ["name"]
 
@@ -38,8 +44,7 @@ class ThreatModel(NameDescriptionMixin, FolderMixin):
 class ThreatModelNode(AbstractBaseModel, FolderMixin):
     class Kind(models.TextChoices):
         TECHNIQUE = "technique", _("Technique")
-        # deterministic junction: Noisy-OR cannot express conjunction, so AND
-        # needs an explicit variable (BN "divorcing")
+        # explicit variable: Noisy-OR cannot express conjunction
         OPERATOR = "operator", _("Operator")
         CUSTOM = "custom", _("Custom")
 
@@ -64,8 +69,7 @@ class ThreatModelNode(AbstractBaseModel, FolderMixin):
         related_name="threat_model_nodes",
         verbose_name=_("Technique"),
     )
-    # which lane the analyst dropped it in: 145 of 697 techniques sit in >1 tactic,
-    # so this is stored, not derived
+    # stored, not derived: 145 of 697 techniques sit in >1 tactic
     tactic = models.ForeignKey(
         Tactic,
         on_delete=models.SET_NULL,

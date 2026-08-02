@@ -92,8 +92,7 @@
 
 	const { screenToFlowPosition } = useSvelteFlow();
 
-	// `techniqueId:tacticId` keys, so the palette can show a technique as placed
-	// in one tactic while still offering it in another
+	// `techniqueId:tacticId`: placed in one tactic, still offered in another
 	const placedIds = $derived(
 		new Set(
 			nodes
@@ -162,8 +161,7 @@
 		});
 	}
 
-	// Lane x is derived, never stored: users can resize a lane but never move one,
-	// so hiding empty tactics just re-runs this and the columns close up.
+	// lane x is derived, never stored: lanes resize but never move
 	function layoutLanes(current: Node[], hidden: Set<string>): Node[] {
 		let x = 0;
 		const positions = new Map<string, number>();
@@ -173,8 +171,7 @@
 			positions.set(id, x);
 			x += laneWidth(id) + LANE_GAP_X;
 		}
-		// must return the SAME array when nothing moved: the caller runs inside an
-		// effect that writes `nodes`, and a fresh reference would loop forever
+		// same reference when nothing moved: the caller's effect writes `nodes`
 		let moved = false;
 		const next = current.map((node) => {
 			if (node.type !== 'lane') return node;
@@ -222,8 +219,7 @@
 
 	initGraph();
 
-	// update the badge in place — rebuilding lane nodes would discard whatever the
-	// analyst resized or dragged them to
+	// in place: rebuilding lane nodes would discard analyst resizing
 	function refreshLaneCounts() {
 		nodes = nodes.map((node) =>
 			node.type === 'lane'
@@ -232,13 +228,9 @@
 		);
 	}
 
-	// Empty tactics are noise: a model touching 5 of 15 tactics should show 5
-	// columns. Hidden rather than removed, so geometry survives the toggle — and
-	// a drag reveals everything so you can always reach an empty lane.
-	//
-	// This derives a STRING, not a Set. The effect below writes `nodes`, which
-	// re-runs this; a fresh Set is a new reference every time and would loop
-	// forever, while an unchanged string compares equal and stops the cascade.
+	// hidden, not removed, so geometry survives the toggle; a drag reveals all.
+	// a STRING, not a Set: the effect below writes `nodes` and re-runs this, and a
+	// fresh reference would loop forever
 	const hiddenLaneKey = $derived(
 		showAllLanes || dragTactics
 			? ''
@@ -340,9 +332,8 @@
 		dirty = true;
 	}
 
-	// Attack Flow semantics: AND cannot be expressed by a per-edge parameter, so a
-	// junction becomes a real node. Inserted automatically on the second incoming
-	// edge and removed when it drops back to one, so the interaction stays one click.
+	// AND cannot be a per-edge parameter, so a junction is a real node.
+	// auto-inserted on the second incoming edge to keep it one click.
 	async function reconcileOperator(targetId: string) {
 		const target = nodes.find((node) => node.id === targetId);
 		if (!target || target.type === 'operator') return;
@@ -480,9 +471,8 @@
 		refreshLaneCounts();
 	}
 
-	// Draft a sequence from the tactic order: every node in an occupied lane feeds
-	// every node in the next occupied one. Additive — existing edges are kept, and
-	// nothing is removed, so it is a starting point to prune rather than a layout.
+	// every node in an occupied lane feeds every node in the next occupied one.
+	// additive: a draft to prune, not a layout
 	function autoLink() {
 		const order = tactics.map((tactic) => laneId(tactic.id));
 		const occupied = order

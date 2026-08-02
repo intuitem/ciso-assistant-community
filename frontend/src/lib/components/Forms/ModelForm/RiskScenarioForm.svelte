@@ -114,3 +114,17 @@
 	bind:cachedValue={formDataCache['threats']}
 	label={m.threats()}
 />
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="threat-models"
+	optionsExtraFields={[['folder', 'str']]}
+	optionsDetailedUrlParameters={[
+		scopeFolder?.id ? ['scope_folder_id', scopeFolder.id] : ['', undefined]
+	]}
+	optionsLabelField="auto"
+	field="threat_models"
+	cacheLock={cacheLocks['threat_models']}
+	bind:cachedValue={formDataCache['threat_models']}
+	label={m.threatModels()}
+/>

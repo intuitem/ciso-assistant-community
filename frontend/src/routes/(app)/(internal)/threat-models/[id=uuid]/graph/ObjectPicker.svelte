@@ -24,8 +24,7 @@
 	let open = $state(false);
 	let timer: ReturnType<typeof setTimeout> | null = null;
 
-	// AutocompleteSelect needs a Superforms context, so this panel uses its own
-	// search-driven picker rather than dragging a form in
+	// AutocompleteSelect needs a Superforms context, which this panel has none of
 	function labelOf(item: any): string {
 		const name = [item.ref_id, item.name].filter(Boolean).join(' - ') || item.str || item.id;
 		return item.folder?.str ? `${item.folder.str}/${name}` : name;
@@ -41,7 +40,7 @@
 		}));
 	}
 
-	// resolve the stored ids to labels, independent of what the search returns
+	// stored ids resolve to labels independently of the search
 	$effect(() => {
 		const ids = value;
 		if (!ids.length) {

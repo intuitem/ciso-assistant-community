@@ -5690,5 +5690,6 @@
 	"threatModelCustomNode": "Custom node",
 	"threatModelHighlightNode": "Key step",
 	"threatModelOperatorHint": "AND requires every incoming step; OR accepts any of them.",
-	"addCustomNode": "Add a step"
+	"addCustomNode": "Add a step",
+	"threatModeling": "Threat modeling"
 }

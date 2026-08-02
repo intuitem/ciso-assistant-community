@@ -72,8 +72,7 @@
 		}, {})
 	);
 
-	// both filters keep a parent whose sub-technique matches, so a cell never
-	// disappears because only its children qualify
+	// a parent stays when only its sub-techniques match
 	function matchesSelf(cell: MatrixCell): boolean {
 		const needle = query.trim().toLowerCase();
 		if (needle && !`${cell.ref_id} ${cell.name}`.toLowerCase().includes(needle)) return false;

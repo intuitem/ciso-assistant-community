@@ -84,6 +84,18 @@
 	label={m.threats()}
 />
 
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="threat-models"
+	optionsExtraFields={[['folder', 'str']]}
+	optionsLabelField="auto"
+	field="threat_models"
+	cacheLock={cacheLocks['threat_models']}
+	bind:cachedValue={formDataCache['threat_models']}
+	label={m.threatModels()}
+/>
+
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<Select
 		{form}

@@ -5685,5 +5685,6 @@
 	"threatModelCustomNode": "Nœud personnalisé",
 	"threatModelHighlightNode": "Étape clé",
 	"threatModelOperatorHint": "ET exige toutes les étapes entrantes ; OU en accepte une seule.",
-	"addCustomNode": "Ajouter une étape"
+	"addCustomNode": "Ajouter une étape",
+	"threatModeling": "Modélisation des menaces"
 }

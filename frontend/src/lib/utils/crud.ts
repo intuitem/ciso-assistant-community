@@ -460,6 +460,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		},
 		foreignKeyFields: [
 			{ field: 'threats', urlModel: 'threats' },
+			{ field: 'threat_models', urlModel: 'threat-models' },
 			{ field: 'risk_assessment', urlModel: 'risk-assessments' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' },
@@ -2804,6 +2805,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' },
 			{ field: 'threats', urlModel: 'threats' },
+			{ field: 'threat_models', urlModel: 'threat-models' },
 			{ field: 'qualifications', urlModel: 'qualifications' }
 		],
 		detailViewFields: [

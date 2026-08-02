@@ -28,7 +28,7 @@
 	let { lanes, techniques, placedIds, onDragStateChange }: Props = $props();
 
 	let query = $state('');
-	// 15+ lanes and ~700 techniques: everything starts collapsed, search is the way in
+	// ~700 techniques: collapsed by default, search is the way in
 	let expandedLanes = $state(new Set<string>());
 	let expandedParents = $state(new Set<string>());
 
@@ -62,8 +62,7 @@
 
 	function handleDragStart(event: DragEvent, technique: PaletteTechnique) {
 		if (!event.dataTransfer) return;
-		// sub-technique rows are nested inside the parent's draggable element, so
-		// without this the parent's handler overwrites the payload and you drop the parent
+		// nested inside the parent's draggable element: without this you drop the parent
 		event.stopPropagation();
 		event.dataTransfer.setData(
 			'application/json',

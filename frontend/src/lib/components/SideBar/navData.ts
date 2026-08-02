@@ -281,7 +281,7 @@ export const navData = {
 					href: '/ebios-rm'
 				},
 				{
-					name: 'threatModels',
+					name: 'threatModeling',
 					fa_icon: 'fa-solid fa-diagram-project',
 					href: '/threat-models',
 					permissions: ['view_threatmodel']
