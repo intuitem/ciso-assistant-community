@@ -4,7 +4,12 @@
 
 	interface Props {
 		id: string;
-		data: { label: string; refId: string; parentName?: string | null };
+		data: {
+			label: string;
+			refId?: string | null;
+			parentName?: string | null;
+			isHighlighted?: boolean;
+		};
 	}
 
 	let { id, data }: Props = $props();
@@ -19,13 +24,21 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class="relative rounded-base border-[1.5px] border-surface-300-700 bg-surface-50-950 px-3 py-2 min-w-[150px] max-w-[190px] select-none"
+	class="relative rounded-base border-[1.5px] bg-surface-50-950 px-3 py-2 min-w-[150px] max-w-[190px] select-none {data.isHighlighted
+		? 'border-warning-500'
+		: 'border-surface-300-700'}"
 	onmouseenter={() => (hovered = true)}
 	onmouseleave={() => (hovered = false)}
 >
-	<div class="absolute left-0 top-0 bottom-0 w-1 rounded-l-base bg-primary-400"></div>
+	<div
+		class="absolute left-0 top-0 bottom-0 w-1 rounded-l-base {data.isHighlighted
+			? 'bg-warning-500'
+			: 'bg-primary-400'}"
+	></div>
 
-	<p class="text-[10px] font-mono text-surface-600-400 leading-none">{data.refId}</p>
+	{#if data.refId}
+		<p class="text-[10px] font-mono text-surface-600-400 leading-none">{data.refId}</p>
+	{/if}
 	{#if data.parentName}
 		<p class="text-[10px] text-surface-600-400 leading-tight text-wrap mt-1">{data.parentName}:</p>
 	{/if}

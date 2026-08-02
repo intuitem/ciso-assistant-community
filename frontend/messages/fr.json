@@ -5680,5 +5680,10 @@
 	"hideEmptyTactics": "Masquer les tactiques vides",
 	"showAllTactics": "Afficher {count} vide(s)",
 	"graphView": "Graphe",
-	"selectionView": "Sélection"
+	"selectionView": "Sélection",
+	"threatModelSelectNodeHint": "Sélectionnez un nœud pour en modifier le contexte.",
+	"threatModelCustomNode": "Nœud personnalisé",
+	"threatModelHighlightNode": "Étape clé",
+	"threatModelOperatorHint": "ET exige toutes les étapes entrantes ; OU en accepte une seule.",
+	"addCustomNode": "Ajouter une étape"
 }

@@ -17,13 +17,11 @@ from core.models import (
     RequirementNode,
     RiskMatrix,
     ReferenceControl,
-    Tactic,
-    Technique,
     Terminology,
     Threat,
-    TTPCatalog,
     _sync_questions_from_data,
 )
+from sec_intel.models import Tactic, Technique, TTPCatalog
 from metrology.models import MetricDefinition
 from django.db import transaction
 from iam.models import Folder

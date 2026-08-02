@@ -1,5 +1,12 @@
 from .views import *
-from sec_intel.views import SecurityAdvisoryViewSet, CWEViewSet
+from sec_intel.views import (
+    SecurityAdvisoryViewSet,
+    CWEViewSet,
+    TTPCatalogViewSet,
+    TacticViewSet,
+    TechniqueViewSet,
+)
+from threat_modeling.views import ThreatModelViewSet
 from tprm.views import (
     EntityViewSet,
     RepresentativeViewSet,

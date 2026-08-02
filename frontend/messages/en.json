@@ -5685,5 +5685,10 @@
 	"hideEmptyTactics": "Hide empty tactics",
 	"showAllTactics": "Show {count} empty",
 	"graphView": "Graph",
-	"selectionView": "Selection"
+	"selectionView": "Selection",
+	"threatModelSelectNodeHint": "Select a node to edit its context.",
+	"threatModelCustomNode": "Custom node",
+	"threatModelHighlightNode": "Key step",
+	"threatModelOperatorHint": "AND requires every incoming step; OR accepts any of them.",
+	"addCustomNode": "Add a step"
 }

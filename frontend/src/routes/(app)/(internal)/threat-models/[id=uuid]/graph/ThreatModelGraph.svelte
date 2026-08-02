@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
-	import { setContext, untrack } from 'svelte';
+	import { setContext, tick, untrack } from 'svelte';
 	import {
 		SvelteFlow,
 		useSvelteFlow,
@@ -18,7 +18,9 @@
 
 	import TechniqueNodeComponent from './nodes/TechniqueNode.svelte';
 	import LaneNodeComponent from './nodes/LaneNode.svelte';
+	import OperatorNodeComponent from './nodes/OperatorNode.svelte';
 	import TechniquePalette from './TechniquePalette.svelte';
+	import NodeInspector from './NodeInspector.svelte';
 	import type { PaletteTechnique } from './TechniquePalette.svelte';
 
 	interface GraphTactic {
@@ -28,14 +30,21 @@
 	}
 
 	interface GraphNode {
-		/** `techniqueId:tacticId` — the same technique in two tactics is two nodes */
 		id: string;
-		technique: string;
-		ref_id: string;
-		name: string;
+		kind: 'technique' | 'operator' | 'custom';
+		operator: 'AND' | 'OR' | null;
+		technique: string | null;
+		ref_id: string | null;
+		name: string | null;
 		parent_name: string | null;
-		tactic: string;
+		tactic: string | null;
 		label: string;
+		description: string;
+		is_highlighted: boolean;
+		assets: string[];
+		applied_controls: string[];
+		vulnerabilities: string[];
+		properties: Record<string, unknown>;
 		position_x: number;
 		position_y: number;
 	}
@@ -45,7 +54,7 @@
 		tactics: GraphTactic[];
 		graphNodes: GraphNode[];
 		graphEdges: { source: string; target: string }[];
-		graphColumns?: Record<string, { x: number; y: number; width: number; height: number }>;
+		graphColumns?: Record<string, { width: number; height: number }>;
 		paletteTechniques: PaletteTechnique[];
 		readonly?: boolean;
 	}
@@ -60,7 +69,7 @@
 		readonly = false
 	}: Props = $props();
 
-	const LANE_GAP = 320;
+	const LANE_GAP_X = 60;
 	const LANE_WIDTH = 260;
 	const LANE_HEIGHT = 480;
 	const NODE_GAP_Y = 80;
@@ -79,13 +88,18 @@
 	// tactics of the technique currently being dragged, null when idle
 	let dragTactics = $state<string[] | null>(null);
 	let showAllLanes = $state(false);
+	let selectedNodeId = $state<string | null>(null);
 
 	const { screenToFlowPosition } = useSvelteFlow();
 
 	// `techniqueId:tacticId` keys, so the palette can show a technique as placed
 	// in one tactic while still offering it in another
 	const placedIds = $derived(
-		new Set(nodes.filter((node) => node.type === 'technique').map((node) => node.id))
+		new Set(
+			nodes
+				.filter((node) => node.type === 'technique')
+				.map((node) => `${(node.data as any).technique}:${(node.data as any).tactic}`)
+		)
 	);
 
 	setContext('threatModelEditor', {
@@ -99,23 +113,46 @@
 			return readonly;
 		},
 		deleteNode: (id: string) => removeNode(id),
+		toggleOperator: (id: string) => toggleOperator(id),
 		markDirty: () => (dirty = true)
 	});
+
+	function nodeData(node: GraphNode) {
+		return {
+			kind: node.kind,
+			operator: node.operator,
+			technique: node.technique,
+			tactic: node.tactic,
+			label: node.label || node.name || '',
+			customLabel: node.label,
+			refId: node.ref_id,
+			parentName: node.parent_name,
+			description: node.description,
+			isHighlighted: node.is_highlighted,
+			assets: node.assets,
+			appliedControls: node.applied_controls,
+			vulnerabilities: node.vulnerabilities,
+			properties: node.properties
+		};
+	}
 
 	function countIn(laneNodeId: string, current: Node[]): number {
 		return current.filter((node) => node.type === 'technique' && node.parentId === laneNodeId)
 			.length;
 	}
 
+	const laneWidth = (id: string) => graphColumns[id]?.width ?? LANE_WIDTH;
+
 	function buildLaneNodes(current: Node[]): Node[] {
-		return tactics.map((tactic, index) => {
+		return tactics.map((tactic) => {
 			const id = laneId(tactic.id);
 			const saved = graphColumns[id];
 			return {
 				id,
 				type: 'lane',
-				position: saved ? { x: saved.x, y: saved.y } : { x: index * LANE_GAP, y: 0 },
-				style: `width: ${saved?.width ?? LANE_WIDTH}px; height: ${saved?.height ?? LANE_HEIGHT}px;`,
+				// x is assigned by layoutLanes(); lanes are not user-positioned
+				position: { x: 0, y: 0 },
+				style: `width: ${laneWidth(id)}px; height: ${saved?.height ?? LANE_HEIGHT}px;`,
 				data: { name: tactic.name, refId: tactic.ref_id, count: countIn(id, current) },
 				selectable: true,
 				draggable: false,
@@ -125,40 +162,55 @@
 		});
 	}
 
+	// Lane x is derived, never stored: users can resize a lane but never move one,
+	// so hiding empty tactics just re-runs this and the columns close up.
+	function layoutLanes(current: Node[], hidden: Set<string>): Node[] {
+		let x = 0;
+		const positions = new Map<string, number>();
+		for (const tactic of tactics) {
+			const id = laneId(tactic.id);
+			if (hidden.has(id)) continue;
+			positions.set(id, x);
+			x += laneWidth(id) + LANE_GAP_X;
+		}
+		// must return the SAME array when nothing moved: the caller runs inside an
+		// effect that writes `nodes`, and a fresh reference would loop forever
+		let moved = false;
+		const next = current.map((node) => {
+			if (node.type !== 'lane') return node;
+			const x = positions.get(node.id);
+			if (x === undefined || node.position.x === x) return node;
+			moved = true;
+			return { ...node, position: { x, y: 0 } };
+		});
+		return moved ? next : current;
+	}
+
 	function initGraph() {
 		const perLane: Record<string, number> = {};
-		const techniqueNodes: Node[] = [];
+		const flowNodes: Node[] = [];
 
 		for (const node of graphNodes) {
-			if (!node.tactic) continue;
-			const parentId = laneId(node.tactic);
-			const index = perLane[parentId] ?? 0;
+			const parentId = node.tactic ? laneId(node.tactic) : undefined;
+			const index = parentId ? (perLane[parentId] ?? 0) : 0;
 			const placed = node.position_x !== 0 || node.position_y !== 0;
-			techniqueNodes.push({
+			flowNodes.push({
 				id: node.id,
-				type: 'technique',
+				type: node.kind === 'operator' ? 'operator' : 'technique',
 				position: placed
 					? { x: node.position_x, y: node.position_y }
 					: { x: NODE_PADDING_X, y: NODE_PADDING_Y + index * NODE_GAP_Y },
-				parentId,
-				extent: 'parent',
+				...(parentId ? { parentId, extent: 'parent' as const } : {}),
 				draggable: !readonly,
 				deletable: !readonly,
 				connectable: !readonly,
-				data: {
-					label: node.label || node.name,
-					// the stored label, kept apart from the fallback so saving cannot
-					// overwrite it with the technique name
-					customLabel: node.label,
-					refId: node.ref_id,
-					parentName: node.parent_name
-				}
+				data: nodeData(node)
 			} as Node);
-			perLane[parentId] = index + 1;
+			if (parentId) perLane[parentId] = index + 1;
 		}
 
 		dirty = false;
-		nodes = [...buildLaneNodes(techniqueNodes), ...techniqueNodes];
+		nodes = layoutLanes([...buildLaneNodes(flowNodes), ...flowNodes], new Set());
 		edges = graphEdges.map((edge) => ({
 			id: `e-${edge.source}-${edge.target}`,
 			source: edge.source,
@@ -209,7 +261,9 @@
 				changed = true;
 				return { ...node, hidden: shouldHide };
 			});
-			if (changed) nodes = next;
+			const base = changed ? next : nodes;
+			const laid = layoutLanes(base, hidden);
+			if (laid !== nodes) nodes = laid;
 		});
 	});
 
@@ -233,8 +287,108 @@
 		);
 	}
 
-	function handleConnect() {
+	const selectedNode = $derived(
+		nodes.find((node) => node.id === selectedNodeId && node.type !== 'lane') ?? null
+	);
+
+	function patchSelected(patch: Record<string, unknown>) {
+		if (!selectedNodeId) return;
+		nodes = nodes.map((node) =>
+			node.id === selectedNodeId ? { ...node, data: { ...node.data, ...patch } } : node
+		);
 		dirty = true;
+	}
+
+	function addCustomNode() {
+		const lane = nodes.find((node) => node.type === 'lane' && !node.hidden);
+		nodes = [
+			...nodes,
+			{
+				id: crypto.randomUUID(),
+				type: 'technique',
+				position: { x: NODE_PADDING_X, y: NODE_PADDING_Y },
+				...(lane ? { parentId: lane.id, extent: 'parent' as const } : {}),
+				draggable: true,
+				deletable: true,
+				connectable: true,
+				data: {
+					kind: 'custom',
+					technique: null,
+					tactic: lane ? tacticOf(lane.id) : null,
+					label: '',
+					customLabel: '',
+					refId: null,
+					parentName: null,
+					description: '',
+					isHighlighted: false,
+					assets: [],
+					appliedControls: [],
+					vulnerabilities: [],
+					properties: {}
+				}
+			} as Node
+		];
+		dirty = true;
+	}
+
+	function toggleOperator(id: string) {
+		nodes = nodes.map((node) =>
+			node.id === id
+				? { ...node, data: { ...node.data, operator: node.data.operator === 'AND' ? 'OR' : 'AND' } }
+				: node
+		);
+		dirty = true;
+	}
+
+	// Attack Flow semantics: AND cannot be expressed by a per-edge parameter, so a
+	// junction becomes a real node. Inserted automatically on the second incoming
+	// edge and removed when it drops back to one, so the interaction stays one click.
+	async function reconcileOperator(targetId: string) {
+		const target = nodes.find((node) => node.id === targetId);
+		if (!target || target.type === 'operator') return;
+
+		const incoming = edges.filter((edge) => edge.target === targetId);
+		const existing = nodes.find(
+			(node) =>
+				node.type === 'operator' && edges.some((e) => e.source === node.id && e.target === targetId)
+		);
+
+		if (incoming.length > 1 && !existing) {
+			const opId = crypto.randomUUID();
+			const lane = target.parentId;
+			nodes = [
+				...nodes,
+				{
+					id: opId,
+					type: 'operator',
+					// lives in the target's lane so it travels with the columns
+					position: { x: Math.max(0, target.position.x - 70), y: target.position.y + 30 },
+					...(lane ? { parentId: lane, extent: 'parent' as const } : {}),
+					draggable: true,
+					deletable: true,
+					connectable: true,
+					// alternatives are the common case, and auto-link builds exactly that
+					data: { kind: 'operator', operator: 'OR', tactic: (target.data as any).tactic }
+				} as Node
+			];
+			edges = [
+				...incoming.map((edge) => ({ ...edge, target: opId, id: `e-${edge.source}-${opId}` })),
+				{
+					id: `e-${opId}-${targetId}`,
+					source: opId,
+					target: targetId,
+					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' },
+					style: 'stroke: var(--color-surface-500); stroke-width: 2;'
+				},
+				...edges.filter((edge) => edge.target !== targetId)
+			];
+		}
+	}
+
+	async function handleConnect(connection: Connection) {
+		dirty = true;
+		await tick();
+		if (connection.target) await reconcileOperator(connection.target);
 	}
 
 	function handleDelete() {
@@ -286,8 +440,8 @@
 			tactics: string[];
 			parentName?: string | null;
 		};
-		const cellId = `${technique.id}:${tacticOf(lane.id)}`;
-		if (placedIds.has(cellId)) return;
+		const cellKey = `${technique.id}:${tacticOf(lane.id)}`;
+		if (placedIds.has(cellKey)) return;
 		// the backend rejects a technique in a tactic it does not belong to, so
 		// refuse the drop rather than let it fail on save
 		if (!laneAccepts(lane.id, technique.tactics ?? null)) return;
@@ -296,7 +450,8 @@
 		nodes = [
 			...nodes,
 			{
-				id: cellId,
+				// the row's real primary key, minted here so save needs no temp-id mapping
+				id: crypto.randomUUID(),
 				type: 'technique',
 				position: { x: point.x - lane.position.x, y: point.y - lane.position.y },
 				parentId: lane.id,
@@ -305,10 +460,19 @@
 				deletable: true,
 				connectable: true,
 				data: {
+					kind: 'technique',
+					technique: technique.id,
+					tactic: tacticOf(lane.id),
 					label: technique.name,
 					customLabel: '',
 					refId: technique.ref_id,
-					parentName: technique.parentName ?? null
+					parentName: technique.parentName ?? null,
+					description: '',
+					isHighlighted: false,
+					assets: [],
+					appliedControls: [],
+					vulnerabilities: [],
+					properties: {}
 				}
 			} as Node
 		];
@@ -354,13 +518,11 @@
 	}
 
 	function buildPayload() {
-		const laneGeometry: Record<string, { x: number; y: number; width: number; height: number }> =
-			{};
+		// only sizes are persisted: lane x is derived from the visible set
+		const laneGeometry: Record<string, { width: number; height: number }> = {};
 		for (const node of nodes) {
 			if (node.type !== 'lane') continue;
 			laneGeometry[node.id] = {
-				x: node.position.x,
-				y: node.position.y,
 				width: node.measured?.width ?? LANE_WIDTH,
 				height: node.measured?.height ?? LANE_HEIGHT
 			};
@@ -368,13 +530,26 @@
 
 		return {
 			nodes: nodes
-				.filter((node) => node.type === 'technique')
-				.map((node) => ({
-					id: node.id,
-					label: (node.data as any).customLabel ?? '',
-					position_x: node.position.x,
-					position_y: node.position.y
-				})),
+				.filter((node) => node.type !== 'lane')
+				.map((node) => {
+					const data = node.data as any;
+					return {
+						id: node.id,
+						kind: data.kind,
+						operator: data.operator ?? null,
+						technique: data.technique ?? null,
+						tactic: node.parentId ? tacticOf(node.parentId) : (data.tactic ?? null),
+						label: data.customLabel ?? '',
+						description: data.description ?? '',
+						is_highlighted: Boolean(data.isHighlighted),
+						assets: data.assets ?? [],
+						applied_controls: data.appliedControls ?? [],
+						vulnerabilities: data.vulnerabilities ?? [],
+						properties: data.properties ?? {},
+						position_x: node.position.x,
+						position_y: node.position.y
+					};
+				}),
 			edges: edges.map((edge) => ({ source: edge.source, target: edge.target })),
 			graph_columns: laneGeometry
 		};
@@ -417,11 +592,17 @@
 		<SvelteFlow
 			bind:nodes
 			bind:edges
-			nodeTypes={{ technique: TechniqueNodeComponent, lane: LaneNodeComponent }}
+			nodeTypes={{
+				technique: TechniqueNodeComponent,
+				operator: OperatorNodeComponent,
+				lane: LaneNodeComponent
+			}}
 			{isValidConnection}
 			onconnect={handleConnect}
 			ondelete={handleDelete}
 			onnodedragstop={() => (dirty = true)}
+			onnodeclick={({ node }) => (selectedNodeId = node.type === 'lane' ? null : node.id)}
+			onpaneclick={() => (selectedNodeId = null)}
 			nodesDraggable={!readonly}
 			nodesConnectable={!readonly}
 			elementsSelectable={!readonly}
@@ -438,6 +619,9 @@
 			{#if !readonly}
 				<Panel position="top-left">
 					<div class="flex items-center gap-2">
+						<button type="button" class="btn btn-sm preset-tonal-surface" onclick={addCustomNode}>
+							<i class="fa-solid fa-plus mr-1"></i>{m.addCustomNode()}
+						</button>
 						<button
 							type="button"
 							class="btn btn-sm preset-tonal-surface"
@@ -494,6 +678,17 @@
 			<MiniMap />
 		</SvelteFlow>
 	</div>
+
+	{#if !readonly}
+		<NodeInspector
+			node={selectedNode}
+			onUpdate={patchSelected}
+			onDelete={(id) => {
+				removeNode(id);
+				selectedNodeId = null;
+			}}
+		/>
+	{/if}
 </div>
 
 <style>
