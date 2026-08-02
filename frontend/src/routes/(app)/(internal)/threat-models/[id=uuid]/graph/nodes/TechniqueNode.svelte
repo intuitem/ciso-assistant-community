@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Handle, Position } from '@xyflow/svelte';
 	import { getContext } from 'svelte';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		id: string;
@@ -18,17 +19,12 @@
 		deleteNode: (id: string) => void;
 		readonly: boolean;
 	}>('threatModelEditor');
-
-	let hovered = $state(false);
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class="relative rounded-base border-[1.5px] bg-surface-50-950 px-3 py-2 min-w-[150px] max-w-[190px] select-none {data.isHighlighted
+	class="group relative rounded-base border-[1.5px] bg-surface-50-950 px-3 py-2 min-w-[150px] max-w-[190px] select-none {data.isHighlighted
 		? 'border-warning-500'
 		: 'border-surface-300-700'}"
-	onmouseenter={() => (hovered = true)}
-	onmouseleave={() => (hovered = false)}
 >
 	<div
 		class="absolute left-0 top-0 bottom-0 w-1 rounded-l-base {data.isHighlighted
@@ -46,11 +42,11 @@
 		{data.label}
 	</p>
 
-	{#if hovered && !editor?.readonly}
+	{#if !editor?.readonly}
 		<button
 			type="button"
-			aria-label="Remove from graph"
-			class="nopan nodrag absolute -top-2 -left-2 w-4 h-4 rounded-full bg-error-500 text-white text-[8px] flex items-center justify-center hover:bg-error-600 cursor-pointer"
+			aria-label={m.removeNode()}
+			class="nopan nodrag absolute -top-2 -left-2 w-4 h-4 rounded-full bg-error-500 text-white text-[8px] flex items-center justify-center hover:bg-error-600 cursor-pointer opacity-0 transition-opacity focus:opacity-100 group-hover:opacity-100"
 			onclick={() => editor?.deleteNode(id)}
 		>
 			✕

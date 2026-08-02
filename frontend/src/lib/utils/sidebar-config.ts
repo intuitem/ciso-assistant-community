@@ -17,6 +17,8 @@ type SidebarBackendKeys = {
 	organisation_objectives: boolean;
 	organisation_issues: boolean;
 	quantitative_risk_studies: boolean;
+	threat_modeling: boolean;
+	ttps: boolean;
 	terminologies: boolean;
 	custom_fields: boolean;
 	bia: boolean;

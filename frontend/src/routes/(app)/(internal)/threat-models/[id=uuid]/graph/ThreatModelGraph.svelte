@@ -207,6 +207,7 @@
 		}
 
 		dirty = false;
+		errorMessage = '';
 		nodes = layoutLanes([...buildLaneNodes(flowNodes), ...flowNodes], new Set());
 		edges = graphEdges.map((edge) => ({
 			id: `e-${edge.source}-${edge.target}`,
@@ -293,12 +294,13 @@
 
 	function addCustomNode() {
 		const lane = nodes.find((node) => node.type === 'lane' && !node.hidden);
+		const offset = lane ? countIn(lane.id, nodes) : nodes.filter((n) => n.type !== 'lane').length;
 		nodes = [
 			...nodes,
 			{
 				id: crypto.randomUUID(),
 				type: 'technique',
-				position: { x: NODE_PADDING_X, y: NODE_PADDING_Y },
+				position: { x: NODE_PADDING_X, y: NODE_PADDING_Y + offset * NODE_GAP_Y },
 				...(lane ? { parentId: lane.id, extent: 'parent' as const } : {}),
 				draggable: true,
 				deletable: true,
@@ -512,9 +514,11 @@
 		const laneGeometry: Record<string, { width: number; height: number }> = {};
 		for (const node of nodes) {
 			if (node.type !== 'lane') continue;
+			const stored = graphColumns[node.id];
 			laneGeometry[node.id] = {
-				width: node.measured?.width ?? LANE_WIDTH,
-				height: node.measured?.height ?? LANE_HEIGHT
+				// a hidden lane is not measured; keep what was stored rather than reset it
+				width: node.measured?.width ?? stored?.width ?? LANE_WIDTH,
+				height: node.measured?.height ?? stored?.height ?? LANE_HEIGHT
 			};
 		}
 

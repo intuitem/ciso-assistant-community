@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { m } from '$paraglide/messages';
 
 	interface Option {
@@ -43,6 +44,10 @@
 	// stored ids resolve to labels independently of the search
 	$effect(() => {
 		const ids = value;
+		untrack(() => resolveLabels(ids));
+	});
+
+	function resolveLabels(ids: string[]) {
 		if (!ids.length) {
 			chosen = [];
 			return;
@@ -56,7 +61,7 @@
 			const known = new Map([...chosen, ...items].map((item) => [item.id, item]));
 			chosen = ids.map((id) => known.get(id) ?? { id, label: id }).filter(Boolean);
 		});
-	});
+	}
 
 	function search() {
 		if (timer) clearTimeout(timer);
@@ -122,14 +127,14 @@
 							<button
 								type="button"
 								class="flex w-full items-center gap-2 px-2 py-1 text-left hover:bg-surface-100-900"
+								aria-pressed={value.includes(option.id)}
 								onclick={() => toggle(option)}
 							>
-								<input
-									type="checkbox"
-									class="checkbox"
-									checked={value.includes(option.id)}
-									readonly
-								/>
+								<i
+									class="fa-{value.includes(option.id)
+										? 'solid fa-square-check text-primary-500'
+										: 'regular fa-square text-surface-500'} text-xs"
+								></i>
 								<span class="grow">{option.label}</span>
 							</button>
 						</li>

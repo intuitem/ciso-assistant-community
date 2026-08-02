@@ -1208,7 +1208,7 @@ REFERENTIAL_IMPORT_EXPORT_FIELDS = [
 class RiskScenarioWriteSerializer(BaseModelSerializer):
     # Note: Inherent risk fields are always accepted for writing,
     # but only displayed when inherent_risk feature flag is enabled
-    FLAGGED_FIELDS = {}
+    FLAGGED_FIELDS = {"threat_models": "threat_modeling"}
 
     risk_matrix = serializers.PrimaryKeyRelatedField(
         read_only=True, source="risk_assessment.risk_matrix"

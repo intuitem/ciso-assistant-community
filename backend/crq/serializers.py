@@ -139,6 +139,8 @@ class QuantitativeRiskStudyReadSerializer(BaseModelSerializer):
 
 
 class QuantitativeRiskScenarioWriteSerializer(BaseModelSerializer):
+    FLAGGED_FIELDS = {"threat_models": "threat_modeling"}
+
     threat_models = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=ThreatModel.objects.all()
     )
@@ -178,6 +180,8 @@ class QuantitativeRiskScenarioWriteSerializer(BaseModelSerializer):
 
 
 class QuantitativeRiskScenarioReadSerializer(BaseModelSerializer):
+    FLAGGED_FIELDS = {"threat_models": "threat_modeling"}
+
     quantitative_risk_study = FieldsRelatedField()
     assets = FieldsRelatedField(many=True)
     owner = FieldsRelatedField(many=True)

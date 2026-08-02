@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Select from '../Select.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
@@ -84,17 +85,19 @@
 	label={m.threats()}
 />
 
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="threat-models"
-	optionsExtraFields={[['folder', 'str']]}
-	optionsLabelField="auto"
-	field="threat_models"
-	cacheLock={cacheLocks['threat_models']}
-	bind:cachedValue={formDataCache['threat_models']}
-	label={m.threatModels()}
-/>
+{#if $page.data.featureflags?.threat_modeling}
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="threat-models"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="threat_models"
+		cacheLock={cacheLocks['threat_models']}
+		bind:cachedValue={formDataCache['threat_models']}
+		label={m.threatModels()}
+	/>
+{/if}
 
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<Select

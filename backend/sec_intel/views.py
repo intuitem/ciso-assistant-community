@@ -326,7 +326,7 @@ class TechniqueViewSet(BaseModelViewSet):
                 "filtering_labels__folder", "tactics", "reference_controls"
             )
         )
-        if "is_deprecated" not in self.request.query_params:
+        if not self.request.query_params.get("is_deprecated"):
             queryset = queryset.filter(is_deprecated=False)
         return queryset
 
@@ -377,7 +377,7 @@ def build_catalog_matrix(catalog) -> dict:
             children.pop(str(cell["id"]), []), key=lambda item: item["ref_id"]
         )
     for orphans in children.values():
-        cells.extend(orphans)
+        cells.extend({**orphan, "children": []} for orphan in orphans)
     cells.sort(key=lambda item: item["name"].casefold())
 
     return {

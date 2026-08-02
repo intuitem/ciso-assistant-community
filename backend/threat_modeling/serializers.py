@@ -14,6 +14,7 @@ class ThreatModelReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     catalog = FieldsRelatedField()
     risk_scenarios = FieldsRelatedField(many=True)
+    quantitative_risk_scenarios = FieldsRelatedField(many=True)
     node_count = serializers.IntegerField(source="nodes.count", read_only=True)
 
     class Meta:

@@ -35,6 +35,12 @@ class ThreatModel(NameDescriptionMixin, FolderMixin):
 
     fields_to_check = ["name"]
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # nodes and edges mirror the model's folder
+        self.nodes.exclude(folder=self.folder).update(folder=self.folder)
+        self.edges.exclude(folder=self.folder).update(folder=self.folder)
+
     class Meta:
         verbose_name = _("Threat model")
         verbose_name_plural = _("Threat models")

@@ -5688,5 +5688,7 @@
 	"addCustomNode": "Ajouter une étape",
 	"threatModeling": "Modélisation des menaces",
 	"threatModelingDescription": "Construire des séquences d'attaque à partir d'un catalogue de TTP et les relier aux scénarios de risque",
-	"ttpsDescription": "Catalogues de tactiques et techniques adverses tels que MITRE ATT&CK et ATLAS"
+	"ttpsDescription": "Catalogues de tactiques et techniques adverses tels que MITRE ATT&CK et ATLAS",
+	"removeNode": "Supprimer le nœud",
+	"toggleLogicOperator": "Basculer ET / OU"
 }

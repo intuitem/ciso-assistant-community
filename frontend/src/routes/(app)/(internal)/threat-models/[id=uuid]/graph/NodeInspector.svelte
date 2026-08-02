@@ -35,6 +35,7 @@
 				<button
 					type="button"
 					class="btn btn-sm preset-tonal-error shrink-0"
+					aria-label={m.removeNode()}
 					onclick={() => onDelete(node.id)}
 				>
 					<i class="fa-solid fa-trash text-xs"></i>

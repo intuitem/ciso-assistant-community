@@ -46,12 +46,14 @@
 	async function save() {
 		saving = true;
 		errorMessage = '';
+		// snapshot: what comes back confirms this payload, not later edits
+		const submitted = new Set(selected);
 		try {
 			const res = await fetch(`/threat-models/${threatModel.id}/set-techniques`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					selections: [...selected].map((key) => {
+					selections: [...submitted].map((key) => {
 						const [technique, tactic] = key.split(':');
 						return { technique, tactic };
 					})
@@ -59,7 +61,7 @@
 			});
 			const payload = await res.json().catch(() => ({}));
 			if (res.ok) {
-				saved = new Set(selected);
+				saved = submitted;
 			} else {
 				errorMessage = (payload.errors ?? [m.anErrorOccurred()]).join(' ');
 			}

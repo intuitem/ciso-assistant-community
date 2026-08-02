@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
@@ -114,17 +115,19 @@
 	bind:cachedValue={formDataCache['threats']}
 	label={m.threats()}
 />
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="threat-models"
-	optionsExtraFields={[['folder', 'str']]}
-	optionsDetailedUrlParameters={[
-		scopeFolder?.id ? ['scope_folder_id', scopeFolder.id] : ['', undefined]
-	]}
-	optionsLabelField="auto"
-	field="threat_models"
-	cacheLock={cacheLocks['threat_models']}
-	bind:cachedValue={formDataCache['threat_models']}
-	label={m.threatModels()}
-/>
+{#if $page.data.featureflags?.threat_modeling}
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="threat-models"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsDetailedUrlParameters={[
+			scopeFolder?.id ? ['scope_folder_id', scopeFolder.id] : ['', undefined]
+		]}
+		optionsLabelField="auto"
+		field="threat_models"
+		cacheLock={cacheLocks['threat_models']}
+		bind:cachedValue={formDataCache['threat_models']}
+		label={m.threatModels()}
+	/>
+{/if}

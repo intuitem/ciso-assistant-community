@@ -2,13 +2,16 @@ import uuid
 from collections import defaultdict
 
 import structlog
+from django.contrib.auth.models import Permission
 from django.db import transaction
 from django.db.models import F
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from core.models import AppliedControl, Asset, Vulnerability
 from core.permissions import FeatureFlagRequired
+from iam.models import Folder, RoleAssignment
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from sec_intel.models import Technique
 from sec_intel.views import build_catalog_matrix
@@ -19,6 +22,35 @@ logger = structlog.get_logger(__name__)
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
     serializers_module = "threat_modeling.serializers"
+
+
+def _validate_related(user, parsed: dict) -> list[str]:
+    """Reject linked objects the caller cannot see; save_graph bypasses serializers."""
+    errors = []
+    root = Folder.get_root_folder()
+    for key, model in (
+        ("assets", Asset),
+        ("applied_controls", AppliedControl),
+        ("vulnerabilities", Vulnerability),
+    ):
+        requested = set()
+        for payload in parsed.values():
+            for raw in payload.get(key) or []:
+                try:
+                    requested.add(uuid.UUID(str(raw)))
+                except ValueError, AttributeError:
+                    errors.append(f"Invalid {key} id '{raw}'.")
+        if not requested:
+            continue
+        try:
+            accessible = set(
+                RoleAssignment.get_accessible_object_ids(root, user, model)[0]
+            )
+        except NotImplementedError, Permission.DoesNotExist:
+            continue
+        for missing in sorted(requested - accessible):
+            errors.append(f"{model._meta.model_name} {missing} is not accessible.")
+    return errors
 
 
 def validate_placements(threat_model, placements) -> list[str]:
@@ -161,6 +193,20 @@ class ThreatModelViewSet(BaseModelViewSet):
         def as_uuid(value):
             return uuid.UUID(str(value))
 
+        incoming_ids = set()
+        for node in raw_nodes:
+            if isinstance(node, dict):
+                try:
+                    incoming_ids.add(as_uuid(node.get("id")))
+                except ValueError, AttributeError:
+                    continue
+        # a client-minted id must not collide with a node owned by another model
+        foreign_ids = set(
+            ThreatModelNode.objects.filter(id__in=incoming_ids)
+            .exclude(threat_model=threat_model)
+            .values_list("id", flat=True)
+        )
+
         for index, node in enumerate(raw_nodes):
             if not isinstance(node, dict):
                 errors.append(f"Node {index}: invalid payload.")
@@ -210,6 +256,10 @@ class ThreatModelViewSet(BaseModelViewSet):
                 errors.append(f"Node {index}: position must be a number.")
                 continue
 
+            if node_id in foreign_ids:
+                errors.append(f"Node {index}: id already used by another threat model.")
+                continue
+
             parsed[node_id] = {
                 "kind": kind,
                 "technique_id": technique_id,
@@ -227,6 +277,7 @@ class ThreatModelViewSet(BaseModelViewSet):
             }
 
         errors.extend(validate_placements(threat_model, placements))
+        errors.extend(_validate_related(request.user, parsed))
 
         edges = []
         for index, edge in enumerate(raw_edges):
@@ -351,4 +402,10 @@ class ThreatModelViewSet(BaseModelViewSet):
                 ]
             )
 
-        return Response({"count": threat_model.nodes.count()})
+        return Response(
+            {
+                "count": threat_model.nodes.filter(
+                    kind=ThreatModelNode.Kind.TECHNIQUE
+                ).count()
+            }
+        )
