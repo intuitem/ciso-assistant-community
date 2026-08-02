@@ -8,6 +8,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from core.permissions import FeatureFlagRequired
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from sec_intel.models import Technique
 from sec_intel.views import build_catalog_matrix
@@ -50,6 +51,11 @@ class ThreatModelViewSet(BaseModelViewSet):
     """
     API endpoint that allows threat models to be viewed or edited.
     """
+
+    feature_flag = "threat_modeling"
+
+    def get_permissions(self):
+        return super().get_permissions() + [FeatureFlagRequired()]
 
     # POST maps to add_* by default, but both mutate an existing model
     permission_overrides = {

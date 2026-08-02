@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from core.permissions import IsGlobalAdmin
+from core.permissions import FeatureFlagRequired, IsGlobalAdmin
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from .models import SecurityAdvisory, CWE, TTPCatalog, Tactic, Technique
 
@@ -274,6 +274,11 @@ class TacticViewSet(BaseModelViewSet):
     API endpoint that allows tactics to be viewed or edited.
     """
 
+    feature_flag = "ttps"
+
+    def get_permissions(self):
+        return super().get_permissions() + [FeatureFlagRequired()]
+
     model = Tactic
     filterset_fields = ["folder", "provider", "library", "catalog", "urn"]
     search_fields = ["ref_id", "name", "description"]
@@ -286,6 +291,11 @@ class TechniqueViewSet(BaseModelViewSet):
     """
     API endpoint that allows techniques to be viewed or edited.
     """
+
+    feature_flag = "ttps"
+
+    def get_permissions(self):
+        return super().get_permissions() + [FeatureFlagRequired()]
 
     model = Technique
     filterset_fields = [
@@ -387,6 +397,11 @@ class TTPCatalogViewSet(BaseModelViewSet):
     """
     API endpoint that allows TTP catalogs to be viewed or edited.
     """
+
+    feature_flag = "ttps"
+
+    def get_permissions(self):
+        return super().get_permissions() + [FeatureFlagRequired()]
 
     model = TTPCatalog
     filterset_fields = ["folder", "provider", "library", "urn"]

@@ -5686,5 +5686,7 @@
 	"threatModelHighlightNode": "Étape clé",
 	"threatModelOperatorHint": "ET exige toutes les étapes entrantes ; OU en accepte une seule.",
 	"addCustomNode": "Ajouter une étape",
-	"threatModeling": "Modélisation des menaces"
+	"threatModeling": "Modélisation des menaces",
+	"threatModelingDescription": "Construire des séquences d'attaque à partir d'un catalogue de TTP et les relier aux scénarios de risque",
+	"ttpsDescription": "Catalogues de tactiques et techniques adverses tels que MITRE ATT&CK et ATLAS"
 }
