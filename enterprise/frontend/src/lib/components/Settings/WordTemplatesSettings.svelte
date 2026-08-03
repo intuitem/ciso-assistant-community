@@ -215,7 +215,10 @@
 
 <div class="flex flex-col gap-6">
 	<span class="text-surface-600-400">{m.wordTemplatesDescription()}</span>
-	<div class="alert preset-filled-warning-500 w-fit p-3">{m.wordTemplatesWarning()}</div>
+	<div class="card p-4 preset-tonal-warning w-fit">
+		<i class="fa-solid fa-warning mr-2 text-warning-900-5"></i>
+		{m.wordTemplatesWarning()}
+	</div>
 
 	{#if successMessage}
 		<div class="alert preset-filled-success-500 p-3">
