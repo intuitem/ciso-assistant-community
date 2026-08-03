@@ -4,14 +4,18 @@ from math import ceil
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-
-# from icecream import ic
 from django.db.models import Count
+from django.utils.timezone import now
 from docx.shared import Cm
 from docxtpl import InlineImage
 from library.helpers import get_referential_translation
 
-from .models import *
+from .models import (
+    AppliedControl,
+    ComplianceAssessment,
+    RequirementAssessment,
+    RequirementNode,
+)
 
 matplotlib.use("Agg")
 
