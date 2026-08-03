@@ -10,7 +10,9 @@ Compatible with: SaaS or on-premises, CE or Pro
 
 The chat assistant talks to a model server rather than embedding a model of its own. That server can be local (Ollama, LM Studio, vLLM) or a hosted service. This page covers the hosted route — you sign up with a provider, paste a URL, a model name and an API key, and the assistant starts working.
 
-Any service that speaks the OpenAI chat completions API will work. **OVHcloud AI Endpoints** and **OpenRouter** are documented here because they cover the two common cases: European data residency with a single provider, and a broad model catalogue behind one account.
+The service needs to speak more of the OpenAI API than chat completions alone. It must answer `GET <base URL>/models`, since that is how the platform reaches the server at all, and the model you pick has to support tool calling and streamed responses — the assistant chooses a query with the first and streams the answer with the second. Temperature is only sent when **Send temperature to the model** is on, so a model that rejects a custom temperature can still be used with that switch off.
+
+**OVHcloud AI Endpoints** and **OpenRouter** are documented here because they cover the two common cases: European data residency with a single provider, and a broad model catalogue behind one account.
 
 ## Before you start
 
@@ -42,7 +44,7 @@ Set **LLM provider** to `OpenAI-compatible (LM Studio, vLLM, llama.cpp...)`. Des
 **Model name is required here.** Its help text says you may leave it empty to use the server's default loaded model. That applies to local single-model servers. Hosted providers serve many models at once and will reject a request that does not name one.
 {% endhint %}
 
-Save the form. The platform checks the endpoint and key immediately, so a mistake surfaces at once rather than on the first question.
+Save the form. Saving stores the settings and drops the cached connection so the next question picks them up — it does not contact the provider, so a wrong key or model name surfaces on the first question rather than here. Use the `curl` commands below to check the values before you paste them.
 
 ## OVHcloud AI Endpoints
 
@@ -62,7 +64,7 @@ The full catalogue is readable without a key, which is the quickest way to confi
 curl -s https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/models | jq -r '.data[].id'
 ```
 
-Good general-purpose choices are `gpt-oss-120b` and `Mistral-Small-3.2-24B-Instruct-2506`; both handle the assistant's tool calling reliably and answer in the language the question was asked in.
+`gpt-oss-120b` and `Mistral-Small-3.2-24B-Instruct-2506` are the two we have exercised against the assistant: both drive its tool calling and answer in the language the question was asked in. Other models in the catalogue may work equally well — a model that answers a plain chat completion can still fall short on tool calling, so try a question that reads your data before settling on one.
 
 To confirm a key and model together before entering them in the interface:
 
@@ -80,7 +82,7 @@ curl https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions \
 Identifiers are case-sensitive and punctuation-sensitive. `Meta-Llama-3_3-70B-Instruct` uses underscores where the model's public name uses dots — copy identifiers from the catalogue rather than typing them.
 {% endhint %}
 
-OVHcloud applies a request-rate limit per project. Each question the assistant answers costs two requests: one to decide which tool to use, one to write the answer. Worth knowing if you plan to roll the assistant out to a large number of simultaneous users.
+Each question the assistant answers costs two requests to the provider: one to choose a query, one to write the answer. OVHcloud rate-limits authenticated requests, and the allowance depends on your Public Cloud project and the model — check [their AI Endpoints documentation](https://docs.ovhcloud.com/fr/guides/public-cloud/ai-machine-learning/ai-endpoints-getting-started) for the figures that apply to you. Worth doing before rolling the assistant out to many simultaneous users.
 
 ## OpenRouter
 
@@ -109,20 +111,26 @@ Some models are offered at no cost with an identifier ending in `:free`, which i
 To confirm a key and model together before entering them in the interface:
 
 ```bash
+export OPENROUTER_API_KEY="sk-or-v1-your-key-here"
+
 curl https://openrouter.ai/api/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer sk-or-v1-your-key-here" \
+  -H "Authorization: Bearer ${OPENROUTER_API_KEY}" \
   -d '{
     "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
     "messages": [{"role": "user", "content": "What is the meaning of life?"}]
   }'
 ```
 
-A reply containing `choices[0].message.content` means the credentials and the model name are both good, and anything still failing afterwards is on the platform side rather than the provider's.
+A reply containing `choices[0].message.content` confirms the key and the model identifier for a plain completion. It does not exercise tool calling or streaming, so a model that passes here can still fail once the assistant asks it to choose a query — see [Checking it works](#checking-it-works).
 
 ## What stays on your own infrastructure
 
 Choosing a hosted provider sends **chat prompts** there — the question, the conversation history, and the retrieved context that answers it. That context contains your data, so treat the choice of provider as a data-processing decision.
+
+{% hint style="warning" %}
+**OpenRouter is a gateway, not the endpoint.** It forwards each prompt to whichever vendor serves the model you named, or picks one for you when the model is a routed alias. Retention and training policies belong to that downstream vendor and differ between them, and controls such as zero-data-retention routing are account settings you opt into. Review them before pointing the assistant at your risk data — with OVHcloud the prompt stays with one named operator, which is why regulated organisations tend to prefer it.
+{% endhint %}
 
 Two things do **not** go to the provider:
 
@@ -163,15 +171,15 @@ Re-paste it if in doubt — the field is write-only and never displays what is s
 {% step %}
 ### Check the backend logs
 
-A failed provider check is logged when the settings are saved, and again on the first question after a restart.
+The provider is contacted on the first question after the settings change or the service restarts, and a failure to reach it is logged there — not at the moment you save.
 {% endstep %}
 {% endstepper %}
 
 ## Cost
 
-Both providers bill per token consumed, against the account as a whole — neither has a per-user seat or quota. If you need to attribute spend to individual users, set a spending alert with the provider; that is the level at which usage is actually metered.
+Both providers bill per token consumed, against the account as a whole — there is no per-user seat, and the platform does not meter or cap usage per user. Spending controls live with the provider: OpenRouter supports credit limits and per-key spending caps, and OVHcloud bills against the Public Cloud project. Set those limits there, since that is the level at which usage is actually metered.
 
-Answering one question consumes roughly seven thousand input tokens and several hundred output tokens, most of it the assistant's fixed instructions and the retrieved context rather than the question itself. At the rates the models named above are typically offered, ordinary daily use by one person costs a small fraction of a euro per month. Published rates change often, so check [OVHcloud's pricing](https://www.ovhcloud.com/fr/public-cloud/ai-endpoints/) or [OpenRouter's model list](https://openrouter.ai/models) for current figures.
+Most of what a question costs is not the question. The assistant's fixed instructions, the conversation history, the retrieved records and the extra context added on an audit or risk assessment page dominate the input, so a short question on a busy page costs far more than a long one on an empty page. Expect a few thousand input tokens for a simple exchange and a multiple of that where the page carries a lot of context, against several hundred output tokens. Measure your own traffic before budgeting: model, context size and provider pricing all move the figure. Published rates change often, so check [OVHcloud's pricing](https://www.ovhcloud.com/fr/public-cloud/ai-endpoints/) or [OpenRouter's model list](https://openrouter.ai/models) for current figures.
 
 ## Related pages
 

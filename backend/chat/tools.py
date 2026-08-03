@@ -877,11 +877,13 @@ def _build_create_proposal(arguments: dict, scope, parsed_context=None) -> dict 
     parent_fk_field = None
     parent_id = None
 
-    # If the user is on a folder/domain page, use that folder directly
+    # If the user is on a folder/domain page, use that folder directly — but
+    # page_context is client-supplied, so only if they can actually reach it.
     if (
         parsed_context
         and parsed_context.object_id
         and parsed_context.model_key == "folder"
+        and str(parsed_context.object_id) in scope.folder_ids
     ):
         folder_id = parsed_context.object_id
 
@@ -1071,16 +1073,16 @@ def _build_attach_proposal(arguments: dict, scope, parsed_context=None) -> dict 
     if not query_result or not query_result.get("objects"):
         return None
 
-    # Get already-attached IDs to exclude them
+    # Never offer to attach to a parent the user cannot read — the payload
+    # names it, and the follow-up PATCH would be rejected anyway.
+    parent_obj = resolve_context_object(parsed_context, scope)
+    if parent_obj is None:
+        return None
     try:
-        parent_obj = resolve_context_object(parsed_context, scope)
-        if parent_obj:
-            existing_ids = set(
-                str(pk)
-                for pk in getattr(parent_obj, m2m_field).values_list("id", flat=True)
-            )
-        else:
-            existing_ids = set()
+        existing_ids = set(
+            str(pk)
+            for pk in getattr(parent_obj, m2m_field).values_list("id", flat=True)
+        )
     except (AttributeError, TypeError) as e:
         logger.warning("existing_ids_lookup_failed", error=e)
         existing_ids = set()

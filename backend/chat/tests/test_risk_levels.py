@@ -138,3 +138,26 @@ class TestMatricesForScenarios:
         from chat.risk_levels import matrices_for_scenarios
 
         assert matrices_for_scenarios(RiskScenario.objects.none()) == []
+
+
+class TestAliasCollision:
+    """Stripping rank decoration collapses labels that differ only by number,
+    so an exact label must win over its normalized form."""
+
+    LEVELLED = FakeMatrix(
+        "levelled",
+        [{"name": f"Level {n}"} for n in range(1, 6)],
+    )
+
+    def test_exact_label_wins_over_normalized_collision(self):
+        assert resolve_levels_by_matrix("Level 4", [self.LEVELLED]) == {"levelled": {3}}
+
+    def test_every_levelled_label_resolves_to_one_index(self):
+        for index in range(5):
+            assert resolve_levels_by_matrix(f"Level {index + 1}", [self.LEVELLED]) == {
+                "levelled": {index}
+            }
+
+    def test_normalized_fallback_still_works_when_exact_misses(self):
+        # "high" is not a literal label of the 5x5 matrix ("4 - high" is)
+        assert resolve_levels_by_matrix("high", [DECORATED_FIVE_LEVEL]) == {"m5": {3}}

@@ -134,11 +134,16 @@ class TestResolveContextObject:
         ctx = context_for("risk-assessments", risk_assessment)
         assert resolve_context_object(ctx, scope_for(outsider)) is None
 
-    def test_denies_with_no_access(self, risk_assessment, outsider):
+    def test_denies_a_user_with_no_role_at_all(self, risk_assessment):
+        """Distinct from the wrong-domain case: no RoleAssignment means
+        readable_ids returns an empty list rather than a filtered one."""
+        from iam.models import User
+
         from chat.tools import resolve_context_object
 
+        stranger = User.objects.create(email="scoping-stranger@test.local")
         ctx = context_for("risk-assessments", risk_assessment)
-        assert resolve_context_object(ctx, scope_for(outsider)) is None
+        assert resolve_context_object(ctx, scope_for(stranger)) is None
 
     def test_denies_unknown_object_id(self, reader):
         from chat.page_context import parse_page_context
@@ -504,3 +509,48 @@ class TestMultiValueFilters:
         assert one["total_count"] == 1
         assert two["total_count"] >= one["total_count"]
         assert "high or low" in two["filters_applied"][-1]
+
+
+class TestProposalBuildersRespectScope:
+    def test_folder_page_target_must_be_accessible(self, domain, other_domain, reader):
+        """A create proposal must not target a folder from a client-supplied
+        page context that the user cannot reach."""
+        from chat.page_context import parse_page_context
+        from chat.tools import _build_create_proposal
+
+        args = {"model": "asset", "items": [{"name": "proposed asset"}]}
+
+        on_reachable = _build_create_proposal(
+            args,
+            scope_for(reader),
+            parse_page_context({"path": f"/folders/{domain.id}"}),
+        )
+        assert on_reachable["folder_id"] == str(domain.id)
+
+        on_unreachable = _build_create_proposal(
+            args,
+            scope_for(reader),
+            parse_page_context({"path": f"/folders/{other_domain.id}"}),
+        )
+        assert on_unreachable["folder_id"] != str(other_domain.id)
+
+    def test_attach_proposal_refuses_an_unreadable_parent(
+        self, risk_assessment, reader, outsider
+    ):
+        from core.models import AppliedControl
+
+        from chat.tools import _build_attach_proposal
+
+        scenario = risk_assessment.risk_scenarios.first()
+        AppliedControl.objects.create(name="attachable control", folder=scenario.folder)
+        ctx = context_for("risk-scenarios", scenario)
+
+        assert _build_attach_proposal(
+            {"related_model": "applied_control"}, scope_for(reader), ctx
+        )
+        assert (
+            _build_attach_proposal(
+                {"related_model": "applied_control"}, scope_for(outsider), ctx
+            )
+            is None
+        )

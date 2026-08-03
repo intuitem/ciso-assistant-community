@@ -2212,21 +2212,45 @@ def _enrich_context(parsed_context, scope) -> str:
                 parts.append(f"  - {label[:160]} ({Result(ra.result).label})")
 
     elif parsed_context.model_key == "findings_assessment":
+        from django.db.models import Count
+
+        from core.models import Severity
+
         Finding = apps.get_model("core", "Finding")
-        findings = scope.queryset(Finding).filter(findings_assessment=parent_obj)[:30]
+        # Counted from the same scoped rows that get listed — a total the model
+        # is told to report verbatim must not include findings it cannot see.
+        readable = scope.queryset(Finding).filter(findings_assessment=parent_obj)
+        findings = readable[:30]
         if findings:
-            metrics = parent_obj.get_findings_metrics()
+            total = readable.count()
+            unresolved_important = (
+                readable.filter(severity__gte=Severity.HIGH)
+                .exclude(
+                    status__in=[
+                        Finding.Status.MITIGATED,
+                        Finding.Status.RESOLVED,
+                        Finding.Status.DISMISSED,
+                        Finding.Status.CLOSED,
+                    ]
+                )
+                .count()
+            )
             parts.append(
-                f"FINDINGS IN THIS ASSESSMENT: {metrics['total_count']} total, "
-                f"{metrics['unresolved_important_count']} unresolved with "
-                f"high or critical severity."
+                f"FINDINGS IN THIS ASSESSMENT: {total} total, "
+                f"{unresolved_important} unresolved with high or critical severity."
+            )
+            severity_labels = dict(Finding._meta.get_field("severity").choices or [])
+            distribution = (
+                readable.values("severity")
+                .annotate(count=Count("id"))
+                .order_by("-severity")
             )
             parts.append(
                 "Severity distribution: "
                 + ", ".join(
-                    f"{label}={count}"
-                    for label, count in metrics["severity_distribution"].items()
-                    if count
+                    f"{severity_labels.get(row['severity'], row['severity'])}={row['count']}"
+                    for row in distribution
+                    if row["count"]
                 )
             )
             for f in findings:

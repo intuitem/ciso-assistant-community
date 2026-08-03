@@ -84,15 +84,18 @@ def resolve_levels_by_matrix(term: str, matrices) -> dict[str, set[int]]:
     """
     if not term:
         return {}
-    candidates = {str(term).strip().casefold(), _normalize(term)}
-    candidates.discard("")
+    # Exact first: stripping decoration collapses labels that differ only by
+    # rank ("Level 4" and "Level 5" both normalize to "level"), so the
+    # normalized form is a fallback, never an addition.
+    exact = str(term).strip().casefold()
+    normalized = _normalize(term)
 
     resolved: dict[str, set[int]] = {}
     for matrix in matrices:
         aliases = _level_aliases(matrix)
-        levels: set[int] = set()
-        for candidate in candidates:
-            levels |= aliases.get(candidate, set())
+        levels = set(aliases.get(exact, set()))
+        if not levels and normalized:
+            levels = set(aliases.get(normalized, set()))
         if levels:
             resolved[str(matrix.id)] = levels
     return resolved

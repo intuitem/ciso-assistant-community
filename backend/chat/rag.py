@@ -73,7 +73,8 @@ def indexed_payload_types() -> dict[str, Any]:
     try:
         types["document_chunk"] = apps.get_model("chat", "IndexedDocument")
     except LookupError:
-        pass
+        # Uploaded-file chunks simply stay unsearchable rather than unscoped
+        logger.debug("indexed_payload_types: IndexedDocument unavailable")
     return types
 
 

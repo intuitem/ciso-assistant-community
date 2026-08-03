@@ -52,9 +52,9 @@ def scope_for(user):
 
 
 def _allowed_types(scope):
-    from chat.rag import _user_partition_filter
+    import chat.rag as rag
 
-    partition = _user_partition_filter(scope, None, None)
+    partition = rag._user_partition_filter(scope, None, None)
     if partition is None:
         return set()
     return {clause.must[0].match.value for clause in partition.must[0].should}
@@ -71,10 +71,11 @@ class TestUserPartitionFilter:
         assert "asset" not in allowed
 
     def test_each_clause_carries_only_that_types_folders(self, auditee, domain):
-        from chat.rag import _user_partition_filter
+        import chat.rag as rag
+
         from core.models import AppliedControl
 
-        partition = _user_partition_filter(scope_for(auditee), None, None)
+        partition = rag._user_partition_filter(scope_for(auditee), None, None)
         scope = scope_for(auditee)
         for clause in partition.must[0].should:
             if clause.must[0].match.value == "applied_control":
@@ -83,18 +84,18 @@ class TestUserPartitionFilter:
                 )
 
     def test_object_type_argument_narrows_further(self, reader, domain):
-        from chat.rag import _user_partition_filter
+        import chat.rag as rag
 
-        partition = _user_partition_filter(scope_for(reader), None, "asset")
+        partition = rag._user_partition_filter(scope_for(reader), None, "asset")
         assert [c.must[0].match.value for c in partition.must[0].should] == ["asset"]
 
     def test_no_readable_type_yields_no_filter(self, domain):
+        import chat.rag as rag
+
         from iam.models import User
 
-        from chat.rag import _user_partition_filter
-
         stranger = User.objects.create(email="rag-stranger@test.local")
-        assert _user_partition_filter(scope_for(stranger), None, None) is None
+        assert rag._user_partition_filter(scope_for(stranger), None, None) is None
 
 
 class TestSearchEndToEnd:
@@ -157,15 +158,19 @@ class TestSearchEndToEnd:
         return client
 
     def test_reader_retrieves_both(self, indexed, reader):
-        from chat.rag import search
+        import chat.rag as rag
 
-        names = {r["name"] for r in search("ransomware", reader, source_type="model")}
+        names = {
+            r["name"] for r in rag.search("ransomware", reader, source_type="model")
+        }
         assert names == {"secret scenario", "backup control"}
 
     def test_auditee_never_retrieves_the_risk_scenario(self, indexed, auditee):
-        from chat.rag import search
+        import chat.rag as rag
 
-        names = {r["name"] for r in search("ransomware", auditee, source_type="model")}
+        names = {
+            r["name"] for r in rag.search("ransomware", auditee, source_type="model")
+        }
         assert names == {"backup control"}
 
 
@@ -201,21 +206,21 @@ class TestGraphExpandScoping:
     def test_expands_for_a_user_who_may_read_both_ends(
         self, scenario_with_control, reader
     ):
-        from chat.rag import graph_expand
+        import chat.rag as rag
 
         seeds = [
             {"object_type": "risk_scenario", "object_id": str(scenario_with_control.id)}
         ]
-        assert [e["name"] for e in graph_expand(seeds, scope_for(reader))] == [
+        assert [e["name"] for e in rag.graph_expand(seeds, scope_for(reader))] == [
             "rag scoping control"
         ]
 
     def test_unreadable_seed_expands_to_nothing(self, scenario_with_control, auditee):
         """An auditee can read the control but not the scenario — walking from
         the scenario must not become a way to reach it."""
-        from chat.rag import graph_expand
+        import chat.rag as rag
 
         seeds = [
             {"object_type": "risk_scenario", "object_id": str(scenario_with_control.id)}
         ]
-        assert graph_expand(seeds, scope_for(auditee)) == []
+        assert rag.graph_expand(seeds, scope_for(auditee)) == []
