@@ -8,6 +8,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -55,7 +56,7 @@
 	optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
 	field="qualifications"
 	optionsLabelField="translated_name"
-	label={m.qualifications()}
+	label={safeTranslate('qualifications')}
 />
 <Select
 	{form}
