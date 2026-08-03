@@ -66,11 +66,13 @@ def _controls_doc() -> _StubDocument:
     return _StubDocument(_xlsx_bytes(CONTROL_ROWS), XLSX_CT, "controls.xlsx")
 
 
-def _ctx(documents=None, message="", session=None, request=None, folder_ids=None):
+def _ctx(documents=None, message="", session=None, request=None, user=None):
+    from chat.scoping import ReadScope
+
     return WorkflowContext(
         user_message=message,
         parsed_context=None,
-        accessible_folder_ids=folder_ids or [],
+        scope=ReadScope(user or (request.user if request else None)),
         llm=None,
         session=session,
         documents=documents or [],
@@ -385,7 +387,6 @@ class TestWorkflowWithDocument:
             documents=[controls_document],
             session=chat_session,
             request=admin_request,
-            folder_ids=[str(domain.id)],
         )
         events = _run(ImportDocumentWorkflow(), ctx)
 
@@ -425,7 +426,6 @@ class TestWorkflowWithDocument:
             message="import these as pentest findings",
             session=chat_session,
             request=admin_request,
-            folder_ids=[str(domain.id)],
         )
         _run(ImportDocumentWorkflow(), ctx)
         chat_session.refresh_from_db()
@@ -446,7 +446,6 @@ class TestWorkflowWithDocument:
                 message="import these as pentest findings",
                 session=chat_session,
                 request=admin_request,
-                folder_ids=[str(domain.id)],
             ),
         )
         choices = [e for e in events if e.type == "pending_choice"]
@@ -463,7 +462,6 @@ class TestWorkflowWithDocument:
                 message="Q1 Pentest",
                 session=chat_session,
                 request=admin_request,
-                folder_ids=[str(domain.id)],
             ),
         )
         chat_session.refresh_from_db()
@@ -496,7 +494,6 @@ class TestWorkflowWithDocument:
                 documents=[doc],
                 session=chat_session,
                 request=admin_request,
-                folder_ids=[str(domain.id)],
             ),
         )
         chat_session.refresh_from_db()
@@ -508,7 +505,6 @@ class TestWorkflowWithDocument:
                 message="Assets",
                 session=chat_session,
                 request=admin_request,
-                folder_ids=[str(domain.id)],
             ),
         )
         chat_session.refresh_from_db()
@@ -674,7 +670,6 @@ class TestContainerMatching:
                     message="Renewal Q1",
                     session=chat_session,
                     request=admin_request,
-                    folder_ids=[str(domain.id)],
                 )
             )
         )
@@ -697,7 +692,6 @@ class TestContainerMatching:
                     message="create a new one",
                     session=chat_session,
                     request=admin_request,
-                    folder_ids=[str(domain.id)],
                 )
             )
         )
@@ -715,7 +709,6 @@ def test_dry_run_pins_folder_into_state(
             documents=[controls_document],
             session=chat_session,
             request=admin_request,
-            folder_ids=[str(domain.id)],
         ),
     )
     chat_session.refresh_from_db()
