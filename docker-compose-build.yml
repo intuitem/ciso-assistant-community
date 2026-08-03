@@ -15,6 +15,7 @@ services:
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
+      - QDRANT_URL=http://qdrant:6333
 
     read_only: true
     cap_drop:
@@ -45,6 +46,7 @@ services:
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
+      - QDRANT_URL=http://qdrant:6333
 
     read_only: true
     cap_drop:

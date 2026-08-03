@@ -13,6 +13,7 @@ services:
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
+      - QDRANT_URL=http://qdrant:6333
     read_only: true
     cap_drop:
       - ALL
@@ -30,6 +31,41 @@ services:
       timeout: 10s
       retries: 30
       start_period: 150s
+
+  huey:
+    container_name: huey
+    image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+    pull_policy: always
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: always
+    environment:
+      - ALLOWED_HOSTS=backend,localhost
+      - CISO_ASSISTANT_URL=https://localhost:8443
+      - DJANGO_DEBUG=False
+      - AUTH_TOKEN_TTL=7200
+      - HOME=/tmp
+      - XDG_CACHE_HOME=/tmp/.cache
+      - XDG_CONFIG_HOME=/tmp/.config
+      - XDG_DATA_HOME=/tmp/.local/share
+      - QDRANT_URL=http://qdrant:6333
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
+
+    volumes:
+      - ./db:/code/db
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        python manage.py run_huey -w 2 --scheduler-interval 60
+    user: "1001:1001"
 
   frontend:
     container_name: frontend
