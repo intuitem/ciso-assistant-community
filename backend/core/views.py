@@ -5526,7 +5526,12 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get priority chart data")
     def priority_chart_data(self, request):
-        qs = AppliedControl.objects.exclude(status="active")
+        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, self.model
+        )
+        qs = self.model.objects.filter(id__in=viewable_controls_ids).exclude(
+            status="active"
+        )
 
         data = {
             "--": [],
@@ -8701,6 +8706,13 @@ def get_composer_data(request):
         for risk_assessment in risk_assessments
     ):
         return Response({"error": "Invalid UUID list"}, status=400)
+
+    (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), request.user, RiskAssessment
+    )
+    viewable_ids = {str(id) for id in viewable_ids}
+    if not all(risk_assessment in viewable_ids for risk_assessment in risk_assessments):
+        return Response({"error": "Permission denied"}, status=403)
 
     data = compile_risk_assessment_for_composer(request.user, risk_assessments)
     for _data in data["risk_assessment_objects"]:
