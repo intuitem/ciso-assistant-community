@@ -118,7 +118,7 @@
 {#if $page.data.featureflags?.threat_modeling}
 	<AutocompleteSelect
 		{form}
-		multiple
+		nullable
 		optionsEndpoint="threat-models"
 		optionsExtraFields={[['folder', 'str']]}
 		optionsDetailedUrlParameters={[
@@ -128,6 +128,6 @@
 		field="threat_models"
 		cacheLock={cacheLocks['threat_models']}
 		bind:cachedValue={formDataCache['threat_models']}
-		label={m.threatModels()}
+		label={m.threatModel()}
 	/>
 {/if}

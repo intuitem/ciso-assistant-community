@@ -5695,5 +5695,7 @@
 	"threatModelingDescription": "Build attack sequences over a TTP catalog and wire them to risk scenarios",
 	"ttpsDescription": "Adversary tactics and techniques catalogs such as MITRE ATT&CK and ATLAS",
 	"removeNode": "Remove node",
-	"toggleLogicOperator": "Toggle AND / OR"
+	"toggleLogicOperator": "Toggle AND / OR",
+	"addThreatModel": "Add threat model",
+	"threatModelHelpText": "The attack sequence that justifies this scenario"
 }

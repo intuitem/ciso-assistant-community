@@ -5690,5 +5690,7 @@
 	"threatModelingDescription": "Construire des séquences d'attaque à partir d'un catalogue de TTP et les relier aux scénarios de risque",
 	"ttpsDescription": "Catalogues de tactiques et techniques adverses tels que MITRE ATT&CK et ATLAS",
 	"removeNode": "Supprimer le nœud",
-	"toggleLogicOperator": "Basculer ET / OU"
+	"toggleLogicOperator": "Basculer ET / OU",
+	"addThreatModel": "Ajouter un modèle de menaces",
+	"threatModelHelpText": "La séquence d'attaque qui justifie ce scénario"
 }
