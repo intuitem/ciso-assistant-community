@@ -1652,11 +1652,30 @@
 	"cascadeDeleteWarning": "Увага: Видалення цього також призведе до постійного видалення {count} пов'язаних об'єктів:",
 	"errorFetching": "Не вдалося завантажити інформацію про каскад. Будь ласка, спробуйте ще раз.",
 	"info": "Інформація",
-	"cascadeAffectedNotice": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["count", "countPlural"], "match": {"count=0": "Жоден інший об'єкт не буде зачеплений.", "countPlural=one": "{count} пов'язаний об'єкт не буде видалений, але втратить одне або кілька зв'язків.", "countPlural=other": "{count} пов'язаних об'єктів не буде видалено, але втратить одне або кілька зв'язків."}}],
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Жоден інший об'єкт не буде зачеплений.",
+				"countPlural=one": "{count} пов'язаний об'єкт не буде видалений, але втратить одне або кілька зв'язків.",
+				"countPlural=other": "{count} пов'язаних об'єктів не буде видалено, але втратить одне або кілька зв'язків."
+			}
+		}
+	],
 	"cascadeAffectedHint": "Елементи нижче залишаються в системі, але їхні посилання на цей об'єкт будуть видалені.",
 	"libraryFilteringLabels": "Мітки бібліотеки",
 	"campaignsDescription": "Керування кампаніями аудиту",
-	"objectsNotVisible": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} об'єкт невидимий.", "countPlural=other": "{count} об'єкти невидимі."}}],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} об'єкт невидимий.",
+				"countPlural=other": "{count} об'єкти невидимі."
+			}
+		}
+	],
 	"appliedControlsPlaceholder": "Виберіть застосовані контролі...",
 	"assignmentSettings": "Налаштування призначень",
 	"allowAssignmentsToEntities": "Дозволити призначення для сутностей",
@@ -1780,13 +1799,34 @@
 	"builderTranslateQuestion": "Перекласти питання...",
 	"builderFrameworkSettings": "Налаштування фреймворку",
 	"builderNoRulesOrGroupsConfigured": "Не налаштовано правил або груп",
-	"builderOutcomeRuleSummary": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} правил результату", "countPlural=other": "{count} правил результату"}}],
-	"builderImplementationGroupsSummaryShort": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} груп", "countPlural=other": "{count} груп"}}],
+	"builderOutcomeRuleSummary": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} правил результату",
+				"countPlural=other": "{count} правил результату"
+			}
+		}
+	],
+	"builderImplementationGroupsSummaryShort": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": { "countPlural=one": "{count} груп", "countPlural=other": "{count} груп" }
+		}
+	],
 	"builderUrnNamespace": "Простір імен URN",
 	"builderScoringSettings": "Налаштування оцінювання",
 	"builderAggregationHint": "Середнє ділить загальний бал на кількість питань. Сума додає всі бали безпосередньо. Використовуйте Суму для бінарного (0/1) оцінювання.",
 	"builderScoreScale": "Шкала оцінок",
-	"builderScaleLevel": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} рівнів", "countPlural=other": "{count} рівнів"}}],
+	"builderScaleLevel": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": { "countPlural=one": "{count} рівнів", "countPlural=other": "{count} рівнів" }
+		}
+	],
 	"builderAddScaleLevel": "Додати рівень шкали",
 	"builderScaleNamePlaceholder": "напр. Частково",
 	"builderScaleDescriptionPlaceholder": "Необов'язково",
@@ -1848,8 +1888,26 @@
 	"builderDefaultMode": "За замовчуванням",
 	"builderSplashMode": "Заставка",
 	"builderAssessableLeaf": "Оцінюваний листок",
-	"builderAssessableWithChildren": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "Оцінюване · {count} дочірній", "countPlural=other": "Оцінюване · {count} дочірніх"}}],
-	"builderGroupWithChildren": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "Група · {count} дочірній", "countPlural=other": "Група · {count} дочірніх"}}],
+	"builderAssessableWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Оцінюване · {count} дочірній",
+				"countPlural=other": "Оцінюване · {count} дочірніх"
+			}
+		}
+	],
+	"builderGroupWithChildren": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Група · {count} дочірній",
+				"countPlural=other": "Група · {count} дочірніх"
+			}
+		}
+	],
 	"builderEmptyNode": "Порожній вузол",
 	"builderSplashScreenStatus": "Заставка",
 	"builderNestedUnder": "вкладено під {parent}",
@@ -1868,7 +1926,16 @@
 	"builderVisibilityExpressionPlaceholder": "напр. requirements[\"urn:...\"].score > 50",
 	"builderImplementationGroupsLabel": "Групи впровадження:",
 	"builderAddQuestion": "Додати питання",
-	"builderChildrenHidden": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} дочірній прихований", "countPlural=other": "{count} дочірніх приховано"}}],
+	"builderChildrenHidden": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} дочірній прихований",
+				"countPlural=other": "{count} дочірніх приховано"
+			}
+		}
+	],
 	"builderSplashSource": "Джерело",
 	"builderSplashNoSourceContent": "Немає вихідного вмісту.",
 	"builderSplashEditPlaceholder": "Введіть markdown-вміст для вашої заставки...",
@@ -1887,7 +1954,16 @@
 	"builderAnnotationOptional": "Необов'язкова нотатка...",
 	"builderDeleteThisQuestion": "Видалити це питання?",
 	"builderChangeTypeWarning": "Зміна типу видалить наявні варіанти. Продовжити?",
-	"builderShownWhenAnswers": [{"declarations": ["input count", "input ref", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "Показується, коли {ref} = {count} відповідей", "countPlural=other": "Показується, коли {ref} = {count} відповідей"}}],
+	"builderShownWhenAnswers": [
+		{
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Показується, коли {ref} = {count} відповідей",
+				"countPlural=other": "Показується, коли {ref} = {count} відповідей"
+			}
+		}
+	],
 	"builderChoices": "Варіанти",
 	"builderAddChoice": "Додати варіант",
 	"builderChoicePlaceholder": "Текст варіанту...",
@@ -3341,9 +3417,27 @@
 	"averageProgress": "Середній прогрес",
 	"daysRemaining": "Залишилось днів",
 	"associatedFindingsAssessments": "Пов'язані подальші оцінювання",
-	"hourCount": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} година", "countPlural=other": "{count} годин"}}],
-	"minuteCount": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} хвилина", "countPlural=other": "{count} хвилин"}}],
-	"dayCount": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} день", "countPlural=other": "{count} днів"}}],
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": { "countPlural=one": "{count} година", "countPlural=other": "{count} годин" }
+		}
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": { "countPlural=one": "{count} хвилина", "countPlural=other": "{count} хвилин" }
+		}
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": { "countPlural=one": "{count} день", "countPlural=other": "{count} днів" }
+		}
+	],
 	"serverURL": "URL сервера",
 	"oidcConfiguration": "openid-configuration",
 	"tokenAuthMethod": "Метод автентифікації токена",
@@ -5487,11 +5581,68 @@
 	"unpublishedDocumentsNotice": "Документів у чернетці, але ще не опублікованих: {count} — видно в перегляді керування.",
 	"authored": "Створено в редакторі",
 	"uploaded": "Завантажено",
-	"lbCountFrameworks": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} фреймворк", "countPlural=other": "{count} фреймворків"}}],
-	"lbCountThreats": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} загроза", "countPlural=other": "{count} загроз"}}],
-	"lbCountReferenceControls": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} відповідний захід", "countPlural=other": "{count} відповідних заходів"}}],
-	"lbCountRiskMatrices": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} матриця ризиків", "countPlural=other": "{count} матриць ризиків"}}],
-	"lbCountRequirementMappingSets": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} зіставлення", "countPlural=other": "{count} зіставлень"}}],
-	"lbCountPreset": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} пресет", "countPlural=other": "{count} пресетів"}}],
-	"lbCountMetricDefinitions": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} визначення метрики", "countPlural=other": "{count} визначень метрик"}}]
+	"lbCountFrameworks": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} фреймворк",
+				"countPlural=other": "{count} фреймворків"
+			}
+		}
+	],
+	"lbCountThreats": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": { "countPlural=one": "{count} загроза", "countPlural=other": "{count} загроз" }
+		}
+	],
+	"lbCountReferenceControls": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} відповідний захід",
+				"countPlural=other": "{count} відповідних заходів"
+			}
+		}
+	],
+	"lbCountRiskMatrices": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} матриця ризиків",
+				"countPlural=other": "{count} матриць ризиків"
+			}
+		}
+	],
+	"lbCountRequirementMappingSets": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} зіставлення",
+				"countPlural=other": "{count} зіставлень"
+			}
+		}
+	],
+	"lbCountPreset": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": { "countPlural=one": "{count} пресет", "countPlural=other": "{count} пресетів" }
+		}
+	],
+	"lbCountMetricDefinitions": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} визначення метрики",
+				"countPlural=other": "{count} визначень метрик"
+			}
+		}
+	]
 }
