@@ -1313,18 +1313,8 @@ class TestRealAuthAndRBAC:
     def test_restricted_user_cannot_update_hidden_record(
         self, knox_restricted_client, app_ready
     ):
-        """
-        find_existing() locates the record regardless of RBAC (it searches by
-        ref_id/name, not by viewable_ids).  The update is blocked one layer
-        deeper: BaseModelSerializer.update() calls _check_object_perm("change"),
-        which calls RoleAssignment.is_access_allowed() with the real request
-        user.  A user with no role assignments has no "change_asset" permission
-        on any folder, so PermissionDenied is raised → failed == 1, updated == 0,
-        and the record on disk is unchanged.
-
-        This test proves get_accessible_object_ids() / is_access_allowed() are
-        called with the real user and return real results — not a patched shortcut.
-        """
+        # A user with no role assignments holds add_asset on no folder, so the
+        # import is refused before any record is read or written.
         folder = app_ready
         asset = Asset.objects.create(
             name="Hidden Asset", ref_id="RBAC-001", folder=folder
@@ -1337,8 +1327,33 @@ class TestRealAuthAndRBAC:
             folder.id,
             HTTP_X_ON_CONFLICT="update",
         )
-        body = resp.json()
-        assert body["results"]["updated"] == 0
-        assert body["results"]["failed"] == 1
+        assert resp.status_code == 403
         asset.refresh_from_db()
         assert asset.description is None
+
+    def test_restricted_user_cannot_create_in_any_folder(
+        self, knox_restricted_client, app_ready, domain_folder
+    ):
+        for folder_id in (app_ready.id, domain_folder.id, None):
+            resp = _post(
+                knox_restricted_client,
+                _csv("name,ref_id\nIntruder,INTRUDE-001\n"),
+                "a.csv",
+                "Asset",
+                folder_id,
+            )
+            assert resp.status_code == 403
+        assert not Asset.objects.filter(ref_id="INTRUDE-001").exists()
+
+    def test_restricted_user_cannot_import_users(
+        self, knox_restricted_client, app_ready
+    ):
+        resp = _post(
+            knox_restricted_client,
+            _csv("email\nintruder@evil.test\n"),
+            "u.csv",
+            "User",
+            app_ready.id,
+        )
+        assert resp.status_code == 403
+        assert not User.objects.filter(email="intruder@evil.test").exists()

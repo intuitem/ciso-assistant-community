@@ -24,11 +24,6 @@ class IntegrationProviderSerializer(serializers.ModelSerializer):
 
 
 class ConnectionTestSerializer(serializers.Serializer):
-    """
-    Serializer for validating and testing connection credentials before saving.
-    This is not a ModelSerializer, so it doesn't save anything.
-    """
-
     provider = serializers.CharField(write_only=True)
     configuration_id = serializers.PrimaryKeyRelatedField(
         queryset=IntegrationConfiguration.objects.filter(is_active=True),
@@ -36,37 +31,47 @@ class ConnectionTestSerializer(serializers.Serializer):
         required=False,
     )
     credentials = serializers.DictField()
-    # Settings are sometimes needed for the client to initialize correctly
     settings = serializers.DictField(required=False, default=dict)
 
+    def validate_configuration_id(self, config):
+        request = self.context.get("request")
+        if request is None:
+            raise serializers.ValidationError("Configuration not found.")
+        (_, changeable_ids, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, IntegrationConfiguration
+        )
+        if config.id not in changeable_ids:
+            raise serializers.ValidationError("Configuration not found.")
+        return config
+
     def validate(self, data):
-        """
-        Use the IntegrationRegistry to validate provider-specific schema requirements.
-        """
-        provider = data.get("provider")  # This is the IntegrationProvider instance
-        config: IntegrationConfiguration = data.get("configuration_id", None)
-        # The full configuration dictionary to be validated
-        config_data = {
-            "credentials": data.get("credentials", {}),
-            "settings": data.get("settings", {}),
-        }
+        provider = data.get("provider")
+        config: IntegrationConfiguration | None = data.get("configuration_id")
+        credentials = dict(data.get("credentials") or {})
 
-        if not config_data["credentials"].get("api_token") and config:
-            config_data["credentials"]["api_token"] = config.credentials.get(
-                "api_token"
-            )
-        if not config_data["credentials"].get("password") and config:
-            config_data["credentials"]["password"] = config.credentials.get("password")
+        if config:
+            stored = config.credentials or {}
+            # a stored secret is only replayable to the connection it was stored for
+            backfilled = {k for k in stored if not credentials.get(k)}
+            if backfilled and any(
+                v != stored.get(k)
+                for k, v in credentials.items()
+                if k not in backfilled
+            ):
+                raise serializers.ValidationError(
+                    {"credentials": "reenterSecretToTestModifiedConnection"}
+                )
+            credentials.update({k: stored[k] for k in backfilled})
 
-        # Use the validation logic from your registry
         is_valid, errors = IntegrationRegistry.validate_configuration(
-            provider, config_data
+            provider,
+            {"credentials": credentials, "settings": data.get("settings", {})},
         )
 
         if not is_valid:
-            # Raise a validation error that DRF can render nicely
             raise serializers.ValidationError({"provider_specific_errors": errors})
 
+        data["credentials"] = credentials
         return data
 
 
