@@ -138,7 +138,25 @@ CREATABLE_MODELS = {
 # --- Declarative relationship registries ---
 # Adding a new contextual relationship = one line here. No logic changes needed.
 
+# Filters that accept several values — one query answers "A or B" so the model
+# never has to add counts up itself.
+MULTI_VALUE_FILTERS = frozenset(
+    {
+        "status",
+        "treatment",
+        "result",
+        "priority",
+        "category",
+        "effort",
+        "severity",
+        "risk_level",
+    }
+)
+
 # Parent → children via FK.  parent_model_key → [(child_model_key, fk_field_on_child)]
+# Drives query scoping to the object on the current page. Creation is gated
+# separately by CREATABLE_MODELS — requirement_assessments are auto-created by
+# the framework, so they are queryable here but never proposed for creation.
 PARENT_CHILD_MAP: dict[str, list[tuple[str, str]]] = {
     "risk_assessment": [
         ("risk_scenario", "risk_assessment"),
@@ -147,7 +165,7 @@ PARENT_CHILD_MAP: dict[str, list[tuple[str, str]]] = {
         ("finding", "findings_assessment"),
     ],
     "compliance_assessment": [
-        # requirement_assessments are auto-created by the framework, not user-created
+        ("requirement_assessment", "compliance_assessment"),
     ],
     "ebios_rm_study": [
         ("feared_event", "ebios_rm_study"),
@@ -188,6 +206,26 @@ ATTACHABLE_RELATIONS: dict[str, list[tuple[str, str]]] = {
         ("evidence", "evidences"),
     ],
 }
+
+
+def resolve_context_object(parsed_context, scope):
+    """
+    Load the object the user's page points at. page_context comes from the
+    client, so its UUID is untrusted and resolves through the read scope.
+    """
+    if not parsed_context or not parsed_context.object_id:
+        return None
+
+    info = MODEL_MAP.get(parsed_context.model_key)
+    if not info:
+        return None
+
+    try:
+        model_class = apps.get_model(info[0], info[1])
+    except LookupError:
+        return None
+
+    return scope.queryset(model_class).filter(id=parsed_context.object_id).first()
 
 
 def _get_field_choices(
@@ -233,24 +271,27 @@ def _build_filter_properties() -> tuple[dict, dict]:
 
     if treatment_choices:
         properties["treatment"] = {
-            "type": "string",
-            "enum": treatment_choices,
-            "description": "Filter risk scenarios by treatment",
+            "type": "array",
+            "items": {"type": "string", "enum": treatment_choices},
+            "description": "Filter risk scenarios by treatment. Pass several to match any of them.",
         }
-        valid_values["treatment"] = set(treatment_choices)
 
     if result_choices:
         properties["result"] = {
-            "type": "string",
-            "enum": result_choices,
-            "description": "Filter requirement assessments by compliance result",
+            "type": "array",
+            "items": {"type": "string", "enum": result_choices},
+            "description": (
+                "Filter requirement assessments by compliance result. Pass SEVERAL "
+                "values to match any of them — 'non-compliant or partially compliant' "
+                "is result=['non_compliant','partially_compliant'] in ONE call, never "
+                "two calls you add up."
+            ),
         }
-        valid_values["result"] = set(result_choices)
 
     if category_choices:
         properties["category"] = {
-            "type": "string",
-            "enum": category_choices,
+            "type": "array",
+            "items": {"type": "string", "enum": category_choices},
             "description": (
                 "Filter applied controls by their category sub-type. "
                 "Only use this when the user explicitly asks to filter by category "
@@ -258,15 +299,13 @@ def _build_filter_properties() -> tuple[dict, dict]:
                 "the user says 'controls' — that refers to the model, not the category."
             ),
         }
-        valid_values["category"] = set(category_choices)
 
     if effort_choices:
         properties["effort"] = {
-            "type": "string",
-            "enum": effort_choices,
-            "description": "Filter applied controls by effort level",
+            "type": "array",
+            "items": {"type": "string", "enum": effort_choices},
+            "description": "Filter applied controls by effort level. Pass several to match any.",
         }
-        valid_values["effort"] = set(effort_choices)
 
     return properties, valid_values
 
@@ -322,19 +361,27 @@ def _build_tools() -> tuple[list[dict], dict]:
             "description": "Filter by domain/folder name (e.g. 'DEMO', 'Production')",
         },
         "status": {
-            "type": "string",
-            "description": "Filter by status (e.g. 'active', 'in_progress', 'to_do', 'done', 'draft', 'open', 'closed')",
+            "type": "array",
+            "items": {"type": "string"},
+            "description": (
+                "Filter by status (e.g. 'active', 'in_progress', 'to_do', 'done', "
+                "'draft', 'open', 'closed'). Pass several to match any of them."
+            ),
         },
         "priority": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 4,
-            "description": "Filter by priority (1=critical/P1, 2=high/P2, 3=medium/P3, 4=low/P4)",
+            "type": "array",
+            "items": {"type": "integer", "minimum": 1, "maximum": 4},
+            "description": (
+                "Filter by priority (1=critical/P1, 2=high/P2, 3=medium/P3, 4=low/P4). "
+                "Pass several to match any of them."
+            ),
         },
         "severity": {
-            "type": "string",
+            "type": "array",
+            "items": {"type": "string"},
             "description": (
-                "Filter by severity. Pass the label as the user says it — "
+                "Filter by severity, several values to match any of them. "
+                "Pass the label as the user says it — "
                 "'critical', 'high', 'medium', 'low', 'info' for findings, "
                 "vulnerabilities and security exceptions; "
                 "'Critical', 'Major', 'Moderate', 'Minor', 'Low' for incidents. "
@@ -343,9 +390,11 @@ def _build_tools() -> tuple[list[dict], dict]:
             ),
         },
         "risk_level": {
-            "type": "string",
+            "type": "array",
+            "items": {"type": "string"},
             "description": (
-                "Filter risk scenarios by risk level, using the wording of the risk "
+                "Filter risk scenarios by risk level, several values to match any of "
+                "them ('high or very high' is one call). Use the wording of the risk "
                 "matrix in use (e.g. 'High', 'Élevé', 'Very High', 'VH'). Use this "
                 "whenever the user asks how many risks are at a given level. "
                 "Pair with risk_level_scope to pick which level is meant."
@@ -688,10 +737,23 @@ def _build_tools() -> tuple[list[dict], dict]:
                                         "enum": ["list", "count", "summary"],
                                     },
                                     "search": {"type": "string"},
-                                    "status": {"type": "string"},
+                                    "status": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    },
                                     "domain": {"type": "string"},
-                                    "severity": {"type": "string"},
-                                    "risk_level": {"type": "string"},
+                                    "severity": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    },
+                                    "risk_level": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    },
+                                    "result": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    },
                                     "risk_level_scope": {
                                         "type": "string",
                                         "enum": ["current", "residual", "inherent"],
@@ -764,19 +826,35 @@ def _sanitize_arguments(arguments: dict) -> dict:
             if not isinstance(v, list) or not v:
                 continue
 
-        # Validate enum fields against model-derived allowed values
-        if k in valid_values and v not in valid_values[k]:
-            logger.info("Dropping invalid value for %s: %r", k, v)
-            continue
+        if k in MULTI_VALUE_FILTERS:
+            if isinstance(v, str):
+                v = [p.strip() for p in v.split(",") if p.strip()]
+            elif not isinstance(v, (list, tuple)):
+                v = [v]
+            if not v:
+                continue
+            v = list(v)
+
+        # Validate enum fields against model-derived allowed values.
+        # Multi-value filters keep whatever members are valid.
+        if k in valid_values:
+            if isinstance(v, (list, tuple)):
+                kept = [x for x in v if x in valid_values[k]]
+                if len(kept) != len(v):
+                    logger.info("Dropping invalid values for %s: %r", k, v)
+                if not kept:
+                    continue
+                v = kept
+            elif v not in valid_values[k]:
+                logger.info("Dropping invalid value for %s: %r", k, v)
+                continue
 
         cleaned[k] = v
 
     return cleaned
 
 
-def _build_create_proposal(
-    arguments: dict, accessible_folder_ids: list[str], parsed_context=None
-) -> dict | None:
+def _build_create_proposal(arguments: dict, scope, parsed_context=None) -> dict | None:
     """
     Build a structured creation proposal from LLM tool call arguments.
     Does NOT create anything — returns a proposal for the frontend to confirm.
@@ -815,19 +893,9 @@ def _build_create_proposal(
                 parent_id = parsed_context.object_id
                 # Inherit folder from parent object
                 if not folder_id:
-                    parent_info = MODEL_MAP.get(parsed_context.model_key)
-                    if parent_info:
-                        try:
-                            parent_model = apps.get_model(
-                                parent_info[0], parent_info[1]
-                            )
-                            parent_obj = parent_model.objects.filter(
-                                id=parent_id
-                            ).first()
-                            if parent_obj and hasattr(parent_obj, "folder_id"):
-                                folder_id = str(parent_obj.folder_id)
-                        except (LookupError, AttributeError) as e:
-                            logger.warning("parent_folder_lookup_failed", error=e)
+                    parent_obj = resolve_context_object(parsed_context, scope)
+                    if parent_obj and hasattr(parent_obj, "folder_id"):
+                        folder_id = str(parent_obj.folder_id)
                 break
 
     if not folder_id:
@@ -835,12 +903,12 @@ def _build_create_proposal(
         if domain:
             from .orm_query import _resolve_domain
 
-            folder_ids = _resolve_domain(domain, accessible_folder_ids)
+            folder_ids = _resolve_domain(domain, scope.folder_ids)
             if folder_ids:
                 folder_id = folder_ids[0]
 
-    if not folder_id and accessible_folder_ids:
-        folder_id = accessible_folder_ids[0]
+    if not folder_id and scope.folder_ids:
+        folder_id = scope.folder_ids[0]
 
     # Build proposal items — each gets name, description, folder, parent FK,
     # and any extra fields the LLM provided that match the model's actual fields.
@@ -891,7 +959,7 @@ def _build_create_proposal(
                 RiskMatrix = apps.get_model("core", "RiskMatrix")
                 matrix = RiskMatrix.objects.filter(
                     is_enabled=True,
-                    folder_id__in=accessible_folder_ids,
+                    folder_id__in=scope.folder_ids,
                 ).first()
                 if not matrix:
                     matrix = RiskMatrix.objects.filter(is_enabled=True).first()
@@ -917,7 +985,7 @@ def _build_create_proposal(
     # Build list of available domain folders so the user can change the target
     available_folders = list(
         Folder.objects.filter(
-            id__in=accessible_folder_ids,
+            id__in=scope.folder_ids,
             content_type=Folder.ContentType.DOMAIN,
         )
         .order_by("name")
@@ -939,9 +1007,7 @@ def _build_create_proposal(
     }
 
 
-def _build_attach_proposal(
-    arguments: dict, accessible_folder_ids: list[str], parsed_context=None
-) -> dict | None:
+def _build_attach_proposal(arguments: dict, scope, parsed_context=None) -> dict | None:
     """
     Search for existing objects and propose attaching them to the current page's object.
     Returns a proposal dict with type="propose_attach".
@@ -986,17 +1052,12 @@ def _build_attach_proposal(
         and related_model_key == "applied_control"
     ):
         try:
-            parent_model = apps.get_model(parent_info[0], parent_info[1])
-            ra_obj = (
-                parent_model.objects.select_related("requirement")
-                .filter(id=parsed_context.object_id)
-                .first()
-            )
-            if ra_obj and hasattr(ra_obj, "requirement") and ra_obj.requirement:
-                req = ra_obj.requirement
+            ra_obj = resolve_context_object(parsed_context, scope)
+            req = getattr(ra_obj, "requirement", None)
+            if req:
                 # Use the requirement's description or name as search context
                 search = req.description[:200] if req.description else (req.name or "")
-        except (LookupError, AttributeError) as e:
+        except AttributeError as e:
             logger.warning("requirement_context_lookup_failed", error=e)
 
     query_args = {
@@ -1006,14 +1067,13 @@ def _build_attach_proposal(
     if search:
         query_args["search"] = search
 
-    query_result = execute_tool_query(query_args, accessible_folder_ids)
+    query_result = execute_tool_query(query_args, scope)
     if not query_result or not query_result.get("objects"):
         return None
 
     # Get already-attached IDs to exclude them
     try:
-        parent_model = apps.get_model(parent_info[0], parent_info[1])
-        parent_obj = parent_model.objects.filter(id=parsed_context.object_id).first()
+        parent_obj = resolve_context_object(parsed_context, scope)
         if parent_obj:
             existing_ids = set(
                 str(pk)
@@ -1021,7 +1081,7 @@ def _build_attach_proposal(
             )
         else:
             existing_ids = set()
-    except (LookupError, AttributeError, TypeError) as e:
+    except (AttributeError, TypeError) as e:
         logger.warning("existing_ids_lookup_failed", error=e)
         existing_ids = set()
 
@@ -1057,7 +1117,7 @@ REPLAYABLE_TOOLS: frozenset[str] = frozenset({"query_objects", "search_library"}
 def dispatch_tool_call(
     tool_name: str,
     arguments: dict,
-    accessible_folder_ids: list[str],
+    scope,
     parsed_context=None,
     user_message: str = "",
 ) -> dict | None:
@@ -1075,24 +1135,22 @@ def dispatch_tool_call(
     if tool_name == "query_objects":
         from .orm_query import execute_tool_query
 
-        return execute_tool_query(cleaned, accessible_folder_ids, parsed_context)
+        return execute_tool_query(cleaned, scope, parsed_context)
 
     if tool_name == "propose_create":
-        return _build_create_proposal(cleaned, accessible_folder_ids, parsed_context)
+        return _build_create_proposal(cleaned, scope, parsed_context)
 
     if tool_name == "attach_existing":
-        return _build_attach_proposal(cleaned, accessible_folder_ids, parsed_context)
+        return _build_attach_proposal(cleaned, scope, parsed_context)
 
     if tool_name == "multi_query":
-        return _execute_multi_query(arguments, accessible_folder_ids, parsed_context)
+        return _execute_multi_query(arguments, scope, parsed_context)
 
     logger.warning("Unknown tool: %s", tool_name)
     return None
 
 
-def _execute_multi_query(
-    arguments: dict, accessible_folder_ids: list[str], parsed_context=None
-) -> dict | None:
+def _execute_multi_query(arguments: dict, scope, parsed_context=None) -> dict | None:
     """Execute multiple ORM queries and return combined results."""
     from .orm_query import execute_tool_query, format_query_result
 
@@ -1103,7 +1161,7 @@ def _execute_multi_query(
     results = []
     for q in queries[:3]:  # Max 3 sub-queries
         cleaned = _sanitize_arguments(q)
-        result = execute_tool_query(cleaned, accessible_folder_ids, parsed_context)
+        result = execute_tool_query(cleaned, scope, parsed_context)
         if result:
             results.append(result)
 

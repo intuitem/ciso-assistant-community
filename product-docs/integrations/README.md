@@ -5,6 +5,7 @@ CISO Assistant is designed to plug into the rest of your tooling — through its
 ## Available now
 
 - **[API reference](api.md)** — authentication, schema browsing, and curl examples.
+- **[Hosted AI providers](ai-providers.md)** — connecting the chat assistant to OVHcloud AI Endpoints or OpenRouter.
 
 ## Coming soon
 

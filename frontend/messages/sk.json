@@ -5430,13 +5430,8 @@
 	"lbListEmpty": "prázdne",
 	"lbCountFrameworks": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} rámec",
 				"countPlural=few": "{count} rámce",
@@ -5446,13 +5441,8 @@
 	],
 	"lbCountThreats": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} hrozba",
 				"countPlural=few": "{count} hrozby",
@@ -5462,13 +5452,8 @@
 	],
 	"lbCountReferenceControls": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} referenčné opatrenie",
 				"countPlural=few": "{count} referenčné opatrenia",
@@ -5478,13 +5463,8 @@
 	],
 	"lbCountRiskMatrices": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} matica rizík",
 				"countPlural=few": "{count} matice rizík",
@@ -5494,13 +5474,8 @@
 	],
 	"lbCountRequirementMappingSets": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} sada mapovania",
 				"countPlural=few": "{count} sady mapovania",
@@ -5510,13 +5485,8 @@
 	],
 	"lbCountPreset": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} prednastavený postup",
 				"countPlural=few": "{count} prednastavené postupy",
@@ -5526,13 +5496,8 @@
 	],
 	"lbCountMetricDefinitions": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} definícia metriky",
 				"countPlural=few": "{count} definície metrík",

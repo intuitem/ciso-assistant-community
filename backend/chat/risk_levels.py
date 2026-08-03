@@ -1,11 +1,9 @@
 """
 Risk-level vocabulary resolved from the risk matrix.
 
-A scenario's ``current_level`` / ``residual_level`` / ``inherent_level`` are
-indices into the matrix's ``risk`` array. The labels ("High", "Élevé", "VH", …)
-live in the matrix library object and differ per matrix and per locale, so
-everything here reads them back from the matrix definition — nothing about the
-scale is hardcoded.
+A scenario's current/residual/inherent level is an index into the matrix's
+``risk`` array; the labels live in the matrix library object and differ per
+matrix and per locale, so everything here reads them back from the definition.
 """
 
 import re
@@ -15,8 +13,6 @@ from django.utils.translation import get_language
 NOT_RATED = "--"
 
 # Matrix labels are often decorated with their rank ("4 - high", "[3] moyen").
-# Stripping leading/trailing digits and punctuation leaves the bare wording the
-# user actually types, without assuming anything about the words themselves.
 _DECORATION = re.compile(r"^[\W\d_]+|[\W\d_]+$", re.UNICODE)
 
 # Scope name → RiskScenario field holding that scope's level
@@ -46,8 +42,6 @@ def level_label(matrix, level: int | None, locale: str | None = None) -> str:
         return NOT_RATED
     defs = _risk_defs(matrix)
     if not defs:
-        # Without a matrix the index carries no meaning — a bare number here is
-        # what made earlier answers unusable.
         return NOT_RATED
     if level >= len(defs):
         return str(level)
@@ -85,11 +79,8 @@ def _level_aliases(matrix) -> dict[str, set[int]]:
 
 def resolve_levels_by_matrix(term: str, matrices) -> dict[str, set[int]]:
     """
-    Resolve a user-supplied level term per matrix.
-
-    Kept per-matrix on purpose: level 2 in a 3-level matrix is not level 2 in a
-    5-level one, so a single set of indices would miscount across assessments
-    using different matrices.
+    Resolve a level term per matrix — level 2 in a 3-level matrix is not level 2
+    in a 5-level one, so a shared index set would miscount.
     """
     if not term:
         return {}
