@@ -1149,9 +1149,10 @@ def validate_integer_value(
     if column_name is not None:
         df = value_or_df
         if column_name not in df.columns:
-            raise ValueError(
-                f"{f'({context}) ' if context else ''}[{sheet_name}] Column \"{column_name}\" not found"
-            )
+            return  # Should not return error (Optional columns are checked with that function)
+            # raise ValueError(
+            #     f"{f'({context}) ' if context else ''}[{sheet_name}] Column \"{column_name}\" not found"
+            # )
 
         values = []
         for idx, v in df[column_name].items():
@@ -2573,83 +2574,29 @@ def _URN_prefix_validate_prefix_values_and_dependencies(wb: Workbook, df: pd.Dat
 def print_info_about_internal_external_URN_prefix(sheet_name: str, internal_threats: List[str], external_threats: List[str], internal_ref_ctrl: List[str], external_ref_ctrl: List[str], context: str = None, verbose: bool = False, ctx: ConsoleContext = None, all_verbose: bool = False):
     
     verbose_icon = "💬 "
-    
-    if internal_threats:
-        msg = f"ℹ️  [INFO] ({context}) [{sheet_name}] Internal \"threats\" prefixes found: {', '.join(f'\"{x}\"' for x in internal_threats)}"
+    prefix_groups = (
+        ("internal", "threats", internal_threats),
+        ("external", "threats", external_threats),
+        ("internal", "reference_controls", internal_ref_ctrl),
+        ("external", "reference_controls", external_ref_ctrl),
+    )
 
-        if all_verbose and verbose:
-            msg = verbose_icon + msg
+    for origin, prefix_type, prefixes in prefix_groups:
+        if prefixes:
+            quoted_prefixes = ", ".join(f'\"{prefix}\"' for prefix in prefixes)
+            msg = f'ℹ️  [INFO] ({context}) [{sheet_name}] {origin.capitalize()} "{prefix_type}" prefixes found: {quoted_prefixes}'
+
+            if all_verbose:
+                if not verbose:
+                    continue
+                msg = verbose_icon + msg
+
             print(msg)
-
-            if ctx:
+            if ctx and all_verbose:
                 ctx.add_sheet_verbose_msg(sheet_name, msg)
 
-        elif not all_verbose:
-            print(msg)
-
-    else:
-        if verbose:
-            msg = f"💬 ℹ️  [INFO] ({context}) [{sheet_name}] No internal \"threats\" prefixes found"
-            print(msg)
-            if ctx:
-                ctx.add_sheet_verbose_msg(sheet_name, msg)
-
-    if external_threats:
-        msg = f"ℹ️  [INFO] ({context}) [{sheet_name}] External \"threats\" prefixes found: {', '.join(f'\"{x}\"' for x in external_threats)}"
-
-        if all_verbose and verbose:
-            msg = verbose_icon + msg
-            print(msg)
-
-            if ctx:
-                ctx.add_sheet_verbose_msg(sheet_name, msg)
-
-        elif not all_verbose:
-            print(msg)
-
-    else:
-        if verbose:
-            msg = f"💬 ℹ️  [INFO] ({context}) [{sheet_name}] No external \"threats\" prefixes found"
-            print(msg)
-            if ctx:
-                ctx.add_sheet_verbose_msg(sheet_name, msg)
-
-    # Info messages for "reference_controls"
-    if internal_ref_ctrl:
-        msg = f"ℹ️  [INFO] ({context}) [{sheet_name}] Internal \"reference_controls\" prefixes found: {', '.join(f'\"{x}\"' for x in internal_ref_ctrl)}"
-
-        if all_verbose and verbose:
-            msg = verbose_icon + msg
-            print(msg)
-
-            if ctx:
-                ctx.add_sheet_verbose_msg(sheet_name, msg)
-        elif not all_verbose:
-            print(msg)
-
-    else:
-        if verbose:
-            msg = f"💬 ℹ️  [INFO] ({context}) [{sheet_name}] No internal \"reference_controls\" prefixes found"
-            print(msg)
-            if ctx:
-                ctx.add_sheet_verbose_msg(sheet_name, msg)
-
-    if external_ref_ctrl:
-        msg = f"ℹ️  [INFO] ({context}) [{sheet_name}] External \"reference_controls\" prefixes found: {', '.join(f'\"{x}\"' for x in external_ref_ctrl)}"
-
-        if all_verbose and verbose:
-            msg = verbose_icon + msg
-            print(msg)
-
-            if ctx:
-                ctx.add_sheet_verbose_msg(sheet_name, msg)
-
-        elif not all_verbose:
-            print(msg)
-
-    else:
-        if verbose:
-            msg = f"💬 ℹ️  [INFO] ({context}) [{sheet_name}] No external \"reference_controls\" prefixes found"
+        elif verbose:
+            msg = f'💬 ℹ️  [INFO] ({context}) [{sheet_name}] No {origin} "{prefix_type}" prefixes found'
             print(msg)
             if ctx:
                 ctx.add_sheet_verbose_msg(sheet_name, msg)
@@ -3774,15 +3721,15 @@ def validate_risk_matrix_content(df: pd.DataFrame, sheet_name: str, verbose: boo
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
 
 
-    msg = (
-        f"⚠️  [WARNING] ({fct_name}) [{sheet_name}] In this script, Matrix content sheet verification is partially implemented."
+    print(
+        f"ℹ️  [INFO] ({fct_name}) [{sheet_name}] In this script, Matrix content sheet verification is partially implemented."
         f"\n> 💡 Tip: Matrix verification will be improved in a future update."
     )
-    print(msg)
-    if ctx:
-        ctx.add_sheet_warning_msg(sheet_name, msg)
+    # print(msg)
+    # if ctx:
+    #     ctx.add_sheet_warning_msg(sheet_name, msg)
 
-    print_sheet_validation(sheet_name, verbose, ctx)
+    # print_sheet_validation(sheet_name, verbose, ctx)
 
 
 # [CONTENT] Implementation Groups {OK}²
@@ -4111,7 +4058,7 @@ def validate_excel_structure(filepath: str | Path, external_refs: List[str] = No
 
         if base_name not in meta_types:
             raise ValueError(f"({fct_name}) [{sheet_name}] No corresponding meta sheet found for this content"
-                             f"\n> 💡 Tip: Make sure the corresponding meta sheet for \"{sheet_name}\" is named \"{re.sub(r'_content$', '_meta', sheet_name)}\"")
+                             f"\n> 💡 Tip: Make sure the corresponding meta sheet for \"{sheet_name}\" is named \"{re.sub(r'_content$', SheetTypes.META.value, sheet_name)}\"")
 
     # Handle "_content" sheets
     for sheet_name, df in content_sheets.items():
@@ -4120,7 +4067,7 @@ def validate_excel_structure(filepath: str | Path, external_refs: List[str] = No
 
     # Warn about ignored sheets
     for sheet_name in ignored_sheets:
-        msg = f"⏩ [SKIP] Ignored sheet \"{sheet_name}\" (does not end with \"_meta\" or \"_content\")"
+        msg = f"⏩ [SKIP] Ignored sheet \"{sheet_name}\" (does not end with \"{SheetTypes.META.value}\" or \"{SheetTypes.CONTENT.value}\")"
         print(msg)
 
     print("")
@@ -4151,7 +4098,7 @@ def main():
         "-e", "--external-refs",
         type=str,
         help="YAML files containing external references mentioned in the library.\n"
-        "Use it to check the following columns if necessary : \"threats\", \"reference_controls\".\n"
+        f"Use it to check the following columns if necessary : \"{FrameworkContentColumns.THREATS.value}\", \"{FrameworkContentColumns.REFERENCE_CONTROLS.value}\".\n"
         "Separate external references with commas (e.g., ./threats1.yaml,./refs/ref_ctrl.yaml,../test.yaml)",
     )
 
