@@ -70,6 +70,54 @@ ALLOWED_UPLOAD_EXTENSIONS = [
 ]
 
 
+# Magic-byte signatures of native executable / shared-object formats. An
+# uploaded attachment must never be one of these, whatever its extension: a
+# renamed executable (e.g. an ELF stored as ``.zip``) can be loaded as native
+# code by the backend (SQLite ``load_extension``, dlopen, …). None of these
+# signatures overlap with legitimate allowed types (docx/xlsx/zip start with
+# ``PK``, PDF with ``%PDF``, OLE doc with ``\xd0\xcf\x11\xe0``, gzip ``\x1f\x8b``).
+_EXECUTABLE_MAGIC = (
+    b"\x7fELF",  # ELF (Linux/Unix)
+    b"MZ",  # DOS/PE (Windows .exe/.dll)
+    b"\xfe\xed\xfa\xce",  # Mach-O 32-bit big-endian
+    b"\xfe\xed\xfa\xcf",  # Mach-O 64-bit big-endian
+    b"\xce\xfa\xed\xfe",  # Mach-O 32-bit little-endian
+    b"\xcf\xfa\xed\xfe",  # Mach-O 64-bit little-endian
+    b"\xca\xfe\xba\xbe",  # Mach-O universal / fat binary (also Java class)
+    b"\xbe\xba\xfe\xca",  # Mach-O universal, byte-swapped
+)
+
+
+def reject_executable_content(value):
+    """
+    Reject uploads whose leading bytes match a native executable / shared-object
+    signature, regardless of the declared extension. Defense against native code
+    delivery (e.g. an ELF renamed to an allowed extension and later dlopen'd).
+    """
+    f = getattr(value, "file", value)
+    try:
+        pos = f.tell()
+    except AttributeError, OSError:
+        pos = None
+    try:
+        f.seek(0)
+        header = f.read(8)
+    finally:
+        if pos is not None:
+            f.seek(pos)
+        else:
+            try:
+                f.seek(0)
+            except AttributeError, OSError:
+                pass
+
+    if isinstance(header, str):
+        header = header.encode("latin-1", "ignore")
+    if any(header.startswith(sig) for sig in _EXECUTABLE_MAGIC):
+        raise ValidationError("Executable content is not allowed as an attachment.")
+    return value
+
+
 def _validate_file_extension_and_sanitize(value, allowed_extensions):
     parts = value.name.split(".")
     extension = parts[-1].lower()
@@ -91,8 +139,10 @@ def _validate_file_extension_and_sanitize(value, allowed_extensions):
 
 def validate_file_name(value):
     """
-    Check file extension against the general upload allowlist and sanitize its name.
+    Check file extension against the general upload allowlist, reject native
+    executable content, and sanitize the file name.
     """
+    reject_executable_content(value)
     return _validate_file_extension_and_sanitize(value, ALLOWED_UPLOAD_EXTENSIONS)
 
 

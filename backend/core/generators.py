@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 
 from django.db.models import Count
 from library.helpers import get_referential_translation
+from .report_context import audit_proxy
 
 matplotlib.use("Agg")
 
@@ -699,7 +700,7 @@ def gen_audit_context(id, doc, tree, lang):
     ac_chart = InlineImage(doc, hbar_buffer, width=Cm(15))
     IGs = ", ".join([str(x) for x in audit.get_selected_implementation_groups()])
     context = {
-        "audit": audit,
+        "audit": audit_proxy(audit),
         "date": now().strftime("%d/%m/%Y"),
         "contributors": f"{authors}\n{reviewers}",
         "req": aggregated,
