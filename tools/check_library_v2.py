@@ -3561,8 +3561,68 @@ def _framework_validate_depth_consistency(df: pd.DataFrame, sheet_name: str):
         )
 
 
+# Check if sheets mentioned by "scores_definition" exist and don't repeat framework's default
+def _framework_validate_scores_definition_column(wb: Workbook, df: pd.DataFrame, sheet_name: str):
 
-# [CONTENT] Framework {OK} [Check new optional columns : "scores_definition", "depends_on" (Check if actual answer exists in answer sheet), "condition"(Check if condition is valid for "depends_on" values [e.g. no "/" for all depends_on allowed])]
+    fct_name = get_current_fct_name()
+    column_name = FrameworkContentColumns.SCORES_DEFINITION.value
+
+    if column_name not in df.columns:
+        return
+
+    scores_definitions = df[column_name].dropna().astype(str).map(str.strip)
+    scores_definitions = scores_definitions[scores_definitions != ""]
+
+    if scores_definitions.empty:
+        return
+
+    # Get default scores definition from associated framework meta sheet
+    meta_sheet_name = get_corresponding_type_sheet_names([sheet_name], SheetTypes.META)[0]
+
+    if meta_sheet_name not in wb.sheetnames:
+        raise ValueError(f'({fct_name}) [{sheet_name}] Missing associated meta sheet "{meta_sheet_name}".')
+
+    meta_df = pd.DataFrame(wb[meta_sheet_name].values)
+    default_scores_definition = get_meta_value(meta_df, FrameworkMetaKeys.SCORES_DEFINITION, meta_sheet_name, context=fct_name)
+
+    redundant_values = []
+    missing_sheets = []
+
+    # Check every scores definition
+    for index, scores_definition in scores_definitions.items():
+        excel_row = index + 2
+
+        if scores_definition == default_scores_definition:
+            redundant_values.append((excel_row, scores_definition))
+            continue
+
+        expected_meta_sheet = f"{scores_definition}{SheetTypes.META.value}"
+
+        if expected_meta_sheet not in wb.sheetnames:
+            missing_sheets.append((excel_row, scores_definition, expected_meta_sheet))
+
+    errors = []
+
+    if redundant_values:
+        details = "\n   - ".join(f'Row #{row}: "{value}"' for row, value in redundant_values)
+        errors.append(
+            f'Column "{column_name}" repeats default scores definition "{default_scores_definition}":\n   - {details}'
+            f'\n> 💡 Tip: Remove these values because this scores definition is already selected by default in framework meta sheet.'
+        )
+
+    if missing_sheets:
+        details = "\n   - ".join(f'Row #{row}: "{value}" points to missing sheet "{meta_sheet}"' for row, value, meta_sheet in missing_sheets)
+        errors.append(
+            f'Column "{column_name}" references missing score sheets:\n   - {details}'
+            f'\n> 💡 Tip: Create corresponding "{SheetTypes.META.value}" and "{SheetTypes.CONTENT.value}" sheet pair or remove invalid value from "{column_name}".'
+        )
+
+    if errors:
+        raise ValueError(f"({fct_name}) [{sheet_name}] " + "\n".join(errors))
+
+
+
+# [CONTENT] Framework {OK} [Check new optional columns : "depends_on" (Check if actual answer exists in answer sheet), "condition"(Check if condition is valid for "depends_on" values [e.g. no "/" for all depends_on allowed])]
 def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, external_refs: List[str] = None, verbose: bool = False, ctx: ConsoleContext = None):
 
     fct_name = get_current_fct_name()
@@ -3640,6 +3700,9 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, 
 
     # Check if values in "condition" columns are valid
     validate_allowed_column_values(df, FrameworkContentColumns.CONDITION, condition_constraints.allowed_values, sheet_name, fct_name, ctx=ctx, split_regex=condition_constraints.split_regex)
+
+    # Check if values in "scores_definition" columns are valid
+    _framework_validate_scores_definition_column(wb, df, sheet_name)
 
 
     ### A SPECIFIC CHECK FUNCTION SHOULD BE CREATED
