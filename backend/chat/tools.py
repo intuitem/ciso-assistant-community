@@ -42,6 +42,13 @@ MODEL_MAP = {
         "Compliance Assessments",
         "compliance-assessments",
     ),
+    "finding": ("core", "Finding", "Findings", "findings"),
+    "findings_assessment": (
+        "core",
+        "FindingsAssessment",
+        "Findings Assessments",
+        "findings-assessments",
+    ),
     "threat": ("core", "Threat", "Threats", "threats"),
     "evidence": ("core", "Evidence", "Evidences", "evidences"),
     "vulnerability": ("core", "Vulnerability", "Vulnerabilities", "vulnerabilities"),
@@ -111,6 +118,7 @@ CREATABLE_MODELS = {
     "applied_control",
     "asset",
     "risk_scenario",
+    "finding",
     "threat",
     "evidence",
     "vulnerability",
@@ -134,6 +142,9 @@ CREATABLE_MODELS = {
 PARENT_CHILD_MAP: dict[str, list[tuple[str, str]]] = {
     "risk_assessment": [
         ("risk_scenario", "risk_assessment"),
+    ],
+    "findings_assessment": [
+        ("finding", "findings_assessment"),
     ],
     "compliance_assessment": [
         # requirement_assessments are auto-created by the framework, not user-created
@@ -159,6 +170,15 @@ ATTACHABLE_RELATIONS: dict[str, list[tuple[str, str]]] = {
         ("threat", "threats"),
         ("asset", "assets"),
         ("vulnerability", "vulnerabilities"),
+    ],
+    "finding": [
+        ("applied_control", "applied_controls"),
+        ("threat", "threats"),
+        ("vulnerability", "vulnerabilities"),
+        ("evidence", "evidences"),
+    ],
+    "findings_assessment": [
+        ("evidence", "evidences"),
     ],
     "compliance_assessment": [
         ("asset", "assets"),
@@ -193,6 +213,7 @@ def _build_filter_properties() -> tuple[dict, dict]:
     valid_values = {
         "model": set(MODEL_MAP.keys()),
         "action": {"list", "count", "summary"},
+        "risk_level_scope": {"current", "residual", "inherent"},
         "date_filter": {
             "overdue",
             "due_this_month",
@@ -265,6 +286,8 @@ def _build_tools() -> tuple[list[dict], dict]:
                 "'risk scenarios'/'scénarios de risque' → risk_scenario, "
                 "'risk assessments'/'analyses de risque' → risk_assessment, "
                 "'audits'/'compliance assessments' → compliance_assessment, "
+                "'findings'/'constats'/'observations'/'pentest findings' → finding, "
+                "'findings assessments'/'follow-ups'/'suivis de constats'/'pentests' → findings_assessment, "
                 "'threats'/'menaces' → threat, "
                 "'evidences'/'preuves' → evidence, "
                 "'vulnerabilities'/'vulnérabilités' → vulnerability, "
@@ -309,10 +332,33 @@ def _build_tools() -> tuple[list[dict], dict]:
             "description": "Filter by priority (1=critical/P1, 2=high/P2, 3=medium/P3, 4=low/P4)",
         },
         "severity": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 6,
-            "description": "Filter by severity (1=critical, 2=major, 3=significant, 4=minor, 5=negligible, 6=unknown)",
+            "type": "string",
+            "description": (
+                "Filter by severity. Pass the label as the user says it — "
+                "'critical', 'high', 'medium', 'low', 'info' for findings, "
+                "vulnerabilities and security exceptions; "
+                "'Critical', 'Major', 'Moderate', 'Minor', 'Low' for incidents. "
+                "The label is resolved against the model's own severity scale, "
+                "which is why a label is safer here than a number."
+            ),
+        },
+        "risk_level": {
+            "type": "string",
+            "description": (
+                "Filter risk scenarios by risk level, using the wording of the risk "
+                "matrix in use (e.g. 'High', 'Élevé', 'Very High', 'VH'). Use this "
+                "whenever the user asks how many risks are at a given level. "
+                "Pair with risk_level_scope to pick which level is meant."
+            ),
+        },
+        "risk_level_scope": {
+            "type": "string",
+            "enum": ["current", "residual", "inherent"],
+            "description": (
+                "Which risk level risk_level applies to. Default 'current' — use "
+                "'residual' when the user says residual/après traitement, "
+                "'inherent' when they say inherent/brut."
+            ),
         },
         "date_filter": {
             "type": "string",
@@ -426,6 +472,7 @@ def _build_tools() -> tuple[list[dict], dict]:
                             "The type of object to create. Same mapping as query_objects: "
                             "'controls' → applied_control, 'assets' → asset, "
                             "'risk scenarios' → risk_scenario, 'threats' → threat, "
+                            "'findings'/'constats' → finding, "
                             "'evidences' → evidence, 'vulnerabilities' → vulnerability, "
                             "'exceptions' → security_exception, 'incidents' → incident, "
                             "'entities'/'third parties' → entity, 'solutions' → solution, "
@@ -642,6 +689,13 @@ def _build_tools() -> tuple[list[dict], dict]:
                                     },
                                     "search": {"type": "string"},
                                     "status": {"type": "string"},
+                                    "domain": {"type": "string"},
+                                    "severity": {"type": "string"},
+                                    "risk_level": {"type": "string"},
+                                    "risk_level_scope": {
+                                        "type": "string",
+                                        "enum": ["current", "residual", "inherent"],
+                                    },
                                     "has_no_related": {
                                         "type": "array",
                                         "items": {"type": "string"},

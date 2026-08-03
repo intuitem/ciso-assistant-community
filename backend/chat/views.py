@@ -2113,15 +2113,43 @@ def _enrich_context(parsed_context, accessible_folder_ids: list[str]) -> str:
 
     parts = []
 
-    # For risk assessments: include assets from the same domain
+    # For risk assessments: the scenarios and their rating come first — under a
+    # tight token budget these are what questions are actually asked about; the
+    # domain's assets follow as raw material for identifying further risks.
     if parsed_context.model_key == "risk_assessment":
+        from .risk_levels import LEVEL_FIELDS, describe_levels, level_label
+
+        matrix = getattr(parent_obj, "risk_matrix", None)
+        scale = describe_levels(matrix)
+        if scale:
+            parts.append(f"RISK MATRIX LEVELS (lowest to highest): {scale}")
+
+        RiskScenario = apps.get_model("core", "RiskScenario")
+        scenarios = RiskScenario.objects.filter(
+            risk_assessment_id=parsed_context.object_id,
+        )[:20]
+        if scenarios:
+            parts.append("\nEXISTING RISK SCENARIOS (already identified):")
+            for s in scenarios:
+                line = f"  - {s.name}"
+                extras = []
+                for scope, level_field in LEVEL_FIELDS.items():
+                    level = getattr(s, level_field, None)
+                    if level is not None and level >= 0:
+                        extras.append(f"{scope}={level_label(matrix, level)}")
+                if s.treatment:
+                    extras.append(f"treatment={s.get_treatment_display()}")
+                if extras:
+                    line += f" ({', '.join(extras)})"
+                parts.append(line)
+
         Asset = apps.get_model("core", "Asset")
         assets = Asset.objects.filter(
             folder_id=folder_id,
             folder_id__in=accessible_folder_ids,
         )[:30]
         if assets:
-            parts.append("ASSETS IN THIS DOMAIN:")
+            parts.append("\nASSETS IN THIS DOMAIN:")
             for asset in assets:
                 line = f"  - {asset.name}"
                 extras = []
@@ -2139,18 +2167,31 @@ def _enrich_context(parsed_context, accessible_folder_ids: list[str]) -> str:
                     line += f" — {asset.description[:150]}"
                 parts.append(line)
 
-        # Also include existing risk scenarios for awareness
-        RiskScenario = apps.get_model("core", "RiskScenario")
-        scenarios = RiskScenario.objects.filter(
-            risk_assessment_id=parsed_context.object_id,
-        )[:20]
-        if scenarios:
-            parts.append("\nEXISTING RISK SCENARIOS (already identified):")
-            for s in scenarios:
-                line = f"  - {s.name}"
-                if hasattr(s, "treatment") and s.treatment:
-                    line += f" (treatment={s.get_treatment_display()})"
-                parts.append(line)
+    # For findings assessments: include the findings with severity and status
+    elif parsed_context.model_key == "findings_assessment":
+        findings = parent_obj.findings.all()[:30]
+        if findings:
+            metrics = parent_obj.get_findings_metrics()
+            parts.append(
+                f"FINDINGS IN THIS ASSESSMENT: {metrics['total_count']} total, "
+                f"{metrics['unresolved_important_count']} unresolved with "
+                f"high or critical severity."
+            )
+            parts.append(
+                "Severity distribution: "
+                + ", ".join(
+                    f"{label}={count}"
+                    for label, count in metrics["severity_distribution"].items()
+                    if count
+                )
+            )
+            for f in findings:
+                line = f"  - {f.name} (severity={f.get_severity_display()}, status={f.get_status_display()}"
+                if f.priority:
+                    line += f", priority=P{f.priority}"
+                if f.eta:
+                    line += f", eta={f.eta}"
+                parts.append(line + ")")
 
     return "\n".join(parts)
 
