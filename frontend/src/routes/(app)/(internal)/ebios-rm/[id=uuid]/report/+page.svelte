@@ -307,7 +307,9 @@
 							{/if}
 							{#if event.qualifications.length > 0}
 								<div>
-									<span class="font-semibold text-surface-700-300">{m.qualifications()}:</span>
+									<span class="font-semibold text-surface-700-300"
+										>{safeTranslate('qualifications')}:</span
+									>
 									<span class="ml-2"
 										>{event.qualifications.map((q) => safeTranslate(q.str)).join(', ')}</span
 									>
