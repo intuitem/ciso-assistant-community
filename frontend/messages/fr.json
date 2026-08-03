@@ -1320,6 +1320,7 @@
 	"docHtmlTemplateSyntaxHelp": "Les modèles utilisent la syntaxe de gabarit Django rendue par WeasyPrint. Intégrez le CSS dans une balise <style> et utilisez les variables ci-dessous pour composer la mise en page.",
 	"wordTemplates": "Modèles de rapports Word",
 	"wordTemplatesDescription": "Personnalisez les modèles de rapports Word (.docx) utilisés pour la génération de rapports. Téléversez vos propres modèles pour remplacer ceux par défaut.",
+	"wordTemplatesWarning": "Examinez attentivement le contenu du modèle avant utilisation et assurez-vous qu'il respecte les politiques de sécurité et de conformité de votre organisation.",
 	"uploadTemplate": "Téléverser un modèle",
 	"wordTemplateUploadHelp": "Téléversez un fichier .docx utilisant les mêmes variables que le modèle par défaut. Téléchargez d'abord le modèle par défaut comme point de départ.",
 	"downloadDefaultTemplate": "Télécharger le modèle par défaut",
