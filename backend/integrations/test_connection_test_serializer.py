@@ -11,8 +11,13 @@ STORED = {
 }
 
 
+class StubProvider:
+    name = "jira"
+
+
 class StubConfig:
     credentials = STORED
+    provider = StubProvider()
 
 
 @pytest.fixture(autouse=True)
@@ -22,10 +27,12 @@ def accept_any_provider(monkeypatch):
     )
 
 
-def _validate(credentials, config: StubConfig | None = StubConfig()):
+def _validate(
+    credentials, config: StubConfig | None = StubConfig(), provider: str = "jira"
+):
     return ConnectionTestSerializer().validate(
         {
-            "provider": "jira",
+            "provider": provider,
             "configuration_id": config,
             "credentials": credentials,
             "settings": {},
@@ -85,6 +92,14 @@ def test_does_not_mutate_the_incoming_credentials():
     }
     _validate(credentials)
     assert credentials["api_token"] == ""
+
+
+def test_rejects_backfill_through_a_different_provider():
+    with pytest.raises(serializers.ValidationError):
+        _validate(
+            {"instance_url": "https://attacker.example", "username": "x"},
+            provider="servicenow",
+        )
 
 
 def test_no_config_leaves_credentials_untouched():

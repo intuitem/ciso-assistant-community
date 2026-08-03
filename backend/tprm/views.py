@@ -9,7 +9,7 @@ from rest_framework.status import (
     HTTP_403_FORBIDDEN,
     HTTP_409_CONFLICT,
 )
-from iam.models import Folder, Permission, RoleAssignment, UserGroup
+from iam.models import Folder, Permission, RoleAssignment
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,

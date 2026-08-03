@@ -1534,6 +1534,28 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         collector = NestedObjects(using=router.db_for_write(instance))
         collector.collect([instance])
 
+        scope_folder = (
+            instance if isinstance(instance, Folder) else Folder.get_folder(instance)
+        )
+        in_scope_folder_ids = set()
+        if scope_folder is not None:
+            in_scope_folder_ids = {str(scope_folder.id)} | {
+                str(f.id) for f in scope_folder.get_sub_folders()
+            }
+        viewable_folder_ids = {
+            str(fid)
+            for fid in RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, Folder
+            )[0]
+        }
+
+        def is_visible(obj):
+            folder = Folder.get_folder(obj)
+            if folder is None:
+                return True
+            folder_id = str(folder.id)
+            return folder_id in in_scope_folder_ids or folder_id in viewable_folder_ids
+
         skip_model_names = {
             "Token",
             "AuthToken",
@@ -1565,6 +1587,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         def add_grouped(bucket, obj):
             model = obj.__class__
             if is_hidden_model(model):
+                return
+            if not is_visible(obj):
                 return
             key = model.__name__
             pk = str(getattr(obj, "pk", "")) or ""

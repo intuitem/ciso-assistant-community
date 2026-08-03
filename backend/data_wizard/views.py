@@ -179,18 +179,31 @@ def resolve_accessible_target(model_class, target_id, user):
     return model_class.objects.filter(id=target_id, id__in=change_ids).first()
 
 
-def get_accessible_folders_map(user: User) -> dict[str, UUID]:
+def get_accessible_folders_map(user: User, model_name: str | None = None) -> dict:
     """
     Build a map of folder names to IDs that the provided user can access.
     Used by the data wizard import flow to validate targets.
+
+    Consumers resolve a record's `domain` column through this map and write there,
+    so when the target model is known the map is narrowed to folders the user may
+    actually add to. The write serializers enforce this too, but only implicitly —
+    a future importer calling objects.create() directly would not.
     """
     (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
         Folder.get_root_folder(), user, Folder
     )
-    folders_map = {
-        f.name.lower(): f.id for f in Folder.objects.filter(id__in=viewable_folders_ids)
-    }
-    return folders_map
+    folders = Folder.objects.filter(id__in=viewable_folders_ids)
+    if model_name:
+        try:
+            perm = Permission.objects.get(codename=f"add_{model_name}")
+        except Permission.DoesNotExist:
+            return {}
+        folders = [
+            f
+            for f in folders
+            if RoleAssignment.is_access_allowed(user=user, perm=perm, folder=f)
+        ]
+    return {f.name.lower(): f.id for f in folders}
 
 
 ZIP_MAGIC_NUMBER: Final[bytes] = bytes([0x50, 0x4B, 0x03, 0x04])
@@ -3448,7 +3461,12 @@ class LoadFileView(APIView):
         # get viewable and actionable folders, perimeters and frameworks
         # build a map from the name to the id
 
-        folders_map = get_accessible_folders_map(request.user)
+        folders_map = get_accessible_folders_map(
+            request.user,
+            IMPORT_ROOT_MODEL.get(model_type, model_type.value.lower())
+            if model_type
+            else None,
+        )
         file_type: RecordFileType = RecordFileType.XLSX
         res = None
         try:

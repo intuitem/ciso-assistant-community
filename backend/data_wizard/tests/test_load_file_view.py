@@ -1345,6 +1345,51 @@ class TestRealAuthAndRBAC:
             assert resp.status_code == 403
         assert not Asset.objects.filter(ref_id="INTRUDE-001").exists()
 
+    def test_domain_column_cannot_escape_into_a_view_only_folder(self, app_ready):
+        # The gate authorizes the X-Folder-Id folder, but a record's `domain`
+        # column is resolved separately through the accessible-folders map.
+        from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+        from knox.models import AuthToken
+        from rest_framework.test import APIClient
+
+        writable = Folder.objects.create(
+            name="Writable",
+            parent_folder=app_ready,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        readonly = Folder.objects.create(
+            name="Readonly",
+            parent_folder=app_ready,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        user = User.objects.create_user("split@datawizard.test", is_published=True)
+        user.folder = app_ready
+        user.save()
+        for folder, role_name in ((writable, "BI-RL-ANA"), (readonly, "BI-RL-AUD")):
+            group = UserGroup.objects.create(name=f"grp-{role_name}", folder=folder)
+            group.user_set.add(user)
+            assignment = RoleAssignment.objects.create(
+                user_group=group,
+                role=Role.objects.get(name=role_name),
+                folder=folder,
+                is_recursive=True,
+            )
+            assignment.perimeter_folders.add(folder)
+
+        client = APIClient()
+        _, token = AuthToken.objects.create(user=user)
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+
+        resp = _post(
+            client,
+            _csv("name,domain\nESCAPED-ASSET,Readonly\n"),
+            "a.csv",
+            "Asset",
+            writable.id,
+        )
+        assert resp.status_code == 200
+        assert not Asset.objects.filter(folder=readonly).exists()
+
     def test_restricted_user_cannot_import_users(
         self, knox_restricted_client, app_ready
     ):

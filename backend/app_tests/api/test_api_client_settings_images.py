@@ -90,9 +90,15 @@ def test_user_without_role_cannot_upload(norole_client, app_ready, field):
 
 
 @pytest.mark.parametrize("field", ["logo", "favicon"])
-def test_user_without_role_cannot_delete(norole_client, app_ready, field):
+def test_user_without_role_cannot_delete(admin_client, norole_client, app_ready, field):
+    # Without an uploaded image handle_file_delete short-circuits to 403 anyway,
+    # so the assertion below would hold even with no authorization at all.
+    assert _upload(admin_client, app_ready.id, field).status_code == 200
+
     resp = norole_client.put(f"/api/client-settings/{app_ready.id}/{field}/delete/")
     assert resp.status_code in (403, 404)
+    app_ready.refresh_from_db()
+    assert getattr(app_ready, field)
 
 
 def test_non_image_payload_is_rejected(admin_client, app_ready):

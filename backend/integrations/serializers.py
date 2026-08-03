@@ -50,6 +50,10 @@ class ConnectionTestSerializer(serializers.Serializer):
         credentials = dict(data.get("credentials") or {})
 
         if config:
+            if provider != config.provider.name:
+                raise serializers.ValidationError(
+                    {"provider": "Provider does not match configuration."}
+                )
             stored = config.credentials or {}
             # a stored secret is only replayable to the connection it was stored for
             backfilled = {k for k in stored if not credentials.get(k)}
