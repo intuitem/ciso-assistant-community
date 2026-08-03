@@ -1,5 +1,6 @@
 import uuid
 from collections import defaultdict
+from math import isfinite
 
 import structlog
 from django.contrib.auth.models import Permission
@@ -254,6 +255,9 @@ class ThreatModelViewSet(BaseModelViewSet):
                 position_y = float(node.get("position_y") or 0)
             except ValueError, TypeError:
                 errors.append(f"Node {index}: position must be a number.")
+                continue
+            if not (isfinite(position_x) and isfinite(position_y)):
+                errors.append(f"Node {index}: position must be finite.")
                 continue
 
             if node_id in foreign_ids:
