@@ -2558,7 +2558,6 @@
 	"resetToDefault": "Obnovit výchozí",
 	"customized": "Přizpůsobeno",
 	"defaultTemplate": "Výchozí",
-	"loadDefault": "Načíst výchozí",
 	"templateSaved": "Šablona byla úspěšně uložena",
 	"templateReset": "Šablona byla obnovena do výchozího stavu",
 	"confirmResetTemplate": "Opravdu chcete tuto šablonu obnovit do výchozího stavu? Vaše vlastní úpravy budou ztraceny.",

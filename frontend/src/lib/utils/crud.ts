@@ -1,6 +1,6 @@
 // define the content of forms
 
-import EvidenceFilePreview from '$lib/components/ModelTable/field/EvidenceFilePreview.svelte';
+import EvidenceFileName from '$lib/components/ModelTable/field/EvidenceFileName.svelte';
 import LanguageDisplay from '$lib/components/ModelTable/field/LanguageDisplay.svelte';
 import FrameworkName from '$lib/components/ModelTable/field/FrameworkName.svelte';
 import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svelte';
@@ -3342,10 +3342,10 @@ export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
 
 const FIELD_COMPONENT_MAP = {
 	evidences: {
-		attachment: EvidenceFilePreview
+		attachment: EvidenceFileName
 	},
 	'evidence-revisions': {
-		attachment: EvidenceFilePreview
+		attachment: EvidenceFileName
 	},
 	'stored-libraries': {
 		locales: LanguageDisplay,
