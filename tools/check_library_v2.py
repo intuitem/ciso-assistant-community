@@ -130,7 +130,8 @@ class CommonLineBreakIndicator(Enum):
     PIPE = "|"
 
 class CommonPatternRegex(Enum):
-    HEX_COLOR_OR_NONE = r"(?:#[0-9a-fA-F]{6}|/)"
+    HEX_COLOR_OR_NONE = r"(?:#[0-9a-fA-F]{6}|/)"                # E.g. "#05ef89" ; "#5AFFC4" ; "/"
+    FRAMEWORK_DEPENDS_ON_OR_NONE = r"(?:\d+:\d+(?:,\d+)*|/)"    # E.g. "1:1,2" ; "145:56" ; "47858:2,96,78,4568" ; "/"
 
 
 
@@ -487,6 +488,10 @@ FRAMEWORK_CONTENT_COLUMN_CONSTRAINTS: Mapping[ContentColumn, ContentColumnConstr
     FrameworkContentColumns.MAX_SCORE: ContentColumnConstraints(integer_only=True, min_value=0),
     FrameworkContentColumns.QUESTIONS: ContentColumnConstraints(
         line_break_indicator=CommonLineBreakIndicator.PIPE,
+    ),
+    FrameworkContentColumns.DEPENDS_ON: ContentColumnConstraints(
+        allowed_values=CommonPatternRegex.FRAMEWORK_DEPENDS_ON_OR_NONE,
+        split_regex=CommonSeparatorRegex.LF,
     ),
     FrameworkContentColumns.CONDITION: ContentColumnConstraints(
         allowed_values=("any", "all", "/"),
@@ -3574,6 +3579,7 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, 
     min_score_constraints = column_constraints[FrameworkContentColumns.MIN_SCORE]
     max_score_constraints = column_constraints[FrameworkContentColumns.MAX_SCORE]
     questions_constraints = column_constraints[FrameworkContentColumns.QUESTIONS]
+    depends_on_constraints = column_constraints[FrameworkContentColumns.DEPENDS_ON]
     condition_constraints = column_constraints[FrameworkContentColumns.CONDITION]
 
     validate_content_sheet(df, sheet_name, schema.required_columns, fct_name)
@@ -3623,15 +3629,19 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name: str, 
     # Check if values in "importance" columns are valid
     validate_allowed_column_values(df, FrameworkContentColumns.IMPORTANCE, importance_constraints.allowed_values, sheet_name, fct_name, ctx=ctx)
     
-    # Check if values in "condition" columns are valid
-    validate_allowed_column_values(df, FrameworkContentColumns.CONDITION, condition_constraints.allowed_values, sheet_name, fct_name, ctx=ctx, split_regex=condition_constraints.split_regex)
-    
     # Check if the number of lines in cells of "questions" are coherent with lines in cells of "answer"
     validate_cell_line_count_alignment(df, FrameworkContentColumns.QUESTIONS, FrameworkContentColumns.DEPENDS_ON, sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=questions_constraints.line_break_indicator)
     
     # Check if the number of lines in cells of "questions" are coherent with lines in cells of "depends_on"
     validate_cell_line_count_alignment(df, FrameworkContentColumns.QUESTIONS, FrameworkContentColumns.CONDITION, sheet_name, fct_name, cmp_can_be_empty=True, ref_line_break_indicator=questions_constraints.line_break_indicator)
-    
+
+    # Check if values in "depends_on" columns are valid
+    validate_allowed_column_values(df, FrameworkContentColumns.DEPENDS_ON, depends_on_constraints.allowed_values, sheet_name, fct_name, ctx=ctx, split_regex=depends_on_constraints.split_regex)
+
+    # Check if values in "condition" columns are valid
+    validate_allowed_column_values(df, FrameworkContentColumns.CONDITION, condition_constraints.allowed_values, sheet_name, fct_name, ctx=ctx, split_regex=condition_constraints.split_regex)
+
+
     ### A SPECIFIC CHECK FUNCTION SHOULD BE CREATED
     # Check if "condition" exists when "depends_on" is defined
     # validate_cell_line_count_alignment(df, FrameworkContentColumns.DEPENDS_ON, FrameworkContentColumns.CONDITION, sheet_name, fct_name)
