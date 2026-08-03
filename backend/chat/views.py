@@ -156,7 +156,6 @@ class ChatSessionViewSet(BaseModelViewSet):
             graph_expand,
             format_context,
             build_context_refs,
-            get_accessible_folder_ids,
         )
         from .orm_query import format_query_result
         from .tools import (
@@ -167,9 +166,12 @@ class ChatSessionViewSet(BaseModelViewSet):
             MODEL_MAP,
         )
 
-        accessible_folders = get_accessible_folder_ids(request.user)
+        from .scoping import ReadScope
+
+        scope = ReadScope(request.user)
         context_refs = []
         context = ""
+        enrichment = ""
         query_result = None
 
         # Parse page context into structured reference
@@ -282,7 +284,7 @@ class ChatSessionViewSet(BaseModelViewSet):
                 wf_ctx = WorkflowContext(
                     user_message=user_content,
                     parsed_context=parsed_context,
-                    accessible_folder_ids=accessible_folders,
+                    scope=scope,
                     llm=llm,
                     history=wf_history,
                     user_lang=request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2],
@@ -368,7 +370,7 @@ class ChatSessionViewSet(BaseModelViewSet):
             query_result = dispatch_tool_call(
                 tool_response["name"],
                 tool_response.get("arguments", {}),
-                accessible_folders,
+                scope,
                 parsed_context,
                 user_message=user_content,
             )
@@ -502,6 +504,14 @@ class ChatSessionViewSet(BaseModelViewSet):
                 }
             )
         else:
+            # Page enrichment doubles as the signal for whether we already have
+            # something to say about this page (see the auto-attach fallback).
+            enrichment = (
+                _enrich_context(parsed_context, scope)
+                if parsed_context and parsed_context.object_id
+                else ""
+            )
+
             # Step 2: Knowledge graph + Semantic RAG search
             # Check the knowledge graph for framework context, but only for
             # general questions — skip when on action pages (detail/edit)
@@ -510,12 +520,10 @@ class ChatSessionViewSet(BaseModelViewSet):
             if not (parsed_context and parsed_context.object_id):
                 graph_context = _get_graph_context(user_content)
 
-            results = search(user_content, request.user, top_k=10)
+            results = search(user_content, request.user, top_k=10, scope=scope)
 
             structured = [r for r in results if r.get("source_type") == "model"]
-            expanded = (
-                graph_expand(structured, accessible_folders) if structured else []
-            )
+            expanded = graph_expand(structured, scope) if structured else []
 
             context = ""
             if graph_context:
@@ -523,10 +531,16 @@ class ChatSessionViewSet(BaseModelViewSet):
             context += format_context(results, expanded)
             context_refs = build_context_refs(results, expanded)
 
-            # Step 3: Auto-suggest attachable objects when on a contextual page
-            # If the LLM didn't call a tool but we're on a detail/edit page
-            # with attachable relations, try attaching relevant objects automatically.
-            if parsed_context and parsed_context.object_id:
+            # Step 3: Auto-suggest attachable objects when on a contextual page.
+            # Only when retrieval came back empty — this branch replaces the
+            # context wholesale, so firing it on a question that retrieval could
+            # answer buries the answer under attachment cards.
+            if (
+                parsed_context
+                and parsed_context.object_id
+                and not context.strip()
+                and not enrichment.strip()
+            ):
                 from .tools import ATTACHABLE_RELATIONS, _build_attach_proposal
 
                 relations = ATTACHABLE_RELATIONS.get(parsed_context.model_key, [])
@@ -535,7 +549,7 @@ class ChatSessionViewSet(BaseModelViewSet):
                     first_rel_key = relations[0][0]
                     attach_result = _build_attach_proposal(
                         {"related_model": first_rel_key},
-                        accessible_folders,
+                        scope,
                         parsed_context,
                     )
                     if attach_result and attach_result.get("items"):
@@ -608,7 +622,8 @@ class ChatSessionViewSet(BaseModelViewSet):
 
         # Enrich context with domain objects when on a detail page
         if parsed_context and parsed_context.object_id:
-            enrichment = _enrich_context(parsed_context, accessible_folders)
+            if not enrichment:
+                enrichment = _enrich_context(parsed_context, scope)
             if enrichment:
                 ctx_builder.add("enrichment", enrichment, priority=5)
 
@@ -2020,7 +2035,12 @@ def _build_context_prompt(page_context: dict, parsed_context) -> str:
     if not page_context:
         return ""
 
-    from .tools import PARENT_CHILD_MAP, ATTACHABLE_RELATIONS, MODEL_MAP
+    from .tools import (
+        ATTACHABLE_RELATIONS,
+        CREATABLE_MODELS,
+        MODEL_MAP,
+        PARENT_CHILD_MAP,
+    )
 
     parts = []
     page_path = page_context.get("path", "")
@@ -2051,9 +2071,9 @@ def _build_context_prompt(page_context: dict, parsed_context) -> str:
     if parsed_context and parsed_context.object_id:
         actions = []
 
-        # Child creation hints
+        # Child creation hints — the map also carries query-only children
         for child_key, fk_field in PARENT_CHILD_MAP.get(parsed_context.model_key, []):
-            if child_key in MODEL_MAP:
+            if child_key in MODEL_MAP and child_key in CREATABLE_MODELS:
                 child_display = MODEL_MAP[child_key][2]
                 actions.append(
                     f"- Create {child_display} linked to this {page_model or parsed_context.model_key}"
@@ -2089,39 +2109,54 @@ def _build_context_prompt(page_context: dict, parsed_context) -> str:
     return "\n".join(parts) + "\n"
 
 
-def _enrich_context(parsed_context, accessible_folder_ids: list[str]) -> str:
+def _enrich_context(parsed_context, scope) -> str:
     """
     Enrich the LLM context with domain objects relevant to the current page.
     For example, when on a risk assessment page, include the domain's assets
     so the LLM can reason about additional risks.
     """
-    from .tools import MODEL_MAP
+    from .tools import resolve_context_object
 
-    # Determine the parent object's folder
-    parent_info = MODEL_MAP.get(parsed_context.model_key)
-    if not parent_info:
+    parent_obj = resolve_context_object(parsed_context, scope)
+    if not parent_obj or not hasattr(parent_obj, "folder_id"):
         return ""
-
-    try:
-        parent_model = apps.get_model(parent_info[0], parent_info[1])
-        parent_obj = parent_model.objects.filter(id=parsed_context.object_id).first()
-        if not parent_obj or not hasattr(parent_obj, "folder_id"):
-            return ""
-        folder_id = str(parent_obj.folder_id)
-    except Exception:
-        return ""
+    folder_id = str(parent_obj.folder_id)
 
     parts = []
 
-    # For risk assessments: include assets from the same domain
+    # Scenarios and their rating come before the asset list: under a tight token
+    # budget these are what questions are actually asked about.
     if parsed_context.model_key == "risk_assessment":
+        from .risk_levels import LEVEL_FIELDS, describe_levels, level_label
+
+        matrix = getattr(parent_obj, "risk_matrix", None)
+        scale = describe_levels(matrix)
+        if scale:
+            parts.append(f"RISK MATRIX LEVELS (lowest to highest): {scale}")
+
+        RiskScenario = apps.get_model("core", "RiskScenario")
+        scenarios = scope.queryset(RiskScenario).filter(
+            risk_assessment_id=parent_obj.id
+        )[:20]
+        if scenarios:
+            parts.append("\nEXISTING RISK SCENARIOS (already identified):")
+            for s in scenarios:
+                line = f"  - {s.name}"
+                extras = []
+                for level_scope, level_field in LEVEL_FIELDS.items():
+                    level = getattr(s, level_field, None)
+                    if level is not None and level >= 0:
+                        extras.append(f"{level_scope}={level_label(matrix, level)}")
+                if s.treatment:
+                    extras.append(f"treatment={s.get_treatment_display()}")
+                if extras:
+                    line += f" ({', '.join(extras)})"
+                parts.append(line)
+
         Asset = apps.get_model("core", "Asset")
-        assets = Asset.objects.filter(
-            folder_id=folder_id,
-            folder_id__in=accessible_folder_ids,
-        )[:30]
+        assets = scope.queryset(Asset).filter(folder_id=folder_id)[:30]
         if assets:
-            parts.append("ASSETS IN THIS DOMAIN:")
+            parts.append("\nASSETS IN THIS DOMAIN:")
             for asset in assets:
                 line = f"  - {asset.name}"
                 extras = []
@@ -2139,18 +2174,92 @@ def _enrich_context(parsed_context, accessible_folder_ids: list[str]) -> str:
                     line += f" — {asset.description[:150]}"
                 parts.append(line)
 
-        # Also include existing risk scenarios for awareness
-        RiskScenario = apps.get_model("core", "RiskScenario")
-        scenarios = RiskScenario.objects.filter(
-            risk_assessment_id=parsed_context.object_id,
-        )[:20]
-        if scenarios:
-            parts.append("\nEXISTING RISK SCENARIOS (already identified):")
-            for s in scenarios:
-                line = f"  - {s.name}"
-                if hasattr(s, "treatment") and s.treatment:
-                    line += f" (treatment={s.get_treatment_display()})"
-                parts.append(line)
+    elif parsed_context.model_key == "compliance_assessment":
+        RequirementAssessment = apps.get_model("core", "RequirementAssessment")
+        Result = RequirementAssessment.Result
+
+        header = f"AUDIT: {parent_obj.name}"
+        framework = getattr(parent_obj, "framework", None)
+        if framework:
+            header += f" — framework: {framework.name}"
+        parts.append(header)
+        parts.append(f"Progress: {parent_obj.progress}%")
+
+        # The model's own accessor, so these agree with the figures on the page
+        # (assessable requirements only, narrowed to the selected groups).
+        breakdown = ", ".join(
+            f"{Result(result).label}={count}"
+            for count, result in parent_obj.get_requirements_result_count()
+        )
+        if breakdown:
+            parts.append(f"Requirement results: {breakdown}")
+
+        gaps = (
+            scope.queryset(RequirementAssessment)
+            .filter(
+                compliance_assessment=parent_obj,
+                requirement__assessable=True,
+                result__in=[Result.NON_COMPLIANT, Result.PARTIALLY_COMPLIANT],
+            )
+            .select_related("requirement")[:25]
+        )
+        if gaps:
+            parts.append("\nREQUIREMENTS NOT FULLY MET:")
+            for ra in gaps:
+                ref_id = getattr(ra.requirement, "ref_id", "") or ""
+                name = ra.requirement.name or ra.requirement.description or ""
+                label = f"[{ref_id}] {name}".strip() if ref_id else name
+                parts.append(f"  - {label[:160]} ({Result(ra.result).label})")
+
+    elif parsed_context.model_key == "findings_assessment":
+        from django.db.models import Count
+
+        from core.models import Severity
+
+        Finding = apps.get_model("core", "Finding")
+        # Counted from the same scoped rows that get listed — a total the model
+        # is told to report verbatim must not include findings it cannot see.
+        readable = scope.queryset(Finding).filter(findings_assessment=parent_obj)
+        findings = readable[:30]
+        if findings:
+            total = readable.count()
+            unresolved_important = (
+                readable.filter(severity__gte=Severity.HIGH)
+                .exclude(
+                    status__in=[
+                        Finding.Status.MITIGATED,
+                        Finding.Status.RESOLVED,
+                        Finding.Status.DISMISSED,
+                        Finding.Status.CLOSED,
+                    ]
+                )
+                .count()
+            )
+            parts.append(
+                f"FINDINGS IN THIS ASSESSMENT: {total} total, "
+                f"{unresolved_important} unresolved with high or critical severity."
+            )
+            severity_labels = dict(Finding._meta.get_field("severity").choices or [])
+            distribution = (
+                readable.values("severity")
+                .annotate(count=Count("id"))
+                .order_by("-severity")
+            )
+            parts.append(
+                "Severity distribution: "
+                + ", ".join(
+                    f"{severity_labels.get(row['severity'], row['severity'])}={row['count']}"
+                    for row in distribution
+                    if row["count"]
+                )
+            )
+            for f in findings:
+                line = f"  - {f.name} (severity={f.get_severity_display()}, status={f.get_status_display()}"
+                if f.priority:
+                    line += f", priority=P{f.priority}"
+                if f.eta:
+                    line += f", eta={f.eta}"
+                parts.append(line + ")")
 
     return "\n".join(parts)
 
