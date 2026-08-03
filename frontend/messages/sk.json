@@ -1159,6 +1159,7 @@
 	"templateAuditReportDescription": "Auditná správa o hodnotení súladu",
 	"wordTemplates": "Šablóny Word dokumentov",
 	"wordTemplatesDescription": "Prispôsobte si šablóny reportov programu Word (.docx), ktoré sa používajú na generovanie reportov. Nahrajte svoje vlastné šablóny na prepísanie vstavaných predvolených nastavení.",
+	"wordTemplatesWarning": "Pred použitím starostlivo skontrolujte obsah šablóny a uistite sa, že je v súlade so zásadami bezpečnosti a súladu vašej organizácie.",
 	"uploadTemplate": "Nahrajte šablónu",
 	"wordTemplateUploadHelp": "Nahrajte súbor .docx pomocou rovnakých premenných šablóny, aké sú predvolené. Najprv si stiahnite predvolené nastavenie a použite ho ako východiskový bod.",
 	"downloadDefaultTemplate": "Stiahnite si predvolenú šablónu",

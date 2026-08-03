@@ -215,6 +215,7 @@
 
 <div class="flex flex-col gap-6">
 	<span class="text-surface-600-400">{m.wordTemplatesDescription()}</span>
+	<div class="alert preset-filled-warning-500 w-fit p-3">{m.wordTemplatesWarning()}</div>
 
 	{#if successMessage}
 		<div class="alert preset-filled-success-500 p-3">

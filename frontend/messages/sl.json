@@ -1284,6 +1284,7 @@
 	"docHtmlTemplateSyntaxHelp": "Predloge uporabljajo sintakso Django, ki jo izriše WeasyPrint. Vstavite CSS v oznako <style> in uporabite spodnje spremenljivke za sestavo postavitve.",
 	"wordTemplates": "Wordove predloge poročil",
 	"wordTemplatesDescription": "Prilagodite Wordove predloge poročil (.docx), ki se uporabljajo za generiranje poročil. Naložite svoje predloge, da prepišete vgrajene privzete.",
+	"wordTemplatesWarning": "Pred uporabo skrbno preglejte vsebino predloge in se prepričajte, da je skladna z varnostnimi in skladnostnimi politikami vaše organizacije.",
 	"uploadTemplate": "Naloži predlogo",
 	"wordTemplateUploadHelp": "Naložite datoteko .docx z uporabo istih spremenljivk predloge kot privzeta. Najprej prenesite privzeto, da jo uporabite kot izhodišče.",
 	"downloadDefaultTemplate": "Prenesi privzeto predlogo",

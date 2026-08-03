@@ -1157,6 +1157,7 @@
 	"templateAuditReportDescription": "Atitikties vertinimo Word ataskaita",
 	"wordTemplates": "Word ataskaitų šablonai",
 	"wordTemplatesDescription": "Tinkinti Word ataskaitų šablonus (.docx), naudojamus ataskaitoms generuoti. Įkelkite savo šablonus, kad perrašytumėte įtaisytuosius numatytuosius.",
+	"wordTemplatesWarning": "Prieš naudodami atidžiai peržiūrėkite šablono turinį ir įsitikinkite, kad jis atitinka jūsų organizacijos saugumo ir atitikties politiką.",
 	"uploadTemplate": "Įkelti šabloną",
 	"wordTemplateUploadHelp": "Įkelkite .docx failą, naudodami tuos pačius šablono kintamuosius kaip numatytasis. Pirmiausia atsisiųskite numatytąjį, kad naudotumėte jį kaip atskaitos tašką.",
 	"downloadDefaultTemplate": "Atsisiųsti numatytąjį šabloną",

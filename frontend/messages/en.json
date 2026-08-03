@@ -1288,6 +1288,7 @@
 	"docHtmlTemplateSyntaxHelp": "Templates use Django template syntax rendered by WeasyPrint. Embed CSS in a <style> tag and use the variables below to compose the layout.",
 	"wordTemplates": "Word report templates",
 	"wordTemplatesDescription": "Customize Word report templates (.docx) used for report generation. Upload your own templates to override the built-in defaults.",
+	"wordTemplatesWarning": "Review template content carefully before use and ensure it complies with your organization's security and compliance policies.",
 	"uploadTemplate": "Upload template",
 	"wordTemplateUploadHelp": "Upload a .docx file using the same template variables as the default. Download the default first to use as a starting point.",
 	"downloadDefaultTemplate": "Download default template",
