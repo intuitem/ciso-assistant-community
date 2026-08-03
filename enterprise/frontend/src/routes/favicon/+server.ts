@@ -5,6 +5,11 @@ import path from 'path';
 
 const faviconPath = path.resolve(process.cwd(), 'src/lib/assets/favicon.ico');
 
+const SECURITY_HEADERS = {
+	'Content-Security-Policy': 'sandbox',
+	'X-Content-Type-Options': 'nosniff',
+};
+
 export const GET: RequestHandler = async ({ fetch }) => {
 	try {
 		const endpoint = `${BASE_API_URL}/client-settings/favicon/`;
@@ -15,7 +20,8 @@ export const GET: RequestHandler = async ({ fetch }) => {
 
 			return new Response(fileBuffer, {
 				headers: {
-					'Content-Type': 'image/x-icon'
+					...SECURITY_HEADERS,
+					'Content-Type': 'image/x-icon',
 				}
 			});
 		}
@@ -25,7 +31,8 @@ export const GET: RequestHandler = async ({ fetch }) => {
 
 		return new Response(binaryData, {
 			headers: {
-				'Content-Type': response.mime_type
+				...SECURITY_HEADERS,
+				'Content-Type': response.mime_type,
 			}
 		});
 	} catch (error) {
@@ -33,7 +40,8 @@ export const GET: RequestHandler = async ({ fetch }) => {
 
 		return new Response(fileBuffer, {
 			headers: {
-				'Content-Type': 'image/x-icon'
+				...SECURITY_HEADERS,
+				'Content-Type': 'image/x-icon',
 			}
 		});
 	}
