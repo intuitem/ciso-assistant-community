@@ -755,6 +755,7 @@
 	"removeIp": "{ip} verwijderen",
 	"noAllowedIpsYet": "Nog geen toegestane IP's.",
 	"invalidFileType": "Ongeldig bestandstype",
+	"wordTemplatesWarning": "Controleer de inhoud van de sjabloon zorgvuldig vóór gebruik en zorg ervoor dat deze voldoet aan het beveiligings- en compliancebeleid van uw organisatie.",
 	"logoHelpText": "Het logo wordt weergegeven in de header van de applicatie. Geaccepteerde formaten zijn PNG, JPEG, WEBP, SVG.",
 	"faviconHelpText": "Het favicon wordt weergegeven in het browsertabblad. Geaccepteerde formaten zijn ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Entiteit",

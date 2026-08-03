@@ -95,6 +95,7 @@ let abortController = $state<AbortController | null>(null);
 let sessionHistory = $state<ChatSession[]>([]);
 let loadingHistory = $state(false);
 let pendingAttachment = $state<PendingAttachment | null>(null);
+let uploadToken = 0;
 
 function getDefaultActions(): SuggestedAction[] {
 	return [
@@ -228,15 +229,17 @@ export function getPendingAttachment(): PendingAttachment | null {
 }
 
 export function removePendingAttachment() {
+	uploadToken++; // invalidate any in-flight upload
 	pendingAttachment = null;
 }
 
 export async function uploadAttachment(file: File) {
 	// Token guard: a removed or superseded attachment must not be resurrected
-	// by its own late response.
-	const slot: PendingAttachment = { id: '', filename: file.name, status: 'uploading' };
-	pendingAttachment = slot;
-	const isCurrent = () => pendingAttachment === slot;
+	// by its own late response. Compared by token, not object identity — $state
+	// stores a proxy, so the stored value never === the object we assigned.
+	const token = ++uploadToken;
+	pendingAttachment = { id: '', filename: file.name, status: 'uploading' };
+	const isCurrent = () => uploadToken === token;
 	try {
 		const sid = await ensureSession();
 		const formData = new FormData();
@@ -592,7 +595,7 @@ export function sendMessage(text: string) {
 		...(attachment && { attachments: [{ id: attachment.id, filename: attachment.filename }] })
 	});
 	inputText = '';
-	pendingAttachment = null;
+	removePendingAttachment();
 	saveState();
 	streamResponse(content, attachment ? [attachment.id] : []);
 }
@@ -871,7 +874,7 @@ export function startNewSession() {
 		abortController = null;
 	}
 	isTyping = false;
-	pendingAttachment = null;
+	removePendingAttachment();
 
 	// Clear backend session reference — next message creates a fresh session
 	sessionId = null;
@@ -938,7 +941,7 @@ export async function switchToSession(targetSessionId: string) {
 	}
 	isTyping = false;
 	isStreaming = false;
-	pendingAttachment = null;
+	removePendingAttachment();
 
 	try {
 		const res = await fetch(`${CHAT_API}/sessions/${targetSessionId}`);
