@@ -1393,6 +1393,44 @@ class TestRealAuthAndRBAC:
         assert resp.json()["results"]["created"] == 0
         assert not Asset.objects.filter(name="ESCAPED-ASSET").exists()
 
+    def test_domain_scoped_user_can_import_without_a_folder_header(self, app_ready):
+        # The wizard's domain selector is optional; rows carry their own domain.
+        from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+        from knox.models import AuthToken
+        from rest_framework.test import APIClient
+
+        dom = Folder.objects.create(
+            name="MyDomain",
+            parent_folder=app_ready,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        user = User.objects.create_user("dma@datawizard.test", is_published=True)
+        user.folder = app_ready
+        user.save()
+        group = UserGroup.objects.create(name="grp-dma", folder=dom)
+        group.user_set.add(user)
+        assignment = RoleAssignment.objects.create(
+            user_group=group,
+            role=Role.objects.get(name="BI-RL-DMA"),
+            folder=dom,
+            is_recursive=True,
+        )
+        assignment.perimeter_folders.add(dom)
+
+        client = APIClient()
+        _, token = AuthToken.objects.create(user=user)
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+
+        resp = _post(
+            client,
+            _csv("name,domain\nROW-SCOPED-ASSET,MyDomain\n"),
+            "a.csv",
+            "Asset",
+            folder_id=None,
+        )
+        assert resp.status_code == 200
+        assert Asset.objects.get(name="ROW-SCOPED-ASSET").folder_id == dom.id
+
     def test_restricted_user_cannot_import_users(
         self, knox_restricted_client, app_ready
     ):

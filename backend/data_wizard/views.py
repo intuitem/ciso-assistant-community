@@ -3412,16 +3412,23 @@ class LoadFileView(APIView):
     serializer_class = LoadFileSerializer
 
     def _may_import(self, request, model_type: ModelType, folder_id) -> bool:
-        if folder_id:
-            try:
-                folder = Folder.objects.filter(id=UUID(str(folder_id))).first()
-            except ValueError:
-                return False
-        else:
-            folder = Folder.get_root_folder()
+        model_name = IMPORT_ROOT_MODEL.get(model_type, model_type.value.lower())
+
+        # No target folder is a legitimate flow — the domain selector is optional
+        # and rows may carry their own `domain`. Requiring it on the root folder
+        # would lock out every domain-scoped user; the per-record serializer check
+        # is what scopes those writes.
+        if not folder_id:
+            return RoleAssignment.has_permission_anywhere(
+                request.user, f"add_{model_name}"
+            )
+
+        try:
+            folder = Folder.objects.filter(id=UUID(str(folder_id))).first()
+        except ValueError:
+            return False
         if folder is None:
             return False
-        model_name = IMPORT_ROOT_MODEL.get(model_type, model_type.value.lower())
         try:
             perm = Permission.objects.get(codename=f"add_{model_name}")
         except Permission.DoesNotExist:
