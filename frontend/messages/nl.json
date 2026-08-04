@@ -3800,5 +3800,8 @@
 	"deleteUsergroup": "Gebruikersgroep verwijderen",
 	"viewUsergroup": "Gebruikersgroep bekijken",
 	"serviceNow": "ServiceNow",
-	"servicenow": "ServiceNow"
+	"servicenow": "ServiceNow",
+	"reopenAssignmentForEditing": "Heropenen voor bewerking",
+	"forReview": "Voor beoordeling",
+	"forEditing": "Voor bewerking"
 }

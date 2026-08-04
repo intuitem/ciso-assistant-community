@@ -3712,5 +3712,8 @@
 	"workshopThree": "Workshop 3",
 	"workshopTwo": "Workshop 2",
 	"workshops": "Workshop",
-	"yearlyTasksReview": "Riepilogo attività aggregate"
+	"yearlyTasksReview": "Riepilogo attività aggregate",
+	"reopenAssignmentForEditing": "Riapri per la modifica",
+	"forReview": "Per la revisione",
+	"forEditing": "Per la modifica"
 }

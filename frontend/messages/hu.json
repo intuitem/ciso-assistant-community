@@ -1668,5 +1668,8 @@
 	"idpGroup": "IdP csoport",
 	"idpGroups": "IdP csoportok",
 	"idpGroupsDescription": "IdP csoportföderáció engedélyezése (SCIM kiépítés, IdP csoport-hozzárendelések és felhasználók IdP csoporttagságai).",
-	"ebiosRmStudyDomainHelpText": "A tartomány módosítása áthelyezi a tanulmányt és annak összes műhelyobjektumát a kiválasztott tartományba."
+	"ebiosRmStudyDomainHelpText": "A tartomány módosítása áthelyezi a tanulmányt és annak összes műhelyobjektumát a kiválasztott tartományba.",
+	"reopenAssignmentForEditing": "Újranyitás szerkesztésre",
+	"forReview": "Felülvizsgálatra",
+	"forEditing": "Szerkesztésre"
 }
