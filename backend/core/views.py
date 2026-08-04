@@ -1516,7 +1516,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 str(f.id) for f in scope_folder.get_sub_folders()
             }
         viewable_folder_ids = {
-            str(fid) for fid in RoleAssignment.get_viewable_object_ids(request.user, Folder)
+            str(fid)
+            for fid in RoleAssignment.get_viewable_object_ids(request.user, Folder)
         }
 
         def is_visible(obj):
