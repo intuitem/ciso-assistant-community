@@ -13,6 +13,7 @@ from workflows.engine import start_instance
 from workflows.graph import save_graph
 from workflows.models import Workflow, WorkflowInstance, WorkflowNode, WorkflowVersion
 from workflows.validation import validate_graph
+from workflows.tests.helpers import publisher_user
 
 
 def node(type_, **kwargs):
@@ -43,7 +44,7 @@ def make_domain(name, parent=None):
 
 def read_flow(folder, config, variables=None, input_mapping=None):
     workflow = Workflow.objects.create(name=f"Read flow {uuid.uuid4()}", folder=folder)
-    version = WorkflowVersion.objects.create(workflow=workflow)
+    version = WorkflowVersion.objects.create(workflow=workflow, run_as=publisher_user())
     start = node(
         "trigger", trigger_config={"type": "manual"}, input_mapping=input_mapping or {}
     )

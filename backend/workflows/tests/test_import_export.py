@@ -14,6 +14,7 @@ from workflows.import_export import (
 )
 from workflows.models import Workflow, WorkflowVersion
 from workflows.views import WorkflowViewSet
+from workflows.tests.helpers import publisher_user
 
 
 @pytest.fixture
@@ -171,10 +172,10 @@ def rich_workflow(db, root):
     workflow = Workflow.objects.create(
         name="HRIS sync", description="Sync HRIS", folder=root
     )
-    version = WorkflowVersion.objects.create(workflow=workflow)
+    version = WorkflowVersion.objects.create(workflow=workflow, run_as=publisher_user())
     _, payload = _rich_graph()
     save_graph(version, payload)
-    version.publish()
+    version.publish(publisher_user())
     hook = workflow.triggers.get(node_ref="hook")
     hook.hmac_secret = "hmac-secret-value"
     hook.save(update_fields=["hmac_secret"])
@@ -252,7 +253,9 @@ class TestExport:
 
     def test_requires_omitted_without_secret_references(self, db, root):
         workflow = Workflow.objects.create(name="Plain", folder=root)
-        version = WorkflowVersion.objects.create(workflow=workflow)
+        version = WorkflowVersion.objects.create(
+            workflow=workflow, run_as=publisher_user()
+        )
         _, payload = _rich_graph()
         payload["nodes"][3]["action_config"] = {"type": "log", "message": "hi"}
         save_graph(version, payload)
@@ -277,7 +280,7 @@ class TestImport:
         imported, _ = import_workflow(export_workflow(rich_workflow), root)
         assert imported.triggers.count() == 0
 
-        imported.draft_version.publish()
+        imported.draft_version.publish(publisher_user())
         hook = imported.triggers.get(node_ref="hook")
         nightly = imported.triggers.get(node_ref="nightly")
         incident = imported.triggers.get(node_ref="on_incident")

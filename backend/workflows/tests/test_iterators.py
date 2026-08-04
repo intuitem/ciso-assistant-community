@@ -11,6 +11,7 @@ from workflows.engine import start_instance
 from workflows.graph import save_graph
 from workflows.models import Workflow, WorkflowInstance, WorkflowVersion
 from workflows.validation import validate_graph
+from workflows.tests.helpers import publisher_user
 
 
 def node(type_, **kwargs):
@@ -42,7 +43,7 @@ def make_domain(name):
 def loop_flow(folder, loop_config, body_configs, variables=None, input_mapping=None):
     """trigger -> loop( each -> body chain -> back ) -> done -> end."""
     workflow = Workflow.objects.create(name=f"Loop flow {uuid.uuid4()}", folder=folder)
-    version = WorkflowVersion.objects.create(workflow=workflow)
+    version = WorkflowVersion.objects.create(workflow=workflow, run_as=publisher_user())
     trigger = node(
         "trigger",
         trigger_config={"type": "manual"},
@@ -104,7 +105,9 @@ class TestLoopNode:
         for name in ("AC one", "AC two"):
             AppliedControl.objects.create(name=name, folder=domain)
         workflow = Workflow.objects.create(name="Read loop", folder=domain)
-        version = WorkflowVersion.objects.create(workflow=workflow)
+        version = WorkflowVersion.objects.create(
+            workflow=workflow, run_as=publisher_user()
+        )
         trigger = node("trigger", trigger_config={"type": "manual"})
         read = node(
             "action",
@@ -154,7 +157,9 @@ class TestLoopNode:
     def test_in_body_condition_sees_item(self):
         domain = make_domain("Branchy loop domain")
         workflow = Workflow.objects.create(name="Branchy", folder=domain)
-        version = WorkflowVersion.objects.create(workflow=workflow)
+        version = WorkflowVersion.objects.create(
+            workflow=workflow, run_as=publisher_user()
+        )
         var_id = str(uuid.uuid4())
         sev_id = str(uuid.uuid4())
         trigger = node(
@@ -356,7 +361,9 @@ class TestLoopNode:
         # lazily-loaded instance copy; the next node's save then clobbered it.
         domain = make_domain("Clobber domain")
         workflow = Workflow.objects.create(name="Clobber", folder=domain)
-        version = WorkflowVersion.objects.create(workflow=workflow)
+        version = WorkflowVersion.objects.create(
+            workflow=workflow, run_as=publisher_user()
+        )
         trigger = node(
             "trigger",
             trigger_config={"type": "manual"},
@@ -398,7 +405,9 @@ class TestLoopNode:
     def test_nested_loops_use_innermost_item(self):
         domain = make_domain("Nested domain")
         workflow = Workflow.objects.create(name="Nested", folder=domain)
-        version = WorkflowVersion.objects.create(workflow=workflow)
+        version = WorkflowVersion.objects.create(
+            workflow=workflow, run_as=publisher_user()
+        )
         trigger = node(
             "trigger",
             trigger_config={"type": "manual"},

@@ -49,6 +49,7 @@ class WorkflowReadSerializer(BaseModelSerializer):
 
     def get_versions(self, workflow):
         # Versions-panel rows (spec D32): newest first, with run counts.
+        # run_as (spec D34) so the panel can say who each version acts as.
         return [
             {
                 "id": str(version.id),
@@ -56,8 +57,11 @@ class WorkflowReadSerializer(BaseModelSerializer):
                 "status": version.status,
                 "published_at": version.published_at,
                 "run_count": version.instances.count(),
+                "run_as": version.run_as.email if version.run_as else None,
             }
-            for version in workflow.versions.order_by("-version_number")
+            for version in workflow.versions.select_related("run_as").order_by(
+                "-version_number"
+            )
         ]
 
     class Meta:
@@ -79,6 +83,10 @@ class WorkflowWriteSerializer(BaseModelSerializer):
 class WorkflowVersionReadSerializer(BaseModelSerializer):
     workflow = FieldsRelatedField()
     folder = FieldsRelatedField()
+    # Run identity (spec D34): published_by is provenance, run_as is the
+    # authority the version's runs wield.
+    published_by = FieldsRelatedField(["id", "email"])
+    run_as = FieldsRelatedField(["id", "email"])
     # Versions-panel row data (spec D32); versions per workflow are few, the
     # count query per row is fine.
     run_count = serializers.SerializerMethodField()
@@ -103,6 +111,16 @@ class WorkflowInstanceReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     initiated_by = FieldsRelatedField(["id", "email"])
     active_nodes = serializers.SerializerMethodField()
+    run_as = serializers.SerializerMethodField()
+
+    def get_run_as(self, obj):
+        # The identity the run acts as (spec D34): version.run_as, or the
+        # invoker for draft runs — mirror of engine.run_identity without the
+        # is_active liveness check (display, not enforcement).
+        identity = obj.version.run_as if obj.version else None
+        if identity is None and obj.version and obj.version.is_draft:
+            identity = obj.initiated_by
+        return identity.email if identity else None
 
     class Meta:
         model = WorkflowInstance

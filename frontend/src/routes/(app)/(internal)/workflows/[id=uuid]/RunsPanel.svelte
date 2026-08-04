@@ -125,6 +125,11 @@
 						<span class="text-surface-700-300">
 							v{run.version?.version_number ?? '?'}
 						</span>
+						{#if run.run_as}
+							<span class="text-surface-500 shrink-0" title={m.runsAs({ user: run.run_as })}>
+								<i class="fa-solid fa-user-shield mr-1 text-[9px] opacity-60"></i>{run.run_as}
+							</span>
+						{/if}
 						{#if run.active_nodes?.length}
 							<span class="text-surface-600-400 truncate">
 								{#each run.active_nodes as active}

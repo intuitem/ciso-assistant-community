@@ -13,6 +13,7 @@ from workflows.graph import save_graph
 from workflows.models import Workflow, WorkflowTrigger, WorkflowVersion
 from workflows.tasks import dispatch_internal_event_task
 from workflows.validation import validate_graph
+from workflows.tests.helpers import publisher_user
 
 
 @pytest.fixture
@@ -39,7 +40,7 @@ def make_workflow(
     workflow = Workflow.objects.create(
         name=name, folder=folder or Folder.get_root_folder()
     )
-    version = WorkflowVersion.objects.create(workflow=workflow)
+    version = WorkflowVersion.objects.create(workflow=workflow, run_as=publisher_user())
     trigger_config = {"type": "internal_event", "event_key": event_key}
     if filters:
         trigger_config["filters"] = filters
@@ -74,7 +75,7 @@ def make_workflow(
         },
     )
     if published:
-        version.publish()
+        version.publish(publisher_user())
         if enabled:
             workflow.triggers.filter(node_ref="on_event").update(enabled=True)
     return workflow
@@ -126,7 +127,7 @@ class TestRegistrationLifecycle:
             "event_key": "incident.created",
         }
         node.save(update_fields=["trigger_config", "updated_at"])
-        draft.publish()
+        draft.publish(publisher_user())
         row = get_registration(workflow)
         assert row.enabled is True
         assert row.event_key == "incident.created"
@@ -383,7 +384,9 @@ class TestConfigValidation:
             name=f"cfg {uuid.uuid4().hex[:6]}",
             folder=folder or Folder.get_root_folder(),
         )
-        version = WorkflowVersion.objects.create(workflow=workflow)
+        version = WorkflowVersion.objects.create(
+            workflow=workflow, run_as=publisher_user()
+        )
         trigger = {
             "id": str(uuid.uuid4()),
             "type": "trigger",

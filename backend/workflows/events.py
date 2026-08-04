@@ -97,6 +97,10 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
         if version is None or entry is None:
             _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_UNPUBLISHED)
             continue
+        if version.run_as is None:
+            # Spec D34: no run identity, no automatic execution.
+            _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_NO_IDENTITY)
+            continue
         try:
             instance = create_instance(
                 version,

@@ -101,6 +101,11 @@ def run_due_schedules(now=None):
             result = WorkflowTrigger.Result.SKIPPED_INACTIVE
         elif version is None:
             result = WorkflowTrigger.Result.SKIPPED_UNPUBLISHED
+        elif version.run_as is None:
+            # Spec D34: no run identity, no automatic execution. next_run_at
+            # already advanced by the claim — republishing resumes on the
+            # next natural occurrence.
+            result = WorkflowTrigger.Result.SKIPPED_NO_IDENTITY
         elif entry is None:
             # A publish raced the claim and removed the node; the row is on
             # its way out (or already gone — update below is then a no-op).

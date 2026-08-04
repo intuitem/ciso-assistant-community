@@ -89,6 +89,10 @@
 	};
 	const badge = $derived(STATUS_BADGE[status] ?? STATUS_BADGE.archived);
 
+	// Run identity of the active version (spec D34). Drafts run as the invoker,
+	// so only published/archived versions carry a stamped run_as to show.
+	const activeRunAs = $derived(versions.find((v) => v.id === activeVersionId)?.run_as ?? null);
+
 	const modalStore: ModalStore = getModalStore();
 
 	function opsUrl(action: string) {
@@ -902,25 +906,60 @@
 		validationErrors = [];
 		try {
 			if (!(await save())) return;
-			const res = await fetch(opsUrl('publish'), {
+			// Deputization report (spec D34): show the authority this version
+			// will wield as the publisher, and let them confirm, before it
+			// attaches. Empty report → publish straight through.
+			const report = await fetchRequiredPermissions();
+			if (report.length > 0) {
+				// Modal body is rendered as plain text, so a comma list rather
+				// than markup.
+				const codenames = [...new Set(report.flatMap((r: any) => r.codenames))].sort();
+				const confirmed = await new Promise<boolean>((resolve) => {
+					modalStore.trigger({
+						type: 'confirm',
+						title: m.publishAuthorityTitle(),
+						body: `${m.publishAuthorityBody()} ${codenames.join(', ')}.`,
+						response: (r: boolean) => resolve(r)
+					});
+				});
+				if (!confirmed) return;
+			}
+			await doPublish();
+		} finally {
+			publishing = false;
+		}
+	}
+
+	async function fetchRequiredPermissions(): Promise<any[]> {
+		try {
+			const res = await fetch(opsUrl('required-permissions'), {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ version: activeVersionId })
 			});
-			if (res.ok) {
-				await refreshRegistrations();
-				await invalidateAll();
-				return;
-			}
-			const body = await res.json().catch(() => ({}));
-			validationErrors = body.errors ?? [];
-			nodes = nodes.map((n) => {
-				const nodeError = validationErrors.find((e) => e.node_id === n.id);
-				return { ...n, data: { ...n.data, error: nodeError?.message ?? null } };
-			});
-		} finally {
-			publishing = false;
+			return res.ok ? await res.json() : [];
+		} catch {
+			return [];
 		}
+	}
+
+	async function doPublish() {
+		const res = await fetch(opsUrl('publish'), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ version: activeVersionId })
+		});
+		if (res.ok) {
+			await refreshRegistrations();
+			await invalidateAll();
+			return;
+		}
+		const body = await res.json().catch(() => ({}));
+		validationErrors = body.errors ?? [];
+		nodes = nodes.map((n) => {
+			const nodeError = validationErrors.find((e) => e.node_id === n.id);
+			return { ...n, data: { ...n.data, error: nodeError?.message ?? null } };
+		});
 	}
 
 	let discarding = $state(false);
@@ -1717,6 +1756,23 @@
 					{isActive ? m.triggerEnabled() : m.triggerDisabled()}
 				</span>
 			</Switch>
+		{/if}
+		{#if activeRunAs}
+			<span
+				class="badge preset-tonal-surface text-[10px]"
+				title={m.runsAs({ user: activeRunAs })}
+				data-testid="run-as-chip"
+			>
+				<i class="fa-solid fa-user-shield mr-1 opacity-60"></i>{activeRunAs}
+			</span>
+		{:else if status === 'published'}
+			<span
+				class="badge preset-tonal-warning text-[10px]"
+				title={m.republishRequired()}
+				data-testid="run-as-missing"
+			>
+				<i class="fa-solid fa-user-slash mr-1"></i>{m.runIdentityMissing()}
+			</span>
 		{/if}
 		{#if workflowDescription}
 			<p class="text-sm text-surface-600-400 truncate">{workflowDescription}</p>

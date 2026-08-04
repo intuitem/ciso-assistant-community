@@ -19,6 +19,7 @@ from .models import (
     WorkflowNode,
     WorkflowToken,
     WorkflowVariable,
+    WorkflowVersion,
 )
 
 # Loops multiply node visits (100 items x body size), so the runaway guard
@@ -139,6 +140,23 @@ def default_entry_node(version):
     if len(trigger_nodes) == 1:
         return trigger_nodes[0]
     raise EngineError("Ambiguous entry: this version has several trigger nodes")
+
+
+def run_identity(instance):
+    """The identity a run acts as (spec D34): the version's run_as (definer
+    rights, stamped at publish), or the invoker for drafts — run_as only
+    exists after publish and drafts are manual-only. Returns None when no
+    live identity resolves (fail closed at the caller). Memoized per
+    in-memory instance so retry/resume paths share one resolution."""
+    if not hasattr(instance, "_run_identity"):
+        version = instance.version
+        identity = version.run_as
+        if identity is None and version.status == WorkflowVersion.Status.DRAFT:
+            identity = instance.initiated_by
+        if identity is not None and not identity.is_active:
+            identity = None
+        instance._run_identity = identity
+    return instance._run_identity
 
 
 def coerce_variable_value(value, variable_type):
@@ -695,6 +713,10 @@ def _start_subprocess(token):
         # Automatic execution must not tunnel through a paused child
         # (spec D32); manual-run leniency applies to direct runs only.
         raise EngineError("Subprocess workflow is inactive")
+    if version.run_as is None:
+        # Child runs under the CHILD version's own identity (spec D34,
+        # nested definer) — no identity, no run.
+        raise EngineError("Subprocess workflow has no run identity")
     # Bound recursion: a subprocess cycle would otherwise nest run_instance
     # calls until the Python stack blows. Publish validation blocks direct
     # self-reference; this catches cross-workflow cycles too.

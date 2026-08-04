@@ -7,6 +7,7 @@
 		status: string;
 		published_at?: string | null;
 		run_count?: number;
+		run_as?: string | null;
 	}
 
 	interface Props {
@@ -56,6 +57,15 @@
 					<span class="text-surface-500" title={m.publishedVersion()}>
 						{formatWhen(version.published_at)}
 					</span>
+					{#if version.run_as}
+						<span class="text-surface-500 shrink-0" title={m.runsAs({ user: version.run_as })}>
+							<i class="fa-solid fa-user-shield mr-1 text-[9px] opacity-60"></i>{version.run_as}
+						</span>
+					{:else if version.status === 'published'}
+						<span class="text-warning-600 shrink-0" title={m.republishRequired()}>
+							<i class="fa-solid fa-user-slash mr-1 text-[9px]"></i>{m.runIdentityMissing()}
+						</span>
+					{/if}
 					<span class="ml-auto text-surface-600-400 shrink-0">
 						<i class="fa-solid fa-bolt-lightning mr-1 text-[9px]"></i>{version.run_count ?? 0}
 						{m.workflowRuns().toLowerCase()}

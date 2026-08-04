@@ -116,6 +116,25 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
         default=Status.DRAFT,
     )
     published_at = models.DateTimeField(null=True, blank=True)
+    # Run authorization (spec D34): published_by is permanent provenance;
+    # run_as is the authority the version's runs wield (definer rights,
+    # checked live). v1 stamps both with the publisher; v2 makes run_as
+    # pickable. Null run_as on a non-draft version = unrunnable (fail closed,
+    # republish to fix). Drafts run as the invoker instead.
+    published_by = models.ForeignKey(
+        "iam.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    run_as = models.ForeignKey(
+        "iam.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
 
     class Meta:
         ordering = ["-version_number"]
@@ -137,12 +156,14 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
     def is_draft(self):
         return self.status == self.Status.DRAFT
 
-    def publish(self):
+    def publish(self, user):
         """Publish this draft and archive the previously published version.
 
         Graph validity must be checked by the caller (see workflows.validation)
         before calling this. Trigger registrations are synced here so the
-        published graph and its operational rows can never drift.
+        published graph and its operational rows can never drift. The
+        publisher becomes the version's run identity (spec D34): publishing
+        is the moment authority attaches.
         """
         from django.db import transaction
 
@@ -154,6 +175,8 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
             ).update(status=self.Status.ARCHIVED)
             self.status = self.Status.PUBLISHED
             self.published_at = timezone.now()
+            self.published_by = user
+            self.run_as = user
             self.save()
             sync_trigger_registrations(self)
 
@@ -693,6 +716,7 @@ class WorkflowInstanceLog(AbstractBaseModel, FolderMixin):
         EVENT_RECEIVED = "event_received", "Event received"
         SUBPROCESS_STARTED = "subprocess_started", "Subprocess started"
         LOOP_COMPLETED = "loop_completed", "Loop completed"
+        AUTHORIZATION_DENIED = "authorization_denied", "Authorization denied"
         INSTANCE_COMPLETED = "instance_completed", "Instance completed"
         ERROR = "error", "Error"
 
@@ -792,6 +816,7 @@ class WorkflowTrigger(AbstractBaseModel, FolderMixin):
         SKIPPED_UNPUBLISHED = "skipped_unpublished", "Skipped (unpublished)"
         SKIPPED_DEPTH = "skipped_depth", "Skipped (chain depth)"
         SKIPPED_INACTIVE = "skipped_inactive", "Skipped (workflow inactive)"
+        SKIPPED_NO_IDENTITY = "run_identity_missing", "Skipped (no run identity)"
         ERROR = "error", "Error"
 
     workflow = models.ForeignKey(

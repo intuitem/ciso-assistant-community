@@ -6,11 +6,12 @@ from iam.models import Folder
 from workflows.engine import start_instance
 from workflows.graph import GraphValidationError, save_graph
 from workflows.models import Workflow, WorkflowInstance, WorkflowVersion
+from workflows.tests.helpers import publisher_user
 
 
 def make_workflow(name="Ref flow"):
     workflow = Workflow.objects.create(name=name, folder=Folder.get_root_folder())
-    version = WorkflowVersion.objects.create(workflow=workflow)
+    version = WorkflowVersion.objects.create(workflow=workflow, run_as=publisher_user())
     return workflow, version
 
 

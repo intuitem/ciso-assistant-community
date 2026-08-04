@@ -15,13 +15,14 @@ from workflows.models import (
     WorkflowVersion,
 )
 from workflows.views import WorkflowVersionViewSet
+from workflows.tests.helpers import publisher_user
 
 
 def make_workflow(name="Integration flow", folder=None):
     workflow = Workflow.objects.create(
         name=name, folder=folder or Folder.get_root_folder()
     )
-    version = WorkflowVersion.objects.create(workflow=workflow)
+    version = WorkflowVersion.objects.create(workflow=workflow, run_as=publisher_user())
     return workflow, version
 
 
@@ -452,7 +453,7 @@ class TestWebhookHardening:
             {"type": "log", "message": "ok"},
             trigger={"ref": "hook", "trigger_config": {"type": "webhook"}},
         )
-        version.publish()
+        version.publish(publisher_user())
         return workflow
 
     def test_hmac_required_when_configured(self):

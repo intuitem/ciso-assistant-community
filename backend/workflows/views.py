@@ -271,8 +271,15 @@ class WorkflowVersionViewSet(BaseModelViewSet):
         errors += _deputization_errors(request.user, version)
         if errors:
             return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
-        version.publish()
+        version.publish(request.user)
         return Response(serialize_graph(version))
+
+    @action(detail=True, methods=["get"], url_path="required-permissions")
+    def required_permissions(self, request, pk=None):
+        """Deputization report (spec D34): the permissions this version's
+        actions will exercise, shown by the publish dialog so the publisher
+        sees the authority they are about to lend."""
+        return Response(collect_required_permissions(self.get_object()))
 
     @action(detail=True, methods=["post"])
     def discard(self, request, pk=None):
@@ -454,14 +461,32 @@ class WorkflowTokenViewSet(BaseModelViewSet):
         return self._run_op(abort_token)
 
 
+def collect_required_permissions(version):
+    """Deputization report (spec D34): per action node, the permission
+    codenames its config exercises. Feeds both the publish lint and the
+    publish dialog."""
+    report = []
+    for node in version.nodes.filter(type=WorkflowNode.Type.ACTION):
+        codenames = required_permissions(node.action_config)
+        if codenames:
+            report.append(
+                {
+                    "node_id": str(node.id),
+                    "label": node.label or "",
+                    "codenames": codenames,
+                }
+            )
+    return report
+
+
 def _deputization_errors(user, version):
     """Spec D18: the publisher must hold the permissions the workflow's
     actions exercise. The workflow then acts as its publisher's deputy."""
     errors = []
     if getattr(user, "is_superuser", False):
         return errors
-    for node in version.nodes.filter(type=WorkflowNode.Type.ACTION):
-        for codename in required_permissions(node.action_config):
+    for entry in collect_required_permissions(version):
+        for codename in entry["codenames"]:
             permission = Permission.objects.filter(codename=codename).first()
             if permission is None:
                 continue
@@ -472,7 +497,7 @@ def _deputization_errors(user, version):
                     {
                         "code": "publisher_permission_missing",
                         "message": f"Publishing this action requires the '{codename}' permission",
-                        "node_id": str(node.id),
+                        "node_id": entry["node_id"],
                         "edge_id": None,
                     }
                 )
@@ -525,6 +550,13 @@ class WorkflowInstanceViewSet(BaseModelViewSet):
             return Response(
                 {"error": "onlyCurrentVersionsCanBeRun"},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Spec D34: published versions run as their run_as (definer rights);
+        # a published version without one predates the identity model and
+        # must be republished. Drafts run as the invoker (request.user).
+        if not version.is_draft and version.run_as is None:
+            return Response(
+                {"error": "republishRequired"}, status=status.HTTP_400_BAD_REQUEST
             )
         entry = None
         entry_node_ref = request.data.get("entry_node_ref")
@@ -663,6 +695,10 @@ class WorkflowWebhookView(APIView):
                 {"error": "workflowNotPublished"},
                 status=status.HTTP_409_CONFLICT,
             )
+        # Spec D34: no run identity, no automatic execution — 404 like the
+        # inactive case above (no oracle for unauthenticated callers).
+        if version.run_as is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         payload = request.data if isinstance(request.data, dict) else {}
         try:
             instance = trigger_instance(

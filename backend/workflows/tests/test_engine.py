@@ -14,6 +14,7 @@ from workflows.models import (
     WorkflowVersion,
 )
 from workflows.views import WorkflowInstanceViewSet, WorkflowTokenViewSet
+from workflows.tests.helpers import publisher_user
 
 
 @pytest.fixture
@@ -25,7 +26,7 @@ def make_workflow(name="Test flow", folder=None):
     workflow = Workflow.objects.create(
         name=name, folder=folder or Folder.get_root_folder()
     )
-    version = WorkflowVersion.objects.create(workflow=workflow)
+    version = WorkflowVersion.objects.create(workflow=workflow, run_as=publisher_user())
     return workflow, version
 
 
@@ -403,7 +404,7 @@ class TestTriggers:
                 "variables": [],
             },
         )
-        version.publish()
+        version.publish(publisher_user())
         return workflow
 
     def test_webhook_trigger(self):
@@ -476,7 +477,7 @@ class TestSubprocess:
         chain.append(node("end"))
         edges = [edge(chain[i], chain[i + 1]) for i in range(len(chain) - 1)]
         save_graph(cv, {"nodes": chain, "edges": edges, "variables": []})
-        cv.publish()
+        cv.publish(publisher_user())
         return child_wf
 
     def _parent(self, child_wf, output_mapping=None):
@@ -566,8 +567,8 @@ class TestSubprocess:
         b_wf, b_v = make_workflow("Cycle B")
         self._wire_subprocess(a_v, b_wf)
         self._wire_subprocess(b_v, a_wf)
-        a_v.publish()
-        b_v.publish()
+        a_v.publish(publisher_user())
+        b_v.publish(publisher_user())
         instance = start_instance(a_wf.published_version)
         assert instance.status == WorkflowInstance.Status.FAILED
         # The depth cap (not a Python RecursionError) terminated it: the
@@ -697,7 +698,7 @@ class TestManualRunAuthz:
                 "variables": [],
             },
         )
-        version.publish()
+        version.publish(publisher_user())
         return workflow
 
     def _post(self, version_id, user):
@@ -782,7 +783,7 @@ class TestInitialVariables:
                 ],
             },
         )
-        version.publish()
+        version.publish(publisher_user())
         return version
 
     def _post(self, version_id, user, **extra):

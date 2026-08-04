@@ -223,6 +223,17 @@ def validate_graph(version):
                         node=node,
                     )
                 )
+            elif target.published_version.run_as is None:
+                # Same TOCTOU caveat as subprocess_inactive: the child
+                # republishes independently; the engine re-checks at run time.
+                errors.append(
+                    _error(
+                        "subprocess_missing_identity",
+                        "The subprocess workflow has no run identity — "
+                        "republish it first",
+                        node=node,
+                    )
+                )
             else:
                 # Best effort (the child republishes independently, same
                 # TOCTOU as subprocess_unpublished): the child's current

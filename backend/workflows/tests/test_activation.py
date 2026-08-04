@@ -20,6 +20,7 @@ from workflows.models import (
 )
 from workflows.scheduling import run_due_schedules
 from workflows.validation import validate_graph
+from workflows.tests.helpers import publisher_user
 
 
 @pytest.fixture
@@ -49,7 +50,7 @@ def edge(source, target, **kwargs):
 
 def build_workflow(name, trigger_config, publish=True):
     workflow = Workflow.objects.create(name=name, folder=Folder.get_root_folder())
-    version = WorkflowVersion.objects.create(workflow=workflow)
+    version = WorkflowVersion.objects.create(workflow=workflow, run_as=publisher_user())
     trigger = node("trigger", ref="entry", trigger_config=trigger_config)
     act = node("action", label="Log", action_config={"type": "log", "message": "hi"})
     end = node("end")
@@ -62,7 +63,7 @@ def build_workflow(name, trigger_config, publish=True):
         },
     )
     if publish:
-        version.publish()
+        version.publish(publisher_user())
     return workflow, version
 
 
@@ -122,9 +123,7 @@ class TestActivation:
         child.is_active = False
         child.save()
 
-        parent = Workflow.objects.create(
-            name="Parent", folder=Folder.get_root_folder()
-        )
+        parent = Workflow.objects.create(name="Parent", folder=Folder.get_root_folder())
         version = WorkflowVersion.objects.create(workflow=parent)
         trigger = node("trigger", trigger_config={"type": "manual"})
         sub = node("subprocess", label="Call child", subprocess_workflow=str(child.id))
@@ -153,7 +152,7 @@ class TestRestore:
     def _workflow_with_archived_version(self):
         workflow, v1 = build_workflow("Restorable", {"type": "manual"})
         draft = v1.clone_as_draft()
-        draft.publish()  # v1 becomes archived, v2 published
+        draft.publish(publisher_user())  # v1 becomes archived, v2 published
         v1.refresh_from_db()
         assert v1.status == WorkflowVersion.Status.ARCHIVED
         return workflow, v1

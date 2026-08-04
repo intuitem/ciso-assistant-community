@@ -20,13 +20,14 @@ from workflows.scheduling import (
     validate_timezone,
 )
 from workflows.serializers import WorkflowTriggerWriteSerializer
+from workflows.tests.helpers import publisher_user
 
 
 def make_workflow(name="Scheduled flow", published=True, cron="*/10 * * * *"):
     """A workflow whose entry is a schedule trigger node; publishing creates
     the registration row (disabled by default per D22 arming policy)."""
     workflow = Workflow.objects.create(name=name, folder=Folder.get_root_folder())
-    version = WorkflowVersion.objects.create(workflow=workflow)
+    version = WorkflowVersion.objects.create(workflow=workflow, run_as=publisher_user())
     trigger = {
         "id": str(uuid.uuid4()),
         "type": "trigger",
@@ -57,7 +58,7 @@ def make_workflow(name="Scheduled flow", published=True, cron="*/10 * * * *"):
         },
     )
     if published:
-        version.publish()
+        version.publish(publisher_user())
     return workflow, version
 
 
@@ -139,7 +140,7 @@ class TestRegistrationLifecycle:
         row = get_registration(workflow)
         before = row.next_run_at
         draft = version.clone_as_draft()
-        draft.publish()
+        draft.publish(publisher_user())
         row.refresh_from_db()
         assert row.enabled is True
         assert row.next_run_at == before
@@ -152,7 +153,7 @@ class TestRegistrationLifecycle:
         node = draft.nodes.get(ref="nightly")
         node.trigger_config = {"type": "schedule", "cron_expression": "0 4 * * *"}
         node.save(update_fields=["trigger_config", "updated_at"])
-        draft.publish()
+        draft.publish(publisher_user())
         row.refresh_from_db()
         assert row.enabled is True
         assert row.next_run_at != before
@@ -164,7 +165,7 @@ class TestRegistrationLifecycle:
         trigger_node.trigger_config = {"type": "manual"}
         trigger_node.ref = "manual_entry"
         trigger_node.save(update_fields=["trigger_config", "ref", "updated_at"])
-        draft.publish()
+        draft.publish(publisher_user())
         assert not workflow.triggers.filter(node_ref="nightly").exists()
 
     def test_subtype_change_resets_state_and_secret(self):
@@ -175,7 +176,7 @@ class TestRegistrationLifecycle:
         node = draft.nodes.get(ref="nightly")
         node.trigger_config = {"type": "webhook"}
         node.save(update_fields=["trigger_config", "updated_at"])
-        draft.publish()
+        draft.publish(publisher_user())
         row.refresh_from_db()
         assert row.type == WorkflowTrigger.Type.WEBHOOK
         assert row.enabled is True  # webhooks arrive live
@@ -278,7 +279,9 @@ class TestScheduleConfigValidation:
         workflow = Workflow.objects.create(
             name=f"cfg {uuid.uuid4().hex[:6]}", folder=Folder.get_root_folder()
         )
-        version = WorkflowVersion.objects.create(workflow=workflow)
+        version = WorkflowVersion.objects.create(
+            workflow=workflow, run_as=publisher_user()
+        )
         trigger = {
             "id": str(uuid.uuid4()),
             "type": "trigger",

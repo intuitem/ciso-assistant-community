@@ -485,9 +485,17 @@ class ReadObjectsAction(BaseAction):
         if order_by.lstrip("-") not in fields:
             raise ActionError(f"read_objects: '{order_by}' is not an orderable field")
 
+        # Rows must be BOTH inside the workflow's subtree scope (spec D26)
+        # AND visible to the run identity (spec D34) — the identity's view
+        # scope is the API's own row-visibility rule, so the run reads
+        # exactly what the API would show that user.
+        from . import authz
+        from .engine import run_identity
+
         queryset = (
             entry["model"]
             .objects.filter(folder_id__in=_read_scope_folder_ids(instance.folder))
+            .filter(id__in=authz.viewable_ids(run_identity(instance), entry["model"]))
             .filter(query)
             .order_by(order_by, "id")  # id tie-break keeps pagination stable
         )
@@ -919,10 +927,50 @@ def validate_read_config(node):
     return errors
 
 
+def authorize_action(node, instance):
+    """Runtime half of the D18 deputization promise (spec D34): before any
+    side effect, the run identity must hold every permission the action
+    exercises, checked live against the workflow's folder. Refusal is a
+    structured, retryable node failure (grant the role, retry the token)."""
+    from . import authz
+    from .engine import _log, run_identity
+    from .models import WorkflowInstanceLog
+
+    codenames = required_permissions(node.action_config)
+    if not codenames:
+        return
+    identity = run_identity(instance)
+    denied = (
+        codenames
+        if identity is None
+        else [c for c in codenames if not authz.can(identity, c, instance.folder)]
+    )
+    if not denied:
+        return
+    reason = (
+        "no run identity (republish the workflow)"
+        if identity is None
+        else f"'{identity.email}' lacks {', '.join(denied)}"
+    )
+    _log(
+        instance,
+        WorkflowInstanceLog.EventType.AUTHORIZATION_DENIED,
+        node=node,
+        message=f"Authorization denied: {reason}",
+        data={
+            "codenames": denied,
+            "folder": str(instance.folder_id),
+            "identity": str(identity.id) if identity else None,
+        },
+    )
+    raise ActionError(f"Authorization denied: {reason}")
+
+
 def execute_action(node, instance):
     config = node.action_config or {}
     action_type = config.get("type")
     action = ACTION_REGISTRY.get(action_type)
     if action is None:
         raise ActionError(f"Unknown action type '{action_type}'")
+    authorize_action(node, instance)
     return action.execute(config, instance)
