@@ -1,15 +1,24 @@
 import pytest
+from django.apps import apps
 from knox.models import AuthToken
 from rest_framework.test import APIClient
 
 from core.apps import startup
 from iam.models import Folder, User, UserGroup
 
-enterprise_core = pytest.importorskip(
-    "enterprise_core", reason="enterprise backend not on the path"
+# Collected-then-skipped rather than importorskip: the CI matrix runs each file
+# as its own job, and a module skipped at collection exits 5 (no tests ran).
+# enterprise_core is importable even in a community run, so the condition is
+# whether it is an installed app — importing its models otherwise raises.
+ENTERPRISE_INSTALLED = apps.is_installed("enterprise_core")
+
+if ENTERPRISE_INSTALLED:
+    from enterprise_core.apps import startup as enterprise_startup
+    from enterprise_core.models import ClientSettings
+
+pytestmark = pytest.mark.skipif(
+    not ENTERPRISE_INSTALLED, reason="enterprise backend not installed"
 )
-from enterprise_core.apps import startup as enterprise_startup  # noqa: E402
-from enterprise_core.models import ClientSettings  # noqa: E402
 
 PNG = (
     b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01"

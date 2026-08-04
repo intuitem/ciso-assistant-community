@@ -1388,7 +1388,10 @@ class TestRealAuthAndRBAC:
             writable.id,
         )
         assert resp.status_code == 200
-        assert not Asset.objects.filter(folder=readonly).exists()
+        # Must fail loudly, not be silently redirected into the request folder.
+        assert resp.json()["results"]["failed"] == 1
+        assert resp.json()["results"]["created"] == 0
+        assert not Asset.objects.filter(name="ESCAPED-ASSET").exists()
 
     def test_restricted_user_cannot_import_users(
         self, knox_restricted_client, app_ready
