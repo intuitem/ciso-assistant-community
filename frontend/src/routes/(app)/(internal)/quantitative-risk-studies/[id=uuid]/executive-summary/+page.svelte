@@ -320,7 +320,7 @@
 									{#if scenario.qualifications && scenario.qualifications.length > 0}
 										<div>
 											<h4 class="text-sm font-medium text-surface-950-50 mb-2">
-												<i class="fa-solid fa-tags mr-1"></i>{m.qualifications()} ({scenario
+												<i class="fa-solid fa-tags mr-1"></i>{safeTranslate('qualifications')} ({scenario
 													.qualifications.length})
 											</h4>
 											<div class="space-y-1">
