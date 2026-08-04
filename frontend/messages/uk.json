@@ -555,7 +555,7 @@
 	"primary": "Основний",
 	"support": "Підтримки",
 	"toDo": "Зробити",
-	"inProgress": "В процесі",
+	"inProgress": "У процесі",
 	"inReview": "В процесі огляду",
 	"approved": "Схвалено",
 	"resolved": "Вирішено",
@@ -916,7 +916,7 @@
 	"sumpageActive": "Активні",
 	"sumpageDeprecated": "Не актуальні",
 	"sumpageToDo": "До виконання",
-	"sumpageInProgress": "В процесі",
+	"sumpageInProgress": "У процесі",
 	"sumpageOnHold": "Призупинено",
 	"sumpageP1": "Очікується P1",
 	"sumpageEtaMissed": "Пропущено ETA",
@@ -1230,6 +1230,8 @@
 	"activityThree": "Крок 3",
 	"ebiosRmStudy": "Дослідження EBIOS RM",
 	"qualifications": "Кваліфікація",
+	"riskCategory": "Категорія ризику",
+	"riskCategories": "Категорії ризику",
 	"impacts": "Впливи",
 	"ebiosRmStudies": "Дослідження EBIOS RM",
 	"bringTheEvidences": "Приведіть докази",
@@ -1659,8 +1661,10 @@
 			"selectors": ["count", "countPlural"],
 			"match": {
 				"count=0": "Жоден інший об'єкт не буде зачеплений.",
-				"countPlural=one": "{count} пов'язаний об'єкт не буде видалений, але втратить одне або кілька зв'язків.",
-				"countPlural=other": "{count} пов'язаних об'єктів не буде видалено, але втратить одне або кілька зв'язків."
+				"countPlural=one": "{count} пов'язаний об'єкт не буде видалено, але він втратить один або кілька зв'язків.",
+				"countPlural=few": "{count} пов'язані об'єкти не буде видалено, але вони втратять один або кілька зв'язків.",
+				"countPlural=many": "{count} пов'язаних об'єктів не буде видалено, але вони втратять один або кілька зв'язків.",
+				"countPlural=other": "{count} пов'язаних об'єктів не буде видалено, але вони втратять один або кілька зв'язків."
 			}
 		}
 	],
@@ -1672,8 +1676,10 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "{count} об'єкт невидимий.",
-				"countPlural=other": "{count} об'єкти невидимі."
+				"countPlural=one": "Приховано {count} об'єкт.",
+				"countPlural=few": "Приховано {count} об'єкти.",
+				"countPlural=many": "Приховано {count} об'єктів.",
+				"countPlural=other": "Приховано {count} об'єктів."
 			}
 		}
 	],
@@ -1805,7 +1811,9 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "{count} правил результату",
+				"countPlural=one": "{count} правило результату",
+				"countPlural=few": "{count} правила результату",
+				"countPlural=many": "{count} правил результату",
 				"countPlural=other": "{count} правил результату"
 			}
 		}
@@ -1814,7 +1822,12 @@
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
-			"match": { "countPlural=one": "{count} груп", "countPlural=other": "{count} груп" }
+			"match": {
+				"countPlural=one": "{count} група",
+				"countPlural=few": "{count} групи",
+				"countPlural=many": "{count} груп",
+				"countPlural=other": "{count} груп"
+			}
 		}
 	],
 	"builderUrnNamespace": "Простір імен URN",
@@ -1825,7 +1838,12 @@
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
-			"match": { "countPlural=one": "{count} рівнів", "countPlural=other": "{count} рівнів" }
+			"match": {
+				"countPlural=one": "{count} рівень",
+				"countPlural=few": "{count} рівні",
+				"countPlural=many": "{count} рівнів",
+				"countPlural=other": "{count} рівнів"
+			}
 		}
 	],
 	"builderAddScaleLevel": "Додати рівень шкали",
@@ -1895,6 +1913,8 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Оцінюване · {count} дочірній",
+				"countPlural=few": "Оцінюване · {count} дочірні",
+				"countPlural=many": "Оцінюване · {count} дочірніх",
 				"countPlural=other": "Оцінюване · {count} дочірніх"
 			}
 		}
@@ -1905,6 +1925,8 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Група · {count} дочірній",
+				"countPlural=few": "Група · {count} дочірні",
+				"countPlural=many": "Група · {count} дочірніх",
 				"countPlural=other": "Група · {count} дочірніх"
 			}
 		}
@@ -1933,6 +1955,8 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} дочірній прихований",
+				"countPlural=few": "{count} дочірні приховані",
+				"countPlural=many": "{count} дочірніх приховано",
 				"countPlural=other": "{count} дочірніх приховано"
 			}
 		}
@@ -1960,7 +1984,9 @@
 			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "Показується, коли {ref} = {count} відповідей",
+				"countPlural=one": "Показується, коли {ref} = {count} відповідь",
+				"countPlural=few": "Показується, коли {ref} = {count} відповіді",
+				"countPlural=many": "Показується, коли {ref} = {count} відповідей",
 				"countPlural=other": "Показується, коли {ref} = {count} відповідей"
 			}
 		}
@@ -2054,13 +2080,13 @@
 	"chinese": "Китайська (спрощена)",
 	"lithuanian": "Литовська",
 	"assetClass": "Клас",
-	"CatalogDescription": "Каталог - місце, де ви імпортуєте репозиторії, загрози, матриці та інші попередньо визначені об'єкти",
-	"securityAdvisoriesDescription": "Поради про безпеку - це сповіщення щодо вразливостей",
+	"CatalogDescription": "Каталог — місце, де ви імпортуєте репозиторії, загрози, матриці та інші попередньо визначені об'єкти",
+	"securityAdvisoriesDescription": "Поради про безпеку — це сповіщення щодо вразливостей",
 	"cweDescription": "перелік слабких місць безпеки програмного забезпечення (CWE)",
 	"associatedContracts": "Пов'язані контракти",
 	"associatedTaskTemplates": "Пов'язані завдання",
 	"associatedObjectsCount": "Пов'язані об'єкти",
-	"associatedMetricInstances": "",
+	"associatedMetricInstances": " ",
 	"view": "Перегляд",
 	"metrology": "Метрологія",
 	"metrologyDescription": "Відстежуйте метрики, KPI та візуалізуйте їх на налаштовуваних дашбордах",
@@ -2361,8 +2387,8 @@
 	"requirementAssignment": "Призначення вимоги",
 	"requirementAssignments": "Призначення вимог",
 	"onlyApproverCanModify": "Лише призначений затверджувач може змінювати перевірку",
-	"disablePartiallyCompliantResult": "Вимкнути результат \"частково відповідає\"",
-	"disablePartiallyCompliantResultHelpText": "Якщо увімкнено, варіант \"частково відповідає\" більше не пропонується при встановленні результату оцінювання вимоги. Наявні значення зберігаються і продовжують відображатися.",
+	"disablePartiallyCompliantResult": "Вимкнути результат «частково відповідає»",
+	"disablePartiallyCompliantResultHelpText": "Якщо увімкнено, варіант «частково відповідає» більше не пропонується при встановленні результату оцінювання вимоги. Наявні значення зберігаються і продовжують відображатися.",
 	"notSet": "--",
 	"thirdPartyRespondent": "Респондент третьої сторони",
 	"submissionFailed": "Не вдалося подати",
@@ -2395,14 +2421,14 @@
 	"customFieldKeyHelpText": "Ідентифікатор у нижньому регістрі, що використовується в API (наприклад, ?cf__<key>=). Не можна змінити після створення.",
 	"customFieldFolderHelpText": "Глобальний (кореневий домен) застосовується до кожного об'єкта цієї моделі; конкретний домен застосовується лише в межах цього домену та його піддоменів.",
 	"customFieldSearchableHelpText": "Включити текстові значення цього поля в глобальний пошук.",
-	"rosiBaselineControlsWarning": "Ця залишкова гіпотеза має заходи лише в розділі \"наявні заходи\", які вважаються базовими і не мають вартості обробки. Щоб обчислити ROSI, розмістіть заходи, в які плануєте інвестувати, у розділі \"додані заходи\".",
+	"rosiBaselineControlsWarning": "Ця залишкова гіпотеза має заходи лише в розділі «наявні заходи», які вважаються базовими і не мають вартості обробки. Щоб обчислити ROSI, розмістіть заходи, в які плануєте інвестувати, у розділі «додані заходи».",
 	"rosiNoAddedControls": "Для ROSI потрібні додані заходи з визначеною вартістю.",
 	"rosiAddedControlsNoCost": "Для ROSI потрібна вартість обробки: у доданих заходів не визначено вартість.",
 	"rosiNegativeCost": "ROSI тут не має сенсу: вилучені заходи переважають додані (від'ємна вартість обробки).",
 	"rosiOnlyResidual": "ROSI обчислюється лише для залишкових гіпотез.",
 	"rosiNoCurrentHypothesis": "Для ROSI потрібна поточна гіпотеза для порівняння.",
 	"rosiMissingAle": "Для ROSI потрібні результати симуляції (ALE) для поточної та залишкової гіпотез.",
-	"rocNotApplicable": "Н/З",
+	"rocNotApplicable": "N/A",
 	"rocInsufficientData": "Недостатньо даних",
 	"rosiCalculationExplanation": "Обчислення ROSI:\n• Поточний ALE: {currentAle}\n• Залишковий ALE: {residualAle}\n• Зниження ризику: {riskReduction}\n• Вартість обробки: {treatmentCost}\n• Чиста вигода: {netBenefit}\n• ROSI = Чиста вигода ÷ Вартість обробки = {rosi}\n\nФормула: ROSI = (Поточний ALE − Залишковий ALE − Вартість обробки) ÷ Вартість обробки",
 	"ebiosRmBaseline": "Основи",
@@ -2450,7 +2476,7 @@
 	"templatePasswordResetName": "Скидання пароля",
 	"templatePasswordResetDescription": "Лист скидання пароля",
 	"templateQuestionnaireAssignmentName": "Призначення опитування",
-	"templateQuestionnaireAssignmentDescription": "Надсилається, коли призначено  опитування третьої сторони",
+	"templateQuestionnaireAssignmentDescription": "Надсилається, коли призначено опитування третьої сторони",
 	"templateAppliedControlAssignmentName": "Призначення контролу",
 	"templateAppliedControlAssignmentDescription": "Надсилається, коли контрол призначено користувачу",
 	"templateAppliedControlExpiringSoonName": "контрол незабаром закінчується",
@@ -2788,7 +2814,7 @@
 	"breachType": "Тип витоку",
 	"openDataBreaches": "Відкриті витоки даних",
 	"dataBreachRiskLevel": "Рівень ризику",
-	"dataBreachRiskLevelHelpText": "Без ризику: потрібно відстежування витоку.\\nРизик:  потрібно відстежування витоку та повідомлення органів влади.\\nВисокий ризик: потрібно відстежування витоку, повідомлення органів влади та суб'єктів даних.",
+	"dataBreachRiskLevelHelpText": "Без ризику: потрібно відстежування витоку.\nРизик: потрібно відстежування витоку та повідомлення органів влади.\nВисокий ризик: потрібно відстежування витоку, повідомлення органів влади та суб'єктів даних.",
 	"affectedSubjectsCount": "Кількість зачеплених суб'єктів даних",
 	"affectedProcessings": "Зачеплені обробки даних",
 	"affectedPersonalData": "Зачеплені персональні дані",
@@ -2815,7 +2841,7 @@
 	"ebiosWs4_0": "Підготувати елементарні дії",
 	"ebiosRMStudies": "Дослідження EBIOS RM",
 	"ebiosRMStudyARM": "Дослідження EBIOS RM (формат ARM)",
-	"ebiosRMStudyARMDescription": "Імпортуйте дослідження EBIOS RM з формату Excel ARM.\\nЗауважте, що це пропрієтарний формат: підтримуються не всі об'єкти, і деякі елементи можуть не імпортуватися через зміни заголовків або аркушів.",
+	"ebiosRMStudyARMDescription": "Імпортуйте дослідження EBIOS RM з формату Excel ARM.\nЗауважте, що це пропрієтарний формат: підтримуються не всі об'єкти, і деякі елементи можуть не імпортуватися через зміни заголовків або аркушів.",
 	"ebiosRMStudyExcel": "Дослідження EBIOS RM (формат CISO Assistant)",
 	"ebiosRMStudyExcelDescription": "Імпортуйте дослідження EBIOS RM з експорту Excel CISO Assistant. Це дозволяє обмінюватися дослідженнями між різними інсталяціями або відновлювати раніше експортовані дослідження.",
 	"armImportPreview": "Попередній перегляд імпорту ARM",
@@ -2983,7 +3009,7 @@
 	"pathLabel": "Шлях",
 	"controlsLabel": "Контролі",
 	"countLabel": "Кількість",
-	"executiveSummary": "Зведений звіт",
+	"executiveSummary": "Резюме для керівництва",
 	"keyMetrics": "Ключові показники",
 	"portfolioOverview": "Огляд портфеля",
 	"lossThresholdLabel": "Поріг втрат",
@@ -3109,9 +3135,11 @@
 	"incidentDetectionBreakdown": "Джерело виявлення",
 	"incidentSeverityBreakdown": "Тяжкість",
 	"incidentQualificationsRadar": "Кваліфікації",
+	"incidentRiskCategoriesRadar": "Категорії ризику",
 	"monthlyIncidentMetrics": "Історія",
 	"noOperationsData": "Дані операцій відсутні",
 	"noQualificationsData": "Кваліфікацій для інцидентів не знайдено",
+	"noRiskCategoriesData": "Категорій ризику для інцидентів не знайдено",
 	"createIncidents": "Створіть інциденти, щоб побачити аналітику",
 	"createIncident": "Створити інцидент",
 	"totalIncidents": "Всього інцидентів",
@@ -3422,21 +3450,36 @@
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
-			"match": { "countPlural=one": "{count} година", "countPlural=other": "{count} годин" }
+			"match": {
+				"countPlural=one": "{count} година",
+				"countPlural=few": "{count} години",
+				"countPlural=many": "{count} годин",
+				"countPlural=other": "{count} годин"
+			}
 		}
 	],
 	"minuteCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
-			"match": { "countPlural=one": "{count} хвилина", "countPlural=other": "{count} хвилин" }
+			"match": {
+				"countPlural=one": "{count} хвилина",
+				"countPlural=few": "{count} хвилини",
+				"countPlural=many": "{count} хвилин",
+				"countPlural=other": "{count} хвилин"
+			}
 		}
 	],
 	"dayCount": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
-			"match": { "countPlural=one": "{count} день", "countPlural=other": "{count} днів" }
+			"match": {
+				"countPlural=one": "{count} день",
+				"countPlural=few": "{count} дні",
+				"countPlural=many": "{count} днів",
+				"countPlural=other": "{count} днів"
+			}
 		}
 	],
 	"serverURL": "URL сервера",
@@ -3492,7 +3535,7 @@
 	"orderedEntryListRefIdPlaceholder": "ID посилання",
 	"orderedEntryListNamePlaceholder": "Назва",
 	"orderedEntryListAddButton": "Додати",
-	"number": "Number",
+	"number": "Кількість",
 	"sampleTimeline": "Хронологія",
 	"allFolders": "Всі домени",
 	"aggregatedStatus": "Статус",
@@ -3645,6 +3688,7 @@
 	"showingAllAppliedControls": "Показано всі застосовані заходи",
 	"showingItemsWith": "Показано елементи з",
 	"qualificationsChartTitle": "Кваліфікації сценаріїв ризику",
+	"riskCategoriesChartTitle": "Категорії ризику за сценаріями ризику",
 	"saveAndNext": "Зберегти і продовжити",
 	"pImpact": "Вплив",
 	"item": "елемент",
@@ -4021,6 +4065,9 @@
 	"clickToDrillDown": "Натисніть для деталізації",
 	"failedToLoadVulnerabilityData": "Не вдалося завантажити дані вразливостей",
 	"noQualificationsFoundOnRiskScenarios": "Кваліфікацій для сценаріїв ризику не знайдено",
+	"noRiskCategoriesFoundOnRiskScenarios": "Категорій ризику для сценаріїв ризику не знайдено",
+	"settingsUseRiskCategoryLabel": "Відображати кваліфікації як категорії ризику",
+	"settingsUseRiskCategoryLabelHelpText": "Якщо увімкнено, термін «кваліфікація» відображається в інтерфейсі як «категорія ризику».",
 	"errorLoadingVulnerabilityData": "Помилка завантаження даних вразливостей",
 	"findingsAssessmentDistribution": "Розподіл трекерів результатів",
 	"addAssetClass": "Додати клас активу",
@@ -4296,7 +4343,7 @@
 	"addMetricInstance": "Додати екземпляр метрики",
 	"customMetricSample": "Зразок власної метрики",
 	"customMetricSamples": "Зразки власних метрик",
-	"associatedCustomMetricSamples": "",
+	"associatedCustomMetricSamples": " ",
 	"addCustomMetricSample": "Додати зразок власної метрики",
 	"builtinMetricSample": "Зразок вбудованої метрики",
 	"builtinMetricSamples": "Зразки вбудованих метрик",
@@ -4415,7 +4462,7 @@
 	"replayAuditEventsHelpText": "Повторно надіслати історичні події аудиту до цього приймача, наприклад, для заповнення після збою. Події читаються з бази даних (зберігання 90 днів).",
 	"replayUntilOptional": "До (необов'язково)",
 	"auditReplayScheduled": "Заплановано повторну відправку подій аудиту: {count}",
-	"raw": "Raw",
+	"raw": "Необроблений",
 	"invalidJson": "Недійсний JSON",
 	"replayFailed": "Повторна відправка не вдалася",
 	"sinceRequiredIso8601": "Потрібна початкова дата у форматі ISO 8601",
@@ -4922,7 +4969,7 @@
 	"clone": "Клонувати",
 	"published": "Опубліковано",
 	"editing": "Редагування",
-	"fromLibraryTooltip": "З бібліотеки - клонуйте, щоб створити редаговану копію",
+	"fromLibraryTooltip": "З бібліотеки — клонуйте, щоб створити редаговану копію",
 	"editMatrixTooltip": "Редагувати цю матрицю (зміни не вплинуть на оцінювання, доки не опубліковані)",
 	"cloneMatrixTooltip": "Створити нову матрицю на основі цієї",
 	"discardDraftConfirm": "Відхилити активну чернетку? Опублікована матриця залишиться.",
@@ -4954,7 +5001,7 @@
 	"subcontractingChainHelpText": "Вкажіть ІКТ-субпідрядників, що підтримують цю послугу. Прямий постачальник (рівень 1) визначається неявно.",
 	"subcontractingDirectProvider": "Прямий постачальник",
 	"subcontractingDirectProviderUnset": "Прямого постачальника не встановлено",
-	"subcontractingRank1ImplicitHelp": "Рівень 1 - це прямий постачальник рішення, встановлюється через поле сутності «Постачальник» вище.",
+	"subcontractingRank1ImplicitHelp": "Рівень 1 — це прямий постачальник рішення, встановлюється через поле сутності «Постачальник» вище.",
 	"subcontractor": "Субпідрядник",
 	"subcontractingTier": "рівень {n}",
 	"addSubcontractor": "Додати субпідрядника",
@@ -5067,7 +5114,7 @@
 	"noResultReturnedForFile": "Для цього файлу результат не повернуто.",
 	"sameContentAs": "Той самий вміст, що й «{name}»",
 	"networkErrorWithMessage": "Помилка мережі: {message}",
-	"batchDoneSummary": "Готово - створено: {created}, версій: {revisions}, замінено: {replaced}, перейменовано: {renamed}, без змін: {unchanged}, помилок: {errors}.",
+	"batchDoneSummary": "Готово — створено: {created}, версій: {revisions}, замінено: {replaced}, перейменовано: {renamed}, без змін: {unchanged}, помилок: {errors}.",
 	"thresholds": "Пороги",
 	"thresholdsHint": "Забарвлює значення, коли умови збігаються. Береться перший рядок, що відповідає умові.",
 	"applyTrafficLightPreset": "Пресет «світлофор» (Traffic-light)",
@@ -5342,7 +5389,7 @@
 	"defaultPackager": "Пакувальник за замовчуванням",
 	"defaultPackagerHelpText": "Автозаповнює ідентичність пакувальника при створенні бібліотек у Library Builder (URN мають вигляд urn:{packager}:risk:…). Лише малі літери, цифри, - та _.",
 	"builderThreatsLabel": "Загрози:",
-	"builderReferenceControlsLabel": "Відповідні заходи:",
+	"builderReferenceControlsLabel": "Типові контролі:",
 	"builderLinkExisting": "Прив'язати наявний",
 	"builderCreateNew": "Створити новий",
 	"builderNoCatalogMatches": "Збігів немає",
@@ -5588,6 +5635,8 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} фреймворк",
+				"countPlural=few": "{count} фреймворки",
+				"countPlural=many": "{count} фреймворків",
 				"countPlural=other": "{count} фреймворків"
 			}
 		}
@@ -5596,7 +5645,12 @@
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
-			"match": { "countPlural=one": "{count} загроза", "countPlural=other": "{count} загроз" }
+			"match": {
+				"countPlural=one": "{count} загроза",
+				"countPlural=few": "{count} загрози",
+				"countPlural=many": "{count} загроз",
+				"countPlural=other": "{count} загроз"
+			}
 		}
 	],
 	"lbCountReferenceControls": [
@@ -5604,8 +5658,10 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "{count} відповідний захід",
-				"countPlural=other": "{count} відповідних заходів"
+				"countPlural=one": "{count} типовий контроль",
+				"countPlural=few": "{count} типові контролі",
+				"countPlural=many": "{count} типових контролів",
+				"countPlural=other": "{count} типових контролів"
 			}
 		}
 	],
@@ -5615,6 +5671,8 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} матриця ризиків",
+				"countPlural=few": "{count} матриці ризиків",
+				"countPlural=many": "{count} матриць ризиків",
 				"countPlural=other": "{count} матриць ризиків"
 			}
 		}
@@ -5625,6 +5683,8 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} зіставлення",
+				"countPlural=few": "{count} зіставлення",
+				"countPlural=many": "{count} зіставлень",
 				"countPlural=other": "{count} зіставлень"
 			}
 		}
@@ -5633,7 +5693,12 @@
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
-			"match": { "countPlural=one": "{count} пресет", "countPlural=other": "{count} пресетів" }
+			"match": {
+				"countPlural=one": "{count} пресет",
+				"countPlural=few": "{count} пресети",
+				"countPlural=many": "{count} пресетів",
+				"countPlural=other": "{count} пресетів"
+			}
 		}
 	],
 	"lbCountMetricDefinitions": [
@@ -5642,6 +5707,8 @@
 			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} визначення метрики",
+				"countPlural=few": "{count} визначення метрик",
+				"countPlural=many": "{count} визначень метрик",
 				"countPlural=other": "{count} визначень метрик"
 			}
 		}
