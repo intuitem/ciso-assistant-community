@@ -2582,8 +2582,8 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:4.2.2
       ref_id: R112
-      name: "Privil\xE9gieruncloisonnementphysiqueentrelesautomatesdes\xE9curit\xE9\
-        \ fonctionnelle (SIS) et les automates standards (BPCS)"
+      name: "Privil\xE9gier un cloisonnement physique entre les automates de s\xE9\
+        curit\xE9 fonctionnelle (SIS) et les automates standards (BPCS)"
       description: "Il est recommand\xE9 de privil\xE9gier un cloisonnement physique\
         \ entre les automates de s\xE9curit\xE9 fonctionnelle (SIS) et les automates\
         \ standards (BPCS). Ind\xE9pendamment de la cybers\xE9curit\xE9, le cloisonnement\
@@ -3228,8 +3228,8 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:4.2.7
       ref_id: R143
-      name: "Consulterr\xE9guli\xE8rementles\xE9v\xE9nementsg\xE9n\xE9r\xE9sparles\xE9\
-        quipements sans-fil"
+      name: "Consulter r\xE9guli\xE8rement les \xE9v\xE9nements g\xE9n\xE9r\xE9s par\
+        \ les \xE9quipements sans-fil"
       description: "Il est recommand\xE9 de consulter r\xE9guli\xE8rement les \xE9\
         v\xE9nements g\xE9n\xE9r\xE9s par les \xE9quipements sans-fil lorsque les\
         \ \xE9v\xE9nements de s\xE9curit\xE9 ne sont pas supervis\xE9s par un dispositif\
@@ -4412,7 +4412,7 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:4.3.6
       ref_id: R200
-      name: "Appliqueretv\xE9rifier lesr\xE8glesdebonnespratiquesdeprogrammation"
+      name: "Appliquer et v\xE9rifier les r\xE8gles de bonnes pratiques de programmation"
       description: "Il est recommand\xE9 d\u2019appliquer et de v\xE9rifier les r\xE8\
         gles de bonnes pratiques de programmation. Pour cela, on pourra par exemple\
         \ utiliser les options avanc\xE9es de certains compilateurs ou des outils\
