@@ -28,6 +28,8 @@ MAX_COUNTED_ROWS = 10_000
 # Import targets supported by the workflow. The consumer name refers to
 # data_wizard.views — the same code path as the manual data wizard, so an
 # AI-mediated import can never do more than a wizard import could.
+# `container` is the parent object rows live inside; its `add_` permission, not
+# the row model's, is what gates the import.
 IMPORT_TARGETS = {
     "applied_control": {
         "label": "Applied controls",
@@ -40,6 +42,28 @@ IMPORT_TARGETS = {
         "model": ("core", "Finding"),
         "consumer": "FindingsAssessmentRecordConsumer",
         "hints": ("finding", "pentest", "constat", "vulnérabilité"),
+        "container": {
+            "model": ("core", "FindingsAssessment"),
+            "label": "findings assessment",
+        },
+    },
+    "risk_scenario": {
+        "label": "Risk scenarios (risk assessment)",
+        "model": ("core", "RiskScenario"),
+        "consumer": "RiskAssessmentRecordConsumer",
+        "hints": (
+            "risk scenario",
+            "scénario de risque",
+            "risk assessment",
+            "risk analysis",
+            "analyse de risque",
+            "appréciation des risques",
+        ),
+        "container": {
+            "model": ("core", "RiskAssessment"),
+            "label": "risk assessment",
+            "needs_matrix": True,
+        },
     },
     "asset": {
         "label": "Assets",
@@ -50,13 +74,31 @@ IMPORT_TARGETS = {
 }
 
 
+def target_model(target_key: str):
+    from django.apps import apps
+
+    return apps.get_model(*IMPORT_TARGETS[target_key]["model"])
+
+
+def container_model(target_key: str):
+    """The parent object rows are imported into, or None for flat targets."""
+    from django.apps import apps
+
+    container = IMPORT_TARGETS[target_key].get("container")
+    return apps.get_model(*container["model"]) if container else None
+
+
+def permission_model_name(target_key: str) -> str:
+    """The model whose `add_` permission gates this import."""
+    model = container_model(target_key) or target_model(target_key)
+    return model._meta.model_name
+
+
 def target_terms(target_key: str) -> tuple[str, ...]:
     """Terms that identify an import target in a user message: the key,
     the display label, the model's verbose names, and configured hints."""
-    from django.apps import apps
-
     target = IMPORT_TARGETS[target_key]
-    meta = apps.get_model(*target["model"])._meta
+    meta = target_model(target_key)._meta
     return (
         target_key.replace("_", " "),
         target["label"].lower(),
@@ -80,6 +122,13 @@ _UNMAPPABLE_FIELDS = {
     "provider",
     "workflow_state",
     "meta",
+    # Container FKs: set from the chosen parent, never a column.
+    "findings_assessment",
+    "risk_assessment",
+    # Computed from probability × impact.
+    "inherent_level",
+    "current_level",
+    "residual_level",
 }
 
 
@@ -198,12 +247,10 @@ def known_columns(target_key: str) -> dict[str, str]:
     derived from the target model's fields plus the data_wizard consumer's
     SOURCE_KEY_MAP aliases, so it stays in sync with what the consumer can
     actually ingest."""
-    from django.apps import apps
-
     import data_wizard.views as dw
 
     target = IMPORT_TARGETS[target_key]
-    model = apps.get_model(*target["model"])
+    model = target_model(target_key)
     consumer_cls = getattr(dw, target["consumer"])
 
     columns: dict[str, str] = {}

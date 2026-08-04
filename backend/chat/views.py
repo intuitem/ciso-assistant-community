@@ -10,6 +10,7 @@ from django.http import StreamingHttpResponse
 from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.exceptions import PermissionDenied as DRFPermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
@@ -916,7 +917,7 @@ class ChatSessionViewSet(BaseModelViewSet):
         target inside a single transaction; nothing here can do more than a
         manual data-wizard import by the same user.
         """
-        from .importer import run_import
+        from .importer import format_side_effects, run_import
         from .rag import get_accessible_folder_ids
         from .tabular import IMPORT_TARGETS
 
@@ -937,7 +938,16 @@ class ChatSessionViewSet(BaseModelViewSet):
             return Response({"detail": "cancelled"})
 
         data = state.get("data") or {}
-        if not data.get("mapping") or data.get("target") not in IMPORT_TARGETS:
+        target = IMPORT_TARGETS.get(data.get("target")) or {}
+        # A container the import has to create may need more than a folder.
+        needs_matrix = (target.get("container") or {}).get(
+            "needs_matrix"
+        ) and not data.get("container_id")
+        if (
+            not data.get("mapping")
+            or data.get("target") not in IMPORT_TARGETS
+            or (needs_matrix and not data.get("matrix_id"))
+        ):
             session.workflow_state = {}
             session.save(update_fields=["workflow_state"])
             return Response(
@@ -987,6 +997,14 @@ class ChatSessionViewSet(BaseModelViewSet):
                 folder_id=folder_id,
                 dry_run=False,
                 target_id=data.get("container_id"),
+                matrix_id=data.get("matrix_id"),
+            )
+        except DRFPermissionDenied:
+            return Response(
+                {
+                    "detail": "You are not allowed to import this object type into this domain."
+                },
+                status=status.HTTP_403_FORBIDDEN,
             )
         except Exception as e:
             logger.error(
@@ -1014,6 +1032,9 @@ class ChatSessionViewSet(BaseModelViewSet):
         if report["failed"]:
             summary += f", {report['failed']} failed"
         summary += "."
+        side_effects = format_side_effects(report.get("details"))
+        if side_effects:
+            summary += f" Also created from names on the rows: {side_effects}."
         if report["errors"]:
             summary += "\n\nIssues:\n" + "\n".join(f"- {e}" for e in report["errors"])
         ChatMessage.objects.create(
