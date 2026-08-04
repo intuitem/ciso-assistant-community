@@ -8,7 +8,6 @@ import structlog
 import os
 import time
 
-from django.db.models import Q
 from django.contrib.auth.models import Permission
 
 from iam.models import Folder, RoleAssignment

@@ -2,14 +2,13 @@ import json
 import re
 import structlog
 import time
-from typing import Iterable
 
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.http import StreamingHttpResponse
 from django.utils import timezone
-from rest_framework import viewsets, status
+from rest_framework import status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
