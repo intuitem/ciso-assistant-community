@@ -30,7 +30,7 @@ import openpyxl
 from copy import deepcopy
 from typing import Any, Dict, List
 from pathlib import Path
-from collections import Counter
+from collections import Counter, defaultdict
 
 SCRIPT_VERSION = "2.1"
 
@@ -1370,6 +1370,27 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
             requirement_nodes.append(node)
 
         framework["requirement_nodes"] = requirement_nodes
+
+        # An implementation group that the definition doesn't declare can never be
+        # selected, so its requirements silently drop out of every scoped audit.
+        defined_igs = {
+            str(ig.get("ref_id", "")).strip()
+            for ig in framework.get("implementation_groups_definition") or []
+        }
+        orphan_igs = defaultdict(list)
+        for node in requirement_nodes:
+            for ig in node.get("implementation_groups") or []:
+                if ig not in defined_igs:
+                    orphan_igs[ig].append(node.get("ref_id") or node.get("urn"))
+        if orphan_igs:
+            details = "; ".join(
+                f"'{ig}' used by {nodes[:3]}{' ...' if len(nodes) > 3 else ''}"
+                for ig, nodes in sorted(orphan_igs.items())
+            )
+            raise ValueError(
+                "(framework) implementation groups used by requirements but missing "
+                f"from the implementation groups definition {sorted(defined_igs)}: {details}"
+            )
 
     library["objects"]["framework"] = framework
 

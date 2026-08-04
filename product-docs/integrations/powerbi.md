@@ -40,7 +40,7 @@ Copy-Item .\CisoAssistant.pqx $dir -Force
 ### Connect
 
 1. Create a Personal Access Token: avatar menu → **My profile** → **Settings** → **Personal Access Tokens** → **Generate new token**. Full walkthrough: [Generating a PAT](pat.md). Copy the token — it is only displayed once.
-2. In Power BI Desktop: **Get Data** → search "CISO Assistant" (category *Online Services*) → enter the URL you use in your browser, e.g. `https://ciso-assistant.example.com` (no `/api` suffix).
+2. In Power BI Desktop: **Get Data** → search "CISO Assistant" (category *Online Services*) → enter the URL you use in your browser, e.g. `https://ciso-assistant.example.com` — no `/api` suffix and **no trailing slash** (`https://host/` is saved as a different credential than `https://host`, so the trailing slash earns you an extra token prompt).
 3. Paste the token when prompted, then pick tables in the Navigator and **Load**.
 
 {% hint style="info" %}
@@ -71,7 +71,9 @@ Some audit fields (e.g. scores) can be hidden per audit by its field visibility 
 
 ### Start from the template
 
-The release also ships `starter.pbit`, a template with a curated set of tables, correct relationships, base measures and four ready-made pages (compliance results, control status, threat coverage, incidents & vulnerabilities). Open it, enter your URL and token, and adapt from there — it is the fastest way to a working report and a reference for how the model is meant to be wired.
+Every connector release also ships `CisoAssistant-starter.pbit`, a template with a curated set of tables, correct relationships, base measures and four ready-made pages (compliance results, control status, threat coverage, incidents & vulnerabilities). It is the fastest way to a working report and a reference for how the model is meant to be wired. It needs the connector installed, but is not tied to a particular version of it.
+
+Opening it asks for a `BaseUrl` parameter — enter your instance URL, the same one you would type in the connector dialog — then for your token, and the report loads against your data. To point an existing report at another instance later, use **Transform data → Manage parameters** and change `BaseUrl`; every query follows.
 
 ### Recipes
 
@@ -132,5 +134,6 @@ Custom connectors require an **on-premises data gateway**: place the connector f
 * **"Can't determine relationships between the fields"** — the visual mixes tables with no relationship path. Either use the denormalized columns of one table (e.g. `folder_name` on the fact itself) or create the missing relationship in Model view.
 * **Drill-down fails with a missing-relationship error** — the next drill level's table has no *active* relationship. With autodetect off, every relationship is manual: check it exists and the line is solid (dashed = inactive). Keep cross-filter direction *Single* unless a slicer genuinely needs *Both* — every *Both* edge is a potential ambiguity loop.
 * **"CISO Assistant rejected your Personal Access Token"** — the token expired or was revoked. Generate a new one and update it in *Data source settings*.
+* **Power BI keeps asking for a token, or asks for a URL you no longer use** — credentials are saved per (connector, URL) pair, and changing the URL does not remove the entry Power BI already recorded. You will see this after repointing a report at another instance, and sometimes on the first open of the template, where the initial evaluation can register the default URL before your own value applies. Go to **File → Options and settings → Data source settings**; the dialog has two scopes — **Data sources in current file** and **Global permissions** — and the stale entry may be in either, so check both. Select it, **Clear permissions** (or **Delete** to drop the source entirely), then **restart Power BI Desktop** — the credential prompt caches its request and survives the clear, so without a restart you keep being asked for the same dead URL. If it still persists, use **Clear All Permissions** under *Global permissions*, restart, and enter the token once for the right URL.
 * **Score columns are empty although the audit has scores** — the audit's field visibility hides them for your role; this is by design (see the hint above).
 * **Values like `compliant` / `in_progress` instead of pretty labels** — some columns carry raw values. Rename them in Power Query (*Replace Values*) if you want display labels in legends.
