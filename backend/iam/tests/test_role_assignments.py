@@ -22,6 +22,7 @@ BASIC_PERMISSION_LIST = [
     "view_folder",
 ]
 
+
 class Utils:
     """File(/module)-local utils."""
 
