@@ -183,6 +183,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "default_custom_analytics_dashboard": None,
             "default_packager": "custom",
             "disable_partially_compliant_result": False,
+            "use_risk_category_label": False,
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")
