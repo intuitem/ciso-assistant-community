@@ -11141,6 +11141,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if not template_path.exists():
                 template_path = core_templates / "audit_report_template_en.docx"
             doc = DocxTemplate(template_path)
+
         audit_obj = self.get_object()
         _framework = audit_obj.framework
         tree = get_sorted_requirement_nodes(

@@ -112,6 +112,11 @@ class Folder(NameDescriptionMixin):
     _CACHED_ROOT_FOLDER: ClassVar[Optional[Folder]] = None
     """**WARNING:** Caching the root folder assumes it can't be deleted."""
 
+    class InconsistencyError(Exception):
+        """Exception raised during `Folder.save` execution if an attempt to save an inconsistent(invalid) folder is made."""
+
+        pass
+
     @staticmethod
     def _init_root_folder():
         """Initialize (create) the root `Folder` if it doesn't exist yet."""
@@ -257,7 +262,83 @@ class Folder(NameDescriptionMixin):
         ).delete()
 
     def save(self, *args, **kwargs):
+        """
+        **WARNING:** This function can raise an `Folder.InconsistencyError` `Exception`.
+
+        This Exception is raised if the `Folder` creation/update would cause some kind of incosistency (a violation of the Folder invariants).
+        """
+
         is_create = self._state.adding
+        is_modification = not is_create
+        is_root_folder = self.parent_folder is None
+        has_root_content_type = self.content_type == Folder.ContentType.ROOT
+
+        if is_create:
+            if is_root_folder:
+                root_folder_already_exists = Folder.objects.filter(
+                    parent_folder=None
+                ).exists()
+
+                if root_folder_already_exists:
+                    raise Folder.InconsistencyError(
+                        "There can't be more than one root folder."
+                    )
+
+            if has_root_content_type:
+                root_content_type_already_exists = Folder.objects.filter(
+                    content_type=Folder.ContentType.ROOT
+                ).exists()
+
+                if root_content_type_already_exists:
+                    raise Folder.InconsistencyError(
+                        "There can't be more than one folder with a ROOT content_type."
+                    )
+
+        if is_modification:
+            current_folder = Folder.objects.get(pk=self.pk)
+
+            old_content_type = current_folder.content_type
+            new_content_type = current_folder.content_type
+            old_parent_folder = current_folder.parent_folder
+            new_parent_folder = self.parent_folder
+
+            if old_parent_folder is None:
+                if not self.builtin:
+                    raise Folder.InconsistencyError(
+                        "The root folder builtin field MUST be True."
+                    )
+
+            if new_parent_folder != old_parent_folder:
+                if old_parent_folder is None:
+                    raise Folder.InconsistencyError(
+                        "The root folder parent_folder field can't be changed."
+                    )
+
+                if old_content_type != new_content_type:
+                    if new_content_type == Folder.ContentType.ROOT:
+                        raise Folder.InconsistencyError(
+                            "Can't change a non-root ContentType folder to a ROOT ContentType."
+                        )
+
+                    if old_content_type == Folder.ContentType.ROOT:
+                        raise Folder.InconsistencyError(
+                            "Can't change a root ContentType to another ContentType."
+                        )
+
+                if is_root_folder:
+                    raise Folder.InconsistencyError(
+                        "A folder can't be changed in a root folder (a parentless folder)."
+                    )
+
+                if new_parent_folder == self:
+                    raise Folder.InconsistencyError(
+                        "A folder can't have itself as a parent."
+                    )
+
+                if self.descendants.filter(pk=new_parent_folder.pk).exists():
+                    raise Folder.InconsistencyError(
+                        "A folder can't have one of its descendants as a parent (as it would create a cycle in the folder tree)."
+                    )
 
         with transaction.atomic():
             if is_create:
@@ -1206,6 +1287,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if not isinstance(user, User):
             return RoleAssignment.objects.none()
 
+        if not user.is_active:
+            return RoleAssignment.objects.none()
+
         from global_settings.utils import ff_is_enabled
 
         filter_query = Q(user=user) | Q(user_group__in=user.user_groups.all())
@@ -1231,8 +1315,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         The `permission` is either a (`perm_prefix`, `model`) pair (e.g. `("view", AppliedControl)`) or a django `Permission`.
         """
-        if not isinstance(user, User):
-            return RoleAssignment.objects.none()
 
         # Using `.order_by()` prevent django from including the "name" column (to avoid problems on queryset unions)
         role_assignments = RoleAssignment.get_role_assignments_from_user(
@@ -1267,9 +1349,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         - assignments: Assignments cache (+ groups cache)
         - folder ancestry: Folder cache
         """
-        if not isinstance(user, User):
-            return False
-
         from core.models import FilteringLabel
 
         model = perm.content_type.model_class()
@@ -1292,14 +1371,22 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         )
 
     @staticmethod
+    def _is_filtering_label_accessible(
+        user: AbstractBaseUser | AnonymousUser,
+        perm_prefix: PermissionPrefix,
+    ) -> bool:
+        from core.models import FilteringLabel
+
+        return RoleAssignment.get_allowed_folder_ids(
+            user, (perm_prefix, FilteringLabel)
+        ).exists()
+
+    @staticmethod
     def _is_actor_accessible(
         user: AbstractBaseUser | AnonymousUser,
         perm_prefix: PermissionPrefix,
         actor: Actor,
     ) -> bool:
-        if not isinstance(user, User):
-            return False
-
         specific = actor.specific
         specific_model = type(specific)
         iam_scope_folder = specific.folder
@@ -1317,9 +1404,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     ) -> bool:
         from core.models import Actor, FilteringLabel
 
-        if not isinstance(user, User):
-            return False
-
         if model is Permission:
             return perm_prefix == "view"
 
@@ -1329,6 +1413,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         if model is Actor:
             return RoleAssignment._is_actor_accessible(user, perm_prefix, obj)
+
+        if model is FilteringLabel:
+            return RoleAssignment._is_filtering_label_accessible(user, perm_prefix)
 
         user_role_assignments = RoleAssignment._get_role_assignments_from_permission(
             user, (perm_prefix, model)
