@@ -9537,6 +9537,21 @@ class EvidenceViewSet(BaseModelViewSet):
     model = Evidence
     filterset_class = EvidenceFilterSet
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related(
+                "revisions",
+                "applied_controls",
+                "requirement_assessments",
+                "security_exceptions",
+                "contracts",
+                "filtering_labels",
+                "owner",
+            )
+        )
+
     @action(detail=False, name="Get all evidences owners")
     def owner(self, request):
         return Response(
