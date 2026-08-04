@@ -48,7 +48,7 @@ class WorkflowContext:
 
     user_message: str
     parsed_context: ParsedContext | None
-    accessible_folder_ids: list[str]
+    scope: object  # ReadScope — what the requesting user may read
     llm: object  # LLM provider instance
     history: list[dict] = field(default_factory=list)
     user_lang: str = "en"  # ISO language code from Accept-Language
