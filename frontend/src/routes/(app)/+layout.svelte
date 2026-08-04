@@ -5,7 +5,7 @@
 	import '../../app.css';
 
 	import { AppBar } from '@skeletonlabs/skeleton-svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate, setUseRiskCategoryLabel } from '$lib/utils/i18n';
 
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
@@ -60,6 +60,14 @@
 	}: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
+
+	// Sync the qualification/risk-category wording flag before children render
+	// (hydration would otherwise flip labels back), then keep it in sync when
+	// settings are invalidated.
+	setUseRiskCategoryLabel(data?.settings?.use_risk_category_label);
+	$effect.pre(() => {
+		setUseRiskCategoryLabel(data?.settings?.use_risk_category_label);
+	});
 
 	// Display title, model name, and description from either page data or manual store setting
 	const displayTitle = $derived($page.data?.title || $pageTitle);

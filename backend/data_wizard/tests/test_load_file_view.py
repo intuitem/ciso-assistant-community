@@ -1313,18 +1313,8 @@ class TestRealAuthAndRBAC:
     def test_restricted_user_cannot_update_hidden_record(
         self, knox_restricted_client, app_ready
     ):
-        """
-        find_existing() locates the record regardless of RBAC (it searches by
-        ref_id/name, not by viewable_ids).  The update is blocked one layer
-        deeper: BaseModelSerializer.update() calls _check_object_perm("change"),
-        which calls RoleAssignment.is_access_allowed() with the real request
-        user.  A user with no role assignments has no "change_asset" permission
-        on any folder, so PermissionDenied is raised → failed == 1, updated == 0,
-        and the record on disk is unchanged.
-
-        This test proves get_accessible_object_ids() / is_access_allowed() are
-        called with the real user and return real results — not a patched shortcut.
-        """
+        # A user with no role assignments holds add_asset on no folder, so the
+        # import is refused before any record is read or written.
         folder = app_ready
         asset = Asset.objects.create(
             name="Hidden Asset", ref_id="RBAC-001", folder=folder
@@ -1337,8 +1327,119 @@ class TestRealAuthAndRBAC:
             folder.id,
             HTTP_X_ON_CONFLICT="update",
         )
-        body = resp.json()
-        assert body["results"]["updated"] == 0
-        assert body["results"]["failed"] == 1
+        assert resp.status_code == 403
         asset.refresh_from_db()
         assert asset.description is None
+
+    def test_restricted_user_cannot_create_in_any_folder(
+        self, knox_restricted_client, app_ready, domain_folder
+    ):
+        for folder_id in (app_ready.id, domain_folder.id, None):
+            resp = _post(
+                knox_restricted_client,
+                _csv("name,ref_id\nIntruder,INTRUDE-001\n"),
+                "a.csv",
+                "Asset",
+                folder_id,
+            )
+            assert resp.status_code == 403
+        assert not Asset.objects.filter(ref_id="INTRUDE-001").exists()
+
+    def test_domain_column_cannot_escape_into_a_view_only_folder(self, app_ready):
+        # The gate authorizes the X-Folder-Id folder, but a record's `domain`
+        # column is resolved separately through the accessible-folders map.
+        from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+        from knox.models import AuthToken
+        from rest_framework.test import APIClient
+
+        writable = Folder.objects.create(
+            name="Writable",
+            parent_folder=app_ready,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        readonly = Folder.objects.create(
+            name="Readonly",
+            parent_folder=app_ready,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        user = User.objects.create_user("split@datawizard.test", is_published=True)
+        user.folder = app_ready
+        user.save()
+        for folder, role_name in ((writable, "BI-RL-ANA"), (readonly, "BI-RL-AUD")):
+            group = UserGroup.objects.create(name=f"grp-{role_name}", folder=folder)
+            group.user_set.add(user)
+            assignment = RoleAssignment.objects.create(
+                user_group=group,
+                role=Role.objects.get(name=role_name),
+                folder=folder,
+                is_recursive=True,
+            )
+            assignment.perimeter_folders.add(folder)
+
+        client = APIClient()
+        _, token = AuthToken.objects.create(user=user)
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+
+        resp = _post(
+            client,
+            _csv("name,domain\nESCAPED-ASSET,Readonly\n"),
+            "a.csv",
+            "Asset",
+            writable.id,
+        )
+        assert resp.status_code == 200
+        # Must fail loudly, not be silently redirected into the request folder.
+        assert resp.json()["results"]["failed"] == 1
+        assert resp.json()["results"]["created"] == 0
+        assert not Asset.objects.filter(name="ESCAPED-ASSET").exists()
+
+    def test_domain_scoped_user_can_import_without_a_folder_header(self, app_ready):
+        # The wizard's domain selector is optional; rows carry their own domain.
+        from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+        from knox.models import AuthToken
+        from rest_framework.test import APIClient
+
+        dom = Folder.objects.create(
+            name="MyDomain",
+            parent_folder=app_ready,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        user = User.objects.create_user("dma@datawizard.test", is_published=True)
+        user.folder = app_ready
+        user.save()
+        group = UserGroup.objects.create(name="grp-dma", folder=dom)
+        group.user_set.add(user)
+        assignment = RoleAssignment.objects.create(
+            user_group=group,
+            role=Role.objects.get(name="BI-RL-DMA"),
+            folder=dom,
+            is_recursive=True,
+        )
+        assignment.perimeter_folders.add(dom)
+
+        client = APIClient()
+        _, token = AuthToken.objects.create(user=user)
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+
+        resp = _post(
+            client,
+            _csv("name,domain\nROW-SCOPED-ASSET,MyDomain\n"),
+            "a.csv",
+            "Asset",
+            folder_id=None,
+        )
+        assert resp.status_code == 200
+        assert Asset.objects.get(name="ROW-SCOPED-ASSET").folder_id == dom.id
+
+    def test_restricted_user_cannot_import_users(
+        self, knox_restricted_client, app_ready
+    ):
+        resp = _post(
+            knox_restricted_client,
+            _csv("email\nintruder@evil.test\n"),
+            "u.csv",
+            "User",
+            app_ready.id,
+        )
+        assert resp.status_code == 403
+        assert not User.objects.filter(email="intruder@evil.test").exists()
