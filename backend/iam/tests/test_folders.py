@@ -6,87 +6,9 @@ import pytest
 from iam.models import Folder
 from . import utils
 
-"""
-@pytest.fixture(scope="module", autouse=True)
-def setup_and_teardown():
-    # beforeAll
-    print("Setting up module")
-
-    yield
-
-    # afterAll
-    print("Tearing down module")
-
-"""
-
-"""
-
----------------------------------------------
-
-# NAMESPACE SEGRATATION
-
-One folder(package)-scoped utils.py (for good utils function reusability)
-
-- One test file per class.
-  - One test class per concept (cohesion shall be judged based on invariants (invariant closely related to each other should be part of th same class))
-    - One test function per low-level invariant to respect
-
-# DOCSTRINGS
-
-The test classes docstring MUST define an exhaustive-enough invariant list.
-Test test functions docstring MUST define the low-elve invariant checked by the function AND why this invariant.
-
-# TEST SUITE
-
-What we need to test:
-
-user role assignment
-user_group role assignment
-idp_group related role assignment ((with feature flag being set (should work) AND not being set (should fail)))
-
-special case model: Permission, FilteringLabel, Actor
-
-is_published (USE a dedicated test class for it (as it will make the future domain-scoped is_published PR easier))
-
-test consistency (1 perm per/50 role/per 1 RoleAssignment IS THE SAME AS 50 perm/per 1 role/per 1 RoleAssignment)
-test for special perms ("_full" suffix, special perm prefixes ("approve", "backup", "restore", etc...))
-test is_active (inactive user shouldn't have any permission)
-focus mode (check low level focus mode utils only)
-
-
-
-The `_get_actor_accessible_ids` special case doesn't seem to be handled by (is_access_allowed AND is_object_accessible)
-The `is_object_accessible` doesn't seem to take account for `Permission`
-The `get_role_assignments_from_user` should block a `user` `User` if `user.is_active is False`
-
-Folder.descendants creation/deletion
-
-Function to test:
-
-get_role_assignments_from_user
-_get_role_assignments_from_permission (test for Permission + perm_prefix (including special ones))
-
-
-Ensure the folder tree remains a DAG
-
-PREVENT folder.objects.bulk_create(remove its usages from the codebase as it can cause problems)/folder.objects.bulk_update(via custom object manager i guess)
-(to do later on)
-
-CHECK HOW (builtin related perms) work (to also create dedicated tests for this invariant too).
-===> Such test would have prevented the privilege escalation vuln so it's pretty important.
-
-
-# NOTE:
-
-The Folder.ContentType.ROOT is useless.
-The Folder.builtin is also useless.
-
-"""
-
 
 @pytest.mark.django_db
 class TestRootFolder:
-    # TODO: Explain the invariants of the root folder.
     """
     The root folder is the unique/single/only ancestor of ALL `Folder` (except itself of course).
 

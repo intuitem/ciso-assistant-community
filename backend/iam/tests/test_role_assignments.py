@@ -22,56 +22,6 @@ BASIC_PERMISSION_LIST = [
     "view_folder",
 ]
 
-"""
-def client_for(email, group_name, folder):
-    user = User.objects.create_user(email, is_published=True)
-    group = UserGroup.objects.get(name=group_name, folder=folder)
-    user.folder = group.folder
-    user.save()
-    group.user_set.add(user)
-    client = APIClient()
-    token = AuthToken.objects.create(user=user)[1]
-    client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
-    return client
-"""
-
-"""
-role = Role.objects.create(name=f"role-{email}")
-role.permissions.set(Permission.objects.filter(codename__in=codenames))
-ra = RoleAssignment.objects.create(
-    user=user, role=role, is_recursive=True
-)
-ra.perimeter_folders.add(folder)
-"""
-
-"""
-if ff_is_enabled("idp_groups"):
-    filter_query |= Q(
-        user_group__in=UserGroup.objects.filter(
-            idp_groups__in=user.idp_groups.all()
-        )
-    )
-
-
-UserGroup.idp_groups (intersects with user.idp_groups)
-"""
-
-"""
-from global_settings.models import GlobalSettings
-
-settings, _ = GlobalSettings.objects.get_or_create(
-    name=GlobalSettings.Names.FEATURE_FLAGS,
-    defaults={"value": {}},
-)
-
-settings.value = {
-    **(settings.value or {}),
-    "idp_groups": True,
-}
-settings.save(update_fields=["value"])
-"""
-
-
 class Utils:
     """File(/module)-local utils."""
 
@@ -697,10 +647,6 @@ class TestPermissionCheck:
         entity = Entity.objects.create(name="entity", folder=folder)
         actor = Actor.objects.get(entity=entity)
         self._check_actor_perms(user, role, actor, Entity)
-
-
-# TODO: Add focus mode tests (`RoleAssignment._filter_accessible_folder_ids_by_focus_folder`).
-# (I guess we should use the Utils.create_folder_tree for this (which should be namespaced a by a local `utils.py` instead)).
 
 
 @pytest.mark.django_db
