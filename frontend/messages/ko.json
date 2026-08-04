@@ -1101,6 +1101,7 @@
 	"templateAuditReportDescription": "컴플라이언스 평가 Word 보고서",
 	"wordTemplates": "Word 보고서 템플릿",
 	"wordTemplatesDescription": "보고서 생성에 사용되는 Word 보고서 템플릿(.docx)을 사용자 지정합니다. 사용자 템플릿을 업로드하여 기본 제공 기본값을 덮어쓸 수 있습니다.",
+	"wordTemplatesWarning": "사용 전에 템플릿 내용을 주의 깊게 검토하고 조직의 보안 및 규정 준수 정책을 준수하는지 확인하세요.",
 	"uploadTemplate": "템플릿 업로드",
 	"wordTemplateUploadHelp": "기본 템플릿과 동일한 템플릿 변수를 사용하는 .docx 파일을 업로드하세요. 시작점으로 사용하려면 먼저 기본 템플릿을 다운로드하세요.",
 	"downloadDefaultTemplate": "기본 템플릿 다운로드",

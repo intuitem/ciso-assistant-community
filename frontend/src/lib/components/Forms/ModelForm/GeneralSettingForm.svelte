@@ -254,6 +254,12 @@
 					label={m.showGetStartedButton()}
 					helpText={m.showGetStartedButtonHelpText()}
 				/>
+				<Checkbox
+					{form}
+					field="use_risk_category_label"
+					label={m.settingsUseRiskCategoryLabel()}
+					helpText={m.settingsUseRiskCategoryLabelHelpText()}
+				/>
 				<TextField
 					{form}
 					field="default_packager"

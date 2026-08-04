@@ -1150,6 +1150,7 @@
 	"templateAuditReportDescription": "Auditná správa o hodnotení súladu",
 	"wordTemplates": "Šablóny Word dokumentov",
 	"wordTemplatesDescription": "Prispôsobte si šablóny reportov programu Word (.docx), ktoré sa používajú na generovanie reportov. Nahrajte svoje vlastné šablóny na prepísanie vstavaných predvolených nastavení.",
+	"wordTemplatesWarning": "Pred použitím starostlivo skontrolujte obsah šablóny a uistite sa, že je v súlade so zásadami bezpečnosti a súladu vašej organizácie.",
 	"uploadTemplate": "Nahrajte šablónu",
 	"wordTemplateUploadHelp": "Nahrajte súbor .docx pomocou rovnakých premenných šablóny, aké sú predvolené. Najprv si stiahnite predvolené nastavenie a použite ho ako východiskový bod.",
 	"downloadDefaultTemplate": "Stiahnite si predvolenú šablónu",
@@ -5430,13 +5431,8 @@
 	"lbListEmpty": "prázdne",
 	"lbCountFrameworks": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} rámec",
 				"countPlural=few": "{count} rámce",
@@ -5446,13 +5442,8 @@
 	],
 	"lbCountThreats": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} hrozba",
 				"countPlural=few": "{count} hrozby",
@@ -5462,13 +5453,8 @@
 	],
 	"lbCountReferenceControls": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} referenčné opatrenie",
 				"countPlural=few": "{count} referenčné opatrenia",
@@ -5478,13 +5464,8 @@
 	],
 	"lbCountRiskMatrices": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} matica rizík",
 				"countPlural=few": "{count} matice rizík",
@@ -5494,13 +5475,8 @@
 	],
 	"lbCountRequirementMappingSets": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} sada mapovania",
 				"countPlural=few": "{count} sady mapovania",
@@ -5510,13 +5486,8 @@
 	],
 	"lbCountPreset": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} prednastavený postup",
 				"countPlural=few": "{count} prednastavené postupy",
@@ -5526,13 +5497,8 @@
 	],
 	"lbCountMetricDefinitions": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} definícia metriky",
 				"countPlural=few": "{count} definície metrík",
