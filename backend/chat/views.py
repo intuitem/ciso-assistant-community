@@ -868,9 +868,9 @@ class ChatSessionViewSet(BaseModelViewSet):
                 {"detail": " ".join(e.messages)}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        # The session folder defaults to the root folder, which the RAG domain
-        # filter excludes — documents must land in an accessible domain folder.
-        accessible_folders = get_accessible_folder_ids(request.user)
+        accessible_folders = get_accessible_folder_ids(
+            request.user, codename="add_indexeddocument"
+        )
         if not accessible_folders:
             return Response(
                 {"detail": "No accessible domain folder to store the document in."},
