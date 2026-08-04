@@ -1497,7 +1497,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         focused_folders = folders.filter(
             Q(ancestors=focus_folder_id) | Q(id=focus_folder_id)
         )
-        focused_folder_ids = focused_folders.values_list("id", flat=True)
+        focused_folder_ids = focused_folders.values_list("id", flat=True).distinct()
 
         return focused_folder_ids
 

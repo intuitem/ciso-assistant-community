@@ -1,4 +1,3 @@
-from dataclasses import dataclass, field
 from typing import Literal
 
 from django.db import models
@@ -15,6 +14,7 @@ from core.models import (
     Team,
 )
 from tprm.models import Entity
+from . import utils
 
 BASIC_PERMISSION_LIST = [
     "view_appliedcontrol",
@@ -73,6 +73,8 @@ settings.save(update_fields=["value"])
 
 
 class Utils:
+    """File(/module)-local utils."""
+
     @staticmethod
     def _get_global_settings() -> GlobalSettings:
         settings, _ = GlobalSettings.objects.get_or_create(
@@ -699,3 +701,80 @@ class TestPermissionCheck:
 
 # TODO: Add focus mode tests (`RoleAssignment._filter_accessible_folder_ids_by_focus_folder`).
 # (I guess we should use the Utils.create_folder_tree for this (which should be namespaced a by a local `utils.py` instead)).
+
+
+@pytest.mark.django_db
+class TestFocusMode:
+    def test_focus_accessible_folder_ids(self):
+        """Ensure the `RoleAssignment._get_focus_accessible_folder_ids` function returns the proper accessible folders."""
+
+        utils.create_folder_tree(
+            utils.Node(
+                name="folder_1",
+                children=[
+                    utils.Node(
+                        name="folder_1_1",
+                        children=[
+                            utils.Node(name="folder_1_1_1"),
+                            utils.Node(
+                                name="folder_1_1_2",
+                                children=[
+                                    utils.Node(name="folder_1_1_2_1"),
+                                    utils.Node(name="folder_1_1_2_2"),
+                                ],
+                            ),
+                        ],
+                    ),
+                    utils.Node(
+                        name="folder_1_2",
+                        children=[utils.Node(name="folder_1_2_1")],
+                    ),
+                ],
+            )
+        )
+
+        folder_name_set = set(Folder.objects.values_list("name", flat=True))
+
+        root_folder = Folder.get_root_folder()
+        assert root_folder is not None, "Root folder not found."
+
+        all_folder_ids = Folder.objects.all().values_list("id", flat=True)
+        focused_folder_ids = RoleAssignment._get_focus_accessible_folder_ids(
+            root_folder.id, all_folder_ids
+        )
+
+        assert focused_folder_ids.count() == Folder.objects.count(), (
+            "All folders SHALL be accessible (when the focus folder is the root folder)."
+        )
+
+        focus_folder = Folder.objects.get(name="folder_1_1")
+        focused_folder_ids = RoleAssignment._get_focus_accessible_folder_ids(
+            focus_folder.id, all_folder_ids
+        )
+
+        folder_name_set.difference_update(
+            [
+                root_folder.name,
+                "folder_1",
+                "folder_1_2",
+                "folder_1_2_1",
+            ]
+        )
+
+        focused_folder_names = Folder.objects.filter(
+            id__in=focused_folder_ids
+        ).values_list("name", flat=True)
+
+        assert sorted(focused_folder_names) == sorted(folder_name_set), (
+            "Unexpected/missing focused folders."
+        )
+
+        focus_folder = Folder.objects.get(name="folder_1_1_2_2")
+
+        focused_folder_ids = RoleAssignment._get_focus_accessible_folder_ids(
+            focus_folder.id, all_folder_ids
+        )
+
+        assert list(focused_folder_ids) == [focus_folder.id], (
+            "Focusing on a folder with no children SHALL make it the only accessible one."
+        )
