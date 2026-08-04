@@ -1063,9 +1063,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_dashboardwidget",
     "delete_dashboardwidget",
     # integrations
-    "add_integrationconfiguration",
     "view_integrationconfiguration",
-    "delete_integrationconfiguration",
     "add_syncmapping",
     "view_syncmapping",
     "change_syncmapping",

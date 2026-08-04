@@ -37,10 +37,13 @@ class ConnectionTestSerializer(serializers.Serializer):
         request = self.context.get("request")
         if request is None:
             raise serializers.ValidationError("Configuration not found.")
-        (_, changeable_ids, _) = RoleAssignment.get_accessible_object_ids(
+        # Viewable, not changeable: a Domain Manager may create a configuration
+        # without holding change_, and must still be able to test it. What keeps
+        # the stored secret safe is the same-connection pinning below, not this.
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, IntegrationConfiguration
         )
-        if config.id not in changeable_ids:
+        if config.id not in viewable_ids:
             raise serializers.ValidationError("Configuration not found.")
         return config
 
