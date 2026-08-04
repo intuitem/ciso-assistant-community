@@ -1516,10 +1516,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 str(f.id) for f in scope_folder.get_sub_folders()
             }
         viewable_folder_ids = {
-            str(fid)
-            for fid in RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), request.user, Folder
-            )[0]
+            str(fid) for fid in RoleAssignment.get_viewable_object_ids(user, Folder)
         }
 
         def is_visible(obj):
@@ -5509,8 +5506,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get priority chart data")
     def priority_chart_data(self, request):
-        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, self.model
+        viewable_controls_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, self.model
         )
         qs = self.model.objects.filter(id__in=viewable_controls_ids).exclude(
             status="active"
@@ -8667,9 +8664,8 @@ def get_composer_data(request):
     ):
         return Response({"error": "Invalid UUID list"}, status=400)
 
-    (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), request.user, RiskAssessment
-    )
+    viewable_ids = RoleAssignment.get_viewable_object_ids(request.user, RiskAssessment)
+
     viewable_ids = {str(id) for id in viewable_ids}
     if not all(risk_assessment in viewable_ids for risk_assessment in risk_assessments):
         return Response({"error": "Permission denied"}, status=403)

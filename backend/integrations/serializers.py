@@ -40,9 +40,10 @@ class ConnectionTestSerializer(serializers.Serializer):
         # Viewable, not changeable: a Domain Manager may create a configuration
         # without holding change_, and must still be able to test it. What keeps
         # the stored secret safe is the same-connection pinning below, not this.
-        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, IntegrationConfiguration
+        viewable_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, IntegrationConfiguration
         )
+
         if config.id not in viewable_ids:
             raise serializers.ValidationError("Configuration not found.")
         return config
