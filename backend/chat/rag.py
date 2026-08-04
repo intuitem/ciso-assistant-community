@@ -46,7 +46,7 @@ def get_qdrant_client():
 def get_accessible_folder_ids(user, codename: str = "view_folder") -> list[str]:
     """Get all folder IDs the user has access to, as strings for Qdrant filtering."""
 
-    permission = Permission.objects.get(codename="codename")
+    permission = Permission.objects.get(codename=codename)
 
     folder_id_queryset = RoleAssignment.get_allowed_folder_ids(user, permission)
     normal_domain_ids = Folder.objects.filter(
