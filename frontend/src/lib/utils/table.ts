@@ -439,7 +439,10 @@ export const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'withinTolerance',
-		options: YES_NO_OPTIONS,
+		options: [
+			{ label: 'YES', value: 'YES' },
+			{ label: 'NO', value: 'NO' }
+		],
 		multiple: false,
 		enableDoubleDash: true
 	}
@@ -2787,8 +2790,8 @@ export const listViewFields = {
 			'updated_at'
 		],
 		optionalFields: {
-			head: ['createdAt'],
-			body: ['created_at']
+			head: ['createdAt', 'labels'],
+			body: ['created_at', 'filtering_labels']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,

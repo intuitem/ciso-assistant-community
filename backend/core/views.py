@@ -9525,6 +9525,7 @@ class EvidenceFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
             "status",
             "processings",
             "data_breaches",
+            "security_exceptions",
         ]
 
 
