@@ -748,7 +748,7 @@
 									class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
 								>
 									<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
-										{m.qualificationsChartTitle()}
+										{safeTranslate('qualificationsChartTitle')}
 									</h3>
 									<div class="overflow-y-auto max-h-[500px]">
 										<div style="height: {Math.max(224, qLabels.length * 28)}px">
@@ -766,7 +766,9 @@
 								<div
 									class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6 flex items-center justify-center"
 								>
-									<p class="text-surface-600-400">{m.noQualificationsFoundOnRiskScenarios()}</p>
+									<p class="text-surface-600-400">
+										{safeTranslate('noQualificationsFoundOnRiskScenarios')}
+									</p>
 								</div>
 							{/if}
 						</div>
@@ -1171,7 +1173,7 @@
 									class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
 								>
 									<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
-										{m.incidentQualificationsRadar()}
+										{safeTranslate('incidentQualificationsRadar')}
 									</h3>
 									<div class="h-80">
 										{#if operationsAnalytics?.qualifications_breakdown?.labels?.length > 0}
@@ -1183,7 +1185,7 @@
 											/>
 										{:else}
 											<div class="flex items-center justify-center h-full text-surface-600-400">
-												<p>{m.noQualificationsData()}</p>
+												<p>{safeTranslate('noQualificationsData')}</p>
 											</div>
 										{/if}
 									</div>

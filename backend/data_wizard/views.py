@@ -131,7 +131,7 @@ from privacy.serializers import (
     DataTransferWriteSerializer,
 )
 from core.constants import COUNTRY_CHOICES
-from iam.models import RoleAssignment, User
+from iam.models import Permission, RoleAssignment, User
 from core.models import FilteringLabel
 from core.utils import get_global_currency
 from uuid import UUID
@@ -181,6 +181,11 @@ def get_accessible_folders_map(user: User) -> dict[str, UUID]:
     """
     Build a map of folder names to IDs that the provided user can access.
     Used by the data wizard import flow to validate targets.
+
+    Deliberately view-scoped: consumers fall back to the request folder for any
+    name absent from this map, so narrowing it to add-permitted folders would
+    silently redirect a row instead of failing it. The write serializers reject
+    the unauthorized folder loudly, which is the behaviour we want.
     """
     viewable_folders_ids = RoleAssignment.get_viewable_object_ids(user, Folder)
     folders_map = {
@@ -476,6 +481,16 @@ class ModelType(enum.StrEnum):
             return ModelType(model_type)
         except ValueError:
             return
+
+
+# ModelType values are model class names; only multi-object imports need an entry here.
+IMPORT_ROOT_MODEL: dict[ModelType, str] = {
+    ModelType.TPRM: "entity",
+    ModelType.EBIOS_RM_STUDY_ARM: "ebiosrmstudy",
+    ModelType.EBIOS_RM_STUDY_EXCEL: "ebiosrmstudy",
+    ModelType.EBIOS_RM_STUDY_EGERIE_XML: "ebiosrmstudy",
+    ModelType.CYFUN_ASSESSMENT: "complianceassessment",
+}
 
 
 IMPORT_TEMPLATES_DIR = Path(__file__).resolve().parent / "import_templates"
@@ -3390,9 +3405,34 @@ class LoadFileView(APIView):
     parser_classes = (FileUploadParser,)
     serializer_class = LoadFileSerializer
 
+    def _may_import(self, request, model_type: ModelType, folder_id) -> bool:
+        model_name = IMPORT_ROOT_MODEL.get(model_type, model_type.value.lower())
+
+        # No target folder is a legitimate flow — the domain selector is optional
+        # and rows may carry their own `domain`. Requiring it on the root folder
+        # would lock out every domain-scoped user; the per-record serializer check
+        # is what scopes those writes.
+        if not folder_id:
+            return RoleAssignment.has_permission_anywhere(
+                request.user, f"add_{model_name}"
+            )
+
+        try:
+            folder = Folder.objects.filter(id=UUID(str(folder_id))).first()
+        except ValueError:
+            return False
+        if folder is None:
+            return False
+        try:
+            perm = Permission.objects.get(codename=f"add_{model_name}")
+        except Permission.DoesNotExist:
+            logger.error("No import permission defined", model_type=model_type)
+            return False
+        return RoleAssignment.is_access_allowed(
+            user=request.user, perm=perm, folder=folder
+        )
+
     def process_excel_file(self, request, record_file: io.BytesIO) -> Response:
-        # Parse Excel data
-        # Note: I can still pick the request.user for extra checks on the legit access for write operations
         model_type_string = request.META.get("HTTP_X_MODEL_TYPE")
         model_type = ModelType.from_string(model_type_string)
         folder_id = request.META.get("HTTP_X_FOLDER_ID") or None
@@ -3424,6 +3464,15 @@ class LoadFileView(APIView):
                     {"error": "UnknownModelType"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
+            if not self._may_import(request, model_type, folder_id):
+                logger.warning(
+                    "Unauthorized import attempt",
+                    user=request.user,
+                    model_type=model_type,
+                    folder_id=folder_id,
+                )
+                return Response(status=status.HTTP_403_FORBIDDEN)
 
             # Special handling for TPRM multi-sheet import
             match model_type:
@@ -5351,10 +5400,6 @@ class LoadFileView(APIView):
         return results
 
     def post(self, request, *args, **kwargs) -> Response:
-        # if not request.user.has_file_permission:
-        #     logger.error("Unauthorized user tried to load a file", user=request.user)
-        #     return Response({}, status=status.HTTP_403_FORBIDDEN)
-
         if not request.data:
             logger.error("Request has no data")
             return Response(

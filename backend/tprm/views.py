@@ -4,8 +4,12 @@ import re
 from django.db.models import ProtectedError
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT
-from iam.models import Folder, RoleAssignment, UserGroup
+from rest_framework.status import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_403_FORBIDDEN,
+    HTTP_409_CONFLICT,
+)
+from iam.models import Folder, Permission, RoleAssignment
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
@@ -50,6 +54,27 @@ import zipfile
 from datetime import datetime
 
 logger = structlog.get_logger(__name__)
+
+# Core models the DORA ROI is built from. Reading the register as a whole
+# requires holding these on the root folder, i.e. instance-wide.
+DORA_ROI_PERMISSIONS = (
+    "view_entity",
+    "view_solution",
+    "view_asset",
+    "view_contract",
+)
+
+
+def has_dora_roi_access(user) -> bool:
+    root_folder = Folder.get_root_folder()
+    return all(
+        RoleAssignment.is_access_allowed(
+            user=user,
+            perm=Permission.objects.get(codename=codename),
+            folder=root_folder,
+        )
+        for codename in DORA_ROI_PERMISSIONS
+    )
 
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
@@ -449,6 +474,9 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         Validate DORA ROI requirements and return linting results.
         """
         from tprm import dora_linter
+
+        if not has_dora_roi_access(request.user):
+            return Response(status=HTTP_403_FORBIDDEN)
 
         lint_results = dora_linter.lint_dora_roi()
         return Response(lint_results)
