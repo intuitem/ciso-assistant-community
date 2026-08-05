@@ -1361,7 +1361,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             model_name = model.__name__.lower()
             codename = f"{perm_prefix}_{model_name}"
 
-        role_assignments = role_assignments.filter(role__permissions__codename=codename)
+        permission = Permission.objects.get(codename=codename)
+
+        role_assignments = role_assignments.filter(role__permissions=permission)
         return role_assignments
 
     @staticmethod
