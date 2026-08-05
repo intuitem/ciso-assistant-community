@@ -841,6 +841,7 @@
 	"removeIp": "Ukloni {ip}",
 	"noAllowedIpsYet": "Još nema dopuštenih IP adresa.",
 	"invalidFileType": "Neispravna vrsta datoteke",
+	"wordTemplatesWarning": "Pažljivo pregledajte sadržaj predloška prije upotrebe i provjerite je li usklađen sa sigurnosnim i compliance pravilima vaše organizacije.",
 	"logoHelpText": "Logo će biti prikazan u zaglavlju aplikacije. Dozvoljeni formati su PNG, JPEG, WEBP, SVG.",
 	"faviconHelpText": "Favicon će biti prikazan u kartici preglednika. Dozvoljeni formati su ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Entitet",

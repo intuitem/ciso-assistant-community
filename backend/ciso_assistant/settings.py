@@ -255,7 +255,7 @@ EXPOSE_METRICS = os.environ.get("EXPOSE_METRICS", "False").strip().lower() in (
 )
 logger.info("EXPOSE_METRICS: %s", EXPOSE_METRICS)
 
-ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 25)
+ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 50)
 
 USE_S3 = os.getenv("USE_S3", "False").lower() in ("true", "1", "yes")
 USE_AZURE = os.getenv("USE_AZURE", "False").lower() in ("true", "1", "yes")

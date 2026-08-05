@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
+	import { invalidateAll } from '$app/navigation';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import {
@@ -10,13 +11,13 @@
 	} from '$lib/components/Modals/stores';
 	import BatchActionModal from '$lib/components/Modals/BatchActionModal.svelte';
 	import MergeAppliedControlsModal from '$lib/components/Modals/MergeAppliedControlsModal.svelte';
-	import type { BatchActionConfig } from '$lib/utils/table';
+	import type { BatchActionConfig, TableBatchAction } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types';
 	import type { DataHandler } from '@vincjo/datatables/remote';
 
 	interface Props {
 		selectedIds: Set<string>;
-		actions: BatchActionConfig[];
+		actions: TableBatchAction[];
 		URLModel: urlModel;
 		handler: DataHandler;
 		onClearSelection: () => void;
@@ -37,10 +38,57 @@
 		openGroupIndex = null;
 	}
 
-	function triggerAction(action: BatchActionConfig) {
+	function triggerAction(action: TableBatchAction) {
 		closeGroup();
 		const count = selectedIds.size;
 		const ids = [...selectedIds];
+
+		if (action.type === 'parent_action') {
+			// Parent mutation: the selection parameterizes an edit of the parent
+			// object (endpoint resolved by the embedding view). One operation, one
+			// {count} response — a light count-confirm is enough, unlike deletes.
+			const endpoint = action.endpoint;
+			if (!endpoint) return;
+			modalStore.trigger({
+				type: 'confirm',
+				title: safeTranslate(action.label),
+				body: safeTranslate(action.confirmMessage ?? 'confirmRemoveSelected', { count }),
+				buttonTextConfirm: safeTranslate(action.label),
+				response: async (confirmed: boolean) => {
+					if (!confirmed) return;
+					try {
+						const res = await fetch(endpoint, {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ [action.payloadField]: ids })
+						});
+						if (!res.ok) {
+							const body = await res.json().catch(() => ({}));
+							toastStore.trigger({
+								message:
+									typeof body?.error === 'string' ? safeTranslate(body.error) : m.anErrorOccurred(),
+								background: 'preset-filled-error-500'
+							});
+							return;
+						}
+						toastStore.trigger({
+							message: safeTranslate(action.successMessage ?? 'saved'),
+							background: 'preset-filled-success-500'
+						});
+						handler.invalidate();
+						await invalidateAll();
+						onClearSelection();
+					} catch (e) {
+						console.error('Parent batch action failed', e);
+						toastStore.trigger({
+							message: m.anErrorOccurred(),
+							background: 'preset-filled-error-500'
+						});
+					}
+				}
+			});
+			return;
+		}
 
 		if (action.type === 'merge') {
 			const minSel = action.minSelection ?? 2;
@@ -84,6 +132,7 @@
 				optionsEndpoint: action.optionsEndpoint,
 				enableDoubleDash: action.enableDoubleDash ?? false,
 				multiSelect: action.multiSelect ?? false,
+				confirmMessage: action.confirmMessage,
 				onConfirm: async (value?: string | string[]) => {
 					try {
 						const res = await fetch(`/${URLModel}/batch-action`, {
@@ -130,6 +179,7 @@
 						}
 
 						handler.invalidate();
+						await invalidateAll();
 						onClearSelection();
 					} catch (e) {
 						console.error('Batch action failed', e);
@@ -200,7 +250,7 @@
 			{:else}
 				<button
 					type="button"
-					class="btn text-sm {action.type === 'delete'
+					class="btn text-sm {action.type === 'delete' || action.type === 'parent_action'
 						? 'preset-tonal-error hover:ring-2 hover:ring-error-500'
 						: 'preset-tonal-primary hover:ring-2 hover:ring-primary-500'}"
 					onclick={() => triggerAction(action)}

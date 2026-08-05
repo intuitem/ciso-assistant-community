@@ -69,17 +69,6 @@
 	bind:cachedValue={formDataCache['authors']}
 	label={m.authors()}
 />
-<AutocompleteSelect
-	multiple
-	{form}
-	optionsEndpoint="evidences"
-	optionsExtraFields={[['folder', 'str']]}
-	optionsLabelField="auto"
-	field="evidences"
-	label={m.evidences()}
-	cacheLock={cacheLocks['evidences']}
-	bind:cachedValue={formDataCache['evidences']}
-/>
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<AutocompleteSelect
 		{form}
@@ -112,6 +101,27 @@
 		helpText={m.dueDateHelpText()}
 		cacheLock={cacheLocks['due_date']}
 		bind:cachedValue={formDataCache['due_date']}
+	/>
+	<TextField
+		type="date"
+		{form}
+		field="reported_at"
+		label={m.reportedAt()}
+		helpText={m.reportedAtHelpText()}
+		cacheLock={cacheLocks['reported_at']}
+		bind:cachedValue={formDataCache['reported_at']}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		translateOptions={false}
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		allowUserOptions="append"
 	/>
 	<MarkdownField
 		{form}

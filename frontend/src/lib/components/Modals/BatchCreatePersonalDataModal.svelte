@@ -14,11 +14,11 @@
 
 	interface Props {
 		parent: any;
-		processingId: string;
+		parentId: string;
 		urlModel: string;
 	}
 
-	let { parent, processingId, urlModel }: Props = $props();
+	let { parent, parentId, urlModel }: Props = $props();
 
 	// Groups defined by category key prefixes/ranges, labels fetched from backend
 	const groupDefinitions: { label: string; keys: string[] }[] = [
@@ -220,7 +220,7 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					processing: processingId,
+					processing: parentId,
 					categories: selectedCategories.map((c) => codeToId[c]).filter(Boolean),
 					retention,
 					deletion_policy: deletionPolicy,

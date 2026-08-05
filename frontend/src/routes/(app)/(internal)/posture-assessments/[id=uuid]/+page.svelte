@@ -4,13 +4,15 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import PostureTrendChart from '$lib/components/Chart/PostureTrendChart.svelte';
 	import PostureHeatmapChart from '$lib/components/Chart/PostureHeatmapChart.svelte';
+	import PostureHistoryChart from '$lib/components/Chart/PostureHistoryChart.svelte';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import { deserialize, enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { invalidateAll, replaceState } from '$app/navigation';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/state';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import ImportMappingModal from '$lib/components/Modals/ImportMappingModal.svelte';
 	import { postureResultTailwindColorMap } from '$lib/utils/constants';
@@ -38,7 +40,7 @@
 	const totalChecks = $derived(data.posture?.total_checks ?? 0);
 
 	// overview filters
-	let filterAsset = $state('');
+	let filterAsset = $state(page.url.searchParams.get('asset') ?? '');
 	let filterStatuses = $state<string[]>([]);
 
 	function toggleStatus(status: string) {
@@ -97,6 +99,36 @@
 
 	const trendPoints = $derived(data.trend?.points ?? []);
 
+	// run history for the selected asset (overview)
+	let history: any = $state(null);
+	$effect(() => {
+		const assetId = filterAsset;
+		if (!assetId) {
+			history = null;
+			return;
+		}
+		fetch(`/posture-assessments/${data.data.id}/history?asset=${assetId}`)
+			.then((res) => (res.ok ? res.json() : null))
+			.then((body) => {
+				if (filterAsset === assetId) history = body;
+			})
+			.catch(() => {
+				if (filterAsset === assetId) history = null;
+			});
+	});
+	const historyResults = $derived(
+		(history?.results ?? []).filter(
+			(r: any) => filterStatuses.length === 0 || filterStatuses.includes(r.result)
+		)
+	);
+
+	$effect(() => {
+		const url = new URL(page.url);
+		if (filterAsset) url.searchParams.set('asset', filterAsset);
+		else url.searchParams.delete('asset');
+		if (url.href !== page.url.href) replaceState(url, page.state);
+	});
+
 	const scopedAssets = $derived(data.data?.assets ?? []);
 	const measuredAssets = $derived.by(() => {
 		const scoped = new Set(scopedAssets.map((a: any) => a.id));
@@ -148,8 +180,31 @@
 	});
 
 	const modalStore: ModalStore = getModalStore();
+	const toastStore = getToastStore();
 
-	let purgeError = $state('');
+	function toastError(message: string) {
+		toastStore.trigger({ message, background: 'preset-filled-error-500' });
+	}
+
+	// heatmap cell actions
+	let expandedRow: any = $state(null);
+
+	async function requestCreateFinding(row: any) {
+		const fd = new FormData();
+		fd.set('requirement', row.requirement.id);
+		fd.set('asset', row.asset.id);
+		const result = await postAction('createFinding', fd);
+		if (result.type === 'success') {
+			const created = (result.data as any)?.createdFinding?.created;
+			toastStore.trigger({
+				message: created ? m.findingCreated() : m.findingAlreadyExists(),
+				background: created ? 'preset-filled-success-500' : 'preset-filled-warning-500'
+			});
+			await invalidateAll();
+		} else {
+			toastError((result as any).data?.error ?? m.error());
+		}
+	}
 
 	async function confirmPurge(asset: { id: string; name: string }) {
 		let impact = '';
@@ -174,7 +229,9 @@
 				const fd = new FormData();
 				fd.set('asset', asset.id);
 				const result = await postAction('purgeAsset', fd);
-				purgeError = result.type === 'success' ? '' : ((result as any).data?.error ?? m.error());
+				if (result.type !== 'success') {
+					toastError((result as any).data?.error ?? m.error());
+				}
 				await invalidateAll();
 			}
 		});
@@ -436,7 +493,30 @@
 					{/key}
 				{/if}
 
-				{#if filteredResults.length}
+				{#if filterAsset}
+					{#if history?.runs?.length}
+						{#key historyResults}
+							<div>
+								<h3 class="text-lg font-semibold mb-2">{m.runHistory()}</h3>
+								<PostureHistoryChart
+									runs={history.runs}
+									results={historyResults}
+									name="posture_history"
+									onCellClick={(row) =>
+										(expandedRow = {
+											...row,
+											asset: {
+												id: filterAsset,
+												str: assetLabel(scopedAssets.find((a: any) => a.id === filterAsset))
+											}
+										})}
+								/>
+							</div>
+						{/key}
+					{:else if history}
+						<p class="text-sm text-surface-500 p-4">{m.noEntriesFound()}</p>
+					{/if}
+				{:else if filteredResults.length}
 					{#key filteredResults}
 						<div>
 							<h3 class="text-lg font-semibold mb-2">{m.currentPosture()}</h3>
@@ -444,6 +524,7 @@
 								results={filteredResults}
 								assets={filterAsset ? assets.filter((a) => a.id === filterAsset) : assets}
 								name="posture_heatmap"
+								onCellClick={(row) => (expandedRow = row)}
 							/>
 						</div>
 					{/key}
@@ -467,11 +548,6 @@
 
 			<Tabs.Content value="assets" class="p-4">
 				<div data-testid="posture-assets-card" class="space-y-3">
-					{#if purgeError}
-						<p class="text-sm text-error-600-400">
-							<i class="fa-solid fa-triangle-exclamation mr-1"></i>{purgeError}
-						</p>
-					{/if}
 					<div class="flex items-center justify-between relative">
 						<h3 class="text-lg font-semibold">{m.assets()}</h3>
 						<div class="flex items-center gap-2">
@@ -571,6 +647,18 @@
 										</td>
 										<td class="px-2 py-2">
 											<div class="flex items-center gap-3 justify-end">
+												<button
+													type="button"
+													class="text-surface-500 hover:text-primary-500 disabled:opacity-40 disabled:pointer-events-none"
+													disabled={row.measured === 0}
+													title={m.runHistory()}
+													onclick={() => {
+														filterAsset = row.id;
+														activeTab = 'overview';
+													}}
+												>
+													<i class="fa-solid fa-clock-rotate-left"></i>
+												</button>
 												<Anchor
 													href="/posture-assessments/{data.data.id}/tree?asset={row.id}"
 													class="text-surface-500 hover:text-primary-500"
@@ -701,7 +789,19 @@
 												{new Date(run.started_at).toLocaleString()}
 											</Anchor>
 										</td>
-										<td class="px-2 py-1">{run.tool || '--'}</td>
+										<td class="px-2 py-1">
+											{run.tool || '--'}
+											{#if run.observation}
+												<i class="fa-solid fa-message text-surface-400 ml-1" title={run.observation}
+												></i>
+											{/if}
+											{#if run.attachment}
+												<i
+													class="fa-solid fa-paperclip text-surface-400 ml-1"
+													title={run.attachment}
+												></i>
+											{/if}
+										</td>
 										<td class="px-2 py-1">{run.source}</td>
 										<td class="px-2 py-1">{run.assets}</td>
 										<td class="px-2 py-1">{run.checks}</td>
@@ -849,3 +949,83 @@
 		</Tabs>
 	</div>
 </div>
+
+<svelte:window
+	onkeydown={(e) => {
+		if (e.key === 'Escape' && expandedRow) expandedRow = null;
+	}}
+/>
+
+{#if expandedRow}
+	<button
+		type="button"
+		class="fixed inset-0 z-40 bg-black/40 cursor-default"
+		aria-label={m.close()}
+		onclick={() => (expandedRow = null)}
+	></button>
+	<div
+		class="fixed z-50 inset-0 m-auto h-fit max-h-[80vh] overflow-y-auto card bg-surface-50-950 shadow-lg p-6 max-w-xl w-[90vw] space-y-3"
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby="posture-cell-dialog-title"
+	>
+		<div class="flex items-start justify-between gap-4">
+			<h3 id="posture-cell-dialog-title" class="text-lg font-semibold">
+				{expandedRow.requirement.ref_id} — {expandedRow.requirement.name ?? ''}
+			</h3>
+			<button
+				type="button"
+				class="text-surface-500 hover:text-surface-700-300"
+				aria-label={m.close()}
+				onclick={() => (expandedRow = null)}
+			>
+				<i class="fa-solid fa-xmark"></i>
+			</button>
+		</div>
+		<p class="text-sm flex items-center gap-2">
+			<span
+				class="inline-block w-2.5 h-2.5 rounded-sm {postureResultTailwindColorMap[
+					expandedRow.result
+				]}"
+			></span>
+			{resultLabels[expandedRow.result] ?? expandedRow.result} — {expandedRow.asset?.str ?? ''}
+		</p>
+		<p class="text-sm text-surface-600-400">
+			<i class="fa-solid fa-calendar mr-1"></i>{new Date(expandedRow.timestamp).toLocaleString()}
+			{#if expandedRow.tool}
+				<span class="ml-3"><i class="fa-solid fa-wrench mr-1"></i>{expandedRow.tool}</span>
+			{/if}
+		</p>
+		{#if expandedRow.actual}
+			<p class="text-sm"><b>{m.observedValue()}:</b> {expandedRow.actual}</p>
+		{/if}
+		{#if expandedRow.expected}
+			<p class="text-sm"><b>{m.expected()}:</b> {expandedRow.expected}</p>
+		{/if}
+		{#if expandedRow.message}
+			<p class="text-sm whitespace-pre-wrap">{expandedRow.message}</p>
+		{/if}
+		<div class="flex items-center gap-2 justify-end pt-2">
+			<Anchor
+				href="/posture-assessments/{data.data.id}/runs/{expandedRow.run_id}"
+				class="btn btn-sm preset-tonal"
+				label={m.runDetail()}
+			>
+				<i class="fa-solid fa-clock-rotate-left mr-1"></i>{m.runDetail()}
+			</Anchor>
+			{#if data.data.follow_up_assessment && expandedRow.result !== 'pass' && expandedRow.result !== 'not_applicable'}
+				<button
+					type="button"
+					class="btn btn-sm preset-filled-primary-500"
+					onclick={() => {
+						const row = expandedRow;
+						expandedRow = null;
+						requestCreateFinding(row);
+					}}
+				>
+					<i class="fa-solid fa-clipboard-list mr-1"></i>{m.createFinding()}
+				</button>
+			{/if}
+		</div>
+	</div>
+{/if}

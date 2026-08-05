@@ -957,6 +957,7 @@
 	"removeIp": "移除 {ip}",
 	"noAllowedIpsYet": "尚无允许的 IP。",
 	"invalidFileType": "无效的文件类型",
+	"wordTemplatesWarning": "请在使用前仔细检查模板内容，并确保其符合您组织的安全与合规政策。",
 	"logoHelpText": "标志将显示在应用程序的页眉中。接受的格式为PNG、JPEG、WEBP、SVG。",
 	"faviconHelpText": "网站图标将显示在浏览器标签中。接受的格式为ICO、PNG、JPEG、WEBP、SVG。",
 	"financialSettings": "财务设置",
