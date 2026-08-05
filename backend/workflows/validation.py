@@ -56,15 +56,10 @@ def validate_graph(version):
 
     known_refs = {n.ref for n in nodes if n.ref}
     trigger_nodes = [n for n in nodes if n.type == WorkflowNode.Type.TRIGGER]
-    end_nodes = [n for n in nodes if n.type == WorkflowNode.Type.END]
 
     if not trigger_nodes:
         errors.append(
             _error("trigger_node_missing", "The graph needs at least one trigger node")
-        )
-    if not end_nodes:
-        errors.append(
-            _error("end_node_missing", "The graph needs at least one end node")
         )
 
     outgoing = {node.id: [] for node in nodes}
@@ -87,29 +82,27 @@ def validate_graph(version):
                     )
                 )
 
-    if end_nodes:
-        reaches_end = set()
-        for end in end_nodes:
-            reaches_end |= _traverse(end.id, incoming)
-        for node in nodes:
-            if node.id not in reaches_end:
-                errors.append(
-                    _error(
-                        "dead_end",
-                        "No path from this node reaches an end node",
-                        node=node,
-                    )
-                )
-
+    # A terminal is any leaf: an unwired output just ends that branch (spec
+    # D35), and end nodes are leaves by construction (end_has_outgoing). So the
+    # only structural failure left is a node that can reach no leaf at all,
+    # which means it sits in a cycle with no exit and could never finish. This
+    # is deliberately the one thing you cannot see by looking at the canvas.
+    leaves = [n for n in nodes if not outgoing[n.id]]
+    reaches_terminal = set()
+    for leaf in leaves:
+        reaches_terminal |= _traverse(leaf.id, incoming)
     for node in nodes:
-        if node.type != WorkflowNode.Type.END and not outgoing[node.id]:
+        if node.id not in reaches_terminal:
             errors.append(
                 _error(
-                    "missing_outgoing_edge",
-                    "Only end nodes may have no outgoing edge",
+                    "dead_end",
+                    "This node is in a loop with no exit, so no path from it "
+                    "can finish",
                     node=node,
                 )
             )
+
+    for node in nodes:
         if node.type == WorkflowNode.Type.TRIGGER:
             if incoming[node.id]:
                 errors.append(
@@ -281,7 +274,7 @@ def validate_graph(version):
             errors.append(
                 _error(
                     "end_has_outgoing",
-                    "End nodes cannot have outgoing edges",
+                    "Nothing can follow a stop node: it ends the run",
                     edge=edge,
                 )
             )
@@ -334,8 +327,10 @@ def _validate_loop(node, edges, outgoing, nodes_by_id):
         return results
 
     # Walk forward from the each targets; the loop node itself is the only
-    # legal exit. Reaching a dead end (or an end node) without coming home is
-    # an escape; the loop would wait forever.
+    # legal exit. A body path that just dead-ends never comes home, so the
+    # controller would wait forever — that's an escape. An END node is the
+    # exception: terminating consumes the controller too, so "bail out of the
+    # whole run from inside the loop" is legitimate (spec D35).
     body = set()
     stack = [e.target_node_id for e in each_edges]
     escapes = False
@@ -348,6 +343,9 @@ def _validate_loop(node, edges, outgoing, nodes_by_id):
         if current in body:
             continue
         body.add(current)
+        current_node = nodes_by_id.get(current)
+        if current_node is not None and current_node.type == WorkflowNode.Type.END:
+            continue
         next_ids = outgoing.get(current, [])
         if not next_ids:
             escapes = True

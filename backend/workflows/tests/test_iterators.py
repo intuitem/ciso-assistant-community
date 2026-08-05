@@ -514,6 +514,25 @@ class TestLoopValidation:
 
         assert "loop_body_escape" in self._codes(mutate)
 
+    def test_own_end_node_in_body_is_not_an_escape(self):
+        """Terminating from inside a loop body is legitimate (spec D35): the
+        end node consumes the controller, so nothing is left waiting."""
+
+        def mutate(version):
+            from workflows.models import WorkflowEdge, WorkflowNode
+
+            body = version.nodes.get(label="Body 0")
+            halt = WorkflowNode.objects.create(
+                version=version, type=WorkflowNode.Type.END, label="Stop"
+            )
+            WorkflowEdge.objects.create(
+                version=version, source_node=body, target_node=halt
+            )
+
+        codes = self._codes(mutate)
+        assert "loop_body_escape" not in codes
+        assert "loop_body_no_return" not in codes
+
     def test_source_port_on_non_loop_edge(self):
         def mutate(version):
             edge_row = version.edges.filter(source_node__type="trigger").first()

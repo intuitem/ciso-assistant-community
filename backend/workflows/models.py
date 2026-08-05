@@ -717,6 +717,7 @@ class WorkflowInstanceLog(AbstractBaseModel, FolderMixin):
         SUBPROCESS_STARTED = "subprocess_started", "Subprocess started"
         LOOP_COMPLETED = "loop_completed", "Loop completed"
         AUTHORIZATION_DENIED = "authorization_denied", "Authorization denied"
+        RUN_TERMINATED = "run_terminated", "Run terminated"
         INSTANCE_COMPLETED = "instance_completed", "Instance completed"
         ERROR = "error", "Error"
 

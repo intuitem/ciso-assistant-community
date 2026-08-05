@@ -32,6 +32,14 @@ MAX_STEPS = 5000
 # cross-workflow cycles that can't be detected statically.
 MAX_SUBPROCESS_DEPTH = 10
 
+# Token states that still represent work in progress: what a run has to have
+# none of to be finished, and what terminating a run has to consume.
+LIVE_TOKEN_STATUSES = [
+    WorkflowToken.Status.ACTIVE,
+    WorkflowToken.Status.WAITING,
+    WorkflowToken.Status.RETRYING,
+]
+
 # Event-chain depth of the workflow run currently executing in this context;
 # 0 means "not inside a run" (user/API-caused changes). Read by the
 # internal-event producer (workflows/events.py).
@@ -342,12 +350,7 @@ def abort_token(token):
             id=token.instance_id
         )
         instance.tokens.filter(
-            status__in=[
-                WorkflowToken.Status.ACTIVE,
-                WorkflowToken.Status.WAITING,
-                WorkflowToken.Status.RETRYING,
-                WorkflowToken.Status.ERROR,
-            ]
+            status__in=[*LIVE_TOKEN_STATUSES, WorkflowToken.Status.ERROR]
         ).update(status=WorkflowToken.Status.CONSUMED)
         instance.status = WorkflowInstance.Status.ABANDONED
         instance.save(update_fields=["status", "updated_at"])
@@ -403,13 +406,9 @@ def _run(instance):
         _process(token)
     else:
         # Leave no ACTIVE/WAITING tokens behind, or a later run resumes them.
-        instance.tokens.filter(
-            status__in=[
-                WorkflowToken.Status.ACTIVE,
-                WorkflowToken.Status.WAITING,
-                WorkflowToken.Status.RETRYING,
-            ]
-        ).update(status=WorkflowToken.Status.ERROR)
+        instance.tokens.filter(status__in=LIVE_TOKEN_STATUSES).update(
+            status=WorkflowToken.Status.ERROR
+        )
         _fail_instance(instance, "Max execution steps exceeded")
         return
     _refresh_status(instance)
@@ -431,8 +430,7 @@ def _process(token):
 
     try:
         if node.type == WorkflowNode.Type.END:
-            token.status = WorkflowToken.Status.COMPLETED
-            token.save(update_fields=["status", "updated_at"])
+            _terminate_run(token, node)
             return
 
         if node.type == WorkflowNode.Type.TASK:
@@ -828,7 +826,11 @@ def _advance(token):
     instance = token.instance
     edges = list(node.outgoing_edges.all())
     if not edges:
-        raise EngineError(f"Node '{node}' has no outgoing edge")
+        # A leaf is an implicit terminal: this branch is done, siblings keep
+        # running. Stopping the WHOLE run is the end node's job (spec D35).
+        token.status = WorkflowToken.Status.COMPLETED
+        token.save(update_fields=["status", "updated_at"])
+        return
 
     if node.type == WorkflowNode.Type.CONDITION:
         # Exclusive routing by branch (spec D25): evaluate branches in order,
@@ -962,6 +964,53 @@ def _coerce(value, variable_type):
     return value
 
 
+def _terminate_run(token, node):
+    """End node = stop the run NOW (spec D35).
+
+    Consumes every other live token, so parallel branches, parked task/event
+    tokens and loop controllers all stop. The final status is deliberately left
+    to _refresh_status: a clean terminate completes, but a sibling branch that
+    already errored still fails the run (terminate never launders a failure).
+    """
+    instance = token.instance
+    cancelled = (
+        instance.tokens.filter(status__in=LIVE_TOKEN_STATUSES)
+        .exclude(pk=token.pk)
+        .update(status=WorkflowToken.Status.CONSUMED)
+    )
+    token.status = WorkflowToken.Status.COMPLETED
+    token.save(update_fields=["status", "updated_at"])
+    _abandon_children(instance)
+    message = "Run stopped"
+    if cancelled:
+        message += f" — {cancelled} running branch(es) cancelled"
+    _log(
+        instance,
+        WorkflowInstanceLog.EventType.RUN_TERMINATED,
+        node=node,
+        message=message,
+    )
+
+
+def _abandon_children(instance):
+    """Terminating a run cascades DOWN to subprocess children it started: they
+    were cut short, so they land ABANDONED (spec D35). Termination never
+    propagates UP — a child hitting its own end node completes normally and the
+    waiting parent carries on."""
+    for child in instance.children.filter(status=WorkflowInstance.Status.ACTIVE):
+        child.tokens.filter(status__in=LIVE_TOKEN_STATUSES).update(
+            status=WorkflowToken.Status.CONSUMED
+        )
+        child.status = WorkflowInstance.Status.ABANDONED
+        child.save(update_fields=["status", "updated_at"])
+        _log(
+            child,
+            WorkflowInstanceLog.EventType.RUN_TERMINATED,
+            message="Abandoned: the calling workflow stopped",
+        )
+        _abandon_children(child)
+
+
 def _fail_token(token, message):
     token.status = WorkflowToken.Status.ERROR
     token.error_message = message
@@ -982,11 +1031,7 @@ def _fail_instance(instance, message):
 
 def _refresh_status(instance):
     statuses = set(instance.tokens.values_list("status", flat=True))
-    if statuses & {
-        WorkflowToken.Status.ACTIVE,
-        WorkflowToken.Status.WAITING,
-        WorkflowToken.Status.RETRYING,
-    }:
+    if statuses & set(LIVE_TOKEN_STATUSES):
         return
     if WorkflowToken.Status.ERROR in statuses:
         instance.status = WorkflowInstance.Status.FAILED

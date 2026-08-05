@@ -314,7 +314,71 @@ class TestPublish:
         assert resp.status_code == 400
         codes = {e["code"] for e in resp.data["errors"]}
         assert "trigger_node_missing" in codes
-        assert "end_node_missing" in codes
+
+    def test_dangling_step_is_a_valid_terminal(self, workflow, superuser):
+        """An unwired last step just ends that branch (spec D35): no end node
+        required, and no nag about the missing edge."""
+        version = workflow.draft_version
+        trigger, action = str(uuid.uuid4()), str(uuid.uuid4())
+        graph = {
+            "nodes": [
+                {
+                    "id": trigger,
+                    "type": "trigger",
+                    "trigger_config": {"type": "manual"},
+                    "position": {"x": 0, "y": 0},
+                },
+                {
+                    "id": action,
+                    "type": "action",
+                    "action_config": {"type": "log", "message": "done"},
+                    "position": {"x": 200, "y": 0},
+                },
+            ],
+            "edges": [{"id": str(uuid.uuid4()), "source": trigger, "target": action}],
+            "variables": [],
+        }
+        assert _put_graph(version, graph, superuser).status_code == 200
+        assert _publish(version, superuser).status_code == 200
+
+    def test_cycle_with_no_exit_fails_validation(self, workflow, superuser):
+        """The one structural check left: a loop of steps that can reach no
+        terminal could never finish."""
+        version = workflow.draft_version
+        trigger, a, b = str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())
+        graph = {
+            "nodes": [
+                {
+                    "id": trigger,
+                    "type": "trigger",
+                    "trigger_config": {"type": "manual"},
+                    "position": {"x": 0, "y": 0},
+                },
+                {
+                    "id": a,
+                    "type": "action",
+                    "action_config": {"type": "log"},
+                    "position": {"x": 200, "y": 0},
+                },
+                {
+                    "id": b,
+                    "type": "action",
+                    "action_config": {"type": "log"},
+                    "position": {"x": 400, "y": 0},
+                },
+            ],
+            "edges": [
+                {"id": str(uuid.uuid4()), "source": trigger, "target": a},
+                {"id": str(uuid.uuid4()), "source": a, "target": b},
+                {"id": str(uuid.uuid4()), "source": b, "target": a},
+            ],
+            "variables": [],
+        }
+        assert _put_graph(version, graph, superuser).status_code == 200
+        resp = _publish(version, superuser)
+        assert resp.status_code == 400
+        codes = {e["code"] for e in resp.data["errors"]}
+        assert "dead_end" in codes
 
     def test_unreachable_node_fails_validation(self, workflow, superuser):
         version = workflow.draft_version
