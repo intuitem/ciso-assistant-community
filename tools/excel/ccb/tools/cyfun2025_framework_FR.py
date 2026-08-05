@@ -9,6 +9,7 @@ such as ``cyfun2025_nl.xlsx``, without modifying that source file.
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -17,9 +18,13 @@ import fitz
 import cyfun2025_framework_NL as base
 
 
+BASE_VALIDATE_LOCALIZED_COVERAGE = base.validate_dutch_coverage
+
+
 BASE_DIR = Path(__file__).resolve().parent
-DEFAULT_ENGLISH_PDF = BASE_DIR / "CyFun2025_Booklet_ESSENTIAL_E.pdf"
-DEFAULT_FRENCH_PDF = BASE_DIR / "CyFun2025_Booklet-ESSENTIAL_F_pr3.pdf"
+DATA_DIR = BASE_DIR.parent
+DEFAULT_ENGLISH_PDF = DATA_DIR / "CyFun2025_Booklet_ESSENTIAL_E.pdf"
+DEFAULT_FRENCH_PDF = DATA_DIR / "CyFun2025_Booklet-ESSENTIAL_F_pr3.pdf"
 
 FRENCH_FUNCTION_NAMES = {
     "GV": "Gouverner",
@@ -195,6 +200,43 @@ def extract_french_sidebar_content(
     )
 
 
+def is_french_body_candidate(block: base.PdfBlock) -> bool:
+    """Keep long French list blocks that end just above the page footer."""
+    return (
+        84 <= block.x0 <= 190
+        and block.x1 <= 570
+        and block.y0 < 790
+        and block.y1 < 805
+    )
+
+
+def validate_french_coverage(
+    rows: list[base.WorkbookRow], extracted: base.ExtractedTexts
+) -> None:
+    """Reject the two confirmed French list-truncation regressions."""
+    BASE_VALIDATE_LOCALIZED_COVERAGE(rows, extracted)
+
+    pr_at = extracted.annotations.get("PR.AT-01.1", "")
+    pr_at_bullets = len(re.findall(r"(?m)^-\s+", pr_at))
+    if pr_at_bullets != 8:
+        raise ValueError(
+            f"Expected 8 French PR.AT-01.1 bullets, got {pr_at_bullets}."
+        )
+
+    pr_ps = extracted.annotations.get("PR.PS-01.1", "")
+    required_pr_ps_texts = (
+        "Les systèmes pourraient être surveillés en continu",
+        "Mettre à jour les bases de référence",
+        "Systèmes gérés par le cloud et les fournisseurs",
+    )
+    missing = [text for text in required_pr_ps_texts if text not in pr_ps]
+    if missing:
+        raise ValueError(
+            "Incomplete French PR.PS-01.1 annotation; missing: "
+            + ", ".join(missing)
+        )
+
+
 def configure_french_extraction() -> None:
     base.LANGUAGE_CODE = "fr"
     base.LANGUAGE_NAME = "French"
@@ -226,6 +268,8 @@ def configure_french_extraction() -> None:
     )
     base.parse_arguments = parse_arguments
     base.extract_sidebar_content = extract_french_sidebar_content
+    base.is_body_candidate = is_french_body_candidate
+    base.validate_dutch_coverage = validate_french_coverage
 
 
 def main() -> int:

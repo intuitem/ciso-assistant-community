@@ -36,10 +36,11 @@ except ImportError as exc:  # pragma: no cover - only used for a clear CLI error
 
 
 BASE_DIR = Path(__file__).resolve().parent
-DEFAULT_WORKBOOK = BASE_DIR / "cyfun2025.xlsx"
-DEFAULT_ENGLISH_PDF = BASE_DIR / "CyFun2025_Booklet_ESSENTIAL_E.pdf"
-DEFAULT_DUTCH_PDF = BASE_DIR / "CyFun2025_Booklet-ESSENTIAL_N.pdf"
-DEFAULT_OUTPUT = BASE_DIR / "cyfun2025_nl.xlsx"
+DATA_DIR = BASE_DIR.parent
+DEFAULT_WORKBOOK = DATA_DIR / "cyfun2025.xlsx"
+DEFAULT_ENGLISH_PDF = DATA_DIR / "CyFun2025_Booklet_ESSENTIAL_E.pdf"
+DEFAULT_DUTCH_PDF = DATA_DIR / "CyFun2025_Booklet-ESSENTIAL_N.pdf"
+DEFAULT_OUTPUT = DATA_DIR / "cyfun2025_nl.xlsx"
 LANGUAGE_CODE = "nl"
 LANGUAGE_NAME = "Dutch"
 INTRODUCTION_HEADING = "INLEIDING"
@@ -80,6 +81,15 @@ IG_REQUIRED_TERMS = (
     "managementaspecten",
 )
 
+DUTCH_FUNCTION_NAMES = {
+    "GV": "BEHEREN",
+    "ID": "IDENTIFICEREN",
+    "PR": "BESCHERMEN",
+    "DE": "DETECTEREN",
+    "RS": "REAGEREN",
+    "RC": "HERSTELLEN",
+}
+
 REFERENCE_RE = re.compile(r"^\s*([A-Z]{2}\.[A-Z]{2}-\d{2}(?:[.-]\d+)?)\b")
 CATEGORY_RE = re.compile(r"^[A-Z]{2}\.[A-Z]{2}$")
 FUNCTION_RE = re.compile(r"^[A-Z]{2}$")
@@ -93,6 +103,7 @@ BULLET_LEFT_X = 87.9
 BULLET_INDENT_STEP_X = 10.65
 BULLET_INDENT_SPACES = 4
 EXPECTED_TARGET_BULLET_INDENTATIONS = {0, 4, 8}
+BODY_TEXT_MAX_SIZE = 10.1
 
 GUIDANCE_LABELS = ("Implementation guidance", "Implementatierichtlijnen")
 REFERENCES_LABELS = ("References", "Referenties")
@@ -453,9 +464,17 @@ def extract_sidebar_content(
     expected_categories: set[str],
     expected_functions: set[str],
 ) -> tuple[dict[str, str], dict[str, str], dict[str, str]]:
+    missing_function_labels = expected_functions - DUTCH_FUNCTION_NAMES.keys()
+    if missing_function_labels:
+        raise ValueError(
+            "Missing Dutch function labels: "
+            + ", ".join(sorted(missing_function_labels))
+        )
     category_names: dict[str, str] = {}
     category_descriptions: dict[str, str] = {}
-    function_names: dict[str, str] = {}
+    function_names = {
+        ref_id: DUTCH_FUNCTION_NAMES[ref_id] for ref_id in expected_functions
+    }
 
     for page_number, page in enumerate(document, start=1):
         blocks = list(iter_pdf_blocks(page, page_number))
@@ -501,32 +520,6 @@ def extract_sidebar_content(
                 )
                 category_descriptions[category_ref] = clean_inline_text(
                     description_block.text
-                )
-
-            function_ref = category_ref.split(".", 1)[0]
-            if function_ref in expected_functions and function_ref not in function_names:
-                function_candidates = [
-                    block
-                    for block in blocks
-                    if 90 <= block.x0 <= 140
-                    and 130 <= block.y0 <= 220
-                    and block.x1 <= 155
-                ]
-                cleaned_candidates = [
-                    clean_inline_text(block.text) for block in function_candidates
-                ]
-                cleaned_candidates = [
-                    candidate
-                    for candidate in cleaned_candidates
-                    if candidate and len(candidate) <= 35 and candidate.isupper()
-                ]
-                if not cleaned_candidates:
-                    raise ValueError(
-                        f"No function name found for {function_ref} on PDF page "
-                        f"{page_number}."
-                    )
-                function_names[function_ref] = max(
-                    cleaned_candidates, key=len
                 )
 
     return function_names, category_names, category_descriptions
@@ -677,13 +670,13 @@ def extract_body_content(
                 current_section == "description"
                 and current_ref.count(".") == 2
                 and not is_header_continuation
-                and block.first_size <= 10
+                and block.first_size <= BODY_TEXT_MAX_SIZE
             ):
                 # Two controls in the official PDFs omit the explicit guidance
                 # label. The change from semibold requirement text to regular
                 # body text is the same visual boundary.
                 current_section = "annotation"
-            if block.first_size > 10 and not is_header_continuation:
+            if block.first_size > BODY_TEXT_MAX_SIZE and not is_header_continuation:
                 continue
             if stripped_text.startswith("Version 2025-"):
                 continue
@@ -982,6 +975,28 @@ def validate_dutch_coverage(
             f"{LANGUAGE_NAME} extraction is incomplete. Missing fields: "
             + ", ".join(missing[:20])
         )
+
+    if LANGUAGE_CODE == "nl":
+        actual_function_names = {
+            ref_id: extracted.names.get(ref_id)
+            for ref_id in DUTCH_FUNCTION_NAMES
+        }
+        if actual_function_names != DUTCH_FUNCTION_NAMES:
+            raise ValueError(
+                "Unexpected Dutch function names: "
+                f"{actual_function_names}; expected {DUTCH_FUNCTION_NAMES}."
+            )
+
+    if LANGUAGE_CODE == "fr" and "PR.AT-01.1" in extracted.annotations:
+        pr_at_bullet_count = len(
+            re.findall(r"(?m)^-\s+", extracted.annotations["PR.AT-01.1"])
+        )
+        if pr_at_bullet_count != 8:
+            raise ValueError(
+                "French PR.AT-01.1 annotation must contain 8 bullets, "
+                f"got {pr_at_bullet_count}."
+            )
+
     descriptions_with_line_breaks = [
         ref_id
         for ref_id, description in extracted.descriptions.items()
@@ -1053,6 +1068,36 @@ def validate_dutch_coverage(
             f"Invalid {LANGUAGE_NAME} bullet indentation: "
             + ", ".join(invalid_bullet_indents[:20])
         )
+
+    if LANGUAGE_CODE == "nl":
+        required_annotation_texts = {
+            "GV.SC-03.1": (
+                "Definieer criteria voor materialiteit",
+                "Zorg voor een formeel escalatiepad",
+            ),
+            "PR.AA-03.2": (
+                "Als individuele accounts niet haalbaar zijn",
+                "Veilige externe toegang tot OT-systemen",
+            ),
+            "PR.AA-05.7": (
+                "In OT-omgevingen zou geprivilegieerde toegang",
+                "Afstemmen op ENISA-richtlijnen",
+            ),
+            "PR.AA-06.3": (
+                "Kritieke zones zouden geïdentificeerd kunnen worden",
+            ),
+        }
+        missing_required_texts = [
+            f"{ref_id}:{required_text}"
+            for ref_id, required_texts in required_annotation_texts.items()
+            for required_text in required_texts
+            if required_text not in extracted.annotations.get(ref_id, "")
+        ]
+        if missing_required_texts:
+            raise ValueError(
+                "Confirmed Dutch annotation text is missing: "
+                + ", ".join(missing_required_texts)
+            )
 
     target_annotation = extracted.annotations.get("DE.CM-01.2", "")
     target_indentations = {
