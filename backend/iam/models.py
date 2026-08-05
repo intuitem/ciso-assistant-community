@@ -1393,17 +1393,18 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         allowed_folder_set = RoleAssignment._get_directly_allowed_folder_ids(user, perm)
 
-        direct_flat_folder_ids = allowed_folder_set.direct_flat_folder_ids
-        direct_recursive_folder_ids = allowed_folder_set.direct_recursive_folder_ids
-
-        return (
-            folder.get_parent_folders(include_self=True)
-            .filter(
-                Q(id__in=direct_recursive_folder_ids)
-                | Q(id=folder.id, id__in=direct_flat_folder_ids)
-            )
-            .exists()
+        direct_flat_folder_id_set = set(allowed_folder_set.direct_flat_folder_ids)
+        direct_recursive_folder_id_set = set(
+            allowed_folder_set.direct_recursive_folder_ids
         )
+
+        is_directly_accessible = folder.id in direct_flat_folder_id_set
+        is_indirectly_accessible = any(
+            parent_folder.id in direct_recursive_folder_id_set
+            for parent_folder in folder.get_parent_folders()
+        )
+
+        return is_directly_accessible or is_indirectly_accessible
 
     @staticmethod
     def _is_filtering_label_accessible(
