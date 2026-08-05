@@ -1403,7 +1403,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         is_directly_accessible = folder.id in direct_flat_folder_id_set
         is_indirectly_accessible = any(
             parent_folder.id in direct_recursive_folder_id_set
-            for parent_folder in folder.get_parent_folders()
+            for parent_folder in folder.get_parent_folders(include_self=True)
         )
 
         return is_directly_accessible or is_indirectly_accessible
