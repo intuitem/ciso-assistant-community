@@ -1528,32 +1528,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             Q(id=focused_folder.id) | Q(descendants=focused_folder.id)
         ).exists()
 
-<<<<<<< HEAD
         if is_whole_focus_folder_tree_accessible:
             # A non-strict folder supertree of the `focused_folder` tree is accessible
             # Therefore all the focused folder tree can be accessed.
             focused_folder_tree = Folder.objects.filter(id=focused_folder.id).union(
                 Folder.objects.filter(ancestors=focused_folder.id)
-=======
-        perimeter_ids = set(iter_descendant_ids(state, folder.id, include_start=True))
-
-        focus_folder_id = focus_folder_id_var.get()
-        if focus_folder_id:
-            focus_ids = set(
-                iter_descendant_ids(state, focus_folder_id, include_start=True)
-            )
-            if state.root_folder_id is not None:
-                focus_ids.add(state.root_folder_id)
-            perimeter_ids &= focus_ids
-
-        # folder_id -> set of granted permission codenames ("view_x", "change_x", "delete_x")
-        folder_perm_codes: dict[uuid.UUID, set[str]] = defaultdict(set)
-
-        # Compute folder permissions using caches only
-        for a in _iter_assignment_lites_for_user(user):
-            role_perm_codenames = roles_state.role_permissions.get(
-                a.role_id, frozenset()
->>>>>>> main
             )
 
             accessible_folder_ids = focused_folder_tree.values_list("id", flat=True)
