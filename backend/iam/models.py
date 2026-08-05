@@ -362,10 +362,14 @@ class Folder(NameDescriptionMixin):
         return subfolders
 
     # Should we update data-model.md now that this method is a generator ?
-    def get_parent_folders(self) -> QuerySet[Folder]:
+    def get_parent_folders(self, include_self: bool = False) -> QuerySet[Folder]:
         """Return the list of parent folders"""
 
-        return self.ancestors.all()
+        parents = self.ancestors.all()
+        if include_self:
+            parents = Folder.objects.filter(Q(id=self.id) | Q(id__in=parents))
+
+        return parents
 
     def get_folder_full_path(self, *, include_root: bool = False) -> list[Folder]:
         """
@@ -1253,6 +1257,26 @@ class Role(NameDescriptionMixin, FolderMixin):
     fields_to_check = ["name"]
 
 
+@dataclass
+class AllowedFolderSet:
+    directly_accessible_folder_ids: Iterable[uuid.UUID]
+    """
+    The "direct folders" are the ones stored in the `RoleAssignment.perimeter_folders` field.
+    These folders have roles (`RoleAssignment.role`) being directly assigned to them.
+
+    In opposition to the indirect (recursive) folders which permission was granted due to a `Role` assigned on one of its ancestor folders.
+    """
+    direct_flat_folder_ids: Iterable[uuid.UUID]
+    """A "flat" `folder` (in this context) is a folder linked to a "flat" `RoleAssignment` (non-recursive)."""
+    direct_recursive_folder_ids: Iterable[uuid.UUID]
+    """A direct recursive folder, is a direct folder of a recursive `RoleAssignment`."""
+
+    @staticmethod
+    def none() -> AllowedFolderSet:
+        _none = Folder.objects.none().values_list("id", flat=True)
+        return AllowedFolderSet(_none, _none, _none)
+
+
 class RoleAssignment(NameDescriptionMixin, FolderMixin):
     """fundamental class for CISO Assistant RBAC model, similar to Azure IAM model"""
 
@@ -1367,10 +1391,17 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 user, perm
             ).exists()
 
-        allowed_folder_ids = RoleAssignment.get_allowed_folder_ids(user, perm)
+        allowed_folder_set = RoleAssignment._get_directly_allowed_folder_ids(user, perm)
+
+        direct_flat_folder_ids = allowed_folder_set.direct_flat_folder_ids
+        direct_recursive_folder_ids = allowed_folder_set.direct_recursive_folder_ids
+
         return (
-            Folder.objects.filter(id__in=allowed_folder_ids)
-            .filter(id=folder.id)
+            folder.get_parent_folders(include_self=True)
+            .filter(
+                Q(id__in=direct_recursive_folder_ids)
+                | Q(id=folder.id, id__in=direct_flat_folder_ids)
+            )
             .exists()
         )
 
@@ -1565,6 +1596,40 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return accessible_folder_ids
 
     @staticmethod
+    def _get_directly_allowed_folder_ids(
+        user: AbstractBaseUser | AnonymousUser,
+        permission: tuple[PermissionPrefix, type[models.Model]] | Permission,
+    ) -> AllowedFolderSet:
+        if not isinstance(user, User):
+            return AllowedFolderSet.none()
+
+        user_role_assignments = RoleAssignment._get_role_assignments_from_permission(
+            user, permission
+        )
+
+        flat_role_assignments = user_role_assignments.filter(is_recursive=False)
+        # A "flat" `RoleAssignment` is a non-recursive `RoleAssignment`.
+        recursive_role_assignments = user_role_assignments.filter(is_recursive=True)
+
+        directly_accessible_folder_ids = user_role_assignments.values_list(
+            "perimeter_folders__id", flat=True
+        ).distinct()
+
+        direct_flat_folder_ids = flat_role_assignments.values_list(
+            "perimeter_folders__id", flat=True
+        ).distinct()
+
+        direct_recursive_folder_ids = recursive_role_assignments.values_list(
+            "perimeter_folders__id", flat=True
+        ).distinct()
+
+        return AllowedFolderSet(
+            directly_accessible_folder_ids=directly_accessible_folder_ids,
+            direct_flat_folder_ids=direct_flat_folder_ids,
+            direct_recursive_folder_ids=direct_recursive_folder_ids,
+        )
+
+    @staticmethod
     def get_allowed_folder_ids(
         user: AbstractBaseUser | AnonymousUser,
         permission: tuple[PermissionPrefix, type[models.Model]] | Permission,
@@ -1601,32 +1666,15 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if not isinstance(user, User):
             return Folder.objects.none().values_list("id", flat=True)
 
-        user_role_assignments = RoleAssignment._get_role_assignments_from_permission(
+        allowed_folder_set = RoleAssignment._get_directly_allowed_folder_ids(
             user, permission
         )
 
-        flat_role_assignments = user_role_assignments.filter(is_recursive=False)
-        # A "flat" `RoleAssignment` is a non-recursive `RoleAssignment`.
-        recursive_role_assignments = user_role_assignments.filter(is_recursive=True)
-
-        directly_accessible_folder_ids = user_role_assignments.values_list(
-            "perimeter_folders__id", flat=True
-        ).distinct()
-        """
-        The "direct folders" are the ones stored in the `RoleAssignment.perimeter_folders` field.
-        These folders have roles (`RoleAssignment.role`) being directly assigned to them.
-
-        In opposition to the indirect (recursive) folders which permission was granted due to a `Role` assigned on one of its ancestor folders.
-        """
-
-        direct_flat_folder_ids = flat_role_assignments.values_list(
-            "perimeter_folders__id", flat=True
-        ).distinct()
-        # A "flat" `folder` (in this context) is a folder linked to a "flat" `RoleAssignment` (non-recursive).
-        direct_recursive_folder_ids = recursive_role_assignments.values_list(
-            "perimeter_folders__id", flat=True
-        ).distinct()
-        # A direct recursive folder, is a direct folder of a recursive `RoleAssignment`.
+        directly_accessible_folder_ids = (
+            allowed_folder_set.directly_accessible_folder_ids
+        )
+        direct_flat_folder_ids = allowed_folder_set.direct_flat_folder_ids
+        direct_recursive_folder_ids = allowed_folder_set.direct_recursive_folder_ids
 
         focused_folder_id = focus_folder_id_var.get()
 
