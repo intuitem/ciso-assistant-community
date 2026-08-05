@@ -10,6 +10,7 @@ logger = get_logger(__name__)
 
 READER_PERMISSIONS_LIST = [
     "view_customfielddefinition",
+    "view_savedfilter",
     "view_compliance_assessment_full",
     "view_object_audittrail",
     "view_appliedcontrol",
@@ -148,6 +149,7 @@ READER_PERMISSIONS_LIST = [
 
 APPROVER_PERMISSIONS_LIST = [
     "view_customfielddefinition",
+    "view_savedfilter",
     "view_compliance_assessment_full",
     "view_perimeter",
     "view_riskassessment",
@@ -271,6 +273,7 @@ APPROVER_PERMISSIONS_LIST = [
 
 ANALYST_PERMISSIONS_LIST = [
     "view_customfielddefinition",
+    "view_savedfilter",
     "view_compliance_assessment_full",
     "view_object_audittrail",
     "add_filteringlabel",
@@ -678,6 +681,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_customfielddefinition",
     "change_customfielddefinition",
     "delete_customfielddefinition",
+    "add_savedfilter",
+    "view_savedfilter",
+    "change_savedfilter",
+    "delete_savedfilter",
     "view_compliance_assessment_full",
     "view_object_audittrail",
     "add_filteringlabel",
@@ -1128,6 +1135,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_customfielddefinition",
     "change_customfielddefinition",
     "delete_customfielddefinition",
+    "add_savedfilter",
+    "view_savedfilter",
+    "change_savedfilter",
+    "delete_savedfilter",
     "view_central_auditlog",
     "view_compliance_assessment_full",
     "view_object_audittrail",

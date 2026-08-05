@@ -5674,5 +5674,11 @@
 	"importTemplatesSingleNote": "Importing just one template? It's quicker to create it directly from the Templates list.",
 	"unpublishedDocumentsNotice": "{count} document(s) drafted but not yet published — visible in the manage view.",
 	"authored": "Authored",
-	"uploaded": "Uploaded"
+	"uploaded": "Uploaded",
+	"savedFilters": "Saved filters",
+	"saveFilter": "Save filter",
+	"saveAsPersonalFilter": "Save as personal filter",
+	"personalFilters": "Personal",
+	"sharedFilters": "Shared",
+	"noSavedFilters": "No saved filters"
 }

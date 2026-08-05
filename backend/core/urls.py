@@ -112,6 +112,11 @@ router.register(
     basename="requirement-mapping-sets",
 )
 router.register(
+    r"saved-filters",
+    SavedFilterViewSet,
+    basename="saved-filters",
+)
+router.register(
     r"filtering-labels",
     FilteringLabelViewSet,
     basename="filtering-labels",

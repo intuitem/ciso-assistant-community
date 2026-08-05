@@ -5669,5 +5669,11 @@
 	"record": "Enregistrement",
 	"unpublishedDocumentsNotice": "{count} document(s) rédigé(s) mais pas encore publié(s) — visibles dans la vue de gestion.",
 	"authored": "Rédigé",
-	"uploaded": "Téléversé"
+	"uploaded": "Téléversé",
+	"savedFilters": "Filtres enregistrés",
+	"saveFilter": "Enregistrer le filtre",
+	"saveAsPersonalFilter": "Enregistrer comme filtre personnel",
+	"personalFilters": "Personnels",
+	"sharedFilters": "Partagés",
+	"noSavedFilters": "Aucun filtre enregistré"
 }

@@ -365,6 +365,27 @@ class FilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
     fields_to_check = ["label"]
 
 
+class SavedFilter(FolderMixin, NameDescriptionMixin):
+    """A domain-scoped, shareable saved filter for a target model's list view.
+
+    ``properties`` mirrors the frontend's filterValues shape exactly
+    ({field: [{value: str}]}), so applying a saved filter needs no translation.
+    """
+
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        related_name="saved_filters",
+        verbose_name=_("model"),
+    )
+    properties = models.JSONField(default=dict, verbose_name=_("properties"))
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        ordering = ["name"]
+
+
 class FilteringLabelMixin(models.Model):
     filtering_labels = models.ManyToManyField(
         FilteringLabel, blank=True, verbose_name=_("Labels")

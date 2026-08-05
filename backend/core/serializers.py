@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from django.conf import settings
 from core.models import *
+from core.saved_filters.registry import resolve_saved_filter_content_type
 from core.serializer_fields import (
     FieldsRelatedField,
     HashSlugRelatedField,
@@ -4404,6 +4405,44 @@ class ComputeMappingSerializer(serializers.Serializer):
     source_assessment = serializers.PrimaryKeyRelatedField(
         queryset=ComplianceAssessment.objects.all()
     )
+
+
+class SavedFilterReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    model = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SavedFilter
+        exclude = ["content_type"]
+
+    def get_model(self, obj) -> str:
+        return f"{obj.content_type.app_label}.{obj.content_type.model}"
+
+
+class SavedFilterWriteSerializer(BaseModelSerializer):
+    model = serializers.CharField(write_only=True, required=False)
+
+    class Meta:
+        model = SavedFilter
+        exclude = ["content_type", "is_published"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["model"] = f"{instance.content_type.app_label}.{instance.content_type.model}"
+        return data
+
+    def validate(self, data):
+        data = super().validate(data)
+        model = data.pop("model", None)
+        if model is not None:
+            data["content_type"] = resolve_saved_filter_content_type(model)
+        elif self.instance is not None:
+            data["content_type"] = self.instance.content_type
+        else:
+            raise serializers.ValidationError(
+                {"model": "This field is required (e.g. 'core.complianceassessment')."}
+            )
+        return data
 
 
 class FilteringLabelReadSerializer(BaseModelSerializer):

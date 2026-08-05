@@ -750,6 +750,138 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         prefs["ui"] = ui
         return prefs
 
+    def _save_saved_filters(self, prefs: dict, filters: list[dict]) -> None:
+        prefs["saved_filters"] = filters
+        self.preferences = prefs
+        self.save(update_fields=["preferences"])
+
+    def get_saved_filters(self) -> list[dict]:
+        return list(self.get_preferences().get("saved_filters", []))
+
+    def add_saved_filter(
+        self, *, name: str, model: str, properties: dict, shared_id: str | None = None
+    ) -> dict:
+        """Create a personal saved filter. When copied from a shared filter
+        (``shared_id`` set), the stored `updated_at` is seeded from the shared
+        filter's own `updated_at` so it isn't immediately flagged as stale by
+        sync_saved_filters_from_shared()."""
+        synced_at = timezone.now().isoformat()
+        if shared_id:
+            from core.models import SavedFilter
+
+            shared = SavedFilter.objects.filter(id=shared_id).first()
+            if shared is not None:
+                synced_at = shared.updated_at.isoformat()
+
+        entry = {
+            "id": str(uuid.uuid4()),
+            "shared_id": str(shared_id) if shared_id else None,
+            "name": name,
+            "model": model,
+            "properties": properties,
+            "updated_at": synced_at,
+        }
+        prefs = self.get_preferences()
+        filters = prefs.get("saved_filters", [])
+        filters.append(entry)
+        self._save_saved_filters(prefs, filters)
+        return entry
+
+    def update_saved_filter(self, filter_id: str, **fields) -> dict:
+        """Update a personal saved filter's name/properties. Any edit detaches
+        it from a shared filter it was copied from, so a later sync doesn't
+        clobber the user's local changes."""
+        prefs = self.get_preferences()
+        filters = prefs.get("saved_filters", [])
+        for entry in filters:
+            if entry.get("id") == str(filter_id):
+                entry.update(fields)
+                entry["shared_id"] = None
+                entry["updated_at"] = timezone.now().isoformat()
+                break
+        else:
+            raise ValueError(f"Saved filter {filter_id} not found")
+        self._save_saved_filters(prefs, filters)
+        return entry
+
+    def delete_saved_filter(self, filter_id: str) -> None:
+        prefs = self.get_preferences()
+        filters = [
+            entry
+            for entry in prefs.get("saved_filters", [])
+            if entry.get("id") != str(filter_id)
+        ]
+        self._save_saved_filters(prefs, filters)
+
+    def sync_saved_filters_from_shared(self) -> list[str]:
+        """Refresh personal filters copied from a shared filter (``shared_id``
+        set) whose source has changed since the last sync. Never copies from a
+        shared filter the user can no longer read (same reference-visibility
+        check as SavedFilterViewSet) -- otherwise this would leak filter
+        values through a detour around that restriction."""
+        from core.models import SavedFilter
+        from core.saved_filters.registry import get_referenced_models
+
+        prefs = self.get_preferences()
+        filters = prefs.get("saved_filters", [])
+        root_folder = Folder.get_root_folder()
+        accessible_cache: dict = {}
+        refreshed = []
+        changed = False
+
+        for entry in filters:
+            shared_id = entry.get("shared_id")
+            if not shared_id:
+                continue
+            shared = (
+                SavedFilter.objects.filter(id=shared_id)
+                .select_related("content_type")
+                .first()
+            )
+            if shared is None:
+                continue
+
+            refs = get_referenced_models(shared.content_type.model_class())
+            visible = True
+            for field, values in (shared.properties or {}).items():
+                referenced_model = refs.get(field)
+                if referenced_model is None or not values:
+                    continue
+                if referenced_model not in accessible_cache:
+                    accessible_cache[referenced_model] = {
+                        str(i)
+                        for i in RoleAssignment.get_accessible_object_ids(
+                            root_folder, self, referenced_model
+                        )[0]
+                    }
+                accessible_ids = accessible_cache[referenced_model]
+                for value_entry in values:
+                    value = (
+                        value_entry.get("value")
+                        if isinstance(value_entry, dict)
+                        else value_entry
+                    )
+                    if value and str(value) not in accessible_ids:
+                        visible = False
+                        break
+                if not visible:
+                    break
+            if not visible:
+                continue
+
+            current = shared.updated_at.isoformat()
+            if entry.get("updated_at") == current:
+                continue
+            entry["name"] = shared.name
+            entry["properties"] = shared.properties
+            entry["updated_at"] = current
+            refreshed.append(entry["id"])
+            changed = True
+
+        if changed:
+            self._save_saved_filters(prefs, filters)
+        return refreshed
+
     # Maps Django HTML template names to YAML template keys
     _TEMPLATE_KEY_MAP = {
         "registration/first_connexion_email.html": "welcome",

@@ -3536,6 +3536,99 @@ class VulnerabilityViewSet(BaseModelViewSet):
         return Response(treemap_data, status=status.HTTP_200_OK)
 
 
+class SavedFilterViewSet(BaseModelViewSet):
+    """
+    API endpoint for domain-shared saved filters. A shared filter is hidden
+    from list/retrieve for any user who lacks read access to an object
+    referenced in its `properties` (e.g. a filter on a specific Audit is
+    invisible to a user without read access to that Audit) -- on top of the
+    normal domain-folder RBAC scoping already applied by get_queryset().
+    """
+
+    model = SavedFilter
+    filterset_fields = ["folder", "content_type"]
+    search_fields = ["name"]
+
+    def _is_visible(self, saved_filter, user, accessible_cache: dict) -> bool:
+        from core.saved_filters.registry import get_referenced_models
+
+        refs = get_referenced_models(saved_filter.content_type.model_class())
+        for field, entries in (saved_filter.properties or {}).items():
+            referenced_model = refs.get(field)
+            if referenced_model is None or not entries:
+                continue
+            if referenced_model not in accessible_cache:
+                accessible_cache[referenced_model] = {
+                    str(i)
+                    for i in RoleAssignment.get_accessible_object_ids(
+                        Folder.get_root_folder(), user, referenced_model
+                    )[0]
+                }
+            accessible_ids = accessible_cache[referenced_model]
+            for entry in entries:
+                value = entry.get("value") if isinstance(entry, dict) else entry
+                if value and str(value) not in accessible_ids:
+                    return False
+        return True
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.request.method not in permissions.SAFE_METHODS:
+            return queryset
+        accessible_cache: dict = {}
+        visible_ids = [
+            sf.id
+            for sf in queryset.select_related("content_type")
+            if self._is_visible(sf, self.request.user, accessible_cache)
+        ]
+        return queryset.filter(id__in=visible_ids)
+
+    @action(detail=False, methods=["post"])
+    def sync(self, request):
+        refreshed = request.user.sync_saved_filters_from_shared()
+        return Response({"refreshed": refreshed})
+
+    @action(detail=False, methods=["get", "post"])
+    def personal(self, request):
+        """Personal saved filters live in request.user.preferences, not in
+        this model's table -- CRUD is delegated to the User helpers so the
+        RBAC-free personal scope stays out of the SavedFilter queryset/RBAC
+        machinery entirely."""
+        if request.method == "POST":
+            data = request.data
+            model = data.get("model")
+            if model:
+                from core.saved_filters.registry import resolve_saved_filter_content_type
+
+                resolve_saved_filter_content_type(model)
+            entry = request.user.add_saved_filter(
+                name=data.get("name", ""),
+                model=model,
+                properties=data.get("properties", {}),
+                shared_id=data.get("shared_id"),
+            )
+            return Response(entry, status=status.HTTP_201_CREATED)
+        return Response(request.user.get_saved_filters())
+
+    @action(
+        detail=False,
+        methods=["patch", "delete"],
+        url_path=r"personal/(?P<filter_id>[^/.]+)",
+    )
+    def personal_detail(self, request, filter_id=None):
+        if request.method == "DELETE":
+            request.user.delete_saved_filter(filter_id)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        try:
+            entry = request.user.update_saved_filter(
+                filter_id,
+                **{k: v for k, v in request.data.items() if k in ("name", "properties")},
+            )
+        except ValueError:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(entry)
+
+
 class FilteringLabelViewSet(BaseModelViewSet):
     """
     API endpoint that allows labels to be viewed or edited.
