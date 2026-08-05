@@ -352,9 +352,7 @@ class ImportDocumentWorkflow(Workflow):
         from core.models import RiskMatrix
         from iam.models import Folder, RoleAssignment
 
-        (view_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), ctx.request.user, RiskMatrix
-        )
+        view_ids = RoleAssignment.get_viewable_object_ids(ctx.request.user, RiskMatrix)
         return [
             {"id": str(row["id"]), "name": row["name"]}
             for row in RiskMatrix.objects.filter(id__in=view_ids, is_enabled=True)
