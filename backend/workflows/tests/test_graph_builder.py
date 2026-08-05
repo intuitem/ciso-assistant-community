@@ -380,6 +380,101 @@ class TestPublish:
         codes = {e["code"] for e in resp.data["errors"]}
         assert "dead_end" in codes
 
+    def test_stop_node_cannot_be_followed(self, workflow, superuser):
+        """end_has_outgoing is load-bearing now: it is what guarantees stop
+        nodes are leaves, which the dead_end rule relies on."""
+        from workflows.models import WorkflowEdge, WorkflowNode
+        from workflows.validation import validate_graph
+
+        version = workflow.draft_version
+        _put_graph(version, _minimal_graph(), superuser)
+        stop = version.nodes.get(type=WorkflowNode.Type.END)
+        trailing = WorkflowNode.objects.create(
+            version=version, type=WorkflowNode.Type.ACTION, label="After the stop"
+        )
+        WorkflowEdge.objects.create(
+            version=version, source_node=stop, target_node=trailing
+        )
+        codes = {e["code"] for e in validate_graph(version)}
+        assert "end_has_outgoing" in codes
+
+    def test_all_condition_branches_may_be_leaves(self, workflow, superuser):
+        """Every branch of a decision can simply stop, with no stop node."""
+        version = workflow.draft_version
+        trigger, gate, yes, no = (str(uuid.uuid4()) for _ in range(4))
+        var, match_branch, default_branch = (str(uuid.uuid4()) for _ in range(3))
+        graph = {
+            "nodes": [
+                {
+                    "id": trigger,
+                    "type": "trigger",
+                    "trigger_config": {"type": "manual"},
+                    "input_mapping": {"decision": "decision"},
+                    "position": {"x": 0, "y": 0},
+                },
+                {
+                    "id": gate,
+                    "type": "condition",
+                    "label": "Gate",
+                    "position": {"x": 200, "y": 0},
+                    "branches": [
+                        {
+                            "id": match_branch,
+                            "name": "yes",
+                            "order": 0,
+                            "is_default": False,
+                            "condition_groups": [
+                                {
+                                    "operator": "and",
+                                    "conditions": [
+                                        {"variable": var, "op": "eq", "value": "go"}
+                                    ],
+                                    "children": [],
+                                }
+                            ],
+                        },
+                        {
+                            "id": default_branch,
+                            "name": "otherwise",
+                            "order": 1,
+                            "is_default": True,
+                            "condition_groups": [],
+                        },
+                    ],
+                },
+                {
+                    "id": yes,
+                    "type": "action",
+                    "action_config": {"type": "log"},
+                    "position": {"x": 400, "y": -60},
+                },
+                {
+                    "id": no,
+                    "type": "action",
+                    "action_config": {"type": "log"},
+                    "position": {"x": 400, "y": 60},
+                },
+            ],
+            "edges": [
+                {"id": str(uuid.uuid4()), "source": trigger, "target": gate},
+                {
+                    "id": str(uuid.uuid4()),
+                    "source": gate,
+                    "target": yes,
+                    "source_branch": match_branch,
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "source": gate,
+                    "target": no,
+                    "source_branch": default_branch,
+                },
+            ],
+            "variables": [{"id": var, "key": "decision", "type": "string"}],
+        }
+        assert _put_graph(version, graph, superuser).status_code == 200
+        assert _publish(version, superuser).status_code == 200
+
     def test_unreachable_node_fails_validation(self, workflow, superuser):
         version = workflow.draft_version
         graph = _minimal_graph()

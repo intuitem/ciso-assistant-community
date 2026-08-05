@@ -523,6 +523,10 @@ class TestTermination:
         # "Done" is on the loop's done port, never reached after a terminate.
         assert "Done" not in entered
         assert instance.logs.filter(event_type="run_terminated").exists()
+        # _loop_finish never runs, so the loop publishes no output at all.
+        # Documented consequence: {{nodes.<loop>.results}} is absent downstream.
+        loop_ref = version.nodes.get(label="Per item").ref
+        assert loop_ref not in instance.node_outputs
         assert not instance.tokens.filter(
             status__in=[
                 WorkflowToken.Status.ACTIVE,
@@ -556,6 +560,157 @@ class TestTermination:
         )
         instance = start_instance(version)
         assert instance.status == WorkflowInstance.Status.FAILED
+
+    def test_linear_flow_with_no_end_node_completes(self):
+        # No end node anywhere: the last step is simply unwired.
+        _, version = make_workflow()
+        start = node("trigger", trigger_config={"type": "manual"})
+        only = node("action", label="Only", action_config={"type": "log"})
+        save_graph(
+            version,
+            {"nodes": [start, only], "edges": [edge(start, only)], "variables": []},
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert not instance.logs.filter(event_type="run_terminated").exists()
+
+    def test_terminate_message_counts_cancelled_branches(self):
+        # The log line is the only place an operator sees what was cut off, so
+        # pin the arithmetic, and pin that a lone branch says nothing about it.
+        _, version = make_workflow()
+        start = node("trigger", trigger_config={"type": "manual"})
+        fork = node("action", label="Fork", action_config={"type": "log"})
+        slow = node("action", label="Slow", action_config={"type": "log"})
+        slower = node("action", label="Slower", action_config={"type": "log"})
+        halt = node("end", label="Stop")
+        save_graph(
+            version,
+            {
+                "nodes": [start, fork, slow, slower, halt],
+                "edges": [
+                    edge(start, fork),
+                    edge(fork, slow),
+                    edge(fork, halt),
+                    edge(slow, slower),
+                ],
+                "variables": [],
+            },
+        )
+        instance = start_instance(version)
+        message = instance.logs.get(event_type="run_terminated").message
+        assert "1 running branch(es) cancelled" in message
+
+        # Single-token run: nothing to cancel, so no suffix.
+        _, solo = make_workflow("Solo stop")
+        s2 = node("trigger", trigger_config={"type": "manual"})
+        h2 = node("end", label="Stop")
+        save_graph(solo, {"nodes": [s2, h2], "edges": [edge(s2, h2)], "variables": []})
+        solo_instance = start_instance(solo)
+        assert (
+            solo_instance.logs.get(event_type="run_terminated").message == "Run stopped"
+        )
+
+    def test_two_end_nodes_terminate_once(self):
+        # Racing stop nodes: the first consumes the second's token, so the run
+        # is terminated exactly once.
+        _, version = make_workflow()
+        start = node("trigger", trigger_config={"type": "manual"})
+        fork = node("action", label="Fork", action_config={"type": "log"})
+        halt_a = node("end", label="Stop A")
+        halt_b = node("end", label="Stop B")
+        save_graph(
+            version,
+            {
+                "nodes": [start, fork, halt_a, halt_b],
+                "edges": [edge(start, fork), edge(fork, halt_a), edge(fork, halt_b)],
+                "variables": [],
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert instance.logs.filter(event_type="run_terminated").count() == 1
+
+    def test_terminate_consumes_a_parked_token_that_cannot_be_revived(self):
+        # A branch parked on an event is consumed by the stop, and a later wake
+        # attempt must not resurrect it (resume_token re-checks under the lock).
+        from workflows.engine import resume_token
+
+        _, version = make_workflow()
+        start = node("trigger", trigger_config={"type": "manual"})
+        fork = node("action", label="Fork", action_config={"type": "log"})
+        waiter = node("event", label="Waiter", event_key="never")
+        after = node("action", label="After wake", action_config={"type": "log"})
+        halt = node("end", label="Stop")
+        save_graph(
+            version,
+            {
+                "nodes": [start, fork, waiter, after, halt],
+                # Waiter edge first so it parks before the stop branch runs.
+                "edges": [
+                    edge(start, fork),
+                    edge(fork, waiter),
+                    edge(fork, halt),
+                    edge(waiter, after),
+                ],
+                "variables": [],
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        parked = instance.tokens.get(current_node__label="Waiter")
+        assert parked.status == WorkflowToken.Status.CONSUMED
+
+        log_count = instance.logs.count()
+        resume_token(parked)
+        parked.refresh_from_db()
+        instance.refresh_from_db()
+        assert parked.status == WorkflowToken.Status.CONSUMED
+        assert instance.logs.count() == log_count
+        assert not instance.logs.filter(
+            event_type="node_entered", node__label="After wake"
+        ).exists()
+
+    def test_terminate_consumes_a_retrying_token(self):
+        # A branch waiting on a delayed retry is consumed too, so the pending
+        # Huey task finds nothing to do.
+        _, version = make_workflow()
+        start = node("trigger", trigger_config={"type": "manual"})
+        fork = node("action", label="Fork", action_config={"type": "log"})
+        flaky = node(
+            "action",
+            label="Flaky",
+            action_config={
+                "type": "create_object",
+                "model": "nonexistent_model",
+                "fields": {"name": "x"},
+            },
+            retry_max_attempts=3,
+            retry_delay_seconds=600,
+        )
+        halt = node("end", label="Stop")
+        save_graph(
+            version,
+            {
+                "nodes": [start, fork, flaky, halt],
+                # Flaky first so it is RETRYING by the time the stop runs.
+                "edges": [edge(start, fork), edge(fork, flaky), edge(fork, halt)],
+                "variables": [],
+            },
+        )
+        instance = start_instance(version)
+        retrying = instance.tokens.get(current_node__label="Flaky")
+        assert retrying.status == WorkflowToken.Status.CONSUMED
+        # Mirrors the filter in tasks.retry_token_task: nothing left to retry.
+        assert not WorkflowToken.objects.filter(
+            id=retrying.id, status=WorkflowToken.Status.RETRYING
+        ).exists()
+        assert not instance.tokens.filter(
+            status__in=[
+                WorkflowToken.Status.ACTIVE,
+                WorkflowToken.Status.WAITING,
+                WorkflowToken.Status.RETRYING,
+            ]
+        ).exists()
 
 
 @pytest.mark.django_db
@@ -742,6 +897,85 @@ class TestSubprocess:
         assert child_instance.status == WorkflowInstance.Status.ABANDONED
         assert not child_instance.tokens.filter(
             status=WorkflowToken.Status.WAITING
+        ).exists()
+
+    def _publish_child_calling(self, target_wf):
+        """A published workflow whose own body calls another workflow, so a
+        parent/child/grandchild chain can be built."""
+        wf = Workflow.objects.create(
+            name=f"Mid {uuid.uuid4()}", folder=Folder.get_root_folder()
+        )
+        version = WorkflowVersion.objects.create(workflow=wf)
+        trig = node("trigger", trigger_config={"type": "manual"})
+        sub = node("subprocess", subprocess_workflow=str(target_wf.id))
+        save_graph(
+            version,
+            {"nodes": [trig, sub], "edges": [edge(trig, sub)], "variables": []},
+        )
+        version.publish(publisher_user())
+        return wf
+
+    def _parent_stopping_beside(self, *subprocess_targets):
+        """trigger -> fork -> [one subprocess branch per target, plus a stop]."""
+        _, pv = make_workflow(f"Stopping parent {uuid.uuid4()}")
+        trig = node("trigger", trigger_config={"type": "manual"})
+        fork = node("action", label="Fork", action_config={"type": "log"})
+        subs = [
+            node(
+                "subprocess",
+                label=f"Call {index}",
+                subprocess_workflow=str(target.id),
+            )
+            for index, target in enumerate(subprocess_targets)
+        ]
+        halt = node("end", label="Stop")
+        save_graph(
+            pv,
+            {
+                "nodes": [trig, fork, *subs, halt],
+                # Subprocess branches first, so they have started (and possibly
+                # parked) before the stop branch runs.
+                "edges": [
+                    edge(trig, fork),
+                    *[edge(fork, sub) for sub in subs],
+                    edge(fork, halt),
+                ],
+                "variables": [],
+            },
+        )
+        return pv
+
+    def test_cascade_leaves_finished_children_alone(self):
+        # Only children still running are cut short: one that already completed
+        # must keep its COMPLETED status.
+        finished = self._publish_child()
+        parked = self._publish_child(event_key="go")
+        pv = self._parent_stopping_beside(finished, parked)
+        instance = start_instance(pv)
+
+        by_workflow = {
+            child.version.workflow_id: child for child in instance.children.all()
+        }
+        assert by_workflow[finished.id].status == WorkflowInstance.Status.COMPLETED
+        assert by_workflow[parked.id].status == WorkflowInstance.Status.ABANDONED
+
+    def test_cascade_reaches_grandchildren(self):
+        # _abandon_children recurses: a parked grandchild is abandoned too.
+        grandchild = self._publish_child(event_key="go")
+        middle = self._publish_child_calling(grandchild)
+        pv = self._parent_stopping_beside(middle)
+        instance = start_instance(pv)
+
+        child_instance = instance.children.get()
+        grandchild_instance = child_instance.children.get()
+        assert child_instance.status == WorkflowInstance.Status.ABANDONED
+        assert grandchild_instance.status == WorkflowInstance.Status.ABANDONED
+        assert not grandchild_instance.tokens.filter(
+            status__in=[
+                WorkflowToken.Status.ACTIVE,
+                WorkflowToken.Status.WAITING,
+                WorkflowToken.Status.RETRYING,
+            ]
         ).exists()
 
     def test_child_terminate_does_not_stop_the_parent(self):

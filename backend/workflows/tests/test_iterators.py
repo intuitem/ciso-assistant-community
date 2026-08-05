@@ -465,6 +465,63 @@ class TestLoopNode:
             ["member c"],
         ]
 
+    def test_stop_inside_an_inner_loop_kills_both_controllers(self):
+        """Terminating from the innermost body consumes every parked controller,
+        so neither loop resumes (spec D35)."""
+        domain = make_domain("Nested stop domain")
+        workflow = Workflow.objects.create(name="Nested stop", folder=domain)
+        version = WorkflowVersion.objects.create(
+            workflow=workflow, run_as=publisher_user()
+        )
+        trigger = node(
+            "trigger",
+            trigger_config={"type": "manual"},
+            input_mapping={"groups": "groups"},
+        )
+        outer = node("loop", label="Outer", loop_config={"collection": "{{groups}}"})
+        inner = node(
+            "loop", label="Inner", loop_config={"collection": "{{item.members}}"}
+        )
+        halt = node("end", label="Stop")
+        after = node("action", label="After", action_config={"type": "log"})
+        save_graph(
+            version,
+            {
+                "nodes": [trigger, outer, inner, halt, after],
+                "edges": [
+                    edge(trigger, outer),
+                    edge(outer, inner, source_port="each"),
+                    # First item of the first group stops the whole run.
+                    edge(inner, halt, source_port="each"),
+                    edge(inner, outer, source_port="done"),
+                    edge(outer, after, source_port="done"),
+                ],
+                "variables": [
+                    {"id": str(uuid.uuid4()), "key": "groups", "type": "string"}
+                ],
+            },
+        )
+        instance = start_instance(
+            version,
+            payload={"groups": [{"members": ["a", "b"]}, {"members": ["c"]}]},
+        )
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        from workflows.models import WorkflowToken
+
+        assert not instance.tokens.filter(
+            status__in=[
+                WorkflowToken.Status.ACTIVE,
+                WorkflowToken.Status.WAITING,
+                WorkflowToken.Status.RETRYING,
+            ]
+        ).exists()
+        # Neither loop reached its done port.
+        assert not instance.logs.filter(
+            event_type="node_entered", node__label="After"
+        ).exists()
+        assert not instance.logs.filter(event_type="loop_completed").exists()
+        assert instance.logs.filter(event_type="run_terminated").count() == 1
+
 
 @pytest.mark.django_db
 class TestLoopValidation:
@@ -483,6 +540,9 @@ class TestLoopValidation:
     def test_valid_loop_passes(self):
         codes = self._codes(lambda version: None)
         assert not any(code.startswith("loop") for code in codes)
+        # A loop is a legitimate cycle: the back edge must not read as a graph
+        # that can never finish (guards the leaf-based dead_end rule, spec D35).
+        assert "dead_end" not in codes
 
     def test_missing_collection(self):
         def mutate(version):
