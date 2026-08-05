@@ -4458,6 +4458,7 @@
 	"workshopThree": "Atelier 3",
 	"workshopTwo": "Atelier 2",
 	"cascadeDeleteWarning": "Attention : La suppression de cet élément entraînera également la suppression définitive de {count} objet(s) associé(s) :",
+	"cascadeBlockedWarning": "Suppression impossible : {count} objet(s) y font encore référence. Supprimez-les ou rattachez-les ailleurs au préalable.",
 	"errorFetching": "Impossible de charger les informations de cascade. Veuillez réessayer.",
 	"cascadeAffectedNotice": [
 		{
@@ -5669,5 +5670,16 @@
 	"record": "Enregistrement",
 	"unpublishedDocumentsNotice": "{count} document(s) rédigé(s) mais pas encore publié(s) — visibles dans la vue de gestion.",
 	"authored": "Rédigé",
-	"uploaded": "Téléversé"
+	"uploaded": "Téléversé",
+	"selectAnOption": "Sélectionner une option",
+	"assetClasses": "Classes d'actifs",
+	"parentAssetClass": "Classe parente",
+	"errorAssetClassGraphMustNotContainCycles": "L'arborescence des classes d'actifs ne doit pas contenir de boucles.",
+	"builtinAssetClassHelpText": "Les classes natives sont fournies avec le produit : elles peuvent être masquées, mais ni renommées ni supprimées.",
+	"hiddenAssetClassHelpText": "Les classes masquées restent listées ici mais ne sont plus proposées lors de la classification d'un actif.",
+	"assetsTree": "Actifs par classe",
+	"unclassifiedAssets": "Non classés",
+	"hideEmptyClasses": "Masquer les classes vides",
+	"loadMoreAssets": "Charger plus",
+	"noAssetsInClass": "Aucun actif directement dans cette classe."
 }

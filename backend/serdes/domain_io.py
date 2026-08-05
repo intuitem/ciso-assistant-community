@@ -33,6 +33,7 @@ from rest_framework.exceptions import PermissionDenied
 from core.models import (
     AppliedControl,
     Asset,
+    AssetClass,
     ComplianceAssessment,
     Evidence,
     EvidenceRevision,
@@ -369,6 +370,25 @@ def import_terminologies(
     if single_value:
         return result_qs.first()
     return result_qs
+
+
+def import_asset_class(full_path: str | None) -> AssetClass | None:
+    """Resolve a canonical asset class path, creating any missing segment."""
+    if not full_path or not isinstance(full_path, str):
+        return None
+
+    segments = [part.strip() for part in full_path.split("/") if part.strip()]
+    if not segments:
+        return None
+
+    parent = None
+    for segment in segments:
+        parent, _ = AssetClass.objects.get_or_create(
+            name=segment,
+            parent=parent,
+            defaults={"builtin": False, "is_visible": True},
+        )
+    return parent
 
 
 def import_objects(
@@ -757,6 +777,7 @@ def process_model_relationships(
             many_to_many_map_ids["parent_ids"] = get_mapped_ids(
                 _fields.pop("parent_assets", []), link_dump_database_ids
             )
+            _fields["asset_class"] = import_asset_class(_fields.get("asset_class"))
 
         case "riskassessment":
             _fields["perimeter"] = Perimeter.objects.filter(

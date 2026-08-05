@@ -1142,6 +1142,24 @@ export const ASSET_CLASS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const ASSET_CLASS_IS_VISIBLE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'is_visible',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
+const ASSET_CLASS_BUILTIN_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'builtin',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
 const ASSET_IS_BUSINESS_FUNCTION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1884,8 +1902,19 @@ export const listViewFields = {
 		}
 	},
 	'asset-class': {
-		head: ['name', 'description'],
-		body: ['name', 'description']
+		head: ['name', 'parentAssetClass', 'description', 'translations', 'isVisible', 'builtin'],
+		body: [
+			'translated_name',
+			'parent',
+			'translated_description',
+			'translations',
+			'is_visible',
+			'builtin'
+		],
+		filters: {
+			is_visible: ASSET_CLASS_IS_VISIBLE_FILTER,
+			builtin: ASSET_CLASS_BUILTIN_FILTER
+		}
 	},
 	users: {
 		head: [

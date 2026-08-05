@@ -2,6 +2,7 @@ import csv
 import io
 import logging
 import structlog
+from functools import cached_property
 from pathlib import Path
 from types import MappingProxyType
 import re
@@ -19,6 +20,7 @@ from core.models import (
     Actor,
     Assessment,
     Asset,
+    AssetClass,
     ComplianceAssessment,
     Evidence,
     Folder,
@@ -385,6 +387,26 @@ def _parse_recovery_objectives(raw: str) -> dict:
         if secs is not None and secs >= 0:
             result[key] = {"value": secs}
     return result
+
+
+def _resolve_asset_class(value: Any, path_index: dict) -> Optional[AssetClass]:
+    """Resolve a canonical asset class path, or an unambiguous leaf name."""
+    if not isinstance(value, str):
+        return None
+    token = value.strip()
+    if not token:
+        return None
+
+    normalized = "/".join(part.strip() for part in token.split("/") if part.strip())
+    match = path_index.get(normalized.lower())
+    if match is not None:
+        return match
+
+    leaf = normalized.split("/")[-1]
+    candidates = [
+        node for key, node in path_index.items() if key.split("/")[-1] == leaf.lower()
+    ]
+    return candidates[0] if len(candidates) == 1 else None
 
 
 def _resolve_filtering_labels(value: Any) -> list[UUID]:
@@ -997,6 +1019,7 @@ class AssetRecordConsumer(RecordConsumer[list]):
         {
             "reference_link": ["reference_link", "link"],
             "filtering_labels": ["filtering_labels", "labels", "étiquette", "label"],
+            "asset_class": ["asset_class", "class", "classe"],
         }
     )
     TYPE_MAP: Final[dict[str, str]] = {
@@ -1005,6 +1028,10 @@ class AssetRecordConsumer(RecordConsumer[list]):
         "support": "SP",
         "sp": "SP",
     }
+
+    @cached_property
+    def asset_class_index(self) -> dict:
+        return AssetClass.path_index()
 
     def create_context(self):
         return _get_security_objective_scale(), None
@@ -1081,6 +1108,16 @@ class AssetRecordConsumer(RecordConsumer[list]):
             parse_warning_msgs.append(
                 f"Could not parse disaster_recovery_objectives: '{raw_rec}'"
             )
+
+        raw_asset_class = (
+            record.get("asset_class") or record.get("class") or record.get("classe")
+        )
+        if raw_asset_class:
+            asset_class = _resolve_asset_class(raw_asset_class, self.asset_class_index)
+            if asset_class is not None:
+                data["asset_class"] = asset_class.id
+            else:
+                parse_warning_msgs.append(f"Unknown asset_class: '{raw_asset_class}'")
 
         if asset_type == "PR":
             if sec_objectives:
