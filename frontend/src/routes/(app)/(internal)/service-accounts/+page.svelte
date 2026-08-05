@@ -59,8 +59,6 @@
 		modalStore.trigger(modal);
 	}
 
-	// The create action returns the written object, which carries the one-time
-	// client_secret. Show it once, after the create modal has closed.
 	let displayedSecretForId = $state('');
 	$effect(() => {
 		const object = (form as Record<string, any> | null)?.form?.message?.object;
@@ -70,10 +68,6 @@
 		}
 	});
 
-	// Service accounts are gated behind IsGlobalAdmin, not the folder-scoped
-	// RBAC permission catalog, so ModelTable's generic canPerformAction check
-	// never sees change_serviceaccount/delete_serviceaccount and hides the
-	// built-in row actions. Render our own, gated on isAdmin instead.
 	function modalConfirmDelete(row: Record<string, any>): void {
 		const modalComponent: ModalComponent = {
 			ref: DeleteConfirmModal,

@@ -1930,7 +1930,9 @@ export const IdPGroupSchema = z.object({
 export const ServiceAccountSchema = z.object({
 	name: z.string().min(1).max(100),
 	description: z.string().optional().nullable(),
-	permissions: z.array(z.number()),
+	authorization_mode: z.enum(['role', 'custom']).default('custom'),
+	permissions: z.array(z.number()).optional(),
+	role: z.string().uuid().optional().nullable(),
 	perimeter_folders: z.array(z.string().uuid()).min(1),
 	is_recursive: z.boolean().default(false),
 	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()

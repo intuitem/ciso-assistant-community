@@ -1,12 +1,3 @@
-"""DRF authentication for OAuth2 service accounts.
-
-Service accounts authenticate with the client_credentials grant against the
-allauth OIDC IdP token endpoint. The resulting access tokens carry no user
-(client_credentials has no resource owner), so this class maps the token's
-client to its ServiceAccount and authenticates the request as the service
-account's dedicated user, letting the regular RBAC machinery apply.
-"""
-
 from allauth.idp.oidc.contrib.rest_framework.authentication import (
     TokenAuthentication as OIDCTokenAuthentication,
 )

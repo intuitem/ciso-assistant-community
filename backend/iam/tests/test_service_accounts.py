@@ -1,10 +1,4 @@
-"""Service accounts: OAuth2 client_credentials via the allauth OIDC IdP.
-
-Covers provisioning (User + Client + Role + RoleAssignment bundle), the
-token flow against the real allauth token endpoint, RBAC scoping through
-the SA's role assignment, lifecycle (deactivate/rotate/delete), and the
-exclusion of SA artifacts from user-facing surfaces.
-"""
+"""Service accounts: provisioning, token flow, RBAC scoping, and lifecycle."""
 
 from datetime import timedelta
 
@@ -19,6 +13,7 @@ from django.contrib.auth.models import Permission
 from django.utils import timezone
 from global_settings.models import GlobalSettings
 from iam.models import Folder, Role, RoleAssignment, ServiceAccount, User, UserGroup
+from iam.service_accounts import get_selectable_permissions
 
 TOKEN_ENDPOINT = "/api/identity/o/api/token"
 SA_ENDPOINT = "/api/iam/service-accounts/"
@@ -119,9 +114,18 @@ class TestServiceAccountProvisioning:
         assert ra is not None
         assert list(ra.perimeter_folders.all()) == [domain_folder]
 
+        # secret is prefixed, and only a short, non-reversible preview is persisted
+        assert payload["client_secret"].startswith(ServiceAccount.SECRET_PREFIX)
+        assert sa.secret_preview == payload["secret_preview"]
+        assert sa.secret_preview.startswith(
+            payload["client_secret"][: len(ServiceAccount.SECRET_PREFIX) + 3]
+        )
+        assert sa.secret_preview != payload["client_secret"]
+
         # secret never appears on subsequent reads
         detail = admin_client.get(f"{SA_ENDPOINT}{payload['id']}/").json()
         assert "client_secret" not in detail
+        assert detail["secret_preview"] == sa.secret_preview
 
     def test_create_requires_admin(self, app_config, domain_folder):
         user = User.objects.create_user(email="plain@sa-tests.com", password="x")
@@ -172,6 +176,20 @@ class TestServiceAccountProvisioning:
         assert "viewFolder" in {entry["normalized_codename"] for entry in entries}
         assert not any(entry["codename"].endswith("_role") for entry in entries)
         assert not any("serviceaccount" in entry["codename"] for entry in entries)
+
+    def test_builtin_roles_lists_selectable_permissions_only(self, admin_client):
+        response = admin_client.get(f"{SA_ENDPOINT}roles/")
+        assert response.status_code == 200
+        roles = response.json()
+        assert roles
+        names = {r["name"] for r in roles}
+        assert any("permissions" in r for r in roles)
+        assert all(isinstance(r["permissions"], list) for r in roles)
+
+        all_ids = {p for r in roles for p in r["permissions"]}
+        selectable_ids = set(get_selectable_permissions().values_list("id", flat=True))
+        assert all_ids <= selectable_ids
+        assert names  # at least the seeded builtin roles are present
 
     def test_create_rejects_duplicate_name(self, admin_client, domain_folder):
         _create_sa(admin_client, domain_folder, name="dup-name")
@@ -295,8 +313,14 @@ class TestServiceAccountTokenFlow:
             f"{SA_ENDPOINT}{payload['id']}/rotate-secret/", format="json"
         )
         assert response.status_code == 200
-        new_secret = response.json()["client_secret"]
+        rotate_payload = response.json()
+        new_secret = rotate_payload["client_secret"]
         assert new_secret != old_secret
+
+        # preview is refreshed to reflect the new secret
+        sa = ServiceAccount.objects.get(id=payload["id"])
+        assert sa.secret_preview == rotate_payload["secret_preview"]
+        assert sa.secret_preview != payload["secret_preview"]
 
         assert _fetch_token(payload["client_id"], old_secret).status_code in (400, 401)
         assert _fetch_token(payload["client_id"], new_secret).status_code == 200
@@ -309,7 +333,7 @@ class TestServiceAccountTokenFlow:
 
         response = admin_client.post(
             f"{SA_ENDPOINT}{payload['id']}/rotate-secret/",
-            {"grace_period_minutes": 60},
+            {"grace_period_days": 1},
             format="json",
         )
         assert response.status_code == 200
@@ -333,18 +357,18 @@ class TestServiceAccountTokenFlow:
         payload = _create_sa(admin_client, domain_folder)
         response = admin_client.post(
             f"{SA_ENDPOINT}{payload['id']}/rotate-secret/",
-            {"grace_period_minutes": 7 * 24 * 60},
+            {"grace_period_days": 7},
             format="json",
         )
         assert response.status_code == 200, response.content
 
     def test_rotate_secret_grace_period_capped(self, admin_client, domain_folder):
-        from iam.views import MAX_GRACE_PERIOD_MINUTES
+        from iam.views import MAX_GRACE_PERIOD_DAYS
 
         payload = _create_sa(admin_client, domain_folder)
         response = admin_client.post(
             f"{SA_ENDPOINT}{payload['id']}/rotate-secret/",
-            {"grace_period_minutes": MAX_GRACE_PERIOD_MINUTES + 1},
+            {"grace_period_days": MAX_GRACE_PERIOD_DAYS + 1},
             format="json",
         )
         assert response.status_code == 400
@@ -438,9 +462,7 @@ class TestServiceAccountExclusions:
         sa = ServiceAccount.objects.get(id=payload["id"])
         assert sa.role.permissions.count() == 0
 
-        # the account can still authenticate (it's not deactivated), it just
-        # has no RBAC grants left — list endpoints scope results rather than
-        # 403 outright, so the previously-visible folder now reads as empty
+        # still authenticates (not deactivated) but has no RBAC grants left
         assert (
             _fetch_token(payload["client_id"], payload["client_secret"]).status_code
             == 200
@@ -596,3 +618,248 @@ class TestServiceAccountExpiry:
         assert ok.is_active is False
         # ...and doesn't leave the failing one silently marked inactive either
         assert broken.is_active is True
+
+
+@pytest.mark.django_db
+class TestServiceAccountRoleLinked:
+    def _reader_role(self):
+        return Role.objects.get(name="BI-RL-AUD", builtin=True)
+
+    def test_create_with_role_links_live_permissions(self, admin_client, domain_folder):
+        role = self._reader_role()
+        response = admin_client.post(
+            SA_ENDPOINT,
+            {
+                "name": "role-linked",
+                "role": str(role.id),
+                "perimeter_folders": [str(domain_folder.id)],
+            },
+            format="json",
+        )
+        assert response.status_code == 201, response.content
+        payload = response.json()
+        assert payload["is_role_linked"] is True
+        assert payload["role_name"]
+
+        sa = ServiceAccount.objects.get(id=payload["id"])
+        assert sa.role_id == role.id
+
+        # a permission added to the shared role afterwards is immediately reflected
+        extra_perm = (
+            Permission.objects.exclude(
+                id__in=role.permissions.values_list("id", flat=True)
+            )
+            .filter(codename="view_perimeter")
+            .first()
+        )
+        role.permissions.add(extra_perm)
+        detail = admin_client.get(f"{SA_ENDPOINT}{payload['id']}/").json()
+        codenames = {p["codename"] for p in detail["permissions"]}
+        assert "view_perimeter" in codenames
+
+    def test_create_rejects_role_and_permissions_together(
+        self, admin_client, domain_folder
+    ):
+        role = self._reader_role()
+        response = admin_client.post(
+            SA_ENDPOINT,
+            {
+                "name": "both-given",
+                "role": str(role.id),
+                "permissions": _view_folder_permission_ids(),
+                "perimeter_folders": [str(domain_folder.id)],
+            },
+            format="json",
+        )
+        assert response.status_code == 400
+
+    def test_create_rejects_neither_role_nor_permissions(
+        self, admin_client, domain_folder
+    ):
+        response = admin_client.post(
+            SA_ENDPOINT,
+            {"name": "neither-given", "perimeter_folders": [str(domain_folder.id)]},
+            format="json",
+        )
+        assert response.status_code == 400
+
+    def test_create_rejects_non_builtin_role(self, admin_client, domain_folder):
+        custom_role = Role.objects.create(
+            name="not-builtin", folder=Folder.get_root_folder()
+        )
+        response = admin_client.post(
+            SA_ENDPOINT,
+            {
+                "name": "custom-role-rejected",
+                "role": str(custom_role.id),
+                "perimeter_folders": [str(domain_folder.id)],
+            },
+            format="json",
+        )
+        assert response.status_code == 400
+
+    def test_update_with_different_permissions_detaches_to_a_dedicated_role(
+        self, admin_client, domain_folder
+    ):
+        role = self._reader_role()
+        create_response = admin_client.post(
+            SA_ENDPOINT,
+            {
+                "name": "role-linked-2",
+                "role": str(role.id),
+                "perimeter_folders": [str(domain_folder.id)],
+            },
+            format="json",
+        )
+        payload = create_response.json()
+        new_permission_ids = _view_folder_permission_ids()
+
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"permissions": new_permission_ids},
+            format="json",
+        )
+        assert response.status_code == 200, response.content
+        assert response.json()["is_role_linked"] is False
+
+        sa = ServiceAccount.objects.get(id=payload["id"])
+        assert not sa.role.builtin
+        assert sa.role_id != role.id
+        assert set(sa.role.permissions.values_list("id", flat=True)) == set(
+            new_permission_ids
+        )
+        # the shared builtin role itself is untouched
+        assert Role.objects.get(id=role.id, builtin=True).permissions.exists()
+
+    def test_update_tolerates_resubmitting_the_roles_own_permissions(
+        self, admin_client, domain_folder
+    ):
+        role = self._reader_role()
+        create_response = admin_client.post(
+            SA_ENDPOINT,
+            {
+                "name": "role-linked-3",
+                "role": str(role.id),
+                "perimeter_folders": [str(domain_folder.id)],
+            },
+            format="json",
+        )
+        payload = create_response.json()
+        current_permission_ids = list(role.permissions.values_list("id", flat=True))
+
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"name": "role-linked-3-renamed", "permissions": current_permission_ids},
+            format="json",
+        )
+        assert response.status_code == 200, response.content
+        assert response.json()["name"] == "role-linked-3-renamed"
+
+    def test_update_can_switch_a_dedicated_account_to_role_linked(
+        self, admin_client, domain_folder
+    ):
+        role = self._reader_role()
+        payload = _create_sa(admin_client, domain_folder, name="dedicated-role")
+        old_role_id = ServiceAccount.objects.get(id=payload["id"]).role_id
+
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"role": str(role.id)},
+            format="json",
+        )
+        assert response.status_code == 200, response.content
+        assert response.json()["is_role_linked"] is True
+
+        sa = ServiceAccount.objects.get(id=payload["id"])
+        assert sa.role_id == role.id
+        assert not Role.objects.filter(id=old_role_id).exists()
+
+    def test_update_tolerates_a_stray_empty_permissions_list_alongside_role(
+        self, admin_client, domain_folder
+    ):
+        role = self._reader_role()
+        payload = _create_sa(admin_client, domain_folder, name="dedicated-role-2")
+
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"role": str(role.id), "permissions": []},
+            format="json",
+        )
+        assert response.status_code == 200, response.content
+        assert response.json()["is_role_linked"] is True
+
+    def test_update_can_switch_between_two_builtin_roles(
+        self, admin_client, domain_folder
+    ):
+        reader = self._reader_role()
+        approver = Role.objects.get(name="BI-RL-APP", builtin=True)
+        create_response = admin_client.post(
+            SA_ENDPOINT,
+            {
+                "name": "role-linked-4",
+                "role": str(reader.id),
+                "perimeter_folders": [str(domain_folder.id)],
+            },
+            format="json",
+        )
+        payload = create_response.json()
+
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"role": str(approver.id)},
+            format="json",
+        )
+        assert response.status_code == 200, response.content
+
+        sa = ServiceAccount.objects.get(id=payload["id"])
+        assert sa.role_id == approver.id
+        assert Role.objects.filter(id=reader.id, builtin=True).exists()
+
+    def test_delete_does_not_delete_shared_role(self, admin_client, domain_folder):
+        role = self._reader_role()
+        create_response = admin_client.post(
+            SA_ENDPOINT,
+            {
+                "name": "role-linked-delete",
+                "role": str(role.id),
+                "perimeter_folders": [str(domain_folder.id)],
+            },
+            format="json",
+        )
+        payload = create_response.json()
+        response = admin_client.delete(f"{SA_ENDPOINT}{payload['id']}/")
+        assert response.status_code == 204
+        assert Role.objects.filter(id=role.id, builtin=True).exists()
+
+    def test_role_assignment_exclusion_is_scoped_to_the_sa_user_not_the_role(
+        self, admin_client, domain_folder
+    ):
+        """RoleAssignmentViewSet excludes SA-owned assignments by user, not by
+        role, so a human sharing a role with a role-linked SA stays visible."""
+        role = self._reader_role()
+        human = User.objects.create_user(
+            email="human-reader@sa-tests.com", password="x"
+        )
+        human_assignment = RoleAssignment.objects.create(
+            user=human, role=role, folder=Folder.get_root_folder()
+        )
+        human_assignment.perimeter_folders.set([domain_folder])
+
+        create_response = admin_client.post(
+            SA_ENDPOINT,
+            {
+                "name": "role-linked-shared",
+                "role": str(role.id),
+                "perimeter_folders": [str(domain_folder.id)],
+            },
+            format="json",
+        )
+        sa = ServiceAccount.objects.get(id=create_response.json()["id"])
+
+        visible_ids = set(
+            RoleAssignment.objects.exclude(
+                user__service_account__isnull=False
+            ).values_list("id", flat=True)
+        )
+        assert human_assignment.id in visible_ids
+        assert sa.role_assignment.id not in visible_ids

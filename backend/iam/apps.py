@@ -83,13 +83,7 @@ class IamConfig(AppConfig):
         )
 
     def _patch_client_check_secret(self, ServiceAccount):
-        """Give service accounts a grace-period secret during rotation.
-
-        allauth's Client.check_secret is the single call site oauthlib uses
-        to authenticate the client_credentials grant — there's no adapter
-        hook or multi-secret support upstream, so the fallback to a
-        previous, not-yet-expired secret has to be patched in here.
-        """
+        """adapter hook for multi-secret/grace-period support."""
         from allauth.idp.oidc.models import Client
         from django.contrib.auth.hashers import check_password
         from django.utils import timezone

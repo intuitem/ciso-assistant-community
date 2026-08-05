@@ -136,6 +136,10 @@ export async function defaultWriteFormAction({
 		}
 	}
 
+	if (urlModel === 'service-accounts') {
+		normalizeServiceAccountAuthorization(form.data);
+	}
+
 	const endpoint = getEndpoint({ action, urlModel, event });
 	const model = getModelInfo(urlModel!);
 
@@ -199,6 +203,13 @@ export async function defaultWriteFormAction({
 		return message(form, { redirect: `/${urlModel}/${writtenObject.id}` });
 	}
 	return message(form, { object: writtenObject });
+}
+
+export function normalizeServiceAccountAuthorization(data: Record<string, any>): void {
+	const mode = data.authorization_mode;
+	delete data.authorization_mode;
+	if (mode === 'role') delete data.permissions;
+	else delete data.role;
 }
 
 export async function nestedWriteFormAction({

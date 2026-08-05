@@ -33,6 +33,7 @@ from core.models import Actor
 from .models import (
     Folder,
     PersonalAccessToken,
+    Role,
     RoleAssignment,
     SCIMToken,
     ServiceAccount,
@@ -611,18 +612,11 @@ class SCIMTokenDeleteView(views.APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# Grace-period rotation cap: a full month, well past any conceivable credential-rollout window.
-MAX_GRACE_PERIOD_MINUTES = 31 * 24 * 60
+MAX_GRACE_PERIOD_DAYS = 30
 
 
 class ServiceAccountViewSet(viewsets.ModelViewSet):
-    """
-    Admin-only management of OAuth2 service accounts.
-
-    Service accounts authenticate with the client_credentials grant against
-    the allauth OIDC token endpoint (/api/identity/o/api/token). The client
-    secret is returned exactly once, on creation and on rotation.
-    """
+    """Admin-only management of OAuth2 service accounts; secret is returned once, on create/rotate."""
 
     permission_classes = [
         permissions.IsAuthenticated,
@@ -643,7 +637,8 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
             service_account, plain_secret = provision_service_account(
                 name=data["name"],
                 description=data.get("description"),
-                permission_ids=data["permissions"],
+                permission_ids=data.get("permissions"),
+                role_id=data["role"].id if data.get("role") else None,
                 folder_ids=data["perimeter_folders"],
                 is_recursive=data["is_recursive"],
                 created_by=request.user,
@@ -671,6 +666,7 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
                     if "description" in data
                     else UNSET_FIELD,
                     permission_ids=data.get("permissions"),
+                    role_id=data["role"].id if data.get("role") else None,
                     folder_ids=data.get("perimeter_folders"),
                     is_recursive=data.get("is_recursive"),
                     expiry_date=data["expiry_date"]
@@ -703,26 +699,24 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
 
     def rotate_secret(self, request, pk=None):
         service_account = self.get_object()
-        grace_period_minutes = request.data.get("grace_period_minutes") or 0
+        grace_period_days = request.data.get("grace_period_days") or 0
         try:
-            grace_period_minutes = int(grace_period_minutes)
+            grace_period_days = int(grace_period_days)
         except TypeError, ValueError:
             return Response(
-                {"error": ["grace_period_minutes must be an integer"]},
+                {"error": ["grace_period_days must be an integer"]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if not 0 <= grace_period_minutes <= MAX_GRACE_PERIOD_MINUTES:
+        if not 0 <= grace_period_days <= MAX_GRACE_PERIOD_DAYS:
             return Response(
                 {
                     "error": [
-                        f"grace_period_minutes must be between 0 and {MAX_GRACE_PERIOD_MINUTES}"
+                        f"grace_period_days must be between 0 and {MAX_GRACE_PERIOD_DAYS}"
                     ]
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        grace_period = (
-            timedelta(minutes=grace_period_minutes) if grace_period_minutes else None
-        )
+        grace_period = timedelta(days=grace_period_days) if grace_period_days else None
         with transaction.atomic():
             plain_secret = service_account.rotate_secret(grace_period=grace_period)
         logger.info(
@@ -734,16 +728,30 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
             {
                 "client_id": service_account.client_id,
                 "client_secret": plain_secret,
+                "secret_preview": service_account.secret_preview,
             }
         )
 
     def permissions_catalog(self, request):
-        # Same serialization as the permissions endpoint used by custom roles,
-        # so both pickers display permissions identically.
-        # Deferred import: core.serializers pulls in ebios_rm.models, which
-        # circles back into iam at module-import time.
+        # Deferred: core.serializers -> ebios_rm.models circles back into iam at import time.
         from core.serializers import PermissionReadSerializer
 
         return Response(
             PermissionReadSerializer(get_selectable_permissions(), many=True).data
+        )
+
+    def builtin_roles(self, request):
+        selectable_ids = set(get_selectable_permissions().values_list("id", flat=True))
+        roles = Role.objects.filter(builtin=True).prefetch_related("permissions")
+        return Response(
+            [
+                {
+                    "id": str(role.id),
+                    "name": str(role),
+                    "permissions": [
+                        p.id for p in role.permissions.all() if p.id in selectable_ids
+                    ],
+                }
+                for role in roles
+            ]
         )

@@ -1720,18 +1720,13 @@ class SCIMToken(models.Model):
 
 
 class ServiceAccount(AbstractBaseModel):
-    """Machine principal authenticating via the OAuth2 client_credentials grant.
+    """Machine principal (OIDC Client + dedicated User/Role/RoleAssignment) authenticating via client_credentials."""
 
-    Composed of an allauth OIDC Client (credentials), a dedicated internal User
-    (RBAC identity, hidden from user-facing surfaces) and a dedicated Role
-    (explicit permissions) bound through a RoleAssignment on explicitly chosen
-    perimeter folders. Admin-managed; excluded from the RBAC permission catalog
-    via IGNORED_PERMISSION_MODELS.
-    """
+    SECRET_PREFIX = "ca_sa."
+    _SECRET_PREVIEW_VISIBLE_CHARS = 3
+    _SECRET_PREVIEW_MASK = "•" * 8
 
-    # Capped at 100 to match allauth's Client.name (copied into it verbatim
-    # on provision/rename) — Client.name isn't guarded by
-    # AbstractBaseModel._validate_char_max_lengths since it's a third-party model.
+    # Capped at 100 to match allauth's Client.name, which it's copied into verbatim.
     name = models.CharField(max_length=100, unique=True, verbose_name=_("Name"))
     description = models.TextField(blank=True, null=True)
     client = models.OneToOneField(
@@ -1744,10 +1739,10 @@ class ServiceAccount(AbstractBaseModel):
         on_delete=models.PROTECT,
         related_name="service_account",
     )
-    role = models.OneToOneField(
+    role = models.ForeignKey(
         Role,
         on_delete=models.PROTECT,
-        related_name="service_account",
+        related_name="service_accounts",
     )
     created_by = models.ForeignKey(
         User,
@@ -1764,6 +1759,7 @@ class ServiceAccount(AbstractBaseModel):
     )
     previous_secret_hash = models.CharField(max_length=200, null=True, blank=True)
     previous_secret_expires_at = models.DateTimeField(null=True, blank=True)
+    secret_preview = models.CharField(max_length=32, blank=True, default="")
 
     class Meta:
         verbose_name = _("Service account")
@@ -1776,6 +1772,15 @@ class ServiceAccount(AbstractBaseModel):
     @property
     def role_assignment(self) -> RoleAssignment | None:
         return RoleAssignment.objects.filter(user=self.user, role=self.role).first()
+
+    @classmethod
+    def generate_secret(cls) -> str:
+        return cls.SECRET_PREFIX + get_oidc_adapter().generate_client_secret()
+
+    @classmethod
+    def secret_preview_for(cls, secret: str) -> str:
+        visible = secret[: len(cls.SECRET_PREFIX) + cls._SECRET_PREVIEW_VISIBLE_CHARS]
+        return visible + cls._SECRET_PREVIEW_MASK
 
     def deactivate(self):
         """Block token issuance (no grant types) and revoke outstanding tokens."""
@@ -1796,22 +1801,21 @@ class ServiceAccount(AbstractBaseModel):
         self.user.save(update_fields=["is_active"])
 
     def rotate_secret(self, grace_period: timedelta | None = None) -> str:
-        """Set a fresh client secret and revoke outstanding tokens.
-
-        If grace_period is given, the current (soon-to-be-replaced) secret
-        keeps authenticating client_credentials requests until it expires —
-        see Client.check_secret's monkeypatch in apps.py, the only place
-        allauth checks a Client's secret. Returns the plaintext secret — the
-        only time it is available.
-        """
-        plain_secret = get_oidc_adapter().generate_client_secret()
+        plain_secret = self.generate_secret()
         if grace_period:
             self.previous_secret_hash = self.client.secret  # already hashed
             self.previous_secret_expires_at = timezone.now() + grace_period
         else:
             self.previous_secret_hash = None
             self.previous_secret_expires_at = None
-        self.save(update_fields=["previous_secret_hash", "previous_secret_expires_at"])
+        self.secret_preview = self.secret_preview_for(plain_secret)
+        self.save(
+            update_fields=[
+                "previous_secret_hash",
+                "previous_secret_expires_at",
+                "secret_preview",
+            ]
+        )
         self.client.set_secret(plain_secret)
         self.client.save(update_fields=["secret"])
         Token.objects.filter(client=self.client).delete()
@@ -1823,7 +1827,8 @@ class ServiceAccount(AbstractBaseModel):
             result = super().delete(*args, **kwargs)
             client.delete()  # cascades outstanding OIDC tokens
             user.delete()  # cascades the role assignment
-            role.delete()
+            if not role.builtin:
+                role.delete()
         return result
 
     def __str__(self):

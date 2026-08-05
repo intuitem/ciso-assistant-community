@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from core.serializer_fields import FieldsRelatedField
 
-from .models import PersonalAccessToken, ServiceAccount, User
+from .models import PersonalAccessToken, Role, ServiceAccount, User
 
 logger = structlog.get_logger(__name__)
 
@@ -109,6 +109,9 @@ class ServiceAccountReadSerializer(serializers.ModelSerializer):
     permissions = serializers.SerializerMethodField()
     perimeter_folders = serializers.SerializerMethodField()
     is_recursive = serializers.SerializerMethodField()
+    is_role_linked = serializers.BooleanField(source="role.builtin", read_only=True)
+    role_name = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
 
     class Meta:
         model = ServiceAccount
@@ -126,7 +129,17 @@ class ServiceAccountReadSerializer(serializers.ModelSerializer):
             "perimeter_folders",
             "is_recursive",
             "previous_secret_expires_at",
+            "secret_preview",
+            "is_role_linked",
+            "role_name",
+            "role",
         ]
+
+    def get_role_name(self, obj) -> str | None:
+        return str(obj.role) if obj.role.builtin else None
+
+    def get_role(self, obj) -> str | None:
+        return str(obj.role_id) if obj.role.builtin else None
 
     def get_permissions(self, obj) -> list[dict]:
         return [
@@ -164,7 +177,10 @@ class ServiceAccountWriteSerializer(serializers.Serializer):
         required=False, allow_blank=True, allow_null=True
     )
     permissions = serializers.ListField(
-        child=serializers.IntegerField(), allow_empty=True
+        child=serializers.IntegerField(), allow_empty=True, required=False
+    )
+    role = serializers.PrimaryKeyRelatedField(
+        queryset=Role.objects.filter(builtin=True), required=False, allow_null=True
     )
     perimeter_folders = serializers.ListField(
         child=serializers.UUIDField(), allow_empty=False
@@ -182,6 +198,21 @@ class ServiceAccountWriteSerializer(serializers.Serializer):
                 "A service account with this name already exists."
             )
         return value
+
+    def validate(self, attrs):
+        # role: null, and permissions: [], are both treated as "not given" —
+        # clients may resend either unset on every save.
+        has_role = attrs.get("role") is not None
+        has_permissions = bool(attrs.get("permissions"))
+        if has_role and has_permissions:
+            raise serializers.ValidationError(
+                "Provide either a role or permissions, not both."
+            )
+        if has_role:
+            attrs.pop("permissions", None)
+        if not self.partial and not has_role and not has_permissions:
+            raise serializers.ValidationError("Provide either a role or permissions.")
+        return attrs
 
 
 class DisableMFASerializer(serializers.Serializer):

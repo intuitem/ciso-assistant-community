@@ -43,13 +43,13 @@
 		modalStore.trigger(modal);
 	}
 
-	async function rotateSecret(gracePeriodMinutes: number): Promise<void> {
+	async function rotateSecret(gracePeriodDays: number): Promise<void> {
 		busy = true;
 		try {
 			const res = await fetch(`/service-accounts/${data.data.id}/rotate-secret`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ grace_period_minutes: gracePeriodMinutes })
+				body: JSON.stringify({ grace_period_days: gracePeriodDays })
 			});
 			if (res.ok) {
 				const result = await res.json();

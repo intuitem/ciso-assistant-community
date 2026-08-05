@@ -54,6 +54,11 @@ urlpatterns = [
         name="service-account-permissions",
     ),
     path(
+        "service-accounts/roles/",
+        ServiceAccountViewSet.as_view({"get": "builtin_roles"}),
+        name="service-account-roles",
+    ),
+    path(
         "service-accounts/<uuid:pk>/",
         ServiceAccountViewSet.as_view(
             {"get": "retrieve", "patch": "partial_update", "delete": "destroy"}

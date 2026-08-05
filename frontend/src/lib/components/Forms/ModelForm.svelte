@@ -503,7 +503,7 @@
 		{:else if URLModel === 'idp-groups'}
 			<IdpGroupForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} />
 		{:else if URLModel === 'service-accounts'}
-			<ServiceAccountForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} />
+			<ServiceAccountForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} {object} />
 		{:else if URLModel === 'risk-assessments'}
 			<RiskAssessmentForm
 				{form}

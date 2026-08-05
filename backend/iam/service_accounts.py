@@ -1,10 +1,4 @@
-"""Provisioning and update helpers for OAuth2 service accounts.
-
-A service account bundles an allauth OIDC Client (client_credentials only),
-a dedicated internal User, a dedicated Role holding the explicitly selected
-permissions, and a RoleAssignment scoping that role to explicitly chosen
-perimeter folders.
-"""
+"""Provisioning and update helpers for OAuth2 service accounts (see ServiceAccount model)."""
 
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
@@ -26,8 +20,7 @@ from iam.models import (
 
 SERVICE_ACCOUNT_EMAIL_DOMAIN = "service-accounts.local"
 
-# Distinguishes "expiry_date not sent in this partial update" (leave unchanged)
-# from "expiry_date sent as null" (clear it) — None is a valid target value.
+# Marks "field omitted" so it's distinguishable from "field sent as null".
 UNSET = object()
 
 
@@ -48,26 +41,34 @@ def _validated_permissions(permission_ids):
     return permissions
 
 
+def get_selectable_builtin_role(role_id) -> Role:
+    role = Role.objects.filter(id=role_id, builtin=True).first()
+    if role is None:
+        raise ValidationError("Invalid role selection.")
+    return role
+
+
 def provision_service_account(
     *,
     name: str,
     description: str | None,
-    permission_ids: list[int],
+    permission_ids: list[int] | None,
+    role_id=None,
     folder_ids: list,
     is_recursive: bool,
     created_by: User | None,
     expiry_date=None,
 ) -> tuple[ServiceAccount, str]:
-    """Create the full service account bundle. Returns (sa, plaintext_secret);
-    the secret is hashed at rest and can never be retrieved again."""
-    permissions = _validated_permissions(permission_ids)
+    """Returns (sa, plaintext_secret); exactly one of permission_ids/role_id is expected."""
+    role = get_selectable_builtin_role(role_id) if role_id is not None else None
+    permissions = _validated_permissions(permission_ids) if role is None else None
     folders = list(Folder.objects.filter(id__in=folder_ids))
     if len(folders) != len(set(folder_ids)) or not folders:
         raise ValidationError("Invalid perimeter folder selection.")
 
     adapter = get_oidc_adapter()
     client_id = adapter.generate_client_id()
-    plain_secret = adapter.generate_client_secret()
+    plain_secret = ServiceAccount.generate_secret()
     root_folder = Folder.get_root_folder()
 
     with transaction.atomic():
@@ -89,9 +90,10 @@ def provision_service_account(
         )
         client.set_secret(plain_secret)
         client.save()
-        role = Role.objects.create(name=f"SA-{client_id}", folder=root_folder)
-        role.permissions.set(permissions)
-        invalidate_roles_cache()
+        if role is None:
+            role = Role.objects.create(name=f"SA-{client_id}", folder=root_folder)
+            role.permissions.set(permissions)
+            invalidate_roles_cache()
         role_assignment = RoleAssignment.objects.create(
             user=user,
             role=role,
@@ -107,8 +109,32 @@ def provision_service_account(
             role=role,
             created_by=created_by,
             expiry_date=expiry_date,
+            secret_preview=ServiceAccount.secret_preview_for(plain_secret),
         )
     return service_account, plain_secret
+
+
+def _switch_role(service_account: ServiceAccount, new_role: Role) -> None:
+    old_role = service_account.role
+    role_assignment = RoleAssignment.objects.filter(user=service_account.user).first()
+    service_account.role = new_role
+    service_account.save(update_fields=["role"])
+    if role_assignment is not None:
+        role_assignment.role = new_role
+        role_assignment.save()
+    if not old_role.builtin:
+        old_role.delete()
+    invalidate_roles_cache()
+
+
+def _detach_to_dedicated_role(
+    service_account: ServiceAccount, permission_ids: list[int]
+) -> None:
+    new_role = Role.objects.create(
+        name=f"SA-{service_account.client_id}", folder=Folder.get_root_folder()
+    )
+    new_role.permissions.set(_validated_permissions(permission_ids))
+    _switch_role(service_account, new_role)
 
 
 def update_service_account(
@@ -117,6 +143,7 @@ def update_service_account(
     name: str | None = None,
     description=UNSET,
     permission_ids: list[int] | None = None,
+    role_id=None,
     folder_ids: list | None = None,
     is_recursive: bool | None = None,
     expiry_date=UNSET,
@@ -131,9 +158,22 @@ def update_service_account(
         if expiry_date is not UNSET:
             service_account.expiry_date = expiry_date
         service_account.save()
-        if permission_ids is not None:
-            service_account.role.permissions.set(_validated_permissions(permission_ids))
-            invalidate_roles_cache()
+        if role_id is not None:
+            new_role = get_selectable_builtin_role(role_id)
+            if new_role.id != service_account.role_id:
+                _switch_role(service_account, new_role)
+        elif permission_ids is not None:
+            if service_account.role.builtin:
+                current_ids = set(
+                    service_account.role.permissions.values_list("id", flat=True)
+                )
+                if set(permission_ids) != current_ids:
+                    _detach_to_dedicated_role(service_account, permission_ids)
+            else:
+                service_account.role.permissions.set(
+                    _validated_permissions(permission_ids)
+                )
+                invalidate_roles_cache()
         role_assignment = service_account.role_assignment
         if role_assignment is not None:
             if folder_ids is not None:

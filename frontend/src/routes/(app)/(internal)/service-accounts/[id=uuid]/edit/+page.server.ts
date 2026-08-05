@@ -1,4 +1,4 @@
-import { handleErrorResponse } from '$lib/utils/actions';
+import { handleErrorResponse, normalizeServiceAccountAuthorization } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { getSecureRedirect } from '$lib/utils/helpers';
@@ -17,8 +17,6 @@ export const load: PageServerLoad = async (event) => {
 	const model = getModelInfo(URLModel);
 	const schema = modelSchema(URLModel);
 
-	// The service accounts endpoint has no /object/ action: map the read shape
-	// (nested permissions and perimeter_folders) back to the write shape.
 	const endpoint = `${BASE_API_URL}/${model.endpointUrl}/${event.params.id}/`;
 	const res = await event.fetch(endpoint);
 	if (!res.ok) {
@@ -31,7 +29,11 @@ export const load: PageServerLoad = async (event) => {
 		permissions: serviceAccount.permissions?.map((permission: { id: number }) => permission.id),
 		perimeter_folders: serviceAccount.perimeter_folders?.map((folder: { id: string }) => folder.id),
 		is_recursive: serviceAccount.is_recursive,
-		expiry_date: serviceAccount.expiry_date
+		expiry_date: serviceAccount.expiry_date,
+		is_role_linked: serviceAccount.is_role_linked,
+		role_name: serviceAccount.role_name,
+		role: serviceAccount.role,
+		authorization_mode: serviceAccount.is_role_linked ? 'role' : 'custom'
 	};
 
 	const form = await superValidate(object, zod(schema), { errors: false });
@@ -53,6 +55,8 @@ export const actions: Actions = {
 			console.error(form.errors);
 			return message(form, { status: 400 });
 		}
+
+		normalizeServiceAccountAuthorization(form.data);
 
 		const model = getModelInfo(URLModel);
 		const endpoint = `${BASE_API_URL}/${model.endpointUrl}/${event.params.id}/`;

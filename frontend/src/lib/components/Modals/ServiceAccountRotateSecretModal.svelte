@@ -7,32 +7,23 @@
 	interface Props {
 		/** Exposes parent props to this component. */
 		parent: any;
-		onConfirm: (gracePeriodMinutes: number) => void;
+		onConfirm: (gracePeriodDays: number) => void;
 	}
 
 	let { parent, onConfirm }: Props = $props();
 
-	const MAX_GRACE_PERIOD_MINUTES = 31 * 24 * 60;
-	const UNIT_MINUTES: Record<string, number> = {
-		MINUTES: 1,
-		HOURS: 60,
-		DAYS: 24 * 60,
-		WEEKS: 7 * 24 * 60
-	};
+	const MAX_GRACE_PERIOD_DAYS = 30;
 
 	let hasGracePeriod = $state(false);
-	let interval = $state(1);
-	let unit = $state('HOURS');
+	let days = $state(1);
 
-	let gracePeriodMinutes = $derived(
-		hasGracePeriod ? Math.max(0, Math.round(interval)) * UNIT_MINUTES[unit] : 0
-	);
-	let tooLong = $derived(gracePeriodMinutes > MAX_GRACE_PERIOD_MINUTES);
+	let gracePeriodDays = $derived(hasGracePeriod ? Math.max(0, Math.round(days)) : 0);
+	let tooLong = $derived(gracePeriodDays > MAX_GRACE_PERIOD_DAYS);
 
 	function confirm() {
 		if (tooLong) return;
 		modalStore.close();
-		onConfirm(gracePeriodMinutes);
+		onConfirm(gracePeriodDays);
 	}
 
 	function cancel() {
@@ -59,20 +50,15 @@
 			</label>
 			{#if hasGracePeriod}
 				<div class="flex w-full items-center space-x-3">
-					<span class="font-semibold text-sm text-surface-950-50">{m.each()}</span>
 					<input
 						type="number"
 						min="1"
+						max={MAX_GRACE_PERIOD_DAYS}
 						class="input w-24"
-						bind:value={interval}
-						data-testid="grace-period-interval"
+						bind:value={days}
+						data-testid="grace-period-days"
 					/>
-					<select class="select" bind:value={unit} data-testid="grace-period-unit-select">
-						<option value="MINUTES">{m.minutes()}</option>
-						<option value="HOURS">{m.hours()}</option>
-						<option value="DAYS">{m.days()}</option>
-						<option value="WEEKS">{m.weeks()}</option>
-					</select>
+					<span class="font-semibold text-sm text-surface-950-50">{m.days()}</span>
 				</div>
 				{#if tooLong}
 					<p class="text-sm text-error-500">{m.gracePeriodTooLong()}</p>

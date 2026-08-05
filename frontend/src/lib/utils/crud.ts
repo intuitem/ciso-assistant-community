@@ -931,6 +931,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'client_id' },
+			{ field: 'secret_preview' },
 			{ field: 'is_active' },
 			{ field: 'expiry_date', type: 'date' },
 			{ field: 'is_recursive' },

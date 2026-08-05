@@ -7844,8 +7844,7 @@ class RoleAssignmentViewSet(BaseModelViewSet):
     filterset_fields = ["folder"]
 
     def get_queryset(self):
-        # Service account assignments are managed via /api/iam/service-accounts/.
-        return super().get_queryset().exclude(role__service_account__isnull=False)
+        return super().get_queryset().exclude(user__service_account__isnull=False)
 
 
 class FolderFilter(GenericFilterSet):

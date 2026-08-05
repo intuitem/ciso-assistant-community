@@ -281,8 +281,12 @@ class RoleViewSet(BaseModelViewSet):
     ]
 
     def get_queryset(self):
-        # Service account roles are internal; managed via /api/iam/service-accounts/.
-        return super().get_queryset().exclude(service_account__isnull=False)
+        # Hide only dedicated per-SA roles; a shared builtin role stays visible.
+        return (
+            super()
+            .get_queryset()
+            .exclude(service_accounts__isnull=False, builtin=False)
+        )
 
     def _get_default_permissions(self):
         return Permission.objects.filter(

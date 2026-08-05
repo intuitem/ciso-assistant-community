@@ -15,6 +15,7 @@
 	let { parent, clientId, clientSecret }: Props = $props();
 
 	let copiedField = $state('');
+	let secretRevealed = $state(false);
 
 	function handleCopy(field: string) {
 		copiedField = field;
@@ -75,13 +76,22 @@
 			<div class="flex flex-row gap-2 items-stretch">
 				<input
 					id="service-account-client-secret"
-					type="text"
+					type={secretRevealed ? 'text' : 'password'}
 					readonly
 					value={clientSecret}
 					class="input font-mono text-sm px-3 py-2 flex-1 select-all"
 					onfocus={(e) => e.currentTarget.select()}
 					data-testid="client-secret-value"
 				/>
+				<button
+					type="button"
+					class="btn preset-tonal-surface border border-surface-300-700 px-3"
+					onclick={() => (secretRevealed = !secretRevealed)}
+					aria-label={secretRevealed ? m.hide() : m.show()}
+					data-testid="toggle-client-secret-visibility"
+				>
+					<i class="fa-solid {secretRevealed ? 'fa-eye-slash' : 'fa-eye'}"></i>
+				</button>
 				<button
 					type="button"
 					class="btn preset-filled-primary-500 px-4"

@@ -834,9 +834,7 @@ SOCIALACCOUNT_PROVIDERS = {
     },
 }
 
-# OIDC identity provider (allauth.idp.oidc) — used for service account
-# client_credentials tokens. The private key signs id_tokens/jwks; access
-# tokens stay opaque (IDP_OIDC_ACCESS_TOKEN_FORMAT default).
+# Signs id_tokens/jwks only, access tokens stay opaque (default format).
 IDP_OIDC_PRIVATE_KEY = os.environ.get("IDP_OIDC_PRIVATE_KEY", "")
 if not IDP_OIDC_PRIVATE_KEY:
     _idp_oidc_key_path = Path(
