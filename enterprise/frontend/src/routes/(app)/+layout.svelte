@@ -4,7 +4,7 @@
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
 	import ThemeToggle from '$lib/components/ThemeToggle/ThemeToggle.svelte';
 	import ChatWidget from '$lib/components/ChatWidget/ChatWidget.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate, setUseRiskCategoryLabel } from '$lib/utils/i18n';
 	import { AppBar } from '@skeletonlabs/skeleton-svelte';
 	import '../../app.css';
 
@@ -146,6 +146,14 @@
 	import { interceptExternalLinks, setGlobalModalStore } from '$lib/utils/external-links';
 
 	const modalStore: ModalStore = getModalStore();
+
+	// Sync the qualification/risk-category wording flag before children render
+	// (hydration would otherwise flip labels back), then keep it in sync when
+	// settings are invalidated.
+	setUseRiskCategoryLabel(data?.settings?.use_risk_category_label);
+	$effect.pre(() => {
+		setUseRiskCategoryLabel(data?.settings?.use_risk_category_label);
+	});
 
 	const clientSettings = $derived($page.data.clientSettings);
 
