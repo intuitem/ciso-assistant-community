@@ -933,6 +933,18 @@
 				{/if}
 			</div>
 
+			{#if nodeDomain.type === 'end'}
+				<!-- The hazard is wiring several branches into one end node and
+					expecting them all to finish. Say what it does, and point at the
+					safe alternative right where the confusion happens. -->
+				<aside
+					class="flex gap-2 rounded-md border border-error-500 bg-error-50-950 p-2 text-xs text-error-700-300"
+				>
+					<i class="fa-solid fa-circle-stop mt-0.5"></i>
+					<span>{m.workflowNodeEndHint()}</span>
+				</aside>
+			{/if}
+
 			{#if nodeDomain.type !== 'end'}
 				<label>
 					{@render fieldLabel(m.nodeLabel())}

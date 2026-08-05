@@ -37,7 +37,7 @@
 		{ type: 'condition', icon: 'fa-code-branch', label: m.workflowNodeCondition() },
 		{ type: 'action', icon: 'fa-bolt', label: m.workflowNodeAction() },
 		{ type: 'loop', icon: 'fa-rotate', label: m.workflowNodeLoop() },
-		{ type: 'end', icon: 'fa-flag-checkered', label: m.workflowNodeEnd() }
+		{ type: 'end', icon: 'fa-circle-stop', label: m.workflowNodeEnd() }
 	]);
 
 	let nodeSearch = $state('');

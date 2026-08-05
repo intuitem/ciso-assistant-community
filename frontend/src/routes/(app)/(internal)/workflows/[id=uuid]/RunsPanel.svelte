@@ -210,9 +210,11 @@
 										<span
 											class="shrink-0 {entry.event_type === 'error'
 												? 'text-error-500'
-												: entry.event_type === 'action_executed'
-													? 'text-success-600'
-													: 'text-surface-600-400'}"
+												: entry.event_type === 'run_terminated'
+													? 'text-warning-600'
+													: entry.event_type === 'action_executed'
+														? 'text-success-600'
+														: 'text-surface-600-400'}"
 										>
 											{entry.event_type}
 										</span>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Handle, Position } from '@xyflow/svelte';
 	import { getContext } from 'svelte';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		id: string;
@@ -27,41 +28,49 @@
 	);
 </script>
 
-<div
-	class="terminal-node relative flex items-center justify-center w-14 h-14 rounded-full border-2 select-none transition-shadow
-	bg-surface-200-800 border-surface-600-400 text-surface-800-200
-	{selected ? 'ring-2 ring-primary-500 ring-offset-2 ring-offset-surface-50-950' : ''}
-	{data.error ? 'ring-2 ring-error-500' : ''}
-	{data.runState === 'visited' ? 'ring-2 ring-success-400' : ''}
-	{data.runState === 'active' ? 'ring-2 ring-warning-400 animate-pulse' : ''}"
-	title={data.error ?? undefined}
-	data-testid="workflow-node-{data.nodeType}"
-	onmouseenter={() => (hovered = true)}
-	onmouseleave={() => (hovered = false)}
->
-	<i class="fa-solid fa-flag-checkered text-sm"></i>
+<!-- Deliberately alarming (spec D35): this node stops the WHOLE run, cancelling
+	every branch still in flight. The danger has to read off the canvas, because
+	the safe way to finish one branch is simply to leave its last step unwired. -->
+<div class="terminal-node flex flex-col items-center gap-1 select-none">
+	<div
+		class="relative flex items-center justify-center w-14 h-14 rounded-full border-2 transition-shadow
+		bg-error-100-900 border-error-500 text-error-700-300
+		{selected ? 'ring-2 ring-primary-500 ring-offset-2 ring-offset-surface-50-950' : ''}
+		{data.error ? 'ring-2 ring-error-500' : ''}
+		{data.runState === 'visited' ? 'ring-2 ring-success-400' : ''}
+		{data.runState === 'active' ? 'ring-2 ring-warning-400 animate-pulse' : ''}"
+		title={data.error ?? m.workflowNodeEndHint()}
+		data-testid="workflow-node-{data.nodeType}"
+		onmouseenter={() => (hovered = true)}
+		onmouseleave={() => (hovered = false)}
+	>
+		<i class="fa-solid fa-circle-stop text-lg"></i>
+		<Handle type="target" position={Position.Left} class={handleClass} />
 
-	{#if hovered && !editor?.readonly && !data.error}
-		<button
-			type="button"
-			aria-label="Delete node"
-			class="nopan nodrag absolute -top-2 -right-2 w-4 h-4 rounded-full bg-error-500 text-white text-[8px] flex items-center justify-center hover:bg-error-600 cursor-pointer"
-			onclick={(e) => {
-				e.stopPropagation();
-				editor?.deleteNode(id);
-			}}
-		>
-			✕
-		</button>
-	{/if}
+		{#if hovered && !editor?.readonly && !data.error}
+			<button
+				type="button"
+				aria-label="Delete node"
+				class="nopan nodrag absolute -top-2 -right-2 w-4 h-4 rounded-full bg-error-500 text-white text-[8px] flex items-center justify-center hover:bg-error-600 cursor-pointer"
+				onclick={(e) => {
+					e.stopPropagation();
+					editor?.deleteNode(id);
+				}}
+			>
+				✕
+			</button>
+		{/if}
 
-	{#if data.error}
-		<span
-			class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-error-500 text-white text-[9px] flex items-center justify-center"
-		>
-			!
-		</span>
-	{/if}
+		{#if data.error}
+			<span
+				class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-error-500 text-white text-[9px] flex items-center justify-center"
+			>
+				!
+			</span>
+		{/if}
+	</div>
 
-	<Handle type="target" position={Position.Left} class={handleClass} />
+	<span class="text-[10px] font-medium leading-tight text-error-700-300 whitespace-nowrap">
+		{m.workflowNodeEnd()}
+	</span>
 </div>

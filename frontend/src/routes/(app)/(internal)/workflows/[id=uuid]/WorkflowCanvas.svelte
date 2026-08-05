@@ -323,13 +323,11 @@
 	let nodes = $state<Node[]>((graph.nodes ?? []).map(toFlowNode));
 	edges = (graph.edges ?? []).map(toFlowEdge);
 
-	// A brand-new draft gets a manual trigger and an end waiting to be wired,
-	// instead of an empty void.
+	// A brand-new draft gets a manual trigger to build from. No end node: a
+	// branch finishes by simply having nothing wired after its last step
+	// (spec D35), so the default shape teaches that instead of the hard stop.
 	if (!readonly && nodes.length === 0) {
-		nodes = [
-			toFlowNode(newNodeDomain('trigger', { x: 120, y: 202 }, 'manual'), 0),
-			toFlowNode(newNodeDomain('end', { x: 560, y: 202 }), 1)
-		];
+		nodes = [toFlowNode(newNodeDomain('trigger', { x: 120, y: 202 }, 'manual'), 0)];
 	}
 	refreshVisuals();
 
