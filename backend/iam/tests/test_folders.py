@@ -196,27 +196,33 @@ class TestFolderDescendants:
         """Ensure the `Folder.descendants` field is correctly updated when the `folder.parent_folder` changes."""
 
         utils.create_folder_tree(
-            utils.Node(
-                "folder_1",
-                [
-                    utils.Node(
-                        "folder_1_1",
-                        [
-                            utils.Node(
-                                "folder_1_1_1",
-                                [
-                                    utils.Node("folder_1_1_1_1"),
-                                    utils.Node("folder_1_1_1_2"),
-                                ],
-                            )
-                        ],
-                    ),
-                    utils.Node(
-                        "folder_1_2",
-                        [utils.Node("folder_1_2_1", [utils.Node("folder_2_1_1_1")])],
-                    ),
-                ],
-            ),
+            [
+                utils.Node(
+                    "folder_1",
+                    [
+                        utils.Node(
+                            "folder_1_1",
+                            [
+                                utils.Node(
+                                    "folder_1_1_1",
+                                    [
+                                        utils.Node("folder_1_1_1_1"),
+                                        utils.Node("folder_1_1_1_2"),
+                                    ],
+                                )
+                            ],
+                        ),
+                        utils.Node(
+                            "folder_1_2",
+                            [
+                                utils.Node(
+                                    "folder_1_2_1", [utils.Node("folder_2_1_1_1")]
+                                )
+                            ],
+                        ),
+                    ],
+                ),
+            ]
         )
 
         folder = Folder.objects.get(name="folder_1_1_1_2")
@@ -247,26 +253,32 @@ class TestFolderDescendants:
         """Ensure the `Folder.descendants` field is correctly filled(set) when a `Folder` is created."""
 
         utils.create_folder_tree(
-            utils.Node(
-                "folder_1",
-                [
-                    utils.Node(
-                        "folder_1_1",
-                        [
-                            utils.Node(
-                                "folder_1_1_1",
-                                [
-                                    utils.Node("folder_1_1_1_1"),
-                                ],
-                            )
-                        ],
-                    ),
-                    utils.Node(
-                        "folder_1_2",
-                        [utils.Node("folder_1_2_1", [utils.Node("folder_2_1_1_1")])],
-                    ),
-                ],
-            ),
+            [
+                utils.Node(
+                    "folder_1",
+                    [
+                        utils.Node(
+                            "folder_1_1",
+                            [
+                                utils.Node(
+                                    "folder_1_1_1",
+                                    [
+                                        utils.Node("folder_1_1_1_1"),
+                                    ],
+                                )
+                            ],
+                        ),
+                        utils.Node(
+                            "folder_1_2",
+                            [
+                                utils.Node(
+                                    "folder_1_2_1", [utils.Node("folder_2_1_1_1")]
+                                )
+                            ],
+                        ),
+                    ],
+                ),
+            ]
         )
 
         parent_folder = Folder.objects.get(name="folder_1_1_1_1")

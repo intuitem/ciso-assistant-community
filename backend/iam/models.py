@@ -352,10 +352,14 @@ class Folder(NameDescriptionMixin):
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
 
-    def get_sub_folders(self) -> QuerySet[Folder]:
+    def get_sub_folders(self, include_self: bool = False) -> QuerySet[Folder]:
         """Return the list of subfolders through the cached tree."""
 
-        return self.descendants.all()
+        subfolders = self.descendants.all()
+        if include_self:
+            subfolders = Folder.objects.filter(Q(id=self.id) | Q(id__in=subfolders))
+
+        return subfolders
 
     # Should we update data-model.md now that this method is a generator ?
     def get_parent_folders(self) -> QuerySet[Folder]:
@@ -1507,7 +1511,13 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         direct_flat_folder_ids: Iterable[uuid.UUID],
         direct_recursive_folder_ids: Iterable[uuid.UUID],
     ) -> QuerySet[uuid.UUID]:
-        """Return the accessible folder IDs rooted from the `focused_folder` `Folder` from the direct flat and direct recursive folder IDs."""
+        """
+        Return the accessible folder IDs rooted from the `focused_folder` `Folder` from the direct flat and direct recursive folder IDs.
+
+        `direct_flat_folder_ids` is list of Folder IDs (`Folder.id`) from non-recursive role assignments folders (`RoleAssignment.perimeter_folders`).
+
+        `direct_recursive_folder_ids` is list of Folder IDs from recursive role assignments folders.
+        """
 
         direct_recursive_folders = Folder.objects.filter(
             id__in=direct_recursive_folder_ids

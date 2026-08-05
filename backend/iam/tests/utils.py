@@ -14,13 +14,14 @@ class Node:
     """Represent the direct children `Folder`(domains) for this `Folder`(domain)."""
 
 
-def create_folder_tree(node: Node, *, parent_folder: Optional[Folder] = None):
+def create_folder_tree(nodes: list[Node], *, parent_folder: Optional[Folder] = None):
     if parent_folder is None:
         parent_folder = Folder.get_root_folder()
 
-    folder = Folder.objects.create(name=node.name, parent_folder=parent_folder)
-    for child_node in node.children:
-        create_folder_tree(child_node, parent_folder=folder)
+    for node in nodes:
+        folder = Folder.objects.create(name=node.name, parent_folder=parent_folder)
+        for child_node in node.children:
+            create_folder_tree([child_node], parent_folder=folder)
 
 
 def check_folder_ancestors(folder: Folder, expected_ancestor_names: list[str]):

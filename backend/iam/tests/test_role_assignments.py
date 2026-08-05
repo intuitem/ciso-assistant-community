@@ -653,31 +653,33 @@ class TestPermissionCheck:
 @pytest.mark.django_db
 class TestFocusMode:
     def test_focus_accessible_folder_ids(self):
-        """Ensure the `RoleAssignment._get_focus_accessible_folder_ids` function returns the proper accessible folders."""
+        """Ensure the `RoleAssignment._get_focus_accessible_folder_ids` function returns the proper accessible folders IDs."""
 
         utils.create_folder_tree(
-            utils.Node(
-                name="folder_1",
-                children=[
-                    utils.Node(
-                        name="folder_1_1",
-                        children=[
-                            utils.Node(name="folder_1_1_1"),
-                            utils.Node(
-                                name="folder_1_1_2",
-                                children=[
-                                    utils.Node(name="folder_1_1_2_1"),
-                                    utils.Node(name="folder_1_1_2_2"),
-                                ],
-                            ),
-                        ],
-                    ),
-                    utils.Node(
-                        name="folder_1_2",
-                        children=[utils.Node(name="folder_1_2_1")],
-                    ),
-                ],
-            )
+            [
+                utils.Node(
+                    name="folder_1",
+                    children=[
+                        utils.Node(
+                            name="folder_1_1",
+                            children=[
+                                utils.Node(name="folder_1_1_1"),
+                                utils.Node(
+                                    name="folder_1_1_2",
+                                    children=[
+                                        utils.Node(name="folder_1_1_2_1"),
+                                        utils.Node(name="folder_1_1_2_2"),
+                                    ],
+                                ),
+                            ],
+                        ),
+                        utils.Node(
+                            name="folder_1_2",
+                            children=[utils.Node(name="folder_1_2_1")],
+                        ),
+                    ],
+                )
+            ]
         )
 
         folder_name_set = set(Folder.objects.values_list("name", flat=True))
@@ -724,4 +726,225 @@ class TestFocusMode:
 
         assert list(focused_folder_ids) == [focus_folder.id], (
             "Focusing on a folder with no children SHALL make it the only accessible one."
+        )
+
+    def test_filter_accessible_folder_ids_by_focus_folder(self):
+        """Ensure the `RoleAssignment._filter_accessible_folder_ids_by_focus_folder` returns the proper accessible folder IDs."""
+
+        utils.create_folder_tree(
+            [
+                utils.Node(
+                    name="folder_1",
+                    children=[
+                        utils.Node(
+                            name="folder_1_1",
+                            children=[
+                                utils.Node(
+                                    name="folder_1_1_1",
+                                    children=[
+                                        utils.Node(name="folder_1_1_1_1"),
+                                        utils.Node(name="folder_1_1_1_2"),
+                                    ],
+                                ),
+                                utils.Node(name="folder_1_1_2"),
+                            ],
+                        ),
+                        utils.Node(
+                            name="folder_1_2",
+                            children=[
+                                utils.Node(
+                                    name="folder_1_2_1",
+                                    children=[
+                                        utils.Node(name="folder_1_2_1_1"),
+                                    ],
+                                ),
+                                utils.Node(name="folder_1_2_2"),
+                            ],
+                        ),
+                        utils.Node(name="folder_1_3"),
+                    ],
+                ),
+                utils.Node(
+                    name="folder_2",
+                    children=[
+                        utils.Node(name="folder_2_1"),
+                        utils.Node(name="folder_2_2"),
+                    ],
+                ),
+            ]
+        )
+
+        focus_folder = Folder.objects.get(name="folder_1_1")
+
+        accessible_folder_ids = (
+            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
+                focus_folder, [focus_folder.id], []
+            )
+        )
+        assert list(accessible_folder_ids) == [focus_folder.id], (
+            "The focused folder should be the only accessible one (as there's no recursive folder)."
+        )
+
+        accessible_folder_ids = (
+            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
+                focus_folder, [], [focus_folder.id]
+            )
+        )
+        assert focus_folder.id in accessible_folder_ids, (
+            "The focused folder SHALL always be accessible."
+        )
+
+        accessible_folder_ids = (
+            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
+                focus_folder, [focus_folder.id], [focus_folder.id]
+            )
+        )
+        assert focus_folder.id in accessible_folder_ids, (
+            "The focused folder SHALL always be accessible."
+        )
+
+        focus_descendant = Folder.objects.get(name="folder_1_1_1_1")
+
+        accessible_folder_ids = (
+            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
+                focus_folder, [focus_descendant.id], []
+            )
+        )
+        assert list(accessible_folder_ids) == [focus_descendant.id], (
+            "The descendant folder should be the only accessible one (as there's no recursive folder)."
+        )
+
+        accessible_folder_ids = (
+            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
+                focus_folder, [], [focus_descendant.id]
+            )
+        )
+        assert focus_descendant.id in accessible_folder_ids, (
+            "A descendant folder of the focused folder SHALL be accessible."
+        )
+
+        accessible_folder_ids = (
+            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
+                focus_folder, [focus_descendant.id], [focus_descendant.id]
+            )
+        )
+        assert focus_descendant.id in accessible_folder_ids, (
+            "A descendant folder of the focused folder SHALL be accessible."
+        )
+
+        focus_ancestor = focus_folder.parent_folder.parent_folder
+
+        root_folder = Folder.get_root_folder()
+
+        assert root_folder is not None, "Root folder not found."
+
+        all_focused_folder_ids = (
+            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
+                focus_folder, [], [root_folder.id]
+            )
+        )
+        accessible_folder_ids = (
+            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
+                focus_folder, [], [focus_ancestor.id]
+            )
+        )
+
+        assert all_focused_folder_ids.count() > 0, (
+            "Having a recursive role assignment over the root folder SHALL make at least one folder being accessible."
+        )
+        assert sorted(accessible_folder_ids) == sorted(all_focused_folder_ids), (
+            "Having a recursive role assignment on an ancestor folder of the focused folder SHALL make all the descendant of the focused folder accessible."
+        )
+
+        accessible_folder_ids = (
+            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
+                focus_folder, [focus_ancestor.id], [focus_ancestor.id]
+            )
+        )
+        assert sorted(accessible_folder_ids) == sorted(all_focused_folder_ids), (
+            "Having a recursive role assignment on an ancestor folder of the focused folder SHALL make all the descendant of the focused folder accessible."
+        )
+
+        accessible_folder_ids = (
+            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
+                focus_folder, [focus_ancestor.id], []
+            )
+        )
+        assert accessible_folder_ids.count() == 0, (
+            "An ancestor folder of the focused folder SHALL NOT be accessible."
+        )
+
+        ancestor_folder_ids = focus_folder.get_parent_folders().values_list(
+            "id", flat=True
+        )
+        unrelated_folder_ids = [
+            Folder.objects.get(name=folder_name).id
+            for folder_name in [
+                "folder_1_2",
+                "folder_1_2_1",
+                "folder_1_2_1_1",
+                "folder_1_2_2",
+                "folder_1_3",
+            ]
+        ]
+
+        accessible_folder_ids = (
+            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
+                focus_folder,
+                [*ancestor_folder_ids, *unrelated_folder_ids],
+                unrelated_folder_ids,
+            )
+        )
+
+        assert accessible_folder_ids.count() == 0, (
+            "Role assignments on an unrelated the focused folder (being nor an ancestor folder, nor in the the focused folder subtree) SHALL not make anything accessible."
+        )
+
+        focus_folder = Folder.objects.get(name="folder_1")
+
+        non_recursive_folder_ids = [Folder.objects.get(name="folder_1_3").id]
+        recursive_folder_ids = [
+            Folder.objects.get(name=folder_name).id
+            for folder_name in [
+                "folder_1_1_1",
+                "folder_1_2_1",
+                "folder_1_1_2",
+            ]
+        ]
+
+        accessible_folder_ids = (
+            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
+                focus_folder,
+                non_recursive_folder_ids,
+                recursive_folder_ids,
+            )
+        )
+
+        expected_accessible_folder_ids = [
+            Folder.objects.get(name=folder_name).id
+            for folder_name in [
+                "folder_1_3",
+                "folder_1_1_1",
+                "folder_1_1_1_1",
+                "folder_1_1_1_2",
+                "folder_1_2_1",
+                "folder_1_2_1_1",
+                "folder_1_1_2",
+            ]
+        ]
+
+        assert sorted(accessible_folder_ids) == sorted(
+            expected_accessible_folder_ids
+        ), "Unexpected accessible folder IDs."
+
+        accessible_folder_ids2 = (
+            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
+                focus_folder,
+                [*non_recursive_folder_ids, root_folder.id],
+                recursive_folder_ids,
+            )
+        )
+
+        assert sorted(accessible_folder_ids) == sorted(accessible_folder_ids2), (
+            "A non-recursive root folder access SHALL NOT make any extra folder accessible (except if the focused folder is also the root folder itself)."
         )
