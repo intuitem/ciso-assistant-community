@@ -3688,7 +3688,7 @@
 	"servicenow": "ServiceNow",
 	"reopenAssignmentForEditing": "Heropenen voor bewerking",
 	"forReview": "Voor beoordeling",
-	"forEditing": "Voor bewerking"
+	"forEditing": "Voor bewerking",
 	"actionPlanEmptyHelp": "Alle controles zijn geslaagd — items verschijnen hier wanneer controles mislukken, een fout opleveren of niet zijn gecontroleerd.",
 	"actionPlanNoFollowUpHint": "Er is geen beoordeling van bevindingen gekoppeld — bewerk deze technische status en stel een vervolgbeoordeling in om de herstelmaatregelen voor de bevindingen te plannen.",
 	"addAssetColumn": "Middel toevoegen",
