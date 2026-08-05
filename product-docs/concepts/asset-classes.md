@@ -4,7 +4,7 @@ description: A shared taxonomy for classifying assets, extensible per organisati
 
 # Asset classes
 
-An **asset class** answers "what kind of thing is this?" for an asset — a server, a business process, a set of personal data. Classes form a tree, so a class can be a refinement of a broader one, and every asset points at a single class.
+An **asset class** answers "what kind of thing is this?" for an asset — a server, a business process, a set of personal data. Classes form a tree, so a class can be a refinement of a broader one, and an asset points at most one class.
 
 CISO Assistant ships with a taxonomy derived from the CIS asset categories (Devices, Software, Data, Users, Network, Facilities, Documentation, Business Process, and their sub-classes). You can extend that tree with your own classes, and hide the shipped ones you don't use.
 
@@ -45,7 +45,7 @@ The shipped classes are marked **Builtin**. They are re-created every time the p
 - They **cannot be renamed or deleted** — a rename would be undone and a deletion would silently reappear on the next restart. The edit form states this: _"Built-in classes are provided with the product: they can be hidden, but not renamed or deleted."_
 - They **can be hidden**. Clearing **Visible** removes a class from the picker used when classifying an asset, without touching any asset already classified under it. The form notes: _"Hidden classes stay listed here but are no longer offered when classifying an asset."_
 
-Classes you create are yours entirely — rename, re-parent, hide or delete them at will. Creating a class **under** a built-in one is the intended way to extend the shipped taxonomy: the child is your own class, and the built-in parent stays untouched.
+Classes you create are yours entirely — rename, re-parent, hide, or delete them (see [Deleting a class](#deleting-a-class)). Creating a class **under** a built-in one is the intended way to extend the shipped taxonomy: the child is your own class, and the built-in parent stays untouched.
 
 Hiding a class that still has visible sub-classes does not orphan them. The class remains in the picker as a non-selectable grouping row so its descendants keep a readable path.
 

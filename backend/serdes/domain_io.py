@@ -383,10 +383,13 @@ def import_asset_class(full_path: str | None) -> AssetClass | None:
 
     parent = None
     for segment in segments:
-        parent, _ = AssetClass.objects.get_or_create(
-            name=segment,
-            parent=parent,
-            defaults={"builtin": False, "is_visible": True},
+        # unique_together is case-sensitive, so match first to avoid creating a
+        # near-duplicate sibling differing only in case.
+        existing = AssetClass.objects.filter(
+            parent=parent, name__iexact=segment
+        ).first()
+        parent = existing or AssetClass.objects.create(
+            name=segment, parent=parent, builtin=False, is_visible=True
         )
     return parent
 

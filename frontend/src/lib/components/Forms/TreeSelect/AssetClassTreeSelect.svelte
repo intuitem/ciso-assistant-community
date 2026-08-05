@@ -54,12 +54,12 @@
 	let nodes = $state<TreeSelectItem[]>([]);
 	let isLoading = $state(false);
 
-	// Built-in names are i18n keys; custom ones are already translated
-	// server-side and pass through safeTranslate unchanged.
+	// Only built-in names are i18n keys. Custom ones are user text and must not
+	// be looked up, or a class named like a key would render catalog text.
 	function normalise(raw: RawNode[]): TreeSelectItem[] {
 		return raw.map((node) => ({
 			id: node.id,
-			label: safeTranslate(node.translated_name ?? node.name),
+			label: node.builtin ? safeTranslate(node.name) : (node.translated_name ?? node.name),
 			selectable: node.is_visible,
 			children: normalise(node.children ?? [])
 		}));

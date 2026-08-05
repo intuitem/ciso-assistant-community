@@ -122,13 +122,8 @@
 			return null;
 		}
 		const result = find(nodes ?? [], []);
-		if (result) {
-			selectedLabel = result.node.label;
-			selectedPath = result.path;
-		} else if (fallbackLabel) {
-			selectedLabel = fallbackLabel;
-			selectedPath = [];
-		}
+		selectedLabel = result ? result.node.label : (fallbackLabel ?? '');
+		selectedPath = result ? result.path : [];
 	});
 
 	$effect(() => {

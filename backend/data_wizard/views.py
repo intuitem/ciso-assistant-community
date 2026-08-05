@@ -402,9 +402,15 @@ def _resolve_asset_class(value: Any, path_index: dict) -> Optional[AssetClass]:
     if match is not None:
         return match
 
-    leaf = normalized.split("/")[-1]
+    # A path that names its parents is explicit: falling back to a leaf match
+    # elsewhere in the tree would silently reclassify the asset.
+    if "/" in normalized:
+        return None
+
     candidates = [
-        node for key, node in path_index.items() if key.split("/")[-1] == leaf.lower()
+        node
+        for key, node in path_index.items()
+        if key.split("/")[-1] == normalized.lower()
     ]
     return candidates[0] if len(candidates) == 1 else None
 

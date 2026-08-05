@@ -8,6 +8,7 @@
 		id: string;
 		name: string;
 		translated_name: string;
+		builtin: boolean;
 		is_visible: boolean;
 		direct_count: number;
 		total_count: number;
@@ -36,7 +37,9 @@
 		(node.children ?? []).filter((c) => !hideEmpty || c.total_count > 0)
 	);
 	const hasChildren = $derived(visibleChildren.length > 0);
-	const label = $derived(safeTranslate(node.translated_name ?? node.name));
+	const label = $derived(
+		node.builtin ? safeTranslate(node.name) : (node.translated_name ?? node.name)
+	);
 
 	async function loadAssets() {
 		if (isLoading) return;

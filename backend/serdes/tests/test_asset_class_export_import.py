@@ -71,6 +71,14 @@ class TestImportAssetClass:
         assert import_asset_class(builtin.full_path) == builtin
         assert AssetClass.objects.count() == before
 
+    def test_existing_segments_match_case_insensitively(self):
+        parent = AssetClass.objects.create(name="ACXCase")
+        leaf = AssetClass.objects.create(name="ACXLeafCase", parent=parent)
+        before = AssetClass.objects.count()
+
+        assert import_asset_class("acxcase/acxleafcase") == leaf
+        assert AssetClass.objects.count() == before
+
     def test_blank_and_none_resolve_to_none(self):
         assert import_asset_class(None) is None
         assert import_asset_class("") is None

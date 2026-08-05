@@ -538,8 +538,7 @@
 				})
 			: false) &&
 			(!(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) ||
-				URLModel === 'terminologies' ||
-				URLModel === 'entities')
+				BUILTIN_EDITABLE_URL_MODELS.includes(URLModel))
 	);
 
 	let contextMenuDisplayEdit = $derived(

@@ -138,6 +138,11 @@ class TestResolveAssetClass:
     def test_unknown_path_resolves_to_nothing(self, index):
         assert _resolve_asset_class("Nope/Nothing", index) is None
 
+    def test_explicit_path_never_falls_back_to_a_leaf_elsewhere(self, index):
+        # "Servers" exists only under Machines; naming another parent must not
+        # silently reclassify the asset.
+        assert _resolve_asset_class("Virtual/Servers", index) is None
+
     def test_blank_and_non_string_are_ignored(self, index):
         assert _resolve_asset_class("", index) is None
         assert _resolve_asset_class("   ", index) is None
