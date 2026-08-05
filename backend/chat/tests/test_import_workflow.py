@@ -27,6 +27,50 @@ CONTROL_ROWS = [
     ["Backups", "Daily backups", "in_progress", 4, "CTL-2", "y"],
 ]
 
+RISK_HEADERS = [
+    "ref_id",
+    "name",
+    "description",
+    "current_probability",
+    "current_impact",
+    "treatment",
+    "assets",
+    "applied_controls",
+]
+RISK_ROWS = [
+    RISK_HEADERS,
+    [
+        "R-1",
+        "Ransomware",
+        "Production data encrypted",
+        "High",
+        "High",
+        "mitigate",
+        "ERP|Backup server",
+        "EDR rollout",
+    ],
+    ["R-2", "Data leak", "Exfiltration via SaaS", "Low", "Medium", "accept", "ERP", ""],
+]
+
+MATRIX_DEFINITION = {
+    "probability": [
+        {"id": 0, "name": "Low"},
+        {"id": 1, "name": "Medium"},
+        {"id": 2, "name": "High"},
+    ],
+    "impact": [
+        {"id": 0, "name": "Low"},
+        {"id": 1, "name": "Medium"},
+        {"id": 2, "name": "High"},
+    ],
+    "risk": [
+        {"id": 0, "name": "Low", "abbreviation": "L", "hexcolor": "#BBF7D0"},
+        {"id": 1, "name": "Medium", "abbreviation": "M", "hexcolor": "#FDE047"},
+        {"id": 2, "name": "High", "abbreviation": "H", "hexcolor": "#F87171"},
+    ],
+    "grid": [[0, 0, 1], [0, 1, 2], [1, 2, 2]],
+}
+
 
 class _StubFieldFile:
     def __init__(self, raw: bytes):
@@ -131,6 +175,54 @@ def controls_document(domain):
 
 
 @pytest.fixture
+def reader_request(domain):
+    """A user who may read the domain but not write anything into it."""
+    from rest_framework.test import APIRequestFactory
+
+    from iam.models import Role, RoleAssignment, User, UserGroup
+
+    user = User.objects.create_user("reader@chat-import.test", is_published=True)
+    group = UserGroup.objects.create(name="readers", folder=domain)
+    group.user_set.add(user)
+    assignment = RoleAssignment.objects.create(
+        user_group=group,
+        role=Role.objects.get(name="BI-RL-AUD"),
+        folder=domain,
+        is_recursive=True,
+    )
+    assignment.perimeter_folders.add(domain)
+    request = APIRequestFactory().post("/")
+    request.user = user
+    return request
+
+
+@pytest.fixture
+def risk_matrix(domain):
+    from core.models import RiskMatrix
+
+    return RiskMatrix.objects.create(
+        name="3x3",
+        folder=domain,
+        json_definition=MATRIX_DEFINITION,
+    )
+
+
+@pytest.fixture
+def risk_document(domain):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    from chat.models import IndexedDocument
+
+    return IndexedDocument.objects.create(
+        folder=domain,
+        file=SimpleUploadedFile("Q1 risks.xlsx", _xlsx_bytes(RISK_ROWS)),
+        filename="Q1 risks.xlsx",
+        content_type=XLSX_CT,
+        source_type=IndexedDocument.SourceType.CHAT,
+    )
+
+
+@pytest.fixture
 def chat_session(admin_request, domain):
     from chat.models import ChatSession
 
@@ -225,6 +317,44 @@ def test_detect_target_prefers_asset():
     headers = ["name", "type", "parent_assets", "ref_id"]
     scores = detect_target(headers)
     assert scores[0][0] == "asset"
+
+
+def test_detect_target_prefers_risk_scenario():
+    scores = detect_target(RISK_HEADERS)
+    assert scores[0][0] == "risk_scenario"
+
+
+def test_detect_target_still_prefers_finding():
+    headers = ["ref_id", "name", "severity", "status", "eta", "observation"]
+    scores = detect_target(headers)
+    assert scores[0][0] == "finding"
+
+
+def test_risk_columns_map_export_and_legacy_names():
+    mapped, _ = map_columns(
+        ["current_probability", "residual_proba", "additional_controls", "asset"],
+        "risk_scenario",
+    )
+    assert mapped["current_probability"] == "current_proba"
+    assert mapped["residual_proba"] == "residual_proba"
+    assert mapped["additional_controls"] == "applied_controls"
+    assert mapped["asset"] == "assets"
+
+
+def test_container_fk_and_computed_levels_are_never_mapped():
+    mapped, unmapped = map_columns(
+        ["risk_assessment", "current_level", "name"], "risk_scenario"
+    )
+    assert mapped == {"name": "name"}
+    assert set(unmapped) == {"risk_assessment", "current_level"}
+
+
+def test_permission_model_is_the_container_when_there_is_one():
+    from chat.tabular import permission_model_name
+
+    assert permission_model_name("risk_scenario") == "riskassessment"
+    assert permission_model_name("finding") == "findingsassessment"
+    assert permission_model_name("asset") == "asset"
 
 
 # ── workflow turns without a document (pure) ─────────────────────────
@@ -372,6 +502,209 @@ class TestImporter:
         assert assessment.findings.count() == 2
         assert assessment.findings.get(ref_id="F-1").name == "SQL injection (retested)"
 
+    def test_findings_capture_the_asset_named_on_the_row(self, admin_request, domain):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        from chat.importer import run_import
+        from chat.models import IndexedDocument
+        from core.models import Asset, FindingsAssessment
+
+        Asset.objects.create(name="ERP", folder=domain)
+        headers = ["ref_id", "name", "severity", "asset"]
+        doc = IndexedDocument.objects.create(
+            folder=domain,
+            file=SimpleUploadedFile(
+                "findings.xlsx",
+                _xlsx_bytes(
+                    [
+                        headers,
+                        ["F-1", "SQL injection", "high", "ERP"],
+                        ["F-2", "Weak TLS", "medium", "Payment gateway|Load balancer"],
+                    ]
+                ),
+            ),
+            filename="findings.xlsx",
+            content_type=XLSX_CT,
+            source_type=IndexedDocument.SourceType.CHAT,
+        )
+        mapped, _ = map_columns(headers, "finding")
+        assert mapped["asset"] == "asset"
+
+        report = run_import(
+            admin_request,
+            doc,
+            mapped,
+            "finding",
+            folder_id=str(domain.id),
+            dry_run=False,
+        )
+        assert report["created"] == 2
+        assert report["details"]["assets_created"] == 1
+
+        assessment = FindingsAssessment.objects.get()
+        assert assessment.findings.get(ref_id="F-1").asset.name == "ERP"
+        gateway = assessment.findings.get(ref_id="F-2").asset
+        assert gateway.name == "Payment gateway"
+        assert gateway.folder == domain
+        assert gateway.type == Asset.Type.SUPPORT
+
+        # Finding.asset is a single FK: the second name leaves no orphan.
+        assert not Asset.objects.filter(name="Load balancer").exists()
+        assert Asset.objects.count() == 2
+
+    def test_risk_scenarios_create_assessment_assets_and_controls(
+        self, admin_request, domain, risk_matrix, risk_document
+    ):
+        from chat.importer import run_import
+        from core.models import AppliedControl, Asset, RiskAssessment, RiskScenario
+
+        mapped, _ = map_columns(RISK_HEADERS, "risk_scenario")
+        report = run_import(
+            admin_request,
+            risk_document,
+            mapped,
+            "risk_scenario",
+            folder_id=str(domain.id),
+            dry_run=False,
+            matrix_id=str(risk_matrix.id),
+        )
+        assert report["created"] == 2
+        assert report["failed"] == 0
+        assert report["details"]["assets_created"] == 2
+        assert report["details"]["applied_controls_created"] == 1
+
+        assessment = RiskAssessment.objects.get()
+        # Named after the uploaded file, not a timestamp.
+        assert assessment.name == "Q1 risks"
+        assert assessment.risk_matrix == risk_matrix
+
+        ransomware = RiskScenario.objects.get(ref_id="R-1")
+        assert ransomware.current_proba == 2
+        assert ransomware.current_impact == 2
+        assert ransomware.treatment == "mitigate"
+        assert set(ransomware.assets.values_list("name", flat=True)) == {
+            "ERP",
+            "Backup server",
+        }
+        assert list(ransomware.applied_controls.values_list("name", flat=True)) == [
+            "EDR rollout"
+        ]
+        assert Asset.objects.filter(folder=domain).count() == 2
+        assert AppliedControl.objects.filter(folder=domain).count() == 1
+
+    def test_risk_scenarios_dry_run_writes_nothing(
+        self, admin_request, domain, risk_matrix, risk_document
+    ):
+        from chat.importer import run_import
+        from core.models import AppliedControl, Asset, RiskAssessment
+
+        mapped, _ = map_columns(RISK_HEADERS, "risk_scenario")
+        report = run_import(
+            admin_request,
+            risk_document,
+            mapped,
+            "risk_scenario",
+            folder_id=str(domain.id),
+            dry_run=True,
+            matrix_id=str(risk_matrix.id),
+        )
+        assert report["created"] == 2
+        assert RiskAssessment.objects.count() == 0
+        assert Asset.objects.count() == 0
+        assert AppliedControl.objects.count() == 0
+
+    def test_risk_scenarios_update_existing_assessment(
+        self, admin_request, domain, risk_matrix, risk_document
+    ):
+        from chat.importer import run_import
+        from core.models import RiskAssessment, RiskScenario
+
+        assessment = RiskAssessment.objects.create(
+            name="Existing study", folder=domain, risk_matrix=risk_matrix
+        )
+        RiskScenario.objects.create(
+            risk_assessment=assessment,
+            name="Old ransomware",
+            ref_id="R-1",
+            folder=domain,
+        )
+
+        mapped, _ = map_columns(RISK_HEADERS, "risk_scenario")
+        report = run_import(
+            admin_request,
+            risk_document,
+            mapped,
+            "risk_scenario",
+            folder_id=str(domain.id),
+            dry_run=False,
+            target_id=str(assessment.id),
+        )
+        assert report["updated"] == 1
+        assert report["created"] == 1
+        assert RiskAssessment.objects.count() == 1
+        assert assessment.risk_scenarios.count() == 2
+        assert assessment.risk_scenarios.get(ref_id="R-1").name == "Ransomware"
+
+    def test_reader_cannot_import_anything(
+        self, reader_request, domain, risk_matrix, risk_document, controls_document
+    ):
+        from rest_framework.exceptions import PermissionDenied
+
+        from chat.importer import check_import_permission, run_import
+        from core.models import RiskAssessment
+
+        assert not check_import_permission(
+            reader_request.user, "risk_scenario", str(domain.id)
+        )
+        assert not check_import_permission(
+            reader_request.user, "applied_control", str(domain.id)
+        )
+
+        mapped, _ = map_columns(RISK_HEADERS, "risk_scenario")
+        with pytest.raises(PermissionDenied):
+            run_import(
+                reader_request,
+                risk_document,
+                mapped,
+                "risk_scenario",
+                folder_id=str(domain.id),
+                dry_run=True,
+                matrix_id=str(risk_matrix.id),
+            )
+        assert RiskAssessment.objects.count() == 0
+
+    def test_assets_are_not_created_for_a_user_who_may_not_add_them(
+        self, reader_request, domain
+    ):
+        from data_wizard.views import _resolve_assets
+        from core.models import Asset
+
+        resolved = _resolve_assets("Unknown ERP", domain, reader_request)
+
+        assert resolved.ids == []
+        assert resolved.created == []
+        assert resolved.failed == ["Unknown ERP"]
+        assert Asset.objects.count() == 0
+
+    def test_missing_matrix_fails_the_whole_run(
+        self, admin_request, domain, risk_document
+    ):
+        from chat.importer import run_import
+        from core.models import RiskAssessment
+
+        mapped, _ = map_columns(RISK_HEADERS, "risk_scenario")
+        report = run_import(
+            admin_request,
+            risk_document,
+            mapped,
+            "risk_scenario",
+            folder_id=str(domain.id),
+            dry_run=True,
+        )
+        assert report["created"] == 0
+        assert report["failed"] == 2
+        assert RiskAssessment.objects.count() == 0
+
 
 # ── workflow turns with a real document (DB) ─────────────────────────
 
@@ -431,6 +764,83 @@ class TestWorkflowWithDocument:
         chat_session.refresh_from_db()
         assert chat_session.workflow_state["data"]["target"] == "finding"
 
+    def test_risk_flow_asks_for_matrix_when_creating_an_assessment(
+        self, admin_request, domain, risk_matrix, risk_document, chat_session
+    ):
+        from core.models import RiskAssessment, RiskMatrix
+
+        RiskMatrix.objects.create(
+            name="5x5", folder=domain, json_definition=MATRIX_DEFINITION
+        )
+        RiskAssessment.objects.create(
+            name="Existing study", folder=domain, risk_matrix=risk_matrix
+        )
+
+        workflow = ImportDocumentWorkflow()
+        events = _run(
+            workflow,
+            _ctx(
+                documents=[risk_document],
+                session=chat_session,
+                request=admin_request,
+            ),
+        )
+        chat_session.refresh_from_db()
+        assert chat_session.workflow_state["data"]["target"] == "risk_scenario"
+        assert chat_session.workflow_state["step"] == "awaiting_container"
+        names = [i["name"] for i in events[-1].content["items"]]
+        assert names == ["Create a new risk assessment", "Existing study"]
+
+        events = _run(
+            workflow, _ctx(message="new", session=chat_session, request=admin_request)
+        )
+        chat_session.refresh_from_db()
+        assert chat_session.workflow_state["step"] == "awaiting_matrix"
+        assert {i["name"] for i in events[-1].content["items"]} == {"3x3", "5x5"}
+        assert RiskAssessment.objects.count() == 1
+
+        events = _run(
+            workflow, _ctx(message="3x3", session=chat_session, request=admin_request)
+        )
+        chat_session.refresh_from_db()
+        state_data = chat_session.workflow_state["data"]
+        assert chat_session.workflow_state["step"] == "import_review"
+        assert state_data["matrix_id"] == str(risk_matrix.id)
+
+        action = [e for e in events if e.type == "pending_action"][-1]
+        assert action.content["created"] == 2
+        narration = "".join(
+            e.content
+            for e in events
+            if e.type == "token" and isinstance(e.content, str)
+        )
+        assert "2 assets" in narration
+        assert "1 applied controls" in narration
+        assert RiskAssessment.objects.count() == 1
+
+    def test_risk_flow_skips_the_matrix_question_for_an_existing_assessment(
+        self, admin_request, domain, risk_matrix, risk_document, chat_session
+    ):
+        from core.models import RiskAssessment
+
+        RiskAssessment.objects.create(
+            name="Existing study", folder=domain, risk_matrix=risk_matrix
+        )
+        workflow = ImportDocumentWorkflow()
+        _run(
+            workflow,
+            _ctx(
+                documents=[risk_document], session=chat_session, request=admin_request
+            ),
+        )
+        _run(
+            workflow,
+            _ctx(message="Existing study", session=chat_session, request=admin_request),
+        )
+        chat_session.refresh_from_db()
+        assert chat_session.workflow_state["step"] == "import_review"
+        assert chat_session.workflow_state["data"]["container_name"] == "Existing study"
+
     def test_findings_flow_asks_for_container_then_updates(
         self, admin_request, domain, controls_document, chat_session
     ):
@@ -452,7 +862,7 @@ class TestWorkflowWithDocument:
         assert len(choices) == 1
         names = [i["name"] for i in choices[0].content["items"]]
         assert "Q1 Pentest" in names
-        assert "Create a new assessment" in names
+        assert "Create a new findings assessment" in names
         chat_session.refresh_from_db()
         assert chat_session.workflow_state["step"] == "awaiting_container"
 
