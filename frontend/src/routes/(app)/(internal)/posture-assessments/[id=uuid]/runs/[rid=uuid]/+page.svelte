@@ -1,16 +1,50 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { enhance } from '$app/forms';
+	import { deserialize, enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
 	import { postureResultTailwindColorMap } from '$lib/utils/constants';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
+	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 
 	interface Props {
 		data: PageData;
 	}
 
 	let { data }: Props = $props();
+
+	const modalStore: ModalStore = getModalStore();
+	const toastStore = getToastStore();
+
+	function toastError(message: string) {
+		toastStore.trigger({ message, background: 'preset-filled-error-500' });
+	}
+
+	function confirmDeleteRun() {
+		modalStore.trigger({
+			type: 'component',
+			title: m.deleteRun(),
+			body: m.deleteRunConfirm({ count: data.run.checks }),
+			component: { ref: PromptConfirmModal, props: { bodyComponent: undefined } },
+			response: async (confirmed: boolean) => {
+				if (!confirmed) return;
+				const res = await fetch(`?/deleteRun`, {
+					method: 'POST',
+					body: new FormData(),
+					headers: { 'x-sveltekit-action': 'true' }
+				});
+				const result = deserialize(await res.text());
+				if (result.type === 'redirect') {
+					goto(result.location);
+				} else if (result.type === 'failure') {
+					toastError((result.data as any)?.error ?? m.error());
+				}
+			}
+		});
+	}
 
 	const RESULT_ORDER = ['pass', 'fail', 'error', 'not_applicable', 'not_checked'];
 	const resultLabels: Record<string, string> = {
@@ -32,8 +66,9 @@
 	});
 
 	function submitOnChange(event: Event) {
-		const select = event.currentTarget as HTMLSelectElement;
-		if (select.value) select.form?.requestSubmit();
+		const el = event.currentTarget as HTMLSelectElement | HTMLInputElement;
+		if (el instanceof HTMLSelectElement && !el.value) return;
+		el.form?.requestSubmit();
 	}
 </script>
 
@@ -58,7 +93,67 @@
 			<span class={data.run.failed ? 'text-red-600 dark:text-red-400' : ''}>
 				{m.fail()}: {data.run.failed}
 			</span>
+			<button
+				type="button"
+				class="btn btn-sm preset-tonal text-red-600 dark:text-red-400"
+				onclick={confirmDeleteRun}
+				data-testid="delete-run"
+			>
+				<i class="fa-solid fa-trash mr-1"></i>{m.deleteRun()}
+			</button>
 		</div>
+	</div>
+
+	<div class="card p-4 bg-surface-50-950 shadow-xs space-y-3">
+		<form
+			method="POST"
+			action="?/updateRun"
+			enctype="multipart/form-data"
+			use:enhance={() =>
+				async ({ result, update }) => {
+					if (result.type === 'failure') {
+						toastError((result.data as any)?.error ?? m.error());
+					} else if (result.type === 'success') {
+						toastStore.trigger({
+							message: m.saved(),
+							background: 'preset-filled-success-500'
+						});
+					}
+					await update();
+				}}
+			class="space-y-3"
+		>
+			<div>
+				<label class="text-sm font-semibold" for="run-observation">{m.runObservation()}</label>
+				<textarea
+					id="run-observation"
+					name="observation"
+					class="textarea w-full mt-1"
+					rows="2"
+					value={data.run.observation ?? ''}
+				></textarea>
+			</div>
+			<div class="flex items-center gap-3 flex-wrap">
+				{#if data.run.attachment}
+					<a href="{page.url.pathname}/attachment" class="anchor text-sm" download>
+						<i class="fa-solid fa-paperclip mr-1"></i>{data.run.attachment}
+					</a>
+					<label class="text-sm flex items-center gap-1 cursor-pointer">
+						<input type="checkbox" name="remove_attachment" value="true" class="checkbox" />
+						{m.removeAttachment()}
+					</label>
+				{/if}
+				<label class="text-sm flex items-center gap-2">
+					<i class="fa-solid fa-paperclip"></i>{data.run.attachment
+						? m.replaceAttachment()
+						: m.attachment()}
+					<input type="file" name="attachment" class="input text-sm py-1" />
+				</label>
+				<button type="submit" class="btn btn-sm preset-filled-primary-500 ml-auto">
+					<i class="fa-solid fa-floppy-disk mr-1"></i>{m.save()}
+				</button>
+			</div>
+		</form>
 	</div>
 
 	<p class="text-sm text-surface-600-400 px-2">{m.runEditHelp()}</p>
@@ -83,12 +178,12 @@
 						<span class="grow truncate text-surface-700-300" title={row.requirement.name}>
 							{row.requirement.name ?? ''}
 						</span>
-						{#if row.actual || row.message}
+						{#if row.actual || row.expected}
 							<span
 								class="text-xs text-surface-500 truncate max-w-64"
-								title={[row.actual, row.expected, row.message].filter(Boolean).join(' — ')}
+								title={[row.actual, row.expected].filter(Boolean).join(' — ')}
 							>
-								{row.actual || row.message}
+								{row.actual || row.expected}
 							</span>
 						{/if}
 						<span
@@ -96,9 +191,31 @@
 								row.result
 							]}"
 						></span>
-						<form method="POST" action="?/setResult" use:enhance>
+						<form
+							method="POST"
+							action="?/setResult"
+							use:enhance={() =>
+								async ({ result, update }) => {
+									if (result.type === 'failure') {
+										toastError((result.data as any)?.error ?? m.error());
+									}
+									await update();
+								}}
+							class="flex items-center gap-2"
+						>
 							<input type="hidden" name="ref_id" value={row.requirement.ref_id} />
 							<input type="hidden" name="asset" value={group.id} />
+							<input type="hidden" name="actual" value={row.actual ?? ''} />
+							<input type="hidden" name="expected" value={row.expected ?? ''} />
+							<input
+								type="text"
+								name="message"
+								class="input w-56 py-0.5 text-sm"
+								placeholder={m.comment()}
+								value={row.message ?? ''}
+								aria-label="{row.requirement.ref_id} — {m.comment()}"
+								onchange={submitOnChange}
+							/>
 							<select
 								name="result"
 								class="select w-36 py-0.5 text-sm"

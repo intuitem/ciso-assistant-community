@@ -48,6 +48,7 @@ ALLOWED_UPLOAD_EXTENSIONS = [
     "xlsx",
     "ods",
     "csv",
+    "md",
     "pdf",
     "json",
     "yaml",

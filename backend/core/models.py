@@ -983,6 +983,69 @@ class LibraryUpdater:
                 },
             )
 
+    @staticmethod
+    def prune_stale_implementation_groups(framework, compliance_assessments):
+        """Drop selected IG ref_ids that the updated framework no longer defines.
+
+        A renamed ref_id is indistinguishable from a removed one, so both are dropped;
+        the selection has to be made again by the user.
+        """
+        from automation.models import PostureAssessment
+
+        valid_implementation_groups = {
+            group.get("ref_id")
+            for group in framework.implementation_groups_definition or []
+            if isinstance(group, dict) and group.get("ref_id")
+        }
+
+        for model, objects in (
+            (ComplianceAssessment, compliance_assessments),
+            (PostureAssessment, PostureAssessment.objects.filter(framework=framework)),
+        ):
+            stale_objects = []
+            for obj in objects:
+                selected_groups = obj.selected_implementation_groups or []
+                cleaned_groups = [
+                    group
+                    for group in selected_groups
+                    if group in valid_implementation_groups
+                ]
+                if cleaned_groups != selected_groups:
+                    obj.selected_implementation_groups = cleaned_groups
+                    stale_objects.append(obj)
+
+            if stale_objects:
+                model.objects.bulk_update(
+                    stale_objects,
+                    ["selected_implementation_groups"],
+                    batch_size=100,
+                )
+
+        # Campaign entries are {"value": <ref_id>, "framework": <framework id>} and
+        # span several frameworks, so only this framework's entries are pruned.
+        framework_id = str(framework.id)
+        stale_campaigns = []
+        for campaign in Campaign.objects.filter(frameworks=framework):
+            selected_groups = campaign.selected_implementation_groups or []
+            cleaned_groups = [
+                group
+                for group in selected_groups
+                if not (
+                    isinstance(group, dict) and group.get("framework") == framework_id
+                )
+                or group.get("value") in valid_implementation_groups
+            ]
+            if cleaned_groups != selected_groups:
+                campaign.selected_implementation_groups = cleaned_groups
+                stale_campaigns.append(campaign)
+
+        if stale_campaigns:
+            Campaign.objects.bulk_update(
+                stale_campaigns,
+                ["selected_implementation_groups"],
+                batch_size=100,
+            )
+
     def update_frameworks(self):
         """
         Update frameworks with score change handling.
@@ -1059,36 +1122,9 @@ class LibraryUpdater:
                     ).select_related("folder", "perimeter")
                 ]
 
-                # Drop selected IGs that the updated framework no longer defines.
-                valid_implementation_groups = {
-                    group.get("ref_id")
-                    for group in new_framework.implementation_groups_definition or []
-                    if isinstance(group, dict) and group.get("ref_id")
-                }
-                assessments_with_stale_implementation_groups = []
-                for compliance_assessment in compliance_assessments:
-                    selected_groups = (
-                        compliance_assessment.selected_implementation_groups or []
-                    )
-                    cleaned_groups = [
-                        group
-                        for group in selected_groups
-                        if group in valid_implementation_groups
-                    ]
-                    if cleaned_groups != selected_groups:
-                        compliance_assessment.selected_implementation_groups = (
-                            cleaned_groups
-                        )
-                        assessments_with_stale_implementation_groups.append(
-                            compliance_assessment
-                        )
-
-                if assessments_with_stale_implementation_groups:
-                    ComplianceAssessment.objects.bulk_update(
-                        assessments_with_stale_implementation_groups,
-                        ["selected_implementation_groups"],
-                        batch_size=100,
-                    )
+                self.prune_stale_implementation_groups(
+                    new_framework, compliance_assessments
+                )
 
                 existing_requirement_node_objects = {
                     rn.urn.lower(): rn
@@ -3420,6 +3456,12 @@ class SecurityException(
         null=True,
         blank=True,
     )
+    evidences = models.ManyToManyField(
+        "Evidence",
+        blank=True,
+        verbose_name=_("Evidences"),
+        related_name="security_exceptions",
+    )
     is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
     link = models.URLField(
@@ -4875,14 +4917,6 @@ class Evidence(
     def last_revision(self):
         revs = self.revisions.all()
         return max(revs, key=lambda r: r.version) if revs else None
-
-    def get_folder(self):
-        if self.applied_controls:
-            return self.applied_controls.first().folder
-        elif self.requirement_assessments:
-            return self.requirement_assessments.first().folder
-        else:
-            return None
 
     def filename(self) -> str | None:
         return self.last_revision.filename() if self.last_revision else None
@@ -9449,7 +9483,10 @@ class Answer(AbstractBaseModel, FolderMixin):
         self._defer_cel_evaluation()
 
 
-class FindingsAssessment(Assessment):
+class FindingsAssessment(Assessment, FilteringLabelMixin):
+    class Meta(Assessment.Meta, FilteringLabelMixin.Meta):
+        pass
+
     class Category(models.TextChoices):
         UNDEFINED = "--", "Undefined"
         PENTEST = "pentest", "Pentest"
@@ -9458,6 +9495,7 @@ class FindingsAssessment(Assessment):
         AUDIT = "audit", "Audit"
         SELF_IDENTIFIED = "self_identified", "Self-identified"
         POSTURE = "posture", "Posture follow-up"
+        RESPONSIBLE_DISCLOSURE = "responsible_disclosure", "Responsible disclosure"
 
     category = models.CharField(
         verbose_name=_("Category"),
@@ -9477,6 +9515,8 @@ class FindingsAssessment(Assessment):
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
+
+    reported_at = models.DateField(null=True, blank=True, verbose_name=_("Reported at"))
 
     def get_findings_metrics(self):
         findings = self.findings.all()

@@ -59,4 +59,5 @@ The current attachment shown on the evidence page is always the latest revision;
 - [Applied controls](applied-controls.md)
 - [Audits](audits.md)
 - [Tasks](tasks.md)
+- [Evidence preview](../features/evidence-preview.md)
 - [Vocabulary → Evidence](../introduction/vocabulary.md)

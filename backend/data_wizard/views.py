@@ -2,9 +2,11 @@ import csv
 import io
 import logging
 import structlog
+from pathlib import Path
 from types import MappingProxyType
 import re
 import pandas as pd
+from django.http import FileResponse
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -129,7 +131,7 @@ from privacy.serializers import (
     DataTransferWriteSerializer,
 )
 from core.constants import COUNTRY_CHOICES
-from iam.models import RoleAssignment, User
+from iam.models import Permission, RoleAssignment, User
 from core.models import FilteringLabel
 from core.utils import get_global_currency
 from uuid import UUID
@@ -148,15 +150,20 @@ import enum
 logger = structlog.get_logger(__name__)
 
 
-def resolve_container_name(request, default_prefix: str) -> str:
+def resolve_container_name(
+    request, default_prefix: str, override: Optional[str] = None
+) -> str:
     """Return a user-supplied name for an imported container object (assessment,
     study, etc.) or a timestamped fallback.
 
     Data Wizard imports that create a single parent object (e.g. compliance /
     risk / findings assessments, EBIOS RM studies) let the client override the
-    auto-generated name via the ``X-Name`` header. When absent or blank,
+    auto-generated name via the ``X-Name`` header, or the caller pass one
+    directly. When both are absent or blank,
     ``{default_prefix}_{YYYYMMDD_HHMMSS}`` is used.
     """
+    if override and override.strip():
+        return override.strip()
     custom_name = ""
     if request is not None:
         custom_name = (request.headers.get("X-Name") or "").strip()
@@ -164,6 +171,27 @@ def resolve_container_name(request, default_prefix: str) -> str:
         return custom_name
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     return f"{default_prefix}_{timestamp}"
+
+
+def may_import(user: User, model_name: str, folder_id) -> bool:
+    """Does *user* hold ``add_<model_name>`` where the import would write?"""
+    # No target folder is legitimate: rows may carry their own `domain`, and
+    # the per-record serializer check is what scopes those writes.
+    if not folder_id:
+        return RoleAssignment.has_permission_anywhere(user, f"add_{model_name}")
+
+    try:
+        folder = Folder.objects.filter(id=UUID(str(folder_id))).first()
+    except ValueError:
+        return False
+    if folder is None:
+        return False
+    try:
+        perm = Permission.objects.get(codename=f"add_{model_name}")
+    except Permission.DoesNotExist:
+        logger.error("No import permission defined", model_name=model_name)
+        return False
+    return RoleAssignment.is_access_allowed(user=user, perm=perm, folder=folder)
 
 
 def resolve_accessible_target(model_class, target_id, user):
@@ -181,6 +209,11 @@ def get_accessible_folders_map(user: User) -> dict[str, UUID]:
     """
     Build a map of folder names to IDs that the provided user can access.
     Used by the data wizard import flow to validate targets.
+
+    Deliberately view-scoped: consumers fall back to the request folder for any
+    name absent from this map, so narrowing it to add-permitted folders would
+    silently redirect a row instead of failing it. The write serializers reject
+    the unauthorized folder loudly, which is the behaviour we want.
     """
     (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
         Folder.get_root_folder(), user, Folder
@@ -366,7 +399,9 @@ def _resolve_filtering_labels(value: Any) -> list[UUID]:
     if not value:
         return []
 
-    label_names = set(name.strip() for name in re.split(r"[|,]", value) if name.strip())
+    label_names = set(
+        name.strip() for name in re.split(r"[|,\n]", value) if name.strip()
+    )
     label_ids: list[UUID] = []
     for label_name in label_names:
         label = FilteringLabel.objects.filter(label=label_name).first()
@@ -394,7 +429,7 @@ def _resolve_vulnerabilities(
     """
     if not value or not isinstance(value, str):
         return [], []
-    tokens = [t.strip() for t in re.split(r"[|,]", value) if t.strip()]
+    tokens = [t.strip() for t in re.split(r"[|,\n]", value) if t.strip()]
     vuln_ids: list[UUID] = []
     failed_tokens: list[str] = []
     for token in tokens:
@@ -416,6 +451,135 @@ def _resolve_vulnerabilities(
             logging.exception(f"Failed to resolve vulnerability {token}")
             failed_tokens.append(token)
     return vuln_ids, failed_tokens
+
+
+def _split_multi_separator(text: Any) -> list[str]:
+    """Split a cell on newline, pipe, semicolon or comma; trimmed, non-empty."""
+    if not text or not isinstance(text, str):
+        return []
+    return [item.strip() for item in re.split(r"[\n|;,]", text) if item.strip()]
+
+
+@dataclass
+class SideObjects:
+    ids: list[UUID] = field(default_factory=list)
+    failed: list[str] = field(default_factory=list)
+    created: list[str] = field(default_factory=list)
+
+
+def _resolve_named_objects(
+    value: Any,
+    folder: "Folder",
+    request,
+    model_class,
+    serializer_class,
+    extra_create_data: Optional[dict] = None,
+) -> SideObjects:
+    """Resolve object names on a row to ids in *folder*, by ref_id then name.
+
+    Misses are created through the write serializer, and only when the user may
+    add that model there; otherwise the token comes back in `failed`.
+    """
+    resolved = SideObjects()
+    tokens = _split_multi_separator(value)
+    if not tokens:
+        return resolved
+
+    may_create: Optional[bool] = None
+    model_name = model_class._meta.model_name
+    for token in tokens:
+        obj = (
+            model_class.objects.filter(ref_id=token, folder=folder).first()
+            or model_class.objects.filter(name__iexact=token, folder=folder).first()
+        )
+        if obj is None:
+            if may_create is None:
+                may_create = may_import(request.user, model_name, folder.id)
+            if not may_create:
+                resolved.failed.append(token)
+                continue
+            serializer = serializer_class(
+                data={
+                    "name": token,
+                    "folder": str(folder.id),
+                    **(extra_create_data or {}),
+                },
+                context={"request": request},
+            )
+            if not serializer.is_valid():
+                logger.warning(
+                    "import_side_object_invalid",
+                    model=model_name,
+                    token=token,
+                    errors=serializer.errors,
+                )
+                resolved.failed.append(token)
+                continue
+            obj = serializer.save()
+            resolved.created.append(token)
+        resolved.ids.append(obj.id)
+    return resolved
+
+
+def _resolve_assets(value: Any, folder: "Folder", request) -> SideObjects:
+    return _resolve_named_objects(
+        value,
+        folder,
+        request,
+        Asset,
+        AssetWriteSerializer,
+        extra_create_data={"type": Asset.Type.SUPPORT},
+    )
+
+
+def _resolve_applied_controls(value: Any, folder: "Folder", request) -> SideObjects:
+    return _resolve_named_objects(
+        value,
+        folder,
+        request,
+        AppliedControl,
+        AppliedControlWriteSerializer,
+        extra_create_data={"status": "to_do"},
+    )
+
+
+def build_matrix_mappings(risk_matrix: RiskMatrix) -> dict:
+    """Label-to-value mappings for probability and impact, translations included."""
+    mappings: dict[str, dict[str, int]] = {"probability": {}, "impact": {}}
+
+    try:
+        matrix_definition = risk_matrix.json_definition
+        for dimension in ("probability", "impact"):
+            for entry in matrix_definition.get(dimension, []):
+                entry_id = entry.get("id")
+                if entry_id is None:
+                    continue
+                name = entry.get("name", "")
+                if name:
+                    mappings[dimension][name.lower()] = entry_id
+                for translation in entry.get("translations", {}).values():
+                    translated = translation.get("name", "")
+                    if translated:
+                        mappings[dimension][translated.lower()] = entry_id
+    except Exception:
+        logger.warning("matrix_mappings_build_failed", exc_info=True)
+
+    return mappings
+
+
+def map_risk_value(value: Any, mapping_dict: dict) -> int:
+    """Map a probability/impact label to its matrix value, -1 when undefined."""
+    if value is None or value == "":
+        return -1
+    clean_value = str(value).strip().lower()
+    if clean_value in mapping_dict:
+        return mapping_dict[clean_value]
+    logger.warning(
+        "risk_value_unmapped",
+        value=str(value),
+        available=list(mapping_dict.keys()),
+    )
+    return -1
 
 
 class RecordFileType(enum.StrEnum):
@@ -476,6 +640,57 @@ class ModelType(enum.StrEnum):
             return ModelType(model_type)
         except ValueError:
             return
+
+
+# ModelType values are model class names; only multi-object imports need an entry here.
+IMPORT_ROOT_MODEL: dict[ModelType, str] = {
+    ModelType.TPRM: "entity",
+    ModelType.EBIOS_RM_STUDY_ARM: "ebiosrmstudy",
+    ModelType.EBIOS_RM_STUDY_EXCEL: "ebiosrmstudy",
+    ModelType.EBIOS_RM_STUDY_EGERIE_XML: "ebiosrmstudy",
+    ModelType.CYFUN_ASSESSMENT: "complianceassessment",
+}
+
+
+IMPORT_TEMPLATES_DIR = Path(__file__).resolve().parent / "import_templates"
+
+# Models without an entry (ComplianceAssessment, CyFun, EBIOS variants) have no
+# generic template: their file depends on a framework or comes from an external tool.
+IMPORT_TEMPLATES: dict[ModelType, str] = {
+    ModelType.ASSET: "assets_template.xlsx",
+    ModelType.APPLIED_CONTROL: "applied_controls_template.xlsx",
+    ModelType.PERIMETER: "perimeters_template.xlsx",
+    ModelType.USER: "users_template.xlsx",
+    ModelType.ELEMENTARY_ACTION: "elementary_actions_template.xlsx",
+    ModelType.REFERENCE_CONTROL: "reference_controls_template.xlsx",
+    ModelType.THREAT: "threats_template.xlsx",
+    ModelType.FOLDER: "domains_template.xlsx",
+    ModelType.SECURITY_EXCEPTION: "security_exceptions_template.xlsx",
+    ModelType.INCIDENT: "incidents_template.xlsx",
+    ModelType.POLICY: "policies_template.xlsx",
+    ModelType.VULNERABILITY: "vulnerabilities_template.xlsx",
+    ModelType.PROCESSING: "processings_template.xlsx",
+    ModelType.TPRM: "third_parties_template.xlsx",
+    ModelType.FINDINGS_ASSESSMENT: "findings_assessment_template.xlsx",
+    ModelType.RISK_ASSESSMENT: "risk_assessment_template.xlsx",
+    ModelType.BUSINESS_IMPACT_ANALYSIS: "business_impact_analysis_template.xlsx",
+    ModelType.TASK_TEMPLATE: "tasks_template.xlsx",
+}
+
+
+class ImportTemplateView(APIView):
+    def get(self, request, model_type: str):
+        parsed = ModelType.from_string(model_type)
+        filename = IMPORT_TEMPLATES.get(parsed) if parsed else None
+        if filename is None:
+            return Response(
+                {"error": "noTemplateAvailable"}, status=status.HTTP_404_NOT_FOUND
+            )
+        return FileResponse(
+            (IMPORT_TEMPLATES_DIR / filename).open("rb"),
+            as_attachment=True,
+            filename=filename,
+        )
 
 
 @dataclass(frozen=True)
@@ -549,6 +764,8 @@ class BaseContext:
     on_conflict: ConflictMode = ConflictMode.STOP
     # Existing composite container to reconcile the import into, if any.
     target_id: Optional[str] = None
+    # Name for a container this import creates, overriding the timestamped one.
+    container_name: Optional[str] = None
 
 
 class RecordConsumer[Context = None](ABC):
@@ -566,6 +783,8 @@ class RecordConsumer[Context = None](ABC):
         self.framework_id = base_context.framework_id
         self.on_conflict = base_context.on_conflict
         self.target_id = base_context.target_id
+        self.container_name = base_context.container_name
+        self.side_effects: dict[str, list[str]] = {}
 
     def __init_subclass__(cls):
         provided_class = getattr(cls, "SERIALIZER_CLASS", None)
@@ -752,12 +971,19 @@ class RecordConsumer[Context = None](ABC):
                     results.stopped = True
                     break
 
+        for key, names in self.side_effects.items():
+            if names:
+                results.details[key] = len(names)
+
         logger.info(
             f"{self.__class__.__name__} record processing complete. "
             f"Created: {results.created}, Updated: {results.updated}, "
             f"Skipped: {results.skipped}, Failed: {results.failed}"
         )
         return results
+
+    def _record_side_effects(self, key: str, resolved: SideObjects) -> None:
+        self.side_effects.setdefault(key, []).extend(resolved.created)
 
 
 class AssetRecordConsumer(RecordConsumer[list]):
@@ -1390,6 +1616,12 @@ class FindingsAssessmentContext:
 
 class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]):
     SERIALIZER_CLASS = FindingWriteSerializer
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {
+            "asset": ["asset", "assets", "actif", "actifs"],
+            "filtering_labels": ["filtering_labels", "labels", "label"],
+        }
+    )
     SEVERITY_MAP: Final[dict[Optional[str], int]] = {
         None: -1,
         "info": 0,
@@ -1432,7 +1664,9 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
                     error="A folder must be specified when there's no perimeter!",
                 )
 
-            assessment_name = resolve_container_name(self.request, "Followup")
+            assessment_name = resolve_container_name(
+                self.request, "Followup", self.container_name
+            )
             assessment_data = {
                 "name": assessment_name,
                 "perimeter": self.perimeter_id,
@@ -1501,16 +1735,29 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         if isinstance(priority, int) and not (1 <= priority <= 4):
             priority = None
 
-        filtering_label_ids = _resolve_filtering_labels(record.get("filtering_labels"))
+        filtering_label_ids = _resolve_filtering_labels(
+            record.get("filtering_labels") or record.get("labels")
+        )
         vulnerabilities, failed_vulnerabilities = _resolve_vulnerabilities(
             record.get("vulnerabilities"), context.folder
         )
+        # Resolve only the first: Finding.asset is a single FK, and the others
+        # would be created and left attached to nothing.
+        asset_tokens = _split_multi_separator(
+            record.get("asset")
+            or record.get("assets")
+            or record.get("actif")
+            or record.get("actifs")
+        )
+        assets = _resolve_assets(
+            asset_tokens[0] if asset_tokens else None, context.folder, self.request
+        )
+        self._record_side_effects("assets_created", assets)
 
         finding_data = {
             "name": name,
             "description": record.get("description"),
             "ref_id": record.get("ref_id"),
-            "status": record.get("status"),
             "findings_assessment": context.findings_assessment.id,
             "severity": severity,
             "filtering_labels": filtering_label_ids,
@@ -1520,17 +1767,239 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "vulnerabilities": vulnerabilities,
         }
 
+        # Only pass status when the source provides one — a None status fails
+        # serializer validation, so files without a status column keep the
+        # model default.
+        if record.get("status"):
+            finding_data["status"] = record.get("status")
+
         if priority is not None:
             finding_data["priority"] = priority
 
+        if assets.ids:
+            finding_data["asset"] = assets.ids[0]
+
+        unresolved = []
         if failed_vulnerabilities:
+            unresolved.append(
+                f"Could not resolve vulnerabilities: {', '.join(failed_vulnerabilities)}"
+            )
+        if assets.failed:
+            unresolved.append(f"Could not resolve assets: {', '.join(assets.failed)}")
+        if len(asset_tokens) > 1:
+            unresolved.append(
+                f"A finding takes a single asset: ignored {', '.join(asset_tokens[1:])}"
+            )
+        if unresolved:
             return finding_data, Error(
                 record=record,
-                error=f"Could not resolve vulnerabilities: {', '.join(failed_vulnerabilities)}",
+                error="; ".join(unresolved),
                 is_warning=True,
             )
 
         return finding_data, None
+
+
+@dataclass(frozen=True)
+class RiskAssessmentContext:
+    risk_assessment: RiskAssessment
+    folder: Folder
+    matrix_mappings: dict
+
+
+class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
+    """Import risk scenarios into a risk assessment, creating the assessment
+    itself unless the caller reconciles into an existing one."""
+
+    SERIALIZER_CLASS = RiskScenarioWriteSerializer
+    # Legacy column names alongside the ones the CSV/XLSX export writes.
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {
+            "inherent_proba": ["inherent_proba", "inherent_probability"],
+            "current_proba": ["current_proba", "current_probability"],
+            "residual_proba": ["residual_proba", "residual_probability"],
+            "existing_applied_controls": [
+                "existing_applied_controls",
+                "existing_controls",
+            ],
+            "applied_controls": ["applied_controls", "additional_controls"],
+            "assets": ["assets", "asset"],
+            "filtering_labels": ["filtering_labels", "labels", "label"],
+        }
+    )
+
+    def create_context(self) -> tuple[Optional[RiskAssessmentContext], Optional[Error]]:
+        try:
+            if self.target_id:
+                risk_assessment = resolve_accessible_target(
+                    RiskAssessment, self.target_id, self.request.user
+                )
+                if risk_assessment is None:
+                    return None, Error(
+                        record={},
+                        error=f"Target risk assessment with ID {self.target_id} does not exist",
+                    )
+                logger.info(
+                    "Reconciling import into existing risk assessment",
+                    risk_assessment_id=str(risk_assessment.id),
+                )
+            else:
+                perimeter = None
+                if self.perimeter_id:
+                    perimeter = Perimeter.objects.get(id=self.perimeter_id)
+
+                if perimeter is not None:
+                    folder = perimeter.folder
+                elif self.folder_id:
+                    folder = Folder.objects.get(id=self.folder_id)
+                else:
+                    return None, Error(
+                        record={},
+                        error="A folder must be specified when there's no perimeter!",
+                    )
+
+                if not self.matrix_id:
+                    return None, Error(
+                        record={},
+                        error="A risk matrix is required to create a risk assessment.",
+                    )
+                RiskMatrix.objects.get(id=self.matrix_id)
+
+                assessment_name = resolve_container_name(
+                    self.request, "Risk_Assessment", self.container_name
+                )
+                assessment_data = {
+                    "name": assessment_name,
+                    "perimeter": self.perimeter_id,
+                    "risk_matrix": self.matrix_id,
+                    "folder": folder.id,
+                }
+                serializer = RiskAssessmentWriteSerializer(
+                    data=assessment_data, context={"request": self.request}
+                )
+                if not serializer.is_valid():
+                    return None, Error(
+                        record=assessment_data, error=str(serializer.errors)
+                    )
+                risk_assessment = serializer.save()
+                logger.info(
+                    "Created risk assessment",
+                    name=assessment_name,
+                    risk_assessment_id=str(risk_assessment.id),
+                )
+
+            self._container = risk_assessment
+            return RiskAssessmentContext(
+                risk_assessment=risk_assessment,
+                folder=risk_assessment.folder,
+                matrix_mappings=build_matrix_mappings(risk_assessment.risk_matrix),
+            ), None
+
+        except Perimeter.DoesNotExist:
+            return None, Error(
+                record={},
+                error=f"Perimeter with ID {self.perimeter_id} does not exist",
+            )
+        except RiskMatrix.DoesNotExist:
+            return None, Error(
+                record={},
+                error=f"Risk matrix with ID {self.matrix_id} does not exist",
+            )
+        except Exception as e:
+            return None, Error(record={}, error=str(e))
+
+    def find_existing(self, record_data: dict):
+        # Match only within this assessment, never a sibling's scenario.
+        container = getattr(self, "_container", None)
+        if container is None:
+            return None
+        model_class = self.SERIALIZER_CLASS.Meta.model
+        ref_id = record_data.get("ref_id")
+        if ref_id:
+            existing = model_class.objects.filter(
+                risk_assessment=container, ref_id=ref_id
+            ).first()
+            if existing:
+                return existing
+        name = record_data.get("name")
+        if name:
+            return model_class.objects.filter(
+                risk_assessment=container, name__iexact=name
+            ).first()
+        return None
+
+    def prepare_create(
+        self, record: dict, context: RiskAssessmentContext
+    ) -> tuple[dict, Optional[Error]]:
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Risk scenario name is required")
+
+        impact = context.matrix_mappings["impact"]
+        probability = context.matrix_mappings["probability"]
+        treatment = str(record.get("treatment") or "").strip().lower()
+
+        existing_controls = _resolve_applied_controls(
+            record.get("existing_applied_controls") or record.get("existing_controls"),
+            context.folder,
+            self.request,
+        )
+        additional_controls = _resolve_applied_controls(
+            record.get("applied_controls") or record.get("additional_controls"),
+            context.folder,
+            self.request,
+        )
+        assets = _resolve_assets(
+            record.get("assets") or record.get("asset"), context.folder, self.request
+        )
+        self._record_side_effects("assets_created", assets)
+        self._record_side_effects("applied_controls_created", existing_controls)
+        self._record_side_effects("applied_controls_created", additional_controls)
+
+        scenario_data = {
+            "name": name,
+            "ref_id": record.get("ref_id", ""),
+            "description": record.get("description", ""),
+            "risk_assessment": context.risk_assessment.id,
+            "inherent_impact": map_risk_value(record.get("inherent_impact"), impact),
+            "inherent_proba": map_risk_value(
+                record.get("inherent_proba") or record.get("inherent_probability"),
+                probability,
+            ),
+            "current_impact": map_risk_value(record.get("current_impact"), impact),
+            "current_proba": map_risk_value(
+                record.get("current_proba") or record.get("current_probability"),
+                probability,
+            ),
+            "residual_impact": map_risk_value(record.get("residual_impact"), impact),
+            "residual_proba": map_risk_value(
+                record.get("residual_proba") or record.get("residual_probability"),
+                probability,
+            ),
+            "treatment": next(
+                (opt for opt, _ in RiskScenario.TREATMENT_OPTIONS if treatment == opt),
+                "open",
+            ),
+            "justification": record.get("justification", "") or "",
+            "existing_applied_controls": existing_controls.ids,
+            "applied_controls": additional_controls.ids,
+            "assets": assets.ids,
+            "filtering_labels": _resolve_filtering_labels(
+                record.get("filtering_labels") or record.get("labels")
+            ),
+        }
+
+        unresolved = existing_controls.failed + additional_controls.failed
+        messages = []
+        if unresolved:
+            messages.append(f"Could not resolve controls: {', '.join(unresolved)}")
+        if assets.failed:
+            messages.append(f"Could not resolve assets: {', '.join(assets.failed)}")
+        if messages:
+            return scenario_data, Error(
+                record=record, error="; ".join(messages), is_warning=True
+            )
+        return scenario_data, None
 
 
 class PolicyRecordConsumer(RecordConsumer):
@@ -1861,7 +2330,7 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
         """
         has_ref_id = any(f.name == "ref_id" for f in model._meta.fields)
         ids = set()
-        for entry in re.split(r"[|,]", raw):
+        for entry in re.split(r"[|,\n]", raw):
             entry = entry.strip()
             if not entry:
                 continue
@@ -2148,7 +2617,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
             status = "--"
 
         applied_controls = []
-        for token in re.split(r"[|,]", record.get("applied_controls") or ""):
+        for token in re.split(r"[|,\n]", record.get("applied_controls") or ""):
             token = token.strip()
             if not token:
                 continue
@@ -2170,7 +2639,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
                 )
 
         assets = []
-        for token in re.split(r"[|,]", record.get("assets") or ""):
+        for token in re.split(r"[|,\n]", record.get("assets") or ""):
             token = token.strip()
             if not token:
                 continue
@@ -2192,7 +2661,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
                 )
 
         security_exceptions = []
-        for token in re.split(r"[|,]", record.get("security_exceptions") or ""):
+        for token in re.split(r"[|,\n]", record.get("security_exceptions") or ""):
             token = token.strip()
             if not token:
                 continue
@@ -3346,9 +3815,14 @@ class LoadFileView(APIView):
     parser_classes = (FileUploadParser,)
     serializer_class = LoadFileSerializer
 
+    def _may_import(self, request, model_type: ModelType, folder_id) -> bool:
+        return may_import(
+            request.user,
+            IMPORT_ROOT_MODEL.get(model_type, model_type.value.lower()),
+            folder_id,
+        )
+
     def process_excel_file(self, request, record_file: io.BytesIO) -> Response:
-        # Parse Excel data
-        # Note: I can still pick the request.user for extra checks on the legit access for write operations
         model_type_string = request.META.get("HTTP_X_MODEL_TYPE")
         model_type = ModelType.from_string(model_type_string)
         folder_id = request.META.get("HTTP_X_FOLDER_ID") or None
@@ -3380,6 +3854,15 @@ class LoadFileView(APIView):
                     {"error": "UnknownModelType"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
+            if not self._may_import(request, model_type, folder_id):
+                logger.warning(
+                    "Unauthorized import attempt",
+                    user=request.user,
+                    model_type=model_type,
+                    folder_id=folder_id,
+                )
+                return Response(status=status.HTTP_403_FORBIDDEN)
 
             # Special handling for TPRM multi-sheet import
             match model_type:
@@ -3578,6 +4061,12 @@ class LoadFileView(APIView):
                                 .process_records(records)
                                 .to_dict()
                             )
+                        case ModelType.RISK_ASSESSMENT:
+                            res = (
+                                RiskAssessmentRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
                         case ModelType.POLICY:
                             res = (
                                 PolicyRecordConsumer(base_context)
@@ -3666,16 +4155,6 @@ class LoadFileView(APIView):
                     folder_id,
                     perimeter_id,
                     framework_id,
-                    on_conflict,
-                    target_id,
-                )
-            case ModelType.RISK_ASSESSMENT:
-                return self._process_risk_assessment(
-                    request,
-                    records,
-                    folder_id,
-                    perimeter_id,
-                    matrix_id,
                     on_conflict,
                     target_id,
                 )
@@ -5306,10 +5785,6 @@ class LoadFileView(APIView):
         return results
 
     def post(self, request, *args, **kwargs) -> Response:
-        # if not request.user.has_file_permission:
-        #     logger.error("Unauthorized user tried to load a file", user=request.user)
-        #     return Response({}, status=status.HTTP_403_FORBIDDEN)
-
         if not request.data:
             logger.error("Request has no data")
             return Response(
@@ -5337,537 +5812,11 @@ class LoadFileView(APIView):
         # Process the Excel file
         return self.process_excel_file(request, io.BytesIO(file_data))
 
-    def _process_risk_assessment(
-        self,
-        request,
-        records,
-        folder_id,
-        perimeter_id,
-        matrix_id,
-        on_conflict=ConflictMode.STOP,
-        target_id=None,
-    ):
-        """Process risk assessment import with the specified column structure"""
-        results = {"successful": 0, "failed": 0, "errors": []}
-
-        try:
-            if target_id is not None:
-                # Reconcile into an existing risk assessment, reusing its domain
-                # and matrix.
-                risk_assessment = resolve_accessible_target(
-                    RiskAssessment, target_id, request.user
-                )
-                if risk_assessment is None:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "error": f"Target risk assessment with ID {target_id} does not exist"
-                        }
-                    )
-                    return results
-                domain = risk_assessment.folder
-                risk_matrix = risk_assessment.risk_matrix
-                logger.info(
-                    f"Reconciling import into existing risk assessment {risk_assessment.id}"
-                )
-            else:
-                # Get the perimeter and its domain
-                perimeter = None
-                if perimeter_id is not None:
-                    perimeter = Perimeter.objects.get(id=perimeter_id)
-
-                if perimeter is not None:
-                    domain = perimeter.folder
-                else:
-                    if folder_id is None:
-                        results["failed"] += 1
-                        results["errors"].append(
-                            {
-                                "error": "A folder must be specified when there's no perimeter!"
-                            }
-                        )
-                        return results
-                    else:
-                        domain = Folder.objects.get(id=folder_id)
-
-                # Get the risk matrix
-                risk_matrix = RiskMatrix.objects.get(id=matrix_id)
-
-                assessment_name = resolve_container_name(request, "Risk_Assessment")
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-                # Create the risk assessment
-                assessment_data = {
-                    "name": assessment_name,
-                    "perimeter": perimeter_id,
-                    "risk_matrix": matrix_id,
-                    "folder": domain.id,
-                    "description": f"Imported risk assessment from Excel on {timestamp}",
-                }
-
-                risk_assessment_serializer = RiskAssessmentWriteSerializer(
-                    data=assessment_data, context={"request": request}
-                )
-
-                if not risk_assessment_serializer.is_valid():
-                    return {
-                        "successful": 0,
-                        "failed": len(records),
-                        "errors": [
-                            {
-                                "error": "Failed to create risk assessment",
-                                "details": risk_assessment_serializer.errors,
-                            }
-                        ],
-                    }
-
-                risk_assessment = risk_assessment_serializer.save()
-                logger.info(
-                    f"Created risk assessment: {assessment_name} with ID {risk_assessment.id}"
-                )
-
-            # Build matrix mapping dictionaries
-            matrix_mappings = self._build_matrix_mappings(risk_matrix)
-
-            # Process controls first - collect all unique control names
-            # Accept both the legacy columns name and the model fields name for the
-            all_controls = set()
-            for record in records:
-                existing_controls = (
-                    record.get("existing_applied_controls")
-                    or record.get("existing_controls")
-                    or ""
-                ).strip()
-                additional_controls = (
-                    record.get("additional_controls")
-                    or record.get("applied_controls")
-                    or ""
-                ).strip()
-
-                if existing_controls:
-                    all_controls.update(self._split_multi_separator(existing_controls))
-                if additional_controls:
-                    all_controls.update(
-                        self._split_multi_separator(additional_controls)
-                    )
-
-            # Create or find controls in the domain
-            control_mapping = self._create_or_find_controls(
-                list(all_controls), domain, request
-            )
-
-            # Process each record to create or reconcile risk scenarios
-            results["skipped"] = 0
-            for record in records:
-                try:
-                    scenario, action = self._process_risk_scenario_record(
-                        record,
-                        risk_assessment,
-                        matrix_mappings,
-                        control_mapping,
-                        request,
-                        domain,
-                        on_conflict,
-                    )
-                    if action == "stopped":
-                        results["failed"] += 1
-                        results["errors"].append(
-                            {
-                                "record": record,
-                                "error": "Risk scenario already exists",
-                            }
-                        )
-                        results["stopped"] = True
-                        break
-                    elif action == "skipped":
-                        results["skipped"] += 1
-                    elif action in ("created", "updated"):
-                        results["successful"] += 1
-                    else:
-                        results["failed"] += 1
-                        results["errors"].append(
-                            {
-                                "record": record,
-                                "error": "Failed to create risk scenario",
-                            }
-                        )
-
-                except Exception as e:
-                    logger.warning(f"Error creating risk scenario: {str(e)}")
-                    results["failed"] += 1
-                    results["errors"].append({"record": record, "error": str(e)})
-
-            logger.info(
-                f"Risk Assessment import complete. Success: {results['successful']}, Failed: {results['failed']}"
-            )
-            return results
-
-        except Perimeter.DoesNotExist:
-            return {
-                "successful": 0,
-                "failed": len(records),
-                "errors": [
-                    {"error": f"Perimeter with ID {perimeter_id} does not exist"}
-                ],
-            }
-        except RiskMatrix.DoesNotExist:
-            return {
-                "successful": 0,
-                "failed": len(records),
-                "errors": [
-                    {"error": f"Risk matrix with ID {matrix_id} does not exist"}
-                ],
-            }
-        except Exception as e:
-            logger.error(f"Error in risk assessment processing: {str(e)}")
-            return {
-                "successful": 0,
-                "failed": len(records),
-                "errors": [{"error": f"Failed to process risk assessment: {str(e)}"}],
-            }
-
     def _build_matrix_mappings(self, risk_matrix):
-        """Build label-to-value mapping dictionaries for probability and impact"""
-        mappings = {"probability": {}, "impact": {}}
-
-        try:
-            matrix_definition = risk_matrix.json_definition
-
-            # Build probability mapping
-            if "probability" in matrix_definition:
-                for prob_def in matrix_definition["probability"]:
-                    prob_id = prob_def.get("id")
-                    name = prob_def.get("name", "")
-
-                    # Add base name
-                    if name and prob_id is not None:
-                        mappings["probability"][name.lower()] = prob_id
-
-                    # Add translated names
-                    if "translations" in prob_def:
-                        for lang, translation in prob_def["translations"].items():
-                            translated_name = translation.get("name", "")
-                            if translated_name and prob_id is not None:
-                                mappings["probability"][translated_name.lower()] = (
-                                    prob_id
-                                )
-
-            # Build impact mapping
-            if "impact" in matrix_definition:
-                for impact_def in matrix_definition["impact"]:
-                    impact_id = impact_def.get("id")
-                    name = impact_def.get("name", "")
-
-                    # Add base name
-                    if name and impact_id is not None:
-                        mappings["impact"][name.lower()] = impact_id
-
-                    # Add translated names
-                    if "translations" in impact_def:
-                        for lang, translation in impact_def["translations"].items():
-                            translated_name = translation.get("name", "")
-                            if translated_name and impact_id is not None:
-                                mappings["impact"][translated_name.lower()] = impact_id
-
-            # Note: Risk levels are automatically computed by the system
-            # based on probability and impact values, so no need to map them
-
-        except Exception as e:
-            logger.warning(f"Error building matrix mappings: {str(e)}")
-            logger.debug(f"Matrix definition structure: {matrix_definition}")
-
-        return mappings
-
-    def _create_or_find_controls(self, control_names, domain, request):
-        """Create or find controls in the specified domain"""
-        control_mapping = {}
-
-        for control_name in control_names:
-            if not control_name:
-                continue
-
-            # Try to find existing control in the domain
-            existing_control = AppliedControl.objects.filter(
-                name=control_name, folder=domain
-            ).first()
-
-            if existing_control:
-                control_mapping[control_name] = existing_control.id
-            else:
-                # Create new control
-                try:
-                    control_data = {
-                        "name": control_name,
-                        "folder": domain.id,
-                        "description": f"Control imported from risk assessment",
-                        "status": "to_do",
-                    }
-
-                    control_serializer = AppliedControlWriteSerializer(
-                        data=control_data, context={"request": request}
-                    )
-
-                    if control_serializer.is_valid():
-                        control = control_serializer.save()
-                        control_mapping[control_name] = control.id
-                        logger.info(f"Created control: {control_name}")
-                    else:
-                        logger.warning(
-                            f"Failed to create control {control_name}: {control_serializer.errors}"
-                        )
-
-                except Exception as e:
-                    logger.warning(f"Error creating control {control_name}: {str(e)}")
-
-        return control_mapping
-
-    def _process_risk_scenario_record(
-        self,
-        record,
-        risk_assessment,
-        matrix_mappings,
-        control_mapping,
-        request,
-        domain,
-        on_conflict=ConflictMode.STOP,
-    ):
-        """Process one row, returning (scenario, action) where action is one of
-        created/updated/skipped/stopped/failed. Existing scenarios are matched by
-        ref_id, then name."""
-        try:
-            ref_id = record.get("ref_id", "")
-            name = record.get("name", "")
-            description = record.get("description", "")
-
-            if not name:
-                raise ValueError("Risk scenario name is required")
-
-            existing_scenario = None
-            if ref_id:
-                existing_scenario = RiskScenario.objects.filter(
-                    risk_assessment=risk_assessment, ref_id=ref_id
-                ).first()
-            if existing_scenario is None:
-                existing_scenario = RiskScenario.objects.filter(
-                    risk_assessment=risk_assessment, name__iexact=name
-                ).first()
-
-            if existing_scenario is not None:
-                if on_conflict == ConflictMode.SKIP:
-                    return existing_scenario, "skipped"
-                if on_conflict == ConflictMode.STOP:
-                    return existing_scenario, "stopped"
-                # UPDATE: fall through and update the existing scenario in place.
-
-            # Map risk values using matrix mappings. Accept both the short form
-            # (`*_proba`, used historically) and the long form (`*_probability`,
-            # used by the CSV/XLSX export) so that exported files round-trip cleanly.
-            inherent_impact = self._map_risk_value(
-                record.get("inherent_impact", ""), matrix_mappings["impact"]
-            )
-            inherent_proba = self._map_risk_value(
-                record.get("inherent_proba")
-                or record.get("inherent_probability")
-                or "",
-                matrix_mappings["probability"],
-            )
-
-            current_impact = self._map_risk_value(
-                record.get("current_impact", ""), matrix_mappings["impact"]
-            )
-            current_proba = self._map_risk_value(
-                record.get("current_proba") or record.get("current_probability") or "",
-                matrix_mappings["probability"],
-            )
-
-            residual_impact = self._map_risk_value(
-                record.get("residual_impact", ""), matrix_mappings["impact"]
-            )
-            residual_proba = self._map_risk_value(
-                record.get("residual_proba")
-                or record.get("residual_probability")
-                or "",
-                matrix_mappings["probability"],
-            )
-
-            logger.debug(
-                f"Risk scenario '{name}': current_proba={current_proba}, current_impact={current_impact}, "
-                f"residual_proba={residual_proba}, residual_impact={residual_impact}"
-            )
-
-            # Get treatment status
-            treatment = record.get("treatment", "").strip().lower()
-
-            # Prepare risk scenario data
-            # Note: inherent_level, current_level, and residual_level will be computed automatically
-            scenario_data = {
-                "ref_id": ref_id,
-                "name": name,
-                "description": description,
-                "risk_assessment": risk_assessment.id,
-                "inherent_impact": inherent_impact,
-                "inherent_proba": inherent_proba,
-                "current_impact": current_impact,
-                "current_proba": current_proba,
-                "residual_impact": residual_impact,
-                "residual_proba": residual_proba,
-                "treatment": next(
-                    (
-                        opt
-                        for opt, _ in RiskScenario.TREATMENT_OPTIONS
-                        if treatment == opt
-                    ),
-                    "open",
-                ),
-                "justification": record.get("justification", "") or "",
-            }
-
-            # Create or update the risk scenario
-            if existing_scenario is not None:
-                scenario_serializer = RiskScenarioWriteSerializer(
-                    instance=existing_scenario,
-                    data=scenario_data,
-                    partial=True,
-                    context={"request": request},
-                )
-            else:
-                scenario_serializer = RiskScenarioWriteSerializer(
-                    data=scenario_data, context={"request": request}
-                )
-
-            logger.debug(
-                f"Validating scenario serializer for '{name}' with data: {scenario_serializer.initial_data}"
-            )
-
-            if not scenario_serializer.is_valid():
-                logger.warning(
-                    f"Risk scenario validation failed: {scenario_serializer.errors}"
-                )
-                return None, "failed"
-
-            risk_scenario = scenario_serializer.save()
-
-            # Link filtering labels
-            filtering_label_ids = _resolve_filtering_labels(
-                record.get("filtering_labels")
-            )
-            if filtering_label_ids:
-                risk_scenario.filtering_labels.set(filtering_label_ids)
-
-            # Link existing controls
-            self._link_controls_to_scenario(
-                risk_scenario,
-                record.get("existing_applied_controls", ""),
-                control_mapping,
-                "existing_applied_controls",
-            )
-
-            # Link additional controls. Accept both the legacy column name
-            # (`additional_controls`) and the model field name (`applied_controls`,
-            # used by the CSV/XLSX export) for round-trip compatibility.
-            self._link_controls_to_scenario(
-                risk_scenario,
-                record.get("additional_controls")
-                or record.get("applied_controls")
-                or "",
-                control_mapping,
-                "applied_controls",
-            )
-
-            # Link assets (must already exist in the domain folder)
-            self._link_assets_to_scenario(
-                risk_scenario, record.get("assets", ""), domain
-            )
-
-            return risk_scenario, (
-                "updated" if existing_scenario is not None else "created"
-            )
-
-        except Exception as e:
-            logger.warning(f"Error processing risk scenario record: {str(e)}")
-            raise e
+        return build_matrix_mappings(risk_matrix)
 
     def _map_risk_value(self, value, mapping_dict):
-        """Map a risk value label to its numeric value using the mapping dictionary"""
-        if not value:
-            return -1
-
-        # Convert to string if needed (pandas may read Excel cells as numbers, etc.)
-        original_value = value
-        if not isinstance(value, str):
-            value = str(value)
-
-        # Try exact match first
-        clean_value = value.strip().lower()
-        if clean_value in mapping_dict:
-            mapped_value = mapping_dict[clean_value]
-            logger.debug(f"Mapped risk value '{original_value}' -> {mapped_value}")
-            return mapped_value
-
-        # If no match found, return -1 (undefined)
-        logger.warning(
-            f"Failed to map risk value '{original_value}' (type: {type(original_value).__name__}). "
-            f"Available values: {list(mapping_dict.keys())}"
-        )
-        return -1
-
-    @staticmethod
-    def _split_multi_separator(text: str) -> list[str]:
-        """Split a string on newline, pipe, semicolon or comma and return trimmed, non-empty items."""
-        if not text:
-            return []
-        return [item.strip() for item in re.split(r"[\n|;,]", text) if item.strip()]
-
-    def _link_controls_to_scenario(
-        self, risk_scenario, controls_text, control_mapping, field_name
-    ):
-        """Link controls to a risk scenario based on control names"""
-        if not controls_text:
-            return
-
-        control_names = self._split_multi_separator(controls_text)
-        control_ids = []
-
-        for control_name in control_names:
-            if control_name in control_mapping:
-                control_ids.append(control_mapping[control_name])
-
-        if control_ids:
-            # Get the field and set the many-to-many relationship
-            field = getattr(risk_scenario, field_name)
-            field.set(control_ids)
-
-    def _link_assets_to_scenario(self, risk_scenario, assets_text, domain):
-        """Link assets to a risk scenario based on asset names.
-
-        Assets are looked up by name within the domain folder. Missing assets are
-        created with the model's default type (SUPPORT); users can re-classify
-        them afterward from the UI.
-        """
-        if not assets_text:
-            return
-
-        asset_names = self._split_multi_separator(assets_text)
-        asset_ids = []
-
-        for asset_name in asset_names:
-            try:
-                asset, created = Asset.objects.get_or_create(
-                    name=asset_name, folder=domain
-                )
-                if created:
-                    logger.info(
-                        f"Created asset '{asset_name}' in domain '{domain.name}' "
-                        f"with default type '{asset.get_type_display()}'"
-                    )
-                asset_ids.append(asset.id)
-            except Exception:
-                logger.exception(
-                    f"Failed to resolve asset '{asset_name}' in domain '{domain.name}'"
-                )
-
-        if asset_ids:
-            risk_scenario.assets.set(asset_ids)
+        return map_risk_value(value, mapping_dict)
 
     def _process_ebios_rm_study_arm(
         self,
