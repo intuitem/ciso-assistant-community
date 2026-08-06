@@ -48,10 +48,14 @@
 		<Handle type="target" position={Position.Left} class={handleClass} />
 
 		{#if hovered && !editor?.readonly && !data.error}
+			<!-- Overlaps the circle's fill (round node: a -top-2/-right-2 corner
+			     button would sit in the fill's dead corner, so the pointer leaves
+			     the hovered circle before reaching it). Slightly larger + inset so
+			     hover region and button stay contiguous. -->
 			<button
 				type="button"
 				aria-label="Delete node"
-				class="nopan nodrag absolute -top-2 -right-2 w-4 h-4 rounded-full bg-error-500 text-white text-[8px] flex items-center justify-center hover:bg-error-600 cursor-pointer"
+				class="nopan nodrag absolute -top-1 -right-1 w-5 h-5 rounded-full bg-error-500 text-white text-[10px] flex items-center justify-center hover:bg-error-600 cursor-pointer"
 				onclick={(e) => {
 					e.stopPropagation();
 					editor?.deleteNode(id);
