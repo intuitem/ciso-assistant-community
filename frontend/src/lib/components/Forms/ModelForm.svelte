@@ -542,7 +542,16 @@
 		{:else if URLModel === 'cwes'}
 			<CWEForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'risk-scenarios'}
-			<RiskScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<RiskScenarioForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+				{...rest}
+			/>
 		{:else if URLModel === 'applied-controls' || URLModel === 'policies'}
 			<AppliedControlsPoliciesForm
 				{form}

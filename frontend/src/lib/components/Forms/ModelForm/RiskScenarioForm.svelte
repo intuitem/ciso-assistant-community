@@ -22,6 +22,8 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
+		object?: Record<string, any>;
+		context?: string;
 		updated_fields?: Set<string>;
 		[key: string]: any;
 		object?: any;
@@ -35,6 +37,7 @@
 		initialData = {},
 		updated_fields = new Set(),
 		object,
+		context = 'default',
 		...rest
 	}: Props = $props();
 
@@ -157,8 +160,8 @@
 	label={m.threats()}
 />
 {#if $page.data.featureflags?.threat_modeling}
-	<div class="flex items-center gap-2">
-		<div class="flex-1">
+	<div class="flex flex-row space-x-2 items-center">
+		<div class="w-full">
 			<AutocompleteSelect
 				{form}
 				nullable
@@ -174,14 +177,18 @@
 				label={m.threatModel()}
 			/>
 		</div>
-		<button
-			class="btn preset-tonal-primary shrink-0 h-10 w-10"
-			onclick={() => modalThreatModelCreateForm()}
-			type="button"
-			title={safeTranslate('add-' + threatModelModel.localName)}
-			aria-label={safeTranslate('add-' + threatModelModel.localName)}
-		>
-			<i class="fa-solid fa-plus text-sm"></i>
-		</button>
+		{#if context !== 'create'}
+			<div class="mt-4">
+				<button
+					class="btn preset-tonal-primary h-10 w-10"
+					onclick={() => modalThreatModelCreateForm()}
+					type="button"
+					title={safeTranslate('add-' + threatModelModel.localName)}
+					aria-label={safeTranslate('add-' + threatModelModel.localName)}
+				>
+					<i class="fa-solid fa-plus text-sm"></i>
+				</button>
+			</div>
+		{/if}
 	</div>
 {/if}
