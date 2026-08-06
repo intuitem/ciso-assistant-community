@@ -32,7 +32,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "version=$(git describe --tags --always)" >> "$GITHUB_OUTPUT"
+          # On a tag push the pushed tag IS the version: git describe breaks
+          # ties between tags on the same commit alphabetically, so a
+          # powerbi-v* tag cut on the same commit would win over v*.
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            version="$GITHUB_REF_NAME"
+          else
+            version="$(git describe --tags --always --match 'v[0-9]*')"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "build=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
   build-frontend:

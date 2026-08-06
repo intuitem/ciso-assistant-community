@@ -13,7 +13,8 @@ explicit user confirmation.
 Steps:
     1. Digest the attached file (deterministic)
     2. Detect the target model, ask the user when ambiguous (pending_choice)
-    3. For findings: pick an existing assessment to update, or a new one
+    3. For findings and risk scenarios: pick an existing assessment to update
+       or a new one, plus the matrix a new risk assessment needs
     4. Map columns via data_wizard alias tables + model fields (deterministic)
     5. Dry-run through the consumer (rolled back) and narrate exact counts
     6. Confirmation card; apply happens in views.apply_import atomically
@@ -24,6 +25,7 @@ from collections.abc import Iterator
 
 import structlog
 
+from chat.importer import format_side_effects
 from chat.tabular import (
     IMPORT_TARGETS,
     TABULAR_CONTENT_TYPES,
@@ -62,7 +64,11 @@ def should_resume(state: dict | None, message: str) -> bool:
     unrelated question would re-enter the workflow instead of being answered."""
     if not state or state.get("workflow") != "import_document":
         return False
-    if state.get("step") in ("awaiting_target", "awaiting_container"):
+    if state.get("step") in (
+        "awaiting_target",
+        "awaiting_container",
+        "awaiting_matrix",
+    ):
         return True
     return is_cancel(message)
 
@@ -72,8 +78,9 @@ class ImportDocumentWorkflow(Workflow):
     description = (
         "Digest a spreadsheet (xlsx/csv) the user attached to the chat and "
         "prepare importing its rows as objects: applied controls, pentest or "
-        "audit findings… Use this when the user uploads a file and wants its "
-        "content imported, created, or updated. Works in any language."
+        "audit findings, assets, risk scenarios of a risk assessment… Use this "
+        "when the user uploads a file and wants its content imported, created, "
+        "or updated. Works in any language."
     )
 
     def run(self, ctx: WorkflowContext) -> Iterator[SSEEvent]:
@@ -103,6 +110,10 @@ class ImportDocumentWorkflow(Workflow):
 
         if state.get("step") == "awaiting_container":
             yield from self._container_reply_turn(ctx, state)
+            return
+
+        if state.get("step") == "awaiting_matrix":
+            yield from self._matrix_reply_turn(ctx, state)
             return
 
         if state.get("step") == "import_review":
@@ -217,62 +228,72 @@ class ImportDocumentWorkflow(Workflow):
     def _proceed_to_mapping(
         self, ctx: WorkflowContext, data: dict
     ) -> Iterator[SSEEvent]:
-        """Gate between target resolution and mapping: findings live inside a
-        FindingsAssessment, so ask whether to update an existing one."""
-        if (
-            data["target"] == "finding"
-            and "container_id" not in data
-            and ctx.request is not None
-        ):
-            candidates = self._container_candidates(ctx)
+        """Ask whether to update an existing container before mapping."""
+        container = IMPORT_TARGETS[data["target"]].get("container")
+        if container and "container_id" not in data and ctx.request is not None:
+            candidates = self._container_candidates(ctx, data["target"])
             if candidates:
                 data["container_candidates"] = candidates
                 self._save_state(ctx, "awaiting_container", data)
                 yield self._token(
-                    "Should I update an existing findings assessment or create "
+                    f"Should I update an existing {container['label']} or create "
                     "a new one?"
                 )
                 yield self._pending_choice(
                     field="import_container",
                     label="Import into",
-                    items=[{"id": "__new__", "name": "Create a new assessment"}]
-                    + candidates,
+                    items=self._container_items(container, candidates),
                 )
                 return
             data["container_id"] = None
-        yield from self._narrate_mapping(ctx, data)
+        yield from self._after_container(ctx, data)
 
     @staticmethod
-    def _container_candidates(ctx: WorkflowContext) -> list[dict]:
-        from core.models import FindingsAssessment
+    def _container_items(container: dict, candidates: list[dict]) -> list[dict]:
+        return [
+            {"id": "__new__", "name": f"Create a new {container['label']}"}
+        ] + candidates
+
+    @staticmethod
+    def _container_candidates(ctx: WorkflowContext, target_key: str) -> list[dict]:
         from iam.models import Folder, RoleAssignment
 
+        from chat.tabular import container_model
+
+        model = container_model(target_key)
+        if model is None:
+            return []
         (_, change_ids, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), ctx.request.user, FindingsAssessment
+            Folder.get_root_folder(), ctx.request.user, model
         )
         return [
-            {"id": str(fa["id"]), "name": fa["name"]}
-            for fa in FindingsAssessment.objects.filter(id__in=change_ids)
+            {"id": str(row["id"]), "name": row["name"]}
+            for row in model.objects.filter(id__in=change_ids)
             .order_by("-updated_at")
             .values("id", "name")[:10]
         ]
+
+    @staticmethod
+    def _match_candidate(message: str, candidates: list[dict]) -> dict | None:
+        message = message.strip().casefold()
+        return next(
+            (c for c in candidates if c["name"].casefold() in message),
+            None,
+        )
 
     def _container_reply_turn(
         self, ctx: WorkflowContext, state: dict
     ) -> Iterator[SSEEvent]:
         data = state["data"]
-        message = ctx.user_message.strip().casefold()
+        container = IMPORT_TARGETS[data["target"]].get("container") or {}
         candidates = data.get("container_candidates", [])
 
         # Names win over the "new" keyword: an assessment called "Renewal Q1"
         # contains "new".
-        chosen = next(
-            (c for c in candidates if c["name"].casefold() in message),
-            None,
-        )
-        if chosen is None and _words(message) & _NEW_CONTAINER_WORDS:
+        chosen = self._match_candidate(ctx.user_message, candidates)
+        if chosen is None and _words(ctx.user_message) & _NEW_CONTAINER_WORDS:
             data = {**data, "container_id": None}
-            yield from self._narrate_mapping(ctx, data)
+            yield from self._after_container(ctx, data)
             return
 
         if chosen is None:
@@ -280,12 +301,83 @@ class ImportDocumentWorkflow(Workflow):
             yield self._pending_choice(
                 field="import_container",
                 label="Import into",
-                items=[{"id": "__new__", "name": "Create a new assessment"}]
-                + candidates,
+                items=self._container_items(container, candidates),
             )
             return
 
         data = {**data, "container_id": chosen["id"], "container_name": chosen["name"]}
+        yield from self._after_container(ctx, data)
+
+    # ── Risk matrix selection (only for a new risk assessment) ──────
+
+    def _after_container(self, ctx: WorkflowContext, data: dict) -> Iterator[SSEEvent]:
+        container = IMPORT_TARGETS[data["target"]].get("container") or {}
+        needs_matrix = (
+            container.get("needs_matrix")
+            and not data.get("container_id")
+            and not data.get("matrix_id")
+            and ctx.request is not None
+        )
+        if not needs_matrix:
+            yield from self._narrate_mapping(ctx, data)
+            return
+
+        matrices = self._matrix_candidates(ctx)
+        if not matrices:
+            self._clear_state(ctx)
+            yield self._token(
+                "I can't create a risk assessment: no risk matrix is available "
+                "to you. Import a risk matrix library first, then attach the "
+                "file again."
+            )
+            return
+
+        if len(matrices) == 1:
+            data = {
+                **data,
+                "matrix_id": matrices[0]["id"],
+                "matrix_name": matrices[0]["name"],
+            }
+            yield from self._narrate_mapping(ctx, data)
+            return
+
+        data = {**data, "matrix_candidates": matrices}
+        self._save_state(ctx, "awaiting_matrix", data)
+        yield self._token("Which risk matrix should the new risk assessment use?")
+        yield self._pending_choice(
+            field="import_matrix", label="Risk matrix", items=matrices
+        )
+
+    @staticmethod
+    def _matrix_candidates(ctx: WorkflowContext) -> list[dict]:
+        from core.models import RiskMatrix
+        from iam.models import Folder, RoleAssignment
+
+        (view_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), ctx.request.user, RiskMatrix
+        )
+        return [
+            {"id": str(row["id"]), "name": row["name"]}
+            for row in RiskMatrix.objects.filter(id__in=view_ids, is_enabled=True)
+            .order_by("name")
+            .values("id", "name")[:10]
+        ]
+
+    def _matrix_reply_turn(
+        self, ctx: WorkflowContext, state: dict
+    ) -> Iterator[SSEEvent]:
+        data = state["data"]
+        candidates = data.get("matrix_candidates", [])
+        chosen = self._match_candidate(ctx.user_message, candidates)
+
+        if chosen is None:
+            yield self._token("I didn't catch which risk matrix you meant.")
+            yield self._pending_choice(
+                field="import_matrix", label="Risk matrix", items=candidates
+            )
+            return
+
+        data = {**data, "matrix_id": chosen["id"], "matrix_name": chosen["name"]}
         yield from self._narrate_mapping(ctx, data)
 
     # ── Narration ────────────────────────────────────────────────────
@@ -321,6 +413,8 @@ class ImportDocumentWorkflow(Workflow):
     # ── Dry-run + confirmation ───────────────────────────────────────
 
     def _dry_run(self, ctx: WorkflowContext, data: dict) -> Iterator[SSEEvent]:
+        from rest_framework.exceptions import PermissionDenied
+
         from chat.importer import run_import
         from chat.models import IndexedDocument
 
@@ -347,7 +441,15 @@ class ImportDocumentWorkflow(Workflow):
                 folder_id=data["folder_id"],
                 dry_run=True,
                 target_id=data.get("container_id"),
+                matrix_id=data.get("matrix_id"),
             )
+        except PermissionDenied:
+            self._clear_state(ctx)
+            yield self._token(
+                f"\nYou don't have permission to import {target['label'].lower()} "
+                "into this domain."
+            )
+            return
         except Exception:
             logger.error(
                 "chat_import_dry_run_failed",
@@ -373,6 +475,12 @@ class ImportDocumentWorkflow(Workflow):
         if report["failed"]:
             summary += f", {report['failed']} invalid"
         summary += "."
+        side_effects = format_side_effects(report.get("details"))
+        if side_effects:
+            summary += (
+                f"\n\nObjects referenced by name that don't exist yet and would "
+                f"be created alongside: {side_effects}."
+            )
         if report["errors"]:
             summary += "\n\nSample issues:\n" + "\n".join(
                 f"- {e}" for e in report["errors"]

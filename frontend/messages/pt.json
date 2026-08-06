@@ -790,6 +790,7 @@
 	"removeIp": "Remover {ip}",
 	"noAllowedIpsYet": "Ainda não há IPs permitidos.",
 	"invalidFileType": "Tipo de arquivo inválido",
+	"wordTemplatesWarning": "Revise cuidadosamente o conteúdo do modelo antes do uso e certifique-se de que ele esteja em conformidade com as políticas de segurança e conformidade da sua organização.",
 	"logoHelpText": "O logotipo será exibido no cabeçalho do aplicativo. Os formatos aceitos são PNG, JPEG, WEBP, SVG.",
 	"faviconHelpText": "O favicon será exibido na aba do navegador. Os formatos aceitos são ICO, PNG, JPEG, WEBP, SVG.",
 	"entity": "Entidade",
