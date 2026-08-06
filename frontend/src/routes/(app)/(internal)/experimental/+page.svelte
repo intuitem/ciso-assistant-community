@@ -55,12 +55,6 @@
 		link="/experimental/analytics-export"
 		tags={['analytics', 'export', 'xlsx', 'reporting']}
 	/>
-	<Article
-		title="Workflow Builder"
-		desc="Design multi-actor business processes on a visual canvas: tasks with RACI assignments, conditional routing, parallel paths and sub-workflows. Publish immutable versions."
-		link="/workflows"
-		tags={['workflows', 'builder', 'canvas', 'raci']}
-	/>
 	<!-- <Article -->
 	<!-- 	title="Multi-file evidence (UX prototype)" -->
 	<!-- 	desc="Imagine an evidence whose revisions hold multiple files at once. History timeline with file-level diff (added / removed / replaced / unchanged) and arbitrary revision compare. Static fake data, no backend." -->

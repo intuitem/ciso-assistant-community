@@ -455,12 +455,6 @@ export const navData = {
 					fa_icon: 'fa-solid fa-people-arrows',
 					href: '/responsibility-matrices',
 					permissions: ['view_responsibilitymatrix']
-				},
-				{
-					name: 'workflows',
-					fa_icon: 'fa-solid fa-diagram-project',
-					href: '/workflows',
-					permissions: ['view_workflow']
 				}
 			]
 		},
