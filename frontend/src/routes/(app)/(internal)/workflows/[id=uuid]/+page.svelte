@@ -64,6 +64,7 @@
 			creatableModels={data.creatableModels}
 			readableModels={data.readableModels}
 			workflowIsActive={data.workflow.is_active}
+			workflowTimeoutSeconds={data.workflow.timeout_seconds}
 			versions={data.versions}
 			versionPinned={data.versionPinned}
 			fkOptions={data.fkOptions}

@@ -117,6 +117,12 @@ export const POST: RequestHandler = async ({ fetch, request, url, params }) => {
 			});
 		}
 
+		case 'set-timeout': {
+			return proxy(fetch, `${BASE_API_URL}/workflows/workflows/${params.id}/`, 'PATCH', {
+				timeout_seconds: Math.max(0, Math.trunc(Number(body.timeout_seconds) || 0))
+			});
+		}
+
 		case 'restore-version': {
 			const versionId = requireUuid(body.version, 'version');
 			return proxy(

@@ -34,6 +34,34 @@ def process_workflow_schedules():
     run_due_schedules()
 
 
+@db_periodic_task(crontab(minute="*"))
+def reap_timed_out_runs():
+    """Terminate runs past their absolute TTL (spec D36). The inline check in
+    _run covers sync + resumed runs; this catches runs parked WAITING on an
+    event/subprocess that never resumes — they never re-enter _run on their
+    own. Needs the Huey worker running (same as scheduled triggers)."""
+    from django.db import transaction
+
+    from .engine import _is_over_ttl, _timeout_instance
+    from .models import WorkflowInstance
+
+    candidates = WorkflowInstance.objects.filter(
+        status=WorkflowInstance.Status.ACTIVE,
+        version__timeout_seconds__gt=0,
+    ).values_list("id", flat=True)
+    for instance_id in list(candidates):
+        with transaction.atomic():
+            instance = (
+                WorkflowInstance.objects.select_for_update()
+                .select_related("version")
+                .get(id=instance_id)
+            )
+            if instance.status == WorkflowInstance.Status.ACTIVE and _is_over_ttl(
+                instance
+            ):
+                _timeout_instance(instance)
+
+
 @db_task()
 def dispatch_internal_event_task(log_entry_id, origin_depth=0):
     from auditlog.models import LogEntry

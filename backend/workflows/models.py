@@ -23,6 +23,11 @@ class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
     # Master switch (spec D32): gates AUTOMATIC execution only — manual runs
     # keep working so a paused workflow stays debuggable. Cascades to versions.
     is_active = models.BooleanField(default=True)
+    # Absolute run TTL in seconds (spec D36): a run older than this is
+    # terminated. 0 = no limit. Cascades to versions like is_active; the
+    # engine reads the frozen version copy so an edit can't retroactively
+    # change in-flight runs.
+    timeout_seconds = models.PositiveIntegerField(default=0)
     # Marketplace/catalog provenance (spec D28): where an imported document
     # came from. Purely informational — the workflow divorces at import and
     # owns its own lifecycle; nothing ever syncs back.
@@ -41,11 +46,12 @@ class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
         # inherit folder at create-time, so IAM scoping would drift.
         folder_changed = False
         active_changed = False
+        timeout_changed = False
         if self.pk:
             previous = (
                 type(self)
                 .objects.filter(pk=self.pk)
-                .values("folder_id", "is_active")
+                .values("folder_id", "is_active", "timeout_seconds")
                 .first()
             )
             if previous:
@@ -53,11 +59,16 @@ class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
                     folder_changed = True
                 if previous["is_active"] != self.is_active:
                     active_changed = True
+                if previous["timeout_seconds"] != self.timeout_seconds:
+                    timeout_changed = True
         super().save(*args, **kwargs)
         if active_changed:
             # The version flag is the enforcement layer every execution path
             # checks; not user-toggleable per version in this iteration.
             self.versions.update(is_active=self.is_active)
+        if timeout_changed:
+            # Same mirroring as is_active: the engine reads the version copy.
+            self.versions.update(timeout_seconds=self.timeout_seconds)
         if folder_changed:
             self.versions.update(folder=self.folder)
             self.triggers.update(folder=self.folder)
@@ -110,6 +121,10 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
     # Mirrors Workflow.is_active (spec D32) — set by the cascade, checked by
     # every automatic execution path.
     is_active = models.BooleanField(default=True)
+    # Frozen copy of Workflow.timeout_seconds (spec D36) — the engine reads
+    # this off instance.version so in-flight runs keep their limit even if the
+    # author edits it. 0 = no limit.
+    timeout_seconds = models.PositiveIntegerField(default=0)
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
@@ -147,6 +162,11 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.workflow.folder
+        # Inherit the TTL from the parent on first save (spec D36) so a new
+        # draft/clone carries the workflow's current limit; later edits mirror
+        # via Workflow.save(). Only on create — never clobber a frozen copy.
+        if self._state.adding:
+            self.timeout_seconds = self.workflow.timeout_seconds
         super().save(*args, **kwargs)
 
     def __str__(self):

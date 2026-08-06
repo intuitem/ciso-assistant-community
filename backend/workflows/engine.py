@@ -8,9 +8,10 @@ as `waiting`; everything else executes and advances in the same call.
 
 import contextvars
 import re
-from datetime import date
+from datetime import date, timedelta
 
 from django.db import transaction
+from django.utils import timezone
 
 from .actions import ActionError, _render_context, dig, execute_action, render
 from .models import (
@@ -387,12 +388,48 @@ def broadcast_event(event_key, emitting_instance):
     return len(waiting)
 
 
+def _is_over_ttl(instance):
+    """Has the run exceeded its absolute time limit (spec D36)? Reads the
+    frozen version copy; 0 = no limit."""
+    timeout = instance.version.timeout_seconds
+    return bool(timeout) and (
+        timezone.now() - instance.created_at > timedelta(seconds=timeout)
+    )
+
+
+def _timeout_instance(instance):
+    """Terminate an over-TTL run: mirror the max-steps branch — error live
+    tokens, log RUN_TERMINATED (no TIMED_OUT status; reuse FAILED), cascade to
+    subprocess children."""
+    instance.tokens.filter(status__in=LIVE_TOKEN_STATUSES).update(
+        status=WorkflowToken.Status.ERROR
+    )
+    _log(
+        instance,
+        WorkflowInstanceLog.EventType.RUN_TERMINATED,
+        message=f"Run exceeded its {instance.version.timeout_seconds}s time limit",
+    )
+    instance.status = WorkflowInstance.Status.FAILED
+    instance.save(update_fields=["status", "updated_at"])
+    _abandon_children(instance)
+
+
 def _run(instance):
     # A failed/completed instance must not resume (e.g. a duplicate task
     # enqueue after a max-steps failure would run another MAX_STEPS).
     if instance.status != WorkflowInstance.Status.ACTIVE:
         return
+    # A run resuming after a long park (event/subprocess wait) is over its TTL
+    # before it advances a single step.
+    if _is_over_ttl(instance):
+        _timeout_instance(instance)
+        return
     for _ in range(MAX_STEPS):
+        # Re-check each step: a long synchronous pass (big loop / subprocess
+        # fan-out) could blow the wall clock inside one _run call.
+        if _is_over_ttl(instance):
+            _timeout_instance(instance)
+            return
         # Deterministic pick: an unordered .first() lets SQLite and PG execute
         # parallel branches in different orders, so the last writer of a shared
         # variable diverges between backends.

@@ -50,6 +50,7 @@
 		creatableModels?: any[];
 		readableModels?: any[];
 		workflowIsActive?: boolean;
+		workflowTimeoutSeconds?: number;
 		versions?: any[];
 		versionPinned?: boolean;
 		fkOptions?: Record<string, any[]>;
@@ -71,6 +72,7 @@
 		creatableModels = [],
 		readableModels = [],
 		workflowIsActive = true,
+		workflowTimeoutSeconds = 0,
 		versions = [],
 		versionPinned = false,
 		fkOptions = {}
@@ -1160,6 +1162,43 @@
 		if (!res.ok) isActive = !next; // revert on failure
 	}
 
+	// Absolute run TTL (spec D36). Stored as seconds; edited as value + unit so
+	// "1 hour" doesn't mean typing 3600. Pick the largest unit that divides
+	// evenly for display.
+	const TIMEOUT_UNITS: { value: number; label: () => string }[] = [
+		{ value: 1, label: () => m.unitSeconds() },
+		{ value: 60, label: () => m.unitMinutes() },
+		{ value: 3600, label: () => m.unitHours() }
+	];
+	function splitTimeout(seconds: number) {
+		for (const u of [3600, 60, 1]) {
+			if (seconds && seconds % u === 0) return { amount: seconds / u, unit: u };
+		}
+		return { amount: 0, unit: 60 };
+	}
+	// svelte-ignore state_referenced_locally
+	let timeoutAmount = $state(splitTimeout(workflowTimeoutSeconds).amount);
+	// svelte-ignore state_referenced_locally
+	let timeoutUnit = $state(splitTimeout(workflowTimeoutSeconds).unit);
+	let savedTimeoutSeconds = $state(workflowTimeoutSeconds);
+
+	async function commitTimeout() {
+		const seconds = Math.max(0, Math.trunc(timeoutAmount)) * timeoutUnit;
+		if (seconds === savedTimeoutSeconds) return;
+		const res = await fetch(opsUrl('set-timeout'), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ timeout_seconds: seconds })
+		});
+		if (res.ok) {
+			savedTimeoutSeconds = seconds;
+		} else {
+			const restored = splitTimeout(savedTimeoutSeconds); // revert on failure
+			timeoutAmount = restored.amount;
+			timeoutUnit = restored.unit;
+		}
+	}
+
 	function selectVersion(version: any) {
 		if (version.id === activeVersionId) return;
 		goto(`/workflows/${workflowId}?version=${version.id}`, { invalidateAll: true });
@@ -1754,6 +1793,30 @@
 					{isActive ? m.triggerEnabled() : m.triggerDisabled()}
 				</span>
 			</Switch>
+			<div class="flex items-center gap-1" title={m.runTimeoutHint()}>
+				<i class="fa-solid fa-hourglass-half text-[10px] text-surface-500"></i>
+				<span class="text-[10px] uppercase tracking-wide text-surface-500">
+					{m.runTimeout()}
+				</span>
+				<input
+					type="number"
+					min="0"
+					class="input w-14 text-xs px-1 py-0.5"
+					bind:value={timeoutAmount}
+					onblur={commitTimeout}
+					data-testid="timeout-amount"
+				/>
+				<select
+					class="select w-20 text-xs px-1 py-0.5"
+					bind:value={timeoutUnit}
+					onchange={commitTimeout}
+					data-testid="timeout-unit"
+				>
+					{#each TIMEOUT_UNITS as unit (unit.value)}
+						<option value={unit.value}>{unit.label()}</option>
+					{/each}
+				</select>
+			</div>
 		{/if}
 		{#if activeRunAs}
 			<span
