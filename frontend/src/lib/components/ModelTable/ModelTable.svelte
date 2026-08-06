@@ -406,10 +406,14 @@
 
 	const filters = $derived(source?.filters ?? tableFilters);
 	const filteredFields = $derived(Object.keys(filters));
-	// Only persist filters on standalone list pages, not embedded sub-tables
+	// Column selector is offered on standalone list pages only (embedded tables
+	// pass a curated `fields` prop) -- unrelated to filter persistence below.
 	const isStandaloneTable = baseEndpoint === `/${URLModel}`;
+	// filterStoreKey is unique per parent object + embedded table instance
+	// (baseEndpoint carries the parent id and field name), so filters persist
+	// for embedded tables too, not just standalone list pages.
 	const filterStoreKey = `${page.url.pathname}::${baseEndpoint}`;
-	const storedFilters = isStandaloneTable ? ($tableFilterStates[filterStoreKey] ?? {}) : {};
+	const storedFilters = $tableFilterStates[filterStoreKey] ?? {};
 	// Check if any filter-related URL params exist
 	const hasUrlFilterParams = filteredFields.some(
 		(field) => page.url.searchParams.getAll(field).length > 0
@@ -463,11 +467,9 @@
 			return next;
 		});
 		// untracked so resetFilters can delete the entry without retriggering us
-		if (isStandaloneTable) {
-			untrack(() => {
-				$tableFilterStates[filterStoreKey] = { ...filterValues };
-			});
-		}
+		untrack(() => {
+			$tableFilterStates[filterStoreKey] = { ...filterValues };
+		});
 		setTimeout(() => {
 			handler.invalidate();
 		}, 10);
@@ -638,7 +640,6 @@
 			}
 			return data;
 		});
-		if (!isStandaloneTable) return;
 		await tick();
 		const next = { ...$tableFilterStates };
 		delete next[filterStoreKey];
