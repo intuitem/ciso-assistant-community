@@ -1,15 +1,17 @@
-// Saved-filter-eligible URLModels → their backend app_label.model.
-// Mirrors CUSTOM_FIELD_HOST_MODELS: an explicit opt-in set, not derived from
-// the backend's full registry (core/saved_filters/registry.py), so it can
-// drift if a listed model's router registration changes -- same known
-// limitation already accepted for custom fields.
-export const SAVED_FILTER_TARGET_MODELS: Record<string, string> = {
-	'risk-assessments': 'core.riskassessment',
-	'compliance-assessments': 'core.complianceassessment',
-	'applied-controls': 'core.appliedcontrol',
-	assets: 'core.asset',
-	entities: 'tprm.entity'
-};
+// Saved-filter-eligible URLModels → their backend app_label.model, fetched
+// from the backend (core/saved_filters/registry.py) instead of hardcoded --
+// a backend model rename or a newly-eligible model then needs no frontend
+// change. Fetched once per page load and cached for the module's lifetime.
+let eligibleModelsPromise: Promise<Record<string, string>> | null = null;
+
+export function getSavedFilterEligibleModels(): Promise<Record<string, string>> {
+	if (!eligibleModelsPromise) {
+		eligibleModelsPromise = fetch('/fe-api/saved-filters/eligible-models/')
+			.then((res) => (res.ok ? res.json() : {}))
+			.catch(() => ({}));
+	}
+	return eligibleModelsPromise;
+}
 
 export interface SavedFilterEntry {
 	id: string;

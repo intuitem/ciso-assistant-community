@@ -769,7 +769,7 @@
 							{@const [firstPart, ...restParts] = option.label.split(' - ')}
 							{safeTranslate(firstPart)} - {restParts.join(' - ')}
 						{:else}
-							{option.translatedLabel}
+							{option.translatedLabel ?? option.label ?? option}
 						{/if}
 					{:else}
 						{option.label || option}

@@ -55,7 +55,8 @@
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import SaveFilterModal from '$lib/components/Modals/SaveFilterModal.svelte';
 	import RenameSavedFilterModal from '$lib/components/Modals/RenameSavedFilterModal.svelte';
-	import { SAVED_FILTER_TARGET_MODELS } from '$lib/utils/savedFilters';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { getSavedFilterEligibleModels } from '$lib/utils/savedFilters';
 	import type { SavedFilterEntry, SharedSavedFilter } from '$lib/utils/savedFilters';
 	import {
 		getModalStore,
@@ -435,7 +436,13 @@
 	$effect(() => onFilterChange(filterValues));
 
 	// --- Saved filters --------------------------------------------------
-	const savedFilterModel = $derived(SAVED_FILTER_TARGET_MODELS[URLModel as string]);
+	let savedFilterTargetModels: Record<string, string> = $state({});
+	onMount(() => {
+		getSavedFilterEligibleModels().then((map) => {
+			savedFilterTargetModels = map;
+		});
+	});
+	const savedFilterModel = $derived(savedFilterTargetModels[URLModel as string]);
 
 	type AppliedSavedFilter = {
 		id: string;
@@ -445,8 +452,55 @@
 
 	let personalSavedFilters: SavedFilterEntry[] = $state([]);
 	let sharedSavedFilters: SharedSavedFilter[] = $state([]);
-	let savedFiltersOpen = $state(false);
 	let appliedSavedFilter: AppliedSavedFilter | undefined = $state();
+	const appliedSavedFilterName = $derived(
+		appliedSavedFilter?.scope === 'personal'
+			? personalSavedFilters.find((f) => f.id === appliedSavedFilter?.id)?.name
+			: sharedSavedFilters.find((f) => f.id === appliedSavedFilter?.id)?.name
+	);
+
+	// A shared filter already copied as a personal favorite is represented by
+	// that personal entry in the list -- showing both would look like a duplicate.
+	const visibleSharedFilters = $derived(
+		sharedSavedFilters.filter(
+			(shared) => !personalSavedFilters.some((p) => p.shared_id === shared.id)
+		)
+	);
+
+	const savedFilterPickerSchema = z.object({ savedFilter: z.string().optional().nullable() });
+	const savedFilterPickerForm = superForm(
+		defaults({ savedFilter: null }, zod(savedFilterPickerSchema)),
+		{
+			SPA: true,
+			dataType: 'json',
+			validators: zod(savedFilterPickerSchema),
+			taintedMessage: false
+		}
+	);
+	const savedFilterOptions = $derived([
+		...personalSavedFilters.map((entry) => ({
+			label: entry.name,
+			value: entry.id,
+			suggested: true
+		})),
+		...visibleSharedFilters.map((entry) => ({
+			label: entry.name,
+			value: entry.id,
+			suggested: false
+		}))
+	]);
+
+	function onSavedFilterPicked(value: string) {
+		if (!value) return;
+		const personal = personalSavedFilters.find((f) => f.id === value);
+		if (personal) {
+			applySavedFilter(personal, 'personal');
+		} else {
+			const shared = visibleSharedFilters.find((f) => f.id === value);
+			if (shared) applySavedFilter(shared, 'shared');
+		}
+		savedFilterPickerForm.form.update((data) => ({ ...data, savedFilter: null }));
+	}
 
 	async function loadSavedFilters() {
 		if (!savedFilterModel) return;
@@ -480,22 +534,47 @@
 			serializeFilterValues(filterValues) !== serializeFilterValues(appliedSavedFilter.properties)
 	);
 
-	function applySavedFilter(entry: SavedFilterEntry | SharedSavedFilter, scope: 'personal' | 'shared') {
+	function applySavedFilter(
+		entry: SavedFilterEntry | SharedSavedFilter,
+		scope: 'personal' | 'shared'
+	) {
 		for (const field of filteredFields) {
 			filterValues[field] = entry.properties?.[field] ?? [];
 		}
+		// filterValues drives the URL/query; the filter widgets themselves read
+		// from the SuperForm store, which must be synced separately (see resetFilters).
+		_form.form.update((data) => {
+			for (const field of filteredFields) {
+				data[field] = (entry.properties?.[field] ?? []).map((v) => v.value);
+			}
+			return data;
+		});
 		appliedSavedFilter = { id: entry.id, scope, properties: entry.properties };
-		savedFiltersOpen = false;
+		openState = false;
+	}
+
+	function clearAppliedSavedFilter() {
+		for (const field of filteredFields) {
+			filterValues[field] = [];
+		}
+		_form.form.update((data) => {
+			for (const field of filteredFields) {
+				data[field] = [];
+			}
+			return data;
+		});
+		appliedSavedFilter = undefined;
 	}
 
 	function openSaveFilterModal() {
 		const modalComponent: ModalComponent = {
 			ref: SaveFilterModal,
 			props: {
-				urlModel: URLModel,
+				model: savedFilterModel,
 				properties: { ...filterValues },
 				onSaved: (entry: SavedFilterEntry | SharedSavedFilter, scope: 'personal' | 'shared') => {
-					if (scope === 'personal') personalSavedFilters = [...personalSavedFilters, entry as SavedFilterEntry];
+					if (scope === 'personal')
+						personalSavedFilters = [...personalSavedFilters, entry as SavedFilterEntry];
 					else sharedSavedFilters = [...sharedSavedFilters, entry as SharedSavedFilter];
 					appliedSavedFilter = { id: entry.id, scope, properties: entry.properties };
 				}
@@ -525,21 +604,7 @@
 		}
 	}
 
-	async function saveDirtyPersonalFilter() {
-		if (appliedSavedFilter?.scope !== 'personal') return;
-		const res = await fetch(`/fe-api/saved-filters/personal/${appliedSavedFilter.id}/`, {
-			method: 'PATCH',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ properties: { ...filterValues } })
-		});
-		if (res.ok) {
-			const entry = (await res.json()) as SavedFilterEntry;
-			personalSavedFilters = personalSavedFilters.map((f) => (f.id === entry.id ? entry : f));
-			appliedSavedFilter = { id: entry.id, scope: 'personal', properties: entry.properties };
-		}
-	}
-
-	function openRenameModal() {
+	function openEditPersonalFilterModal() {
 		if (appliedSavedFilter?.scope !== 'personal') return;
 		const current = personalSavedFilters.find((f) => f.id === appliedSavedFilter!.id);
 		if (!current) return;
@@ -551,7 +616,7 @@
 					const res = await fetch(`/fe-api/saved-filters/personal/${appliedSavedFilter!.id}/`, {
 						method: 'PATCH',
 						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ name: newName })
+						body: JSON.stringify({ name: newName, properties: { ...filterValues } })
 					});
 					if (res.ok) {
 						const entry = (await res.json()) as SavedFilterEntry;
@@ -561,7 +626,7 @@
 				}
 			}
 		};
-		modalStore.trigger({ type: 'component', component: modalComponent, title: m.rename() });
+		modalStore.trigger({ type: 'component', component: modalComponent, title: m.edit() });
 	}
 
 	async function deletePersonalFilter() {
@@ -936,6 +1001,7 @@
 			/>
 		{:else}
 			{#if !hideFilters}
+			<div class="flex">
 				<Popover
 					open={openState}
 					onOpenChange={(e) => (openState = e.open)}
@@ -955,6 +1021,35 @@
 						<Popover.Content
 							class="card p-2 bg-surface-50-950 max-w-lg shadow-lg space-y-2 border border-surface-200-800"
 						>
+							{#if savedFilterModel}
+								<div class="space-y-1 pb-2 mb-2 border-b border-surface-200-800">
+									<p class="text-xs font-semibold text-surface-500 px-1">{m.savedFilters()}</p>
+									{#if appliedSavedFilter}
+										<div
+											class="flex items-center justify-between px-2 py-1 rounded bg-surface-100-900 text-sm font-semibold"
+										>
+											<span>{appliedSavedFilterName}</span>
+											<button
+												type="button"
+												class="text-surface-500 hover:text-surface-700-300"
+												title={m.clearSelection()}
+												onclick={() => clearAppliedSavedFilter()}
+											>
+												<i class="fa-solid fa-xmark"></i>
+											</button>
+										</div>
+									{:else if personalSavedFilters.length === 0 && visibleSharedFilters.length === 0}
+										<p class="text-sm text-surface-500 px-2 py-1">{m.noSavedFilters()}</p>
+									{:else}
+										<AutocompleteSelect
+											form={savedFilterPickerForm}
+											field="savedFilter"
+											options={savedFilterOptions}
+											onChange={(value) => onSavedFilterPicked(value)}
+										/>
+									{/if}
+								</div>
+							{/if}
 							<SuperForm {_form} validators={zod(z.object({}))}>
 								{#snippet children({ form })}
 									{#each filteredFields as field}
@@ -997,104 +1092,66 @@
 						</Popover.Content>
 					</Popover.Positioner>
 				</Popover>
-			{/if}
-			{#if savedFilterModel}
-				<Popover
-					open={savedFiltersOpen}
-					onOpenChange={(e) => (savedFiltersOpen = e.open)}
-					positioning={{ placement: 'bottom-start' }}
-					autoFocus={false}
-					onPointerDownOutside={() => (savedFiltersOpen = false)}
-					closeOnInteractOutside={false}
-				>
-					<Popover.Trigger class="btn preset-tonal-surface h-9 inline-flex items-center">
-						<i class="fa-solid fa-bookmark mr-2"></i>
-						{m.savedFilters()}
-					</Popover.Trigger>
-					<Popover.Positioner class="z-50!">
-						<Popover.Content
-							class="card p-2 bg-surface-50-950 max-w-sm shadow-lg space-y-1 border border-surface-200-800 max-h-96 overflow-y-auto"
+				{#if savedFilterModel}
+					{#if appliedSavedFilter}
+						<div
+							class="flex items-center justify-between px-2 py-1 rounded bg-surface-100-900 text-sm font-semibold"
 						>
-							{#if personalSavedFilters.length === 0 && sharedSavedFilters.length === 0}
-								<p class="text-sm text-surface-500 px-2 py-1">{m.noSavedFilters()}</p>
-							{:else}
-								{#if personalSavedFilters.length > 0}
-									<p class="text-xs font-semibold text-surface-500 px-2">{m.personalFilters()}</p>
-									{#each personalSavedFilters as entry (entry.id)}
-										<button
-											type="button"
-											class="w-full text-left px-2 py-1 rounded hover:bg-surface-100-900 text-sm font-semibold"
-											onclick={() => applySavedFilter(entry, 'personal')}
-										>
-											{entry.name}
-										</button>
-									{/each}
-								{/if}
-								{#if sharedSavedFilters.length > 0}
-									<p class="text-xs font-semibold text-surface-500 px-2 pt-1">
-										{m.sharedFilters()}
-									</p>
-									{#each sharedSavedFilters as entry (entry.id)}
-										<button
-											type="button"
-											class="w-full text-left px-2 py-1 rounded hover:bg-surface-100-900 text-sm"
-											onclick={() => applySavedFilter(entry, 'shared')}
-										>
-											{entry.name}
-										</button>
-									{/each}
-								{/if}
-							{/if}
-						</Popover.Content>
-					</Popover.Positioner>
-				</Popover>
-				<button
-					type="button"
-					class="btn preset-tonal-surface h-9"
-					title={m.saveFilter()}
-					onclick={() => openSaveFilterModal()}
-				>
-					<i class="fa-solid fa-floppy-disk"></i>
-				</button>
-				{#if appliedSavedFilter?.scope === 'shared'}
-					<button
-						type="button"
-						class="btn preset-tonal-surface h-9"
-						title={m.saveAsPersonalFilter()}
-						onclick={() => copyAsPersonal()}
-					>
-						<i class="fa-solid fa-star"></i>
-					</button>
-				{/if}
-				{#if appliedSavedFilter?.scope === 'personal'}
-					{#if savedFilterDirty}
+							<span>{appliedSavedFilterName}</span>
+							<button
+								type="button"
+								class="text-surface-500 hover:text-surface-700-300"
+								title={m.clearSelection()}
+								onclick={() => clearAppliedSavedFilter()}
+							>
+								<i class="fa-solid fa-xmark"></i>
+							</button>
+						</div>
+					{/if}
+					{#if !appliedSavedFilter && filterCount > 0}
 						<button
 							type="button"
 							class="btn preset-tonal-surface h-9"
-							title={m.save()}
-							onclick={() => saveDirtyPersonalFilter()}
+							title={m.saveFilter()}
+							onclick={() => openSaveFilterModal()}
 						>
-							<i class="fa-solid fa-check"></i>
+							<i class="fa-solid fa-floppy-disk"></i>
 						</button>
 					{/if}
-					<button
-						type="button"
-						class="btn preset-tonal-surface h-9"
-						title={m.rename()}
-						onclick={() => openRenameModal()}
-					>
-						<i class="fa-solid fa-pen"></i>
-					</button>
-					<button
-						type="button"
-						class="btn preset-tonal-surface h-9"
-						title={m.delete()}
-						onclick={() => deletePersonalFilter()}
-					>
-						<i class="fa-solid fa-trash"></i>
-					</button>
+					{#if appliedSavedFilter?.scope === 'shared'}
+						<button
+							type="button"
+							class="btn preset-tonal-surface h-9"
+							title={m.saveAsPersonalFilter()}
+							onclick={() => copyAsPersonal()}
+						>
+							<i class="fa-solid fa-star"></i>
+						</button>
+					{/if}
+					{#if appliedSavedFilter?.scope === 'personal'}
+						{#if savedFilterDirty}
+							<button
+								type="button"
+								class="btn preset-tonal-surface h-9"
+								title={m.edit()}
+								onclick={() => openEditPersonalFilterModal()}
+							>
+								<i class="fa-solid fa-pen"></i>
+							</button>
+						{/if}
+						<button
+							type="button"
+							class="btn preset-tonal-surface h-9"
+							title={m.delete()}
+							onclick={() => deletePersonalFilter()}
+						>
+							<i class="fa-solid fa-trash"></i>
+						</button>
+					{/if}
 				{/if}
+					</div>
 			{/if}
+
 			{#if search}
 				<Search {handler} bind:value={searchValue} />
 			{/if}

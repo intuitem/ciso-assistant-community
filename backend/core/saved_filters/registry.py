@@ -59,6 +59,23 @@ def eligible_models() -> set:
     return set(get_model_to_filterset_class().keys())
 
 
+def eligible_models_by_urlmodel() -> dict:
+    """{router URL prefix: 'app_label.model'} for every eligible model, so the
+    frontend can resolve its URLModel to a content_type without hardcoding
+    the mapping -- a backend model rename then needs no frontend change."""
+    from core.urls import router as drf_router
+
+    eligible = get_model_to_filterset_class()
+    mapping = {}
+    for prefix, viewset, _ in drf_router.registry:
+        model = getattr(viewset, "model", None)
+        if model not in eligible:
+            continue
+        ct = ContentType.objects.get_for_model(model)
+        mapping[prefix] = f"{ct.app_label}.{ct.model}"
+    return mapping
+
+
 def resolve_saved_filter_content_type(model: str) -> ContentType:
     """Resolve an 'app_label.model' string to a ContentType, restricted to
     models with a real FilterSet (see eligible_models) so read-visibility

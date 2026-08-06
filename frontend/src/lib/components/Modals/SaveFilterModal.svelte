@@ -1,10 +1,7 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { onMount } from 'svelte';
-	import { getModalStore, type ModalStore } from './stores';
-	import { SAVED_FILTER_TARGET_MODELS } from '$lib/utils/savedFilters';
-
-	const modalStore: ModalStore = getModalStore();
+	import FilterNameModal from './FilterNameModal.svelte';
 
 	interface DomainOption {
 		id: string;
@@ -14,20 +11,19 @@
 
 	interface Props {
 		parent: any;
-		urlModel: string;
+		model: string;
 		properties: Record<string, { value: string }[]>;
 		onSaved: (entry: any, scope: 'personal' | 'shared') => void;
 	}
 
-	let { parent, urlModel, properties, onSaved }: Props = $props();
+	let { parent, model, properties, onSaved }: Props = $props();
 
-	let name = $state('');
 	let scope = $state<'personal' | 'shared'>('personal');
 	let domains = $state<DomainOption[]>([]);
 	let selectedDomain = $state('');
 	let domainsLoading = $state(true);
-	let isSubmitting = $state(false);
-	let errorMsg = $state<string | null>(null);
+
+	const canSubmit = $derived(scope !== 'shared' || (!domainsLoading && !!selectedDomain));
 
 	function flatten(node: any, depth: number, out: DomainOption[]) {
 		if (node.writable !== false && node.uuid) {
@@ -55,54 +51,27 @@
 		}
 	});
 
-	async function handleSubmit() {
-		if (!name.trim()) return;
-		isSubmitting = true;
-		errorMsg = null;
-		const model = SAVED_FILTER_TARGET_MODELS[urlModel];
-		try {
-			const endpoint = scope === 'personal' ? '/fe-api/saved-filters/personal/' : '/fe-api/saved-filters/';
-			const body =
-				scope === 'personal'
-					? { name: name.trim(), model, properties }
-					: { name: name.trim(), model, properties, folder: selectedDomain };
-			const res = await fetch(endpoint, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(body)
-			});
-			const data = await res.json();
-			if (!res.ok) {
-				errorMsg = typeof data === 'string' ? data : JSON.stringify(data);
-				return;
-			}
-			onSaved(data, scope);
-			parent.onClose();
-		} finally {
-			isSubmitting = false;
+	async function handleSubmit(name: string) {
+		const endpoint = scope === 'personal' ? '/fe-api/saved-filters/personal/' : '/fe-api/saved-filters/';
+		const body =
+			scope === 'personal'
+				? { name, model, properties }
+				: { name, model, properties, folder: selectedDomain };
+		const res = await fetch(endpoint, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(body)
+		});
+		const data = await res.json();
+		if (!res.ok) {
+			throw new Error(typeof data === 'string' ? data : JSON.stringify(data));
 		}
+		onSaved(data, scope);
 	}
 </script>
 
-{#if $modalStore[0]}
-	<div class="card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4">
-		<div class="flex items-center justify-between">
-			<header class="text-2xl font-bold">{$modalStore[0].title ?? m.saveFilter()}</header>
-			<button
-				type="button"
-				aria-label={m.close()}
-				class="flex items-center hover:text-primary-500 cursor-pointer"
-				onclick={parent.onClose}
-			>
-				<i class="fa-solid fa-xmark"></i>
-			</button>
-		</div>
-
-		<div class="space-y-1">
-			<label class="block text-sm font-semibold" for="save-filter-name">{m.name()}</label>
-			<input id="save-filter-name" type="text" class="input w-full" bind:value={name} />
-		</div>
-
+<FilterNameModal {parent} {canSubmit} onSubmit={handleSubmit}>
+	{#snippet extraFields()}
 		<div class="space-y-1">
 			<span class="block text-sm font-semibold">{m.scope()}</span>
 			<div class="flex gap-4">
@@ -133,25 +102,5 @@
 				{/if}
 			</div>
 		{/if}
-
-		{#if errorMsg}
-			<p class="text-error-500 text-sm">{errorMsg}</p>
-		{/if}
-
-		<div class="flex justify-end gap-2">
-			<button type="button" class="btn preset-tonal" onclick={parent.onClose}>
-				{m.cancel()}
-			</button>
-			<button
-				type="button"
-				class="btn preset-filled-primary-500"
-				disabled={isSubmitting ||
-					!name.trim() ||
-					(scope === 'shared' && (domainsLoading || !selectedDomain))}
-				onclick={handleSubmit}
-			>
-				{m.save()}
-			</button>
-		</div>
-	</div>
-{/if}
+	{/snippet}
+</FilterNameModal>

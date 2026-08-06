@@ -3588,6 +3588,12 @@ class SavedFilterViewSet(BaseModelViewSet):
         refreshed = request.user.sync_saved_filters_from_shared()
         return Response({"refreshed": refreshed})
 
+    @action(detail=False, methods=["get"], url_path="eligible-models")
+    def eligible_models(self, request):
+        from core.saved_filters.registry import eligible_models_by_urlmodel
+
+        return Response(eligible_models_by_urlmodel())
+
     @action(detail=False, methods=["get", "post"])
     def personal(self, request):
         """Personal saved filters live in request.user.preferences, not in
