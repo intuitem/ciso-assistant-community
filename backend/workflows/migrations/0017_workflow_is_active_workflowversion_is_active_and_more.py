@@ -4,25 +4,35 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('workflows', '0016_workflowsecret_workflow_scoped'),
+        ("workflows", "0016_workflowsecret_workflow_scoped"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='workflow',
-            name='is_active',
+            model_name="workflow",
+            name="is_active",
             field=models.BooleanField(default=True),
         ),
         migrations.AddField(
-            model_name='workflowversion',
-            name='is_active',
+            model_name="workflowversion",
+            name="is_active",
             field=models.BooleanField(default=True),
         ),
         migrations.AlterField(
-            model_name='workflowtrigger',
-            name='last_result',
-            field=models.CharField(blank=True, choices=[('triggered', 'Triggered'), ('skipped_overlap', 'Skipped (previous run still active)'), ('skipped_unpublished', 'Skipped (unpublished)'), ('skipped_depth', 'Skipped (chain depth)'), ('skipped_inactive', 'Skipped (workflow inactive)'), ('error', 'Error')], max_length=30),
+            model_name="workflowtrigger",
+            name="last_result",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("triggered", "Triggered"),
+                    ("skipped_overlap", "Skipped (previous run still active)"),
+                    ("skipped_unpublished", "Skipped (unpublished)"),
+                    ("skipped_depth", "Skipped (chain depth)"),
+                    ("skipped_inactive", "Skipped (workflow inactive)"),
+                    ("error", "Error"),
+                ],
+                max_length=30,
+            ),
         ),
     ]

@@ -804,17 +804,13 @@ class LoadedLibraryViewSet(BaseModelViewSet):
 
         folder = Folder.objects.filter(id=request.data.get("folder")).first()
         if folder is None:
-            return Response(
-                {"error": "invalidFolder"}, status=HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": "invalidFolder"}, status=HTTP_400_BAD_REQUEST)
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename="add_workflow"),
             folder=folder,
         ):
-            return Response(
-                {"error": "permissionDenied"}, status=HTTP_403_FORBIDDEN
-            )
+            return Response({"error": "permissionDenied"}, status=HTTP_403_FORBIDDEN)
 
         warnings = []
         created = []

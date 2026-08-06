@@ -251,9 +251,7 @@ def create_instance(
             data={
                 "variables": variables,
                 **(
-                    {"seeded_variables": initial_variables}
-                    if initial_variables
-                    else {}
+                    {"seeded_variables": initial_variables} if initial_variables else {}
                 ),
             },
         )
@@ -618,9 +616,7 @@ def _process_loop(token):
     # Fresh arrival: this token becomes the controller.
     config = node.loop_config or {}
     expression = config.get("collection") or ""
-    match = (
-        LOOP_TEMPLATE_RE.match(expression) if isinstance(expression, str) else None
-    )
+    match = LOOP_TEMPLATE_RE.match(expression) if isinstance(expression, str) else None
     if match is None:
         raise ActionError("loop: collection must be a single {{path}} expression")
     _set_iteration_overlay(token)
@@ -687,9 +683,7 @@ def _loop_body_returned(controller, failed):
         return
 
     # Iteration complete: collect (unless it failed), then advance.
-    iteration_failed = any(
-        e["index"] == state["index"] for e in state["errors"]
-    )
+    iteration_failed = any(e["index"] == state["index"] for e in state["errors"])
     collect = (controller.current_node.loop_config or {}).get("collect")
     if collect and not iteration_failed:
         overlay = {

@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('workflows', '0019_alter_workflowinstancelog_event_type'),
+        ("workflows", "0019_alter_workflowinstancelog_event_type"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='workflow',
-            name='timeout_seconds',
+            model_name="workflow",
+            name="timeout_seconds",
             field=models.PositiveIntegerField(default=0),
         ),
         migrations.AddField(
-            model_name='workflowversion',
-            name='timeout_seconds',
+            model_name="workflowversion",
+            name="timeout_seconds",
             field=models.PositiveIntegerField(default=0),
         ),
     ]

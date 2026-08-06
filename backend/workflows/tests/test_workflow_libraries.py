@@ -116,9 +116,7 @@ class TestInstantiateFromLoadedLibrary:
         loaded = LoadedLibrary.objects.get(urn=document["urn"])
         client = APIClient()
         client.force_authenticate(superuser)
-        resp = client.get(
-            f"/api/loaded-libraries/{loaded.id}/preview-workflows/"
-        )
+        resp = client.get(f"/api/loaded-libraries/{loaded.id}/preview-workflows/")
         assert resp.status_code == 200, resp.data
         workflows = resp.data["workflows"]
         assert len(workflows) == 1

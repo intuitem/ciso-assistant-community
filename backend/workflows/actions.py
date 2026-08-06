@@ -303,6 +303,7 @@ def _requirements_breakdown(assessment):
         total += count
     return {"total": total, **by_result}
 
+
 READABLE_MODELS = {
     "applied_control": {
         "model": AppliedControl,
@@ -405,7 +406,9 @@ def _read_condition_to_q(condition, allowed_fields, context):
         raise ActionError(f"read_objects: unknown operator '{op}'")
     value = render(condition.get("value"), context)
     if op == "is_null":
-        return Q(**{f"{field}__isnull": _as_bool(value) if value not in (None, "") else True})
+        return Q(
+            **{f"{field}__isnull": _as_bool(value) if value not in (None, "") else True}
+        )
     if op in ("in", "not_in"):
         if isinstance(value, str):
             parsed = json_loads_or_none(value)
@@ -915,7 +918,7 @@ def validate_read_config(node):
     if limit is not None:
         try:
             valid_limit = 1 <= int(limit) <= READ_MAX_LIMIT
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             valid_limit = False
         if not valid_limit:
             errors.append(

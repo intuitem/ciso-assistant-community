@@ -218,7 +218,9 @@ class TestSchemaFreeze:
         imported, _ = import_workflow(
             document, Folder.get_root_folder(), source_version=3
         )
-        assert imported.source_urn == "urn:custom:risk:library:wf:workflow:overdue-digest"
+        assert (
+            imported.source_urn == "urn:custom:risk:library:wf:workflow:overdue-digest"
+        )
         assert imported.source_version == "3"
 
     def test_node_reference_missing_validation(self):
