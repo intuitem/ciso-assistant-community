@@ -115,18 +115,47 @@ def trigger_instance(
     return instance
 
 
+def _lock_instance_tree(instance_id):
+    """Lock an instance row after locking its ancestors, root first.
+
+    Two flows cross instance boundaries in opposite directions: a finishing
+    child hands control back to its parent (child lock held, parent lock
+    acquired in _refresh_status), while a terminating/timing-out parent
+    abandons its children (parent lock held, child rows updated). Acquiring
+    the same two rows in opposite orders deadlocks on PostgreSQL. Locking
+    top-down from the root ancestor at every transaction entry point makes
+    all acquisition follow one tree order, so no cycle can form; the price
+    is that runs within one subprocess tree serialize, which matches the
+    engine's single-token-at-a-time model anyway. The parent chain is set at
+    creation and never changes, so walking it unlocked is safe.
+    """
+    chain = [instance_id]
+    while len(chain) <= MAX_SUBPROCESS_DEPTH + 2:
+        parent_id = (
+            WorkflowInstance.objects.filter(id=chain[-1])
+            .values_list("parent_token__instance_id", flat=True)
+            .first()
+        )
+        if parent_id is None:
+            break
+        chain.append(parent_id)
+    locked = None
+    for ancestor_id in reversed(chain):
+        locked = (
+            WorkflowInstance.objects.select_for_update()
+            .select_related("version")
+            .get(id=ancestor_id)
+        )
+    return locked
+
+
 def run_instance(instance):
     # Expose this run's event-chain depth so changes its actions make can be
     # attributed by the internal-event producer (loop containment).
     depth_token = current_trigger_depth.set(instance.trigger_depth)
     try:
         with transaction.atomic():
-            locked = (
-                WorkflowInstance.objects.select_for_update()
-                .select_related("version")
-                .get(id=instance.id)
-            )
-            _run(locked)
+            _run(_lock_instance_tree(instance.id))
     finally:
         current_trigger_depth.reset(depth_token)
 
@@ -262,9 +291,7 @@ def create_instance(
 def resume_token(token):
     """Wake a waiting token (event received, subprocess finished, ...)."""
     with transaction.atomic():
-        instance = WorkflowInstance.objects.select_for_update().get(
-            id=token.instance_id
-        )
+        instance = _lock_instance_tree(token.instance_id)
         # Re-read under the lock: broadcast_event lists waiters without one, so
         # two concurrent emits could both reach here for the same token. Only
         # the first (still WAITING) resume is allowed to advance it.
@@ -288,9 +315,7 @@ def _reopen(instance):
 def retry_token(token):
     """Operator recovery: re-run an errored token from its node."""
     with transaction.atomic():
-        instance = WorkflowInstance.objects.select_for_update().get(
-            id=token.instance_id
-        )
+        instance = _lock_instance_tree(token.instance_id)
         token.refresh_from_db()
         if token.status != WorkflowToken.Status.ERROR:
             raise EngineError("Only an errored token can be retried")
@@ -314,9 +339,7 @@ def retry_token(token):
 def skip_token(token):
     """Operator recovery: skip an errored node and advance past it."""
     with transaction.atomic():
-        instance = WorkflowInstance.objects.select_for_update().get(
-            id=token.instance_id
-        )
+        instance = _lock_instance_tree(token.instance_id)
         token.refresh_from_db()
         if token.status != WorkflowToken.Status.ERROR:
             raise EngineError("Only an errored token can be skipped")
@@ -345,9 +368,7 @@ def abort_token(token):
     """Operator recovery: abandon the run. Consumes every live token
     and marks the instance ABANDONED (a manual terminal state)."""
     with transaction.atomic():
-        instance = WorkflowInstance.objects.select_for_update().get(
-            id=token.instance_id
-        )
+        instance = _lock_instance_tree(token.instance_id)
         instance.tokens.filter(
             status__in=[*LIVE_TOKEN_STATUSES, WorkflowToken.Status.ERROR]
         ).update(status=WorkflowToken.Status.CONSUMED)
@@ -1085,8 +1106,9 @@ def _refresh_status(instance):
         # {{nodes.<subprocess>.<path>}} refs, THEN apply output_mapping — but
         # under the parent instance lock, or two sibling subprocesses finishing
         # together clobber each other's read-modify-write of the parent's
-        # variables/node_outputs. Lock ordering is child→parent everywhere, so
-        # holding the child lock while waiting here cannot deadlock.
+        # variables/node_outputs. The parent row is already held: every entry
+        # point locks the whole ancestor chain root-first
+        # (_lock_instance_tree), so this select_for_update is a re-acquire.
         with transaction.atomic():
             parent_instance = WorkflowInstance.objects.select_for_update().get(
                 id=parent_token.instance_id

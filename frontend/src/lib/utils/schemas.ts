@@ -1815,7 +1815,7 @@ export const WorkflowSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
-	filtering_labels: z.array(z.string().uuid().optional()).optional()
+	filtering_labels: z.array(z.string().uuid()).optional()
 });
 
 // Metrology

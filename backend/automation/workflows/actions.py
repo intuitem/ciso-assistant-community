@@ -625,7 +625,8 @@ class HttpRequestAction(BaseAction):
             for key, value in (config.get("headers") or {}).items()
         }
         body = render(config.get("body"), context)
-        timeout = min(int(config.get("timeout") or 15), 30)
+        # Clamp both ends: requests raises ValueError on a negative timeout.
+        timeout = min(max(int(config.get("timeout") or 15), 1), 30)
 
         # Redirects are NOT followed: only the initial URL is SSRF-checked, so
         # following a 3xx Location would reach an internal address the guard

@@ -24,6 +24,11 @@ from .models import (
     WorkflowVariable,
 )
 
+# Bound for nested condition groups, shared with the import path: both the
+# builder payload and imported documents recurse over children, and an
+# unbounded tree would hit Python's recursion limit.
+MAX_CONDITION_DEPTH = 5
+
 NODE_FIELDS = [
     "type",
     "label",
@@ -306,7 +311,9 @@ def save_graph(version, payload):
     return serialize_graph(version)
 
 
-def _save_condition_tree(branch, group_data, parent, variables):
+def _save_condition_tree(branch, group_data, parent, variables, depth=0):
+    if depth > MAX_CONDITION_DEPTH:
+        raise GraphValidationError("Condition groups are nested too deeply")
     group = ConditionGroup(
         branch=branch,
         parent_group=parent,
@@ -328,7 +335,7 @@ def _save_condition_tree(branch, group_data, parent, variables):
                 setattr(condition, field, condition_data[field])
         _save_row(condition)
     for child_data in group_data.get("children", []):
-        _save_condition_tree(branch, child_data, group, variables)
+        _save_condition_tree(branch, child_data, group, variables, depth + 1)
 
 
 def _save_row(instance):

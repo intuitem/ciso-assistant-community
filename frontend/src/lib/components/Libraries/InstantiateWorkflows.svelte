@@ -66,7 +66,7 @@
 			flash.set({ type: 'success', message: m.workflowInstantiated({ names }) });
 			instantiating = false;
 		} catch (error) {
-			flash.set({ type: 'error', message: String(error) });
+			flash.set({ type: 'error', message: `${m.anErrorOccurred()}: ${String(error)}` });
 		} finally {
 			instantiateBusy = false;
 		}

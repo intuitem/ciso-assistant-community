@@ -97,7 +97,12 @@
 					class="w-full flex items-center gap-1 py-0.5 text-[11px] hover:bg-surface-100-900 rounded cursor-pointer text-left group"
 					title={'{{' + path + '}}'}
 					onclick={() => toggle(path)}
-					onkeydown={(e) => e.key === 'Enter' && e.target === e.currentTarget && toggle(path)}
+					onkeydown={(e) => {
+						if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) {
+							e.preventDefault();
+							toggle(path);
+						}
+					}}
 				>
 					<i
 						class="fa-solid fa-chevron-{expanded[path]
@@ -120,8 +125,12 @@
 					class="w-full flex items-center gap-1 py-0.5 text-[11px] hover:bg-primary-50 dark:hover:bg-primary-950 rounded cursor-pointer text-left group"
 					title={'{{' + path + '}}'}
 					onclick={() => onInsert('{{' + path + '}}')}
-					onkeydown={(e) =>
-						e.key === 'Enter' && e.target === e.currentTarget && onInsert('{{' + path + '}}')}
+					onkeydown={(e) => {
+						if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) {
+							e.preventDefault();
+							onInsert('{{' + path + '}}');
+						}
+					}}
 				>
 					<i class="fa-solid fa-circle text-[4px] text-surface-300-700 w-3 text-center"></i>
 					<span class="font-mono text-surface-800-200 shrink-0">{key}</span>

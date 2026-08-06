@@ -32,7 +32,7 @@
 		const paddingBottom = container.parentElement
 			? parseFloat(getComputedStyle(container.parentElement).paddingBottom)
 			: 0;
-		const top = container.getBoundingClientRect().top + window.scrollY;
+		const top = container.getBoundingClientRect().top;
 		canvasHeight = Math.max(400, window.innerHeight - top - paddingBottom);
 	}
 

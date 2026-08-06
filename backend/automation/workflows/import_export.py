@@ -20,7 +20,13 @@ from uuid import uuid4
 
 from django.db import transaction
 
-from .graph import REF_RE, GraphValidationError, save_graph, serialize_graph
+from .graph import (
+    MAX_CONDITION_DEPTH,
+    REF_RE,
+    GraphValidationError,
+    save_graph,
+    serialize_graph,
+)
 from .models import (
     Workflow,
     WorkflowNode,
@@ -30,7 +36,6 @@ from .models import (
 )
 
 SCHEMA_VERSION = 1
-MAX_CONDITION_DEPTH = 5
 
 SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
 UUID_RE = re.compile(r"\b[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\b")
@@ -66,6 +71,10 @@ def export_workflow(workflow):
         or workflow.published_version
         or workflow.versions.first()
     )
+    if version is None:
+        # Reachable via a raw DELETE of the last version, which bypasses the
+        # discard action's orphan guard.
+        raise WorkflowImportError("Workflow has no version to export")
     document = serialize_graph(version)
     refs = _ref_map(document["nodes"])
     variable_keys = {v["id"]: v["key"] for v in document["variables"]}
@@ -438,6 +447,13 @@ def import_workflow(data, folder, user=None, source_version=None, secrets=None):
             raise WorkflowImportError(e.message)
         _post_import_warnings(data, workflow, folder, warnings)
     return workflow, warnings
+
+
+def validate_workflow_document(data):
+    """Public structural validation of one workflow object (the library
+    pipeline validates entries without importing them). Raises
+    WorkflowImportError on bad shape."""
+    _validate_structure(data)
 
 
 def _validate_structure(data):

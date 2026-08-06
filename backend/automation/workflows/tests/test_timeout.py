@@ -78,15 +78,6 @@ class TestTimeoutField:
         version.refresh_from_db()
         assert version.timeout_seconds == 1800
 
-    def test_editing_timeout_does_not_touch_inflight_frozen_copy(self):
-        # The engine reads the version copy; changing the workflow after a
-        # version is frozen only affects future versions unless cascaded.
-        workflow, version = log_workflow(timeout_seconds=100)
-        # simulate a manual out-of-band version tweak staying put
-        WorkflowVersion.objects.filter(id=version.id).update(timeout_seconds=100)
-        version.refresh_from_db()
-        assert version.timeout_seconds == 100
-
 
 @pytest.mark.django_db
 class TestTimeoutEnforcement:

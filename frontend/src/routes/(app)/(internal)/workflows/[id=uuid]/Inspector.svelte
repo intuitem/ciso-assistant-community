@@ -12,7 +12,7 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { publicHookUrl } from './hook-url';
+	import { fetchHookSecret, publicHookUrl } from './hook-url';
 	import DataBrowser from './DataBrowser.svelte';
 	import { dig, renderTemplate } from './expressions';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
@@ -289,9 +289,20 @@
 			? (registrationsByRef[nodeDomain.ref] ?? null)
 			: null
 	);
+	// The URL credential is change-gated server-side and fetched on demand;
+	// viewers get null and the hook URL block stays hidden.
+	let hookSecrets = $state<Record<string, string>>({});
+	$effect(() => {
+		const registration = triggerRegistration;
+		if (!registration || triggerConfig?.type !== 'webhook') return;
+		if (registration.id in hookSecrets) return;
+		fetchHookSecret(workflowId, registration.id).then((secret) => {
+			if (secret) hookSecrets[registration.id] = secret;
+		});
+	});
 	const nodeHookUrl = $derived(
-		triggerRegistration && triggerConfig?.type === 'webhook'
-			? publicHookUrl(workflowId, nodeDomain.ref, triggerRegistration.secret)
+		triggerRegistration && triggerConfig?.type === 'webhook' && hookSecrets[triggerRegistration.id]
+			? publicHookUrl(workflowId, nodeDomain.ref, hookSecrets[triggerRegistration.id])
 			: null
 	);
 
@@ -314,7 +325,11 @@
 	async function rotateSecret() {
 		if (!triggerRegistration) return;
 		const res = await triggerOps('rotate-trigger-secret', { id: triggerRegistration.id });
-		if (res.ok) onRegistrationsChanged?.();
+		if (res.ok) {
+			const body = await res.json().catch(() => ({}));
+			if (typeof body.secret === 'string') hookSecrets[triggerRegistration.id] = body.secret;
+			onRegistrationsChanged?.();
+		}
 	}
 
 	// Event catalog, fetched lazily the first time an internal_event trigger

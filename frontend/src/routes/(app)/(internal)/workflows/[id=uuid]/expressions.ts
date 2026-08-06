@@ -7,7 +7,9 @@ export function dig(data: unknown, path: string): unknown {
 	let current: any = data;
 	for (const part of String(path).split('.')) {
 		if (current !== null && typeof current === 'object' && !Array.isArray(current)) {
-			if (!(part in current)) return undefined;
+			// Own keys only, like Python dict lookup on the engine side —
+			// `in` would resolve inherited names ({{constructor}}, {{toString}}).
+			if (!Object.prototype.hasOwnProperty.call(current, part)) return undefined;
 			current = current[part];
 		} else if (Array.isArray(current) && /^\d+$/.test(part) && Number(part) < current.length) {
 			current = current[Number(part)];

@@ -132,9 +132,9 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
     # Mirrors Workflow.is_active — set by the cascade, checked by
     # every automatic execution path.
     is_active = models.BooleanField(default=True)
-    # Frozen copy of Workflow.timeout_seconds — the engine reads
-    # this off instance.version so in-flight runs keep their limit even if the
-    # author edits it. 0 = no limit.
+    # Mirror of Workflow.timeout_seconds, like is_active: seeded on create,
+    # kept in sync by the Workflow.save cascade. The engine reads this copy,
+    # so a TTL edit applies to in-flight runs too. 0 = no limit.
     timeout_seconds = models.PositiveIntegerField(default=0)
     status = models.CharField(
         max_length=20,
@@ -246,7 +246,15 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
             }
             node_map = {}
             branch_map = {}
-            for node in self.nodes.all():
+            nodes = self.nodes.prefetch_related(
+                "assignments",
+                "presentation",
+                models.Prefetch(
+                    "branches__condition_groups",
+                    queryset=ConditionGroup.objects.filter(parent_group=None),
+                ),
+            )
+            for node in nodes:
                 clone = _clone_row(node, version=draft)
                 node_map[node.id] = clone
                 for assignment in node.assignments.all():
@@ -256,7 +264,10 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
                 for branch in node.branches.all():
                     branch_clone = _clone_row(branch, node=clone)
                     branch_map[branch.id] = branch_clone
-                    for group in branch.condition_groups.filter(parent_group=None):
+                    # The prefetch above narrows condition_groups to root
+                    # groups; .all() reuses that cache where .filter() would
+                    # re-query per branch.
+                    for group in branch.condition_groups.all():
                         _clone_condition_group(group, branch_clone, None, variable_map)
             for edge in self.edges.all():
                 _clone_row(
@@ -698,7 +709,10 @@ class WorkflowInstance(AbstractBaseModel, FolderMixin):
 
 class WorkflowToken(AbstractBaseModel, FolderMixin):
     class Meta(AbstractBaseModel.Meta, FolderMixin.Meta):
-        pass
+        indexes = [
+            # The engine filters an instance's tokens by status on every step.
+            models.Index(fields=["instance", "status"]),
+        ]
 
     class Status(models.TextChoices):
         ACTIVE = "active", "Active"
@@ -864,6 +878,7 @@ class WorkflowTrigger(AbstractBaseModel, FolderMixin):
         SKIPPED_DEPTH = "skipped_depth", "Skipped (chain depth)"
         SKIPPED_INACTIVE = "skipped_inactive", "Skipped (workflow inactive)"
         SKIPPED_NO_IDENTITY = "run_identity_missing", "Skipped (no run identity)"
+        SKIPPED_INVALID_SCHEDULE = "invalid_schedule", "Skipped (invalid schedule)"
         ERROR = "error", "Error"
 
     workflow = models.ForeignKey(
@@ -903,6 +918,10 @@ class WorkflowTrigger(AbstractBaseModel, FolderMixin):
                 name="unique_workflow_trigger_node_ref",
             )
         ]
+        indexes = [
+            # The scheduler tick filters due rows on exactly these three.
+            models.Index(fields=["type", "enabled", "next_run_at"]),
+        ]
 
     def save(self, *args, **kwargs):
         self.folder = self.workflow.folder
@@ -913,11 +932,17 @@ class WorkflowTrigger(AbstractBaseModel, FolderMixin):
 
 
 def _clone_row(instance, **overrides):
+    # attname copies raw FK ids, so cloning never lazy-loads the related
+    # objects it is about to override anyway.
     data = {
-        field.name: getattr(instance, field.name)
+        field.attname: getattr(instance, field.attname)
         for field in instance._meta.concrete_fields
         if field.name not in ("id", "created_at", "updated_at")
     }
+    for key in overrides:
+        # An override passed by field name ("version") must not clash with
+        # the copied raw id ("version_id") — the ORM rejects both at once.
+        data.pop(instance._meta.get_field(key).attname, None)
     data.update(overrides)
     return type(instance).objects.create(**data)
 

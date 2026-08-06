@@ -21,6 +21,8 @@ from django.utils import timezone
 
 import structlog
 
+from iam.models import Folder
+
 from .models import Condition, WorkflowInstance, WorkflowNode, WorkflowTrigger
 
 logger = structlog.get_logger(__name__)
@@ -72,10 +74,16 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
     state_cache = {}
     for trigger in triggers:
         # Hard security boundary: the event's object must live within the
-        # workflow's folder subtree, regardless of user filters.
-        if folder_id is not None and str(folder_id) not in _workflow_scope(
-            trigger.workflow
-        ):
+        # workflow's folder subtree, regardless of user filters. Events from
+        # models that carry no folder count as root-scoped, so only workflows
+        # whose scope includes the root folder may receive them — never a
+        # bypass.
+        effective_folder = (
+            str(folder_id)
+            if folder_id is not None
+            else str(Folder.get_root_folder().id)
+        )
+        if effective_folder not in _workflow_scope(trigger.workflow):
             continue
         filters = (trigger.config or {}).get("filters") or {}
         if not _filters_match(filters, payload, state_cache):
@@ -257,7 +265,14 @@ def _fetch_object(payload, state_cache):
     try:
         from django.contrib.contenttypes.models import ContentType
 
-        content_type = ContentType.objects.filter(model=payload.get("model")).first()
+        # ContentType is only unique per (app_label, model); model-name-only
+        # resolution picks an arbitrary app on a cross-app name collision.
+        # The producer sends app_label; model-only stays as a fallback for
+        # payloads predating it.
+        lookup = {"model": payload.get("model")}
+        if payload.get("app_label"):
+            lookup["app_label"] = payload["app_label"]
+        content_type = ContentType.objects.filter(**lookup).first()
         if content_type is not None:
             obj = (
                 content_type.model_class()
@@ -365,6 +380,7 @@ def payload_from_log_entry(log_entry):
             }[log_entry.action]
         ),
         "model": log_entry.content_type.model,
+        "app_label": log_entry.content_type.app_label,
         "operation": {
             log_entry.Action.CREATE: "created",
             log_entry.Action.UPDATE: "updated",

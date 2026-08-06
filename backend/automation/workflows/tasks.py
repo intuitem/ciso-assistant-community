@@ -14,16 +14,20 @@ def run_instance_task(instance_id):
 
 @db_task()
 def retry_token_task(token_id):
+    from django.utils import timezone
+
     from .engine import run_instance
     from .models import WorkflowToken
 
-    token = WorkflowToken.objects.filter(
+    # Exclusive claim (same CAS pattern as run_due_schedules): Huey may
+    # deliver a task twice, and a read-then-save window would let both
+    # deliveries run the instance.
+    claimed = WorkflowToken.objects.filter(
         id=token_id, status=WorkflowToken.Status.RETRYING
-    ).first()
-    if token is None:
+    ).update(status=WorkflowToken.Status.ACTIVE, updated_at=timezone.now())
+    if not claimed:
         return
-    token.status = WorkflowToken.Status.ACTIVE
-    token.save(update_fields=["status", "updated_at"])
+    token = WorkflowToken.objects.select_related("instance").get(id=token_id)
     run_instance(token.instance)
 
 
@@ -42,7 +46,7 @@ def reap_timed_out_runs():
     own. Needs the Huey worker running (same as scheduled triggers)."""
     from django.db import transaction
 
-    from .engine import _is_over_ttl, _timeout_instance
+    from .engine import _is_over_ttl, _lock_instance_tree, _timeout_instance
     from .models import WorkflowInstance
 
     candidates = WorkflowInstance.objects.filter(
@@ -51,11 +55,10 @@ def reap_timed_out_runs():
     ).values_list("id", flat=True)
     for instance_id in list(candidates):
         with transaction.atomic():
-            instance = (
-                WorkflowInstance.objects.select_for_update()
-                .select_related("version")
-                .get(id=instance_id)
-            )
+            # Tree lock (root ancestor first): _timeout_instance abandons
+            # children, so this transaction must follow the engine's
+            # top-down lock order.
+            instance = _lock_instance_tree(instance_id)
             if instance.status == WorkflowInstance.Status.ACTIVE and _is_over_ttl(
                 instance
             ):

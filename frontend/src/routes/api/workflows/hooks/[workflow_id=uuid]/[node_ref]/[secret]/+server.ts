@@ -32,8 +32,26 @@ export const POST: RequestHandler = async ({ params, request, getClientAddress }
 
 	const declaredLength = Number(request.headers.get('content-length') ?? '0');
 	if (declaredLength > MAX_BODY_BYTES) return payloadTooLarge();
-	const body = await request.arrayBuffer();
-	if (body.byteLength > MAX_BODY_BYTES) return payloadTooLarge();
+	// Chunked deliveries carry no Content-Length, so the precheck alone would
+	// let a sender stream unbounded data into memory: read incrementally and
+	// abort the moment the cap is crossed.
+	let body = new ArrayBuffer(0);
+	if (request.body) {
+		const reader = request.body.getReader();
+		const chunks: Uint8Array[] = [];
+		let total = 0;
+		for (;;) {
+			const { done, value } = await reader.read();
+			if (done) break;
+			total += value.byteLength;
+			if (total > MAX_BODY_BYTES) {
+				await reader.cancel();
+				return payloadTooLarge();
+			}
+			chunks.push(value);
+		}
+		body = await new Blob(chunks).arrayBuffer();
+	}
 
 	const headers = new Headers();
 	for (const name of FORWARDED_HEADERS) {

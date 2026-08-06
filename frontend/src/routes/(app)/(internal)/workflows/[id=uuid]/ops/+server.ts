@@ -193,6 +193,16 @@ export const POST: RequestHandler = async ({ fetch, request, url, params }) => {
 			);
 		}
 
+		case 'trigger-hook-secret': {
+			// Change-gated on the backend: viewers get a 403 and the builder
+			// simply hides the hook URL.
+			return proxy(
+				fetch,
+				`${BASE_API_URL}/workflows/workflow-triggers/${requireUuid(body.id, 'id')}/hook-url/`,
+				'GET'
+			);
+		}
+
 		case 'rotate-trigger-secret': {
 			return proxy(
 				fetch,

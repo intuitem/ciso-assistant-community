@@ -79,15 +79,21 @@ def run_due_schedules(now=None):
     started = []
     for registration in due:
         config = registration.config or {}
+        nxt = next_occurrence(
+            config.get("cron_expression", ""), config.get("timezone", "UTC"), now
+        )
         claimed = WorkflowTrigger.objects.filter(
             id=registration.id, next_run_at=registration.next_run_at
-        ).update(
-            next_run_at=next_occurrence(
-                config.get("cron_expression", ""), config.get("timezone", "UTC"), now
-            ),
-            last_run_at=now,
-        )
+        ).update(next_run_at=nxt, last_run_at=now)
         if not claimed:
+            continue
+        if nxt is None:
+            # The expression stopped resolving (config drift, bad timezone):
+            # the schedule cannot advance, so don't fire — and record why,
+            # instead of retiring the row with no trace.
+            WorkflowTrigger.objects.filter(id=registration.id).update(
+                last_result=WorkflowTrigger.Result.SKIPPED_INVALID_SCHEDULE
+            )
             continue
         version = registration.workflow.published_version
         entry = None

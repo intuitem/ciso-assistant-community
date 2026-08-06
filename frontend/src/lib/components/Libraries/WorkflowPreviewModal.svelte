@@ -24,7 +24,9 @@
 			const res = await fetch(`/loaded-libraries/${loadedLibraryId}/preview-workflows`);
 			const body = await res.json().catch(() => ({}));
 			if (!res.ok) {
-				error = String(body.error ?? res.statusText);
+				// Some endpoints answer with a bare JSON string, others with
+				// {error: ...} — mirror InstantiateWorkflows.
+				error = String(typeof body === 'string' ? body : (body.error ?? res.statusText));
 				return;
 			}
 			workflows = body.workflows ?? [];

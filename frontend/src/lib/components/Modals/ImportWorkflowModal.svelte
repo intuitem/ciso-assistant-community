@@ -82,7 +82,10 @@
 		validators={zod(WorkflowImportSchema)}
 		action="?/importWorkflow"
 		useFocusTrap={false}
-		onSubmit={() => {
+		onUpdated={() => {
+			// Close only on a valid result — a failed import must keep the
+			// modal open so its field errors stay visible (success redirects
+			// away regardless).
 			modalStore.close();
 		}}
 	>

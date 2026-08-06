@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { m } from '$paraglide/messages';
-	import { publicHookUrl } from './hook-url';
+	import { fetchHookSecret, publicHookUrl } from './hook-url';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 
 	interface Props {
@@ -34,11 +34,28 @@
 
 	async function rotateSecret(registration: any) {
 		const res = await ops('rotate-trigger-secret', { id: registration.id });
-		if (res.ok) onRefresh();
+		if (res.ok) {
+			const body = await res.json().catch(() => ({}));
+			if (typeof body.secret === 'string') hookSecrets[registration.id] = body.secret;
+			onRefresh();
+		}
 	}
 
+	// Secrets are change-gated server-side and fetched per trigger; viewers
+	// get none and the URL column simply stays hidden for them.
+	let hookSecrets = $state<Record<string, string>>({});
+	$effect(() => {
+		for (const registration of registrations) {
+			if (registration.type !== 'webhook' || registration.id in hookSecrets) continue;
+			fetchHookSecret(workflowId, registration.id).then((secret) => {
+				if (secret) hookSecrets[registration.id] = secret;
+			});
+		}
+	});
+
 	function hookUrl(registration: any): string {
-		return publicHookUrl(workflowId, registration.node_ref, registration.secret);
+		const secret = hookSecrets[registration.id];
+		return secret ? publicHookUrl(workflowId, registration.node_ref, secret) : '';
 	}
 
 	let copiedId = $state<string | null>(null);
@@ -155,21 +172,23 @@
 						</span>
 						<span class="badge preset-tonal text-[9px]">×{registration.trigger_count ?? 0}</span>
 					{:else if registration.type === 'webhook'}
-						<span class="font-mono text-surface-500 truncate" title={hookUrl(registration)}>
-							{truncate(hookUrl(registration), 48)}
-						</span>
-						<button
-							type="button"
-							aria-label="Copy webhook URL"
-							class="btn-icon preset-tonal w-6 h-6 text-[10px] shrink-0"
-							onclick={() => copyHookUrl(registration)}
-						>
-							<i
-								class="fa-solid {copiedId === registration.id
-									? 'fa-check text-success-500'
-									: 'fa-copy'}"
-							></i>
-						</button>
+						{#if hookUrl(registration)}
+							<span class="font-mono text-surface-500 truncate" title={hookUrl(registration)}>
+								{truncate(hookUrl(registration), 48)}
+							</span>
+							<button
+								type="button"
+								aria-label="Copy webhook URL"
+								class="btn-icon preset-tonal w-6 h-6 text-[10px] shrink-0"
+								onclick={() => copyHookUrl(registration)}
+							>
+								<i
+									class="fa-solid {copiedId === registration.id
+										? 'fa-check text-success-500'
+										: 'fa-copy'}"
+								></i>
+							</button>
+						{/if}
 						<button
 							type="button"
 							title={m.rotateSecret()}

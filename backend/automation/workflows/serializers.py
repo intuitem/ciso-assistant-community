@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 
 from core.serializers import BaseModelSerializer
@@ -82,8 +83,11 @@ class WorkflowWriteSerializer(BaseModelSerializer):
         fields = "__all__"
 
     def create(self, validated_data):
-        workflow = super().create(validated_data)
-        WorkflowVersion.objects.create(workflow=workflow)
+        # ATOMIC_REQUESTS is off: without this, a failed first-version create
+        # leaves a committed workflow with no version.
+        with transaction.atomic():
+            workflow = super().create(validated_data)
+            WorkflowVersion.objects.create(workflow=workflow)
         return workflow
 
 
@@ -183,9 +187,10 @@ class WorkflowTriggerReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = WorkflowTrigger
-        # secret stays readable (builders need the hook URL; view permission
-        # gates it, matching the old workflow-level webhook_secret exposure).
-        exclude = ["hmac_secret"]
+        # Both credentials stay server-side: secret authorizes inbound
+        # deliveries, so read access must not leak it. Builders fetch the
+        # hook URL through the change-gated hook-url action instead.
+        exclude = ["hmac_secret", "secret"]
 
     def get_has_hmac(self, obj):
         return bool(obj.hmac_secret)

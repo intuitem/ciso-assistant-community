@@ -91,7 +91,7 @@
 							<button
 								type="button"
 								aria-label="Remove variable"
-								class="opacity-0 group-hover:opacity-100 text-error-500 hover:text-error-600 cursor-pointer text-[10px] transition-opacity shrink-0"
+								class="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-error-500 hover:text-error-600 cursor-pointer text-[10px] transition-opacity shrink-0"
 								onclick={() => onRemoveVariable?.(variable.id)}
 							>
 								<i class="fa-solid fa-xmark"></i>
@@ -140,7 +140,7 @@
 						<button
 							type="button"
 							aria-label="Remove secret"
-							class="ml-auto opacity-0 group-hover:opacity-100 text-error-500 hover:text-error-600 cursor-pointer text-[10px] transition-opacity"
+							class="ml-auto opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-error-500 hover:text-error-600 cursor-pointer text-[10px] transition-opacity"
 							onclick={() => onRemoveSecret?.(secret.id)}
 						>
 							<i class="fa-solid fa-xmark"></i>

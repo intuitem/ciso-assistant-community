@@ -38,18 +38,27 @@
 	}
 
 	export async function refresh() {
-		const res = await fetch(opsUrl('list-instances'), {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ workflow: workflowId })
-		});
-		if (res.ok) {
-			const data = await res.json();
-			runs = data.results ?? data;
-			onRunsRefreshed?.(runs);
-			if (expandedId) await loadLogs(expandedId);
+		// Called from mount and a polling interval with nothing awaiting the
+		// promise: a thrown fetch must not become an unhandled rejection or
+		// leave the spinner stuck.
+		try {
+			const res = await fetch(opsUrl('list-instances'), {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ workflow: workflowId })
+			});
+			if (res.ok) {
+				const data = await res.json();
+				runs = data.results ?? data;
+				onRunsRefreshed?.(runs);
+				if (expandedId) await loadLogs(expandedId);
+			}
+		} catch {
+			// Transient network failure: keep the current list, the next
+			// polling tick retries.
+		} finally {
+			loading = false;
 		}
-		loading = false;
 	}
 
 	async function loadLogs(instanceId: string) {

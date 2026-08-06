@@ -59,6 +59,23 @@ from .validation import validate_graph
 LONG_CACHE_TTL = 60
 
 
+class _NoAliasSafeLoader(yaml.SafeLoader):
+    """SafeLoader that rejects aliases. Alias expansion happens AFTER
+    parsing, so the upload size cap alone doesn't stop a billion-laughs
+    document from exploding in memory; workflow documents never need
+    anchors."""
+
+    def compose_node(self, parent, index):
+        if self.check_event(yaml.events.AliasEvent):
+            raise yaml.composer.ComposerError(
+                None,
+                None,
+                "YAML aliases are not allowed",
+                self.peek_event().start_mark,
+            )
+        return super().compose_node(parent, index)
+
+
 class WorkflowFilterSet(GenericFilterSet):
     trigger_type = df.MultipleChoiceFilter(
         choices=WorkflowNode.TriggerType.choices, method="filter_trigger_type"
@@ -157,8 +174,12 @@ class WorkflowViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], url_path="export-yaml")
     def export_yaml(self, request, pk=None):
         workflow = self.get_object()
+        try:
+            document = export_workflow_library(workflow)
+        except WorkflowImportError as e:
+            return Response({"error": e.message}, status=status.HTTP_400_BAD_REQUEST)
         content = yaml.dump(
-            export_workflow_library(workflow),
+            document,
             allow_unicode=True,
             default_flow_style=False,
             sort_keys=False,
@@ -180,7 +201,7 @@ class WorkflowViewSet(BaseModelViewSet):
                 {"error": "fileTooLarge"}, status=status.HTTP_400_BAD_REQUEST
             )
         try:
-            data = yaml.safe_load(uploaded_file.read())
+            data = yaml.load(uploaded_file.read(), Loader=_NoAliasSafeLoader)
         except yaml.YAMLError:
             return Response(
                 {"error": "invalidYamlFile"}, status=status.HTTP_400_BAD_REQUEST
@@ -388,7 +409,12 @@ class WorkflowTriggerViewSet(BaseModelViewSet):
     ordering = ["created_at"]
     # POST detail actions map to add_* by default; rotation is a state change
     # on an existing row and no role holds add_workflowtrigger (publish-managed).
-    permission_overrides = {"rotate_secret": "change_workflowtrigger"}
+    # hook_url exposes the URL credential, so viewing rows isn't enough: only
+    # users who may change the trigger get the secret.
+    permission_overrides = {
+        "rotate_secret": "change_workflowtrigger",
+        "hook_url": "change_workflowtrigger",
+    }
 
     def create(self, request, *args, **kwargs):
         return Response(
@@ -411,6 +437,18 @@ class WorkflowTriggerViewSet(BaseModelViewSet):
             )
         trigger.secret = generate_webhook_secret()
         trigger.save(update_fields=["secret", "updated_at"])
+        return Response({"secret": trigger.secret})
+
+    @action(detail=True, methods=["get"], url_path="hook-url")
+    def hook_url(self, request, pk=None):
+        """The webhook URL credential. Not on the read serializer: it lets
+        the holder forge deliveries that start runs, so read access alone
+        must not expose it."""
+        trigger = self.get_object()
+        if trigger.type != WorkflowTrigger.Type.WEBHOOK:
+            return Response(
+                {"error": "notAWebhookTrigger"}, status=status.HTTP_400_BAD_REQUEST
+            )
         return Response({"secret": trigger.secret})
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -752,4 +790,7 @@ class WorkflowWebhookView(APIView):
         expected = hmac.new(
             hmac_secret.encode(), request.body, hashlib.sha256
         ).hexdigest()
-        return hmac.compare_digest(provided, expected)
+        # Bytes, not str: compare_digest raises TypeError on non-ASCII str
+        # input (attacker-controlled header → 500) and only guarantees
+        # constant time for bytes.
+        return hmac.compare_digest(provided.encode(), expected.encode())

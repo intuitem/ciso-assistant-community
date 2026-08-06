@@ -26,6 +26,9 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 	// default stays draft ?? published ?? first.
 	const requestedVersion = url.searchParams.get('version');
 	const pinnedVersion = versions.find((v) => v.id === requestedVersion) ?? null;
+	// An explicit ?version= that matches nothing is a dead link, not a cue to
+	// silently show some other version.
+	if (requestedVersion && !pinnedVersion) error(404, 'Workflow version not found');
 	const activeVersion =
 		pinnedVersion ??
 		versions.find((v) => v.status === 'draft') ??

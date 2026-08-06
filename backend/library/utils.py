@@ -683,14 +683,14 @@ class LibraryImporter:
         creation happens in import_objects via the workflows app."""
         from automation.workflows.import_export import (
             WorkflowImportError,
-            _validate_structure,
+            validate_workflow_document,
         )
 
         if not isinstance(workflows, list) or not workflows:
             return "objects.workflows must be a non-empty list"
         for index, entry in enumerate(workflows):
             try:
-                _validate_structure(entry)
+                validate_workflow_document(entry)
             except WorkflowImportError as e:
                 return f"objects.workflows[{index}]: {e.message}"
         self._workflows = workflows
