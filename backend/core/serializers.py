@@ -4418,6 +4418,16 @@ class SavedFilterReadSerializer(BaseModelSerializer):
     def get_model(self, obj) -> str:
         return f"{obj.content_type.app_label}.{obj.content_type.model}"
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get("request")
+        if request is not None and getattr(request.user, "is_authenticated", False):
+            from core.saved_filters.registry import mask_inaccessible_properties
+
+            cache = self.context.setdefault("_saved_filter_accessible_cache", {})
+            data["properties"] = mask_inaccessible_properties(instance, request.user, cache)
+        return data
+
 
 class SavedFilterWriteSerializer(BaseModelSerializer):
     model = serializers.CharField(write_only=True, required=False)

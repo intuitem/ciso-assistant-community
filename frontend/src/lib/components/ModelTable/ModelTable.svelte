@@ -523,29 +523,50 @@
 		if (savedFilterModel) untrack(() => loadSavedFilters());
 	});
 
-	function serializeFilterValues(values: Record<string, { value: string }[]> | undefined) {
-		return JSON.stringify(
-			filteredFields.map((field) => [field, (values?.[field] ?? []).map((v) => v.value).sort()])
-		);
-	}
-
-	const savedFilterDirty = $derived(
-		appliedSavedFilter?.scope === 'personal' &&
-			serializeFilterValues(filterValues) !== serializeFilterValues(appliedSavedFilter.properties)
+	const appliedSharedFilter = $derived(
+		appliedSavedFilter?.scope === 'shared'
+			? sharedSavedFilters.find((f) => f.id === appliedSavedFilter!.id)
+			: undefined
 	);
+	const canEditSharedFilter = $derived(
+		!!appliedSharedFilter &&
+			canPerformActionOnObject({
+				user,
+				action: 'change',
+				model: 'savedfilter',
+				object: { folder: appliedSharedFilter.folder }
+			})
+	);
+	const canDeleteSharedFilter = $derived(
+		!!appliedSharedFilter &&
+			canPerformActionOnObject({
+				user,
+				action: 'delete',
+				model: 'savedfilter',
+				object: { folder: appliedSharedFilter.folder }
+			})
+	);
+
+	// A shared filter's values referencing an object the current user can't
+	// read come back from the backend masked as `{}` (same convention as
+	// related-object masking elsewhere, see related-visibility.ts) -- those
+	// criteria are dropped rather than applied as "undefined".
+	function unmaskedEntries(values: { value: string }[] | undefined) {
+		return (values ?? []).filter((v) => !isMaskedPlaceholder(v));
+	}
 
 	function applySavedFilter(
 		entry: SavedFilterEntry | SharedSavedFilter,
 		scope: 'personal' | 'shared'
 	) {
 		for (const field of filteredFields) {
-			filterValues[field] = entry.properties?.[field] ?? [];
+			filterValues[field] = unmaskedEntries(entry.properties?.[field]);
 		}
 		// filterValues drives the URL/query; the filter widgets themselves read
 		// from the SuperForm store, which must be synced separately (see resetFilters).
 		_form.form.update((data) => {
 			for (const field of filteredFields) {
-				data[field] = (entry.properties?.[field] ?? []).map((v) => v.value);
+				data[field] = unmaskedEntries(entry.properties?.[field]).map((v) => v.value);
 			}
 			return data;
 		});
@@ -636,6 +657,42 @@
 		});
 		if (res.ok || res.status === 204) {
 			personalSavedFilters = personalSavedFilters.filter((f) => f.id !== appliedSavedFilter!.id);
+			appliedSavedFilter = undefined;
+		}
+	}
+
+	function openEditSharedFilterModal() {
+		if (appliedSavedFilter?.scope !== 'shared') return;
+		const current = sharedSavedFilters.find((f) => f.id === appliedSavedFilter!.id);
+		if (!current) return;
+		const modalComponent: ModalComponent = {
+			ref: RenameSavedFilterModal,
+			props: {
+				initialName: current.name,
+				onRenamed: async (newName: string) => {
+					const res = await fetch(`/fe-api/saved-filters/${appliedSavedFilter!.id}/`, {
+						method: 'PATCH',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ name: newName, properties: { ...filterValues } })
+					});
+					if (res.ok) {
+						const entry = (await res.json()) as SharedSavedFilter;
+						sharedSavedFilters = sharedSavedFilters.map((f) => (f.id === entry.id ? entry : f));
+						appliedSavedFilter = { id: entry.id, scope: 'shared', properties: entry.properties };
+					}
+				}
+			}
+		};
+		modalStore.trigger({ type: 'component', component: modalComponent, title: m.edit() });
+	}
+
+	async function deleteSharedFilter() {
+		if (appliedSavedFilter?.scope !== 'shared') return;
+		const res = await fetch(`/fe-api/saved-filters/${appliedSavedFilter.id}/`, {
+			method: 'DELETE'
+		});
+		if (res.ok || res.status === 204) {
+			sharedSavedFilters = sharedSavedFilters.filter((f) => f.id !== appliedSavedFilter!.id);
 			appliedSavedFilter = undefined;
 		}
 	}
@@ -1001,7 +1058,7 @@
 			/>
 		{:else}
 			{#if !hideFilters}
-			<div class="flex">
+			<div class="flex items-center gap-2">
 				<Popover
 					open={openState}
 					onOpenChange={(e) => (openState = e.open)}
@@ -1115,7 +1172,7 @@
 							title={m.saveFilter()}
 							onclick={() => openSaveFilterModal()}
 						>
-							<i class="fa-solid fa-floppy-disk"></i>
+							<i class="fa-solid fa-floppy-disk text-surface-700-300"></i>
 						</button>
 					{/if}
 					{#if appliedSavedFilter?.scope === 'shared'}
@@ -1125,27 +1182,45 @@
 							title={m.saveAsPersonalFilter()}
 							onclick={() => copyAsPersonal()}
 						>
-							<i class="fa-solid fa-star"></i>
+							<i class="fa-solid fa-star text-surface-700-300"></i>
 						</button>
-					{/if}
-					{#if appliedSavedFilter?.scope === 'personal'}
-						{#if savedFilterDirty}
+						{#if canEditSharedFilter}
 							<button
 								type="button"
 								class="btn preset-tonal-surface h-9"
 								title={m.edit()}
-								onclick={() => openEditPersonalFilterModal()}
+								onclick={() => openEditSharedFilterModal()}
 							>
-								<i class="fa-solid fa-pen"></i>
+								<i class="fa-solid fa-pen text-surface-700-300"></i>
 							</button>
 						{/if}
+						{#if canDeleteSharedFilter}
+							<button
+								type="button"
+								class="btn preset-tonal-surface h-9"
+								title={m.delete()}
+								onclick={() => deleteSharedFilter()}
+							>
+								<i class="fa-solid fa-trash text-surface-700-300"></i>
+							</button>
+						{/if}
+					{/if}
+					{#if appliedSavedFilter?.scope === 'personal'}
+						<button
+							type="button"
+							class="btn preset-tonal-surface h-9"
+							title={m.edit()}
+							onclick={() => openEditPersonalFilterModal()}
+						>
+							<i class="fa-solid fa-pen text-surface-700-300"></i>
+						</button>
 						<button
 							type="button"
 							class="btn preset-tonal-surface h-9"
 							title={m.delete()}
 							onclick={() => deletePersonalFilter()}
 						>
-							<i class="fa-solid fa-trash"></i>
+							<i class="fa-solid fa-trash text-surface-700-300"></i>
 						</button>
 					{/if}
 				{/if}

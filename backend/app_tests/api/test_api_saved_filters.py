@@ -119,14 +119,41 @@ class TestSavedFilterPermissions:
         resp = client.delete(f"{SAVED_FILTERS_URL}{sf.id}/")
         assert resp.status_code == status.HTTP_403_FORBIDDEN
 
+    def test_domain_manager_can_update_and_delete_shared_filter(
+        self, authenticated_client
+    ):
+        domain = _make_domain("d4")
+        manager = _make_role_user(domain, RoleCodename.DOMAIN_MANAGER.value)
+        sf = SavedFilter.objects.create(
+            name="orig",
+            folder=domain,
+            content_type=_compliance_assessment_content_type(),
+            properties={"status": [{"value": "a"}]},
+        )
+        client = _client_for(manager)
+
+        resp = client.patch(
+            f"{SAVED_FILTERS_URL}{sf.id}/",
+            {"name": "renamed", "properties": {"status": [{"value": "b"}]}},
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_200_OK, resp.content
+        assert resp.json()["name"] == "renamed"
+        assert resp.json()["properties"] == {"status": [{"value": "b"}]}
+
+        resp = client.delete(f"{SAVED_FILTERS_URL}{sf.id}/")
+        assert resp.status_code == status.HTTP_204_NO_CONTENT
+        assert not SavedFilter.objects.filter(id=sf.id).exists()
+
 
 @pytest.mark.django_db
 class TestSavedFilterReferenceVisibility:
-    """A shared filter referencing an object the requester cannot read must
-    not appear in their list, even though the filter's own domain is
-    visible to them (SavedFilterViewSet._is_visible)."""
+    """A shared filter is always visible to anyone with domain access; only
+    the specific `properties` values referencing an object the requester
+    can't read are masked to `{}` (SavedFilterReadSerializer.to_representation
+    / core.saved_filters.registry.mask_inaccessible_properties)."""
 
-    def test_reader_without_access_to_referenced_audit_does_not_see_filter(
+    def test_reader_without_access_to_referenced_audit_sees_masked_value(
         self, authenticated_client
     ):
         domain_a = _make_domain("visible")
@@ -138,16 +165,26 @@ class TestSavedFilterReferenceVisibility:
             name="filter on audit B",
             folder=domain_a,
             content_type=_compliance_assessment_content_type(),
-            properties={"id": [{"value": str(audit_b.id)}]},
+            properties={
+                "id": [{"value": str(audit_b.id)}],
+                "status": [{"value": "in_progress"}],
+            },
         )
 
         reader = _make_role_user(domain_a, RoleCodename.READER.value)
         resp = _client_for(reader).get(SAVED_FILTERS_URL)
         assert resp.status_code == status.HTTP_200_OK
-        ids = {item["id"] for item in resp.json()["results"]}
-        assert str(sf.id) not in ids
+        results = {item["id"]: item for item in resp.json()["results"]}
+        # The filter itself stays visible...
+        assert str(sf.id) in results
+        # ...but the reference to an inaccessible object is masked, while an
+        # unrelated (non-referencing) field is left untouched.
+        assert results[str(sf.id)]["properties"]["id"] == [{}]
+        assert results[str(sf.id)]["properties"]["status"] == [
+            {"value": "in_progress"}
+        ]
 
-    def test_reader_with_access_to_referenced_audit_sees_filter(
+    def test_reader_with_access_to_referenced_audit_sees_unmasked_value(
         self, authenticated_client
     ):
         domain_a = _make_domain("visible2")
@@ -164,8 +201,31 @@ class TestSavedFilterReferenceVisibility:
         reader = _make_role_user(domain_a, RoleCodename.READER.value)
         resp = _client_for(reader).get(SAVED_FILTERS_URL)
         assert resp.status_code == status.HTTP_200_OK
-        ids = {item["id"] for item in resp.json()["results"]}
-        assert str(sf.id) in ids
+        results = {item["id"]: item for item in resp.json()["results"]}
+        assert str(sf.id) in results
+        assert results[str(sf.id)]["properties"]["id"] == [{"value": str(audit_a.id)}]
+
+    def test_fully_masked_filter_still_appears(self, authenticated_client):
+        """Even if every property ends up masked, the filter itself must
+        still be shown -- only its values are hidden, never the filter."""
+        domain_a = _make_domain("visible3")
+        domain_b = _make_domain("hidden2")
+        framework = _make_framework()
+        audit_b = _make_audit(domain_b, framework)
+
+        sf = SavedFilter.objects.create(
+            name="fully masked filter",
+            folder=domain_a,
+            content_type=_compliance_assessment_content_type(),
+            properties={"id": [{"value": str(audit_b.id)}]},
+        )
+
+        reader = _make_role_user(domain_a, RoleCodename.READER.value)
+        resp = _client_for(reader).get(SAVED_FILTERS_URL)
+        assert resp.status_code == status.HTTP_200_OK
+        results = {item["id"]: item for item in resp.json()["results"]}
+        assert str(sf.id) in results
+        assert results[str(sf.id)]["properties"]["id"] == [{}]
 
 
 @pytest.mark.django_db
@@ -238,9 +298,10 @@ class TestSavedFilterSync:
         )
         assert updated_entry["properties"] == {"status": [{"value": "done"}]}
 
-    def test_sync_does_not_leak_filter_the_user_lost_access_to(
-        self, authenticated_client
-    ):
+    def test_sync_masks_values_the_user_lost_access_to(self, authenticated_client):
+        """Sync still refreshes a personal copy whose shared source changed,
+        but masks the values the user can no longer read instead of either
+        leaking them or skipping the sync entirely."""
         domain_a = _make_domain("sync-a")
         domain_b = _make_domain("sync-b")
         framework = _make_framework()
@@ -268,12 +329,11 @@ class TestSavedFilterSync:
 
         resp = _client_for(reader).post(f"{SAVED_FILTERS_URL}sync/")
         assert resp.status_code == status.HTTP_200_OK, resp.content
-        assert entry["id"] not in resp.json()["refreshed"]
+        assert entry["id"] in resp.json()["refreshed"]
 
         reader.refresh_from_db()
-        untouched_entry = next(
+        updated_entry = next(
             e for e in reader.get_saved_filters() if e["id"] == entry["id"]
         )
-        assert untouched_entry["properties"] == {
-            "status": [{"value": "in_progress"}]
-        }
+        assert updated_entry["properties"]["id"] == [{}]
+        assert updated_entry["properties"]["status"] == [{"value": "done"}]

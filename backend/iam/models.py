@@ -761,10 +761,13 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def add_saved_filter(
         self, *, name: str, model: str, properties: dict, shared_id: str | None = None
     ) -> dict:
-        """Create a personal saved filter. When copied from a shared filter
-        (``shared_id`` set), the stored `updated_at` is seeded from the shared
+        """
+        Create the saved filter in the preferences. When copied from a shared filter, the attribute
+        shared_id is set.
+        the stored `updated_at` is seeded from the shared
         filter's own `updated_at` so it isn't immediately flagged as stale by
-        sync_saved_filters_from_shared()."""
+        sync_saved_filters_from_shared().
+        """
         synced_at = timezone.now().isoformat()
         if shared_id:
             from core.models import SavedFilter
@@ -788,9 +791,10 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         return entry
 
     def update_saved_filter(self, filter_id: str, **fields) -> dict:
-        """Update a personal saved filter's name/properties. Any edit detaches
-        it from a shared filter it was copied from, so a later sync doesn't
-        clobber the user's local changes."""
+        """
+        Update a personal saved filter. Removes the possible relation to a shared filter so a later sync doesn't
+        clobber the user's local changes.
+        """
         prefs = self.get_preferences()
         filters = prefs.get("saved_filters", [])
         for entry in filters:
@@ -814,17 +818,18 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         self._save_saved_filters(prefs, filters)
 
     def sync_saved_filters_from_shared(self) -> list[str]:
-        """Refresh personal filters copied from a shared filter (``shared_id``
-        set) whose source has changed since the last sync. Never copies from a
-        shared filter the user can no longer read (same reference-visibility
-        check as SavedFilterViewSet) -- otherwise this would leak filter
-        values through a detour around that restriction."""
+        """
+        Refresh personal filters copied from a shared filter (``shared_id``
+        set) whose source has changed since the last sync. Values referencing
+        an object the user can no longer read are masked (same rule as
+        SavedFilterReadSerializer) rather than skipping the sync entirely --
+        the filter stays usable, only the hidden values are redacted.
+        """
         from core.models import SavedFilter
-        from core.saved_filters.registry import get_referenced_models
+        from core.saved_filters.registry import mask_inaccessible_properties
 
         prefs = self.get_preferences()
         filters = prefs.get("saved_filters", [])
-        root_folder = Folder.get_root_folder()
         accessible_cache: dict = {}
         refreshed = []
         changed = False
@@ -841,39 +846,13 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             if shared is None:
                 continue
 
-            refs = get_referenced_models(shared.content_type.model_class())
-            visible = True
-            for field, values in (shared.properties or {}).items():
-                referenced_model = refs.get(field)
-                if referenced_model is None or not values:
-                    continue
-                if referenced_model not in accessible_cache:
-                    accessible_cache[referenced_model] = {
-                        str(i)
-                        for i in RoleAssignment.get_accessible_object_ids(
-                            root_folder, self, referenced_model
-                        )[0]
-                    }
-                accessible_ids = accessible_cache[referenced_model]
-                for value_entry in values:
-                    value = (
-                        value_entry.get("value")
-                        if isinstance(value_entry, dict)
-                        else value_entry
-                    )
-                    if value and str(value) not in accessible_ids:
-                        visible = False
-                        break
-                if not visible:
-                    break
-            if not visible:
-                continue
-
             current = shared.updated_at.isoformat()
             if entry.get("updated_at") == current:
                 continue
             entry["name"] = shared.name
-            entry["properties"] = shared.properties
+            entry["properties"] = mask_inaccessible_properties(
+                shared, self, accessible_cache
+            )
             entry["updated_at"] = current
             refreshed.append(entry["id"])
             changed = True

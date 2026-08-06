@@ -3538,50 +3538,18 @@ class VulnerabilityViewSet(BaseModelViewSet):
 
 class SavedFilterViewSet(BaseModelViewSet):
     """
-    API endpoint for domain-shared saved filters. A shared filter is hidden
-    from list/retrieve for any user who lacks read access to an object
-    referenced in its `properties` (e.g. a filter on a specific Audit is
-    invisible to a user without read access to that Audit) -- on top of the
-    normal domain-folder RBAC scoping already applied by get_queryset().
+    API endpoint for domain-shared saved filters. A shared filter is always
+    visible to anyone with domain-folder access (normal RBAC scoping from
+    get_queryset()) -- but any value in its `properties` that references an
+    object the requester can't read is masked (see
+    SavedFilterReadSerializer.to_representation /
+    core.saved_filters.registry.mask_inaccessible_properties), not the whole
+    filter.
     """
 
     model = SavedFilter
     filterset_fields = ["folder", "content_type"]
     search_fields = ["name"]
-
-    def _is_visible(self, saved_filter, user, accessible_cache: dict) -> bool:
-        from core.saved_filters.registry import get_referenced_models
-
-        refs = get_referenced_models(saved_filter.content_type.model_class())
-        for field, entries in (saved_filter.properties or {}).items():
-            referenced_model = refs.get(field)
-            if referenced_model is None or not entries:
-                continue
-            if referenced_model not in accessible_cache:
-                accessible_cache[referenced_model] = {
-                    str(i)
-                    for i in RoleAssignment.get_accessible_object_ids(
-                        Folder.get_root_folder(), user, referenced_model
-                    )[0]
-                }
-            accessible_ids = accessible_cache[referenced_model]
-            for entry in entries:
-                value = entry.get("value") if isinstance(entry, dict) else entry
-                if value and str(value) not in accessible_ids:
-                    return False
-        return True
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        if self.request.method not in permissions.SAFE_METHODS:
-            return queryset
-        accessible_cache: dict = {}
-        visible_ids = [
-            sf.id
-            for sf in queryset.select_related("content_type")
-            if self._is_visible(sf, self.request.user, accessible_cache)
-        ]
-        return queryset.filter(id__in=visible_ids)
 
     @action(detail=False, methods=["post"])
     def sync(self, request):
