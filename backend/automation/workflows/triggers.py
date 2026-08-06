@@ -1,4 +1,4 @@
-"""Trigger registration lifecycle (spec D22).
+"""Trigger registration lifecycle.
 
 Trigger nodes carry the definition in the immutable graph; WorkflowTrigger
 rows carry the operational state. Publishing a version syncs the rows from

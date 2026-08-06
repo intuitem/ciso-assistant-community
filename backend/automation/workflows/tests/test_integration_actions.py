@@ -507,7 +507,7 @@ class TestWebhookHardening:
         assert resp.status_code == 404
 
     def test_inbound_hooks_kill_switch(self, settings):
-        # D23: environments that want no unauthenticated ingress disable all
+        # Environments that want no unauthenticated ingress disable all
         # hooks uniformly; a valid URL is indistinguishable from a wrong one.
         workflow = self._hooked_workflow()
         registration = workflow.triggers.get(node_ref="hook")

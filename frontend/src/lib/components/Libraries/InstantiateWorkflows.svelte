@@ -10,7 +10,7 @@
 	import WorkflowPreviewModal from './WorkflowPreviewModal.svelte';
 
 	interface Props {
-		// The LOADED library the instantiate action lives on (spec D31) —
+		// The LOADED library the instantiate action lives on —
 		// pages showing stored data must resolve the counterpart id.
 		loadedLibraryId: string;
 		count: number;

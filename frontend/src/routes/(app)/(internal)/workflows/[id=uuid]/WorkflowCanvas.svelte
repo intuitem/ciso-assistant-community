@@ -91,7 +91,7 @@
 	};
 	const badge = $derived(STATUS_BADGE[status] ?? STATUS_BADGE.archived);
 
-	// Run identity of the active version (spec D34). Drafts run as the invoker,
+	// Run identity of the active version. Drafts run as the invoker,
 	// so only published/archived versions carry a stamped run_as to show.
 	const activeRunAs = $derived(versions.find((v) => v.id === activeVersionId)?.run_as ?? null);
 
@@ -286,7 +286,7 @@
 			source: domain.source,
 			target: domain.target,
 			// Condition edges anchor to their branch's port (handle id = branch
-			// id); loop edges anchor to their 'each'/'done' port (spec D29).
+			// id); loop edges anchor to their 'each'/'done' port.
 			sourceHandle: domain.source_branch ?? (domain.source_port || undefined),
 			label: edgeLabel(domain) || undefined,
 			deletable: !readonly,
@@ -326,8 +326,8 @@
 	edges = (graph.edges ?? []).map(toFlowEdge);
 
 	// A brand-new draft gets a manual trigger to build from. No end node: a
-	// branch finishes by simply having nothing wired after its last step
-	// (spec D35), so the default shape teaches that instead of the hard stop.
+	// branch finishes by simply having nothing wired after its last step,
+	// so the default shape teaches that instead of the hard stop.
 	if (!readonly && nodes.length === 0) {
 		nodes = [toFlowNode(newNodeDomain('trigger', { x: 120, y: 202 }, 'manual'), 0)];
 	}
@@ -531,7 +531,7 @@
 		saveTimer = setTimeout(save, 1200);
 	}
 
-	// ---------- reference run for the data browser (spec D20) ----------
+	// ---------- reference run for the data browser ----------
 
 	let referenceRun = $state<any | null>(null);
 	let referencePinned = $state(false);
@@ -624,7 +624,7 @@
 		return referenceRun.variables ?? {};
 	});
 
-	// Static upstream summaries for the loop collection picker (spec D29):
+	// Static upstream summaries for the loop collection picker:
 	// lets the Inspector offer known array outputs (list reads, loops) even
 	// before any reference run exists.
 	const upstreamNodes = $derived(
@@ -906,7 +906,7 @@
 		validationErrors = [];
 		try {
 			if (!(await save())) return;
-			// Deputization report (spec D34): show the authority this version
+			// Deputization report: show the authority this version
 			// will wield as the publisher, and let them confirm, before it
 			// attaches. Empty report → publish straight through.
 			const report = await fetchRequiredPermissions();
@@ -1147,7 +1147,7 @@
 	// svelte-ignore state_referenced_locally
 	let versionsOpen = $state(versionPinned);
 
-	// Master switch (spec D32): gates automatic execution; manual runs keep
+	// Master switch: gates automatic execution; manual runs keep
 	// working, so the builder stays fully usable while paused.
 	// svelte-ignore state_referenced_locally
 	let isActive = $state(workflowIsActive);
@@ -1166,7 +1166,7 @@
 		}
 	}
 
-	// Absolute run TTL (spec D36). Stored as seconds; edited as value + unit so
+	// Absolute run TTL. Stored as seconds; edited as value + unit so
 	// "1 hour" doesn't mean typing 3600. Pick the largest unit that divides
 	// evenly for display.
 	const TIMEOUT_UNITS: { value: number; label: () => string }[] = [
@@ -1239,7 +1239,7 @@
 	let dataOpen = $state(false);
 	let running = $state(false);
 	let runPickerOpen = $state(false);
-	// Run-with-variables (spec D33): raw form values + touched tracking so
+	// Run-with-variables: raw form values + touched tracking so
 	// only fields the user actually edited are sent as seeds.
 	let runMenuOpen = $state(false);
 	let runVarsOpen = $state(false);
@@ -1464,7 +1464,7 @@
 		if (!source || !target) return false;
 		if (source.data.nodeType === 'end' || target.data.nodeType === 'trigger') return false;
 		// A condition-node port IS a branch: at most one wire per branch. Loop
-		// ports ('each'/'done') take any number of wires (spec D29).
+		// ports ('each'/'done') take any number of wires.
 		const handle = connection.sourceHandle ?? null;
 		const isLoopPort = handle === 'each' || handle === 'done';
 		if (
@@ -1624,7 +1624,7 @@
 		markDirty();
 	}
 
-	// ---------- node refs: derived from labels, references rewritten (D28) ----------
+	// ---------- node refs: derived from labels, references rewritten ----------
 
 	// Refs are slug(label), always — not generated-once. Editing a node's label
 	// re-derives its ref and mechanically rewrites every {{nodes.<old>...}}

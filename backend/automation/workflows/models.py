@@ -21,7 +21,7 @@ def generate_webhook_secret():
 class DraftExistsError(Exception):
     """Raised by clone_as_draft when the workflow already has a draft —
     detected under the workflow row lock, after the caller's unlocked
-    pre-check has passed (one draft at a time, spec D6)."""
+    pre-check has passed (one draft at a time)."""
 
     def __init__(self, draft):
         self.draft = draft
@@ -30,15 +30,15 @@ class DraftExistsError(Exception):
 
 class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
     ref_id = models.CharField(max_length=100, blank=True)
-    # Master switch (spec D32): gates AUTOMATIC execution only — manual runs
+    # Master switch: gates AUTOMATIC execution only — manual runs
     # keep working so a paused workflow stays debuggable. Cascades to versions.
     is_active = models.BooleanField(default=True)
-    # Absolute run TTL in seconds (spec D36): a run older than this is
+    # Absolute run TTL in seconds: a run older than this is
     # terminated. 0 = no limit. Cascades to versions like is_active; the
     # engine reads the frozen version copy so an edit can't retroactively
     # change in-flight runs.
     timeout_seconds = models.PositiveIntegerField(default=0)
-    # Marketplace/catalog provenance (spec D28): where an imported document
+    # Marketplace/catalog provenance: where an imported document
     # came from. Purely informational — the workflow divorces at import and
     # owns its own lifecycle; nothing ever syncs back.
     source_urn = models.CharField(max_length=255, blank=True)
@@ -129,10 +129,10 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
         related_name="versions",
     )
     version_number = models.PositiveIntegerField(default=1)
-    # Mirrors Workflow.is_active (spec D32) — set by the cascade, checked by
+    # Mirrors Workflow.is_active — set by the cascade, checked by
     # every automatic execution path.
     is_active = models.BooleanField(default=True)
-    # Frozen copy of Workflow.timeout_seconds (spec D36) — the engine reads
+    # Frozen copy of Workflow.timeout_seconds — the engine reads
     # this off instance.version so in-flight runs keep their limit even if the
     # author edits it. 0 = no limit.
     timeout_seconds = models.PositiveIntegerField(default=0)
@@ -142,7 +142,7 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
         default=Status.DRAFT,
     )
     published_at = models.DateTimeField(null=True, blank=True)
-    # Run authorization (spec D34): published_by is permanent provenance;
+    # Run authorization: published_by is permanent provenance;
     # run_as is the authority the version's runs wield (definer rights,
     # checked live). v1 stamps both with the publisher; v2 makes run_as
     # pickable. Null run_as on a non-draft version = unrunnable (fail closed,
@@ -173,7 +173,7 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.workflow.folder
-        # Inherit the TTL from the parent on first save (spec D36) so a new
+        # Inherit the TTL from the parent on first save so a new
         # draft/clone carries the workflow's current limit; later edits mirror
         # via Workflow.save(). Only on create — never clobber a frozen copy.
         if self._state.adding:
@@ -193,7 +193,7 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
         Graph validity must be checked by the caller (see workflows.validation)
         before calling this. Trigger registrations are synced here so the
         published graph and its operational rows can never drift. The
-        publisher becomes the version's run identity (spec D34): publishing
+        publisher becomes the version's run identity: publishing
         is the moment authority attaches.
         """
         from django.db import transaction
@@ -215,7 +215,7 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
             sync_trigger_registrations(self)
 
     def clone_as_draft(self):
-        """Clone this version's whole graph into a new draft (spec D6).
+        """Clone this version's whole graph into a new draft.
 
         Raises DraftExistsError if the workflow already has a draft — checked
         under the workflow row lock, so two concurrent clones cannot both pass
@@ -300,7 +300,7 @@ class WorkflowNode(AbstractBaseModel, FolderMixin):
     )
     type = models.CharField(max_length=20, choices=Type.choices)
     label = models.CharField(max_length=200, blank=True)
-    # Stable slug for {{nodes.<ref>.<path>}} references (spec D20).
+    # Stable slug for {{nodes.<ref>.<path>}} references.
     # Auto-generated from the label on first save, then never regenerated.
     ref = models.CharField(max_length=100, blank=True)
     task_template = models.ForeignKey(
@@ -311,9 +311,9 @@ class WorkflowNode(AbstractBaseModel, FolderMixin):
         related_name="workflow_nodes",
     )
     action_config = models.JSONField(default=dict, blank=True)
-    # Loop nodes (spec D29): {collection, collect?, on_item_error}.
+    # Loop nodes: {collection, collect?, on_item_error}.
     loop_config = models.JSONField(default=dict, blank=True)
-    # Definition half of a trigger node (spec D22): {"type": manual|webhook|
+    # Definition half of a trigger node: {"type": manual|webhook|
     # schedule|internal_event, ...subtype keys}. Operational state (enabled,
     # secrets, bookkeeping) lives on WorkflowTrigger rows synced at publish.
     trigger_config = models.JSONField(default=dict, blank=True)
@@ -378,8 +378,8 @@ class WorkflowEdge(AbstractBaseModel, FolderMixin):
         on_delete=models.CASCADE,
         related_name="incoming_edges",
     )
-    # For edges leaving a condition node: the branch this wire belongs to
-    # (spec D25). Deleting the branch removes its wire. Null for plain edges.
+    # For edges leaving a condition node: the branch this wire belongs to.
+    # Deleting the branch removes its wire. Null for plain edges.
     source_branch = models.ForeignKey(
         "automation.ConditionBranch",
         on_delete=models.CASCADE,
@@ -388,7 +388,7 @@ class WorkflowEdge(AbstractBaseModel, FolderMixin):
         related_name="edges",
     )
     label = models.CharField(max_length=200, blank=True)
-    # Loop-node output port ("each"|"done", spec D29); blank elsewhere.
+    # Loop-node output port ("each"|"done"); blank elsewhere.
     source_port = models.CharField(max_length=10, blank=True)
 
     class Meta:
@@ -441,8 +441,8 @@ class WorkflowVariable(AbstractBaseModel, FolderMixin):
 
 
 class ConditionBranch(AbstractBaseModel, FolderMixin):
-    """A named routing branch of a condition node (spec D25). Owns its
-    condition tree relationally (D4 preserved). A branch exists independently
+    """A named routing branch of a condition node. Owns its
+    condition tree relationally. A branch exists independently
     of its wire, so the builder can define branches before connecting them
     ("define now, wire later"); the wire is the WorkflowEdge whose
     source_branch points here. Exactly one branch per condition node is the
@@ -649,7 +649,7 @@ class WorkflowInstance(AbstractBaseModel, FolderMixin):
     payload = models.JSONField(default=dict, blank=True)
     # Per-node action outputs keyed by node ref (or node id for pre-ref
     # graphs), addressable in templates as {{nodes.<ref>.<path>}} and browsed
-    # by the builder's reference-run data panel (spec D20).
+    # by the builder's reference-run data panel.
     node_outputs = models.JSONField(default=dict, blank=True)
     initiated_by = models.ForeignKey(
         "iam.User",
@@ -679,7 +679,7 @@ class WorkflowInstance(AbstractBaseModel, FolderMixin):
         blank=True,
         related_name="instances",
     )
-    # Event-chain generation counter (spec D21): user/API-caused events start
+    # Event-chain generation counter: user/API-caused events start
     # instances at depth 1; changes those runs make start instances at depth 2,
     # capped by events.MAX_TRIGGER_DEPTH to contain trigger loops.
     trigger_depth = models.PositiveSmallIntegerField(default=0)
@@ -732,7 +732,7 @@ class WorkflowToken(AbstractBaseModel, FolderMixin):
     )
     error_message = models.TextField(blank=True)
     retry_count = models.PositiveIntegerField(default=0)
-    # Iteration context STACK (spec D29): [{item, index}, ...] — nested loops
+    # Iteration context STACK: [{item, index}, ...] — nested loops
     # push/pop; {{item}}/{{index}} resolve to the innermost entry.
     iteration_context = models.JSONField(default=list, blank=True)
     # Controller state for a token parked ON a loop node:
@@ -801,7 +801,7 @@ class WorkflowInstanceLog(AbstractBaseModel, FolderMixin):
 class WorkflowSecret(AbstractBaseModel, FolderMixin):
     """Named credential for http_request, referenced as {{secrets.NAME}}.
     Values are write-only at the API level: never returned in responses,
-    resolved only by the engine at execution time (spec D17).
+    resolved only by the engine at execution time.
 
     Workflow-scoped: a secret belongs to one workflow and is only ever
     resolvable by that workflow's instances (no cross-workflow or cross-folder
@@ -843,7 +843,7 @@ class WorkflowSecret(AbstractBaseModel, FolderMixin):
 
 
 class WorkflowTrigger(AbstractBaseModel, FolderMixin):
-    """Operational registration for a published trigger node (spec D22).
+    """Operational registration for a published trigger node.
 
     The definition (subtype, cron, event key, filters, input mapping) lives in
     the immutable graph; rows are synced at publish time

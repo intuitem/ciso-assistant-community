@@ -101,7 +101,7 @@ def _minimal_graph():
 def _condition_graph(op="eq", value='"approved"', with_default=True, wire_default=True):
     """trigger -> condition -> {matching branch -> end, default branch -> end2}.
 
-    Conditions live on the condition node's branches (spec D25); edges only
+    Conditions live on the condition node's branches; edges only
     reference a branch via ``source_branch``. Returns (graph, ids) so callers
     can assert on / tweak specific rows.
     """
@@ -316,7 +316,7 @@ class TestPublish:
         assert "trigger_node_missing" in codes
 
     def test_dangling_step_is_a_valid_terminal(self, workflow, superuser):
-        """An unwired last step just ends that branch (spec D35): no end node
+        """An unwired last step just ends that branch: no end node
         required, and no nag about the missing edge."""
         version = workflow.draft_version
         trigger, action = str(uuid.uuid4()), str(uuid.uuid4())

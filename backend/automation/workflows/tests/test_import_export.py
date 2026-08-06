@@ -116,7 +116,7 @@ def _rich_graph():
                 "type": "condition",
                 "label": "Gate",
                 "position": {"x": 400, "y": 120},
-                # Conditions live on the condition node's branches (spec D25);
+                # Conditions live on the condition node's branches;
                 # edges only reference a branch via source_branch.
                 "branches": [
                     {
@@ -304,7 +304,7 @@ class TestImport:
     def test_falsy_condition_value_survives_import(self, root):
         """A boolean condition of `value: false` (or 0) must not collapse to ''
         on import — the operand would silently change (regression). Document
-        shape uses refs/keys/branch-names, per the exchange format (D28)."""
+        shape uses refs/keys/branch-names, per the exchange format."""
         doc = {
             "schema_version": 1,
             "name": "Falsy",
@@ -530,7 +530,7 @@ def _condition_doc(name="Branchy"):
 
 @pytest.mark.django_db
 class TestBranchEdgeCases:
-    """Adversarial import/export shapes for the D25 node-owned branch model."""
+    """Adversarial import/export shapes for the node-owned branch model."""
 
     def _stable(self, data, root):
         """export∘import is idempotent: importing a doc then re-exporting, and

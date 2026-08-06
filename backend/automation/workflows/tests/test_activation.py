@@ -1,4 +1,4 @@
-"""Workflow activation (spec D32): the master switch gates automatic
+"""Workflow activation: the master switch gates automatic
 execution only, cascades to versions, and restore rebuilds drafts from
 archived versions."""
 

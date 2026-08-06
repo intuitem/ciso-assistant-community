@@ -1,4 +1,4 @@
-"""Workflow run authorization (spec D34): definer rights checked live.
+"""Workflow run authorization: definer rights checked live.
 
 The version wields its publisher's authority (run_as), whoever triggers it;
 drafts run as the invoker. Enforcement is per action node at runtime, refusal

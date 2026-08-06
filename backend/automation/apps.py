@@ -6,7 +6,7 @@ class AutomationConfig(AppConfig):
     name = "automation"
 
     def ready(self):
-        # Internal-event trigger producer (spec D21): mirror auditlog LogEntry
+        # Internal-event trigger producer: mirror auditlog LogEntry
         # rows into workflow event dispatch, same hook as webhooks/signals.py.
         from auditlog.models import LogEntry
         from django.db.models.signals import post_save

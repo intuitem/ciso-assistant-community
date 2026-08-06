@@ -1,4 +1,4 @@
-"""Periodic workflow scheduling (spec D19).
+"""Periodic workflow scheduling.
 
 Schedules are DB rows, not huey periodic tasks: huey's periodic registry is
 fixed at import time in the consumer, so user CRUD could never reach it. A
@@ -102,7 +102,7 @@ def run_due_schedules(now=None):
         elif version is None:
             result = WorkflowTrigger.Result.SKIPPED_UNPUBLISHED
         elif version.run_as is None:
-            # Spec D34: no run identity, no automatic execution. next_run_at
+            # No run identity, no automatic execution. next_run_at
             # already advanced by the claim — republishing resumes on the
             # next natural occurrence.
             result = WorkflowTrigger.Result.SKIPPED_NO_IDENTITY

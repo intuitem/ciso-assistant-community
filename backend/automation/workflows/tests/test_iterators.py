@@ -1,4 +1,4 @@
-"""Loop node (spec D29): controller/body token semantics, multi-step bodies,
+"""Loop node: controller/body token semantics, multi-step bodies,
 in-body conditions on {{item}}, failure policies, caps, nesting, validation."""
 
 import uuid
@@ -299,7 +299,7 @@ class TestLoopNode:
         instance = start_instance(
             version, payload={"items": [{"name": "Inc A"}, {}, {"name": "Inc B"}]}
         )
-        # Stop policy fails the controller (spec D29) — no WAITING hang, and the
+        # Stop policy fails the controller — no WAITING hang, and the
         # third item is never processed.
         assert instance.status == WorkflowInstance.Status.FAILED
         from automation.workflows.models import WorkflowToken
@@ -467,7 +467,7 @@ class TestLoopNode:
 
     def test_stop_inside_an_inner_loop_kills_both_controllers(self):
         """Terminating from the innermost body consumes every parked controller,
-        so neither loop resumes (spec D35)."""
+        so neither loop resumes."""
         domain = make_domain("Nested stop domain")
         workflow = Workflow.objects.create(name="Nested stop", folder=domain)
         version = WorkflowVersion.objects.create(
@@ -541,7 +541,7 @@ class TestLoopValidation:
         codes = self._codes(lambda version: None)
         assert not any(code.startswith("loop") for code in codes)
         # A loop is a legitimate cycle: the back edge must not read as a graph
-        # that can never finish (guards the leaf-based dead_end rule, spec D35).
+        # that can never finish (guards the leaf-based dead_end rule).
         assert "dead_end" not in codes
 
     def test_missing_collection(self):
@@ -575,7 +575,7 @@ class TestLoopValidation:
         assert "loop_body_escape" in self._codes(mutate)
 
     def test_own_end_node_in_body_is_not_an_escape(self):
-        """Terminating from inside a loop body is legitimate (spec D35): the
+        """Terminating from inside a loop body is legitimate: the
         end node consumes the controller, so nothing is left waiting."""
 
         def mutate(version):

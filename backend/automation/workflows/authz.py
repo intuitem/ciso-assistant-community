@@ -1,4 +1,4 @@
-"""Run-authorization kernel access (spec D34).
+"""Run-authorization kernel access.
 
 This module is the ONLY place in the workflows app allowed to touch iam
 authorization primitives, so the engine's authz surface stays auditable in
@@ -21,7 +21,7 @@ def can(user, codename, folder) -> bool:
     """May ``user`` exercise ``codename`` in ``folder``?
 
     Fail-closed on missing or inactive identities. Superusers get NO special
-    treatment here (spec D34 amendment): every user's verdict comes from the
+    treatment here: every user's verdict comes from the
     iam kernel unchanged.
     """
     if user is None or not user.is_active:

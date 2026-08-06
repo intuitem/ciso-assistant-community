@@ -23,7 +23,7 @@
 	let expandedNodes: string[] = $state([]);
 	const showRisks = true;
 
-	// The instantiate action lives on the LOADED counterpart (spec D31).
+	// The instantiate action lives on the LOADED counterpart.
 	// Two data shapes reach this page: stored data (loaded_library holds the
 	// counterpart id, null when not loaded) and, for exclusively-loaded
 	// libraries, the loader already swapped to loaded data (its id differs

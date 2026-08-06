@@ -25,7 +25,7 @@ from automation.workflows.tests.helpers import publisher_user
 
 def make_workflow(name="Scheduled flow", published=True, cron="*/10 * * * *"):
     """A workflow whose entry is a schedule trigger node; publishing creates
-    the registration row (disabled by default per D22 arming policy)."""
+    the registration row (disabled by default per the arming policy)."""
     workflow = Workflow.objects.create(name=name, folder=Folder.get_root_folder())
     version = WorkflowVersion.objects.create(workflow=workflow, run_as=publisher_user())
     trigger = {

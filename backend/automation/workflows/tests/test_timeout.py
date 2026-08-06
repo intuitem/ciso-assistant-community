@@ -1,4 +1,4 @@
-"""Absolute run TTL (spec D36): a run older than its version's
+"""Absolute run TTL: a run older than its version's
 timeout_seconds is terminated — inline when it next advances, and by the
 periodic reaper if it's parked and never resumes."""
 

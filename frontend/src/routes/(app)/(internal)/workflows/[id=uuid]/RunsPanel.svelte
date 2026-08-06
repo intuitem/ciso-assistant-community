@@ -8,7 +8,7 @@
 		onPinReference?: (run: any) => void;
 		onRunsRefreshed?: (runs: any[]) => void;
 		referenceRunId?: string | null;
-		// Pin the list to one version (versions-panel navigation, spec D32).
+		// Pin the list to one version (versions-panel navigation).
 		filterVersionId?: string | null;
 	}
 

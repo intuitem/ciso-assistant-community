@@ -1,4 +1,4 @@
-"""D28 schema freeze: every export validates against the versioned JSON
+"""Schema freeze: every export validates against the versioned JSON
 Schema, canonical exports are minimal, branches travel by name, provenance
 is stamped at import."""
 

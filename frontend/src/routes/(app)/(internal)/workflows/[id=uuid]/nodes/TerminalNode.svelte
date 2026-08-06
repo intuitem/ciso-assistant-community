@@ -28,7 +28,7 @@
 	);
 </script>
 
-<!-- Deliberately alarming (spec D35): this node stops the WHOLE run, cancelling
+<!-- Deliberately alarming: this node stops the WHOLE run, cancelling
 	every branch still in flight. The danger has to read off the canvas, because
 	the safe way to finish one branch is simply to leave its last step unwired. -->
 <div class="terminal-node flex flex-col items-center gap-1 select-none">

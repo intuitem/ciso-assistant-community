@@ -1,4 +1,4 @@
-"""Internal event triggers (spec D21): start workflows when something happens
+"""Internal event triggers: start workflows when something happens
 inside CISO Assistant.
 
 Two halves:
@@ -100,7 +100,7 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
             _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_UNPUBLISHED)
             continue
         if version.run_as is None:
-            # Spec D34: no run identity, no automatic execution.
+            # No run identity, no automatic execution.
             _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_NO_IDENTITY)
             continue
         try:

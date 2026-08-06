@@ -1,4 +1,4 @@
-"""Workflow libraries (spec D31): exports are library documents, loadable
+"""Workflow libraries: exports are library documents, loadable
 through the library pipeline; loaded workflows are divorced user documents."""
 
 import uuid
@@ -110,7 +110,7 @@ class TestInstantiateFromLoadedLibrary:
 
     def test_preview_returns_graph_and_secrets(self, superuser):
         # Preview reads the same divorced-source content and exposes each
-        # workflow's graph + required secrets (spec D36).
+        # workflow's graph + required secrets.
         document = export_workflow_library(simple_workflow("Previewable"))
         stored, _ = StoredLibrary.store_library_content(
             yaml.safe_dump(document).encode()

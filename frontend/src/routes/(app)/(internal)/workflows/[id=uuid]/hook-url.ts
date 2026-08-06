@@ -1,6 +1,6 @@
 import { env } from '$env/dynamic/public';
 
-// Public URL of a webhook trigger (spec D23). Hooks are served through the
+// Public URL of a webhook trigger. Hooks are served through the
 // frontend origin (passthrough at /api/workflows/hooks/, short-circuited by
 // proxies that route /api/* straight to the backend), so the browser's own
 // origin is correct with zero configuration. PUBLIC_HOOKS_URL overrides it

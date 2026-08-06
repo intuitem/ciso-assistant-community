@@ -16,7 +16,7 @@
 		// Present in edit mode only: shows the quick-add affordance on the
 		// secrets group header.
 		onAddSecret?: (name: string, value: string) => void;
-		// First element of the loop node's collection (spec D29), resolved
+		// First element of the loop node's collection, resolved
 		// against the reference run: rendered as an "item" group whose paths
 		// insert as {{item.*}}.
 		itemPreview?: unknown;

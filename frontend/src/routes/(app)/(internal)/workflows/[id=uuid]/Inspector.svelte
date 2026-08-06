@@ -92,7 +92,7 @@
 		onChange
 	}: Props = $props();
 
-	// ---------- expression assist (spec D20) ----------
+	// ---------- expression assist ----------
 
 	let lastFocusedInput: HTMLInputElement | HTMLTextAreaElement | null = null;
 	let lastFocusedValue = $state('');
@@ -409,7 +409,7 @@
 		}
 	}
 
-	// read_objects filter builder (spec D26) — same DNF editor pattern as the
+	// read_objects filter builder — same DNF editor pattern as the
 	// event-trigger filters above, keyed on the selected read node. Trees that
 	// don't fit the DNF shape (e.g. "not" groups from an imported YAML) fall
 	// back to raw JSON editing.
@@ -483,7 +483,7 @@
 		onChange();
 	}
 
-	// Loop node (spec D29): resolve the collection against the reference run
+	// Loop node: resolve the collection against the reference run
 	// so the builder can preview the iteration count and offer {{item.*}} paths.
 	const COLLECTION_RE = /^\{\{\s*([\w.]+)\s*\}\}$/;
 	const loopConfig = $derived(nodeDomain?.type === 'loop' ? nodeDomain.loop_config : null);
@@ -502,7 +502,7 @@
 		return { invalid: false, count: resolved.length, first: resolved[0] };
 	});
 
-	// Collection picker (spec D27 UX): enumerate candidate arrays instead of
+	// Collection picker: enumerate candidate arrays instead of
 	// making the user type an expression. Static candidates come from upstream
 	// node shapes we know (list reads, per-item actions); dynamic ones from
 	// whatever actually resolved to an array in the reference run.

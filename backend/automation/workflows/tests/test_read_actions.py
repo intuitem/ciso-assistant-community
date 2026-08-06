@@ -1,4 +1,4 @@
-"""read_objects action (spec D26): catalog reads scoped to the instance
+"""read_objects action: catalog reads scoped to the instance
 folder's subtree, filter-tree compilation, modes, and publish validation."""
 
 import uuid

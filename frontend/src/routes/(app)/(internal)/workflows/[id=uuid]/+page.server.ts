@@ -22,7 +22,7 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 	const versions: { id: string; version_number: number; status: string }[] = (
 		workflow.versions ?? []
 	).sort((a: any, b: any) => b.version_number - a.version_number);
-	// ?version= pins a specific version (versions panel navigation, spec D32);
+	// ?version= pins a specific version (versions panel navigation);
 	// default stays draft ?? published ?? first.
 	const requestedVersion = url.searchParams.get('version');
 	const pinnedVersion = versions.find((v) => v.id === requestedVersion) ?? null;

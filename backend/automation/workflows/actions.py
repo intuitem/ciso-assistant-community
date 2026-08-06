@@ -1,4 +1,4 @@
-"""Built-in action registry (spec D12).
+"""Built-in action registry.
 
 One class per action type. `execute` receives the node's action_config and the
 running instance; whatever dict it returns is fed through the node's
@@ -79,7 +79,7 @@ def render(value, variables):
 
 def _render_context(instance):
     """Template context: instance variables plus the node-output namespace
-    ({{nodes.<ref>.<path>}}, spec D20). Inside a loop body (spec D29) the
+    ({{nodes.<ref>.<path>}}). Inside a loop body the
     engine sets a transient instance-local overlay from the current token's
     iteration stack, adding {{item}}/{{index}} (shadowing same-named
     variables); never persisted."""
@@ -121,7 +121,7 @@ class SetVariablesAction(BaseAction):
         return values
 
 
-# Explicit registry of models workflows may create (spec D15): each entry
+# Explicit registry of models workflows may create: each entry
 # lists the writable simple fields and the FK fields (target model + the
 # frontend endpoint serving its options). Anything else in the config is
 # ignored. FK values are UUIDs — templatable, so a previous node's
@@ -129,7 +129,7 @@ class SetVariablesAction(BaseAction):
 #
 # With `upsert: true` in the config, the action matches an existing row by
 # the entry's `match_on` field (within the instance's folder) and updates it
-# instead of creating a duplicate — the primitive sync flows need (D16).
+# instead of creating a duplicate, which the primitive sync flows need.
 # Entries without an explicit `match_on` match on name.
 CREATABLE_MODELS = {
     "applied_control": {
@@ -286,7 +286,7 @@ class CreateObjectAction(BaseAction):
         }
 
 
-# Explicit registry of models workflows may read (spec D26). Each entry lists
+# Explicit registry of models workflows may read. Each entry lists
 # the readable simple fields on top of BASE_READ_FIELDS; the combined set is
 # both the serialized output AND the filter/order whitelist — no "__" paths,
 # no relations, so filters cannot tunnel into other objects.
@@ -376,7 +376,7 @@ READ_DEFAULT_LIMIT = 25
 
 
 def _read_scope_folder_ids(folder):
-    """Instance folder + subtree ONLY (spec D26) — deliberately narrower than
+    """Instance folder + subtree ONLY — deliberately narrower than
     _accessible_folder_ids: reads of ancestor folders would leak parent-domain
     rows into a child-domain workflow's run log."""
     return {folder.id, *(f.id for f in folder.get_sub_folders())}
@@ -488,8 +488,8 @@ class ReadObjectsAction(BaseAction):
         if order_by.lstrip("-") not in fields:
             raise ActionError(f"read_objects: '{order_by}' is not an orderable field")
 
-        # Rows must be BOTH inside the workflow's subtree scope (spec D26)
-        # AND visible to the run identity (spec D34) — the identity's view
+        # Rows must be BOTH inside the workflow's subtree scope
+        # AND visible to the run identity — the identity's view
         # scope is the API's own row-visibility rule, so the run reads
         # exactly what the API would show that user.
         from . import authz
@@ -612,7 +612,7 @@ class HttpRequestAction(BaseAction):
             assert_public_url_unless_dev(url, allowed_schemes=("https", "http"))
         except (BlockedRequestError, DnsLookupError) as e:
             # Report the host only: the URL may carry a secret in its query
-            # string (spec D17). DNS failures are transient-adjacent, so
+            # string. DNS failures are transient-adjacent, so
             # ActionError keeps them on the node's retry path.
             host = urlsplit(url).hostname or "target"
             raise ActionError(f"http_request: {type(e).__name__} for host '{host}'")
@@ -834,7 +834,7 @@ def _as_bool(value):
     return str(value).strip().lower() in ("true", "1", "yes")
 
 
-# Deputization rule (spec D18): publishing a workflow requires the publisher
+# Deputization rule: publishing a workflow requires the publisher
 # to hold the permissions its actions exercise, checked per action node
 # against the workflow's folder.
 def required_permissions(action_config):
@@ -861,7 +861,7 @@ def required_permissions(action_config):
 
 
 def validate_read_config(node):
-    """Publish-time checks for read_objects nodes (spec D26): (code, message)
+    """Publish-time checks for read_objects nodes: (code, message)
     tuples, same contract as triggers.validate_trigger_config."""
     config = node.action_config or {}
     if config.get("type") != "read_objects":
@@ -931,7 +931,7 @@ def validate_read_config(node):
 
 
 def authorize_action(node, instance):
-    """Runtime half of the D18 deputization promise (spec D34): before any
+    """Runtime half of the deputization promise: before any
     side effect, the run identity must hold every permission the action
     exercises, checked live against the workflow's folder. Refusal is a
     structured, retryable node failure (grant the role, retry the token)."""

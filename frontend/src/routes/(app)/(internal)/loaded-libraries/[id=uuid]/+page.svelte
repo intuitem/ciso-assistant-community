@@ -15,7 +15,7 @@
 	let { data } = $props();
 	let expandedNodes: string[] = $state([]);
 
-	// Workflow libraries (spec D31): loaded workflows are divorced rows, so the
+	// Workflow libraries: loaded workflows are divorced rows, so the
 	// library only carries a count (objects_meta) — instantiation reads the
 	// stored content server-side and can be repeated at will.
 	const workflowCount = $derived(data.library.objects_meta?.workflows ?? 0);

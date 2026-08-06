@@ -328,7 +328,7 @@ class TestRouting:
         assert approved_id not in visited
 
     def test_parallel_fan_out_runs_converging_node_per_token(self):
-        # Fan-out is always parallel; without a merge node (spec D30) a
+        # Fan-out is always parallel; without a merge node a
         # converging node runs once per arriving token.
         _, version = make_workflow()
         start = node("trigger", trigger_config={"type": "manual"})
@@ -379,7 +379,7 @@ class TestRouting:
 
 @pytest.mark.django_db
 class TestTermination:
-    """Leaf = end this branch; end node = stop the whole run (spec D35)."""
+    """Leaf = end this branch; end node = stop the whole run."""
 
     def _log_labels(self, instance, event_type="node_entered"):
         return list(
@@ -877,7 +877,7 @@ class TestSubprocess:
 
     def test_terminate_cascades_to_running_children(self):
         # Parent stops while the child is parked: the child is cut short, so it
-        # lands ABANDONED rather than lingering ACTIVE forever (spec D35).
+        # lands ABANDONED rather than lingering ACTIVE forever.
         child = self._publish_child(event_key="go")
         _, pv = make_workflow("Cascading parent")
         trig = node("trigger", trigger_config={"type": "manual"})
@@ -1044,7 +1044,7 @@ class TestSubprocess:
 
 @pytest.mark.django_db
 class TestTokenAdmin:
-    """Operator recovery endpoints for stuck runs (spec D10)."""
+    """Operator recovery endpoints for stuck runs."""
 
     def _errored_instance(self):
         _, version = make_workflow()
@@ -1218,7 +1218,7 @@ class TestManualRunAuthz:
 
 @pytest.mark.django_db
 class TestInitialVariables:
-    """Manual runs can seed declared variables (spec D33)."""
+    """Manual runs can seed declared variables."""
 
     def _version(self):
         _, version = make_workflow(f"Seeded {uuid.uuid4()}")

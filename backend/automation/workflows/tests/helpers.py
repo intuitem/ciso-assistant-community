@@ -1,6 +1,6 @@
 """Shared helpers for workflow engine tests.
 
-Run authorization (spec D34) gives every run an identity. Engine-level tests
+Run authorization gives every run an identity. Engine-level tests
 that exercise privileged actions need one: ``publisher_user()`` returns a
 process-wide admin (BI-UG-ADM member, so kernel verdicts pass — there is no
 superuser bypass in the runtime path) usable both as ``publish(user)``

@@ -779,7 +779,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
     @action(detail=True, methods=["post"], url_path="instantiate-workflows")
     def instantiate_workflows(self, request, pk):
         """Create fresh, divorced workflows from this library's documents in a
-        chosen folder (spec D31 follow-up) — repeatable at will, no
+        chosen folder — repeatable at will, no
         unload/reload dance. Reads the matching StoredLibrary content: loaded
         workflows are divorced rows, so the documents only live in the store."""
         from django.db import transaction
@@ -838,7 +838,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="preview-workflows")
     def preview_workflows(self, request, pk):
-        """Read-only preview of this library's workflow documents (spec D36):
+        """Read-only preview of this library's workflow documents:
         each entry's graph + required secrets, for a look-before-instantiate.
         Same stored-content source as instantiate_workflows (loaded workflows
         are divorced rows, so the documents only live in the store)."""

@@ -865,7 +865,7 @@ WORKFLOWS_ASYNC_EXECUTION = (
     os.environ.get("WORKFLOWS_ASYNC_EXECUTION", "").lower() == "true"
 )
 
-# Kill-switch for inbound workflow webhooks (spec D23): when disabled, hook
+# Kill-switch for inbound workflow webhooks: when disabled, hook
 # URLs answer 404 uniformly, for environments that want no unauthenticated
 # ingress at all.
 WORKFLOWS_INBOUND_HOOKS = (

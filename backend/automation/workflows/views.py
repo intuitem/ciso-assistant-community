@@ -138,7 +138,7 @@ class WorkflowViewSet(BaseModelViewSet):
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get readable models", url_path="readable-models")
     def readable_models(self, request):
-        """The read_objects registry (spec D26): field lists double as the
+        """The read_objects registry: field lists double as the
         filter/order whitelist the builder offers."""
         from .actions import BASE_READ_FIELDS, READABLE_MODELS
 
@@ -282,7 +282,7 @@ class WorkflowVersionViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="required-permissions")
     def required_permissions(self, request, pk=None):
-        """Deputization report (spec D34): the permissions this version's
+        """Deputization report: the permissions this version's
         actions will exercise, shown by the publish dialog so the publisher
         sees the authority they are about to lend."""
         return Response(collect_required_permissions(self.get_object()))
@@ -342,7 +342,7 @@ class WorkflowVersionViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["post"])
     def restore(self, request, pk=None):
-        """Clone any archived version into a new draft (spec D32). Blocked
+        """Clone any archived version into a new draft. Blocked
         while a draft exists — one draft at a time, no silent forking."""
         version = self.get_object()
         if version.status != WorkflowVersion.Status.ARCHIVED:
@@ -430,7 +430,7 @@ class WorkflowSecretViewSet(BaseModelViewSet):
 
 
 class WorkflowTokenViewSet(BaseModelViewSet):
-    """Operator recovery for stuck runs (spec D10). Tokens are engine-managed,
+    """Operator recovery for stuck runs. Tokens are engine-managed,
     so the only writes are the retry/skip/abort actions, gated by
     change_workflowtoken (domain manager / administrator)."""
 
@@ -488,7 +488,7 @@ class WorkflowTokenViewSet(BaseModelViewSet):
 
 
 def collect_required_permissions(version):
-    """Deputization report (spec D34): per action node, the permission
+    """Deputization report: per action node, the permission
     codenames its config exercises. Feeds both the publish lint and the
     publish dialog."""
     report = []
@@ -506,7 +506,7 @@ def collect_required_permissions(version):
 
 
 def _deputization_errors(user, version):
-    """Spec D18: the publisher must hold the permissions the workflow's
+    """The publisher must hold the permissions the workflow's
     actions exercise. The workflow then acts as its publisher's deputy."""
     errors = []
     if getattr(user, "is_superuser", False):
@@ -577,7 +577,7 @@ class WorkflowInstanceViewSet(BaseModelViewSet):
                 {"error": "onlyCurrentVersionsCanBeRun"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        # Spec D34: published versions run as their run_as (definer rights);
+        # Published versions run as their run_as (definer rights);
         # a published version without one predates the identity model and
         # must be republished. Drafts run as the invoker (request.user).
         if not version.is_draft and version.run_as is None:
@@ -595,7 +595,7 @@ class WorkflowInstanceViewSet(BaseModelViewSet):
                     {"error": "unknownTriggerNode"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-        # Debug seeds (spec D33): only declared variables, values checked
+        # Debug seeds: only declared variables, values checked
         # against the declared type.
         initial_variables = request.data.get("initial_variables")
         if initial_variables is not None:
@@ -650,7 +650,7 @@ class WorkflowInstanceViewSet(BaseModelViewSet):
 
 class WebhookRateThrottle(SimpleRateThrottle):
     """Rate-limit the unauthenticated hook ingress per sender IP. Keyed on the
-    TRAILING X-Forwarded-For entry: the frontend passthrough (spec D23) appends
+    TRAILING X-Forwarded-For entry: the frontend passthrough appends
     the real client IP last, so the leading (client-supplied) entries are not
     trusted."""
 
@@ -721,7 +721,7 @@ class WorkflowWebhookView(APIView):
                 {"error": "workflowNotPublished"},
                 status=status.HTTP_409_CONFLICT,
             )
-        # Spec D34: no run identity, no automatic execution — 404 like the
+        # No run identity, no automatic execution — 404 like the
         # inactive case above (no oracle for unauthenticated callers).
         if version.run_as is None:
             return Response(status=status.HTTP_404_NOT_FOUND)

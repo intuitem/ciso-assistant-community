@@ -117,7 +117,7 @@ def trigger_instance(
 
 def run_instance(instance):
     # Expose this run's event-chain depth so changes its actions make can be
-    # attributed by the internal-event producer (spec D21 loop containment).
+    # attributed by the internal-event producer (loop containment).
     depth_token = current_trigger_depth.set(instance.trigger_depth)
     try:
         with transaction.atomic():
@@ -152,7 +152,7 @@ def default_entry_node(version):
 
 
 def run_identity(instance):
-    """The identity a run acts as (spec D34): the version's run_as (definer
+    """The identity a run acts as: the version's run_as (definer
     rights, stamped at publish), or the invoker for drafts — run_as only
     exists after publish and drafts are manual-only. Returns None when no
     live identity resolves (fail closed at the caller). Memoized per
@@ -170,7 +170,7 @@ def run_identity(instance):
 
 def coerce_variable_value(value, variable_type):
     """Validate/coerce a user-supplied initial value against the declared
-    variable type (spec D33). Raises ValueError on mismatch. Dates stay ISO
+    variable type. Raises ValueError on mismatch. Dates stay ISO
     strings (variables live in a JSONField)."""
     if variable_type == WorkflowVariable.Type.STRING:
         if isinstance(value, str):
@@ -219,7 +219,7 @@ def create_instance(
         value = dig(payload, path)
         if value is not None:
             variables[variable_key] = value
-    # Explicit debug seeds (spec D33) beat defaults and input mapping. The
+    # Explicit debug seeds beat defaults and input mapping. The
     # caller (manual-run endpoint) validates keys and types beforehand.
     if initial_variables:
         variables.update(initial_variables)
@@ -247,7 +247,7 @@ def create_instance(
             WorkflowInstanceLog.EventType.INSTANCE_STARTED,
             node=entry_node,
             message=f"Triggered by {trigger}",
-            # seeded_variables keeps debugged runs distinguishable (spec D33).
+            # seeded_variables keeps debugged runs distinguishable.
             data={
                 "variables": variables,
                 **(
@@ -279,14 +279,14 @@ def resume_token(token):
 
 def _reopen(instance):
     """A failed/abandoned instance goes back to ACTIVE so _run proceeds after
-    an operator unsticks one of its tokens (spec D10)."""
+    an operator unsticks one of its tokens."""
     if instance.status != WorkflowInstance.Status.ACTIVE:
         instance.status = WorkflowInstance.Status.ACTIVE
         instance.save(update_fields=["status", "updated_at"])
 
 
 def retry_token(token):
-    """Operator recovery (spec D10): re-run an errored token from its node."""
+    """Operator recovery: re-run an errored token from its node."""
     with transaction.atomic():
         instance = WorkflowInstance.objects.select_for_update().get(
             id=token.instance_id
@@ -312,7 +312,7 @@ def retry_token(token):
 
 
 def skip_token(token):
-    """Operator recovery (spec D10): skip an errored node and advance past it."""
+    """Operator recovery: skip an errored node and advance past it."""
     with transaction.atomic():
         instance = WorkflowInstance.objects.select_for_update().get(
             id=token.instance_id
@@ -342,7 +342,7 @@ def skip_token(token):
 
 
 def abort_token(token):
-    """Operator recovery (spec D10): abandon the run. Consumes every live token
+    """Operator recovery: abandon the run. Consumes every live token
     and marks the instance ABANDONED (a manual terminal state)."""
     with transaction.atomic():
         instance = WorkflowInstance.objects.select_for_update().get(
@@ -387,7 +387,7 @@ def broadcast_event(event_key, emitting_instance):
 
 
 def _is_over_ttl(instance):
-    """Has the run exceeded its absolute time limit (spec D36)? Reads the
+    """Has the run exceeded its absolute time limit? Reads the
     frozen version copy; 0 = no limit."""
     timeout = instance.version.timeout_seconds
     return bool(timeout) and (
@@ -451,9 +451,9 @@ def _run(instance):
 
 
 def _set_iteration_overlay(token):
-    """Expose the token's innermost iteration context to _render_context
-    (spec D29). Execution is single-token-at-a-time inside a run, so the
-    transient instance attribute is safe."""
+    """Expose the token's innermost iteration context to _render_context.
+    Execution is single-token-at-a-time inside a run, so the transient
+    instance attribute is safe."""
     stack = token.iteration_context or []
     token.instance._iteration_context = dict(stack[-1]) if stack else None
 
@@ -523,7 +523,7 @@ def _process(token):
 
 
 def _handle_failure(token, message):
-    """Retry policy (spec D10/D17): schedule a delayed Huey re-execution while
+    """Retry policy: schedule a delayed Huey re-execution while
     attempts remain on action/subprocess nodes, else park the token in error."""
     node = token.current_node
     retryable = node.type in (
@@ -538,7 +538,7 @@ def _handle_failure(token, message):
                 "on_item_error", "continue"
             )
             if policy == "continue":
-                # continue policy (spec D29): the iteration is recorded as
+                # continue policy: the iteration is recorded as
                 # failed and the loop moves on instead of stalling the run.
                 _log(
                     token.instance,
@@ -552,7 +552,7 @@ def _handle_failure(token, message):
                 _loop_body_returned(controller, failed=message)
                 return
             # stop policy: fail the body token AND the parked controller, or the
-            # controller waits forever (spec D29). Loop restart-from-item-0 via
+            # controller waits forever. Loop restart-from-item-0 via
             # controller retry is deliberately out of scope.
             _fail_token(token, message)
             _fail_token(controller, f"loop stopped on item error: {message}")
@@ -595,7 +595,7 @@ def _loop_each_edges(node):
 
 
 def _process_loop(token):
-    """Loop node (spec D29). The first token to arrive becomes the CONTROLLER:
+    """Loop node. The first token to arrive becomes the CONTROLLER:
     it parks WAITING holding {items, index, outstanding, results, errors} and
     emits body tokens through the `each` port. Body tokens return to the loop
     input; the last return of an iteration collects and advances. Exhausted →
@@ -740,12 +740,12 @@ def _start_subprocess(token):
     if version is None:
         raise EngineError("Subprocess workflow has no published version")
     if not version.is_active:
-        # Automatic execution must not tunnel through a paused child
-        # (spec D32); manual-run leniency applies to direct runs only.
+        # Automatic execution must not tunnel through a paused child;
+        # manual-run leniency applies to direct runs only.
         raise EngineError("Subprocess workflow is inactive")
     if version.run_as is None:
-        # Child runs under the CHILD version's own identity (spec D34,
-        # nested definer) — no identity, no run.
+        # Child runs under the CHILD version's own identity (nested
+        # definer) — no identity, no run.
         raise EngineError("Subprocess workflow has no run identity")
     # Bound recursion: a subprocess cycle would otherwise nest run_instance
     # calls until the Python stack blows. Publish validation blocks direct
@@ -785,7 +785,7 @@ def _start_subprocess(token):
 
 def _store_node_output(node, output, instance):
     """Persist the node's output for {{nodes.<ref>.<path>}} references and the
-    builder's reference-run data browser (spec D20). Structure-preserving:
+    builder's reference-run data browser. Structure-preserving:
     nested JSON stays navigable and referenceable; only oversized leaves and
     collections shrink. The display log truncates flat and harder."""
     key = node.ref or str(node.id)
@@ -859,13 +859,13 @@ def _advance(token):
     edges = list(node.outgoing_edges.all())
     if not edges:
         # A leaf is an implicit terminal: this branch is done, siblings keep
-        # running. Stopping the WHOLE run is the end node's job (spec D35).
+        # running. Stopping the WHOLE run is the end node's job.
         token.status = WorkflowToken.Status.COMPLETED
         token.save(update_fields=["status", "updated_at"])
         return
 
     if node.type == WorkflowNode.Type.CONDITION:
-        # Exclusive routing by branch (spec D25): evaluate branches in order,
+        # Exclusive routing by branch: evaluate branches in order,
         # default last (always matches), first match wins; follow its wire.
         chosen = []
         branches = sorted(node.branches.all(), key=lambda b: (b.is_default, b.order))
@@ -904,9 +904,9 @@ def _advance(token):
 
 def _arrive(instance, edge, iteration_context=None, loop_controller=None):
     # Tokens are per-hop rows: iteration context and the controller pointer
-    # travel with the moving token (spec D29).
+    # travel with the moving token.
     # Convergence = run once per arriving token (n8n default). Waiting for all
-    # branches becomes the merge node's job (spec D30).
+    # branches becomes the merge node's job.
     WorkflowToken.objects.create(
         instance=instance,
         current_node=edge.target_node,
@@ -942,7 +942,7 @@ def _evaluate_group(group, variables):
 
 def _evaluate_condition(condition, variables):
     runtime = variables.get(condition.variable.key)
-    # The compared value may itself be a template ({{item.severity}}, spec D29);
+    # The compared value may itself be a template ({{item.severity}});
     # render it ONCE and use it for every operator (in/not_in/contains used to
     # compare against the raw "{{...}}" string and silently mis-routed).
     rendered = render(condition.value, variables)
@@ -997,7 +997,7 @@ def _coerce(value, variable_type):
 
 
 def _terminate_run(token, node):
-    """End node = stop the run NOW (spec D35).
+    """End node = stop the run NOW.
 
     Consumes every other live token, so parallel branches, parked task/event
     tokens and loop controllers all stop. The final status is deliberately left
@@ -1026,7 +1026,7 @@ def _terminate_run(token, node):
 
 def _abandon_children(instance):
     """Terminating a run cascades DOWN to subprocess children it started: they
-    were cut short, so they land ABANDONED (spec D35). Termination never
+    were cut short, so they land ABANDONED. Termination never
     propagates UP — a child hitting its own end node completes normally and the
     waiting parent carries on."""
     for child in instance.children.filter(status=WorkflowInstance.Status.ACTIVE):

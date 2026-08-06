@@ -1,6 +1,6 @@
 """Portable YAML import/export of workflow definitions.
 
-Workflows travel as LIBRARIES (spec D31): the exported document is a standard
+Workflows travel as LIBRARIES: the exported document is a standard
 library envelope whose `objects.workflows` section carries workflow objects,
 so the same file loads through the library pipeline (catalog/marketplace) or
 through the workflow import dialog (folder-targeted). Workflow objects carry
@@ -81,7 +81,7 @@ def export_workflow(workflow):
     if secret_names:
         data["requires"] = {"secrets": secret_names}
 
-    # Edges reference their branch BY NAME (spec D28 — positional references
+    # Edges reference their branch BY NAME (positional references
     # are where LLM edits silently rewire graphs). The exporter guarantees a
     # unique-per-node name for every branch, synthesizing one when blank.
     branch_names = _branch_name_map(document["nodes"])
@@ -98,7 +98,7 @@ def export_workflow(workflow):
 
 
 def export_workflow_library(workflow):
-    """Wrap the workflow object in a library envelope (spec D31). The urn is
+    """Wrap the workflow object in a library envelope. The urn is
     minted fresh on every export — an imported workflow divorced at import,
     so re-exporting it is publishing a NEW document (source_urn stays
     provenance-only)."""
@@ -216,7 +216,7 @@ def _branch_name_map(nodes):
 
 
 def _strip_empty(value):
-    """Canonical exports carry no empty values (spec D28): '', None, {} and []
+    """Canonical exports carry no empty values: '', None, {} and []
     are dropped recursively; a filter-tree dict reduced to bare {'operator'}
     is empty too. Booleans and numbers always survive."""
     if isinstance(value, dict):
@@ -279,7 +279,7 @@ def _export_node(node, refs, taxonomies, variable_keys, branch_names):
         }
         if presentation:
             out["presentation"] = presentation
-    # Condition nodes own their routing branches (spec D25); the branch order is
+    # Condition nodes own their routing branches; the branch order is
     # the list order, so edges can reference a branch by index.
     branches = [
         _export_branch(b, variable_keys, branch_names) for b in node["branches"]
@@ -420,7 +420,7 @@ def import_workflow(data, folder, user=None, source_version=None, secrets=None):
             description=str(data.get("description") or ""),
             ref_id=str(data.get("ref_id") or "")[:100],
             folder=folder,
-            # Marketplace/catalog provenance (spec D28): the document divorces
+            # Marketplace/catalog provenance: the document divorces
             # at import, these only record where it came from.
             source_urn=str(data.get("urn") or "")[:255],
             source_version=str(source_version or data.get("version") or "")[:50],

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ciso-assistant.com/schemas/workflow-v1.schema.json",
   "title": "CISO Assistant workflow object (schema_version 1) \u2014 an entry of a library's objects.workflows",
-  "description": "FROZEN CONTRACT (spec D28/D31): this schema evolves additively only \u2014 new OPTIONAL keys may appear, existing keys are never renamed, repurposed or removed. schema_version is reserved for structural breaks we intend never to make. The embedded expression language is frozen too: {{<variable>}}, {{nodes.<ref>.<path>}}, {{secrets.<name>}}, {{item}}/{{item.<path>}}/{{index}} during iteration; dotted paths with numeric list segments; no functions, no operators. Workflows travel inside standard library documents (objects.workflows, spec D31); this schema describes one workflow object. Canonical exports are minimal (no empty values, no defaults); importers accept a superset (position, 0-based source_branch index).",
+  "description": "FROZEN CONTRACT: this schema evolves additively only \u2014 new OPTIONAL keys may appear, existing keys are never renamed, repurposed or removed. schema_version is reserved for structural breaks we intend never to make. The embedded expression language is frozen too: {{<variable>}}, {{nodes.<ref>.<path>}}, {{secrets.<name>}}, {{item}}/{{item.<path>}}/{{index}} during iteration; dotted paths with numeric list segments; no functions, no operators. Workflows travel inside standard library documents (objects.workflows); this schema describes one workflow object. Canonical exports are minimal (no empty values, no defaults); importers accept a superset (position, 0-based source_branch index).",
   "type": "object",
   "required": [
     "schema_version",

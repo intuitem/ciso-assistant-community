@@ -2,7 +2,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 
 import type { RequestHandler } from './$types';
 
-// Inbound webhook passthrough (spec D23): the frontend origin is the only
+// Inbound webhook passthrough: the frontend origin is the only
 // surface guaranteed reachable in every deployment, so hook deliveries enter
 // here and are forwarded to the backend over the internal network. Deployments
 // whose reverse proxy routes /api/* straight to the backend never hit this

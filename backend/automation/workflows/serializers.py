@@ -48,8 +48,8 @@ class WorkflowReadSerializer(BaseModelSerializer):
         )
 
     def get_versions(self, workflow):
-        # Versions-panel rows (spec D32): newest first, with run counts.
-        # run_as (spec D34) so the panel can say who each version acts as.
+        # Versions-panel rows: newest first, with run counts.
+        # run_as so the panel can say who each version acts as.
         # .all() honors the viewset's prefetch (which carries run_as and an
         # instance_count annotation); sorting in Python keeps the order stable
         # for routes without it, where the count falls back to a query.
@@ -90,11 +90,11 @@ class WorkflowWriteSerializer(BaseModelSerializer):
 class WorkflowVersionReadSerializer(BaseModelSerializer):
     workflow = FieldsRelatedField()
     folder = FieldsRelatedField()
-    # Run identity (spec D34): published_by is provenance, run_as is the
+    # Run identity: published_by is provenance, run_as is the
     # authority the version's runs wield.
     published_by = FieldsRelatedField(["id", "email"])
     run_as = FieldsRelatedField(["id", "email"])
-    # Versions-panel row data (spec D32); versions per workflow are few, the
+    # Versions-panel row data; versions per workflow are few, the
     # count query per row is fine.
     run_count = serializers.SerializerMethodField()
 
@@ -121,7 +121,7 @@ class WorkflowInstanceReadSerializer(BaseModelSerializer):
     run_as = serializers.SerializerMethodField()
 
     def get_run_as(self, obj):
-        # The identity the run acts as (spec D34): version.run_as, or the
+        # The identity the run acts as: version.run_as, or the
         # invoker for draft runs — mirror of engine.run_identity without the
         # is_active liveness check (display, not enforcement).
         identity = obj.version.run_as if obj.version else None
@@ -164,7 +164,7 @@ class WorkflowSecretReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = WorkflowSecret
-        # Write-only store: the value never leaves the server (spec D17).
+        # Write-only store: the value never leaves the server.
         fields = ["id", "name", "workflow", "folder", "created_at", "updated_at"]
 
 

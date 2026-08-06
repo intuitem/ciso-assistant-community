@@ -1,4 +1,4 @@
-"""Publish-time graph validation (spec D7).
+"""Publish-time graph validation.
 
 Drafts can be saved in any state; publishing requires a sound graph. Each
 error carries the offending node/edge id so the canvas can surface it in
@@ -29,7 +29,7 @@ def validate_graph(version):
     nodes_by_id = {node.id: node for node in nodes}
     existing_secrets = _existing_secret_names(version, nodes)
     # Which branches carry a wire (a branch with a condition but no wire is a
-    # defined-but-unrouted case — spec D25).
+    # defined-but-unrouted case).
     wired_branch_ids = {
         e.source_branch_id for e in edges if e.source_branch_id is not None
     }
@@ -82,8 +82,8 @@ def validate_graph(version):
                     )
                 )
 
-    # A terminal is any leaf: an unwired output just ends that branch (spec
-    # D35), and end nodes are leaves by construction (end_has_outgoing). So the
+    # A terminal is any leaf: an unwired output just ends that branch, and
+    # end nodes are leaves by construction (end_has_outgoing). So the
     # only structural failure left is a node that can reach no leaf at all,
     # which means it sits in a cycle with no exit and could never finish. This
     # is deliberately the one thing you cannot see by looking at the canvas.
@@ -290,7 +290,7 @@ LOOP_COLLECTION_RE = re.compile(r"^\{\{\s*[\w.]+\s*\}\}$")
 
 
 def _validate_loop(node, edges, outgoing, nodes_by_id):
-    """Loop rules (spec D29): a valid collection expression, both ports wired,
+    """Loop rules: a valid collection expression, both ports wired,
     every `each` path returns to the loop, and no `each` path escapes into the
     rest of the graph."""
     results = []
@@ -330,7 +330,7 @@ def _validate_loop(node, edges, outgoing, nodes_by_id):
     # legal exit. A body path that just dead-ends never comes home, so the
     # controller would wait forever — that's an escape. An END node is the
     # exception: terminating consumes the controller too, so "bail out of the
-    # whole run from inside the loop" is legitimate (spec D35).
+    # whole run from inside the loop" is legitimate.
     body = set()
     stack = [e.target_node_id for e in each_edges]
     escapes = False
@@ -404,7 +404,7 @@ def _validate_loop(node, edges, outgoing, nodes_by_id):
 
 def _referenced_node_refs(node):
     """Refs named by {{nodes.<ref>...}} anywhere in the node's configs. The
-    builder rewrites references on rename (spec D28); this is the safety net
+    builder rewrites references on rename; this is the safety net
     for imports and hand-written documents. loop_config is included: a loop's
     collection/collect expressions hold {{nodes.<ref>...}} too."""
     blob = json.dumps(

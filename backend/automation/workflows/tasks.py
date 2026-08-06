@@ -36,7 +36,7 @@ def process_workflow_schedules():
 
 @db_periodic_task(crontab(minute="*"))
 def reap_timed_out_runs():
-    """Terminate runs past their absolute TTL (spec D36). The inline check in
+    """Terminate runs past their absolute TTL. The inline check in
     _run covers sync + resumed runs; this catches runs parked WAITING on an
     event/subprocess that never resumes — they never re-enter _run on their
     own. Needs the Huey worker running (same as scheduled triggers)."""

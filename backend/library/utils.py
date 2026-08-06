@@ -679,7 +679,7 @@ class LibraryImporter:
         self._workflows = []
 
     def init_workflows(self, workflows: List[dict]) -> Union[str, None]:
-        """Structural validation of workflow objects (spec D31); actual
+        """Structural validation of workflow objects; actual
         creation happens in import_objects via the workflows app."""
         from automation.workflows.import_export import (
             WorkflowImportError,
@@ -1063,7 +1063,7 @@ class LibraryImporter:
         for requirement_mapping_set in self._requirement_mapping_sets:
             requirement_mapping_set.load(library_object)
 
-        # Workflows divorce at load (spec D31): created as plain user documents
+        # Workflows divorce at load: created as plain user documents
         # with provenance stamped, no FK to the library — unload leaves them,
         # update never mutates them.
         if self._workflows:

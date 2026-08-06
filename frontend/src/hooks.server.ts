@@ -149,7 +149,7 @@ async function validateUserSession(event: RequestEvent): Promise<User | null> {
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
-	// Inbound webhook passthrough (spec D23): unauthenticated by design (the
+	// Inbound webhook passthrough: unauthenticated by design (the
 	// URL secret is the credential) — skip locale middleware, CSRF-token fetch
 	// and session validation, none of which apply to machine deliveries.
 	if (event.url.pathname.startsWith('/api/workflows/hooks/')) {
