@@ -244,6 +244,20 @@ def validate_graph(version):
                             node=node,
                         )
                     )
+            # Scope gate (mirrors the runtime guard in engine._start_subprocess):
+            # the target must sit within this workflow's folder subtree, so a
+            # subprocess can never reach into an unrelated domain.
+            if target is not None and target.id != version.workflow_id:
+                from .actions import _read_scope_folder_ids
+
+                if target.folder_id not in _read_scope_folder_ids(version.folder):
+                    errors.append(
+                        _error(
+                            "subprocess_out_of_scope",
+                            "The subprocess workflow is outside this workflow's scope",
+                            node=node,
+                        )
+                    )
         for assignment in node.assignments.all():
             if (
                 assignment.resolve_type == NodeAssignment.ResolveType.ACTOR

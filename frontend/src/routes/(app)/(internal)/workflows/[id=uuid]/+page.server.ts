@@ -36,14 +36,12 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 		versions[0];
 	if (!activeVersion) error(404, 'This workflow has no version');
 
-	const [graph, taskTemplates, workflows, creatableModelsRaw, readableModelsRaw] =
-		await Promise.all([
-			fetchJson(fetch, `${BASE_API_URL}/workflows/workflow-versions/${activeVersion.id}/graph/`),
-			fetchJson(fetch, `${BASE_API_URL}/task-templates/`),
-			fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/`),
-			fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/creatable-models/`),
-			fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/readable-models/`)
-		]);
+	const [graph, taskTemplates, creatableModelsRaw, readableModelsRaw] = await Promise.all([
+		fetchJson(fetch, `${BASE_API_URL}/workflows/workflow-versions/${activeVersion.id}/graph/`),
+		fetchJson(fetch, `${BASE_API_URL}/task-templates/`),
+		fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/creatable-models/`),
+		fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/readable-models/`)
+	]);
 	if (!graph) error(404, 'Graph not found');
 
 	// Options for the create_object FK selects, driven by the backend registry.
@@ -70,8 +68,10 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 		versionPinned: pinnedVersion !== null,
 		graph,
 		taskTemplates: listResults(taskTemplates),
-		// A workflow can't be its own subprocess.
-		subprocessCandidates: listResults(workflows).filter((w: any) => w.id !== workflow.id),
+		// Subprocess authoring is disabled for v1 (not in the palette, blocked at
+		// the graph API). No target list is loaded; the picker stays empty for
+		// any seeded/legacy subprocess node.
+		subprocessCandidates: [],
 		creatableModels,
 		readableModels: listResults(readableModelsRaw),
 		fkOptions,

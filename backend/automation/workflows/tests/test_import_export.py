@@ -404,21 +404,19 @@ class TestImport:
         assert node.task_template.name == "Vendor review"
         assert not any("task template" in w for w in warnings)
 
-    def test_subprocess_resolution_excludes_self(self, rich_workflow, root):
+    def test_subprocess_nodes_are_rejected(self, rich_workflow, root):
+        # Subprocess authoring is disabled for v1: a document carrying a
+        # subprocess node is refused outright rather than materialized as an
+        # unreachable node.
         data = export_workflow(rich_workflow)
         data["name"] = "Caller"
         data["graph"]["nodes"][3] = {
             "ref": "fetch_employee",
             "type": "subprocess",
-            "subprocess_workflow": "Caller",
+            "subprocess_workflow": "HRIS sync",
         }
-        _, warnings = import_workflow(data, root)
-        assert any("subprocess workflow 'Caller'" in w for w in warnings)
-
-        data["graph"]["nodes"][3]["subprocess_workflow"] = "HRIS sync"
-        imported, _ = import_workflow(data, root)
-        node = imported.draft_version.nodes.get(ref="fetch_employee")
-        assert node.subprocess_workflow_id == rich_workflow.id
+        with pytest.raises(WorkflowImportError, match="subprocess"):
+            import_workflow(data, root)
 
     def test_role_resolution(self, rich_workflow, root):
         from pmbok.models import ResponsibilityRole

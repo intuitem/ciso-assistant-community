@@ -511,6 +511,14 @@ def _validate_structure(data):
             raise WorkflowImportError(
                 f"Node '{ref}' has an unknown type {node.get('type')!r}"
             )
+        if node.get("type") == WorkflowNode.Type.SUBPROCESS:
+            # Subprocess authoring is disabled for v1 (see the graph endpoint
+            # and Palette). Refuse to import a document that carries one rather
+            # than silently materializing an unreachable node.
+            raise WorkflowImportError(
+                f"Node '{ref}' is a subprocess node — subprocess nodes are not "
+                "available yet and cannot be imported"
+            )
         node_type[ref] = node.get("type")
         branches = node.get("branches") or []
         if not isinstance(branches, list):

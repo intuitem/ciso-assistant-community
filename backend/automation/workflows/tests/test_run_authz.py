@@ -339,6 +339,58 @@ class TestSubprocessIdentity:
         with pytest.raises(EngineError, match="run identity"):
             _start_subprocess(token)
 
+    def test_subprocess_out_of_scope_rejected(self):
+        """A subprocess pointing at a workflow in an unrelated domain is refused
+        at run time (fail closed), so it can never run as that workflow's
+        run_as or leak its outputs back into the caller's run."""
+        from automation.workflows.engine import EngineError, _start_subprocess
+        from automation.workflows.models import WorkflowToken
+
+        domain_a = make_domain("Alpha")
+        domain_b = make_domain("Bravo")
+
+        # Child lives in a sibling domain, published with a valid run identity.
+        child_wf = Workflow.objects.create(name="Foreign child", folder=domain_b)
+        child_v = WorkflowVersion.objects.create(workflow=child_wf)
+        save_graph(
+            child_v,
+            {
+                "nodes": [
+                    node("trigger", trigger_config={"type": "manual"}),
+                    node("end"),
+                ],
+                "edges": [],
+                "variables": [],
+            },
+        )
+        child_v.publish(publisher_user())
+
+        parent_wf = Workflow.objects.create(name="Parent", folder=domain_a)
+        parent_v = WorkflowVersion.objects.create(
+            workflow=parent_wf, run_as=publisher_user()
+        )
+        save_graph(
+            parent_v,
+            {
+                "nodes": [
+                    node("trigger", trigger_config={"type": "manual"}),
+                    node("subprocess"),
+                    node("end"),
+                ],
+                "edges": [],
+                "variables": [],
+            },
+        )
+        instance = WorkflowInstance.objects.create(
+            workflow=parent_wf, version=parent_v, folder=parent_wf.folder
+        )
+        sub_node = parent_v.nodes.get(type="subprocess")
+        sub_node.subprocess_workflow = child_wf
+        sub_node.save(update_fields=["subprocess_workflow"])
+        token = WorkflowToken.objects.create(instance=instance, current_node=sub_node)
+        with pytest.raises(EngineError, match="outside this workflow's scope"):
+            _start_subprocess(token)
+
 
 @pytest.mark.django_db
 class TestApiParity:

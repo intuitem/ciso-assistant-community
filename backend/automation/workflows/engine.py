@@ -760,6 +760,16 @@ def _start_subprocess(token):
     version = target.published_version if target else None
     if version is None:
         raise EngineError("Subprocess workflow has no published version")
+    # Scope guard (fail closed): the child must live within the calling
+    # workflow's folder subtree. Without this a subprocess node could invoke a
+    # workflow in an unrelated domain, running as THAT workflow's run_as and
+    # piping its outputs back — a cross-domain confused deputy. Subprocess
+    # authoring is disabled for users, so this only backstops seeded/legacy
+    # graphs, but it stays as the load-bearing runtime boundary.
+    from .actions import _read_scope_folder_ids
+
+    if version.folder_id not in _read_scope_folder_ids(instance.folder):
+        raise EngineError("Subprocess workflow is outside this workflow's scope")
     if not version.is_active:
         # Automatic execution must not tunnel through a paused child;
         # manual-run leniency applies to direct runs only.

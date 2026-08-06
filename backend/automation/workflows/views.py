@@ -280,6 +280,18 @@ class WorkflowVersionViewSet(BaseModelViewSet):
                 {"error": "onlyDraftVersionsAreEditable"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        # Subprocess authoring is disabled for v1: the engine still executes
+        # subprocess nodes carried by seeded/legacy graphs, but users may not
+        # create or edit them through the API. Reject any payload that carries
+        # one instead of persisting it.
+        if any(
+            (node or {}).get("type") == WorkflowNode.Type.SUBPROCESS
+            for node in (request.data.get("nodes") or [])
+        ):
+            return Response(
+                {"error": "subprocessNodesUnavailable"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         try:
             document = save_graph(version, request.data)
         except GraphValidationError as e:

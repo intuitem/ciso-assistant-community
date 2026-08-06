@@ -306,6 +306,24 @@ class TestGraphSave:
         resp = _put_graph(version, _minimal_graph(), superuser)
         assert resp.status_code == 400
 
+    def test_subprocess_nodes_are_rejected(self, workflow, superuser):
+        # Subprocess authoring is disabled for v1: the graph endpoint refuses a
+        # payload that carries a subprocess node, even for a superuser.
+        version = workflow.draft_version
+        graph = _minimal_graph()
+        graph["nodes"].append(
+            {
+                "id": str(uuid.uuid4()),
+                "type": "subprocess",
+                "position": {"x": 600, "y": 0},
+            }
+        )
+        resp = _put_graph(version, graph, superuser)
+        assert resp.status_code == 400
+        assert resp.data["error"] == "subprocessNodesUnavailable"
+        # Nothing was persisted: the draft has no subprocess node.
+        assert not version.nodes.filter(type="subprocess").exists()
+
 
 @pytest.mark.django_db
 class TestPublish:
