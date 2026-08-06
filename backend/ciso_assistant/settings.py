@@ -459,7 +459,6 @@ INSTALLED_APPS = [
     "tprm",
     "privacy",
     "resilience",
-    "workflows",
     "automation",
     "crq",
     "custom_fields",

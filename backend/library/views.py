@@ -784,7 +784,10 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         workflows are divorced rows, so the documents only live in the store."""
         from django.db import transaction
 
-        from workflows.import_export import WorkflowImportError, import_workflow
+        from automation.workflows.import_export import (
+            WorkflowImportError,
+            import_workflow,
+        )
 
         try:
             key = "urn" if pk.startswith("urn:") else "id"

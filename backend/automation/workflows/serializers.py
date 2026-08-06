@@ -3,7 +3,7 @@ from rest_framework import serializers
 from core.serializers import BaseModelSerializer
 from core.serializer_fields import FieldsRelatedField, PathField
 
-from workflows.models import (
+from automation.workflows.models import (
     Workflow,
     WorkflowInstance,
     WorkflowInstanceLog,
@@ -201,7 +201,7 @@ class WorkflowTriggerWriteSerializer(BaseModelSerializer):
         ):
             from django.utils import timezone
 
-            from workflows.scheduling import next_occurrence
+            from automation.workflows.scheduling import next_occurrence
 
             config = instance.config or {}
             instance.next_run_at = (

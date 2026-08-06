@@ -9,9 +9,12 @@ from rest_framework.test import APIClient
 
 from core.models import StoredLibrary, LoadedLibrary
 from iam.models import Folder, User
-from workflows.graph import save_graph
-from workflows.import_export import export_workflow_library, import_workflow_library
-from workflows.models import Workflow, WorkflowVersion
+from automation.workflows.graph import save_graph
+from automation.workflows.import_export import (
+    export_workflow_library,
+    import_workflow_library,
+)
+from automation.workflows.models import Workflow, WorkflowVersion
 
 
 def node(type_, **kwargs):
@@ -172,7 +175,7 @@ class TestWorkflowLibraryExport:
         assert workflows[0].source_version == "1"
 
     def test_non_library_document_is_rejected(self):
-        from workflows.import_export import WorkflowImportError
+        from automation.workflows.import_export import WorkflowImportError
 
         with pytest.raises(WorkflowImportError, match="workflow library"):
             import_workflow_library(

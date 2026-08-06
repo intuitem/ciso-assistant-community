@@ -10,17 +10,17 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from iam.models import Folder, User
-from workflows.engine import start_instance
-from workflows.graph import save_graph
-from workflows.models import (
+from automation.workflows.engine import start_instance
+from automation.workflows.graph import save_graph
+from automation.workflows.models import (
     Workflow,
     WorkflowInstance,
     WorkflowTrigger,
     WorkflowVersion,
 )
-from workflows.scheduling import run_due_schedules
-from workflows.validation import validate_graph
-from workflows.tests.helpers import publisher_user
+from automation.workflows.scheduling import run_due_schedules
+from automation.workflows.validation import validate_graph
+from automation.workflows.tests.helpers import publisher_user
 
 
 @pytest.fixture

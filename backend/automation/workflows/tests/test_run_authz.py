@@ -17,17 +17,17 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 
 from core.models import AppliedControl
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
-from workflows.engine import run_identity, start_instance
-from workflows.graph import save_graph
-from workflows.models import (
+from automation.workflows.engine import run_identity, start_instance
+from automation.workflows.graph import save_graph
+from automation.workflows.models import (
     Workflow,
     WorkflowInstance,
     WorkflowInstanceLog,
     WorkflowTrigger,
     WorkflowVersion,
 )
-from workflows.tests.helpers import publisher_user
-from workflows.views import WorkflowInstanceViewSet
+from automation.workflows.tests.helpers import publisher_user
+from automation.workflows.views import WorkflowInstanceViewSet
 
 
 def node(type_, **kwargs):
@@ -132,8 +132,8 @@ class TestRuntimeEnforcement:
 
         # Grant the missing permission, retry the errored token → completes.
         grant(runner, domain, ["add_workflowinstance", "add_appliedcontrol"])
-        from workflows.engine import retry_token
-        from workflows.models import WorkflowToken
+        from automation.workflows.engine import retry_token
+        from automation.workflows.models import WorkflowToken
 
         token = instance.tokens.get(status=WorkflowToken.Status.ERROR)
         retry_token(token)
@@ -272,7 +272,7 @@ class TestNoSuperuserBypass:
         # A superuser is in BI-UG-ADM, so it passes the SAME can() path — the
         # point is that no wrapper short-circuits is_superuser. Assert the
         # can() verdict comes from the kernel, not a bypass.
-        from workflows import authz
+        from automation.workflows import authz
 
         admin = publisher_user()  # superuser (BI-UG-ADM)
         root = Folder.get_root_folder()
@@ -288,8 +288,8 @@ class TestNoSuperuserBypass:
 @pytest.mark.django_db
 class TestSubprocessIdentity:
     def test_subprocess_child_needs_identity(self):
-        from workflows.engine import EngineError, _start_subprocess
-        from workflows.models import WorkflowToken
+        from automation.workflows.engine import EngineError, _start_subprocess
+        from automation.workflows.models import WorkflowToken
 
         child_wf = Workflow.objects.create(
             name="Child", folder=Folder.get_root_folder()
@@ -348,7 +348,7 @@ class TestApiParity:
 
     def test_engine_read_matches_api_visibility(self):
         from core.views import AppliedControlViewSet
-        from workflows import authz
+        from automation.workflows import authz
 
         parent = make_domain("Parity")
         child = Folder.objects.create(
@@ -485,7 +485,7 @@ def no_run(monkeypatch):
     """Intercept async run dispatch so entry-point tests observe which
     instances were created without executing them."""
     calls = []
-    monkeypatch.setattr("workflows.tasks.run_instance_task", calls.append)
+    monkeypatch.setattr("automation.workflows.tasks.run_instance_task", calls.append)
     return calls
 
 
@@ -510,7 +510,7 @@ class TestAutomationEntryPoints:
         assert resp.status_code == 404
 
     def test_scheduler_skips_null_identity_and_advances(self, no_run):
-        from workflows.scheduling import run_due_schedules
+        from automation.workflows.scheduling import run_due_schedules
 
         admin = publisher_user()
         workflow, version = build_schedule_workflow(
@@ -532,7 +532,7 @@ class TestAutomationEntryPoints:
         assert no_run == []
 
     def test_events_skip_null_identity_but_fire_siblings(self, no_run):
-        from workflows.events import dispatch_internal_event
+        from automation.workflows.events import dispatch_internal_event
 
         admin = publisher_user()
         root = Folder.get_root_folder()
@@ -739,7 +739,7 @@ class TestRepublishStamping:
 @pytest.mark.django_db
 class TestDeputizationReport:
     def test_collect_required_permissions_lists_action_codenames(self):
-        from workflows.views import collect_required_permissions
+        from automation.workflows.views import collect_required_permissions
 
         _, version = create_control_workflow("Report", Folder.get_root_folder())
         report = collect_required_permissions(version)
@@ -748,7 +748,7 @@ class TestDeputizationReport:
         assert all({"node_id", "label", "codenames"} <= set(e) for e in report)
 
     def test_required_permissions_endpoint(self):
-        from workflows.views import WorkflowVersionViewSet
+        from automation.workflows.views import WorkflowVersionViewSet
 
         _, version = create_control_workflow("ReportEp", Folder.get_root_folder())
         factory = APIRequestFactory()
@@ -766,7 +766,7 @@ class TestDeputizationReport:
 @pytest.mark.django_db
 class TestIdentitySerialization:
     def test_version_read_exposes_identity(self):
-        from workflows.serializers import WorkflowVersionReadSerializer
+        from automation.workflows.serializers import WorkflowVersionReadSerializer
 
         admin = publisher_user()
         _, version = create_control_workflow("Ser", Folder.get_root_folder())
@@ -777,7 +777,7 @@ class TestIdentitySerialization:
         assert data["published_by"]["email"] == admin.email
 
     def test_instance_run_as_shows_invoker_for_draft(self):
-        from workflows.serializers import WorkflowInstanceReadSerializer
+        from automation.workflows.serializers import WorkflowInstanceReadSerializer
 
         domain = make_domain("SerInst")
         runner = User.objects.create_user(email="serinst@authz.test")

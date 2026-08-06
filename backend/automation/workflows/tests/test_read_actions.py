@@ -8,12 +8,17 @@ import pytest
 
 from core.models import AppliedControl, Incident
 from iam.models import Folder
-from workflows.actions import required_permissions, validate_read_config
-from workflows.engine import start_instance
-from workflows.graph import save_graph
-from workflows.models import Workflow, WorkflowInstance, WorkflowNode, WorkflowVersion
-from workflows.validation import validate_graph
-from workflows.tests.helpers import publisher_user
+from automation.workflows.actions import required_permissions, validate_read_config
+from automation.workflows.engine import start_instance
+from automation.workflows.graph import save_graph
+from automation.workflows.models import (
+    Workflow,
+    WorkflowInstance,
+    WorkflowNode,
+    WorkflowVersion,
+)
+from automation.workflows.validation import validate_graph
+from automation.workflows.tests.helpers import publisher_user
 
 
 def node(type_, **kwargs):
@@ -274,7 +279,7 @@ class TestComputedReadFields:
         assert "computed_outcome" in row
 
     def test_computed_fields_are_not_filterable(self):
-        from workflows.actions import validate_read_config
+        from automation.workflows.actions import validate_read_config
 
         domain = make_domain("Computed filter domain")
         version = read_flow(

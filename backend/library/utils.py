@@ -681,7 +681,10 @@ class LibraryImporter:
     def init_workflows(self, workflows: List[dict]) -> Union[str, None]:
         """Structural validation of workflow objects (spec D31); actual
         creation happens in import_objects via the workflows app."""
-        from workflows.import_export import WorkflowImportError, _validate_structure
+        from automation.workflows.import_export import (
+            WorkflowImportError,
+            _validate_structure,
+        )
 
         if not isinstance(workflows, list) or not workflows:
             return "objects.workflows must be a non-empty list"
@@ -1066,7 +1069,7 @@ class LibraryImporter:
         if self._workflows:
             from iam.models import Folder as IamFolder
 
-            from workflows.import_export import import_workflow
+            from automation.workflows.import_export import import_workflow
 
             for entry in self._workflows:
                 _workflow, warnings = import_workflow(
@@ -1102,8 +1105,8 @@ class LibraryImporter:
         if error_msg is not None:
             return error_msg
 
-        from workflows.graph import GraphValidationError
-        from workflows.import_export import WorkflowImportError
+        from automation.workflows.graph import GraphValidationError
+        from automation.workflows.import_export import WorkflowImportError
 
         for _ in range(10):
             try:

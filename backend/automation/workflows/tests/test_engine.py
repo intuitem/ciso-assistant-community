@@ -5,16 +5,16 @@ from rest_framework.test import APIClient, APIRequestFactory, force_authenticate
 
 from core.models import AppliedControl
 from iam.models import Folder, User, UserGroup
-from workflows.engine import broadcast_event, start_instance
-from workflows.graph import save_graph
-from workflows.models import (
+from automation.workflows.engine import broadcast_event, start_instance
+from automation.workflows.graph import save_graph
+from automation.workflows.models import (
     Workflow,
     WorkflowInstance,
     WorkflowToken,
     WorkflowVersion,
 )
-from workflows.views import WorkflowInstanceViewSet, WorkflowTokenViewSet
-from workflows.tests.helpers import publisher_user
+from automation.workflows.views import WorkflowInstanceViewSet, WorkflowTokenViewSet
+from automation.workflows.tests.helpers import publisher_user
 
 
 @pytest.fixture
@@ -633,7 +633,7 @@ class TestTermination:
     def test_terminate_consumes_a_parked_token_that_cannot_be_revived(self):
         # A branch parked on an event is consumed by the stop, and a later wake
         # attempt must not resurrect it (resume_token re-checks under the lock).
-        from workflows.engine import resume_token
+        from automation.workflows.engine import resume_token
 
         _, version = make_workflow()
         start = node("trigger", trigger_config={"type": "manual"})
@@ -1014,7 +1014,7 @@ class TestSubprocess:
         )
 
     def test_self_reference_fails_publish(self):
-        from workflows.validation import validate_graph
+        from automation.workflows.validation import validate_graph
 
         workflow, version = make_workflow("Selfie")
         self._wire_subprocess(version, workflow)
@@ -1035,7 +1035,7 @@ class TestSubprocess:
         # The depth cap (not a Python RecursionError) terminated it: the
         # deepest instance logs "too deep"; the outer ones log "Subprocess
         # failed", so check across all instances.
-        from workflows.models import WorkflowInstanceLog
+        from automation.workflows.models import WorkflowInstanceLog
 
         assert WorkflowInstanceLog.objects.filter(
             event_type="error", message__icontains="too deep"
@@ -1259,7 +1259,7 @@ class TestInitialVariables:
         return view(req)
 
     def test_seeds_override_defaults_and_are_logged(self, superuser):
-        from workflows.models import WorkflowInstance, WorkflowInstanceLog
+        from automation.workflows.models import WorkflowInstance, WorkflowInstanceLog
 
         version = self._version()
         resp = self._post(
@@ -1282,7 +1282,7 @@ class TestInitialVariables:
         }
 
     def test_untouched_variables_keep_defaults(self, superuser):
-        from workflows.models import WorkflowInstance
+        from automation.workflows.models import WorkflowInstance
 
         version = self._version()
         resp = self._post(str(version.id), superuser, initial_variables={"count": 3})

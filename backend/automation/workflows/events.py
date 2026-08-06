@@ -40,9 +40,11 @@ def event_key_catalog():
 
     keys = []
     for model in sorted(auditlog.get_models(), key=lambda m: m._meta.model_name):
-        # Skip the workflows app's own bookkeeping models: triggering on them
-        # is either circular (instances) or pointless (graph rows).
-        if model._meta.app_label == "workflows":
+        # Skip the workflow engine's own bookkeeping models: triggering on them
+        # is either circular (instances) or pointless (graph rows). Keyed on
+        # the defining module, not the app label, since the engine now shares
+        # the `automation` app with unrelated models (e.g. posture).
+        if model.__module__ == "automation.workflows.models":
             continue
         for action in CUD_ACTIONS:
             keys.append(

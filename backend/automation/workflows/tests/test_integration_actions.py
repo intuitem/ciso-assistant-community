@@ -5,17 +5,17 @@ from rest_framework.test import APIClient, APIRequestFactory, force_authenticate
 
 from core.models import AppliedControl
 from iam.models import Folder, User, UserGroup
-from workflows.engine import start_instance
-from workflows.graph import save_graph
-from workflows.models import (
+from automation.workflows.engine import start_instance
+from automation.workflows.graph import save_graph
+from automation.workflows.models import (
     Workflow,
     WorkflowInstance,
     WorkflowSecret,
     WorkflowToken,
     WorkflowVersion,
 )
-from workflows.views import WorkflowVersionViewSet
-from workflows.tests.helpers import publisher_user
+from automation.workflows.views import WorkflowVersionViewSet
+from automation.workflows.tests.helpers import publisher_user
 
 
 def make_workflow(name="Integration flow", folder=None):
@@ -195,7 +195,7 @@ class TestHttpRequest:
         monkeypatch.setattr("requests.request", failing_request)
         scheduled = {}
         monkeypatch.setattr(
-            "workflows.tasks.retry_token_task.schedule",
+            "automation.workflows.tasks.retry_token_task.schedule",
             lambda args, delay: scheduled.update(token_id=args[0], delay=delay),
         )
 
@@ -482,7 +482,7 @@ class TestWebhookHardening:
         assert resp.status_code == 201, resp.data
 
     def test_rotate_secret(self):
-        from workflows.views import WorkflowTriggerViewSet
+        from automation.workflows.views import WorkflowTriggerViewSet
 
         superuser = User.objects.create_superuser(email="rotator@example.com")
         workflow = self._hooked_workflow()
@@ -524,7 +524,7 @@ class TestWebhookHardening:
 @pytest.mark.django_db
 class TestSecretApi:
     def test_value_never_returned(self):
-        from workflows.views import WorkflowSecretViewSet
+        from automation.workflows.views import WorkflowSecretViewSet
 
         superuser = User.objects.create_superuser(email="secrets@example.com")
         workflow, _ = make_workflow()

@@ -5,22 +5,22 @@ import pytest
 from django.utils import timezone
 
 from iam.models import Folder
-from workflows.graph import save_graph
-from workflows.models import (
+from automation.workflows.graph import save_graph
+from automation.workflows.models import (
     Workflow,
     WorkflowInstance,
     WorkflowTrigger,
     WorkflowVersion,
 )
-from workflows.scheduling import (
+from automation.workflows.scheduling import (
     CronValidationError,
     next_occurrence,
     run_due_schedules,
     validate_cron_expression,
     validate_timezone,
 )
-from workflows.serializers import WorkflowTriggerWriteSerializer
-from workflows.tests.helpers import publisher_user
+from automation.workflows.serializers import WorkflowTriggerWriteSerializer
+from automation.workflows.tests.helpers import publisher_user
 
 
 def make_workflow(name="Scheduled flow", published=True, cron="*/10 * * * *"):
@@ -82,7 +82,7 @@ def force_due(registration, when=None):
 @pytest.fixture
 def capture_runs(monkeypatch):
     calls = []
-    monkeypatch.setattr("workflows.tasks.run_instance_task", calls.append)
+    monkeypatch.setattr("automation.workflows.tasks.run_instance_task", calls.append)
     return calls
 
 
@@ -274,7 +274,7 @@ class TestScheduleConfigValidation:
     validation of the trigger node's config."""
 
     def _publish_errors(self, trigger_config):
-        from workflows.validation import validate_graph
+        from automation.workflows.validation import validate_graph
 
         workflow = Workflow.objects.create(
             name=f"cfg {uuid.uuid4().hex[:6]}", folder=Folder.get_root_folder()

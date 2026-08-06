@@ -84,7 +84,7 @@ class WorkflowFilterSet(GenericFilterSet):
 
 class WorkflowViewSet(BaseModelViewSet):
     model = Workflow
-    serializers_module = "workflows.serializers"
+    serializers_module = "automation.workflows.serializers"
     filterset_class = WorkflowFilterSet
     search_fields = ["name", "description", "ref_id"]
     ordering = ["created_at"]
@@ -226,7 +226,7 @@ class WorkflowViewSet(BaseModelViewSet):
 
 class WorkflowVersionViewSet(BaseModelViewSet):
     model = WorkflowVersion
-    serializers_module = "workflows.serializers"
+    serializers_module = "automation.workflows.serializers"
     filterset_fields = ["workflow", "status", "folder"]
     search_fields = []
     ordering = ["-version_number"]
@@ -356,7 +356,7 @@ class WorkflowTriggerViewSet(BaseModelViewSet):
     surface is read + PATCH of the runtime state, never create/delete."""
 
     model = WorkflowTrigger
-    serializers_module = "workflows.serializers"
+    serializers_module = "automation.workflows.serializers"
     filterset_fields = ["workflow", "folder", "enabled", "type", "event_key"]
     search_fields = ["node_ref", "event_key"]
     ordering = ["created_at"]
@@ -397,7 +397,7 @@ class WorkflowTriggerViewSet(BaseModelViewSet):
 
 class WorkflowSecretViewSet(BaseModelViewSet):
     model = WorkflowSecret
-    serializers_module = "workflows.serializers"
+    serializers_module = "automation.workflows.serializers"
     filterset_fields = ["workflow", "folder"]
     search_fields = ["name"]
     ordering = ["name"]
@@ -409,7 +409,7 @@ class WorkflowTokenViewSet(BaseModelViewSet):
     change_workflowtoken (domain manager / administrator)."""
 
     model = WorkflowToken
-    serializers_module = "workflows.serializers"
+    serializers_module = "automation.workflows.serializers"
     filterset_fields = ["instance", "status", "current_node", "folder"]
     search_fields = []
     ordering = ["created_at"]
@@ -506,7 +506,7 @@ def _deputization_errors(user, version):
 
 class WorkflowInstanceViewSet(BaseModelViewSet):
     model = WorkflowInstance
-    serializers_module = "workflows.serializers"
+    serializers_module = "automation.workflows.serializers"
     filterset_fields = ["workflow", "version", "status", "trigger", "folder"]
     search_fields = []
     ordering = ["-created_at"]

@@ -355,7 +355,7 @@ class WorkflowEdge(AbstractBaseModel, FolderMixin):
     # For edges leaving a condition node: the branch this wire belongs to
     # (spec D25). Deleting the branch removes its wire. Null for plain edges.
     source_branch = models.ForeignKey(
-        "workflows.ConditionBranch",
+        "automation.ConditionBranch",
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -640,14 +640,14 @@ class WorkflowInstance(AbstractBaseModel, FolderMixin):
         related_name="children",
     )
     parent_token = models.ForeignKey(
-        "workflows.WorkflowToken",
+        "automation.WorkflowToken",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="subprocess_instances",
     )
     trigger_registration = models.ForeignKey(
-        "workflows.WorkflowTrigger",
+        "automation.WorkflowTrigger",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

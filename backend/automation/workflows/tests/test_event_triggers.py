@@ -4,23 +4,23 @@ import pytest
 
 from core.models import AppliedControl, FilteringLabel
 from iam.models import Folder
-from workflows.events import (
+from automation.workflows.events import (
     MAX_TRIGGER_DEPTH,
     dispatch_internal_event,
     event_key_catalog,
 )
-from workflows.graph import save_graph
-from workflows.models import Workflow, WorkflowTrigger, WorkflowVersion
-from workflows.tasks import dispatch_internal_event_task
-from workflows.validation import validate_graph
-from workflows.tests.helpers import publisher_user
+from automation.workflows.graph import save_graph
+from automation.workflows.models import Workflow, WorkflowTrigger, WorkflowVersion
+from automation.workflows.tasks import dispatch_internal_event_task
+from automation.workflows.validation import validate_graph
+from automation.workflows.tests.helpers import publisher_user
 
 
 @pytest.fixture
 def capture_runs(monkeypatch):
     launched = []
     monkeypatch.setattr(
-        "workflows.tasks.run_instance_task",
+        "automation.workflows.tasks.run_instance_task",
         lambda instance_id: launched.append(instance_id),
     )
     return launched

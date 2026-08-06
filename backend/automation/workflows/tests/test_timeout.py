@@ -9,15 +9,15 @@ import pytest
 from django.utils import timezone
 
 from iam.models import Folder
-from workflows.engine import _run, start_instance
-from workflows.graph import save_graph
-from workflows.models import (
+from automation.workflows.engine import _run, start_instance
+from automation.workflows.graph import save_graph
+from automation.workflows.models import (
     Workflow,
     WorkflowInstance,
     WorkflowInstanceLog,
     WorkflowVersion,
 )
-from workflows.tests.helpers import publisher_user
+from automation.workflows.tests.helpers import publisher_user
 
 
 def node(type_, **kwargs):
@@ -108,7 +108,7 @@ class TestTimeoutEnforcement:
             workflow=version.workflow, version=version, folder=version.folder
         )
         entry = version.nodes.get(type="trigger")
-        from workflows.models import WorkflowToken
+        from automation.workflows.models import WorkflowToken
 
         WorkflowToken.objects.create(instance=instance, current_node=entry)
         backdate(instance, 120)
@@ -120,14 +120,14 @@ class TestTimeoutEnforcement:
         ).exists()
 
     def test_reaper_terminates_parked_over_ttl_run(self):
-        from workflows.tasks import reap_timed_out_runs
+        from automation.workflows.tasks import reap_timed_out_runs
 
         _, version = log_workflow(timeout_seconds=60)
         instance = WorkflowInstance.objects.create(
             workflow=version.workflow, version=version, folder=version.folder
         )
         entry = version.nodes.get(type="trigger")
-        from workflows.models import WorkflowToken
+        from automation.workflows.models import WorkflowToken
 
         # Parked WAITING — never re-enters _run on its own.
         WorkflowToken.objects.create(
@@ -146,13 +146,13 @@ class TestTimeoutEnforcement:
         ).exists()
 
     def test_reaper_ignores_within_limit_runs(self):
-        from workflows.tasks import reap_timed_out_runs
+        from automation.workflows.tasks import reap_timed_out_runs
 
         _, version = log_workflow(timeout_seconds=3600)
         instance = WorkflowInstance.objects.create(
             workflow=version.workflow, version=version, folder=version.folder
         )
-        from workflows.models import WorkflowToken
+        from automation.workflows.models import WorkflowToken
 
         WorkflowToken.objects.create(
             instance=instance,

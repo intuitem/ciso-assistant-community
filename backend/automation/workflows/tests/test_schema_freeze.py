@@ -10,13 +10,13 @@ import jsonschema
 import pytest
 
 from iam.models import Folder
-from workflows.graph import save_graph
-from workflows.import_export import (
+from automation.workflows.graph import save_graph
+from automation.workflows.import_export import (
     WorkflowImportError,
     export_workflow,
     import_workflow,
 )
-from workflows.models import Workflow, WorkflowVersion
+from automation.workflows.models import Workflow, WorkflowVersion
 
 SCHEMA = json.loads(
     (Path(__file__).parent.parent / "schema" / "workflow-v1.schema.json").read_text()
@@ -224,7 +224,7 @@ class TestSchemaFreeze:
         assert imported.source_version == "3"
 
     def test_node_reference_missing_validation(self):
-        from workflows.validation import validate_graph
+        from automation.workflows.validation import validate_graph
 
         workflow = rich_workflow()
         version = workflow.versions.first()

@@ -7,11 +7,11 @@ import pytest
 
 from core.models import AppliedControl, Incident
 from iam.models import Folder
-from workflows.engine import start_instance
-from workflows.graph import save_graph
-from workflows.models import Workflow, WorkflowInstance, WorkflowVersion
-from workflows.validation import validate_graph
-from workflows.tests.helpers import publisher_user
+from automation.workflows.engine import start_instance
+from automation.workflows.graph import save_graph
+from automation.workflows.models import Workflow, WorkflowInstance, WorkflowVersion
+from automation.workflows.validation import validate_graph
+from automation.workflows.tests.helpers import publisher_user
 
 
 def node(type_, **kwargs):
@@ -302,7 +302,7 @@ class TestLoopNode:
         # Stop policy fails the controller (spec D29) — no WAITING hang, and the
         # third item is never processed.
         assert instance.status == WorkflowInstance.Status.FAILED
-        from workflows.models import WorkflowToken
+        from automation.workflows.models import WorkflowToken
 
         assert not instance.tokens.filter(status=WorkflowToken.Status.WAITING).exists()
         assert Incident.objects.filter(folder=domain).count() == 1
@@ -506,7 +506,7 @@ class TestLoopNode:
             payload={"groups": [{"members": ["a", "b"]}, {"members": ["c"]}]},
         )
         assert instance.status == WorkflowInstance.Status.COMPLETED
-        from workflows.models import WorkflowToken
+        from automation.workflows.models import WorkflowToken
 
         assert not instance.tokens.filter(
             status__in=[
@@ -564,7 +564,7 @@ class TestLoopValidation:
 
     def test_body_escape_to_done_side(self):
         def mutate(version):
-            from workflows.models import WorkflowEdge
+            from automation.workflows.models import WorkflowEdge
 
             body = version.nodes.get(label="Body 0")
             end = version.nodes.get(type="end")
@@ -579,7 +579,7 @@ class TestLoopValidation:
         end node consumes the controller, so nothing is left waiting."""
 
         def mutate(version):
-            from workflows.models import WorkflowEdge, WorkflowNode
+            from automation.workflows.models import WorkflowEdge, WorkflowNode
 
             body = version.nodes.get(label="Body 0")
             halt = WorkflowNode.objects.create(
@@ -612,7 +612,7 @@ class TestLoopValidation:
             variables=items_variable(),
             input_mapping={"items": "items"},
         )
-        from workflows.models import WorkflowEdge
+        from automation.workflows.models import WorkflowEdge
 
         loop = version.nodes.get(type="loop")
         body0 = version.nodes.get(label="Body 0")

@@ -5,8 +5,8 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 
 from iam.models import Folder, User
 from pmbok.models import ResponsibilityRole
-from workflows.models import Workflow, WorkflowVersion
-from workflows.views import WorkflowVersionViewSet, WorkflowViewSet
+from automation.workflows.models import Workflow, WorkflowVersion
+from automation.workflows.views import WorkflowVersionViewSet, WorkflowViewSet
 
 
 @pytest.fixture
@@ -383,8 +383,8 @@ class TestPublish:
     def test_stop_node_cannot_be_followed(self, workflow, superuser):
         """end_has_outgoing is load-bearing now: it is what guarantees stop
         nodes are leaves, which the dead_end rule relies on."""
-        from workflows.models import WorkflowEdge, WorkflowNode
-        from workflows.validation import validate_graph
+        from automation.workflows.models import WorkflowEdge, WorkflowNode
+        from automation.workflows.validation import validate_graph
 
         version = workflow.draft_version
         _put_graph(version, _minimal_graph(), superuser)

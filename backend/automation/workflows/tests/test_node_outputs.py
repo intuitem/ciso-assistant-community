@@ -3,10 +3,10 @@ import uuid
 import pytest
 
 from iam.models import Folder
-from workflows.engine import start_instance
-from workflows.graph import GraphValidationError, save_graph
-from workflows.models import Workflow, WorkflowInstance, WorkflowVersion
-from workflows.tests.helpers import publisher_user
+from automation.workflows.engine import start_instance
+from automation.workflows.graph import GraphValidationError, save_graph
+from automation.workflows.models import Workflow, WorkflowInstance, WorkflowVersion
+from automation.workflows.tests.helpers import publisher_user
 
 
 def make_workflow(name="Ref flow"):
@@ -106,7 +106,7 @@ class TestNodeRefs:
 
 class TestObjectRendering:
     def test_object_references_render_as_json(self):
-        from workflows.actions import render
+        from automation.workflows.actions import render
 
         context = {"nodes": {"fetch": {"body": {"a": 1, "items": [1, 2]}}}}
         rendered = render("payload: {{nodes.fetch.body}}", context)

@@ -6,15 +6,15 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 
 from core.models import TaskTemplate
 from iam.models import Folder, User
-from workflows.graph import save_graph
-from workflows.import_export import (
+from automation.workflows.graph import save_graph
+from automation.workflows.import_export import (
     WorkflowImportError,
     export_workflow,
     import_workflow,
 )
-from workflows.models import Workflow, WorkflowVersion
-from workflows.views import WorkflowViewSet
-from workflows.tests.helpers import publisher_user
+from automation.workflows.models import Workflow, WorkflowVersion
+from automation.workflows.views import WorkflowViewSet
+from automation.workflows.tests.helpers import publisher_user
 
 
 @pytest.fixture
@@ -371,8 +371,8 @@ class TestImport:
         assert not any("Missing secrets" in w for w in warnings)
 
     def test_publish_blocks_on_missing_secret(self, rich_workflow, root):
-        from workflows.models import WorkflowSecret
-        from workflows.validation import validate_graph
+        from automation.workflows.models import WorkflowSecret
+        from automation.workflows.validation import validate_graph
 
         imported, _ = import_workflow(export_workflow(rich_workflow), root)
         errors = validate_graph(imported.draft_version)
@@ -847,7 +847,7 @@ class TestApi:
         assert Workflow.objects.filter(id=resp.data["id"]).exists()
 
     def test_import_with_provided_secrets(self, rich_workflow, superuser, root):
-        from workflows.models import WorkflowSecret
+        from automation.workflows.models import WorkflowSecret
 
         exported = self._export(rich_workflow, superuser).content
         resp = self._import(
