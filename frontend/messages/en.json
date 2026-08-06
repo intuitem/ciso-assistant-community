@@ -2591,7 +2591,7 @@
 	"deactivateServiceAccountConfirm": "Deactivating this service account will immediately revoke all currently issued access tokens and block new ones from being issued. Continue?",
 	"gracePeriod": "Grace period",
 	"gracePeriodHelpText": "The current secret keeps working for this long after rotation, so integrations can be updated without downtime. Capped at 1 month.",
-	"gracePeriodTooLong": "The grace period can't be longer than 1 month.",
+	"gracePeriodInvalid": "Enter a whole number of days between 1 and 30.",
 	"previousSecretValidUntil": "The previous client secret is still valid until {date}.",
 	"expiresOn": "Expires on {date}",
 	"expiresIn": "Expires in",

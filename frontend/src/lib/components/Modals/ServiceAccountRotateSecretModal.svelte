@@ -15,13 +15,15 @@
 	const MAX_GRACE_PERIOD_DAYS = 30;
 
 	let hasGracePeriod = $state(false);
-	let days = $state(1);
+	let days: number = $state(1);
 
-	let gracePeriodDays = $derived(hasGracePeriod ? Math.max(0, Math.round(days)) : 0);
-	let tooLong = $derived(gracePeriodDays > MAX_GRACE_PERIOD_DAYS);
+	let invalid = $derived(
+		hasGracePeriod && (!Number.isInteger(days) || days < 1 || days > MAX_GRACE_PERIOD_DAYS)
+	);
+	let gracePeriodDays = $derived(hasGracePeriod ? days : 0);
 
 	function confirm() {
-		if (tooLong) return;
+		if (invalid) return;
 		modalStore.close();
 		onConfirm(gracePeriodDays);
 	}
@@ -60,8 +62,8 @@
 					/>
 					<span class="font-semibold text-sm text-surface-950-50">{m.days()}</span>
 				</div>
-				{#if tooLong}
-					<p class="text-sm text-error-500">{m.gracePeriodTooLong()}</p>
+				{#if invalid}
+					<p class="text-sm text-error-500">{m.gracePeriodInvalid()}</p>
 				{/if}
 			{/if}
 			<p class="text-sm opacity-75">{m.gracePeriodHelpText()}</p>
@@ -73,7 +75,7 @@
 			<button
 				class="btn preset-filled-error-500"
 				type="button"
-				disabled={tooLong}
+				disabled={invalid}
 				onclick={confirm}
 				data-testid="confirm-rotate-secret-button">{m.submit()}</button
 			>

@@ -2522,7 +2522,7 @@
 	"deactivateServiceAccountConfirm": "La désactivation de ce compte de service révoquera immédiatement tout jeton d'accès en cours et empêchera l'émission de nouveaux jetons. Continuer ?",
 	"gracePeriod": "Délai de grâce",
 	"gracePeriodHelpText": "Le secret actuel continue de fonctionner pendant cette durée après la rotation, afin que les intégrations puissent être mises à jour sans interruption. Plafonné à 1 mois.",
-	"gracePeriodTooLong": "Le délai de grâce ne peut pas dépasser 1 mois.",
+	"gracePeriodInvalid": "Indiquez un nombre entier de jours entre 1 et 30.",
 	"previousSecretValidUntil": "Le secret client précédent reste valide jusqu'au {date}.",
 	"expiresOn": "Expire le {date}",
 	"expiresIn": "Expire dans",

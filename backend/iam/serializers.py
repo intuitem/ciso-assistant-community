@@ -200,16 +200,17 @@ class ServiceAccountWriteSerializer(serializers.Serializer):
         return value
 
     def validate(self, attrs):
-        # role: null, and permissions: [], are both treated as "not given" —
-        # clients may resend either unset on every save.
         has_role = attrs.get("role") is not None
         has_permissions = bool(attrs.get("permissions"))
         if has_role and has_permissions:
             raise serializers.ValidationError(
                 "Provide either a role or permissions, not both."
             )
-        if has_role:
-            attrs.pop("permissions", None)
+        if "permissions" in attrs and not has_permissions:
+            instance = self.context.get("instance")
+            currently_role_linked = instance is not None and instance.role.builtin
+            if has_role or currently_role_linked:
+                attrs.pop("permissions")
         if not self.partial and not has_role and not has_permissions:
             raise serializers.ValidationError("Provide either a role or permissions.")
         return attrs

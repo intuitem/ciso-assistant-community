@@ -1818,6 +1818,7 @@ class ServiceAccount(AbstractBaseModel):
                 "previous_secret_hash",
                 "previous_secret_expires_at",
                 "secret_preview",
+                "updated_at",
             ]
         )
         self.client.set_secret(plain_secret)

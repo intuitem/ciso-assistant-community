@@ -783,6 +783,32 @@ class TestServiceAccountRoleLinked:
         assert response.status_code == 200, response.content
         assert response.json()["is_role_linked"] is True
 
+    def test_update_tolerates_a_stray_empty_permissions_list_without_role(
+        self, admin_client, domain_folder
+    ):
+        role = self._reader_role()
+        create_response = admin_client.post(
+            SA_ENDPOINT,
+            {
+                "name": "role-linked-stray-perms",
+                "role": str(role.id),
+                "perimeter_folders": [str(domain_folder.id)],
+            },
+            format="json",
+        )
+        payload = create_response.json()
+
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"permissions": []},
+            format="json",
+        )
+        assert response.status_code == 200, response.content
+        assert response.json()["is_role_linked"] is True
+
+        sa = ServiceAccount.objects.get(id=payload["id"])
+        assert sa.role_id == role.id
+
     def test_update_can_switch_between_two_builtin_roles(
         self, admin_client, domain_folder
     ):

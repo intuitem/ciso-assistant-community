@@ -26,7 +26,7 @@ Scrolling down, pick the **domains** (perimeter folders) the account can act on,
 <figure><img src="../.gitbook/assets/service-accounts-create-domains.png" alt=""><figcaption><p>Domain scope, "apply to sub-domains", and expiry date.</p></figcaption></figure>
 
 {% hint style="warning" %}
-On save, the **Client ID** and **Client secret** are shown once. <mark style="color:orange;">Copy the secret now, it cannot be retrieved again.</mark> If you lose it, use **Rotate secret** to issue a new one.
+On save, the **Client ID** and **Client secret** are both shown, but only the secret is one-time: the Client ID stays visible on the detail page afterwards. <mark style="color:orange;">Copy the secret now, it cannot be retrieved again.</mark> If you lose it, use **Rotate secret** to issue a new one.
 {% endhint %}
 
 <figure><img src="../.gitbook/assets/service-accounts-secret.png" alt=""><figcaption><p>The client secret is shown only once, right after creation.</p></figcaption></figure>
@@ -38,7 +38,8 @@ Afterwards, the list and detail views show a **secret preview** (a masked prefix
 ```
 curl https://<your-instance>/api/identity/o/api/token \
   -d "grant_type=client_credentials" \
-  -u "<client_id>:<client_secret>"
+  -d "client_id=<client_id>" \
+  -d "client_secret=<client_secret>"
 ```
 
 This returns a bearer access token, scoped to the permissions and domains you granted. Use it like any other API token:
@@ -62,4 +63,4 @@ A service account's detail page shows its Client ID, secret preview, scope, and 
 
 * **Delete** removes the underlying OAuth2 client entirely; its Client ID stops being valid.
 
-Unlike a [PAT](pat.md), a service account isn't tied to a human user and doesn't expire on a fixed schedule, it lives until you deactivate or delete it, which makes it the right choice for long-running integrations rather than personal, short-lived API access.
+Unlike a [PAT](pat.md), a service account isn't tied to a human user and doesn't expire on a fixed schedule, it stays active until you deactivate or delete it, or until its optional expiry date passes, which makes it the right choice for long-running integrations rather than personal, short-lived API access.

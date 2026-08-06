@@ -118,7 +118,7 @@ def _switch_role(service_account: ServiceAccount, new_role: Role) -> None:
     old_role = service_account.role
     role_assignment = RoleAssignment.objects.filter(user=service_account.user).first()
     service_account.role = new_role
-    service_account.save(update_fields=["role"])
+    service_account.save(update_fields=["role", "updated_at"])
     if role_assignment is not None:
         role_assignment.role = new_role
         role_assignment.save()
