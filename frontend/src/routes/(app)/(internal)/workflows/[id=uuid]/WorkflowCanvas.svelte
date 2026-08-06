@@ -1154,12 +1154,16 @@
 	async function toggleActive() {
 		const next = !isActive;
 		isActive = next;
-		const res = await fetch(opsUrl('set-active'), {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ is_active: next })
-		});
-		if (!res.ok) isActive = !next; // revert on failure
+		try {
+			const res = await fetch(opsUrl('set-active'), {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ is_active: next })
+			});
+			if (!res.ok) isActive = !next; // revert on failure
+		} catch {
+			isActive = !next; // revert on network failure too
+		}
 	}
 
 	// Absolute run TTL (spec D36). Stored as seconds; edited as value + unit so
@@ -1199,20 +1203,37 @@
 		}
 	}
 
-	function selectVersion(version: any) {
+	// Surfaces restore failures next to the versions panel — the save badge is
+	// hidden in readonly views, so it can't carry them.
+	let versionsError = $state('');
+
+	async function selectVersion(version: any) {
 		if (version.id === activeVersionId) return;
-		goto(`/workflows/${workflowId}?version=${version.id}`, { invalidateAll: true });
+		// Flush pending edits like startRun does, or navigating away drops them.
+		const pending = saveState === 'dirty' || saveState === 'saving' || saveState === 'error';
+		if (!readonly && pending && !(await save())) return;
+		await goto(`/workflows/${workflowId}?version=${version.id}`, { invalidateAll: true });
 	}
 
 	async function restoreVersion(version: any) {
-		const res = await fetch(opsUrl('restore-version'), {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ version: version.id })
-		});
-		if (res.ok) {
-			// The new draft becomes the default active version.
-			await goto(`/workflows/${workflowId}`, { invalidateAll: true });
+		const pending = saveState === 'dirty' || saveState === 'saving' || saveState === 'error';
+		if (!readonly && pending && !(await save())) return;
+		versionsError = '';
+		try {
+			const res = await fetch(opsUrl('restore-version'), {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ version: version.id })
+			});
+			if (res.ok) {
+				// The new draft becomes the default active version.
+				await goto(`/workflows/${workflowId}`, { invalidateAll: true });
+				return;
+			}
+			const body = await res.json().catch(() => ({}));
+			versionsError = String(body.error ?? res.statusText);
+		} catch (error) {
+			versionsError = String(error);
 		}
 	}
 	let dataOpen = $state(false);
@@ -2296,9 +2317,17 @@
 			{/if}
 
 			{#if versionsOpen}
+				{#if versionsError}
+					<div
+						class="text-xs text-error-500 px-4 py-1 border-t border-surface-200-800"
+						data-testid="versions-error"
+					>
+						{versionsError}
+					</div>
+				{/if}
 				<VersionsPanel
 					{versions}
-					activeVersionId={versionId}
+					{activeVersionId}
 					onSelect={selectVersion}
 					onRestore={restoreVersion}
 				/>
@@ -2334,7 +2363,7 @@
 					onPinReference={pinReference}
 					onRunsRefreshed={handleRunsRefreshed}
 					referenceRunId={referenceRun?.id ?? null}
-					filterVersionId={versionPinned ? versionId : null}
+					filterVersionId={versionPinned ? activeVersionId : null}
 				/>
 			{/if}
 		</div>

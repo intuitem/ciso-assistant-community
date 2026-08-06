@@ -18,6 +18,16 @@ def generate_webhook_secret():
     return secrets.token_urlsafe(32)
 
 
+class DraftExistsError(Exception):
+    """Raised by clone_as_draft when the workflow already has a draft —
+    detected under the workflow row lock, after the caller's unlocked
+    pre-check has passed (one draft at a time, spec D6)."""
+
+    def __init__(self, draft):
+        self.draft = draft
+        super().__init__("draftAlreadyExists")
+
+
 class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
     ref_id = models.CharField(max_length=100, blank=True)
     # Master switch (spec D32): gates AUTOMATIC execution only — manual runs
@@ -72,6 +82,7 @@ class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
         if folder_changed:
             self.versions.update(folder=self.folder)
             self.triggers.update(folder=self.folder)
+            self.secrets.update(folder=self.folder)
             WorkflowNode.objects.filter(version__workflow=self).update(
                 folder=self.folder
             )
@@ -190,6 +201,9 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
         from .triggers import sync_trigger_registrations
 
         with transaction.atomic():
+            # Serialize publish/draft flows per workflow: without the row lock
+            # two concurrent publishes could archive each other's version.
+            Workflow.objects.select_for_update().get(pk=self.workflow_id)
             WorkflowVersion.objects.filter(
                 workflow=self.workflow, status=self.Status.PUBLISHED
             ).update(status=self.Status.ARCHIVED)
@@ -201,10 +215,19 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
             sync_trigger_registrations(self)
 
     def clone_as_draft(self):
-        """Clone this version's whole graph into a new draft (spec D6)."""
+        """Clone this version's whole graph into a new draft (spec D6).
+
+        Raises DraftExistsError if the workflow already has a draft — checked
+        under the workflow row lock, so two concurrent clones cannot both pass
+        the callers' unlocked pre-check and fork two drafts.
+        """
         from django.db import transaction
 
         with transaction.atomic():
+            Workflow.objects.select_for_update().get(pk=self.workflow_id)
+            existing_draft = self.workflow.draft_version
+            if existing_draft is not None:
+                raise DraftExistsError(existing_draft)
             last_number = (
                 self.workflow.versions.order_by("-version_number")
                 .values_list("version_number", flat=True)
@@ -213,6 +236,9 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
             draft = WorkflowVersion.objects.create(
                 workflow=self.workflow,
                 version_number=(last_number or 0) + 1,
+                # A draft cloned from a paused workflow must not come up
+                # active — the cascade only fires when the flag changes.
+                is_active=self.workflow.is_active,
             )
             variable_map = {
                 variable.id: _clone_row(variable, version=draft)

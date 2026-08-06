@@ -3099,7 +3099,7 @@ export const listViewFields = {
 		filters: {}
 	},
 	workflows: {
-		head: ['name', 'description', 'triggerTypes', 'is_active', 'folder'],
+		head: ['name', 'description', 'triggerTypes', 'isActive', 'folder'],
 		body: ['name', 'description', 'trigger_types', 'is_active', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,

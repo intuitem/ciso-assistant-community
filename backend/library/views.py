@@ -805,7 +805,11 @@ class LoadedLibraryViewSet(BaseModelViewSet):
                 status=HTTP_400_BAD_REQUEST,
             )
 
-        folder = Folder.objects.filter(id=request.data.get("folder")).first()
+        try:
+            folder_id = uuid.UUID(str(request.data.get("folder")))
+        except (ValueError, TypeError, AttributeError):
+            return Response({"error": "invalidFolder"}, status=HTTP_400_BAD_REQUEST)
+        folder = Folder.objects.filter(id=folder_id).first()
         if folder is None:
             return Response({"error": "invalidFolder"}, status=HTTP_400_BAD_REQUEST)
         if not RoleAssignment.is_access_allowed(

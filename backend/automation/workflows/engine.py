@@ -430,10 +430,11 @@ def _run(instance):
             return
         # Deterministic pick: an unordered .first() lets SQLite and PG execute
         # parallel branches in different orders, so the last writer of a shared
-        # variable diverges between backends.
+        # variable diverges between backends. "id" breaks created_at ties
+        # between siblings created in the same statement.
         token = (
             instance.tokens.filter(status=WorkflowToken.Status.ACTIVE)
-            .order_by("created_at")
+            .order_by("created_at", "id")
             .first()
         )
         if token is None:
@@ -1081,14 +1082,28 @@ def _refresh_status(instance):
         return
     if instance.status == WorkflowInstance.Status.COMPLETED:
         # Mirror the synchronous path: store the node output for
-        # {{nodes.<subprocess>.<path>}} refs, THEN apply output_mapping.
-        _store_node_output(
-            parent_token.current_node, instance.variables, parent_token.instance
-        )
-        _apply_output_mapping(
-            parent_token.current_node, instance.variables, parent_token.instance
-        )
-        resume_token(parent_token)
+        # {{nodes.<subprocess>.<path>}} refs, THEN apply output_mapping — but
+        # under the parent instance lock, or two sibling subprocesses finishing
+        # together clobber each other's read-modify-write of the parent's
+        # variables/node_outputs. Lock ordering is child→parent everywhere, so
+        # holding the child lock while waiting here cannot deadlock.
+        with transaction.atomic():
+            parent_instance = WorkflowInstance.objects.select_for_update().get(
+                id=parent_token.instance_id
+            )
+            parent_token.refresh_from_db()
+            if parent_token.status != WorkflowToken.Status.WAITING:
+                return
+            parent_token.instance = parent_instance
+            _store_node_output(
+                parent_token.current_node, instance.variables, parent_instance
+            )
+            _apply_output_mapping(
+                parent_token.current_node, instance.variables, parent_instance
+            )
+            # resume_token re-acquires the same row lock in this transaction
+            # (a no-op) and re-checks WAITING before advancing.
+            resume_token(parent_token)
     elif instance.status == WorkflowInstance.Status.FAILED:
         # A failed async child must surface on the parent, or the parent token
         # waits forever. Route through the node's retry policy like the

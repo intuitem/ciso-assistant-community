@@ -56,12 +56,17 @@
 			});
 			const body = await res.json().catch(() => ({}));
 			if (!res.ok) {
-				flash.set({ type: 'error', message: String(body.error ?? res.statusText) });
+				// Some endpoints answer with a bare JSON string ("Library not
+				// found."), others with {error: ...}.
+				const message = typeof body === 'string' ? body : (body.error ?? res.statusText);
+				flash.set({ type: 'error', message: String(message) });
 				return;
 			}
 			const names = (body.workflows ?? []).map((w: any) => w.name).join(', ');
 			flash.set({ type: 'success', message: m.workflowInstantiated({ names }) });
 			instantiating = false;
+		} catch (error) {
+			flash.set({ type: 'error', message: String(error) });
 		} finally {
 			instantiateBusy = false;
 		}

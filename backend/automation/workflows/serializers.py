@@ -50,17 +50,24 @@ class WorkflowReadSerializer(BaseModelSerializer):
     def get_versions(self, workflow):
         # Versions-panel rows (spec D32): newest first, with run counts.
         # run_as (spec D34) so the panel can say who each version acts as.
+        # .all() honors the viewset's prefetch (which carries run_as and an
+        # instance_count annotation); sorting in Python keeps the order stable
+        # for routes without it, where the count falls back to a query.
         return [
             {
                 "id": str(version.id),
                 "version_number": version.version_number,
                 "status": version.status,
                 "published_at": version.published_at,
-                "run_count": version.instances.count(),
+                "run_count": version.instance_count
+                if hasattr(version, "instance_count")
+                else version.instances.count(),
                 "run_as": version.run_as.email if version.run_as else None,
             }
-            for version in workflow.versions.select_related("run_as").order_by(
-                "-version_number"
+            for version in sorted(
+                workflow.versions.all(),
+                key=lambda v: v.version_number,
+                reverse=True,
             )
         ]
 

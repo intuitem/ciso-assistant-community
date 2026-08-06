@@ -364,9 +364,14 @@ def _validate_loop(node, edges, outgoing, nodes_by_id):
     # Parallel fan-out inside the body breaks the controller's per-iteration
     # accounting (one emitted token, N returning tokens), so forbid it. A
     # condition node is exempt: exactly one branch fires, so one token returns.
+    # A nested loop is exempt too: its two edges are its own each/done ports
+    # (enforced above), not a parallel split.
     for body_id in body:
         body_node = nodes_by_id.get(body_id)
-        if body_node is None or body_node.type == WorkflowNode.Type.CONDITION:
+        if body_node is None or body_node.type in (
+            WorkflowNode.Type.CONDITION,
+            WorkflowNode.Type.LOOP,
+        ):
             continue
         if len(outgoing.get(body_id, [])) > 1:
             results.append(

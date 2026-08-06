@@ -6,7 +6,7 @@ import yaml
 from django.contrib.auth.models import Permission
 import django_filters as df
 from django.db import transaction
-from django.db.models import Prefetch
+from django.db.models import Count, Prefetch
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.crypto import constant_time_compare
@@ -40,6 +40,7 @@ from .import_export import (
 )
 from .models import (
     ConditionGroup,
+    DraftExistsError,
     Workflow,
     WorkflowInstance,
     WorkflowNode,
@@ -96,7 +97,12 @@ class WorkflowViewSet(BaseModelViewSet):
             super()
             .get_queryset()
             .prefetch_related(
-                "versions",
+                Prefetch(
+                    "versions",
+                    queryset=WorkflowVersion.objects.select_related("run_as")
+                    .annotate(instance_count=Count("instances"))
+                    .order_by("-version_number"),
+                ),
                 Prefetch(
                     "versions__nodes",
                     queryset=WorkflowNode.objects.filter(
@@ -318,7 +324,17 @@ class WorkflowVersionViewSet(BaseModelViewSet):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        draft = version.clone_as_draft()
+        try:
+            draft = version.clone_as_draft()
+        except DraftExistsError as e:
+            return Response(
+                {
+                    "error": "draftAlreadyExists",
+                    "draft_id": str(e.draft.id),
+                    "draft_version_number": e.draft.version_number,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response(
             {"id": str(draft.id), "version_number": draft.version_number},
             status=status.HTTP_201_CREATED,
@@ -344,7 +360,17 @@ class WorkflowVersionViewSet(BaseModelViewSet):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        draft = version.clone_as_draft()
+        try:
+            draft = version.clone_as_draft()
+        except DraftExistsError as e:
+            return Response(
+                {
+                    "error": "draftAlreadyExists",
+                    "draft_id": str(e.draft.id),
+                    "draft_version_number": e.draft.version_number,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response(
             {"id": str(draft.id), "version_number": draft.version_number},
             status=status.HTTP_201_CREATED,

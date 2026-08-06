@@ -362,6 +362,26 @@ def _export_condition_groups(groups, variable_keys):
 SECRET_KEY_RE = re.compile(r"^\w{1,100}$")
 
 
+def _narrow_import_secrets(data, provided):
+    """Keep only the names this workflow references (declared requires.secrets
+    plus {{secrets.*}} refs in its node configs — same computation as
+    _post_import_warnings), so a multi-workflow library import doesn't attach
+    every dialog-provided secret to every workflow."""
+    if not isinstance(provided, dict):
+        return provided
+    graph = data.get("graph") if isinstance(data.get("graph"), dict) else {}
+    configs = [
+        node.get("action_config")
+        for node in graph.get("nodes") or []
+        if isinstance(node, dict) and isinstance(node.get("action_config"), dict)
+    ]
+    declared = data.get("requires") if isinstance(data.get("requires"), dict) else {}
+    needed = set(declared.get("secrets") or []) | set(
+        SECRET_NAME_RE.findall(json.dumps(configs))
+    )
+    return {name: value for name, value in provided.items() if name in needed}
+
+
 def _create_import_secrets(workflow, provided):
     """Attach dialog-provided secret values to the imported workflow (secrets
     are workflow-scoped). Blank values are skipped — the missing-secrets
@@ -407,7 +427,9 @@ def import_workflow(data, folder, user=None, source_version=None, secrets=None):
         )
         # Dialog-provided secrets attach to the new workflow BEFORE the
         # missing-secrets warning is computed, so provided names don't warn.
-        _create_import_secrets(workflow, secrets)
+        # Narrowed to this entry's own references: the library path passes the
+        # same mapping for every workflow in the document.
+        _create_import_secrets(workflow, _narrow_import_secrets(data, secrets))
         version = WorkflowVersion.objects.create(workflow=workflow)
         payload = _build_graph_payload(data["graph"], workflow, folder, warnings)
         try:

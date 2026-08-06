@@ -626,5 +626,103 @@ class TestLoopValidation:
     def test_condition_in_body_is_not_fan_out(self):
         """A condition node in the body fans out edges but fires only one
         branch, so it must NOT trip the fan-out guard."""
-        codes = self._codes(lambda version: None)
+        domain = make_domain(f"Cond body {uuid.uuid4()}")
+        workflow = Workflow.objects.create(name="Cond body", folder=domain)
+        version = WorkflowVersion.objects.create(
+            workflow=workflow, run_as=publisher_user()
+        )
+        var_id = str(uuid.uuid4())
+        trigger = node(
+            "trigger",
+            trigger_config={"type": "manual"},
+            input_mapping={"items": "items"},
+        )
+        loop = node("loop", label="Per item", loop_config={"collection": "{{items}}"})
+        branch_high = {
+            "id": str(uuid.uuid4()),
+            "name": "high",
+            "order": 0,
+            "is_default": False,
+            "condition_groups": [
+                {
+                    "operator": "and",
+                    "order": 0,
+                    "conditions": [
+                        {"variable": var_id, "op": "eq", "value": "high", "order": 0}
+                    ],
+                    "children": [],
+                }
+            ],
+        }
+        branch_rest = {
+            "id": str(uuid.uuid4()),
+            "name": "rest",
+            "order": 1,
+            "is_default": True,
+            "condition_groups": [],
+        }
+        cond = node("condition", label="Sev?", branches=[branch_high, branch_rest])
+        escalate = node(
+            "action", label="Escalate", action_config={"type": "log", "message": "!"}
+        )
+        skip = node(
+            "action", label="Skip", action_config={"type": "log", "message": "-"}
+        )
+        end = node("end")
+        save_graph(
+            version,
+            {
+                "nodes": [trigger, loop, cond, escalate, skip, end],
+                "edges": [
+                    edge(trigger, loop),
+                    edge(loop, cond, source_port="each"),
+                    edge(cond, escalate, source_branch=branch_high["id"]),
+                    edge(cond, skip, source_branch=branch_rest["id"]),
+                    edge(escalate, loop),
+                    edge(skip, loop),
+                    edge(loop, end, source_port="done"),
+                ],
+                "variables": [{"id": var_id, "key": "items", "type": "string"}],
+            },
+        )
+        codes = [e["code"] for e in validate_graph(version)]
+        assert "loop_body_fan_out" not in codes
+
+    def test_nested_loop_in_body_is_not_fan_out(self):
+        """An inner loop's two outgoing edges are its own each/done ports, not
+        a parallel split, so nesting must NOT trip the fan-out guard."""
+        domain = make_domain(f"Nested val {uuid.uuid4()}")
+        workflow = Workflow.objects.create(name="Nested val", folder=domain)
+        version = WorkflowVersion.objects.create(
+            workflow=workflow, run_as=publisher_user()
+        )
+        trigger = node(
+            "trigger",
+            trigger_config={"type": "manual"},
+            input_mapping={"groups": "groups"},
+        )
+        outer = node("loop", label="Outer", loop_config={"collection": "{{groups}}"})
+        inner = node(
+            "loop", label="Inner", loop_config={"collection": "{{item.members}}"}
+        )
+        tag = node("action", label="Tag", action_config={"type": "log", "message": "x"})
+        end = node("end")
+        save_graph(
+            version,
+            {
+                "nodes": [trigger, outer, inner, tag, end],
+                "edges": [
+                    edge(trigger, outer),
+                    edge(outer, inner, source_port="each"),
+                    edge(inner, tag, source_port="each"),
+                    edge(tag, inner),
+                    edge(inner, outer, source_port="done"),
+                    edge(outer, end, source_port="done"),
+                ],
+                "variables": [
+                    {"id": str(uuid.uuid4()), "key": "groups", "type": "string"}
+                ],
+            },
+        )
+        codes = [e["code"] for e in validate_graph(version)]
         assert "loop_body_fan_out" not in codes

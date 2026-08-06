@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
 
 	interface VersionRow {
 		id: string;
@@ -29,7 +31,7 @@
 
 	function formatWhen(value?: string | null) {
 		if (!value) return '—';
-		return new Date(value).toLocaleString();
+		return formatDateOrDateTime(value, getLocale());
 	}
 </script>
 
@@ -47,7 +49,12 @@
 					class="w-full flex items-center gap-3 px-4 py-2 text-xs cursor-pointer text-left
 					{version.id === activeVersionId ? 'bg-surface-50-950' : 'hover:bg-surface-50-950'}"
 					onclick={() => onSelect(version)}
-					onkeydown={(e) => e.key === 'Enter' && e.target === e.currentTarget && onSelect(version)}
+					onkeydown={(e) => {
+						if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) {
+							e.preventDefault();
+							onSelect(version);
+						}
+					}}
 					data-testid="version-row"
 				>
 					<span class="font-mono font-semibold text-surface-800-200 w-8">
