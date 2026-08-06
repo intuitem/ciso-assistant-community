@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0178_finding_asset_finding_requirement_node_and_more"),
+        ("core", "0180_securityexception_evidences"),
     ]
 
     operations = [
