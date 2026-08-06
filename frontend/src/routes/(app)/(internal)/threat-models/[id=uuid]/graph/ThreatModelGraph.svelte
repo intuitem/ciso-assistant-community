@@ -183,6 +183,27 @@
 		return moved ? next : current;
 	}
 
+	function applyLaneVisibility(current: Node[], hidden: Set<string>): Node[] {
+		let changed = false;
+		const next = current.map((node) => {
+			const target = node.type === 'lane' ? node.id : node.parentId;
+			const shouldHide = target ? hidden.has(target) : false;
+			if (Boolean(node.hidden) === shouldHide) return node;
+			changed = true;
+			return { ...node, hidden: shouldHide };
+		});
+		return layoutLanes(changed ? next : current, hidden);
+	}
+
+	function emptyLaneIds(current: Node[]): Set<string> {
+		if (showAllLanes || dragTactics) return new Set();
+		return new Set(
+			current
+				.filter((node) => node.type === 'lane' && countIn(node.id, current) === 0)
+				.map((n) => n.id)
+		);
+	}
+
 	function initGraph() {
 		const perLane: Record<string, number> = {};
 		const flowNodes: Node[] = [];
@@ -208,7 +229,8 @@
 
 		dirty = false;
 		errorMessage = '';
-		nodes = layoutLanes([...buildLaneNodes(flowNodes), ...flowNodes], new Set());
+		const built = [...buildLaneNodes(flowNodes), ...flowNodes];
+		nodes = applyLaneVisibility(built, emptyLaneIds(built));
 		edges = graphEdges.map((edge) => ({
 			id: `e-${edge.source}-${edge.target}`,
 			source: edge.source,
@@ -245,17 +267,7 @@
 	$effect(() => {
 		const hidden = new Set(hiddenLaneKey ? hiddenLaneKey.split(',') : []);
 		untrack(() => {
-			// second guard: never assign a new array unless something actually changed
-			let changed = false;
-			const next = nodes.map((node) => {
-				const target = node.type === 'lane' ? node.id : node.parentId;
-				const shouldHide = target ? hidden.has(target) : false;
-				if (Boolean(node.hidden) === shouldHide) return node;
-				changed = true;
-				return { ...node, hidden: shouldHide };
-			});
-			const base = changed ? next : nodes;
-			const laid = layoutLanes(base, hidden);
+			const laid = applyLaneVisibility(nodes, hidden);
 			if (laid !== nodes) nodes = laid;
 		});
 	});
@@ -669,7 +681,9 @@
 				</Panel>
 			{/if}
 			<Controls showLock={false} />
-			<MiniMap />
+			{#if !readonly}
+				<MiniMap />
+			{/if}
 		</SvelteFlow>
 	</div>
 

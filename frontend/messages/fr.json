@@ -5701,5 +5701,6 @@
 	"removeNode": "Supprimer le nœud",
 	"toggleLogicOperator": "Basculer ET / OU",
 	"addThreatModel": "Ajouter un modèle de menaces",
-	"threatModelHelpText": "La séquence d'attaque qui justifie ce scénario"
+	"threatModelHelpText": "La séquence d'attaque qui justifie ce scénario",
+	"threatModelEmptyGraph": "Aucune technique sur ce graphe pour l'instant."
 }
