@@ -5,6 +5,7 @@ CISO Assistant is designed to plug into the rest of your tooling — through its
 ## Available now
 
 - **[API reference](api.md)** — authentication, schema browsing, and curl examples.
+- **[Hosted AI providers](ai-providers.md)** — connecting the chat assistant to OVHcloud AI Endpoints or OpenRouter.
 
 ## Coming soon
 
@@ -12,4 +13,4 @@ CISO Assistant is designed to plug into the rest of your tooling — through its
 - MCP server — exposing CISO Assistant to AI agents and assistants.
 - Third-party integrations — Jira, ServiceNow.
 - Outgoing webhooks.
-- The in-product chat assistant and agentic workflows.
+- Agentic workflows.

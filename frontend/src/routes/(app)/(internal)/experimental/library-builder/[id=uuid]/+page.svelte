@@ -6,6 +6,9 @@
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { createCopyHandler } from '$lib/components/FrameworkBuilder/builder-utils.svelte';
+	import { getToastStore } from '$lib/components/Toast/stores';
+
+	const toastStore = getToastStore();
 
 	let { data } = $props();
 	let draft: any = $state(data.draft);
@@ -54,20 +57,11 @@
 		return label ? label({ count }) : `${count} ${type.replaceAll('_', ' ')}`;
 	}
 
-	let statusMessage = $state('');
-	let statusType: 'success' | 'error' | '' = $state('');
-	let statusTimeout: ReturnType<typeof setTimeout> | null = null;
-
 	function setStatus(message: string, type: 'success' | 'error') {
-		statusMessage = message;
-		statusType = type;
-		if (statusTimeout) clearTimeout(statusTimeout);
-		if (type === 'success') {
-			statusTimeout = setTimeout(() => {
-				statusMessage = '';
-				statusType = '';
-			}, 3000);
-		}
+		toastStore.trigger({
+			message,
+			background: type === 'error' ? 'preset-filled-error-500' : 'preset-filled-success-500'
+		});
 	}
 
 	const base = () => `/experimental/library-builder/${draft.id}`;
@@ -153,7 +147,10 @@
 		});
 		if (!res.ok) {
 			const err = await res.json().catch(() => ({}));
-			setStatus(JSON.stringify(err), 'error');
+			setStatus(
+				err.detail || (err.error ? safeTranslate(err.error) : JSON.stringify(err)),
+				'error'
+			);
 			return false;
 		}
 		await reload();
@@ -692,15 +689,6 @@
 			     would otherwise pollute the controls' accessible names (breaking
 			     exact-name queries like the functional tests' /^publish$/). -->
 			<div class="flex items-center gap-2 flex-wrap">
-				{#if statusMessage}
-					<span
-						class="text-xs px-2 py-1 rounded-full {statusType === 'error'
-							? 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300'
-							: 'bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-300'}"
-					>
-						{statusMessage}
-					</span>
-				{/if}
 				{#if primaryKind}
 					<button
 						type="button"

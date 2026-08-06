@@ -122,13 +122,9 @@ class SuggestControlsWorkflow(Workflow):
         try:
             RequirementAssessment = apps.get_model("core", "RequirementAssessment")
             ra = (
-                RequirementAssessment.objects.select_related(
-                    "requirement", "compliance_assessment__framework"
-                )
-                .filter(
-                    id=ctx.parsed_context.object_id,
-                    compliance_assessment__folder_id__in=ctx.accessible_folder_ids,
-                )
+                ctx.scope.queryset(RequirementAssessment)
+                .select_related("requirement", "compliance_assessment__framework")
+                .filter(id=ctx.parsed_context.object_id)
                 .first()
             )
             if not ra or not ra.requirement:
@@ -272,7 +268,7 @@ class SuggestControlsWorkflow(Workflow):
         # Search 2: Broaden to all accessible folders if not enough results
         if len(results) < 10:
             broad_qs = (
-                AppliedControl.objects.filter(folder_id__in=ctx.accessible_folder_ids)
+                ctx.scope.queryset(AppliedControl)
                 .filter(keyword_filter)
                 .exclude(id__in=seen_ids)
                 .order_by("name")[: 20 - len(results)]
@@ -319,10 +315,11 @@ class SuggestControlsWorkflow(Workflow):
         """Get IDs of controls already attached to this requirement assessment."""
         try:
             RequirementAssessment = apps.get_model("core", "RequirementAssessment")
-            ra = RequirementAssessment.objects.filter(
-                id=ctx.parsed_context.object_id,
-                compliance_assessment__folder_id__in=ctx.accessible_folder_ids,
-            ).first()
+            ra = (
+                ctx.scope.queryset(RequirementAssessment)
+                .filter(id=ctx.parsed_context.object_id)
+                .first()
+            )
             if ra:
                 return {
                     str(pk) for pk in ra.applied_controls.values_list("id", flat=True)

@@ -91,12 +91,12 @@ docker compose exec backend uv run python manage.py createsuperuser
 
 ### "Payload too large" when uploading a file to the frontend
 
-By default, the `BODY_SIZE_LIMIT` environment variable is set to 20 MB in the frontend Dockerfile:
+By default, the `BODY_SIZE_LIMIT` environment variable is set to 50 MB in the frontend Dockerfile:
 
 ```docker
 # frontend/Dockerfile
 
-ENV BODY_SIZE_LIMIT=20000000
+ENV BODY_SIZE_LIMIT=50000000
 ```
 
 In order to upload larger files, this value must be increased. How to do so depends on you rmode of deployment. Here are relevant docs:

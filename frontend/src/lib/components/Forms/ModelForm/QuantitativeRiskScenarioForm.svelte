@@ -5,6 +5,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { run } from 'svelte/legacy';
 
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
@@ -46,6 +47,7 @@
 	cacheLock={cacheLocks['quantitative_risk_study']}
 	bind:cachedValue={formDataCache['quantitative_risk_study']}
 	label="Quantitative Risk Study"
+	helpText={m.quantitativeRiskStudyHelpText()}
 	hidden={initialData.quantitative_risk_study}
 />
 
@@ -113,7 +115,7 @@
 		field="qualifications"
 		cacheLock={cacheLocks['qualifications']}
 		bind:cachedValue={formDataCache['qualifications']}
-		label={m.qualifications()}
+		label={safeTranslate('qualifications')}
 	/>
 	<AutocompleteSelect
 		{form}
