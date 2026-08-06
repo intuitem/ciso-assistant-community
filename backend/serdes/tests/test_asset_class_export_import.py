@@ -71,6 +71,18 @@ class TestImportAssetClass:
         assert import_asset_class(builtin.full_path) == builtin
         assert AssetClass.objects.count() == before
 
+    def test_missing_segments_are_not_created_when_not_allowed(self):
+        before = AssetClass.objects.count()
+
+        assert import_asset_class("ACXNope/ACXChild", create_missing=False) is None
+        assert AssetClass.objects.count() == before
+
+    def test_existing_path_still_resolves_when_creation_is_not_allowed(self):
+        parent = AssetClass.objects.create(name="ACXHere")
+        leaf = AssetClass.objects.create(name="ACXThere", parent=parent)
+
+        assert import_asset_class("ACXHere/ACXThere", create_missing=False) == leaf
+
     def test_existing_segments_match_case_insensitively(self):
         parent = AssetClass.objects.create(name="ACXCase")
         leaf = AssetClass.objects.create(name="ACXLeafCase", parent=parent)
@@ -108,6 +120,7 @@ class TestAssetClassRoundTrip:
             domain_name="ACX Imported",
             load_missing_libraries=True,
             user=admin_user,
+            create_missing_asset_classes=True,
         )
         assert result["message"] == "Import successful"
 
@@ -129,3 +142,54 @@ class TestAssetClassRoundTrip:
         assert AssetClass.objects.count() == classes_before + 2
 
         assert assets["ACX Unclassified"].asset_class is None
+
+        # Classes created on the fly land in the root folder, so the caller is
+        # told which ones the import published instance-wide.
+        assert result["created_referentials"]["asset_classes"] == [
+            "ACXRoot",
+            "ACXRoot/ACXLeaf",
+        ]
+
+    def test_classes_are_not_created_unless_the_import_allows_it(
+        self, domain_with_classed_assets, admin_user
+    ):
+        """Creation is opt-in: classes land in the root folder, visible to all."""
+        response = export_domain(domain_with_classed_assets["domain"], admin_user)
+        json_dump = process_uploaded_file(io.BytesIO(response.content))
+        Folder.objects.filter(name="ACX Source").delete()
+        AssetClass.objects.filter(name="ACXRoot", parent=None).delete()
+
+        result = import_objects(
+            json_dump,
+            domain_name="ACX No Create",
+            load_missing_libraries=True,
+            user=admin_user,
+        )
+
+        assert not AssetClass.objects.filter(name="ACXLeaf").exists()
+        assert result["created_referentials"]["asset_classes"] == []
+
+        imported = Folder.objects.get(
+            name="ACX No Create", content_type=Folder.ContentType.DOMAIN
+        )
+        assets = {a.name: a for a in Asset.objects.filter(folder=imported)}
+        # The asset still imports, it just arrives unclassified.
+        assert assets["ACX Custom"].asset_class is None
+        # A class the target already has still binds.
+        assert assets["ACX Builtin"].asset_class is not None
+
+    def test_report_is_empty_when_every_class_already_exists(
+        self, domain_with_classed_assets, admin_user
+    ):
+        response = export_domain(domain_with_classed_assets["domain"], admin_user)
+        json_dump = process_uploaded_file(io.BytesIO(response.content))
+        Folder.objects.filter(name="ACX Source").delete()
+
+        result = import_objects(
+            json_dump,
+            domain_name="ACX Imported Twice",
+            load_missing_libraries=True,
+            user=admin_user,
+        )
+
+        assert result["created_referentials"]["asset_classes"] == []

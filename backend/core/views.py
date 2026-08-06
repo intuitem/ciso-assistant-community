@@ -8302,6 +8302,10 @@ class FolderViewSet(BaseModelViewSet):
             request.query_params.get("load_missing_libraries", "false").lower()
             == "true"
         )
+        create_missing_asset_classes = (
+            request.query_params.get("create_missing_asset_classes", "false").lower()
+            == "true"
+        )
         try:
             if not RoleAssignment.is_access_allowed(
                 user=request.user,
@@ -8314,7 +8318,11 @@ class FolderViewSet(BaseModelViewSet):
             )
             parsed_data = domain_io.process_uploaded_file(request.data["file"])
             result = domain_io.import_objects(
-                parsed_data, domain_name, load_missing_libraries, user=request.user
+                parsed_data,
+                domain_name,
+                load_missing_libraries,
+                user=request.user,
+                create_missing_asset_classes=create_missing_asset_classes,
             )
             return Response(result, status=status.HTTP_200_OK)
 

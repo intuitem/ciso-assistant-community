@@ -5681,5 +5681,7 @@
 	"unclassifiedAssets": "Non classés",
 	"hideEmptyClasses": "Masquer les classes vides",
 	"loadMoreAssets": "Charger plus",
-	"noAssetsInClass": "Aucun actif directement dans cette classe."
+	"noAssetsInClass": "Aucun actif directement dans cette classe.",
+	"createMissingAssetClasses": "Créer les classes d'actifs manquantes",
+	"createMissingAssetClassesHelpText": "Crée les classes d'actifs personnalisées référencées par l'import. Elles sont ajoutées au catalogue global et deviennent visibles par tous les utilisateurs."
 }

@@ -5686,5 +5686,7 @@
 	"unclassifiedAssets": "Unclassified",
 	"hideEmptyClasses": "Hide empty classes",
 	"loadMoreAssets": "Load more",
-	"noAssetsInClass": "No assets directly in this class."
+	"noAssetsInClass": "No assets directly in this class.",
+	"createMissingAssetClasses": "Create missing asset classes",
+	"createMissingAssetClassesHelpText": "Create the custom asset classes referenced by the import. They are added to the global catalogue and become visible to every user."
 }

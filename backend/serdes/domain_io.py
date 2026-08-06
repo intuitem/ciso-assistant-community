@@ -339,7 +339,7 @@ def import_terminologies(
     names: str | List[str] | None,
     field_path: Terminology.FieldPath,
 ) -> QuerySet[Terminology] | Terminology | None:
-    """Ensure requested terminologies exist and are visible."""
+    """Ensure requested terminologies exist."""
     if not names:
         return None
 
@@ -361,10 +361,8 @@ def import_terminologies(
             ignore_conflicts=True,
         )
 
-    Terminology.objects.filter(
-        name__in=names, field_path=field_path, is_visible=False
-    ).update(is_visible=True)
-
+    # An entry hidden on this instance stays hidden: an import must not override
+    # a deliberate visibility decision.
     result_qs = Terminology.objects.filter(name__in=names, field_path=field_path)
 
     if single_value:
@@ -372,8 +370,14 @@ def import_terminologies(
     return result_qs
 
 
-def import_asset_class(full_path: str | None) -> AssetClass | None:
-    """Resolve a canonical asset class path, creating any missing segment."""
+def import_asset_class(
+    full_path: str | None, create_missing: bool = True
+) -> AssetClass | None:
+    """Resolve a canonical asset class path, optionally creating missing segments.
+
+    Created classes land in the root folder, where every user sees them, so the
+    caller decides whether an import may publish them.
+    """
     if not full_path or not isinstance(full_path, str):
         return None
 
@@ -388,6 +392,8 @@ def import_asset_class(full_path: str | None) -> AssetClass | None:
         existing = AssetClass.objects.filter(
             parent=parent, name__iexact=segment
         ).first()
+        if existing is None and not create_missing:
+            return None
         parent = existing or AssetClass.objects.create(
             name=segment, parent=parent, builtin=False, is_visible=True
         )
@@ -399,7 +405,8 @@ def import_objects(
     domain_name: str,
     load_missing_libraries: bool,
     user: User,
-) -> dict[str, str]:
+    create_missing_asset_classes: bool = False,
+) -> dict[str, Any]:
     """Import and validate domain objects using their ImportExport serializers."""
     validation_errors: list = []
     required_libraries: list = []
@@ -410,6 +417,11 @@ def import_objects(
     if not objects:
         logger.error("No objects found in the dump")
         raise ValidationError({"error": "No objects found in the dump"})
+
+    # Referentials missing on this instance are created on the fly, in the root
+    # folder where everyone sees them. Snapshot so the caller is told which.
+    known_asset_classes = set(AssetClass.objects.values_list("id", flat=True))
+    known_terminologies = set(Terminology.objects.values_list("id", flat=True))
 
     try:
         models_map = get_models_map(objects)
@@ -517,12 +529,26 @@ def import_objects(
                     model=model,
                     objects=objects,
                     link_dump_database_ids=link_dump_database_ids,
+                    create_missing_asset_classes=create_missing_asset_classes,
                 )
 
             resolve_security_exception_m2m(objects, link_dump_database_ids)
             resolve_self_referencing_fks(objects, link_dump_database_ids)
 
-        return {"message": "Import successful"}
+        return {
+            "message": "Import successful",
+            "created_referentials": {
+                "asset_classes": sorted(
+                    node.full_path
+                    for node in AssetClass.objects.exclude(id__in=known_asset_classes)
+                ),
+                "terminologies": sorted(
+                    Terminology.objects.exclude(id__in=known_terminologies).values_list(
+                        "name", flat=True
+                    )
+                ),
+            },
+        }
 
     except (ValidationError, PermissionDenied) as e:
         # Keep 403 semantics — don't let the broad Exception branch below
@@ -610,6 +636,7 @@ def create_model_objects(
     model: type[models.Model],
     objects: List[dict],
     link_dump_database_ids: dict[str, Any],
+    create_missing_asset_classes: bool = True,
 ) -> None:
     """Create all objects for a model after validation."""
     logger.debug("Creating objects for model", model=model)
@@ -640,6 +667,7 @@ def create_model_objects(
             model=model,
             batch=batch,
             link_dump_database_ids=link_dump_database_ids,
+            create_missing_asset_classes=create_missing_asset_classes,
         )
 
 
@@ -647,6 +675,7 @@ def create_batch(
     model: type[models.Model],
     batch: List[dict],
     link_dump_database_ids: dict[str, Any],
+    create_missing_asset_classes: bool = True,
 ) -> None:
     """Create a batch of objects with proper relationship handling."""
     with transaction.atomic():
@@ -671,6 +700,7 @@ def create_batch(
                     fields=fields,
                     link_dump_database_ids=link_dump_database_ids,
                     many_to_many_map_ids=many_to_many_map_ids,
+                    create_missing_asset_classes=create_missing_asset_classes,
                 )
 
                 try:
@@ -760,6 +790,7 @@ def process_model_relationships(
     fields: dict[str, Any],
     link_dump_database_ids: dict[str, Any],
     many_to_many_map_ids: dict[str, QuerySet | List[UUID | str] | None],
+    create_missing_asset_classes: bool = True,
 ) -> dict[str, Any]:
     """Resolve FK references and split out M2M fields for post-create handling."""
 
@@ -780,7 +811,9 @@ def process_model_relationships(
             many_to_many_map_ids["parent_ids"] = get_mapped_ids(
                 _fields.pop("parent_assets", []), link_dump_database_ids
             )
-            _fields["asset_class"] = import_asset_class(_fields.get("asset_class"))
+            _fields["asset_class"] = import_asset_class(
+                _fields.get("asset_class"), create_missing_asset_classes
+            )
 
         case "riskassessment":
             _fields["perimeter"] = Perimeter.objects.filter(
