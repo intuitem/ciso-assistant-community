@@ -644,18 +644,13 @@ class TestServiceAccountRoleLinked:
         sa = ServiceAccount.objects.get(id=payload["id"])
         assert sa.role_id == role.id
 
-        # a permission added to the shared role afterwards is immediately reflected
-        extra_perm = (
-            Permission.objects.exclude(
-                id__in=role.permissions.values_list("id", flat=True)
-            )
-            .filter(codename="view_perimeter")
-            .first()
-        )
+        # a permission added to the shared role afterwards is immediately reflected;
+        extra_perm = Permission.objects.get(codename="add_perimeter")
+        assert not role.permissions.filter(id=extra_perm.id).exists()
         role.permissions.add(extra_perm)
         detail = admin_client.get(f"{SA_ENDPOINT}{payload['id']}/").json()
         codenames = {p["codename"] for p in detail["permissions"]}
-        assert "view_perimeter" in codenames
+        assert "add_perimeter" in codenames
 
     def test_create_rejects_role_and_permissions_together(
         self, admin_client, domain_folder
