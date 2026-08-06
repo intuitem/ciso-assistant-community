@@ -356,6 +356,37 @@ class TestGraphSave:
         assert destroyed.status_code == 405
         assert WorkflowVersion.objects.filter(id=version.id).exists()
 
+    def test_event_nodes_and_emit_event_are_rejected(self, workflow, superuser):
+        # #2: event handling is cut from v1 — the graph endpoint refuses both
+        # event nodes and the emit_event action.
+        version = workflow.draft_version
+        event_graph = _minimal_graph()
+        event_graph["nodes"].append(
+            {
+                "id": str(uuid.uuid4()),
+                "type": "event",
+                "event_key": "approved",
+                "position": {"x": 600, "y": 0},
+            }
+        )
+        resp = _put_graph(version, event_graph, superuser)
+        assert resp.status_code == 400
+        assert resp.data["error"] == "eventNodesUnavailable"
+
+        emit_graph = _minimal_graph()
+        emit_graph["nodes"].append(
+            {
+                "id": str(uuid.uuid4()),
+                "type": "action",
+                "action_config": {"type": "emit_event", "event_key": "approved"},
+                "position": {"x": 600, "y": 0},
+            }
+        )
+        resp = _put_graph(version, emit_graph, superuser)
+        assert resp.status_code == 400
+        assert resp.data["error"] == "eventNodesUnavailable"
+        assert not version.nodes.filter(type="event").exists()
+
 
 @pytest.mark.django_db
 class TestPublish:

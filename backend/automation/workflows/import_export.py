@@ -519,6 +519,21 @@ def _validate_structure(data):
                 f"Node '{ref}' is a subprocess node — subprocess nodes are not "
                 "available yet and cannot be imported"
             )
+        if node.get("type") == WorkflowNode.Type.EVENT:
+            # Event handling is cut from v1 for the same reason (see the graph
+            # endpoint and Palette).
+            raise WorkflowImportError(
+                f"Node '{ref}' is an event node — event nodes are not available "
+                "yet and cannot be imported"
+            )
+        if (
+            node.get("type") == WorkflowNode.Type.ACTION
+            and (node.get("action_config") or {}).get("type") == "emit_event"
+        ):
+            raise WorkflowImportError(
+                f"Node '{ref}' uses the emit_event action, which is not "
+                "available yet and cannot be imported"
+            )
         node_type[ref] = node.get("type")
         branches = node.get("branches") or []
         if not isinstance(branches, list):

@@ -308,18 +308,24 @@ class WorkflowVersionViewSet(BaseModelViewSet):
                 {"error": "onlyDraftVersionsAreEditable"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        # Subprocess authoring is disabled for v1: the engine still executes
-        # subprocess nodes carried by seeded/legacy graphs, but users may not
-        # create or edit them through the API. Reject any payload that carries
-        # one instead of persisting it.
-        if any(
-            (node or {}).get("type") == WorkflowNode.Type.SUBPROCESS
-            for node in (request.data.get("nodes") or [])
-        ):
-            return Response(
-                {"error": "subprocessNodesUnavailable"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        # Subprocess and event handling are cut from v1: the engine still runs
+        # nodes that seeded/legacy graphs carry, but users may not create or
+        # edit them through the API. Reject any payload that introduces one.
+        for node in request.data.get("nodes") or []:
+            node = node or {}
+            if node.get("type") == WorkflowNode.Type.SUBPROCESS:
+                return Response(
+                    {"error": "subprocessNodesUnavailable"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if node.get("type") == WorkflowNode.Type.EVENT or (
+                node.get("type") == WorkflowNode.Type.ACTION
+                and (node.get("action_config") or {}).get("type") == "emit_event"
+            ):
+                return Response(
+                    {"error": "eventNodesUnavailable"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         try:
             document = save_graph(version, request.data)
         except GraphValidationError as e:

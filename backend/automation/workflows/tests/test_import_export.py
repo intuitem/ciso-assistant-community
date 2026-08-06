@@ -418,6 +418,29 @@ class TestImport:
         with pytest.raises(WorkflowImportError, match="subprocess"):
             import_workflow(data, root)
 
+    def test_event_nodes_are_rejected(self, rich_workflow, root):
+        # #2: event handling is cut from v1 — an event node cannot be imported.
+        data = export_workflow(rich_workflow)
+        data["name"] = "Eventful"
+        data["graph"]["nodes"][3] = {
+            "ref": "fetch_employee",
+            "type": "event",
+            "event_key": "approved",
+        }
+        with pytest.raises(WorkflowImportError, match="event node"):
+            import_workflow(data, root)
+
+    def test_emit_event_action_is_rejected(self, rich_workflow, root):
+        data = export_workflow(rich_workflow)
+        data["name"] = "Emitter"
+        data["graph"]["nodes"][3] = {
+            "ref": "fetch_employee",
+            "type": "action",
+            "action_config": {"type": "emit_event", "event_key": "approved"},
+        }
+        with pytest.raises(WorkflowImportError, match="emit_event"):
+            import_workflow(data, root)
+
     def test_role_resolution(self, rich_workflow, root):
         from pmbok.models import ResponsibilityRole
 
