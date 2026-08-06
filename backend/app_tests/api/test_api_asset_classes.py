@@ -100,6 +100,17 @@ class TestAssetClassCycles:
         a.refresh_from_db()
         assert a.parent is None
 
+    def test_slash_in_name_is_rejected(self, authenticated_client):
+        """'/' separates levels in the canonical path used by import/export."""
+        response = authenticated_client.post(
+            reverse("asset-class-list"),
+            {"name": "Machines/Servers"},
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert not AssetClass.objects.filter(name="Machines/Servers").exists()
+
     def test_legitimate_reparent_is_accepted(self, authenticated_client, user_classes):
         a, _, c = user_classes
 

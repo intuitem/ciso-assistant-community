@@ -1097,6 +1097,13 @@ class AssetClassWriteSerializer(BaseModelSerializer):
         model = AssetClass
         exclude = ["created_at", "updated_at", "folder", "is_published"]
 
+    def validate_name(self, value):
+        if "/" in value:
+            raise serializers.ValidationError(
+                "The name cannot contain '/' for an Asset class."
+            )
+        return value
+
     def validate_parent(self, parent):
         """Check that the asset class tree will not contain cycles."""
         if parent is not None and self.instance in parent.ancestors_plus_self():

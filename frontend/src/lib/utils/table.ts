@@ -1890,8 +1890,8 @@ export const listViewFields = {
 			'filtering_labels'
 		],
 		optionalFields: {
-			head: ['referenceLink', 'createdAt', 'updatedAt'],
-			body: ['reference_link', 'created_at', 'updated_at']
+			head: ['assetClass', 'referenceLink', 'createdAt', 'updatedAt'],
+			body: ['asset_class', 'reference_link', 'created_at', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2003,8 +2003,8 @@ export const listViewFields = {
 			'updated_at'
 		],
 		optionalFields: {
-			head: ['status'],
-			body: ['status']
+			head: ['status', 'authors'],
+			body: ['status', 'authors']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
