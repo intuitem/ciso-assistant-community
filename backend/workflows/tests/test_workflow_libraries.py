@@ -105,6 +105,29 @@ class TestInstantiateFromLoadedLibrary:
         )
         assert resp.status_code == 400
 
+    def test_preview_returns_graph_and_secrets(self, superuser):
+        # Preview reads the same divorced-source content and exposes each
+        # workflow's graph + required secrets (spec D36).
+        document = export_workflow_library(simple_workflow("Previewable"))
+        stored, _ = StoredLibrary.store_library_content(
+            yaml.safe_dump(document).encode()
+        )
+        assert stored.load() is None
+        loaded = LoadedLibrary.objects.get(urn=document["urn"])
+        client = APIClient()
+        client.force_authenticate(superuser)
+        resp = client.get(
+            f"/api/loaded-libraries/{loaded.id}/preview-workflows/"
+        )
+        assert resp.status_code == 200, resp.data
+        workflows = resp.data["workflows"]
+        assert len(workflows) == 1
+        entry = workflows[0]
+        assert entry["name"] == "Previewable"
+        assert entry["graph"]["nodes"]  # graph travels
+        # simple_workflow logs "{{secrets.token}}" → token is a required secret
+        assert "token" in entry["requires"]["secrets"]
+
 
 @pytest.mark.django_db
 class TestWorkflowLibraryExport:

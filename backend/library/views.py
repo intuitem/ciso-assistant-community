@@ -706,7 +706,10 @@ class LoadedLibraryViewSet(BaseModelViewSet):
     queryset = LoadedLibrary.objects.all()
     # Instantiating reads library content; the real gate is add_workflow on
     # the TARGET folder, checked inside the action.
-    permission_overrides = {"instantiate_workflows": "view_loadedlibrary"}
+    permission_overrides = {
+        "instantiate_workflows": "view_loadedlibrary",
+        "preview_workflows": "view_loadedlibrary",
+    }
 
     search_fields = ["name", "description", "urn", "ref_id"]
 
@@ -829,6 +832,36 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         except WorkflowImportError as e:
             return Response({"error": e.message}, status=HTTP_400_BAD_REQUEST)
         return Response({"workflows": created, "warnings": warnings})
+
+    @action(detail=True, methods=["get"], url_path="preview-workflows")
+    def preview_workflows(self, request, pk):
+        """Read-only preview of this library's workflow documents (spec D36):
+        each entry's graph + required secrets, for a look-before-instantiate.
+        Same stored-content source as instantiate_workflows (loaded workflows
+        are divorced rows, so the documents only live in the store)."""
+        try:
+            key = "urn" if pk.startswith("urn:") else "id"
+            lib = LoadedLibrary.objects.get(**{key: pk})
+        except Exception:
+            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
+        if not RoleAssignment.is_object_readable(request.user, LoadedLibrary, lib.id):
+            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
+
+        stored = StoredLibrary.objects.filter(urn=lib.urn, locale=lib.locale).first()
+        entries = (stored.content if stored else {}).get("workflows") or []
+        return Response(
+            {
+                "workflows": [
+                    {
+                        "ref_id": entry.get("ref_id", ""),
+                        "name": entry.get("name", ""),
+                        "graph": entry.get("graph", {}),
+                        "requires": entry.get("requires", {}),
+                    }
+                    for entry in entries
+                ]
+            }
+        )
 
     @action(detail=True, methods=["get"])
     def tree(

@@ -6,6 +6,8 @@
 	import { m } from '$paraglide/messages';
 	import { getFlash } from 'sveltekit-flash-message';
 	import { page } from '$app/stores';
+	import { getModalStore, type ModalComponent } from '$lib/components/Modals/stores';
+	import WorkflowPreviewModal from './WorkflowPreviewModal.svelte';
 
 	interface Props {
 		// The LOADED library the instantiate action lives on (spec D31) —
@@ -17,6 +19,15 @@
 	let { loadedLibraryId, count }: Props = $props();
 
 	const flash = getFlash(page);
+	const modalStore = getModalStore();
+
+	function openPreview() {
+		const component: ModalComponent = {
+			ref: WorkflowPreviewModal,
+			props: { loadedLibraryId }
+		};
+		modalStore.trigger({ type: 'component', component });
+	}
 
 	let instantiating = $state(false);
 	let instantiateFolder = $state('');
@@ -64,6 +75,14 @@
 				<i class="fa-solid fa-diagram-project mr-2"></i>{count}
 				{m.workflows()}
 			</span>
+			<button
+				type="button"
+				class="btn preset-tonal text-sm"
+				onclick={openPreview}
+				data-testid="preview-workflows"
+			>
+				<i class="fa-solid fa-eye mr-1"></i>{m.previewWorkflow()}
+			</button>
 			<button
 				type="button"
 				class="btn preset-filled-primary-500 text-sm"
