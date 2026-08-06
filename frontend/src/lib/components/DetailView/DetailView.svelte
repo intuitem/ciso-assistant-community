@@ -780,7 +780,7 @@
 											{:else if typeof value === 'boolean'}
 												{@const bd = booleanDisplay(value, key, data.urlModel)}
 												<i class="{bd.icon} {bd.colorClass}"></i>
-											{:else if key === 'roc_display'}
+											{:else if key === 'roc_display' || key === 'dora_ict_service_type'}
 												{safeTranslate(value)}
 											{:else if key === 'roc_calculation_explanation'}
 												{safeTranslate(value.key, formatRosiExplanationParams(value.params))}
