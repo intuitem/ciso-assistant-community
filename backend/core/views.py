@@ -116,7 +116,7 @@ from django.template.loader import render_to_string
 from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from iam.models import Folder, IdPGroup, RoleAssignment, User, UserGroup
+from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup
 from rest_framework import filters, generics, permissions, status, viewsets
 from custom_fields.filters import CustomFieldFilterBackend, CustomFieldSearchFilter
 from django.utils.translation import gettext_lazy as _, get_language
@@ -1518,8 +1518,43 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         - affected: objects not deleted but whose relationships will be removed (through rows, SET_NULL, local links)
         """
         instance = self.get_object()
+
+        # This previews a deletion, so it must require the permission to delete —
+        # get_object() only proves the caller may view the parent, and roles such
+        # as respondent or auditee hold view_folder without view_user/view_asset.
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(
+                codename=f"delete_{self.model._meta.model_name}"
+            ),
+            folder=Folder.get_folder(instance),
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
         collector = NestedObjects(using=router.db_for_write(instance))
         collector.collect([instance])
+
+        scope_folder = (
+            instance if isinstance(instance, Folder) else Folder.get_folder(instance)
+        )
+        in_scope_folder_ids = set()
+        if scope_folder is not None:
+            in_scope_folder_ids = {str(scope_folder.id)} | {
+                str(f.id) for f in scope_folder.get_sub_folders()
+            }
+        viewable_folder_ids = {
+            str(fid)
+            for fid in RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, Folder
+            )[0]
+        }
+
+        def is_visible(obj):
+            folder = Folder.get_folder(obj)
+            if folder is None:
+                return True
+            folder_id = str(folder.id)
+            return folder_id in in_scope_folder_ids or folder_id in viewable_folder_ids
 
         skip_model_names = {
             "Token",
@@ -1552,6 +1587,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         def add_grouped(bucket, obj):
             model = obj.__class__
             if is_hidden_model(model):
+                return
+            if not is_visible(obj):
                 return
             key = model.__name__
             pk = str(getattr(obj, "pk", "")) or ""
@@ -5537,7 +5574,12 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get priority chart data")
     def priority_chart_data(self, request):
-        qs = AppliedControl.objects.exclude(status="active")
+        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, self.model
+        )
+        qs = self.model.objects.filter(id__in=viewable_controls_ids).exclude(
+            status="active"
+        )
 
         data = {
             "--": [],
@@ -8712,6 +8754,13 @@ def get_composer_data(request):
         for risk_assessment in risk_assessments
     ):
         return Response({"error": "Invalid UUID list"}, status=400)
+
+    (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), request.user, RiskAssessment
+    )
+    viewable_ids = {str(id) for id in viewable_ids}
+    if not all(risk_assessment in viewable_ids for risk_assessment in risk_assessments):
+        return Response({"error": "Permission denied"}, status=403)
 
     data = compile_risk_assessment_for_composer(request.user, risk_assessments)
     for _data in data["risk_assessment_objects"]:

@@ -101,6 +101,7 @@ GENERAL_SETTINGS_KEYS = [
     "personal_folders",
     "personal_folders_parent",
     "disable_partially_compliant_result",
+    "use_risk_category_label",
 ]
 
 LLM_URL_DEFAULTS = {

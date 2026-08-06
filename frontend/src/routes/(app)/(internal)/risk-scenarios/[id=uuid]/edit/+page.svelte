@@ -647,7 +647,7 @@
 					multiple
 					optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
 					field="qualifications"
-					label={m.qualifications()}
+					label={safeTranslate('qualifications')}
 					optionsLabelField="translated_name"
 				/>
 				<Select
