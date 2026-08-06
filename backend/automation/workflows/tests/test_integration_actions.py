@@ -402,6 +402,29 @@ class TestIamActions:
         assert instance.status == WorkflowInstance.Status.COMPLETED
         assert User.objects.get(email="leaver@example.com").is_active is False
 
+    def test_cannot_remove_last_administrator(self):
+        # #4: manage_group_membership must not strip the final global admin
+        # (mirrors the core remove-members guard). publisher_user is the sole
+        # BI-UG-ADM member in a fresh test DB.
+        admin_group = UserGroup.objects.get(
+            folder=Folder.get_root_folder(), name="BI-UG-ADM"
+        )
+        sole_admin = publisher_user()
+        assert User.objects.filter(user_groups__name="BI-UG-ADM").count() == 1
+        _, version = make_workflow()  # folder = root, run_as = publisher_user
+        linear_graph(
+            version,
+            {
+                "type": "manage_group_membership",
+                "user": sole_admin.email,
+                "group": str(admin_group.id),
+                "operation": "remove",
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert sole_admin in admin_group.user_set.all()
+
 
 @pytest.mark.django_db
 class TestDeputization:
@@ -442,6 +465,43 @@ class TestDeputization:
         )
         resp = self._publish(version, superuser)
         assert resp.status_code == 200
+
+    def test_domain_scoped_user_perms_cannot_publish_provisioning(self):
+        # #4: provision_user is authorized at the ROOT folder, so a publisher
+        # holding add_user/change_user only in a domain fails deputization even
+        # though it can otherwise manage the workflow there.
+        from django.contrib.auth.models import Permission
+        from iam.models import Role, RoleAssignment
+
+        domain = Folder.objects.create(
+            name="DomainDeputy",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        publisher = User.objects.create_user(email="domdeputy@example.com")
+        role = Role.objects.create(name="domain-user-role")
+        role.permissions.set(
+            Permission.objects.filter(
+                codename__in=[
+                    "change_workflowversion",
+                    "view_workflowversion",
+                    "view_folder",
+                    "add_user",
+                    "change_user",
+                ]
+            )
+        )
+        ra = RoleAssignment.objects.create(
+            user=publisher, role=role, folder=domain, is_recursive=True
+        )
+        ra.perimeter_folders.add(domain)
+
+        _, version = make_workflow(folder=domain)
+        linear_graph(version, {"type": "provision_user", "email": "x@example.com"})
+        resp = self._publish(version, publisher)
+        assert resp.status_code == 400
+        codes = {e["code"] for e in resp.data["errors"]}
+        assert "publisher_permission_missing" in codes
 
 
 @pytest.mark.django_db

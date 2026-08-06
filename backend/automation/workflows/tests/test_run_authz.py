@@ -735,6 +735,65 @@ class TestPrivilegeBranches:
         # ActionError "outside this workflow's scope" → run fails.
         assert instance.status == WorkflowInstance.Status.FAILED
 
+    def test_provision_user_denied_with_domain_scoped_perms(self):
+        # #4: user provisioning is a GLOBAL operation — a domain-scoped
+        # add_user/change_user must not authorize it, since the user API itself
+        # gates user creation at the root folder.
+        domain = make_domain("DomainUserOnly")
+        runner = User.objects.create_user(email="domonly@authz.test")
+        grant(runner, domain, ["add_user", "change_user"])  # at domain, not root
+        instance = self._run_action(
+            {"type": "provision_user", "email": "victim@x.test"}, domain, runner
+        )
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert instance.logs.filter(
+            event_type=WorkflowInstanceLog.EventType.AUTHORIZATION_DENIED
+        ).exists()
+        assert not User.objects.filter(email="victim@x.test").exists()
+
+    def test_provision_user_allowed_with_root_scoped_perms(self):
+        # The same grant at the ROOT folder authorizes it, matching the API.
+        runner = User.objects.create_user(email="rootonly@authz.test")
+        grant(runner, Folder.get_root_folder(), ["add_user", "change_user"])
+        domain = make_domain("RootUserOk")
+        instance = self._run_action(
+            {"type": "provision_user", "email": "hire@x.test"}, domain, runner
+        )
+        assert instance.status == WorkflowInstance.Status.COMPLETED, list(
+            instance.logs.values_list("message", flat=True)
+        )
+        assert User.objects.filter(email="hire@x.test").exists()
+
+    def test_membership_authorized_by_change_usergroup_alone(self):
+        # #4: membership is a group mutation — change_usergroup on the group's
+        # folder suffices (no root-scoped change_user), matching core
+        # add-members / remove-members.
+        domain = Folder.objects.create(
+            name=f"MembOk-{uuid.uuid4()}",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=True,
+        )
+        Folder.create_default_ug_and_ra(domain)
+        member = User.objects.create_user(email="member@authz.test")
+        runner = User.objects.create_user(email="mgr@authz.test")
+        grant(runner, domain, ["change_usergroup"])  # NOT change_user
+        analysts = UserGroup.objects.get(folder=domain, name="BI-UG-ANA")
+        instance = self._run_action(
+            {
+                "type": "manage_group_membership",
+                "user": "member@authz.test",
+                "group": str(analysts.id),
+                "operation": "add",
+            },
+            domain,
+            runner,
+        )
+        assert instance.status == WorkflowInstance.Status.COMPLETED, list(
+            instance.logs.values_list("message", flat=True)
+        )
+        assert analysts in member.user_groups.all()
+
 
 @pytest.mark.django_db
 class TestApiInterplay:
@@ -943,3 +1002,69 @@ def _loop_create_workflow(domain):
         },
     )
     return version
+
+
+@pytest.mark.django_db
+class TestOwnershipImmutability:
+    """#5: ownership FKs are frozen after create, so a caller can't reparent a
+    row into a scope they don't control (e.g. poison another workflow's
+    secrets)."""
+
+    def test_secret_workflow_fk_is_immutable(self):
+        from rest_framework.exceptions import PermissionDenied
+
+        from automation.workflows.models import WorkflowSecret
+        from automation.workflows.serializers import WorkflowSecretWriteSerializer
+
+        root = Folder.get_root_folder()
+        wf_a = Workflow.objects.create(name="secret-a", folder=root)
+        wf_b = Workflow.objects.create(name="secret-b", folder=root)
+        secret = WorkflowSecret.objects.create(workflow=wf_a, name="TOKEN", value="v")
+
+        serializer = WorkflowSecretWriteSerializer(instance=secret)
+        # Keeping the same workflow is fine; moving to another is refused.
+        assert serializer.validate_workflow(wf_a) == wf_a
+        with pytest.raises(PermissionDenied):
+            serializer.validate_workflow(wf_b)
+
+    def test_version_workflow_fk_is_immutable(self):
+        from rest_framework.exceptions import PermissionDenied
+
+        from automation.workflows.serializers import WorkflowVersionWriteSerializer
+
+        root = Folder.get_root_folder()
+        wf_a = Workflow.objects.create(name="ver-a", folder=root)
+        wf_b = Workflow.objects.create(name="ver-b", folder=root)
+        version = WorkflowVersion.objects.create(workflow=wf_a)
+
+        serializer = WorkflowVersionWriteSerializer(instance=version)
+        assert serializer.validate_workflow(wf_a) == wf_a
+        with pytest.raises(PermissionDenied):
+            serializer.validate_workflow(wf_b)
+
+
+@pytest.mark.django_db
+class TestLifecycleLockdown:
+    """#6: runs are immutable history — the generic update/destroy verbs are
+    closed so a run can't be re-pointed at another version or its audit trail
+    deleted."""
+
+    def test_instance_mutations_are_blocked(self):
+        factory = APIRequestFactory()
+        wf = Workflow.objects.create(name="ll", folder=Folder.get_root_folder())
+        version = WorkflowVersion.objects.create(workflow=wf, run_as=publisher_user())
+        instance = WorkflowInstance.objects.create(
+            workflow=wf, version=version, folder=wf.folder
+        )
+        admin = publisher_user()
+        for method, op in (("put", "update"), ("delete", "destroy")):
+            view = WorkflowInstanceViewSet.as_view({method: op})
+            req = getattr(factory, method)(
+                f"/api/workflows/workflow-instances/{instance.id}/",
+                {"version": str(version.id)},
+                format="json",
+            )
+            force_authenticate(req, user=admin)
+            resp = view(req, pk=str(instance.id))
+            assert resp.status_code == 405, (op, resp.status_code)
+        assert WorkflowInstance.objects.filter(id=instance.id).exists()

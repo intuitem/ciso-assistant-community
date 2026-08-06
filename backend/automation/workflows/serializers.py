@@ -115,6 +115,12 @@ class WorkflowVersionWriteSerializer(BaseModelSerializer):
         model = WorkflowVersion
         fields = ["workflow"]
 
+    def validate_workflow(self, value):
+        # Ownership FK is immutable: reparenting a version to another workflow
+        # would move it (and its folder/RBAC scope) out from under the caller.
+        self._ensure_immutable("workflow", value)
+        return value
+
 
 class WorkflowInstanceReadSerializer(BaseModelSerializer):
     workflow = FieldsRelatedField()
@@ -161,6 +167,11 @@ class WorkflowInstanceWriteSerializer(BaseModelSerializer):
         model = WorkflowInstance
         fields = ["version"]
 
+    def validate_version(self, value):
+        # Ownership FK is immutable: a run belongs to the version it started on.
+        self._ensure_immutable("version", value)
+        return value
+
 
 class WorkflowSecretReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
@@ -178,6 +189,13 @@ class WorkflowSecretWriteSerializer(BaseModelSerializer):
         # Workflow-scoped: folder is derived from the workflow on save.
         fields = ["name", "workflow", "value"]
         extra_kwargs = {"value": {"write_only": True}}
+
+    def validate_workflow(self, value):
+        # Ownership FK is immutable: moving a secret into another workflow — a
+        # folder the caller may not access — and overwriting its value would let
+        # them poison that workflow's credentials. Settable on create only.
+        self._ensure_immutable("workflow", value)
+        return value
 
 
 class WorkflowTriggerReadSerializer(BaseModelSerializer):

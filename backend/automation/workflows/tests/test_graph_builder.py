@@ -324,6 +324,38 @@ class TestGraphSave:
         # Nothing was persisted: the draft has no subprocess node.
         assert not version.nodes.filter(type="subprocess").exists()
 
+    def test_generic_version_mutations_are_blocked(self, workflow, superuser):
+        # #6: versions are lifecycle-managed. The generic create/update/destroy
+        # verbs are closed so a published version (and its cascade-linked run
+        # history) can't be created or deleted outside the guarded flow.
+        version = workflow.draft_version
+        created = _call(
+            {"post": "create"},
+            "post",
+            "/api/workflows/workflow-versions/",
+            superuser,
+            data={"workflow": str(workflow.id)},
+        )
+        assert created.status_code == 405
+        updated = _call(
+            {"put": "update"},
+            "put",
+            f"/api/workflows/workflow-versions/{version.id}/",
+            superuser,
+            pk=str(version.id),
+            data={"workflow": str(workflow.id)},
+        )
+        assert updated.status_code == 405
+        destroyed = _call(
+            {"delete": "destroy"},
+            "delete",
+            f"/api/workflows/workflow-versions/{version.id}/",
+            superuser,
+            pk=str(version.id),
+        )
+        assert destroyed.status_code == 405
+        assert WorkflowVersion.objects.filter(id=version.id).exists()
+
 
 @pytest.mark.django_db
 class TestPublish:

@@ -23,7 +23,7 @@ from rest_framework.views import APIView
 from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import Folder, RoleAssignment
 
-from .actions import required_permissions
+from .actions import authorization_folder, required_permissions
 from .engine import (
     EngineError,
     abort_token,
@@ -257,8 +257,36 @@ class WorkflowVersionViewSet(BaseModelViewSet):
     filterset_fields = ["workflow", "status", "folder"]
     search_fields = []
     ordering = ["-version_number"]
-    # POST detail actions map to add_* by default; discarding is a delete.
-    permission_overrides = {"discard": "delete_workflowversion"}
+    # POST detail actions map to add_* by default; discarding is a delete and
+    # publishing is a state change (not a create), so both are overridden.
+    permission_overrides = {
+        "discard": "delete_workflowversion",
+        "publish": "change_workflowversion",
+    }
+
+    # Versions are lifecycle-managed: the first version is created with its
+    # workflow, further ones only through new-draft/restore, edits through the
+    # graph action, and removal through the guarded discard action. The generic
+    # create/update/destroy verbs would bypass the single-draft lock and let a
+    # published version (and its cascade-linked run history) be deleted, so they
+    # are closed.
+    def create(self, request, *args, **kwargs):
+        return Response(
+            {"error": "versionsAreLifecycleManaged"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+    def update(self, request, *args, **kwargs):
+        return Response(
+            {"error": "versionsAreLifecycleManaged"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        return Response(
+            {"error": "versionsAreLifecycleManaged"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -567,7 +595,9 @@ def _deputization_errors(user, version):
             if permission is None:
                 continue
             if not RoleAssignment.is_access_allowed(
-                user=user, perm=permission, folder=version.folder
+                user=user,
+                perm=permission,
+                folder=authorization_folder(codename, version.folder),
             ):
                 errors.append(
                     {
@@ -686,6 +716,22 @@ class WorkflowInstanceViewSet(BaseModelViewSet):
         return Response(
             WorkflowInstanceReadSerializer(instance).data,
             status=status.HTTP_201_CREATED,
+        )
+
+    # Runs and their logs/tokens are immutable history: only the engine writes
+    # them, and the custom create() above is the sole way to start one. The
+    # generic update/destroy verbs would let a run be re-pointed at another
+    # version or its audit trail deleted, so they are closed.
+    def update(self, request, *args, **kwargs):
+        return Response(
+            {"error": "runHistoryIsImmutable"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        return Response(
+            {"error": "runHistoryIsImmutable"},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
         )
 
     @action(detail=True)

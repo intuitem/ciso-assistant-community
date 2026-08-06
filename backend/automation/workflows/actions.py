@@ -813,7 +813,29 @@ class ManageGroupMembershipAction(BaseAction):
 
         operation = config.get("operation", "add")
         if operation == "remove":
-            user.user_groups.remove(group)
+            # Last-admin protection (mirrors core remove-members): never strip the
+            # final global administrator, or the platform locks out. Only reachable
+            # for a root-scoped workflow, since BI-UG-ADM lives at the root folder.
+            if group.name == "BI-UG-ADM":
+                from django.db import transaction
+
+                with transaction.atomic():
+                    UserGroup.objects.select_for_update().filter(
+                        name="BI-UG-ADM"
+                    ).first()
+                    others_remain = (
+                        User.objects.filter(user_groups__name="BI-UG-ADM")
+                        .exclude(id=user.id)
+                        .exists()
+                    )
+                    if not others_remain:
+                        raise ActionError(
+                            "manage_group_membership: cannot remove the last "
+                            "administrator"
+                        )
+                    user.user_groups.remove(group)
+            else:
+                user.user_groups.remove(group)
         else:
             user.user_groups.add(group)
         return {
@@ -857,8 +879,31 @@ def required_permissions(action_config):
     return {
         "provision_folder": ["add_folder", "change_folder"],
         "provision_user": ["add_user", "change_user"],
-        "manage_group_membership": ["change_user", "change_usergroup"],
+        # Membership is a M2M-only mutation: the platform authorizes it with
+        # change_usergroup on the group's folder (see core add-members/
+        # remove-members), NOT change_user — a domain manager manages groups in
+        # its subtree without holding the root-scoped change_user.
+        "manage_group_membership": ["change_usergroup"],
     }.get(action_type, [])
+
+
+# User rows are global, not folder-scoped: the platform authorizes user
+# create/change/delete at the ROOT folder (core.serializers UserWriteSerializer
+# and UserViewSet), so a domain-scoped grant must never let a workflow provision
+# or modify users beyond its author's own API authority. Folder and group
+# permissions stay folder-scoped — those actions subtree-restrict their targets
+# themselves.
+ROOT_SCOPED_PERMISSIONS = {"add_user", "change_user", "delete_user"}
+
+
+def authorization_folder(codename, base_folder):
+    """Folder a permission is checked against: root for global user
+    permissions, the workflow's own folder for everything else."""
+    if codename in ROOT_SCOPED_PERMISSIONS:
+        from iam.models import Folder
+
+        return Folder.get_root_folder()
+    return base_folder
 
 
 def validate_read_config(node):
@@ -947,7 +992,11 @@ def authorize_action(node, instance):
     denied = (
         codenames
         if identity is None
-        else [c for c in codenames if not authz.can(identity, c, instance.folder)]
+        else [
+            c
+            for c in codenames
+            if not authz.can(identity, c, authorization_folder(c, instance.folder))
+        ]
     )
     if not denied:
         return
