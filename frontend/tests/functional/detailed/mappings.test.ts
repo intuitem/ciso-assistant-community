@@ -98,6 +98,8 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 		await page.waitForURL('/requirement-assessments/**');
 		await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('data-value', '0');
 
+		await page.getByTestId('form-input-result').selectOption('compliant');
+
 		const slider = page.getByTestId('range-slider-input');
 		await expect(slider).toBeVisible();
 		await slider.focus();
@@ -120,6 +122,9 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 		//NOTE: imitates PageContent.createItem(), since our form is not a "classic"" one
 		// This could be improved
 		await applyMappingButton.click();
+		// "Apply mapping" now opens a direction chooser; pick "Map to a framework"
+		// (create a new audit) to reach the create form.
+		await page.getByTestId('map-to-framework-card').click();
 		await applyMappingForm.hasTitle();
 		if (page) {
 			await page.waitForLoadState('networkidle');
@@ -163,6 +168,72 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 		await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');
 		await page.goBack();
 		await page.waitForURL(complianceAssessmentsPage.url + '/**');
+	});
+
+	// Map-from = inbound direction (pull a source audit's results INTO the
+	// current one). We create a fresh, empty target audit and pull the
+	// previously-mapped audit into it twice: the first pull applies the data
+	// (changes exist -> confirm), the second is a no-op (idempotent -> the
+	// no-changes notice shows and confirmation is disabled).
+	const pullTargetName = 'PullTarget-' + vars.assessmentName;
+
+	// Helper: open the empty target audit, run "Apply mapping -> Map from an
+	// audit" sourcing the mapped audit, and land on the preview page. The
+	// target is excluded from the picker, and the mapped audit's name is unique,
+	// so the source selection is unambiguous.
+	async function openMapFromPreview() {
+		await complianceAssessmentsPage.goto();
+		await complianceAssessmentsPage.hasUrl();
+		await complianceAssessmentsPage.viewItemDetail(pullTargetName);
+		await applyMappingButton.click();
+		await page.getByTestId('map-from-audit-card').click();
+		const mapFromForm = new FormContent(page, m.mapFromAudit(), [
+			{ name: 'source_audit', type: FormFieldType.SELECT_AUTOCOMPLETE }
+		]);
+		await mapFromForm.hasTitle();
+		await mapFromForm.fill({ source_audit: 'Mapped-' + vars.assessmentName });
+		await page.getByTestId('map-from-submit-button').click();
+		await page.waitForURL(/map-from-preview/);
+	}
+
+	await test.step('create an empty target audit for map-from', async () => {
+		await complianceAssessmentsPage.goto();
+		await complianceAssessmentsPage.hasUrl();
+		await complianceAssessmentsPage.createItem({
+			name: pullTargetName,
+			description: vars.description,
+			folder: vars.folderName,
+			framework: vars.framework.name
+		});
+
+		// Enable scoring so the target accepts scored data from the source.
+		await page.getByTestId('edit-button').click();
+		await page.getByText('More').click();
+		for (const spinner of await page.locator('.loading-spinner').all()) {
+			await expect(spinner).not.toBeVisible({
+				timeout: 10_000
+			});
+		}
+		await page.getByTestId('visibility-score-everyone').click();
+		await page.getByTestId('save-button').click();
+		await page.waitForTimeout(5000);
+	});
+
+	await test.step('map from into the empty target: changes are applied', async () => {
+		await openMapFromPreview();
+		// The target is empty, so the mapping produces changes and confirm is enabled.
+		await expect(page.getByTestId('confirm-mapping-button')).toBeEnabled();
+		await page.getByTestId('confirm-mapping-button').click();
+		await page.waitForURL(/\/compliance-assessments\/[0-9a-f-]{36}/i);
+		await complianceAssessmentsPage.isToastVisible('updated successfully', 'i');
+	});
+
+	await test.step('map from again: no change (idempotent)', async () => {
+		await openMapFromPreview();
+		// The target now mirrors the source, so nothing would change: the
+		// no-changes notice shows and confirmation is disabled.
+		await expect(page.getByTestId('map-from-no-changes')).toBeVisible();
+		await expect(page.getByTestId('confirm-mapping-button')).toBeDisabled();
 	});
 });
 

@@ -1,0 +1,53 @@
+name: Verify README features list
+
+# Read-only guardrail: the collapsible feature list in README.md is generated
+# from tools/readme/features.json. This job regenerates it and fails if the
+# committed README is out of sync. It NEVER writes back — no special
+# permissions, works on fork PRs. Regenerate locally with:
+#   pnpm --dir frontend readme:features   (updates README list + features.png)
+#
+# Note: features.png is intentionally NOT verified here. Byte-diffing a Chromium
+# screenshot is flaky across browser versions; a stale image is obvious in PR
+# review. Only the machine-readable text list is gated.
+
+on:
+  pull_request:
+    paths:
+      - "tools/readme/features.json"
+      - "README.md"
+      - "frontend/scripts/generate-readme-list.mjs"
+      - ".github/workflows/verify-readme-features.yml"
+  push:
+    branches: [main]
+    paths:
+      - "tools/readme/features.json"
+      - "README.md"
+      - "frontend/scripts/generate-readme-list.mjs"
+
+# Default read-only token — no contents: write.
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # Pure Node stdlib, no dependencies — nothing to install.
+      - name: Regenerate README feature list
+        run: node frontend/scripts/generate-readme-list.mjs
+
+      - name: Fail if README is out of sync
+        run: |
+          if ! git diff --quiet -- README.md; then
+            echo "::error::README.md feature list is out of date."
+            echo "Run 'pnpm --dir frontend readme:features' and commit the result."
+            git --no-pager diff -- README.md
+            exit 1
+          fi
+          echo "README feature list is in sync. ✅"

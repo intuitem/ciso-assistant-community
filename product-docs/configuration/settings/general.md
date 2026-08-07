@@ -8,6 +8,7 @@ Instance-wide settings that don't belong to a more specific category. Grouped he
 - **EBIOS radar configuration** — the max radius and the green / yellow / red zone radii used to draw the EBIOS RM radar chart.
 - **Aggregated scenario matrix** — toggles the aggregated view of scenarios on the risk-matrix display.
 - **Risk matrix axis options** — `swap axes`, `flip vertical`, custom axis labels. Cosmetic adjustments to how every risk matrix is rendered.
+- **Display qualifications as risk categories** — swaps the term _qualification_ for _risk category_ throughout the interface: field labels on risk scenarios, incidents, feared events, escalation thresholds and quantitative risk scenarios, plus the matching filters and analytics charts. The values themselves (confidentiality, integrity, …) are managed as [terminology](../../concepts/terminology.md) either way.
 
 ## Language
 
@@ -41,11 +42,18 @@ Instance-wide settings that don't belong to a more specific category. Grouped he
 
 These settings drive the optional AI features (chat mode, agentic workflows, RAG over the knowledge base):
 
-- **LLM provider** — which provider the platform calls (Ollama, OpenAI, …).
-- **Ollama** — base URL, model, embedding model. Used when the provider is Ollama.
-- **OpenAI** — API base, model, API key (write-only; never returned by GET). Used when the provider is OpenAI.
-- **Embedding backend** — which backend powers semantic search over knowledge.
-- **Chat system prompt** — system prompt prepended to chat-mode conversations.
+- **LLM provider** — which model server the platform calls: `Ollama`, or `OpenAI-compatible (LM Studio, vLLM, llama.cpp...)` for any server speaking the OpenAI chat completions API, hosted or local.
+- **Ollama base URL**, **Ollama model**, **Ollama embedding model** — used when the provider is Ollama.
+- **API base URL**, **Model name**, **API key** — used when the provider is OpenAI-compatible. The key is write-only and never returned by GET.
+- **Embedding backend** — which backend powers semantic search over knowledge. Local sentence transformers or Ollama; hosted providers are not offered here, so selecting one for the LLM leaves embeddings where they are.
+- **System prompt** — system prompt prepended to chat-mode conversations.
+- **Send temperature to the model** and **Temperature** — whether to pass a sampling temperature, and its value. Some servers reject the parameter, which is why it can be switched off.
+
+To connect a hosted service such as OVHcloud AI Endpoints or OpenRouter, see [Hosted AI providers](../../integrations/ai-providers.md).
+
+{% hint style="warning" %}
+**Local or self-hosted LLMs.** The **Ollama URL** and OpenAI **API base URL** are checked when you save them and must resolve to a public address — private, loopback, and internal IPs are rejected to prevent server-side request forgery (SSRF). To point at a local or in-network model (for example Ollama on `localhost`, LM Studio, or an in-cluster endpoint), start the backend with the environment variable `ALLOW_PRIVATE_NETWORK_REQUESTS=True`. (This variable was previously named `WEBHOOK_ALLOW_PRIVATE_IPS`; the old name is no longer recognized.)
+{% endhint %}
 
 ## Analytics
 

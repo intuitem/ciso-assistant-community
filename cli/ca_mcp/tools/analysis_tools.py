@@ -13,7 +13,7 @@ async def get_all_audits_with_metrics(
     status: str = None,
     framework: str = None,
 ):
-    """List audits with compliance metrics breakdown (uses 'result' field for compliance outcome, not 'status'). Use filters to avoid large responses.
+    """List audits with, for each, the compliance-result breakdown (compliant / non-compliant / partially / not-assessed / not-applicable counts) AND the score. The audit "score" is the maturity score (the headline figure); implementation and documentation scores are its components. Use this for 'show the audits with scores' or overall compliance-status questions. Use filters to avoid large responses.
 
     Args:
         folder: Folder ID/name
@@ -38,7 +38,8 @@ async def get_all_audits_with_metrics(
         if framework:
             params["framework"] = resolve_framework_id(framework)
 
-        # Get compliance assessments (with pagination)
+        # Filtered listing (with pagination) — carries the native status/progress
+        # fields and honours all four filters.
         audits, error = fetch_all_results("/compliance-assessments/", params=params)
         if error:
             return error
@@ -46,7 +47,25 @@ async def get_all_audits_with_metrics(
         if not audits:
             return "No audits found matching the given filters"
 
-        # Fetch requirement assessments per audit (not globally)
+        # Fetch compliance-result counts + aggregate scores for every accessible
+        # audit in ONE server-side prefetched call, replacing the previous
+        # per-audit requirement-assessment fetch (no more N+1). /recap/ takes no
+        # filters, so we use it purely as an id -> metrics map and display only
+        # the filtered subset above. Best-effort: if recap is unavailable, each
+        # audit's metrics degrade to "unavailable" rather than failing the run.
+        # recap returns a bare (non-paginated) list, so we read it directly.
+        metrics_map = {}
+        recap_res = make_get_request("/compliance-assessments/recap/")
+        if recap_res.status_code == 200:
+            recap_data = recap_res.json()
+            if isinstance(recap_data, list):
+                for entry in recap_data:
+                    metrics_map[str(entry.get("id"))] = entry
+
+        def _fmt_score(value):
+            # -1 is the backend sentinel for "nothing scored"
+            return "N/A" if value is None or value == -1 else value
+
         result = "# Compliance Assessments - Summary\n\n"
         result += f"Total Audits: {len(audits)}\n\n"
 
@@ -58,24 +77,33 @@ async def get_all_audits_with_metrics(
             progress = audit.get("progress", "N/A")
             domain = (audit.get("folder") or {}).get("str", "N/A")
 
-            # Fetch requirements for this specific audit
-            requirements, req_error = fetch_all_results(
-                "/requirement-assessments/",
-                params={"compliance_assessment": audit_id},
-            )
-            if req_error:
-                result += (
-                    f"## {audit_name}\n- Error fetching requirements: {req_error}\n\n"
-                )
+            result += f"## {audit_name}\n"
+            result += f"- **Framework:** {fw}\n"
+            result += f"- **Domain:** {domain}\n"
+            result += f"- **Audit Status:** {audit_status}\n"
+            result += f"- **Progress:** {progress}%\n"
+
+            entry = metrics_map.get(str(audit_id))
+            if entry is None:
+                result += "- Metrics unavailable (audit not returned by recap)\n\n"
                 continue
 
-            total = len(requirements)
+            # Aggregate score (server-computed). The headline "score" is the
+            # maturity score; implementation/documentation are its components.
+            gs = entry.get("global_score") or {}
+            result += f"- **Score (Maturity):** {_fmt_score(gs.get('maturity_score'))}\n"
+            result += f"  - Implementation: {_fmt_score(gs.get('implementation_score'))}\n"
+            doc_score = gs.get("documentation_score")
+            if doc_score is not None:
+                result += f"  - Documentation: {_fmt_score(doc_score)}\n"
 
-            # Count by compliance result
-            counts = {}
-            for r in requirements:
-                res_val = (r.get("result") or "not_assessed").lower()
-                counts[res_val] = counts.get(res_val, 0) + 1
+            # Compliance-result counts (assessable requirements only), taken from
+            # the donut breakdown rather than re-counted client-side.
+            donut_values = (
+                ((entry.get("donut") or {}).get("result") or {}).get("values") or []
+            )
+            counts = {v.get("name"): v.get("value", 0) for v in donut_values}
+            total = sum(counts.values())
 
             compliant = counts.get("compliant", 0)
             non_compliant = counts.get("non_compliant", 0)
@@ -83,13 +111,7 @@ async def get_all_audits_with_metrics(
             not_applicable = counts.get("not_applicable", 0)
             not_assessed = counts.get("not_assessed", 0)
 
-            result += f"## {audit_name}\n"
-            result += f"- **Framework:** {fw}\n"
-            result += f"- **Domain:** {domain}\n"
-            result += f"- **Audit Status:** {audit_status}\n"
-            result += f"- **Progress:** {progress}%\n"
             result += f"- **Total Requirements:** {total}\n"
-
             if total > 0:
                 result += f"\n**Compliance Results:**\n"
                 result += f"  - Compliant: {compliant} ({compliant * 100 // total}%)\n"
@@ -230,4 +252,93 @@ async def get_audit_gap_analysis(audit_name: str):
         result,
         "get_audit_gap_analysis",
         "Use this gap analysis to answer the user's question about audit compliance",
+    )
+
+
+async def get_audit_global_score(audit_name: str):
+    """Get an audit's score. The audit "score" is the maturity score (the headline figure: the average of the enabled implementation and documentation layers); implementation and documentation scores are its components. Server-computed with correct weighting, implementation-group filtering and N/A anchoring, without fetching individual requirement assessments.
+
+    Args:
+        audit_name: Audit/compliance assessment name or ID
+    """
+    from ..resolvers import resolve_compliance_assessment_id
+
+    # Resolve audit name to ID
+    try:
+        audit_id = resolve_compliance_assessment_id(audit_name)
+    except ValueError as e:
+        return error_response(
+            "Not Found",
+            str(e),
+            "Use get_audits_progress() to see available audits",
+            retry_allowed=True,
+        )
+    except Exception as e:
+        return error_response(
+            "API Error",
+            f"Unable to resolve audit: {e}",
+            "Verify the API connection and token configuration",
+            retry_allowed=True,
+        )
+
+    # Single O(1) call to the server-side aggregate endpoint. Guard the request
+    # and JSON decode so timeouts, connection errors, or a malformed body return
+    # a structured tool error instead of escaping as an unhandled exception.
+    try:
+        res = make_get_request(f"/compliance-assessments/{audit_id}/global_score/")
+    except Exception as e:
+        return error_response(
+            "API Error",
+            f"Unable to fetch global score: {e}",
+            "Verify the API connection and token configuration",
+            retry_allowed=True,
+        )
+
+    if res.status_code != 200:
+        return error_response(
+            "API Error",
+            f"Unable to fetch global score: {res.status_code}",
+            "Verify the audit exists and API token configuration",
+            retry_allowed=False,
+        )
+
+    try:
+        scores = res.json()
+    except ValueError as e:
+        return error_response(
+            "API Error",
+            f"Invalid response decoding global score: {e}",
+            "Report this error to the user",
+            retry_allowed=False,
+        )
+
+    def _fmt(value):
+        # -1 is the backend sentinel for "nothing scored"
+        return "N/A" if value is None or value == -1 else value
+
+    if not scores.get("scoring_enabled", True):
+        return success_response(
+            f"Scoring is not enabled for audit '{audit_name}'.",
+            "get_audit_global_score",
+            "Inform the user this audit has no scoring configured",
+        )
+
+    result = f"# Score: {audit_name}\n\n"
+    result += f"- **Score (Maturity):** {_fmt(scores.get('maturity_score'))}\n"
+    result += f"\n_Components:_\n"
+    result += (
+        f"- **Implementation:** {_fmt(scores.get('implementation_score'))}\n"
+    )
+    documentation_score = scores.get("documentation_score")
+    if documentation_score is not None:
+        result += f"- **Documentation:** {_fmt(documentation_score)}\n"
+    result += (
+        f"- **Score Range:** {scores.get('min_score', 'N/A')} - "
+        f"{scores.get('max_score', 'N/A')} (total max {scores.get('total_max_score', 'N/A')})\n"
+    )
+
+    return success_response(
+        result,
+        "get_audit_global_score",
+        "The audit's score is the maturity score; use it to answer the user's question about the audit's overall score",
     )

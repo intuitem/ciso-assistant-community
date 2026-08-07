@@ -76,7 +76,7 @@ class Command(BaseCommand):
             try:
                 app_label, model_name = model_path.split(".")
                 model_class = apps.get_model(app_label, model_name)
-            except (LookupError, ValueError):
+            except LookupError, ValueError:
                 continue
             object_type = _normalize_model_name(model_name)
             try:

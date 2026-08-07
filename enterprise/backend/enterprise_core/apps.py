@@ -14,6 +14,21 @@ def startup(sender, **kwargs):
     from django.contrib.auth.models import Permission
 
     ClientSettings.objects.get_or_create()
+
+    from global_settings.models import GlobalSettings
+
+    ff, _ = GlobalSettings.objects.get_or_create(
+        name=GlobalSettings.Names.FEATURE_FLAGS
+    )
+    # A legacy row may carry value=None; normalise before membership checks so
+    # enterprise boot never crashes. The "not in" test still preserves an
+    # admin's explicit False.
+    if not isinstance(ff.value, dict):
+        ff.value = {}
+    if "idp_groups" not in ff.value:
+        ff.value["idp_groups"] = False
+        ff.save(update_fields=["value"])
+
     administrator_permissions = Permission.objects.filter(
         codename__in=ADMINISTRATOR_PERMISSIONS
     )

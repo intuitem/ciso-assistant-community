@@ -409,7 +409,7 @@ class EUVDFeed:
             if epss is not None:
                 try:
                     epss_score = Decimal(str(epss)) / 100
-                except (ValueError, ArithmeticError):
+                except ValueError, ArithmeticError:
                     logger.warning("Invalid EPSS value", euvd_id=euvd_id, epss=epss)
 
             pub = entry.get("datePublished")

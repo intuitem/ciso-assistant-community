@@ -5,11 +5,11 @@
 	import { getModalStore, type ModalStore } from './stores';
 	import { m } from '$paraglide/messages';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-surface-50 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container';
 
@@ -70,24 +70,24 @@
 			}}
 		>
 			{#snippet children({ form })}
-				<TextArea
+				<MarkdownField
 					{form}
 					field="justification"
 					label={m.riskAcceptanceJustificationLabel()}
 					helpText={m.riskAcceptanceJustificationHelpText()}
-					class="shadow-sm border-red-100 hover:shadow-md hover:border-red-300 transition-all focus:border-red-100"
+					class="shadow-sm hover:shadow-md transition-all"
 				/>
 				<footer class="modal-footer {parent.regionFooter}">
 					<button
 						type="button"
-						class="btn bg-gray-100 shadow-sm {parent.buttonNeutral}"
+						class="btn bg-surface-100-900 shadow-sm {parent.buttonNeutral}"
 						onclick={parent.onClose}
 					>
 						{m.cancel()}
 					</button>
 					<input type="hidden" name="urlmodel" value={URLModel} />
 					<input type="hidden" name="id" value={id} />
-					<button class="btn border-green-900 {submitButtonStyle} shadow-sm" type="submit">
+					<button class="btn {submitButtonStyle} shadow-sm" type="submit">
 						{submitButtonText}
 					</button>
 				</footer>

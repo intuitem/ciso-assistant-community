@@ -164,8 +164,10 @@ LICENSE_EXPIRATION=2025-12-31
 AUDITLOG_RETENTION_DAYS=90
 AUDITLOG_MAX_RECORDS=50000
 
-# Webhook configuration
-# WEBHOOK_ALLOW_PRIVATE_IPS=False
+# Allow outbound server-side requests (webhooks, integrations, chat LLM endpoints)
+# to target private/loopback addresses. Required for local LLMs (e.g. Ollama). Default False.
+# Renamed from WEBHOOK_ALLOW_PRIVATE_IPS; the old name is no longer recognized.
+# ALLOW_PRIVATE_NETWORK_REQUESTS=False
 
 # Logging
 # LOG_LEVEL=INFO
@@ -256,7 +258,7 @@ User=ciso-assistant
 Group=ciso-assistant
 WorkingDirectory=/path/to/ciso-assistant-community/frontend
 Environment="NODE_ENV=production"
-Environment="BODY_SIZE_LIMIT=25000000"
+Environment="BODY_SIZE_LIMIT=50000000"
 Environment="ORIGIN=http://localhost:3000"
 Environment="PUBLIC_BACKEND_API_URL=http://localhost:8000/api"
 ExecStart=/usr/bin/node server

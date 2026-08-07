@@ -28,7 +28,7 @@ from core.models import (
 )
 from core.serializers import AppliedControlWriteSerializer
 from crq.models import QuantitativeRiskHypothesis
-from doc_management.models import ManagedDocument
+from doc_management.models import DocumentContainer
 from ebios_rm.models import Stakeholder
 from iam.models import Folder, RoleAssignment
 from integrations.models import SyncMapping
@@ -74,6 +74,12 @@ def _reverse_m2m_through_tables() -> list[tuple[Any, str]]:
         # Through Policy (a proxy of AppliedControl — same table).
         (ValidationFlow.policies.through, "ValidationFlow_policies"),
         (GenericCollection.policies.through, "GenericCollection_policies"),
+        # Document links (Stream E.1) — associative, unioned onto the target.
+        (DocumentContainer.policies.through, "DocumentContainer_policies"),
+        (
+            DocumentContainer.applied_controls.through,
+            "DocumentContainer_applied_controls",
+        ),
     ]
 
 
@@ -203,65 +209,6 @@ def _union_direct_m2ms(target, sources) -> dict[str, int]:
     return counts
 
 
-def _candidate_managed_documents(source_ids: list, target_id) -> list[dict]:
-    policy_ids = list(source_ids)
-    if target_id is not None:
-        policy_ids.append(target_id)
-    docs = ManagedDocument.objects.filter(policy_id__in=policy_ids).values(
-        "id", "name", "policy_id"
-    )
-    return [
-        {"id": str(d["id"]), "name": d["name"], "policy_id": str(d["policy_id"])}
-        for d in docs
-    ]
-
-
-def _detect_managed_document_conflict(
-    source_ids: list, target_id, candidates: list[dict]
-) -> dict | None:
-    """Conflict when 2+ distinct parties (sources or target) have docs.
-    A single source with multiple docs is not a conflict — siblings stay."""
-    parties_with_docs = {d["policy_id"] for d in candidates}
-    if len(parties_with_docs) < 2:
-        return None
-    return {
-        "parties_with_docs": sorted(parties_with_docs),
-        "candidates": candidates,
-    }
-
-
-def _apply_managed_document_resolution(
-    source_ids: list,
-    target_id,
-    candidates: list[dict],
-    keep_id: str | None,
-) -> dict[str, int]:
-    """Repoint the kept doc to target; unlink (policy=None) every other candidate."""
-    candidate_ids = {c["id"] for c in candidates}
-    if keep_id is not None and keep_id not in candidate_ids:
-        raise ValidationError(
-            "managed_document_resolution.keep must be one of the candidate document ids."
-        )
-
-    result = {"kept": 0, "unlinked": 0, "repointed": 0}
-
-    if keep_id is not None:
-        ManagedDocument.objects.filter(id=keep_id).update(policy_id=target_id)
-        result["kept"] = 1
-
-    unlink_qs = ManagedDocument.objects.filter(id__in=candidate_ids)
-    if keep_id is not None:
-        unlink_qs = unlink_qs.exclude(id=keep_id)
-    result["unlinked"] = unlink_qs.filter(
-        policy_id__in=list(source_ids) + ([target_id] if target_id is not None else [])
-    ).update(policy_id=None)
-    return result
-
-
-def _repoint_all_managed_documents(source_ids: list, target_id) -> int:
-    return _rewire_fk(ManagedDocument, "policy_id", source_ids, target_id)
-
-
 def _check_permissions(
     user,
     source_folders: list,
@@ -307,7 +254,6 @@ def merge_applied_controls(
     request=None,
     lookup_queryset=None,
     dry_run: bool = False,
-    managed_document_resolution: dict | None = None,
 ) -> dict:
     """Merge N sources into 1 target. See module docstring for semantics.
 
@@ -358,11 +304,6 @@ def merge_applied_controls(
     _check_permissions(user, source_folders, target_folder, target_is_new)
 
     source_id_list = [s.id for s in sources]
-    md_target_id = target_existing_obj.id if target_existing_obj is not None else None
-    md_candidates = _candidate_managed_documents(source_id_list, md_target_id)
-    md_conflict = _detect_managed_document_conflict(
-        source_id_list, md_target_id, md_candidates
-    )
 
     folder_mismatch = any(
         (s.folder_id if s.folder else None)
@@ -377,7 +318,6 @@ def merge_applied_controls(
             "target_folder_id": str(target_folder.id) if target_folder else None,
             "source_folder_ids": sorted({str(f.id) for f in source_folders}),
             "folder_mismatch": folder_mismatch,
-            "managed_document_conflict": md_conflict,
             "rewired_preview": _compute_rewire_preview(source_id_list),
             "unioned_m2m_preview": _compute_union_preview(
                 sources, target_existing_obj, target_is_new
@@ -385,22 +325,9 @@ def merge_applied_controls(
             "deleted_sources_preview": [str(s.id) for s in sources],
         }
 
-    if md_conflict is not None:
-        keep_id = (managed_document_resolution or {}).get("keep")
-        if not keep_id:
-            raise ValidationError(
-                {
-                    "managed_document_resolution": (
-                        "Required: multiple applied controls have managed documents; "
-                        "pick one to retain."
-                    ),
-                    "managed_document_conflict": md_conflict,
-                }
-            )
-
     with transaction.atomic():
-        # Lock sources + target and re-detect conflicts so concurrent writers
-        # can't smuggle changes in between the dry-run preview and the rewire.
+        # Lock sources + target so concurrent writers can't smuggle changes in
+        # between the dry-run preview and the rewire.
         locked_sources = list(
             AppliedControl.objects.select_for_update().filter(id__in=source_id_list)
         )
@@ -413,25 +340,7 @@ def merge_applied_controls(
                 id=target_existing_obj.id
             ).first()
 
-        locked_candidates = _candidate_managed_documents(source_id_list, md_target_id)
-        locked_conflict = _detect_managed_document_conflict(
-            source_id_list, md_target_id, locked_candidates
-        )
-        if locked_conflict is not None:
-            keep_id = (managed_document_resolution or {}).get("keep")
-            if not keep_id or keep_id not in {c["id"] for c in locked_candidates}:
-                raise ValidationError(
-                    {
-                        "managed_document_resolution": (
-                            "A managed-document conflict appeared during the merge; "
-                            "please retry to pick which document to keep."
-                        ),
-                        "managed_document_conflict": locked_conflict,
-                    }
-                )
         sources = locked_sources
-        md_candidates = locked_candidates
-        md_conflict = locked_conflict
 
         if target_is_new:
             serializer_context = {"request": request} if request is not None else {}
@@ -454,17 +363,6 @@ def merge_applied_controls(
         rewired["Comment"] = _rewire_fk(
             Comment, "applied_control_id", source_id_list, target_obj.id
         )
-
-        if md_conflict is not None:
-            md_result = _apply_managed_document_resolution(
-                source_id_list,
-                target_obj.id,
-                md_candidates,
-                (managed_document_resolution or {}).get("keep"),
-            )
-        else:
-            repointed = _repoint_all_managed_documents(source_id_list, target_obj.id)
-            md_result = {"kept": 0, "unlinked": 0, "repointed": repointed}
 
         sync_result = _rewire_sync_mappings(source_id_list, target_obj.id)
 
@@ -511,8 +409,6 @@ def merge_applied_controls(
         "folder_mismatch": folder_mismatch,
         "rewired": rewired,
         "unioned_m2m": unioned,
-        "managed_documents": md_result,
-        "managed_document_conflict": md_conflict,
         "sync_mappings": sync_result,
         "deleted_sources": source_snapshots,
     }
@@ -528,14 +424,6 @@ def _compute_rewire_preview(source_ids: list) -> dict[str, int]:
     counts["Comment"] = Comment.objects.filter(
         applied_control_id__in=source_ids
     ).count()
-    try:
-        from doc_management.models import ManagedDocument
-
-        counts["ManagedDocument"] = ManagedDocument.objects.filter(
-            policy_id__in=source_ids
-        ).count()
-    except ImportError:
-        pass
     return counts
 
 

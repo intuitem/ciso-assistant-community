@@ -18,7 +18,7 @@
 	}
 </script>
 
-<div class="bg-white p-6 shadow-sm flex flex-col overflow-x-auto">
+<div class="bg-surface-50-950 p-6 shadow-sm flex flex-col overflow-x-auto">
 	<div class="flex items-center gap-4 mb-4">
 		<label class="flex items-center gap-2 text-sm font-medium cursor-pointer">
 			<input
@@ -29,7 +29,7 @@
 			/>
 			{m.includeEnclaves()}
 		</label>
-		<div class="flex items-center gap-4 text-sm text-gray-600">
+		<div class="flex items-center gap-4 text-sm text-surface-600-400">
 			<span class="flex items-center gap-1">
 				<span class="inline-block w-3 h-3 rounded-sm" style="background-color: #B0C4DE;"></span>
 				{m.domain()}

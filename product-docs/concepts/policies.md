@@ -19,7 +19,7 @@ The Policies page in the platform is a filtered view of applied controls where t
 Policies can come from either side of the divide:
 
 - **Author in CISO Assistant.** Each policy can carry one or more **managed documents** — versioned documents tracked in-platform through a draft → in-review → validated → published → deprecated lifecycle. Useful when you want the policy text to live where the rest of the GRC programme lives, with revision history and approval workflow attached.
-- **Attach existing documents.** If your policies already live in Confluence, SharePoint, a DMS, or anywhere else, the policy entry can point at the external location via a link and carry evidence files (signed PDF, last-approved revision) without duplicating the source-of-truth.
+- **Bring an existing document.** If a policy already exists as a file, or lives in Confluence, SharePoint, or a DMS, its managed document can be **uploaded** (the file itself) or **linked** (a pointer to where it lives) — the same lifecycle, versioning, and links apply, without duplicating the source of truth.
 
 Both paths are first-class — you can mix them across an organisation, or even across policies in the same domain. The applied-control machinery (assignee, status, linked requirements, evidence) is the same either way.
 
@@ -48,6 +48,7 @@ Policies have their own lifecycle — drafting, review, approval, publication, p
 
 ## Related
 
+- [Documents](documents.md)
 - [Applied controls](applied-controls.md)
 - [Audits](audits.md)
 - [Evidence](evidence.md)

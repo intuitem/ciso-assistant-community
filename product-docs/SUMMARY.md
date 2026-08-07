@@ -26,6 +26,7 @@
   * [Journeys](concepts/journeys.md)
 * Assets and resilience
   * [Assets](concepts/assets.md)
+  * [Asset classes](concepts/asset-classes.md)
   * [Business impact analyses](concepts/business-impact-analyses.md)
 * Operations
   * [Applied controls](concepts/applied-controls.md)
@@ -33,6 +34,7 @@
   * [Incidents](concepts/incidents.md)
 * Governance
   * [Policies](concepts/policies.md)
+  * [Documents](concepts/documents.md)
   * [Findings assessments](concepts/findings-assessments.md)
   * [Validation flows](concepts/validation-flows.md)
 * Risk
@@ -43,12 +45,14 @@
 * Compliance
   * [Audits](concepts/audits.md)
     * [Manage extended result](concepts/extended-results.md)
+  * [Technical postures](concepts/technical-postures.md)
   * [Evidence](concepts/evidence.md)
 * Specialised modules
   * [Third-party risk](concepts/third-party-risk.md)
   * [Privacy register](concepts/privacy-register.md)
   * [Project management](concepts/project-management.md)
   * [Terminology](concepts/terminology.md)
+  * [Object classifications](concepts/object-classification.md)
 
 ## Installation
 
@@ -95,6 +99,7 @@
 * [SSO](configuration/sso/README.md)
   * [SAML](configuration/sso/saml.md)
   * [OpenID Connect (OIDC)](configuration/sso/oidc.md)
+  * [SCIM provisioning and IdP groups](configuration/sso/scim.md)
   * [Identity providers](configuration/sso/identity-providers/README.md)
     * [Microsoft Entra ID](configuration/sso/identity-providers/entra-id.md)
     * [Okta](configuration/sso/identity-providers/okta.md)
@@ -109,12 +114,7 @@
   * [Upgrading a library](configuration/libraries/upgrading-a-library.md)
   * [Library clean-up](configuration/libraries/library-cleanup.md)
 * [Authoring](configuration/authoring/README.md)
-  * [Framework](configuration/authoring/framework.md)
-    * [Framework builder — reference](configuration/authoring/framework-builder.md)
-  * [Risk matrix](configuration/authoring/matrix.md)
-    * [Matrix editor — reference](configuration/authoring/matrix-editor.md)
-  * [Journey preset](configuration/authoring/preset.md)
-    * [Preset editor — reference](configuration/authoring/preset-editor.md)
+  * [Library builder](configuration/authoring/library-builder.md)
   * [Excel-driven authoring](configuration/authoring/excel.md)
 * [Data import wizard](configuration/data-import.md)
 * [Changing the language](configuration/language.md)
@@ -141,8 +141,12 @@
   * [Managing a collection](guides/collections.md)
   * [Managing an accreditation](guides/accreditations.md)
   * [Managing a responsibility matrix](guides/responsibility-matrix.md)
+* Documents
+  * [Authoring documents](guides/documents/authoring-documents.md)
+  * [Document templates](guides/documents/document-templates.md)
 * Third-party
   * [Third-Party Risk Management](guides/tprm.md)
+  * [Common TPRM pitfalls](guides/tprm-challenges.md)
 
 ## Features
 
@@ -154,6 +158,7 @@
 * [Kanban mode](features/kanban-mode.md)
 * [Applied controls analytics](features/applied-controls-analytics.md)
 * [Evidences from clipboard](features/evidences-from-clipboard.md)
+* [Evidence preview](features/evidence-preview.md)
 * [Mappings](features/mappings.md)
 * [Mapping explorer](features/mapping-explorer.md)
 * [X-rays](features/x-rays.md)
@@ -171,10 +176,12 @@
 * [Control Plan](features/control-plan.md)
 * [Action plans](features/action-plans.md)
 * [Working with tables](features/working-with-tables.md)
+* [Custom fields](features/custom-fields.md)
 * [Command palette](features/command-palette.md)
 * [Universal search](features/search.md)
 * [My assignments](features/my-assignments.md)
 * [Notifications](features/notifications.md)
+* [Portals and trust center](features/portals.md)
 * [Framework-specific features](features/framework-specific/README.md)
   * [ISO 27001](features/framework-specific/iso.md)
   * [CCB CyFun](features/framework-specific/cyfun.md)
@@ -187,7 +194,10 @@
 * [API reference](integrations/api.md)
 * [Generating a PAT](integrations/pat.md)
 * [Outgoing webhooks](integrations/webhooks.md)
+* [Audit log forwarding](integrations/audit-log-forwarding.md)
+* [Hosted AI providers](integrations/ai-providers.md)
 * [MCP setup guide](integrations/mcp.md)
+* [Power BI connector](integrations/powerbi.md)
 * [Third-party integrations](integrations/third-party/README.md)
   * [Jira](integrations/third-party/jira.md)
   * [ServiceNow](integrations/third-party/servicenow.md)

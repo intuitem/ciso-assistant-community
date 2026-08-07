@@ -28,7 +28,7 @@
 	};
 </script>
 
-<main class="bg-white card p-4">
+<main class="bg-surface-50-950 card p-4">
 	<ModelTable
 		source={{
 			head: {

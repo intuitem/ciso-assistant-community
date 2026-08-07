@@ -1,9 +1,9 @@
 from core.serializers import (
     BaseModelSerializer,
 )
-from django.db import transaction
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.models import RiskMatrix
+from pmbok.models import GenericCollection
 from .models import (
     EbiosRMStudy,
     FearedEvent,
@@ -20,6 +20,12 @@ from rest_framework import serializers
 
 
 class EbiosRMStudyWriteSerializer(BaseModelSerializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
     risk_matrix = serializers.PrimaryKeyRelatedField(
         queryset=RiskMatrix.objects.all(), required=False
     )
@@ -27,25 +33,6 @@ class EbiosRMStudyWriteSerializer(BaseModelSerializer):
     class Meta:
         model = EbiosRMStudy
         exclude = ["created_at", "updated_at"]
-
-    def update(self, instance, validated_data):
-        old_folder_id = instance.folder_id
-        with transaction.atomic():
-            updated_instance = super().update(instance, validated_data)
-            if old_folder_id != updated_instance.folder_id:
-                child_models = [
-                    FearedEvent,
-                    RoTo,
-                    Stakeholder,
-                    StrategicScenario,
-                    AttackPath,
-                    OperationalScenario,
-                ]
-                for model in child_models:
-                    model.objects.filter(ebios_rm_study=updated_instance).update(
-                        folder=updated_instance.folder
-                    )
-        return updated_instance
 
 
 class EbiosRMStudyReadSerializer(BaseModelSerializer):

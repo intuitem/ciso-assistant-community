@@ -21,26 +21,25 @@
 
 	const flash = getFlash(page);
 
-	let options: { label: string; value: string }[] = $state([]);
+	let options: { label: string; value: string | null }[] = $state([]);
 
 	onMount(async () => {
 		const rawOptions = await fetch('/applied-controls/priority').then((r) => r.json());
-		// Move '--' to the end while preserving order of other options
+		// Append the '--' (unset) option at the end, deduplicating if already present
 		options = [
 			...rawOptions.filter((o: { label: string }) => o.label !== '--'),
-			...rawOptions.filter((o: { label: string }) => o.label === '--')
+			{ label: '--', value: null }
 		];
 	});
 
-	async function changePriority(newPriority: string) {
+	async function changePriority(newPriority: string | null) {
 		const endpoint = `/applied-controls/${row?.meta?.id}/priority`;
-		const priorityValue = newPriority === '--' ? null : newPriority;
 		const requestInit = {
 			method: 'PATCH',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ priority: priorityValue })
+			body: JSON.stringify({ priority: newPriority })
 		};
 		try {
 			const response = await fetch(endpoint, requestInit);
@@ -65,17 +64,17 @@
 
 <ContextMenu.Sub>
 	<ContextMenu.SubTrigger
-		class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-muted data-[state=open]:bg-surface-50"
+		class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-muted data-[state=open]:bg-surface-50-950"
 	>
 		<div class="flex items-center">{m.changePriority()}</div>
 	</ContextMenu.SubTrigger>
 	<ContextMenu.SubContent
-		class="z-50 w-full min-w-[180px] max-w-[209px] outline-hidden card bg-white px-1 py-1.5 shadow-md border border-surface-200 cursor-default data-highlighted:bg-surface-50"
+		class="z-50 w-full min-w-[180px] max-w-[209px] outline-hidden card bg-surface-50-950 px-1 py-1.5 shadow-md border border-surface-200-800 cursor-default data-highlighted:bg-surface-50-950"
 		sideOffset={10}
 	>
 		{#each options as option}
 			<ContextMenu.Item
-				class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! hover:bg-surface-50"
+				class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! hover:bg-surface-50-950"
 				onclick={async () => await changePriority(option.value)}
 			>
 				{safeTranslate(option.label)}

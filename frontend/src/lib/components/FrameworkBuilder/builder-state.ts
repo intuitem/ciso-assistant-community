@@ -1,12 +1,6 @@
 import { getContext, setContext } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
-import {
-	apiSaveDraft,
-	apiPublishDraft,
-	apiDiscardDraft,
-	apiStartEditing,
-	type DraftJSON
-} from './builder-api';
+import { apiSaveDraft, type DraftJSON } from './builder-api';
 import { m } from '$paraglide/messages';
 import { resolveComputeResult } from '$lib/utils/helpers';
 
@@ -92,6 +86,9 @@ export interface RequirementNode {
 	importance: string;
 	display_mode: 'default' | 'splash';
 	translations?: Translations | null;
+	// Links to threats / reference controls: full URNs, as in the library YAML.
+	threats: string[];
+	reference_controls: string[];
 	framework: string | { id: string };
 	folder: { id: string; str: string } | string;
 }
@@ -262,6 +259,76 @@ function withNodeId(urn: string, nodeId: string): string {
 	return [...parts.slice(0, 5), nodeId].join(':');
 }
 
+const REWRITABLE_URN_TYPES = new Set(['req_node', 'question', 'question_choice']);
+
+/**
+ * Rewrite segment 1 (namespace) and segment 4 (slug) of a rewritable child URN,
+ * preserving the node_id (segments 5+). Mirrors the backend `rewrite_child_urns`
+ * so the client and server agree on a framework's URNs after a rename.
+ */
+function rewriteUrnNsSlug(urn: string | null, newNs: string, newSlug: string): string | null {
+	if (!urn) return urn;
+	const parts = urn.split(':');
+	if (
+		parts.length >= 6 &&
+		parts[0] === 'urn' &&
+		parts[2] === 'risk' &&
+		REWRITABLE_URN_TYPES.has(parts[3])
+	) {
+		parts[1] = newNs;
+		parts[4] = newSlug;
+		return parts.join(':');
+	}
+	return urn;
+}
+
+function rewriteDependsOnUrns(
+	dependsOn: Record<string, unknown> | null | undefined,
+	newNs: string,
+	newSlug: string
+): Record<string, unknown> | null | undefined {
+	if (!dependsOn || typeof dependsOn !== 'object') return dependsOn;
+	const result: Record<string, unknown> = { ...dependsOn };
+	if (typeof result.question === 'string') {
+		result.question = rewriteUrnNsSlug(result.question, newNs, newSlug);
+	}
+	if (Array.isArray(result.answers)) {
+		result.answers = result.answers.map((a) =>
+			typeof a === 'string' ? rewriteUrnNsSlug(a, newNs, newSlug) : a
+		);
+	}
+	return result;
+}
+
+/**
+ * Rewrite every stored child URN in the builder tree to a new namespace/slug,
+ * preserving node_ids. Returns a new tree so Svelte stores react. Covers node
+ * urn + parent_urn, question urn + depends_on, and choice urn.
+ */
+function rewriteTreeUrns(nodes: BuilderNode[], newNs: string, newSlug: string): BuilderNode[] {
+	return nodes.map((bn) => ({
+		...bn,
+		node: {
+			...bn.node,
+			urn: rewriteUrnNsSlug(bn.node.urn, newNs, newSlug),
+			parent_urn: rewriteUrnNsSlug(bn.node.parent_urn, newNs, newSlug)
+		},
+		questions: bn.questions.map((bq) => ({
+			...bq,
+			question: {
+				...bq.question,
+				urn: rewriteUrnNsSlug(bq.question.urn, newNs, newSlug) ?? bq.question.urn,
+				depends_on: rewriteDependsOnUrns(bq.question.depends_on, newNs, newSlug),
+				choices: bq.question.choices.map((c) => ({
+					...c,
+					urn: rewriteUrnNsSlug(c.urn, newNs, newSlug)
+				}))
+			}
+		})),
+		children: rewriteTreeUrns(bn.children, newNs, newSlug)
+	}));
+}
+
 /**
  * Return a node_id not present in `taken`, appending `-2`, `-3`, … to the
  * candidate until free. Used so a new item's URN never reuses the frozen
@@ -348,6 +415,43 @@ function repairDuplicateNodeIds(nodes: RequirementNode[]): boolean {
 		n.urn = withNodeId(n.urn, newNid);
 		changed = true;
 	}
+	return changed;
+}
+
+/**
+ * Self-heal duplicate question / question_choice node_ids in a hydrated draft,
+ * mutating URNs in place. node_id must be unique per type (publish-time rewrite
+ * collapses divergent-slug duplicates onto one URN otherwise). The sibling of
+ * `repairDuplicateNodeIds`, which only covers requirement nodes.
+ */
+function repairDuplicateChildNodeIds(questions: Question[]): boolean {
+	let changed = false;
+
+	const dedupe = (items: { urn: string | null; ref_id: string | null }[]): void => {
+		const used = new Set<string>();
+		for (const it of items) {
+			const nid = extractNodeId(it.urn);
+			if (nid) used.add(nid);
+		}
+		const seen = new Set<string>();
+		for (const it of items) {
+			const nid = extractNodeId(it.urn);
+			if (!nid || !it.urn) continue;
+			if (!seen.has(nid)) {
+				seen.add(nid);
+				continue;
+			}
+			const refId = it.ref_id?.trim() ?? '';
+			const base = /^[A-Za-z0-9._-]+$/.test(refId) ? refId : nid;
+			const newNid = uniqueNodeId(base, used);
+			used.add(newNid);
+			it.urn = withNodeId(it.urn, newNid);
+			changed = true;
+		}
+	};
+
+	dedupe(questions);
+	dedupe(questions.flatMap((q) => q.choices));
 	return changed;
 }
 
@@ -459,6 +563,8 @@ export function serializeNode(n: RequirementNode): Record<string, unknown> {
 		weight: n.weight,
 		importance: n.importance,
 		display_mode: n.display_mode,
+		threats: n.threats ?? [],
+		reference_controls: n.reference_controls ?? [],
 		folder_id: extractFolderId(n.folder),
 		translations: n.translations ?? null
 	};
@@ -641,6 +747,8 @@ export function hydrateDraft(
 		importance: (n.importance ?? '') as string,
 		display_mode: (n.display_mode ?? 'default') as 'default' | 'splash',
 		translations: (n.translations ?? null) as Translations | null,
+		threats: (n.threats ?? []) as string[],
+		reference_controls: (n.reference_controls ?? []) as string[],
 		framework: (n.framework ?? frameworkId) as string,
 		folder: (n.folder_id ?? n.folder ?? '') as string
 	}));
@@ -780,6 +888,8 @@ const CONTEXT_KEY = 'framework-builder';
 export type NodePreset = 'blank' | 'group' | 'requirement' | 'splash';
 
 export interface BuilderStore {
+	/** Target of the _action protocol calls (framework id or adapter path) */
+	apiTarget: string;
 	framework: Writable<Framework>;
 	rootNodes: Writable<BuilderNode[]>;
 	saving: Writable<boolean>;
@@ -789,7 +899,6 @@ export interface BuilderStore {
 	unsaved: Writable<boolean>;
 	unpublished: Writable<boolean>;
 	isScrolling: Writable<boolean>;
-	publishWarnings: Writable<string[]>;
 	clearError: (key: string) => void;
 
 	addNode: (opts: { parent: string | null; preset?: NodePreset; afterIndex?: number }) => void;
@@ -817,8 +926,6 @@ export interface BuilderStore {
 	removeLanguage: (lang: string) => void;
 	setBaseLocale: (locale: string) => void;
 	flushDraft: () => Promise<boolean>;
-	publish: () => Promise<boolean>;
-	discard: () => Promise<void>;
 	destroy: () => void;
 }
 
@@ -831,11 +938,15 @@ export function createBuilderState(
 	frameworkData: Framework,
 	nodes: RequirementNode[],
 	questions: Question[],
-	editingDraft?: DraftJSON | null
+	editingDraft?: DraftJSON | null,
+	options?: { apiTarget?: string }
 ): BuilderStore {
 	const folderId =
 		typeof frameworkData.folder === 'string' ? frameworkData.folder : frameworkData.folder.id;
 	const frameworkId = frameworkData.id;
+	// Where the _action protocol calls go. Defaults to the live-framework
+	// builder proxy; the library builder passes its own adapter path.
+	const apiTarget = options?.apiTarget ?? frameworkId;
 	function getUrnNs(): string {
 		return get(framework).urn_namespace || 'custom';
 	}
@@ -869,7 +980,12 @@ export function createBuilderState(
 	// list before buildTree (which keys children by parent_urn and would
 	// otherwise duplicate subtrees under colliding URNs). Marked
 	// unsaved/unpublished so it persists on the next save or publish.
-	const didRepairNodeIds = editingDraft ? repairDuplicateNodeIds(initialNodes) : false;
+	// Run both repairs (array avoids `||` short-circuiting the second).
+	const didRepairNodeIds = editingDraft
+		? [repairDuplicateNodeIds(initialNodes), repairDuplicateChildNodeIds(initialQuestions)].some(
+				Boolean
+			)
+		: false;
 	const initialRootNodes = buildTree(initialNodes, initialQuestions);
 	const rootNodes = writable<BuilderNode[]>(initialRootNodes);
 	const saving = writable(false);
@@ -883,9 +999,6 @@ export function createBuilderState(
 	const unpublished = writable(!!draftMarkedDirty || didRepairNodeIds);
 	const isScrolling = writable(false);
 	const activeLanguage = writable<string | null>(null);
-	// Non-fatal warnings returned by the last successful publish
-	// (e.g. URN disambiguation). Cleared by the UI when dismissed.
-	const publishWarnings = writable<string[]>([]);
 
 	function markDirty() {
 		unsaved.set(true);
@@ -933,7 +1046,7 @@ export function createBuilderState(
 			try {
 				const draft = serializeDraft(get(framework), get(rootNodes));
 				(draft as any)._dirty = true; // mark draft as having user changes
-				await apiSaveDraft(frameworkId, draft);
+				await apiSaveDraft(apiTarget, draft);
 				unsaved.set(false); // saved to draft, but still unpublished
 				clearError('save-draft');
 				return true;
@@ -949,86 +1062,6 @@ export function createBuilderState(
 			return await currentSave;
 		} finally {
 			currentSave = null;
-		}
-	}
-
-	/** Validate all nodes and framework before publish. Returns true if valid. */
-	function validateBeforePublish(): boolean {
-		const validationErrors = validateDraft(get(framework), get(rootNodes));
-		for (const err of validationErrors) {
-			setError(err.key, err.message);
-		}
-		return validationErrors.length === 0;
-	}
-
-	// Returns true only when the draft was actually published. Every failure
-	// path (save failed, client-side validation failed, backend rejected,
-	// unexpected throw) records a 'publish' error and returns false so the
-	// caller can keep the confirmation dialog open and show why, instead of
-	// flashing success or dying as an unhandled rejection.
-	async function publish(): Promise<boolean> {
-		try {
-			const saved = await flushDraft();
-			if (!saved) {
-				setError('publish', m.builderFailedToSaveDraftBeforePublish());
-				return false;
-			}
-
-			// Clear previous node- and question-level validation errors so stale
-			// entries (e.g. slider min/max/step errors from the previous attempt)
-			// don't survive a re-validation.
-			errors.update((prev) => {
-				const next = new Map(prev);
-				for (const key of next.keys()) {
-					if (key.startsWith('node-') || key.startsWith('question-')) next.delete(key);
-				}
-				return next;
-			});
-			clearError('publish');
-
-			if (!validateBeforePublish()) {
-				// Keep a specific message (e.g. framework name required) if
-				// validateDraft already set one; only fall back to the generic.
-				if (!get(errors).has('publish')) {
-					setError('publish', m.builderFixValidationErrorsBeforePublish());
-				}
-				return false;
-			}
-
-			const warnings = await apiPublishDraft(frameworkId);
-			// Reflect the server-side bump locally so reactive status (e.g.,
-			// "Live" vs "Draft — nothing live yet") updates without a refresh.
-			framework.update((f) => ({ ...f, editing_version: (f.editing_version ?? 1) + 1 }));
-			clearError('publish');
-			publishWarnings.set(warnings);
-			return true;
-		} catch (e) {
-			console.error('[FrameworkBuilder] Publish failed:', e);
-			setError('publish', (e as Error).message);
-			return false;
-		}
-	}
-
-	async function discard() {
-		try {
-			// Clear the draft on the server
-			await apiDiscardDraft(frameworkId);
-			// Re-create a fresh draft from live relational data
-			const { draft: freshDraft } = await apiStartEditing(frameworkId);
-			// Re-hydrate stores from the fresh draft
-			const hydrated = hydrateDraft(freshDraft, frameworkId);
-			const freshFramework = { ...frameworkData, ...hydrated.frameworkPatch } as Framework;
-			const freshRootNodes = buildTree(hydrated.nodes, hydrated.questions);
-			framework.set(freshFramework);
-			rootNodes.set(freshRootNodes);
-			activeSection.set(freshRootNodes[0]?.node.id ?? '');
-			unsaved.set(false);
-			unpublished.set(false);
-			clearError('discard');
-		} catch (e) {
-			console.error('[FrameworkBuilder] Draft discard failed:', e);
-			setError('discard', (e as Error).message);
-			throw e;
 		}
 	}
 
@@ -1098,6 +1131,8 @@ export function createBuilderState(
 			weight: 1,
 			importance: '',
 			display_mode: defaults.display_mode,
+			threats: [],
+			reference_controls: [],
 			framework: frameworkId,
 			folder: folderId
 		};
@@ -1536,7 +1571,20 @@ export function createBuilderState(
 	}
 
 	function doUpdateFramework(patch: Record<string, unknown>) {
+		const oldNs = get(framework).urn_namespace || 'custom';
+		const oldSlug = getFwSlug();
 		framework.update((f) => ({ ...f, ...patch }) as Framework);
+		const newNs = getUrnNs();
+		const newSlug = getFwSlug();
+		// A namespace / ref_id change (or a name change while ref_id is empty,
+		// since the slug is name-derived then) must propagate to every stored
+		// child URN — mirroring the backend rewrite on publish. Without this the
+		// draft carries mixed slugs: stale URNs in the UI, and a publish-time
+		// rewrite that can collapse two of them onto one URN. Skipped once
+		// compliance assessments exist, when URNs are locked.
+		if ((newNs !== oldNs || newSlug !== oldSlug) && !get(framework).has_compliance_assessments) {
+			rootNodes.update((nodes) => rewriteTreeUrns(nodes, newNs, newSlug));
+		}
 		markDirty();
 	}
 
@@ -1866,6 +1914,7 @@ export function createBuilderState(
 	}
 
 	return {
+		apiTarget,
 		framework,
 		rootNodes,
 		saving,
@@ -1875,7 +1924,6 @@ export function createBuilderState(
 		unsaved,
 		unpublished,
 		isScrolling,
-		publishWarnings,
 		clearError,
 
 		addNode,
@@ -1903,8 +1951,6 @@ export function createBuilderState(
 		removeLanguage,
 		setBaseLocale,
 		flushDraft,
-		publish,
-		discard,
 		destroy
 	};
 }

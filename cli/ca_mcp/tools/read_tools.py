@@ -50,7 +50,9 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|UUID|Ref|Name|Inherent Level|Current Level|Residual Level|Treatment|\n"
+        result += (
+            "|UUID|Ref|Name|Inherent Level|Current Level|Residual Level|Treatment|\n"
+        )
         result += "|---|---|---|---|---|---|---|\n"
 
         for rs in scenarios:
@@ -196,8 +198,7 @@ async def get_applied_controls(folder: str = None):
             )
             owner_uuids = (
                 ", ".join(
-                    o.get("id", "") if isinstance(o, dict) else str(o)
-                    for o in owners
+                    o.get("id", "") if isinstance(o, dict) else str(o) for o in owners
                 )
                 if owners
                 else "N/A"
@@ -1035,8 +1036,11 @@ async def get_requirement_assessments(
             return "No requirement assessments found"
 
         result = f"Found {len(req_assessments)} requirement assessments\n\n"
-        result += "|ID|Ref|Description|Requirement|Assessment|Status|Result|\n"
-        result += "|---|---|---|---|---|---|---|\n"
+        result += "|ID|Ref|Description|Requirement|Assessment|Status|Result|Scored|Score|DocScore|TargetScore|\n"
+        result += "|---|---|---|---|---|---|---|---|---|---|---|\n"
+
+        def _fmt(value):
+            return "N/A" if value is None else value
 
         for req in req_assessments:
             req_id = req.get("id", "N/A")
@@ -1048,8 +1052,15 @@ async def get_requirement_assessments(
             )[:20]
             status = req.get("status", "N/A")
             result_val = req.get("result", "N/A")
+            is_scored = req.get("is_scored", False)
+            score = _fmt(req.get("score"))
+            documentation_score = _fmt(req.get("documentation_score"))
+            target_score = _fmt(req.get("target_score"))
 
-            result += f"|{req_id}|{req_ref_id}|{description}|{requirement}|{comp_assessment}|{status}|{result_val}|\n"
+            result += (
+                f"|{req_id}|{req_ref_id}|{description}|{requirement}|{comp_assessment}"
+                f"|{status}|{result_val}|{is_scored}|{score}|{documentation_score}|{target_score}|\n"
+            )
 
         return result
     except Exception as e:
@@ -1518,7 +1529,11 @@ async def get_asset_classes(
             ac_id = ac.get("id", "N/A")
             name = ac.get("name", "N/A")
             parent_obj = ac.get("parent")
-            parent_name = parent_obj.get("str", "N/A") if isinstance(parent_obj, dict) else (parent_obj or "N/A")
+            parent_name = (
+                parent_obj.get("str", "N/A")
+                if isinstance(parent_obj, dict)
+                else (parent_obj or "N/A")
+            )
             result += f"|{ac_id}|{name}|{parent_name}|\n"
 
         return success_response(

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
+	import { isDark } from '$lib/utils/helpers';
 
 	interface TimelineEntry {
 		folder: string;
@@ -75,6 +76,23 @@
 		return parts.join(' ');
 	}
 
+	// A "--" / no-impact cell carries a white hexcolor from the backend, which stays glaringly
+	// light in dark mode. Treat those as empty and let them use the theme surface instead.
+	function isEmptyCell(point: { name?: string }) {
+		return !point?.name || point.name === '--';
+	}
+
+	// Empty cells follow the theme surface (bg + adaptive text); impact cells keep their fixed
+	// color with black/white text picked by luminance.
+	function cellBg(point: { hexcolor?: string; name?: string }) {
+		if (isEmptyCell(point)) return 'var(--color-surface-100-900)';
+		return point.hexcolor || 'var(--color-surface-100-900)';
+	}
+	function cellTextClass(point: { hexcolor?: string; name?: string }) {
+		if (isEmptyCell(point)) return 'text-surface-950-50';
+		return point.hexcolor && isDark(point.hexcolor) ? 'text-white' : 'text-surface-950';
+	}
+
 	// Helper to determine if a cell represents an impact change
 	function isImpactChange(entry: TimelineEntry, currentIndex: number) {
 		if (currentIndex === 0) return true;
@@ -89,18 +107,18 @@
 <div class="space-y-4">
 	<!-- Legend -->
 	{#if impactLevels.length > 0}
-		<div class="bg-white shadow-sm rounded-lg p-4">
+		<div class="bg-surface-50-950 shadow-sm rounded-lg p-4">
 			<div class="flex flex-wrap gap-4">
 				{#each impactLevels as level}
 					<div class="flex items-center gap-2">
 						<div
-							class="w-6 h-6 rounded border border-gray-300 flex-shrink-0"
+							class="w-6 h-6 rounded border border-surface-300-700 flex-shrink-0"
 							style="background-color: {level.hexcolor}"
 						></div>
 						<div class="flex flex-col">
-							<span class="text-sm font-semibold text-gray-800">{level.name}</span>
+							<span class="text-sm font-semibold text-surface-950-50">{level.name}</span>
 							{#if level.description}
-								<span class="text-xs text-gray-600">{level.description}</span>
+								<span class="text-xs text-surface-600-400">{level.description}</span>
 							{/if}
 						</div>
 					</div>
@@ -111,16 +129,18 @@
 
 	<!-- Timeline Table -->
 	{#if Array.isArray(data) && data.length > 0}
-		<div class="bg-white shadow-sm overflow-x-auto">
+		<div class="bg-surface-50-950 shadow-sm overflow-x-auto">
 			<div class="w-full">
 				<table class="min-w-full border-collapse">
 					<thead>
-						<tr class="bg-gray-100">
-							<th class="sticky-col px-4 py-2 text-left font-medium text-gray-600 bg-gray-100">
+						<tr class="bg-surface-100-900">
+							<th
+								class="sticky-col px-4 py-2 text-left font-medium text-surface-600-400 bg-surface-100-900"
+							>
 								{m.asset()}
 							</th>
 							{#each xAxisPoints as point, i}
-								<th class="px-4 py-2 text-center font-medium text-gray-600">
+								<th class="px-4 py-2 text-center font-medium text-surface-600-400">
 									T{i}
 								</th>
 							{/each}
@@ -128,18 +148,20 @@
 					</thead>
 					<tbody>
 						{#each data as entry}
-							<tr class="border-t border-gray-200">
-								<td class="sticky-col px-4 py-2 font-medium bg-white">
+							<tr class="border-t border-surface-200-800">
+								<td class="sticky-col px-4 py-2 font-medium bg-surface-50-950">
 									{entry.folder}/{entry.asset}
 								</td>
 								{#each xAxisPoints as point, i}
 									<td
 										class="px-4 py-2 text-center"
-										style="background-color: {entry.data[point].hexcolor || '#f9fafb'};
+										style="background-color: {cellBg(entry.data[point])};
 										       {!isImpactChange(entry, i) ? 'border-left: none;' : ''}"
 									>
 										{#if isImpactChange(entry, i)}
-											<div class="font-medium">{entry.data[point].name || '--'}</div>
+											<div class="font-medium {cellTextClass(entry.data[point])}">
+												{entry.data[point].name || '--'}
+											</div>
 										{/if}
 									</td>
 								{/each}
@@ -147,12 +169,14 @@
 						{/each}
 					</tbody>
 					<tfoot>
-						<tr class="bg-gray-50 border-t-2 border-gray-200">
-							<td class="sticky-col px-4 py-2 font-medium text-gray-600 capitalize bg-gray-50">
+						<tr class="bg-surface-50-950 border-t-2 border-surface-200-800">
+							<td
+								class="sticky-col px-4 py-2 font-medium text-surface-600-400 capitalize bg-surface-50-950"
+							>
 								{m.time()}
 							</td>
 							{#each xAxisPoints as point}
-								<td class="px-4 py-2 text-center text-sm text-gray-600">
+								<td class="px-4 py-2 text-center text-sm text-surface-600-400">
 									{formatTimePoint(point)}
 								</td>
 							{/each}
@@ -162,7 +186,7 @@
 			</div>
 		</div>
 	{:else}
-		<div class="bg-white shadow-sm rounded-lg p-8 text-center text-gray-500">
+		<div class="bg-surface-50-950 shadow-sm rounded-lg p-8 text-center text-surface-600-400">
 			{m.noDataAvailable()}
 		</div>
 	{/if}
@@ -179,7 +203,7 @@
 
 	th,
 	td {
-		border-right: 1px solid rgba(0, 0, 0, 0.05);
+		border-right: 1px solid var(--color-surface-200-800);
 	}
 
 	th:last-child,
@@ -213,7 +237,7 @@
 		top: 0;
 		bottom: 0;
 		width: 1px;
-		background: rgba(0, 0, 0, 0.05);
+		background: var(--color-surface-300-700);
 		opacity: 0.3;
 	}
 

@@ -1,14 +1,14 @@
 import { handleErrorResponse, nestedWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
+import { safeTranslate } from '$lib/utils/i18n';
 import { modelSchema } from '$lib/utils/schemas';
 import { headData } from '$lib/utils/table';
-import { safeTranslate } from '$lib/utils/i18n';
 import { m } from '$paraglide/messages';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { error, fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { superValidate } from 'sveltekit-superforms';
+import { message, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { ModelInfo } from '$lib/utils/types';
@@ -196,7 +196,8 @@ export const actions: Actions = {
 	},
 	createEvidence: async (event) => {
 		const result = await nestedWriteFormAction({ event, action: 'create' });
-		return { form: result.form, newEvidence: result.form.message.object };
+		if (result.form) return { form: result.form, newEvidence: result.form.message.object };
+		else return result;
 	},
 	createAppliedControl: async (event) => {
 		return nestedWriteFormAction({ event, action: 'create' });
@@ -206,70 +207,23 @@ export const actions: Actions = {
 		return { form: result.form, newSecurityException: result.form.message.object };
 	},
 	update: async (event) => {
-		// Strip fields hidden by field_visibility (the backend GET omits them
-		// for the current viewer role) before PATCHing. Without this the form
-		// sends empty strings the backend rejects (e.g. status: "").
-		const URLModel = 'requirement-assessments';
-		const schema = modelSchema(URLModel);
+		const schema = modelSchema('requirement-assessments');
 		const id = event.url.searchParams.get('id');
-		const endpoint = `${BASE_API_URL}/${URLModel}/${id}/`;
-		const form = await superValidate(event.request, zod(schema));
+		if (!id) return fail(400, { form: await superValidate(event.request, zod(schema)) });
 
-		if (!form.valid) {
-			console.error(form.errors);
-			return fail(400, { form });
-		}
+		const form = await superValidate(event.request, zod(schema));
+		if (!form.valid) return fail(400, { form });
 
 		const formData: Record<string, any> = { ...form.data };
-
-		let currentRa: Record<string, any>;
-		try {
-			const currentRaResponse = await event.fetch(endpoint);
-			if (!currentRaResponse.ok) {
-				return handleErrorResponse({ event, response: currentRaResponse, form });
-			}
-			currentRa = await currentRaResponse.json();
-		} catch (error) {
-			console.error('Failed to fetch requirement assessment before update', error);
-			return fail(502, { form });
-		}
-
-		const visibilityControlled = [
-			'result',
-			'status',
-			'score',
-			'is_scored',
-			'documentation_score',
-			'observation',
-			'answers',
-			'evidences',
-			'applied_controls',
-			'security_exceptions'
-		];
-		for (const key of visibilityControlled) {
-			if (!(key in currentRa)) {
-				delete formData[key];
-			}
-		}
-		if (!('result' in currentRa)) {
-			delete formData.extended_result;
-		}
-
-		// The detail GET does not honor viewer_role and returns the auditor
-		// view regardless of caller. Strip empty enum values that the zod
-		// schema defaulted to "" so DRF does not reject the PATCH with
-		// "is not a valid choice".
 		for (const key of ['status', 'result', 'extended_result', 'respondent_alignment']) {
-			if (formData[key] === '' || formData[key] === null) {
-				delete formData[key];
-			}
+			if (formData[key] === '' || formData[key] === null) delete formData[key];
 		}
 
+		const endpoint = `${BASE_API_URL}/requirement-assessments/${id}/`;
 		const response = await event.fetch(endpoint, {
 			method: 'PATCH',
 			body: JSON.stringify(formData)
 		});
-
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 
 		const object = await response.json();
@@ -282,7 +236,7 @@ export const actions: Actions = {
 			},
 			event
 		);
-		return { form, object };
+		return message(form, { object });
 	},
 	submitAssignment: async (event) => {
 		const endpoint = `${BASE_API_URL}/requirement-assignments/${event.params.id}/set_status/`;

@@ -17,7 +17,9 @@
 		expiry_date: 'expiryDate',
 		effort: 'effort',
 		annual_cost: 'cost',
-		findings_count: 'associated_findings'
+		findings_count: 'associated_findings',
+		created_at: 'createdAt',
+		updated_at: 'updatedAt'
 	};
 	const appliedControlsColumns = [
 		'name',
@@ -39,7 +41,7 @@
 	};
 </script>
 
-<div class="bg-white p-2 shadow-sm rounded-lg space-x-2 flex flex-row justify-center mb-2">
+<div class="bg-surface-50-950 p-2 shadow-sm rounded-lg space-x-2 flex flex-row justify-center mb-2">
 	<p class="font-semibold text-lg">
 		{#if data.findings_assessment.perimeter}
 			{m.perimeter()}:
@@ -68,11 +70,11 @@
 	</p>
 	<p>/</p>
 </div>
-<div class="flex flex-col space-y-4 bg-white p-4 shadow-sm rounded-lg space-x-2">
+<div class="flex flex-col space-y-4 bg-surface-50-950 p-4 shadow-sm rounded-lg space-x-2">
 	<div class="flex justify-between items-center w-full">
 		<div class="flex-1">
 			<p class="text-xl font-extrabold">{m.associatedAppliedControls()}</p>
-			<p class="text-sm text-gray-500">
+			<p class="text-sm text-surface-600-400">
 				{m.actionPlanHelpText()}
 			</p>
 		</div>
@@ -104,6 +106,8 @@
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			tags={false}
 			baseEndpoint="/applied-controls?findings_assessments={page.params.id}"
+			columnSelector={true}
+			columnStateKey="applied-controls:findings-action-plan"
 			fields={[
 				'name',
 				'status',

@@ -44,7 +44,11 @@
 	import Search from './Search.svelte';
 	import Th from './Th.svelte';
 	import ThFilter from './ThFilter.svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import {
+		canPerformAction,
+		canPerformActionOnObject,
+		hasPermissionAnywhere
+	} from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
 	import { tableHandlers, tableStates, tableColumnStates } from '$lib/utils/stores';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
@@ -91,6 +95,7 @@
 		detailQueryParameter?: string;
 		fields?: string[];
 		columnSelector?: boolean;
+		columnStateKey?: string;
 		canSelectObject?: boolean;
 		overrideFilters?: { [key: string]: any[] };
 		defaultFilters?: { [key: string]: any[] };
@@ -110,10 +115,17 @@
 		actionsBody?: import('svelte').Snippet;
 		actionsHead?: import('svelte').Snippet;
 		tail?: import('svelte').Snippet;
+		// Table-scoped batch actions merged into the batch bar next to the child
+		// model's global batchActions. The caller pre-gates them (DetailView only
+		// passes them when the user can change the parent object); this component
+		// only applies the disableDelete/disableEdit filters — never the
+		// child-model permission filter, which would ask the wrong question for
+		// parent_action entries.
+		extraBatchActions?: import('$lib/utils/table').TableBatchAction[];
 	}
 
 	let {
-		source = { head: [], body: [] },
+		source = { head: {}, body: [] },
 		interactive = true,
 		search = true,
 		thFilter = false,
@@ -125,11 +137,11 @@
 		orderBy = undefined,
 		element = 'table',
 		text = 'text-xs',
-		backgroundColor = 'bg-white',
+		backgroundColor = 'bg-surface-50-950',
 		color = '',
 		regionHead = '',
-		regionHeadCell = 'uppercase bg-white text-gray-700',
-		regionBody = 'bg-white',
+		regionHeadCell = 'uppercase bg-surface-50-950 text-surface-700-300',
+		regionBody = 'bg-surface-50-950',
 		regionCell = 'max-w-[65ch] max-h-[8em] overflow-hidden hover:overflow-y-auto',
 		regionFoot = '',
 		regionFootCell = '',
@@ -145,6 +157,7 @@
 		detailQueryParameter = $bindable(),
 		fields = [],
 		columnSelector = undefined,
+		columnStateKey = undefined,
 		canSelectObject = false,
 		overrideFilters = {},
 		defaultFilters = {},
@@ -167,12 +180,15 @@
 		actions,
 		actionsBody,
 		actionsHead,
-		tail
+		tail,
+		extraBatchActions = []
 	}: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
 
 	let model = $derived(URL_MODEL_MAP[URLModel]);
+	// Models keeping some fields writable on built-in rows (BUILTIN_EDITABLE_FIELDS).
+	const BUILTIN_EDITABLE_URL_MODELS = ['terminologies', 'entities', 'asset-class'];
 	const tableSource: TableSource = $derived(
 		Object.keys(source.head)
 			.filter(
@@ -198,22 +214,27 @@
 		Object.entries(tableSource.head).map(([key, label]) => ({ key, label: label as string }))
 	);
 	const allColumnKeys = $derived(allColumns.map((c) => c.key));
+	// A page-provided `fields` curation is the default visible set; otherwise the generic list-view default.
 	const defaultColumns = $derived(
-		(URLModel && listViewFields[URLModel]?.body
-			? listViewFields[URLModel].body
-			: allColumnKeys
+		(fields.length > 0
+			? fields
+			: URLModel && listViewFields[URLModel]?.body
+				? listViewFields[URLModel].body
+				: allColumnKeys
 		).filter((key) => allColumnKeys.includes(key))
 	);
-	// Selector is offered on standalone list pages only; curated embedded tables pass `fields`.
+	// Offered on standalone list pages, or wherever a page opts in explicitly (even alongside `fields`).
 	const showColumnSelector = $derived(
 		(columnSelector ?? Boolean(deleteForm)) &&
 			Boolean(URLModel) &&
-			isStandaloneTable &&
-			fields.length === 0 &&
+			(columnSelector === true || isStandaloneTable) &&
+			(columnSelector === true || fields.length === 0) &&
 			allColumns.length > 1
 	);
+	// Persistence key: distinct per embedded table when set, else the shared per-model key.
+	const stateKey = $derived(columnStateKey ?? URLModel);
 	// Stored choice, with stale keys dropped and a fallback to defaults so a table is never empty.
-	const storedColumns = $derived(URLModel ? $tableColumnStates[URLModel] : undefined);
+	const storedColumns = $derived(stateKey ? $tableColumnStates[stateKey] : undefined);
 	const sanitizedStored = $derived(storedColumns?.filter((key) => allColumnKeys.includes(key)));
 	const visibleColumns = $derived(sanitizedStored?.length ? sanitizedStored : defaultColumns);
 	// Keys to render, in order. Without the selector, keep natural head order (behaviour unchanged).
@@ -222,23 +243,31 @@
 			? visibleColumns
 			: allColumnKeys.filter((key) => fields.length === 0 || fields.includes(key))
 	);
+	$effect(() => {
+		if (fields.length > 0 && allColumnKeys.length > 0 && renderColumnKeys.length === 0) {
+			console.warn(
+				`ModelTable(${URLModel}): none of \`fields\` [${fields.join(', ')}] match source.head keys [${allColumnKeys.join(', ')}] — table will render no columns. Build head with headData().`
+			);
+		}
+	});
+
 	// Order-sensitive so a pure reorder of the default set still persists instead of resetting.
 	const sameAsDefault = (cols: string[]) =>
 		cols.length === defaultColumns.length && cols.every((key, i) => defaultColumns[i] === key);
 
 	function setVisibleColumns(visible: string[]) {
-		if (!URLModel) return;
+		if (!stateKey) return;
 		if (sameAsDefault(visible)) {
 			resetColumns();
 			return;
 		}
-		$tableColumnStates = { ...$tableColumnStates, [URLModel]: visible };
+		$tableColumnStates = { ...$tableColumnStates, [stateKey]: visible };
 	}
 
 	function resetColumns() {
-		if (!URLModel) return;
+		if (!stateKey) return;
 		const next = { ...$tableColumnStates };
-		delete next[URLModel];
+		delete next[stateKey];
 		$tableColumnStates = next;
 	}
 
@@ -280,6 +309,22 @@
 	const user = page.data.user;
 
 	const isRelatedField = (fieldName: string): boolean => relatedFieldNames.has(fieldName);
+	const nonNavigableRelatedFields = new Set(['qualifications', 'relationship', 'nature']);
+	const getRelatedFieldHref = (
+		fieldName: string,
+		id: string,
+		options: { fallbackToDashedField?: boolean } = {}
+	): string | undefined => {
+		if (nonNavigableRelatedFields.has(fieldName)) return undefined;
+		const relatedUrlModel = model?.foreignKeyFields?.find(
+			(field) => field.field === fieldName
+		)?.urlModel;
+		const urlModel =
+			relatedUrlModel ?? (options.fallbackToDashedField ? fieldName.replace(/_/g, '-') : undefined);
+
+		if (!urlModel) return undefined;
+		return `/${urlModel}/${id}`;
+	};
 
 	let classProp = ''; // Replacing $$props.class
 
@@ -320,18 +365,20 @@
 			URLModel,
 			endpoint: baseEndpoint,
 			fields:
-				fields.length > 0
-					? { head: fields, body: fields }
-					: {
-							head:
-								typeof tableSource.head[0] === 'string'
-									? Object.values(tableSource.head)
-									: Object.keys(tableSource.head),
-							body:
-								typeof tableSource.body[0] === 'string'
-									? Object.values(tableSource.body)
-									: Object.keys(tableSource.body)
-						},
+				showColumnSelector && allColumnKeys.length > 0
+					? { head: allColumnKeys, body: allColumnKeys }
+					: fields.length > 0
+						? { head: fields, body: fields }
+						: {
+								head:
+									typeof tableSource.head[0] === 'string'
+										? Object.values(tableSource.head)
+										: Object.keys(tableSource.head),
+								body:
+									typeof tableSource.body[0] === 'string'
+										? Object.values(tableSource.body)
+										: Object.keys(tableSource.body)
+							},
 			featureFlags: page.data?.featureflags
 		})
 	);
@@ -353,7 +400,8 @@
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type) ||
 		forcePreventDelete;
-	const preventEdit = (row: TableSource) => forcePreventEdit;
+	const preventEdit = (row: TableSource) =>
+		(row?.meta?.builtin && !BUILTIN_EDITABLE_URL_MODELS.includes(URLModel)) || forcePreventEdit;
 
 	const tableURLModel = URLModel;
 
@@ -477,28 +525,20 @@
 							page.params.id ||
 							user.root_folder_id
 					})
-				: Object.hasOwn(user.permissions, `add_${model.name}`)
+				: hasPermissionAnywhere(user, `add_${model.name}`)
 			: false
 	);
 	let contextMenuCanEditObject = $derived(
 		(model
-			? page.params.id
-				? canPerformAction({
-						user,
-						action: 'change',
-						model: model.name,
-						domain:
-							model.name === 'folder'
-								? contextMenuOpenRow?.meta.id
-								: (contextMenuOpenRow?.meta.folder?.id ??
-									contextMenuOpenRow?.meta.folder ??
-									user.root_folder_id)
-					})
-				: Object.hasOwn(user.permissions, `change_${model.name}`)
+			? canPerformActionOnObject({
+					user,
+					action: 'change',
+					model: model.name,
+					object: contextMenuOpenRow?.meta
+				})
 			: false) &&
 			(!(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) ||
-				URLModel === 'terminologies' ||
-				URLModel === 'entities')
+				BUILTIN_EDITABLE_URL_MODELS.includes(URLModel))
 	);
 
 	let contextMenuDisplayEdit = $derived(
@@ -508,21 +548,14 @@
 	);
 
 	let contextMenuCanDeleteObject = $derived(
-		!preventDelete(contextMenuOpenRow ?? { head: [], body: [], meta: [] }) &&
+		!preventDelete(contextMenuOpenRow ?? { head: {}, body: [], meta: [] }) &&
 			(model
-				? page.params.id
-					? canPerformAction({
-							user,
-							action: 'delete',
-							model: model.name,
-							domain:
-								model.name === 'folder'
-									? contextMenuOpenRow?.meta.id
-									: (contextMenuOpenRow?.meta.folder?.id ??
-										contextMenuOpenRow?.meta.folder ??
-										user.root_folder_id)
-						})
-					: Object.hasOwn(user.permissions, `delete_${model.name}`)
+				? canPerformActionOnObject({
+						user,
+						action: 'delete',
+						model: model.name,
+						object: contextMenuOpenRow?.meta
+					})
 				: false)
 	);
 
@@ -615,7 +648,10 @@
 	}
 
 	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
-		return isDark(backgroundHexColor) ? 'text-white' : '';
+		// The badge background is a fixed hex color, so the text must be a fixed color too
+		// (not theme-dependent), otherwise it turns light in dark mode and vanishes on a
+		// light-colored badge. White on dark backgrounds, fixed dark surface otherwise.
+		return isDark(backgroundHexColor) ? 'text-white' : 'text-surface-950';
 	});
 
 	const tail_render = $derived(tail);
@@ -687,12 +723,21 @@
 		URLModel && model
 			? getBatchActions(URLModel).filter((a) =>
 					a.type === 'delete'
-						? Object.hasOwn(user.permissions, `delete_${model.name}`)
-						: Object.hasOwn(user.permissions, `change_${model.name}`)
+						? !disableDelete && hasPermissionAnywhere(user, `delete_${model.name}`)
+						: !disableEdit && hasPermissionAnywhere(user, `change_${model.name}`)
 				)
 			: []
 	);
-	const hasBatchActions = $derived(currentBatchActions.length > 0 && deleteForm !== undefined);
+	// Table-scoped extras are pre-gated by the caller (change on the parent);
+	// only the lock/disable filters apply here — the child-model permission
+	// filter above would ask the wrong question for parent_action entries.
+	const extraActions = $derived(
+		extraBatchActions.filter((a) => (a.type === 'delete' ? !disableDelete : !disableEdit))
+	);
+	const allBatchActions = $derived([...currentBatchActions, ...extraActions]);
+	const hasBatchActions = $derived(
+		(currentBatchActions.length > 0 && deleteForm !== undefined) || extraActions.length > 0
+	);
 
 	let selectAllChecked = $derived.by(() => {
 		const pageIds = $rows.filter((r: any) => r.meta?.id).map((r: any) => r.meta.id);
@@ -731,14 +776,16 @@
 		}
 		previousRowSignature = sig;
 	});
+
+	let tableWrapEl: HTMLElement | undefined = $state();
 </script>
 
-<div class="card table-wrap {classesBase}">
+<div class="card table-wrap {classesBase}" bind:this={tableWrapEl}>
 	<header class="flex items-center justify-between gap-2 px-2 h-16">
 		{#if hasBatchActions && selectedIds.size > 0}
 			<BatchActionBar
 				{selectedIds}
-				actions={currentBatchActions}
+				actions={allBatchActions}
 				{URLModel}
 				{handler}
 				onClearSelection={clearSelection}
@@ -762,7 +809,7 @@
 					</Popover.Trigger>
 					<Popover.Positioner class="z-50!">
 						<Popover.Content
-							class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
+							class="card p-2 bg-surface-50-950 max-w-lg shadow-lg space-y-2 border border-surface-200-800"
 						>
 							<SuperForm {_form} validators={zod(z.object({}))}>
 								{#snippet children({ form })}
@@ -859,11 +906,12 @@
 						}}
 					>
 						<span
-							class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-white/10"
+							class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-surface-100-900/10"
 						>
 							<input
 								type="checkbox"
 								class="checkbox pointer-events-none"
+								aria-label={m.selectAll()}
 								checked={selectAllChecked}
 								tabindex={-1}
 							/>
@@ -905,7 +953,7 @@
 								onkeydown={(e) => onRowKeydown(e, rowIndex)}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
 								aria-rowindex={rowIndex + 1}
-								class="hover:preset-tonal-primary even:bg-surface-50 cursor-pointer"
+								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer"
 							>
 								{#if hasBatchActions}
 									<td
@@ -917,11 +965,12 @@
 										}}
 									>
 										<span
-											class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-white/10"
+											class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-surface-100-900/10"
 										>
 											<input
 												type="checkbox"
 												class="checkbox pointer-events-none"
+												aria-label={m.selectRow()}
 												checked={selectedIds.has(meta?.id)}
 												tabindex={-1}
 											/>
@@ -965,11 +1014,17 @@
 																			{@const [securityObjectiveName, securityObjectiveValue] =
 																				Object.entries(val)[0]}
 																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																		{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
-																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
-																			<Anchor href={itemHref} class="anchor" stopPropagation
-																				>{safeTranslate(val.str)}</Anchor
-																			>
+																		{:else if val.str && val.id}
+																			{@const itemHref = getRelatedFieldHref(key, val.id, {
+																				fallbackToDashedField: true
+																			})}
+																			{#if itemHref}
+																				<Anchor href={itemHref} class="anchor" stopPropagation
+																					>{safeTranslate(val.str)}</Anchor
+																				>
+																			{:else}
+																				{safeTranslate(val.str)}
+																			{/if}
 																		{:else if val.str}
 																			{safeTranslate(val.str)}
 																		{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
@@ -1004,8 +1059,10 @@
 															--
 														{/if}
 													{:else if value && value.str}
-														{#if value.id}
-															{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
+														{@const itemHref = value.id
+															? getRelatedFieldHref(key, value.id)
+															: undefined}
+														{#if itemHref}
 															{#if key === 'ro_to_couple'}
 																<Anchor
 																	breadcrumbAction="push"
@@ -1036,7 +1093,7 @@
 														>
 															{safeTranslate(value.name ?? value.str) ?? '-'}
 														</p>
-													{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
+													{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'end_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
 														{formatDateOrDateTime(value, getLocale())}
 													{:else if [true, false].includes(value)}
 														{@const bd = booleanDisplay(value, key, URLModel)}
@@ -1044,7 +1101,7 @@
 													{:else if value === 'YES' || value === 'NO'}
 														{@const bd = booleanDisplay(value === 'YES', key, URLModel)}
 														<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
-													{:else if key === 'progress' || key === 'treatment_progress'}
+													{:else if key === 'progress' || key === 'treatment_progress' || key === 'progress_field'}
 														<span class="ml-9"
 															>{value != null
 																? safeTranslate('percentageDisplay', { number: value })
@@ -1056,20 +1113,33 @@
 																{#each Object.entries(value) as [lang, translation]}
 																	<div class="flex flex-row gap-2">
 																		<strong>{lang}:</strong>
-																		<span>{safeTranslate(translation)}</span>
+																		<span
+																			>{safeTranslate(
+																				typeof translation === 'object' && translation !== null
+																					? ((translation as Record<string, string>).name ?? '')
+																					: translation
+																			)}</span
+																		>
 																	</div>
 																{/each}
 															</div>
 														{:else}
 															--
 														{/if}
-													{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
+													{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.state}
 														<div class="flex items-center space-x-2">
 															<span>{safeTranslate(value ?? '-')}</span>
 															<span
-																class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-sm dark:bg-green-200 dark:text-green-900"
+																class="badge text-xs"
+																class:preset-tonal-success={row.meta.state === 'Accepted'}
+																class:preset-tonal-error={row.meta.state === 'Rejected' ||
+																	row.meta.state === 'Revoked'}
+																class:preset-tonal-primary={row.meta.state === 'Submitted'}
+																class:preset-tonal-secondary={row.meta.state === 'Created'}
 															>
-																{m.accept()}
+																{row.meta.state === 'Created'
+																	? m.draft()
+																	: safeTranslate(row.meta.state)}
 															</span>
 														</div>
 													{:else if (key === 'name' || key === 'str') && row.meta?.is_locked}
@@ -1083,7 +1153,12 @@
 														{value.name}
 													{:else}
 														<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-														{@const displayValue = ['name', 'description', 'ref_id'].includes(key)
+														{@const displayValue = [
+															'name',
+															'description',
+															'ref_id',
+															'key'
+														].includes(key)
 															? (value ?? '-')
 															: safeTranslate(value ?? '-')}
 														{#if displayValue?.length > 300}
@@ -1110,8 +1185,7 @@
 												URLModel={actionsURLModel}
 												detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
 												editURL={!(row.meta.builtin || row.meta.urn) ||
-												URLModel === 'terminologies' ||
-												URLModel === 'entities'
+												BUILTIN_EDITABLE_URL_MODELS.includes(URLModel)
 													? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`
 													: undefined}
 												{row}
@@ -1149,17 +1223,17 @@
 			</ContextMenu.Trigger>
 			{#if contextMenuDisplayEdit || contextMenuDisplayDelete || Object.hasOwn(contextMenuActions, URLModel)}
 				<ContextMenu.Content
-					class="z-50 min-w-[180px] outline-hidden bg-white px-1 py-1.5 shadow-md border border-surface-200 rounded-md"
+					class="z-50 min-w-[180px] outline-hidden bg-surface-50-950 px-1 py-1.5 shadow-md border border-surface-200-800 rounded-md"
 				>
 					{#if Object.hasOwn(contextMenuActions, URLModel)}
 						{#each contextMenuActions[URLModel] as action}
 							<action.component row={contextMenuOpenRow} {handler} {URLModel} {action} />
 						{/each}
-						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
+						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100-900" />
 					{/if}
 					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) || URLModel === 'terminologies' || URLModel === 'entities'}
 						<ContextMenu.Item
-							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
 							onclick={() => {
 								goto(
 									`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`,
@@ -1172,7 +1246,7 @@
 							{m.edit()}
 						</ContextMenu.Item>
 						<ContextMenu.Item
-							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
 							onclick={() => {
 								goto(`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`, {
 									breadcrumbAction: 'push'
@@ -1183,9 +1257,9 @@
 						</ContextMenu.Item>
 					{/if}
 					{#if contextMenuDisplayDelete}
-						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
+						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100-900" />
 						<ContextMenu.Item
-							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer text-red-500 data-highlighted:bg-surface-50"
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer text-red-500 data-highlighted:bg-surface-100-900"
 							onclick={() => {
 								if (URLModel === 'folders') {
 									contextMenuPromptModalConfirmDelete(
@@ -1222,7 +1296,7 @@
 			<RowCount {handler} />
 		{/if}
 		{#if pagination}
-			<Pagination {handler} {URLModel} />
+			<Pagination {handler} {URLModel} scrollTarget={tableWrapEl} />
 		{/if}
 	</footer>
 </div>

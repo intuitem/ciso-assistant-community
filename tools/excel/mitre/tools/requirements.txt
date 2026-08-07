@@ -1,0 +1,5 @@
+mitreattack-python
+openpyxl
+PyYAML
+requests
+tqdm

@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
+	import { isAccessAllowed } from '$lib/utils/access-control';
 	import type { PageData } from './$types';
 
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
@@ -96,12 +97,12 @@
 
 	const authorizedExtensions = ['.bak'];
 	const user = page.data.user;
-	const canBackup: boolean = Object.hasOwn(user.permissions, 'backup');
+	const canBackup: boolean = isAccessAllowed(user, 'backup', user.root_folder_id);
 </script>
 
 {#if canBackup}
 	<div class="grid grid-cols-2 space-y-2 lg:space-y-0 lg:space-x-4">
-		<div class="card col-span-full lg:col-span-1 bg-white shadow-sm py-4 px-6 space-y-2">
+		<div class="card col-span-full lg:col-span-1 bg-surface-50-950 shadow-sm py-4 px-6 space-y-2">
 			<h4 class="h4 font-semibold">{m.exportBackup()} <i class="fa-solid fa-download"></i></h4>
 			<div class=" py-4">
 				{m.exportBackupDescription()}
@@ -123,7 +124,7 @@
 			</div>
 		</div>
 
-		<div class="card col-span-full lg:col-span-1 bg-white shadow-sm py-4 px-6 space-y-2">
+		<div class="card col-span-full lg:col-span-1 bg-surface-50-950 shadow-sm py-4 px-6 space-y-2">
 			<h4 class="h4 font-semibold">{m.importBackup()} <i class="fa-solid fa-upload"></i></h4>
 			<div class=" py-4">
 				{m.importBackupDescription()}

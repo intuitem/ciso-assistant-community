@@ -20,8 +20,8 @@
 			<i class="fa-solid fa-arrow-left mr-2" aria-hidden="true"></i>{m.actionPlan()}
 		</Anchor>
 		<div>
-			<h1 class="text-2xl font-bold text-gray-900">{m.appliedControlsAnalytics()}</h1>
-			<p class="text-sm text-gray-500">
+			<h1 class="text-2xl font-bold text-surface-900-100">{m.appliedControlsAnalytics()}</h1>
+			<p class="text-sm text-surface-600-400">
 				{data.compliance_assessment.name}
 				{#if data.compliance_assessment.version}
 					- {data.compliance_assessment.version}
