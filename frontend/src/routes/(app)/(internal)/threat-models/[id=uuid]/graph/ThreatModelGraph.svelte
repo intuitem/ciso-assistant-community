@@ -144,7 +144,14 @@
 			.length;
 	}
 
-	const laneWidth = (id: string) => graphColumns[id]?.width ?? LANE_WIDTH;
+	// NodeResizer updates node.width/height, so the live node wins over what was
+	// stored at page load — otherwise a resize is lost on save and on relayout
+	const laneSize = (node: Node | undefined, id: string) => ({
+		width:
+			node?.measured?.width ?? (node?.width as number) ?? graphColumns[id]?.width ?? LANE_WIDTH,
+		height:
+			node?.measured?.height ?? (node?.height as number) ?? graphColumns[id]?.height ?? LANE_HEIGHT
+	});
 
 	function buildLaneNodes(current: Node[]): Node[] {
 		return tactics.map((tactic) => {
@@ -155,7 +162,7 @@
 				type: 'lane',
 				// x is assigned by layoutLanes(); lanes are not user-positioned
 				position: { x: 0, y: 0 },
-				style: `width: ${laneWidth(id)}px; height: ${saved?.height ?? LANE_HEIGHT}px;`,
+				style: `width: ${saved?.width ?? LANE_WIDTH}px; height: ${saved?.height ?? LANE_HEIGHT}px;`,
 				data: { name: tactic.name, refId: tactic.ref_id, count: countIn(id, current) },
 				selectable: true,
 				draggable: false,
@@ -167,13 +174,14 @@
 
 	// lane x is derived, never stored: lanes resize but never move
 	function layoutLanes(current: Node[], hidden: Set<string>): Node[] {
+		const laneById = new Map(current.filter((node) => node.type === 'lane').map((n) => [n.id, n]));
 		let x = 0;
 		const positions = new Map<string, number>();
 		for (const tactic of tactics) {
 			const id = laneId(tactic.id);
 			if (hidden.has(id)) continue;
 			positions.set(id, x);
-			x += laneWidth(id) + LANE_GAP_X;
+			x += laneSize(laneById.get(id), id).width + LANE_GAP_X;
 		}
 		// same reference when nothing moved: the caller's effect writes `nodes`
 		let moved = false;
@@ -469,8 +477,7 @@
 		const point = screenToFlowPosition({ x: clientX, y: clientY });
 		return nodes.find((node) => {
 			if (node.type !== 'lane') return false;
-			const width = node.measured?.width ?? LANE_WIDTH;
-			const height = node.measured?.height ?? LANE_HEIGHT;
+			const { width, height } = laneSize(node, node.id);
 			return (
 				point.x >= node.position.x &&
 				point.x <= node.position.x + width &&
@@ -591,12 +598,8 @@
 		const laneGeometry: Record<string, { width: number; height: number }> = {};
 		for (const node of nodes) {
 			if (node.type !== 'lane') continue;
-			const stored = graphColumns[node.id];
-			laneGeometry[node.id] = {
-				// a hidden lane is not measured; keep what was stored rather than reset it
-				width: node.measured?.width ?? stored?.width ?? LANE_WIDTH,
-				height: node.measured?.height ?? stored?.height ?? LANE_HEIGHT
-			};
+			// a hidden lane is not measured; laneSize falls back to what was stored
+			laneGeometry[node.id] = laneSize(node, node.id);
 		}
 
 		return {
@@ -604,6 +607,9 @@
 				.filter((node) => node.type !== 'lane')
 				.map((node) => {
 					const data = node.data as any;
+					// (0,0) means "never positioned" on load, and extent:'parent' lets a
+					// dragged node land exactly there, so nudge it off the sentinel
+					const atOrigin = node.position.x === 0 && node.position.y === 0;
 					return {
 						id: node.id,
 						kind: data.kind,
@@ -617,8 +623,8 @@
 						applied_controls: data.appliedControls ?? [],
 						vulnerabilities: data.vulnerabilities ?? [],
 						properties: data.properties ?? {},
-						position_x: node.position.x,
-						position_y: node.position.y
+						position_x: atOrigin ? 1 : node.position.x,
+						position_y: atOrigin ? 1 : node.position.y
 					};
 				}),
 			edges: edges.map((edge) => ({ source: edge.source, target: edge.target })),
