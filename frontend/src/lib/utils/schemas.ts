@@ -257,15 +257,17 @@ export const RiskScenarioSchema = z.object({
 	threats: z.string().uuid().optional().array().optional(),
 	// the edit page binds a single value while the relation stays many-to-many,
 	// so accept a scalar and always hand the API a list
-	threat_models: z.preprocess(
-		(value) =>
-			value === undefined || value === null || value === ''
-				? []
-				: Array.isArray(value)
-					? value.filter(Boolean)
-					: [value],
-		z.string().uuid().array()
-	),
+	threat_models: z
+		.preprocess(
+			(value) =>
+				value === undefined || value === null || value === ''
+					? []
+					: Array.isArray(value)
+						? value.filter(Boolean)
+						: [value],
+			z.string().uuid().array()
+		)
+		.optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	incidents: z.string().uuid().optional().array().optional(),
@@ -1236,15 +1238,17 @@ export const quantitativeRiskScenarioSchema = z.object({
 	status: z.string().optional().default('draft'),
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	threats: z.string().uuid().optional().array().optional(),
-	threat_models: z.preprocess(
-		(value) =>
-			value === undefined || value === null || value === ''
-				? []
-				: Array.isArray(value)
-					? value.filter(Boolean)
-					: [value],
-		z.string().uuid().array()
-	),
+	threat_models: z
+		.preprocess(
+			(value) =>
+				value === undefined || value === null || value === ''
+					? []
+					: Array.isArray(value)
+						? value.filter(Boolean)
+						: [value],
+			z.string().uuid().array()
+		)
+		.optional(),
 	qualifications: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	is_selected: z.boolean().default(true),
