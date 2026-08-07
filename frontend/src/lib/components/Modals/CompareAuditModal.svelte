@@ -20,7 +20,7 @@
 
 	let { parent, currentAudit }: Props = $props();
 
-	const cBase = 'card bg-surface-50 p-4 w-fit max-w-2xl shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-fit max-w-2xl shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	// Create a simple form schema for the comparison selection
@@ -58,6 +58,7 @@
 			<header class={cHeader}>{m.compareToAudit()}</header>
 			<button
 				type="button"
+				aria-label={m.close()}
 				class="flex items-center hover:text-primary-500 cursor-pointer"
 				onclick={parent.onClose}
 			>

@@ -14,10 +14,10 @@
 </script>
 
 <div class="grid grid-cols-[1fr_3fr]">
-	<dt class="font-medium text-gray-900" data-testid="{field.replace('_', '-')}-field-title">
+	<dt class="font-medium text-surface-900-100" data-testid="{field.replace('_', '-')}-field-title">
 		{safeTranslate(field)}
 	</dt>
-	<dd class="text-gray-700 whitespace-pre-line grid grid-cols-4">
+	<dd class="text-surface-700-300 whitespace-pre-line grid grid-cols-4">
 		{#if ['update', 'delete'].includes(action)}
 			<span class={action === 'delete' ? 'col-span-4' : ''}>
 				{before}

@@ -45,6 +45,7 @@ from data_wizard.views import (
     ThreatRecordConsumer,
     UserRecordConsumer,
     VulnerabilityRecordConsumer,
+    _resolve_asset_class,
     _resolve_filtering_labels,
 )
 
@@ -104,7 +105,89 @@ class TestResolveFilteringLabels:
 
 
 @pytest.mark.django_db
+class TestResolveAssetClass:
+    """The xlsx `asset_class` column carries the canonical path."""
+
+    @pytest.fixture
+    def index(self):
+        from core.models import AssetClass
+
+        parent = AssetClass.objects.create(name="Machines")
+        AssetClass.objects.create(name="Servers", parent=parent)
+        other = AssetClass.objects.create(name="Virtual")
+        AssetClass.objects.create(name="Hypervisors", parent=other)
+        return AssetClass.path_index()
+
+    def test_canonical_path_resolves(self, index):
+        assert _resolve_asset_class("Machines/Servers", index).name == "Servers"
+
+    def test_resolution_is_case_and_space_insensitive(self, index):
+        assert _resolve_asset_class("  machines / servers  ", index).name == "Servers"
+
+    def test_unambiguous_leaf_name_resolves(self, index):
+        assert _resolve_asset_class("Hypervisors", index).name == "Hypervisors"
+
+    def test_ambiguous_leaf_resolves_to_nothing(self, index):
+        from core.models import AssetClass
+
+        AssetClass.objects.create(
+            name="Hypervisors", parent=AssetClass.objects.get(name="Machines")
+        )
+        assert _resolve_asset_class("Hypervisors", AssetClass.path_index()) is None
+
+    def test_unknown_path_resolves_to_nothing(self, index):
+        assert _resolve_asset_class("Nope/Nothing", index) is None
+
+    def test_explicit_path_never_falls_back_to_a_leaf_elsewhere(self, index):
+        # "Servers" exists only under Machines; naming another parent must not
+        # silently reclassify the asset.
+        assert _resolve_asset_class("Virtual/Servers", index) is None
+
+    def test_blank_and_non_string_are_ignored(self, index):
+        assert _resolve_asset_class("", index) is None
+        assert _resolve_asset_class("   ", index) is None
+        assert _resolve_asset_class(None, index) is None
+
+
+@pytest.mark.django_db
 class TestAssetConsumer:
+    def test_asset_class_column_is_imported(self, base_context):
+        from core.models import AssetClass
+
+        parent = AssetClass.objects.create(name="Machines")
+        leaf = AssetClass.objects.create(name="Servers", parent=parent)
+
+        consumer = AssetRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "X", "asset_class": "Machines/Servers"}, [1, 2, 3, 4]
+        )
+
+        assert error is None
+        assert record_data["asset_class"] == leaf.id
+
+    def test_unknown_asset_class_warns_but_keeps_the_row(self, base_context):
+        consumer = AssetRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "X", "asset_class": "Does/Not/Exist"}, [1, 2, 3, 4]
+        )
+
+        assert error is not None and error.is_warning is True
+        assert "Unknown asset_class" in error.error
+        assert record_data["name"] == "X"
+        assert "asset_class" not in record_data
+
+    def test_class_alias_accepted(self, base_context):
+        from core.models import AssetClass
+
+        cls = AssetClass.objects.create(name="Machines")
+
+        consumer = AssetRecordConsumer(base_context)
+        record_data, _ = consumer.prepare_create(
+            {"name": "X", "class": "Machines"}, [1, 2, 3, 4]
+        )
+
+        assert record_data["asset_class"] == cls.id
+
     def test_missing_name_returns_error(self, base_context):
         consumer = AssetRecordConsumer(base_context)
         _, error = consumer.prepare_create({}, [1, 2, 3, 4])
@@ -942,7 +1025,13 @@ class TestFolderConsumer:
 @pytest.mark.django_db
 class TestFindingsAssessmentConsumer:
     def _findings_context(
-        self, domain_folder, admin_user, perimeter=None, perimeter_id=None
+        self,
+        domain_folder,
+        admin_user,
+        perimeter=None,
+        perimeter_id=None,
+        target_id=None,
+        on_conflict=ConflictMode.STOP,
     ):
         request = MagicMock()
         request.user = admin_user
@@ -952,8 +1041,11 @@ class TestFindingsAssessmentConsumer:
             request=request,
             folder_id=str(domain_folder.id),
             folders_map={},
-            on_conflict=ConflictMode.STOP,
-            perimeter_id=str(perimeter_id or (perimeter.id if perimeter else "")),
+            on_conflict=on_conflict,
+            perimeter_id=(
+                str(perimeter_id or (perimeter.id if perimeter else "")) or None
+            ),
+            target_id=str(target_id) if target_id else None,
         )
 
     def test_create_context_fails_with_invalid_perimeter(
@@ -992,6 +1084,99 @@ class TestFindingsAssessmentConsumer:
         )
         assert result.created == 1
         assert FindingsAssessment.objects.filter(folder=domain_folder).exists()
+
+    def test_folder_fallback_without_perimeter(self, domain_folder, admin_user):
+        """Perimeter is optional: with no perimeter the explicit folder is used."""
+        ctx = self._findings_context(domain_folder, admin_user)  # perimeter empty
+        result = _run(
+            FindingsAssessmentRecordConsumer,
+            ctx,
+            [{"name": "Orphan Finding", "ref_id": "FIND-NP", "status": "identified"}],
+        )
+        assert result.created == 1
+        assert FindingsAssessment.objects.filter(folder=domain_folder).exists()
+
+    def test_target_reuse_updates_existing_and_adds_new(
+        self, domain_folder, admin_user
+    ):
+        """target_id reconciles into the existing container: matched findings
+        update, unmatched rows create, no new container is made."""
+        perimeter = Perimeter.objects.create(
+            name="Reuse Perimeter", folder=domain_folder
+        )
+        # Seed an assessment with one finding.
+        seed_ctx = self._findings_context(
+            domain_folder, admin_user, perimeter=perimeter
+        )
+        _run(
+            FindingsAssessmentRecordConsumer,
+            seed_ctx,
+            [
+                {
+                    "name": "Initial",
+                    "ref_id": "F-1",
+                    "observation": "old",
+                    "status": "identified",
+                }
+            ],
+        )
+        fa = FindingsAssessment.objects.get(folder=domain_folder)
+        assert fa.findings.count() == 1
+
+        # Reconcile into it: update F-1, add F-2.
+        target_ctx = self._findings_context(
+            domain_folder,
+            admin_user,
+            target_id=fa.id,
+            on_conflict=ConflictMode.UPDATE,
+        )
+        result = _run(
+            FindingsAssessmentRecordConsumer,
+            target_ctx,
+            [
+                {
+                    "name": "Initial",
+                    "ref_id": "F-1",
+                    "observation": "new",
+                    "status": "identified",
+                },
+                {"name": "Second", "ref_id": "F-2", "status": "identified"},
+            ],
+        )
+        assert FindingsAssessment.objects.filter(folder=domain_folder).count() == 1
+        assert result.updated == 1
+        assert result.created == 1
+        fa.refresh_from_db()
+        assert fa.findings.count() == 2
+        assert fa.findings.get(ref_id="F-1").observation == "new"
+
+    def test_target_invalid_id_fails(self, domain_folder, admin_user):
+        ctx = self._findings_context(
+            domain_folder,
+            admin_user,
+            target_id="00000000-0000-0000-0000-000000000000",
+        )
+        result = _run(
+            FindingsAssessmentRecordConsumer, ctx, [{"name": "X", "ref_id": "F-X"}]
+        )
+        assert result.failed == 1
+        assert result.created == 0
+        assert not FindingsAssessment.objects.filter(folder=domain_folder).exists()
+
+    def test_target_not_accessible_fails(self, domain_folder, admin_user):
+        """A real target the user cannot change must not be writable."""
+        fa = FindingsAssessment.objects.create(name="Locked", folder=domain_folder)
+        ctx = self._findings_context(domain_folder, admin_user, target_id=fa.id)
+        with patch(
+            "data_wizard.views.RoleAssignment.get_accessible_object_ids",
+            return_value=([], [], []),
+        ):
+            result = FindingsAssessmentRecordConsumer(ctx).process_records(
+                [{"name": "X", "ref_id": "F-X", "status": "identified"}]
+            )
+        assert result.failed == 1
+        assert result.created == 0
+        assert fa.findings.count() == 0
 
 
 # ─────────────────────────────────────────────────────────────────────────────

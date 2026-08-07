@@ -8,7 +8,8 @@
 
 	let { data }: Props = $props();
 
-	const customNameDescription = ['operational-scenarios', 'terminologies'].includes(
+	// NOTE: duplicates `customNameDescription` in crud.ts, which this route ignores.
+	const customNameDescription = ['operational-scenarios', 'terminologies', 'asset-class'].includes(
 		data.model.urlModel
 	);
 </script>

@@ -17,7 +17,11 @@ export const load: PageServerLoad = async ({ fetch, locals, cookies, url }) => {
 	// User is logged in, now we need to fetch allauth's session token
 	// to end the authentication flow
 	const allauthSessionEndpoint = `${BASE_API_URL}/iam/session-token/`;
-	const allauthSessionResponse = await fetch(allauthSessionEndpoint, { method: 'POST' });
+	const ssoSessionKey = cookies.get('sessionid');
+	const allauthSessionResponse = await fetch(allauthSessionEndpoint, {
+		method: 'POST',
+		headers: ssoSessionKey ? { 'X-SSO-Session-Key': ssoSessionKey } : {}
+	});
 
 	if (!allauthSessionResponse.ok) {
 		logger.error('Failed to fetch allauth session token', {

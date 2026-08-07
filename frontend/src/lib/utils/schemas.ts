@@ -109,7 +109,6 @@ const NameDescriptionMixin = {
 
 export const FolderSchema = z.object({
 	...NameDescriptionMixin,
-	ref_id: z.string().optional(),
 	parent_folder: z.string(),
 	create_iam_groups: z.boolean().default(false),
 	filtering_labels: z.array(z.string()).optional()
@@ -118,7 +117,8 @@ export const FolderSchema = z.object({
 export const FolderImportSchema = z.object({
 	name: nameSchema,
 	file: z.instanceof(File),
-	load_missing_libraries: z.coerce.boolean().default(false)
+	load_missing_libraries: z.coerce.boolean().default(false),
+	create_missing_asset_classes: z.coerce.boolean().default(false)
 	//NOTE: coerce is used to handle checkbox form values which can be strings ('true'/'false')
 	//or booleans (true/false). Without coerce, form validation fails inconsistently.
 });
@@ -144,6 +144,7 @@ export const LibraryUploadSchema = z.object({
 
 export const RiskAssessmentSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('1.0'),
 	folder: z.string(),
 	perimeter: z.string().optional().nullable(),
@@ -280,7 +281,8 @@ export const AppliedControlSchema = z.object({
 	observation: z.string().optional().nullable(),
 	integration_config: z.string().optional().nullable(),
 	remote_object_id: z.string().optional().nullable(),
-	create_remote_object: z.boolean().optional().default(false)
+	create_remote_object: z.boolean().optional().default(false),
+	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
 export const AppliedControlDuplicateSchema = z.object({
@@ -288,7 +290,9 @@ export const AppliedControlDuplicateSchema = z.object({
 	duplicate_evidences: z.boolean().optional()
 });
 
-export const PolicySchema = AppliedControlSchema.omit({ category: true });
+export const PolicySchema = AppliedControlSchema.omit({ category: true }).extend({
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional()
+});
 
 export const RiskAcceptanceSchema = z.object({
 	...NameDescriptionMixin,
@@ -296,7 +300,8 @@ export const RiskAcceptanceSchema = z.object({
 	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	justification: z.string().optional().nullable(),
 	approver: z.string().optional().nullable(),
-	risk_scenarios: z.array(z.string())
+	risk_scenarios: z.array(z.string()),
+	submit: z.boolean().optional()
 });
 
 export const ValidationFlowSchema = z.object({
@@ -414,7 +419,8 @@ export const AssetSchema = z.object({
 	dora_licenced_activity: z.string().optional().nullable(),
 	dora_criticality_assessment: z.string().default('eba_BT:x21'),
 	dora_criticality_justification: z.string().optional().nullable(),
-	dora_discontinuing_impact: z.string().default('eba_ZZ:x799')
+	dora_discontinuing_impact: z.string().default('eba_ZZ:x799'),
+	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
 export const FilteringLabelSchema = z.object({
@@ -447,23 +453,10 @@ export const UserEditSchema = z.object({
 	last_name: z.string().optional(),
 	is_active: z.boolean().optional(),
 	keep_local_login: z.boolean().optional(),
+	has_mfa_enabled: z.boolean().optional(),
 	user_groups: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
-	expiry_date: z
-		.union([z.literal('').transform(() => null), z.iso.date()])
-		.nullish()
-		.refine(
-			(val) => {
-				if (!val) return true; // Allow null/undefined values
-				const expiryDate = new Date(val);
-				const today = new Date();
-				today.setHours(0, 0, 0, 0); // Set to start of today to allow today's date
-				return expiryDate >= today;
-			},
-			{
-				message: 'Expiry date cannot be in the past'
-			}
-		)
+	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
 export const UserCreateSchema = z.object({
@@ -505,6 +498,7 @@ export const SetPasswordSchema = z.object({
 
 export const ComplianceAssessmentSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('1.0'),
 	ref_id: z.string().optional(),
 	folder: z.string(),
@@ -562,8 +556,10 @@ export const EvidenceSchema = z.object({
 	findings_assessments: z
 		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
 		.optional(),
+	security_exceptions: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	timeline_entries: z.string().optional().array().optional(),
 	contracts: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	link: z
 		.string()
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
@@ -605,14 +601,25 @@ export const GeneralSettingsSchema = z.object({
 		.enum(['none', 'parent_wins', 'child_wins', 'best_case', 'worst_case'])
 		.default('none')
 		.optional(),
+	default_landing: z.enum(['analytics', 'respondent', 'portal']).default('analytics').optional(),
+	disable_partially_compliant_result: z.boolean().default(false).optional(),
+	use_risk_category_label: z.boolean().default(false).optional(),
+	personal_folders_parent: z.string().uuid().optional().nullable(),
 	currency: z.enum(CURRENCY_SYMBOLS).default('€'),
 	daily_rate: z.number().default(500).optional(),
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
 	allow_self_validation: z.boolean().default(false).optional(),
 	show_warning_external_links: z.boolean().default(true).optional(),
+	show_get_started: z.boolean().default(true).optional(),
+	personal_folders: z.boolean().default(false).optional(),
 	allow_assignments_to_entities: z.boolean().default(false).optional(),
 	enforce_mfa: z.boolean().default(false).optional(),
 	default_language: z.string().default('en').optional(),
+	default_packager: z
+		.string()
+		.regex(/^[a-z0-9_-]+$/)
+		.default('custom')
+		.optional(),
 	llm_provider: z.string().default('ollama').optional(),
 	ollama_base_url: z.string().default('http://localhost:11434').optional(),
 	ollama_model: z.string().default('mistral').optional(),
@@ -664,12 +671,14 @@ export const FeatureFlagsSchema = z.object({
 	organisation_issues: z.boolean().optional(),
 	quantitative_risk_studies: z.boolean().optional(),
 	terminologies: z.boolean().optional(),
+	custom_fields: z.boolean().optional(),
 	bia: z.boolean().optional(),
 	project_management: z.boolean().optional(),
 	contracts: z.boolean().optional(),
 	reports: z.boolean().optional(),
 	validation_flows: z.boolean().optional(),
 	focus_mode: z.boolean().optional(),
+	idp_groups: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
 	audit_log_forwarding: z.boolean().optional(),
 	metrology: z.boolean().optional(),
@@ -683,14 +692,48 @@ export const FeatureFlagsSchema = z.object({
 	comments: z.boolean().optional(),
 	journeys: z.boolean().optional(),
 	policy_documents: z.boolean().optional(),
+	document_management: z.boolean().optional(),
 	security_advisories: z.boolean().optional(),
 	cwes: z.boolean().optional(),
-	object_audit_trail: z.boolean().optional()
+	object_audit_trail: z.boolean().optional(),
+	custom_portals: z.boolean().optional(),
+	posture_assessments: z.boolean().optional()
+});
+
+export const PortalSettingsSchema = z.object({
+	enabled: z.boolean().default(true),
+	is_default: z.boolean().default(false),
+	order: z.number().default(0),
+	audience_groups: z.array(z.string().uuid()).optional(),
+	is_public: z.boolean().default(false),
+	is_primary: z.boolean().default(false),
+	branding: z
+		.object({
+			logo_url: z.string().optional(),
+			accent_color: z.string().optional(),
+			tagline: z.string().optional()
+		})
+		.default({})
+});
+
+export const SnapshotCreateSchema = z.object({
+	name: z.string(),
+	folder: z.string().uuid().optional(),
+	source_audit: z.string().uuid(),
+	implementation_groups: z.string().optional().array().optional()
+});
+
+export const SnapshotEditSchema = z.object({
+	id: z.string().uuid(),
+	name: z.string(),
+	implementation_groups: z.string().optional().array().optional(),
+	display_mode: z.enum(['both', 'score', 'result']).default('both')
 });
 
 export const SSOSettingsSchema = z.object({
 	is_enabled: z.boolean().default(false).optional(),
 	force_sso: z.boolean().default(false).optional(),
+	slo_enabled: z.boolean().default(false).optional(),
 	provider: z.string().default('saml'),
 	provider_id: z.string().optional(),
 	provider_name: z.string().optional(),
@@ -777,6 +820,7 @@ export const EntitiesSchema = z.object({
 
 export const EntityAssessmentSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	create_audit: z.boolean().optional().default(false),
 	framework: z.string().optional(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
@@ -983,6 +1027,7 @@ export const dataBreachSchema = z.object({
 	subjects_notified_on: z.string().optional(),
 	potential_consequences: z.string().optional(),
 	remediation_measures: z.array(z.string()).optional().default([]),
+	evidences: z.string().optional().array().optional(),
 	incident: z.string().optional(),
 	reference_link: z.string().url().optional().or(z.literal('')),
 	observation: z.string().optional()
@@ -1093,6 +1138,7 @@ export const organisationIssueSchema = z.object({
 
 export const quantitativeRiskStudySchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	ref_id: z.string().optional(),
 	status: z.string().optional().nullable(),
 	distribution_model: z.string().optional().default('lognormal_ci90'),
@@ -1167,6 +1213,7 @@ export const quantitativeRiskHypothesisSchema = z.object({
 });
 export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('0.1'),
 	quotation_method: z.string().optional().default('express'),
 	status: z.string().optional().default('planned'),
@@ -1260,6 +1307,7 @@ export const operationalScenarioSchema = z.object({
 
 export const SecurityExceptionSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	folder: z.string(),
 	ref_id: z.string().optional(),
 	owners: z.array(z.string().optional()).optional(),
@@ -1270,8 +1318,10 @@ export const SecurityExceptionSchema = z.object({
 	requirement_assessments: z.string().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
+	evidences: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
-	link: z.string().url().optional().nullable().or(z.literal(''))
+	link: z.string().url().optional().nullable().or(z.literal('')),
+	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
 export const FindingSchema = z.object({
@@ -1284,6 +1334,7 @@ export const FindingSchema = z.object({
 	applied_controls: z.string().uuid().optional().array().optional(),
 	reference_controls: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string(),
+	asset: z.string().optional().nullable(),
 	severity: z.number().default(-1),
 	priority: z.number().optional().nullable(),
 	filtering_labels: z.string().optional().array().optional(),
@@ -1295,6 +1346,7 @@ export const FindingSchema = z.object({
 
 export const FindingsAssessmentSchema = z.object({
 	...NameDescriptionMixin,
+	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('0.1'),
 	folder: z.string(),
 	perimeter: z.string().optional().nullable(),
@@ -1307,7 +1359,24 @@ export const FindingsAssessmentSchema = z.object({
 	observation: z.string().optional().nullable(),
 	category: z.string().default('--'),
 	evidences: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional(),
+	reported_at: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	is_locked: z.boolean().optional().default(false)
+});
+
+export const PostureAssessmentSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
+	status: z.string().optional().nullable(),
+	framework: z.string(),
+	selected_implementation_groups: z.array(z.string().optional()).optional(),
+	history_depth: z.number().int().min(1).optional().default(10),
+	authors: z.array(z.string().optional()).optional(),
+	observation: z.string().optional().nullable(),
+	follow_up_assessment: z.string().optional().nullable(),
+	create_follow_up_assessment: z.boolean().optional().default(true)
 });
 
 export const IncidentSchema = z.object({
@@ -1439,6 +1508,7 @@ export const TaskTemplateSchema = z.object({
 	compliance_assessments: z.string().uuid().optional().array().optional(),
 	risk_assessments: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string().uuid().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional(),
 	objectives: z.string().uuid().optional().array().optional(),
 	incidents: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional(),
@@ -1546,11 +1616,80 @@ export const KillChainSchema = z.object({
 	folder: z.string()
 });
 
+export const CustomFieldDefinitionSchema = z
+	.object({
+		model: z.string().optional(),
+		key: z
+			.string()
+			.min(1)
+			.regex(/^[a-z0-9_]+$/, {
+				message: 'Use lowercase letters, digits and underscores only.'
+			}),
+		label: z.string().min(1),
+		help_text: z.string().optional().default(''),
+		field_type: z.enum(['text', 'number', 'date', 'boolean', 'choice', 'multi_choice']),
+		required: z.boolean().default(false),
+		visible: z.boolean().default(true),
+		searchable: z.boolean().default(false),
+		filterable: z.boolean().default(true),
+		order: z.number().default(0),
+		folder: z.string(),
+		choices: z
+			.array(
+				z.object({
+					value: z.string().min(1),
+					label: z.string().min(1),
+					order: z.number().default(0),
+					translations: z.record(z.string(), z.any()).optional()
+				})
+			)
+			.optional()
+			.default([]),
+		translations: z.record(z.string(), z.any()).optional()
+	})
+	.superRefine((data, ctx) => {
+		if (
+			(data.field_type === 'choice' || data.field_type === 'multi_choice') &&
+			data.choices.length === 0
+		) {
+			ctx.addIssue({
+				code: 'custom',
+				path: ['choices'],
+				message: 'At least one choice is required for choice fields.'
+			});
+		}
+	});
+
 export const TerminologySchema = z.object({
 	...NameDescriptionMixin,
 	field_path: z.string().min(1),
 	is_visible: z.boolean().default(true),
 	translations: z.record(z.string().min(1), z.string().min(1))
+});
+
+export const ObjectClassificationSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional().default(''),
+	is_visible: z.boolean().default(true),
+	translations: z.record(z.string().min(1), z.string().min(1)).optional()
+});
+
+export const ClassificationLevelSchema = z.object({
+	...NameDescriptionMixin,
+	object_classification: z.string(),
+	rank: z.number().int().min(0).default(0),
+	abbreviation: z.string().optional().default(''),
+	hexcolor: z.string().optional().default(''),
+	is_visible: z.boolean().default(true),
+	translations: z.record(z.string().min(1), z.string().min(1)).optional()
+});
+
+export const AssetClassSchema = z.object({
+	...NameDescriptionMixin,
+	parent: z.string().optional().nullable(),
+	is_visible: z.boolean().default(true),
+	// {locale: {name, description}}
+	translations: z.record(z.string().min(1), z.record(z.string().min(1), z.string())).optional()
 });
 
 export const RoleSchema = z.object({
@@ -1627,10 +1766,12 @@ export const ProjectSchema = z.object({
 	actual_cost: z.coerce.number().optional().nullable(),
 	currency: z.string().max(3).optional(),
 	linked_collection: z.string().uuid().optional().nullable(),
+	create_collection: z.boolean().optional().default(true),
 	parent_project: z.string().uuid().optional().nullable(),
 	tolerances: z.record(z.string(), z.unknown()).optional(),
 	observation: z.string().optional().nullable(),
-	filtering_labels: z.array(z.string().uuid().optional()).optional()
+	filtering_labels: z.array(z.string().uuid().optional()).optional(),
+	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
 export const ResponsibilityRoleSchema = z.object({
@@ -1750,6 +1891,31 @@ export const teamSchema = z.object({
 	deputies: z.array(z.string().uuid().optional()).optional()
 });
 
+export const DocumentContainerSchema = z.object({
+	ref_id: z.string().max(100).optional().default(''),
+	name: z.string().max(200).optional().default(''),
+	description: z.string().optional().default(''),
+	document_type: z.string().optional().default('policy'),
+	folder: z.string(),
+	classification: z.string().uuid().optional().nullable(),
+	policies: z.array(z.string().uuid()).optional().default([]),
+	applied_controls: z.array(z.string().uuid()).optional().default([]),
+	task_templates: z.array(z.string().uuid()).optional().default([]),
+	processings: z.array(z.string().uuid()).optional().default([]),
+	filtering_labels: z.array(z.string()).optional().default([])
+});
+
+export const DocumentTemplateSchema = z.object({
+	ref_id: z.string().max(100),
+	name: z.string().max(200),
+	description: z.string().optional().default(''),
+	provider: z.string().max(200).optional().default(''),
+	document_type: z.string().optional().default('policy'),
+	content: z.string().optional().default(''),
+	locale: z.string().optional().default('en'),
+	folder: z.string()
+});
+
 export const ManagedDocumentSchema = z.object({
 	name: z.string().max(200).optional().default(''),
 	description: z.string().optional().default(''),
@@ -1767,6 +1933,12 @@ export const DocumentRevisionSchema = z.object({
 	status: z.string().optional().default('draft'),
 	change_summary: z.string().optional().default(''),
 	reviewer_comments: z.string().optional().nullable()
+});
+
+export const IdPGroupSchema = z.object({
+	id: z.string().uuid().optional(),
+	name: z.string().min(1),
+	user_groups: z.array(z.string().uuid().optional()).optional()
 });
 
 const SCHEMA_MAP: Record<string, ZodSchema> = {
@@ -1793,6 +1965,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	evidences: EvidenceSchema,
 	'evidence-revisions': EvidenceRevisionSchema,
 	users: UserCreateSchema,
+	'idp-groups': IdPGroupSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
 	'feature-flags': FeatureFlagsSchema,
@@ -1827,6 +2000,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'security-exceptions': SecurityExceptionSchema,
 	findings: FindingSchema,
 	'findings-assessments': FindingsAssessmentSchema,
+	'posture-assessments': PostureAssessmentSchema,
 	incidents: IncidentSchema,
 	'timeline-entries': TimelineEntrySchema,
 	'dora-incident-reports': DoraIncidentReportSchema,
@@ -1841,6 +2015,10 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'quantitative-risk-scenarios': quantitativeRiskScenarioSchema,
 	'quantitative-risk-hypotheses': quantitativeRiskHypothesisSchema,
 	terminologies: TerminologySchema,
+	'object-classifications': ObjectClassificationSchema,
+	'classification-levels': ClassificationLevelSchema,
+	'asset-class': AssetClassSchema,
+	'custom-fields': CustomFieldDefinitionSchema,
 	roles: RoleSchema,
 	'generic-collections': GenericCollectionSchema,
 	accreditations: AccreditationSchema,
@@ -1858,6 +2036,8 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'dashboard-text-widgets': DashboardWidgetSchema,
 	'dashboard-builtin-widgets': DashboardWidgetSchema,
 	teams: teamSchema,
+	'document-containers': DocumentContainerSchema,
+	'document-templates': DocumentTemplateSchema,
 	'managed-documents': ManagedDocumentSchema,
 	'document-revisions': DocumentRevisionSchema
 };

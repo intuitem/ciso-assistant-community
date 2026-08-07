@@ -44,14 +44,14 @@
 			</Anchor>
 			<Anchor
 				href={`${page.url.pathname}/executive-summary`}
-				class="btn bg-emerald-500 hover:bg-emerald-600 text-white h-fit"
+				class="btn bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white h-fit"
 				breadcrumbAction="push"
 			>
 				<i class="fa-solid fa-chart-line mr-2"></i>{m.executiveSummary()}
 			</Anchor>
 			<Anchor
 				href={`${page.url.pathname}/key-metrics`}
-				class="btn bg-amber-500 hover:bg-amber-600 text-white h-fit"
+				class="btn bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 text-white h-fit"
 				breadcrumbAction="push"
 			>
 				<i class="fa-solid fa-chart-simple mr-2"></i>{m.keyMetrics()}
@@ -114,7 +114,7 @@
 										background:
 											summary?.failed_simulations > 0
 												? 'bg-yellow-500 text-white'
-												: 'bg-green-500 text-white',
+												: 'bg-green-500 dark:bg-green-600 text-white',
 										autohide: true,
 										timeout: 4000
 									});
@@ -141,7 +141,7 @@
 			>
 				<button
 					type="submit"
-					class="btn bg-violet-500 hover:bg-violet-600 text-white h-fit disabled:opacity-50 disabled:cursor-not-allowed"
+					class="btn bg-violet-500 hover:bg-violet-600 dark:bg-violet-600 dark:hover:bg-violet-700 text-white h-fit disabled:opacity-50 disabled:cursor-not-allowed"
 					disabled={retriggerIsLoading}
 					title="Retrigger all simulations for this study including hypotheses, portfolio data, and risk tolerance curve"
 				>
@@ -164,19 +164,19 @@
 	{/snippet}
 
 	{#snippet widgets()}
-		<div class="h-full flex flex-col space-y-4 bg-slate-100 rounded-xl p-4">
+		<div class="h-full flex flex-col space-y-4 bg-surface-100-900 rounded-xl p-4">
 			{#if data.combinedAle?.combined_metrics}
 				{@const metrics = data.combinedAle.combined_metrics}
 				<!-- Combined ALE Metrics -->
-				<div class="bg-white rounded-lg p-6 shadow-sm">
+				<div class="bg-surface-50-950 rounded-lg p-6 shadow-sm">
 					<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 						<!-- Current ALE Combined -->
 						<div class="text-center">
 							<div class="text-2xl font-bold text-blue-600 mb-2">
 								{safeTranslate(metrics.current_ale_combined_display)}
 							</div>
-							<div class="text-sm text-gray-600">{m.currentAleCombined()}</div>
-							<div class="text-xs text-gray-500 mt-1">
+							<div class="text-sm text-surface-600-400">{m.currentAleCombined()}</div>
+							<div class="text-xs text-surface-600-400 mt-1">
 								{data.combinedAle.scenarios_with_current_ale} / {data.combinedAle.total_scenarios}
 								{m.scenarios()}
 							</div>
@@ -187,8 +187,8 @@
 							<div class="text-2xl font-bold text-green-600 mb-2">
 								{safeTranslate(metrics.residual_ale_combined_display)}
 							</div>
-							<div class="text-sm text-gray-600">{m.residualAleCombined()}</div>
-							<div class="text-xs text-gray-500 mt-1">
+							<div class="text-sm text-surface-600-400">{m.residualAleCombined()}</div>
+							<div class="text-xs text-surface-600-400 mt-1">
 								{data.combinedAle.scenarios_with_residual_ale} / {data.combinedAle.total_scenarios}
 								{m.scenarios()}
 							</div>
@@ -199,13 +199,15 @@
 							<div class="text-2xl font-bold text-purple-600 mb-2">
 								{safeTranslate(metrics.risk_reduction_display)}
 							</div>
-							<div class="text-sm text-gray-600">{m.riskReduction()}</div>
-							<div class="text-xs text-gray-500 mt-1">{m.currentAle()} - {m.residualAle()}</div>
+							<div class="text-sm text-surface-600-400">{m.riskReduction()}</div>
+							<div class="text-xs text-surface-600-400 mt-1">
+								{m.currentAle()} - {m.residualAle()}
+							</div>
 						</div>
 					</div>
 
 					<!-- Summary information -->
-					<div class="mt-4 pt-4 border-t border-gray-200 text-sm text-gray-600">
+					<div class="mt-4 pt-4 border-t border-surface-200-800 text-sm text-surface-600-400">
 						<p class="text-center">
 							<i class="fa-solid fa-circle-info"></i>
 							{m.assumingIndependentScenarios()}
@@ -221,10 +223,10 @@
 					{@const residualRiskCurve = curves.find((c) => c.type === 'combined_residual')}
 					{@const toleranceCurve = curves.find((c) => c.type === 'tolerance')}
 
-					<div class="bg-white rounded-lg p-6 shadow-sm">
+					<div class="bg-surface-50-950 rounded-lg p-6 shadow-sm">
 						<div class="flex justify-between items-center mb-4">
 							<h3 class="text-lg font-semibold">{m.portfolioOverview()}</h3>
-							<div class="text-sm text-gray-600">
+							<div class="text-sm text-surface-600-400">
 								{#if data.combinedLec.scenarios_with_inherent_data}
 									{m.inherentLabel()}: {data.combinedLec.scenarios_with_inherent_data} / {data
 										.combinedLec.total_scenarios} |
@@ -260,11 +262,13 @@
 					</div>
 				{:else}
 					<!-- Empty State for LEC Chart -->
-					<div class="bg-white rounded-lg p-8 shadow-sm text-center">
+					<div class="bg-surface-50-950 rounded-lg p-8 shadow-sm text-center">
 						<div class="flex flex-col items-center space-y-4">
-							<i class="fa-solid fa-chart-area text-4xl text-gray-400"></i>
-							<h5 class="text-lg font-semibold text-gray-600">{m.combinedLossExceedanceCurve()}</h5>
-							<p class="text-gray-500">
+							<i class="fa-solid fa-chart-area text-4xl text-surface-400-600"></i>
+							<h5 class="text-lg font-semibold text-surface-600-400">
+								{m.combinedLossExceedanceCurve()}
+							</h5>
+							<p class="text-surface-600-400">
 								{m.noLecDataAvailable()}
 							</p>
 						</div>
@@ -272,11 +276,11 @@
 				{/if}
 			{:else}
 				<!-- Empty State -->
-				<div class="bg-white rounded-lg p-8 shadow-sm text-center">
+				<div class="bg-surface-50-950 rounded-lg p-8 shadow-sm text-center">
 					<div class="flex flex-col items-center space-y-4">
-						<i class="fa-solid fa-chart-column text-4xl text-gray-400"></i>
-						<h5 class="text-lg font-semibold text-gray-600">{m.combinedAleMetrics()}</h5>
-						<p class="text-gray-500">
+						<i class="fa-solid fa-chart-column text-4xl text-surface-400-600"></i>
+						<h5 class="text-lg font-semibold text-surface-600-400">{m.combinedAleMetrics()}</h5>
+						<p class="text-surface-600-400">
 							{m.noAleDataAvailableRunSimulations()}
 						</p>
 					</div>

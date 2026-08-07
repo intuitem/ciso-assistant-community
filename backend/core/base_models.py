@@ -141,7 +141,23 @@ class AbstractBaseModel(models.Model):
         if field_errors:
             raise ValidationError(field_errors)
 
+    def _validate_char_max_lengths(self):
+        errors = {}
+        for field in self._meta.fields:
+            if not isinstance(field, models.CharField):
+                continue
+            value = field.to_python(getattr(self, field.attname))
+            if value is not None and len(value) > field.max_length:
+                errors[field.name] = ValidationError(
+                    f"Ensure this value has at most {field.max_length} characters (it has {len(value)}).",
+                    code="max_length",
+                    params={"max_length": field.max_length, "length": len(value)},
+                )
+        if errors:
+            raise ValidationError(errors)
+
     def save(self, *args, **kwargs) -> None:
+        self._validate_char_max_lengths()
         self.clean()
         super().save(*args, **kwargs)
 
@@ -160,42 +176,6 @@ class NameDescriptionMixin(AbstractBaseModel):
 
     def __str__(self) -> str:
         return self.name
-
-
-class EditableMixin(models.Model):
-    """
-    Mixin for models that support in-place editing with draft isolation.
-
-    - editing_draft: WIP definition (null when no active draft)
-    - editing_version: bumped on each publish
-    - editing_history: list of snapshots [{version, definition, published_at}]
-
-    The model's main content field (e.g. json_definition) is the live/published data.
-    Authors edit via editing_draft. Publishing copies editing_draft → main field,
-    snapshots the previous value into editing_history, and bumps editing_version.
-    """
-
-    editing_draft = models.JSONField(
-        null=True,
-        blank=True,
-        default=None,
-        verbose_name=_("Editing draft"),
-        help_text=_("Work-in-progress definition. Null when no active draft."),
-    )
-    editing_version = models.IntegerField(
-        default=1,
-        verbose_name=_("Editing version"),
-        help_text=_("Incremented on each publish."),
-    )
-    editing_history = models.JSONField(
-        default=list,
-        blank=True,
-        verbose_name=_("Editing history"),
-        help_text=_("Snapshots of previous published definitions."),
-    )
-
-    class Meta:
-        abstract = True
 
 
 class ETADueDateMixin(models.Model):

@@ -1,0 +1,11 @@
+subject: "CISO Assistant: Security exception expiring in ${days_remaining} day(s)"
+body: |
+  Hello,
+
+  You have ${exception_count} security exception(s) expiring in ${days_remaining} day(s):
+
+  ${exception_list}
+
+  Please log in to your CISO Assistant portal to review and update these security exceptions: [Go to CISO Assistant](${ciso_assistant_url})
+
+  Thank you.

@@ -3,9 +3,9 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import TextArea from '../TextArea.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
@@ -27,7 +27,7 @@
 	}: Props = $props();
 </script>
 
-<p class="text-sm text-gray-500">{m.fearedEventHelpText()}</p>
+<p class="text-sm text-surface-600-400">{m.fearedEventHelpText()}</p>
 <AutocompleteSelect
 	{form}
 	field="ebios_rm_study"
@@ -35,14 +35,6 @@
 	bind:cachedValue={formDataCache['ebios_rm_study']}
 	label={m.ebiosRmStudy()}
 	hidden={initialData.ebios_rm_study}
-/>
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.folder()}
-	hidden
 />
 <Select
 	{form}
@@ -86,7 +78,7 @@
 	optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
 	field="qualifications"
 	optionsLabelField="translated_name"
-	label={m.qualifications()}
+	label={safeTranslate('qualifications')}
 	helpText={m.fearedEventQualificationHelpText()}
 />
 <Checkbox

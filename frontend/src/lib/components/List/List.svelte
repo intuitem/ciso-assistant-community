@@ -11,7 +11,7 @@
 	let {
 		items,
 		message = '',
-		classesMessage = 'bg-surface-100 bg-opacity-80 backdrop-blur-xs',
+		classesMessage = 'bg-surface-100-900 bg-opacity-80 backdrop-blur-xs',
 		...rest
 	}: Props = $props();
 </script>

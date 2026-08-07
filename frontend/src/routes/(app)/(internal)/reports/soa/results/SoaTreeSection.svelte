@@ -51,9 +51,11 @@
 
 	// Visual weight by depth: top-level sections are bold, deeper ones lighter
 	const sectionStyles = $derived.by(() => {
-		if (depth === 0) return 'bg-gray-700 text-white border-b-2 border-gray-800';
-		if (depth === 1) return 'bg-gray-200 text-gray-900 border-b border-gray-300';
-		return 'bg-gray-100 text-gray-700 border-b border-gray-200';
+		if (depth === 0)
+			return 'bg-surface-200-800 text-surface-900-100 border-b-2 border-surface-300-700';
+		if (depth === 1)
+			return 'bg-surface-100-800 text-surface-900-100 border-b border-surface-200-700';
+		return 'bg-surface-50-900 text-surface-700-300 border-b border-surface-100-800';
 	});
 
 	const sectionTextSize = $derived(depth === 0 ? 'text-sm font-bold' : 'text-sm font-semibold');
@@ -62,22 +64,26 @@
 {#if isAssessable}
 	<!-- Leaf row -->
 	<tr
-		class="border-b border-gray-200 transition-colors print:break-inside-avoid
-			{isNotApplicable ? 'bg-gray-50 text-gray-400' : index % 2 === 0 ? 'bg-white' : 'bg-slate-50'}"
+		class="border-b border-surface-200-800 transition-colors print:break-inside-avoid
+			{isNotApplicable
+			? 'bg-surface-50-950 text-surface-500'
+			: index % 2 === 0
+				? 'bg-surface-50-950'
+				: 'bg-surface-50-950'}"
 	>
 		<!-- Ref -->
 		<td
 			class="px-3 py-2 text-xs font-mono whitespace-nowrap align-top {isNotApplicable
-				? 'text-gray-400'
-				: 'text-gray-600'}"
+				? 'text-surface-500'
+				: 'text-surface-600-400'}"
 		>
 			<span style="padding-left: {depth * 1}rem">{node.ref_id || ''}</span>
 		</td>
 		<!-- Requirement -->
 		<td
 			class="px-3 py-2 text-sm align-top overflow-hidden {isNotApplicable
-				? 'text-gray-400'
-				: 'text-gray-900'}"
+				? 'text-surface-500'
+				: 'text-surface-900-100'}"
 		>
 			{#if editHref}
 				<Anchor breadcrumbAction="push" href={editHref} class="hover:underline">
@@ -87,7 +93,7 @@
 				<div class="font-medium">{node.name || ''}</div>
 			{/if}
 			{#if node.description}
-				<div class="text-xs mt-0.5 {isNotApplicable ? 'text-gray-300' : 'text-gray-500'}">
+				<div class="text-xs mt-0.5 {isNotApplicable ? 'text-surface-400' : 'text-surface-600-400'}">
 					{node.description}
 				</div>
 			{/if}
@@ -111,8 +117,8 @@
 		<!-- Observation -->
 		<td
 			class="px-3 py-2 text-sm align-top overflow-hidden {isNotApplicable
-				? 'text-gray-400'
-				: 'text-gray-600'}"
+				? 'text-surface-500'
+				: 'text-surface-600-400'}"
 		>
 			{#if isNotApplicable && !node.observation}
 				<span class="inline-flex items-center gap-1 text-xs text-amber-600 print:text-amber-800">
@@ -139,14 +145,14 @@
 							>
 								{statusBadge.label}
 							</span>
-							<span class="text-xs text-gray-700 break-words">
+							<span class="text-xs text-surface-700-300 break-words">
 								{ac.ref_id ? `${ac.ref_id} ` : ''}{ac.name}
 							</span>
 						</Anchor>
 					{/each}
 				</div>
 			{:else}
-				<span class="text-xs text-gray-300">--</span>
+				<span class="text-xs text-surface-400">--</span>
 			{/if}
 		</td>
 	</tr>
@@ -160,15 +166,12 @@
 				style="padding-left: {depth * 1}rem"
 			>
 				<i
-					class="fas fa-chevron-right text-xs transition-transform duration-200 print:hidden
-						{depth === 0 ? 'text-gray-400' : 'text-gray-500'}
+					class="fas fa-chevron-right text-xs transition-transform duration-200 print:hidden text-surface-500
 						{expanded ? 'rotate-90' : ''}"
 				></i>
 				<span class={sectionTextSize}>
 					{#if node.ref_id}
-						<span class="{depth === 0 ? 'text-gray-300' : 'text-gray-500'} font-mono mr-1.5"
-							>{node.ref_id}</span
-						>
+						<span class="text-surface-500 font-mono mr-1.5">{node.ref_id}</span>
 					{/if}
 					{node.name || ''}
 				</span>

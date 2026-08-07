@@ -120,7 +120,7 @@
 		{#if mode === 'number' && value !== null && !disabled}
 			<button
 				type="button"
-				class="text-gray-400 hover:text-red-500 transition-colors"
+				class="text-surface-500 hover:text-red-500 transition-colors"
 				aria-label={m.clearAnswer()}
 				onclick={clear}
 			>
@@ -129,7 +129,7 @@
 		{/if}
 	</div>
 
-	<div class="flex items-center justify-center text-sm font-medium text-gray-700">
+	<div class="flex items-center justify-center text-sm font-medium text-surface-700-300">
 		<span>{activeLabel}</span>
 		{#if activeDescription}
 			<Tooltip positioning={{ placement: 'top' }} openDelay={50}>

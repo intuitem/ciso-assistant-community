@@ -39,7 +39,17 @@ export const loadTableData = async ({
 				}
 			: baseFields;
 
-	const bodyData = tableSourceMapper(response.results, fieldsToUse.body);
+	// Flatten custom field values to top-level `cf__<key>` so they map to opt-in columns.
+	const results = (response.results ?? []).map((row: Record<string, any>) => {
+		if (row.custom_fields && typeof row.custom_fields === 'object') {
+			const flat: Record<string, any> = {};
+			for (const [k, v] of Object.entries(row.custom_fields)) flat[`cf__${k}`] = v;
+			return { ...row, ...flat };
+		}
+		return row;
+	});
+
+	const bodyData = tableSourceMapper(results, fieldsToUse.body);
 
 	const headData: Record<string, string> = fieldsToUse.body.reduce((obj, key, index) => {
 		obj[key] = fieldsToUse.head[index];

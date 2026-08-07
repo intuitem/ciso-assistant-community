@@ -3,15 +3,17 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import BatchCreatePersonalDataModal from '$lib/components/Modals/BatchCreatePersonalDataModal.svelte';
+	import BatchAddAssetAssessmentsModal from '$lib/components/Modals/BatchAddAssetAssessmentsModal.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import RiskAcceptanceModal from '$lib/components/Modals/RiskAcceptanceModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import CustomFieldsDisplay from '$lib/components/Forms/CustomFieldsDisplay.svelte';
 	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
-	import { getModelInfo } from '$lib/utils/crud.js';
+	import { getModelInfo, getMarkdownFields } from '$lib/utils/crud';
 	import { formatDate, formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -24,10 +26,10 @@
 
 	import { onMount } from 'svelte';
 
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getListViewFields } from '$lib/utils/table';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformActionOnObject, resolveObjectDomain } from '$lib/utils/access-control';
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import {
 		getModalStore,
@@ -35,10 +37,36 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
 
 	const modalStore: ModalStore = getModalStore();
+	const toastStore = getToastStore();
 
 	const defaultExcludes = ['id', 'is_published', 'str', 'path', 'sync_mappings'];
+
+	// Format the raw numbers of the ROSI explanation per the active locale.
+	function formatRosiExplanationParams(params: Record<string, number> | undefined) {
+		if (!params) return {};
+		const locale = getLocale();
+		const amount = (value: number) =>
+			new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
+				value
+			);
+		const percent = (value: number) =>
+			new Intl.NumberFormat(locale, {
+				style: 'percent',
+				minimumFractionDigits: 1,
+				maximumFractionDigits: 1
+			}).format(value);
+		return {
+			currentAle: amount(params.currentAle),
+			residualAle: amount(params.residualAle),
+			riskReduction: amount(params.riskReduction),
+			treatmentCost: amount(params.treatmentCost),
+			netBenefit: amount(params.netBenefit),
+			rosi: percent(params.rosi)
+		};
+	}
 
 	interface Props {
 		data: any;
@@ -87,6 +115,8 @@
 	}: Props = $props();
 
 	exclude = [...exclude, ...defaultExcludes];
+
+	const markdownFieldSet = $derived(getMarkdownFields(data.urlModel));
 
 	const getRelatedModelIndex = (model: ModelMapEntry, relatedModel: Record<string, string>) => {
 		if (!model.reverseForeignKeyFields) return -1;
@@ -188,6 +218,19 @@
 		modalStore.trigger(modal);
 	}
 
+	// Table-scoped batch actions for a reverse-FK table, gated by change on the
+	// parent object (so parent_action entries are only offered to users the
+	// parent endpoint would authorize). parent_action endpoints are resolved
+	// here — the only place that knows the parent url and id.
+	function tableBatchActions(field: ReverseForeignKeyField) {
+		if (!field.tableBatchActions || !canEditObject) return [];
+		return field.tableBatchActions.map((a) =>
+			a.type === 'parent_action'
+				? { ...a, endpoint: `/${data.model.urlModel}/${data.data.id}/${a.action}` }
+				: a
+		);
+	}
+
 	function modalSelectExisting(field: ReverseForeignKeyField): void {
 		if (!field.addExisting || !data.updateForm) return;
 		const addExisting = field.addExisting;
@@ -211,12 +254,18 @@
 		modalStore.trigger(modal);
 	}
 
+	const batchCreateModals: Record<string, ModalComponent['ref']> = {
+		'personal-data': BatchCreatePersonalDataModal,
+		'asset-assessments': BatchAddAssetAssessmentsModal
+	};
+
 	function modalBatchCreate(field: ReverseForeignKeyField, parentId: string): void {
-		if (!field.batchCreate) return;
+		const ref = batchCreateModals[field.urlModel];
+		if (!field.batchCreate || !ref) return;
 		const modalComponent: ModalComponent = {
-			ref: BatchCreatePersonalDataModal,
+			ref,
 			props: {
-				processingId: parentId,
+				parentId,
 				urlModel: field.urlModel
 			}
 		};
@@ -340,15 +389,19 @@
 	}
 
 	const user = page.data.user;
-	const canEditObject: boolean = canPerformAction({
-		user,
-		action: 'change',
-		model: data.model.name,
-		domain:
-			data.model.name === 'folder'
-				? data.data.id
-				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
-	});
+	const objectDomain: string = $derived(
+		resolveObjectDomain(data.model.name, data.data) ?? user.root_folder_id
+	);
+	// Same helper as ModelTable/TableRowActions so edit affordances agree everywhere,
+	// including the no-folder fallback (existential check deferring to the backend).
+	const canEditObject: boolean = $derived(
+		canPerformActionOnObject({
+			user,
+			action: 'change',
+			model: data.model.name,
+			object: data.data
+		})
+	);
 
 	let displayEditButton = $derived(function () {
 		return (
@@ -416,16 +469,18 @@
 	<!-- Warning for non-visible objects (only for users with edit permissions) -->
 
 	{#if data.urlModel === 'risk-acceptances' && data.data.state === 'Created'}
-		<div class="flex flex-row items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2">
-			<div class="text-yelloW-900">
+		<div
+			class="flex flex-row items-center bg-yellow-100 dark:bg-yellow-900 rounded-container shadow-sm px-6 py-2"
+		>
+			<div class="text-yellow-800 dark:text-yellow-200">
 				{m.riskAcceptanceNotYetSubmittedMessage()}
 			</div>
 		</div>
 	{:else if data.data.state === 'Submitted' && page.data.user.id === data.data.approver?.id}
 		<div
-			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2 justify-between"
+			class="flex flex-row space-x-4 items-center bg-yellow-100 dark:bg-yellow-900 rounded-container shadow-sm px-6 py-2 justify-between"
 		>
-			<div class="text-yellow-900">
+			<div class="text-yellow-800 dark:text-yellow-200">
 				{m.riskAcceptanceValidatingReviewMessage()}
 			</div>
 			<div class="flex space-x-2">
@@ -449,9 +504,9 @@
 		</div>
 	{:else if data.data.state === 'Accepted'}
 		<div
-			class="flex flex-row items-center space-x-4 bg-green-100 rounded-container shadow-lg px-6 py-2 mt-2 justify-between"
+			class="flex flex-row items-center space-x-4 bg-green-100 dark:bg-green-900 rounded-container shadow-lg px-6 py-2 mt-2 justify-between"
 		>
-			<div class="text-green-900">
+			<div class="text-green-800 dark:text-green-200">
 				{m.riskAcceptanceValidatedMessage()}
 			</div>
 			{#if page.data.user.id === data.data.approver?.id}
@@ -470,7 +525,7 @@
 	{/if}
 
 	<!-- Main content area - modified to use conditional flex layout -->
-	<div class="card shadow-lg bg-white p-4">
+	<div class="card shadow-lg bg-surface-50-950 p-4">
 		{#if data.urlModel === 'stakeholders' && data.data?.ebios_rm_study?.id}
 			<div class="mb-4 p-3">
 				<Anchor
@@ -503,22 +558,23 @@
 		<div class={hasWidgets ? 'flex flex-row flex-wrap gap-4' : 'w-full'}>
 			<!-- Left side - Details (conditional width) -->
 			<div
-				class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs {hasWidgets
+				class="flow-root rounded-lg border border-surface-100-900 py-3 shadow-xs {hasWidgets
 					? 'flex-1 min-w-[300px]'
 					: 'w-full'}"
 			>
-				<dl class="-my-3 divide-y divide-gray-100 text-sm">
+				<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
 					{#each orderedEntries().filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
 						{@const isRelatedField = relatedFieldNames.has(key)}
 						{@const hiddenCountForValue = isRelatedField ? countMasked(value) : 0}
 						<div
-							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-5 sm:gap-4 {index >=
+							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-100-900 sm:grid-cols-5 sm:gap-4 {index >=
 								MAX_ROWS && !expandedTable
 								? 'hidden'
 								: ''}"
 						>
+							<!-- Keys column -->
 							<dt
-								class="font-medium text-gray-900 flex items-center gap-2"
+								class="font-medium text-surface-950-50 flex items-center gap-2"
 								data-testid="{key.replace('_', '-')}-field-title"
 							>
 								<span>{safeTranslate(key)}</span>
@@ -533,7 +589,7 @@
 										</Tooltip.Trigger>
 										<Tooltip.Positioner>
 											<Tooltip.Content
-												class="card bg-gray-800 text-white p-3 max-w-xs shadow-xl border border-gray-700"
+												class="card bg-surface-950-50 text-white p-3 max-w-xs shadow-xl border border-surface-700-300"
 											>
 												<p class="text-sm">{tooltipText}</p>
 											</Tooltip.Content>
@@ -541,7 +597,8 @@
 									</Tooltip>
 								{/if}
 							</dt>
-							<dd class="text-gray-700 sm:col-span-4">
+							<!-- Value column -->
+							<dd class="text-surface-700-300 sm:col-span-4">
 								<ul class="">
 									<li
 										class="list-none whitespace-pre-line"
@@ -610,6 +667,7 @@
 												{:else}
 													--
 												{/if}
+												<!-- Values that are Arrays -->
 											{:else if Array.isArray(value)}
 												{@const visibleValues = isRelatedField
 													? value.filter((item) => !isMaskedPlaceholder(item))
@@ -630,7 +688,7 @@
 																		>{val.name}</Anchor
 																	>
 																	{#if val.legal_basis}
-																		<span class="text-gray-600">
+																		<span class="text-surface-600-400">
 																			- {safeTranslate(val.legal_basis)}
 																		</span>
 																	{/if}
@@ -638,6 +696,11 @@
 																	{@const [securityObjectiveName, securityObjectiveValue] =
 																		Object.entries(val)[0]}
 																	{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
+																{:else if key === 'choices_definition'}
+																	<span class="font-mono text-xs bg-surface-200-800 px-1 rounded"
+																		>{val.ref_id}</span
+																	>
+																	- {val.name}
 																{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
 																	{@const itemHref = `/${
 																		data.model?.foreignKeyFields?.find((item) => item.field === key)
@@ -701,7 +764,7 @@
 												<li class="fa-solid fa-flag text-blue-500"></li>
 												{m.p3()}
 											{:else if value === 'P4'}
-												<li class="fa-solid fa-flag text-gray-500"></li>
+												<li class="fa-solid fa-flag text-surface-600-400"></li>
 												{m.p4()}
 											{:else if key === 'icon'}
 												<i class="text-lg fa {data.data.icon_fa_class}"></i>
@@ -712,11 +775,15 @@
 												>
 											{:else if ISO_8601_REGEX.test(value) && dateFieldsToFormat.includes(key)}
 												{formatDateOrDateTime(value, getLocale())}
-											{:else if key === 'description' || key === 'observation' || key === 'annotation' || key === 'justification'}
+											{:else if markdownFieldSet.has(key)}
 												<MarkdownRenderer content={value} />
 											{:else if typeof value === 'boolean'}
 												{@const bd = booleanDisplay(value, key, data.urlModel)}
 												<i class="{bd.icon} {bd.colorClass}"></i>
+											{:else if key === 'roc_display'}
+												{safeTranslate(value)}
+											{:else if key === 'roc_calculation_explanation'}
+												{safeTranslate(value.key, formatRosiExplanationParams(value.params))}
 											{:else if !['name', 'ref_id'].includes(key) && m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
 											{:else}
@@ -745,7 +812,7 @@
 		{#if orderedEntries().filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
 			<button
 				onclick={() => (expandedTable = !expandedTable)}
-				class="m-5 text-blue-800"
+				class="m-5 text-primary-800-200"
 				aria-expanded={expandedTable}
 			>
 				<i class="{expandedTable ? 'fas fa-chevron-up' : 'fas fa-chevron-down'} mr-3"></i>
@@ -835,7 +902,7 @@
 
 				{#if data.urlModel === 'applied-controls'}
 					<button
-						class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+						class="btn text-white bg-linear-to-l from-sky-500 to-green-600"
 						onclick={(_) => modalDuplicateForm(m.duplicateAppliedControl)}
 						data-testid="duplicate-button"
 					>
@@ -845,7 +912,7 @@
 				{/if}
 				{#if data.urlModel === 'organisation-objectives'}
 					<button
-						class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+						class="btn text-white bg-linear-to-l from-sky-500 to-green-600"
 						onclick={(_) => modalDuplicateForm(m.duplicateOrganisationObjective)}
 						data-testid="duplicate-button"
 					>
@@ -855,13 +922,19 @@
 				{/if}
 			{/if}
 			{@render actions?.()}
-			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} />
+			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} folderId={objectDomain} />
 		</div>
 	</div>
 </div>
 
+<CustomFieldsDisplay
+	urlModel={data.urlModel}
+	folderId={data.data?.folder?.id ?? data.data?.folder}
+	values={data.data?.custom_fields}
+/>
+
 {#if relatedModels.length > 0 && displayModelTable}
-	<div class="card shadow-lg mt-8 bg-white px-2 py-6">
+	<div class="card shadow-lg mt-8 bg-surface-50-950 px-2 py-6">
 		<Tabs
 			value={group}
 			onValueChange={(e) => (group = e.value)}
@@ -873,7 +946,7 @@
 					<Tabs.Trigger
 						value={urlmodel}
 						class="justify-between w-full rounded-md px-3 py-2 transition-colors
-			       aria-[selected=true]:!bg-gray-200
+			       aria-[selected=true]:!bg-surface-200-800
 			       "
 						data-testid="tabs-control"
 					>
@@ -881,7 +954,7 @@
 						{#if model.count !== undefined && model.count > 0}
 							<span
 								class="ml-2 rounded-full px-2 py-0.5 text-xs
-						   preset-tonal-secondary text-gray-700"
+						   preset-tonal-secondary text-surface-700-300"
 							>
 								{model.count}
 							</span>
@@ -912,17 +985,22 @@
 								})}
 								source={model.table}
 								disableCreate={disableCreate || model.disableCreate}
-								disableEdit={disableEdit || model.disableEdit}
-								disableDelete={disableDelete || model.disableDelete}
+								disableEdit={disableEdit || model.disableEdit || Boolean(data.data.is_locked)}
+								disableDelete={disableDelete || model.disableDelete || Boolean(data.data.is_locked)}
 								deleteForm={model.deleteForm}
 								URLModel={urlmodel}
 								expectedCount={getExpectedCount(urlmodel, field)}
 								fields={fieldsToUse}
 								defaultFilters={field.defaultFilters || {}}
+								extraBatchActions={tableBatchActions(field)}
 							>
 								{#snippet addButton()}
-									{#if canEditObject && field?.addExisting}
-										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+									{#if data.data.is_locked}
+										<!-- Locked parent: no add affordances, matching the hidden remove selection. -->
+									{:else if canEditObject && field?.addExisting}
+										<span
+											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+										>
 											<button
 												class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 												data-testid="select-existing-button"
@@ -934,7 +1012,7 @@
 										</span>
 										{#if field?.batchCreate}
 											<span
-												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+												class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
 											>
 												<button
 													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
@@ -946,7 +1024,9 @@
 												</button>
 											</span>
 										{/if}
-										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+										<span
+											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+										>
 											<button
 												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
 												data-testid="add-button"
@@ -959,7 +1039,7 @@
 									{:else}
 										{#if field?.batchCreate}
 											<span
-												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+												class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
 											>
 												<button
 													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"

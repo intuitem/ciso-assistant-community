@@ -1,6 +1,5 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import HiddenInput from '../HiddenInput.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
@@ -18,6 +17,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import MarkdownField from '../MarkdownField.svelte';
+	import CustomFieldsSection from '../CustomFieldsSection.svelte';
 	import { formFieldProxy } from 'sveltekit-superforms';
 
 	interface Props {
@@ -91,19 +91,13 @@
 	}
 
 	const { value: expirationDate } = formFieldProxy(form, 'expiration_date');
+	const { value: folderId } = formFieldProxy(form, 'folder');
 	const today = getTodayDateString();
 
 	let isExpirationDateInPast = $derived(Boolean($expirationDate) && $expirationDate < today);
 </script>
 
 <HiddenInput {form} field="requirement_assessments" />
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
 <AutocompleteSelect
 	{form}
 	multiple
@@ -120,14 +114,15 @@
 />
 <AutocompleteSelect
 	{form}
+	disabled={true}
 	optionsEndpoint="users?is_approver=true"
 	optionsLabelField="email"
 	field="approver"
 	cacheLock={cacheLocks['approver']}
 	bind:cachedValue={formDataCache['approver']}
 	nullable={true}
-	label={m.approver()}
-	helpText={m.approverHelpText()}
+	label={`${m.approver()} (${m.deprecated()})`}
+	helpText={m.approverDeprecatedHelpText()}
 />
 <Select
 	{form}
@@ -203,7 +198,7 @@
 	{#if context !== 'create'}
 		<div class="mt-4">
 			<button
-				class="btn bg-gray-300 h-10 w-10"
+				class="btn bg-surface-300-700 h-10 w-10"
 				aria-label={m.addAppliedControl()}
 				onclick={(_) => modalAppliedControlCreateForm('applied_controls')}
 				type="button"><i class="fa-solid fa-plus text-sm"></i></button
@@ -211,3 +206,15 @@
 		</div>
 	{/if}
 </div>
+<AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="evidences"
+	optionsExtraFields={[['folder', 'str']]}
+	optionsLabelField="auto"
+	field="evidences"
+	cacheLock={cacheLocks['evidences']}
+	bind:cachedValue={formDataCache['evidences']}
+	label={m.evidences()}
+/>
+<CustomFieldsSection {form} model="core.securityexception" folderId={$folderId} />

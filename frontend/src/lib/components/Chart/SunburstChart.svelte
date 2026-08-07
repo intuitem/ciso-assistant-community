@@ -50,7 +50,11 @@
 
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+		let chart = echarts.init(
+			document.getElementById(chart_id),
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 
 		const option = {
 			title: {
@@ -111,7 +115,7 @@
 						r: '40%',
 						itemStyle: {
 							borderWidth: 1,
-							borderColor: '#fff'
+							borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
 						},
 						label: {
 							show: true,
@@ -129,7 +133,7 @@
 						r: '65%',
 						itemStyle: {
 							borderWidth: 1,
-							borderColor: '#fff'
+							borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
 						},
 						label: {
 							show: true,
@@ -145,7 +149,7 @@
 						r: '85%',
 						itemStyle: {
 							borderWidth: 1,
-							borderColor: '#fff'
+							borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
 						},
 						label: {
 							show: true,
@@ -161,7 +165,7 @@
 						r: '98%',
 						itemStyle: {
 							borderWidth: 1,
-							borderColor: '#fff'
+							borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
 						},
 						label: {
 							show: true,
@@ -175,6 +179,7 @@
 			}
 		};
 
+		option.backgroundColor = 'transparent';
 		chart.setOption(option);
 
 		const resizeHandler = function () {

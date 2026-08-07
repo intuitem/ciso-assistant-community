@@ -8,14 +8,14 @@
 	let { data }: Props = $props();
 </script>
 
-<div class="card p-4 bg-white shadow-lg">
+<div class="card p-4 bg-surface-50-950 shadow-lg">
 	<ModelForm
-		customNameDescription
 		form={data.form}
 		object={data.object}
 		selectOptions={data.selectOptions}
 		model={data.model}
 		context="ebiosRmStudy"
+		customFolder
 		scopeFolder={data.data.folder}
 	/>
 </div>

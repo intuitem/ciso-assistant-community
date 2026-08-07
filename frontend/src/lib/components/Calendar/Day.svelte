@@ -49,9 +49,9 @@
 
 	let heatBg = $derived.by(() => {
 		if (totalCount === 0 || isPast) return '';
-		if (totalCount <= 2) return 'bg-primary-50/50';
-		if (totalCount <= 5) return 'bg-primary-50';
-		return 'bg-primary-100/70';
+		if (totalCount <= 2) return 'bg-primary-50/50 dark:bg-primary-900/20';
+		if (totalCount <= 5) return 'bg-primary-50 dark:bg-primary-900/40';
+		return 'bg-primary-100/70 dark:bg-primary-900/60';
 	});
 
 	const categoryLabelMap: Record<string, () => string> = {
@@ -75,14 +75,14 @@
 	);
 
 	let cellClass = $derived(
-		`flex flex-col items-start p-1.5 rounded-lg text-sm min-h-20 w-full h-full border transition-all cursor-pointer hover:bg-surface-100 ${
+		`flex flex-col items-start p-1.5 rounded-lg text-sm min-h-20 w-full h-full border transition-all cursor-pointer hover:bg-surface-100-900 ${
 			isPast
 				? totalCount > 0
-					? 'bg-surface-100 text-surface-400 border-surface-200'
-					: 'bg-surface-50 text-surface-400 border-surface-100'
+					? 'bg-surface-100-900 text-surface-400-600 border-surface-200-800'
+					: 'bg-surface-50-950 text-surface-400-600 border-surface-100-900'
 				: totalCount > 0
-					? `border-surface-200 ${heatBg}`
-					: 'border-surface-200 bg-white'
+					? `border-surface-200-800 ${heatBg}`
+					: 'border-surface-200-800 bg-surface-50-950'
 		} ${isSelected ? 'ring-2 ring-primary-400' : ''}`
 	);
 </script>

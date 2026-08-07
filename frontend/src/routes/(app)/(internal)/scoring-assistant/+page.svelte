@@ -4,6 +4,7 @@
 	import type { RiskMatrixJsonDefinition } from '$lib/utils/types';
 	import Selector from './selector.svelte';
 	import { average, forms } from './utils';
+	import { isDark } from '$lib/utils/helpers';
 	import { m } from '$paraglide/messages';
 
 	let { data, risk_matrices = data.risk_matrices } = $props();
@@ -91,7 +92,7 @@
 					<!--Threat Agent Factors-->
 					<div
 						id="ta_div"
-						class="px-4 py-2 mx-1 my-2 bg-white shadow-sm rounded-sm h-1/2 grid grid-cols-5"
+						class="px-4 py-2 mx-1 my-2 bg-surface-50-950 shadow-sm rounded-sm h-1/2 grid grid-cols-5"
 					>
 						<div class="col-span-4 p-2">
 							{#each forms.threat_agent as selector_data, index}
@@ -105,7 +106,7 @@
 						</div>
 						<div class="my-auto ml-2 col-span 1 w-full">
 							<div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
-								<div class="text-gray-100 text-xs">{m.threatAgentFactors()}</div>
+								<div class="text-surface-100-900 text-xs">{m.threatAgentFactors()}</div>
 								<div class="font-bold text-white text-lg" id="threat_agent_score">
 									{threat_agent_score}
 								</div>
@@ -115,7 +116,7 @@
 					<!--Vulnerability Factors-->
 					<div
 						id="vf_div"
-						class="px-4 py-2 mx-1 my-2 bg-white shadow-sm rounded-sm h-1/2 grid grid-cols-5"
+						class="px-4 py-2 mx-1 my-2 bg-surface-50-950 shadow-sm rounded-sm h-1/2 grid grid-cols-5"
 					>
 						<div class="col-span-4 p-2">
 							{#each forms.vulnerability as selector_data, index}
@@ -129,7 +130,7 @@
 						</div>
 						<div class="my-auto ml-2 col-span 1 w-full">
 							<div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
-								<div class="text-gray-100 text-xs">{m.vulnerabilityFactors()}</div>
+								<div class="text-surface-100-900 text-xs">{m.vulnerabilityFactors()}</div>
 								<div class="font-bold text-white text-lg" id="vulnerability_score">
 									{vulnerability_score}
 								</div>
@@ -142,9 +143,9 @@
 					<!--Business Impact Factors-->
 					<div
 						id="bi_div"
-						class="px-4 py-2 mx-1 my-2 shadow rounded h-1/2 grid grid-cols-5 bg-white {is_business_impact_ignored
-							? 'bg-gray-100 text-gray-400'
-							: 'bg-white text-black'}"
+						class="px-4 py-2 mx-1 my-2 shadow rounded h-1/2 grid grid-cols-5 bg-surface-50-950 {is_business_impact_ignored
+							? 'bg-surface-100-900 text-surface-400-600'
+							: 'bg-surface-50-950 text-black'}"
 					>
 						<div class="col-span-4 p-2">
 							{#each forms.business_impact as selector_data, index}
@@ -159,7 +160,7 @@
 						</div>
 						<div class="my-auto ml-2 col-span 1 w-full">
 							<div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
-								<div class="text-gray-100 text-xs">{m.businessImpactFactors()}</div>
+								<div class="text-surface-100-900 text-xs">{m.businessImpactFactors()}</div>
 								<div class="font-bold text-white text-lg" id="business_impact_score">
 									{is_business_impact_ignored ? '--' : business_impact_score}
 								</div>
@@ -167,12 +168,12 @@
 									<input
 										id="ignore_business_impact"
 										type="checkbox"
-										class="w-4 h-4 bg-gray-100 border-gray-300 rounded
+										class="w-4 h-4 bg-surface-100-900 border-surface-300-700 rounded
                 focus:ring-2"
 										bind:checked={is_business_impact_ignored}
 									/>
 									<label
-										class="ml-2 text-sm font-medium text-gray-100"
+										class="ml-2 text-sm font-medium text-surface-100-900"
 										for="ignore_business_impact"
 									>
 										{m.ignore()}
@@ -184,9 +185,9 @@
 					<!--Technical Impact Factors-->
 					<div
 						id="ti_div"
-						class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5 {is_business_impact_ignored
-							? 'bg-white text-black'
-							: 'bg-gray-100 text-gray-400'}"
+						class="px-4 py-2 mx-1 my-2 bg-surface-50-950 shadow rounded h-1/2 grid grid-cols-5 {is_business_impact_ignored
+							? 'bg-surface-50-950 text-black'
+							: 'bg-surface-100-900 text-surface-400-600'}"
 					>
 						<div class="col-span-4 p-2">
 							{#each forms.technical_impact as selector_data, index}
@@ -201,7 +202,7 @@
 						</div>
 						<div class="my-auto ml-2 col-span 1 w-full">
 							<div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl mx-auto">
-								<div class="text-gray-100 text-xs">{m.technicalImpactFactors()}</div>
+								<div class="text-surface-100-900 text-xs">{m.technicalImpactFactors()}</div>
 								<div class="font-bold text-white text-lg" id="technical_impact_score">
 									{is_business_impact_ignored ? technical_impact_score : '--'}
 								</div>
@@ -211,14 +212,14 @@
 				</div>
 			</div>
 
-			<div class="p-2 my-8 bg-white rounded-sm shadow-sm">
+			<div class="p-2 my-8 bg-surface-50-950 rounded-sm shadow-sm">
 				<div class="p-1 m-1 text-xs">
 					{m.assessmentVector()}: <span id="vector">{vector_string}</span>
 				</div>
 				<div class="grid grid-cols-3 grid-rows-1 items-center justify-center">
 					<div class="mx-auto w-full">
 						<div class="bg-cyan-600 p-4 m-2 rounded-lg shadow-lg lg:mx-4">
-							<div class="text-gray-100 font-semibold">{m.probability()}</div>
+							<div class="text-surface-100-900 font-semibold">{m.probability()}</div>
 							<div>
 								<span class="text-xl text-white font-bold" id="probability_label"
 									>{labels.probability.name}
@@ -240,14 +241,20 @@
 							id="risk_label"
 							style="background-color: {labels.risk.hexcolor}"
 						>
-							<p class="overflow-clip">{labels.risk.name}</p></span
+							<p
+								class="overflow-clip {labels.risk.hexcolor && isDark(labels.risk.hexcolor)
+									? 'text-white'
+									: 'text-surface-950'}"
+							>
+								{labels.risk.name}
+							</p></span
 						>
 						<i class="fas fa-arrow-alt-circle-left"></i>
 					</div>
 
 					<div class="mx-auto w-full">
 						<div class="bg-cyan-600 p-4 m-2 rounded-lg shadow-lg lg:mx-4">
-							<div class="text-gray-100 font-semibold">{m.impact()}</div>
+							<div class="text-surface-100-900 font-semibold">{m.impact()}</div>
 							<div>
 								<span class="text-xl text-white font-bold" id="impact_label"
 									>{labels.impact.name} {impact_score === 0 ? '--' : impact_score}</span

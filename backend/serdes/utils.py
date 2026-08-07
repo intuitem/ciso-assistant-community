@@ -47,7 +47,14 @@ from ebios_rm.models import (
     AttackPath,
 )
 
-from tprm.models import Entity
+from tprm.models import (
+    Entity,
+    EntityAssessment,
+    Representative,
+    Solution,
+    SolutionSubcontractor,
+    Contract,
+)
 
 from core.serializers import (
     AnswerImportExportSerializer,
@@ -86,7 +93,14 @@ from ebios_rm.serializers import (
     AttackPathImportExportSerializer,
 )
 
-from tprm.serializers import EntityImportExportSerializer
+from tprm.serializers import (
+    EntityImportExportSerializer,
+    EntityAssessmentImportExportSerializer,
+    RepresentativeImportExportSerializer,
+    SolutionImportExportSerializer,
+    SolutionSubcontractorImportExportSerializer,
+    ContractImportExportSerializer,
+)
 
 from django.db import models
 from library.serializers import LoadedLibraryImportExportSerializer
@@ -192,6 +206,11 @@ def import_export_serializer_class(model: Model) -> serializers.Serializer:
         OperationalScenario: OperationalScenarioImportExportSerializer,
         Stakeholder: StakeholderImportExportSerializer,
         Entity: EntityImportExportSerializer,
+        EntityAssessment: EntityAssessmentImportExportSerializer,
+        Representative: RepresentativeImportExportSerializer,
+        Solution: SolutionImportExportSerializer,
+        SolutionSubcontractor: SolutionSubcontractorImportExportSerializer,
+        Contract: ContractImportExportSerializer,
         StrategicScenario: StrategicScenarioImportExportSerializer,
         AttackPath: AttackPathImportExportSerializer,
         Framework: FrameworkImportExportSerializer,
@@ -350,7 +369,10 @@ def sort_objects_by_self_reference(
     roots = set(object_map.keys())
 
     for obj in objects:
-        parent_ids = obj["fields"].get(self_ref_field, [])
+        # A nullable self-referencing FK (e.g. Entity.parent_entity,
+        # Contract.overarching_contract) serializes to None when unset; treat
+        # that (and a missing key) as "no parent" rather than iterating None.
+        parent_ids = obj["fields"].get(self_ref_field) or []
         if isinstance(parent_ids, str) or isinstance(parent_ids, int):
             parent_ids = [parent_ids]  # Ensure it's a list
 
@@ -461,13 +483,6 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         | Q(ebios_rm_studies__in=ebios_rm_studies)
     ).distinct()
 
-    assets = Asset.objects.filter(
-        Q(folder__in=folders)
-        | Q(risk_scenarios__in=risk_scenarios)
-        | Q(ebios_rm_studies__in=ebios_rm_studies)
-        | Q(feared_events__in=feared_events)
-    ).distinct()
-
     vulnerabilities = Vulnerability.objects.filter(
         Q(folder__in=folders) | Q(risk_scenarios__in=risk_scenarios)
     ).distinct()
@@ -508,7 +523,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
 
     incidents = Incident.objects.filter(folder__in=folders).distinct()
     # Close the loop on reverse M2Ms so objects reachable only through
-    # incidents/campaigns still make it into the dump (and into
+    # incidents/campaigns/findings still make it into the dump (and into
     # loaded_libraries). Rebuild with fresh Q filters rather than queryset
     # union so the result plays nicely with .distinct().
     entities = Entity.objects.filter(
@@ -523,6 +538,14 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         Q(folder__in=folders)
         | Q(complianceassessment__in=compliance_assessments)
         | Q(campaigns__in=campaigns)
+        | Q(requirement_nodes__findings__in=findings)
+    ).distinct()
+    assets = Asset.objects.filter(
+        Q(folder__in=folders)
+        | Q(risk_scenarios__in=risk_scenarios)
+        | Q(ebios_rm_studies__in=ebios_rm_studies)
+        | Q(feared_events__in=feared_events)
+        | Q(findings__in=findings)
     ).distinct()
     perimeters = Perimeter.objects.filter(
         Q(folder__in=folders) | Q(campaigns__in=campaigns)
@@ -533,12 +556,75 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         Q(folder__in=folders) | Q(task_template__in=task_templates)
     ).distinct()
 
+    # --- TPRM ecosystem ---
+    # Only Entity was exported historically. Pull in the rest of the third
+    # party graph so a SaaS -> on-prem migration keeps assessments, solutions,
+    # subcontracting chains, representatives and contracts (all flattened into
+    # the target domain like everything else). Computed before evidences so
+    # audit / contract attachments are folded into the evidence scope below.
+    entity_assessments = EntityAssessment.objects.filter(
+        Q(folder__in=folders) | Q(perimeter__in=perimeters)
+    ).distinct()
+
+    solutions = Solution.objects.filter(
+        Q(provider_entity__in=entities)
+        | Q(recipient_entity__in=entities)
+        | Q(entity_assessments__in=entity_assessments)
+    ).distinct()
+
+    contracts = Contract.objects.filter(folder__in=folders).distinct()
+
+    # Close the entity loop so exported FKs resolve on import.
+    #
+    # Required (non-null) FK targets MUST travel or the import crashes on a
+    # missing lookup: EntityAssessment.entity, Solution.provider_entity and
+    # SolutionSubcontractor.subcontractor. These are exported even when
+    # builtin — correctness wins over the (rare) duplicate main-entity row.
+    required_entity_targets = Entity.objects.filter(
+        Q(pk__in=entity_assessments.values("entity"))
+        | Q(provided_solutions__in=solutions)
+        | Q(subcontracts__solution__in=solutions)
+    )
+
+    # Optional (nullable) FK targets are pulled in for fidelity but skip
+    # builtin entities: the main organisation lives in the root folder and the
+    # target instance keeps its own, so a null on import degrades gracefully
+    # (Contract.save even re-defaults beneficiary to the target main entity).
+    optional_entity_targets = Entity.objects.filter(
+        Q(received_solutions__in=solutions)
+        | Q(contracts__in=contracts)
+        | Q(beneficiary_contracts__in=contracts)
+        | Q(subcontract_recipients__solution__in=solutions)
+    ).exclude(builtin=True)
+
+    # NOTE: parent_entity / overarching_contract ancestor chains are only
+    # preserved when the ancestor is itself in scope (handled by the self-ref
+    # sort at import). Ancestors living outside the exported domain become null
+    # on import — acceptable for a flat single-domain migration; we don't walk
+    # the chain recursively across domains.
+    entities = Entity.objects.filter(
+        Q(folder__in=folders)
+        | Q(stakeholders__in=stakeholders)
+        | Q(ebios_rm_studies__in=ebios_rm_studies)
+        | Q(incidents__in=incidents)
+        | Q(pk__in=required_entity_targets)
+        | Q(pk__in=optional_entity_targets)
+    ).distinct()
+
+    solution_subcontractors = SolutionSubcontractor.objects.filter(
+        solution__in=solutions
+    ).distinct()
+
+    representatives = Representative.objects.filter(entity__in=entities).distinct()
+
     evidences = Evidence.objects.filter(
         Q(folder__in=folders)
         | Q(applied_controls__in=applied_controls)
         | Q(requirement_assessments__in=requirement_assessments)
         | Q(findings__in=findings)
         | Q(findings_assessments__in=findings_assessments)
+        | Q(entityassessment__in=entity_assessments)
+        | Q(contracts__in=contracts)
     ).distinct()
 
     evidence_revisions = EvidenceRevision.objects.filter(
@@ -579,6 +665,11 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         "asset": assets,
         "appliedcontrol": applied_controls,
         "entity": entities,
+        "solution": solutions,
+        "solutionsubcontractor": solution_subcontractors,
+        "representative": representatives,
+        "entityassessment": entity_assessments,
+        "contract": contracts,
         "evidence": evidences,
         "evidencerevision": evidence_revisions,
         "perimeter": perimeters,

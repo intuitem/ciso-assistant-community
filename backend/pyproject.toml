@@ -45,7 +45,7 @@ dependencies = [
     "regex>=2025.11.3,<2026",
     "prometheus-client>=0.22.1,<0.23",
     "jira>=3.10.5,<4",
-    "cryptography>=46.0.7,<47",
+    "cryptography>=48.0.1",
     "cel-python>=0.5.0,<0.6",
     "qdrant-client>=1.14.2,<2",
     "httpx>=0.28.1,<0.29",
@@ -64,6 +64,7 @@ dev = [
     "mypy>=1.9.0,<2",
     "coverage==7.5.4",
     "pre-commit==3.7.1",
+    "django-querycount>=0.8.3",
 ]
 
 [tool.uv]

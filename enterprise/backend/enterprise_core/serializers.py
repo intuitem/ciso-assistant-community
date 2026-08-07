@@ -7,14 +7,16 @@ from core.serializers import (
     UserWriteSerializer as CommunityUserWriteSerializer,
 )
 from core.serializer_fields import FieldsRelatedField
-from iam.models import Folder, User, Role
+from iam.models import RoleAssignment, User, Role
+from iam.cache_builders import get_folder_path, CacheNotReadyError
+import uuid
 
 from global_settings.models import GlobalSettings
 from global_settings.serializers import (
     FeatureFlagsSerializer as CommunityFeatureFlagSerializer,
 )
 
-from core.models import CustomEmailTemplate, CustomWordTemplate
+from core.models import CustomEmailTemplate, CustomWordTemplate, CustomDocHtmlTemplate
 from .models import ClientSettings, LogEntryAction
 from auditlog.models import LogEntry
 from global_settings.serializers import (
@@ -70,7 +72,11 @@ class EditorPermissionMixin:
         editors = User.get_editors()
         seats = settings.LICENSE_SEATS
 
-        perms = [p for p in group.permissions if p not in User.NON_SEAT_PERMISSIONS]
+        perms = [
+            p
+            for p in RoleAssignment.get_permissions(group)
+            if p not in User.NON_SEAT_PERMISSIONS
+        ]
         if any(perm.startswith(prefix) for prefix in editor_prefixes for perm in perms):
             logger.info("Adding editor permissions to user", user=instance, group=group)
             if instance not in editors and len(editors) >= seats:
@@ -145,13 +151,28 @@ class LogEntrySerializer(serializers.ModelSerializer):
     actor = serializers.SerializerMethodField(method_name="get_actor")
     action = serializers.SerializerMethodField(method_name="get_action_display")
     content_type = serializers.SerializerMethodField(method_name="get_content_type")
-    folder = serializers.CharField(source="additional_data.folder", read_only=True)
+    folder = serializers.SerializerMethodField(method_name="get_folder")
 
     def get_action_display(self, obj):
         return LogEntryAction(obj.action).to_string()
 
     def get_actor(self, obj):
-        return obj.additional_data.get("user_email") if obj.additional_data else None
+        # actor/actor_email are native LogEntry columns populated by the auditlog
+        # middleware. They replaced the additional_data["user_email"] blob that the
+        # old post_save enrichment used to fill (removed in the audit-trail refactor).
+        return obj.actor_email or (obj.actor.email if obj.actor_id else None)
+
+    def get_folder(self, obj):
+        # additional_data now carries folder_id (the old enrichment stored a "folder"
+        # path string). Resolve it to the full path via the in-memory folders cache.
+        folder_id = (obj.additional_data or {}).get("folder_id")
+        if not folder_id:
+            return None
+        try:
+            path = get_folder_path(uuid.UUID(str(folder_id)))
+        except ValueError, KeyError, CacheNotReadyError:
+            return None
+        return "/".join(f.name for f in path) or None
 
     def get_content_type(self, obj):
         return obj.content_type.name
@@ -237,6 +258,35 @@ class CustomWordTemplateWriteSerializer(BaseModelSerializer):
         read_only_fields = ["id"]
 
 
+class CustomDocHtmlTemplateReadSerializer(BaseModelSerializer):
+    file = serializers.SerializerMethodField()
+
+    def get_file(self, obj):
+        if obj.file:
+            return obj.file.name.split("/")[-1]
+        return None
+
+    class Meta:
+        model = CustomDocHtmlTemplate
+        fields = [
+            "id",
+            "folder",
+            "template_key",
+            "language",
+            "file",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class CustomDocHtmlTemplateWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = CustomDocHtmlTemplate
+        fields = ["id", "template_key", "language", "is_active"]
+        read_only_fields = ["id"]
+
+
 class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
     """
     Serializer for managing Feature Flags stored within the 'value' JSON field
@@ -256,6 +306,13 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
         source="value.audit_log_forwarding", required=False, default=False
     )
 
+    custom_fields = serializers.BooleanField(
+        source="value.custom_fields", required=False, default=False
+    )
+
     object_audit_trail = serializers.BooleanField(
         source="value.object_audit_trail", required=False, default=True
+    )
+    idp_groups = serializers.BooleanField(
+        source="value.idp_groups", required=False, default=False
     )

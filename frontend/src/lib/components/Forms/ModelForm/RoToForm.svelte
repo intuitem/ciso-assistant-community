@@ -3,10 +3,10 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import { page } from '$app/state';
 
 	interface Props {
@@ -27,7 +27,7 @@
 		context
 	}: Props = $props();
 
-	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-900';
+	const activityBackground = context === 'edit' ? 'bg-surface-50-950' : 'bg-surface-100-900';
 
 	let activeActivity: string | null = $state(null);
 	page.url.searchParams.forEach((value, key) => {
@@ -49,23 +49,15 @@
 	label={m.ebiosRmStudy()}
 	hidden={initialData.ebios_rm_study}
 />
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.folder()}
-	hidden
-/>
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'one'
 		? 'border-2 border-primary-500'
-		: 'border-2 border-gray-300 border-dashed'}"
+		: 'border-2 border-surface-300-700 border-dashed'}"
 >
 	<p
 		class="absolute -top-3 {activityBackground} font-bold {activeActivity === 'one'
 			? 'text-primary-500'
-			: 'text-gray-500'}"
+			: 'text-surface-600-400'}"
 	>
 		{m.activityOne()}
 	</p>
@@ -91,12 +83,12 @@
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'two'
 		? 'border-2 border-primary-500'
-		: 'border-2 border-gray-300 border-dashed'}"
+		: 'border-2 border-surface-300-700 border-dashed'}"
 >
 	<p
 		class="absolute -top-3 {activityBackground} font-bold {activeActivity === 'two'
 			? 'text-primary-500'
-			: 'text-gray-500'}"
+			: 'text-surface-600-400'}"
 	>
 		{m.activityTwo()}
 	</p>
@@ -131,12 +123,12 @@
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'three'
 		? 'border-2 border-primary-500'
-		: 'border-2 border-gray-300 border-dashed'}"
+		: 'border-2 border-surface-300-700 border-dashed'}"
 >
 	<p
 		class="absolute -top-3 {activityBackground} font-bold {activeActivity === 'three'
 			? 'text-primary-500'
-			: 'text-gray-500'}"
+			: 'text-surface-600-400'}"
 	>
 		{m.activityThree()}
 	</p>
@@ -157,7 +149,7 @@
 		label={m.fearedEvents()}
 		helpText={m.roToFearedEventHelpText()}
 	/>
-	<TextArea
+	<MarkdownField
 		{form}
 		field="justification"
 		label={m.justification()}

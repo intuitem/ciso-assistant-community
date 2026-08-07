@@ -1,4 +1,5 @@
-FROM python:3.14-slim
+ARG PYTHON_IMAGE=python:3.14-slim
+FROM ${PYTHON_IMAGE}
 
 # UV_NO_SYNC=1: prevent `uv run` from auto-syncing at runtime (caused startup-docker-compose-test CI to fail);
 #   the venv is built once at image build (uv sync --locked --no-dev)
@@ -51,6 +52,23 @@ COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
   --mount=type=cache,target=/root/.cache/pip \
   uv sync --locked --no-dev
+
+# Pre-bake the embedding and reranker models into the image so the AI works with no
+# internet at runtime (otherwise sentence-transformers downloads them from HuggingFace
+# on first use, which breaks fully offline / air-gapped instances).
+# Model IDs come from chat/embedding_models.py (single source of truth). It is copied
+# first so this layer re-bakes whenever the IDs change. Network is needed at BUILD time only.
+COPY chat/embedding_models.py ./chat/embedding_models.py
+ENV HF_HOME=/opt/hf-cache \
+  SENTENCE_TRANSFORMERS_HOME=/opt/hf-cache
+RUN uv run python -c "import chat.embedding_models as m; from sentence_transformers import SentenceTransformer, CrossEncoder; SentenceTransformer(m.DEFAULT_EMBEDDING_MODEL); CrossEncoder(m.RERANKER_MODEL)" \
+  && chown -R 1001:1001 /opt/hf-cache
+
+# Force offline at runtime: the model is cached above and nothing else in the chat
+# stack reaches HuggingFace (LLM and Ollama use their own URLs). Avoids a network
+# round-trip on model load. Set AFTER the bake so the build can still download.
+ENV HF_HUB_OFFLINE=1 \
+  TRANSFORMERS_OFFLINE=1
 
 #watch out for local files during dev and maintenance of .dockerignore
 COPY . .

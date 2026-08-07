@@ -1,4 +1,5 @@
-FROM node:24-slim AS builder
+ARG NODE_IMAGE=node:24-slim
+FROM ${NODE_IMAGE} AS builder
 ENV NODE_OPTIONS="--max-old-space-size=10240"
 WORKDIR /app
 
@@ -11,7 +12,8 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm run build
 RUN pnpm prune
 
-FROM node:24-slim
+ARG NODE_IMAGE=node:24-slim
+FROM ${NODE_IMAGE}
 ENV NODE_OPTIONS="--max-old-space-size=10240"
 WORKDIR /app
 COPY --from=builder /app/build build/
@@ -20,7 +22,7 @@ COPY --from=builder /app/node_modules node_modules/
 COPY package.json .
 EXPOSE 3000
 ENV NODE_ENV=production
-ENV BODY_SIZE_LIMIT=25000000
+ENV BODY_SIZE_LIMIT=50000000
 
 RUN groupadd -g 1001 app && useradd -u 1001 -g 1001 -m -s /bin/bash app
 # USER app  # not activated by default to keep compatibility
