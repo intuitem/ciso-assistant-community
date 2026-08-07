@@ -21,6 +21,9 @@
 		expandChat,
 		collapseChat,
 		sendMessage,
+		uploadAttachment,
+		getPendingAttachment,
+		removePendingAttachment,
 		startNewSession,
 		retryLastMessage,
 		copyToClipboard,
@@ -76,6 +79,8 @@
 	const isTyping = $derived(getIsTyping());
 	const isStreaming = $derived(getIsStreaming());
 	const hasUserMessages = $derived(messages.some((m) => m.role === 'user'));
+	const pendingAttachment = $derived(getPendingAttachment());
+	const canSend = $derived(!!inputText.trim() || pendingAttachment?.status === 'ready');
 
 	$effect(() => {
 		// Auto-scroll when new content arrives, unless user manually scrolled up
@@ -150,6 +155,13 @@
 	function autoResize(el: HTMLTextAreaElement) {
 		el.style.height = 'auto';
 		el.style.height = Math.min(el.scrollHeight, 150) + 'px';
+	}
+
+	function handleFileSelected(e: Event) {
+		const input = e.currentTarget as HTMLInputElement;
+		const file = input.files?.[0];
+		input.value = '';
+		if (file) uploadAttachment(file);
 	}
 
 	function handleGlobalKeydown(e: KeyboardEvent) {
@@ -256,6 +268,18 @@
 			>
 				{message.content}
 			</div>
+			{#if message.attachments?.length}
+				<div class="mt-1 flex flex-wrap justify-end gap-1">
+					{#each message.attachments as attachment}
+						<span
+							class="inline-flex items-center gap-1 rounded-md bg-violet-100 px-1.5 py-0.5 text-[10px] text-violet-700 dark:bg-violet-900 dark:text-violet-200"
+						>
+							<i class="fa-solid fa-file-lines"></i>
+							{attachment.filename}
+						</span>
+					{/each}
+				</div>
+			{/if}
 			<div class="mt-1 flex items-center gap-1 px-1">
 				<span class="text-[10px] text-surface-500">{formatTime(message.timestamp)}</span>
 				<button
@@ -290,6 +314,10 @@
 				{#if pa.action === 'attach'}
 					<i class="fa-solid fa-link text-violet-500"></i>
 					{m.chatAttach()}
+					{pa.displayName}
+				{:else if pa.action === 'import'}
+					<i class="fa-solid fa-file-import text-violet-500"></i>
+					{m.chatImport()}
 					{pa.displayName}
 				{:else}
 					<i class="fa-solid fa-plus-circle text-violet-500"></i>
@@ -326,6 +354,42 @@
 				<i class="fa-solid fa-folder"></i>
 				<span>{pa.folderName}</span>
 			</div>
+		{/if}
+		{#if pa.action === 'import'}
+			{#if pa.targetName}
+				<div class="mb-2 flex items-center gap-2 text-[11px] text-surface-600-400">
+					<i class="fa-solid fa-clipboard-check text-surface-500"></i>
+					<span>{pa.targetName}</span>
+				</div>
+			{/if}
+			<div class="mb-2 flex flex-wrap items-center gap-2 text-[11px]">
+				<span class="text-surface-600-400">
+					{pa.rowCount}
+					{m.chatImportRows()}:
+				</span>
+				<span class="font-medium text-green-600">+{pa.createdCount} {m.chatImportNew()}</span>
+				<span class="font-medium text-blue-600">~{pa.updatedCount} {m.chatImportUpdated()}</span>
+				{#if pa.failedCount}
+					<span class="font-medium text-red-500">{pa.failedCount} {m.chatImportInvalid()}</span>
+				{/if}
+			</div>
+			{#if pa.truncated}
+				<div class="mb-2 text-[11px] text-amber-600">
+					<i class="fa-solid fa-triangle-exclamation mr-1"></i>{m.chatImportTruncated({
+						count: pa.rowCount ?? 0
+					})}
+				</div>
+			{/if}
+			{#if pa.status === 'creating'}
+				<div class="mb-2 flex items-center gap-2 text-[11px] text-violet-600">
+					<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>
+					{m.chatImporting()}
+				</div>
+			{:else if pa.status === 'error' && pa.results?.[0]?.error}
+				<div class="mb-2 text-[11px] text-red-500">
+					<i class="fa-solid fa-xmark mr-1"></i>{pa.results[0].error}
+				</div>
+			{/if}
 		{/if}
 		<div class="flex items-center justify-between">
 			{#if pa.status === 'pending' && pa.items.length > 1}
@@ -385,7 +449,7 @@
 			<div class="flex items-center gap-2">
 				<button
 					onclick={() => confirmAction(message.id)}
-					disabled={selectedCount === 0}
+					disabled={pa.action !== 'import' && selectedCount === 0}
 					class="rounded-lg bg-violet-600 dark:bg-violet-700 px-3 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-violet-700 disabled:opacity-40"
 				>
 					<i class="fa-solid fa-check mr-1"></i>{m.chatConfirm()}{selectedCount < pa.items.length
@@ -404,8 +468,12 @@
 		{:else if pa.status === 'created'}
 			<div class="text-[11px] text-green-600 font-medium">
 				<i class="fa-solid fa-check-circle mr-1"></i>
-				{pa.action === 'attach' ? m.chatAttached() : m.chatCreated()}
-				{selectedCount} item{selectedCount !== 1 ? 's' : ''}
+				{#if pa.action === 'import'}
+					{m.chatImported()}
+				{:else}
+					{pa.action === 'attach' ? m.chatAttached() : m.chatCreated()}
+					{selectedCount} item{selectedCount !== 1 ? 's' : ''}
+				{/if}
 			</div>
 		{/if}
 	</div>
@@ -507,7 +575,56 @@
 				{/each}
 			</div>
 		{/if}
+		{#if pendingAttachment}
+			<div class="mb-2 flex items-center gap-2">
+				<span
+					class="inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs
+						{pendingAttachment.status === 'error'
+						? 'border-red-200 bg-red-50 text-red-700'
+						: 'border-violet-200 bg-violet-50 text-violet-700'}"
+				>
+					{#if pendingAttachment.status === 'uploading'}
+						<i class="fa-solid fa-circle-notch fa-spin text-[10px]"></i>
+					{:else if pendingAttachment.status === 'error'}
+						<i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
+					{:else}
+						<i class="fa-solid fa-file-lines text-[10px]"></i>
+					{/if}
+					<span class="truncate">
+						{pendingAttachment.status === 'error'
+							? pendingAttachment.error || m.chatAttachmentFailed()
+							: pendingAttachment.filename}
+					</span>
+					<button
+						onclick={removePendingAttachment}
+						class="ml-0.5 hover:text-red-600"
+						aria-label={m.chatRemoveAttachment()}
+						title={m.chatRemoveAttachment()}
+					>
+						<i class="fa-solid fa-xmark text-[10px]"></i>
+					</button>
+				</span>
+			</div>
+		{/if}
 		<div class="flex items-end {compact ? 'gap-2' : 'gap-3'}">
+			<label
+				class="flex {compact
+					? 'h-10 w-10'
+					: 'h-11 w-11'} shrink-0 cursor-pointer items-center justify-center rounded-xl
+					text-surface-500 transition-colors hover:bg-surface-100-900 hover:text-violet-600
+					{isStreaming || pendingAttachment?.status === 'uploading' ? 'pointer-events-none opacity-40' : ''}"
+				aria-label={m.chatAttachFile()}
+				title={m.chatAttachFile()}
+			>
+				<i class="fa-solid fa-paperclip text-sm"></i>
+				<input
+					type="file"
+					class="hidden"
+					accept=".xlsx,.csv"
+					onchange={handleFileSelected}
+					disabled={isStreaming || pendingAttachment?.status === 'uploading'}
+				/>
+			</label>
 			{#if hasUserMessages}
 				<button
 					onclick={() => (showQuickActions = !showQuickActions)}
@@ -549,7 +666,7 @@
 			{:else}
 				<button
 					onclick={handleSend}
-					disabled={!inputText.trim()}
+					disabled={!canSend}
 					class="flex {compact
 						? 'h-10 w-10'
 						: 'h-11 w-11'} shrink-0 items-center justify-center rounded-xl bg-violet-600 dark:bg-violet-700 text-white transition-colors hover:bg-violet-700 disabled:opacity-40"

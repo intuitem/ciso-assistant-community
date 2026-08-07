@@ -752,6 +752,12 @@ class TestImportResults:
             format="multipart",
         )
 
+    def test_import_size_limit_follows_attachment_setting(self, setup, settings):
+        settings.ATTACHMENT_MAX_SIZE_MB = 1
+        res = self.import_file(setup, "big.csv", b"ref_id,result\n" + b"x" * 1_100_000)
+        assert res.status_code == 400
+        assert "max 1 MB" in res.json()["error"]
+
     def test_csv_import(self, setup):
         s = setup
         csv_content = (
@@ -1367,6 +1373,25 @@ class TestBatchAssetMutation:
         assert not s["pa"].assets.filter(id=newcomer.id).exists()
         assert s["pa"].assets.count() == 2
 
+    def test_remove_measured_asset_blocked(self, setup):
+        s = setup
+        upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}])
+        res = self.batch(s, "remove_m2m", s["asset1"])
+        assert res.status_code == 200
+        assert "recorded results" in str(res.json()["failed"][0]["error"])
+        assert s["pa"].assets.filter(id=s["asset1"].id).exists()
+
+    def test_locked_blocks_batch_mutation(self, setup):
+        s = setup
+        s["pa"].is_locked = True
+        s["pa"].save(update_fields=["is_locked"])
+        newcomer = Asset.objects.create(name="vm-3", folder=s["domain"])
+        res = self.batch(s, "add_m2m", newcomer)
+        assert "cannot modify a locked assessment" in str(
+            res.json()["failed"][0]["error"]
+        )
+        assert not s["pa"].assets.filter(id=newcomer.id).exists()
+
 
 @pytest.mark.django_db
 class TestPosturePermissions:
@@ -1476,6 +1501,220 @@ class TestPosturePermissions:
             row["asset"]["id"] for row in admin_body["results"]
         }
 
+    def test_batch_add_invisible_asset_blocked(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        tester = self.make_user("batch-tester@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.post(
+            "/api/automation/posture-assessments/batch-action/",
+            {
+                "action": "add_m2m",
+                "ids": [str(s["pa"].id)],
+                "field": "assets",
+                "value": [str(hidden.id)],
+            },
+            format="json",
+        )
+        assert "permission denied to add this asset" in str(
+            res.json()["failed"][0]["error"]
+        )
+        assert not s["pa"].assets.filter(id=hidden.id).exists()
+
+    def test_hidden_assets_filtered_from_read(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        s["pa"].assets.add(hidden)
+
+        reader = self.make_user("asset-reader@tests.com", "BI-RL-AUD", s["domain"])
+        body = reader.get(f"/api/automation/posture-assessments/{s['pa'].id}/").json()
+        ids = {a["id"] for a in body["assets"]}
+        assert str(hidden.id) not in ids
+        assert {str(s["asset1"].id), str(s["asset2"].id)} <= ids
+
+        admin_body = (
+            s["client"].get(f"/api/automation/posture-assessments/{s['pa'].id}/").json()
+        )
+        assert str(hidden.id) in {a["id"] for a in admin_body["assets"]}
+
+    def test_patch_add_invisible_asset_blocked(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        tester = self.make_user("patcher@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/",
+            {
+                "assets": [
+                    str(s["asset1"].id),
+                    str(s["asset2"].id),
+                    str(hidden.id),
+                ]
+            },
+            format="json",
+        )
+        assert res.status_code == 400
+        assert "permission denied" in str(res.json())
+        assert not s["pa"].assets.filter(id=hidden.id).exists()
+
+    def test_removal_errors_hide_invisible_asset_names(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        upload(s["client"], s["pa"], hidden, [{"ref_id": "1.1", "result": "fail"}])
+
+        tester = self.make_user("remover@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.post(
+            "/api/automation/posture-assessments/batch-action/",
+            {
+                "action": "remove_m2m",
+                "ids": [str(s["pa"].id)],
+                "field": "assets",
+                "value": [str(hidden.id)],
+            },
+            format="json",
+        )
+        assert res.json()["failed"] == []
+        assert "hidden-vm" not in str(res.json())
+        assert s["pa"].assets.filter(id=hidden.id).exists()
+
+        res = tester.patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/",
+            {"assets": [str(s["asset1"].id), str(s["asset2"].id)]},
+            format="json",
+        )
+        assert res.status_code == 200
+        assert "hidden-vm" not in str(res.json())
+        assert s["pa"].assets.filter(id=hidden.id).exists()
+        assert s["pa"].assets.count() == 3
+
+    def test_batch_remove_invisible_asset_kept(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        s["pa"].assets.add(hidden)
+
+        tester = self.make_user("batch-remover@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.post(
+            "/api/automation/posture-assessments/batch-action/",
+            {
+                "action": "remove_m2m",
+                "ids": [str(s["pa"].id)],
+                "field": "assets",
+                "value": [str(hidden.id)],
+            },
+            format="json",
+        )
+        assert res.json()["failed"] == []
+        assert "hidden-vm" not in str(res.json())
+        assert s["pa"].assets.filter(id=hidden.id).exists()
+
+    def test_batch_mutate_visible_asset_while_hidden_linked(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        s["pa"].assets.add(hidden)
+        newcomer = Asset.objects.create(name="vm-new", folder=s["domain"])
+
+        tester = self.make_user("mixed@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.post(
+            "/api/automation/posture-assessments/batch-action/",
+            {
+                "action": "add_m2m",
+                "ids": [str(s["pa"].id)],
+                "field": "assets",
+                "value": [str(newcomer.id)],
+            },
+            format="json",
+        )
+        assert res.json()["failed"] == []
+        assert s["pa"].assets.filter(id=newcomer.id).exists()
+
+        res = tester.post(
+            "/api/automation/posture-assessments/batch-action/",
+            {
+                "action": "remove_m2m",
+                "ids": [str(s["pa"].id)],
+                "field": "assets",
+                "value": [str(newcomer.id)],
+            },
+            format="json",
+        )
+        assert res.json()["failed"] == []
+        assert not s["pa"].assets.filter(id=newcomer.id).exists()
+        assert s["pa"].assets.filter(id=hidden.id).exists()
+
+    def test_patch_keeps_invisible_unmeasured_asset(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        s["pa"].assets.add(hidden)
+
+        tester = self.make_user("keeper@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/",
+            {"assets": [str(s["asset1"].id)]},
+            format="json",
+        )
+        assert res.status_code == 200
+        remaining = set(s["pa"].assets.values_list("id", flat=True))
+        assert remaining == {s["asset1"].id, hidden.id}
+
+    def test_create_finding_invisible_asset_rejected(self, setup):
+        s = setup
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="Other Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        hidden = Asset.objects.create(name="hidden-vm", folder=other)
+        s["pa"].assets.add(hidden)
+        register = FindingsAssessment.objects.create(
+            name="follow-up",
+            folder=s["pa"].folder,
+            category=FindingsAssessment.Category.POSTURE,
+        )
+        s["pa"].follow_up_assessment = register
+        s["pa"].save(update_fields=["follow_up_assessment"])
+
+        tester = self.make_user("finder@tests.com", "BI-RL-TST", s["domain"])
+        res = tester.post(
+            f"/api/automation/posture-assessments/{s['pa'].id}/create-finding/",
+            {"requirement": str(s["nodes"]["1.1"].id), "asset": str(hidden.id)},
+            format="json",
+        )
+        assert res.status_code == 400
+        assert Finding.objects.count() == 0
+
     def test_cross_domain_follow_up_link_rejected(self, setup):
         s = setup
         other = Folder.objects.create(
@@ -1565,3 +1804,229 @@ class TestIngestionValidation:
             format="json",
         )
         assert res.status_code == 400
+
+
+@pytest.mark.django_db
+class TestRunLifecycle:
+    def _run_id(self, s):
+        return upload(
+            s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "fail"}]
+        ).json()["run_id"]
+
+    def test_update_run_observation(self, setup):
+        s = setup
+        run_id = self._run_id(s)
+        url = f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/"
+        res = s["client"].patch(url, {"observation": "manual review"}, format="json")
+        assert res.status_code == 200
+        assert res.json()["observation"] == "manual review"
+        detail = s["client"].get(url).json()
+        assert detail["run"]["observation"] == "manual review"
+        runs = (
+            s["client"]
+            .get(f"/api/automation/posture-assessments/{s['pa'].id}/runs/")
+            .json()["runs"]
+        )
+        assert runs[0]["observation"] == "manual review"
+
+    def test_update_run_attachment_upload_and_remove(self, setup):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        s = setup
+        run_id = self._run_id(s)
+        url = f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/"
+        res = s["client"].patch(
+            url,
+            {
+                "attachment": SimpleUploadedFile(
+                    "scan-report.txt", b"raw scanner output"
+                )
+            },
+            format="multipart",
+        )
+        assert res.status_code == 200
+        assert res.json()["attachment"].endswith(".txt")
+
+        res = s["client"].get(url + "attachment/")
+        assert res.status_code == 200
+        content = (
+            b"".join(res.streaming_content)
+            if hasattr(res, "streaming_content")
+            else res.content
+        )
+        assert b"raw scanner output" in content
+
+        res = s["client"].patch(url, {"remove_attachment": "true"}, format="multipart")
+        assert res.status_code == 200
+        assert res.json()["attachment"] is None
+        assert s["client"].get(url + "attachment/").status_code == 404
+
+    def test_update_run_locked_blocked(self, setup):
+        s = setup
+        run_id = self._run_id(s)
+        s["pa"].is_locked = True
+        s["pa"].save(update_fields=["is_locked"])
+        res = s["client"].patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/",
+            {"observation": "nope"},
+            format="json",
+        )
+        assert res.status_code == 400
+
+    def test_delete_run_cascades_results(self, setup):
+        s = setup
+        run_id = self._run_id(s)
+        assert PostureResult.objects.filter(run_id=run_id).count() == 1
+        res = s["client"].delete(
+            f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/"
+        )
+        assert res.status_code == 204
+        assert not PostureRun.objects.filter(id=run_id).exists()
+        assert not PostureResult.objects.filter(run_id=run_id).exists()
+
+    def test_delete_run_locked_blocked(self, setup):
+        s = setup
+        run_id = self._run_id(s)
+        s["pa"].is_locked = True
+        s["pa"].save(update_fields=["is_locked"])
+        res = s["client"].delete(
+            f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/"
+        )
+        assert res.status_code == 400
+        assert PostureRun.objects.filter(id=run_id).exists()
+
+    def test_history_requires_asset(self, setup):
+        s = setup
+        res = s["client"].get(
+            f"/api/automation/posture-assessments/{s['pa'].id}/history/"
+        )
+        assert res.status_code == 400
+
+    def test_history_returns_runs_and_results(self, setup):
+        s = setup
+        upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "fail"}])
+        upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}])
+        upload(s["client"], s["pa"], s["asset2"], [{"ref_id": "1.2", "result": "pass"}])
+        body = (
+            s["client"]
+            .get(
+                f"/api/automation/posture-assessments/{s['pa'].id}/history/",
+                {"asset": str(s["asset1"].id)},
+            )
+            .json()
+        )
+        assert len(body["runs"]) == 2
+        assert len(body["results"]) == 2
+        assert {r["result"] for r in body["results"]} == {"pass", "fail"}
+        assert all(r["requirement"]["ref_id"] == "1.1" for r in body["results"])
+
+    def test_update_run_rejects_disallowed_extension_with_string_error(self, setup):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        s = setup
+        run_id = self._run_id(s)
+        res = s["client"].patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/",
+            {"attachment": SimpleUploadedFile("payload.exe", b"MZ")},
+            format="multipart",
+        )
+        assert res.status_code == 400
+        assert isinstance(res.json()["error"], str)
+
+    def test_observation_only_update_keeps_attachment_and_bumps_updated_at(self, setup):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        s = setup
+        run_id = self._run_id(s)
+        url = f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/"
+        s["client"].patch(
+            url,
+            {"attachment": SimpleUploadedFile("report.txt", b"x")},
+            format="multipart",
+        )
+        run = PostureRun.objects.get(id=run_id)
+        stored_name, before = run.attachment.name, run.updated_at
+
+        res = s["client"].patch(url, {"observation": "note"}, format="json")
+        assert res.status_code == 200
+        run.refresh_from_db()
+        assert run.attachment.name == stored_name
+        assert run.updated_at > before
+
+    def test_remove_attachment_ignores_falsy_strings(self, setup):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        s = setup
+        run_id = self._run_id(s)
+        url = f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/"
+        s["client"].patch(
+            url, {"attachment": SimpleUploadedFile("r.txt", b"x")}, format="multipart"
+        )
+        res = s["client"].patch(url, {"remove_attachment": "false"}, format="json")
+        assert res.status_code == 200
+        assert res.json()["attachment"] is not None
+
+    def test_delete_run_removes_attachment_file(self, setup):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        s = setup
+        run_id = self._run_id(s)
+        url = f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/"
+        s["client"].patch(
+            url,
+            {"attachment": SimpleUploadedFile("gone.txt", b"x")},
+            format="multipart",
+        )
+        run = PostureRun.objects.get(id=run_id)
+        storage, name = run.attachment.storage, run.attachment.name
+        assert storage.exists(name)
+
+        deleted = s["client"].delete(url)
+        assert deleted.status_code == 204
+        assert not storage.exists(name)
+
+    def test_pruning_spares_annotated_runs(self, setup):
+        s = setup
+        first = upload(
+            s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "fail"}]
+        ).json()["run_id"]
+        s["client"].patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/runs/{first}/",
+            {"observation": "investigated manually"},
+            format="json",
+        )
+        # history_depth is 2, so three more runs age the first one's results out
+        for _ in range(3):
+            upload(
+                s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}]
+            )
+        assert not PostureResult.objects.filter(run_id=first).exists()
+        assert PostureRun.objects.filter(id=first).exists()
+
+    def test_pruning_drops_plain_empty_runs(self, setup):
+        s = setup
+        first = upload(
+            s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "fail"}]
+        ).json()["run_id"]
+        for _ in range(3):
+            upload(
+                s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}]
+            )
+        assert not PostureRun.objects.filter(id=first).exists()
+
+    def test_assessment_deletion_cascades_attachment_files(self, setup):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        s = setup
+        run_id = self._run_id(s)
+        s["client"].patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/",
+            {"attachment": SimpleUploadedFile("cascade.txt", b"x")},
+            format="multipart",
+        )
+        run = PostureRun.objects.get(id=run_id)
+        storage, name = run.attachment.storage, run.attachment.name
+        assert storage.exists(name)
+
+        s["pa"].delete()
+        assert not storage.exists(name)

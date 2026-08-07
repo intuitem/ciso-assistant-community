@@ -3,6 +3,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import BatchCreatePersonalDataModal from '$lib/components/Modals/BatchCreatePersonalDataModal.svelte';
+	import BatchAddAssetAssessmentsModal from '$lib/components/Modals/BatchAddAssetAssessmentsModal.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import RiskAcceptanceModal from '$lib/components/Modals/RiskAcceptanceModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
@@ -217,36 +218,17 @@
 		modalStore.trigger(modal);
 	}
 
-	async function removeFromParent(
-		field: any,
-		ids: string[],
-		clear: () => void,
-		reload: () => void
-	): Promise<void> {
-		if (!field?.removeFromParent || !ids.length) return;
-		const res = await fetch(
-			`/${data.model.urlModel}/${data.data.id}/${field.removeFromParent.action}`,
-			{
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ [field.removeFromParent.payloadField]: ids })
-			}
+	// Table-scoped batch actions for a reverse-FK table, gated by change on the
+	// parent object (so parent_action entries are only offered to users the
+	// parent endpoint would authorize). parent_action endpoints are resolved
+	// here — the only place that knows the parent url and id.
+	function tableBatchActions(field: ReverseForeignKeyField) {
+		if (!field.tableBatchActions || !canEditObject) return [];
+		return field.tableBatchActions.map((a) =>
+			a.type === 'parent_action'
+				? { ...a, endpoint: `/${data.model.urlModel}/${data.data.id}/${a.action}` }
+				: a
 		);
-		if (res.ok) {
-			clear();
-			reload();
-			await invalidateAll();
-			toastStore.trigger({
-				message: safeTranslate(field.removeFromParent.successMessage ?? 'saved'),
-				background: 'preset-filled-success-500'
-			});
-		} else {
-			const body = await res.json().catch(() => ({}));
-			toastStore.trigger({
-				message: typeof body?.error === 'string' ? safeTranslate(body.error) : m.anErrorOccurred(),
-				background: 'preset-filled-error-500'
-			});
-		}
 	}
 
 	function modalSelectExisting(field: ReverseForeignKeyField): void {
@@ -272,12 +254,18 @@
 		modalStore.trigger(modal);
 	}
 
+	const batchCreateModals: Record<string, ModalComponent['ref']> = {
+		'personal-data': BatchCreatePersonalDataModal,
+		'asset-assessments': BatchAddAssetAssessmentsModal
+	};
+
 	function modalBatchCreate(field: ReverseForeignKeyField, parentId: string): void {
-		if (!field.batchCreate) return;
+		const ref = batchCreateModals[field.urlModel];
+		if (!field.batchCreate || !ref) return;
 		const modalComponent: ModalComponent = {
-			ref: BatchCreatePersonalDataModal,
+			ref,
 			props: {
-				processingId: parentId,
+				parentId,
 				urlModel: field.urlModel
 			}
 		};
@@ -997,30 +985,19 @@
 								})}
 								source={model.table}
 								disableCreate={disableCreate || model.disableCreate}
-								disableEdit={disableEdit || model.disableEdit}
-								disableDelete={disableDelete || model.disableDelete}
+								disableEdit={disableEdit || model.disableEdit || Boolean(data.data.is_locked)}
+								disableDelete={disableDelete || model.disableDelete || Boolean(data.data.is_locked)}
 								deleteForm={model.deleteForm}
 								URLModel={urlmodel}
 								expectedCount={getExpectedCount(urlmodel, field)}
 								fields={fieldsToUse}
 								defaultFilters={field.defaultFilters || {}}
-								selectable={Boolean(canEditObject && field?.removeFromParent)}
+								extraBatchActions={tableBatchActions(field)}
 							>
-								{#snippet selectActions({ ids, clear, reload })}
-									{#if field?.removeFromParent}
-										<button
-											type="button"
-											class="btn btn-sm preset-filled-error-500"
-											onclick={() => removeFromParent(field, ids, clear, reload)}
-										>
-											<i class="fa-solid fa-user-minus mr-2"></i>{safeTranslate(
-												field.removeFromParent.label ?? 'remove'
-											)}
-										</button>
-									{/if}
-								{/snippet}
 								{#snippet addButton()}
-									{#if canEditObject && field?.addExisting}
+									{#if data.data.is_locked}
+										<!-- Locked parent: no add affordances, matching the hidden remove selection. -->
+									{:else if canEditObject && field?.addExisting}
 										<span
 											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
 										>

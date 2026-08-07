@@ -117,7 +117,8 @@ export const FolderSchema = z.object({
 export const FolderImportSchema = z.object({
 	name: nameSchema,
 	file: z.instanceof(File),
-	load_missing_libraries: z.coerce.boolean().default(false)
+	load_missing_libraries: z.coerce.boolean().default(false),
+	create_missing_asset_classes: z.coerce.boolean().default(false)
 	//NOTE: coerce is used to handle checkbox form values which can be strings ('true'/'false')
 	//or booleans (true/false). Without coerce, form validation fails inconsistently.
 });
@@ -555,6 +556,7 @@ export const EvidenceSchema = z.object({
 	findings_assessments: z
 		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
 		.optional(),
+	security_exceptions: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	timeline_entries: z.string().optional().array().optional(),
 	contracts: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
@@ -601,6 +603,7 @@ export const GeneralSettingsSchema = z.object({
 		.optional(),
 	default_landing: z.enum(['analytics', 'respondent', 'portal']).default('analytics').optional(),
 	disable_partially_compliant_result: z.boolean().default(false).optional(),
+	use_risk_category_label: z.boolean().default(false).optional(),
 	personal_folders_parent: z.string().uuid().optional().nullable(),
 	currency: z.enum(CURRENCY_SYMBOLS).default('€'),
 	daily_rate: z.number().default(500).optional(),
@@ -1315,8 +1318,10 @@ export const SecurityExceptionSchema = z.object({
 	requirement_assessments: z.string().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
+	evidences: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
-	link: z.string().url().optional().nullable().or(z.literal(''))
+	link: z.string().url().optional().nullable().or(z.literal('')),
+	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
 export const FindingSchema = z.object({
@@ -1329,6 +1334,7 @@ export const FindingSchema = z.object({
 	applied_controls: z.string().uuid().optional().array().optional(),
 	reference_controls: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string(),
+	asset: z.string().optional().nullable(),
 	severity: z.number().default(-1),
 	priority: z.number().optional().nullable(),
 	filtering_labels: z.string().optional().array().optional(),
@@ -1353,6 +1359,8 @@ export const FindingsAssessmentSchema = z.object({
 	observation: z.string().optional().nullable(),
 	category: z.string().default('--'),
 	evidences: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional(),
+	reported_at: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	is_locked: z.boolean().optional().default(false)
 });
 
@@ -1674,6 +1682,14 @@ export const ClassificationLevelSchema = z.object({
 	hexcolor: z.string().optional().default(''),
 	is_visible: z.boolean().default(true),
 	translations: z.record(z.string().min(1), z.string().min(1)).optional()
+});
+
+export const AssetClassSchema = z.object({
+	...NameDescriptionMixin,
+	parent: z.string().optional().nullable(),
+	is_visible: z.boolean().default(true),
+	// {locale: {name, description}}
+	translations: z.record(z.string().min(1), z.record(z.string().min(1), z.string())).optional()
 });
 
 export const RoleSchema = z.object({
@@ -2001,6 +2017,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	terminologies: TerminologySchema,
 	'object-classifications': ObjectClassificationSchema,
 	'classification-levels': ClassificationLevelSchema,
+	'asset-class': AssetClassSchema,
 	'custom-fields': CustomFieldDefinitionSchema,
 	roles: RoleSchema,
 	'generic-collections': GenericCollectionSchema,

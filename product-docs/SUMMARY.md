@@ -26,6 +26,7 @@
   * [Journeys](concepts/journeys.md)
 * Assets and resilience
   * [Assets](concepts/assets.md)
+  * [Asset classes](concepts/asset-classes.md)
   * [Business impact analyses](concepts/business-impact-analyses.md)
 * Operations
   * [Applied controls](concepts/applied-controls.md)
@@ -157,6 +158,7 @@
 * [Kanban mode](features/kanban-mode.md)
 * [Applied controls analytics](features/applied-controls-analytics.md)
 * [Evidences from clipboard](features/evidences-from-clipboard.md)
+* [Evidence preview](features/evidence-preview.md)
 * [Mappings](features/mappings.md)
 * [Mapping explorer](features/mapping-explorer.md)
 * [X-rays](features/x-rays.md)
@@ -193,7 +195,9 @@
 * [Generating a PAT](integrations/pat.md)
 * [Outgoing webhooks](integrations/webhooks.md)
 * [Audit log forwarding](integrations/audit-log-forwarding.md)
+* [Hosted AI providers](integrations/ai-providers.md)
 * [MCP setup guide](integrations/mcp.md)
+* [Power BI connector](integrations/powerbi.md)
 * [Third-party integrations](integrations/third-party/README.md)
   * [Jira](integrations/third-party/jira.md)
   * [ServiceNow](integrations/third-party/servicenow.md)

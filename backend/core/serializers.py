@@ -77,12 +77,31 @@ class BaseModelSerializer(serializers.ModelSerializer):
     # fields lives in the compliance assessment's `field_visibility`.
     RESPONDENT_PROTECTED_FIELDS: set[str] = set()
 
+    # Built-in objects are immutable by default. A model may keep specific fields
+    # editable on built-in rows by listing them here, or set "__all__" for
+    # built-in rows that are user-owned and fully editable (e.g. the default org
+    # entity). Deletion of built-in objects is blocked at the permission layer.
+    BUILTIN_EDITABLE_FIELDS: "set[str] | str" = set()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         for field_name, flag_name in self.FLAGGED_FIELDS.items():
             if not ff_is_enabled(flag_name):
                 self.fields.pop(field_name)
+
+        # `builtin` flag must never be writable through the API.
+        if "builtin" in self.fields:
+            self.fields["builtin"].read_only = True
+
+        # Enforce built-in immutability field-by-field: on a built-in instance,
+        # every field outside BUILTIN_EDITABLE_FIELDS becomes read-only.
+        if self.BUILTIN_EDITABLE_FIELDS != "__all__" and getattr(
+            self.instance, "builtin", False
+        ):
+            for field_name, field in self.fields.items():
+                if field_name not in self.BUILTIN_EDITABLE_FIELDS:
+                    field.read_only = True
 
     def _strip_respondent_protected_fields(self, attrs: dict) -> dict:
         """Drop `RESPONDENT_PROTECTED_FIELDS` from *attrs* when the requesting
@@ -199,8 +218,19 @@ class BaseModelSerializer(serializers.ModelSerializer):
             accessible_ids = accessible_cache[related_model]
             if accessible_ids is None:
                 continue
+            # keeping an already-linked object is not linking a new one
+            current_ids: set = set()
+            if self.instance is not None and not isinstance(self.instance, list):
+                manager = getattr(self.instance, field_name, None)
+                if manager is not None and hasattr(manager, "values_list"):
+                    current_ids = {
+                        str(pk) for pk in manager.values_list("pk", flat=True)
+                    }
             for item in value:
-                if str(item.id) not in accessible_ids:
+                if (
+                    str(item.id) not in accessible_ids
+                    and str(item.id) not in current_ids
+                ):
                     raise PermissionDenied(
                         {
                             field_name: f"You do not have permission to link to this {related_model._meta.model_name}"
@@ -385,7 +415,7 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = Vulnerability
-        exclude = ["created_at", "updated_at", "is_published"]
+        exclude = ["is_published"]
 
 
 class VulnerabilityWriteSerializer(BaseModelSerializer):
@@ -1018,6 +1048,12 @@ class AppliedControlAutocompleteSerializer(BaseModelSerializer):
 class AssetImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     parent_assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    # Canonical path, not a pk: asset classes are root-folder referentials and
+    # never travel in the dump, so a pk would dangle on the target instance.
+    asset_class = serializers.SerializerMethodField()
+
+    def get_asset_class(self, obj) -> str | None:
+        return obj.asset_class.full_path if obj.asset_class else None
 
     class Meta:
         model = Asset
@@ -1029,6 +1065,7 @@ class AssetImportExportSerializer(BaseModelSerializer):
             "security_objectives",
             "disaster_recovery_objectives",
             "parent_assets",
+            "asset_class",
             "folder",
             "created_at",
             "updated_at",
@@ -1038,17 +1075,42 @@ class AssetImportExportSerializer(BaseModelSerializer):
 class AssetClassReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     parent = FieldsRelatedField()
+    # Needed by the frontend to resolve the folder governing this object.
+    folder = FieldsRelatedField()
     full_path = serializers.CharField()
+    # `name`/`description` stay canonical: the edit form round-trips them.
+    translated_name = serializers.CharField(source="get_name_translated")
+    translated_description = serializers.CharField(
+        source="get_description_translated", allow_blank=True, allow_null=True
+    )
 
     class Meta:
         model = AssetClass
-        exclude = ["created_at", "updated_at", "folder", "is_published"]
+        exclude = ["created_at", "updated_at", "is_published"]
 
 
 class AssetClassWriteSerializer(BaseModelSerializer):
+    # Built-ins are re-seeded at every startup: they are hidable, not editable.
+    BUILTIN_EDITABLE_FIELDS = {"is_visible"}
+
     class Meta:
         model = AssetClass
         exclude = ["created_at", "updated_at", "folder", "is_published"]
+
+    def validate_name(self, value):
+        if "/" in value:
+            raise serializers.ValidationError(
+                "The name cannot contain '/' for an Asset class."
+            )
+        return value
+
+    def validate_parent(self, parent):
+        """Check that the asset class tree will not contain cycles."""
+        if parent is not None and self.instance in parent.ancestors_plus_self():
+            raise serializers.ValidationError(
+                "errorAssetClassGraphMustNotContainCycles"
+            )
+        return parent
 
 
 class ReferenceControlWriteSerializer(BaseModelSerializer):
@@ -1662,6 +1724,7 @@ class AppliedControlListSerializer(BaseModelSerializer):
             "expiry_date",
             "progress_field",
             "cost",
+            "observation",
             "folder",
             "reference_control",
             "owner",
@@ -2466,6 +2529,7 @@ class EvidenceReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
     requirement_assessments = FieldsRelatedField(many=True)
+    security_exceptions = FieldsRelatedField(many=True)
     contracts = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     owner = FieldsRelatedField(many=True)
@@ -2499,6 +2563,9 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     )
     findings_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=FindingsAssessment.objects.all(), required=False
+    )
+    security_exceptions = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=SecurityException.objects.all(), required=False
     )
     timeline_entries = serializers.PrimaryKeyRelatedField(
         many=True, queryset=TimelineEntry.objects.all(), required=False
@@ -4081,6 +4148,7 @@ class FindingsAssessmentImportExportSerializer(BaseModelSerializer):
             "status",
             "eta",
             "due_date",
+            "reported_at",
             "observation",
             "category",
             "is_locked",
@@ -4095,6 +4163,8 @@ class FindingsAssessmentImportExportSerializer(BaseModelSerializer):
 class FindingImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     findings_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
+    asset = HashSlugRelatedField(slug_field="pk", read_only=True)
+    requirement_node = serializers.SlugRelatedField(slug_field="urn", read_only=True)
     threats = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     vulnerabilities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     reference_controls = HashSlugRelatedField(
@@ -4117,6 +4187,8 @@ class FindingImportExportSerializer(BaseModelSerializer):
             "due_date",
             "folder",
             "findings_assessment",
+            "asset",
+            "requirement_node",
             "threats",
             "vulnerabilities",
             "reference_controls",
@@ -4396,7 +4468,9 @@ class LibraryFilteringLabelWriteSerializer(BaseModelSerializer):
         exclude = ["folder", "is_published"]
 
 
-class SecurityExceptionWriteSerializer(BaseModelSerializer):
+class SecurityExceptionWriteSerializer(
+    CustomFieldsSerializerMixin, BaseModelSerializer
+):
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
         many=True,
@@ -4411,6 +4485,9 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
     )
     assets = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Asset.objects.all(), required=False
+    )
+    evidences = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Evidence.objects.all(), required=False
     )
 
     def create(self, validated_data):
@@ -4517,7 +4594,7 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
         read_only_fields = ["approver"]
 
 
-class SecurityExceptionReadSerializer(BaseModelSerializer):
+class SecurityExceptionReadSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     owners = FieldsRelatedField(many=True)
@@ -4525,6 +4602,7 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
     severity = serializers.CharField(source="get_severity_display")
     associated_objects_count = serializers.SerializerMethodField()
     assets = FieldsRelatedField(many=True)
+    evidences = FieldsRelatedField(many=True)
     validation_flows = FieldsRelatedField(
         many=True,
         fields=[
@@ -4551,6 +4629,7 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
                 + len(obj.vulnerabilities.all())
                 + len(obj.risk_scenarios.all())
                 + len(obj.requirement_assessments.all())
+                + len(obj.evidences.all())
             )
         except Exception:
             # Fallback: perform DB counts
@@ -4560,6 +4639,7 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
                 + obj.vulnerabilities.count()
                 + obj.risk_scenarios.count()
                 + obj.requirement_assessments.count()
+                + obj.evidences.count()
             )
 
     class Meta:
@@ -4628,6 +4708,7 @@ class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
     findings_count = serializers.IntegerField(source="findings.count")
     treatment_progress = serializers.IntegerField(read_only=True, default=0)
     evidences = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     validation_flows = FieldsRelatedField(
         many=True,
         fields=[
@@ -4675,7 +4756,9 @@ class FindingReadSerializer(FindingWriteSerializer):
     path = PathField(read_only=True)
     owner = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField(["id", "name", "is_locked"])
-    requirement_node = FieldsRelatedField(["id", "ref_id", "name"])
+    # No standalone page exists for requirement nodes: omit "id" so the
+    # generic detail view renders plain text instead of a dead link.
+    requirement_node = FieldsRelatedField(["ref_id", "name"])
     asset = FieldsRelatedField()
     threats = FieldsRelatedField(many=True)
     vulnerabilities = FieldsRelatedField(many=True)
@@ -5351,6 +5434,9 @@ class TerminologyReadSerializer(BaseModelSerializer):
 
 
 class TerminologyWriteSerializer(BaseModelSerializer):
+    # Built-in terminologies are seeded at startup; users may only toggle their
+    # visibility, not rename or otherwise modify them.
+    BUILTIN_EDITABLE_FIELDS = {"is_visible"}
     builtin = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -5368,6 +5454,8 @@ class ClassificationLevelReadSerializer(BaseModelSerializer):
 
 
 class ClassificationLevelWriteSerializer(BaseModelSerializer):
+    # Same as terminologies: built-in levels can only be shown/hidden.
+    BUILTIN_EDITABLE_FIELDS = {"is_visible"}
     builtin = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -5385,6 +5473,8 @@ class ObjectClassificationReadSerializer(BaseModelSerializer):
 
 
 class ObjectClassificationWriteSerializer(BaseModelSerializer):
+    # Built-in classifications (e.g. TLP) can only be shown/hidden.
+    BUILTIN_EDITABLE_FIELDS = {"is_visible"}
     builtin = serializers.BooleanField(read_only=True)
 
     class Meta:

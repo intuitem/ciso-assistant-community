@@ -116,7 +116,7 @@ from django.template.loader import render_to_string
 from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from iam.models import Folder, IdPGroup, RoleAssignment, User, UserGroup
+from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup
 from rest_framework import filters, generics, permissions, status, viewsets
 from custom_fields.filters import CustomFieldFilterBackend, CustomFieldSearchFilter
 from django.utils.translation import gettext_lazy as _, get_language
@@ -132,6 +132,7 @@ from rest_framework.parsers import (
     JSONParser,
     MultiPartParser,
 )
+from rest_framework.relations import ManyRelatedField
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -209,6 +210,12 @@ logger = structlog.get_logger(__name__)
 SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
+
+# Max ids accepted per batch request (batch-action, batch-create, member
+# management). Keep >= the largest table/picker page size (100 — see
+# RowsPerPage options and EntityPickerModal PAGE_SIZE_OPTIONS) so a full-page
+# selection always fits in a single request.
+BATCH_SIZE_LIMIT = 100
 
 
 MAPPING_MAX_DEPTH = 3
@@ -749,7 +756,24 @@ class GenericFilterSet(df.FilterSet):
                     "queryset": f.remote_field.model.objects.all(),
                 },
             },
+            # ISO 8601 (incl. timezone/Z) parsing for datetime filters,
+            # required by BI clients filtering on created_at/updated_at
+            models.DateTimeField: {
+                "filter_class": df.IsoDateTimeFilter,
+            },
         }
+
+
+class TimestampRangeFilterMixin(df.FilterSet):
+    """ISO-8601 created_at/updated_at range params for BI clients
+    (Power BI incremental refresh). Mix into FilterSets of viewsets
+    that use filterset_class; list-style viewsets declare the same
+    lookups via dict-form filterset_fields."""
+
+    created_at__gte = df.IsoDateTimeFilter(field_name="created_at", lookup_expr="gte")
+    created_at__lt = df.IsoDateTimeFilter(field_name="created_at", lookup_expr="lt")
+    updated_at__gte = df.IsoDateTimeFilter(field_name="updated_at", lookup_expr="gte")
+    updated_at__lt = df.IsoDateTimeFilter(field_name="updated_at", lookup_expr="lt")
 
 
 class SmartOrderingFilter(filters.OrderingFilter):
@@ -1221,7 +1245,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return instance
 
     def perform_destroy(self, instance):
-        serializer = self.get_serializer(instance)
+        # resolve for "destroy" explicitly so batch_action can call this too
+        serializer_class = self.get_serializer_class(action="destroy")
+        serializer = serializer_class(instance, context=self.get_serializer_context())
         serializer.delete(instance)
         try:
             dispatch_webhook_event(instance, "deleted")
@@ -1331,10 +1357,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        BATCH_SIZE_LIMIT = 100
         if len(ids) > BATCH_SIZE_LIMIT:
             return Response(
-                {"error": f"Too many ids (max {BATCH_SIZE_LIMIT})"},
+                {"error": "too many ids", "max": BATCH_SIZE_LIMIT},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -1353,6 +1378,22 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         # Resolve the write serializer once for all update operations
         if action_type != "delete":
             serializer_class = self.get_serializer_class(action="partial_update")
+            target_field = "folder" if action_type == "change_folder" else field_name
+            field = (
+                serializer_class().fields.get(target_field) if target_field else None
+            )
+            if field is None or field.read_only:
+                return Response(
+                    {"error": f"field not editable: {target_field}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if action_type in ("add_m2m", "remove_m2m") and not isinstance(
+                field, ManyRelatedField
+            ):
+                return Response(
+                    {"error": f"not a many-to-many field: {target_field}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         succeeded = []
         failed = []
@@ -1382,49 +1423,45 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 )
                 continue
 
+            # Built-in / library objects are immutable through the API (mirrors the
+            # object-permission guard); skip any mutating batch action on them.
+            if getattr(obj, "builtin", False) or getattr(obj, "urn", None):
+                failed.append(
+                    {
+                        "id": str(obj_id),
+                        "name": str(obj),
+                        "error": "Cannot modify builtin object",
+                    }
+                )
+                continue
+
             try:
                 if action_type == "delete":
-                    if getattr(obj, "builtin", False) or getattr(obj, "urn", None):
-                        failed.append(
-                            {
-                                "id": str(obj_id),
-                                "name": str(obj),
-                                "error": "Cannot delete builtin object",
-                            }
-                        )
-                        continue
-                    try:
-                        dispatch_webhook_event(obj, "deleted")
-                    except Exception:
-                        logger.error(
-                            "Webhook dispatch failed on batch delete", exc_info=True
-                        )
-                    obj.delete()
-
-                elif action_type in ("add_m2m", "remove_m2m"):
-                    ids_to_modify = value if isinstance(value, list) else [value]
-                    m2m_field = getattr(obj, field_name)
-                    if action_type == "add_m2m":
-                        m2m_field.add(*ids_to_modify)
-                    else:
-                        m2m_field.remove(*ids_to_modify)
-                    obj.save(update_fields=["updated_at"])
-                    try:
-                        dispatch_webhook_event(obj, "updated")
-                    except Exception:
-                        logger.error(
-                            "Webhook dispatch failed on batch %s",
-                            action_type,
-                            exc_info=True,
-                        )
+                    self.perform_destroy(obj)
 
                 else:
                     # Build data dict for the serializer
                     if action_type == "change_folder":
                         data = {"folder": value}
-                    elif action_type == "change_m2m":
-                        actor_ids = value if isinstance(value, list) else [value]
-                        data = {field_name: actor_ids}
+                    elif action_type in ("change_m2m", "add_m2m", "remove_m2m"):
+                        # read-modify-write is racy vs concurrent writers, accepted: serializer validation (IAM/lock) outweighs cbe008798's atomic .add()/.remove()
+                        target = {
+                            str(i)
+                            for i in (value if isinstance(value, list) else [value])
+                        }
+                        if action_type != "change_m2m":
+                            current = {
+                                str(pk)
+                                for pk in getattr(obj, field_name).values_list(
+                                    "pk", flat=True
+                                )
+                            }
+                            target = (
+                                current | target
+                                if action_type == "add_m2m"
+                                else current - target
+                            )
+                        data = {field_name: list(target)}
                     else:  # change_field
                         data = {field_name: value}
 
@@ -1459,6 +1496,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                         else "Permission denied",
                     }
                 )
+            except DRFValidationError as e:
+                failed.append({"id": str(obj_id), "name": str(obj), "error": e.detail})
             except Exception:
                 logger.error("Batch action failed for %s", obj_id, exc_info=True)
                 failed.append(
@@ -1479,8 +1518,43 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         - affected: objects not deleted but whose relationships will be removed (through rows, SET_NULL, local links)
         """
         instance = self.get_object()
+
+        # This previews a deletion, so it must require the permission to delete —
+        # get_object() only proves the caller may view the parent, and roles such
+        # as respondent or auditee hold view_folder without view_user/view_asset.
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(
+                codename=f"delete_{self.model._meta.model_name}"
+            ),
+            folder=Folder.get_folder(instance),
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
         collector = NestedObjects(using=router.db_for_write(instance))
         collector.collect([instance])
+
+        scope_folder = (
+            instance if isinstance(instance, Folder) else Folder.get_folder(instance)
+        )
+        in_scope_folder_ids = set()
+        if scope_folder is not None:
+            in_scope_folder_ids = {str(scope_folder.id)} | {
+                str(f.id) for f in scope_folder.get_sub_folders()
+            }
+        viewable_folder_ids = {
+            str(fid)
+            for fid in RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, Folder
+            )[0]
+        }
+
+        def is_visible(obj):
+            folder = Folder.get_folder(obj)
+            if folder is None:
+                return True
+            folder_id = str(folder.id)
+            return folder_id in in_scope_folder_ids or folder_id in viewable_folder_ids
 
         skip_model_names = {
             "Token",
@@ -1501,18 +1575,27 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             )
 
         # Build index of concrete objects that will be deleted
+        # Excludes the previewed object only, not its whole model: a
+        # self-referential cascade would otherwise hide every descendant.
+        def is_the_subject(model, obj):
+            return model is type(instance) and str(getattr(obj, "pk", "")) == str(
+                instance.pk
+            )
+
         deleted_index = set()
         for model, objs in collector.model_objs.items():
-            if model is type(instance):
-                continue
             if getattr(model._meta, "auto_created", False):
                 continue  # skip through rows here; we will bubble endpoints separately
             for o in objs:
+                if is_the_subject(model, o):
+                    continue
                 deleted_index.add((model.__name__, str(getattr(o, "pk", ""))))
 
         def add_grouped(bucket, obj):
             model = obj.__class__
             if is_hidden_model(model):
+                return
+            if not is_visible(obj):
                 return
             key = model.__name__
             pk = str(getattr(obj, "pk", "")) or ""
@@ -1555,18 +1638,26 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
         deleted_bucket = {"by_model": {}, "_seen": set()}
         affected_bucket = {"by_model": {}, "_seen": set()}
+        blocked_bucket = {"by_model": {}, "_seen": set()}
+
+        # 0) PROTECT/RESTRICT references: NestedObjects.collect() swallows the
+        # ProtectedError and parks the blockers here.
+        for obj in getattr(collector, "protected", ()):
+            if is_hidden_model(type(obj)) or not is_visible(obj):
+                continue
+            add_grouped(blocked_bucket, obj)
 
         # 1) Concrete deletions
         through_rows = []
         for model, instances in collector.model_objs.items():
-            if model is type(instance):
-                continue
             if getattr(model._meta, "auto_created", False):
                 through_rows.append((model, list(instances)))
                 continue
             if is_hidden_model(model):
                 continue
             for obj in instances:
+                if is_the_subject(model, obj):
+                    continue
                 add_grouped(deleted_bucket, obj)
 
         # 2) Bubble endpoints from through rows (M2M join tables)
@@ -1678,6 +1769,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         # 3) Sort and respond
         deleted_groups, deleted_count = finalize(deleted_bucket)
         affected_groups, affected_count = finalize(affected_bucket)
+        blocked_groups, blocked_count = finalize(blocked_bucket)
 
         def flatten(groups):
             return [
@@ -1704,6 +1796,13 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 "related_objects": flatten(affected_groups),
                 "message": "These objects will NOT be deleted but will lose one or more relationships.",
                 "level": "info",
+            },
+            "blocked": {
+                "count": blocked_count,
+                "grouped_objects": blocked_groups,
+                "related_objects": flatten(blocked_groups),
+                "message": "Deletion is blocked while these objects still reference this one.",
+                "level": "error",
             },
         }
         return Response(payload)
@@ -1965,9 +2064,41 @@ class ThreatViewSet(BaseModelViewSet):
         return Response(my_map)
 
 
-class AssetFilter(GenericFilterSet):
+class AssetFilter(TimestampRangeFilterMixin, GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     asset_class = df.ModelMultipleChoiceFilter(queryset=AssetClass.objects.all())
+    asset_class__isnull = df.BooleanFilter(
+        field_name="asset_class", lookup_expr="isnull"
+    )
+    # BIA report: only assets assessed in the given BIA.
+    bia = df.UUIDFilter(method="filter_bia")
+    # Add-only pickers: drop assets already assessed in the given BIA.
+    exclude_bia = df.UUIDFilter(method="filter_exclude_bia")
+
+    def _can_read_bia(self, value) -> bool:
+        # Both BIA filters are only honoured for a BIA the caller can actually
+        # read, so this endpoint can't be used to infer the scope of BIAs they
+        # can't see.
+        from resilience.models import BusinessImpactAnalysis
+
+        return bool(
+            value
+            and self.request
+            and RoleAssignment.is_object_readable(
+                self.request.user, BusinessImpactAnalysis, value
+            )
+        )
+
+    def filter_bia(self, queryset, name, value):
+        if not self._can_read_bia(value):
+            # Same result as a nonexistent BIA, so the two can't be told apart.
+            return queryset.none()
+        return queryset.filter(assetassessment__bia=value).distinct()
+
+    def filter_exclude_bia(self, queryset, name, value):
+        if not self._can_read_bia(value):
+            return queryset
+        return queryset.exclude(assetassessment__bia=value)
 
     exclude_children = df.ModelChoiceFilter(
         queryset=Asset.objects.all(),
@@ -2429,6 +2560,47 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
 
         return Response(asset_data)
 
+    @action(detail=False, url_path="class-tree", name="Get assets by class tree")
+    def class_tree(self, request):
+        """Asset class tree annotated with accessible asset counts.
+
+        Cost is O(number of classes), not O(number of assets): the counts come
+        from a single GROUP BY, and the assets themselves are fetched per class
+        by the paginated list endpoint.
+        """
+        # order_by() is cleared first: a queryset's ordering fields are added to
+        # the GROUP BY, which would silently make this one row per asset.
+        scoped = self.filter_queryset(self.get_queryset()).order_by()
+
+        direct_counts = {
+            row["asset_class"]: row["total"]
+            for row in scoped.values("asset_class").annotate(total=Count("id"))
+        }
+
+        def annotate(nodes):
+            annotated = []
+            for node in nodes:
+                children = annotate(node["children"])
+                direct = direct_counts.get(UUID(node["id"]), 0)
+                annotated.append(
+                    {
+                        **node,
+                        "children": children,
+                        "direct_count": direct,
+                        "total_count": direct
+                        + sum(child["total_count"] for child in children),
+                    }
+                )
+            return annotated
+
+        return Response(
+            {
+                "tree": annotate(AssetClass.build_tree()),
+                "unclassified_count": direct_counts.get(None, 0),
+                "total_count": sum(direct_counts.values()),
+            }
+        )
+
     @action(detail=False, name="Get assets graph")
     def graph(self, request):
         nodes = []
@@ -2595,16 +2767,8 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
             "asset_class": {
                 "source": "asset_class",
                 "label": "asset_class",
-                # Handle missing asset_class safely and trim a leading 'assetClass/' segment if present
-                "format": lambda ac: (
-                    (
-                        ac.full_path.replace("assetClass/", "", 1)
-                        if ac.full_path.startswith("assetClass/")
-                        else ac.full_path.replace("assetClass", "")
-                    )
-                    if ac
-                    else ""
-                ),
+                # Canonical path: a translated one could not be re-imported.
+                "format": lambda ac: ac.full_path if ac else "",
                 "escape": True,
             },
             "folder": {"source": "folder.name", "label": "folder", "escape": True},
@@ -2849,14 +3013,15 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
 
 class AssetClassViewSet(BaseModelViewSet):
     model = AssetClass
-    filterset_fields = ["parent", "name"]
+    filterset_fields = ["parent", "name", "builtin", "is_visible"]
 
     ordering = ["parent", "name"]
     search_fields = ["name", "description"]
 
     @action(detail=False, name="Get Asset Class Tree")
     def tree(self, request):
-        return Response(AssetClass.build_tree())
+        visible_only = request.query_params.get("visible_only") == "true"
+        return Response(AssetClass.build_tree(visible_only=visible_only))
 
 
 class ReferenceControlViewSet(BaseModelViewSet):
@@ -3167,19 +3332,21 @@ class VulnerabilityViewSet(BaseModelViewSet):
     """
 
     model = Vulnerability
-    filterset_fields = [
-        "folder",
-        "assets",
-        "status",
-        "severity",
-        "risk_scenarios",
-        "applied_controls",
-        "security_exceptions",
-        "filtering_labels",
-        "findings",
-        "security_advisories",
-        "cwes",
-    ]
+    filterset_fields = {
+        "folder": ["exact"],
+        "assets": ["exact"],
+        "status": ["exact"],
+        "severity": ["exact"],
+        "risk_scenarios": ["exact"],
+        "applied_controls": ["exact"],
+        "security_exceptions": ["exact"],
+        "filtering_labels": ["exact"],
+        "findings": ["exact"],
+        "security_advisories": ["exact"],
+        "cwes": ["exact"],
+        "created_at": ["gte", "lt"],
+        "updated_at": ["gte", "lt"],
+    }
     search_fields = ["name", "description", "ref_id"]
 
     @action(detail=False, name="Lightweight autocomplete search")
@@ -4721,7 +4888,7 @@ APPLIED_CONTROL_LINKED_FIELDS = [
 APPLIED_CONTROL_LINKED_FIELD_NAMES = [f[0] for f in APPLIED_CONTROL_LINKED_FIELDS]
 
 
-class AppliedControlFilterSet(GenericFilterSet):
+class AppliedControlFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     reference_control = df.ModelMultipleChoiceFilter(
         queryset=ReferenceControl.objects.all()
@@ -5456,7 +5623,12 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get priority chart data")
     def priority_chart_data(self, request):
-        qs = AppliedControl.objects.exclude(status="active")
+        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, self.model
+        )
+        qs = self.model.objects.filter(id__in=viewable_controls_ids).exclude(
+            status="active"
+        )
 
         data = {
             "--": [],
@@ -6553,7 +6725,7 @@ class IntegerInFilter(df.BaseInFilter, df.NumberFilter):
     field_class = FormIntegerField
 
 
-class RiskScenarioFilter(GenericFilterSet):
+class RiskScenarioFilter(TimestampRangeFilterMixin, GenericFilterSet):
     risk_assessment = df.ModelMultipleChoiceFilter(
         queryset=RiskAssessment.objects.all()
     )
@@ -7679,16 +7851,9 @@ class UserGroupViewSet(BaseModelViewSet):
     def get_queryset(self):
         return super().get_queryset().select_related("folder")
 
-    def destroy(self, request, *args, **kwargs):
-        user_group = self.get_object()
-        if user_group.builtin:
-            return Response(
-                {"error": "attemptToDeleteBuiltinUserGroup"},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        return super().destroy(request, *args, **kwargs)
+    # Deletion of built-in groups is blocked generically by the permission layer.
 
-    MEMBER_BATCH_LIMIT = 100
+    MEMBER_BATCH_LIMIT = BATCH_SIZE_LIMIT
 
     def _member_ids(self, request) -> list[str]:
         ids = request.data.get("users")
@@ -8137,6 +8302,10 @@ class FolderViewSet(BaseModelViewSet):
             request.query_params.get("load_missing_libraries", "false").lower()
             == "true"
         )
+        create_missing_asset_classes = (
+            request.query_params.get("create_missing_asset_classes", "false").lower()
+            == "true"
+        )
         try:
             if not RoleAssignment.is_access_allowed(
                 user=request.user,
@@ -8149,7 +8318,11 @@ class FolderViewSet(BaseModelViewSet):
             )
             parsed_data = domain_io.process_uploaded_file(request.data["file"])
             result = domain_io.import_objects(
-                parsed_data, domain_name, load_missing_libraries, user=request.user
+                parsed_data,
+                domain_name,
+                load_missing_libraries,
+                user=request.user,
+                create_missing_asset_classes=create_missing_asset_classes,
             )
             return Response(result, status=status.HTTP_200_OK)
 
@@ -8638,6 +8811,13 @@ def get_composer_data(request):
         for risk_assessment in risk_assessments
     ):
         return Response({"error": "Invalid UUID list"}, status=400)
+
+    (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), request.user, RiskAssessment
+    )
+    viewable_ids = {str(id) for id in viewable_ids}
+    if not all(risk_assessment in viewable_ids for risk_assessment in risk_assessments):
+        return Response({"error": "Permission denied"}, status=403)
 
     data = compile_risk_assessment_for_composer(request.user, risk_assessments)
     for _data in data["risk_assessment_objects"]:
@@ -9402,23 +9582,41 @@ class EvidenceViewSet(BaseModelViewSet):
     """
 
     model = Evidence
-    filterset_fields = [
-        "folder",
-        "applied_controls",
-        "requirement_assessments",
-        "name",
-        "timeline_entries",
-        "filtering_labels",
-        "findings",
-        "findings_assessments",
-        "genericcollection",
-        "owner",
-        "status",
-        "expiry_date",
-        "contracts",
-        "processings",
-        "data_breaches",
-    ]
+    filterset_fields = {
+        "folder": ["exact"],
+        "applied_controls": ["exact"],
+        "requirement_assessments": ["exact"],
+        "name": ["exact"],
+        "timeline_entries": ["exact"],
+        "filtering_labels": ["exact"],
+        "findings": ["exact"],
+        "findings_assessments": ["exact"],
+        "security_exceptions": ["exact"],
+        "genericcollection": ["exact"],
+        "owner": ["exact"],
+        "status": ["exact"],
+        "expiry_date": ["exact"],
+        "contracts": ["exact"],
+        "processings": ["exact"],
+        "data_breaches": ["exact"],
+        "created_at": ["gte", "lt"],
+        "updated_at": ["gte", "lt"],
+    }
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related(
+                "revisions",
+                "applied_controls",
+                "requirement_assessments",
+                "security_exceptions",
+                "contracts",
+                "filtering_labels",
+                "owner",
+            )
+        )
 
     @action(detail=False, name="Get all evidences owners")
     def owner(self, request):
@@ -10762,7 +10960,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         name="Get target frameworks mapping options with compliance distribution",
     )
     def frameworks(self, request, pk):
-        audit = ComplianceAssessment.objects.get(id=pk)
+        audit = self.get_object()
         from core.mappings.engine import engine
 
         audit_from_results = engine.load_audit_fields(audit)
@@ -13308,28 +13506,22 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="progress_ts")
     def progress_ts(self, request, pk):
-        try:
-            raw = (
-                HistoricalMetric.objects.filter(
-                    model="ComplianceAssessment", object_id=pk
-                )
-                .annotate(progress=F("data__reqs__progress_perc"))
-                .values("date", "progress")
-                .order_by("date")
+        compliance_assessment = self.get_object()
+        raw = (
+            HistoricalMetric.objects.filter(
+                model="ComplianceAssessment", object_id=compliance_assessment.id
             )
+            .annotate(progress=F("data__reqs__progress_perc"))
+            .values("date", "progress")
+            .order_by("date")
+        )
 
-            # Transform the data into the required format
-            formatted_data = [
-                [entry["date"].isoformat(), entry["progress"]] for entry in raw
-            ]
+        # Transform the data into the required format
+        formatted_data = [
+            [entry["date"].isoformat(), entry["progress"]] for entry in raw
+        ]
 
-            return Response({"data": formatted_data})
-
-        except HistoricalMetric.DoesNotExist:
-            return Response(
-                {"error": "No metrics found for this assessment"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        return Response({"data": formatted_data})
 
     @action(detail=True, methods=["get"])
     def threats_metrics(self, request, pk=None):
@@ -13990,22 +14182,24 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     """
 
     model = RequirementAssessment
-    filterset_fields = [
-        "folder",
-        "folder__name",
-        "evidences",
-        "compliance_assessment",
-        "applied_controls",
-        "security_exceptions",
-        "requirement__urn",
-        "result",
-        "extended_result",
-        "compliance_assessment__ref_id",
-        "compliance_assessment__perimeter",
-        "compliance_assessment__perimeter__name",
-        "compliance_assessment__assets__ref_id",
-        "requirement__assessable",
-    ]
+    filterset_fields = {
+        "folder": ["exact"],
+        "folder__name": ["exact"],
+        "evidences": ["exact"],
+        "compliance_assessment": ["exact"],
+        "applied_controls": ["exact"],
+        "security_exceptions": ["exact"],
+        "requirement__urn": ["exact"],
+        "result": ["exact"],
+        "extended_result": ["exact"],
+        "compliance_assessment__ref_id": ["exact"],
+        "compliance_assessment__perimeter": ["exact"],
+        "compliance_assessment__perimeter__name": ["exact"],
+        "compliance_assessment__assets__ref_id": ["exact"],
+        "requirement__assessable": ["exact"],
+        "created_at": ["gte", "lt"],
+        "updated_at": ["gte", "lt"],
+    }
     search_fields = [
         "requirement__name",
         "requirement__description",
@@ -14790,19 +14984,26 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
     """
 
     model = SecurityException
-    filterset_fields = [
-        "name",
-        "requirement_assessments",
-        "risk_scenarios",
-        "owners",
-        "approver",
-        "folder",
-        "severity",
-        "status",
-        "genericcollection",
-        "expiration_date",
-    ]
+    filterset_fields = {
+        "name": ["exact"],
+        "requirement_assessments": ["exact"],
+        "risk_scenarios": ["exact"],
+        "evidences": ["exact"],
+        "owners": ["exact"],
+        "approver": ["exact"],
+        "folder": ["exact"],
+        "severity": ["exact"],
+        "status": ["exact"],
+        "genericcollection": ["exact"],
+        "expiration_date": ["exact"],
+        "created_at": ["gte", "lt"],
+        "updated_at": ["gte", "lt"],
+    }
     search_fields = ["name", "description", "ref_id"]
+    filter_backends = [
+        CustomFieldSearchFilter if b is filters.SearchFilter else b
+        for b in BaseModelViewSet.filter_backends
+    ] + [CustomFieldFilterBackend]
 
     export_config = {
         "fields": {
@@ -14863,7 +15064,9 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
                 "vulnerabilities",
                 "risk_scenarios",
                 "requirement_assessments",
+                "evidences",
                 "owners",
+                "custom_field_values__definition",
                 Prefetch(
                     "validationflow_set",
                     queryset=ValidationFlow.objects.select_related(
@@ -14954,6 +15157,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "authors",
         "status",
         "evidences",
+        "filtering_labels",
         "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id"]
@@ -14972,6 +15176,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "evidences",
                 "authors",
+                "filtering_labels__folder",
             )
             .annotate(
                 _total_findings=Count("findings"),
@@ -15435,20 +15640,23 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
 class FindingViewSet(BaseModelViewSet):
     model = Finding
-    filterset_fields = [
-        "name",
-        "owner",
-        "folder",
-        "status",
-        "severity",
-        "priority",
-        "findings_assessment",
-        "filtering_labels",
-        "applied_controls",
-        "evidences",
-        "vulnerabilities",
-        "due_date",
-    ]
+    filterset_fields = {
+        "name": ["exact"],
+        "owner": ["exact"],
+        "folder": ["exact"],
+        "status": ["exact"],
+        "severity": ["exact"],
+        "priority": ["exact"],
+        "findings_assessment": ["exact"],
+        "asset": ["exact"],
+        "filtering_labels": ["exact"],
+        "applied_controls": ["exact"],
+        "evidences": ["exact"],
+        "vulnerabilities": ["exact"],
+        "due_date": ["exact"],
+        "created_at": ["gte", "lt"],
+        "updated_at": ["gte", "lt"],
+    }
     ordering = ["ref_id"]
 
     def get_queryset(self) -> models.query.QuerySet:
@@ -15587,20 +15795,22 @@ class FindingViewSet(BaseModelViewSet):
 class IncidentViewSet(ExportMixin, BaseModelViewSet):
     model = Incident
     search_fields = ["name", "description", "ref_id"]
-    filterset_fields = [
-        "folder",
-        "status",
-        "severity",
-        "qualifications",
-        "detection",
-        "owners",
-        "entities",
-        "assets",
-        "applied_controls",
-        "task_templates",
-        "risk_scenarios",
-        "filtering_labels",
-    ]
+    filterset_fields = {
+        "folder": ["exact"],
+        "status": ["exact"],
+        "severity": ["exact"],
+        "qualifications": ["exact"],
+        "detection": ["exact"],
+        "owners": ["exact"],
+        "entities": ["exact"],
+        "assets": ["exact"],
+        "applied_controls": ["exact"],
+        "task_templates": ["exact"],
+        "risk_scenarios": ["exact"],
+        "filtering_labels": ["exact"],
+        "created_at": ["gte", "lt"],
+        "updated_at": ["gte", "lt"],
+    }
 
     export_config = {
         "fields": {
