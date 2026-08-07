@@ -625,23 +625,24 @@ export default {
 		},
 		urn: 'urn:intuitem:risk:function:DOC.CONTROLS'
 	},
+	// ATT&CK now ships as TTPs, so its legacy threats are no longer maintained
 	threat: {
-		name: 'T1011 - Exfiltration Over Other Network Medium',
+		name: 'ICT-001 - Ransomware',
 		library: {
-			name: 'Mitre ATT&CK v19.1 - Threats and Mitigations',
-			ref: 'mitre-attack',
-			urn: 'urn:intuitem:risk:library:mitre-attack'
+			name: 'INTUITEM Common Catalog',
+			ref: 'intuitem-common-catalog',
+			urn: 'urn:intuitem:risk:library:intuitem-common-catalog'
 		},
-		urn: 'urn:intuitem:risk:threat:mitre-attack:T1011'
+		urn: 'urn:intuitem:risk:threat:intuitem-common-catalog:ict-001'
 	},
 	threat2: {
-		name: 'T1052 - Exfiltration Over Physical Medium',
+		name: 'ICT-002 - Phishing and Spear Phishing',
 		library: {
-			name: 'Mitre ATT&CK v19.1 - Threats and Mitigations',
-			ref: 'mitre-attack',
-			urn: 'urn:intuitem:risk:library:mitre-attack'
+			name: 'INTUITEM Common Catalog',
+			ref: 'intuitem-common-catalog',
+			urn: 'urn:intuitem:risk:library:intuitem-common-catalog'
 		},
-		urn: 'urn:intuitem:risk:threat:mitre-attack:T1052'
+		urn: 'urn:intuitem:risk:threat:intuitem-common-catalog:ict-002'
 	},
 	requirement_assessment: {
 		name: 'RC.RP - Recovery Planning',

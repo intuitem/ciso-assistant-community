@@ -1150,6 +1150,24 @@ export const ASSET_CLASS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const ASSET_CLASS_IS_VISIBLE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'is_visible',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
+const ASSET_CLASS_BUILTIN_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'builtin',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
 const ASSET_IS_BUSINESS_FUNCTION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1880,8 +1898,8 @@ export const listViewFields = {
 			'filtering_labels'
 		],
 		optionalFields: {
-			head: ['referenceLink', 'createdAt', 'updatedAt'],
-			body: ['reference_link', 'created_at', 'updated_at']
+			head: ['assetClass', 'referenceLink', 'createdAt', 'updatedAt'],
+			body: ['asset_class', 'reference_link', 'created_at', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1892,8 +1910,19 @@ export const listViewFields = {
 		}
 	},
 	'asset-class': {
-		head: ['name', 'description'],
-		body: ['name', 'description']
+		head: ['name', 'parentAssetClass', 'description', 'translations', 'isVisible', 'builtin'],
+		body: [
+			'translated_name',
+			'parent',
+			'translated_description',
+			'translations',
+			'is_visible',
+			'builtin'
+		],
+		filters: {
+			is_visible: ASSET_CLASS_IS_VISIBLE_FILTER,
+			builtin: ASSET_CLASS_BUILTIN_FILTER
+		}
 	},
 	users: {
 		head: [
@@ -1982,8 +2011,8 @@ export const listViewFields = {
 			'updated_at'
 		],
 		optionalFields: {
-			head: ['status'],
-			body: ['status']
+			head: ['status', 'authors'],
+			body: ['status', 'authors']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2639,6 +2668,13 @@ export const listViewFields = {
 			threats: THREAT_FILTER,
 			likelihood: RISK_PROBABILITY_FILTER,
 			is_selected: IS_SELECTED_FILTER
+		}
+	},
+	'threat-models': {
+		head: ['ref_id', 'name', 'description', 'catalog', 'nodeCount', 'domain'],
+		body: ['ref_id', 'name', 'description', 'catalog', 'node_count', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER
 		}
 	},
 	'elementary-actions': {

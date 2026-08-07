@@ -166,6 +166,11 @@ export const navData = {
 					href: '/threats'
 				},
 				{
+					name: 'ttpCatalogs',
+					fa_icon: 'fa-solid fa-table-cells',
+					href: '/ttp-catalogs'
+				},
+				{
 					name: 'securityAdvisories',
 					fa_icon: 'fa-solid fa-shield-virus',
 					href: '/security-advisories'
@@ -319,6 +324,12 @@ export const navData = {
 					name: 'ebiosRM',
 					fa_icon: 'fa-solid fa-gopuram',
 					href: '/ebios-rm'
+				},
+				{
+					name: 'threatModeling',
+					fa_icon: 'fa-solid fa-diagram-project',
+					href: '/threat-models',
+					permissions: ['view_threatmodel']
 				},
 				{
 					name: 'quantitativeRiskStudies',
@@ -534,6 +545,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-shield-halved',
 					href: '/object-classifications',
 					permissions: ['view_objectclassification']
+				},
+				{
+					name: 'assetClasses',
+					fa_icon: 'fa-solid fa-sitemap',
+					href: '/asset-class',
+					permissions: ['view_assetclass']
 				},
 				{
 					name: 'customFields',

@@ -117,7 +117,8 @@ export const FolderSchema = z.object({
 export const FolderImportSchema = z.object({
 	name: nameSchema,
 	file: z.instanceof(File),
-	load_missing_libraries: z.coerce.boolean().default(false)
+	load_missing_libraries: z.coerce.boolean().default(false),
+	create_missing_asset_classes: z.coerce.boolean().default(false)
 	//NOTE: coerce is used to handle checkbox form values which can be strings ('true'/'false')
 	//or booleans (true/false). Without coerce, form validation fails inconsistently.
 });
@@ -178,6 +179,45 @@ export const ThreatSchema = z.object({
 	findings: z.string().uuid().optional().array().optional()
 });
 
+export const TTPCatalogSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	provider: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
+	annotation: z.string().optional().nullable()
+});
+
+export const TacticSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	provider: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
+	annotation: z.string().optional().nullable(),
+	catalog: z.string().uuid(),
+	order_id: z.number().optional().nullable()
+});
+
+export const ThreatModelSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	catalog: z.string().uuid({ message: 'Select a TTP catalog' })
+});
+
+export const TechniqueSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	provider: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
+	annotation: z.string().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional(),
+	catalog: z.string().uuid().optional().nullable(),
+	parent: z.string().uuid().optional().nullable(),
+	tactics: z.string().uuid().optional().array().optional(),
+	reference_controls: z.string().uuid().optional().array().optional(),
+	is_deprecated: z.boolean().optional()
+});
+
 export const SecurityAdvisorySchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -223,6 +263,19 @@ export const RiskScenarioSchema = z.object({
 	justification: z.string().optional().nullable(),
 	risk_assessment: z.string(),
 	threats: z.string().uuid().optional().array().optional(),
+	// the edit page binds a single value while the relation stays many-to-many,
+	// so accept a scalar and always hand the API a list
+	threat_models: z
+		.preprocess(
+			(value) =>
+				value === undefined || value === null || value === ''
+					? []
+					: Array.isArray(value)
+						? value.filter(Boolean)
+						: [value],
+			z.string().uuid().array()
+		)
+		.optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	incidents: z.string().uuid().optional().array().optional(),
@@ -676,6 +729,8 @@ export const FeatureFlagsSchema = z.object({
 	organisation_objectives: z.boolean().optional(),
 	organisation_issues: z.boolean().optional(),
 	quantitative_risk_studies: z.boolean().optional(),
+	threat_modeling: z.boolean().optional(),
+	ttps: z.boolean().optional(),
 	terminologies: z.boolean().optional(),
 	custom_fields: z.boolean().optional(),
 	bia: z.boolean().optional(),
@@ -1191,6 +1246,17 @@ export const quantitativeRiskScenarioSchema = z.object({
 	status: z.string().optional().default('draft'),
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	threats: z.string().uuid().optional().array().optional(),
+	threat_models: z
+		.preprocess(
+			(value) =>
+				value === undefined || value === null || value === ''
+					? []
+					: Array.isArray(value)
+						? value.filter(Boolean)
+						: [value],
+			z.string().uuid().array()
+		)
+		.optional(),
 	qualifications: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	is_selected: z.boolean().default(true),
@@ -1690,6 +1756,14 @@ export const ClassificationLevelSchema = z.object({
 	translations: z.record(z.string().min(1), z.string().min(1)).optional()
 });
 
+export const AssetClassSchema = z.object({
+	...NameDescriptionMixin,
+	parent: z.string().optional().nullable(),
+	is_visible: z.boolean().default(true),
+	// {locale: {name, description}}
+	translations: z.record(z.string().min(1), z.record(z.string().min(1), z.string())).optional()
+});
+
 export const RoleSchema = z.object({
 	...NameDescriptionMixin,
 	permissions: z.array(z.number()).optional()
@@ -1953,6 +2027,10 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'risk-matrices': RiskMatrixSchema,
 	'risk-assessments': RiskAssessmentSchema,
 	threats: ThreatSchema,
+	'ttp-catalogs': TTPCatalogSchema,
+	tactics: TacticSchema,
+	techniques: TechniqueSchema,
+	'threat-models': ThreatModelSchema,
 	'security-advisories': SecurityAdvisorySchema,
 	cwes: CWESchema,
 	'risk-scenarios': RiskScenarioSchema,
@@ -2022,6 +2100,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	terminologies: TerminologySchema,
 	'object-classifications': ObjectClassificationSchema,
 	'classification-levels': ClassificationLevelSchema,
+	'asset-class': AssetClassSchema,
 	'custom-fields': CustomFieldDefinitionSchema,
 	roles: RoleSchema,
 	'generic-collections': GenericCollectionSchema,

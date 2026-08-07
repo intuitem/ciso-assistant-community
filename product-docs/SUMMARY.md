@@ -26,6 +26,7 @@
   * [Journeys](concepts/journeys.md)
 * Assets and resilience
   * [Assets](concepts/assets.md)
+  * [Asset classes](concepts/asset-classes.md)
   * [Business impact analyses](concepts/business-impact-analyses.md)
 * Operations
   * [Applied controls](concepts/applied-controls.md)
