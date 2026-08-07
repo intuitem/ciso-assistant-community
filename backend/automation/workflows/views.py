@@ -131,6 +131,15 @@ class WorkflowViewSet(BaseModelViewSet):
             )
         )
 
+    def perform_destroy(self, instance):
+        with transaction.atomic():
+            # Conditions PROTECT their variables; clear the trees before the
+            # cascade so the workflow delete cannot trip ProtectedError.
+            ConditionGroup.objects.filter(
+                branch__node__version__workflow=instance
+            ).delete()
+            instance.delete()
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get creatable models", url_path="creatable-models")
     def creatable_models(self, request):

@@ -67,8 +67,12 @@ export const POST: RequestHandler = async ({ params, request, getClientAddress }
 		// getClientAddress is adapter-dependent; the hook works without it.
 	}
 
+	// Route params arrive decoded, so %2F is a real separator here: encode or a
+	// crafted node_ref escapes this path and reaches any backend endpoint.
 	const res = await fetch(
-		`${BASE_API_URL}/workflows/hooks/${params.workflow_id}/${params.node_ref}/${params.secret}/`,
+		`${BASE_API_URL}/workflows/hooks/${params.workflow_id}/${encodeURIComponent(
+			params.node_ref
+		)}/${encodeURIComponent(params.secret)}/`,
 		{ method: 'POST', headers, body }
 	);
 	return new Response(await res.arrayBuffer(), {

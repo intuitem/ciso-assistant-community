@@ -979,6 +979,37 @@ def validate_read_config(node):
     return errors
 
 
+def validate_create_config(node):
+    """Publish-time checks for create_object nodes, same contract as
+    validate_read_config."""
+    config = node.action_config or {}
+    if config.get("type") != "create_object":
+        return []
+    entry = CREATABLE_MODELS.get(config.get("model"))
+    if entry is None:
+        return [
+            (
+                "action_create_unknown_model",
+                f"Unknown creatable model '{config.get('model')}'",
+            )
+        ]
+    fields = config.get("fields") or {}
+    errors = []
+    for fk_name in entry["fk_fields"]:
+        # execute_action skips empty FKs, so a missing non-nullable one only
+        # surfaces as an IntegrityError mid-run.
+        if entry["model"]._meta.get_field(fk_name).null:
+            continue
+        if not fields.get(fk_name):
+            errors.append(
+                (
+                    "action_create_missing_fk",
+                    f"'{fk_name}' is required to create a '{config.get('model')}'",
+                )
+            )
+    return errors
+
+
 def authorize_action(node, instance):
     """Runtime half of the deputization promise: before any
     side effect, the run identity must hold every permission the action

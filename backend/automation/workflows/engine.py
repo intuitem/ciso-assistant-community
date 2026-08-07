@@ -491,61 +491,70 @@ def _process(token):
     _log(instance, WorkflowInstanceLog.EventType.NODE_ENTERED, node=node)
     _set_iteration_overlay(token)
 
+    failure = None
     try:
-        if node.type == WorkflowNode.Type.END:
-            _terminate_run(token, node)
-            return
+        # Savepoint: a DB error here would otherwise poison run_instance's
+        # atomic block and take _handle_failure's error token down with it.
+        # Deliberate failures are caught inside so the block exits clean and
+        # keeps the writes explaining them (e.g. the authorization-denied log).
+        with transaction.atomic():
+            try:
+                if node.type == WorkflowNode.Type.END:
+                    _terminate_run(token, node)
+                    return
 
-        if node.type == WorkflowNode.Type.TASK:
-            # Human-task materialization (TaskNode integration) is the next
-            # milestone; until then the run parks here, visible in the log.
-            token.status = WorkflowToken.Status.WAITING
-            token.save(update_fields=["status", "updated_at"])
-            _log(
-                instance,
-                WorkflowInstanceLog.EventType.TASK_WAITING,
-                node=node,
-                message=f"Waiting on task '{node.label}'",
-            )
-            return
+                if node.type == WorkflowNode.Type.TASK:
+                    # Human-task materialization (TaskNode integration) is the next
+                    # milestone; until then the run parks here, visible in the log.
+                    token.status = WorkflowToken.Status.WAITING
+                    token.save(update_fields=["status", "updated_at"])
+                    _log(
+                        instance,
+                        WorkflowInstanceLog.EventType.TASK_WAITING,
+                        node=node,
+                        message=f"Waiting on task '{node.label}'",
+                    )
+                    return
 
-        if node.type == WorkflowNode.Type.EVENT:
-            token.status = WorkflowToken.Status.WAITING
-            token.save(update_fields=["status", "updated_at"])
-            _log(
-                instance,
-                WorkflowInstanceLog.EventType.EVENT_WAITING,
-                node=node,
-                message=f"Waiting for event '{node.event_key}'",
-            )
-            return
+                if node.type == WorkflowNode.Type.EVENT:
+                    token.status = WorkflowToken.Status.WAITING
+                    token.save(update_fields=["status", "updated_at"])
+                    _log(
+                        instance,
+                        WorkflowInstanceLog.EventType.EVENT_WAITING,
+                        node=node,
+                        message=f"Waiting for event '{node.event_key}'",
+                    )
+                    return
 
-        if node.type == WorkflowNode.Type.ACTION:
-            config = node.action_config or {}
-            output = execute_action(node, instance) or {}
-            _persist_node_output(node, output, instance)
-            _log(
-                instance,
-                WorkflowInstanceLog.EventType.ACTION_EXECUTED,
-                node=node,
-                message=config.get("type", ""),
-                data=_truncate_log_data(output),
-            )
+                if node.type == WorkflowNode.Type.ACTION:
+                    config = node.action_config or {}
+                    output = execute_action(node, instance) or {}
+                    _persist_node_output(node, output, instance)
+                    _log(
+                        instance,
+                        WorkflowInstanceLog.EventType.ACTION_EXECUTED,
+                        node=node,
+                        message=config.get("type", ""),
+                        data=_truncate_log_data(output),
+                    )
 
-        if node.type == WorkflowNode.Type.SUBPROCESS:
-            _start_subprocess(token)
-            if token.status == WorkflowToken.Status.WAITING:
-                return
+                if node.type == WorkflowNode.Type.SUBPROCESS:
+                    _start_subprocess(token)
+                    if token.status == WorkflowToken.Status.WAITING:
+                        return
 
-        if node.type == WorkflowNode.Type.LOOP:
-            _process_loop(token)
-            return
+                if node.type == WorkflowNode.Type.LOOP:
+                    _process_loop(token)
+                    return
 
-        _advance(token)
-    except (ActionError, EngineError) as e:
-        _handle_failure(token, str(e))
+                _advance(token)
+            except (ActionError, EngineError) as e:
+                failure = str(e)
     except Exception as e:  # noqa: BLE001 — a buggy action must not 500 the request
-        _handle_failure(token, f"{type(e).__name__}: {e}")
+        failure = f"{type(e).__name__}: {e}"
+    if failure is not None:
+        _handle_failure(token, failure)
 
 
 def _handle_failure(token, message):
