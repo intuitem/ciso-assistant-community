@@ -27,12 +27,12 @@ FRAMEWORK_REF_ID = "Cbw_NIS2_Control_Framework"
 FRAMEWORK_VERSION = "1"
 FRAMEWORK_NAME_NL = "Cbw (NIS2) Control Framework (v1.2)"
 FRAMEWORK_NAME_EN = "Cbw (NIS2) Control Framework (v1.2)"
-FRAMEWORK_DESCRIPTION_NL = """# Introductie
+FRAMEWORK_DESCRIPTION_NL = """## Introductie
 
 De evaluatietool is opgesteld als praktisch hulpmiddel om organisaties te ondersteunen bij het op een effectieve wijze verkrijgen van inzicht in de mate waarin zij voldoen aan de Cyberbeveiligingswet (Cbw) en het onderliggende Cyberbeveiligingsbesluit (Cbb).
 
 De evaluatietool is ontwikkeld om inzicht te geven in de huidige staat van cyberweerbaarheid en om verbeterpotentieel te identificeren, gebaseerd op de eisen zoals vastgelegd in de Cbw en Cbb. Het Cbw (NIS2) Control Framework vervangt de geldende wet- en regelgeving niet, maar maakt deze inzichtelijk en hanteerbaar - zie ook het studierapport vanaf p. 16. De Cbw en de Cbb dagen organisaties uit om middels risicoanalyse en inzicht in de eigen organisatie de Cbw en de Cbb te implementeren. Medewerkers van organisaties zijn zelf verantwoordelijk voor het kennen en naleven van de relevante wet- en regelgeving. Bovendien dient bij het gebruik ervan altijd rekening te worden gehouden met de specifieke context en kenmerken van de organisatie en haar omgeving."""
-FRAMEWORK_DESCRIPTION_EN = """# Introduction
+FRAMEWORK_DESCRIPTION_EN = """## Introduction
 
 The evaluation tool has been developed as a practical tool to support organizations in effectively gaining insight into their compliance with the Cybersecurity Act (Cbw) and the underlying Cybersecurity Decree (Cbb). The evaluation tool was developed to provide insight into the current state of cyber resilience and to identify potential for improvement, based on the requirements laid out in the Cbw and Cbb. The Cbw (NIS2) Control Framework does not replace current laws and regulations, but rather makes them transparent and manageable – see also the study report from p. 16 onwards. The Cbw and Cbb challenge organizations to implement the Cbw and Cbb through risk analysis and insight into their own organization. Employees of organizations are responsible for knowing and complying with the relevant laws and regulations. Furthermore, the specific context and characteristics of the organization and its environment should always be taken into account when using the tool."""
 COPYRIGHT = """Unless otherwise noted, everything in this work is licensed under a Creative Commons Attribution 4.0 License.
