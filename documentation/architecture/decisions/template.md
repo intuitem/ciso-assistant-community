@@ -2,7 +2,7 @@
 
 # Title stating the decision, not the topic
 
-- Status: Proposed | Accepted | Superseded by [slug](slug.md)
+- Status: Proposed | Accepted | Replaced by [slug](slug.md)
 - Deciders: who was in the room
 
 ## Context
