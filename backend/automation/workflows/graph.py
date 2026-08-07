@@ -3,8 +3,8 @@
 The canvas edits a whole workflow version as one JSON document and saves it
 atomically. Rows are matched by client-generated UUIDs: ids present in the
 payload are upserted, rows absent from the payload are deleted. Condition
-trees, assignments and presentations are recreated on every save (they are
-small and have no identity worth preserving).
+trees and presentations are recreated on every save (they are small and have
+no identity worth preserving).
 """
 
 import re
@@ -17,7 +17,6 @@ from .models import (
     Condition,
     ConditionBranch,
     ConditionGroup,
-    NodeAssignment,
     NodePresentation,
     WorkflowEdge,
     WorkflowNode,
@@ -50,12 +49,6 @@ REF_RE = re.compile(r"^[a-z][a-z0-9_]{0,99}$")
 
 VARIABLE_FIELDS = ["key", "type", "default_value"]
 EDGE_FIELDS = ["label", "source_port"]
-ASSIGNMENT_FIELDS = [
-    "resolve_type",
-    "variable_key",
-    "is_blocking",
-    "participation",
-]
 PRESENTATION_FIELDS = [
     "type",
     "redirect_path",
@@ -70,21 +63,8 @@ BRANCH_FIELDS = ["name", "order", "is_default"]
 def serialize_graph(version):
     nodes = []
     for node in version.nodes.prefetch_related(
-        "assignments__role",
-        "assignments__actor",
         "branches__condition_groups__conditions",
     ).select_related("presentation", "task_template", "subprocess_workflow"):
-        assignments = [
-            {
-                "id": str(a.id),
-                "role": str(a.role_id),
-                "role_code": a.role.code,
-                "actor": str(a.actor_id) if a.actor_id else None,
-                "actor_name": str(a.actor) if a.actor_id else None,
-                **{f: getattr(a, f) for f in ASSIGNMENT_FIELDS},
-            }
-            for a in node.assignments.all()
-        ]
         presentation = None
         if hasattr(node, "presentation"):
             presentation = {
@@ -105,7 +85,6 @@ def serialize_graph(version):
                 "subprocess_workflow_name": node.subprocess_workflow.name
                 if node.subprocess_workflow_id
                 else None,
-                "assignments": assignments,
                 "presentation": presentation,
                 "branches": [
                     {
@@ -249,18 +228,7 @@ def save_graph(version, payload):
         seen_refs.add(node.ref)
         nodes[data["id"]] = node
 
-        # Assignments and presentation are recreated wholesale.
-        node.assignments.all().delete()
-        for assignment_data in data.get("assignments", []):
-            assignment = NodeAssignment(
-                node=node,
-                role_id=assignment_data.get("role"),
-                actor_id=assignment_data.get("actor") or None,
-            )
-            for field in ASSIGNMENT_FIELDS:
-                if field in assignment_data:
-                    setattr(assignment, field, assignment_data[field])
-            _save_row(assignment)
+        # Presentation is recreated wholesale.
         NodePresentation.objects.filter(node=node).delete()
         if data.get("presentation"):
             presentation = NodePresentation(node=node)

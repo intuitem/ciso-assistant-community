@@ -97,7 +97,6 @@
 				nodeType: node.type,
 				label: node.label || NODE_TYPE_LABELS[node.type]?.() || node.type,
 				meta: nodeMeta(node),
-				assignments: node.assignments ?? [],
 				branches: node.type === 'condition' ? branchVisuals(node) : undefined,
 				triggerType: node.type === 'trigger' ? (node.trigger_config?.type ?? 'manual') : undefined,
 				registration: null,

@@ -101,9 +101,6 @@ class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
             Condition.objects.filter(
                 group__branch__node__version__workflow=self
             ).update(folder=self.folder)
-            NodeAssignment.objects.filter(node__version__workflow=self).update(
-                folder=self.folder
-            )
             NodePresentation.objects.filter(node__version__workflow=self).update(
                 folder=self.folder
             )
@@ -247,7 +244,6 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
             node_map = {}
             branch_map = {}
             nodes = self.nodes.prefetch_related(
-                "assignments",
                 "presentation",
                 models.Prefetch(
                     "branches__condition_groups",
@@ -257,8 +253,6 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
             for node in nodes:
                 clone = _clone_row(node, version=draft)
                 node_map[node.id] = clone
-                for assignment in node.assignments.all():
-                    _clone_row(assignment, node=clone)
                 if hasattr(node, "presentation"):
                     _clone_row(node.presentation, node=clone)
                 for branch in node.branches.all():
@@ -551,53 +545,6 @@ class Condition(AbstractBaseModel, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.group.folder
-        super().save(*args, **kwargs)
-
-
-class NodeAssignment(AbstractBaseModel, FolderMixin):
-    class Meta(AbstractBaseModel.Meta, FolderMixin.Meta):
-        pass
-
-    class ResolveType(models.TextChoices):
-        ACTOR = "actor", "Actor"
-        VARIABLE = "variable", "Variable"
-
-    class Participation(models.TextChoices):
-        TASK = "task", "Task"
-        NOTIFICATION = "notification", "Notification"
-
-    node = models.ForeignKey(
-        WorkflowNode,
-        on_delete=models.CASCADE,
-        related_name="assignments",
-    )
-    role = models.ForeignKey(
-        "pmbok.ResponsibilityRole",
-        on_delete=models.PROTECT,
-        related_name="workflow_assignments",
-    )
-    resolve_type = models.CharField(
-        max_length=20,
-        choices=ResolveType.choices,
-        default=ResolveType.ACTOR,
-    )
-    actor = models.ForeignKey(
-        "core.Actor",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name="workflow_assignments",
-    )
-    variable_key = models.CharField(max_length=100, blank=True)
-    is_blocking = models.BooleanField(default=True)
-    participation = models.CharField(
-        max_length=20,
-        choices=Participation.choices,
-        default=Participation.TASK,
-    )
-
-    def save(self, *args, **kwargs):
-        self.folder = self.node.folder
         super().save(*args, **kwargs)
 
 
@@ -975,7 +922,6 @@ auditlog.register(WorkflowVariable, exclude_fields=common_exclude)
 auditlog.register(ConditionBranch, exclude_fields=common_exclude)
 auditlog.register(ConditionGroup, exclude_fields=common_exclude)
 auditlog.register(Condition, exclude_fields=common_exclude)
-auditlog.register(NodeAssignment, exclude_fields=common_exclude)
 auditlog.register(NodePresentation, exclude_fields=common_exclude)
 auditlog.register(WorkflowInstance, exclude_fields=common_exclude)
 # secret/hmac_secret excluded so LogEntry diffs never leak credentials.

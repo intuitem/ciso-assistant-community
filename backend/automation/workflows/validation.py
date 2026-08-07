@@ -9,7 +9,6 @@ import json
 import re
 
 from .models import (
-    NodeAssignment,
     WorkflowNode,
     WorkflowSecret,
     WorkflowVersion,
@@ -36,9 +35,8 @@ DISABLED_ACTION_TYPES = frozenset({"emit_event"})
 
 def validate_graph(version):
     errors = []
-    nodes = list(version.nodes.prefetch_related("assignments", "branches"))
+    nodes = list(version.nodes.prefetch_related("branches"))
     edges = list(version.edges.all())
-    variable_keys = set(version.variables.values_list("key", flat=True))
     nodes_by_id = {node.id: node for node in nodes}
     existing_secrets = _existing_secret_names(version, nodes)
     # Which branches carry a wire (a branch with a condition but no wire is a
@@ -271,29 +269,6 @@ def validate_graph(version):
                             node=node,
                         )
                     )
-        for assignment in node.assignments.all():
-            if (
-                assignment.resolve_type == NodeAssignment.ResolveType.ACTOR
-                and assignment.actor_id is None
-            ):
-                errors.append(
-                    _error(
-                        "assignment_actor_missing",
-                        "An assignment has no actor selected",
-                        node=node,
-                    )
-                )
-            if (
-                assignment.resolve_type == NodeAssignment.ResolveType.VARIABLE
-                and assignment.variable_key not in variable_keys
-            ):
-                errors.append(
-                    _error(
-                        "assignment_variable_undeclared",
-                        f"Assignment variable '{assignment.variable_key}' is not declared",
-                        node=node,
-                    )
-                )
 
     for edge in edges:
         source = nodes_by_id.get(edge.source_node_id)

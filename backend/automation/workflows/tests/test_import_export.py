@@ -437,24 +437,6 @@ class TestImport:
         with pytest.raises(WorkflowImportError, match="emit_event"):
             import_workflow(data, root)
 
-    def test_role_resolution(self, rich_workflow, root):
-        from pmbok.models import ResponsibilityRole
-
-        ResponsibilityRole.create_default_roles()
-        data = export_workflow(rich_workflow)
-        data["graph"]["nodes"][3]["assignments"] = [
-            {"role": {"taxonomy": "raci", "code": "R"}},
-            {"role": {"taxonomy": "raci", "code": "ZZ"}},
-        ]
-        imported, warnings = import_workflow(data, root)
-        node = imported.draft_version.nodes.get(ref="fetch_employee")
-        assignments = list(node.assignments.all())
-        assert len(assignments) == 1
-        assert assignments[0].role.code == "R"
-        assert assignments[0].actor is None
-        assert any("ZZ" in w for w in warnings)
-        assert any("assignees are not exported" in w for w in warnings)
-
     def test_event_trigger_foreign_folder_filter_stripped(self, rich_workflow, root):
         sub = Folder.objects.create(
             name="Sub", parent_folder=root, content_type=Folder.ContentType.DOMAIN

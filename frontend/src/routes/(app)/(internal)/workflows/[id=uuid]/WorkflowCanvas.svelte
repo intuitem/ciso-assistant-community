@@ -176,7 +176,6 @@
 			nodeType: domain.type,
 			label: domain.label || NODE_TYPE_LABELS[domain.type]?.() || domain.type,
 			meta: nodeMeta(domain),
-			assignments: domain.assignments ?? [],
 			branches: domain.type === 'condition' ? conditionBranchVisuals(domain) : undefined,
 			triggerType:
 				domain.type === 'trigger' ? (domain.trigger_config?.type ?? 'manual') : undefined,
@@ -1380,7 +1379,6 @@
 					}
 				: {}),
 			position: position ?? {},
-			assignments: [],
 			presentation: null
 		};
 	}

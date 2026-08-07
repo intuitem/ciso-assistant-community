@@ -9,7 +9,6 @@
 			nodeType: 'task' | 'action' | 'subprocess' | 'event';
 			label: string;
 			meta?: string | null;
-			assignments?: { role_code: string; is_blocking: boolean }[];
 			error?: string | null;
 			runState?: 'visited' | 'active' | 'error' | 'warning' | null;
 		};
@@ -22,33 +21,28 @@
 		deleteNode: (id: string) => void;
 	}>('workflowEditor');
 
-	const TYPE_STYLE: Record<string, { icon: string; accent: string; border: string; chip: string }> =
-		{
-			task: {
-				icon: 'fa-clipboard-check',
-				accent: 'bg-primary-500',
-				border: 'border-primary-300 dark:border-primary-700',
-				chip: 'preset-tonal-primary'
-			},
-			action: {
-				icon: 'fa-bolt',
-				accent: 'bg-secondary-500',
-				border: 'border-secondary-300 dark:border-secondary-700',
-				chip: 'preset-tonal-secondary'
-			},
-			subprocess: {
-				icon: 'fa-diagram-project',
-				accent: 'bg-tertiary-500',
-				border: 'border-tertiary-300 dark:border-tertiary-700',
-				chip: 'preset-tonal-tertiary'
-			},
-			event: {
-				icon: 'fa-tower-broadcast',
-				accent: 'bg-surface-500',
-				border: 'border-surface-300-700',
-				chip: 'preset-tonal'
-			}
-		};
+	const TYPE_STYLE: Record<string, { icon: string; accent: string; border: string }> = {
+		task: {
+			icon: 'fa-clipboard-check',
+			accent: 'bg-primary-500',
+			border: 'border-primary-300 dark:border-primary-700'
+		},
+		action: {
+			icon: 'fa-bolt',
+			accent: 'bg-secondary-500',
+			border: 'border-secondary-300 dark:border-secondary-700'
+		},
+		subprocess: {
+			icon: 'fa-diagram-project',
+			accent: 'bg-tertiary-500',
+			border: 'border-tertiary-300 dark:border-tertiary-700'
+		},
+		event: {
+			icon: 'fa-tower-broadcast',
+			accent: 'bg-surface-500',
+			border: 'border-surface-300-700'
+		}
+	};
 
 	const style = $derived(TYPE_STYLE[data.nodeType] ?? TYPE_STYLE.action);
 	let hovered = $state(false);
@@ -87,19 +81,6 @@
 
 	{#if data.meta}
 		<p class="pl-1 mt-1 text-[10px] text-surface-600-400 truncate">{data.meta}</p>
-	{/if}
-
-	{#if data.assignments?.length}
-		<div class="flex flex-wrap items-center gap-1 pl-1 mt-1.5">
-			{#each data.assignments ?? [] as assignment}
-				<span
-					class="badge {style.chip} text-[9px] px-1.5 py-0.5 font-mono font-bold"
-					class:opacity-60={!assignment.is_blocking}
-				>
-					{assignment.role_code}
-				</span>
-			{/each}
-		</div>
 	{/if}
 
 	{#if data.error}

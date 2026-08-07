@@ -78,7 +78,6 @@ def export_workflow(workflow):
     document = serialize_graph(version)
     refs = _ref_map(document["nodes"])
     variable_keys = {v["id"]: v["key"] for v in document["variables"]}
-    taxonomies = _role_taxonomies(document["nodes"])
 
     data = {"schema_version": SCHEMA_VERSION, "name": workflow.name}
     if workflow.ref_id:
@@ -98,7 +97,7 @@ def export_workflow(workflow):
     data["graph"] = {
         "variables": [_export_variable(v) for v in document["variables"]],
         "nodes": [
-            _export_node(n, refs, taxonomies, variable_keys, branch_names)
+            _export_node(n, refs, variable_keys, branch_names)
             for n in document["nodes"]
         ],
         "edges": [_export_edge(e, refs, branch_names) for e in document["edges"]],
@@ -185,16 +184,6 @@ def _ref_map(nodes):
     return refs
 
 
-def _role_taxonomies(nodes):
-    from pmbok.models import ResponsibilityRole
-
-    role_ids = {
-        a["role"] for node in nodes for a in node["assignments"] if a.get("role")
-    }
-    roles = ResponsibilityRole.objects.in_bulk(role_ids)
-    return {str(pk): role.taxonomy for pk, role in roles.items()}
-
-
 def _referenced_secrets(nodes):
     blob = json.dumps([n["action_config"] for n in nodes])
     return sorted(set(SECRET_NAME_RE.findall(blob)))
@@ -249,7 +238,7 @@ def _export_variable(variable):
     return out
 
 
-def _export_node(node, refs, taxonomies, variable_keys, branch_names):
+def _export_node(node, refs, variable_keys, branch_names):
     out = {"ref": refs[node["id"]], "type": node["type"]}
     if node["label"]:
         out["label"] = node["label"]
@@ -270,13 +259,6 @@ def _export_node(node, refs, taxonomies, variable_keys, branch_names):
         out["task_template"] = node["task_template_name"]
     if node["subprocess_workflow_name"]:
         out["subprocess_workflow"] = node["subprocess_workflow_name"]
-    assignments = [
-        _export_assignment(a, taxonomies)
-        for a in node["assignments"]
-        if a.get("role") and str(a["role"]) in taxonomies
-    ]
-    if assignments:
-        out["assignments"] = assignments
     if node["presentation"]:
         presentation = {
             k: v for k, v in node["presentation"].items() if v not in ("", {}, None)
@@ -300,25 +282,6 @@ def _export_branch(branch, variable_keys, branch_names):
     groups = _export_condition_groups(branch["condition_groups"], variable_keys)
     if groups:
         out["condition_groups"] = groups
-    return out
-
-
-def _export_assignment(assignment, taxonomies):
-    # Actors are instance-specific and never travel; the role does.
-    out = {
-        "role": {
-            "taxonomy": taxonomies[str(assignment["role"])],
-            "code": assignment["role_code"],
-        }
-    }
-    if assignment["resolve_type"] != "actor":
-        out["resolve_type"] = assignment["resolve_type"]
-    if assignment["variable_key"]:
-        out["variable_key"] = assignment["variable_key"]
-    if not assignment["is_blocking"]:
-        out["is_blocking"] = False
-    if assignment["participation"] != "task":
-        out["participation"] = assignment["participation"]
     return out
 
 
@@ -752,14 +715,6 @@ def _build_node(
             warnings,
         )
 
-    assignments = []
-    for assignment in entry.get("assignments") or []:
-        built = _build_assignment(assignment, ref, warnings)
-        if built:
-            assignments.append(built)
-    if assignments:
-        node["assignments"] = assignments
-
     presentation = entry.get("presentation")
     if isinstance(presentation, dict) and presentation:
         node["presentation"] = presentation
@@ -796,40 +751,6 @@ def _resolve_by_name(queryset, name, label, warnings):
         f"{label} '{name}' could not be resolved ({reason}) — re-select it in the builder"
     )
     return None
-
-
-def _build_assignment(assignment, ref, warnings):
-    from pmbok.models import ResponsibilityRole
-
-    role_spec = assignment.get("role") if isinstance(assignment, dict) else None
-    role = None
-    if isinstance(role_spec, dict):
-        role = (
-            ResponsibilityRole.objects.filter(
-                taxonomy=role_spec.get("taxonomy"),
-                code__iexact=str(role_spec.get("code") or ""),
-            )
-            .order_by("-builtin", "created_at")
-            .first()
-        )
-    if role is None:
-        warnings.append(
-            f"node '{ref}': assignment role {role_spec!r} not found — assignment dropped"
-        )
-        return None
-    resolve_type = assignment.get("resolve_type") or "actor"
-    if resolve_type == "actor":
-        warnings.append(
-            f"node '{ref}': assignees are not exported — re-select one in the builder"
-        )
-    return {
-        "role": str(role.id),
-        "actor": None,
-        "resolve_type": resolve_type,
-        "variable_key": str(assignment.get("variable_key") or ""),
-        "is_blocking": bool(assignment.get("is_blocking", True)),
-        "participation": assignment.get("participation") or "task",
-    }
 
 
 def _condition_value(condition):

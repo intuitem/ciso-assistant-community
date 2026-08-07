@@ -172,44 +172,6 @@
         "subprocess_workflow": {
           "type": "string"
         },
-        "assignments": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": [
-              "role"
-            ],
-            "properties": {
-              "role": {
-                "type": "object",
-                "required": [
-                  "taxonomy",
-                  "code"
-                ],
-                "properties": {
-                  "taxonomy": {
-                    "type": "string"
-                  },
-                  "code": {
-                    "type": "string"
-                  }
-                }
-              },
-              "resolve_type": {
-                "type": "string"
-              },
-              "variable_key": {
-                "type": "string"
-              },
-              "is_blocking": {
-                "type": "boolean"
-              },
-              "participation": {
-                "type": "string"
-              }
-            }
-          }
-        },
         "presentation": {
           "type": "object"
         },
