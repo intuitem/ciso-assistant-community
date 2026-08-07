@@ -117,7 +117,8 @@ export const FolderSchema = z.object({
 export const FolderImportSchema = z.object({
 	name: nameSchema,
 	file: z.instanceof(File),
-	load_missing_libraries: z.coerce.boolean().default(false)
+	load_missing_libraries: z.coerce.boolean().default(false),
+	create_missing_asset_classes: z.coerce.boolean().default(false)
 	//NOTE: coerce is used to handle checkbox form values which can be strings ('true'/'false')
 	//or booleans (true/false). Without coerce, form validation fails inconsistently.
 });
@@ -1683,6 +1684,14 @@ export const ClassificationLevelSchema = z.object({
 	translations: z.record(z.string().min(1), z.string().min(1)).optional()
 });
 
+export const AssetClassSchema = z.object({
+	...NameDescriptionMixin,
+	parent: z.string().optional().nullable(),
+	is_visible: z.boolean().default(true),
+	// {locale: {name, description}}
+	translations: z.record(z.string().min(1), z.record(z.string().min(1), z.string())).optional()
+});
+
 export const RoleSchema = z.object({
 	...NameDescriptionMixin,
 	permissions: z.array(z.number()).optional()
@@ -2008,6 +2017,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	terminologies: TerminologySchema,
 	'object-classifications': ObjectClassificationSchema,
 	'classification-levels': ClassificationLevelSchema,
+	'asset-class': AssetClassSchema,
 	'custom-fields': CustomFieldDefinitionSchema,
 	roles: RoleSchema,
 	'generic-collections': GenericCollectionSchema,
