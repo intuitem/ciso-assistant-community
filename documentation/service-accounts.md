@@ -46,6 +46,11 @@ characters, masked) for display in the UI without ever re-exposing the full
 secret. Deactivating a service account strips its grant types (blocking
 new token issuance), revokes outstanding tokens, and deactivates its user.
 
+Secrets are prefixed `ca_sa.` followed by 43 url-safe base64 characters
+(~256 bits from the system CSPRNG) — safe to paste in shells, URLs and
+form-encoded bodies. Secret scanners can match them with
+`ca_sa\.[A-Za-z0-9_-]{43}`.
+
 In the Enterprise edition, the number of **active** service accounts is
 capped at the licensed seat count: creating or reactivating one beyond the
 cap returns `errorServiceAccountSeatsExceeded`. Deactivated accounts free

@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 from typing import Any, Dict, Generator, List, Optional, Tuple
 from typing import TYPE_CHECKING, Set, cast
+import secrets
 import uuid
 from allauth.account.models import EmailAddress
 from django.utils import timezone
@@ -48,7 +49,6 @@ logger = structlog.get_logger(__name__)
 from auditlog.registry import auditlog
 from auditlog.signals import pre_log
 from allauth.mfa.models import Authenticator
-from allauth.idp.oidc.adapter import get_adapter as get_oidc_adapter
 from allauth.idp.oidc.models import Client, Token
 from core.context import focus_folder_id_var
 from django.shortcuts import get_object_or_404
@@ -1779,7 +1779,11 @@ class ServiceAccount(AbstractBaseModel):
 
     @classmethod
     def generate_secret(cls) -> str:
-        return cls.SECRET_PREFIX + get_oidc_adapter().generate_client_secret()
+        # token_urlsafe rather than allauth's default (Django's SECRET_KEY
+        # charset): the secret travels in form-encoded token requests and
+        # shell command lines, where &, +, %, ! and $ corrupt or split the
+        # value. 32 bytes = 43 chars of [A-Za-z0-9_-], ~256 bits.
+        return cls.SECRET_PREFIX + secrets.token_urlsafe(32)
 
     @classmethod
     def secret_preview_for(cls, secret: str) -> str:
