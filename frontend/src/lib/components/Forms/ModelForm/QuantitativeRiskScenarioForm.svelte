@@ -120,11 +120,6 @@
 	{form}
 	multiple
 	optionsEndpoint="threats"
-	optionsInfoFields={{
-		fields: [{ field: 'is_legacy_ttp', display: (v) => (v ? `(${m.legacyTtpBadge()})` : '') }],
-		position: 'suffix',
-		classes: 'text-warning-600-400'
-	}}
 	optionsExtraFields={[['folder', 'str']]}
 	optionsLabelField="auto"
 	field="threats"
