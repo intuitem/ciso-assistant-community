@@ -79,11 +79,10 @@ export async function handleErrorResponse({
 		return message(form, { warning: res.warning });
 	}
 	if (res.error || res.detail) {
-		setFlash(
-			{ type: 'error', message: safeTranslate(res.error || res.detail), timeout: 10000 },
-			event
-		);
-		return message(form, { error: res.error || res.detail });
+		const rawError = res.error || res.detail;
+		const errorKey = Array.isArray(rawError) ? rawError[0] : rawError;
+		setFlash({ type: 'error', message: safeTranslate(errorKey), timeout: 10000 }, event);
+		return message(form, { error: rawError });
 	}
 	Object.entries(res).forEach(([key, value]) => {
 		if (Array.isArray(value)) {

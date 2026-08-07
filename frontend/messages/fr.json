@@ -2527,6 +2527,7 @@
 	"gracePeriodHelpText": "Le secret actuel continue de fonctionner pendant cette durée après la rotation, afin que les intégrations puissent être mises à jour sans interruption. Plafonné à 1 mois.",
 	"gracePeriodInvalid": "Indiquez un nombre entier de jours entre 1 et 30.",
 	"previousSecretValidUntil": "Le secret client précédent reste valide jusqu'au {date}.",
+	"errorServiceAccountSeatsExceeded": "Le nombre de comptes de service actifs est limité au nombre de sièges de votre licence. Désactivez ou supprimez d'abord un autre compte de service, ou contactez votre administrateur.",
 	"expiresOn": "Expire le {date}",
 	"expiresIn": "Expire dans",
 	"token": "Jeton",

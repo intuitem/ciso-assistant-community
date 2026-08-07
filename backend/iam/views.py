@@ -53,7 +53,6 @@ from .serializers import (
     DisableMFASerializer,
     ResetPasswordConfirmSerializer,
     ServiceAccountReadSerializer,
-    ServiceAccountWriteSerializer,
     SetPasswordSerializer,
 )
 
@@ -630,8 +629,20 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
         "client", "user", "role", "created_by"
     ).order_by("-created_at")
 
+    def get_write_serializer_class(self):
+        """Resolve the write serializer by name through MODULE_PATHS, like
+        BaseModelViewSet does — the seam the enterprise build uses to layer
+        license rules (seat quota) on top without any license code here."""
+        # Deferred import: core.serializers circles into iam at import time.
+        from core.serializers import SerializerFactory
+
+        factory = SerializerFactory(
+            "iam.serializers", settings.MODULE_PATHS.get("serializers", [])
+        )
+        return factory.get_serializer("ServiceAccount", "create")
+
     def create(self, request, *args, **kwargs):
-        serializer = ServiceAccountWriteSerializer(data=request.data)
+        serializer = self.get_write_serializer_class()(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         try:
@@ -653,7 +664,7 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         service_account = self.get_object()
-        serializer = ServiceAccountWriteSerializer(
+        serializer = self.get_write_serializer_class()(
             data=request.data, partial=True, context={"instance": service_account}
         )
         serializer.is_valid(raise_exception=True)
@@ -674,18 +685,10 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
                     if "expiry_date" in data
                     else UNSET_FIELD,
                 )
-                if "is_active" in request.data:
-                    raw_is_active = request.data["is_active"]
-                    if isinstance(raw_is_active, str):
-                        is_active = raw_is_active.strip().lower() in (
-                            "true",
-                            "1",
-                        )
-                    else:
-                        is_active = bool(raw_is_active)
-                    if is_active and not service_account.is_active:
+                if "is_active" in data:
+                    if data["is_active"] and not service_account.is_active:
                         service_account.activate()
-                    elif not is_active and service_account.is_active:
+                    elif not data["is_active"] and service_account.is_active:
                         service_account.deactivate()
         except DjangoValidationError as e:
             return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)

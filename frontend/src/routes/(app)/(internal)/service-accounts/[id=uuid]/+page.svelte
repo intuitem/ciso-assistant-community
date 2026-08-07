@@ -4,6 +4,7 @@
 	import ServiceAccountSecretModal from '$lib/components/Modals/ServiceAccountSecretModal.svelte';
 	import ServiceAccountRotateSecretModal from '$lib/components/Modals/ServiceAccountRotateSecretModal.svelte';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/state';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { getToastStore } from '$lib/components/Toast/stores';
@@ -89,12 +90,27 @@
 			if (res.ok) {
 				await invalidateAll();
 			} else {
-				toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
+				toastStore.trigger({ message: await extractErrorMessage(res), preset: 'error' });
 			}
 		} catch {
 			toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
 		}
 		busy = false;
+	}
+
+	// The backend replies with translation keys (e.g. the enterprise seat
+	// quota's errorServiceAccountSeatsExceeded); surface them instead of a
+	// generic failure message when present.
+	async function extractErrorMessage(res: Response): Promise<string> {
+		try {
+			const body = await res.json();
+			const raw = body?.error ?? body?.message?.error ?? body?.detail;
+			const key = Array.isArray(raw) ? raw[0] : raw;
+			if (typeof key === 'string' && key) return safeTranslate(key);
+		} catch {
+			/* fall through to the generic message */
+		}
+		return m.anErrorOccurred();
 	}
 
 	function toggleActive(): void {

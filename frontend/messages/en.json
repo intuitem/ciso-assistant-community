@@ -2596,6 +2596,7 @@
 	"gracePeriodHelpText": "The current secret keeps working for this long after rotation, so integrations can be updated without downtime. Capped at 1 month.",
 	"gracePeriodInvalid": "Enter a whole number of days between 1 and 30.",
 	"previousSecretValidUntil": "The previous client secret is still valid until {date}.",
+	"errorServiceAccountSeatsExceeded": "The number of active service accounts is limited to the number of licensed seats. Deactivate or delete another service account first, or contact your administrator.",
 	"expiresOn": "Expires on {date}",
 	"expiresIn": "Expires in",
 	"token": "Token",

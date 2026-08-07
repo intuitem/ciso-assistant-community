@@ -191,6 +191,10 @@ class ServiceAccountWriteSerializer(serializers.Serializer):
     folders = serializers.ListField(child=serializers.UUIDField(), allow_empty=False)
     is_recursive = serializers.BooleanField(default=True)
     expiry_date = serializers.DateField(required=False, allow_null=True)
+    # Activation toggle (PATCH only; creation is always active). A real field —
+    # rather than raw request.data — so overriding serializers (e.g. the
+    # enterprise seat quota) see activation changes in validate().
+    is_active = serializers.BooleanField(required=False)
 
     def validate_name(self, value):
         qs = ServiceAccount.objects.filter(name=value)

@@ -3,6 +3,7 @@
 from datetime import timedelta
 
 import pytest
+from django.test import override_settings
 from knox.models import AuthToken
 from rest_framework.test import APIClient
 
@@ -952,3 +953,65 @@ class TestServiceAccountGlobalAdmin:
         roles = response.json()
         global_only_ids = {r["id"] for r in roles if r["global_only"]}
         assert global_only_ids == {str(self._admin_role().id)}
+
+
+QUOTA_SETTINGS = dict(
+    LICENSE_SEATS=1,
+    MODULE_PATHS={"serializers": "iam.tests.ee_stub_serializers"},
+)
+
+
+@pytest.mark.django_db
+class TestServiceAccountSeatQuota:
+    """The enterprise build layers "active service accounts <= licensed seats"
+    onto the community viewset by shadowing the write serializer through
+    MODULE_PATHS (see enterprise_core.serializers). CE stays uncapped: these
+    tests exercise the seam with an EE-shaped stub."""
+
+    def test_ce_default_is_uncapped(self, admin_client, domain_folder):
+        _create_sa(admin_client, domain_folder, name="bot-1")
+        _create_sa(admin_client, domain_folder, name="bot-2")
+
+    def test_create_blocked_at_quota(self, admin_client, domain_folder):
+        with override_settings(**QUOTA_SETTINGS):
+            _create_sa(admin_client, domain_folder, name="only-bot")
+            response = admin_client.post(
+                SA_ENDPOINT,
+                {
+                    "name": "one-too-many",
+                    "permissions": _view_folder_permission_ids(),
+                    "folders": [str(domain_folder.id)],
+                },
+                format="json",
+            )
+            assert response.status_code == 400
+            assert response.json()["error"] == ["errorServiceAccountSeatsExceeded"]
+
+    def test_deactivation_frees_the_slot_and_reactivation_is_gated(
+        self, admin_client, domain_folder
+    ):
+        with override_settings(**QUOTA_SETTINGS):
+            first = _create_sa(admin_client, domain_folder, name="first-bot")
+            # deactivating is always allowed, and frees the slot
+            response = admin_client.patch(
+                f"{SA_ENDPOINT}{first['id']}/", {"is_active": False}, format="json"
+            )
+            assert response.status_code == 200
+
+            second = _create_sa(admin_client, domain_folder, name="second-bot")
+            assert second["is_active"] is True
+
+            # the slot is taken again: reactivating the first is refused
+            response = admin_client.patch(
+                f"{SA_ENDPOINT}{first['id']}/", {"is_active": True}, format="json"
+            )
+            assert response.status_code == 400
+            assert response.json()["error"] == ["errorServiceAccountSeatsExceeded"]
+
+            # updates that do not activate stay allowed on the inactive account
+            response = admin_client.patch(
+                f"{SA_ENDPOINT}{first['id']}/",
+                {"description": "still editable"},
+                format="json",
+            )
+            assert response.status_code == 200, response.content

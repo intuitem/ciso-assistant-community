@@ -46,6 +46,14 @@ characters, masked) for display in the UI without ever re-exposing the full
 secret. Deactivating a service account strips its grant types (blocking
 new token issuance), revokes outstanding tokens, and deactivates its user.
 
+In the Enterprise edition, the number of **active** service accounts is
+capped at the licensed seat count: creating or reactivating one beyond the
+cap returns `errorServiceAccountSeatsExceeded`. Deactivated accounts free
+their slot. The check lives in the enterprise build only (the community
+`ServiceAccountViewSet` resolves its write serializer through
+`MODULE_PATHS["serializers"]`, which the enterprise settings point at
+`enterprise_core.serializers`).
+
 `is_recursive` defaults to `true`. The **Administrator** builtin role
 (`BI-RL-ADM`, "all permissions") is meant for the explicit global-admin case
 only: the UI's "Global administrator" mode links it with the Global folder,
