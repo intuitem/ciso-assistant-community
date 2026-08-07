@@ -583,6 +583,51 @@ class TestWebhookHardening:
 
 @pytest.mark.django_db
 class TestSecretApi:
+    def _create_secret_as(self, user, workflow, name="hris_token"):
+        from automation.workflows.views import WorkflowSecretViewSet
+
+        factory = APIRequestFactory()
+        create = WorkflowSecretViewSet.as_view({"post": "create"})
+        req = factory.post(
+            "/api/workflows/workflow-secrets/",
+            {"name": name, "workflow": str(workflow.id), "value": "s3cret"},
+            format="json",
+        )
+        force_authenticate(req, user=user)
+        return create(req)
+
+    def _domain_with_manager(self, name, email):
+        domain = Folder.objects.create(
+            name=name,
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=True,
+        )
+        Folder.create_default_ug_and_ra(domain)
+        manager = User.objects.create_user(email=email)
+        manager.user_groups.add(UserGroup.objects.get(folder=domain, name="BI-UG-DMA"))
+        return domain, manager
+
+    def test_domain_manager_can_create_secret_in_scope(self):
+        # The payload carries no folder, so the generic create() used to check
+        # add_workflowsecret at the ROOT folder — 403 for the exact role
+        # startup.py grants the permission to. The check must run against the
+        # owning workflow's folder.
+        domain, manager = self._domain_with_manager("SecretDomain", "sdma@example.com")
+        workflow, _ = make_workflow(folder=domain)
+        resp = self._create_secret_as(manager, workflow)
+        assert resp.status_code == 201, resp.data
+        assert WorkflowSecret.objects.filter(workflow=workflow).exists()
+
+    def test_domain_manager_cannot_create_secret_out_of_scope(self):
+        # The scoped check must not over-grant: a manager of another domain
+        # still gets denied for a workflow outside their scope.
+        _, outsider = self._domain_with_manager("OtherDomain", "odma@example.com")
+        workflow, _ = make_workflow()  # root-folder workflow
+        resp = self._create_secret_as(outsider, workflow)
+        assert resp.status_code == 403, resp.data
+        assert not WorkflowSecret.objects.filter(workflow=workflow).exists()
+
     def test_value_never_returned(self):
         from automation.workflows.views import WorkflowSecretViewSet
 

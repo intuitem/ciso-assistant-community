@@ -205,6 +205,16 @@ class WorkflowSecretWriteSerializer(BaseModelSerializer):
         self._ensure_immutable("workflow", value)
         return value
 
+    def create(self, validated_data):
+        # No folder field in the payload, so the generic create() would
+        # resolve the add_workflowsecret check to the root folder and 403
+        # every domain-scoped role. Check in the owning workflow's folder,
+        # which is where the secret lands on save.
+        self._check_object_perm(
+            validated_data, "add", folder=validated_data["workflow"].folder
+        )
+        return serializers.ModelSerializer.create(self, validated_data)
+
 
 class WorkflowTriggerReadSerializer(BaseModelSerializer):
     workflow = FieldsRelatedField()
