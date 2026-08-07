@@ -411,7 +411,7 @@
 	const filteredFields = $derived(Object.keys(filters));
 	// Column selector is offered on standalone list pages only (embedded tables
 	// pass a curated `fields` prop) -- unrelated to filter persistence below.
-	const isStandaloneTable = baseEndpoint === `/${URLModel}`;
+	const isStandaloneTable = $derived(baseEndpoint === `/${URLModel}`);
 	// Unique per parent object + tab (baseEndpoint carries the parent id).
 	// $derived so it updates when this instance is reused for a different
 	// object (DetailView.svelte keys tabs by model name, not by parent id).
@@ -444,7 +444,53 @@
 		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
 	});
 
+	const filterInitialData: Record<string, string[]> = {};
+	// convert URL search params and default filters to filter initial data
+	for (const [key, value] of page.url.searchParams) {
+		filterInitialData[key] ??= [];
+		filterInitialData[key].push(value);
+	}
+	// Add default filter values if no URL params exist for that field
+	for (const field of filteredFields) {
+		if (!filterInitialData[field] && filterValues[field]?.length > 0) {
+			filterInitialData[field] = filterValues[field].map((v: Record<string, any>) => v.value);
+		}
+	}
+	const zodFiltersObject = {};
+	Object.keys(filters).forEach((k) => {
+		zodFiltersObject[k] = z.array(z.string()).optional().nullable();
+	});
+	const _form = superForm(defaults(filterInitialData, zod(z.object(zodFiltersObject))), {
+		SPA: true,
+		validators: zod(z.object(zodFiltersObject)),
+		dataType: 'json',
+		invalidateAll: false,
+		applyAction: false,
+		resetForm: false,
+		taintedMessage: false,
+		validationMethod: 'auto'
+	});
+
+	// Reseed + sync/persist in one effect: a scope change (instance reused for
+	// a different object) must finish reseeding before anything is written
+	// under the new key -- two separate effects can't guarantee that order.
+	let previousFilterStoreKey = filterStoreKey;
 	$effect(() => {
+		if (filterStoreKey !== previousFilterStoreKey) {
+			previousFilterStoreKey = filterStoreKey;
+			const fresh = seedFilterValues();
+			Object.assign(filterValues, fresh);
+			_form.form.update((data) => ({
+				...data,
+				...Object.fromEntries(
+					Object.entries(fresh).map(([f, v]: [string, any]) => [
+						f,
+						(v ?? []).map((x: any) => x.value)
+					])
+				)
+			}));
+		}
+
 		for (const field of filteredFields) {
 			const filterValue = filterValues[field];
 			const overrideFilterValue = overrideFilters[field];
@@ -479,54 +525,6 @@
 		setTimeout(() => {
 			handler.invalidate();
 		}, 10);
-	});
-
-	const filterInitialData: Record<string, string[]> = {};
-	// convert URL search params and default filters to filter initial data
-	for (const [key, value] of page.url.searchParams) {
-		filterInitialData[key] ??= [];
-		filterInitialData[key].push(value);
-	}
-	// Add default filter values if no URL params exist for that field
-	for (const field of filteredFields) {
-		if (!filterInitialData[field] && filterValues[field]?.length > 0) {
-			filterInitialData[field] = filterValues[field].map((v: Record<string, any>) => v.value);
-		}
-	}
-	const zodFiltersObject = {};
-	Object.keys(filters).forEach((k) => {
-		zodFiltersObject[k] = z.array(z.string()).optional().nullable();
-	});
-	const _form = superForm(defaults(filterInitialData, zod(z.object(zodFiltersObject))), {
-		SPA: true,
-		validators: zod(z.object(zodFiltersObject)),
-		dataType: 'json',
-		invalidateAll: false,
-		applyAction: false,
-		resetForm: false,
-		taintedMessage: false,
-		validationMethod: 'auto'
-	});
-
-	// Re-seed filterValues + _form when the scope changes (this instance got
-	// reused for a different object) -- otherwise filters keep reading/writing
-	// under the previous object's key.
-	let previousFilterStoreKey = filterStoreKey;
-	$effect(() => {
-		const key = filterStoreKey;
-		if (key !== previousFilterStoreKey) {
-			const fresh = seedFilterValues();
-			for (const field of filteredFields) {
-				filterValues[field] = fresh[field] ?? [];
-			}
-			_form.form.update((data) => {
-				for (const field of filteredFields) {
-					data[field] = (fresh[field] ?? []).map((v: any) => v.value);
-				}
-				return data;
-			});
-		}
-		previousFilterStoreKey = key;
 	});
 
 	$effect(() => {
