@@ -151,6 +151,9 @@ export const URL_MODEL = [
 	'responsibility-matrix-activities',
 	'responsibility-matrix-actors',
 	'responsibility-assignments',
+	// workflows
+	'workflows',
+	'workflow-versions',
 	// metrology
 	'metric-definitions',
 	'metric-instances',

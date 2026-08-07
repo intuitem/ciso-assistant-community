@@ -860,6 +860,25 @@ HUEY = {
 AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
 
+# Run workflow instances in a Huey worker instead of the triggering request.
+# Requires a running Huey consumer; keep False for dev setups without one.
+WORKFLOWS_ASYNC_EXECUTION = (
+    os.environ.get("WORKFLOWS_ASYNC_EXECUTION", "").lower() == "true"
+)
+
+# Kill-switch for inbound workflow webhooks: when disabled, hook
+# URLs answer 404 uniformly, for environments that want no unauthenticated
+# ingress at all.
+WORKFLOWS_INBOUND_HOOKS = (
+    os.environ.get("WORKFLOWS_INBOUND_HOOKS", "true").lower() != "false"
+)
+
+# Per-sender-IP rate limit on the unauthenticated inbound hook endpoint (DRF
+# rate string, e.g. "120/min"). Keyed on the trailing X-Forwarded-For entry.
+WORKFLOWS_WEBHOOK_THROTTLE_RATE = os.environ.get(
+    "WORKFLOWS_WEBHOOK_THROTTLE_RATE", "120/min"
+)
+
 # Allow outbound server-side requests (webhooks, integrations, LLM URLs) to private/loopback addresses
 ALLOW_PRIVATE_NETWORK_REQUESTS = os.environ.get(
     "ALLOW_PRIVATE_NETWORK_REQUESTS", "False"
