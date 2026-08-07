@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { invalidateAll, goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { getFlash } from 'sveltekit-flash-message';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { setContext } from 'svelte';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
@@ -93,6 +96,7 @@
 	const activeRunAs = $derived(versions.find((v) => v.id === activeVersionId)?.run_as ?? null);
 
 	const modalStore: ModalStore = getModalStore();
+	const flash = getFlash(page);
 
 	const opsUrl = (action: string) => buildOpsUrl(workflowId, action);
 
@@ -309,8 +313,13 @@
 	// A brand-new draft gets a manual trigger to build from. No end node: a
 	// branch finishes by simply having nothing wired after its last step,
 	// so the default shape teaches that instead of the hard stop.
+	// The seed exists only client-side until saved: markDirty() is called at
+	// the end of the script (the save machinery isn't declared yet here), or
+	// the first Execute would run against an empty server draft.
+	let seededTrigger = false;
 	if (!readonly && nodes.length === 0) {
 		nodes = [toFlowNode(newNodeDomain('trigger', { x: 120, y: 202 }, 'manual'), 0)];
+		seededTrigger = true;
 	}
 	refreshVisuals();
 
@@ -1259,6 +1268,11 @@
 			}
 			const body = await res.json().catch(() => ({}));
 			runVarsError = String(body.error ?? res.statusText);
+			// The inline error line lives in the run-with-variables popover;
+			// plain Execute failures must surface somewhere visible too.
+			if (!runVarsOpen) {
+				flash.set({ type: 'error', message: safeTranslate(runVarsError) });
+			}
 			return false;
 		} finally {
 			running = false;
@@ -1766,6 +1780,10 @@
 		selectedEdgeId = null;
 		flowInstance?.fitView({ nodes: [{ id: nodeError.node_id }], duration: 300, maxZoom: 1.2 });
 	}
+
+	// Persist the auto-seeded trigger through the normal dirty/save funnel
+	// (deferred to here so everything markDirty touches is initialized).
+	if (seededTrigger) markDirty();
 </script>
 
 <div class="workflow-builder flex flex-col h-full gap-3">
