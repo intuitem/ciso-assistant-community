@@ -1,0 +1,1061 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:cbw_nis2_control_framework
+locale: nl
+ref_id: Cbw_NIS2_Control_Framework
+name: Cbw (NIS2) Control Framework (v1.2)
+description: '## Introductie
+
+
+  De evaluatietool is opgesteld als praktisch hulpmiddel om organisaties te ondersteunen
+  bij het op een effectieve wijze verkrijgen van inzicht in de mate waarin zij voldoen
+  aan de Cyberbeveiligingswet (Cbw) en het onderliggende Cyberbeveiligingsbesluit
+  (Cbb).
+
+
+  De evaluatietool is ontwikkeld om inzicht te geven in de huidige staat van cyberweerbaarheid
+  en om verbeterpotentieel te identificeren, gebaseerd op de eisen zoals vastgelegd
+  in de Cbw en Cbb. Het Cbw (NIS2) Control Framework vervangt de geldende wet- en
+  regelgeving niet, maar maakt deze inzichtelijk en hanteerbaar - zie ook het studierapport
+  vanaf p. 16. De Cbw en de Cbb dagen organisaties uit om middels risicoanalyse en
+  inzicht in de eigen organisatie de Cbw en de Cbb te implementeren. Medewerkers van
+  organisaties zijn zelf verantwoordelijk voor het kennen en naleven van de relevante
+  wet- en regelgeving. Bovendien dient bij het gebruik ervan altijd rekening te worden
+  gehouden met de specifieke context en kenmerken van de organisatie en haar omgeving.'
+copyright: 'Unless otherwise noted, everything in this work is licensed under a Creative
+  Commons Attribution 4.0 License.
+
+  If you wish to use this work, please use the following attribution method: ADR &
+  NOREA, Cbw (NIS2) Control Framework (2025), CC-BY 4.0 licensed
+
+  The full license text can be read at: https://creativecommons.org/licenses/by/4.0/.'
+version: 1
+publication_date: 2026-08-07
+provider: ADR (Auditdienst Rijk) & NOREA
+packager: intuitem
+translations:
+  en:
+    name: Cbw (NIS2) Control Framework (v1.2)
+    description: "## Introduction\n\nThe evaluation tool has been developed as a practical\
+      \ tool to support organizations in effectively gaining insight into their compliance\
+      \ with the Cybersecurity Act (Cbw) and the underlying Cybersecurity Decree (Cbb).\
+      \ The evaluation tool was developed to provide insight into the current state\
+      \ of cyber resilience and to identify potential for improvement, based on the\
+      \ requirements laid out in the Cbw and Cbb. The Cbw (NIS2) Control Framework\
+      \ does not replace current laws and regulations, but rather makes them transparent\
+      \ and manageable \u2013 see also the study report from p. 16 onwards. The Cbw\
+      \ and Cbb challenge organizations to implement the Cbw and Cbb through risk\
+      \ analysis and insight into their own organization. Employees of organizations\
+      \ are responsible for knowing and complying with the relevant laws and regulations.\
+      \ Furthermore, the specific context and characteristics of the organization\
+      \ and its environment should always be taken into account when using the tool."
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cbw_nis2_control_framework
+    ref_id: Cbw_NIS2_Control_Framework
+    name: Cbw (NIS2) Control Framework (v1.2)
+    description: '## Introductie
+
+
+      De evaluatietool is opgesteld als praktisch hulpmiddel om organisaties te ondersteunen
+      bij het op een effectieve wijze verkrijgen van inzicht in de mate waarin zij
+      voldoen aan de Cyberbeveiligingswet (Cbw) en het onderliggende Cyberbeveiligingsbesluit
+      (Cbb).
+
+
+      De evaluatietool is ontwikkeld om inzicht te geven in de huidige staat van cyberweerbaarheid
+      en om verbeterpotentieel te identificeren, gebaseerd op de eisen zoals vastgelegd
+      in de Cbw en Cbb. Het Cbw (NIS2) Control Framework vervangt de geldende wet-
+      en regelgeving niet, maar maakt deze inzichtelijk en hanteerbaar - zie ook het
+      studierapport vanaf p. 16. De Cbw en de Cbb dagen organisaties uit om middels
+      risicoanalyse en inzicht in de eigen organisatie de Cbw en de Cbb te implementeren.
+      Medewerkers van organisaties zijn zelf verantwoordelijk voor het kennen en naleven
+      van de relevante wet- en regelgeving. Bovendien dient bij het gebruik ervan
+      altijd rekening te worden gehouden met de specifieke context en kenmerken van
+      de organisatie en haar omgeving.'
+    translations:
+      en:
+        name: Cbw (NIS2) Control Framework (v1.2)
+        description: "## Introduction\n\nThe evaluation tool has been developed as\
+          \ a practical tool to support organizations in effectively gaining insight\
+          \ into their compliance with the Cybersecurity Act (Cbw) and the underlying\
+          \ Cybersecurity Decree (Cbb). The evaluation tool was developed to provide\
+          \ insight into the current state of cyber resilience and to identify potential\
+          \ for improvement, based on the requirements laid out in the Cbw and Cbb.\
+          \ The Cbw (NIS2) Control Framework does not replace current laws and regulations,\
+          \ but rather makes them transparent and manageable \u2013 see also the study\
+          \ report from p. 16 onwards. The Cbw and Cbb challenge organizations to\
+          \ implement the Cbw and Cbb through risk analysis and insight into their\
+          \ own organization. Employees of organizations are responsible for knowing\
+          \ and complying with the relevant laws and regulations. Furthermore, the\
+          \ specific context and characteristics of the organization and its environment\
+          \ should always be taken into account when using the tool."
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21)
+      assessable: false
+      depth: 1
+      name: Zorgplicht (art. 21)
+      translations:
+        en:
+          name: Duty of care (Art. 21)
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21)
+      name: Beleid over netwerk en informatiesystemen
+      translations:
+        en:
+          name: Network and information systems policy
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):1
+      ref_id: '1.1'
+      description: "Komt overeen met D.1: beleid in ISMS evaluatie\nDe entiteit heeft\
+        \ een beveiligingsbeleid voor haar netwerk- en informatiesystemen, waarin\
+        \ passende en evenredige technische, organisatorische en operationele maatregelen\
+        \ zijn opgenomen (of naar wordt verwezen). Dit beleid wordt actief toegepast,\
+        \ ge\xEBvalueerd en gehandhaafd (middels een managementsystematiek). Het bestuur\
+        \ stelt het beleid vast, herziet het periodiek, en borgt dat personeel en\
+        \ andere betrokkenen op de hoogte zijn van het beleid en handelen in overeenstemming\
+        \ daarmee. In dit beleid worden de rollen, verantwoordelijkheden en bevoegdheden\
+        \ in relatie tot de beveiliging van haar netwerk- en informatiesystemen ook\
+        \ vastgesteld."
+      annotation: "De maatregelen omvatten ten minste het volgende:\na. beleid over\
+        \ risicoanalyse en beveiliging van informatiesystemen;\nb. incidentenbehandeling;\n\
+        c. bedrijfscontinu\xEFteit, zoals back-upbeheer en herstelplannen, en crisisbeheer;\n\
+        d. de beveiliging van de toeleveringsketen, met inbegrip van beveiligingsgerelateerde\
+        \ aspecten met betrekking tot de relaties tussen de entiteit en haar rechtstreekse\
+        \ leveranciers of dienstverleners.\ne. beveiliging bij het verwerven, ontwikkelen\
+        \ en onderhouden van netwerk- en\ninformatiesystemen, met inbegrip van de\
+        \ respons op en bekendmaking van kwetsbaarheden;\nf. beleid en procedures\
+        \ om de effectiviteit van maatregelen voor het beheersen van cyberbeveiligingsrisico\u2019\
+        s te beoordelen;\ng. basispraktijken op het gebied van cyberhygi\xEBne en\
+        \ opleiding op het gebied van cyberbeveiliging;\nh. beleid en procedures inzake\
+        \ het gebruik van cryptografie en, in voorkomend geval, encryptie;\ni. beveiligingsaspecten\
+        \ ten aanzien van personeel, toegangsbeleid en beheer van assets; en\nj. wanneer\
+        \ gepast, het gebruik van multifactor-authenticatie- of continue-authenticatieoplossingen,\
+        \ beveiligde spraak-, video- en tekstcommunicatie en beveiligde noodcommunicatiesystemen\
+        \ binnen de entiteit."
+      translations:
+        en:
+          description: The entity has a security policy for its network and information
+            systems, which includes (or refers to) appropriate and proportionate technical,
+            organizational, and operational measures. This policy is actively applied,
+            evaluated, and enforced (through a management system). The board establishes
+            and periodically reviews the policy, and ensures that staff and other
+            stakeholders are aware of it and act in accordance with it. This policy
+            also defines the roles, responsibilities, and authorities related to the
+            security of its network and information systems.
+          annotation: 'The measures shall include at least the following:
+
+            a. policies on risk assessment and security of information systems;
+
+            b. incident handling;
+
+            c. business continuity, such as backup management and recovery plans,
+            and crisis management;
+
+            d. supply chain security, including security-related aspects of the relationships
+            between the entity and its direct suppliers or service providers.
+
+            e. security in the acquisition, development, and maintenance of network
+            and information systems, including vulnerability response and disclosure;
+
+            f. policies and procedures to assess the effectiveness of cybersecurity
+            risk management measures;
+
+            g. baseline cyber hygiene practices and cybersecurity training;
+
+            h. policies and procedures on the use of cryptography and, where appropriate,
+            encryption;
+
+            i. security aspects related to personnel, access policies, and asset management;
+            and
+
+            j. where appropriate, the use of multi-factor authentication or continuous
+            authentication solutions, secure voice, video, and text communications,
+            and secure emergency communications systems within the entity.'
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21)
+      name: Beleid over risicomanagement
+      translations:
+        en:
+          name: Risk management policy
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):2
+      ref_id: '2.1'
+      description: 'De entiteit heeft een risicomanagementbeleid met betrekking tot
+        de beveiliging van haar netwerk- en informatiesystemen. Dit beleid omvat ten
+        minste een risicomanagementmethodiek en criteria voor risico acceptatie. Voor
+        de toepassing van het beleid zijn processen en procedures opgenomen voor risicoanalyse,
+        risicobeoordeling en risicobehandeling.
+
+        De entiteit heeft, op basis van de risico analyse, een overzicht van de risico''s
+        voor haar netwerk- en informatiesystemen. Aan de hand van dit overzicht worden
+        eisen aan de beveiliging (beveiligingeisen) van de netwerk en informatiesystemen
+        gesteld, en indien de risicoanalyse hiertoe aanleiding geeft maatregelen getroffen.'
+      annotation: "Bij het selecteren van de maatregelen houdt de entiteit in ieder\
+        \ geval rekening met:\n- de stand van de techniek\n- de uitvoeringskosten\n\
+        - indien van toepassing, de desbetreffende Europese en internationale normen.\n\
+        - de evenredigheid van de maatregelen: de mate waarin zij aan risico\u2019\
+        s is blootgesteld, de omvang van de entiteit, de kans dat zich incidenten\
+        \ voordoen en de ernst ervan (met inbegrip van de maatschappelijke en economische\
+        \ gevolgen)."
+      translations:
+        en:
+          description: The entity has a risk management policy regarding the security
+            of its network and information systems. This policy includes, at a minimum,
+            a risk management methodology and risk acceptance criteria. Processes
+            and procedures for risk analysis, risk assessment, and risk treatment
+            are included for implementing the policy.Based on the risk analysis, the
+            entity has an overview of the risks to its network and information systems.
+            This overview is used to define security requirements for the network
+            and information systems, and, if the risk analysis indicates the need,
+            appropriate measures are taken.
+          annotation: 'When selecting measures, the entity must at least consider:
+
+            - the state of the art;
+
+            - the implementation costs;
+
+            - where applicable, the relevant European and international standards;
+
+            - the proportionality of the measures: the extent to which it is exposed
+            to risks, the size of the entity, the likelihood of incidents occurring,
+            and their severity (including their social and economic impact).'
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21)
+      name: Evaluatie
+      translations:
+        en:
+          name: Evaluation
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):3
+      ref_id: '3.1'
+      description: De entiteit evalueert periodiek de doeltreffendheid van de maatregelen
+        die zij heeft genomen en de effecten ervan in de praktijk, en legt het resultaat
+        daarvan schriftelijk vast. De entiteit past naar aanleiding van de uitkomst
+        van die evaluaties de maatregelen waar nodig aan.
+      translations:
+        en:
+          description: The entity periodically evaluates the effectiveness of the
+            measures it has implemented and their practical effects, and documents
+            the results in writing. Based on the outcome of these evaluations, the
+            entity adjusts the measures as needed.
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21)
+      name: Incidentenbehandeling
+      translations:
+        en:
+          name: Incident handling
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):4
+      ref_id: '4.1'
+      description: "De entiteit heeft een incident managementbeleid dat wordt gecommuniceerd\
+        \ en ge\xEFmplementeerd. In dit beleid worden de rollen, verantwoordelijkheden\
+        \ en bevoegdheden ten aanzien van incidentenbehandeling vastgesteld."
+      annotation: 'In het beleid zijn de rollen, verantwoordelijkheden en bevoegdheden
+        vastgesteld vast voor:
+
+        a. het tijdig detecteren van incidenten;
+
+        b. het analyseren en beoordelen van incidenten;
+
+        c. het reageren op, beperken van de gevolgen van, wegnemen van de oorzaak
+        van en herstellen van
+
+        incidenten;
+
+        d. het documenteren van incidenten;
+
+        e. het rapporteren van incidenten; en
+
+        f. het leren van incidenten.'
+      translations:
+        en:
+          description: The entity has an incident management policy that is communicated
+            and implemented. This policy defines the roles, responsibilities, and
+            authorities regarding incident handling.
+          annotation: 'The policy establishes the roles, responsibilities, and authorities
+            for:
+
+            a. timely detection of incidents;
+
+            b. analyzing and assessing incidents;
+
+            c. responding to, mitigating the consequences of, eliminating the cause
+            of, and recovering from incidents;
+
+            d. documenting incidents;
+
+            e. reporting incidents; and
+
+            f. learning from incidents.'
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):4
+      ref_id: '4.2'
+      description: De entiteit heeft processen en procedures om relevante activiteiten,
+        handelingen en gebeurtenissen in haar netwerk- en informatiesystemen te monitoren
+        teneinde incidenten te detecteren, analyseren en classificeren. De entiteit
+        logt de voor de beveiliging van haar netwerk- en informatiesystemen relevante
+        gebeurtenissen in haar netwerk- en informatiesystemen. De logbestanden worden
+        opgeslagen gedurende een vooraf bepaalde periode en beschermt deze tegen ongeautoriseerde
+        wijzigingen.
+      annotation: 'Deze processen en procedures zijn vastgesteld en aantoonbaar toegepast,
+        en bevatten ten minste:
+
+        a. het tijdig detecteren van incidenten;
+
+        b. het analyseren en beoordelen van incidenten;
+
+        c. het reageren op, beperken van de gevolgen van, wegnemen van de oorzaak
+        van en herstellen van
+
+        incidenten;
+
+        d. het documenteren van incidenten;
+
+        e. het rapporteren van incidenten; en
+
+        f. het leren van incidenten.'
+      translations:
+        en:
+          description: The entity has processes and procedures to monitor relevant
+            activities, actions, and events in its network and information systems
+            in order to detect, analyze, and classify incidents. The entity logs events
+            relevant to the security of its network and information systems. The log
+            files are stored for a predetermined period and protected from unauthorized
+            modification.
+          annotation: 'These processes and procedures have been established and demonstrably
+            applied, and include at least:
+
+            a. timely detection of incidents;
+
+            b. analysis and assessment of incidents;
+
+            c. responding to, mitigating the consequences of, eliminating the cause
+            of, and recovering from incidents;
+
+            d. documenting incidents;
+
+            e. reporting incidents; and
+
+            f. learning from incidents.'
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21)
+      name: "Bedrijfscontinu\xEFteit en crisisbeheer"
+      translations:
+        en:
+          name: Business continuity and crisis management
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):5
+      ref_id: '5.1'
+      description: "De entiteit heeft een bedrijfscontinu\xEFteitbeleid met betrekking\
+        \ tot haar netwerk- en informatiesystemen."
+      annotation: "De entiteit stelt in het kader van het toepassen van het beleid\
+        \ processen en procedures vast voor het borgen van haar bedrijfscontinu\xEF\
+        teit, waaronder in ieder geval processen en procedures voor het herstellen\
+        \ van haar netwerk- en informatiesystemen en voor het maken en periodiek verifi\xEB\
+        ren van de betrouwbaarheid van back-ups van software en gegevens. De entiteit\
+        \ past deze processen en procedures aantoonbaar toe en test\ndeze periodiek."
+      translations:
+        en:
+          description: The entity has a business continuity policy in relation to
+            its network and information systems.
+          annotation: As part of the policy implementation, the entity establishes
+            processes and procedures to ensure its business continuity, including,
+            but not limited to, processes and procedures for restoring its network
+            and information systems and for creating and periodically verifying the
+            reliability of software and data backups. The entity demonstrably applies
+            these processes and procedures and tests them periodically.
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):5
+      ref_id: '5.2'
+      description: De entiteit heeft een bedrijfscontinuiteitsplan en een herstelplan.
+        De entiteit past ze toe in geval van een incident en test de plannen periodiek.
+      translations:
+        en:
+          description: The entity has a business continuity plan and a recovery plan.
+            The entity applies them in the event of an incident and tests the plans
+            periodically.
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):5
+      ref_id: '5.3'
+      description: De entiteit heeft een crisisbeheersingsplan en test en beoefent
+        dit plan periodiek.
+      annotation: 'Het plan bevat ten minste:
+
+        - de taken, verantwoordelijkheden en bevoegdheden voor het personeel ten tijde
+        van crisis
+
+        - een beschrijving van de communicatiemiddelen ten tijde van crisis
+
+        - wanneer passend, een beschrijving van de beschikbare noodvoorzieningen,
+        waaronder het gebruik van beveiligde noodcommunicatiesystemen ten tijde van
+        crisis.'
+      translations:
+        en:
+          description: The entity has a crisis management plan and tests and exercises
+            this plan periodically.
+          annotation: 'The plan contains at least:
+
+            a. the tasks, responsibilities and authorities for the staff in times
+            of crisis,
+
+            b. a description of the means of communication in times of crisis,
+
+            c. where appropriate, a description of available emergency arrangements,
+            including the use of secure emergency communications systems in times
+            of crisis.'
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21)
+      name: Beveiliging van de toeleveringsketen
+      translations:
+        en:
+          name: Supply chain security
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):6
+      ref_id: '6.1'
+      description: De entiteit heeft beleid over de beveiliging en maatregelen van
+        de toeleveringsketen. De entiteit bepaalt in dat beleid haar omgang met afhankelijkheden
+        van de producten en diensten van haar rechtstreekse leveranciers en dienstverleners
+        die invloed kunnen hebben op de beveiliging van haar netwerk- en informatiesystemen.
+      translations:
+        en:
+          description: The entity has a policy on supply chain security and controls.
+            This policy outlines how the entity addresses dependencies on the products
+            and services of its direct suppliers and service providers that could
+            impact the security of its network and information systems.
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):6
+      ref_id: '6.2'
+      description: De entiteit toetst periodiek of rechtstreekse (diensten)leveranciers
+        voldoen aan de beveiligingseisen.
+      translations:
+        en:
+          description: The entity periodically assesses whether direct (service) suppliers
+            meet the security requirements.
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:6.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):6
+      ref_id: '6.3'
+      description: De entiteit heeft een volledige en actuele inventaris van haar
+        leveranciers en dienstverleners en houdt deze bij. De entiteit houdt bij welke
+        producten en diensten van leveranciers en dienstverleners worden afgenomen
+        mede als de gemaakte afspreken over de afgenomen diensten en producten.
+      translations:
+        en:
+          description: The entity has and maintains a complete and up-to-date inventory
+            of its suppliers and service providers. The entity keeps track of which
+            products and services are purchased from suppliers and service providers,
+            also as well as the agreements made about the purchased services and products.
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21)
+      name: Verwerven, ontwikkelen en onderhouden van informatiesystemen
+      translations:
+        en:
+          name: Acquiring, developing and maintaining information systems
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):7
+      ref_id: '7.1'
+      description: "De entiteit heeft, op basis van de beveilingseisen (zie 2.1),\
+        \ beleid voor het mitigeren en beheersen van risico\u2019s die voortvloeien\
+        \ uit het verwerven van software, hardware of diensten die betrekking hebben\
+        \ op haar netwerk- en informatiesystemen."
+      annotation: 'De entiteit stelt de procedure en de eisen vast op basis op van
+        de analyses uit het beleid over risicomanagement over de beveiliging van haar
+        netwerk- en informatiesystemen (zie artikel 7). Deze eisen maken waar mogelijk
+        deel uit van de overeenkomsten bij de verwerving van software, hardware en
+        diensten.
+
+        In het geval van onderhoud en beheer hebben de procedures ten minste betrekking
+        op het configuratiebeheer en het veranderingsbeheer van de netwerk- en informatiesystemen.'
+      translations:
+        en:
+          description: The entity has, based on the security requirements (see 2.1),
+            a policy for mitigating and controlling risks arising from the acquisition
+            of software, hardware or services related to its network and information
+            systems.
+          annotation: The entity establishes the procedure and requirements based
+            on the analyses from the risk management policy regarding the security
+            of its network and information systems (see Article 7). These requirements
+            are incorporated, where possible, into the agreements for the acquisition
+            of software, hardware, and services. In the case of maintenance and management,
+            the procedures cover at least configuration management and change management
+            of the network and information systems.
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):7
+      ref_id: '7.2'
+      description: De entiteit heeft (indien van toepassing) processen en procedures
+        voor de veilige ontwikkeling van haar netwerk- en informatiesystemen. Deze
+        processen en procedures hebben betrekking op alle ontwikkelingsfasen van de
+        netwerk- en informatiesystemen van de entiteit.
+      translations:
+        en:
+          description: The entity has (where applicable) processes and procedures
+            for the secure development of its network and information systems. These
+            processes and procedures cover all development phases of the entity's
+            network and information systems.
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):7
+      ref_id: '7.3'
+      description: De entiteit heeft processen en procedures voor het onderhoud en
+        beheer van haar netwerk- en informatiesystemen. Deze processen en procedures
+        hebben ten minste betrekking op het configuratiebeheer en het wijzigingsbeheer
+        van de netwerk- en informatiesystemen van de entiteit.
+      translations:
+        en:
+          description: The entity has processes and procedures for the maintenance
+            and management of its network and information systems. These processes
+            and procedures cover, at a minimum, configuration management and change
+            management of the entity's network and information systems.
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21)
+      name: "Cyberhygi\xEBne en opleidingen"
+      translations:
+        en:
+          name: Cyber hygiene and training
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):8
+      ref_id: '8.1'
+      description: "De entiteit zorgt ervoor dat haar personeel en andere binnen de\
+        \ entiteit werkzame personen zich bewust zijn van de risico\u2019s met betrekking\
+        \ tot de netwerk- en informatiesystemen van de entiteit en praktijken op het\
+        \ gebied van cyberhygi\xEBne toepassen."
+      translations:
+        en:
+          description: The entity shall ensure that its personnel and other persons
+            working within the entity are aware of the risks related to the entity's
+            network and information systems and implement cyber hygiene practices.
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):8
+      ref_id: '8.2'
+      description: De entiteit wijst het personeel en andere binnen de entiteit werkzame
+        personen aan waarvan de rollen, verantwoordelijkheden en bevoegdheden vaardigheden
+        en deskundigheid vereisen op het gebied van beveiliging van de netwerk- en
+        informatiesystemen en zorgt ervoor dat zij regelmatig opleiding krijgen over
+        de beveiliging van netwerk- en informatiesystemen.
+      translations:
+        en:
+          description: The entity shall designate the personnel and other individuals
+            working within the entity whose roles, responsibilities and authorities
+            require skills and expertise in the field of network and information systems
+            security and shall ensure that they receive regular training on network
+            and information systems security.
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21)
+      name: Beleid over cryptografie
+      translations:
+        en:
+          name: Policy in cryptography
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:9.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):9
+      ref_id: '9.1'
+      description: De entiteit heeft beleid over het gebruik van cryptografie en heeft
+        om dit beleid uit te voeren vastgestelde processen en procedures voor het
+        gebruik van cryptografie.
+      annotation: 'In het beleid wordt in ieder geval uitgewerkt:
+
+        a. in welke gevallen cryptografie ingezet wordt;
+
+        b. in voorkomende gevallen welke typen encryptie worden gebruikt en de wijze
+        waarop deze worden toegepast;
+
+        c. wie binnen de entiteit verantwoordelijk zijn voor de implementatie van
+        cryptografie;
+
+        d. wie binnen de entiteit verantwoordelijk zijn voor het sleutelbeheer.'
+      translations:
+        en:
+          description: The entity has a policy on the use of cryptography and has
+            established processes and procedures for the use of cryptography to implement
+            this policy.
+          annotation: 'The policy shall at least specify:
+
+            a. in which cases cryptography is used;
+
+            b. in which cases, which types of encryption are used and how they are
+            applied;
+
+            c. who within the entity is responsible for implementing cryptography;
+
+            d. who within the entity is responsible for key management.'
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21)
+      name: Beveiligingsaspecten t.a.v. personeel
+      translations:
+        en:
+          name: Security aspects regarding personnel
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:10.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):10
+      ref_id: '10.1'
+      description: 'De entiteit wijst het personeel en andere binnen de entiteit werkzame
+        personen aan die worden belast met rollen, verantwoordelijkheden en bevoegdheden
+        met betrekking tot de beveiliging van haar netwerk- en informatiesystemen
+        en evalueert deze aanwijzing periodiek.
+
+        Daarnaast stelt de entiteit betrouwbaarheidseisen op waaraan haar personeel
+        en andere binnen de entiteit werkzame personen moeten voldoen, voor zover
+        deze passend en noodzakelijk zijn voor hun taakuitoefening met betrekking
+        tot de beveiliging van de netwerk- en informatiesystemen van de entiteit.'
+      translations:
+        en:
+          description: The entity designates the personnel and other individuals working
+            within the entity with roles, responsibilities, and authorities related
+            to the security of its network and information systems, and periodically
+            reviews this designation. In addition, the entity establishes reliability
+            requirements that its personnel and other individuals working within the
+            entity must meet, to the extent appropriate and necessary for their duties
+            related to the security of the entity's network and information systems.
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21)
+      name: Beveiligingsaspecten t.a.v. toegangsbeleid
+      translations:
+        en:
+          name: Security aspects regarding access policy
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:11.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):11
+      ref_id: '11.1'
+      description: 'De entiteit heeft logische en fysieke toegangsbeveiligingsbeleid.
+        Het beleid omvat in ieder geval het uitgeven, monitoren, gebruiken, wijzigen
+        en intrekken van identiteiten en autorisaties, en het beheer van identiteiten
+        en autorisaties.
+
+        De entiteit controleert periodiek identiteiten, authenticatiemiddelen en autorisaties
+        op noodzakelijkheid, juistheid en actualiteit en wijzigt deze indien nodig.'
+      translations:
+        en:
+          description: The entity has logical and physical access security policies.
+            These policies cover, at a minimum, the issuance, monitoring, use, modification,
+            and revocation of identities and authorizations, as well as the management
+            of identities and authorizations. The entity periodically checks identities,
+            authentication methods, and authorizations for necessity, accuracy, and
+            timeliness, and amends them as needed.
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21)
+      name: Beveiligingsaspecten t.a.v. beheer van assets
+      translations:
+        en:
+          name: Security aspects regarding asset management
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:12.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):12
+      ref_id: '12.1'
+      description: De entiteit heeft beleid voor het beheer van haar assets die zij
+        voor haar werkzaamheden of voor het verlenen van haar diensten gebruikt en
+        heeft om dit beleid uit te voeren processen en procedures voor het beheer
+        van assets.
+      annotation: 'Denk hierbij aan configuratiemanagement.
+
+        Het beleid omvat in ieder geval:
+
+        a. een systeem om assets op verschillende niveaus te kunnen classificeren,
+        indien van toepassing op basis van de eisen voor vertrouwelijkheid, integriteit
+        en beschikbaarheid;
+
+        b. regels voor het aanvaardbaar gebruik van assets.'
+      translations:
+        en:
+          description: The entity has a policy for the management of its assets used
+            in the conduct of its operations or in the provision of its services and
+            has asset management processes and procedures to implement that policy.
+          annotation: 'The policy should include at least:
+
+            a. a system for classifying assets at different levels, where applicable,
+            based on confidentiality, integrity, and availability requirements;
+
+            b. rules for the acceptable use of assets.'
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:12.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):12
+      ref_id: '12.2'
+      description: De entiteit heeft een volledige en actuele inventaris van haar
+        assests en houdt deze bij.
+      translations:
+        en:
+          description: The entity has and maintains a complete and current inventory
+            of its assets.
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21)
+      name: Attenderingen, adviezen en informatie
+      translations:
+        en:
+          name: Alerts, advice and information
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:13.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):13
+      ref_id: '13.1'
+      description: De entiteit verwerkt alle adviezen en informatie over relevante
+        kwetsbaarheden of cyberdreigingen die relevant zijn voor de beveiliging van
+        haar netwerk- en informatiesystemen en beoordeelt op basis daarvan of zij
+        aanpassingen of aanvulling moet toepassen op de maatregelen die van kracht
+        zijn voor het uitvoeren van de zorgplicht .
+      annotation: "Indien de essenti\xEBle entiteit of belangrijke entiteit door relevante\
+        \ partijen, waaronder CSIRT\u2019s, bevoegde autoriteiten, andere betrokken\
+        \ overheidsinstanties of rechtstreekse leveranciers of dienstverleners, gericht\
+        \ wordt geattendeerd op de voor de beveiliging van haar netwerk- en informatiesystemen\
+        \ relevante kwetsbaarheden of cyberdreigingen, of van die partijen gerichte\
+        \ beveiligingsadviezen of dreigingsinformatie ontvangt die relevant zijn voor\
+        \ de beveiliging van haar netwerk- en informatiesystemen, beoordeelt zij of\
+        \ op basis daarvan aanpassingen of aanvullingen nodig zijn van de maatregelen\
+        \ die nodig zijn ter uitvoering van artikel 21 van de wet. De entiteit legt\
+        \ de uitkomsten van die beoordeling schriftelijk vast."
+      translations:
+        en:
+          description: The entity processes all advice and information on relevant
+            vulnerabilities or cyber threats that are relevant to the security of
+            its network and information systems and, on that basis, assesses whether
+            it needs to apply adjustments or supplements to the measures in force
+            to carry out the duty of care.
+          annotation: If the entity is specifically alerted by relevant parties, including
+            CSIRTs, competent authorities, other relevant government agencies, or
+            direct suppliers or service providers, to vulnerabilities or cyber threats
+            relevant to the security of its network and information systems, or receives
+            targeted security advice or threat information from those parties that
+            is relevant to the security of its network and information systems, it
+            shall assess whether, based on this information, adjustments or additions
+            are required to the measures necessary to implement Article 21 of the
+            Act. The entity shall record the results of this assessment in writing.
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:governance-(art.-24)
+      assessable: false
+      depth: 1
+      name: Governance (art. 24)
+      translations:
+        en:
+          name: Governance (Art. 24)
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:governance-(art.-24):1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:governance-(art.-24)
+      name: Eisen aan de training, de trainer en het certificaat en doel van de training
+      translations:
+        en:
+          name: Requirements for the training, the trainer and the certificate and
+            purpose of the training
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:14.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:governance-(art.-24):1
+      ref_id: '14.1'
+      description: "Het bestuur van de entiteit is, naar aanleiding van een training,\
+        \ in staat om risico\u2019s voor de beveiliging van netwerk- en informatiesystemen\
+        \ te kunnen identificeren en de gevolgen daarvan voor de diensten die door\
+        \ de entiteit worden verleend te kunnen beoordelen. Daarnaast zorgt de training\
+        \ dat ieder bestuurslid in staat is om risicobeheersmaatregelen op het gebied\
+        \ van cyberbeveiliging en de gevolgen daarvan voor de diensten die door de\
+        \ entiteit worden verleend te kunnen beoordelen."
+      annotation: "De training, behandelt in ieder geval de volgende onderwerpen:\n\
+        a. de soorten risico\u2019s voor netwerk- en informatiesystemen;\nb. risicomanagementprocessen;\n\
+        c. risicobeoordelingsmethodiek;\nd. risicobeheersingsmaatregelen op het gebied\
+        \ van cyberbeveiliging (zoals ook vastgelegd in beveiligingsbeleid).\nHet\
+        \ certificaat van de training, bevat in ieder geval:\na. de naam van het lid\
+        \ van het bestuur van de essenti\xEBle entiteit of belangrijke entiteit;\n\
+        b. de datum of data waarop de training is gevolgd;\nc. de behandelde onderwerpen\
+        \ in de training; en\nd. de naam van de aanbieder van de training.\nHet certificaat\
+        \ van de training is opgesteld in de Nederlandse taal of de Engelse taal."
+      translations:
+        en:
+          description: Following training, the entity's board is able to identify
+            security risks to network and information systems and assess their impact
+            on the services provided by the entity. Furthermore, the training ensures
+            that each board member is able to assess cybersecurity risk management
+            measures and their impact on the services provided by the entity.
+          annotation: 'The training shall, at a minimum, cover the following topics:
+
+            a. The types of risks for network and information systems;
+
+            b. Risk management processes;
+
+            c. Risk assessment methodology;
+
+            d. Cybersecurity risk control measures (as also laid down in security
+            policy).
+
+
+            The training certificate shall, at a minimum, include:
+
+            a. The name of the board member of the entity;
+
+            b. The date(s) on which the training was completed;
+
+            c. The topics covered in the training; and
+
+            d. The name of the training provider.
+
+
+            The training certificate shall be available in Dutch or English.'
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:14.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:governance-(art.-24):1
+      ref_id: '14.2'
+      description: Ieder lid van het bestuur van een entiteit voldoet binnen twee
+        jaar aan de trainingseisen. Daarnaast houdt ieder bestuurslid de kennis aantoonbaar
+        actueel.
+      annotation: "De training, behandelt in ieder geval de volgende onderwerpen:\n\
+        a. de soorten risico\u2019s voor netwerk- en informatiesystemen;\nb. risicomanagementprocessen;\n\
+        c. risicobeoordelingsmethodiek;\nd. risicobeheersingsmaatregelen op het gebied\
+        \ van cyberbeveiliging (zoals ook vastgelegd in beveiligingsbeleid).\nHet\
+        \ certificaat van de training, bevat in ieder geval:\na. de naam van het lid\
+        \ van het bestuur van de essenti\xEBle entiteit of belangrijke entiteit;\n\
+        b. de datum of data waarop de training is gevolgd;\nc. de behandelde onderwerpen\
+        \ in de training; en\nd. de naam van de aanbieder van de training.\nHet certificaat\
+        \ van de training is opgesteld in de Nederlandse taal of de Engelse taal."
+      translations:
+        en:
+          description: Every member of an entity's board must meet the training requirements
+            within two years. In addition, every board member must demonstrably keep
+            their knowledge up-to-date.
+          annotation: 'The training shall, at a minimum, cover the following topics:
+
+            a. The types of risks for network and information systems;
+
+            b. Risk management processes;
+
+            c. Risk assessment methodology;
+
+            d. Cybersecurity risk control measures (as also laid down in security
+            policy).
+
+
+            The training certificate shall, at a minimum, include:
+
+            a. The name of the board member of the entity;
+
+            b. The date(s) on which the training was completed;
+
+            c. The topics covered in the training; and
+
+            d. The name of the training provider.
+
+
+            The training certificate shall be available in Dutch or English.'
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:meldplicht-(art.-25)
+      assessable: false
+      depth: 1
+      name: Meldplicht (art. 25)
+      translations:
+        en:
+          name: Reporting obligation (Art. 25)
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:meldplicht-(art.-25):1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:meldplicht-(art.-25)
+      name: Meldplicht significante incidenten
+      translations:
+        en:
+          name: Reporting obligation for significant incidents
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:15.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:meldplicht-(art.-25):1
+      ref_id: '15.1'
+      description: De entiteit meldt ieder significant incident aan haar CSIRT en
+        de bevoegde autoriteit.
+      annotation: "Een incident is significant als het:\na. een ernstige operationele\
+        \ verstoring van de diensten of financi\xEBle verliezen voor de betrokken\
+        \ entiteit veroorzaakt of kan veroorzaken; of\nb. andere entiteiten heeft\
+        \ getroffen of kan treffen door aanzienlijke materi\xEBle of immateri\xEB\
+        le schade te veroorzaken.\nVrijwillige meldplicht: elke entiteit heeft de\
+        \ mogelijke om vrijwillig een melding van een incident, bijna-incident of\
+        \ cyberdreiging te doen bij haar CSIRT of bevoegde autoriteit."
+      translations:
+        en:
+          description: The entity shall report any significant incident to its CSIRT
+            and the competent authority.
+          annotation: 'An incident is significant if it:
+
+            a. causes or may cause serious operational disruption of services or financial
+            loss to the entity concerned; or
+
+            b. has affected or may affect other entities by causing significant material
+            or immaterial damage.
+
+
+            Voluntary reporting obligation: Every entity has the option to voluntarily
+            report an incident, near miss, or cyber threat to its CSIRT or competent
+            authority.'
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:meldplicht-(art.-25):2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:meldplicht-(art.-25)
+      name: Vroegtijdige waarschuwing
+      translations:
+        en:
+          name: Early warning
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:16.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:meldplicht-(art.-25):2
+      ref_id: '16.1'
+      description: 'De entiteit meldt de significante incidenten in drie fasen: 1)
+        de eerste (vroegtijdige) melding vindt onverwijld plaats of, indien dat niet
+        mogelijk is, binnen 24 uur nadat zij kennis heeft gekregen van het significante
+        incident. 2) een tussentijdse update over de ontwikkelingen van het incident
+        (binnen 72 uur na het indienen van de eerste melding, ook als de status of
+        de afhandeling van het incident niet is gewijzigd of als de reguliere activiteiten
+        zijn hervat) en 3) het eindverslag met een analyse van de grondoorzaak en
+        vervolgacties (uiterlijk een maand na het indienen van de tussentijdse update).
+        Indien het incident op het moment van dit rapport nog voortduurt wordt dit
+        verslag een tussentijdsverslag. In dit geval volgt het eindverslag binnen
+        een maand nadat het incident is afgehandeld.'
+      annotation: "Bij de vroegtijdige melding verstrekt de entiteit de volgende informatie:\
+        \ indicatie of het incident vermoedelijk door een onrechtmatige of kwaadwillige\
+        \ handeling is veroorzaakt, of het incident grensoverschrijdende gevolgen\
+        \ kan hebben, de contactgegevens van de functionaris die verantwoordelijk\
+        \ is voor de melding, het vermoedelijke tijdstip van de aanvang van het significante\
+        \ incident, zo mogelijk, een beschrijving van de aard en op dat moment merkbare\
+        \ gevolgen van het incident, zo mogelijk, een prognose van de hersteltijd,\
+        \ en zo mogelijk de door de entiteit genomen of voorgenomen maatregelen om\
+        \ de gevolgen van het significante incident te beperken of herhaling hiervan\
+        \ te voorkomen.\nBij de tussentijdse update geeft de entiteit een update op\
+        \ de informatie uit de vroegtijdige melding en, indien van toepassing, een\
+        \ initi\xEBle beoordeling van het significante\nincident, met inbegrip van\
+        \ de ernst en de gevolgen ervan, de indicatoren voor aantasting\nen alle beschikbare\
+        \ informatie die het CSIRT en de bevoegde autoriteit in staat stelt om eventuele\
+        \ grensoverschrijdende gevolgen van het incident te bepalen.\nIn het eindverslag\
+        \ is het volgende opgenomen: een gedetailleerde beschrijving van het incident,\
+        \ de ernst en de gevolgen ervan, het soort bedreiging of de grondoorzaak die\
+        \ waarschijnlijk tot het incident heeft geleid, toegepaste en lopende risicobeperkende\
+        \ maatregelen en in voorkomend geval, de grensoverschrijdende gevolgen van\
+        \ het\nincident."
+      translations:
+        en:
+          description: 'The entity reports significant incidents in three phases:
+            1) the initial (early) notification is made without delay or, if that
+            is not possible, within 24 hours of becoming aware of the significant
+            incident. 2) an interim update on the incident''s development (within
+            72 hours of submitting the initial notification, even if the status or
+            handling of the incident has not changed or if regular activities have
+            resumed); and 3) the final report with a root cause analysis and follow-up
+            actions (no later than one month after submitting the interim update).
+            If the incident is still ongoing at the time of this report, this report
+            becomes an interim report. In this case, the final report follows within
+            one month of the incident''s resolution.'
+          annotation: 'In the early notification, the entity shall provide the following
+            information:
+
+            a. an indication of whether the incident is likely to have been caused
+            by an unlawful or malicious act;
+
+            b. whether the incident may have cross-border implications;
+
+            c. the contact details of the official responsible for notification;
+
+            d. the estimated time of onset of the significant incident,
+
+            e. where possible; a description of the nature and currently noticeable
+            impact of the incident,
+
+            f. where possible; a forecast of the recovery time; and,
+
+            g. where possible, the measures taken or planned by the entity to mitigate
+            the impact of the significant incident or prevent its recurrence.
+
+
+            In the interim update, the entity shall provide
+
+            a. an update on the information from the early notification and,
+
+            b. where applicable, an initial assessment of the significant incident,
+            including its severity and impact, the indicators of impairment, and any
+            available information enabling the CSIRT and the competent authority to
+            determine any cross-border implications of the incident.
+
+
+            The final report shall include
+
+            a. a detailed description of the incident, its severity and consequences,
+
+            b. the type of threat or root cause likely to have led to the incident,
+
+            c. risk mitigation measures implemented and ongoing, and,
+
+            d. where appropriate, the transboundary implications of the incident.'
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:meldplicht-(art.-25):3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:meldplicht-(art.-25)
+      name: Nadere regels over meldingen
+      translations:
+        en:
+          name: Further rules on notifications
+    - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:17.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:meldplicht-(art.-25):3
+      ref_id: '17.1'
+      description: De entiteit brengt, in het geval van een significant incident,
+        de ontvangers van haar diensten zo snel mogelijk op de hoogte wanneer het
+        incident een nadelige invloed kan hebben op de dienstverlening. Daarnaast
+        deelt de entiteit mee welke maatregelen deze ontvangers kunnen nemen in reactie
+        op de dreiging.
+      translations:
+        en:
+          description: In the event of a significant incident, the entity will notify
+            the recipients of its services as soon as possible if the incident could
+            adversely affect service provision. The entity will also communicate the
+            measures these recipients can take in response to the threat.
