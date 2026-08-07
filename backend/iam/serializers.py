@@ -188,9 +188,7 @@ class ServiceAccountWriteSerializer(serializers.Serializer):
     role = serializers.PrimaryKeyRelatedField(
         queryset=Role.objects.filter(builtin=True), required=False, allow_null=True
     )
-    folders = serializers.ListField(
-        child=serializers.UUIDField(), allow_empty=False
-    )
+    folders = serializers.ListField(child=serializers.UUIDField(), allow_empty=False)
     is_recursive = serializers.BooleanField(default=True)
     expiry_date = serializers.DateField(required=False, allow_null=True)
 
