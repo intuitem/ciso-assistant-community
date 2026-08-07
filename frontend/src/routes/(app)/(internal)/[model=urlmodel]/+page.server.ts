@@ -87,7 +87,12 @@ export const actions: Actions = {
 
 		const { file } = Object.fromEntries(formData) as { file: File };
 
-		const endpoint = `${BASE_API_URL}/folders/import/${form.data.load_missing_libraries ? '?load_missing_libraries=true' : ''}`;
+		const importParams = new URLSearchParams();
+		if (form.data.load_missing_libraries) importParams.set('load_missing_libraries', 'true');
+		if (form.data.create_missing_asset_classes)
+			importParams.set('create_missing_asset_classes', 'true');
+		const query = importParams.toString();
+		const endpoint = `${BASE_API_URL}/folders/import/${query ? `?${query}` : ''}`;
 
 		const response = await event.fetch(endpoint, {
 			method: 'POST',

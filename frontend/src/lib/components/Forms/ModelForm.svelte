@@ -67,6 +67,7 @@
 	import EscalationThresholdForm from './ModelForm/EscalationThresholdForm.svelte';
 	import CampaignForm from './ModelForm/CampaignForm.svelte';
 	import ElementaryActionForm from './ModelForm/ElementaryActionForm.svelte';
+	import ThreatModelForm from './ModelForm/ThreatModelForm.svelte';
 	import OperatingModeForm from './ModelForm/OperatingModeForm.svelte';
 	import KillChainForm from './ModelForm/KillChainForm.svelte';
 	import OrganisationIssueForm from './ModelForm/OrganisationIssueForm.svelte';
@@ -77,6 +78,7 @@
 	import TerminologyForm from './ModelForm/TerminologyForm.svelte';
 	import ObjectClassificationForm from './ModelForm/ObjectClassificationForm.svelte';
 	import ClassificationLevelForm from './ModelForm/ClassificationLevelForm.svelte';
+	import AssetClassForm from './ModelForm/AssetClassForm.svelte';
 	import CustomFieldDefinitionForm from './ModelForm/CustomFieldDefinitionForm.svelte';
 	import RoleForm from './ModelForm/RoleForm.svelte';
 	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
@@ -544,7 +546,16 @@
 		{:else if URLModel === 'cwes'}
 			<CWEForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'risk-scenarios'}
-			<RiskScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<RiskScenarioForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+				{...rest}
+			/>
 		{:else if URLModel === 'applied-controls' || URLModel === 'policies'}
 			<AppliedControlsPoliciesForm
 				{form}
@@ -876,6 +887,16 @@
 			/>
 		{:else if URLModel === 'task-nodes'}
 			<TaskNodeForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+		{:else if URLModel === 'threat-models'}
+			<ThreatModelForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{...rest}
+			/>
 		{:else if URLModel === 'elementary-actions'}
 			<ElementaryActionForm
 				{form}
@@ -957,6 +978,8 @@
 			/>
 		{:else if URLModel === 'classification-levels'}
 			<ClassificationLevelForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'asset-class'}
+			<AssetClassForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'custom-fields'}
 			<CustomFieldDefinitionForm
 				{form}

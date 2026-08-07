@@ -205,6 +205,16 @@
 					description: m.quantitativeRiskStudiesDescription()
 				},
 				{
+					field: 'threat_modeling',
+					label: m.threatModeling(),
+					description: m.threatModelingDescription()
+				},
+				{
+					field: 'ttps',
+					label: m.ttpCatalogs(),
+					description: m.ttpsDescription()
+				},
+				{
 					field: 'scoring_assistant',
 					label: m.scoringAssistant(),
 					description: m.scoringAssistantDescription()

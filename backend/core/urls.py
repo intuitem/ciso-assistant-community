@@ -1,5 +1,12 @@
 from .views import *
-from sec_intel.views import SecurityAdvisoryViewSet, CWEViewSet
+from sec_intel.views import (
+    SecurityAdvisoryViewSet,
+    CWEViewSet,
+    TTPCatalogViewSet,
+    TacticViewSet,
+    TechniqueViewSet,
+)
+from threat_modeling.views import ThreatModelViewSet
 from tprm.views import (
     EntityViewSet,
     RepresentativeViewSet,
@@ -41,6 +48,10 @@ router.register(r"risk-matrices", RiskMatrixViewSet, basename="risk-matrices")
 router.register(r"vulnerabilities", VulnerabilityViewSet, basename="vulnerabilities")
 router.register(r"risk-assessments", RiskAssessmentViewSet, basename="risk-assessments")
 router.register(r"threats", ThreatViewSet, basename="threats")
+router.register(r"ttp-catalogs", TTPCatalogViewSet, basename="ttp-catalogs")
+router.register(r"tactics", TacticViewSet, basename="tactics")
+router.register(r"techniques", TechniqueViewSet, basename="techniques")
+router.register(r"threat-models", ThreatModelViewSet, basename="threat-models")
 router.register(
     r"security-advisories", SecurityAdvisoryViewSet, basename="security-advisories"
 )
