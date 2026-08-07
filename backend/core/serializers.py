@@ -15,6 +15,7 @@ from core.serializer_fields import (
     HashSlugRelatedField,
     PathField,
 )
+from core.constants import LEGACY_TTP_LIBRARIES
 from core.utils import time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from tprm.models import Contract, Solution
@@ -1158,6 +1159,10 @@ class ThreatReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    is_legacy_ttp = serializers.SerializerMethodField()
+
+    def get_is_legacy_ttp(self, obj) -> bool:
+        return bool(obj.library and obj.library.urn in LEGACY_TTP_LIBRARIES)
 
     class Meta:
         model = Threat

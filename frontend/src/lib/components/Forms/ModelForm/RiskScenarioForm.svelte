@@ -149,6 +149,11 @@
 	{form}
 	multiple
 	optionsEndpoint="threats"
+	optionsInfoFields={{
+		fields: [{ field: 'is_legacy_ttp', display: (v) => (v ? `(${m.legacyTtpBadge()})` : '') }],
+		position: 'suffix',
+		classes: 'text-warning-600-400'
+	}}
 	optionsExtraFields={[['folder', 'str']]}
 	optionsDetailedUrlParameters={[
 		scopeFolder?.id ? ['scope_folder_id', scopeFolder.id] : ['', undefined]

@@ -5707,5 +5707,6 @@
 	"toggleLogicOperator": "Toggle AND / OR",
 	"addThreatModel": "Add threat model",
 	"threatModelHelpText": "The attack sequence that justifies this scenario",
-	"threatModelEmptyGraph": "No technique on this graph yet."
+	"threatModelEmptyGraph": "No technique on this graph yet.",
+	"legacyTtpBadge": "legacy"
 }

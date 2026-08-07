@@ -76,6 +76,7 @@ from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
 
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from core.constants import LEGACY_TTP_LIBRARIES
 from core.permissions import FeatureFlagRequired
 from core.helpers import get_instance_metrics
 from core.instance_metrics import (
@@ -1972,13 +1973,6 @@ class PerimeterViewSet(BaseModelViewSet):
             my_map[item.folder.name].update({item.name: item.id})
 
         return Response(my_map)
-
-
-# superseded by the TTP catalog; kept out of pickers, not deleted
-LEGACY_TTP_LIBRARIES = {
-    "urn:intuitem:risk:library:mitre-attack",
-    "urn:intuitem:risk:library:mitre-atlas",
-}
 
 
 class ThreatViewSet(BaseModelViewSet):
