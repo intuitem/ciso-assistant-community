@@ -16,11 +16,22 @@
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import InstantiateWorkflows from '$lib/components/Libraries/InstantiateWorkflows.svelte';
 
 	let { data } = $props();
 	let loading = $state({ form: false, library: '' });
 	let expandedNodes: string[] = $state([]);
 	const showRisks = true;
+
+	// The instantiate action lives on the LOADED counterpart.
+	// Two data shapes reach this page: stored data (loaded_library holds the
+	// counterpart id, null when not loaded) and, for exclusively-loaded
+	// libraries, the loader already swapped to loaded data (its id differs
+	// from the route param).
+	const loadedLibraryId = $derived(
+		data.library.loaded_library ?? (data.library.id !== page.params.id ? data.library.id : null)
+	);
+	const workflowCount = $derived(data.library.objects_meta?.workflows ?? 0);
 
 	interface LibraryObjects {
 		[key: string]: any;
@@ -224,6 +235,10 @@
 			{/if}
 		</div>
 	</div>
+
+	{#if loadedLibraryId}
+		<InstantiateWorkflows {loadedLibraryId} count={workflowCount} />
+	{/if}
 
 	{#if riskMatrices.length > 0}
 		<Dropdown

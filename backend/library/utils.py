@@ -760,6 +760,7 @@ class LibraryImporter:
         "requirement_mapping_set",  # This field name is deprecated
         "requirement_mapping_sets",
         "preset",
+        "workflows",
     ]
     NON_DEPRECATED_OBJECT_FIELDS = [
         field
@@ -778,6 +779,24 @@ class LibraryImporter:
         self._metric_definitions = []
         self._risk_matrices = []
         self._requirement_mapping_sets = []
+        self._workflows = []
+
+    def init_workflows(self, workflows: List[dict]) -> Union[str, None]:
+        """Structural validation of workflow objects; actual
+        creation happens in import_objects via the workflows app."""
+        from automation.workflows.import_export import (
+            WorkflowImportError,
+            validate_workflow_document,
+        )
+
+        if not isinstance(workflows, list) or not workflows:
+            return "objects.workflows must be a non-empty list"
+        for index, entry in enumerate(workflows):
+            try:
+                validate_workflow_document(entry)
+            except WorkflowImportError as e:
+                return f"objects.workflows[{index}]: {e.message}"
+        self._workflows = workflows
 
     def _init_referential(self, data, importer_cls, attr, label):
         importers, errors = [], []
@@ -1089,6 +1108,14 @@ class LibraryImporter:
             ) is not None:
                 return metric_definition_import_error
 
+        if "workflows" in library_objects:
+            if (
+                workflow_import_error := self.init_workflows(
+                    library_objects["workflows"]
+                )
+            ) is not None:
+                return workflow_import_error
+
     def check_and_import_dependencies(self) -> Union[str, None]:
         """Check and import library dependencies."""
         content = self._library.content
@@ -1191,6 +1218,27 @@ class LibraryImporter:
         for requirement_mapping_set in self._requirement_mapping_sets:
             requirement_mapping_set.load(library_object)
 
+        # Workflows divorce at load: created as plain user documents
+        # with provenance stamped, no FK to the library — unload leaves them,
+        # update never mutates them.
+        if self._workflows:
+            from iam.models import Folder as IamFolder
+
+            from automation.workflows.import_export import import_workflow
+
+            for entry in self._workflows:
+                _workflow, warnings = import_workflow(
+                    entry,
+                    IamFolder.get_root_folder(),
+                    source_version=self._library.version,
+                )
+                for warning in warnings:
+                    logger.warning(
+                        "Workflow library load warning",
+                        library=self._library.urn,
+                        warning=warning,
+                    )
+
     @transaction.atomic
     def _import_library(self):
         library_object = self.create_or_update_library()
@@ -1212,6 +1260,9 @@ class LibraryImporter:
         if error_msg is not None:
             return error_msg
 
+        from automation.workflows.graph import GraphValidationError
+        from automation.workflows.import_export import WorkflowImportError
+
         for _ in range(10):
             try:
                 self._import_library()
@@ -1221,6 +1272,14 @@ class LibraryImporter:
                     time.sleep(3)
                 else:
                     raise e
+            except (WorkflowImportError, GraphValidationError) as e:
+                # A malformed workflow object must surface as the error-string
+                # contract, not a 500 (structural checks run at init_workflows,
+                # but save_graph can still reject at load).
+                logger.error(
+                    "Workflow library load error", error=e, library=self._library
+                )
+                return getattr(e, "message", str(e))
             except Exception as e:
                 logger.error("Library import error", error=e, library=self._library)
                 raise e

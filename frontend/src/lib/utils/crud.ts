@@ -6,6 +6,7 @@ import FrameworkName from '$lib/components/ModelTable/field/FrameworkName.svelte
 import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/field/UserGroupNameDisplay.svelte';
 import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
+import TriggerTypesDisplay from '$lib/components/ModelTable/field/TriggerTypesDisplay.svelte';
 import { listViewFields } from './table';
 import type { TableBatchAction } from './table';
 import type { urlModel } from './types';
@@ -3291,6 +3292,30 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		filters: [{ field: 'activity' }, { field: 'actor' }, { field: 'role' }]
 	},
+	workflows: {
+		name: 'workflow',
+		localName: 'workflow',
+		localNamePlural: 'workflows',
+		verboseName: 'Workflow',
+		verboseNamePlural: 'Workflows',
+		endpointUrl: 'workflows/workflows',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		filters: [{ field: 'folder' }, { field: 'filtering_labels' }]
+	},
+	'workflow-versions': {
+		name: 'workflowversion',
+		localName: 'workflowVersion',
+		localNamePlural: 'workflowVersions',
+		verboseName: 'Workflow version',
+		verboseNamePlural: 'Workflow versions',
+		endpointUrl: 'workflows/workflow-versions',
+		foreignKeyFields: [{ field: 'workflow', urlModel: 'workflows' }],
+		selectFields: [{ field: 'status' }],
+		filters: [{ field: 'workflow' }, { field: 'status' }]
+	},
 	'metric-definitions': {
 		name: 'metricdefinition',
 		localName: 'metricDefinition',
@@ -3495,6 +3520,9 @@ const FIELD_COMPONENT_MAP = {
 	},
 	frameworks: {
 		name: FrameworkName
+	},
+	workflows: {
+		trigger_types: TriggerTypesDisplay
 	}
 };
 

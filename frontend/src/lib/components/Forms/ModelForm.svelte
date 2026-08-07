@@ -88,6 +88,7 @@
 	import AccreditationForm from './ModelForm/AccreditationForm.svelte';
 	import ProjectForm from './ModelForm/ProjectForm.svelte';
 	import ResponsibilityMatrixForm from './ModelForm/ResponsibilityMatrixForm.svelte';
+	import WorkflowForm from './ModelForm/WorkflowForm.svelte';
 	import ResponsibilityMatrixActivityForm from './ModelForm/ResponsibilityMatrixActivityForm.svelte';
 	import ResponsibilityAssignmentForm from './ModelForm/ResponsibilityAssignmentForm.svelte';
 	import ResponsibilityRoleForm from './ModelForm/ResponsibilityRoleForm.svelte';
@@ -1026,6 +1027,8 @@
 				{object}
 				{context}
 			/>
+		{:else if URLModel === 'workflows'}
+			<WorkflowForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {context} />
 		{:else if URLModel === 'responsibility-matrix-activities'}
 			<ResponsibilityMatrixActivityForm
 				{form}
