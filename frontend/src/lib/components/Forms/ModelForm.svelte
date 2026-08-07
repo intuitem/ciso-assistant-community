@@ -66,6 +66,7 @@
 	import EscalationThresholdForm from './ModelForm/EscalationThresholdForm.svelte';
 	import CampaignForm from './ModelForm/CampaignForm.svelte';
 	import ElementaryActionForm from './ModelForm/ElementaryActionForm.svelte';
+	import ThreatModelForm from './ModelForm/ThreatModelForm.svelte';
 	import OperatingModeForm from './ModelForm/OperatingModeForm.svelte';
 	import KillChainForm from './ModelForm/KillChainForm.svelte';
 	import OrganisationIssueForm from './ModelForm/OrganisationIssueForm.svelte';
@@ -86,6 +87,7 @@
 	import AccreditationForm from './ModelForm/AccreditationForm.svelte';
 	import ProjectForm from './ModelForm/ProjectForm.svelte';
 	import ResponsibilityMatrixForm from './ModelForm/ResponsibilityMatrixForm.svelte';
+	import WorkflowForm from './ModelForm/WorkflowForm.svelte';
 	import ResponsibilityMatrixActivityForm from './ModelForm/ResponsibilityMatrixActivityForm.svelte';
 	import ResponsibilityAssignmentForm from './ModelForm/ResponsibilityAssignmentForm.svelte';
 	import ResponsibilityRoleForm from './ModelForm/ResponsibilityRoleForm.svelte';
@@ -542,7 +544,16 @@
 		{:else if URLModel === 'cwes'}
 			<CWEForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'risk-scenarios'}
-			<RiskScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<RiskScenarioForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+				{...rest}
+			/>
 		{:else if URLModel === 'applied-controls' || URLModel === 'policies'}
 			<AppliedControlsPoliciesForm
 				{form}
@@ -874,6 +885,16 @@
 			/>
 		{:else if URLModel === 'task-nodes'}
 			<TaskNodeForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+		{:else if URLModel === 'threat-models'}
+			<ThreatModelForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{...rest}
+			/>
 		{:else if URLModel === 'elementary-actions'}
 			<ElementaryActionForm
 				{form}
@@ -1003,6 +1024,8 @@
 				{object}
 				{context}
 			/>
+		{:else if URLModel === 'workflows'}
+			<WorkflowForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {context} />
 		{:else if URLModel === 'responsibility-matrix-activities'}
 			<ResponsibilityMatrixActivityForm
 				{form}

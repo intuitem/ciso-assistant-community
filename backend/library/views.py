@@ -704,6 +704,12 @@ class LoadedLibraryViewSet(BaseModelViewSet):
     lookup_value_regex = r"[\w.:-]+"
     model = LoadedLibrary
     queryset = LoadedLibrary.objects.all()
+    # Instantiating reads library content; the real gate is add_workflow on
+    # the TARGET folder, checked inside the action.
+    permission_overrides = {
+        "instantiate_workflows": "view_loadedlibrary",
+        "preview_workflows": "view_loadedlibrary",
+    }
 
     search_fields = ["name", "description", "urn", "ref_id"]
 
@@ -769,6 +775,96 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         if not RoleAssignment.is_object_readable(request.user, LoadedLibrary, lib.id):
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
         return Response(lib._objects)
+
+    @action(detail=True, methods=["post"], url_path="instantiate-workflows")
+    def instantiate_workflows(self, request, pk):
+        """Create fresh, divorced workflows from this library's documents in a
+        chosen folder — repeatable at will, no
+        unload/reload dance. Reads the matching StoredLibrary content: loaded
+        workflows are divorced rows, so the documents only live in the store."""
+        from django.db import transaction
+
+        from automation.workflows.import_export import (
+            WorkflowImportError,
+            import_workflow,
+        )
+
+        try:
+            key = "urn" if pk.startswith("urn:") else "id"
+            lib = LoadedLibrary.objects.get(**{key: pk})
+        except Exception:
+            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
+        if not RoleAssignment.is_object_readable(request.user, LoadedLibrary, lib.id):
+            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
+
+        stored = StoredLibrary.objects.filter(urn=lib.urn, locale=lib.locale).first()
+        entries = (stored.content if stored else {}).get("workflows")
+        if not entries:
+            return Response(
+                {"error": "storedLibraryContentMissing"},
+                status=HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            folder_id = uuid.UUID(str(request.data.get("folder")))
+        except ValueError, TypeError, AttributeError:
+            return Response({"error": "invalidFolder"}, status=HTTP_400_BAD_REQUEST)
+        folder = Folder.objects.filter(id=folder_id).first()
+        if folder is None:
+            return Response({"error": "invalidFolder"}, status=HTTP_400_BAD_REQUEST)
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_workflow"),
+            folder=folder,
+        ):
+            return Response({"error": "permissionDenied"}, status=HTTP_403_FORBIDDEN)
+
+        warnings = []
+        created = []
+        try:
+            with transaction.atomic():
+                for entry in entries:
+                    workflow, entry_warnings = import_workflow(
+                        entry,
+                        folder,
+                        user=request.user,
+                        source_version=stored.version,
+                    )
+                    created.append({"id": str(workflow.id), "name": workflow.name})
+                    warnings.extend(entry_warnings)
+        except WorkflowImportError as e:
+            return Response({"error": e.message}, status=HTTP_400_BAD_REQUEST)
+        return Response({"workflows": created, "warnings": warnings})
+
+    @action(detail=True, methods=["get"], url_path="preview-workflows")
+    def preview_workflows(self, request, pk):
+        """Read-only preview of this library's workflow documents:
+        each entry's graph + required secrets, for a look-before-instantiate.
+        Same stored-content source as instantiate_workflows (loaded workflows
+        are divorced rows, so the documents only live in the store)."""
+        try:
+            key = "urn" if pk.startswith("urn:") else "id"
+            lib = LoadedLibrary.objects.get(**{key: pk})
+        except Exception:
+            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
+        if not RoleAssignment.is_object_readable(request.user, LoadedLibrary, lib.id):
+            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
+
+        stored = StoredLibrary.objects.filter(urn=lib.urn, locale=lib.locale).first()
+        entries = (stored.content if stored else {}).get("workflows") or []
+        return Response(
+            {
+                "workflows": [
+                    {
+                        "ref_id": entry.get("ref_id", ""),
+                        "name": entry.get("name", ""),
+                        "graph": entry.get("graph", {}),
+                        "requires": entry.get("requires", {}),
+                    }
+                    for entry in entries
+                ]
+            }
+        )
 
     @action(detail=True, methods=["get"])
     def tree(

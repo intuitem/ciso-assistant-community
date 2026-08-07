@@ -367,6 +367,10 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     quantitative_risk_studies = serializers.BooleanField(
         source="value.quantitative_risk_studies", required=False, default=True
     )
+    threat_modeling = serializers.BooleanField(
+        source="value.threat_modeling", required=False, default=False
+    )
+    ttps = serializers.BooleanField(source="value.ttps", required=False, default=False)
     terminologies = serializers.BooleanField(
         source="value.terminologies", required=False, default=True
     )

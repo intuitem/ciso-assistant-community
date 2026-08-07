@@ -35,6 +35,7 @@ from integrations.models import SyncMapping
 from pmbok.models import GenericCollection, ResponsibilityMatrixActivity
 from privacy.models import DataBreach, Processing
 from resilience.models import AssetAssessment
+from threat_modeling.models import ThreatModelNode
 from webhooks.service import dispatch_webhook_event
 
 logger = structlog.get_logger(__name__)
@@ -80,6 +81,7 @@ def _reverse_m2m_through_tables() -> list[tuple[Any, str]]:
             DocumentContainer.applied_controls.through,
             "DocumentContainer_applied_controls",
         ),
+        (ThreatModelNode.applied_controls.through, "ThreatModelNode"),
     ]
 
 
