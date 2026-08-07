@@ -148,7 +148,7 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	optionsEndpoint="threats?exclude_legacy_ttp=true"
+	optionsEndpoint="threats"
 	optionsExtraFields={[['folder', 'str']]}
 	optionsDetailedUrlParameters={[
 		scopeFolder?.id ? ['scope_folder_id', scopeFolder.id] : ['', undefined]

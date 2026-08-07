@@ -625,7 +625,7 @@ export default {
 		},
 		urn: 'urn:intuitem:risk:function:DOC.CONTROLS'
 	},
-	// legacy MITRE threats are excluded from pickers, so these cannot be ATT&CK
+	// ATT&CK now ships as TTPs, so its legacy threats are no longer maintained
 	threat: {
 		name: 'ICT-001 - Ransomware',
 		library: {

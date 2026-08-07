@@ -276,7 +276,7 @@
 					<AutocompleteSelect
 						form={_form}
 						multiple
-						optionsEndpoint="threats?exclude_legacy_ttp=true"
+						optionsEndpoint="threats"
 						optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
 						optionsExtraFields={[['folder', 'str']]}
 						optionsLabelField="auto"

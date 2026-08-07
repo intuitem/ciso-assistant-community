@@ -119,7 +119,7 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	optionsEndpoint="threats?exclude_legacy_ttp=true"
+	optionsEndpoint="threats"
 	optionsExtraFields={[['folder', 'str']]}
 	optionsLabelField="auto"
 	field="threats"

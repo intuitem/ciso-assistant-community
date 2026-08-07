@@ -151,7 +151,7 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		optionsEndpoint="threats?exclude_legacy_ttp=true"
+		optionsEndpoint="threats"
 		field="threats"
 		cacheLock={cacheLocks['threats']}
 		bind:cachedValue={formDataCache['threats']}
