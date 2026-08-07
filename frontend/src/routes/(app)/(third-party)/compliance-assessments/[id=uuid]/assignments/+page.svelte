@@ -5,6 +5,7 @@
 	import { setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
+	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import type { TreeViewNode } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -85,6 +86,8 @@
 	let isCreating = $state(false);
 	let isUpdating = $state(false);
 	let isDeleting = $state<string | null>(null);
+
+	let reopenMenuOpenId = $state<string | null>(null);
 
 	// State for requirements detail modal
 	let showRequirementsModal = $state(false);
@@ -647,7 +650,7 @@
 
 	// Helper: can edit/delete this assignment?
 	function canModifyAssignment(assignmentStatus: string): boolean {
-		return assignmentStatus === 'draft' || assignmentStatus === 'in_progress';
+		return assignmentStatus === 'draft';
 	}
 </script>
 
@@ -1001,6 +1004,7 @@
 										assignment.status === 'draft' ||
 										assignment.status === 'submitted' ||
 										assignment.status === 'closed' ||
+										assignment.status === 'changes_requested' ||
 										canModifyAssignment(assignment.status)}
 									{#if hasActions}
 										<div
@@ -1036,13 +1040,69 @@
 												</button>
 											{/if}
 											{#if assignment.status === 'closed'}
-												<button
-													class="btn btn-sm preset-filled-warning-500 text-xs"
-													onclick={() => handleSetStatus(assignment.id, 'submitted')}
-													title={m.reopenAssignment()}
+												<!-- Dropdown with the reopening option, either for editing (to draft status) or submition -->
+												<Popover
+													open={reopenMenuOpenId === assignment.id}
+													onOpenChange={(e) => (reopenMenuOpenId = e.open ? assignment.id : null)}
+													positioning={{ placement: 'bottom-start' }}
+													autoFocus={false}
+													onPointerDownOutside={() => (reopenMenuOpenId = null)}
+													closeOnInteractOutside={true}
 												>
-													<i class="fa-solid fa-lock-open mr-1"></i>
-													{m.reopenAssignment()}
+													<Popover.Trigger
+														class="btn btn-sm preset-filled-warning-500 text-xs"
+														title={m.reopenAssignment()}
+													>
+														<i class="fa-solid fa-lock-open mr-1"></i>
+														{m.reopenAssignment()}
+														<i class="fa-solid fa-caret-down ml-1"></i>
+													</Popover.Trigger>
+													<Popover.Positioner class="z-50!">
+														<Popover.Content
+															class="card p-1 bg-surface-50-950 w-40 shadow-lg border border-surface-200"
+														>
+															{#if reopenMenuOpenId === assignment.id}
+																<ul class="space-y-1">
+																	<li>
+																		<button
+																			type="button"
+																			class="btn btn-sm preset-ghost-surface w-full justify-start text-xs"
+																			onclick={() => {
+																				reopenMenuOpenId = null;
+																				handleSetStatus(assignment.id, 'submitted');
+																			}}
+																		>
+																			<i class="fa-solid fa-eye mr-1"></i>
+																			{m.forReview()}
+																		</button>
+																	</li>
+																	<li>
+																		<button
+																			type="button"
+																			class="btn btn-sm preset-ghost-surface w-full justify-start text-xs"
+																			onclick={() => {
+																				reopenMenuOpenId = null;
+																				handleSetStatus(assignment.id, 'draft');
+																			}}
+																		>
+																			<i class="fa-solid fa-pen-to-square mr-1"></i>
+																			{m.forEditing()}
+																		</button>
+																	</li>
+																</ul>
+															{/if}
+														</Popover.Content>
+													</Popover.Positioner>
+												</Popover>
+											{/if}
+											{#if assignment.status === 'submitted' || assignment.status === 'changes_requested'}
+												<button
+													class="btn btn-sm preset-tonal text-xs"
+													onclick={() => handleSetStatus(assignment.id, 'draft')}
+													title={m.reopenAssignmentForEditing()}
+												>
+													<i class="fa-solid fa-pen-to-square mr-1"></i>
+													{m.reopenAssignmentForEditing()}
 												</button>
 											{/if}
 

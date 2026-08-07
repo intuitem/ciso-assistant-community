@@ -3702,5 +3702,8 @@
 	"scimTokenGenerationFailed": "No se pudo generar el token SCIM",
 	"idpGroup": "Grupo IdP",
 	"idpGroups": "Grupos IdP",
-	"idpGroupsDescription": "Habilitar la federación de grupos IdP (aprovisionamiento SCIM, asignaciones de grupos IdP y pertenencias a grupos IdP en los usuarios)."
+	"idpGroupsDescription": "Habilitar la federación de grupos IdP (aprovisionamiento SCIM, asignaciones de grupos IdP y pertenencias a grupos IdP en los usuarios).",
+	"reopenAssignmentForEditing": "Reabrir para edición",
+	"forReview": "Para revisión",
+	"forEditing": "Para edición"
 }
