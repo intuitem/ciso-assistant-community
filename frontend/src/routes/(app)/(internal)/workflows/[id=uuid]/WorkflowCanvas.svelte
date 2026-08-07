@@ -1378,8 +1378,7 @@
 						]
 					}
 				: {}),
-			position: position ?? {},
-			presentation: null
+			position: position ?? {}
 		};
 	}
 

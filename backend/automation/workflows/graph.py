@@ -3,8 +3,8 @@
 The canvas edits a whole workflow version as one JSON document and saves it
 atomically. Rows are matched by client-generated UUIDs: ids present in the
 payload are upserted, rows absent from the payload are deleted. Condition
-trees and presentations are recreated on every save (they are small and have
-no identity worth preserving).
+trees are recreated on every save (they are small and have no identity worth
+preserving).
 """
 
 import re
@@ -17,7 +17,6 @@ from .models import (
     Condition,
     ConditionBranch,
     ConditionGroup,
-    NodePresentation,
     WorkflowEdge,
     WorkflowNode,
     WorkflowVariable,
@@ -49,13 +48,6 @@ REF_RE = re.compile(r"^[a-z][a-z0-9_]{0,99}$")
 
 VARIABLE_FIELDS = ["key", "type", "default_value"]
 EDGE_FIELDS = ["label", "source_port"]
-PRESENTATION_FIELDS = [
-    "type",
-    "redirect_path",
-    "redirect_params",
-    "completion_cta",
-    "instructions",
-]
 CONDITION_FIELDS = ["op", "value", "order"]
 BRANCH_FIELDS = ["name", "order", "is_default"]
 
@@ -64,12 +56,7 @@ def serialize_graph(version):
     nodes = []
     for node in version.nodes.prefetch_related(
         "branches__condition_groups__conditions",
-    ).select_related("presentation", "task_template", "subprocess_workflow"):
-        presentation = None
-        if hasattr(node, "presentation"):
-            presentation = {
-                f: getattr(node.presentation, f) for f in PRESENTATION_FIELDS
-            }
+    ).select_related("task_template", "subprocess_workflow"):
         nodes.append(
             {
                 "id": str(node.id),
@@ -85,7 +72,6 @@ def serialize_graph(version):
                 "subprocess_workflow_name": node.subprocess_workflow.name
                 if node.subprocess_workflow_id
                 else None,
-                "presentation": presentation,
                 "branches": [
                     {
                         "id": str(branch.id),
@@ -227,15 +213,6 @@ def save_graph(version, payload):
             raise GraphValidationError(f"Duplicate node ref '{node.ref}'")
         seen_refs.add(node.ref)
         nodes[data["id"]] = node
-
-        # Presentation is recreated wholesale.
-        NodePresentation.objects.filter(node=node).delete()
-        if data.get("presentation"):
-            presentation = NodePresentation(node=node)
-            for field in PRESENTATION_FIELDS:
-                if field in data["presentation"]:
-                    setattr(presentation, field, data["presentation"][field])
-            _save_row(presentation)
 
         # Branches are upserted by id (edges reference them via source_branch);
         # each branch's condition tree is recreated wholesale.

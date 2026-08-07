@@ -259,12 +259,6 @@ def _export_node(node, refs, variable_keys, branch_names):
         out["task_template"] = node["task_template_name"]
     if node["subprocess_workflow_name"]:
         out["subprocess_workflow"] = node["subprocess_workflow_name"]
-    if node["presentation"]:
-        presentation = {
-            k: v for k, v in node["presentation"].items() if v not in ("", {}, None)
-        }
-        if presentation:
-            out["presentation"] = presentation
     # Condition nodes own their routing branches; the branch order is
     # the list order, so edges can reference a branch by index.
     branches = [
@@ -714,10 +708,6 @@ def _build_node(
             f"node '{ref}': subprocess workflow",
             warnings,
         )
-
-    presentation = entry.get("presentation")
-    if isinstance(presentation, dict) and presentation:
-        node["presentation"] = presentation
 
     # Folder ids inside internal-event trigger filters are instance-specific:
     # keep only values that resolve in this workflow's scope.

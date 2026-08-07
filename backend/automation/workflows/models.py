@@ -101,9 +101,6 @@ class Workflow(NameDescriptionFolderMixin, FilteringLabelMixin):
             Condition.objects.filter(
                 group__branch__node__version__workflow=self
             ).update(folder=self.folder)
-            NodePresentation.objects.filter(node__version__workflow=self).update(
-                folder=self.folder
-            )
 
     @property
     def published_version(self):
@@ -244,7 +241,6 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
             node_map = {}
             branch_map = {}
             nodes = self.nodes.prefetch_related(
-                "presentation",
                 models.Prefetch(
                     "branches__condition_groups",
                     queryset=ConditionGroup.objects.filter(parent_group=None),
@@ -253,8 +249,6 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
             for node in nodes:
                 clone = _clone_row(node, version=draft)
                 node_map[node.id] = clone
-                if hasattr(node, "presentation"):
-                    _clone_row(node.presentation, node=clone)
                 for branch in node.branches.all():
                     branch_clone = _clone_row(branch, node=clone)
                     branch_map[branch.id] = branch_clone
@@ -545,34 +539,6 @@ class Condition(AbstractBaseModel, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.group.folder
-        super().save(*args, **kwargs)
-
-
-class NodePresentation(AbstractBaseModel, FolderMixin):
-    class Meta(AbstractBaseModel.Meta, FolderMixin.Meta):
-        pass
-
-    class Type(models.TextChoices):
-        REDIRECT = "redirect", "Redirect"
-        EXTERNAL_URL = "external_url", "External URL"
-
-    node = models.OneToOneField(
-        WorkflowNode,
-        on_delete=models.CASCADE,
-        related_name="presentation",
-    )
-    type = models.CharField(
-        max_length=20,
-        choices=Type.choices,
-        default=Type.REDIRECT,
-    )
-    redirect_path = models.CharField(max_length=500, blank=True)
-    redirect_params = models.JSONField(default=dict, blank=True)
-    completion_cta = models.CharField(max_length=200, blank=True)
-    instructions = models.TextField(blank=True)
-
-    def save(self, *args, **kwargs):
-        self.folder = self.node.folder
         super().save(*args, **kwargs)
 
 
@@ -922,7 +888,6 @@ auditlog.register(WorkflowVariable, exclude_fields=common_exclude)
 auditlog.register(ConditionBranch, exclude_fields=common_exclude)
 auditlog.register(ConditionGroup, exclude_fields=common_exclude)
 auditlog.register(Condition, exclude_fields=common_exclude)
-auditlog.register(NodePresentation, exclude_fields=common_exclude)
 auditlog.register(WorkflowInstance, exclude_fields=common_exclude)
 # secret/hmac_secret excluded so LogEntry diffs never leak credentials.
 auditlog.register(

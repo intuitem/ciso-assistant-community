@@ -172,9 +172,6 @@
         "subprocess_workflow": {
           "type": "string"
         },
-        "presentation": {
-          "type": "object"
-        },
         "branches": {
           "type": "array",
           "items": {
