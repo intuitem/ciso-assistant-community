@@ -343,6 +343,7 @@ class TestIamActions:
         assert groups.count() >= 5
         user = User.objects.get(email="ada@example.com")
         assert user.first_name == "Ada"
+        assert user.is_active is True  # omitted is_active defaults new users to active
         analysts = UserGroup.objects.get(folder=folder, name="BI-UG-ANA")
         assert analysts in user.user_groups.all()
 
@@ -401,6 +402,44 @@ class TestIamActions:
         instance = start_instance(version)
         assert instance.status == WorkflowInstance.Status.COMPLETED
         assert User.objects.get(email="leaver@example.com").is_active is False
+
+    def test_provision_user_omitted_is_active_preserves_deactivation(self):
+        # An HR sync that doesn't manage activation must not silently
+        # re-activate an offboarded account on every run.
+        _, version = make_workflow()
+        offboarded = User.objects.create_user(email="gone@example.com")
+        offboarded.is_active = False
+        offboarded.save()
+        linear_graph(
+            version,
+            {
+                "type": "provision_user",
+                "email": "gone@example.com",
+                "first_name": "Still",
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        refreshed = User.objects.get(email="gone@example.com")
+        assert refreshed.is_active is False
+        assert refreshed.first_name == "Still"
+
+    def test_provision_user_explicit_true_reactivates(self):
+        _, version = make_workflow()
+        rehire = User.objects.create_user(email="back@example.com")
+        rehire.is_active = False
+        rehire.save()
+        linear_graph(
+            version,
+            {
+                "type": "provision_user",
+                "email": "back@example.com",
+                "is_active": "true",
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert User.objects.get(email="back@example.com").is_active is True
 
     def test_cannot_remove_last_administrator(self):
         # #4: manage_group_membership must not strip the final global admin

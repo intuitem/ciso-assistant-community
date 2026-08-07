@@ -746,10 +746,6 @@ class ProvisionUserAction(BaseAction):
             ),
             "last_name": render(config.get("last_name", ""), _render_context(instance)),
         }
-        is_active = _as_bool(
-            render(config.get("is_active", True), _render_context(instance))
-        )
-
         user = User.objects.filter(email__iexact=email).first()
         created = user is None
         if created:
@@ -765,7 +761,13 @@ class ProvisionUserAction(BaseAction):
             for key, value in fields.items():
                 if value:
                     setattr(user, key, value)
-        user.is_active = is_active
+        # Only touch activation when the config says so: an omitted key must
+        # not re-activate an offboarded account on a routine sync run.
+        # (New users are active by default via create_user.)
+        if "is_active" in config:
+            user.is_active = _as_bool(
+                render(config["is_active"], _render_context(instance))
+            )
         user.save()
         return {"user_id": str(user.id), "user_email": user.email, "created": created}
 
