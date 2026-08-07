@@ -2662,6 +2662,13 @@ export const listViewFields = {
 			is_selected: IS_SELECTED_FILTER
 		}
 	},
+	'threat-models': {
+		head: ['ref_id', 'name', 'description', 'catalog', 'nodeCount', 'domain'],
+		body: ['ref_id', 'name', 'description', 'catalog', 'node_count', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
 	'elementary-actions': {
 		head: ['ref_id', 'folder', '', 'name', 'attack_stage', 'threat'],
 		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat'],
