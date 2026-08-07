@@ -1,4 +1,4 @@
-ARG PYTHON_IMAGE=python:3.14-slim
+ARG PYTHON_IMAGE=dhi.io/python:3.14-dev
 FROM ${PYTHON_IMAGE}
 
 # UV_NO_SYNC=1: prevent `uv run` from auto-syncing at runtime (caused startup-docker-compose-test CI to fail);
@@ -7,6 +7,7 @@ ENV PYTHONUNBUFFERED=1 \
   PYTHONDONTWRITEBYTECODE=1 \
   UV_LINK_MODE=copy \
   UV_NO_SYNC=1 \
+  UV_PYTHON_DOWNLOADS=never \
   PATH="/code/.venv/bin:$PATH"
 
 COPY --from=ghcr.io/astral-sh/uv:0.11.6 /uv /bin/
@@ -14,10 +15,12 @@ COPY --from=ghcr.io/astral-sh/uv:0.11.6 /uv /bin/
 WORKDIR /code
 
 RUN apt-get update && apt-get install -y \
+  curl \
   libyaml-cpp-dev \
   libffi-dev \
   libglib2.0-0 \
-  pango-1.0 \
+  libpango-1.0-0 \
+  libpangoft2-1.0-0 \
   libcairo2 \
   locales \
   tzdata \
@@ -73,7 +76,10 @@ ENV HF_HUB_OFFLINE=1 \
 #watch out for local files during dev and maintenance of .dockerignore
 COPY . .
 
-RUN groupadd -g 1001 app && useradd -u 1001 -g 1001 -m -s /bin/bash app
+# DHI base ships no shadow-utils (groupadd/useradd); append the entries directly
+RUN echo "app:x:1001:" >> /etc/group \
+  && echo "app:x:1001:1001::/home/app:/bin/bash" >> /etc/passwd \
+  && mkdir -p /home/app && chown 1001:1001 /home/app
 # USER app  # not activated by default to keep compatibility
 
 EXPOSE 8000
