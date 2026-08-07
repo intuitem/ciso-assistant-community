@@ -27,13 +27,18 @@ export const load: PageServerLoad = async (event) => {
 		name: serviceAccount.name,
 		description: serviceAccount.description,
 		permissions: serviceAccount.permissions?.map((permission: { id: number }) => permission.id),
-		perimeter_folders: serviceAccount.perimeter_folders?.map((folder: { id: string }) => folder.id),
+		folders: serviceAccount.folders?.map((folder: { id: string }) => folder.id),
 		is_recursive: serviceAccount.is_recursive,
 		expiry_date: serviceAccount.expiry_date,
 		is_role_linked: serviceAccount.is_role_linked,
+		is_global_admin: serviceAccount.is_global_admin,
 		role_name: serviceAccount.role_name,
 		role: serviceAccount.role,
-		authorization_mode: serviceAccount.is_role_linked ? 'role' : 'custom'
+		authorization_mode: serviceAccount.is_global_admin
+			? 'global_admin'
+			: serviceAccount.is_role_linked
+				? 'role'
+				: 'custom'
 	};
 
 	const form = await superValidate(object, zod(schema), { errors: false });

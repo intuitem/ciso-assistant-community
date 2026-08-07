@@ -1035,7 +1035,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'serviceAccounts',
 		verboseName: 'Service account',
 		verboseNamePlural: 'Service accounts',
-		foreignKeyFields: [{ field: 'perimeter_folders', urlModel: 'folders' }],
+		foreignKeyFields: [{ field: 'folders', urlModel: 'folders' }],
 		detailViewFields: [
 			{ field: 'id' },
 			{ field: 'name' },
@@ -1045,7 +1045,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'is_active' },
 			{ field: 'expiry_date', type: 'date' },
 			{ field: 'is_recursive' },
-			{ field: 'perimeter_folders' },
+			{ field: 'folders' },
 			{ field: 'created_by' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }

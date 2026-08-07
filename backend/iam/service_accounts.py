@@ -64,7 +64,7 @@ def provision_service_account(
     permissions = _validated_permissions(permission_ids) if role is None else None
     folders = list(Folder.objects.filter(id__in=folder_ids))
     if len(folders) != len(set(folder_ids)) or not folders:
-        raise ValidationError("Invalid perimeter folder selection.")
+        raise ValidationError("Invalid domain selection.")
 
     adapter = get_oidc_adapter()
     client_id = adapter.generate_client_id()
@@ -179,7 +179,7 @@ def update_service_account(
             if folder_ids is not None:
                 folders = list(Folder.objects.filter(id__in=folder_ids))
                 if len(folders) != len(set(folder_ids)) or not folders:
-                    raise ValidationError("Invalid perimeter folder selection.")
+                    raise ValidationError("Invalid domain selection.")
                 role_assignment.perimeter_folders.set(folders)
             if is_recursive is not None:
                 role_assignment.is_recursive = is_recursive

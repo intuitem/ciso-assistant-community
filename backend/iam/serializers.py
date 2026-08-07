@@ -3,6 +3,7 @@ from django.contrib.auth import password_validation
 from rest_framework import serializers
 
 from core.serializer_fields import FieldsRelatedField
+from core.utils import RoleCodename
 
 from .models import PersonalAccessToken, Role, ServiceAccount, User
 
@@ -107,9 +108,10 @@ class ServiceAccountReadSerializer(serializers.ModelSerializer):
     client_id = serializers.CharField(read_only=True)
     created_by = FieldsRelatedField(["email", "id"])
     permissions = serializers.SerializerMethodField()
-    perimeter_folders = serializers.SerializerMethodField()
+    folders = serializers.SerializerMethodField()
     is_recursive = serializers.SerializerMethodField()
     is_role_linked = serializers.BooleanField(source="role.builtin", read_only=True)
+    is_global_admin = serializers.SerializerMethodField()
     role_name = serializers.SerializerMethodField()
     role = serializers.SerializerMethodField()
 
@@ -126,14 +128,18 @@ class ServiceAccountReadSerializer(serializers.ModelSerializer):
             "updated_at",
             "created_by",
             "permissions",
-            "perimeter_folders",
+            "folders",
             "is_recursive",
             "previous_secret_expires_at",
             "secret_preview",
             "is_role_linked",
+            "is_global_admin",
             "role_name",
             "role",
         ]
+
+    def get_is_global_admin(self, obj) -> bool:
+        return obj.role.builtin and obj.role.name == RoleCodename.ADMINISTRATOR.value
 
     def get_role_name(self, obj) -> str | None:
         return str(obj.role) if obj.role.builtin else None
@@ -152,7 +158,7 @@ class ServiceAccountReadSerializer(serializers.ModelSerializer):
             for permission in obj.role.permissions.select_related("content_type").all()
         ]
 
-    def get_perimeter_folders(self, obj) -> list[dict]:
+    def get_folders(self, obj) -> list[dict]:
         role_assignment = obj.role_assignment
         if role_assignment is None:
             return []
@@ -182,10 +188,10 @@ class ServiceAccountWriteSerializer(serializers.Serializer):
     role = serializers.PrimaryKeyRelatedField(
         queryset=Role.objects.filter(builtin=True), required=False, allow_null=True
     )
-    perimeter_folders = serializers.ListField(
+    folders = serializers.ListField(
         child=serializers.UUIDField(), allow_empty=False
     )
-    is_recursive = serializers.BooleanField(default=False)
+    is_recursive = serializers.BooleanField(default=True)
     expiry_date = serializers.DateField(required=False, allow_null=True)
 
     def validate_name(self, value):

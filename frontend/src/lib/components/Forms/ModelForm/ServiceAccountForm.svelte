@@ -32,47 +32,81 @@
 	interface BuiltinRole {
 		id: string;
 		name: string;
+		global_only?: boolean;
 		permissions: number[];
 	}
 
+	type AuthorizationMode = 'custom' | 'role' | 'global_admin';
+
 	let builtinRoles: BuiltinRole[] = $state([]);
+	let rootFolderId: string = $state('');
 	let permissionsSelector: ReturnType<typeof ListSelector> | undefined = $state();
 
 	const { value: roleValue } = formFieldProxy(form, 'role');
 	const { value: permissionsValue } = formFieldProxy(form, 'permissions');
+	const { value: perimeterValue } = formFieldProxy(form, 'folders');
+	const { value: isRecursiveValue } = formFieldProxy(form, 'is_recursive');
 
-	const isEditingRoleLinked = context === 'edit' && Boolean(object.is_role_linked);
-	let mode: 'role' | 'custom' = $state(isEditingRoleLinked ? 'role' : 'custom');
+	const initialMode: AuthorizationMode =
+		context === 'edit' &&
+		(object.authorization_mode === 'global_admin' || object.authorization_mode === 'role')
+			? object.authorization_mode
+			: 'custom';
+	let mode: AuthorizationMode = $state(initialMode);
 	let customPermissions: number[] = $state(
-		!isEditingRoleLinked && Array.isArray(object.permissions) ? object.permissions : []
+		initialMode === 'custom' && Array.isArray(object.permissions) ? object.permissions : []
 	);
+	let selectedRoleId: string = $state(
+		initialMode === 'role' && typeof object.role === 'string' ? object.role : ''
+	);
+	// Scope stashed when entering global-admin mode, restored on the way back.
+	let savedScope: { folders: string[]; is_recursive: boolean } | null = $state(null);
 
-	let selectedRoleId: string = $state(typeof object.role === 'string' ? object.role : '');
+	// The Administrator role is only linkable through the explicit global-admin
+	// mode, which forces the perimeter to the Global folder, recursive.
+	let globalAdminRole = $derived(builtinRoles.find((role) => role.global_only));
+	let selectableRoles = $derived(builtinRoles.filter((role) => !role.global_only));
 
 	setAuthorizationFields(mode);
 
 	onMount(async () => {
-		const res = await fetch('/service-accounts/roles');
-		if (res.ok) builtinRoles = await res.json();
+		const [rolesRes, foldersRes] = await Promise.all([
+			fetch('/service-accounts/roles'),
+			fetch('/folders?content_type=GL')
+		]);
+		if (rolesRes.ok) builtinRoles = await rolesRes.json();
+		if (foldersRes.ok) rootFolderId = (await foldersRes.json()).results?.[0]?.id ?? '';
+		// The forced global-admin fields depend on these fetches: apply them
+		// now if the mode was set before the data was available. Event-driven
+		// on purpose — a reactive $effect writing the form store loops against
+		// superforms' own store updates (effect_update_depth_exceeded).
+		if (mode === 'global_admin') {
+			setAuthorizationFields('global_admin');
+		}
 	});
 
-	function setAuthorizationFields(next: 'role' | 'custom'): void {
+	function setAuthorizationFields(next: AuthorizationMode): void {
 		form.form.update((data) => {
 			const updated = { ...data };
 			updated.authorization_mode = next;
-			if (next === 'role') {
+			if (next === 'custom') {
+				delete updated.role;
+				updated.permissions = customPermissions;
+			} else if (next === 'role') {
 				delete updated.permissions;
 				if (selectedRoleId) updated.role = selectedRoleId;
 				else delete updated.role;
 			} else {
-				delete updated.role;
-				updated.permissions = customPermissions;
+				delete updated.permissions;
+				if (globalAdminRole) updated.role = globalAdminRole.id;
+				if (rootFolderId) updated.folders = [rootFolderId];
+				updated.is_recursive = true;
 			}
 			return updated;
 		});
 	}
 
-	function selectMode(next: 'role' | 'custom'): void {
+	function selectMode(next: AuthorizationMode): void {
 		if (next === mode) return;
 
 		if (mode === 'custom') {
@@ -82,10 +116,26 @@
 					)
 				: [];
 		}
+		if (next === 'global_admin') {
+			savedScope = {
+				folders: Array.isArray($perimeterValue) ? [...$perimeterValue] : [],
+				is_recursive: Boolean($isRecursiveValue ?? true)
+			};
+		}
 
 		mode = next;
 		formDataCache['permissions'] = customPermissions;
 		setAuthorizationFields(next);
+
+		if (next !== 'global_admin' && savedScope) {
+			const scope = savedScope;
+			savedScope = null;
+			form.form.update((data) => ({
+				...data,
+				folders: scope.folders,
+				is_recursive: scope.is_recursive
+			}));
+		}
 	}
 
 	function pickRole(roleId: string): void {
@@ -99,7 +149,7 @@
 	}
 </script>
 
-<div class="flex gap-4">
+<div class="flex flex-wrap gap-4">
 	<label class="flex items-center gap-2">
 		<input
 			type="radio"
@@ -118,14 +168,27 @@
 		/>
 		{m.useRoleDirectly()}
 	</label>
+	<label class="flex items-center gap-2">
+		<input
+			type="radio"
+			name="sa-mode"
+			checked={mode === 'global_admin'}
+			onchange={() => selectMode('global_admin')}
+		/>
+		{m.globalAdmin()}
+	</label>
 </div>
 
-{#if mode === 'role'}
+{#if mode === 'global_admin'}
+	<div class="card p-4 preset-tonal-warning text-sm" data-testid="global-admin-notice">
+		<i class="fa-solid fa-triangle-exclamation mr-2"></i>{m.serviceAccountGlobalAdminHelpText()}
+	</div>
+{:else if mode === 'role'}
 	<label class="label space-y-1">
 		<span class="font-semibold">{m.role()}<span class="text-error-500"> *</span></span>
 		<select class="select" value={selectedRoleId} onchange={(e) => pickRole(e.currentTarget.value)}>
 			<option value="">{m.select()}</option>
-			{#each builtinRoles as role (role.id)}
+			{#each selectableRoles as role (role.id)}
 				<option value={role.id}>{role.name}</option>
 			{/each}
 		</select>
@@ -136,7 +199,7 @@
 		<span class="font-semibold">{m.startFromRole()}</span>
 		<select class="select" onchange={(e) => applyRolePreset(e.currentTarget.value)}>
 			<option value="">{m.select()}</option>
-			{#each builtinRoles as role (role.id)}
+			{#each selectableRoles as role (role.id)}
 				<option value={role.id}>{role.name}</option>
 			{/each}
 		</select>
@@ -154,23 +217,25 @@
 		bind:this={permissionsSelector}
 	/>
 {/if}
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="folders"
-	field="perimeter_folders"
-	cacheLock={cacheLocks['perimeter_folders']}
-	bind:cachedValue={formDataCache['perimeter_folders']}
-	label={m.domains()}
-/>
-<Checkbox
-	{form}
-	field="is_recursive"
-	label={m.isRecursive()}
-	helpText={m.isRecursiveHelpText()}
-	cacheLock={cacheLocks['is_recursive']}
-	bind:cachedValue={formDataCache['is_recursive']}
-/>
+{#if mode !== 'global_admin'}
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="folders"
+		field="folders"
+		cacheLock={cacheLocks['folders']}
+		bind:cachedValue={formDataCache['folders']}
+		label={m.domains()}
+	/>
+	<Checkbox
+		{form}
+		field="is_recursive"
+		label={m.isRecursive()}
+		helpText={m.isRecursiveHelpText()}
+		cacheLock={cacheLocks['is_recursive']}
+		bind:cachedValue={formDataCache['is_recursive']}
+	/>
+{/if}
 <TextField
 	type="date"
 	{form}

@@ -30,6 +30,7 @@ from django.conf import settings
 
 from global_settings.models import GlobalSettings
 from core.models import Actor
+from core.utils import RoleCodename
 from .models import (
     Folder,
     PersonalAccessToken,
@@ -639,7 +640,7 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
                 description=data.get("description"),
                 permission_ids=data.get("permissions"),
                 role_id=data["role"].id if data.get("role") else None,
-                folder_ids=data["perimeter_folders"],
+                folder_ids=data["folders"],
                 is_recursive=data["is_recursive"],
                 created_by=request.user,
                 expiry_date=data.get("expiry_date"),
@@ -667,7 +668,7 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
                     else UNSET_FIELD,
                     permission_ids=data.get("permissions"),
                     role_id=data["role"].id if data.get("role") else None,
-                    folder_ids=data.get("perimeter_folders"),
+                    folder_ids=data.get("folders"),
                     is_recursive=data.get("is_recursive"),
                     expiry_date=data["expiry_date"]
                     if "expiry_date" in data
@@ -748,6 +749,9 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
                 {
                     "id": str(role.id),
                     "name": str(role),
+                    # Administrator is only linkable through the explicit
+                    # global-admin case (perimeter = Global, recursive).
+                    "global_only": role.name == RoleCodename.ADMINISTRATOR.value,
                     "permissions": [
                         p.id for p in role.permissions.all() if p.id in selectable_ids
                     ],

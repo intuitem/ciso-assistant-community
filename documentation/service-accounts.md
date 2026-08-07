@@ -21,7 +21,7 @@ A service account bundles four objects, managed as one unit:
   a linked role. Editing a role-linked account with different permissions
   detaches it: a new dedicated Role is forked with those permissions, the
   shared role is left untouched;
-- a **RoleAssignment** scoping that role to explicitly chosen perimeter
+- a **RoleAssignment** scoping that role to explicitly chosen domain
   folders (optionally recursive).
 
 Existing RBAC applies untouched: an access token resolves to the service
@@ -35,8 +35,8 @@ account's role stays visible in the admin's role-assignments list.
 | Endpoint | Method | Purpose |
 |---|---|---|
 | `/api/iam/service-accounts/` | GET / POST | List / create — `role` (builtin role id) XOR `permissions` (dedicated); response includes the one-time `client_secret` |
-| `/api/iam/service-accounts/permissions/` | GET | Selectable permissions catalog (`[{value, label}]`) |
-| `/api/iam/service-accounts/roles/` | GET | Built-in roles (`[{id, name, permissions}]`) — link directly, or seed the permission picker as a starting point |
+| `/api/iam/service-accounts/permissions/` | GET | Selectable permissions catalog (`[{id, codename, normalized_codename, content_type, ...}]`, same shape as the custom-roles permission picker) |
+| `/api/iam/service-accounts/roles/` | GET | Built-in roles (`[{id, name, global_only, permissions}]`) — link directly, or seed the permission picker as a starting point |
 | `/api/iam/service-accounts/<id>/` | GET / PATCH / DELETE | Detail / update (incl. `is_active` toggle) / full teardown |
 | `/api/iam/service-accounts/<id>/rotate-secret/` | POST | New secret (returned once); accepts `grace_period_days` (0-30); revokes outstanding tokens |
 
@@ -45,6 +45,14 @@ rotate-secret; both responses also include `secret_preview` (prefix + a few
 characters, masked) for display in the UI without ever re-exposing the full
 secret. Deactivating a service account strips its grant types (blocking
 new token issuance), revokes outstanding tokens, and deactivates its user.
+
+`is_recursive` defaults to `true`. The **Administrator** builtin role
+(`BI-RL-ADM`, "all permissions") is meant for the explicit global-admin case
+only: the UI's "Global administrator" mode links it with the Global folder,
+recursive, and the regular role picker does not propose it (`global_only` in
+the roles catalog). The API itself does not restrict the combination — an
+admin can grant anything through custom permissions anyway. For domain-scoped
+admin automation, use the Domain Manager role.
 
 ## Token flow
 
@@ -59,7 +67,7 @@ curl -s -X POST http://localhost:8000/api/identity/o/api/token \
 ```
 
 Then call the API with the bearer token — access is limited to the service
-account's permissions and perimeter folders:
+account's permissions and domains:
 
 ```bash
 curl -s http://localhost:8000/api/folders/ \

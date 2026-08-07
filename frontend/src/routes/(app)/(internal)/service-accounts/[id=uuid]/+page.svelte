@@ -185,7 +185,12 @@
 	</div>
 {/if}
 
-{#if data.data.permissions?.length}
+{#if data.data.is_global_admin}
+	<div class="card p-4 preset-tonal-warning flex flex-row items-center mt-4">
+		<i class="fa-solid fa-triangle-exclamation mr-2"></i>
+		{m.serviceAccountGlobalAdminHelpText()}
+	</div>
+{:else if data.data.permissions?.length}
 	<div class="card px-6 py-4 bg-surface-50-950 shadow-lg mt-4 space-y-2">
 		<h4 class="h4 font-semibold">{m.permissions()}</h4>
 		<div class="flex flex-wrap gap-2">

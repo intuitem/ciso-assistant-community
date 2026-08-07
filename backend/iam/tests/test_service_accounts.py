@@ -65,7 +65,7 @@ def _create_sa(admin_client, domain_folder, name="reporter", is_recursive=False)
             "name": name,
             "description": "test service account",
             "permissions": _view_folder_permission_ids(),
-            "perimeter_folders": [str(domain_folder.id)],
+            "folders": [str(domain_folder.id)],
             "is_recursive": is_recursive,
         },
         format="json",
@@ -127,6 +127,19 @@ class TestServiceAccountProvisioning:
         assert "client_secret" not in detail
         assert detail["secret_preview"] == sa.secret_preview
 
+    def test_is_recursive_defaults_to_true(self, admin_client, domain_folder):
+        response = admin_client.post(
+            SA_ENDPOINT,
+            {
+                "name": "default-recursive",
+                "permissions": _view_folder_permission_ids(),
+                "folders": [str(domain_folder.id)],
+            },
+            format="json",
+        )
+        assert response.status_code == 201, response.content
+        assert response.json()["is_recursive"] is True
+
     def test_create_requires_admin(self, app_config, domain_folder):
         user = User.objects.create_user(email="plain@sa-tests.com", password="x")
         client = APIClient()
@@ -137,7 +150,7 @@ class TestServiceAccountProvisioning:
             {
                 "name": "nope",
                 "permissions": _view_folder_permission_ids(),
-                "perimeter_folders": [str(domain_folder.id)],
+                "folders": [str(domain_folder.id)],
             },
             format="json",
         )
@@ -152,7 +165,7 @@ class TestServiceAccountProvisioning:
             {
                 "name": "bad-perms",
                 "permissions": [bad_permission.id],
-                "perimeter_folders": [str(domain_folder.id)],
+                "folders": [str(domain_folder.id)],
             },
             format="json",
         )
@@ -198,7 +211,7 @@ class TestServiceAccountProvisioning:
             {
                 "name": "dup-name",
                 "permissions": _view_folder_permission_ids(),
-                "perimeter_folders": [str(domain_folder.id)],
+                "folders": [str(domain_folder.id)],
             },
             format="json",
         )
@@ -210,7 +223,7 @@ class TestServiceAccountProvisioning:
             {
                 "name": "x" * 101,
                 "permissions": _view_folder_permission_ids(),
-                "perimeter_folders": [str(domain_folder.id)],
+                "folders": [str(domain_folder.id)],
             },
             format="json",
         )
@@ -405,6 +418,17 @@ class TestServiceAccountExclusions:
 
         assert sa.user not in User.get_editors()
 
+    def test_sa_user_hidden_from_actor_pickers(self, admin_client, domain_folder):
+        payload = _create_sa(admin_client, domain_folder)
+        sa = ServiceAccount.objects.get(id=payload["id"])
+
+        response = admin_client.get("/api/actors/")
+        assert response.status_code == 200
+        names = {row["str"] for row in response.json()["results"]}
+        assert sa.user.email not in names
+        # regular user actors are unaffected by the exclusion
+        assert "admin@sa-tests.com" in names
+
     def test_update_permissions_and_folders(self, admin_client, domain_folder):
         payload = _create_sa(admin_client, domain_folder)
         new_folder = Folder.objects.create(
@@ -421,7 +445,7 @@ class TestServiceAccountExclusions:
             f"{SA_ENDPOINT}{payload['id']}/",
             {
                 "permissions": perm_ids,
-                "perimeter_folders": [str(new_folder.id)],
+                "folders": [str(new_folder.id)],
                 "is_recursive": True,
             },
             format="json",
@@ -480,7 +504,7 @@ class TestServiceAccountExpiry:
             {
                 "name": "expiring",
                 "permissions": _view_folder_permission_ids(),
-                "perimeter_folders": [str(domain_folder.id)],
+                "folders": [str(domain_folder.id)],
                 "expiry_date": "2099-01-01",
             },
             format="json",
@@ -632,7 +656,7 @@ class TestServiceAccountRoleLinked:
             {
                 "name": "role-linked",
                 "role": str(role.id),
-                "perimeter_folders": [str(domain_folder.id)],
+                "folders": [str(domain_folder.id)],
             },
             format="json",
         )
@@ -662,7 +686,7 @@ class TestServiceAccountRoleLinked:
                 "name": "both-given",
                 "role": str(role.id),
                 "permissions": _view_folder_permission_ids(),
-                "perimeter_folders": [str(domain_folder.id)],
+                "folders": [str(domain_folder.id)],
             },
             format="json",
         )
@@ -673,7 +697,7 @@ class TestServiceAccountRoleLinked:
     ):
         response = admin_client.post(
             SA_ENDPOINT,
-            {"name": "neither-given", "perimeter_folders": [str(domain_folder.id)]},
+            {"name": "neither-given", "folders": [str(domain_folder.id)]},
             format="json",
         )
         assert response.status_code == 400
@@ -687,7 +711,7 @@ class TestServiceAccountRoleLinked:
             {
                 "name": "custom-role-rejected",
                 "role": str(custom_role.id),
-                "perimeter_folders": [str(domain_folder.id)],
+                "folders": [str(domain_folder.id)],
             },
             format="json",
         )
@@ -702,7 +726,7 @@ class TestServiceAccountRoleLinked:
             {
                 "name": "role-linked-2",
                 "role": str(role.id),
-                "perimeter_folders": [str(domain_folder.id)],
+                "folders": [str(domain_folder.id)],
             },
             format="json",
         )
@@ -735,7 +759,7 @@ class TestServiceAccountRoleLinked:
             {
                 "name": "role-linked-3",
                 "role": str(role.id),
-                "perimeter_folders": [str(domain_folder.id)],
+                "folders": [str(domain_folder.id)],
             },
             format="json",
         )
@@ -792,7 +816,7 @@ class TestServiceAccountRoleLinked:
             {
                 "name": "role-linked-stray-perms",
                 "role": str(role.id),
-                "perimeter_folders": [str(domain_folder.id)],
+                "folders": [str(domain_folder.id)],
             },
             format="json",
         )
@@ -819,7 +843,7 @@ class TestServiceAccountRoleLinked:
             {
                 "name": "role-linked-4",
                 "role": str(reader.id),
-                "perimeter_folders": [str(domain_folder.id)],
+                "folders": [str(domain_folder.id)],
             },
             format="json",
         )
@@ -843,7 +867,7 @@ class TestServiceAccountRoleLinked:
             {
                 "name": "role-linked-delete",
                 "role": str(role.id),
-                "perimeter_folders": [str(domain_folder.id)],
+                "folders": [str(domain_folder.id)],
             },
             format="json",
         )
@@ -871,7 +895,7 @@ class TestServiceAccountRoleLinked:
             {
                 "name": "role-linked-shared",
                 "role": str(role.id),
-                "perimeter_folders": [str(domain_folder.id)],
+                "folders": [str(domain_folder.id)],
             },
             format="json",
         )
@@ -884,3 +908,47 @@ class TestServiceAccountRoleLinked:
         )
         assert human_assignment.id in visible_ids
         assert sa.role_assignment.id not in visible_ids
+
+
+@pytest.mark.django_db
+class TestServiceAccountGlobalAdmin:
+    """The explicit global-admin case: BI-RL-ADM linked with the Global folder,
+    recursive. The API does not enforce this shape (admins can grant anything
+    via custom permissions anyway) — the frontend steers it via the roles
+    catalog's global_only flag and the read serializer's is_global_admin."""
+
+    def _admin_role(self):
+        return Role.objects.get(name="BI-RL-ADM", builtin=True)
+
+    def test_global_admin_sa_reads_into_domains(self, admin_client, domain_folder):
+        response = admin_client.post(
+            SA_ENDPOINT,
+            {
+                "name": "global-admin-bot",
+                "role": str(self._admin_role().id),
+                "folders": [str(Folder.get_root_folder().id)],
+                "is_recursive": True,
+            },
+            format="json",
+        )
+        assert response.status_code == 201, response.content
+        payload = response.json()
+        assert payload["is_global_admin"] is True
+        assert payload["is_role_linked"] is True
+
+        access_token = _fetch_token(
+            payload["client_id"], payload["client_secret"]
+        ).json()["access_token"]
+        response = _bearer_client(access_token).get("/api/folders/")
+        assert response.status_code == 200, response.content
+        folder_ids = {row["id"] for row in response.json()["results"]}
+        assert str(domain_folder.id) in folder_ids
+
+    def test_builtin_roles_endpoint_flags_administrator_as_global_only(
+        self, admin_client
+    ):
+        response = admin_client.get(f"{SA_ENDPOINT}roles/")
+        assert response.status_code == 200
+        roles = response.json()
+        global_only_ids = {r["id"] for r in roles if r["global_only"]}
+        assert global_only_ids == {str(self._admin_role().id)}

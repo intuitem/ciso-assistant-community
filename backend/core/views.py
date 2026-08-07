@@ -7603,6 +7603,10 @@ class ActorViewSet(BaseModelViewSet):
             third_parties = Actor.objects.filter(user__is_third_party=True)
             queryset = queryset.exclude(id__in=third_parties)
 
+        # Service account users are managed via /api/iam/service-accounts/
+        # and must never surface in owner/assignee pickers.
+        queryset = queryset.exclude(user__service_account__isnull=False)
+
         return queryset.order_by("type_rank", "display_name")
 
 

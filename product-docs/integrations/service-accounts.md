@@ -21,7 +21,7 @@ There are two ways to grant permissions:
 
 <figure><img src="../.gitbook/assets/service-accounts-create-permissions.png" alt=""><figcaption><p>Custom permissions, with the "start from a role" preset and the grouped picker.</p></figcaption></figure>
 
-Scrolling down, pick the **domains** (perimeter folders) the account can act on, with an option to extend the grant to their sub-domains automatically, and an optional **expiry date** after which the account is disabled.
+Scrolling down, pick the **domains** the account can act on, with an option to extend the grant to their sub-domains automatically, and an optional **expiry date** after which the account is disabled.
 
 <figure><img src="../.gitbook/assets/service-accounts-create-domains.png" alt=""><figcaption><p>Domain scope, "apply to sub-domains", and expiry date.</p></figcaption></figure>
 
