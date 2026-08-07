@@ -54,7 +54,8 @@
 #   To enable, uncomment the example block below.
 #
 # TO ENABLE custom Excel file name : Uncomment the first block below.
-# TO ENABLE implementation groups: Uncomment the last two blocks below.
+# TO ENABLE implementation groups: Uncomment the "implementation_groups_sheet_base_name"
+#   field and the "implementation_groups" block below.
 # TO ENABLE another optional sheet pair: Uncomment its corresponding field below.
 # TO ENABLE extra_locales: Uncomment the block below marked as extra_locales.
 # ==============================================================================
