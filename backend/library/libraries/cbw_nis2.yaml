@@ -478,7 +478,7 @@ objects:
           description: The entity has and maintains a complete and up-to-date inventory
             of its suppliers and service providers. The entity keeps track of which
             products and services are purchased from suppliers and service providers,
-            also as well as the agreements made about the purchased services and products.
+            as well as the agreements made about the purchased services and products.
     - urn: urn:intuitem:risk:req_node:cbw_nis2_control_framework:zorgplicht-(art.-21):7
       assessable: false
       depth: 2
