@@ -1,15 +1,12 @@
 <script lang="ts">
-	import {
-		SvelteFlow,
-		Background,
-		MarkerType,
-		useSvelteFlow,
-		type Node,
-		type Edge
-	} from '@xyflow/svelte';
+	import { SvelteFlow, Background, useSvelteFlow, type Node, type Edge } from '@xyflow/svelte';
 	import '@xyflow/svelte/dist/style.css';
 	import { setContext, onMount } from 'svelte';
-	import { m } from '$paraglide/messages';
+	import {
+		EDGE_STYLE,
+		EDGE_MARKER,
+		NODE_TYPE_LABELS
+	} from '../../../routes/(app)/(internal)/workflows/[id=uuid]/node-visuals';
 	import StepNode from '../../../routes/(app)/(internal)/workflows/[id=uuid]/nodes/StepNode.svelte';
 	import ConditionNode from '../../../routes/(app)/(internal)/workflows/[id=uuid]/nodes/ConditionNode.svelte';
 	import TerminalNode from '../../../routes/(app)/(internal)/workflows/[id=uuid]/nodes/TerminalNode.svelte';
@@ -42,19 +39,6 @@
 		loop: LoopNode
 	};
 	const edgeTypes = { workflow: WorkflowEdge };
-	const EDGE_STYLE = 'stroke: var(--color-surface-500); stroke-width: 2;';
-	const EDGE_MARKER = { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' };
-
-	const NODE_TYPE_LABELS: Record<string, () => string> = {
-		trigger: m.workflowNodeTrigger,
-		end: m.workflowNodeEnd,
-		task: m.workflowNodeTask,
-		condition: m.workflowNodeCondition,
-		loop: m.workflowNodeLoop,
-		action: m.workflowNodeAction,
-		subprocess: m.workflowNodeSubprocess,
-		event: m.workflowNodeEvent
-	};
 
 	function nodeMeta(node: any): string | null {
 		switch (node.type) {

@@ -15,11 +15,13 @@
 		Panel,
 		type Node,
 		type Edge,
-		type Connection,
-		MarkerType
+		type Connection
 	} from '@xyflow/svelte';
 	import '@xyflow/svelte/dist/style.css';
 	import { computeLayout } from './graph-layout';
+	import { buildOpsUrl } from './ops';
+	import { STATUS_BADGE } from './builder-constants';
+	import { EDGE_STYLE, EDGE_MARKER, NODE_TYPE_LABELS } from './node-visuals';
 
 	import Palette from './Palette.svelte';
 	import Inspector from './Inspector.svelte';
@@ -84,11 +86,6 @@
 	let status = $state(versionStatus);
 	let versionNumber = $state(initialVersionNumber);
 
-	const STATUS_BADGE: Record<string, { class: string; label: () => string }> = {
-		draft: { class: 'preset-tonal-warning', label: () => m.draftVersion() },
-		published: { class: 'preset-tonal-success', label: () => m.publishedVersion() },
-		archived: { class: 'preset-tonal', label: () => m.archivedVersion() }
-	};
 	const badge = $derived(STATUS_BADGE[status] ?? STATUS_BADGE.archived);
 
 	// Run identity of the active version. Drafts run as the invoker,
@@ -97,9 +94,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	function opsUrl(action: string) {
-		return `/workflows/${workflowId}/ops?action=${action}`;
-	}
+	const opsUrl = (action: string) => buildOpsUrl(workflowId, action);
 
 	const nodeTypes = {
 		step: StepNode,
@@ -114,9 +109,6 @@
 	const edgeTypes = {
 		workflow: WorkflowEdge
 	};
-
-	const EDGE_STYLE = 'stroke: var(--color-surface-500); stroke-width: 2;';
-	const EDGE_MARKER = { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' };
 
 	// ---------- domain → canvas ----------
 
@@ -179,17 +171,6 @@
 		}
 	}
 
-	const NODE_TYPE_LABELS: Record<string, () => string> = {
-		trigger: m.workflowNodeTrigger,
-		end: m.workflowNodeEnd,
-		task: m.workflowNodeTask,
-		condition: m.workflowNodeCondition,
-		loop: m.workflowNodeLoop,
-		action: m.workflowNodeAction,
-		subprocess: m.workflowNodeSubprocess,
-		event: m.workflowNodeEvent
-	};
-
 	function visualData(domain: any, error: string | null = null) {
 		return {
 			nodeType: domain.type,
@@ -231,11 +212,12 @@
 
 	// The set of branch ids that currently have a wire (an edge whose
 	// source_branch references them). Drives the node's wired/unwired ports.
-	function wiredBranchIds(): Set<string> {
-		return new Set(
-			edges.map((e) => (e.data?.domain as any)?.source_branch).filter(Boolean) as string[]
-		);
-	}
+	// The set of branch ids that have a wire. Derived (not a function) so the
+	// many condition nodes rendered in one refreshVisuals pass share a single
+	// computed Set instead of each rescanning every edge (was O(nodes × edges)).
+	const wiredBranchIds = $derived(
+		new Set(edges.map((e) => (e.data?.domain as any)?.source_branch).filter(Boolean) as string[])
+	);
 
 	// Branches sorted for display/evaluation: conditional branches first by
 	// order, the single default (is_default) pinned last regardless of its
@@ -249,7 +231,7 @@
 	// Per-port descriptors the condition node renders: one per branch, in
 	// display order, carrying its wired state so unwired ports stay connectable.
 	function conditionBranchVisuals(domain: any) {
-		const wired = wiredBranchIds();
+		const wired = wiredBranchIds;
 		return sortedBranches(domain).map((branch) => ({
 			branchId: branch.id,
 			name: branch.name || conditionSummary(branch),
@@ -483,7 +465,7 @@
 	const selectedConditionBranches = $derived.by(() => {
 		const domain: any = selectedNode?.data?.domain;
 		if (!domain || domain.type !== 'condition') return [];
-		const wired = wiredBranchIds();
+		const wired = wiredBranchIds;
 		return sortedBranches(domain)
 			.filter((branch) => !branch.is_default)
 			.map((branch, index) => ({
@@ -499,7 +481,7 @@
 		const domain: any = selectedNode?.data?.domain;
 		if (!domain || domain.type !== 'condition') return null;
 		const branch = (domain.branches ?? []).find((b: any) => b.is_default);
-		return branch ? { branch, wired: wiredBranchIds().has(branch.id) } : null;
+		return branch ? { branch, wired: wiredBranchIds.has(branch.id) } : null;
 	});
 
 	// ---------- save machinery ----------

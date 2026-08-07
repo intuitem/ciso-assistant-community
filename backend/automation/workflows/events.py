@@ -35,6 +35,24 @@ VALID_FILTER_OPS = {choice[0] for choice in Condition.Operator.choices}
 MAX_FILTER_DEPTH = 5
 
 
+def _log_entry_verb(action):
+    """Map an auditlog LogEntry.Action to its CUD event verb, or None for
+    non-CUD actions (e.g. ACCESS). auditlog imported lazily like elsewhere."""
+    from auditlog.models import LogEntry
+
+    return {
+        LogEntry.Action.CREATE: "created",
+        LogEntry.Action.UPDATE: "updated",
+        LogEntry.Action.DELETE: "deleted",
+    }.get(action)
+
+
+def make_event_key(model_name, verb):
+    """Canonical internal-event key format. Keep producer and consumer in step
+    by minting keys through here only."""
+    return f"{model_name}.{verb}"
+
+
 def event_key_catalog():
     """All CUD event keys, derived from the auditlog registry so new model
     registrations appear automatically."""
@@ -51,7 +69,7 @@ def event_key_catalog():
         for action in CUD_ACTIONS:
             keys.append(
                 {
-                    "key": f"{model._meta.model_name}.{action}",
+                    "key": make_event_key(model._meta.model_name, action),
                     "model": model._meta.model_name,
                     "action": action,
                 }
@@ -140,10 +158,9 @@ def _bookkeep(trigger, result, fired=False):
 
 def _workflow_scope(workflow):
     # String ids: additional_data serializes folder_id as str.
-    folder = workflow.folder
-    ids = {str(folder.id)}
-    ids |= {str(f.id) for f in folder.get_sub_folders()}
-    return ids
+    from .actions import _read_scope_folder_ids
+
+    return {str(fid) for fid in _read_scope_folder_ids(workflow.folder)}
 
 
 # ---------- filter tree validation ----------
@@ -342,18 +359,14 @@ def forward_log_entry(sender, instance, created, **kwargs):
 
     if not created or instance.action == LogEntry.Action.ACCESS:
         return
-    action = {
-        LogEntry.Action.CREATE: "created",
-        LogEntry.Action.UPDATE: "updated",
-        LogEntry.Action.DELETE: "deleted",
-    }.get(instance.action)
-    if action is None or instance.content_type_id is None:
+    verb = _log_entry_verb(instance.action)
+    if verb is None or instance.content_type_id is None:
         return
-    event_key = f"{instance.content_type.model}.{action}"
+    key = make_event_key(instance.content_type.model, verb)
     # Cheap indexed gate: one query per audited save, no enqueue when nothing
     # listens for this key.
     if not WorkflowTrigger.objects.filter(
-        type=WorkflowTrigger.Type.INTERNAL_EVENT, enabled=True, event_key=event_key
+        type=WorkflowTrigger.Type.INTERNAL_EVENT, enabled=True, event_key=key
     ).exists():
         return
 
@@ -370,22 +383,12 @@ def forward_log_entry(sender, instance, created, **kwargs):
 def payload_from_log_entry(log_entry):
     changes = log_entry.changes_dict or {}
     additional = log_entry.additional_data or {}
+    verb = _log_entry_verb(log_entry.action)
     return {
-        "event_key": (
-            f"{log_entry.content_type.model}."
-            + {
-                log_entry.Action.CREATE: "created",
-                log_entry.Action.UPDATE: "updated",
-                log_entry.Action.DELETE: "deleted",
-            }[log_entry.action]
-        ),
+        "event_key": make_event_key(log_entry.content_type.model, verb),
         "model": log_entry.content_type.model,
         "app_label": log_entry.content_type.app_label,
-        "operation": {
-            log_entry.Action.CREATE: "created",
-            log_entry.Action.UPDATE: "updated",
-            log_entry.Action.DELETE: "deleted",
-        }[log_entry.action],
+        "operation": verb,
         "object_id": str(log_entry.object_pk),
         "object_repr": log_entry.object_repr,
         "changes": changes,

@@ -2,6 +2,7 @@
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { STATUS_BADGE } from './builder-constants';
 
 	interface VersionRow {
 		id: string;
@@ -20,12 +21,6 @@
 	}
 
 	let { versions, activeVersionId, onSelect, onRestore }: Props = $props();
-
-	const STATUS_BADGE: Record<string, { class: string; label: () => string }> = {
-		draft: { class: 'preset-tonal-warning', label: () => m.draftVersion() },
-		published: { class: 'preset-tonal-success', label: () => m.publishedVersion() },
-		archived: { class: 'preset-tonal', label: () => m.archivedVersion() }
-	};
 
 	const hasDraft = $derived(versions.some((v) => v.status === 'draft'));
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { childEntries, isExpandable, previewValue } from './expressions';
+	import SecretInlineForm from './SecretInlineForm.svelte';
 
 	interface NodeData {
 		key: string;
@@ -25,18 +26,6 @@
 	let { variables, nodes, secretNames, onInsert, onAddSecret, itemPreview }: Props = $props();
 
 	let addingSecret = $state(false);
-	let newSecretName = $state('');
-	let newSecretValue = $state('');
-
-	function submitSecret(event: Event) {
-		event.preventDefault();
-		const name = newSecretName.trim();
-		if (!name || !newSecretValue) return;
-		onAddSecret?.(name, newSecretValue);
-		newSecretName = '';
-		newSecretValue = '';
-		addingSecret = false;
-	}
 
 	let expanded = $state<Record<string, boolean>>({});
 
@@ -199,33 +188,15 @@
 				{/if}
 			</div>
 			{#if addingSecret}
-				<form class="flex items-center gap-1 mb-1" autocomplete="off" onsubmit={submitSecret}>
-					<input
-						type="text"
-						class="input text-xs px-1.5 py-1 min-w-0 flex-1"
-						placeholder={m.secretName()}
-						autocomplete="off"
-						bind:value={newSecretName}
-					/>
-					<input
-						type="password"
-						class="input text-xs px-1.5 py-1 min-w-0 flex-1"
-						placeholder={m.secretValue()}
-						autocomplete="new-password"
-						data-1p-ignore
-						data-lpignore="true"
-						bind:value={newSecretValue}
-					/>
-					<button
-						type="submit"
-						aria-label={m.addSecret()}
-						class="btn-icon preset-tonal w-6 h-6 text-xs shrink-0"
-						disabled={!newSecretName.trim() || !newSecretValue}
-						data-testid="databrowser-confirm-secret"
-					>
-						<i class="fa-solid fa-check"></i>
-					</button>
-				</form>
+				<SecretInlineForm
+					onAdd={(name, value) => {
+						onAddSecret?.(name, value);
+						addingSecret = false;
+					}}
+					formClass="mb-1"
+					submitIcon="fa-check"
+					confirmTestId="databrowser-confirm-secret"
+				/>
 			{/if}
 			{#each secretNames as name (name)}
 				<button

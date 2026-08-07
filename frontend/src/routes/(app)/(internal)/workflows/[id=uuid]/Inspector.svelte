@@ -13,10 +13,18 @@
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { fetchHookSecret, publicHookUrl } from './hook-url';
+	import { postOps } from './ops';
 	import DataBrowser from './DataBrowser.svelte';
 	import { dig, renderTemplate } from './expressions';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
-	import { newCondition, treeToGroups, groupsToTree, type Condition } from './filter-dnf';
+	import {
+		newCondition,
+		treeToGroups,
+		groupsToTree,
+		FILTER_OPS,
+		type Condition
+	} from './filter-dnf';
+	import { VARIABLE_TYPES } from './builder-constants';
 
 	interface Option {
 		id: string;
@@ -167,19 +175,6 @@
 		{ code: 'BI-UG-ADE', label: 'auditee' }
 	];
 
-	const CONDITION_OPS = [
-		'eq',
-		'neq',
-		'gt',
-		'lt',
-		'gte',
-		'lte',
-		'in',
-		'not_in',
-		'contains',
-		'is_null'
-	];
-
 	const nodeDomain = $derived(selectedNode?.data?.domain);
 	const edgeDomain = $derived(selectedEdge?.data?.domain);
 	const actionConfig = $derived(nodeDomain?.action_config);
@@ -306,13 +301,8 @@
 			: null
 	);
 
-	function triggerOps(action: string, body: Record<string, unknown>) {
-		return fetch(`/workflows/${workflowId}/ops?action=${action}`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(body)
-		});
-	}
+	const triggerOps = (action: string, body: Record<string, unknown>) =>
+		postOps(workflowId, action, body);
 
 	let copiedHook = $state(false);
 	async function copyHookUrl() {
@@ -369,7 +359,6 @@
 
 	// ---------- internal_event DNF filter builder ----------
 
-	const FILTER_OPS = ['eq', 'neq', 'gt', 'lt', 'gte', 'lte', 'in', 'not_in', 'contains', 'is_null'];
 	const FIELD_CHIPS = ['status', 'folder', 'filtering_labels'];
 	const CHANGED_HELP =
 		'Match the transition (field just changed to this value), not the standing state.';
@@ -718,7 +707,6 @@
 
 	// ---------- inline variable creation (point of use) ----------
 
-	const VARIABLE_TYPES = ['string', 'number', 'boolean', 'date', 'json'];
 	const NEW_VARIABLE = '__new__';
 
 	// The condition row currently showing the inline creator (at most one at a
@@ -880,7 +868,7 @@
 								bind:value={condition.op}
 								onchange={onChange}
 							>
-								{#each CONDITION_OPS as op}
+								{#each FILTER_OPS as op}
 									<option value={op}>{op}</option>
 								{/each}
 							</select>

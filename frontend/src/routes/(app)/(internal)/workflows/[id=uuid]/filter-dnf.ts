@@ -2,6 +2,21 @@
 // conditions, children}) to and from the DNF ("or of and-groups") shape the
 // builder UI edits.
 
+// The comparison operators offered by both the DNF filter builder and the
+// condition-node branch builder (mirrors the backend Condition.Operator set).
+export const FILTER_OPS = [
+	'eq',
+	'neq',
+	'gt',
+	'lt',
+	'gte',
+	'lte',
+	'in',
+	'not_in',
+	'contains',
+	'is_null'
+];
+
 export interface Condition {
 	field: string;
 	op: string;

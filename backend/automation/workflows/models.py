@@ -354,10 +354,17 @@ class WorkflowNode(AbstractBaseModel, FolderMixin):
             self.ref = self._generate_ref()
         super().save(*args, **kwargs)
 
-    def _generate_ref(self):
+    @staticmethod
+    def slugify_ref(label, node_type):
+        """Base ref slug shared by draft ref generation and export ref
+        synthesis (import_export._ref_map). Keep the two in step: same
+        separator, length cap, and empty-slug fallback."""
         from django.utils.text import slugify
 
-        base = slugify(self.label or self.type).replace("-", "_")[:80] or self.type
+        return slugify(label or node_type).replace("-", "_")[:80] or node_type
+
+    def _generate_ref(self):
+        base = self.slugify_ref(self.label, self.type)
         candidate = base
         suffix = 2
         while (

@@ -20,6 +20,19 @@ from .triggers import validate_trigger_config
 SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
 NODE_REF_RE = re.compile(r"\{\{\s*nodes\.([A-Za-z_]\w*)")
 
+# Node/action types cut from v1: the engine still runs them for seeded/legacy
+# graphs, but the API refuses to author (graph PUT) or import them. Enabling a
+# feature means removing it here — and dropping its per-site user message in the
+# graph endpoint / importer. Single source for "what is disabled".
+DISABLED_NODE_TYPES = frozenset(
+    {
+        WorkflowNode.Type.SUBPROCESS,
+        WorkflowNode.Type.TASK,
+        WorkflowNode.Type.EVENT,
+    }
+)
+DISABLED_ACTION_TYPES = frozenset({"emit_event"})
+
 
 def validate_graph(version):
     errors = []

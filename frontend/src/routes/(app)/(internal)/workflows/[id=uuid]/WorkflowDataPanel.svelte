@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
+	import { VARIABLE_TYPES } from './builder-constants';
+	import SecretInlineForm from './SecretInlineForm.svelte';
 
 	// The workflow-level data CRUD (variables + secrets), shared between the
 	// Inspector's no-selection Workflow panel and the canvas "Variables" toggle
@@ -34,8 +36,6 @@
 		onRemoveSecret
 	}: Props = $props();
 
-	const VARIABLE_TYPES = ['string', 'number', 'boolean', 'date', 'json'];
-
 	let newVariableKey = $state('');
 	let newVariableType = $state('string');
 
@@ -45,18 +45,6 @@
 		if (!key) return;
 		onAddVariable?.(key, newVariableType);
 		newVariableKey = '';
-	}
-
-	let newSecretName = $state('');
-	let newSecretValue = $state('');
-
-	function submitSecret(event: Event) {
-		event.preventDefault();
-		const name = newSecretName.trim();
-		if (!name || !newSecretValue) return;
-		onAddSecret?.(name, newSecretValue);
-		newSecretName = '';
-		newSecretValue = '';
 	}
 
 	function formatReferenceValue(value: unknown): string {
@@ -150,32 +138,7 @@
 			{/each}
 		</div>
 		{#if !readonly}
-			<form class="flex items-center gap-1 mt-2" autocomplete="off" onsubmit={submitSecret}>
-				<input
-					type="text"
-					class="input text-xs px-1.5 py-1 min-w-0 flex-1"
-					placeholder={m.secretName()}
-					autocomplete="off"
-					bind:value={newSecretName}
-				/>
-				<input
-					type="password"
-					class="input text-xs px-1.5 py-1 min-w-0 flex-1"
-					placeholder={m.secretValue()}
-					autocomplete="new-password"
-					data-1p-ignore
-					data-lpignore="true"
-					bind:value={newSecretValue}
-				/>
-				<button
-					type="submit"
-					aria-label={m.addSecret()}
-					class="btn-icon preset-tonal w-6 h-6 text-xs shrink-0"
-					disabled={!newSecretName.trim() || !newSecretValue}
-				>
-					<i class="fa-solid fa-plus"></i>
-				</button>
-			</form>
+			<SecretInlineForm onAdd={(name, value) => onAddSecret?.(name, value)} formClass="mt-2" />
 		{/if}
 	</div>
 </div>

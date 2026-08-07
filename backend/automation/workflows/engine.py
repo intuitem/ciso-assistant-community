@@ -13,7 +13,14 @@ from datetime import date, timedelta
 from django.db import transaction
 from django.utils import timezone
 
-from .actions import ActionError, _render_context, dig, execute_action, render
+from .actions import (
+    ActionError,
+    _read_scope_folder_ids,
+    _render_context,
+    dig,
+    execute_action,
+    render,
+)
 from .models import (
     WorkflowInstance,
     WorkflowInstanceLog,
@@ -385,8 +392,7 @@ def abort_token(token):
 def broadcast_event(event_key, emitting_instance):
     """Wake every waiting event token matching the key within the emitting
     instance's folder SUBTREE (spec §7), not just its exact folder."""
-    folder = emitting_instance.folder
-    scope_ids = {folder.id, *(f.id for f in folder.get_sub_folders())}
+    scope_ids = _read_scope_folder_ids(emitting_instance.folder)
     waiting = list(
         WorkflowToken.objects.filter(
             status=WorkflowToken.Status.WAITING,
@@ -517,8 +523,7 @@ def _process(token):
         if node.type == WorkflowNode.Type.ACTION:
             config = node.action_config or {}
             output = execute_action(node, instance) or {}
-            _store_node_output(node, output, instance)
-            _apply_output_mapping(node, output, instance)
+            _persist_node_output(node, output, instance)
             _log(
                 instance,
                 WorkflowInstanceLog.EventType.ACTION_EXECUTED,
@@ -735,8 +740,7 @@ def _loop_finish(controller):
         "results": state["results"],
         "errors": state["errors"],
     }
-    _store_node_output(node, output, instance)
-    _apply_output_mapping(node, output, instance)
+    _persist_node_output(node, output, instance)
     failed = len(state["errors"])
     message = f"processed {output['count']} items"
     if failed:
@@ -766,8 +770,6 @@ def _start_subprocess(token):
     # piping its outputs back — a cross-domain confused deputy. Subprocess
     # authoring is disabled for users, so this only backstops seeded/legacy
     # graphs, but it stays as the load-bearing runtime boundary.
-    from .actions import _read_scope_folder_ids
-
     if version.folder_id not in _read_scope_folder_ids(instance.folder):
         raise EngineError("Subprocess workflow is outside this workflow's scope")
     if not version.is_active:
@@ -805,8 +807,7 @@ def _start_subprocess(token):
         trigger_depth=depth,
     )
     if child.status == WorkflowInstance.Status.COMPLETED:
-        _store_node_output(node, child.variables, instance)
-        _apply_output_mapping(node, child.variables, instance)
+        _persist_node_output(node, child.variables, instance)
     elif child.status == WorkflowInstance.Status.ACTIVE:
         token.status = WorkflowToken.Status.WAITING
         token.save(update_fields=["status", "updated_at"])
@@ -815,13 +816,13 @@ def _start_subprocess(token):
 
 
 def _store_node_output(node, output, instance):
-    """Persist the node's output for {{nodes.<ref>.<path>}} references and the
-    builder's reference-run data browser. Structure-preserving:
-    nested JSON stays navigable and referenceable; only oversized leaves and
-    collections shrink. The display log truncates flat and harder."""
+    """Record the node's output (in memory) for {{nodes.<ref>.<path>}} references
+    and the builder's reference-run data browser. Structure-preserving: nested
+    JSON stays navigable and referenceable; only oversized leaves and collections
+    shrink. The display log truncates flat and harder. Persisting is the caller's
+    job — see _persist_node_output."""
     key = node.ref or str(node.id)
     instance.node_outputs[key] = _cap_structure(output)
-    instance.save(update_fields=["node_outputs", "updated_at"])
 
 
 MAX_LEAF_CHARS = 1000
@@ -871,6 +872,8 @@ def _cap_structure(value, budget=None, depth=0):
 
 
 def _apply_output_mapping(node, output, instance):
+    """Map selected output paths into instance variables (in memory).
+    Persisting is the caller's job — see _persist_node_output."""
     mapping = node.output_mapping or {}
     if not mapping:
         return
@@ -881,7 +884,14 @@ def _apply_output_mapping(node, output, instance):
             updates[variable_key] = value
     if updates:
         instance.variables.update(updates)
-        instance.save(update_fields=["variables", "updated_at"])
+
+
+def _persist_node_output(node, output, instance):
+    """Store the node output and apply its output mapping, flushing both to the
+    row in a single write (they always change together at the end of a node)."""
+    _store_node_output(node, output, instance)
+    _apply_output_mapping(node, output, instance)
+    instance.save(update_fields=["node_outputs", "variables", "updated_at"])
 
 
 def _advance(token):
@@ -898,10 +908,19 @@ def _advance(token):
     if node.type == WorkflowNode.Type.CONDITION:
         # Exclusive routing by branch: evaluate branches in order,
         # default last (always matches), first match wins; follow its wire.
+        # Prefetch the whole branch subtree so evaluation doesn't N+1 over
+        # groups/conditions/variables (mirrors graph.serialize_graph's shape).
         chosen = []
-        branches = sorted(node.branches.all(), key=lambda b: (b.is_default, b.order))
+        branches = sorted(
+            node.branches.prefetch_related(
+                "condition_groups__conditions__variable",
+                "condition_groups__children",
+            ),
+            key=lambda b: (b.is_default, b.order),
+        )
+        context = _render_context(instance)
         for branch in branches:
-            if _evaluate_branch(branch, _render_context(instance)):
+            if _evaluate_branch(branch, context):
                 edge = branch.edges.first()
                 if edge is None:
                     raise EngineError(
@@ -1127,10 +1146,7 @@ def _refresh_status(instance):
             if parent_token.status != WorkflowToken.Status.WAITING:
                 return
             parent_token.instance = parent_instance
-            _store_node_output(
-                parent_token.current_node, instance.variables, parent_instance
-            )
-            _apply_output_mapping(
+            _persist_node_output(
                 parent_token.current_node, instance.variables, parent_instance
             )
             # resume_token re-acquires the same row lock in this transaction

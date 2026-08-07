@@ -2,6 +2,9 @@
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { m } from '$paraglide/messages';
 	import { fetchHookSecret, publicHookUrl } from './hook-url';
+	import { postOps } from './ops';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { getLocale } from '$paraglide/runtime';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 
 	interface Props {
@@ -12,17 +15,7 @@
 
 	let { registrations, workflowId, onRefresh }: Props = $props();
 
-	function opsUrl(action: string) {
-		return `/workflows/${workflowId}/ops?action=${action}`;
-	}
-
-	async function ops(action: string, body: Record<string, unknown>) {
-		return fetch(opsUrl(action), {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(body)
-		});
-	}
+	const ops = (action: string, body: Record<string, unknown>) => postOps(workflowId, action, body);
 
 	async function toggleEnabled(registration: any) {
 		const res = await ops('toggle-trigger', {
@@ -83,8 +76,7 @@
 	};
 
 	function formatWhen(iso: string | null): string {
-		if (!iso) return '—';
-		return new Date(iso).toLocaleString();
+		return formatDateOrDateTime(iso, getLocale()) ?? '—';
 	}
 
 	function relativeTime(iso: string | null): string {

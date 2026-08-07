@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
+	import { postOps } from './ops';
 
 	interface Props {
 		workflowId: string;
@@ -33,20 +34,12 @@
 	let logs = $state<Record<string, any[]>>({});
 	let loading = $state(true);
 
-	function opsUrl(action: string) {
-		return `/workflows/${workflowId}/ops?action=${action}`;
-	}
-
 	export async function refresh() {
 		// Called from mount and a polling interval with nothing awaiting the
 		// promise: a thrown fetch must not become an unhandled rejection or
 		// leave the spinner stuck.
 		try {
-			const res = await fetch(opsUrl('list-instances'), {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ workflow: workflowId })
-			});
+			const res = await postOps(workflowId, 'list-instances', { workflow: workflowId });
 			if (res.ok) {
 				const data = await res.json();
 				runs = data.results ?? data;
@@ -62,11 +55,7 @@
 	}
 
 	async function loadLogs(instanceId: string) {
-		const res = await fetch(opsUrl('instance-logs'), {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ instance: instanceId })
-		});
+		const res = await postOps(workflowId, 'instance-logs', { instance: instanceId });
 		if (res.ok) logs = { ...logs, [instanceId]: await res.json() };
 	}
 

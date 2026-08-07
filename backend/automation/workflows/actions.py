@@ -115,9 +115,10 @@ class SetVariablesAction(BaseAction):
     action_type = "set_variables"
 
     def execute(self, config, instance):
+        # In-memory update only; the engine flushes variables + node_outputs in
+        # one write via _persist_node_output right after every action runs.
         values = render(config.get("variables", {}), _render_context(instance))
         instance.variables.update(values)
-        instance.save(update_fields=["variables", "updated_at"])
         return values
 
 

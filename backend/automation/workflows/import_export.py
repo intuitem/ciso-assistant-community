@@ -34,10 +34,10 @@ from .models import (
     WorkflowVariable,
     WorkflowVersion,
 )
+from .validation import DISABLED_ACTION_TYPES, DISABLED_NODE_TYPES, SECRET_NAME_RE
 
 SCHEMA_VERSION = 1
 
-SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
 UUID_RE = re.compile(r"\b[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\b")
 
 NODE_JSON_FIELDS = [
@@ -175,12 +175,7 @@ def _ref_map(nodes):
     for node in nodes:
         ref = node["ref"]
         if not ref:
-            from django.utils.text import slugify
-
-            base = (
-                slugify(node["label"] or node["type"]).replace("-", "_")[:80]
-                or node["type"]
-            )
+            base = WorkflowNode.slugify_ref(node["label"], node["type"])
             ref, suffix = base, 2
             while ref in taken:
                 ref = f"{base}_{suffix}"
@@ -511,32 +506,35 @@ def _validate_structure(data):
             raise WorkflowImportError(
                 f"Node '{ref}' has an unknown type {node.get('type')!r}"
             )
-        if node.get("type") == WorkflowNode.Type.SUBPROCESS:
-            # Subprocess authoring is disabled for v1 (see the graph endpoint
-            # and Palette). Refuse to import a document that carries one rather
-            # than silently materializing an unreachable node.
+        # Subprocess/event/task authoring is cut from v1 (DISABLED_NODE_TYPES,
+        # shared with the graph endpoint). Refuse to import a document that
+        # carries one rather than silently materializing an unreachable node
+        # (task nodes in particular park WAITING forever — engine._process).
+        if node.get("type") in DISABLED_NODE_TYPES:
+            disabled_messages = {
+                WorkflowNode.Type.SUBPROCESS: (
+                    f"Node '{ref}' is a subprocess node — subprocess nodes are "
+                    "not available yet and cannot be imported"
+                ),
+                WorkflowNode.Type.EVENT: (
+                    f"Node '{ref}' is an event node — event nodes are not "
+                    "available yet and cannot be imported"
+                ),
+                WorkflowNode.Type.TASK: (
+                    f"Node '{ref}' is a task node — task nodes are not available "
+                    "yet and cannot be imported"
+                ),
+            }
             raise WorkflowImportError(
-                f"Node '{ref}' is a subprocess node — subprocess nodes are not "
-                "available yet and cannot be imported"
-            )
-        if node.get("type") == WorkflowNode.Type.EVENT:
-            # Event handling is cut from v1 for the same reason (see the graph
-            # endpoint and Palette).
-            raise WorkflowImportError(
-                f"Node '{ref}' is an event node — event nodes are not available "
-                "yet and cannot be imported"
-            )
-        if node.get("type") == WorkflowNode.Type.TASK:
-            # Task nodes park WAITING with no completion path (engine._process),
-            # so importing one would materialize a run that hangs forever. Cut
-            # from v1 like subprocess/event until human-task support lands.
-            raise WorkflowImportError(
-                f"Node '{ref}' is a task node — task nodes are not available "
-                "yet and cannot be imported"
+                disabled_messages.get(
+                    node.get("type"),
+                    f"Node '{ref}' uses a node type that is not available yet "
+                    "and cannot be imported",
+                )
             )
         if (
             node.get("type") == WorkflowNode.Type.ACTION
-            and (node.get("action_config") or {}).get("type") == "emit_event"
+            and (node.get("action_config") or {}).get("type") in DISABLED_ACTION_TYPES
         ):
             raise WorkflowImportError(
                 f"Node '{ref}' uses the emit_event action, which is not "

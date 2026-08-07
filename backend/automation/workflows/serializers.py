@@ -15,6 +15,14 @@ from automation.workflows.models import (
     WorkflowVersion,
 )
 
+# Token states shown as a run's "active nodes" (live or stuck, not yet done).
+ACTIVE_TOKEN_STATUSES = [
+    WorkflowToken.Status.ACTIVE,
+    WorkflowToken.Status.WAITING,
+    WorkflowToken.Status.RETRYING,
+    WorkflowToken.Status.ERROR,
+]
+
 
 class WorkflowReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
@@ -144,6 +152,13 @@ class WorkflowInstanceReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
     def get_active_nodes(self, obj):
+        # The list viewset prefetches these into `active_tokens`; fall back to a
+        # query for any standalone use of this serializer.
+        tokens = getattr(obj, "active_tokens", None)
+        if tokens is None:
+            tokens = obj.tokens.filter(status__in=ACTIVE_TOKEN_STATUSES).select_related(
+                "current_node"
+            )
         return [
             {
                 "id": str(token.current_node_id),
@@ -151,14 +166,7 @@ class WorkflowInstanceReadSerializer(BaseModelSerializer):
                 "status": token.status,
                 "error_message": token.error_message,
             }
-            for token in obj.tokens.filter(
-                status__in=[
-                    WorkflowToken.Status.ACTIVE,
-                    WorkflowToken.Status.WAITING,
-                    WorkflowToken.Status.RETRYING,
-                    WorkflowToken.Status.ERROR,
-                ]
-            ).select_related("current_node")
+            for token in tokens
         ]
 
 

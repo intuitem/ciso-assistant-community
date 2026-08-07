@@ -51,10 +51,11 @@ from .models import (
     generate_webhook_secret,
 )
 from .serializers import (
+    ACTIVE_TOKEN_STATUSES,
     WorkflowInstanceLogReadSerializer,
     WorkflowInstanceReadSerializer,
 )
-from .validation import validate_graph
+from .validation import DISABLED_ACTION_TYPES, DISABLED_NODE_TYPES, validate_graph
 
 LONG_CACHE_TTL = 60
 
@@ -251,6 +252,33 @@ class WorkflowViewSet(BaseModelViewSet):
         )
 
 
+def _draft_exists_response(draft):
+    return Response(
+        {
+            "error": "draftAlreadyExists",
+            "draft_id": str(draft.id),
+            "draft_version_number": draft.version_number,
+        },
+        status=status.HTTP_400_BAD_REQUEST,
+    )
+
+
+def _clone_into_draft_response(version):
+    """Shared body of new_draft/restore: refuse if a draft already exists (one
+    draft at a time, no silent forking), else clone into a new draft."""
+    existing_draft = version.workflow.draft_version
+    if existing_draft is not None:
+        return _draft_exists_response(existing_draft)
+    try:
+        draft = version.clone_as_draft()
+    except DraftExistsError as e:
+        return _draft_exists_response(e.draft)
+    return Response(
+        {"id": str(draft.id), "version_number": draft.version_number},
+        status=status.HTTP_201_CREATED,
+    )
+
+
 class WorkflowVersionViewSet(BaseModelViewSet):
     model = WorkflowVersion
     serializers_module = "automation.workflows.serializers"
@@ -303,27 +331,33 @@ class WorkflowVersionViewSet(BaseModelViewSet):
                 {"error": "onlyDraftVersionsAreEditable"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        # Subprocess, event and task handling are cut from v1: the engine still
-        # runs nodes that seeded/legacy graphs carry, but users may not create
-        # or edit them through the API. Reject any payload that introduces one.
+        # Subprocess, event and task handling are cut from v1 (DISABLED_NODE_TYPES
+        # / DISABLED_ACTION_TYPES): the engine still runs nodes that seeded/legacy
+        # graphs carry, but users may not create or edit them through the API.
         # Task nodes in particular park their token WAITING with no completion
         # path (engine._process), so an authored task workflow would hang
         # forever — refuse it at the door.
+        disabled_node_errors = {
+            WorkflowNode.Type.SUBPROCESS: "subprocessNodesUnavailable",
+            WorkflowNode.Type.TASK: "taskNodesUnavailable",
+            WorkflowNode.Type.EVENT: "eventNodesUnavailable",
+        }
         for node in request.data.get("nodes") or []:
             node = node or {}
-            if node.get("type") == WorkflowNode.Type.SUBPROCESS:
+            node_type = node.get("type")
+            if node_type in DISABLED_NODE_TYPES:
                 return Response(
-                    {"error": "subprocessNodesUnavailable"},
+                    {
+                        "error": disabled_node_errors.get(
+                            node_type, "nodeTypeUnavailable"
+                        )
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            if node.get("type") == WorkflowNode.Type.TASK:
-                return Response(
-                    {"error": "taskNodesUnavailable"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            if node.get("type") == WorkflowNode.Type.EVENT or (
-                node.get("type") == WorkflowNode.Type.ACTION
-                and (node.get("action_config") or {}).get("type") == "emit_event"
+            if (
+                node_type == WorkflowNode.Type.ACTION
+                and (node.get("action_config") or {}).get("type")
+                in DISABLED_ACTION_TYPES
             ):
                 return Response(
                     {"error": "eventNodesUnavailable"},
@@ -383,32 +417,7 @@ class WorkflowVersionViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="new-draft")
     def new_draft(self, request, pk=None):
-        version = self.get_object()
-        existing_draft = version.workflow.draft_version
-        if existing_draft is not None:
-            return Response(
-                {
-                    "error": "draftAlreadyExists",
-                    "draft_id": str(existing_draft.id),
-                    "draft_version_number": existing_draft.version_number,
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        try:
-            draft = version.clone_as_draft()
-        except DraftExistsError as e:
-            return Response(
-                {
-                    "error": "draftAlreadyExists",
-                    "draft_id": str(e.draft.id),
-                    "draft_version_number": e.draft.version_number,
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        return Response(
-            {"id": str(draft.id), "version_number": draft.version_number},
-            status=status.HTTP_201_CREATED,
-        )
+        return _clone_into_draft_response(self.get_object())
 
     @action(detail=True, methods=["post"])
     def restore(self, request, pk=None):
@@ -420,31 +429,7 @@ class WorkflowVersionViewSet(BaseModelViewSet):
                 {"error": "onlyArchivedVersionsCanBeRestored"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        existing_draft = version.workflow.draft_version
-        if existing_draft is not None:
-            return Response(
-                {
-                    "error": "draftAlreadyExists",
-                    "draft_id": str(existing_draft.id),
-                    "draft_version_number": existing_draft.version_number,
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        try:
-            draft = version.clone_as_draft()
-        except DraftExistsError as e:
-            return Response(
-                {
-                    "error": "draftAlreadyExists",
-                    "draft_id": str(e.draft.id),
-                    "draft_version_number": e.draft.version_number,
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        return Response(
-            {"id": str(draft.id), "version_number": draft.version_number},
-            status=status.HTTP_201_CREATED,
-        )
+        return _clone_into_draft_response(version)
 
 
 class WorkflowTriggerViewSet(BaseModelViewSet):
@@ -598,9 +583,16 @@ def _deputization_errors(user, version):
     errors = []
     if getattr(user, "is_superuser", False):
         return errors
-    for entry in collect_required_permissions(version):
+    entries = list(collect_required_permissions(version))
+    # Resolve every distinct codename in one query (the same ones recur across
+    # nodes); setdefault keeps the first match per codename like .first() did.
+    codenames = {codename for entry in entries for codename in entry["codenames"]}
+    permissions = {}
+    for permission in Permission.objects.filter(codename__in=codenames):
+        permissions.setdefault(permission.codename, permission)
+    for entry in entries:
         for codename in entry["codenames"]:
-            permission = Permission.objects.filter(codename=codename).first()
+            permission = permissions.get(codename)
             if permission is None:
                 continue
             if not RoleAssignment.is_access_allowed(
@@ -625,6 +617,23 @@ class WorkflowInstanceViewSet(BaseModelViewSet):
     filterset_fields = ["workflow", "version", "status", "trigger", "folder"]
     search_fields = []
     ordering = ["-created_at"]
+
+    def get_queryset(self):
+        # Preload what the read serializer touches per row (run_as, initiator,
+        # workflow, folder) and the live tokens it renders as active_nodes, so a
+        # runs list is a handful of queries instead of ~5 per instance. Chains
+        # the base queryset so folder RBAC scoping stays intact.
+        queryset = super().get_queryset()
+        if queryset is None:
+            return queryset
+        active_tokens = WorkflowToken.objects.filter(
+            status__in=ACTIVE_TOKEN_STATUSES
+        ).select_related("current_node")
+        return queryset.select_related(
+            "version__run_as", "initiated_by", "workflow", "folder"
+        ).prefetch_related(
+            Prefetch("tokens", queryset=active_tokens, to_attr="active_tokens")
+        )
 
     def create(self, request, *args, **kwargs):
         """Launching a run: POST {version: uuid, entry_node_ref?: str}.
