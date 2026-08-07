@@ -4843,6 +4843,30 @@ class LoadFileView(APIView):
                         if has_any_answer:
                             requirement_data["answers"] = answers
 
+                    # Override flag: explicit column wins; else a score without
+                    # answers is a manual override.
+                    if (
+                        requirement_data.get("score") not in (None, "")
+                        and requirement_assessment.requirement.questions.exists()
+                    ):
+                        override_cell = record.get("is_score_overridden")
+                        if override_cell not in (None, ""):
+                            requirement_data["is_score_overridden"] = str(
+                                override_cell
+                            ).strip().lower() in (
+                                "true",
+                                "1",
+                                "1.0",
+                                "yes",
+                                "oui",
+                                "vrai",
+                                "x",
+                            )
+                        else:
+                            requirement_data["is_score_overridden"] = (
+                                "answers" not in requirement_data
+                            )
+
                     req_serializer = RequirementAssessmentWriteSerializer(
                         instance=requirement_assessment,
                         data=requirement_data,
