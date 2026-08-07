@@ -270,7 +270,10 @@ class WorkflowVersion(AbstractBaseModel, FolderMixin):
 
 class WorkflowNode(AbstractBaseModel, FolderMixin):
     class Meta(AbstractBaseModel.Meta, FolderMixin.Meta):
-        pass
+        # Rows are saved one at a time in payload order (save_graph), so
+        # created_at is the authored order. Without an explicit ordering
+        # PostgreSQL returns heap order and exports stop round-tripping.
+        ordering = ["created_at"]
 
     class Type(models.TextChoices):
         TRIGGER = "trigger", "Trigger"
