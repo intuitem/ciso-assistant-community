@@ -70,6 +70,8 @@
 	}: Props = $props();
 
 	const LANE_GAP_X = 60;
+	const OPERATOR_WIDTH = 64;
+	const OPERATOR_GAP = 24;
 	const LANE_WIDTH = 260;
 	const LANE_HEIGHT = 480;
 	const NODE_GAP_Y = 80;
@@ -116,7 +118,10 @@
 		},
 		deleteNode: (id: string) => removeNode(id),
 		toggleOperator: (id: string) => toggleOperator(id),
-		markDirty: () => (dirty = true)
+		markDirty: () => {
+			dirty = true;
+			relayout();
+		}
 	});
 
 	function nodeData(node: GraphNode) {
@@ -254,6 +259,12 @@
 
 	initGraph();
 	baseline = { nodes, edges };
+
+	function relayout() {
+		const hidden = new Set(hiddenLaneKey ? hiddenLaneKey.split(',') : []);
+		const laid = layoutLanes(nodes, hidden);
+		if (laid !== nodes) nodes = laid;
+	}
 
 	function discardChanges() {
 		nodes = baseline.nodes;
@@ -427,18 +438,35 @@
 		if (incoming.length > 1 && !existing) {
 			const opId = crypto.randomUUID();
 			const lane = target.parentId;
+			const shift = OPERATOR_WIDTH + OPERATOR_GAP;
+			// the junction reads left-to-right into its target, so it takes the
+			// target's slot and the target slides right to make room
+			const opPosition = { x: target.position.x, y: target.position.y };
+			const targetX = target.position.x + shift;
+			const targetWidth = target.measured?.width ?? 190;
+
+			nodes = nodes.map((node) => {
+				if (node.id === targetId) return { ...node, position: { ...node.position, x: targetX } };
+				if (node.id !== lane || node.type !== 'lane') return node;
+				// widen just enough that the shifted target still fits; layoutLanes then
+				// pushes the following lanes so LANE_GAP_X is preserved
+				const current = laneSize(node, node.id);
+				const needed = targetX + targetWidth + NODE_PADDING_X;
+				if (needed <= current.width) return node;
+				return {
+					...node,
+					width: needed,
+					style: `width: ${needed}px; height: ${current.height}px;`
+				};
+			});
+
 			nodes = [
 				...nodes,
 				{
 					id: opId,
 					type: 'operator',
 					// lives in the target's lane so it travels with the columns
-					// above the target, not left of it: NODE_PADDING_X is only 35 so a
-					// leftward offset clamps to the lane edge and pins the node
-					position: {
-						x: target.position.x,
-						y: Math.max(0, target.position.y - 52)
-					},
+					position: opPosition,
 					...(lane ? { parentId: lane, extent: 'parent' as const } : {}),
 					draggable: true,
 					deletable: true,
@@ -447,6 +475,7 @@
 					data: { kind: 'operator', operator: 'OR', tactic: (target.data as any).tactic }
 				} as Node
 			];
+			relayout();
 			edges = [
 				...incoming.map((edge) => ({ ...edge, target: opId, id: `e-${edge.source}-${opId}` })),
 				{
