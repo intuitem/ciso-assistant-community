@@ -484,6 +484,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.saml",
     "allauth.socialaccount.providers.openid_connect",
     "allauth.mfa",
+    "allauth.idp.oidc",
     "huey.contrib.djhuey",
     "storages",
 ]
@@ -586,6 +587,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "knox.auth.TokenAuthentication",
+        "iam.authentication.OIDCServiceAccountAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -832,6 +834,30 @@ SOCIALACCOUNT_PROVIDERS = {
         "VERIFIED_EMAIL": True,
     },
 }
+
+# Signs id_tokens/jwks only, access tokens stay opaque (default format).
+IDP_OIDC_PRIVATE_KEY = os.environ.get("IDP_OIDC_PRIVATE_KEY", "")
+if not IDP_OIDC_PRIVATE_KEY:
+    _idp_oidc_key_path = Path(
+        os.environ.get(
+            "IDP_OIDC_PRIVATE_KEY_FILE", BASE_DIR / "db" / "idp_oidc_private_key.pem"
+        )
+    )
+    if _idp_oidc_key_path.exists():
+        IDP_OIDC_PRIVATE_KEY = _idp_oidc_key_path.read_text()
+    else:
+        from cryptography.hazmat.primitives import serialization
+        from cryptography.hazmat.primitives.asymmetric import rsa
+
+        _idp_oidc_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        IDP_OIDC_PRIVATE_KEY = _idp_oidc_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        ).decode()
+        _idp_oidc_key_path.parent.mkdir(parents=True, exist_ok=True)
+        _idp_oidc_key_path.touch(mode=0o600)
+        _idp_oidc_key_path.write_text(IDP_OIDC_PRIVATE_KEY)
 
 # MFA / WebAuthn settings
 MFA_SUPPORTED_TYPES = ["recovery_codes", "totp", "webauthn"]
