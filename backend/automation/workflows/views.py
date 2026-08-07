@@ -293,11 +293,6 @@ class WorkflowVersionViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(WorkflowVersion.Status.choices))
 
-    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
-    @action(detail=False, name="Get node type choices", url_path="node-types")
-    def node_types(self, request):
-        return Response(dict(WorkflowNode.Type.choices))
-
     @action(detail=True, methods=["get", "put"])
     def graph(self, request, pk=None):
         version = self.get_object()
@@ -308,14 +303,22 @@ class WorkflowVersionViewSet(BaseModelViewSet):
                 {"error": "onlyDraftVersionsAreEditable"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        # Subprocess and event handling are cut from v1: the engine still runs
-        # nodes that seeded/legacy graphs carry, but users may not create or
-        # edit them through the API. Reject any payload that introduces one.
+        # Subprocess, event and task handling are cut from v1: the engine still
+        # runs nodes that seeded/legacy graphs carry, but users may not create
+        # or edit them through the API. Reject any payload that introduces one.
+        # Task nodes in particular park their token WAITING with no completion
+        # path (engine._process), so an authored task workflow would hang
+        # forever — refuse it at the door.
         for node in request.data.get("nodes") or []:
             node = node or {}
             if node.get("type") == WorkflowNode.Type.SUBPROCESS:
                 return Response(
                     {"error": "subprocessNodesUnavailable"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if node.get("type") == WorkflowNode.Type.TASK:
+                return Response(
+                    {"error": "taskNodesUnavailable"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             if node.get("type") == WorkflowNode.Type.EVENT or (

@@ -526,6 +526,14 @@ def _validate_structure(data):
                 f"Node '{ref}' is an event node — event nodes are not available "
                 "yet and cannot be imported"
             )
+        if node.get("type") == WorkflowNode.Type.TASK:
+            # Task nodes park WAITING with no completion path (engine._process),
+            # so importing one would materialize a run that hangs forever. Cut
+            # from v1 like subprocess/event until human-task support lands.
+            raise WorkflowImportError(
+                f"Node '{ref}' is a task node — task nodes are not available "
+                "yet and cannot be imported"
+            )
         if (
             node.get("type") == WorkflowNode.Type.ACTION
             and (node.get("action_config") or {}).get("type") == "emit_event"

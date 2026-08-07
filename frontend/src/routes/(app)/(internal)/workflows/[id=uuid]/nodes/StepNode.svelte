@@ -6,7 +6,7 @@
 		id: string;
 		selected?: boolean;
 		data: {
-			nodeType: 'task' | 'condition' | 'action' | 'subprocess' | 'event';
+			nodeType: 'task' | 'action' | 'subprocess' | 'event';
 			label: string;
 			meta?: string | null;
 			assignments?: { role_code: string; is_blocking: boolean }[];
@@ -29,12 +29,6 @@
 				accent: 'bg-primary-500',
 				border: 'border-primary-300 dark:border-primary-700',
 				chip: 'preset-tonal-primary'
-			},
-			condition: {
-				icon: 'fa-code-branch',
-				accent: 'bg-warning-500',
-				border: 'border-warning-300 dark:border-warning-700',
-				chip: 'preset-tonal-warning'
 			},
 			action: {
 				icon: 'fa-bolt',

@@ -36,9 +36,8 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 		versions[0];
 	if (!activeVersion) error(404, 'This workflow has no version');
 
-	const [graph, taskTemplates, creatableModelsRaw, readableModelsRaw] = await Promise.all([
+	const [graph, creatableModelsRaw, readableModelsRaw] = await Promise.all([
 		fetchJson(fetch, `${BASE_API_URL}/workflows/workflow-versions/${activeVersion.id}/graph/`),
-		fetchJson(fetch, `${BASE_API_URL}/task-templates/`),
 		fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/creatable-models/`),
 		fetchJson(fetch, `${BASE_API_URL}/workflows/workflows/readable-models/`)
 	]);
@@ -67,10 +66,10 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 		activeVersion,
 		versionPinned: pinnedVersion !== null,
 		graph,
-		taskTemplates: listResults(taskTemplates),
-		// Subprocess authoring is disabled for v1 (not in the palette, blocked at
-		// the graph API). No target list is loaded; the picker stays empty for
-		// any seeded/legacy subprocess node.
+		// Task and subprocess authoring are disabled for v1 (not in the palette,
+		// blocked at the graph API). No option lists are loaded; the pickers stay
+		// empty for any seeded/legacy task or subprocess node.
+		taskTemplates: [],
 		subprocessCandidates: [],
 		creatableModels,
 		readableModels: listResults(readableModelsRaw),

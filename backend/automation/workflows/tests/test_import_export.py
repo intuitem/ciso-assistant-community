@@ -4,7 +4,6 @@ import pytest
 import yaml
 from rest_framework.test import APIRequestFactory, force_authenticate
 
-from core.models import TaskTemplate
 from iam.models import Folder, User
 from automation.workflows.graph import save_graph
 from automation.workflows.import_export import (
@@ -387,7 +386,10 @@ class TestImport:
         errors = validate_graph(imported.draft_version)
         assert not any(e["code"] == "secret_missing" for e in errors)
 
-    def test_task_template_resolution(self, rich_workflow, root):
+    def test_task_nodes_are_rejected(self, rich_workflow, root):
+        # Task authoring is cut from v1: a task node parks WAITING with no
+        # completion path, so a document carrying one is refused outright rather
+        # than materialized as a run that hangs forever.
         data = export_workflow(rich_workflow)
         data["graph"]["nodes"][3] = {
             "ref": "fetch_employee",
@@ -395,14 +397,8 @@ class TestImport:
             "label": "Vendor review",
             "task_template": "Vendor review",
         }
-        _, warnings = import_workflow(data, root)
-        assert any("task template 'Vendor review'" in w for w in warnings)
-
-        TaskTemplate.objects.create(name="Vendor review", folder=root)
-        imported, warnings = import_workflow(data, root)
-        node = imported.draft_version.nodes.get(ref="fetch_employee")
-        assert node.task_template.name == "Vendor review"
-        assert not any("task template" in w for w in warnings)
+        with pytest.raises(WorkflowImportError, match="task"):
+            import_workflow(data, root)
 
     def test_subprocess_nodes_are_rejected(self, rich_workflow, root):
         # Subprocess authoring is disabled for v1: a document carrying a

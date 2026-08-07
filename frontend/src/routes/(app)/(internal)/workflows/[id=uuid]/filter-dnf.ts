@@ -70,7 +70,7 @@ export function treeToGroups(tree: any): Condition[][] | null {
 }
 
 // "3" -> 3, "true" -> true, "[1,2]" -> [1,2]; anything unparseable stays a string.
-export function parseValue(raw: string): unknown {
+function parseValue(raw: string): unknown {
 	const trimmed = raw.trim();
 	if (!trimmed) return raw;
 	try {

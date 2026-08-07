@@ -4,7 +4,6 @@ import pytest
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from iam.models import Folder, User
-from pmbok.models import ResponsibilityRole
 from automation.workflows.models import Workflow, WorkflowVersion
 from automation.workflows.views import WorkflowVersionViewSet, WorkflowViewSet
 
@@ -571,16 +570,18 @@ class TestPublish:
         }
         assert orphan in offending
 
-    def test_task_node_without_template_fails_validation(self, workflow, superuser):
-        ResponsibilityRole.create_default_roles()
+    def test_task_nodes_are_rejected(self, workflow, superuser):
+        # Task authoring is cut from v1: a task node parks WAITING with no
+        # completion path, so the graph endpoint refuses a payload that carries
+        # one rather than let a run be authored that hangs forever.
         version = workflow.draft_version
         graph = _minimal_graph()
         graph["nodes"][1]["type"] = "task"
-        _put_graph(version, graph, superuser)
-        resp = _publish(version, superuser)
+        resp = _put_graph(version, graph, superuser)
         assert resp.status_code == 400
-        codes = {e["code"] for e in resp.data["errors"]}
-        assert "task_template_missing" in codes
+        assert resp.data["error"] == "taskNodesUnavailable"
+        # Nothing was persisted: the draft has no task node.
+        assert not version.nodes.filter(type="task").exists()
 
     def test_condition_without_default_branch_fails_validation(
         self, workflow, superuser

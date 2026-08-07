@@ -90,11 +90,6 @@ export const POST: RequestHandler = async ({ fetch, request, url, params }) => {
 			);
 		}
 
-		case 'get-graph': {
-			const versionId = requireUuid(body.version, 'version');
-			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-versions/${versionId}/graph/`, 'GET');
-		}
-
 		case 'run': {
 			const versionId = requireUuid(body.version, 'version');
 			const payload: Record<string, unknown> = { version: versionId };
@@ -181,15 +176,6 @@ export const POST: RequestHandler = async ({ fetch, request, url, params }) => {
 				`${BASE_API_URL}/workflows/workflow-triggers/${requireUuid(body.id, 'id')}/`,
 				'PATCH',
 				{ enabled: !!body.enabled }
-			);
-		}
-
-		case 'set-trigger-hmac': {
-			return proxy(
-				fetch,
-				`${BASE_API_URL}/workflows/workflow-triggers/${requireUuid(body.id, 'id')}/`,
-				'PATCH',
-				{ hmac_secret: typeof body.hmac_secret === 'string' ? body.hmac_secret : '' }
 			);
 		}
 
