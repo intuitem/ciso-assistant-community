@@ -38,8 +38,8 @@ translations:
     name: Cbw (NIS2) Control Framework (v1.2)
     description: "## Introduction\n\nThe evaluation tool has been developed as a practical\
       \ tool to support organizations in effectively gaining insight into their compliance\
-      \ with the Cybersecurity Act (Cbw) and the underlying Cybersecurity Decree (Cbb).\
-      \ The evaluation tool was developed to provide insight into the current state\
+      \ with the Cybersecurity Act (Cbw) and the underlying Cybersecurity Decree (Cbb).\n\
+      \nThe evaluation tool was developed to provide insight into the current state\
       \ of cyber resilience and to identify potential for improvement, based on the\
       \ requirements laid out in the Cbw and Cbb. The Cbw (NIS2) Control Framework\
       \ does not replace current laws and regulations, but rather makes them transparent\
@@ -79,7 +79,7 @@ objects:
         description: "## Introduction\n\nThe evaluation tool has been developed as\
           \ a practical tool to support organizations in effectively gaining insight\
           \ into their compliance with the Cybersecurity Act (Cbw) and the underlying\
-          \ Cybersecurity Decree (Cbb). The evaluation tool was developed to provide\
+          \ Cybersecurity Decree (Cbb).\n\nThe evaluation tool was developed to provide\
           \ insight into the current state of cyber resilience and to identify potential\
           \ for improvement, based on the requirements laid out in the Cbw and Cbb.\
           \ The Cbw (NIS2) Control Framework does not replace current laws and regulations,\
