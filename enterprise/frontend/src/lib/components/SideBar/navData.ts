@@ -547,6 +547,12 @@ export const navData = {
 					permissions: ['view_objectclassification']
 				},
 				{
+					name: 'assetClasses',
+					fa_icon: 'fa-solid fa-sitemap',
+					href: '/asset-class',
+					permissions: ['view_assetclass']
+				},
+				{
 					name: 'customFields',
 					fa_icon: 'fa-solid fa-sliders',
 					href: '/custom-fields',

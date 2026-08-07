@@ -77,6 +77,7 @@
 	import TerminologyForm from './ModelForm/TerminologyForm.svelte';
 	import ObjectClassificationForm from './ModelForm/ObjectClassificationForm.svelte';
 	import ClassificationLevelForm from './ModelForm/ClassificationLevelForm.svelte';
+	import AssetClassForm from './ModelForm/AssetClassForm.svelte';
 	import CustomFieldDefinitionForm from './ModelForm/CustomFieldDefinitionForm.svelte';
 	import RoleForm from './ModelForm/RoleForm.svelte';
 	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
@@ -974,6 +975,8 @@
 			/>
 		{:else if URLModel === 'classification-levels'}
 			<ClassificationLevelForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'asset-class'}
+			<AssetClassForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'custom-fields'}
 			<CustomFieldDefinitionForm
 				{form}

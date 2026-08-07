@@ -1050,6 +1050,12 @@ class AppliedControlAutocompleteSerializer(BaseModelSerializer):
 class AssetImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     parent_assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    # Canonical path, not a pk: asset classes are root-folder referentials and
+    # never travel in the dump, so a pk would dangle on the target instance.
+    asset_class = serializers.SerializerMethodField()
+
+    def get_asset_class(self, obj) -> str | None:
+        return obj.asset_class.full_path if obj.asset_class else None
 
     class Meta:
         model = Asset
@@ -1061,6 +1067,7 @@ class AssetImportExportSerializer(BaseModelSerializer):
             "security_objectives",
             "disaster_recovery_objectives",
             "parent_assets",
+            "asset_class",
             "folder",
             "created_at",
             "updated_at",
@@ -1070,17 +1077,42 @@ class AssetImportExportSerializer(BaseModelSerializer):
 class AssetClassReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     parent = FieldsRelatedField()
+    # Needed by the frontend to resolve the folder governing this object.
+    folder = FieldsRelatedField()
     full_path = serializers.CharField()
+    # `name`/`description` stay canonical: the edit form round-trips them.
+    translated_name = serializers.CharField(source="get_name_translated")
+    translated_description = serializers.CharField(
+        source="get_description_translated", allow_blank=True, allow_null=True
+    )
 
     class Meta:
         model = AssetClass
-        exclude = ["created_at", "updated_at", "folder", "is_published"]
+        exclude = ["created_at", "updated_at", "is_published"]
 
 
 class AssetClassWriteSerializer(BaseModelSerializer):
+    # Built-ins are re-seeded at every startup: they are hidable, not editable.
+    BUILTIN_EDITABLE_FIELDS = {"is_visible"}
+
     class Meta:
         model = AssetClass
         exclude = ["created_at", "updated_at", "folder", "is_published"]
+
+    def validate_name(self, value):
+        if "/" in value:
+            raise serializers.ValidationError(
+                "The name cannot contain '/' for an Asset class."
+            )
+        return value
+
+    def validate_parent(self, parent):
+        """Check that the asset class tree will not contain cycles."""
+        if parent is not None and self.instance in parent.ancestors_plus_self():
+            raise serializers.ValidationError(
+                "errorAssetClassGraphMustNotContainCycles"
+            )
+        return parent
 
 
 class ReferenceControlWriteSerializer(BaseModelSerializer):

@@ -36,5 +36,6 @@ The distinction matters for risk work: scenarios typically express _what can hap
 
 ## Related
 
+- [Asset classes](asset-classes.md)
 - [Risk assessments](risk-assessments.md)
 - [Vocabulary → Asset](../introduction/vocabulary.md)

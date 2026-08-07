@@ -932,11 +932,22 @@ export const URL_MODEL_MAP: ModelMap = {
 	},
 	'asset-class': {
 		endpointUrl: 'asset-class',
-		name: 'asset-class',
+		// Django model name: codenames are built as `${action}_${name}`.
+		name: 'assetclass',
 		localName: 'assetClass',
 		localNamePlural: 'assetClasses',
 		verboseName: 'assetclass',
-		verboseNamePlural: 'assetclasses'
+		verboseNamePlural: 'assetclasses',
+		customNameDescription: true,
+		foreignKeyFields: [{ field: 'parent', urlModel: 'asset-class' }],
+		reverseForeignKeyFields: [{ field: 'parent', urlModel: 'asset-class' }],
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'parent' },
+			{ field: 'builtin' },
+			{ field: 'is_visible' }
+		]
 	},
 	'asset-capabilities': {
 		endpointUrl: 'asset-capabilities',
