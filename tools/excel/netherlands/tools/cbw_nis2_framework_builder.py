@@ -1,4 +1,11 @@
-from __future__ import annotations
+"""
+Script to create the Cbw (NIS2) Control Framework for CISO Assistant
+
+CAUTION: Control "14.1" & "14.2" have the same "Explanation". Fix this by hand in the final Excel or fix this script.  
+
+"""
+
+
 
 import argparse
 import re
