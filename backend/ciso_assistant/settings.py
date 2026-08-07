@@ -453,6 +453,7 @@ INSTALLED_APPS = [
     "tailwind",
     "iam",
     "sec_intel",
+    "threat_modeling",
     "global_settings",
     "pmbok",
     "ebios_rm",

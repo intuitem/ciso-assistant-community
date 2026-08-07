@@ -891,6 +891,9 @@ class LibraryUpdater:
         if isinstance(self.new_requirement_mapping_sets, dict):
             self.new_requirement_mapping_sets = [self.new_requirement_mapping_sets]
 
+        self.ttp_catalogs = new_library_content.get("ttp_catalogs", [])
+        self.tactics = new_library_content.get("tactics", [])
+        self.techniques = new_library_content.get("techniques", [])
         self.threats = new_library_content.get("threats", [])
         self.reference_controls = new_library_content.get("reference_controls", [])
         self.metric_definitions = new_library_content.get("metric_definitions", [])
@@ -926,6 +929,102 @@ class LibraryUpdater:
                 "libraryHasNoUpdate",
             ]:
                 return error_msg
+
+    def _resolve_ref(self, model, urn, field, referrer):
+        # absent clears the link; unresolvable is a data bug
+        if not urn:
+            return None
+        obj = model.objects.filter(urn=urn.lower()).first()
+        if obj is None:
+            raise ValueError(f"Unknown {field} '{urn}' referenced in '{referrer}'.")
+        return obj
+
+    def update_ttp_catalogs(self):
+        from sec_intel.models import TTPCatalog
+
+        for catalog in self.ttp_catalogs:
+            TTPCatalog.objects.update_or_create(
+                urn=catalog["urn"].lower(),
+                defaults=catalog,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **catalog,
+                    "library": self.old_library,
+                },
+            )
+
+    def update_tactics(self):
+        from sec_intel.models import TTPCatalog, Tactic
+
+        for index, tactic in enumerate(self.tactics):
+            fields = {k: v for k, v in tactic.items() if k != "catalog_urn"}
+            fields.setdefault("order_id", index)
+            fields["catalog"] = self._resolve_ref(
+                TTPCatalog, tactic.get("catalog_urn"), "TTP catalog", tactic["urn"]
+            )
+            Tactic.objects.update_or_create(
+                urn=tactic["urn"].lower(),
+                defaults=fields,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **fields,
+                    "library": self.old_library,
+                },
+            )
+
+    def update_techniques(self):
+        from sec_intel.models import TTPCatalog, Tactic, Technique
+
+        # not concrete fields, so they cannot go through update_or_create()
+        deferred_keys = ("catalog_urn", "parent_urn", "tactics", "reference_controls")
+        pending = {}
+
+        for index, technique in enumerate(self.techniques):
+            deferred = {key: technique.get(key) for key in deferred_keys}
+            fields = {k: v for k, v in technique.items() if k not in deferred_keys}
+            fields.setdefault("order_id", index)
+            # omitted fields must reset, not stay stale
+            fields.setdefault("is_deprecated", False)
+            for clearable in ("description", "annotation", "groups"):
+                fields.setdefault(clearable, None)
+            fields["catalog"] = self._resolve_ref(
+                TTPCatalog, deferred["catalog_urn"], "TTP catalog", technique["urn"]
+            )
+            obj, _ = Technique.objects.update_or_create(
+                urn=technique["urn"].lower(),
+                defaults=fields,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **fields,
+                    "library": self.old_library,
+                },
+            )
+            pending[obj] = deferred
+
+        for obj, deferred in pending.items():
+            obj.parent = self._resolve_ref(
+                Technique, deferred["parent_urn"], "parent technique", obj.urn
+            )
+            obj.save(update_fields=["parent"])
+            for field, model in (
+                ("tactics", Tactic),
+                ("reference_controls", ReferenceControl),
+            ):
+                targets = model.objects.filter(
+                    urn__in=[u.lower() for u in deferred[field] or []]
+                )
+                if targets.exists() or getattr(obj, field).exists():
+                    getattr(obj, field).set(targets)
+
+        # flagged rather than deleted: user data may point at these
+        incoming = {t["urn"].lower() for t in self.techniques}
+        if incoming:
+            Technique.objects.filter(library=self.old_library).exclude(
+                urn__in=incoming
+            ).update(is_deprecated=True)
 
     def update_threats(self):
         for threat in self.threats:
@@ -1715,8 +1814,11 @@ class LibraryUpdater:
         for new_dependency in new_dependencies:
             self.old_library.dependencies.add(new_dependency)
 
+        self.update_ttp_catalogs()
+        self.update_tactics()
         self.update_threats()
         self.update_reference_controls()
+        self.update_techniques()
         self.update_metric_definitions()
 
         if self.new_frameworks is not None:

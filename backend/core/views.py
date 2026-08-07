@@ -76,6 +76,7 @@ from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
 
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from core.constants import LEGACY_TTP_LIBRARIES
 from core.permissions import FeatureFlagRequired
 from core.helpers import get_instance_metrics
 from core.instance_metrics import (
@@ -2015,7 +2016,7 @@ class ThreatViewSet(BaseModelViewSet):
     search_fields = ["ref_id", "name", "provider", "description"]
 
     def get_queryset(self):
-        return (
+        queryset = (
             super()
             .get_queryset()
             .select_related(
@@ -2027,6 +2028,10 @@ class ThreatViewSet(BaseModelViewSet):
                 "filtering_labels__folder",  # FieldsRelatedField includes folder
             )
         )
+        # opt-in: the list page keeps them so existing links stay auditable
+        if self.request.query_params.get("exclude_legacy_ttp") == "true":
+            queryset = queryset.exclude(library__urn__in=LEGACY_TTP_LIBRARIES)
+        return queryset
 
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)

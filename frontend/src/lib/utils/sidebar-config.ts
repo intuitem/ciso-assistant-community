@@ -17,6 +17,8 @@ type SidebarBackendKeys = {
 	organisation_objectives: boolean;
 	organisation_issues: boolean;
 	quantitative_risk_studies: boolean;
+	threat_modeling: boolean;
+	ttps: boolean;
 	terminologies: boolean;
 	custom_fields: boolean;
 	bia: boolean;
@@ -60,6 +62,8 @@ type SidebarFrontendKeys = {
 	organisationObjectives: boolean;
 	organisationIssues: boolean;
 	quantitativeRiskStudies: boolean;
+	threatModeling: boolean;
+	ttpCatalogs: boolean;
 	terminologies: boolean;
 	customFields: boolean;
 	businessImpactAnalysis: boolean;
@@ -103,6 +107,8 @@ export function getSidebarVisibleItems(
 		organisationObjectives: featureFlags?.organisation_objectives ?? false,
 		organisationIssues: featureFlags?.organisation_issues ?? false,
 		quantitativeRiskStudies: featureFlags?.quantitative_risk_studies ?? false,
+		threatModeling: featureFlags?.threat_modeling ?? false,
+		ttpCatalogs: featureFlags?.ttps ?? false,
 		terminologies: featureFlags?.terminologies ?? true,
 		customFields: featureFlags?.custom_fields ?? false,
 		businessImpactAnalysis: featureFlags?.bia ?? true,
