@@ -27,9 +27,13 @@
 ## T4 — Rebranding visual (E4)
 
 - [x] Levantamento técnico: logo (`Logo.svelte` → `ciso.svg`), tema (`ciso-theme.css`), 6 ocorrências hardcoded de "CISO Assistant"
-- [ ] **Validar licenciamento do CISO Assistant Community (bloqueante)**
-- [ ] Sessão de brainstorm dedicada (nome, logo, paleta, tom de voz)
-- [ ] Spec formal do T4
+- [x] Validar licenciamento do CISO Assistant Community — AGPLv3 permite rebranding fora de `enterprise/`, com obrigação de disponibilizar código-fonte no lançamento comercial
+- [x] Nome comercial decidido: **CISO TSI**
+- [x] `frontend/messages/*.json` (25 locales, 198 ocorrências) trocado para "CISO TSI"
+- [x] 6 componentes Svelte hardcoded trocados para "CISO TSI"
+- [x] `docs/plans/*.md` atualizados para referenciar "CISO TSI" como nome do produto
+- [ ] Identidade visual: novo logo e paleta de cores (design gráfico, não iniciado)
+- [ ] `README.md` principal e demais referências fora do escopo aprovado nesta rodada (CI/CD, packaging, `product-docs/`, conectores)
 
 ## Documentação (esta rodada)
 

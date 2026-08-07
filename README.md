@@ -1,3 +1,5 @@
+> **CISO TSI** — este repositório é a base para o fork comercial white-label brasileiro **CISO TSI** (Maturidade de TSI + Gestão de Terceiros), construído sobre o CISO Assistant Community. Ver [docs/plans](docs/plans/README.md) para o plano de tropicalização. O restante deste README documenta o projeto upstream original.
+
 <p align="center">
 Star the project 🌟 to get releases notification and help growing the community!
 </p>

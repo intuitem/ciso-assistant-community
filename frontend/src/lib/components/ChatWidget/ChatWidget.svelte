@@ -690,7 +690,7 @@
 			bg-gradient-to-br from-violet-600 to-purple-700 text-white shadow-lg
 			transition-transform hover:scale-110 active:scale-95"
 		aria-label="Open chat assistant"
-		title="CISO Assistant"
+		title="CISO TSI"
 	>
 		<i class="fa-solid fa-comments text-lg"></i>
 		{#if !hasBeenOpened}
@@ -720,7 +720,7 @@
 					<i class="fa-solid fa-robot text-sm text-white"></i>
 				</div>
 				<div>
-					<div class="text-sm font-semibold text-white">CISO Assistant</div>
+					<div class="text-sm font-semibold text-white">CISO TSI</div>
 					<div class="text-xs text-violet-200">{m.chatSubtitle()}</div>
 				</div>
 			</div>
@@ -804,7 +804,7 @@
 		<div
 			role="dialog"
 			aria-modal="true"
-			aria-label="CISO Assistant Chat"
+			aria-label="CISO TSI Chat"
 			class="flex h-[90vh] w-full max-w-6xl overflow-hidden rounded-2xl bg-surface-50-950 shadow-2xl"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
@@ -878,7 +878,7 @@
 							<i class="fa-solid fa-robot text-white"></i>
 						</div>
 						<div>
-							<div class="font-semibold text-white">CISO Assistant</div>
+							<div class="font-semibold text-white">CISO TSI</div>
 							<div class="text-sm text-violet-200">{m.chatSubtitle()}</div>
 						</div>
 					</div>

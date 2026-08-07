@@ -5,7 +5,7 @@
 
 ## 1. Objetivo
 
-Entregar uma jornada guiada única dentro do produto que leve o cliente a: (a) avaliar a maturidade da governança interna de TI/SI (TSI — Tecnologia e Sistemas de Informação), e (b) gerenciar e avaliar fornecedores/terceiros críticos — sem sair do CISO Assistant, reaproveitando ao máximo capacidades já existentes.
+Entregar uma jornada guiada única dentro do produto que leve o cliente a: (a) avaliar a maturidade da governança interna de TI/SI (TSI — Tecnologia e Sistemas de Informação), e (b) gerenciar e avaliar fornecedores/terceiros críticos — sem sair do CISO TSI, reaproveitando ao máximo capacidades já existentes.
 
 ## 2. Escopo
 
