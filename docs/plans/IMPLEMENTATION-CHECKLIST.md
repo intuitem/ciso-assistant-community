@@ -17,11 +17,12 @@
 
 ## T3 — Maturidade de TSI + Terceiros (E3)
 
-- [x] Design aprovado: adaptar `nist-csf-20-preset.yaml`, aprofundar terceiros com `entity`/`entity_assessment`/`vendor-due-diligence`
-- [ ] Criar `backend/library/libraries/preset-tsi-terceiros.yaml` (locale primário `pt-BR`)
-- [ ] Traduzir/tropicalizar os ~30 objetos e 14 passos herdados do preset NIST CSF
-- [ ] Substituir o passo raso `supply_chain` por 2–3 passos de TPRM completo
-- [ ] Validar via `StoredLibrary` + `PresetExecutor.apply()` (mesmo rigor do T1)
+- [x] Design aprovado: adaptar `nist-csf-20-preset.yaml`, aprofundar terceiros com `entity`/`vendor-due-diligence`
+- [x] Criado `backend/library/libraries/preset-tsi-terceiros.yaml` (locale primário `pt-BR`, tradução `en`)
+- [x] Traduzidos/tropicalizados os ~48 objetos e 16 passos (14 adaptados do NIST CSF + `vendors`/`vendor_due_diligence`)
+- [x] Substituído o passo raso `supply_chain` por `vendors` (cadastro de 5 fornecedores críticos) + `vendor_due_diligence` (aponta para `entity-assessments`, sem scaffold — `entity_assessment`/`contract` não são tipos suportados por `preset_executor.py`)
+- [x] Bug corrigido durante teste: `organisation_objective.status: to_do` inválido → `draft`
+- [x] Validado: `StoredLibrary` + `upsert_preset_from_stored_library` + `PresetExecutor.apply()` em transação revertida — 48 objetos, 16 passos, sem erro, sem vazamento de dados de teste
 
 ## T4 — Rebranding visual (E4)
 
