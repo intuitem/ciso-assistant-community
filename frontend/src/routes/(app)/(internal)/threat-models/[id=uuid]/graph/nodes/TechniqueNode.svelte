@@ -10,10 +10,26 @@
 			refId?: string | null;
 			parentName?: string | null;
 			isHighlighted?: boolean;
+			assets?: string[];
+			appliedControls?: string[];
+			vulnerabilities?: string[];
 		};
 	}
 
 	let { id, data }: Props = $props();
+
+	// what is at stake and what covers it, without opening the inspector
+	const counters = $derived(
+		[
+			{ icon: 'fa-cube', count: data.assets?.length ?? 0, label: m.assets() },
+			{
+				icon: 'fa-shield-halved',
+				count: data.appliedControls?.length ?? 0,
+				label: m.appliedControls()
+			},
+			{ icon: 'fa-bug', count: data.vulnerabilities?.length ?? 0, label: m.vulnerabilities() }
+		].filter((c) => c.count > 0)
+	);
 
 	const editor = getContext<{
 		deleteNode: (id: string) => void;
@@ -41,6 +57,19 @@
 	<p class="text-[11px] font-semibold leading-tight text-surface-900-100 text-wrap mt-0.5">
 		{data.label}
 	</p>
+
+	{#if counters.length}
+		<div class="mt-1 flex items-center gap-2 border-t border-surface-200-800 pt-1">
+			{#each counters as counter (counter.icon)}
+				<span
+					class="flex items-center gap-1 text-[9px] text-surface-600-400"
+					title="{counter.count} {counter.label}"
+				>
+					<i class="fa-solid {counter.icon}"></i>{counter.count}
+				</span>
+			{/each}
+		</div>
+	{/if}
 
 	{#if !editor?.readonly}
 		<button

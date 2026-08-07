@@ -84,6 +84,9 @@
 	let dirty = $state(false);
 	let saving = $state(false);
 	let errorMessage = $state('');
+	// the props hold the page-load payload; after a save that is stale, so discard
+	// restores this snapshot instead
+	let baseline = $state.raw<{ nodes: Node[]; edges: Edge[] }>({ nodes: [], edges: [] });
 	let dragOverLane = $state<string | null>(null);
 	// tactics of the technique currently being dragged, null when idle
 	let dragTactics = $state<string[] | null>(null);
@@ -122,6 +125,7 @@
 			operator: node.operator,
 			technique: node.technique,
 			tactic: node.tactic,
+			name: node.name ?? '',
 			label: node.label || node.name || '',
 			customLabel: node.label,
 			refId: node.ref_id,
@@ -241,6 +245,14 @@
 	}
 
 	initGraph();
+	baseline = { nodes, edges };
+
+	function discardChanges() {
+		nodes = baseline.nodes;
+		edges = baseline.edges;
+		dirty = false;
+		errorMessage = '';
+	}
 
 	// in place: rebuilding lane nodes would discard analyst resizing
 	function refreshLaneCounts() {
@@ -276,11 +288,52 @@
 		nodes.filter((node) => node.type === 'lane' && countIn(node.id, nodes) === 0).length
 	);
 
+	function makeEdge(source: string, target: string): Edge {
+		return {
+			id: `e-${source}-${target}`,
+			source,
+			target,
+			markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' },
+			style: 'stroke: var(--color-surface-500); stroke-width: 2;'
+		};
+	}
+
+	// dropping a junction must not disconnect the branch: its predecessors are
+	// reconnected straight to its successors
+	function bypass(id: string, current: Edge[]): Edge[] {
+		const sources = current.filter((edge) => edge.target === id).map((edge) => edge.source);
+		const targets = current.filter((edge) => edge.source === id).map((edge) => edge.target);
+		const kept = current.filter((edge) => edge.source !== id && edge.target !== id);
+		const restored = sources.flatMap((source) =>
+			targets
+				.filter(
+					(target) =>
+						source !== target &&
+						!kept.some((edge) => edge.source === source && edge.target === target)
+				)
+				.map((target) => makeEdge(source, target))
+		);
+		return [...kept, ...restored];
+	}
+
 	function removeNode(id: string) {
-		nodes = nodes.filter((node) => node.id !== id);
-		edges = edges.filter((edge) => edge.source !== id && edge.target !== id);
+		const node = nodes.find((item) => item.id === id);
+		nodes = nodes.filter((item) => item.id !== id);
+		edges =
+			node?.type === 'operator'
+				? bypass(id, edges)
+				: edges.filter((edge) => edge.source !== id && edge.target !== id);
 		dirty = true;
 		refreshLaneCounts();
+	}
+
+	// an operator left with a single predecessor carries no meaning, so it collapses
+	function collapseRedundantOperators() {
+		for (const node of nodes.filter((item) => item.type === 'operator')) {
+			if (edges.filter((edge) => edge.target === node.id).length > 1) continue;
+			nodes = nodes.filter((item) => item.id !== node.id);
+			edges = bypass(node.id, edges);
+		}
 	}
 
 	// deliberately permissive: cycles and backward edges are legitimate in an
@@ -298,9 +351,13 @@
 
 	function patchSelected(patch: Record<string, unknown>) {
 		if (!selectedNodeId) return;
-		nodes = nodes.map((node) =>
-			node.id === selectedNodeId ? { ...node, data: { ...node.data, ...patch } } : node
-		);
+		nodes = nodes.map((node) => {
+			if (node.id !== selectedNodeId) return node;
+			const data = { ...node.data, ...patch };
+			// the node shows the custom label when there is one, the technique name otherwise
+			if ('customLabel' in patch) data.label = (patch.customLabel as string) || data.name || '';
+			return { ...node, data };
+		});
 		dirty = true;
 	}
 
@@ -321,6 +378,7 @@
 					kind: 'custom',
 					technique: null,
 					tactic: lane ? tacticOf(lane.id) : null,
+					name: '',
 					label: '',
 					customLabel: '',
 					refId: null,
@@ -367,7 +425,12 @@
 					id: opId,
 					type: 'operator',
 					// lives in the target's lane so it travels with the columns
-					position: { x: Math.max(0, target.position.x - 70), y: target.position.y + 30 },
+					// above the target, not left of it: NODE_PADDING_X is only 35 so a
+					// leftward offset clamps to the lane edge and pins the node
+					position: {
+						x: target.position.x,
+						y: Math.max(0, target.position.y - 52)
+					},
 					...(lane ? { parentId: lane, extent: 'parent' as const } : {}),
 					draggable: true,
 					deletable: true,
@@ -397,6 +460,7 @@
 	}
 
 	function handleDelete() {
+		collapseRedundantOperators();
 		dirty = true;
 		refreshLaneCounts();
 	}
@@ -468,6 +532,7 @@
 					kind: 'technique',
 					technique: technique.id,
 					tactic: tacticOf(lane.id),
+					name: technique.name,
 					label: technique.name,
 					customLabel: '',
 					refId: technique.ref_id,
@@ -573,6 +638,7 @@
 			const payload = await res.json().catch(() => ({}));
 			if (res.ok) {
 				dirty = false;
+				baseline = { nodes, edges };
 			} else {
 				errorMessage = (payload.errors ?? [m.anErrorOccurred()]).join(' ');
 			}
@@ -659,7 +725,7 @@
 								<i class="fa-solid fa-circle text-[6px]"></i>
 								{m.unsavedChanges()}
 							</span>
-							<button type="button" class="btn preset-tonal text-sm" onclick={initGraph}>
+							<button type="button" class="btn preset-tonal text-sm" onclick={discardChanges}>
 								<i class="fa-solid fa-rotate-left mr-1"></i>
 								{m.discardChanges()}
 							</button>

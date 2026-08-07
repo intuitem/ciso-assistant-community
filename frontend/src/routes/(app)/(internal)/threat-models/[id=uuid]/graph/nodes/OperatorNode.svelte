@@ -25,7 +25,7 @@
 	{:else}
 		<button
 			type="button"
-			class="nopan nodrag h-full w-full rounded-full hover:bg-secondary-500/25"
+			class="h-full w-full cursor-grab rounded-full hover:bg-secondary-500/25 active:cursor-grabbing"
 			title={m.toggleLogicOperator()}
 			aria-label={m.toggleLogicOperator()}
 			onclick={() => editor?.toggleOperator(id)}

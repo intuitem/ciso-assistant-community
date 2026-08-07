@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
-	import ObjectPicker from './ObjectPicker.svelte';
+	import NodeLinks from './NodeLinks.svelte';
 
 	interface Props {
 		node: any | null;
@@ -98,27 +98,15 @@
 					<span class="font-semibold text-surface-700-300">{m.threatModelHighlightNode()}</span>
 				</label>
 
-				<ObjectPicker
-					label={m.assets()}
-					endpoint="assets"
-					disabled={readonly}
-					value={data.assets ?? []}
-					onChange={(ids) => onUpdate({ assets: ids })}
-				/>
-				<ObjectPicker
-					label={m.appliedControls()}
-					endpoint="applied-controls"
-					disabled={readonly}
-					value={data.appliedControls ?? []}
-					onChange={(ids) => onUpdate({ appliedControls: ids })}
-				/>
-				<ObjectPicker
-					label={m.vulnerabilities()}
-					endpoint="vulnerabilities"
-					disabled={readonly}
-					value={data.vulnerabilities ?? []}
-					onChange={(ids) => onUpdate({ vulnerabilities: ids })}
-				/>
+				{#key node.id}
+					<NodeLinks
+						assets={data.assets ?? []}
+						appliedControls={data.appliedControls ?? []}
+						vulnerabilities={data.vulnerabilities ?? []}
+						{readonly}
+						onUpdate={(patch) => onUpdate(patch)}
+					/>
+				{/key}
 			</div>
 		{/if}
 	{/if}
