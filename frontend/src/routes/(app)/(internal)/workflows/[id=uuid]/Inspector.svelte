@@ -223,7 +223,9 @@
 		const type = actionConfig.type;
 		const defaults: any = ACTION_CONFIG_DEFAULTS[type] ?? {};
 		for (const [key, value] of Object.entries(defaults)) {
-			if (actionConfig[key] === undefined) actionConfig[key] = value;
+			// Clone: the nested literals are shared, and bindings mutate them in
+			// place, so two nodes of the same type would edit one object.
+			if (actionConfig[key] === undefined) actionConfig[key] = structuredClone(value);
 		}
 		onChange();
 	}
