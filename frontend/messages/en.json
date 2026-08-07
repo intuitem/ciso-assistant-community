@@ -4622,6 +4622,7 @@
 	"viewValidationflow": "View validation flow",
 	"viewWebhookendpoint": "View webhook endpoint",
 	"cascadeDeleteWarning": "Warning: Deleting this will also permanently delete {count} related object(s):",
+	"cascadeBlockedWarning": "This cannot be deleted: {count} object(s) still reference it. Delete or reassign them first.",
 	"errorFetching": "Unable to load cascade information. Please try again.",
 	"cascadeAffectedNotice": [
 		{
@@ -5674,5 +5675,18 @@
 	"importTemplatesSingleNote": "Importing just one template? It's quicker to create it directly from the Templates list.",
 	"unpublishedDocumentsNotice": "{count} document(s) drafted but not yet published — visible in the manage view.",
 	"authored": "Authored",
-	"uploaded": "Uploaded"
+	"uploaded": "Uploaded",
+	"selectAnOption": "Select an option",
+	"assetClasses": "Asset classes",
+	"parentAssetClass": "Parent class",
+	"errorAssetClassGraphMustNotContainCycles": "The asset class tree must not contain cycles.",
+	"builtinAssetClassHelpText": "Built-in classes are provided with the product: they can be hidden, but not renamed or deleted.",
+	"hiddenAssetClassHelpText": "Hidden classes stay listed here but are no longer offered when classifying an asset.",
+	"assetsTree": "Assets by class",
+	"unclassifiedAssets": "Unclassified",
+	"hideEmptyClasses": "Hide empty classes",
+	"loadMoreAssets": "Load more",
+	"noAssetsInClass": "No assets directly in this class.",
+	"createMissingAssetClasses": "Create missing asset classes",
+	"createMissingAssetClassesHelpText": "Create the custom asset classes referenced by the import. They are added to the global catalogue and become visible to every user."
 }

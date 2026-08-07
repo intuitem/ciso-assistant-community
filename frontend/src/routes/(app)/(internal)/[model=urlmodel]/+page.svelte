@@ -419,6 +419,13 @@
 								{/if}
 								{#if URLModel === 'assets'}
 									<Anchor
+										href="assets/tree/"
+										class="inline-block p-3 btn-mini-quaternary w-12 focus:relative"
+										title={m.assetsTree()}
+										label={m.assetsTree()}
+										data-testid="tree-button"><i class="fa-solid fa-sitemap"></i></Anchor
+									>
+									<Anchor
 										href="assets/graph/"
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 										title={m.exploreButton()}
