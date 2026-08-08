@@ -89,7 +89,7 @@ class TestRootFolder:
 
         try:
             root_folder.delete()
-        except Exception:
+        except Folder.InconsistencyError:
             pass
 
         assert Folder.objects.filter(id=root_folder.id).exists(), (
