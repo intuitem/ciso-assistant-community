@@ -59,8 +59,6 @@ class TestRootFolder:
             root_folder.save()
         except Folder.InconsistencyError:
             return
-        except Exception:
-            pass
 
         assert root_folder.builtin is True, (
             "The root folder MUST be considered as builtin."
