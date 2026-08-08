@@ -240,7 +240,7 @@ export function normalizeSearchString(str: string): string {
 		.toLowerCase()
 		.normalize('NFD') // Decompose accented characters
 		.replace(/\p{Diacritic}/gu, '') // Remove combining marks (diacritics)
-		.replace(/[^\w\s-]/g, ' ') // Replace special chars with spaces
+		.replace(/[^\p{L}\p{N}\s-]/gu, ' ') // Replace special chars with spaces (unicode-aware, keeps e.g. Cyrillic)
 		.replace(/\s+/g, ' ') // Collapse multiple spaces
 		.trim();
 }
