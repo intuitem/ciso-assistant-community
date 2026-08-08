@@ -354,6 +354,8 @@ class Folder(NameDescriptionMixin):
                 super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
+        if self.content_type == Folder.ContentType.ROOT:
+            raise Folder.InconsistencyError("The root folder can't be deleted.")
         super().delete(*args, **kwargs)
 
     def get_sub_folders(self, include_self: bool = False) -> QuerySet[Folder]:
