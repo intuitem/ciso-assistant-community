@@ -138,20 +138,15 @@
 
 	const inputId = `form-input-${field.replaceAll('_', '-')}`;
 
-	// Patch svelte-multiselect's internal DOM (it exposes no props for these): name
-	// the role="searchbox" wrapper and re-role its chips <ul>, which holds the <input>.
+	// svelte-multiselect ≥11.8 puts our `id` on its role="combobox" <input>, so a
+	// visible <label for={inputId}> names it natively. With no visible <label>
+	// (e.g. column filters), patch an aria-label onto the input — the lib exposes
+	// no prop for it.
 	let outerDiv: HTMLElement | null = $state(null);
 	$effect(() => {
-		if (!outerDiv) return;
-		const a11yName = label?.trim() || placeholder?.trim() || field.replaceAll('_', ' ');
-		if (!outerDiv.getAttribute('aria-label')) outerDiv.setAttribute('aria-label', a11yName);
-		outerDiv.querySelector('ul.selected')?.setAttribute('role', 'group');
-		// No visible <label> (e.g. column filters) — name the input directly.
-		if (label === undefined) {
-			outerDiv
-				.querySelector('ul.selected input:not([aria-hidden])')
-				?.setAttribute('aria-label', a11yName);
-		}
+		if (!outerDiv || label !== undefined) return;
+		const a11yName = placeholder?.trim() || field.replaceAll('_', ' ');
+		outerDiv.querySelector('input[role="combobox"]')?.setAttribute('aria-label', a11yName);
 	});
 
 	if (translateOptions) {
