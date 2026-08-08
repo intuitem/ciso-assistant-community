@@ -83,8 +83,7 @@
 						rows="3"
 						disabled={readonly}
 						value={data.description ?? ''}
-						oninput={(e) => onUpdate({ description: e.currentTarget.value })}
-					></textarea>
+						oninput={(e) => onUpdate({ description: e.currentTarget.value })}></textarea>
 				</label>
 
 				<label class="flex items-center gap-2 text-xs">

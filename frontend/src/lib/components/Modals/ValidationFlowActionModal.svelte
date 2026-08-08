@@ -91,8 +91,7 @@
 					bind:value={notes}
 					class="textarea w-full"
 					rows={4}
-					placeholder={m.enterYourObservation()}
-				></textarea>
+					placeholder={m.enterYourObservation()}></textarea>
 			</div>
 
 			{#if errorMessage}

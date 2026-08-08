@@ -770,8 +770,7 @@
 							class="drawer-md-edit"
 							bind:value={drawerDescription}
 							onblur={saveDescription}
-							placeholder={m.markdownPlaceholder()}
-						></textarea>
+							placeholder={m.markdownPlaceholder()}></textarea>
 						<p class="drawer-md-hint">
 							{drawerSaving ? m.saving() : `${m.savesOnBlur()} ${m.changesAutoPersisted()}`}
 						</p>

@@ -393,8 +393,7 @@
 												'description',
 												e.currentTarget.value
 											)
-										)}
-								></textarea>
+										)}></textarea>
 							</div>
 						</div>
 
@@ -452,8 +451,7 @@
 													'annotation',
 													e.currentTarget.value
 												)
-											)}
-									></textarea>
+											)}></textarea>
 								</div>
 							</div>
 						{/if}
@@ -492,8 +490,7 @@
 													'typical_evidence',
 													e.currentTarget.value
 												)
-											)}
-									></textarea>
+											)}></textarea>
 								</div>
 							</div>
 						{/if}
@@ -753,8 +750,7 @@
 							rows="3"
 							use:autogrowAction
 							class="w-full text-xs text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
-							onblur={(e) => saveField('description', e.currentTarget.value || null)}
-						></textarea>
+							onblur={(e) => saveField('description', e.currentTarget.value || null)}></textarea>
 					</div>
 
 					<!-- Advanced fields toggle -->
@@ -807,8 +803,7 @@
 									rows="2"
 									use:autogrowAction
 									class="w-full text-xs text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
-									onblur={(e) => saveField('annotation', e.currentTarget.value || null)}
-								></textarea>
+									onblur={(e) => saveField('annotation', e.currentTarget.value || null)}></textarea>
 							</div>
 							{#if node.node.assessable}
 								<div>

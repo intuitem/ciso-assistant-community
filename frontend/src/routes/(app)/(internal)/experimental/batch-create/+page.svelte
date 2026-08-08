@@ -247,8 +247,7 @@ Loss of customer trust</pre>
 					onkeydown={handleTextareaKeydown}
 					class="input mt-1.5 w-full rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm font-mono"
 					rows="15"
-					required
-				></textarea>
+					required></textarea>
 				<p class="text-sm mt-1">
 					{itemsText.split('\n').filter((line) => line.trim()).length}
 					{typeLabels[selectedType].plural.toLowerCase()} to create

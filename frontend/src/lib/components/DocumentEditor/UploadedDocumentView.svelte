@@ -311,8 +311,7 @@
 						bind:value={reviewerComments}
 						class="input w-full text-sm"
 						rows="2"
-						placeholder={m.addReviewerComments()}
-					></textarea>
+						placeholder={m.addReviewerComments()}></textarea>
 				</label>
 			</div>
 		{/if}

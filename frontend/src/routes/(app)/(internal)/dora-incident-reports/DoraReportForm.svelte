@@ -724,8 +724,7 @@
 								id="ioc"
 								bind:value={incidentType.indicatorsOfCompromise}
 								class="textarea w-full mt-1"
-								rows="3"
-							></textarea>
+								rows="3"></textarea>
 						</div>
 					{/if}
 				</div>
@@ -765,8 +764,7 @@
 									<textarea
 										bind:value={criterion.memberStatesImpactTypeDescription}
 										class="textarea w-full mt-1"
-										rows="2"
-									></textarea>
+										rows="2"></textarea>
 								</div>
 							{:else if criterion.classificationCriterion === 'data_losses'}
 								<div>
@@ -776,8 +774,7 @@
 									<textarea
 										bind:value={criterion.dataLossesDescription}
 										class="textarea w-full mt-1"
-										rows="2"
-									></textarea>
+										rows="2"></textarea>
 								</div>
 							{:else if criterion.classificationCriterion === 'reputational_impact'}
 								<div>
@@ -787,8 +784,7 @@
 									<textarea
 										bind:value={criterion.reputationalImpactDescription}
 										class="textarea w-full mt-1"
-										rows="2"
-									></textarea>
+										rows="2"></textarea>
 								</div>
 							{:else if criterion.classificationCriterion === 'economic_impact'}
 								<div>
@@ -1066,8 +1062,7 @@
 								id="infraDesc"
 								bind:value={impactAssessment.affectedInfrastructureComponents}
 								class="textarea w-full mt-1"
-								rows="2"
-							></textarea>
+								rows="2"></textarea>
 						</div>
 					{/if}
 				</div>

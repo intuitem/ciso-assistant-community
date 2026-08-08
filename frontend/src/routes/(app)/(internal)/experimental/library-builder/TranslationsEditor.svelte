@@ -99,8 +99,7 @@
 								class="textarea text-sm"
 								rows="2"
 								value={translations?.[code]?.[field.key] ?? ''}
-								oninput={(e) => setValue(code, field.key, e.currentTarget.value)}
-							></textarea>
+								oninput={(e) => setValue(code, field.key, e.currentTarget.value)}></textarea>
 						{:else}
 							<input
 								class="input text-sm"

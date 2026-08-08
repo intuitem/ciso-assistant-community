@@ -290,16 +290,14 @@
 								placeholder=""
 								class="input w-full {_class}"
 								{disabled}
-								bind:value={internalAnswers[urn]}
-							></textarea>
+								bind:value={internalAnswers[urn]}></textarea>
 						{:else}
 							<div>
 								<textarea
 									placeholder=""
 									class="input w-full {_class}"
 									{disabled}
-									bind:value={questionBuffers[urn]}
-								></textarea>
+									bind:value={questionBuffers[urn]}></textarea>
 								{#if !disabled && questionBuffers[urn] !== (internalAnswers[urn] || '')}
 									<button
 										class="rounded-md w-8 h-8 border shadow-lg hover:bg-green-300 hover:text-green-500 duration-300"

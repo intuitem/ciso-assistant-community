@@ -1218,8 +1218,7 @@
 					class="textarea w-full"
 					rows="4"
 					placeholder={m.reviewerObservationPlaceholder()}
-					bind:value={reviewerObservationText}
-				></textarea>
+					bind:value={reviewerObservationText}></textarea>
 			</div>
 			<div class="p-4 border-t bg-surface-50-950 rounded-b-lg flex gap-2">
 				<button

@@ -130,8 +130,7 @@
 					name="observation"
 					class="textarea w-full mt-1"
 					rows="2"
-					value={data.run.observation ?? ''}
-				></textarea>
+					value={data.run.observation ?? ''}></textarea>
 			</div>
 			<div class="flex items-center gap-3 flex-wrap">
 				{#if data.run.attachment}

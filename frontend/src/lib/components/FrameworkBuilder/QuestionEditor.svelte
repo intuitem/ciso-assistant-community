@@ -245,8 +245,7 @@
 								'translations',
 								withTranslation(question.translations, lang, 'text', e.currentTarget.value)
 							);
-						}}
-					></textarea>
+						}}></textarea>
 				</div>
 			{:else}
 				<textarea
@@ -256,8 +255,7 @@
 					class="input w-full text-sm border border-surface-200-800 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
 					onblur={(e) => {
 						saveField('text', e.currentTarget.value);
-					}}
-				></textarea>
+					}}></textarea>
 			{/if}
 
 			<!-- Metadata row -->

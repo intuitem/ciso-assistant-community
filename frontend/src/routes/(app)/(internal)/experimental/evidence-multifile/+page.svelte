@@ -1179,8 +1179,7 @@
 				<textarea
 					bind:value={draftObservation}
 					rows="2"
-					class="mt-1 w-full border rounded px-2 py-1.5 text-sm"
-				></textarea>
+					class="mt-1 w-full border rounded px-2 py-1.5 text-sm"></textarea>
 			</label>
 
 			<!-- Preview -->

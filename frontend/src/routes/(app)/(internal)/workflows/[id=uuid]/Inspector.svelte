@@ -1255,8 +1255,7 @@
 									class="input w-full text-sm"
 									rows="2"
 									bind:value={actionConfig.fields[field]}
-									oninput={onChange}
-								></textarea>
+									oninput={onChange}></textarea>
 							{:else}
 								<input
 									type="text"
@@ -1327,8 +1326,7 @@
 							class="textarea text-xs font-mono w-full"
 							rows="6"
 							bind:value={readFilterRawJson}
-							oninput={syncReadRawFilters}
-						></textarea>
+							oninput={syncReadRawFilters}></textarea>
 						{#if readFilterRawError}
 							<p class="text-[10px] text-error-500">{m.invalidFieldFilters()}</p>
 						{/if}
@@ -1540,8 +1538,7 @@
 							class="input w-full text-sm font-mono"
 							rows="3"
 							bind:value={actionConfig.body}
-							oninput={onChange}
-						></textarea>
+							oninput={onChange}></textarea>
 					</label>
 					<label>
 						{@render fieldLabel(m.httpTimeout())}
@@ -1583,8 +1580,7 @@
 							class="input w-full text-sm"
 							rows="3"
 							bind:value={actionConfig.body}
-							oninput={onChange}
-						></textarea>
+							oninput={onChange}></textarea>
 					</label>
 				{:else if actionConfig.type === 'provision_folder'}
 					<label>
@@ -1905,8 +1901,7 @@
 								class="textarea text-xs font-mono w-full"
 								rows="6"
 								bind:value={filterRawJson}
-								oninput={syncRawFilters}
-							></textarea>
+								oninput={syncRawFilters}></textarea>
 						</label>
 						{#if filterRawError}
 							<p class="text-[10px] text-error-500">{m.invalidFieldFilters()}</p>
