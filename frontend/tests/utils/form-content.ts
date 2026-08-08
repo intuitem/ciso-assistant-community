@@ -96,10 +96,10 @@ export class FormContent {
 						if (
 							(await field.locator.getByRole('option').isVisible()) &&
 							(await field.locator
-								.getByRole('searchbox')
+								.locator('div.multiselect')
 								.evaluate((el) => el.classList.contains('disabled')))
 						) {
-							await expect(field.locator.getByRole('searchbox')).toContainText(values[key]);
+							await expect(field.locator.locator('div.multiselect')).toContainText(values[key]);
 						} else {
 							if (typeof values[key] === 'object' && 'request' in values[key]) {
 								const responsePromise = this.page.waitForResponse(
@@ -116,7 +116,7 @@ export class FormContent {
 								const optionLocator = this.optionLocator(field, values[key]);
 								// If the option isn't immediately visible, type to trigger lazy search
 								if (!(await optionLocator.isVisible())) {
-									await field.locator.getByRole('textbox').fill(values[key]);
+									await field.locator.getByRole('combobox').fill(values[key]);
 								}
 								await expect(optionLocator).toBeVisible({ timeout: 10_000 });
 								await optionLocator.click();
@@ -130,7 +130,7 @@ export class FormContent {
 						const optionLocator = this.optionLocator(field, val);
 						// If the option isn't immediately visible, type to trigger lazy search
 						if (!(await optionLocator.isVisible())) {
-							await field.locator.getByRole('textbox').fill(val);
+							await field.locator.getByRole('combobox').fill(val);
 						}
 						await expect(optionLocator).toBeVisible({ timeout: 10_000 });
 						await optionLocator.click();
@@ -138,7 +138,7 @@ export class FormContent {
 					if (
 						(await field.locator.isEnabled()) &&
 						!(await field.locator
-							.getByRole('searchbox')
+							.locator('div.multiselect')
 							.evaluate((el) => el.classList.contains('disabled')))
 					) {
 						await field.locator.press('Escape');
