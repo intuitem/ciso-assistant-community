@@ -3,11 +3,12 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		%sveltekit.head%
 		<style>
 			.scrollbar {
 				overflow-y: scroll;
-				scrollbar-color: #694998 transparent;
+				scrollbar-color: var(--color-primary-600, #694998) transparent;
 				scrollbar-width: thin;
 			}
 
@@ -28,13 +29,13 @@
 			.scrollbar::-webkit-scrollbar-thumb {
 				margin-top: 22px;
 				margin-bottom: 22px;
-				background: #694998;
+				background: var(--color-primary-600, #694998);
 				border-radius: 100vh;
-				border: 10px solid #2f2a89;
+				border: 10px solid var(--color-primary-800, #2f2a89);
 			}
 
 			.scrollbar::-webkit-scrollbar-thumb:hover {
-				background: #563c81;
+				background: var(--color-primary-700, #563c81);
 			}
 		</style>
 		<script>

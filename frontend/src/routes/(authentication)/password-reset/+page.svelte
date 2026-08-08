@@ -18,7 +18,7 @@
 <div class="flex mx-auto justify-center items-center h-screen w-screen bg-surface-200-800">
 	<div class="absolute top-5 left-5">
 		<div class="flex flex-row w-full space-x-4 pb-3">
-			<Logo />
+			<Logo variant="full" height={40} />
 		</div>
 	</div>
 	<div class="flex items-center justify-center p-10 space-x-4 w-full">
