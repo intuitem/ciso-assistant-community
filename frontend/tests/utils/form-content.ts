@@ -94,10 +94,9 @@ export class FormContent {
 				case FormFieldType.SELECT_AUTOCOMPLETE:
 					await expect(async () => {
 						if (
-							(await field.locator.getByRole('option').isVisible()) &&
-							(await field.locator
+							await field.locator
 								.locator('div.multiselect')
-								.evaluate((el) => el.classList.contains('disabled')))
+								.evaluate((el) => el.classList.contains('disabled'))
 						) {
 							await expect(field.locator.locator('div.multiselect')).toContainText(values[key]);
 						} else {
