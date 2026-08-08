@@ -31,9 +31,15 @@
 - [x] Nome comercial decidido: **CISO TSI**
 - [x] `frontend/messages/*.json` (25 locales, 198 ocorrências) trocado para "CISO TSI"
 - [x] 6 componentes Svelte hardcoded trocados para "CISO TSI"
-- [x] `docs/plans/*.md` atualizados para referenciar "CISO TSI" como nome do produto
-- [ ] Identidade visual: novo logo e paleta de cores (design gráfico, não iniciado)
-- [ ] `README.md` principal e demais referências fora do escopo aprovado nesta rodada (CI/CD, packaging, `product-docs/`, conectores)
+- [x] `docs/plans/*.md` atualizados para referenciar "CISO TSI" como nome do produto (commit `8c952ef59`)
+- [x] Nota de identificação de fork adicionada ao `README.md` principal (não reformulação completa — decisão deliberada)
+- [x] Identidade visual: 3 candidatos de ícone comparados num artifact (legibilidade testada em 16/24px) → escolhido monograma "TSI" em círculo azul
+- [x] Paleta retonalizada (`ciso-theme.css`, hue shift +4°/−3° preservando lightness/chroma)
+- [x] `Logo.svelte`: variant `'icon'`/`'full'` (lockup ícone + "CISO TSI"), aplicado nas 4 páginas de autenticação
+- [x] Favicon SVG novo + `<link rel="icon">` em `app.html`; 3 cores hardcoded do scrollbar trocadas para os tokens retonalizados
+- [x] Validado via `svelte-check` (sem erros nos arquivos alterados) + verificação visual em servidor de desenvolvimento (commit `eca758bd6`)
+- [ ] Regenerar `favicon.ico` binário (sem ferramenta de conversão de imagem disponível neste ambiente)
+- [ ] Rebuild da imagem Docker do frontend para expor o rebranding em produção (pendência compartilhada com o T2)
 
 ## Documentação (esta rodada)
 

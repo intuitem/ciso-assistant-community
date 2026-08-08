@@ -1,6 +1,6 @@
 # PLAN-BR-T4 — Rebranding visual
 
-**Status:** 🚧 Em andamento — nome comercial decidido (**CISO TSI**), licenciamento validado, troca textual concluída. Identidade visual (logo/paleta) ainda não desenhada.
+**Status:** ✅ Concluído (2026-08-08) — nome comercial decidido (**CISO TSI**), licenciamento validado, troca textual e identidade visual (ícone, lockup, paleta, favicon) implementadas e commitadas. Itens residuais fora do escopo aprovado, ver §6.
 
 ## 1. Objetivo
 
@@ -29,15 +29,29 @@ O CISO Assistant Community tem duas licenças: **AGPLv3** para tudo fora de `ent
 - 6 componentes Svelte com nome hardcoded (`login/+page.svelte`, `setup-mfa/+page.svelte`, `+layout.svelte`, `ActivateTOTPModal.svelte`, `executive-summary/+page.svelte`, `ChatWidget.svelte`) — títulos de página, issuer do TOTP/MFA, e rótulos do chat widget atualizados.
 - Documentos de planejamento (`docs/plans/*.md`) atualizados para referenciar "CISO TSI" como nome do produto, mantendo "CISO Assistant Community" onde o texto se refere factualmente ao projeto open source de origem (proveniência/licenciamento).
 
-## 5. Pendente
+## 5. Trabalho realizado (identidade visual, 2026-08-08)
 
-1. Identidade visual: novo logo (`Logo.svelte`/`ciso.svg`) e paleta de cores (`ciso-theme.css`) — trabalho de design gráfico, não coberto por esta rodada de troca textual.
-2. `README.md` principal do repositório e demais 300+ referências fora do escopo aprovado (CI/CD, packaging, conectores de terceiros, `product-docs/`) — deliberadamente não tocadas nesta rodada; decisão de negócio separada sobre se/quando estender o rebranding a essas áreas.
+Sessão de brainstorm dedicada (design lead → 3 candidatos de mark comparados visualmente num artifact, com teste de legibilidade em escala real de favicon 16/24px) resultou em:
+
+- **Paleta**: retonalização do roxo/azul do tema atual (Skeleton UI, `oklch`) — hue shift de +4° no primário e −3° no secundário, mantendo lightness/chroma originais (preserva o ajuste de acessibilidade/contraste já feito). `frontend/ciso-theme.css`.
+- **Ícone**: monograma "TSI" num círculo azul (`#1E4FD8`) — candidato "B" do comparativo, escolhido por manter a melhor legibilidade em 16px entre os 3 testados. `frontend/src/lib/assets/ciso.svg`.
+- **Lockup**: `Logo.svelte` ganhou um prop `variant: 'icon' | 'full'` — `'icon'` (padrão, compatível com todos os usos existentes, incluindo a sidebar) e `'full'` (ícone + "CISO TSI" por extenso), aplicado nas 4 páginas de autenticação (login, first-connexion, password-reset ×2).
+- **Favicon**: `frontend/static/favicon.svg` novo, referenciado via `<link rel="icon">` em `app.html`. O `.ico` binário não pôde ser regenerado neste ambiente (sem ferramenta de conversão de imagem disponível) — fica como pendência técnica menor.
+- **Scrollbar**: as 3 cores hardcoded em `app.html` (`#694998` etc.) trocadas para referenciar os tokens retonalizados do tema.
+- Validado via `svelte-check` (nenhum erro introduzido nos arquivos alterados) e verificação visual ao vivo em servidor de desenvolvimento (login renderiza o lockup corretamente).
+- Commit `eca758bd6`.
+
+## 6. Pendente
+
+1. Regenerar o `favicon.ico` binário (precisa de ferramenta de conversão de imagem/design, não disponível neste ambiente).
+2. `README.md` principal do repositório recebeu apenas uma nota de identificação do fork (não uma reformulação completa) — e as demais 300+ referências fora do escopo aprovado (CI/CD, packaging, conectores de terceiros, `product-docs/`) seguem deliberadamente não tocadas; decisão de negócio separada sobre se/quando estender o rebranding a essas áreas.
 3. Antes do lançamento comercial: implementar o mecanismo de disponibilização de código-fonte exigido pela AGPL (§3).
+4. Rebuild da imagem Docker do frontend (pendência compartilhada com o T2) — o ambiente rodando via `docker-compose` ainda serve a imagem pré-compilada com a marca antiga, então o rebranding só é visível rodando o frontend a partir do código-fonte até que a imagem seja reconstruída.
 
-## 6. Critérios de aceite
+## 7. Critérios de aceite
 
 1. Nome comercial decidido e documentado: **CISO TSI**. ✅
-2. Licenciamento validado, sem bloqueio para a troca textual. ✅
+2. Licenciamento validado, sem bloqueio para a troca textual e visual. ✅
 3. Nenhuma referência textual a "CISO Assistant" visível ao usuário final no escopo de docs/plans + UI + i18n. ✅
-4. Identidade visual (logo, paleta) redesenhada. ⬜ Pendente — requer sessão de design dedicada.
+4. Identidade visual (ícone, lockup, paleta, favicon) implementada e validada. ✅
+5. Favicon binário `.ico` regenerado. ⬜ Pendente — requer ferramenta de imagem.

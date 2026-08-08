@@ -1,6 +1,6 @@
 # PLAN-BR-MASTER — Tropicalização: CISO Assistant → CISO TSI
 
-**Status:** 📋 Proposto (2026-08-07)
+**Status:** ✅ Concluído (2026-08-08) — T1–T4 entregues
 **Prioridade:** Alta
 **Módulos impactados:** `backend/library/libraries/` (conteúdo), `frontend/messages/` (i18n), `frontend/src/lib/assets/` + `frontend/src/lib/components/Logo/` + `frontend/ciso-theme.css` (marca), licenciamento (a validar)
 
@@ -22,10 +22,14 @@ Transformar o CISO Assistant Community (GRC open source, francês/inglês) em **
 - **T2 — i18n pt-BR**: 100% das ~5.490 strings de UI traduzidas para português brasileiro (partiu de 27,7% de cobertura).
 
 - **T3 — Maturidade de TSI + Gestão de Terceiros**: jornada guiada única, adaptada do preset NIST CSF 2.0 existente (que já usa o conceito de *Tiers* = maturidade), com a etapa de terceiros aprofundada usando o aparato completo de TPRM.
+- **T4 — Rebranding visual**: nome comercial (**CISO TSI**), troca textual (i18n + UI) e identidade visual (ícone, lockup, paleta retonalizada, favicon) implementados.
 
-### 2.2 Em desenho / a fazer
+### 2.2 Pendências residuais (fora do escopo desta rodada)
 
-- **T4 — Rebranding visual**: nome comercial decidido (**CISO TSI**) e troca textual concluída; falta identidade visual (logo, paleta de cores).
+- Regenerar o `favicon.ico` binário (sem ferramenta de conversão de imagem disponível).
+- Rebuild da imagem Docker do frontend para expor o rebranding/i18n em produção.
+- Mecanismo de disponibilização de código-fonte exigido pela AGPL, antes do lançamento comercial como SaaS pago.
+- Extensão do rebranding textual às ~300 referências fora do escopo aprovado (CI/CD, packaging, `product-docs/`, conectores de terceiros) — decisão de negócio separada.
 
 ### 2.3 Fora do escopo (por ora)
 
@@ -59,7 +63,7 @@ frontend/src/lib/assets/ciso.svg   ── logo (via Logo.svelte) ── frontend
 1. Produto carrega em pt-BR sem strings em inglês nas telas principais (T2 — já atingido).
 2. Cliente brasileiro consegue montar um programa de conformidade LGPD do zero usando apenas o preset (T1 — já validado via `PresetExecutor.apply()`).
 3. Cliente consegue, numa jornada única, avaliar maturidade interna de TI/SI e cadastrar/avaliar fornecedores críticos, sem sair do produto (T3).
-4. Nenhuma referência a "CISO Assistant" (nome) aparece para o usuário final no texto do produto (T4 — concluído); logo/paleta ainda pendentes.
+4. Nenhuma referência a "CISO Assistant" (nome) aparece para o usuário final no texto ou na identidade visual do produto (T4 — concluído).
 
 ## 6. Fases de entrega e planos
 
