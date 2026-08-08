@@ -15,6 +15,9 @@
 		.map((item) => {
 			// Check and filter the sub-items based on user permissions
 			const filteredSubItems = item.items.filter((subItem) => {
+				if (subItem.adminOnly) {
+					return Boolean(user?.is_admin);
+				}
 				if (subItem.exclude) {
 					return user?.roles?.some((role: string) => !subItem.exclude.includes(role)) ?? false;
 				} else if (subItem.permissions) {

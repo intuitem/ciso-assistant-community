@@ -740,6 +740,7 @@ export const FeatureFlagsSchema = z.object({
 	validation_flows: z.boolean().optional(),
 	focus_mode: z.boolean().optional(),
 	idp_groups: z.boolean().optional(),
+	service_accounts: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
 	audit_log_forwarding: z.boolean().optional(),
 	metrology: z.boolean().optional(),
@@ -2020,6 +2021,17 @@ export const IdPGroupSchema = z.object({
 	user_groups: z.array(z.string().uuid().optional()).optional()
 });
 
+export const ServiceAccountSchema = z.object({
+	name: z.string().min(1).max(100),
+	description: z.string().optional().nullable(),
+	authorization_mode: z.enum(['role', 'custom', 'global_admin']).default('custom'),
+	permissions: z.array(z.number()).optional(),
+	role: z.string().uuid().optional().nullable(),
+	folders: z.array(z.string().uuid()).min(1),
+	is_recursive: z.boolean().default(true),
+	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
+});
+
 const SCHEMA_MAP: Record<string, ZodSchema> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -2049,6 +2061,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'evidence-revisions': EvidenceRevisionSchema,
 	users: UserCreateSchema,
 	'idp-groups': IdPGroupSchema,
+	'service-accounts': ServiceAccountSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
 	'feature-flags': FeatureFlagsSchema,

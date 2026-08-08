@@ -6532,7 +6532,10 @@ class UserRolesOnFolderList(generics.ListAPIView):
             if uid in visible_ids and roles  # roles non-empty in raw_map
         }
 
-        return User.objects.filter(id__in=self._user_roles_map.keys())
+        # Service account users are managed via /api/iam/service-accounts/.
+        return User.objects.filter(id__in=self._user_roles_map.keys()).exclude(
+            service_account__isnull=False
+        )
 
     def get_serializer_context(self):
         ctx = super().get_serializer_context()
@@ -7600,6 +7603,10 @@ class ActorViewSet(BaseModelViewSet):
             third_parties = Actor.objects.filter(user__is_third_party=True)
             queryset = queryset.exclude(id__in=third_parties)
 
+        # Service account users are managed via /api/iam/service-accounts/
+        # and must never surface in owner/assignee pickers.
+        queryset = queryset.exclude(user__service_account__isnull=False)
+
         return queryset.order_by("type_rank", "display_name")
 
 
@@ -7629,7 +7636,10 @@ class UserViewSet(AutocompleteMixin, BaseModelViewSet):
     def get_queryset(self):
         # Use base IAM filtering
         # but ensure current user is always included
-        queryset = super().get_queryset() | User.objects.filter(pk=self.request.user.pk)
+        # Service account users are managed via /api/iam/service-accounts/.
+        queryset = (
+            super().get_queryset() | User.objects.filter(pk=self.request.user.pk)
+        ).exclude(service_account__isnull=False)
 
         # The autocomplete path serializes only id/name/email — skip the
         # user_groups prefetch so it stays lightweight at scale.
@@ -7977,6 +7987,9 @@ class RoleAssignmentViewSet(BaseModelViewSet):
     model = RoleAssignment
     ordering = ["builtin", "folder"]
     filterset_fields = ["folder"]
+
+    def get_queryset(self):
+        return super().get_queryset().exclude(user__service_account__isnull=False)
 
 
 class FolderFilter(GenericFilterSet):
