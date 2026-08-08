@@ -409,28 +409,35 @@
 
 	const filters = $derived(source?.filters ?? tableFilters);
 	const filteredFields = $derived(Object.keys(filters));
-	// Only persist filters on standalone list pages, not embedded sub-tables
+	// Column selector is offered on standalone list pages only (embedded tables
+	// pass a curated `fields` prop) -- unrelated to filter persistence below.
 	const isStandaloneTable = baseEndpoint === `/${URLModel}`;
-	const filterStoreKey = `${page.url.pathname}::${baseEndpoint}`;
-	const storedFilters = isStandaloneTable ? ($tableFilterStates[filterStoreKey] ?? {}) : {};
-	// Check if any filter-related URL params exist
-	const hasUrlFilterParams = filteredFields.some(
-		(field) => page.url.searchParams.getAll(field).length > 0
-	);
-	const filterValues: { [key: string]: any } = $state(
-		Object.fromEntries(
+	// Unique per parent object + tab (baseEndpoint carries the parent id).
+	// $derived so it updates when this instance is reused for a different
+	// object (DetailView.svelte keys tabs by model name, not by parent id).
+	const filterStoreKey = $derived(`${page.url.pathname}::${baseEndpoint}`);
+
+	function seedFilterValues() {
+		const stored = $tableFilterStates[filterStoreKey] ?? {};
+		// Check if any filter-related URL params exist
+		const hasUrlFilterParams = filteredFields.some(
+			(field) => page.url.searchParams.getAll(field).length > 0
+		);
+		return Object.fromEntries(
 			filteredFields.map((field: string) => {
 				const urlValues = page.url.searchParams.getAll(field).map((value) => ({ value }));
 				if (urlValues.length > 0) return [field, urlValues];
 				// Restore persisted filters only when no URL filter params exist at all
-				if (!hasUrlFilterParams && field in storedFilters) {
-					return [field, storedFilters[field] ?? []];
+				if (!hasUrlFilterParams && field in stored) {
+					return [field, stored[field] ?? []];
 				}
 				const defaultValue = defaultFilters[field] || [];
 				return [field, defaultValue];
 			})
-		)
-	);
+		);
+	}
+
+	const filterValues: { [key: string]: any } = $state(seedFilterValues());
 	$effect(() => onFilterChange(filterValues));
 
 	run(() => {
@@ -466,11 +473,9 @@
 			return next;
 		});
 		// untracked so resetFilters can delete the entry without retriggering us
-		if (isStandaloneTable) {
-			untrack(() => {
-				$tableFilterStates[filterStoreKey] = { ...filterValues };
-			});
-		}
+		untrack(() => {
+			$tableFilterStates[filterStoreKey] = { ...filterValues };
+		});
 		setTimeout(() => {
 			handler.invalidate();
 		}, 10);
@@ -501,6 +506,27 @@
 		resetForm: false,
 		taintedMessage: false,
 		validationMethod: 'auto'
+	});
+
+	// Re-seed filterValues + _form when the scope changes (this instance got
+	// reused for a different object) -- otherwise filters keep reading/writing
+	// under the previous object's key.
+	let previousFilterStoreKey = filterStoreKey;
+	$effect(() => {
+		const key = filterStoreKey;
+		if (key !== previousFilterStoreKey) {
+			const fresh = seedFilterValues();
+			for (const field of filteredFields) {
+				filterValues[field] = fresh[field] ?? [];
+			}
+			_form.form.update((data) => {
+				for (const field of filteredFields) {
+					data[field] = (fresh[field] ?? []).map((v: any) => v.value);
+				}
+				return data;
+			});
+		}
+		previousFilterStoreKey = key;
 	});
 
 	$effect(() => {
@@ -640,7 +666,6 @@
 			}
 			return data;
 		});
-		if (!isStandaloneTable) return;
 		await tick();
 		const next = { ...$tableFilterStates };
 		delete next[filterStoreKey];
