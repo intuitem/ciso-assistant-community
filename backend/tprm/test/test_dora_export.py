@@ -4,7 +4,7 @@ import json
 import re
 import unittest
 import zipfile
-from datetime import date
+from datetime import date, datetime
 from unittest.mock import patch
 
 from django.test import TestCase
@@ -523,6 +523,61 @@ class TestGetDoraExportMetadata(TestCase):
         )
         self.assertEqual(meta["folder_prefix"], "KBO_0123456789.CON_NBB_DOR_DORA_ROI")
         self.assertEqual(meta["entity_id"], "rs:0123456789.CON")
+
+    @patch("tprm.dora_export.datetime", wraps=datetime)
+    @patch("tprm.dora_export.date", wraps=date)
+    def test_eba_naming_uses_bafin_package_stem(self, mock_date, mock_datetime):
+        self.entity_with_auth.country = "DE"
+        mock_date.today.return_value = date(2026, 8, 3)
+        mock_datetime.now.return_value = datetime(2026, 8, 3, 12, 34, 56, 789000)
+
+        meta = dora_export.get_dora_export_metadata(
+            self.entity_with_auth, naming_convention="eba"
+        )
+
+        expected_stem = (
+            "123456789ABCDEFGHI00.IND_DE_DORA010100_DORA_2025-12-31_20260803123456789"
+        )
+        self.assertEqual(meta["folder_prefix"], expected_stem)
+        self.assertEqual(meta["filename"], f"{expected_stem}.zip")
+        self.assertNotIn("LEI_", meta["filename"])
+        self.assertNotIn("T", meta["filename"])
+        self.assertNotIn("z", meta["filename"])
+
+    @patch("tprm.dora_export.datetime", wraps=datetime)
+    @patch("tprm.dora_export.date", wraps=date)
+    def test_eba_naming_preserves_con_level(self, mock_date, mock_datetime):
+        self.entity_with_auth.country = "DE"
+        mock_date.today.return_value = date(2026, 8, 3)
+        mock_datetime.now.return_value = datetime(2026, 8, 3, 12, 34, 56, 789000)
+
+        meta = dora_export.get_dora_export_metadata(
+            self.entity_with_auth, level="CON", naming_convention="eba"
+        )
+
+        self.assertEqual(
+            meta["filename"],
+            "123456789ABCDEFGHI00.CON_DE_DORA010100_DORA_"
+            "2025-12-31_20260803123456789.zip",
+        )
+
+    @patch("tprm.dora_export.datetime", wraps=datetime)
+    @patch("tprm.dora_export.date", wraps=date)
+    def test_eba_naming_normalizes_country(self, mock_date, mock_datetime):
+        mock_date.today.return_value = date(2026, 8, 3)
+        mock_datetime.now.return_value = datetime(2026, 8, 3, 12, 34, 56, 789000)
+
+        self.entity_with_auth.country = None
+        missing_country = dora_export.get_dora_export_metadata(
+            self.entity_with_auth, naming_convention="eba"
+        )
+        self.entity_with_auth.country = "deu"
+        long_country = dora_export.get_dora_export_metadata(
+            self.entity_with_auth, naming_convention="eba"
+        )
+
+        self.assertIn(".IND_XX_DORA010100", missing_country["filename"])
+        self.assertIn(".IND_DE_DORA010100", long_country["filename"])
 
 
 # ===========================================================================
