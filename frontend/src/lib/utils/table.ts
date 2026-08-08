@@ -2070,12 +2070,22 @@ export const listViewFields = {
 		body: ['version_number', 'status_display', 'author', 'change_summary', 'created_at']
 	},
 	'document-containers': {
-		head: ['refId', 'name', 'documentType', 'status', 'classification', 'domain', 'labels'],
+		head: [
+			'refId',
+			'name',
+			'documentType',
+			'status',
+			'reviewProgress',
+			'classification',
+			'domain',
+			'labels'
+		],
 		body: [
 			'ref_id',
 			'name',
 			'document_type',
 			'status',
+			'progress',
 			'classification',
 			'folder',
 			'filtering_labels'
