@@ -96,11 +96,23 @@ export class FormContent {
 						// count() doesn't wait: folder fields render a FolderTreeSelect with no
 						// div.multiselect, and evaluate() would block on it until the toPass timeout.
 						const multiselect = field.locator.locator('div.multiselect');
+						const expected =
+							typeof values[key] === 'object' && 'request' in values[key]
+								? values[key].value
+								: values[key];
+						// Skip interaction when the field is disabled (auto-selected single option)
+						// or already holds the value (preset via initialData): the expected entry
+						// renders as a chip, not a dropdown option, so click-and-pick can't find it.
 						if (
 							(await multiselect.count()) > 0 &&
-							(await multiselect.evaluate((el) => el.classList.contains('disabled')))
+							(await multiselect.evaluate(
+								(el, text) =>
+									el.classList.contains('disabled') ||
+									(el.querySelector('ul.selected')?.textContent ?? '').includes(text),
+								expected
+							))
 						) {
-							await expect(multiselect).toContainText(values[key]);
+							await expect(multiselect).toContainText(expected);
 						} else {
 							if (typeof values[key] === 'object' && 'request' in values[key]) {
 								const responsePromise = this.page.waitForResponse(
@@ -125,9 +137,20 @@ export class FormContent {
 						}
 					}).toPass({ timeout: 22_000, intervals: [500, 1000, 10_000] });
 					break;
-				case FormFieldType.SELECT_MULTIPLE_AUTOCOMPLETE:
+				case FormFieldType.SELECT_MULTIPLE_AUTOCOMPLETE: {
+					const multiEl = field.locator.locator('div.multiselect');
+					const isPreset = async (val: string) =>
+						(await multiEl.count()) > 0 &&
+						(await multiEl.evaluate(
+							(el, text) => (el.querySelector('ul.selected')?.textContent ?? '').includes(text),
+							val
+						));
 					await field.locator.click();
 					for (const val of values[key]) {
+						// Preset values (initialData) render as chips, not dropdown options — skip them
+						if (await isPreset(val)) {
+							continue;
+						}
 						const optionLocator = this.optionLocator(field, val);
 						// If the option isn't immediately visible, type to trigger lazy search
 						if (!(await optionLocator.isVisible())) {
@@ -136,7 +159,6 @@ export class FormContent {
 						await expect(optionLocator).toBeVisible({ timeout: 10_000 });
 						await optionLocator.click();
 					}
-					const multiEl = field.locator.locator('div.multiselect');
 					if (
 						(await field.locator.isEnabled()) &&
 						(await multiEl.count()) > 0 &&
@@ -145,6 +167,7 @@ export class FormContent {
 						await field.locator.press('Escape');
 					}
 					break;
+				}
 				case FormFieldType.DATE:
 					await field.locator.clear();
 				case FormFieldType.NUMBER:

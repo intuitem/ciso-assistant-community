@@ -153,7 +153,8 @@ test('ebios rm study', async ({
 				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f\-]+\/workshop-1.*/);
 			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('select-button').click();
-			await page.getByRole('combobox').click();
+			// Scoped: bare combobox is ambiguous — native <select>s (e.g. "Show entries") share the role
+			await page.getByTestId('form-input-assets').getByRole('combobox').click();
 			await page.getByRole('option', { name: `${vars.folderName}/${vars.assetName}` }).click();
 			await page.getByText(`Assets ${vars.folderName}/${vars.assetName}`).click();
 			await page.getByTestId('save-button').click();
