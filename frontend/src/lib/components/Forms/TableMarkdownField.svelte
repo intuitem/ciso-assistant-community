@@ -47,7 +47,8 @@
 			class="input w-full"
 			rows="5"
 			placeholder="You can use markdown formatting here..."
-			bind:value={editValue}></textarea>
+			bind:value={editValue}
+		></textarea>
 		<div class="flex justify-end items-center">
 			<div class="flex space-x-2">
 				<button type="button" class="btn btn-sm variant-filled-primary" onclick={preview}>

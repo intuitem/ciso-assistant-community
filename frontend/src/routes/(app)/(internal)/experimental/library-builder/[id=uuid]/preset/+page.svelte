@@ -1177,7 +1177,8 @@
 																			oninput={(e) =>
 																				updateScaffoldByIndex(idx, {
 																					description: (e.target as HTMLTextAreaElement).value
-																				})}></textarea>
+																				})}
+																		></textarea>
 																	</label>
 																	{@render scaffoldFields(scaffold, idx)}
 																</div>

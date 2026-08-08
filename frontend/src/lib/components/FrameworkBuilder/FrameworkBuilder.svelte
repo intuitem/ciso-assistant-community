@@ -390,7 +390,8 @@
 												e.currentTarget.value
 											)
 										});
-									}}></textarea>
+									}}
+								></textarea>
 							</div>
 						</div>
 					{:else}
@@ -410,7 +411,8 @@
 							class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
 							onblur={(e) => {
 								builder.updateFramework({ description: e.currentTarget.value || null });
-							}}></textarea>
+							}}
+						></textarea>
 					{/if}
 					{#if $frameworkStore.urn}
 						<button
@@ -469,7 +471,8 @@
 									class="mt-1 w-full text-sm text-surface-600-400 bg-transparent border border-surface-200-800 rounded-lg px-3 py-2 hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 									onblur={(e) => {
 										builder.updateFramework({ annotation: e.currentTarget.value || null });
-									}}></textarea>
+									}}
+								></textarea>
 							</div>
 
 							<!-- URN namespace + ref_id -->

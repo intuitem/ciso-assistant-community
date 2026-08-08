@@ -155,7 +155,8 @@
 							onblur={(e) => {
 								rules[index].expression = e.currentTarget.value;
 								persist();
-							}}></textarea>
+							}}
+						></textarea>
 					</label>
 
 					<label class="block">

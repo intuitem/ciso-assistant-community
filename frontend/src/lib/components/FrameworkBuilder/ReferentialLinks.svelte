@@ -313,7 +313,8 @@
 						class="w-full text-xs px-2 py-1 border border-surface-200-800 rounded focus:border-blue-300 focus:outline-none resize-none"
 						placeholder={m.description()}
 						rows="2"
-						bind:value={createDescription}></textarea>
+						bind:value={createDescription}
+					></textarea>
 					{#if createError}
 						<p class="text-xs text-red-600">{createError}</p>
 					{/if}

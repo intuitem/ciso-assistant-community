@@ -83,7 +83,8 @@
 			{...rest}
 			{rows}
 			{cols}
-			{disabled}></textarea>
+			{disabled}
+		></textarea>
 	</div>
 	{#if helpText}
 		<p class="text-sm text-surface-600-400 whitespace-pre-line">{helpText}</p>

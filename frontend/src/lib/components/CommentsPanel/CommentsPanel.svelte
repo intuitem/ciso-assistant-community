@@ -336,7 +336,8 @@
 										focus:border-primary-400 focus:ring-1 focus:ring-primary-200
 										transition-all duration-200"
 											rows="3"
-											bind:value={editBody}></textarea>
+											bind:value={editBody}
+										></textarea>
 										<div class="flex gap-2">
 											<button
 												type="button"
@@ -425,7 +426,8 @@
 					bind:value={newCommentBody}
 					onkeydown={handleKeydown}
 					onfocus={() => (composerFocused = true)}
-					onblur={() => (composerFocused = false)}></textarea>
+					onblur={() => (composerFocused = false)}
+				></textarea>
 				<div class="flex items-center justify-between mt-1">
 					<span class="text-[10px] text-surface-400">
 						{#if composerFocused || newCommentBody.trim()}

@@ -1374,7 +1374,8 @@
 								id="d-desc"
 								bind:value={suggestDraft.description}
 								rows="3"
-								class="mt-1 w-full rounded-lg border-surface-300-700 sm:text-sm"></textarea>
+								class="mt-1 w-full rounded-lg border-surface-300-700 sm:text-sm"
+							></textarea>
 						</div>
 						<div>
 							<label for="d-status" class="block text-xs font-medium text-surface-700-300">

@@ -244,7 +244,8 @@
 				{...rest}
 				{rows}
 				{cols}
-				{disabled}></textarea>
+				{disabled}
+			></textarea>
 		{:else}
 			<textarea
 				class="{'input ' + _class} max-h-[75dvh]"
@@ -256,7 +257,8 @@
 				{...rest}
 				{rows}
 				{cols}
-				{disabled}></textarea>
+				{disabled}
+			></textarea>
 		{/if}
 	</div>
 	{#if helpText}

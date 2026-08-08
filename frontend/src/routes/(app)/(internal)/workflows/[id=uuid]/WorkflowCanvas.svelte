@@ -2163,7 +2163,8 @@
 																varSeeds[variable.key] = e.currentTarget.value;
 																varTouched[variable.key] = true;
 															}}
-															data-testid="seed-{variable.key}"></textarea>
+															data-testid="seed-{variable.key}"
+														></textarea>
 													{:else}
 														<input
 															class="input w-full text-xs"

@@ -145,7 +145,8 @@
 							onblur={(e) => {
 								items[index].description = e.currentTarget.value;
 								persist();
-							}}></textarea>
+							}}
+						></textarea>
 					</label>
 
 					<label class="flex items-center gap-2">

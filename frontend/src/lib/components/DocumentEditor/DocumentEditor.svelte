@@ -1174,7 +1174,8 @@
 						bind:value={reviewerComments}
 						class="input w-full text-sm"
 						rows="2"
-						placeholder={m.addReviewerComments()}></textarea>
+						placeholder={m.addReviewerComments()}
+					></textarea>
 				</div>
 			</div>
 		{/if}
@@ -1393,7 +1394,8 @@
 							: ''}"
 						disabled={!canEdit}
 						placeholder={m.writeDocumentPlaceholder()}
-						spellcheck="true"></textarea>
+						spellcheck="true"
+					></textarea>
 				{/if}
 			</div>
 

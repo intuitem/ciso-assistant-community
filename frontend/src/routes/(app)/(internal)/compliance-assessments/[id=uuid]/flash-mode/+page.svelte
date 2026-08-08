@@ -500,7 +500,8 @@
 							placeholder="{m.observation()}..."
 							value={observation}
 							disabled={isReadOnly}
-							oninput={(e) => handleObservationInput(e.currentTarget.value)}></textarea>
+							oninput={(e) => handleObservationInput(e.currentTarget.value)}
+						></textarea>
 					{/if}
 				{/if}
 
