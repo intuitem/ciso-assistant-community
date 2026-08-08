@@ -126,8 +126,10 @@ class TestFolderTreeShape:
                 Folder.objects.create(name=str(content_type), parent_folder=None)
             except Folder.InconsistencyError:
                 return
-            except Exception:
-                pass
+            except Exception as exc:
+                pytest.fail(
+                    f"Unexpected exception while creating parentless folder for content_type={content_type}: {exc}"
+                )
 
             parentless_folder_count = Folder.objects.filter(parent_folder=None).count()
             assert parentless_folder_count == 1, (
