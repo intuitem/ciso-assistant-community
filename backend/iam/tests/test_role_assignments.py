@@ -430,6 +430,87 @@ class TestPermissionCheck:
             "The user shouldn't have the right to change the previous created applied control (as he doesn't have the 'change_appliedcontrol' permission)."
         )
 
+    def test_enclave_does_not_inherit_published_objects(self):
+        """
+        Ensure a user whose access is scoped to an ENCLAVE `Folder` does NOT inherit the published objects of the enclave ancestors.
+
+        Enclaves are sealed compartments for third parties (e.g. TPRM respondents) living inside a customer domain: the plain `is_published` inheritance rule MUST NOT apply to them, otherwise the third party sees every published object of the customer's domain and of the root folder.
+        """
+
+        root_folder = Folder.get_root_folder()
+        domain = Folder.objects.create(name="customer_domain")
+        enclave = Folder.objects.create(
+            name="enclave",
+            parent_folder=domain,
+            content_type=Folder.ContentType.ENCLAVE,
+        )
+
+        published_in_root = AppliedControl.objects.create(
+            name="published_in_root", folder=root_folder, is_published=True
+        )
+        published_in_domain = AppliedControl.objects.create(
+            name="published_in_domain", folder=domain, is_published=True
+        )
+        control_in_enclave = AppliedControl.objects.create(
+            name="control_in_enclave", folder=enclave, is_published=False
+        )
+
+        role = Role.objects.create(name="role")
+        role.permissions.set(
+            Permission.objects.filter(codename__in=BASIC_PERMISSION_LIST)
+        )
+
+        enclave_user = User.objects.create_user("enclave_user@gmail.com")
+        enclave_role_assignment = RoleAssignment.objects.create(
+            user=enclave_user, role=role, is_recursive=True
+        )
+        enclave_role_assignment.perimeter_folders.add(enclave)
+
+        assert (
+            RoleAssignment.is_object_accessible(
+                enclave_user, "view", AppliedControl, control_in_enclave.id
+            )
+            is True
+        ), "The enclave user should have access to the objects of its enclave."
+
+        for published_control in [published_in_root, published_in_domain]:
+            assert (
+                RoleAssignment.is_object_accessible(
+                    enclave_user, "view", AppliedControl, published_control.id
+                )
+                is False
+            ), (
+                "An enclave-scoped user MUST NOT inherit the published objects of the enclave ancestors."
+            )
+
+        enclave_user_viewable_ids = set(
+            RoleAssignment.get_viewable_object_ids(enclave_user, AppliedControl)
+        )
+        assert enclave_user_viewable_ids == {control_in_enclave.id}, (
+            "An enclave-scoped user MUST only list the objects of its enclave, not the published objects of the enclave ancestors."
+        )
+
+        # Control group: the same assignment on a non-enclave folder DOES inherit published ancestors.
+        domain_user = User.objects.create_user("domain_user@gmail.com")
+        domain_role_assignment = RoleAssignment.objects.create(
+            user=domain_user, role=role, is_recursive=False
+        )
+        domain_role_assignment.perimeter_folders.add(domain)
+
+        assert (
+            RoleAssignment.is_object_accessible(
+                domain_user, "view", AppliedControl, published_in_root.id
+            )
+            is True
+        ), (
+            "A domain-scoped user should still inherit the published objects of the domain ancestors."
+        )
+        assert published_in_root.id in set(
+            RoleAssignment.get_viewable_object_ids(domain_user, AppliedControl)
+        ), (
+            "A domain-scoped user should still list the published objects of the domain ancestors."
+        )
+
     def test_filtering_label_perms(self):
         """
         Ensure any permission on the `FilteringLabel` model result in having this permission globally.

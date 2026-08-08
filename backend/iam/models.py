@@ -1511,10 +1511,14 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             )
 
             if has_is_published_field and getattr(obj, "is_published"):
+                # Access granted on an ENCLAVE folder must not leak the published
+                # objects of its ancestors (e.g. TPRM respondents scoped to an
+                # enclave inside the customer's domain).
                 ancestor_folder_ids = (
                     Folder.objects.filter(
-                        ~Q(content_type=Folder.ContentType.ENCLAVE)
-                        & Q(descendants__in=directly_accessible_folder_id_set)
+                        descendants__in=Folder.objects.filter(
+                            id__in=directly_accessible_folder_id_set
+                        ).exclude(content_type=Folder.ContentType.ENCLAVE)
                     )
                     .values_list("id", flat=True)
                     .distinct()
@@ -1909,9 +1913,13 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         )
 
         if perm_prefix == "view" and has_is_published_field:
+            # Access granted on an ENCLAVE folder must not leak the published
+            # objects of its ancestors (e.g. TPRM respondents scoped to an
+            # enclave inside the customer's domain).
             ancestor_folder_ids = Folder.objects.filter(
-                ~Q(content_type=Folder.ContentType.ENCLAVE)
-                & Q(descendants__in=allowed_folder_ids)
+                descendants__in=Folder.objects.filter(
+                    id__in=allowed_folder_ids
+                ).exclude(content_type=Folder.ContentType.ENCLAVE)
             ).distinct()
             published_objects_query = Q(
                 **{f"{iam_folder_field}__in": ancestor_folder_ids},
