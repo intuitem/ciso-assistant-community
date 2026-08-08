@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("iam", "0024_folder_descendants"),
+        ("iam", "0025_folder_descendants"),
     ]
 
     operations = [

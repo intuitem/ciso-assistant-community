@@ -37,7 +37,7 @@ def fill_folder_descendants(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("iam", "0023_alter_folder_content_type"),
+        ("iam", "0024_serviceaccount"),
     ]
 
     operations = [
