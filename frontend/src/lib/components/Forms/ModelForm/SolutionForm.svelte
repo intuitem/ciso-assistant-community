@@ -7,6 +7,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import Score from '../Score.svelte';
 	interface Props {
 		form: SuperValidated<any>;
@@ -30,6 +31,19 @@
 	// exclusion + display in the chain editor's locked card. The editor
 	// resolves the label itself from the entity lookup it builds.
 	let directProviderId = $derived(($formData as any).provider_entity ?? null);
+
+	// DORA ICT service choices carry the stable EBA code (e.g. "eba_TA:S02") in `value`
+	// and a verbose English sentence in `label`; translate off the code since it maps
+	// cleanly to a message key while the label doesn't.
+	let doraIctServiceTypeOptions = $derived(
+		(model.selectOptions?.dora_ict_service_type ?? []).map((option) => {
+			const translatedLabel = safeTranslate(option.value);
+			return {
+				...option,
+				label: translatedLabel !== option.value ? translatedLabel : option.label
+			};
+		})
+	);
 </script>
 
 <AutocompleteSelect
@@ -106,7 +120,7 @@
 	<AutocompleteSelect
 		{form}
 		field="dora_ict_service_type"
-		options={model.selectOptions?.dora_ict_service_type}
+		options={doraIctServiceTypeOptions}
 		label={m.doraIctServiceType()}
 		cacheLock={cacheLocks['dora_ict_service_type']}
 		bind:cachedValue={formDataCache['dora_ict_service_type']}
