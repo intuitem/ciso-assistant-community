@@ -8,7 +8,7 @@ from core.permissions import IsGlobalAdmin
 from core.serializers import SerializerFactory
 from iam.models import Folder, Permission, RoleAssignment, User
 from iam.sso.models import SSOSettings
-from integrations.models import IntegrationProvider
+from integrations.models import IntegrationConfiguration, IntegrationProvider
 from core.serializers import SerializerFactory
 from django.conf import settings
 from django.http import JsonResponse
@@ -194,12 +194,26 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             settings.value = updated_value
             settings.save()
 
-        enabled_integrations = (
-            IntegrationProvider.objects.filter(is_active=True)
-            .distinct()
-            .values("id", "provider_type", "name", "configurations")
-        )
-        settings.value["enabled_integrations"] = list(enabled_integrations)
+        # Only configurations the caller can reach: the ids are consumed as a
+        # "is an integration usable here" signal, and an unscoped list handed
+        # every domain's configuration UUIDs to any authenticated user.
+        accessible_config_ids = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, IntegrationConfiguration
+        )[0]
+        settings.value["enabled_integrations"] = [
+            {
+                "id": provider.id,
+                "provider_type": provider.provider_type,
+                "name": provider.name,
+                "configurations": [
+                    str(config_id)
+                    for config_id in provider.configurations.filter(
+                        id__in=accessible_config_ids
+                    ).values_list("id", flat=True)
+                ],
+            }
+            for provider in IntegrationProvider.objects.filter(is_active=True)
+        ]
 
         return Response(GeneralSettingsSerializer(settings).data.get("value"))
 

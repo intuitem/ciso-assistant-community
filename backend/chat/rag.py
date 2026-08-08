@@ -42,13 +42,14 @@ def get_qdrant_client():
     return QdrantClient(url=QDRANT_URL)
 
 
-def get_accessible_folder_ids(user) -> list[str]:
+def get_accessible_folder_ids(user, codename: str = "view_folder") -> list[str]:
     """Get all folder IDs the user has access to, as strings for Qdrant filtering."""
     root = Folder.get_root_folder()
     folder_ids = RoleAssignment.get_accessible_folder_ids(
         folder=root,
         user=user,
         content_type=Folder.ContentType.DOMAIN,
+        codename=codename,
     )
     return [str(fid) for fid in folder_ids]
 

@@ -173,6 +173,7 @@ export const defaultLangLabels = {
 
 export function toCamelCase(str: string) {
 	if (typeof str !== 'string') return str;
+	str = str.replace(/[()]/g, ' ').replace(/\s+/g, ' ').trim();
 	str = str.charAt(0).toLowerCase() + str.slice(1);
 	return str.replace(/[_-\s]\w/g, (match) => match.charAt(1).toUpperCase());
 }
