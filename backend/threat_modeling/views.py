@@ -43,9 +43,7 @@ def _validate_related(user, parsed: dict) -> list[str]:
         if not requested:
             continue
         try:
-            accessible = set(
-                RoleAssignment.get_viewable_object_ids(user, model)
-            )
+            accessible = set(RoleAssignment.get_viewable_object_ids(user, model))
         except NotImplementedError, Permission.DoesNotExist:
             continue
         for missing in sorted(requested - accessible):
