@@ -1029,6 +1029,30 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		filters: []
 	},
+	'service-accounts': {
+		endpointUrl: 'iam/service-accounts',
+		name: 'serviceaccount',
+		localName: 'serviceAccount',
+		localNamePlural: 'serviceAccounts',
+		verboseName: 'Service account',
+		verboseNamePlural: 'Service accounts',
+		foreignKeyFields: [{ field: 'folders', urlModel: 'folders' }],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'client_id' },
+			{ field: 'secret_preview' },
+			{ field: 'is_active' },
+			{ field: 'expiry_date', type: 'date' },
+			{ field: 'is_recursive' },
+			{ field: 'folders' },
+			{ field: 'created_by' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
+		filters: []
+	},
 	'role-assignments': {
 		name: 'roleassignment',
 		localName: 'roleAssignment',

@@ -359,7 +359,7 @@ dependencies = [
     { name = "cronsim" },
     { name = "cryptography" },
     { name = "django" },
-    { name = "django-allauth", extra = ["headless", "mfa", "saml", "socialaccount"] },
+    { name = "django-allauth", extra = ["headless", "idp-oidc", "mfa", "saml", "socialaccount"] },
     { name = "django-auditlog" },
     { name = "django-filter" },
     { name = "django-rest-knox" },
@@ -424,7 +424,7 @@ requires-dist = [
     { name = "cronsim", specifier = ">=2.6,<3" },
     { name = "cryptography", specifier = ">=48.0.1" },
     { name = "django", specifier = ">=6.0.4,<7" },
-    { name = "django-allauth", extras = ["socialaccount", "saml", "mfa", "headless"], specifier = ">=65.14.1,<66" },
+    { name = "django-allauth", extras = ["socialaccount", "saml", "mfa", "headless", "idp-oidc"], specifier = ">=65.14.1,<66" },
     { name = "django-auditlog", specifier = ">=3.4.1,<4" },
     { name = "django-filter", specifier = ">=25.2,<26" },
     { name = "django-rest-knox", specifier = ">=5.0.2,<6" },
@@ -666,6 +666,10 @@ wheels = [
 
 [package.optional-dependencies]
 headless = [
+    { name = "pyjwt", extra = ["crypto"] },
+]
+idp-oidc = [
+    { name = "oauthlib" },
     { name = "pyjwt", extra = ["crypto"] },
 ]
 mfa = [
