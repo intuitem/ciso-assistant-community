@@ -165,8 +165,8 @@ class TestFolderTreeShape:
             folder1.save()
         except Folder.InconsistencyError:
             return
-        except Exception:
-            pass
+        except Exception as exc:
+            pytest.fail(f"Unexpected exception while creating ancestor cycle: {exc}")
 
         assert folder1.parent_folder != folder4, (
             "`folder4` is a descendant domain of `folder1`, therfore `folder1` MUST NOT have `folder4` as its parent (as it would create a cycle in the folder tree)."
