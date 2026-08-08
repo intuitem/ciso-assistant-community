@@ -93,12 +93,14 @@ export class FormContent {
 					break;
 				case FormFieldType.SELECT_AUTOCOMPLETE:
 					await expect(async () => {
+						// count() doesn't wait: folder fields render a FolderTreeSelect with no
+						// div.multiselect, and evaluate() would block on it until the toPass timeout.
+						const multiselect = field.locator.locator('div.multiselect');
 						if (
-							await field.locator
-								.locator('div.multiselect')
-								.evaluate((el) => el.classList.contains('disabled'))
+							(await multiselect.count()) > 0 &&
+							(await multiselect.evaluate((el) => el.classList.contains('disabled')))
 						) {
-							await expect(field.locator.locator('div.multiselect')).toContainText(values[key]);
+							await expect(multiselect).toContainText(values[key]);
 						} else {
 							if (typeof values[key] === 'object' && 'request' in values[key]) {
 								const responsePromise = this.page.waitForResponse(
@@ -134,11 +136,11 @@ export class FormContent {
 						await expect(optionLocator).toBeVisible({ timeout: 10_000 });
 						await optionLocator.click();
 					}
+					const multiEl = field.locator.locator('div.multiselect');
 					if (
 						(await field.locator.isEnabled()) &&
-						!(await field.locator
-							.locator('div.multiselect')
-							.evaluate((el) => el.classList.contains('disabled')))
+						(await multiEl.count()) > 0 &&
+						!(await multiEl.evaluate((el) => el.classList.contains('disabled')))
 					) {
 						await field.locator.press('Escape');
 					}
