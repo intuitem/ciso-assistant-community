@@ -46,8 +46,6 @@ class TestRootFolder:
             root_folder.save()
         except Folder.InconsistencyError:
             return
-        except Exception:
-            pass
 
         assert root_folder.parent_folder is None, (
             "The root folder MUST keep a NULL `parent_folder`."
