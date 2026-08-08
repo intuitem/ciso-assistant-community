@@ -292,7 +292,9 @@ test('third-party representative can fill their assigned audit', async ({
 	await test.step('check that selected evidences were updated', async () => {
 		await page.getByTestId('select-evidence-button').click();
 		await expect(page.getByTestId('modal-title')).toBeVisible();
-		await expect(page.getByRole('option').first()).toContainText(/.*tp-evidence.*/);
+		await expect(page.getByTestId('form-input-evidences').locator('div.multiselect')).toContainText(
+			/.*tp-evidence.*/
+		);
 		await page.getByTestId('cancel-button').click();
 	});
 });
