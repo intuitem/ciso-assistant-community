@@ -59,9 +59,13 @@ class SerializerFactory:
         for module_name in self.modules:
             try:
                 serializer_module = importlib.import_module(module_name)
+            except ModuleNotFoundError:
+                continue
+
+            try:
                 serializer_class = getattr(serializer_module, serializer_name)
                 return serializer_class
-            except (ModuleNotFoundError, AttributeError):
+            except AttributeError:
                 continue
 
         raise ValueError(
@@ -810,15 +814,18 @@ class AssetWriteSerializer(
             if field in data and isinstance(data[field], list):
                 converted = {"objectives": {}}
                 for item in data[field]:
-                    if isinstance(item, dict):
-                        for key, val in item.items():
-                            if isinstance(val, dict) and "value" in val:
-                                converted["objectives"][key] = val
-                            elif isinstance(val, int):
-                                converted["objectives"][key] = {
-                                    "value": val,
-                                    "is_enabled": True,
-                                }
+                    if not isinstance(item, dict):
+                        raise serializers.ValidationError({field: ["Array items must be objects."]})
+                    for key, val in item.items():
+                        if isinstance(val, dict) and "value" in val:
+                            converted["objectives"][key] = val
+                        elif isinstance(val, int):
+                            converted["objectives"][key] = {
+                                "value": val,
+                                "is_enabled": True,
+                            }
+                        else:
+                            raise serializers.ValidationError({field: [f"Unsupported value for '{key}'."]})
                 data[field] = converted
         return super().to_internal_value(data)
 
