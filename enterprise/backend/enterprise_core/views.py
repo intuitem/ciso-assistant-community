@@ -305,14 +305,22 @@ class RoleViewSet(BaseModelViewSet):
 
             user_groups = []
             role_assignments = []
+            processed_folders = []
 
             for folder in folders:
+                if (
+                    folder.content_type == Folder.ContentType.DOMAIN
+                    and not folder.create_iam_groups
+                ):
+                    continue
+
                 ug, _ = UserGroup.objects.get_or_create(
                     folder=folder,
                     name=role.name,
                     defaults={"builtin": True},
                 )
                 user_groups.append(ug)
+                processed_folders.append(folder)
 
                 role_assignments.append(
                     RoleAssignment(
@@ -326,7 +334,7 @@ class RoleViewSet(BaseModelViewSet):
             RoleAssignment.objects.bulk_create(role_assignments)
 
             # M2M must be handled after bulk_create
-            for ra, folder in zip(role_assignments, folders):
+            for ra, folder in zip(role_assignments, processed_folders):
                 ra.perimeter_folders.add(folder)
 
     def perform_update(self, serializer):
