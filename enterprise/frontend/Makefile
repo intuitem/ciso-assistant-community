@@ -24,7 +24,7 @@ ensure-pnpm:
 
 pre-build: ensure-pnpm
 	@mkdir -p $(BUILD_DIR)
-	@rsync -av --exclude=$(COMMUNITY_DIR)/build/ --exclude=node_modules/  $(COMMUNITY_DIR) $(BUILD_DIR)
+	@rsync -av --exclude=/frontend/build/ --exclude=/frontend/.svelte-kit/ --exclude=node_modules/  $(COMMUNITY_DIR) $(BUILD_DIR)
 	@rsync -avI --exclude=.build --exclude=build --exclude=node_modules --exclude=package.json --exclude=Makefile --exclude=Dockerfile --exclude=README.md $(ENTERPRISE_DIR) $(BUILD_DIR)
 	@$(PM) install --frozen-lockfile -C $(FRONTEND_DIR)
 
