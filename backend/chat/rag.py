@@ -7,7 +7,8 @@ and context formatting.
 import structlog
 import os
 import time
-from typing import Any
+
+from django.contrib.auth.models import Permission
 
 from iam.models import Folder, RoleAssignment
 from chat.embedding_models import RERANKER_MODEL as _RERANKER_MODEL
@@ -44,14 +45,16 @@ def get_qdrant_client():
 
 def get_accessible_folder_ids(user, codename: str = "view_folder") -> list[str]:
     """Get all folder IDs the user has access to, as strings for Qdrant filtering."""
-    root = Folder.get_root_folder()
-    folder_ids = RoleAssignment.get_accessible_folder_ids(
-        folder=root,
-        user=user,
+
+    permission = Permission.objects.get(codename=codename)
+
+    folder_id_queryset = RoleAssignment.get_allowed_folder_ids(user, permission)
+    normal_domain_ids = Folder.objects.filter(
+        id__in=folder_id_queryset,
         content_type=Folder.ContentType.DOMAIN,
-        codename=codename,
-    )
-    return [str(fid) for fid in folder_ids]
+    ).values_list("id", flat=True)
+
+    return [str(folder_id) for folder_id in normal_domain_ids]
 
 
 def indexed_payload_types() -> dict[str, Any]:

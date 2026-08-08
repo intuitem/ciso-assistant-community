@@ -34,9 +34,9 @@ class ReadScope:
         if key not in self._object_ids:
             from iam.models import Folder, RoleAssignment
 
-            self._object_ids[key] = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), self.user, model_class
-            )[0]
+            self._object_ids[key] = list(
+                RoleAssignment.get_viewable_object_ids(self.user, model_class)
+            )
         return self._object_ids[key]
 
     def can_read(self, model_class, object_id) -> bool:
@@ -62,11 +62,8 @@ class ReadScope:
 
             self._model_folder_ids[key] = [
                 str(fid)
-                for fid in RoleAssignment.get_accessible_folder_ids(
-                    folder=Folder.get_root_folder(),
-                    user=self.user,
-                    content_type=None,
-                    codename=f"view_{model_class._meta.model_name}",
+                for fid in RoleAssignment.get_allowed_folder_ids(
+                    self.user, ("view", model_class)
                 )
             ]
         return self._model_folder_ids[key]

@@ -250,11 +250,10 @@ class TestObjectLevelPermissions:
         from chat.orm_query import execute_tool_query
 
         for user in (reader, respondent):
-            api_count = len(
-                RoleAssignment.get_accessible_object_ids(
-                    Folder.get_root_folder(), user, RiskScenario
-                )[0]
-            )
+            api_count = RoleAssignment.get_viewable_object_ids(
+                user, RiskScenario
+            ).count()
+
             chat_count = execute_tool_query(
                 {"model": "risk_scenario", "action": "count"}, scope_for(user)
             )["total_count"]

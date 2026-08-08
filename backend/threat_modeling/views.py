@@ -12,7 +12,7 @@ from rest_framework.response import Response
 
 from core.models import AppliedControl, Asset, Vulnerability
 from core.permissions import FeatureFlagRequired
-from iam.models import Folder, RoleAssignment
+from iam.models import RoleAssignment
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from sec_intel.models import Technique
 from sec_intel.views import build_catalog_matrix
@@ -28,7 +28,6 @@ class BaseModelViewSet(AbstractBaseModelViewSet):
 def _validate_related(user, parsed: dict) -> list[str]:
     """Reject linked objects the caller cannot see; save_graph bypasses serializers."""
     errors = []
-    root = Folder.get_root_folder()
     for key, model in (
         ("assets", Asset),
         ("applied_controls", AppliedControl),
@@ -45,7 +44,7 @@ def _validate_related(user, parsed: dict) -> list[str]:
             continue
         try:
             accessible = set(
-                RoleAssignment.get_accessible_object_ids(root, user, model)[0]
+                RoleAssignment.get_viewable_object_ids(user, model)
             )
         except NotImplementedError, Permission.DoesNotExist:
             continue
