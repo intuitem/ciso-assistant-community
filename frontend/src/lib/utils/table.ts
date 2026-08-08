@@ -1201,6 +1201,18 @@ export const FINDINGS_ASSESSMENTS_CATEGORY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const FINDINGS_ASSESSMENTS_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'findings-assessments/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const STAKEHOLDER_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2741,6 +2753,7 @@ export const listViewFields = {
 			'category',
 			'evidences',
 			'findings',
+			'status',
 			'treatmentProgress',
 			'folder',
 			'perimeter'
@@ -2751,6 +2764,7 @@ export const listViewFields = {
 			'category',
 			'evidences',
 			'findings_count',
+			'status',
 			'treatment_progress',
 			'folder',
 			'perimeter'
@@ -2763,6 +2777,7 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
 			category: FINDINGS_ASSESSMENTS_CATEGORY_FILTER,
+			status: FINDINGS_ASSESSMENTS_STATUS_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
