@@ -97,7 +97,7 @@ export class FormContent {
 						// div.multiselect, and evaluate() would block on it until the toPass timeout.
 						const multiselect = field.locator.locator('div.multiselect');
 						const expected =
-							typeof values[key] === 'object' && 'request' in values[key]
+							values[key] !== null && typeof values[key] === 'object' && 'request' in values[key]
 								? values[key].value
 								: values[key];
 						// Skip interaction when the field is disabled (auto-selected single option)
@@ -114,7 +114,11 @@ export class FormContent {
 						) {
 							await expect(multiselect).toContainText(expected);
 						} else {
-							if (typeof values[key] === 'object' && 'request' in values[key]) {
+							if (
+								values[key] !== null &&
+								typeof values[key] === 'object' &&
+								'request' in values[key]
+							) {
 								const responsePromise = this.page.waitForResponse(
 									(resp) => resp.url().includes(values[key].request.url) && resp.status() === 200
 								);

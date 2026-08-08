@@ -150,6 +150,9 @@
 		if (label === undefined) {
 			const a11yName = placeholder?.trim() || field.replaceAll('_', ' ');
 			outerDiv.querySelector('input[role="combobox"]')?.setAttribute('aria-label', a11yName);
+		} else {
+			// A visible <label for> names the input; drop any stale fallback so it wins.
+			outerDiv.querySelector('input[role="combobox"]')?.removeAttribute('aria-label');
 		}
 	});
 
