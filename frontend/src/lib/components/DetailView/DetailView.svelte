@@ -118,6 +118,23 @@
 
 	const markdownFieldSet = $derived(getMarkdownFields(data.urlModel));
 
+	// Fields whose serialized value is a stable code (e.g. "eba_TA:S02") or an
+	// English choice label (e.g. "Low reliance") that safeTranslate can map to a
+	// message key. Countries (data_location_*) are excluded on purpose: their
+	// ~250 labels have no message keys.
+	const translatedValueFieldSet = new Set([
+		'roc_display',
+		'dora_ict_service_type',
+		'dora_data_sensitiveness',
+		'dora_reliance_level',
+		'dora_substitutability',
+		'dora_non_substitutability_reason',
+		'dora_has_exit_plan',
+		'dora_reintegration_possibility',
+		'dora_discontinuing_impact',
+		'dora_alternative_providers_identified'
+	]);
+
 	const getRelatedModelIndex = (model: ModelMapEntry, relatedModel: Record<string, string>) => {
 		if (!model.reverseForeignKeyFields) return -1;
 		return model.reverseForeignKeyFields.findIndex((o) => o.urlModel === relatedModel.urlModel);
@@ -780,7 +797,7 @@
 											{:else if typeof value === 'boolean'}
 												{@const bd = booleanDisplay(value, key, data.urlModel)}
 												<i class="{bd.icon} {bd.colorClass}"></i>
-											{:else if key === 'roc_display'}
+											{:else if translatedValueFieldSet.has(key)}
 												{safeTranslate(value)}
 											{:else if key === 'roc_calculation_explanation'}
 												{safeTranslate(value.key, formatRosiExplanationParams(value.params))}

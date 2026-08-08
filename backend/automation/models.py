@@ -234,3 +234,9 @@ auditlog.register(
     m2m_fields={"authors", "assets"},
     exclude_fields=common_exclude,
 )
+
+
+# Workflow engine models (moved from the former `workflows` app). Kept in a
+# submodule for readability; imported here so Django registers them under the
+# `automation` app label.
+from .workflows.models import *  # noqa: E402,F401,F403
