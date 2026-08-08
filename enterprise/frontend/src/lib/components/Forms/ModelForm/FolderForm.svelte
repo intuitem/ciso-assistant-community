@@ -64,6 +64,12 @@
 		label={m.loadMissingLibraries()}
 		helpText={m.loadMissingLibrariesHelpText()}
 	/>
+	<Checkbox
+		{form}
+		field="create_missing_asset_classes"
+		label={m.createMissingAssetClasses()}
+		helpText={m.createMissingAssetClassesHelpText()}
+	/>
 {:else}
 	<FolderTreeSelect
 		{form}

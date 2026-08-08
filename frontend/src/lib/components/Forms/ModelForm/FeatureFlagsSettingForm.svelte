@@ -205,6 +205,16 @@
 					description: m.quantitativeRiskStudiesDescription()
 				},
 				{
+					field: 'threat_modeling',
+					label: m.threatModeling(),
+					description: m.threatModelingDescription()
+				},
+				{
+					field: 'ttps',
+					label: m.ttpCatalogs(),
+					description: m.ttpsDescription()
+				},
+				{
 					field: 'scoring_assistant',
 					label: m.scoringAssistant(),
 					description: m.scoringAssistantDescription()
@@ -260,6 +270,11 @@
 					field: 'idp_groups',
 					label: m.idpGroups(),
 					description: m.idpGroupsDescription()
+				},
+				{
+					field: 'service_accounts',
+					label: m.serviceAccounts(),
+					description: m.serviceAccountsDescription()
 				},
 				{
 					field: 'terminologies',
