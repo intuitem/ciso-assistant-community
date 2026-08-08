@@ -67,12 +67,8 @@ class TestRootFolder:
     def test_root_folder_duplicate(self, root_folder: Folder):
         """Ensure there can't be multiple root folders."""
 
-        try:
+        with pytest.raises(Folder.InconsistencyError):
             Folder.objects.create(name="ABC", content_type=Folder.ContentType.ROOT)
-        except Folder.InconsistencyError:
-            return
-        except Exception:
-            pass
 
         assert (
             Folder.objects.filter(content_type=Folder.ContentType.ROOT).count() == 1
