@@ -1728,7 +1728,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
                 if base_is_descendant_of_focus:
                     effective_focused_folder = base_folder
-                elif (focus_is_descendant_of_base := focused_folder.ancestors.filter(pk=base_folder.pk).exists()):
+                elif focus_is_descendant_of_base := focused_folder.ancestors.filter(
+                    pk=base_folder.pk
+                ).exists():
                     # If `focused_folder` is a descendant of `base_folder`, the effective focus folder is narrowed down to `focused_folder`.
                     effective_focused_folder = focused_folder
                 else:

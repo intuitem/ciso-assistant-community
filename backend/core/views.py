@@ -1064,7 +1064,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         root_folder = Folder.get_root_folder()
 
         view_all_role_assignments = role_assignments.filter(
-            perimeter_folders=root_folder, role__permissions__codename=perm_codename, is_recursive=True
+            perimeter_folders=root_folder,
+            role__permissions__codename=perm_codename,
+            is_recursive=True,
         )
         can_user_view_all = view_all_role_assignments.exists()
         return can_user_view_all
@@ -8617,9 +8619,7 @@ def get_analytics_export_xlsx(request):
     auto_width(ws3)
 
     # --- Sheet 4: Applied Controls ---
-    viewable_controls = RoleAssignment.get_viewable_object_ids(
-        user, AppliedControl
-    )
+    viewable_controls = RoleAssignment.get_viewable_object_ids(user, AppliedControl)
     controls_qs = AppliedControl.objects.filter(id__in=viewable_controls).values(
         "name", "status", "priority", "eta", "folder__name"
     )

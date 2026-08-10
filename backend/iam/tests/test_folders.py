@@ -3,6 +3,7 @@ import pytest
 from iam.models import Folder
 from . import utils
 
+
 @pytest.fixture(autouse=True)
 def _reset_root_folder_cache():
     """Reset the cached root folder at the start+end of each test (to corrupted in-memory root folder for staying corrupted between tests)."""
@@ -10,6 +11,7 @@ def _reset_root_folder_cache():
     Folder._CACHED_ROOT_FOLDER = None
     yield
     Folder._CACHED_ROOT_FOLDER = None
+
 
 @pytest.mark.django_db
 class TestRootFolder:
