@@ -1394,7 +1394,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             perm_type = perm.codename.split("_")[0]
             return perm_type == "view"
 
-        if model is FilteringLabel:
+        if perm_type == "add" and model is FilteringLabel:
             return RoleAssignment._get_role_assignments_from_permission(
                 user, perm
             ).exists()
@@ -1413,17 +1413,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         )
 
         return is_directly_accessible or is_indirectly_accessible
-
-    @staticmethod
-    def _is_filtering_label_accessible(
-        user: AbstractBaseUser | AnonymousUser,
-        perm_prefix: PermissionPrefix,
-    ) -> bool:
-        from core.models import FilteringLabel
-
-        return RoleAssignment.get_allowed_folder_ids(
-            user, (perm_prefix, FilteringLabel)
-        ).exists()
 
     @staticmethod
     def _is_actor_accessible(
@@ -1458,8 +1447,10 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if model is Actor:
             return RoleAssignment._is_actor_accessible(user, perm_prefix, obj)
 
-        if model is FilteringLabel:
-            return RoleAssignment._is_filtering_label_accessible(user, perm_prefix)
+        if perm_type == "add" and model is FilteringLabel:
+            return RoleAssignment.get_allowed_folder_ids(
+                user, (perm_prefix, FilteringLabel)
+            ).exists()
 
         user_role_assignments = RoleAssignment._get_role_assignments_from_permission(
             user, (perm_prefix, model)
