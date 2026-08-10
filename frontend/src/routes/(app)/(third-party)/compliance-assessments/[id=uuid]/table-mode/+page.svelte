@@ -501,8 +501,20 @@
 			activeSectionId = headEl && headEl.getBoundingClientRect().top < offset ? section : null;
 		};
 		updateActiveSection();
-		window.addEventListener('scroll', updateActiveSection, { passive: true });
-		cleanups.push(() => window.removeEventListener('scroll', updateActiveSection));
+		// Coalesce scroll bursts into at most one layout-reading pass per frame.
+		let scrollRaf = 0;
+		const onScroll = () => {
+			if (scrollRaf) return;
+			scrollRaf = requestAnimationFrame(() => {
+				scrollRaf = 0;
+				updateActiveSection();
+			});
+		};
+		window.addEventListener('scroll', onScroll, { passive: true });
+		cleanups.push(() => {
+			window.removeEventListener('scroll', onScroll);
+			if (scrollRaf) cancelAnimationFrame(scrollRaf);
+		});
 
 		return () => cleanups.forEach((fn) => fn());
 	});
