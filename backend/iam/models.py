@@ -1688,8 +1688,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         Both the `base_folder` and the `focused_folder` will compete to be the become the effective base folder (`effective_focused_folder`).
 
-        In such case: `base_folder` will become the effective base folder ONLY IF `base_folder` is a descendant of `focused_folder`.
-        Otherwise `focused_folder` will be the effective base folder.
+        - If `base_folder` is a descendant of (or equal to) `focused_folder`, `base_folder` becomes the effective base folder (it's the narrower scope).
+        - If `focused_folder` is a descendant of `base_folder`, `focused_folder` becomes the effective base folder (it's the narrower scope).
+        - Otherwise (`base_folder` and `focused_folder` are in disjoint subtrees), NO folder is accessible: an empty `QuerySet` is returned.
         """
 
         if not isinstance(user, User):
@@ -1716,9 +1717,24 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         effective_focused_folder = base_folder
 
         if focused_folder is not None:
-            # We only keep `base_folder` as the `effective_focused_folder` if it's a descendant of `focused_folder`
-            if base_folder is None or (focused_folder not in base_folder.ancestors):
+            if base_folder is None:
                 effective_focused_folder = focused_folder
+
+            elif base_folder != focused_folder:
+                # We only keep `base_folder` as the `effective_focused_folder` if it's a descendant of `focused_folder`
+                base_is_descendant_of_focus = base_folder.ancestors.filter(
+                    pk=focused_folder.pk
+                ).exists()
+
+                if base_is_descendant_of_focus:
+                    effective_focused_folder = base_folder
+                elif (focus_is_descendant_of_base := focused_folder.ancestors.filter(pk=base_folder.pk).exists()):
+                    # If `focused_folder` is a descendant of `base_folder`, the effective focus folder is narrowed down to `focused_folder`.
+                    effective_focused_folder = focused_folder
+                else:
+                    # `base_folder` and `focused_folder` are in disjoint folder subtrees.
+                    # Which means their intersection is empty (so we return an empty queryset for it).
+                    return Folder.objects.none().values_list("id", flat=True)
 
         # Folder ID of the focused folder (when the user is in `Focus mode`)
         if effective_focused_folder is not None:
