@@ -36,14 +36,14 @@ Sessão de brainstorm dedicada (design lead → 3 candidatos de mark comparados 
 - **Paleta**: retonalização do roxo/azul do tema atual (Skeleton UI, `oklch`) — hue shift de +4° no primário e −3° no secundário, mantendo lightness/chroma originais (preserva o ajuste de acessibilidade/contraste já feito). `frontend/ciso-theme.css`.
 - **Ícone**: monograma "TSI" num círculo azul (`#1E4FD8`) — candidato "B" do comparativo, escolhido por manter a melhor legibilidade em 16px entre os 3 testados. `frontend/src/lib/assets/ciso.svg`.
 - **Lockup**: `Logo.svelte` ganhou um prop `variant: 'icon' | 'full'` — `'icon'` (padrão, compatível com todos os usos existentes, incluindo a sidebar) e `'full'` (ícone + "CISO TSI" por extenso), aplicado nas 4 páginas de autenticação (login, first-connexion, password-reset ×2).
-- **Favicon**: `frontend/static/favicon.svg` novo, referenciado via `<link rel="icon">` em `app.html`. O `.ico` binário não pôde ser regenerado neste ambiente (sem ferramenta de conversão de imagem disponível) — fica como pendência técnica menor.
+- **Favicon**: `frontend/static/favicon.svg` novo, referenciado via `<link rel="icon">` em `app.html`. O `.ico` binário foi regenerado em 2026-08-10 (`librsvg`/`rsvg-convert` + Pillow, nos 6 tamanhos padrão 16–256px) em `frontend/static/favicon.ico` e `frontend/src/lib/assets/favicon.ico`.
 - **Scrollbar**: as 3 cores hardcoded em `app.html` (`#694998` etc.) trocadas para referenciar os tokens retonalizados do tema.
 - Validado via `svelte-check` (nenhum erro introduzido nos arquivos alterados) e verificação visual ao vivo em servidor de desenvolvimento (login renderiza o lockup corretamente).
 - Commit `eca758bd6`.
 
 ## 6. Pendente
 
-1. Regenerar o `favicon.ico` binário (precisa de ferramenta de conversão de imagem/design, não disponível neste ambiente).
+1. ~~Regenerar o `favicon.ico` binário~~ — ✅ resolvido em 2026-08-10.
 2. `README.md` principal do repositório recebeu apenas uma nota de identificação do fork (não uma reformulação completa) — e as demais 300+ referências fora do escopo aprovado (CI/CD, packaging, conectores de terceiros, `product-docs/`) seguem deliberadamente não tocadas; decisão de negócio separada sobre se/quando estender o rebranding a essas áreas.
 3. Antes do lançamento comercial: implementar o mecanismo de disponibilização de código-fonte exigido pela AGPL (§3).
 4. Rebuild da imagem Docker do frontend (pendência compartilhada com o T2) — o ambiente rodando via `docker-compose` ainda serve a imagem pré-compilada com a marca antiga, então o rebranding só é visível rodando o frontend a partir do código-fonte até que a imagem seja reconstruída.
@@ -54,4 +54,4 @@ Sessão de brainstorm dedicada (design lead → 3 candidatos de mark comparados 
 2. Licenciamento validado, sem bloqueio para a troca textual e visual. ✅
 3. Nenhuma referência textual a "CISO Assistant" visível ao usuário final no escopo de docs/plans + UI + i18n. ✅
 4. Identidade visual (ícone, lockup, paleta, favicon) implementada e validada. ✅
-5. Favicon binário `.ico` regenerado. ⬜ Pendente — requer ferramenta de imagem.
+5. Favicon binário `.ico` regenerado. ✅
