@@ -1552,79 +1552,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return RoleAssignment.is_object_accessible(user, "view", model, id)
 
     @staticmethod
-    def _get_focus_accessible_folder_ids(
-        focus_folder_id: uuid.UUID, folder_ids: Iterable[uuid.UUID]
-    ) -> QuerySet[uuid.UUID]:
-        """Filter out folders excluded by the focus mode."""
-
-        folders = Folder.objects.filter(id__in=folder_ids)
-        focused_folders = folders.filter(
-            Q(ancestors=focus_folder_id) | Q(id=focus_folder_id)
-        )
-        focused_folder_ids = focused_folders.values_list("id", flat=True).distinct()
-
-        return focused_folder_ids
-
-    @staticmethod
-    def _filter_accessible_folder_ids_by_focus_folder(
-        focused_folder: Folder,
-        direct_flat_folder_ids: Iterable[uuid.UUID],
-        direct_recursive_folder_ids: Iterable[uuid.UUID],
-    ) -> QuerySet[uuid.UUID]:
-        """
-        Return the accessible folder IDs rooted from the `focused_folder` `Folder` from the direct flat and direct recursive folder IDs.
-
-        `direct_flat_folder_ids` is list of Folder IDs (`Folder.id`) from non-recursive role assignments folders (`RoleAssignment.perimeter_folders`).
-
-        `direct_recursive_folder_ids` is list of Folder IDs from recursive role assignments folders.
-        """
-
-        direct_recursive_folders = Folder.objects.filter(
-            id__in=direct_recursive_folder_ids
-        )
-
-        # `True` if the user has the `perm_codename` permission on the focus folder itself OR an ancestor `Folder` of the `focused_folder`.
-        is_whole_focus_folder_tree_accessible = direct_recursive_folders.filter(
-            Q(id=focused_folder.id) | Q(descendants=focused_folder.id)
-        ).exists()
-
-        if is_whole_focus_folder_tree_accessible:
-            # A non-strict folder supertree of the `focused_folder` tree is accessible
-            # Therefore all the focused folder tree can be accessed.
-            focused_folder_tree = Folder.objects.filter(id=focused_folder.id).union(
-                Folder.objects.filter(ancestors=focused_folder.id)
-            )
-
-            accessible_folder_ids = focused_folder_tree.values_list("id", flat=True)
-            return accessible_folder_ids
-
-        accessible_direct_flat_folder_ids = (
-            RoleAssignment._get_focus_accessible_folder_ids(
-                focused_folder.id, direct_flat_folder_ids
-            )
-        )
-        accessible_direct_recursive_folder_ids = (
-            RoleAssignment._get_focus_accessible_folder_ids(
-                focused_folder.id, direct_recursive_folder_ids
-            )
-        )
-        directly_accessible_folder_ids = accessible_direct_flat_folder_ids.union(
-            accessible_direct_recursive_folder_ids
-        )
-
-        indirectly_accessible_folders = Folder.objects.filter(
-            ancestors__in=accessible_direct_recursive_folder_ids
-        )
-        indirectly_accessible_folder_ids = indirectly_accessible_folders.values_list(
-            "id", flat=True
-        )
-
-        accessible_folder_ids = directly_accessible_folder_ids.union(
-            indirectly_accessible_folder_ids
-        )
-        return accessible_folder_ids
-
-    @staticmethod
     def _get_directly_allowed_folder_ids(
         user: AbstractBaseUser | AnonymousUser,
         permission: tuple[PermissionPrefix, type[models.Model]] | Permission,
@@ -1738,14 +1665,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                     # Which means their intersection is empty (so we return an empty queryset for it).
                     return Folder.objects.none().values_list("id", flat=True)
 
-        # Folder ID of the focused folder (when the user is in `Focus mode`)
-        if effective_focused_folder is not None:
-            return RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
-                effective_focused_folder,
-                direct_flat_folder_ids,
-                direct_recursive_folder_ids,
-            )
-
         indirectly_accessible_folders = Folder.objects.filter(
             ancestors__in=direct_recursive_folder_ids
         )
@@ -1756,7 +1675,20 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         accessible_folder_ids = directly_accessible_folder_ids.union(
             indirectly_accessible_folder_ids
         )
-        return accessible_folder_ids
+
+        if effective_focused_folder is None:
+            return accessible_folder_ids
+
+        # Focus mode (and `base_folder` scoping) is a pure scope MASK (intersection) over the normally accessible folder IDs: it can only narrow the accessible set, never extend it.
+        # No root folder special case is needed: the root folder objects that matter across the app (e.g. users) are published, so they remain visible through the normal `is_published` inheritance.
+        return (
+            Folder.objects.filter(id__in=accessible_folder_ids)
+            .filter(
+                Q(id=effective_focused_folder.id)
+                | Q(ancestors=effective_focused_folder.id)
+            )
+            .values_list("id", flat=True)
+        )
 
     @staticmethod
     def _get_actor_accessible_ids_by_perm(

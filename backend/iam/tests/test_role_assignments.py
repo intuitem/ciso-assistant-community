@@ -14,7 +14,6 @@ from core.models import (
     Team,
 )
 from tprm.models import Entity
-from . import utils
 
 BASIC_PERMISSION_LIST = [
     "view_appliedcontrol",
@@ -733,299 +732,85 @@ class TestPermissionCheck:
 
 @pytest.mark.django_db
 class TestFocusMode:
-    def test_focus_accessible_folder_ids(self):
-        """Ensure the `RoleAssignment._get_focus_accessible_folder_ids` function returns the proper accessible folders IDs."""
+    def test_focus_mode_is_a_pure_intersection(self):
+        """
+        Ensure focus mode behaves as a PURE INTERSECTION over the accessible folders, THROUGH THE PUBLIC API (`RoleAssignment.get_allowed_folder_ids`/`RoleAssignment.get_viewable_object_ids`):
 
-        utils.create_folder_tree(
-            [
-                utils.Node(
-                    name="folder_1",
-                    children=[
-                        utils.Node(
-                            name="folder_1_1",
-                            children=[
-                                utils.Node(name="folder_1_1_1"),
-                                utils.Node(
-                                    name="folder_1_1_2",
-                                    children=[
-                                        utils.Node(name="folder_1_1_2_1"),
-                                        utils.Node(name="folder_1_1_2_2"),
-                                    ],
-                                ),
-                            ],
-                        ),
-                        utils.Node(
-                            name="folder_1_2",
-                            children=[utils.Node(name="folder_1_2_1")],
-                        ),
-                    ],
+        - Focus mode MUST NEVER extend the accessible folders (especially not with the root folder, for anyone: not even for users with a role assignment on the root folder).
+        - Unpublished root folder objects are NOT reachable while a focus folder is set (even for users with a role assignment on the root folder).
+        - Published root folder objects (like the `User` objects, which are always published) REMAIN visible through the normal `is_published` inheritance (e.g. so the user pickers keep working in focus mode).
+        """
+        from core.context import focus_folder_id_var
+
+        root_folder = Folder.get_root_folder()
+        domain = Folder.objects.create(name="domain")
+
+        role = Role.objects.create(name="role")
+        role.permissions.set(
+            Permission.objects.filter(
+                codename__in=[*BASIC_PERMISSION_LIST, "view_user"]
+            )
+        )
+
+        admin_user = User.objects.create_user("admin_focus@gmail.com")
+        admin_role_assignment = RoleAssignment.objects.create(
+            user=admin_user, role=role, is_recursive=True
+        )
+        admin_role_assignment.perimeter_folders.add(root_folder)
+
+        domain_user = User.objects.create_user("domain_focus@gmail.com")
+        domain_role_assignment = RoleAssignment.objects.create(
+            user=domain_user, role=role, is_recursive=True
+        )
+        domain_role_assignment.perimeter_folders.add(domain)
+
+        unpublished_control_in_root = AppliedControl.objects.create(
+            name="unpublished_control_in_root", folder=root_folder
+        )
+        # `PublishInRootFolderMixin.save` forces `is_published=True` for root folder objects: unpublish directly to model an unpublished root-scoped object (like the models without this mixin can have).
+        AppliedControl.objects.filter(id=unpublished_control_in_root.id).update(
+            is_published=False
+        )
+        published_control_in_root = AppliedControl.objects.create(
+            name="published_control_in_root", folder=root_folder
+        )
+        control_in_domain = AppliedControl.objects.create(
+            name="control_in_domain", folder=domain
+        )
+
+        token = focus_folder_id_var.set(domain.id)
+        try:
+            for user in [admin_user, domain_user]:
+                allowed_folder_ids = set(
+                    RoleAssignment.get_allowed_folder_ids(
+                        user, ("view", AppliedControl)
+                    )
                 )
-            ]
-        )
+                assert domain.id in allowed_folder_ids, (
+                    f"The focused folder itself MUST be accessible ({user.email!r})."
+                )
+                assert root_folder.id not in allowed_folder_ids, (
+                    f"Focus mode MUST be a pure intersection: the root folder MUST NOT be part of the accessible folders ({user.email!r})."
+                )
 
-        folder_name_set = set(Folder.objects.values_list("name", flat=True))
+                viewable_ids = set(
+                    RoleAssignment.get_viewable_object_ids(user, AppliedControl)
+                )
+                assert control_in_domain.id in viewable_ids, (
+                    f"The focused folder objects MUST be visible ({user.email!r})."
+                )
+                assert unpublished_control_in_root.id not in viewable_ids, (
+                    f"Unpublished root folder objects MUST NOT be visible in focus mode ({user.email!r})."
+                )
+                assert published_control_in_root.id in viewable_ids, (
+                    f"Published root folder objects MUST remain visible in focus mode (through the `is_published` inheritance) ({user.email!r})."
+                )
 
-        root_folder = Folder.get_root_folder()
-        assert root_folder is not None, "Root folder not found."
-
-        all_folder_ids = Folder.objects.all().values_list("id", flat=True)
-        focused_folder_ids = RoleAssignment._get_focus_accessible_folder_ids(
-            root_folder.id, all_folder_ids
-        )
-
-        assert focused_folder_ids.count() == Folder.objects.count(), (
-            "All folders SHALL be accessible (when the focus folder is the root folder)."
-        )
-
-        focus_folder = Folder.objects.get(name="folder_1_1")
-        focused_folder_ids = RoleAssignment._get_focus_accessible_folder_ids(
-            focus_folder.id, all_folder_ids
-        )
-
-        folder_name_set.difference_update(
-            [
-                root_folder.name,
-                "folder_1",
-                "folder_1_2",
-                "folder_1_2_1",
-            ]
-        )
-
-        focused_folder_names = Folder.objects.filter(
-            id__in=focused_folder_ids
-        ).values_list("name", flat=True)
-
-        assert sorted(focused_folder_names) == sorted(folder_name_set), (
-            "Unexpected/missing focused folders."
-        )
-
-        focus_folder = Folder.objects.get(name="folder_1_1_2_2")
-
-        focused_folder_ids = RoleAssignment._get_focus_accessible_folder_ids(
-            focus_folder.id, all_folder_ids
-        )
-
-        assert list(focused_folder_ids) == [focus_folder.id], (
-            "Focusing on a folder with no children SHALL make it the only accessible one."
-        )
-
-    def test_filter_accessible_folder_ids_by_focus_folder(self):
-        """Ensure the `RoleAssignment._filter_accessible_folder_ids_by_focus_folder` returns the proper accessible folder IDs."""
-
-        utils.create_folder_tree(
-            [
-                utils.Node(
-                    name="folder_1",
-                    children=[
-                        utils.Node(
-                            name="folder_1_1",
-                            children=[
-                                utils.Node(
-                                    name="folder_1_1_1",
-                                    children=[
-                                        utils.Node(name="folder_1_1_1_1"),
-                                        utils.Node(name="folder_1_1_1_2"),
-                                    ],
-                                ),
-                                utils.Node(name="folder_1_1_2"),
-                            ],
-                        ),
-                        utils.Node(
-                            name="folder_1_2",
-                            children=[
-                                utils.Node(
-                                    name="folder_1_2_1",
-                                    children=[
-                                        utils.Node(name="folder_1_2_1_1"),
-                                    ],
-                                ),
-                                utils.Node(name="folder_1_2_2"),
-                            ],
-                        ),
-                        utils.Node(name="folder_1_3"),
-                    ],
-                ),
-                utils.Node(
-                    name="folder_2",
-                    children=[
-                        utils.Node(name="folder_2_1"),
-                        utils.Node(name="folder_2_2"),
-                    ],
-                ),
-            ]
-        )
-
-        focus_folder = Folder.objects.get(name="folder_1_1")
-
-        accessible_folder_ids = (
-            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
-                focus_folder, [focus_folder.id], []
-            )
-        )
-        assert list(accessible_folder_ids) == [focus_folder.id], (
-            "The focused folder should be the only accessible one (as there's no recursive folder)."
-        )
-
-        accessible_folder_ids = (
-            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
-                focus_folder, [], [focus_folder.id]
-            )
-        )
-        assert focus_folder.id in accessible_folder_ids, (
-            "The focused folder SHALL always be accessible."
-        )
-
-        accessible_folder_ids = (
-            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
-                focus_folder, [focus_folder.id], [focus_folder.id]
-            )
-        )
-        assert focus_folder.id in accessible_folder_ids, (
-            "The focused folder SHALL always be accessible."
-        )
-
-        focus_descendant = Folder.objects.get(name="folder_1_1_1_1")
-
-        accessible_folder_ids = (
-            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
-                focus_folder, [focus_descendant.id], []
-            )
-        )
-        assert list(accessible_folder_ids) == [focus_descendant.id], (
-            "The descendant folder should be the only accessible one (as there's no recursive folder)."
-        )
-
-        accessible_folder_ids = (
-            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
-                focus_folder, [], [focus_descendant.id]
-            )
-        )
-        assert focus_descendant.id in accessible_folder_ids, (
-            "A descendant folder of the focused folder SHALL be accessible."
-        )
-
-        accessible_folder_ids = (
-            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
-                focus_folder, [focus_descendant.id], [focus_descendant.id]
-            )
-        )
-        assert focus_descendant.id in accessible_folder_ids, (
-            "A descendant folder of the focused folder SHALL be accessible."
-        )
-
-        focus_ancestor = focus_folder.parent_folder.parent_folder
-
-        root_folder = Folder.get_root_folder()
-
-        assert root_folder is not None, "Root folder not found."
-
-        all_focused_folder_ids = (
-            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
-                focus_folder, [], [root_folder.id]
-            )
-        )
-        accessible_folder_ids = (
-            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
-                focus_folder, [], [focus_ancestor.id]
-            )
-        )
-
-        assert all_focused_folder_ids.count() > 0, (
-            "Having a recursive role assignment over the root folder SHALL make at least one folder being accessible."
-        )
-        assert sorted(accessible_folder_ids) == sorted(all_focused_folder_ids), (
-            "Having a recursive role assignment on an ancestor folder of the focused folder SHALL make all the descendant of the focused folder accessible."
-        )
-
-        accessible_folder_ids = (
-            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
-                focus_folder, [focus_ancestor.id], [focus_ancestor.id]
-            )
-        )
-        assert sorted(accessible_folder_ids) == sorted(all_focused_folder_ids), (
-            "Having a recursive role assignment on an ancestor folder of the focused folder SHALL make all the descendant of the focused folder accessible."
-        )
-
-        accessible_folder_ids = (
-            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
-                focus_folder, [focus_ancestor.id], []
-            )
-        )
-        assert accessible_folder_ids.count() == 0, (
-            "An ancestor folder of the focused folder SHALL NOT be accessible."
-        )
-
-        ancestor_folder_ids = focus_folder.get_parent_folders().values_list(
-            "id", flat=True
-        )
-        unrelated_folder_ids = [
-            Folder.objects.get(name=folder_name).id
-            for folder_name in [
-                "folder_1_2",
-                "folder_1_2_1",
-                "folder_1_2_1_1",
-                "folder_1_2_2",
-                "folder_1_3",
-            ]
-        ]
-
-        accessible_folder_ids = (
-            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
-                focus_folder,
-                [*ancestor_folder_ids, *unrelated_folder_ids],
-                unrelated_folder_ids,
-            )
-        )
-
-        assert accessible_folder_ids.count() == 0, (
-            "Role assignments on an unrelated the focused folder (being nor an ancestor folder, nor in the the focused folder subtree) SHALL not make anything accessible."
-        )
-
-        focus_folder = Folder.objects.get(name="folder_1")
-
-        non_recursive_folder_ids = [Folder.objects.get(name="folder_1_3").id]
-        recursive_folder_ids = [
-            Folder.objects.get(name=folder_name).id
-            for folder_name in [
-                "folder_1_1_1",
-                "folder_1_2_1",
-                "folder_1_1_2",
-            ]
-        ]
-
-        accessible_folder_ids = (
-            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
-                focus_folder,
-                non_recursive_folder_ids,
-                recursive_folder_ids,
-            )
-        )
-
-        expected_accessible_folder_ids = [
-            Folder.objects.get(name=folder_name).id
-            for folder_name in [
-                "folder_1_3",
-                "folder_1_1_1",
-                "folder_1_1_1_1",
-                "folder_1_1_1_2",
-                "folder_1_2_1",
-                "folder_1_2_1_1",
-                "folder_1_1_2",
-            ]
-        ]
-
-        assert sorted(accessible_folder_ids) == sorted(
-            expected_accessible_folder_ids
-        ), "Unexpected accessible folder IDs."
-
-        accessible_folder_ids2 = (
-            RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
-                focus_folder,
-                [*non_recursive_folder_ids, root_folder.id],
-                recursive_folder_ids,
-            )
-        )
-
-        assert sorted(accessible_folder_ids) == sorted(accessible_folder_ids2), (
-            "A non-recursive root folder access SHALL NOT make any extra folder accessible (except if the focused folder is also the root folder itself)."
-        )
+                viewable_user_ids = set(
+                    RoleAssignment.get_viewable_object_ids(user, User)
+                )
+                assert {admin_user.id, domain_user.id} <= viewable_user_ids, (
+                    f"`User` objects (always published, in the root folder) MUST remain visible in focus mode ({user.email!r})."
+                )
+        finally:
+            focus_folder_id_var.reset(token)
