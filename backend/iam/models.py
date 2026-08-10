@@ -438,6 +438,10 @@ class Folder(NameDescriptionMixin):
         Return a stringified slash-separated folder path.
         This string is unique per-folder.
         """
+        if self.id == self.get_root_folder_id():
+            # The root folder should only return its own name (as it has no ancestors).
+            return self.name
+
         return "/".join(
             f.name for f in self.get_folder_full_path(include_root=include_root)
         )
