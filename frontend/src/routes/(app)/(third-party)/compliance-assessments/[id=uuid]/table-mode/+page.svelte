@@ -73,9 +73,6 @@
 		{ value: 'done', label: m.done() }
 	];
 
-	// Detail chip keys present in the body of an assessable requirement card.
-	const SECTION_VALUES = ['appliedControl', 'evidence'];
-
 	const requirementHashmap = Object.fromEntries(
 		data.requirements.map((requirement: Record<string, any>) => [requirement.id, requirement])
 	);
@@ -315,23 +312,9 @@
 		)
 	);
 
-	// Per-requirement fold state for the card body. The header (result / status /
-	// score) stays visible and editable even while the body is collapsed.
-	let expandedRA: Record<string, boolean> = $state(
-		// svelte-ignore state_referenced_locally
-		// Bodies start expanded so reading needs no click; collapsing is the opt-in densifier.
-		requirementAssessments.reduce(
-			(acc, ra) => {
-				acc[ra.id] = true;
-				return acc;
-			},
-			{} as Record<string, boolean>
-		)
-	);
+	// Sections start expanded (all requirements visible); the header toggle
+	// collapses/expands every section. It does NOT touch the per-item chips.
 	let allExpanded = $state(true);
-	function toggleRA(id: string) {
-		expandedRA[id] = !expandedRA[id];
-	}
 	// Section structure derived from the real tree (urn / parent_urn), not ref_id:
 	// per-row ancestor headings, nesting depth, and assessable count under each heading.
 	const sectionInfo = $derived.by(() => {
@@ -383,11 +366,9 @@
 		return !row || row.ancestors.every((id) => !collapsedSections[id]);
 	}
 
+	// Collapses/expands SECTIONS only (never mass-opens the per-item chips, which would
+	// render every controls/evidences/observation panel at once).
 	function setAllExpanded(expanded: boolean) {
-		for (const ra of requirementAssessments) {
-			expandedRA[ra.id] = expanded;
-		}
-		// Expanding clears all section collapses; collapsing folds every section.
 		const next: Record<string, boolean> = {};
 		if (!expanded) {
 			for (const row of sectionInfo.rows) if (row.isHeading) next[row.id] = true;
@@ -403,6 +384,13 @@
 	let stickyTop = $state(0);
 	// Header height so the TOC column can stick right below the (sticky) page header.
 	let headerHeight = $state(0);
+
+	// Scroll-spy: id of the section whose header is currently at the top (the
+	// deepest one scrolled past). A single sticky bar shows it, so sections never stack.
+	let activeSectionId = $state<string | null>(null);
+	const activeSection = $derived(
+		activeSectionId ? requirementAssessments.find((ra) => ra.id === activeSectionId) : null
+	);
 
 	// --- Table of contents (left column, toggled from the header) ---
 	let tocCollapsed = $state(false);
@@ -460,18 +448,37 @@
 		// Show TOC only if there are more than 3 requirements
 		showToc = requirementAssessments.length > 3;
 
+		const cleanups: Array<() => void> = [];
+
 		// Track the app AppBar height so our header sticks right below it.
 		const appbar = document.querySelector('.sticky.top-0.z-50') as HTMLElement | null;
-		if (!appbar) return;
-		const measure = () => (stickyTop = appbar.getBoundingClientRect().height);
-		measure();
-		const ro = new ResizeObserver(measure);
-		ro.observe(appbar);
-		window.addEventListener('resize', measure);
-		return () => {
-			ro.disconnect();
-			window.removeEventListener('resize', measure);
+		if (appbar) {
+			const measure = () => (stickyTop = appbar.getBoundingClientRect().height);
+			measure();
+			const ro = new ResizeObserver(measure);
+			ro.observe(appbar);
+			window.addEventListener('resize', measure);
+			cleanups.push(() => {
+				ro.disconnect();
+				window.removeEventListener('resize', measure);
+			});
+		}
+
+		// Scroll-spy: current section = deepest section header scrolled above the offset.
+		const updateActiveSection = () => {
+			const offset = stickyTop + headerHeight + 4;
+			let current: string | null = null;
+			for (const el of document.querySelectorAll<HTMLElement>('[data-section-anchor]')) {
+				if (el.getBoundingClientRect().top <= offset) current = el.getAttribute('data-ra-id');
+				else break;
+			}
+			activeSectionId = current;
 		};
+		updateActiveSection();
+		window.addEventListener('scroll', updateActiveSection, { passive: true });
+		cleanups.push(() => window.removeEventListener('scroll', updateActiveSection));
+
+		return () => cleanups.forEach((fn) => fn());
 	});
 </script>
 
@@ -641,407 +648,432 @@
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg w-full h-full space-y-3">
-			{#if !questionnaireOnly}
-				<div
-					class="sticky z-20 -mx-6 flex flex-col gap-2 border-b border-surface-200 bg-white/80 px-6 py-2.5 backdrop-blur"
-					style="top: {stickyTop}px"
-					bind:clientHeight={headerHeight}
-				>
-					<!-- Row 1: navigation + global controls -->
-					<div class="flex flex-row items-center justify-between gap-4">
-						<a
-							href="/compliance-assessments/{complianceAssessment.id}"
-							class="flex items-center space-x-2 text-primary-800 hover:text-primary-600 min-w-0"
-							data-testid="back-to-audit"
-						>
-							<i class="fa-solid fa-arrow-left"></i>
-							<p class="truncate">{m.goBackToAudit()} {complianceAssessment.name}</p>
-						</a>
-						<div class="flex items-center gap-4 shrink-0">
-							{#if !shallow}
-								<button
-									type="button"
-									class="btn btn-sm preset-tonal-surface"
-									onclick={() => setAllExpanded(!allExpanded)}
+		{#if !questionnaireOnly}
+			<div
+				class="sticky z-20 -mx-6 flex flex-col gap-2 border-b border-surface-200 bg-white/80 px-6 py-2.5 backdrop-blur"
+				style="top: {stickyTop}px"
+				bind:clientHeight={headerHeight}
+			>
+				<!-- Row 1: navigation + global controls -->
+				<div class="flex flex-row items-center justify-between gap-4">
+					<a
+						href="/compliance-assessments/{complianceAssessment.id}"
+						class="flex items-center space-x-2 text-primary-800 hover:text-primary-600 min-w-0"
+						data-testid="back-to-audit"
+					>
+						<i class="fa-solid fa-arrow-left"></i>
+						<p class="truncate">{m.goBackToAudit()} {complianceAssessment.name}</p>
+					</a>
+					<div class="flex items-center gap-4 shrink-0">
+						{#if !shallow}
+							<button
+								type="button"
+								class="btn btn-sm preset-tonal-surface"
+								onclick={() => setAllExpanded(!allExpanded)}
+							>
+								<i class="fa-solid {allExpanded ? 'fa-compress' : 'fa-expand'} mr-2"></i>
+								{allExpanded ? m.collapseAll() : m.expandAll()}
+							</button>
+						{/if}
+						{#if !hasQuestions}
+							<div class="flex items-center justify-center space-x-4">
+								{#if questionnaireMode}
+									<p class="font-bold text-sm">{m.assessmentMode()}</p>
+								{:else}
+									<p class="font-bold text-sm text-green-500">{m.assessmentMode()}</p>
+								{/if}
+								<Switch
+									name="questionnaireToggle"
+									class="flex flex-row items-center justify-center"
+									onCheckedChange={(e) => {
+										questionnaireMode = e.checked;
+									}}
 								>
-									<i class="fa-solid {allExpanded ? 'fa-compress' : 'fa-expand'} mr-2"></i>
-									{allExpanded ? m.collapseAll() : m.expandAll()}
-								</button>
-							{/if}
-							{#if !hasQuestions}
-								<div class="flex items-center justify-center space-x-4">
+									<Switch.Control>
+										<Switch.Thumb />
+									</Switch.Control>
+									<Switch.HiddenInput />
 									{#if questionnaireMode}
-										<p class="font-bold text-sm">{m.assessmentMode()}</p>
+										<p class="font-bold text-sm text-primary-500">{m.questionnaireMode()}</p>
 									{:else}
-										<p class="font-bold text-sm text-green-500">{m.assessmentMode()}</p>
+										<p class="font-bold text-sm">{m.questionnaireMode()}</p>
 									{/if}
-									<Switch
-										name="questionnaireToggle"
-										class="flex flex-row items-center justify-center"
-										onCheckedChange={(e) => {
-											questionnaireMode = e.checked;
-										}}
-									>
-										<Switch.Control>
-											<Switch.Thumb />
-										</Switch.Control>
-										<Switch.HiddenInput />
-										{#if questionnaireMode}
-											<p class="font-bold text-sm text-primary-500">{m.questionnaireMode()}</p>
-										{:else}
-											<p class="font-bold text-sm">{m.questionnaireMode()}</p>
-										{/if}
-									</Switch>
-								</div>
-							{/if}
-						</div>
+								</Switch>
+							</div>
+						{/if}
 					</div>
+				</div>
 
-					<!-- Row 2: TOC toggle + audit progress analytics -->
-					{#if (!shallow && showToc) || assessableTotal > 0}
-						<div class="flex items-center gap-4 flex-wrap border-t border-surface-100 pt-2">
-							{#if !shallow && showToc}
-								<button
-									type="button"
-									class="btn btn-sm preset-tonal-surface shrink-0"
-									onclick={() => (tocCollapsed = !tocCollapsed)}
-									aria-pressed={!tocCollapsed}
+				<!-- Row 2: TOC toggle + audit progress analytics -->
+				{#if (!shallow && showToc) || assessableTotal > 0}
+					<div class="flex items-center gap-4 flex-wrap border-t border-surface-100 pt-2">
+						{#if !shallow && showToc}
+							<button
+								type="button"
+								class="btn btn-sm preset-tonal-surface shrink-0"
+								onclick={() => (tocCollapsed = !tocCollapsed)}
+								aria-pressed={!tocCollapsed}
+							>
+								<i class="fa-solid {tocCollapsed ? 'fa-list' : 'fa-angles-left'} mr-2"></i>
+								{m.tableOfContents()}
+							</button>
+						{/if}
+						{#if assessableTotal > 0}
+							<div class="flex flex-1 items-center gap-3 min-w-[200px]">
+								<span class="text-xs font-medium text-surface-500 shrink-0">
+									{m.progress()}: {assessedCount}/{assessableTotal}
+								</span>
+								<div
+									class="flex flex-1 h-5 overflow-hidden rounded-sm border border-surface-200 bg-surface-100"
+									role="img"
+									aria-label="{m.progress()}: {assessedCount}/{assessableTotal}"
 								>
-									<i class="fa-solid {tocCollapsed ? 'fa-list' : 'fa-angles-left'} mr-2"></i>
-									{m.tableOfContents()}
-								</button>
-							{/if}
-							{#if assessableTotal > 0}
-								<div class="flex flex-1 items-center gap-3 min-w-[200px]">
-									<span class="text-xs font-medium text-surface-500 shrink-0">
-										{m.progress()}: {assessedCount}/{assessableTotal}
-									</span>
-									<div
-										class="flex flex-1 h-5 overflow-hidden rounded-sm border border-surface-200 bg-surface-100"
-										role="img"
-										aria-label="{m.progress()}: {assessedCount}/{assessableTotal}"
-									>
-										{#each resultCounts as opt}
-											{#if opt.count > 0}
-												{@const pct = (opt.count / assessableTotal) * 100}
-												<div
-													class="flex h-full items-center justify-center overflow-hidden"
-													style="width: {pct}%; background-color: {complianceResultColorMap[opt.value] ??
-														'#d1d5db'}; color: {opt.value === 'not_applicable' ? '#ffffff' : '#1f2937'}"
-													title="{opt.label}: {opt.count} ({Math.round(pct)}%)"
-												>
-													{#if pct >= 9}
-														<span class="text-[10px] font-semibold leading-none">{Math.round(pct)}%</span>
-													{/if}
-												</div>
-											{/if}
-										{/each}
-									</div>
+									{#each resultCounts as opt}
+										{#if opt.count > 0}
+											{@const pct = (opt.count / assessableTotal) * 100}
+											<div
+												class="flex h-full items-center justify-center overflow-hidden"
+												style="width: {pct}%; background-color: {complianceResultColorMap[
+													opt.value
+												] ?? '#d1d5db'}; color: {opt.value === 'not_applicable'
+													? '#ffffff'
+													: '#1f2937'}"
+												title="{opt.label}: {opt.count} ({Math.round(pct)}%)"
+											>
+												{#if pct >= 9}
+													<span class="text-[10px] font-semibold leading-none"
+														>{Math.round(pct)}%</span
+													>
+												{/if}
+											</div>
+										{/if}
+									{/each}
 								</div>
-							{/if}
-							{#if complianceAssessment.scoring_enabled}
-								<div class="flex items-center gap-2 shrink-0 text-xs font-medium">
+							</div>
+						{/if}
+						{#if complianceAssessment.scoring_enabled}
+							<div class="flex items-center gap-2 shrink-0 text-xs font-medium">
+								<span
+									class="inline-flex items-center gap-1 rounded-md bg-surface-100 px-2 py-1 text-surface-700"
+								>
+									{m.score()}:
+									<span class="font-semibold">{fmtScore(data.scores?.implementation_score)}</span>
+									{#if data.scores?.max_score}<span class="text-surface-400"
+											>/{data.scores.max_score}</span
+										>{/if}
+								</span>
+								{#if complianceAssessment.show_documentation_score}
 									<span
 										class="inline-flex items-center gap-1 rounded-md bg-surface-100 px-2 py-1 text-surface-700"
 									>
-										{m.score()}:
-										<span class="font-semibold">{fmtScore(data.scores?.implementation_score)}</span>
+										{m.documentationScore()}:
+										<span class="font-semibold">{fmtScore(data.scores?.documentation_score)}</span>
 										{#if data.scores?.max_score}<span class="text-surface-400"
 												>/{data.scores.max_score}</span
 											>{/if}
 									</span>
-									{#if complianceAssessment.show_documentation_score}
-										<span
-											class="inline-flex items-center gap-1 rounded-md bg-surface-100 px-2 py-1 text-surface-700"
-										>
-											{m.documentationScore()}:
-											<span class="font-semibold">{fmtScore(data.scores?.documentation_score)}</span>
-											{#if data.scores?.max_score}<span class="text-surface-400"
-													>/{data.scores.max_score}</span
-												>{/if}
-										</span>
-									{/if}
-								</div>
-							{/if}
-						</div>
-					{/if}
-				</div>
-			{/if}
-			<!-- Read-only banner -->
-			{#if isReadOnly}
-				<div
-					class="card bg-yellow-50 border border-yellow-300 px-5 py-3 flex items-center space-x-3 my-2"
-				>
-					<i class="fa-solid fa-lock text-yellow-600 text-lg"></i>
-					<p class="text-yellow-800 font-medium">
-						{complianceAssessment.is_locked
-							? m.lockedAssessmentMessage()
-							: m.assessmentInReviewMessage()}
-					</p>
-				</div>
-			{/if}
-			<div class="flex flex-row items-start gap-4">
-				{#if !shallow && !questionnaireOnly && showToc && !tocCollapsed}
-					<!-- Table of contents column (child of the card, toggled from the header) -->
-					<nav
-						class="hidden lg:block w-64 shrink-0 self-start sticky overflow-y-auto border-r border-surface-200 pr-2"
-						style="top: {stickyTop + headerHeight}px; max-height: calc(100vh - {stickyTop +
-							headerHeight}px - 1rem)"
-					>
-						{#if showResult}
-							<div class="flex flex-wrap gap-1 pb-2 mb-1 border-b border-surface-200">
-								{#each resultCounts as opt}
-									{#if opt.count > 0}
-										<button
-											type="button"
-											class="px-2 py-1 text-[10px] rounded transition-colors flex items-center gap-1.5 {tocFilterResult ===
-											opt.value
-												? 'bg-surface-700 text-white font-semibold'
-												: 'bg-white text-surface-700 hover:bg-surface-100 border border-surface-200'}"
-											onclick={() =>
-												(tocFilterResult = tocFilterResult === opt.value ? null : opt.value)}
-											title={opt.label}
-										>
-											<span
-												class="inline-block w-1.5 h-1.5 rounded-full"
-												style="background-color: {complianceResultColorMap[opt.value] ?? '#d1d5db'}"
-											></span>
-											{opt.count}
-										</button>
-									{/if}
-								{/each}
+								{/if}
 							</div>
 						{/if}
-						<div class="space-y-0.5">
-							{#each filteredTocSections as section}
-								{#if section.isSection}
+					</div>
+				{/if}
+			</div>
+		{/if}
+		<!-- Read-only banner -->
+		{#if isReadOnly}
+			<div
+				class="card bg-yellow-50 border border-yellow-300 px-5 py-3 flex items-center space-x-3 my-2"
+			>
+				<i class="fa-solid fa-lock text-yellow-600 text-lg"></i>
+				<p class="text-yellow-800 font-medium">
+					{complianceAssessment.is_locked
+						? m.lockedAssessmentMessage()
+						: m.assessmentInReviewMessage()}
+				</p>
+			</div>
+		{/if}
+		<div class="flex flex-row items-start gap-4">
+			{#if !shallow && !questionnaireOnly && showToc && !tocCollapsed}
+				<!-- Table of contents column (child of the card, toggled from the header) -->
+				<nav
+					class="hidden lg:block w-64 shrink-0 self-start sticky overflow-y-auto border-r border-surface-200 pr-2"
+					style="top: {stickyTop + headerHeight}px; max-height: calc(100vh - {stickyTop +
+						headerHeight}px - 1rem)"
+				>
+					{#if showResult}
+						<div class="flex flex-wrap gap-1 pb-2 mb-1 border-b border-surface-200">
+							{#each resultCounts as opt}
+								{#if opt.count > 0}
 									<button
 										type="button"
-										class="w-full text-left py-1 text-[10px] font-bold uppercase tracking-wide text-surface-400 mt-2 truncate hover:text-primary-700"
-										style="padding-left: {0.25 + (section.depth - 1) * 0.5}rem"
-										onclick={() => goToRequirement(section)}
-										title={section.title}
-									>
-										{section.refId ? `${section.refId} ` : ''}{section.title}
-									</button>
-								{:else}
-									<button
-										type="button"
-										class="w-full text-left py-1.5 pr-2 text-xs rounded-md transition-colors truncate flex items-center gap-1.5 text-surface-600 hover:bg-surface-100"
-										style="padding-left: {0.25 + (section.depth - 1) * 0.5}rem"
-										onclick={() => goToRequirement(section)}
-										title={section.title}
+										class="px-2 py-1 text-[10px] rounded transition-colors flex items-center gap-1.5 {tocFilterResult ===
+										opt.value
+											? 'bg-surface-700 text-white font-semibold'
+											: 'bg-white text-surface-700 hover:bg-surface-100 border border-surface-200'}"
+										onclick={() =>
+											(tocFilterResult = tocFilterResult === opt.value ? null : opt.value)}
+										title={opt.label}
 									>
 										<span
-											class="inline-block w-2 h-2 rounded-full flex-shrink-0"
-											style="background-color: {section.result === '__splash__'
-												? '#a855f7'
-												: (complianceResultColorMap[section.result] ?? '#d1d5db')}"
+											class="inline-block w-1.5 h-1.5 rounded-full"
+											style="background-color: {complianceResultColorMap[opt.value] ?? '#d1d5db'}"
 										></span>
-										<span class="truncate"
-											>{section.refId ? `${section.refId} ` : ''}{section.title}</span
-										>
+										{opt.count}
 									</button>
 								{/if}
 							{/each}
 						</div>
-					</nav>
-				{/if}
-				<ul data-testid="requirement-assessments" class="flex-1 min-w-0 space-y-3">
-					{#each requirementAssessments as requirementAssessment, i}
-					{@const row = sectionInfo.rows[i]}
-					{#if isRowVisible(i)}
-						<li class="list-none">
-							{#if requirementAssessment.display_mode === 'splash' || requirementAssessment.requirement?.display_mode === 'splash'}
-								<!-- Splash screen node: full-width markdown block -->
-								<div class="my-4">
-									<SplashCard
-										name={requirementAssessment.name ?? requirementAssessment.requirement?.name}
-										description={requirementAssessment.description ??
-											requirementAssessment.requirement?.description}
-										id="requirement-{requirementAssessment.id}"
-									/>
-								</div>
-							{:else if !requirementAssessment.assessable}
-								<!-- Section heading node: collapsible section bar (TOC anchor) -->
-								{@const collapsed = !!collapsedSections[requirementAssessment.id]}
-								{@const sectionCount = sectionInfo.counts[requirementAssessment.id] ?? 0}
-								<div
-									id="requirement-{requirementAssessment.id}"
-									data-toc
-									data-toc-title={getTitle(requirementAssessment)}
-									data-toc-level="0"
-									class="mt-2"
-									style="margin-left: {(row.depth - 1) * 0.75}rem"
-									style:scroll-margin-top="{stickyTop + 64}px"
+					{/if}
+					<div class="space-y-0.5">
+						{#each filteredTocSections as section}
+							{#if section.isSection}
+								<button
+									type="button"
+									class="w-full text-left py-1 text-[10px] font-bold uppercase tracking-wide text-surface-400 mt-2 truncate hover:text-primary-700"
+									style="padding-left: {0.25 + (section.depth - 1) * 0.5}rem"
+									onclick={() => goToRequirement(section)}
+									title={section.title}
 								>
-									<button
-										type="button"
-										onclick={() => toggleSectionCollapse(requirementAssessment.id)}
-										aria-expanded={!collapsed}
-										class="flex w-full items-center gap-2 rounded-lg border border-orange-200 border-l-4 border-l-orange-400 bg-orange-50/60 px-3 py-2 text-left transition-colors hover:bg-orange-100/70"
-									>
-										<i
-											class="fa-solid fa-chevron-down text-orange-500 text-xs transition-transform {collapsed
-												? '-rotate-90'
-												: ''}"
-										></i>
-										{#if getRefId(requirementAssessment)}
-											<span class="shrink-0 font-semibold text-sm text-orange-600"
-												>{getRefId(requirementAssessment)}</span
-											>
-										{/if}
-										<span
-											class="font-semibold text-orange-800 {row.depth > 1
-												? 'text-sm'
-												: 'text-base'}">{getDisplayTitle(requirementAssessment)}</span
-										>
-										{#if sectionCount > 0}
-											<span
-												class="badge preset-tonal-secondary text-xs ml-auto shrink-0"
-												title={m.requirements()}
-											>
-												{sectionCount}
-											</span>
-										{/if}
-									</button>
-									{#if requirementAssessment.requirement.description && !collapsed}
-										<div class="text-sm text-surface-600 px-3 pt-1.5">
-											<MarkdownRenderer content={requirementAssessment.requirement.description} />
-										</div>
-									{/if}
-								</div>
+									{section.refId ? `${section.refId} ` : ''}{section.title}
+								</button>
 							{:else}
-								<!-- Assessable requirement: compact card -->
-								<div
-									class="card border border-surface-200 rounded-xl p-4 space-y-3 shadow-sm"
-									id="requirement-{requirementAssessment.id}"
-									data-toc
-									data-toc-title={getTitle(requirementAssessment)}
-									data-toc-level="0"
-									style:scroll-margin-top="{stickyTop + 64}px"
+								<button
+									type="button"
+									class="w-full text-left py-1.5 pr-2 text-xs rounded-md transition-colors truncate flex items-center gap-1.5 text-surface-600 hover:bg-surface-100"
+									style="padding-left: {0.25 + (section.depth - 1) * 0.5}rem"
+									onclick={() => goToRequirement(section)}
+									title={section.title}
 								>
-									<form
-										id="tableModeForm-{requirementAssessment.id}"
-										action="{actionPath}?/updateRequirementAssessment"
-										method="post"
-										class="flex flex-col gap-3 table-mode-form"
+									<span
+										class="inline-block w-2 h-2 rounded-full flex-shrink-0"
+										style="background-color: {section.result === '__splash__'
+											? '#a855f7'
+											: (complianceResultColorMap[section.result] ?? '#d1d5db')}"
+									></span>
+									<span class="truncate"
+										>{section.refId ? `${section.refId} ` : ''}{section.title}</span
 									>
-										<!-- Row A: foldable title -->
-										<div class="flex items-center gap-3 flex-wrap">
-											<button
-												type="button"
-												class="flex items-center gap-2 text-left min-w-0"
-												onclick={() => toggleRA(requirementAssessment.id)}
-												aria-expanded={!!expandedRA[requirementAssessment.id]}
+								</button>
+							{/if}
+						{/each}
+					</div>
+				</nav>
+			{/if}
+			<div class="flex-1 min-w-0">
+				{#if activeSection}
+					<!-- Single sticky "current section" bar (updated on scroll) -->
+					<div class="sticky z-10 pb-2" style="top: {stickyTop + headerHeight}px">
+						<button
+							type="button"
+							onclick={() => toggleSectionCollapse(activeSection.id)}
+							class="flex w-full items-center gap-2 rounded-lg border border-orange-200 border-l-4 border-l-orange-400 bg-orange-50 px-3 py-2 text-left shadow-md"
+						>
+							<i
+								class="fa-solid fa-chevron-down text-orange-500 text-xs transition-transform {collapsedSections[
+									activeSection.id
+								]
+									? '-rotate-90'
+									: ''}"
+							></i>
+							{#if getRefId(activeSection)}
+								<span class="shrink-0 font-semibold text-sm text-orange-600"
+									>{getRefId(activeSection)}</span
+								>
+							{/if}
+							<span class="font-semibold text-orange-800 truncate"
+								>{getDisplayTitle(activeSection)}</span
+							>
+						</button>
+					</div>
+				{/if}
+				<ul data-testid="requirement-assessments" class="space-y-3">
+					{#each requirementAssessments as requirementAssessment, i}
+						{@const row = sectionInfo.rows[i]}
+						{#if isRowVisible(i)}
+							<li class="list-none">
+								{#if requirementAssessment.display_mode === 'splash' || requirementAssessment.requirement?.display_mode === 'splash'}
+									<!-- Splash screen node: full-width markdown block -->
+									<div class="my-4">
+										<SplashCard
+											name={requirementAssessment.name ?? requirementAssessment.requirement?.name}
+											description={requirementAssessment.description ??
+												requirementAssessment.requirement?.description}
+											id="requirement-{requirementAssessment.id}"
+										/>
+									</div>
+								{:else if !requirementAssessment.assessable}
+									<!-- Section heading node: collapsible section bar (TOC anchor) -->
+									{@const collapsed = !!collapsedSections[requirementAssessment.id]}
+									{@const sectionCount = sectionInfo.counts[requirementAssessment.id] ?? 0}
+									<div
+										id="requirement-{requirementAssessment.id}"
+										data-toc
+										data-toc-title={getTitle(requirementAssessment)}
+										data-toc-level="0"
+										style:scroll-margin-top="{stickyTop + 64}px"
+									>
+										<button
+											type="button"
+											onclick={() => toggleSectionCollapse(requirementAssessment.id)}
+											data-section-anchor
+											data-ra-id={requirementAssessment.id}
+											aria-expanded={!collapsed}
+											class="flex w-full items-center gap-2 rounded-lg border border-orange-200 border-l-4 border-l-orange-400 bg-orange-50 px-3 py-2 text-left transition-colors hover:bg-orange-100/70"
+										>
+											<i
+												class="fa-solid fa-chevron-down text-orange-500 text-xs transition-transform {collapsed
+													? '-rotate-90'
+													: ''}"
+											></i>
+											{#if getRefId(requirementAssessment)}
+												<span class="shrink-0 font-semibold text-sm text-orange-600"
+													>{getRefId(requirementAssessment)}</span
+												>
+											{/if}
+											<span
+												class="font-semibold text-orange-800 {row.depth > 1
+													? 'text-sm'
+													: 'text-base'}">{getDisplayTitle(requirementAssessment)}</span
 											>
-												{#if !shallow}
-													<i
-														class="fa-solid fa-chevron-right text-surface-400 text-sm transition-transform {expandedRA[
-															requirementAssessment.id
-														]
-															? 'rotate-90'
-															: ''}"
-													></i>
-												{/if}
-												{#if getRefId(requirementAssessment)}
-													<span class="badge preset-tonal-secondary font-medium shrink-0"
-														>{getRefId(requirementAssessment)}</span
-													>
-												{/if}
-												<span class="min-w-0 font-semibold text-base text-surface-900">
-													{getDisplayTitle(requirementAssessment)}
-												</span>
-												{#if typeof requirementAssessment.requirement?.weight === 'number' && Number.isFinite(requirementAssessment.requirement.weight) && requirementAssessment.requirement.weight !== 1}
-													<span
-														class="badge text-xs font-medium bg-indigo-100 text-indigo-800 shrink-0"
-													>
-														{m.requirementWeight()}: {requirementAssessment.requirement.weight}
-													</span>
-												{/if}
-											</button>
-
-											{#if viewerRole === 'auditor' && showRespondentAlignment && requirementAssessment.respondent_alignment}
-												<span class="flex flex-col items-end shrink-0 ml-auto">
-													<span class="text-xs italic text-surface-500"
-														>{m.respondentAnswered()}</span
-													>
-													<span
-														class="badge text-sm font-semibold text-white"
-														style="background-color: {alignmentColorMap[
-															requirementAssessment.respondent_alignment
-														]}"
-													>
-														{safeTranslate(requirementAssessment.respondent_alignment)}
-													</span>
+											{#if sectionCount > 0}
+												<span
+													class="badge preset-tonal-secondary text-xs ml-auto shrink-0"
+													title={m.requirements()}
+												>
+													{sectionCount}
 												</span>
 											{/if}
-										</div>
-
-										<!-- Description: always visible, even when the body is collapsed -->
-										{#if requirementAssessment.requirement.description}
-											<div class="text-sm text-surface-700" data-testid="description">
+										</button>
+										{#if requirementAssessment.requirement.description && !collapsed}
+											<div class="text-sm text-surface-600 px-3 pt-1.5">
 												<MarkdownRenderer content={requirementAssessment.requirement.description} />
 											</div>
 										{/if}
-
-										<!-- Row B: result / status / score, aligned under the name (editable while collapsed) -->
-										{#if (!questionnaireMode && showResult) || (!shallow && complianceAssessment.scoring_enabled)}
-											<div class="flex flex-wrap items-start gap-x-6 gap-y-3 pl-7">
-												{#if !questionnaireMode && showResult}
-													<div class="flex flex-col gap-1">
-														<span class="text-xs font-semibold text-surface-500 italic">{m.result()}</span>
-													{#if hasComputedResult(requirementAssessment.requirement.questions)}
-														<span
-															class="badge text-sm font-semibold w-fit"
-															style={resultBadgeStyle(requirementAssessment.result)}
+									</div>
+								{:else}
+									<!-- Assessable requirement: compact card -->
+									<div
+										class="card border border-surface-200 rounded-xl p-4 space-y-3 shadow-sm"
+										id="requirement-{requirementAssessment.id}"
+										data-toc
+										data-toc-title={getTitle(requirementAssessment)}
+										data-toc-level="0"
+										style:scroll-margin-top="{stickyTop + 64}px"
+									>
+										<form
+											id="tableModeForm-{requirementAssessment.id}"
+											action="{actionPath}?/updateRequirementAssessment"
+											method="post"
+											class="flex flex-col gap-3 table-mode-form"
+										>
+											<!-- Row A: foldable title -->
+											<div class="flex items-center gap-3 flex-wrap">
+												<div class="flex items-center gap-2 min-w-0">
+													{#if getRefId(requirementAssessment)}
+														<span class="badge preset-tonal-secondary font-medium shrink-0"
+															>{getRefId(requirementAssessment)}</span
 														>
-															{safeTranslate(requirementAssessment.result)}
+													{/if}
+													<span class="min-w-0 font-semibold text-base text-surface-900">
+														{getDisplayTitle(requirementAssessment)}
+													</span>
+													{#if typeof requirementAssessment.requirement?.weight === 'number' && Number.isFinite(requirementAssessment.requirement.weight) && requirementAssessment.requirement.weight !== 1}
+														<span
+															class="badge text-xs font-medium bg-indigo-100 text-indigo-800 shrink-0"
+														>
+															{m.requirementWeight()}: {requirementAssessment.requirement.weight}
 														</span>
-													{:else}
-														<SegmentedControl
-															options={result_options}
-															value={requirementAssessment.result}
-															colorMap={complianceResultTailwindColorMap}
-															disabled={isReadOnly}
-															size="sm"
-															ariaLabel={m.result()}
-															onChange={(newValue) => {
-																const newResult =
-																	requirementAssessment.result === newValue
-																		? 'not_assessed'
-																		: newValue;
-																requirementAssessment.result = newResult;
-																update(requirementAssessment, 'result');
-															}}
-														/>
 													{/if}
-													</div>
-													{#if complianceAssessment.progress_status_enabled}
-														<div class="flex flex-col gap-1">
-															<span class="text-xs font-semibold text-surface-500 italic">{m.status()}</span>
-														<SegmentedControl
-															options={status_options}
-															value={requirementAssessment.status}
-															colorMap={complianceStatusTailwindColorMap}
-															disabled={isReadOnly}
-															size="sm"
-															ariaLabel={m.status()}
-															onChange={(newValue) => {
-																const newStatus =
-																	requirementAssessment.status === newValue ? 'to_do' : newValue;
-																requirementAssessment.status = newStatus;
-																update(requirementAssessment, 'status');
-															}}
-														/>
-													</div>
-													{/if}
-												{/if}
-												{@render scoreSlot(requirementAssessment)}
-											</div>
-										{/if}
+												</div>
 
-										{#if shallow || expandedRA[requirementAssessment.id]}
+												{#if viewerRole === 'auditor' && showRespondentAlignment && requirementAssessment.respondent_alignment}
+													<span class="flex flex-col items-end shrink-0 ml-auto">
+														<span class="text-xs italic text-surface-500"
+															>{m.respondentAnswered()}</span
+														>
+														<span
+															class="badge text-sm font-semibold text-white"
+															style="background-color: {alignmentColorMap[
+																requirementAssessment.respondent_alignment
+															]}"
+														>
+															{safeTranslate(requirementAssessment.respondent_alignment)}
+														</span>
+													</span>
+												{/if}
+											</div>
+
+											<!-- Description: always visible, even when the body is collapsed -->
+											{#if requirementAssessment.requirement.description}
+												<div class="text-sm text-surface-700" data-testid="description">
+													<MarkdownRenderer
+														content={requirementAssessment.requirement.description}
+													/>
+												</div>
+											{/if}
+
+											<!-- Row B: result / status / score, aligned under the name (editable while collapsed) -->
+											{#if (!questionnaireMode && showResult) || (!shallow && complianceAssessment.scoring_enabled)}
+												<div class="flex flex-wrap items-start gap-x-6 gap-y-3 pl-7">
+													{#if !questionnaireMode && showResult}
+														<div class="flex flex-col gap-1">
+															<span class="text-xs font-semibold text-surface-500 italic"
+																>{m.result()}</span
+															>
+															{#if hasComputedResult(requirementAssessment.requirement.questions)}
+																<span
+																	class="badge text-sm font-semibold w-fit"
+																	style={resultBadgeStyle(requirementAssessment.result)}
+																>
+																	{safeTranslate(requirementAssessment.result)}
+																</span>
+															{:else}
+																<SegmentedControl
+																	options={result_options}
+																	value={requirementAssessment.result}
+																	colorMap={complianceResultTailwindColorMap}
+																	disabled={isReadOnly}
+																	size="sm"
+																	ariaLabel={m.result()}
+																	onChange={(newValue) => {
+																		const newResult =
+																			requirementAssessment.result === newValue
+																				? 'not_assessed'
+																				: newValue;
+																		requirementAssessment.result = newResult;
+																		update(requirementAssessment, 'result');
+																	}}
+																/>
+															{/if}
+														</div>
+														{#if complianceAssessment.progress_status_enabled}
+															<div class="flex flex-col gap-1">
+																<span class="text-xs font-semibold text-surface-500 italic"
+																	>{m.status()}</span
+																>
+																<SegmentedControl
+																	options={status_options}
+																	value={requirementAssessment.status}
+																	colorMap={complianceStatusTailwindColorMap}
+																	disabled={isReadOnly}
+																	size="sm"
+																	ariaLabel={m.status()}
+																	onChange={(newValue) => {
+																		const newStatus =
+																			requirementAssessment.status === newValue
+																				? 'to_do'
+																				: newValue;
+																		requirementAssessment.status = newStatus;
+																		update(requirementAssessment, 'status');
+																	}}
+																/>
+															</div>
+														{/if}
+													{/if}
+													{@render scoreSlot(requirementAssessment)}
+												</div>
+											{/if}
+
 											<!-- Additional information (annotation / typical evidence / mapping inference) -->
 											{#if requirementAssessment.requirement.annotation || requirementAssessment.requirement.typical_evidence || requirementAssessment.mapping_inference?.result}
 												<div class="card p-3 preset-tonal-secondary text-sm cursor-auto w-full">
@@ -1272,6 +1304,14 @@
 																triggerTestId: 'evidence-accordion-trigger'
 															})}
 														{/if}
+														{#if showObservation}
+															{@render chip({
+																raId: requirementAssessment.id,
+																key: 'observation',
+																icon: 'fa-comment-dots',
+																label: m.observation()
+															})}
+														{/if}
 													</div>
 
 													{#if showAppliedControls && isSectionOpen(requirementAssessment.id, 'appliedControl')}
@@ -1287,7 +1327,6 @@
 																modalUpdateForm(requirementAssessment, 'selectAppliedControls')
 														})}
 													{/if}
-
 													{#if showEvidences && isSectionOpen(requirementAssessment.id, 'evidence')}
 														{@render detailPanel({
 															items: requirementAssessment.evidences,
@@ -1304,25 +1343,8 @@
 																modalUpdateForm(requirementAssessment, 'selectEvidences')
 														})}
 													{/if}
-												{/if}
-
-												<!-- Observation: always at the end of the unfolded body -->
-												{#if showObservation}
-													<div class="space-y-1">
-														<p class="text-sm font-medium text-surface-600">
-															<i class="fa-solid fa-comment-dots mr-1 text-surface-500"
-															></i>{m.observation()}
-														</p>
-														{#if shallow}
-															{#if requirementAssessment.observation}
-																<MarkdownRenderer
-																	content={requirementAssessment.observation}
-																	class="text-primary-500"
-																/>
-															{:else}
-																<p class="text-surface-400 italic text-sm">{m.noObservation()}</p>
-															{/if}
-														{:else}
+													{#if showObservation && isSectionOpen(requirementAssessment.id, 'observation')}
+														<div class="card border border-surface-200 rounded-lg p-3">
 															<TableMarkdownField
 																value={requirementAssessment.observation}
 																disabled={isReadOnly}
@@ -1332,18 +1354,29 @@
 																	requirementAssessment.observationBuffer = newValue;
 																}}
 															/>
-														{/if}
-													</div>
+														</div>
+													{/if}
+												{/if}
+
+												{#if shallow && showObservation}
+													{#if requirementAssessment.observation}
+														<MarkdownRenderer
+															content={requirementAssessment.observation}
+															class="text-primary-500"
+														/>
+													{:else}
+														<p class="text-surface-400 italic text-sm">{m.noObservation()}</p>
+													{/if}
 												{/if}
 											</div>
-										{/if}
-									</form>
-								</div>
-							{/if}
-						</li>
-					{/if}
-				{/each}
-			</ul>
+										</form>
+									</div>
+								{/if}
+							</li>
+						{/if}
+					{/each}
+				</ul>
+			</div>
 		</div>
 	</div>
 </div>
