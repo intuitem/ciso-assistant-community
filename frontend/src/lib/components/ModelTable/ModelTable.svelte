@@ -187,6 +187,8 @@
 	const modalStore: ModalStore = getModalStore();
 
 	let model = $derived(URL_MODEL_MAP[URLModel]);
+	// Models keeping some fields writable on built-in rows (BUILTIN_EDITABLE_FIELDS).
+	const BUILTIN_EDITABLE_URL_MODELS = ['terminologies', 'entities', 'asset-class'];
 	const tableSource: TableSource = $derived(
 		Object.keys(source.head)
 			.filter(
@@ -398,7 +400,8 @@
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type) ||
 		forcePreventDelete;
-	const preventEdit = (row: TableSource) => row?.meta?.builtin || forcePreventEdit;
+	const preventEdit = (row: TableSource) =>
+		(row?.meta?.builtin && !BUILTIN_EDITABLE_URL_MODELS.includes(URLModel)) || forcePreventEdit;
 
 	const tableURLModel = URLModel;
 
@@ -561,8 +564,7 @@
 				})
 			: false) &&
 			(!(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) ||
-				URLModel === 'terminologies' ||
-				URLModel === 'entities')
+				BUILTIN_EDITABLE_URL_MODELS.includes(URLModel))
 	);
 
 	let contextMenuDisplayEdit = $derived(
@@ -1136,7 +1138,13 @@
 																{#each Object.entries(value) as [lang, translation]}
 																	<div class="flex flex-row gap-2">
 																		<strong>{lang}:</strong>
-																		<span>{safeTranslate(translation)}</span>
+																		<span
+																			>{safeTranslate(
+																				typeof translation === 'object' && translation !== null
+																					? ((translation as Record<string, string>).name ?? '')
+																					: translation
+																			)}</span
+																		>
 																	</div>
 																{/each}
 															</div>
@@ -1202,8 +1210,7 @@
 												URLModel={actionsURLModel}
 												detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
 												editURL={!(row.meta.builtin || row.meta.urn) ||
-												URLModel === 'terminologies' ||
-												URLModel === 'entities'
+												BUILTIN_EDITABLE_URL_MODELS.includes(URLModel)
 													? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`
 													: undefined}
 												{row}
