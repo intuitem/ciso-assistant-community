@@ -1511,9 +1511,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             )
 
             if has_is_published_field and getattr(obj, "is_published"):
-                # Access granted on an ENCLAVE folder must not leak the published
-                # objects of its ancestors (e.g. TPRM respondents scoped to an
-                # enclave inside the customer's domain).
+                # "view" access granted on an ENCLAVE folder MUST not leak the published objects of its ancestors.
                 ancestor_folder_ids = (
                     Folder.objects.filter(
                         descendants__in=Folder.objects.filter(
@@ -1913,9 +1911,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         )
 
         if perm_prefix == "view" and has_is_published_field:
-            # Access granted on an ENCLAVE folder must not leak the published
-            # objects of its ancestors (e.g. TPRM respondents scoped to an
-            # enclave inside the customer's domain).
+            # "view" access granted on an ENCLAVE folder MUST not leak the published objects of its ancestors.
             ancestor_folder_ids = Folder.objects.filter(
                 descendants__in=Folder.objects.filter(
                     id__in=allowed_folder_ids
