@@ -1,6 +1,6 @@
 """Library management MCP tools for CISO Assistant"""
 
-from ..client import make_get_request, make_post_request, fetch_all_results
+from ..client import make_get_request, make_post_request, fetch_all_results, found_line
 
 
 async def get_stored_libraries(
@@ -28,7 +28,7 @@ async def get_stored_libraries(
         if not libraries:
             return "No stored libraries found"
 
-        result = f"Found {len(libraries)} stored libraries\n\n"
+        result = found_line(libraries, "stored libraries") + "\n\n"
         result += "|URN|Name|Version|Provider|\n"
         result += "|---|---|---|---|\n"
 
@@ -56,7 +56,7 @@ async def get_loaded_libraries():
         if not libraries:
             return "No loaded libraries found"
 
-        result = f"Found {len(libraries)} loaded libraries\n\n"
+        result = found_line(libraries, "loaded libraries") + "\n\n"
         result += "|URN|Name|Version|Provider|\n"
         result += "|---|---|---|---|\n"
 

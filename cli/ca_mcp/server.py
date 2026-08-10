@@ -1,6 +1,12 @@
 """Main MCP server entry point for CISO Assistant"""
 
+import logging
+
 from mcp.server.fastmcp import FastMCP
+
+from . import config
+
+logger = logging.getLogger(__name__)
 
 # Initialize FastMCP server
 mcp = FastMCP("ciso-assistant")
@@ -33,6 +39,8 @@ from .tools.read_tools import (
     get_asset_classes,
     get_users,
 )
+
+from .tools.aggregate_tools import count_objects
 
 from .tools.analysis_tools import (
     get_all_audits_with_metrics,
@@ -135,123 +143,228 @@ from .tools.ebios_rm_tools import (
     update_kill_chain_step,
 )
 
-# Register all tools with MCP decorators
-mcp.tool()(get_risk_scenarios)
-mcp.tool()(get_risk_scenario)
-mcp.tool()(get_applied_controls)
-mcp.tool()(get_audits_progress)
-mcp.tool()(get_folders)
-mcp.tool()(get_perimeters)
-mcp.tool()(get_risk_matrices)
-mcp.tool()(get_risk_matrix_details)
-mcp.tool()(get_risk_assessments)
-mcp.tool()(get_threats)
-mcp.tool()(get_assets)
-mcp.tool()(get_incidents)
-mcp.tool()(get_security_exceptions)
-mcp.tool()(get_frameworks)
-mcp.tool()(get_business_impact_analyses)
-mcp.tool()(get_requirement_assessments)
-mcp.tool()(get_quantitative_risk_studies)
-mcp.tool()(get_quantitative_risk_scenarios)
-mcp.tool()(get_quantitative_risk_hypotheses)
-mcp.tool()(get_task_templates)
-mcp.tool()(get_task_template_details)
-mcp.tool()(get_vulnerabilities)
-mcp.tool()(get_vulnerability)
-mcp.tool()(get_asset_classes)
-mcp.tool()(get_users)
+READ_TOOLS = [
+    count_objects,
+    get_risk_scenarios,
+    get_risk_scenario,
+    get_applied_controls,
+    get_audits_progress,
+    get_folders,
+    get_perimeters,
+    get_risk_matrices,
+    get_risk_matrix_details,
+    get_risk_assessments,
+    get_threats,
+    get_assets,
+    get_incidents,
+    get_security_exceptions,
+    get_frameworks,
+    get_business_impact_analyses,
+    get_requirement_assessments,
+    get_quantitative_risk_studies,
+    get_quantitative_risk_scenarios,
+    get_quantitative_risk_hypotheses,
+    get_task_templates,
+    get_task_template_details,
+    get_vulnerabilities,
+    get_vulnerability,
+    get_asset_classes,
+    get_users,
+    get_all_audits_with_metrics,
+    get_audit_gap_analysis,
+    get_audit_global_score,
+    get_stored_libraries,
+    get_loaded_libraries,
+    get_entities,
+    get_entity_assessments,
+    get_representatives,
+    get_solutions,
+    get_contracts,
+    get_ebios_rm_studies,
+    get_feared_events,
+    get_ro_to_couples,
+    get_stakeholders,
+    get_strategic_scenarios,
+    get_attack_paths,
+    get_operational_scenarios,
+    get_elementary_actions,
+    get_operating_modes,
+    get_kill_chains,
+]
 
-mcp.tool()(get_all_audits_with_metrics)
-mcp.tool()(get_audit_gap_analysis)
-mcp.tool()(get_audit_global_score)
+WRITE_TOOLS = [
+    import_stored_library,
+    create_folder,
+    create_perimeter,
+    create_asset,
+    create_threat,
+    create_applied_control,
+    create_risk_assessment,
+    create_risk_scenario,
+    create_business_impact_analysis,
+    create_compliance_assessment,
+    create_quantitative_risk_study,
+    create_quantitative_risk_scenario,
+    create_quantitative_risk_hypothesis,
+    refresh_quantitative_risk_study_simulations,
+    create_task_template,
+    create_vulnerability,
+    update_vulnerability,
+    delete_vulnerability,
+    update_asset,
+    update_risk_scenario,
+    update_applied_control,
+    update_requirement_assessment,
+    update_requirement_assessments,
+    update_quantitative_risk_study,
+    update_quantitative_risk_scenario,
+    update_quantitative_risk_hypothesis,
+    update_task_template,
+    delete_task_template,
+    create_entity,
+    create_entity_assessment,
+    create_representative,
+    create_solution,
+    create_contract,
+    update_entity,
+    update_entity_assessment,
+    update_representative,
+    update_solution,
+    update_contract,
+    create_ebios_rm_study,
+    create_feared_event,
+    create_ro_to_couple,
+    create_stakeholder,
+    create_strategic_scenario,
+    create_attack_path,
+    create_operational_scenario,
+    create_elementary_action,
+    create_operating_mode,
+    create_kill_chain_step,
+    update_ebios_rm_study,
+    update_feared_event,
+    update_ro_to_couple,
+    update_stakeholder,
+    update_strategic_scenario,
+    update_attack_path,
+    update_operational_scenario,
+    update_operating_mode,
+    update_kill_chain_step,
+]
 
-mcp.tool()(get_stored_libraries)
-mcp.tool()(get_loaded_libraries)
-mcp.tool()(import_stored_library)
 
-mcp.tool()(create_folder)
-mcp.tool()(create_perimeter)
-mcp.tool()(create_asset)
-mcp.tool()(create_threat)
-mcp.tool()(create_applied_control)
-mcp.tool()(create_risk_assessment)
-mcp.tool()(create_risk_scenario)
-mcp.tool()(create_business_impact_analysis)
-mcp.tool()(create_compliance_assessment)
-mcp.tool()(create_quantitative_risk_study)
-mcp.tool()(create_quantitative_risk_scenario)
-mcp.tool()(create_quantitative_risk_hypothesis)
-mcp.tool()(refresh_quantitative_risk_study_simulations)
-mcp.tool()(create_task_template)
-mcp.tool()(create_vulnerability)
-mcp.tool()(update_vulnerability)
-mcp.tool()(delete_vulnerability)
+LOOPBACK_HOSTS = ["127.0.0.1:*", "localhost:*", "[::1]:*"]
+LOOPBACK_ORIGINS = ["http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*"]
 
-mcp.tool()(update_asset)
-mcp.tool()(update_risk_scenario)
-mcp.tool()(update_applied_control)
-mcp.tool()(update_requirement_assessment)
-mcp.tool()(update_requirement_assessments)
-mcp.tool()(update_quantitative_risk_study)
-mcp.tool()(update_quantitative_risk_scenario)
-mcp.tool()(update_quantitative_risk_hypothesis)
-mcp.tool()(update_task_template)
-mcp.tool()(delete_task_template)
+_registered = False
 
-# TPRM tools
-mcp.tool()(get_entities)
-mcp.tool()(get_entity_assessments)
-mcp.tool()(get_representatives)
-mcp.tool()(get_solutions)
-mcp.tool()(get_contracts)
-mcp.tool()(create_entity)
-mcp.tool()(create_entity_assessment)
-mcp.tool()(create_representative)
-mcp.tool()(create_solution)
-mcp.tool()(create_contract)
-mcp.tool()(update_entity)
-mcp.tool()(update_entity_assessment)
-mcp.tool()(update_representative)
-mcp.tool()(update_solution)
-mcp.tool()(update_contract)
 
-# EBIOS RM tools
-mcp.tool()(get_ebios_rm_studies)
-mcp.tool()(get_feared_events)
-mcp.tool()(get_ro_to_couples)
-mcp.tool()(get_stakeholders)
-mcp.tool()(get_strategic_scenarios)
-mcp.tool()(get_attack_paths)
-mcp.tool()(get_operational_scenarios)
-mcp.tool()(get_elementary_actions)
-mcp.tool()(get_operating_modes)
-mcp.tool()(get_kill_chains)
-mcp.tool()(create_ebios_rm_study)
-mcp.tool()(create_feared_event)
-mcp.tool()(create_ro_to_couple)
-mcp.tool()(create_stakeholder)
-mcp.tool()(create_strategic_scenario)
-mcp.tool()(create_attack_path)
-mcp.tool()(create_operational_scenario)
-mcp.tool()(create_elementary_action)
-mcp.tool()(create_operating_mode)
-mcp.tool()(create_kill_chain_step)
-mcp.tool()(update_ebios_rm_study)
-mcp.tool()(update_feared_event)
-mcp.tool()(update_ro_to_couple)
-mcp.tool()(update_stakeholder)
-mcp.tool()(update_strategic_scenario)
-mcp.tool()(update_attack_path)
-mcp.tool()(update_operational_scenario)
-mcp.tool()(update_operating_mode)
-mcp.tool()(update_kill_chain_step)
+def _annotations(fn, is_read):
+    """Behaviour hints so a client can gate destructive calls. Annotations are
+    hints, not a security boundary — the read-only profile is the boundary.
+
+    Read/write comes from which list the tool is in, not from its name: a name
+    prefix silently mislabels anything that isn't called get_*.
+    """
+    from mcp.types import ToolAnnotations
+
+    if is_read:
+        return ToolAnnotations(
+            readOnlyHint=True, destructiveHint=False, idempotentHint=True
+        )
+    name = fn.__name__
+    if name.startswith("delete_"):
+        return ToolAnnotations(
+            readOnlyHint=False, destructiveHint=True, idempotentHint=True
+        )
+    if name.startswith("update_"):
+        return ToolAnnotations(
+            readOnlyHint=False, destructiveHint=True, idempotentHint=True
+        )
+    # create_/import_/refresh_: additive, and not idempotent
+    return ToolAnnotations(
+        readOnlyHint=False, destructiveHint=False, idempotentHint=False
+    )
+
+
+def register_tools(read_only: bool = False):
+    """Register tools with the MCP server, optionally omitting writes."""
+    global _registered
+    if _registered:
+        return
+    for tool in READ_TOOLS:
+        mcp.tool(annotations=_annotations(tool, is_read=True))(tool)
+    if not read_only:
+        for tool in WRITE_TOOLS:
+            mcp.tool(annotations=_annotations(tool, is_read=False))(tool)
+    _registered = True
 
 
 def run_server():
-    """Run the MCP server"""
+    """Run the MCP server over stdio"""
+    register_tools(read_only=False)
     mcp.run(transport="stdio")
 
 
+def run_http():
+    """Run the MCP server over Streamable HTTP"""
+    import uvicorn
+    from mcp.server.transport_security import TransportSecuritySettings
+
+    register_tools(read_only=config.READ_ONLY)
+
+    mcp.settings.stateless_http = config.STATELESS
+    mcp.settings.json_response = config.JSON_RESPONSE
+    mcp.settings.streamable_http_path = config.HTTP_PATH
+
+    if config.ALLOWED_HOSTS == ["*"]:
+        mcp.settings.transport_security = TransportSecuritySettings(
+            enable_dns_rebinding_protection=False
+        )
+        logger.warning(
+            "CA_MCP_ALLOWED_HOSTS='*': DNS rebinding protection DISABLED. "
+            "Acceptable for tunnel testing, never for a real deployment."
+        )
+    elif config.ALLOWED_HOSTS:
+        # Keep loopback allowed so local tooling (Inspector, curl) still reaches
+        # the server once a public hostname is configured.
+        origins = config.ALLOWED_ORIGINS or [
+            f"{scheme}://{host}"
+            for host in config.ALLOWED_HOSTS
+            for scheme in ("https", "http")
+        ]
+        mcp.settings.transport_security = TransportSecuritySettings(
+            enable_dns_rebinding_protection=True,
+            allowed_hosts=config.ALLOWED_HOSTS + LOOPBACK_HOSTS,
+            allowed_origins=origins + LOOPBACK_ORIGINS,
+        )
+        logger.info("Allowed hosts: %s", config.ALLOWED_HOSTS + LOOPBACK_HOSTS)
+    else:
+        logger.warning(
+            "CA_MCP_ALLOWED_HOSTS unset: only loopback hosts are accepted. "
+            "Set it to the public hostname before exposing this server."
+        )
+
+    logger.info(
+        "MCP Streamable HTTP on %s:%s%s (read_only=%s, stateless=%s, json=%s, tools=%d)",
+        config.HTTP_HOST,
+        config.HTTP_PORT,
+        config.HTTP_PATH,
+        config.READ_ONLY,
+        config.STATELESS,
+        config.JSON_RESPONSE,
+        len(READ_TOOLS) if config.READ_ONLY else len(READ_TOOLS) + len(WRITE_TOOLS),
+    )
+    uvicorn.run(mcp.streamable_http_app(), host=config.HTTP_HOST, port=config.HTTP_PORT)
+
+
+def main():
+    logging.basicConfig(level=logging.INFO)
+    if config.TRANSPORT in ("http", "streamable-http"):
+        run_http()
+    else:
+        run_server()
+
+
 if __name__ == "__main__":
-    run_server()
+    main()
