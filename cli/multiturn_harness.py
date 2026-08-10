@@ -16,10 +16,9 @@ measure whether response bloat degrades later turns.
 
 import argparse
 import asyncio
-import json
 import os
 import sys
-import urllib.request
+import requests
 
 BASE = os.environ.get("LM_BASE", "http://127.0.0.1:1234/v1")
 TOKEN = os.environ.get("LM_API_TOKEN", "")
@@ -76,26 +75,21 @@ def load_tools_and_fns():
 
 
 def chat(model, messages, tools, timeout=300):
-    body = json.dumps(
-        {
+    r = requests.post(
+        f"{BASE}/chat/completions",
+        json={
             "model": model,
             "messages": messages,
             "tools": tools,
             "tool_choice": "auto",
             "temperature": 0,
             "max_tokens": 512,
-        }
-    ).encode()
-    req = urllib.request.Request(
-        f"{BASE}/chat/completions",
-        data=body,
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {TOKEN}",
         },
+        headers={"Authorization": f"Bearer {TOKEN}"},
+        timeout=timeout,
     )
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return json.load(r)
+    r.raise_for_status()
+    return r.json()
 
 
 def main():

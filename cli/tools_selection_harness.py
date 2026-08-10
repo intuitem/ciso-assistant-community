@@ -14,8 +14,7 @@ import asyncio
 import json
 import os
 import sys
-import urllib.error
-import urllib.request
+import requests
 
 BASE = os.environ.get("LM_BASE", "http://127.0.0.1:1234/v1")
 TOKEN = os.environ.get("LM_API_TOKEN", "")
@@ -210,32 +209,26 @@ def load_tools(read_only: bool):
 
 
 def ask(model, tools, prompt, timeout=180):
-    body = json.dumps(
-        {
-            "model": model,
-            "messages": [
-                {"role": "system", "content": SYSTEM},
-                {"role": "user", "content": prompt},
-            ],
-            "tools": tools,
-            "tool_choice": "auto",
-            "temperature": 0,
-            "max_tokens": 512,
-        }
-    ).encode()
-    req = urllib.request.Request(
-        f"{BASE}/chat/completions",
-        data=body,
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {TOKEN}",
-        },
-    )
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            d = json.load(r)
-    except urllib.error.HTTPError as e:
-        return None, f"HTTP {e.code}: {e.read()[:160].decode(errors='replace')}"
+        r = requests.post(
+            f"{BASE}/chat/completions",
+            json={
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": SYSTEM},
+                    {"role": "user", "content": prompt},
+                ],
+                "tools": tools,
+                "tool_choice": "auto",
+                "temperature": 0,
+                "max_tokens": 512,
+            },
+            headers={"Authorization": f"Bearer {TOKEN}"},
+            timeout=timeout,
+        )
+        if r.status_code != 200:
+            return None, f"HTTP {r.status_code}: {r.text[:160]}"
+        d = r.json()
     except Exception as e:
         return None, f"{type(e).__name__}"
     msg = d["choices"][0]["message"]
