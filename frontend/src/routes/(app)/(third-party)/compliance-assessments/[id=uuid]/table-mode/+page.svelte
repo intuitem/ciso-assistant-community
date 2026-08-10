@@ -496,7 +496,9 @@
 					break;
 				}
 			}
-			activeSectionId = rowId ? (sectionByRow[rowId] ?? null) : null;
+			const section = rowId ? (sectionByRow[rowId] ?? null) : null;
+			const headEl = section ? document.getElementById(`requirement-${section}`) : null;
+			activeSectionId = headEl && headEl.getBoundingClientRect().top < offset ? section : null;
 		};
 		updateActiveSection();
 		window.addEventListener('scroll', updateActiveSection, { passive: true });
