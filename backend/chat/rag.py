@@ -7,6 +7,7 @@ and context formatting.
 import structlog
 import os
 import time
+from typing import Any
 
 from django.contrib.auth.models import Permission
 
