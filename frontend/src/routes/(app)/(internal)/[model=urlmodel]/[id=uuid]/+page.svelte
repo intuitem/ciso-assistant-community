@@ -29,12 +29,12 @@
 	const canManageMembers = $derived(
 		Boolean(
 			data.model.name === 'usergroup' &&
-				canPerformAction({
-					user: page.data.user,
-					action: 'change',
-					model: 'usergroup',
-					domain: data.data.folder?.id ?? data.data.folder ?? page.data.user.root_folder_id
-				})
+			canPerformAction({
+				user: page.data.user,
+				action: 'change',
+				model: 'usergroup',
+				domain: data.data.folder?.id ?? data.data.folder ?? page.data.user.root_folder_id
+			})
 		)
 	);
 
