@@ -8,6 +8,7 @@ import ChangeImpact from '$lib/components/ContextMenu/applied-controls/ChangeImp
 import ChangeEffort from '$lib/components/ContextMenu/applied-controls/ChangeEffort.svelte';
 import ChangeCsfFunction from '$lib/components/ContextMenu/applied-controls/ChangeCsfFunction.svelte';
 import EvidenceChangeStatus from '$lib/components/ContextMenu/evidences/ChangeStatus.svelte';
+import WorkflowToggleActive from '$lib/components/ContextMenu/workflows/ToggleActive.svelte';
 import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeStatus.svelte';
 import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
@@ -56,6 +57,13 @@ interface ListViewFieldsConfig {
 const YES_NO_OPTIONS = [
 	{ label: 'yes', value: 'true' },
 	{ label: 'no', value: 'false' }
+];
+
+const TRIGGER_TYPE_OPTIONS = [
+	{ label: 'triggerManual', value: 'manual' },
+	{ label: 'triggerWebhook', value: 'webhook' },
+	{ label: 'triggerSchedule', value: 'schedule' },
+	{ label: 'triggerInternalEvent', value: 'internal_event' }
 ];
 
 const SOLUTION_CRITICALITY_OPTIONS = [
@@ -1142,6 +1150,24 @@ export const ASSET_CLASS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const ASSET_CLASS_IS_VISIBLE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'is_visible',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
+const ASSET_CLASS_BUILTIN_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'builtin',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
 const ASSET_IS_BUSINESS_FUNCTION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1172,6 +1198,18 @@ export const FINDINGS_ASSESSMENTS_CATEGORY_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		browserCache: 'force-cache',
 		optionsValueField: 'value'
+	}
+};
+
+export const FINDINGS_ASSESSMENTS_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'findings-assessments/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
 	}
 };
 
@@ -1872,8 +1910,8 @@ export const listViewFields = {
 			'filtering_labels'
 		],
 		optionalFields: {
-			head: ['referenceLink', 'createdAt', 'updatedAt'],
-			body: ['reference_link', 'created_at', 'updated_at']
+			head: ['assetClass', 'referenceLink', 'createdAt', 'updatedAt'],
+			body: ['asset_class', 'reference_link', 'created_at', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1884,8 +1922,19 @@ export const listViewFields = {
 		}
 	},
 	'asset-class': {
-		head: ['name', 'description'],
-		body: ['name', 'description']
+		head: ['name', 'parentAssetClass', 'description', 'translations', 'isVisible', 'builtin'],
+		body: [
+			'translated_name',
+			'parent',
+			'translated_description',
+			'translations',
+			'is_visible',
+			'builtin'
+		],
+		filters: {
+			is_visible: ASSET_CLASS_IS_VISIBLE_FILTER,
+			builtin: ASSET_CLASS_BUILTIN_FILTER
+		}
 	},
 	users: {
 		head: [
@@ -1929,6 +1978,10 @@ export const listViewFields = {
 	'idp-groups': {
 		head: ['name', 'userGroups'],
 		body: ['name', 'user_groups']
+	},
+	'service-accounts': {
+		head: ['name', 'clientId', 'secretPreview', 'isActive', 'expiryDate', 'createdAt'],
+		body: ['name', 'client_id', 'secret_preview', 'is_active', 'expiry_date', 'created_at']
 	},
 	roles: {
 		head: ['name', 'description'],
@@ -1974,8 +2027,8 @@ export const listViewFields = {
 			'updated_at'
 		],
 		optionalFields: {
-			head: ['status'],
-			body: ['status']
+			head: ['status', 'authors'],
+			body: ['status', 'authors']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2029,12 +2082,22 @@ export const listViewFields = {
 		body: ['version_number', 'status_display', 'author', 'change_summary', 'created_at']
 	},
 	'document-containers': {
-		head: ['refId', 'name', 'documentType', 'status', 'classification', 'domain', 'labels'],
+		head: [
+			'refId',
+			'name',
+			'documentType',
+			'status',
+			'reviewProgress',
+			'classification',
+			'domain',
+			'labels'
+		],
 		body: [
 			'ref_id',
 			'name',
 			'document_type',
 			'status',
+			'progress',
 			'classification',
 			'folder',
 			'filtering_labels'
@@ -2633,6 +2696,13 @@ export const listViewFields = {
 			is_selected: IS_SELECTED_FILTER
 		}
 	},
+	'threat-models': {
+		head: ['ref_id', 'name', 'description', 'catalog', 'nodeCount', 'domain'],
+		body: ['ref_id', 'name', 'description', 'catalog', 'node_count', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
 	'elementary-actions': {
 		head: ['ref_id', 'folder', '', 'name', 'attack_stage', 'threat'],
 		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat'],
@@ -2693,6 +2763,7 @@ export const listViewFields = {
 			'category',
 			'evidences',
 			'findings',
+			'status',
 			'treatmentProgress',
 			'folder',
 			'perimeter'
@@ -2703,6 +2774,7 @@ export const listViewFields = {
 			'category',
 			'evidences',
 			'findings_count',
+			'status',
 			'treatment_progress',
 			'folder',
 			'perimeter'
@@ -2715,6 +2787,7 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
 			category: FINDINGS_ASSESSMENTS_CATEGORY_FILTER,
+			status: FINDINGS_ASSESSMENTS_STATUS_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
@@ -3090,6 +3163,30 @@ export const listViewFields = {
 		body: ['activity', 'actor', 'role'],
 		filters: {}
 	},
+	workflows: {
+		head: ['name', 'description', 'triggerTypes', 'isActive', 'folder'],
+		body: ['name', 'description', 'trigger_types', 'is_active', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER,
+			trigger_type: {
+				component: AutocompleteSelect,
+				props: {
+					label: 'triggerType',
+					options: TRIGGER_TYPE_OPTIONS,
+					multiple: true
+				}
+			},
+			is_active: {
+				component: AutocompleteSelect,
+				props: {
+					label: 'isActive',
+					options: YES_NO_OPTIONS,
+					multiple: false
+				}
+			}
+		}
+	},
 	'metric-definitions': {
 		head: ['ref_id', 'name', 'description', 'category', 'unit', 'provider', 'labels', 'folder'],
 		body: [
@@ -3316,6 +3413,7 @@ export const contextMenuActions = {
 		{ component: ReplaceWith, props: {} }
 	],
 	evidences: [{ component: EvidenceChangeStatus, props: {} }],
+	workflows: [{ component: WorkflowToggleActive, props: {} }],
 	'task-nodes': [{ component: TaskNodeChangeStatus, props: {} }],
 	'feared-events': [{ component: SelectObject, props: {} }],
 	'ro-to': [{ component: SelectObject, props: {} }],
