@@ -397,6 +397,17 @@
 	const activeSection = $derived(
 		activeSectionId ? requirementAssessments.find((ra) => ra.id === activeSectionId) : null
 	);
+	// Row id -> enclosing section id (itself if it's a heading, else nearest ancestor
+	// heading). Used by the scroll-spy so a leaf row shows its own branch, not a
+	// sibling branch's deepest heading that merely sits above it in the document.
+	const sectionByRow = $derived.by(() => {
+		const map: Record<string, string | null> = {};
+		requirementAssessments.forEach((ra, i) => {
+			const row = sectionInfo.rows[i];
+			map[ra.id] = !row ? null : row.isHeading ? ra.id : (row.ancestors[0] ?? null);
+		});
+		return map;
+	});
 
 	// --- Table of contents (left column, toggled from the header) ---
 	let tocCollapsed = $state(false);
@@ -470,15 +481,17 @@
 			});
 		}
 
-		// Scroll-spy: current section = deepest section header scrolled above the offset.
+		// Scroll-spy: current section = enclosing section of the topmost still-visible row.
 		const updateActiveSection = () => {
 			const offset = stickyTop + headerHeight + 4;
-			let current: string | null = null;
-			for (const el of document.querySelectorAll<HTMLElement>('[data-section-anchor]')) {
-				if (el.getBoundingClientRect().top <= offset) current = el.getAttribute('data-ra-id');
-				else break;
+			let rowId: string | null = null;
+			for (const el of document.querySelectorAll<HTMLElement>('[data-row-anchor]')) {
+				if (el.getBoundingClientRect().bottom > offset) {
+					rowId = el.getAttribute('data-ra-id');
+					break;
+				}
 			}
-			activeSectionId = current;
+			activeSectionId = rowId ? (sectionByRow[rowId] ?? null) : null;
 		};
 		updateActiveSection();
 		window.addEventListener('scroll', updateActiveSection, { passive: true });
@@ -903,7 +916,7 @@
 							<li class="list-none">
 								{#if requirementAssessment.display_mode === 'splash' || requirementAssessment.requirement?.display_mode === 'splash'}
 									<!-- Splash screen node: full-width markdown block -->
-									<div class="my-4">
+									<div class="my-4" data-row-anchor data-ra-id={requirementAssessment.id}>
 										<SplashCard
 											name={requirementAssessment.name ?? requirementAssessment.requirement?.name}
 											description={requirementAssessment.description ??
@@ -920,13 +933,13 @@
 										data-toc
 										data-toc-title={getTitle(requirementAssessment)}
 										data-toc-level="0"
+										data-row-anchor
+										data-ra-id={requirementAssessment.id}
 										style:scroll-margin-top="{scrollOffset}px"
 									>
 										<button
 											type="button"
 											onclick={() => toggleSectionCollapse(requirementAssessment.id)}
-											data-section-anchor
-											data-ra-id={requirementAssessment.id}
 											aria-expanded={!collapsed}
 											class="flex w-full items-center gap-2 rounded-lg border border-orange-200 border-l-4 border-l-orange-400 bg-orange-50 px-3 py-2 text-left transition-colors hover:bg-orange-100/70"
 										>
@@ -968,6 +981,8 @@
 										data-toc
 										data-toc-title={getTitle(requirementAssessment)}
 										data-toc-level="0"
+										data-row-anchor
+										data-ra-id={requirementAssessment.id}
 										style:scroll-margin-top="{scrollOffset}px"
 									>
 										<form
