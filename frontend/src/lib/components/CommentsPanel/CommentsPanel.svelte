@@ -11,10 +11,7 @@
 	} from '$lib/components/Modals/stores';
 
 	type CommentParentType =
-		| 'requirement_assessment'
-		| 'risk_scenario'
-		| 'applied_control'
-		| 'finding';
+		'requirement_assessment' | 'risk_scenario' | 'applied_control' | 'finding';
 
 	interface CommentAuthor {
 		id: string;

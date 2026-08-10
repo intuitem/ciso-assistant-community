@@ -12,11 +12,7 @@
 	// -----------------------------------------------------------------------------
 
 	type Result =
-		| 'not_assessed'
-		| 'partially_compliant'
-		| 'non_compliant'
-		| 'compliant'
-		| 'not_applicable';
+		'not_assessed' | 'partially_compliant' | 'non_compliant' | 'compliant' | 'not_applicable';
 
 	type InheritancePathEntry = {
 		ca_id: string;
