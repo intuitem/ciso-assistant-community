@@ -541,8 +541,8 @@ class TestGetDoraExportMetadata(TestCase):
         self.assertEqual(meta["folder_prefix"], expected_stem)
         self.assertEqual(meta["filename"], f"{expected_stem}.zip")
         self.assertNotIn("LEI_", meta["filename"])
-        self.assertNotIn("T", meta["filename"])
-        self.assertNotIn("z", meta["filename"])
+        self.assertNotIn("T", meta["folder_prefix"])
+        self.assertNotIn("Z", meta["folder_prefix"])
 
     @patch("tprm.dora_export.datetime", wraps=datetime)
     @patch("tprm.dora_export.date", wraps=date)
