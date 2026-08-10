@@ -1064,7 +1064,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         root_folder = Folder.get_root_folder()
 
         view_all_role_assignments = role_assignments.filter(
-            perimeter_folders=root_folder, role__permissions__codename=perm_codename
+            perimeter_folders=root_folder, role__permissions__codename=perm_codename, is_recursive=True
         )
         can_user_view_all = view_all_role_assignments.exists()
         return can_user_view_all
