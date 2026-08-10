@@ -10913,6 +10913,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             "folder__parent_folder",  # For get_folder_full_path() optimization
             "framework",  # Displayed in table
             "perimeter",  # Displayed in table
+        ).prefetch_related(
+            "authors",  # Optional table column
         ).annotate(
             _has_questions=Exists(
                 Question.objects.filter(
