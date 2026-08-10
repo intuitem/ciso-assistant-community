@@ -143,9 +143,7 @@ export function stringify(value: string | number | boolean | null = null) {
  */
 export function formatActorName(
 	actor:
-		| { first_name?: string; last_name?: string; email?: string; str?: string }
-		| null
-		| undefined
+		{ first_name?: string; last_name?: string; email?: string; str?: string } | null | undefined
 ): string {
 	if (!actor) return '';
 	const full = `${actor.first_name || ''} ${actor.last_name || ''}`.trim();
