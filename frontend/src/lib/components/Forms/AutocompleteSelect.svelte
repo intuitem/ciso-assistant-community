@@ -138,19 +138,21 @@
 
 	const inputId = `form-input-${field.replaceAll('_', '-')}`;
 
-	// Patch svelte-multiselect's internal DOM (it exposes no props for these): name
-	// the role="searchbox" wrapper and re-role its chips <ul>, which holds the <input>.
+	// svelte-multiselect ≥11.8 puts our `id` on its role="combobox" <input>, so a
+	// visible <label for={inputId}> names it natively. Two patches remain (the lib
+	// exposes no props for them): re-role the chips <ul> — it directly contains the
+	// <input>, which axe's "list" rule (WCAG 1.3.1) flags inside a plain list — and,
+	// with no visible <label> (e.g. column filters), name the input directly.
 	let outerDiv: HTMLElement | null = $state(null);
 	$effect(() => {
 		if (!outerDiv) return;
-		const a11yName = label?.trim() || placeholder?.trim() || field.replaceAll('_', ' ');
-		if (!outerDiv.getAttribute('aria-label')) outerDiv.setAttribute('aria-label', a11yName);
 		outerDiv.querySelector('ul.selected')?.setAttribute('role', 'group');
-		// No visible <label> (e.g. column filters) — name the input directly.
 		if (label === undefined) {
-			outerDiv
-				.querySelector('ul.selected input:not([aria-hidden])')
-				?.setAttribute('aria-label', a11yName);
+			const a11yName = placeholder?.trim() || field.replaceAll('_', ' ');
+			outerDiv.querySelector('input[role="combobox"]')?.setAttribute('aria-label', a11yName);
+		} else {
+			// A visible <label for> names the input; drop any stale fallback so it wins.
+			outerDiv.querySelector('input[role="combobox"]')?.removeAttribute('aria-label');
 		}
 	});
 
