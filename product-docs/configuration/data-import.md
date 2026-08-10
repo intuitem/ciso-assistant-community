@@ -257,6 +257,8 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 * **observation**&#x20;
 * **vulnerabilities**\
   Pipe or comma-separated vulnerability names
+* **asset**\
+  Name or ref\_id of a single asset, looked up in the domain folder. A finding carries one asset, so if the cell holds several names only the first is linked and the row is reported as a warning. A missing asset is created in the domain folder with the default type Support, provided you may add assets there.
 
 
 
@@ -310,7 +312,7 @@ Controls are created on picked based on the perimeter's domain. Line breaks are 
   * `avoid`
   * `transfer`
 * **assets**\
-  Newline-, semicolon- or comma-separated asset names. Missing assets are auto-created in the domain folder with the default type Support
+  Newline-, semicolon- or comma-separated asset names or ref\_ids. Missing assets are auto-created in the domain folder with the default type Support, provided you may add assets there — otherwise the name is reported as a warning on the row.
 * **justification**: String
 
 1: The string must represent a value present in the chosen risk matrix

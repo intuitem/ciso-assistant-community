@@ -65,6 +65,15 @@ logger = structlog.get_logger(__name__)
 class ClientSettingsViewSet(BaseModelViewSet):
     model = ClientSettings
 
+    # No role holds add_clientsettings (the row is created by AppConfig), so the
+    # image actions authorize as edits of the existing singleton.
+    permission_overrides = {
+        "upload_logo": "change_clientsettings",
+        "upload_favicon": "change_clientsettings",
+        "delete_logo": "change_clientsettings",
+        "delete_favicon": "change_clientsettings",
+    }
+
     def create(self, request, *args, **kwargs):
         return Response(
             {
@@ -145,13 +154,16 @@ class ClientSettingsViewSet(BaseModelViewSet):
         )
 
     def handle_file_upload(self, request, pk, field_name):
+        # Raises 403/404 before anything is read; the blanket except below must
+        # not turn an authorization failure into a 400.
+        settings = self.get_object()
+
         if "file" not in request.FILES:
             return Response(
                 {"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
-            settings = ClientSettings.objects.get(id=pk)
             file = request.FILES["file"]
             content_type = magic.Magic(mime=True).from_buffer(file.read())
 
@@ -169,11 +181,13 @@ class ClientSettingsViewSet(BaseModelViewSet):
                 )
 
             setattr(settings, field_name, request.FILES["file"])
+            settings.full_clean()
             settings.save()
             return Response(status=status.HTTP_200_OK)
-        except ClientSettings.DoesNotExist:
+        except ValidationError:
             return Response(
-                {"error": "Client settings not found"}, status=status.HTTP_404_NOT_FOUND
+                {field_name: "invalidFileType"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
             logger.error("Error uploading file", exc_info=e)
@@ -200,41 +214,22 @@ class ClientSettingsViewSet(BaseModelViewSet):
     def upload_favicon(self, request, pk):
         return self.handle_file_upload(request, pk, "favicon")
 
+    def handle_file_delete(self, field_name):
+        settings = self.get_object()
+        image = getattr(settings, field_name)
+        if not image:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        image.delete()
+        settings.save()
+        return Response(status=status.HTTP_200_OK)
+
     @action(methods=["put"], detail=True, url_path="logo/delete")
     def delete_logo(self, request, pk):
-        (
-            object_ids_view,
-            _,
-            _,
-        ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ClientSettings
-        )
-        response = Response(status=status.HTTP_403_FORBIDDEN)
-        if UUID(pk) in object_ids_view:
-            settings = self.get_object()
-            if settings.logo:
-                settings.logo.delete()
-                settings.save()
-                response = Response(status=status.HTTP_200_OK)
-        return response
+        return self.handle_file_delete("logo")
 
     @action(methods=["put"], detail=True, url_path="favicon/delete")
     def delete_favicon(self, request, pk):
-        (
-            object_ids_view,
-            _,
-            _,
-        ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ClientSettings
-        )
-        response = Response(status=status.HTTP_403_FORBIDDEN)
-        if UUID(pk) in object_ids_view:
-            settings = self.get_object()
-            if settings.favicon:
-                settings.favicon.delete()
-                settings.save()
-                response = Response(status=status.HTTP_200_OK)
-        return response
+        return self.handle_file_delete("favicon")
 
 
 class LicenseStatusView(APIView):
@@ -279,6 +274,14 @@ class RoleViewSet(BaseModelViewSet):
         DjangoFilterBackend,
         RoleFilter,
     ]
+
+    def get_queryset(self):
+        # Hide only dedicated per-SA roles; a shared builtin role stays visible.
+        return (
+            super()
+            .get_queryset()
+            .exclude(service_accounts__isnull=False, builtin=False)
+        )
 
     def _get_default_permissions(self):
         return Permission.objects.filter(
