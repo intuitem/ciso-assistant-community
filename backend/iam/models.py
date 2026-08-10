@@ -1422,6 +1422,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return perm_prefix == "view"
 
         if perm_prefix == "add" and model is FilteringLabel:
+            # The SINGLE FilteringLabel exception: labels are force-stored in the root folder, so the standard rule would require root folder access to create one.
+            # Holding "add_filteringlabel" on ANY folder allows creating labels; everything else (view/change/delete) follows the standard folder-scoped rules (view relies on the root folder labels being force-published).
             return RoleAssignment._get_role_assignments_from_permission(
                 user, perm
             ).exists()
@@ -1462,7 +1464,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         model: type[models.Model],
         id: uuid.UUID,
     ) -> bool:
-        from core.models import Actor, FilteringLabel
+        from core.models import Actor
 
         if model is Permission:
             return perm_prefix == "view"
@@ -1473,11 +1475,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         if model is Actor:
             return RoleAssignment._is_actor_accessible(user, perm_prefix, obj)
-
-        if perm_prefix == "add" and model is FilteringLabel:
-            return RoleAssignment.get_allowed_folder_ids(
-                user, (perm_prefix, FilteringLabel)
-            ).exists()
 
         user_role_assignments = RoleAssignment._get_role_assignments_from_permission(
             user, (perm_prefix, model)
@@ -1495,9 +1492,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 "perimeter_folders__id", flat=True
             ).distinct()
         )
-
-        if model is FilteringLabel:
-            return user_role_assignments.exists()
 
         iam_scope_folder_id = RoleAssignment.get_iam_folder_id(obj)
 
@@ -1733,33 +1727,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         )
 
     @staticmethod
-    def _get_filtering_label_ids_by_perm(
-        user: AbstractBaseUser | AnonymousUser, perm_prefix: NativePermissionPrefix
-    ) -> QuerySet[uuid.UUID]:
-        from core.models import FilteringLabel
-
-        # If a user has the `perm` permission on any `Folder` for the `FilteringLabel` model.
-        # Then we grant this permission over all the `FilteringLabel` of the DB.
-        is_allowed = RoleAssignment._get_role_assignments_from_permission(
-            user, (perm_prefix, FilteringLabel)
-        ).exists()
-
-        if is_allowed:
-            return FilteringLabel.objects.values_list("id", flat=True)
-        else:
-            return FilteringLabel.objects.none()
-
-    @staticmethod
-    def _get_filtering_label_accessible_ids(
-        user: AbstractBaseUser | AnonymousUser,
-    ) -> tuple[QuerySet[uuid.UUID], QuerySet[uuid.UUID], QuerySet[uuid.UUID]]:
-        return (
-            RoleAssignment._get_filtering_label_ids_by_perm(user, "view"),
-            RoleAssignment._get_filtering_label_ids_by_perm(user, "change"),
-            RoleAssignment._get_filtering_label_ids_by_perm(user, "delete"),
-        )
-
-    @staticmethod
     def _get_permission_accessible_ids() -> tuple[
         QuerySet[uuid.UUID], QuerySet[uuid.UUID], QuerySet[uuid.UUID]
     ]:
@@ -1837,7 +1804,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         Assumes that object type follows Django conventions for permissions
         Also retrieve published objects in view
         """
-        from core.models import Actor, FilteringLabel
+        from core.models import Actor
 
         if folder is None:
             folder = Folder.get_root_folder()
@@ -1859,11 +1826,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         if model is Actor:
             return RoleAssignment._get_actor_accessible_ids(user)[perm_prefix_index]
-
-        if model is FilteringLabel:
-            return RoleAssignment._get_filtering_label_accessible_ids(user)[
-                perm_prefix_index
-            ]
 
         has_is_published_field = any(
             f.name == "is_published" for f in model._meta.get_fields()

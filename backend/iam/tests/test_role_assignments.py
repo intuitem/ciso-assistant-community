@@ -512,88 +512,162 @@ class TestPermissionCheck:
 
     def test_filtering_label_perms(self):
         """
-        Ensure any permission on the `FilteringLabel` model result in having this permission globally.
+        Ensure `FilteringLabel` follows the STANDARD folder-scoped IAM rules, with a SINGLE exception: "add".
 
-        (e.g. Having the "change_filteringlabel" permission on any `Folder` should allow the user to "change" any `FilteringLabel` in the app (no matter its folder (`filtering_label.folder`))).
+        `FilteringLabel` objects are (through the product surface) always stored in the root folder and force-published (`PublishInRootFolderMixin`), so:
+
+        - "view" needs NO special case: root folder labels are visible to any user holding "view_filteringlabel" on any non-ENCLAVE folder, through the normal `is_published` inheritance (and an ENCLAVE-scoped grant sees nothing).
+        - "change"/"delete" need NO special case: they require the permission on the label folder (the root folder), like any other object.
+        - "add" is THE single exception: holding "add_filteringlabel" on ANY folder allows creating labels (they are force-stored in the root folder, so the standard rule would wrongly require root folder access).
         """
 
         root_folder = Folder.get_root_folder()
-        folder1 = Folder.objects.create(name="folder1")
-        folder2 = Folder.objects.create(name="folder2")
+        domain1 = Folder.objects.create(name="domain1")
+        domain2 = Folder.objects.create(name="domain2")
+        enclave = Folder.objects.create(
+            name="enclave",
+            parent_folder=domain1,
+            content_type=Folder.ContentType.ENCLAVE,
+        )
 
-        user = User.objects.create_user("user@gmail.com")
-        role = Role.objects.create(name="role")
-        role.permissions.set(
+        label_in_root = FilteringLabel.objects.create(
+            label="label_in_root", folder=root_folder
+        )
+        assert label_in_root.is_published is True, (
+            "Root folder labels MUST be auto-published (`PublishInRootFolderMixin`)."
+        )
+        label_in_domain1 = FilteringLabel.objects.create(
+            label="label_in_domain1", folder=domain1
+        )
+        label_in_domain2 = FilteringLabel.objects.create(
+            label="label_in_domain2", folder=domain2
+        )
+
+        filtering_label_permissions = Permission.objects.filter(
+            codename__in=[
+                "add_filteringlabel",
+                "view_filteringlabel",
+                "change_filteringlabel",
+                "delete_filteringlabel",
+                "view_folder",
+            ]
+        )
+        label_role = Role.objects.create(name="label_role")
+        label_role.permissions.set(filtering_label_permissions)
+
+        add_permission = Permission.objects.get(codename="add_filteringlabel")
+
+        # A user with the label permissions on a (non-root) domain:
+
+        domain1_user = User.objects.create_user("domain1_labels@gmail.com")
+        domain1_role_assignment = RoleAssignment.objects.create(
+            user=domain1_user, role=label_role, is_recursive=False
+        )
+        domain1_role_assignment.perimeter_folders.add(domain1)
+
+        assert set(
+            RoleAssignment.get_viewable_object_ids(domain1_user, FilteringLabel)
+        ) == {label_in_root.id, label_in_domain1.id}, (
+            "A domain user MUST view the root folder labels (published) and its own domain labels, but NOT the other domains labels."
+        )
+        assert (
+            RoleAssignment.is_object_accessible(
+                domain1_user, "view", FilteringLabel, label_in_root.id
+            )
+            is True
+        ), "Root folder labels MUST be visible through the `is_published` inheritance."
+        assert (
+            RoleAssignment.is_object_accessible(
+                domain1_user, "view", FilteringLabel, label_in_domain2.id
+            )
+            is False
+        ), "Other domains labels MUST NOT be visible."
+
+        assert set(
+            RoleAssignment.get_changeable_object_ids(domain1_user, FilteringLabel)
+        ) == {label_in_domain1.id}, (
+            "A domain user MUST only be able to change its own domain labels (NOT the root folder ones)."
+        )
+        assert set(
+            RoleAssignment.get_deletable_object_ids(domain1_user, FilteringLabel)
+        ) == {label_in_domain1.id}, (
+            "A domain user MUST only be able to delete its own domain labels (NOT the root folder ones)."
+        )
+        assert (
+            RoleAssignment.is_object_accessible(
+                domain1_user, "change", FilteringLabel, label_in_root.id
+            )
+            is False
+        ), "Changing a root folder label MUST require the permission on the root folder."
+
+        assert (
+            RoleAssignment.is_access_allowed(
+                user=domain1_user, perm=add_permission, folder=root_folder
+            )
+            is True
+        ), (
+            "The 'add' exception: holding 'add_filteringlabel' on ANY folder MUST allow creating labels."
+        )
+
+        # A user with the label permissions on the root folder:
+
+        root_user = User.objects.create_user("root_labels@gmail.com")
+        root_role_assignment = RoleAssignment.objects.create(
+            user=root_user, role=label_role, is_recursive=False
+        )
+        root_role_assignment.perimeter_folders.add(root_folder)
+
+        assert set(
+            RoleAssignment.get_changeable_object_ids(root_user, FilteringLabel)
+        ) == {label_in_root.id}, (
+            "A root folder user MUST be able to change the root folder labels."
+        )
+
+        # A user with the label permissions scoped to an ENCLAVE folder:
+
+        enclave_user = User.objects.create_user("enclave_labels@gmail.com")
+        enclave_role_assignment = RoleAssignment.objects.create(
+            user=enclave_user, role=label_role, is_recursive=True
+        )
+        enclave_role_assignment.perimeter_folders.add(enclave)
+
+        assert (
+            set(RoleAssignment.get_viewable_object_ids(enclave_user, FilteringLabel))
+            == set()
+        ), (
+            "An ENCLAVE-scoped grant MUST NOT see any label (the `is_published` inheritance doesn't apply to enclaves)."
+        )
+        assert (
+            RoleAssignment.is_object_accessible(
+                enclave_user, "view", FilteringLabel, label_in_root.id
+            )
+            is False
+        ), (
+            "An ENCLAVE-scoped grant MUST NOT see the root folder labels (the `is_published` inheritance doesn't apply to enclaves)."
+        )
+
+        # A user WITHOUT any label permission:
+
+        noperm_user = User.objects.create_user("noperm_labels@gmail.com")
+        noperm_role = Role.objects.create(name="noperm_role")
+        noperm_role.permissions.set(
             Permission.objects.filter(codename__in=BASIC_PERMISSION_LIST)
         )
-
-        role_assignment = RoleAssignment.objects.create(
-            user=user, role=role, is_recursive=False
+        noperm_role_assignment = RoleAssignment.objects.create(
+            user=noperm_user, role=noperm_role, is_recursive=False
         )
-        role_assignment.perimeter_folders.add(folder1)
+        noperm_role_assignment.perimeter_folders.add(domain1)
 
-        filtering_label0 = FilteringLabel.objects.create(
-            label="filtering_label1", folder=root_folder
-        )
-        filtering_label1 = FilteringLabel.objects.create(
-            label="filtering_label2", folder=folder1
-        )
-        filtering_label2 = FilteringLabel.objects.create(
-            label="filtering_label3", folder=folder2
-        )
-
-        total_filtering_label_count = FilteringLabel.objects.count()
-
-        perm_prefixes: list[TestPermissionCheck.FilteringLabelPermissionPrefix] = [
-            "view",
-            "change",
-            "delete",
-        ]
-
-        for perm_prefix in perm_prefixes:
-            assert (
-                RoleAssignment.is_object_accessible(
-                    user, perm_prefix, FilteringLabel, filtering_label0.id
-                )
-                is False
-            ), "The user doesn't have any permission on the FilteringLabel model yet."
-            assert (
-                RoleAssignment._get_accessible_ids(
-                    user, perm_prefix, FilteringLabel, folder1
-                ).count()
-                == 0
-            ), "The user doesn't have any permission on the FilteringLabel model yet."
-
-        for perm_prefix in perm_prefixes:
-            role.permissions.add(
-                Permission.objects.get(codename=f"{perm_prefix}_filteringlabel")
+        assert (
+            set(RoleAssignment.get_viewable_object_ids(noperm_user, FilteringLabel))
+            == set()
+        ), "A user without 'view_filteringlabel' MUST NOT see any label."
+        assert (
+            RoleAssignment.is_access_allowed(
+                user=noperm_user, perm=add_permission, folder=root_folder
             )
-
-            for filtering_label in [
-                filtering_label0,
-                filtering_label1,
-                filtering_label2,
-            ]:
-                is_filtering_label_accessible = (
-                    RoleAssignment.is_object_accessible(
-                        user, "view", FilteringLabel, filtering_label.id
-                    )
-                    is True
-                )
-
-                assert is_filtering_label_accessible, (
-                    f"The user should be able to {perm_prefix!r} the previously created FilteringLabel (in folder {filtering_label.folder.name!r})."
-                )
-
-                accessible_filtering_label_count = RoleAssignment._get_accessible_ids(
-                    user, perm_prefix, FilteringLabel, filtering_label.folder
-                ).count()
-
-                assert (
-                    accessible_filtering_label_count == total_filtering_label_count
-                ), (
-                    f"The user should be able to {perm_prefix!r} the previously created FilteringLabel (in folder {filtering_label.folder.name!r})."
-                )
+            is False
+        ), "A user without 'add_filteringlabel' MUST NOT be allowed to create labels."
 
     def test_permission_perms(self):
         """Ensure everyone can view permissions, but no one can change/delete them."""
