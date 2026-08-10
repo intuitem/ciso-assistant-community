@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import ImportWorkflowModal from '$lib/components/Modals/ImportWorkflowModal.svelte';
 	import ExportModal, {
 		type ExportGroup,
 		type ExportOption
@@ -136,6 +137,21 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalWorkflowImportForm(): void {
+		let modalComponent: ModalComponent = {
+			ref: ImportWorkflowModal,
+			props: {
+				form: data.model['workflowImportForm']
+			}
+		};
+		let modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate('importWorkflow')
+		};
+		modalStore.trigger(modal);
+	}
+
 	function modalFolderImportForm(): void {
 		let modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -243,6 +259,17 @@
 										onclick={modalExport}
 									>
 										<i class="fa-solid fa-download"></i>
+									</button>
+								{/if}
+								{#if URLModel === 'workflows'}
+									<button
+										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										title={m.importWorkflow()}
+										aria-label={m.importWorkflow()}
+										data-testid="import-workflow-button"
+										onclick={modalWorkflowImportForm}
+									>
+										<i class="fa-solid fa-file-import"></i>
 									</button>
 								{/if}
 								{#if URLModel === 'vulnerabilities'}
