@@ -15,9 +15,11 @@ from core.serializer_fields import (
     HashSlugRelatedField,
     PathField,
 )
+from core.constants import LEGACY_TTP_LIBRARIES
 from core.utils import time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from tprm.models import Contract, Solution
+from threat_modeling.models import ThreatModel
 from pmbok.models import GenericCollection
 from global_settings.utils import ff_is_enabled
 from iam.models import *
@@ -1189,6 +1191,10 @@ class ThreatReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    is_legacy_ttp = serializers.SerializerMethodField()
+
+    def get_is_legacy_ttp(self, obj) -> bool:
+        return bool(obj.library and obj.library.urn in LEGACY_TTP_LIBRARIES)
 
     class Meta:
         model = Threat
@@ -1219,13 +1225,33 @@ class ThreatImportExportSerializer(BaseModelSerializer):
         ]
 
 
+REFERENTIAL_IMPORT_EXPORT_FIELDS = [
+    "created_at",
+    "updated_at",
+    "folder",
+    "urn",
+    "ref_id",
+    "provider",
+    "name",
+    "description",
+    "annotation",
+    "translations",
+    "locale",
+    "default_locale",
+    "library",
+]
+
+
 class RiskScenarioWriteSerializer(BaseModelSerializer):
     # Note: Inherent risk fields are always accepted for writing,
     # but only displayed when inherent_risk feature flag is enabled
-    FLAGGED_FIELDS = {}
+    FLAGGED_FIELDS = {"threat_models": "threat_modeling"}
 
     risk_matrix = serializers.PrimaryKeyRelatedField(
         read_only=True, source="risk_assessment.risk_matrix"
+    )
+    threat_models = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=ThreatModel.objects.all()
     )
 
     def validate_risk_assessment(self, value):
@@ -1336,6 +1362,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     version = serializers.StringRelatedField(source="risk_assessment.version")
     operational_scenario = FieldsRelatedField(["id", "name", "ebios_rm_study"])
     threats = FieldsRelatedField(many=True)
+    threat_models = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
     risk_origin = FieldsRelatedField(["id", "name", "description"])

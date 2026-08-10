@@ -439,6 +439,20 @@ class SolutionSerializersTestCase(TestCase):
         self.assertIn("recipient_entity", data)
         self.assertIn("assets", data)
 
+    def test_solution_read_serializer_dora_ict_service_type_is_raw_code(self):
+        """The frontend maps dora_ict_service_type to a translation from the EBA
+        code, so the read serializer must expose the raw value, not the display
+        label. Sibling DORA choice fields keep the display label on purpose:
+        their labels are what the frontend translates from."""
+        self.solution.dora_ict_service_type = "eba_TA:S02"
+        self.solution.dora_reliance_level = "eba_ZZ:x795"
+        self.solution.save()
+
+        data = SolutionReadSerializer(self.solution).data
+
+        self.assertEqual(data["dora_ict_service_type"], "eba_TA:S02")
+        self.assertEqual(data["dora_reliance_level"], "Low reliance")
+
     @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
     def test_solution_write_serializer(self, mock_is_access_allowed):
         """Test that SolutionWriteSerializer correctly creates a Solution"""

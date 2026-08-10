@@ -149,6 +149,12 @@ export const navData = {
 					name: 'roleAssignments',
 					fa_icon: 'fa-solid fa-user-tag',
 					href: '/role-assignments'
+				},
+				{
+					name: 'serviceAccounts',
+					fa_icon: 'fa-solid fa-robot',
+					href: '/service-accounts',
+					adminOnly: true
 				}
 			]
 		},
@@ -164,6 +170,11 @@ export const navData = {
 					name: 'threats',
 					fa_icon: 'fa-solid fa-biohazard',
 					href: '/threats'
+				},
+				{
+					name: 'ttpCatalogs',
+					fa_icon: 'fa-solid fa-table-cells',
+					href: '/ttp-catalogs'
 				},
 				{
 					name: 'securityAdvisories',
@@ -319,6 +330,12 @@ export const navData = {
 					name: 'ebiosRM',
 					fa_icon: 'fa-solid fa-gopuram',
 					href: '/ebios-rm'
+				},
+				{
+					name: 'threatModeling',
+					fa_icon: 'fa-solid fa-diagram-project',
+					href: '/threat-models',
+					permissions: ['view_threatmodel']
 				},
 				{
 					name: 'quantitativeRiskStudies',
