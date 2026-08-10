@@ -36,16 +36,11 @@
 	};
 
 	type SourceRequirementData =
-		| SourceRequirementAssessmentSingular
-		| SourceRequirementAssessmentMany;
+		SourceRequirementAssessmentSingular | SourceRequirementAssessmentMany;
 
 	type MappingInference = {
 		result:
-			| 'not_assessed'
-			| 'partially_compliant'
-			| 'non_compliant'
-			| 'compliant'
-			| 'not_applicable';
+			'not_assessed' | 'partially_compliant' | 'non_compliant' | 'compliant' | 'not_applicable';
 		annotation?: string | null;
 		[key: string]: unknown; // (There are other fields unused by this component)
 	} & SourceRequirementData;

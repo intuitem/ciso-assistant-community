@@ -131,7 +131,7 @@ test('field visibility effects: each flag toggles the corresponding donut', asyn
 	await expect(page.getByTestId('modal-title')).toBeVisible();
 	const evidenceField = page.getByTestId('form-input-evidences');
 	await evidenceField.click();
-	await evidenceField.getByRole('textbox').fill(hiddenStatusEvidenceName);
+	await evidenceField.getByRole('combobox').fill(hiddenStatusEvidenceName);
 	const evidenceOption = evidenceField
 		.getByRole('option', { name: hiddenStatusEvidenceName })
 		.first();
