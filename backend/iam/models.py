@@ -1738,11 +1738,21 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         # Folder ID of the focused folder (when the user is in `Focus mode`)
         if effective_focused_folder is not None:
-            return RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
+            accessible_folder_ids = RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
                 effective_focused_folder,
                 direct_flat_folder_ids,
                 direct_recursive_folder_ids,
             )
+
+            # We include root in the focus mode accessible folder IDs as there are a lot of important objects (`is_published=True` objects in the root Folder) the user should have access to (even in focus mode).
+            root_folder_id = Folder.get_root_folder_id()
+            accessible_folder_ids = accessible_folder_ids.union(
+                Folder.objects.filter(id=root_folder_id).values_list(
+                    "id", flat=True
+                )
+            )
+
+            return accessible_folder_ids
 
         indirectly_accessible_folders = Folder.objects.filter(
             ancestors__in=direct_recursive_folder_ids
