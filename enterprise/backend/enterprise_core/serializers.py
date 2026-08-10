@@ -11,7 +11,7 @@ from iam.models import RoleAssignment, ServiceAccount, User, Role, Folder
 from iam.serializers import (
     ServiceAccountWriteSerializer as CommunityServiceAccountWriteSerializer,
 )
-import uuid
+from django.core.exceptions import ValidationError
 
 from global_settings.models import GlobalSettings
 from global_settings.serializers import (
@@ -172,9 +172,12 @@ class LogEntrySerializer(serializers.ModelSerializer):
         if not folder_id:
             return None
 
-        folder = Folder.objects.filter(id=folder_id).first()
-        if folder is None:
-            return None
+        try:
+            folder = Folder.objects.filter(id=folder_id).first()
+            if folder is None:
+                return
+        except ValidationError:
+            return
 
         return folder.get_folder_full_path_string()
 
