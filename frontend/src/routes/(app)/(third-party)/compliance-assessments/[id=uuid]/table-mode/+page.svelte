@@ -384,6 +384,12 @@
 	let stickyTop = $state(0);
 	// Header height so the TOC column can stick right below the (sticky) page header.
 	let headerHeight = $state(0);
+	// Sticky "current section" bar height, so scroll targets clear it on auto-scroll.
+	let stickySectionHeight = $state(0);
+	// Total space a scrolled-to element must clear (AppBar + header + section bar).
+	// Reserve the section-bar height even when it isn't rendered yet, since the
+	// target becomes the active sticky bar right after the auto-scroll.
+	const scrollOffset = $derived(stickyTop + headerHeight + (stickySectionHeight || 52) + 4);
 
 	// Scroll-spy: id of the section whose header is currently at the top (the
 	// deepest one scrolled past). A single sticky bar shows it, so sections never stack.
@@ -862,7 +868,11 @@
 			<div class="flex-1 min-w-0">
 				{#if activeSection}
 					<!-- Single sticky "current section" bar (updated on scroll) -->
-					<div class="sticky z-10 pb-2" style="top: {stickyTop + headerHeight}px">
+					<div
+						class="sticky z-10 pb-2"
+						style="top: {stickyTop + headerHeight}px"
+						bind:clientHeight={stickySectionHeight}
+					>
 						<button
 							type="button"
 							onclick={() => toggleSectionCollapse(activeSection.id)}
@@ -910,7 +920,7 @@
 										data-toc
 										data-toc-title={getTitle(requirementAssessment)}
 										data-toc-level="0"
-										style:scroll-margin-top="{stickyTop + 64}px"
+										style:scroll-margin-top="{scrollOffset}px"
 									>
 										<button
 											type="button"
@@ -958,7 +968,7 @@
 										data-toc
 										data-toc-title={getTitle(requirementAssessment)}
 										data-toc-level="0"
-										style:scroll-margin-top="{stickyTop + 64}px"
+										style:scroll-margin-top="{scrollOffset}px"
 									>
 										<form
 											id="tableModeForm-{requirementAssessment.id}"
