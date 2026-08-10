@@ -488,7 +488,7 @@
 		type="button"
 		data-testid={cfg.triggerTestId}
 		onclick={() => toggleSection(cfg.raId, cfg.key)}
-		class="inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors {isSectionOpen(
+		class="inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm transition-colors {isSectionOpen(
 			cfg.raId,
 			cfg.key
 		)
