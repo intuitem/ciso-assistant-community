@@ -17,6 +17,8 @@ type SidebarBackendKeys = {
 	organisation_objectives: boolean;
 	organisation_issues: boolean;
 	quantitative_risk_studies: boolean;
+	threat_modeling: boolean;
+	ttps: boolean;
 	terminologies: boolean;
 	custom_fields: boolean;
 	bia: boolean;
@@ -38,6 +40,7 @@ type SidebarBackendKeys = {
 	cwes: boolean;
 	custom_portals: boolean;
 	idp_groups: boolean;
+	service_accounts: boolean;
 	posture_assessments: boolean;
 };
 
@@ -60,6 +63,8 @@ type SidebarFrontendKeys = {
 	organisationObjectives: boolean;
 	organisationIssues: boolean;
 	quantitativeRiskStudies: boolean;
+	threatModeling: boolean;
+	ttpCatalogs: boolean;
 	terminologies: boolean;
 	customFields: boolean;
 	businessImpactAnalysis: boolean;
@@ -78,6 +83,7 @@ type SidebarFrontendKeys = {
 	cwes: boolean;
 	managePortals: boolean;
 	idpGroups: boolean;
+	serviceAccounts: boolean;
 	postureAssessments: boolean;
 };
 
@@ -103,6 +109,8 @@ export function getSidebarVisibleItems(
 		organisationObjectives: featureFlags?.organisation_objectives ?? false,
 		organisationIssues: featureFlags?.organisation_issues ?? false,
 		quantitativeRiskStudies: featureFlags?.quantitative_risk_studies ?? false,
+		threatModeling: featureFlags?.threat_modeling ?? false,
+		ttpCatalogs: featureFlags?.ttps ?? false,
 		terminologies: featureFlags?.terminologies ?? true,
 		customFields: featureFlags?.custom_fields ?? false,
 		businessImpactAnalysis: featureFlags?.bia ?? true,
@@ -121,6 +129,7 @@ export function getSidebarVisibleItems(
 		cwes: featureFlags?.cwes ?? true,
 		managePortals: featureFlags?.custom_portals ?? false,
 		idpGroups: featureFlags?.idp_groups ?? false,
+		serviceAccounts: featureFlags?.service_accounts ?? false,
 		postureAssessments: featureFlags?.posture_assessments ?? false,
 		documents: featureFlags?.document_management ?? true,
 		documentTemplates: featureFlags?.document_management ?? true,
