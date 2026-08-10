@@ -195,6 +195,22 @@ class Folder(NameDescriptionMixin):
     def __str__(self) -> str:
         return self.name.__str__()
 
+    @staticmethod
+    def _lock_folder_tree() -> None:
+        """
+        Acquire a SQL `FOR UPDATE` lock to ensure there's no race condition related to folder operations.
+        (e.g. Avoiding checking on a stale `Folder.descendants` snapshot)
+
+        (Perform a `SELECT ... FOR UPDATE` on the root folder).
+
+        This lock is purely for Postgre (the `FOR UPDATE` isn't added to the SQLite SQL query).
+
+        But SQLite don't need this anyway as the SQLite `transation.atomic()` already protect from this race condition.
+        """
+        root_folder_id = Folder.get_root_folder_id()
+        if root_folder_id is not None:
+            Folder.objects.select_for_update().get(pk=root_folder_id)
+
     def _update_descendants_at_creation(self):
         """Update the `ancestor.descendants` `ManyToManyField` for each `ancestor` of the newly created `self` `Folder` instance."""
         parent_folder = self.parent_folder
@@ -277,75 +293,77 @@ class Folder(NameDescriptionMixin):
         is_root_folder = self.parent_folder is None
         has_root_content_type = self.content_type == Folder.ContentType.ROOT
 
-        if is_create:
-            if is_root_folder:
-                root_folder_already_exists = Folder.objects.filter(
-                    parent_folder=None
-                ).exists()
-
-                if root_folder_already_exists:
-                    raise Folder.InconsistencyError(
-                        "There can't be more than one root folder."
-                    )
-
-            if has_root_content_type:
-                root_content_type_already_exists = Folder.objects.filter(
-                    content_type=Folder.ContentType.ROOT
-                ).exists()
-
-                if root_content_type_already_exists:
-                    raise Folder.InconsistencyError(
-                        "There can't be more than one folder with a ROOT content_type."
-                    )
-
-        if is_modification:
-            current_folder = Folder.objects.get(pk=self.pk)
-
-            old_content_type = current_folder.content_type
-            new_content_type = self.content_type
-
-            if old_content_type != new_content_type:
-                if new_content_type == Folder.ContentType.ROOT:
-                    raise Folder.InconsistencyError(
-                        "Can't change a non-root ContentType folder to a ROOT ContentType."
-                    )
-
-                if old_content_type == Folder.ContentType.ROOT:
-                    raise Folder.InconsistencyError(
-                        "Can't change a root ContentType to another ContentType."
-                    )
-
-            old_parent_folder = current_folder.parent_folder
-            new_parent_folder = self.parent_folder
-
-            if old_parent_folder is None:
-                if not self.builtin:
-                    raise Folder.InconsistencyError(
-                        "The root folder builtin field MUST be True."
-                    )
-
-            if new_parent_folder != old_parent_folder:
-                if old_parent_folder is None:
-                    raise Folder.InconsistencyError(
-                        "The root folder parent_folder field can't be changed."
-                    )
-
-                if is_root_folder:
-                    raise Folder.InconsistencyError(
-                        "A folder can't be changed in a root folder (a parentless folder)."
-                    )
-
-                if new_parent_folder == self:
-                    raise Folder.InconsistencyError(
-                        "A folder can't have itself as a parent."
-                    )
-
-                if self.descendants.filter(pk=new_parent_folder.pk).exists():
-                    raise Folder.InconsistencyError(
-                        "A folder can't have one of its descendants as a parent (as it would create a cycle in the folder tree)."
-                    )
-
         with transaction.atomic():
+            self._lock_folder_tree()
+
+            if is_create:
+                if is_root_folder:
+                    root_folder_already_exists = Folder.objects.filter(
+                        parent_folder=None
+                    ).exists()
+
+                    if root_folder_already_exists:
+                        raise Folder.InconsistencyError(
+                            "There can't be more than one root folder."
+                        )
+
+                if has_root_content_type:
+                    root_content_type_already_exists = Folder.objects.filter(
+                        content_type=Folder.ContentType.ROOT
+                    ).exists()
+
+                    if root_content_type_already_exists:
+                        raise Folder.InconsistencyError(
+                            "There can't be more than one folder with a ROOT content_type."
+                        )
+
+            if is_modification:
+                current_folder = Folder.objects.get(pk=self.pk)
+
+                old_content_type = current_folder.content_type
+                new_content_type = self.content_type
+
+                if old_content_type != new_content_type:
+                    if new_content_type == Folder.ContentType.ROOT:
+                        raise Folder.InconsistencyError(
+                            "Can't change a non-root ContentType folder to a ROOT ContentType."
+                        )
+
+                    if old_content_type == Folder.ContentType.ROOT:
+                        raise Folder.InconsistencyError(
+                            "Can't change a root ContentType to another ContentType."
+                        )
+
+                old_parent_folder = current_folder.parent_folder
+                new_parent_folder = self.parent_folder
+
+                if old_parent_folder is None:
+                    if not self.builtin:
+                        raise Folder.InconsistencyError(
+                            "The root folder builtin field MUST be True."
+                        )
+
+                if new_parent_folder != old_parent_folder:
+                    if old_parent_folder is None:
+                        raise Folder.InconsistencyError(
+                            "The root folder parent_folder field can't be changed."
+                        )
+
+                    if is_root_folder:
+                        raise Folder.InconsistencyError(
+                            "A folder can't be changed in a root folder (a parentless folder)."
+                        )
+
+                    if new_parent_folder == self:
+                        raise Folder.InconsistencyError(
+                            "A folder can't have itself as a parent."
+                        )
+
+                    if self.descendants.filter(pk=new_parent_folder.pk).exists():
+                        raise Folder.InconsistencyError(
+                            "A folder can't have one of its descendants as a parent (as it would create a cycle in the folder tree)."
+                        )
+
             if is_create:
                 self.is_published = True
                 super().save(*args, **kwargs)
@@ -355,9 +373,13 @@ class Folder(NameDescriptionMixin):
                 super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        if self.content_type == Folder.ContentType.ROOT:
-            raise Folder.InconsistencyError("The root folder can't be deleted.")
-        super().delete(*args, **kwargs)
+        with transaction.atomic():
+            self._lock_folder_tree()
+
+            if self.content_type == Folder.ContentType.ROOT:
+                raise Folder.InconsistencyError("The root folder can't be deleted.")
+
+            super().delete(*args, **kwargs)
 
     def get_sub_folders(self, include_self: bool = False) -> QuerySet[Folder]:
         """Return the list of subfolders through the cached tree."""
