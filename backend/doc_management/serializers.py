@@ -24,7 +24,17 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
     classification = serializers.SerializerMethodField()
     document_count = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    progress = serializers.SerializerMethodField()
     source = serializers.SerializerMethodField()
+
+    STATUS_PROGRESS = {
+        DocumentRevision.Status.DRAFT: 25,
+        DocumentRevision.Status.DEPRECATED: 0,
+        DocumentRevision.Status.IN_REVIEW: 50,
+        DocumentRevision.Status.CHANGE_REQUESTED: 50,
+        DocumentRevision.Status.VALIDATED: 75,
+        DocumentRevision.Status.PUBLISHED: 100,
+    }
 
     class Meta:
         model = DocumentContainer
@@ -66,6 +76,13 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
         doc = self._default_doc(obj)
         if doc and doc.current_revision_id:
             return doc.current_revision.status
+        return None
+
+    def get_progress(self, obj):
+        """Rough completion percentage derived from the workflow status."""
+        doc = self._default_doc(obj)
+        if doc and doc.current_revision_id:
+            return self.STATUS_PROGRESS.get(doc.current_revision.status)
         return None
 
 
