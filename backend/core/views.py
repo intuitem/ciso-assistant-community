@@ -8618,7 +8618,7 @@ def get_analytics_export_xlsx(request):
 
     # --- Sheet 4: Applied Controls ---
     viewable_controls = RoleAssignment.get_viewable_object_ids(
-        Folder.get_root_folder(), user, AppliedControl
+        user, AppliedControl
     )
     controls_qs = AppliedControl.objects.filter(id__in=viewable_controls).values(
         "name", "status", "priority", "eta", "folder__name"
