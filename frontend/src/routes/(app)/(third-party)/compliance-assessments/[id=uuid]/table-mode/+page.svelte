@@ -386,13 +386,18 @@
 	let headerHeight = $state(0);
 	// Sticky "current section" bar height, so scroll targets clear it on auto-scroll.
 	let stickySectionHeight = $state(0);
+	// Whether the audit has any section headings (flat audits pin no sticky bar).
+	const hasSections = $derived(sectionInfo.rows.some((r) => r.isHeading));
 	// Total space a scrolled-to element must clear (AppBar + header + section bar).
 	// Reserve the section-bar height even when it isn't rendered yet, since the
-	// target becomes the active sticky bar right after the auto-scroll.
-	const scrollOffset = $derived(stickyTop + headerHeight + (stickySectionHeight || 52) + 4);
+	// target becomes the active sticky bar right after the auto-scroll; skip it
+	// entirely when the audit is flat and no bar can ever appear.
+	const scrollOffset = $derived(
+		stickyTop + headerHeight + (hasSections ? stickySectionHeight || 52 : 0) + 4
+	);
 
-	// Scroll-spy: id of the section whose header is currently at the top (the
-	// deepest one scrolled past). A single sticky bar shows it, so sections never stack.
+	// Scroll-spy: id of the section enclosing the topmost visible row. A single
+	// sticky bar shows it, so sections never stack. Null in flat audits.
 	let activeSectionId = $state<string | null>(null);
 	const activeSection = $derived(
 		activeSectionId ? requirementAssessments.find((ra) => ra.id === activeSectionId) : null
