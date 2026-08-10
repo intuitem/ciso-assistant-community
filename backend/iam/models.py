@@ -1415,13 +1415,13 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         from core.models import FilteringLabel
 
         model = perm.content_type.model_class()
+        perm_prefix = perm.codename.split("_")[0]
 
         if model is Permission:
             # Everyone can view permissions, no one can add/change/delete them.
-            perm_type = perm.codename.split("_")[0]
-            return perm_type == "view"
+            return perm_prefix == "view"
 
-        if perm_type == "add" and model is FilteringLabel:
+        if perm_prefix == "add" and model is FilteringLabel:
             return RoleAssignment._get_role_assignments_from_permission(
                 user, perm
             ).exists()
@@ -1474,7 +1474,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if model is Actor:
             return RoleAssignment._is_actor_accessible(user, perm_prefix, obj)
 
-        if perm_type == "add" and model is FilteringLabel:
+        if perm_prefix == "add" and model is FilteringLabel:
             return RoleAssignment.get_allowed_folder_ids(
                 user, (perm_prefix, FilteringLabel)
             ).exists()
