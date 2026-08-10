@@ -302,7 +302,19 @@ class Folder(NameDescriptionMixin):
             current_folder = Folder.objects.get(pk=self.pk)
 
             old_content_type = current_folder.content_type
-            new_content_type = current_folder.content_type
+            new_content_type = self.content_type
+
+            if old_content_type != new_content_type:
+                if new_content_type == Folder.ContentType.ROOT:
+                    raise Folder.InconsistencyError(
+                        "Can't change a non-root ContentType folder to a ROOT ContentType."
+                    )
+
+                if old_content_type == Folder.ContentType.ROOT:
+                    raise Folder.InconsistencyError(
+                        "Can't change a root ContentType to another ContentType."
+                    )
+
             old_parent_folder = current_folder.parent_folder
             new_parent_folder = self.parent_folder
 
@@ -317,17 +329,6 @@ class Folder(NameDescriptionMixin):
                     raise Folder.InconsistencyError(
                         "The root folder parent_folder field can't be changed."
                     )
-
-                if old_content_type != new_content_type:
-                    if new_content_type == Folder.ContentType.ROOT:
-                        raise Folder.InconsistencyError(
-                            "Can't change a non-root ContentType folder to a ROOT ContentType."
-                        )
-
-                    if old_content_type == Folder.ContentType.ROOT:
-                        raise Folder.InconsistencyError(
-                            "Can't change a root ContentType to another ContentType."
-                        )
 
                 if is_root_folder:
                     raise Folder.InconsistencyError(
