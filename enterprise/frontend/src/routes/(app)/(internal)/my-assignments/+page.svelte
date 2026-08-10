@@ -104,7 +104,7 @@
 		<h2 class="text-xl font-semibold">
 			{m.myAssignments()}
 			{#if filterMode === 'filter' && selectedActorLabels.length > 0}
-				<span class="text-base font-normal text-gray-600">
+				<span class="text-base font-normal text-surface-600-400">
 					- {selectedActorLabels.join(', ')}
 				</span>
 			{/if}
@@ -131,7 +131,7 @@
 		<Dropdown
 			header={m.filterScope()}
 			icon="fa-solid fa-filter"
-			style="bg-white"
+			style="bg-surface-50-950"
 			open={filterMode === 'filter'}
 		>
 			<div class="p-4 space-y-4">
@@ -199,35 +199,41 @@
 	</div>
 {:then counts}
 	<div class="grid grid-cols-12 gap-4 p-2">
-		<div class="col-span-7 bg-linear-to-br from-pink-200 to-pink-50 p-2 rounded">
-			<div class="font-bold mb-2">
-				<i class="fa-solid fa-fire-extinguisher mr-2"></i>{m.appliedControls()}
-				{#if counts.appliedControls > 0}
-					<span class="badge variant-filled-surface ml-2">{counts.appliedControls}</span>
-				{/if}
+		{#if showEmptySections || counts.appliedControls > 0}
+			<div
+				class="col-span-7 bg-linear-to-br from-pink-200 to-pink-50 dark:from-pink-950/40 dark:to-pink-950/10 p-2 rounded"
+			>
+				<div class="font-bold mb-2">
+					<i class="fa-solid fa-fire-extinguisher mr-2"></i>{m.appliedControls()}
+					{#if counts.appliedControls > 0}
+						<span class="badge variant-filled-surface ml-2">{counts.appliedControls}</span>
+					{/if}
+				</div>
+				<ModelTable
+					source={{
+						head: {
+							ref_id: 'ref_id',
+							name: 'name',
+							status: 'status',
+							priority: 'priority',
+							eta: 'eta',
+							folder: 'folder'
+						},
+						body: [],
+						filters: APPLIED_CONTROL_FILTERS
+					}}
+					URLModel="applied-controls"
+					baseEndpoint="/applied-controls?{ownerParams}"
+				/>
 			</div>
-			<ModelTable
-				source={{
-					head: {
-						ref_id: 'ref_id',
-						name: 'name',
-						status: 'status',
-						priority: 'priority',
-						eta: 'eta',
-						folder: 'folder'
-					},
-					body: [],
-					filters: APPLIED_CONTROL_FILTERS
-				}}
-				URLModel="applied-controls"
-				baseEndpoint="/applied-controls?{ownerParams}"
-			/>
-		</div>
-		<div class="col-span-5 p-2 flex items-center justify-center">
-			<ActivityTracker metrics={data.data.metrics} />
-		</div>
+			<div class="col-span-5 p-2 flex items-center justify-center">
+				<ActivityTracker metrics={data.data.metrics} />
+			</div>
+		{/if}
 		{#if showEmptySections || counts.tasks > 0}
-			<div class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 p-2 rounded">
+			<div
+				class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 dark:from-violet-950/40 dark:to-violet-950/10 p-2 rounded"
+			>
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-note-sticky mr-2"></i>{m.tasks()}
 					{#if counts.tasks > 0}
@@ -251,7 +257,9 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.complianceAssessments > 0}
-			<div class="col-span-6 bg-linear-to-br from-blue-200 to-blue-50 p-2 rounded">
+			<div
+				class="col-span-6 bg-linear-to-br from-blue-200 to-blue-50 dark:from-blue-950/40 dark:to-blue-950/10 p-2 rounded"
+			>
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-certificate mr-2"></i>{m.complianceAssessments()}
 					{#if counts.complianceAssessments > 0}
@@ -276,7 +284,9 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.riskAssessments > 0}
-			<div class="col-span-6 bg-linear-to-br from-blue-200 to-blue-50 p-2 rounded">
+			<div
+				class="col-span-6 bg-linear-to-br from-blue-200 to-blue-50 dark:from-blue-950/40 dark:to-blue-950/10 p-2 rounded"
+			>
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-magnifying-glass-chart mr-2"></i>{m.riskAssessments()}
 					{#if counts.riskAssessments > 0}
@@ -300,7 +310,9 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.riskScenarios > 0}
-			<div class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 p-2 rounded">
+			<div
+				class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 dark:from-violet-950/40 dark:to-violet-950/10 p-2 rounded"
+			>
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-clone mr-2"></i>{m.riskScenarios()}
 					{#if counts.riskScenarios > 0}
@@ -325,7 +337,9 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.incidents > 0}
-			<div class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 p-2 rounded">
+			<div
+				class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 dark:from-violet-950/40 dark:to-violet-950/10 p-2 rounded"
+			>
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-bug mr-2"></i>{m.incidents()}
 					{#if counts.incidents > 0}
@@ -350,7 +364,9 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.securityExceptions > 0}
-			<div class="col-span-6 bg-linear-to-br from-blue-200 to-blue-50 p-2 rounded">
+			<div
+				class="col-span-6 bg-linear-to-br from-blue-200 to-blue-50 dark:from-blue-950/40 dark:to-blue-950/10 p-2 rounded"
+			>
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-circle-exclamation mr-2"></i>{m.securityExceptions()}
 					{#if counts.securityExceptions > 0}
@@ -375,7 +391,9 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.findingsAssessments > 0}
-			<div class="col-span-6 bg-linear-to-br from-blue-200 to-blue-50 p-2 rounded">
+			<div
+				class="col-span-6 bg-linear-to-br from-blue-200 to-blue-50 dark:from-blue-950/40 dark:to-blue-950/10 p-2 rounded"
+			>
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-clipboard-list mr-2"></i>{m.findingsAssessments()}
 					{#if counts.findingsAssessments > 0}
@@ -398,8 +416,10 @@
 				/>
 			</div>
 		{/if}
-		{#if (showEmptySections || counts.validationFlows > 0) && data.featureflags?.validation_flows}
-			<div class="col-span-6 bg-linear-to-br from-orange-200 to-orange-50 p-2 rounded">
+		{#if approverParams && (showEmptySections || counts.validationFlows > 0) && data.featureflags?.validation_flows}
+			<div
+				class="col-span-6 bg-linear-to-br from-orange-200 to-orange-50 dark:from-orange-950/40 dark:to-orange-950/10 p-2 rounded"
+			>
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-check-circle mr-2"></i>{m.validationFlows()}
 					{#if counts.validationFlows > 0}
@@ -423,8 +443,35 @@
 				/>
 			</div>
 		{/if}
+		{#if approverParams && (showEmptySections || counts.riskAcceptances > 0)}
+			<div
+				class="col-span-6 bg-linear-to-br from-yellow-200 to-yellow-50 dark:from-yellow-950/40 dark:to-yellow-950/10 p-2 rounded"
+			>
+				<div class="font-bold mb-2">
+					<i class="fa-solid fa-signature mr-2"></i>{m.riskAcceptances()}
+					{#if counts.riskAcceptances > 0}
+						<span class="badge variant-filled-surface ml-2">{counts.riskAcceptances}</span>
+					{/if}
+				</div>
+				<ModelTable
+					source={{
+						head: {
+							name: 'name',
+							expiry_date: 'expiry_date',
+							folder: 'folder'
+						},
+						body: []
+					}}
+					hideFilters={true}
+					URLModel="risk-acceptances"
+					baseEndpoint="/risk-acceptances?{approverParams}&state=submitted"
+				/>
+			</div>
+		{/if}
 		{#if showEmptySections || counts.findings > 0}
-			<div class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 p-2 rounded">
+			<div
+				class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 dark:from-violet-950/40 dark:to-violet-950/10 p-2 rounded"
+			>
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-triangle-exclamation mr-2"></i>{m.findings()}
 					{#if counts.findings > 0}
@@ -448,7 +495,9 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.organisationObjectives > 0}
-			<div class="col-span-6 bg-linear-to-br from-green-200 to-green-50 p-2 rounded">
+			<div
+				class="col-span-6 bg-linear-to-br from-green-200 to-green-50 dark:from-green-950/40 dark:to-green-950/10 p-2 rounded"
+			>
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-bullseye mr-2"></i>{m.organisationObjectives()}
 					{#if counts.organisationObjectives > 0}
@@ -473,7 +522,9 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.rightRequests > 0}
-			<div class="col-span-6 bg-linear-to-br from-orange-200 to-orange-50 p-2 rounded">
+			<div
+				class="col-span-6 bg-linear-to-br from-orange-200 to-orange-50 dark:from-orange-950/40 dark:to-orange-950/10 p-2 rounded"
+			>
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-user-shield mr-2"></i>{m.rightRequests()}
 					{#if counts.rightRequests > 0}
@@ -498,7 +549,9 @@
 			</div>
 		{/if}
 		{#if showEmptySections || counts.metricInstances > 0}
-			<div class="col-span-6 bg-linear-to-br from-teal-200 to-teal-50 p-2 rounded">
+			<div
+				class="col-span-6 bg-linear-to-br from-teal-200 to-teal-50 dark:from-teal-950/40 dark:to-teal-950/10 p-2 rounded"
+			>
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-chart-line mr-2"></i>{m.metricInstances()}
 					{#if counts.metricInstances > 0}

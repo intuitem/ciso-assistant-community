@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { get } from 'svelte/store';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
+	import { getToastStore } from '$lib/components/Toast/stores';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 
-	let {
-		integrationId,
-		initialConfig = null,
-		form,
-		onSave = (config) => console.log('Saved:', config)
-	} = $props();
+	const toastStore = getToastStore();
 
-	const LOCAL_FIELDS = [
+	// Default local field list (AppliedControl). Other models pass their own via
+	// the `localFields` prop. Kept here so existing callers keep working.
+	const APPLIED_CONTROL_FIELDS = [
 		{ key: 'name', label: m.name(), type: 'string', required: true },
 		{ key: 'description', label: m.description(), type: 'text', required: false },
 		{ key: 'eta', label: m.eta(), type: 'date', required: false },
@@ -25,6 +25,7 @@
 				{ value: 'in_progress', label: m.inProgress() },
 				{ value: 'on_hold', label: m.onHold() },
 				{ value: 'active', label: m.active() },
+				{ value: 'degraded', label: m.degraded() },
 				{ value: 'deprecated', label: m.deprecated() }
 			]
 		},
@@ -41,6 +42,67 @@
 		}
 	];
 
+	let {
+		integrationId,
+		initialConfig = null,
+		form,
+		// Which local model this mapper configures, and where its config lives in
+		// the form store. modelKey is sent with every RPC so the backend targets
+		// the right remote table; valuePathPrefix points at settings.models.<key>.
+		modelKey = 'applied_control',
+		valuePathPrefix = 'settings',
+		localFields = APPLIED_CONTROL_FIELDS,
+		title = m.integrationMappingsTitle(),
+		description = m.integrationMappingsHelpText(),
+		remoteFieldLabel = m.remoteField(),
+		tableHelpText = m.integrationTableHelpText(),
+		onSave = (config) => console.log('Saved:', config),
+		// Fires after handleTableChange. By default the maps are merged into the
+		// superform store at valuePathPrefix (see mergeMapsIntoForm); pages can
+		// still override for custom behavior.
+		onMapsChange = null as
+			| ((maps: { field_map: Record<string, any>; value_map: Record<string, any> }) => void)
+			| null
+	} = $props();
+
+	// Namespace the `field` attribute (id / label-for / hidden input name /
+	// missing-constraint key) so two mappers on one page don't collide. Binding
+	// is by valuePath, so this only affects those DOM/aria identifiers. Empty for
+	// applied_control to keep its existing ids/testids unchanged.
+	const fieldPrefix = modelKey === 'applied_control' ? '' : `${modelKey}_`;
+
+	// Immutably set a dotted path in an object, cloning each level touched.
+	function setNested(obj: Record<string, any>, path: string, value: any) {
+		const keys = path.split('.');
+		const root = { ...obj };
+		let cur = root;
+		for (let i = 0; i < keys.length - 1; i++) {
+			cur[keys[i]] = { ...cur[keys[i]] };
+			cur = cur[keys[i]];
+		}
+		cur[keys[keys.length - 1]] = value;
+		return root;
+	}
+
+	// Default maps sink: write field_map/value_map into the superform store at
+	// valuePathPrefix. Top-level store reassignment so every formFieldProxy
+	// subscriber re-reads (per-row selects otherwise keep stale values).
+	function mergeMapsIntoForm(maps: {
+		field_map: Record<string, any>;
+		value_map: Record<string, any>;
+	}) {
+		const store = form.form;
+		let data = get(store);
+		data = setNested(data, `${valuePathPrefix}.field_map`, maps.field_map);
+		data = setNested(data, `${valuePathPrefix}.value_map`, maps.value_map);
+		store.set(data);
+	}
+
+	const emitMapsChange = (maps: {
+		field_map: Record<string, any>;
+		value_map: Record<string, any>;
+	}) => (onMapsChange ?? mergeMapsIntoForm)(maps);
+
 	let selectedTable = $state(initialConfig?.table_name || '');
 	let fieldMap = $state(initialConfig?.field_map || {});
 	let valueMap = $state(initialConfig?.value_map || {});
@@ -50,28 +112,56 @@
 	let columns = $state([]);
 	let choicesCache = $state({}); // Key: "table:field", Value: Option[]
 	let isLoadingColumns = $state(false);
+	let isRefreshing = $state(false);
 
 	let activeChoiceFields = $derived(
-		LOCAL_FIELDS.filter((f) => f.type === 'choice' && fieldMap[f.key])
+		localFields.filter((f) => f.type === 'choice' && fieldMap[f.key])
 	);
 
-	async function fetchRpc(action: string, params = {}) {
+	// Returns `null` (not `[]`) on failure so callers can branch on it.
+	// Surfaces a toast for non-2xx and network/parse errors so the user has a
+	// signal when the integration backend is unreachable or the action isn't
+	// supported. Callers that want a "safe empty" should do `?? []` themselves.
+	async function fetchRpc(action: string, params = {}): Promise<any> {
+		let res: Response;
 		try {
-			const res = await fetch(`/settings/integrations/configs/${integrationId}/rpc`, {
+			res = await fetch(`/settings/integrations/configs/${integrationId}/rpc`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ action, params })
+				// model_key tells the backend which remote table/mapper to use.
+				body: JSON.stringify({ action, params: { ...params, model_key: modelKey } })
 			});
-			const data = await res.json();
-			return data.result || [];
 		} catch (e) {
-			console.error(`RPC ${action} failed:`, e);
-			return [];
+			console.error(`RPC ${action} network error:`, e);
+			toastStore.trigger({
+				message: `Could not reach the integration backend (${action}).`,
+				preset: 'error'
+			});
+			return null;
 		}
+
+		let data: any = null;
+		try {
+			data = await res.json();
+		} catch {
+			// Non-JSON body (e.g. Django debug HTML on 500). Fall through.
+		}
+
+		if (!res.ok) {
+			const detail = (data && (data.error || data.message)) || `HTTP ${res.status}`;
+			console.error(`RPC ${action} failed:`, detail, data);
+			toastStore.trigger({
+				message: `Integration action "${action}" failed: ${detail}`,
+				preset: 'error'
+			});
+			return null;
+		}
+
+		return data?.result ?? null;
 	}
 
 	async function loadTables() {
-		const rawTables = await fetchRpc('get_tables');
+		const rawTables = (await fetchRpc('get_tables')) ?? [];
 		// Transform to Autocomplete options format
 		tables = rawTables.map((t: Record<string, any>) => ({
 			value: t.name,
@@ -82,7 +172,7 @@
 	async function loadColumns(tableName: string) {
 		if (!tableName) return;
 		isLoadingColumns = true;
-		const rawCols = await fetchRpc('get_columns', { table_name: tableName });
+		const rawCols = (await fetchRpc('get_columns', { table_name: tableName })) ?? [];
 
 		columns = rawCols.map((c: Record<string, any>) => ({
 			value: c.name,
@@ -102,7 +192,40 @@
 			table_name: tableName,
 			field_name: fieldName
 		});
+		if (rawChoices === null) return; // RPC failed — don't cache an empty list as success
 		choicesCache[cacheKey] = rawChoices.map((c) => ({ value: c.value, label: c.label }));
+	}
+
+	// Force the backend to re-pull the remote schema (tables/columns/choices)
+	// in case it changed provider-side, then reload the dropdowns from the
+	// freshly cached data. Synchronous: the user waits behind a spinner.
+	async function refreshSchema() {
+		if (!integrationId || isRefreshing) return;
+		isRefreshing = true;
+		try {
+			const result = await fetchRpc('refresh_schema');
+			if (result !== null) {
+				// Drop component-local caches so reloads read the refreshed data.
+				columns = [];
+				choicesCache = {};
+				await loadTables();
+				if (selectedTable) {
+					await loadColumns(selectedTable);
+					// Repopulate choice lists explicitly rather than relying on the
+					// reactive $effect to re-fire (table/field_map are unchanged here).
+					await Promise.all(
+						activeChoiceFields.map((f) => {
+							const remoteField = fieldMap[f.key];
+							return remoteField ? loadChoices(selectedTable, remoteField) : undefined;
+						})
+					);
+				}
+				toastStore.trigger({ message: m.schemaRefreshed(), preset: 'success' });
+			}
+		} finally {
+			// Always clear the spinner, even if a reload step throws.
+			isRefreshing = false;
+		}
 	}
 
 	onMount(() => {
@@ -121,36 +244,101 @@
 		});
 	});
 
-	function handleTableChange(val: string) {
+	// Seed an empty per-field map up-front so the template can read
+	// `valueMap[field.key][choice.value]` without mutating state during render.
+	$effect(() => {
+		for (const f of activeChoiceFields) {
+			if (!valueMap[f.key]) valueMap[f.key] = {};
+		}
+	});
+
+	async function handleTableChange(val: string) {
+		// Snapshot the user's current maps before touching anything. We need
+		// them as a fallback when the provider has no defaults to suggest
+		// (e.g. ServiceNow) — without the snapshot, a table change would
+		// silently wipe rows the user just finished configuring.
+		const prevFieldMap = { ...fieldMap };
+		const prevValueMap = { ...valueMap };
+
 		selectedTable = val;
-		fieldMap = {}; // Clear mappings on table switch to avoid invalid references
-		valueMap = {};
 		columns = [];
-		loadColumns(val);
+		await loadColumns(val);
+		if (!val) {
+			fieldMap = {};
+			valueMap = {};
+			emitMapsChange({ field_map: {}, value_map: {} });
+			return;
+		}
+
+		const suggested = await fetchRpc('suggest_mapping', { table_name: val });
+		const nextFieldMap = (suggested?.field_map as Record<string, any>) ?? {};
+		const nextValueMap = (suggested?.value_map as Record<string, any>) ?? {};
+		const hasSuggestion =
+			Object.keys(nextFieldMap).length > 0 || Object.keys(nextValueMap).length > 0;
+
+		// Providers with real defaults (Jira) win: clear and replace. Providers
+		// with the BaseFieldMapper no-op (ServiceNow) keep the user's prior
+		// mappings so a table change doesn't destroy hand-configured rows.
+		const finalFieldMap = hasSuggestion ? nextFieldMap : prevFieldMap;
+		const finalValueMap = hasSuggestion ? nextValueMap : prevValueMap;
+
+		// Pre-load every choice list the value_map references BEFORE we surface
+		// the maps. Otherwise the value-mapping AutocompleteSelects mount with
+		// empty options, optionsLoaded=false, and their post-mount $effect is
+		// gated off so the selected option never gets set.
+		await Promise.all(
+			Object.keys(finalValueMap).map(async (localField) => {
+				const remoteField = finalFieldMap[localField];
+				if (remoteField) await loadChoices(val, remoteField);
+			})
+		);
+
+		fieldMap = finalFieldMap;
+		valueMap = finalValueMap;
+		emitMapsChange({ field_map: finalFieldMap, value_map: finalValueMap });
 	}
 </script>
 
-<div class="p-6 max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-surface-200">
-	<div class="mb-8 border-b border-surface-100 pb-4">
-		<h2 class="text-xl font-bold text-surface-800">
-			{m.serviceNowIntegrationMappingsDescription()}
-		</h2>
-		<p class="text-sm text-surface-500 mt-1">{m.serviceNowIntegrationMappingsHelpText()}</p>
+<div
+	class="p-6 max-w-4xl mx-auto bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800"
+>
+	<div class="mb-8 border-b border-surface-100-900 pb-4 flex justify-between items-start gap-4">
+		<div>
+			<h2 class="text-xl font-bold text-surface-800-200">
+				{title}
+			</h2>
+			<p class="text-sm text-surface-500 mt-1">{description}</p>
+		</div>
+		{#if integrationId}
+			<button
+				type="button"
+				class="btn preset-tonal-secondary shrink-0 flex items-center gap-2"
+				disabled={isRefreshing}
+				onclick={refreshSchema}
+			>
+				{#if isRefreshing}
+					<LoadingSpinner />
+				{:else}
+					<i class="fa-solid fa-rotate"></i>
+				{/if}
+				{m.refreshSchema()}
+			</button>
+		{/if}
 	</div>
 
 	<section class="mb-8">
 		{#key tables}
 			<AutocompleteSelect
 				{form}
-				field="table_name"
-				valuePath="settings.table_name"
+				field={`${fieldPrefix}table_name`}
+				valuePath={`${valuePathPrefix}.table_name`}
 				label={m.targetTable()}
 				optionsValueField="value"
 				optionsLabelField="label"
 				options={tables}
 				cachedValue={selectedTable}
 				onChange={handleTableChange}
-				helpText={m.serviceNowTableHelpText()}
+				helpText={tableHelpText}
 				baseClass="w-full md:w-1/2"
 			/>
 		{/key}
@@ -159,37 +347,37 @@
 	{#if selectedTable}
 		<section class="mb-8 animate-fade-in">
 			<div class="flex justify-between items-center mb-4">
-				<h3 class="text-lg font-semibold text-surface-700">{m.fieldMapping()}</h3>
+				<h3 class="text-lg font-semibold text-surface-700-300">{m.fieldMapping()}</h3>
 			</div>
 
-			<div class="bg-surface-50 rounded-lg p-4 border border-surface-200">
+			<div class="bg-surface-50-950 rounded-lg p-4 border border-surface-200-800">
 				<div
 					class="grid grid-cols-12 gap-4 mb-2 text-xs font-semibold text-surface-500 uppercase tracking-wider"
 				>
 					<div class="col-span-5">{m.localField()}</div>
 					<div class="col-span-1 text-center"></div>
-					<div class="col-span-6">{m.serviceNowColumn()}</div>
+					<div class="col-span-6">{remoteFieldLabel}</div>
 				</div>
 
 				<div class="space-y-4">
-					{#each LOCAL_FIELDS as field}
+					{#each localFields as field}
 						<div class="grid grid-cols-12 gap-4 items-center">
 							<div class="col-span-5">
-								<div class="font-medium text-surface-700">
+								<div class="font-medium text-surface-700-300">
 									{field.label}
 									{#if field.required}<span class="text-error-400">*</span>{/if}
 								</div>
-								<div class="text-xs text-surface-400 font-mono">{field.key}</div>
+								<div class="text-xs text-surface-400-600 font-mono">{field.key}</div>
 							</div>
 
-							<div class="col-span-1 text-center text-surface-300">→</div>
+							<div class="col-span-1 text-center text-surface-300">↔</div>
 
 							<div class="col-span-6">
 								{#key columns}
 									<AutocompleteSelect
 										{form}
-										field={field.key}
-										valuePath={`settings.field_map.${field.key}`}
+										field={`${fieldPrefix}${field.key}`}
+										valuePath={`${valuePathPrefix}.field_map.${field.key}`}
 										options={columns}
 										cachedValue={fieldMap[field.key]}
 										onChange={(val) => (fieldMap[field.key] = val)}
@@ -206,42 +394,45 @@
 
 		{#if activeChoiceFields.length > 0}
 			<section class="mb-8 animate-fade-in">
-				<h3 class="text-lg font-semibold text-surface-700 mb-4">{m.valueMapping()}</h3>
+				<h3 class="text-lg font-semibold text-surface-700-300 mb-4">{m.valueMapping()}</h3>
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					{#each activeChoiceFields as field}
 						{@const remoteField = fieldMap[field.key]}
 						{@const choices = choicesCache[`${selectedTable}:${remoteField}`] || []}
 
-						<div class="border border-surface-200 rounded-lg overflow-hidden">
+						<div class="border border-surface-200-800 rounded-lg">
 							<div
-								class="bg-surface-100 px-4 py-2 border-b border-surface-200 font-medium text-surface-700 flex justify-between"
+								class="bg-surface-100-900 px-4 py-2 border-b border-surface-200-800 font-medium text-surface-700-300 flex justify-between rounded-t-lg"
 							>
 								<span>{m.valueMappingForField({ field: safeTranslate(field.label) })}</span>
-								<span class="text-xs bg-surface-200 px-2 py-1 rounded text-surface-600">
+								<span class="text-xs bg-surface-200-800 px-2 py-1 rounded text-surface-600-400">
 									{m.valueMappingToField({ field: remoteField })}
 								</span>
 							</div>
 
-							<div class="p-4 bg-white space-y-3">
+							<div class="p-4 bg-surface-50-950 space-y-3">
 								{#each field.choices as choice}
 									<div class="flex items-center justify-between gap-2">
-										<div class="w-1/3 text-sm text-surface-600 truncate" title={choice.label}>
+										<div class="w-1/3 text-sm text-surface-600-400 truncate" title={choice.label}>
 											{choice.label}
 										</div>
-										<div class="text-surface-300">→</div>
+										<div class="text-surface-300">↔</div>
 
 										<div class="w-2/3">
 											{#key choices}
 												<AutocompleteSelect
 													{form}
-													field={String(choice.value)}
-													valuePath={`settings.value_map.${field.key}.${choice.value}`}
+													field={`${fieldPrefix}${choice.value}`}
+													valuePath={`${valuePathPrefix}.value_map.${field.key}.${choice.value}`}
 													options={choices}
 													optionsValueField="value"
 													optionsLabelField="label"
-													cachedValue={(valueMap[field.key] ??= {})[choice.value]}
-													onChange={(val) => ((valueMap[field.key] ??= {})[choice.value] = val)}
+													cachedValue={valueMap[field.key]?.[choice.value]}
+													onChange={(val) => {
+														valueMap[field.key] ??= {};
+														valueMap[field.key][choice.value] = val;
+													}}
 													nullable={true}
 													baseClass="w-full"
 												/>

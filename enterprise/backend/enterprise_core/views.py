@@ -38,7 +38,7 @@ import shutil
 from pathlib import Path
 import humanize
 
-from core.models import CustomEmailTemplate, CustomWordTemplate
+from core.models import CustomEmailTemplate, CustomWordTemplate, CustomDocHtmlTemplate
 from .models import ClientSettings
 from .serializers import (
     ClientSettingsReadSerializer,
@@ -46,9 +46,16 @@ from .serializers import (
     CustomEmailTemplateWriteSerializer,
     CustomWordTemplateReadSerializer,
     CustomWordTemplateWriteSerializer,
+    CustomDocHtmlTemplateReadSerializer,
+    CustomDocHtmlTemplateWriteSerializer,
     LogEntrySerializer,
 )
-from .template_registry import EMAIL_TEMPLATE_REGISTRY, WORD_TEMPLATE_REGISTRY
+from .template_registry import (
+    EMAIL_TEMPLATE_REGISTRY,
+    WORD_TEMPLATE_REGISTRY,
+    DOC_HTML_TEMPLATE_REGISTRY,
+)
+from .license import effective_expiration
 
 from auditlog.models import LogEntry
 
@@ -57,6 +64,15 @@ logger = structlog.get_logger(__name__)
 
 class ClientSettingsViewSet(BaseModelViewSet):
     model = ClientSettings
+
+    # No role holds add_clientsettings (the row is created by AppConfig), so the
+    # image actions authorize as edits of the existing singleton.
+    permission_overrides = {
+        "upload_logo": "change_clientsettings",
+        "upload_favicon": "change_clientsettings",
+        "delete_logo": "change_clientsettings",
+        "delete_favicon": "change_clientsettings",
+    }
 
     def create(self, request, *args, **kwargs):
         return Response(
@@ -138,13 +154,16 @@ class ClientSettingsViewSet(BaseModelViewSet):
         )
 
     def handle_file_upload(self, request, pk, field_name):
+        # Raises 403/404 before anything is read; the blanket except below must
+        # not turn an authorization failure into a 400.
+        settings = self.get_object()
+
         if "file" not in request.FILES:
             return Response(
                 {"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
-            settings = ClientSettings.objects.get(id=pk)
             file = request.FILES["file"]
             content_type = magic.Magic(mime=True).from_buffer(file.read())
 
@@ -162,11 +181,13 @@ class ClientSettingsViewSet(BaseModelViewSet):
                 )
 
             setattr(settings, field_name, request.FILES["file"])
+            settings.full_clean()
             settings.save()
             return Response(status=status.HTTP_200_OK)
-        except ClientSettings.DoesNotExist:
+        except ValidationError:
             return Response(
-                {"error": "Client settings not found"}, status=status.HTTP_404_NOT_FOUND
+                {field_name: "invalidFileType"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
             logger.error("Error uploading file", exc_info=e)
@@ -193,41 +214,22 @@ class ClientSettingsViewSet(BaseModelViewSet):
     def upload_favicon(self, request, pk):
         return self.handle_file_upload(request, pk, "favicon")
 
+    def handle_file_delete(self, field_name):
+        settings = self.get_object()
+        image = getattr(settings, field_name)
+        if not image:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        image.delete()
+        settings.save()
+        return Response(status=status.HTTP_200_OK)
+
     @action(methods=["put"], detail=True, url_path="logo/delete")
     def delete_logo(self, request, pk):
-        (
-            object_ids_view,
-            _,
-            _,
-        ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ClientSettings
-        )
-        response = Response(status=status.HTTP_403_FORBIDDEN)
-        if UUID(pk) in object_ids_view:
-            settings = self.get_object()
-            if settings.logo:
-                settings.logo.delete()
-                settings.save()
-                response = Response(status=status.HTTP_200_OK)
-        return response
+        return self.handle_file_delete("logo")
 
     @action(methods=["put"], detail=True, url_path="favicon/delete")
     def delete_favicon(self, request, pk):
-        (
-            object_ids_view,
-            _,
-            _,
-        ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ClientSettings
-        )
-        response = Response(status=status.HTTP_403_FORBIDDEN)
-        if UUID(pk) in object_ids_view:
-            settings = self.get_object()
-            if settings.favicon:
-                settings.favicon.delete()
-                settings.save()
-                response = Response(status=status.HTTP_200_OK)
-        return response
+        return self.handle_file_delete("favicon")
 
 
 class LicenseStatusView(APIView):
@@ -251,12 +253,13 @@ class LicenseStatusView(APIView):
             )
 
         now = datetime.now()
+        effective = effective_expiration(expiration_date)
 
-        if expiration_date > now:
-            days_left = (expiration_date - now).days
+        if effective > now:
+            days_left = (effective - now).days
             return Response({"status": "active", "days_left": days_left})
         else:
-            days_expired = (now - expiration_date).days
+            days_expired = (now - effective).days
             return Response({"status": "expired", "days_expired": days_expired})
 
 
@@ -271,6 +274,14 @@ class RoleViewSet(BaseModelViewSet):
         DjangoFilterBackend,
         RoleFilter,
     ]
+
+    def get_queryset(self):
+        # Hide only dedicated per-SA roles; a shared builtin role stays visible.
+        return (
+            super()
+            .get_queryset()
+            .exclude(service_accounts__isnull=False, builtin=False)
+        )
 
     def _get_default_permissions(self):
         return Permission.objects.filter(
@@ -463,9 +474,7 @@ class NumberInFilter(df.BaseInFilter, df.NumberFilter):
 
 class LogEntryFilterSet(GenericFilterSet):
     actor = df.CharFilter(field_name="actor__email", lookup_expr="icontains")
-    folder = df.CharFilter(
-        field_name="additional_data__folder", lookup_expr="icontains"
-    )
+    folder = df.CharFilter(method="filter_folder")
     action = NumberInFilter(field_name="action", lookup_expr="in")
     content_type = df.CharFilter(method="filter_content_type_model")
 
@@ -482,6 +491,25 @@ class LogEntryFilterSet(GenericFilterSet):
             return queryset
         normalized = value.replace(" ", "").lower()
         return queryset.filter(content_type__model__icontains=normalized)
+
+    def filter_folder(self, queryset, name, value):
+        # additional_data stores folder_id, not the path string the old enrichment
+        # used. Resolve folders whose full path matches the query, then match their
+        # ids. Path resolution hits the in-memory folders cache, not the DB.
+        if not value:
+            return queryset
+        needle = value.lower()
+        matching_ids = [
+            str(folder.id)
+            for folder in Folder.objects.only("id")
+            if needle in folder.get_folder_full_path_string().lower()
+        ]
+        if not matching_ids:
+            return queryset.none()
+        q = models.Q()
+        for folder_id in matching_ids:
+            q |= models.Q(additional_data__folder_id=folder_id)
+        return queryset.filter(q)
 
 
 class LogEntryViewSet(
@@ -501,7 +529,6 @@ class LogEntryViewSet(
         "actor__first_name",
         "actor__last_name",
         "changes",  # allows to search for last_login (for example)
-        "additional_data__folder",
     ]
     filterset_class = LogEntryFilterSet
 
@@ -515,12 +542,14 @@ class LogEntryViewSet(
             folder=Folder.get_root_folder(),
         ):
             return LogEntry.objects.none()
+        # Annotate folder_id (display resolution to a path happens in the serializer
+        # via the folders cache). Keeps `folder` orderable without a per-row join.
         return LogEntry.objects.all().annotate(
             folder=Lower(
                 Case(
                     When(additional_data__isnull=True, then=Value("")),
-                    When(additional_data__folder=None, then=Value("")),
-                    default=Cast("additional_data__folder", CharField()),
+                    When(additional_data__folder_id=None, then=Value("")),
+                    default=Cast("additional_data__folder_id", CharField()),
                     output_field=CharField(),
                 )
             ),
@@ -549,7 +578,7 @@ class CustomEmailTemplateViewSet(BaseModelViewSet):
             return CustomEmailTemplate.objects.none()
         return CustomEmailTemplate.objects.all()
 
-    def get_serializer_class(self):
+    def get_serializer_class(self, **kwargs):
         if self.request.method in ("POST", "PUT", "PATCH"):
             return CustomEmailTemplateWriteSerializer
         return CustomEmailTemplateReadSerializer
@@ -640,7 +669,7 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
             return CustomWordTemplate.objects.none()
         return CustomWordTemplate.objects.all()
 
-    def get_serializer_class(self):
+    def get_serializer_class(self, **kwargs):
         if self.request.method in ("POST", "PUT", "PATCH"):
             return CustomWordTemplateWriteSerializer
         return CustomWordTemplateReadSerializer
@@ -810,6 +839,208 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
         )
 
 
+class CustomDocHtmlTemplateViewSet(BaseModelViewSet):
+    """
+    API endpoint for managing custom HTML render-template overrides
+    (WeasyPrint PDF layouts, ...). Gated by change_globalsettings.
+    """
+
+    model = CustomDocHtmlTemplate
+    filterset_fields = ["template_key", "language", "is_active", "folder"]
+    search_fields = ["template_key", "language"]
+
+    def _has_permission(self, request):
+        return RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_globalsettings"),
+            folder=Folder.get_root_folder(),
+        )
+
+    def get_queryset(self):
+        if not self._has_permission(self.request):
+            return CustomDocHtmlTemplate.objects.none()
+        return CustomDocHtmlTemplate.objects.all()
+
+    def get_serializer_class(self, **kwargs):
+        if self.request.method in ("POST", "PUT", "PATCH"):
+            return CustomDocHtmlTemplateWriteSerializer
+        return CustomDocHtmlTemplateReadSerializer
+
+    def perform_create(self, serializer):
+        """New records start inactive until a file is uploaded."""
+        serializer.save(is_active=False)
+
+    @action(methods=["get"], detail=False, url_path="available")
+    def available(self, request):
+        """Return the registry of all overridable HTML templates."""
+        if not self._has_permission(request):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        overrides = (
+            CustomDocHtmlTemplate.objects.filter(is_active=True)
+            .exclude(file="")
+            .values_list("template_key", "language")
+        )
+        override_set = {(k, l) for k, l in overrides}
+
+        result = []
+        for key, meta in DOC_HTML_TEMPLATE_REGISTRY.items():
+            result.append(
+                {
+                    "template_key": key,
+                    "description": meta["description"],
+                    "default_languages": meta["default_languages"],
+                    "variables": meta.get("variables", []),
+                    "overrides": [
+                        lang
+                        for lang in meta["default_languages"]
+                        if (key, lang) in override_set
+                    ],
+                }
+            )
+        return Response(result)
+
+    @action(
+        methods=["post"],
+        detail=True,
+        url_path="upload",
+        parser_classes=(FileUploadParser,),
+    )
+    def upload_file(self, request, pk):
+        """Upload a .html file for an existing override record."""
+        if not self._has_permission(request):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        if "file" not in request.FILES:
+            return Response(
+                {"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            template = CustomDocHtmlTemplate.objects.get(id=pk)
+            uploaded = request.FILES["file"]
+
+            if not uploaded.name.endswith(".html"):
+                return Response(
+                    {"file": "invalidFileType"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Validate the template compiles as a Django template.
+            try:
+                from django.template import Template
+
+                uploaded.seek(0)
+                source = uploaded.read().decode("utf-8")
+                Template(source)
+                uploaded.seek(0)
+            except Exception:
+                return Response(
+                    {"file": "invalidHtmlTemplate"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Reject tags a PDF layout never needs (defense-in-depth).
+            from doc_management.html_templates import find_forbidden_template_tags
+
+            if find_forbidden_template_tags(source):
+                return Response(
+                    {"file": "forbiddenTemplateTags"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            template.file = uploaded
+            template.is_active = True
+            try:
+                template.full_clean()
+            except ValidationError as e:
+                return Response(
+                    e.message_dict
+                    if hasattr(e, "message_dict")
+                    else {"file": "invalidHtmlTemplate"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            template.save()
+            # Keep a single active override per (template_key, language) so the
+            # resolver's .first() is deterministic.
+            CustomDocHtmlTemplate.objects.filter(
+                template_key=template.template_key,
+                language=template.language,
+                is_active=True,
+            ).exclude(pk=template.pk).update(is_active=False)
+            return Response(status=status.HTTP_200_OK)
+        except CustomDocHtmlTemplate.DoesNotExist, ValidationError, ValueError:
+            return Response(
+                {"error": "Template not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(methods=["get"], detail=True, url_path="download")
+    def download_file(self, request, pk):
+        """Download the current custom template file."""
+        if not self._has_permission(request):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            template = CustomDocHtmlTemplate.objects.get(id=pk)
+            if not template.file:
+                return Response(
+                    {"error": "No file uploaded"}, status=status.HTTP_404_NOT_FOUND
+                )
+
+            from django.http import FileResponse
+
+            template.file.open("rb")
+            return FileResponse(
+                template.file,
+                content_type="text/html",
+                as_attachment=True,
+                filename=f"{template.template_key}_{template.language}.html",
+            )
+        except CustomDocHtmlTemplate.DoesNotExist, ValidationError, ValueError:
+            return Response(
+                {"error": "Template not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(
+        methods=["get"],
+        detail=False,
+        url_path="download-default/(?P<template_key>[^/]+)/(?P<language>[^/]+)",
+    )
+    def download_default(self, request, template_key=None, language=None):
+        """Download the built-in default HTML template."""
+        if not self._has_permission(request):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        if template_key not in DOC_HTML_TEMPLATE_REGISTRY:
+            return Response(
+                {"error": "Unknown template key"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        from django.http import FileResponse
+        import doc_management as doc_module
+
+        # The built-in document PDF layout is a single, language-agnostic template.
+        template_path = (
+            Path(doc_module.__file__).resolve().parent
+            / "templates"
+            / "doc_management"
+            / "policy_document_pdf.html"
+        )
+        if not template_path.exists():
+            return Response(
+                {"error": "Default template not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return FileResponse(
+            open(template_path, "rb"),
+            content_type="text/html",
+            as_attachment=True,
+            filename=f"{template_key}_{language}.html",
+        )
+
+
 AUDIT_TRAIL_PERMISSION = "view_object_audittrail"
 
 
@@ -829,7 +1060,9 @@ class AuditedModelsView(APIView):
 
         if (
             not _object_audit_trail_enabled()
-            or AUDIT_TRAIL_PERMISSION not in request.user.permissions
+            or not RoleAssignment.has_permission_anywhere(
+                request.user, AUDIT_TRAIL_PERMISSION
+            )
         ):
             return Response([])
         names = sorted(model._meta.model_name for model in auditlog.get_models())

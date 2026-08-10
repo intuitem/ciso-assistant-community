@@ -37,57 +37,6 @@ def extract_node_id(urn: str | None) -> str | None:
     return node_id if node_id else None
 
 
-REWRITABLE_URN_TYPES = {"req_node", "question", "question_choice"}
-
-
-def rewrite_child_urns(draft: dict, new_ns: str, new_slug: str) -> None:
-    """Rewrite segment 1 (namespace) and segment 4 (slug) of every child URN in
-    the draft, in place. Idempotent across slugs.
-
-    URN format: `urn:ns:risk:type:slug:node_id` (6+ segments). Segments 5+
-    (node_id) are preserved so CEL expressions keying off node_id keep
-    resolving. URNs with fewer than 6 segments are left untouched — the
-    rename branch in `_reconcile_draft` rejects drafts that contain such
-    legacy URNs before this helper runs, so encountering one here would be
-    a bug.
-
-    Touches: nodes[*].urn, nodes[*].parent_urn, questions[*].urn,
-    questions[*].depends_on.{question, answers}, choices[*].urn.
-    """
-
-    def sub(u):
-        if not isinstance(u, str):
-            return u
-        parts = u.split(":")
-        if (
-            len(parts) >= 6
-            and parts[0] == "urn"
-            and parts[2] == "risk"
-            and parts[3] in REWRITABLE_URN_TYPES
-        ):
-            parts[1] = new_ns
-            parts[4] = new_slug
-            return ":".join(parts)
-        return u
-
-    for n in draft.get("nodes", []) or []:
-        n["urn"] = sub(n.get("urn"))
-        if n.get("parent_urn"):
-            n["parent_urn"] = sub(n.get("parent_urn"))
-    for q in draft.get("questions", []) or []:
-        q["urn"] = sub(q.get("urn"))
-        dep = q.get("depends_on")
-        if isinstance(dep, dict):
-            if isinstance(dep.get("question"), str):
-                dep["question"] = sub(dep["question"])
-            if isinstance(dep.get("answers"), list):
-                dep["answers"] = [
-                    sub(a) if isinstance(a, str) else a for a in dep["answers"]
-                ]
-    for c in draft.get("choices", []) or []:
-        c["urn"] = sub(c.get("urn"))
-
-
 def resolve_compute_result(compute_result: str | None) -> str | None:
     """Map a QuestionChoice.compute_result string to a Result value."""
     if compute_result is None:
@@ -235,6 +184,7 @@ class RoleCodename(Enum):
     READER = "BI-RL-AUD"
     THIRD_PARTY_RESPONDENT = "BI-RL-TPR"
     AUDITEE = "BI-RL-ADE"
+    TECHNICAL_TESTER = "BI-RL-TST"
 
     def __str__(self) -> str:
         return self.value
@@ -251,6 +201,7 @@ class UserGroupCodename(Enum):
     READER = "BI-UG-AUD"
     THIRD_PARTY_RESPONDENT = "BI-UG-TPR"
     AUDITEE = "BI-UG-ADE"
+    TECHNICAL_TESTER = "BI-UG-TST"
 
     def __str__(self) -> str:
         return self.value
@@ -449,6 +400,33 @@ BUILTIN_ROLE_TRANSLATIONS = {
         "ur": {"name": "جواب دہندہ"},
         "zh": {"name": "受访者"},
     },
+    "BI-RL-TST": {
+        "en": {"name": "Technical tester"},
+        "ar": {"name": "مختبِر تقني"},
+        "cs": {"name": "Technický tester"},
+        "da": {"name": "Teknisk tester"},
+        "de": {"name": "Technischer Tester"},
+        "el": {"name": "Τεχνικός δοκιμαστής"},
+        "es": {"name": "Probador técnico"},
+        "et": {"name": "Tehniline testija"},
+        "fr": {"name": "Testeur technique"},
+        "hi": {"name": "तकनीकी परीक्षक"},
+        "hr": {"name": "Tehnički tester"},
+        "hu": {"name": "Műszaki tesztelő"},
+        "id": {"name": "Penguji teknis"},
+        "it": {"name": "Tester tecnico"},
+        "ko": {"name": "기술 테스터"},
+        "lt": {"name": "Techninis testuotojas"},
+        "nl": {"name": "Technisch tester"},
+        "pl": {"name": "Tester techniczny"},
+        "pt": {"name": "Testador técnico"},
+        "ro": {"name": "Tester tehnic"},
+        "sv": {"name": "Teknisk testare"},
+        "tr": {"name": "Teknik test uzmanı"},
+        "uk": {"name": "Технічний тестувальник"},
+        "ur": {"name": "تکنیکی ٹیسٹر"},
+        "zh": {"name": "技术测试员"},
+    },
 }
 
 
@@ -483,6 +461,7 @@ BUILTIN_USERGROUP_CODENAMES = {
         RoleCodename.THIRD_PARTY_RESPONDENT
     ),
     str(UserGroupCodename.AUDITEE): str(RoleCodename.AUDITEE),
+    str(UserGroupCodename.TECHNICAL_TESTER): str(RoleCodename.TECHNICAL_TESTER),
 }
 
 # NOTE: This is set to "Main" now, but will be changed to a unique identifier
@@ -1195,10 +1174,23 @@ def _build_answer_context(questions_qs, answers_qs):
 
 
 def update_selected_implementation_groups(compliance_assessment):
-    """Recalculate selected IGs based on all visible answers in the assessment."""
-    from core.models import Answer, Question
+    """Recalculate dynamic IGs from visible answers, preserving manually-picked ones.
 
-    igs_to_select = set()
+    An IG is "dynamic" iff at least one QuestionChoice in the framework lists it in
+    select_implementation_groups. Those get fully recomputed here. Any other IG already
+    on the assessment is treated as a manual pick and left untouched.
+    """
+    from core.models import Answer, Question, QuestionChoice
+
+    dynamic_eligible_igs: set[str] = set()
+    for select_list in QuestionChoice.objects.filter(
+        question__requirement_node__framework=compliance_assessment.framework,
+        select_implementation_groups__isnull=False,
+    ).values_list("select_implementation_groups", flat=True):
+        if select_list:
+            dynamic_eligible_igs.update(select_list)
+
+    igs_to_select: set[str] = set()
 
     requirement_assessments = (
         compliance_assessment.requirement_assessments.select_related(
@@ -1244,7 +1236,12 @@ def update_selected_implementation_groups(compliance_assessment):
                 if ig.get("default_selected"):
                     igs_to_select.add(ig["ref_id"])
 
-    compliance_assessment.selected_implementation_groups = list(igs_to_select)
+    current = set(compliance_assessment.selected_implementation_groups or [])
+    manual_only = current - dynamic_eligible_igs
+
+    compliance_assessment.selected_implementation_groups = list(
+        manual_only | igs_to_select
+    )
     compliance_assessment.save(update_fields=["selected_implementation_groups"])
 
 
@@ -1306,79 +1303,31 @@ def build_questions_dict(node):
     return result if result else None
 
 
-def _resolve_auditee_role_ids():
-    """Resolve respondent role IDs (auditee + third-party respondent) and the
-    "higher" role IDs (analyst, domain-manager, administrator) via IAM cache.
-
-    Auditee and third-party respondent are synonymous here — both are
-    respondents on an audit and get the scoped, field-stripped view.
-    """
-    from iam.cache_builders import get_roles_state
-
-    role_id_by_name = get_roles_state().role_id_by_name
-    respondent_ids = frozenset(
-        role_id_by_name[rc.value]
-        for rc in (RoleCodename.AUDITEE, RoleCodename.THIRD_PARTY_RESPONDENT)
-        if rc.value in role_id_by_name
-    )
-    higher_ids = frozenset(
-        role_id_by_name[rc.value]
-        for rc in (
-            RoleCodename.ANALYST,
-            RoleCodename.DOMAIN_MANAGER,
-            RoleCodename.ADMINISTRATOR,
-        )
-        if rc.value in role_id_by_name
-    )
-    return respondent_ids, higher_ids
+AUDITOR_VIEW_PERM = "view_compliance_assessment_full"
+AUDIT_ACCESS_PERM = "view_complianceassessment"
 
 
-def get_auditee_filtered_folder_ids(user) -> set:
-    """Return folder IDs where *user* holds a respondent role (auditee or
-    third-party respondent) but NO higher role.
+def get_respondent_scoped_folder_ids(user) -> set:
+    """Return folder IDs where *user* sees audits as a **respondent** — i.e. the
+    scoped, field-stripped view applies.
 
-    "Higher" means analyst, domain-manager or administrator — any role that
-    already grants full access to compliance data. For those folders the
-    normal queryset is sufficient; only the returned set needs assignment
-    filtering.
+    A user is a respondent on a folder when they can access compliance
+    assessments there (``view_complianceassessment``) but have NOT been granted
+    the full auditor view (``view_compliance_assessment_full``). This is permission-based and
+    **default-deny**: any role not explicitly granted ``view_compliance_assessment_full`` is
+    treated as a respondent. Auditor-side roles (reader, approver, analyst,
+    domain-manager, administrator) hold ``view_compliance_assessment_full`` and are therefore
+    excluded; auditee and third-party respondent do not and are included.
 
     Uses the IAM snapshot caches exclusively (no extra DB queries).
     """
-    from iam.models import _iter_assignment_lites_for_user
-    from iam.cache_builders import (
-        get_folder_state,
-        iter_descendant_ids,
-    )
+    from iam.models import RoleAssignment
 
-    respondent_role_ids, higher_role_ids = _resolve_auditee_role_ids()
-    if not respondent_role_ids:
-        return set()
-
-    state = get_folder_state()
-
-    # folder_id -> set of role_ids the user has on that folder
-    folder_roles: dict[UUID, set] = {}
-
-    for a in _iter_assignment_lites_for_user(user):
-        role_id = a.role_id
-        if role_id not in respondent_role_ids and role_id not in higher_role_ids:
-            continue  # irrelevant role
-
-        # expand perimeter folders
-        for pf_id in a.perimeter_folder_ids:
-            if a.is_recursive:
-                target_ids = iter_descendant_ids(state, pf_id, include_start=True)
-            else:
-                target_ids = (pf_id,)
-
-            for fid in target_ids:
-                folder_roles.setdefault(fid, set()).add(role_id)
-
-    # Return only folders where user is a respondent and has NO higher role
+    perms_per_folder = RoleAssignment.get_permissions_per_folder(user, recursive=True)
     return {
-        fid
-        for fid, role_ids in folder_roles.items()
-        if role_ids & respondent_role_ids and role_ids.isdisjoint(higher_role_ids)
+        UUID(folder_id)
+        for folder_id, codenames in perms_per_folder.items()
+        if AUDIT_ACCESS_PERM in codenames and AUDITOR_VIEW_PERM not in codenames
     }
 
 

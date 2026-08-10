@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
+import { ALLAUTH_API_URL, BACKEND_API_EXPOSED_URL } from '$lib/utils/constants';
+import { logger } from '$lib/server/logger';
 
 export const GET = async ({ locals }) => {
 	if (!locals.user) {
@@ -8,7 +9,18 @@ export const GET = async ({ locals }) => {
 	redirect(302, '/analytics');
 };
 
-export const POST = async ({ fetch, cookies }) => {
+export const POST = async ({ fetch, cookies, locals }) => {
+	const isSSOUser = locals.user?.is_sso === true;
+
+	if (isSSOUser) {
+		cookies.delete('token', { path: '/' });
+
+		logger.info('User logged out', { user_id: locals.user?.id });
+
+		// Preserve the Django session until the SLO endpoint consumes it.
+		redirect(302, `${BACKEND_API_EXPOSED_URL}/iam/sso/logout/`);
+	}
+
 	const requestInitOptions: RequestInit = {
 		method: 'DELETE'
 	};
@@ -21,6 +33,8 @@ export const POST = async ({ fetch, cookies }) => {
 
 	cookies.delete('token', { path: '/' });
 	cookies.delete('allauth_session_token', { path: '/' });
+
+	logger.info('User logged out', { user_id: locals.user?.id });
 
 	redirect(302, '/login');
 };

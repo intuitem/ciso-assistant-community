@@ -5,7 +5,7 @@
 
 <div
 	id="hellothere"
-	class="flex flex-col justify-center items-center lg:w-3/5 text-gray-900 px-4 lg:px-0"
+	class="flex flex-col justify-center items-center lg:w-3/5 text-surface-950-50 px-4 lg:px-0"
 >
 	<Typewriter mode="loopOnce" cursor={false} interval={50}>
 		<div class="text-2xl unstyled text-center pb-4">

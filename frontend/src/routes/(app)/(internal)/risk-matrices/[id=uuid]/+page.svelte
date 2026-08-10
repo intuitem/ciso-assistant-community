@@ -1,21 +1,23 @@
 <script lang="ts">
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import { URL_MODEL_MAP } from '$lib/utils/crud.js';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { URL_MODEL_MAP, getMarkdownFields } from '$lib/utils/crud';
 	const showRisks = true;
 	let { data } = $props();
 	const riskMatrix = data.data;
+	const markdownFieldSet = getMarkdownFields(data.urlModel);
 </script>
 
 <div class="flex flex-row justify-between">
 	<div class="flex flex-col space-y-2">
 		{#each Object.entries(riskMatrix).filter(([key, _]) => key !== 'id' && key !== 'json_definition' && key !== 'is_enabled') as [key, value]}
 			<div class="flex flex-col">
-				<div class="text-sm font-medium text-gray-800 capitalize-first">
+				<div class="text-sm font-medium text-surface-950-50 capitalize-first">
 					{key.replace('_', ' ')}
 				</div>
 				<ul class="text-sm">
-					<li class="text-gray-600 list-none">
+					<li class="text-surface-600-400 list-none">
 						{#if value}
 							{#if Array.isArray(value)}
 								<ul>
@@ -46,6 +48,8 @@
 									}/${value.id}`}
 									<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
 								{/if}
+							{:else if markdownFieldSet.has(key)}
+								<MarkdownRenderer content={value} />
 							{:else}
 								{value.str ?? value}
 							{/if}

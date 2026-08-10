@@ -8,8 +8,8 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-white p-6 w-modal space-y-6';
-	const cHeader = 'text-xl font-medium text-gray-900';
+	const cBase = 'card bg-surface-50-950 p-6 w-modal space-y-6';
+	const cHeader = 'text-xl font-medium text-surface-950-50';
 	const cForm = 'space-y-4';
 
 	interface Props {
@@ -44,16 +44,21 @@
 		level?: string;
 	};
 
-	let cascadeInfo: { deleted: Bucket; affected: Bucket } | null = $state(null);
+	type BucketName = 'deleted' | 'affected' | 'blocked';
+
+	let cascadeInfo: { deleted: Bucket; affected: Bucket; blocked?: Bucket } | null = $state(null);
 	let loading = $state(true);
 	let errorMsg = $state<string | null>(null);
 
-	// expand/collapse state per-group (deleted/affected buckets share keys, so prefix)
+	// PROTECT/RESTRICT references make the delete fail server-side.
+	const isBlocked = $derived((cascadeInfo?.blocked?.count ?? 0) > 0);
+
+	// expand/collapse state per-group (buckets share keys, so prefix)
 	let expanded = $state<Set<string>>(new Set());
-	function keyFor(bucket: 'deleted' | 'affected', groupKey: string) {
+	function keyFor(bucket: BucketName, groupKey: string) {
 		return `${bucket}:${groupKey}`;
 	}
-	function toggle(bucket: 'deleted' | 'affected', groupKey: string) {
+	function toggle(bucket: BucketName, groupKey: string) {
 		const k = keyFor(bucket, groupKey);
 		if (expanded.has(k)) expanded.delete(k);
 		else expanded.add(k);
@@ -88,39 +93,44 @@
 		<article>{$modalStore[0].body ?? '(body missing)'}</article>
 
 		{#if loading}
-			<div class="text-sm text-gray-500">Loading...</div>
+			<div class="text-sm text-surface-600-400">Loading...</div>
 		{:else if errorMsg}
-			<div class="p-4 bg-red-50 text-red-900 text-sm">
+			<div class="p-4 bg-error-50-950 text-error-900-100 text-sm">
 				{errorMsg}
 			</div>
 		{:else if cascadeInfo}
-			{#if cascadeInfo.deleted?.count > 0}
-				<div class="p-4 bg-orange-50 border-l-2 border-orange-400">
-					<div class="text-sm font-medium text-gray-900 mb-3">
-						{m.cascadeDeleteWarning({ count: cascadeInfo.deleted.count })}
+			{#if isBlocked && cascadeInfo.blocked}
+				<div class="p-4 bg-error-50 dark:bg-error-500/15 border-l-2 border-error-500">
+					<div class="text-sm font-medium text-surface-950-50 mb-3">
+						{m.cascadeBlockedWarning({ count: cascadeInfo.blocked.count })}
 					</div>
 
 					<div class="max-h-64 overflow-y-auto space-y-1">
-						{#each cascadeInfo.deleted.grouped_objects as group (group.model)}
-							<section class="border-t border-gray-200">
+						{#each cascadeInfo.blocked.grouped_objects as group (group.model)}
+							<section class="border-t border-surface-200-800">
 								<button
 									type="button"
-									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-gray-50 text-sm"
-									aria-controls={`del-${group.model}`}
-									aria-expanded={expanded.has(keyFor('deleted', group.model))}
-									onclick={() => toggle('deleted', group.model)}
+									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-50-950 text-sm"
+									aria-controls={`blk-${group.model}`}
+									aria-expanded={expanded.has(keyFor('blocked', group.model))}
+									onclick={() => toggle('blocked', group.model)}
 								>
-									<span class="font-medium text-gray-900">{group.verbose_name ?? group.model}</span>
-									<span class="text-xs text-gray-600">
+									<span class="font-medium text-surface-950-50"
+										>{group.verbose_name ?? group.model}</span
+									>
+									<span class="text-xs text-surface-600-400">
 										{group.objects.length}
 									</span>
 								</button>
 
-								{#if expanded.has(keyFor('deleted', group.model))}
-									<ul id={`del-${group.model}`} class="px-3 pb-2 text-sm space-y-0.5 bg-gray-50">
+								{#if expanded.has(keyFor('blocked', group.model))}
+									<ul
+										id={`blk-${group.model}`}
+										class="px-3 pb-2 text-sm space-y-0.5 bg-surface-50-950"
+									>
 										{#each group.objects as o (o.id)}
 											<li class="flex items-center justify-between py-1">
-												<span class="truncate text-gray-700" title={o.name}>{o.name}</span>
+												<span class="truncate text-surface-700-300" title={o.name}>{o.name}</span>
 											</li>
 										{/each}
 									</ul>
@@ -131,36 +141,83 @@
 				</div>
 			{/if}
 
-			{#if cascadeInfo.affected?.count > 0}
-				<div class="p-4 bg-blue-50 border-l-2 border-blue-400">
-					<div class="text-sm font-medium text-gray-900 mb-1">
+			{#if !isBlocked && cascadeInfo.deleted?.count > 0}
+				<div class="p-4 bg-orange-50 dark:bg-orange-500/15 border-l-2 border-orange-400">
+					<div class="text-sm font-medium text-surface-950-50 mb-3">
+						{m.cascadeDeleteWarning({ count: cascadeInfo.deleted.count })}
+					</div>
+
+					<div class="max-h-64 overflow-y-auto space-y-1">
+						{#each cascadeInfo.deleted.grouped_objects as group (group.model)}
+							<section class="border-t border-surface-200-800">
+								<button
+									type="button"
+									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-50-950 text-sm"
+									aria-controls={`del-${group.model}`}
+									aria-expanded={expanded.has(keyFor('deleted', group.model))}
+									onclick={() => toggle('deleted', group.model)}
+								>
+									<span class="font-medium text-surface-950-50"
+										>{group.verbose_name ?? group.model}</span
+									>
+									<span class="text-xs text-surface-600-400">
+										{group.objects.length}
+									</span>
+								</button>
+
+								{#if expanded.has(keyFor('deleted', group.model))}
+									<ul
+										id={`del-${group.model}`}
+										class="px-3 pb-2 text-sm space-y-0.5 bg-surface-50-950"
+									>
+										{#each group.objects as o (o.id)}
+											<li class="flex items-center justify-between py-1">
+												<span class="truncate text-surface-700-300" title={o.name}>{o.name}</span>
+											</li>
+										{/each}
+									</ul>
+								{/if}
+							</section>
+						{/each}
+					</div>
+				</div>
+			{/if}
+
+			{#if !isBlocked && cascadeInfo.affected?.count > 0}
+				<div class="p-4 bg-blue-50 dark:bg-blue-500/15 border-l-2 border-blue-400">
+					<div class="text-sm font-medium text-surface-950-50 mb-1">
 						{m.cascadeAffectedNotice({ count: cascadeInfo.affected.count })}
 					</div>
-					<p class="text-xs text-gray-600 mb-3">
+					<p class="text-xs text-surface-600-400 mb-3">
 						{m.cascadeAffectedHint()}
 					</p>
 
 					<div class="max-h-64 overflow-y-auto space-y-1">
 						{#each cascadeInfo.affected.grouped_objects as group (group.model)}
-							<section class="border-t border-gray-200">
+							<section class="border-t border-surface-200-800">
 								<button
 									type="button"
-									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-gray-50 text-sm"
+									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-50-950 text-sm"
 									aria-controls={`aff-${group.model}`}
 									aria-expanded={expanded.has(keyFor('affected', group.model))}
 									onclick={() => toggle('affected', group.model)}
 								>
-									<span class="font-medium text-gray-900">{group.verbose_name ?? group.model}</span>
-									<span class="text-xs text-gray-600">
+									<span class="font-medium text-surface-950-50"
+										>{group.verbose_name ?? group.model}</span
+									>
+									<span class="text-xs text-surface-600-400">
 										{group.objects.length}
 									</span>
 								</button>
 
 								{#if expanded.has(keyFor('affected', group.model))}
-									<ul id={`aff-${group.model}`} class="px-3 pb-2 text-sm space-y-0.5 bg-gray-50">
+									<ul
+										id={`aff-${group.model}`}
+										class="px-3 pb-2 text-sm space-y-0.5 bg-surface-50-950"
+									>
 										{#each group.objects as o (o.id)}
 											<li class="flex items-center justify-between py-1">
-												<span class="truncate text-gray-700" title={o.name}>{o.name}</span>
+												<span class="truncate text-surface-700-300" title={o.name}>{o.name}</span>
 											</li>
 										{/each}
 									</ul>
@@ -173,25 +230,27 @@
 		{/if}
 
 		<form method="POST" action={formAction} use:enhance class="modal-form {cForm}">
-			<footer class="flex gap-3 justify-end pt-4 border-t border-gray-200">
+			<footer class="flex gap-3 justify-end pt-4 border-t border-surface-200-800">
 				<button
 					type="button"
-					class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+					class="px-4 py-2 text-sm font-medium text-surface-700-300 bg-surface-50-950 border border-surface-300-700 hover:bg-surface-50-950"
 					data-testid="delete-cancel-button"
 					onclick={parent.onClose}
 				>
-					{m.cancel()}
+					{isBlocked ? m.close() : m.cancel()}
 				</button>
 				<input type="hidden" name="urlmodel" value={URLModel} />
 				<input type="hidden" name="id" value={id} />
-				<button
-					class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700"
-					data-testid="delete-confirm-button"
-					type="submit"
-					onclick={parent.onClose}
-				>
-					{m.submit()}
-				</button>
+				{#if !isBlocked}
+					<button
+						class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+						data-testid="delete-confirm-button"
+						type="submit"
+						onclick={parent.onClose}
+					>
+						{m.submit()}
+					</button>
+				{/if}
 			</footer>
 		</form>
 

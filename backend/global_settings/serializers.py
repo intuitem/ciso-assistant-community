@@ -1,4 +1,5 @@
 import ipaddress
+import re
 import uuid
 
 from django.conf import settings as django_settings
@@ -7,6 +8,11 @@ from rest_framework import serializers
 
 from urllib.parse import urlparse
 
+from core.net_safety import (
+    BlockedRequestError,
+    DnsLookupError,
+    assert_public_url_unless_dev,
+)
 from .models import GlobalSettings
 
 
@@ -45,7 +51,7 @@ def validate_default_dashboard_value(value):
         return None
     try:
         uuid.UUID(str(value))
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         raise serializers.ValidationError(
             {"default_custom_analytics_dashboard": "Must be a valid UUID."}
         )
@@ -72,6 +78,7 @@ GENERAL_SETTINGS_KEYS = [
     "mapping_max_depth",
     "allow_self_validation",
     "show_warning_external_links",
+    "show_get_started",
     "builtin_metrics_retention_days",
     "allow_assignments_to_entities",
     "enforce_mfa",
@@ -89,7 +96,18 @@ GENERAL_SETTINGS_KEYS = [
     "chat_temperature",
     "default_custom_analytics_dashboard",
     "audit_tree_aggregation_strategy",
+    "default_landing",
+    "default_packager",
+    "personal_folders",
+    "personal_folders_parent",
+    "disable_partially_compliant_result",
+    "use_risk_category_label",
 ]
+
+LLM_URL_DEFAULTS = {
+    "ollama_base_url": "http://localhost:11434",
+    "openai_api_base": "http://localhost:1234/v1",
+}
 
 
 class GlobalSettingsSerializer(serializers.ModelSerializer):
@@ -157,6 +175,20 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         {key: "URL must not contain a fragment (#)."}
                     )
+                stored = (instance.value or {}).get(key)
+                if value != stored and value != LLM_URL_DEFAULTS.get(key):
+                    try:
+                        assert_public_url_unless_dev(
+                            value, allowed_schemes=("http", "https")
+                        )
+                    except BlockedRequestError:
+                        raise serializers.ValidationError(
+                            {key: "URL must point to a public address."}
+                        )
+                    except DnsLookupError:
+                        raise serializers.ValidationError(
+                            {key: "URL hostname could not be resolved."}
+                        )
             # Validate builtin_metrics_retention_days minimum value
             if key == "builtin_metrics_retention_days":
                 if not isinstance(value, int) or value < 1:
@@ -173,6 +205,16 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                             "default_language": f"Invalid language. Must be one of: {valid_codes}"
                         }
                     )
+            if key == "default_packager":
+                # Identity alphabet of library packagers / ref_ids
+                # (core.LibraryDraft.IDENTITY_REGEX). fullmatch, not match:
+                # `$` would still accept a trailing newline.
+                if not isinstance(value, str) or not re.fullmatch(
+                    r"[a-z0-9_-]+", value
+                ):
+                    raise serializers.ValidationError(
+                        {"default_packager": "Must match [a-z0-9_-]+."}
+                    )
             if key == "chat_temperature_enabled":
                 if not isinstance(value, bool):
                     raise serializers.ValidationError(
@@ -181,7 +223,7 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
             if key == "chat_temperature":
                 try:
                     temp = float(value)
-                except (TypeError, ValueError):
+                except TypeError, ValueError:
                     raise serializers.ValidationError(
                         {"chat_temperature": "Must be a number."}
                     )
@@ -253,7 +295,7 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                                     * Decimal(str(conversion_rate))
                                 )
 
-                    control.save(update_fields=["cost"])
+                    control.save(update_fields=["cost"], skip_sync=True)
                     updated_count += 1
 
         print(
@@ -325,6 +367,10 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     quantitative_risk_studies = serializers.BooleanField(
         source="value.quantitative_risk_studies", required=False, default=True
     )
+    threat_modeling = serializers.BooleanField(
+        source="value.threat_modeling", required=False, default=False
+    )
+    ttps = serializers.BooleanField(source="value.ttps", required=False, default=False)
     terminologies = serializers.BooleanField(
         source="value.terminologies", required=False, default=True
     )
@@ -380,10 +426,19 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     policy_documents = serializers.BooleanField(
         source="value.policy_documents", required=False, default=True
     )
+    document_management = serializers.BooleanField(
+        source="value.document_management", required=False, default=True
+    )
     security_advisories = serializers.BooleanField(
         source="value.security_advisories", required=False, default=True
     )
     cwes = serializers.BooleanField(source="value.cwes", required=False, default=True)
+    custom_portals = serializers.BooleanField(
+        source="value.custom_portals", required=False, default=False
+    )
+    posture_assessments = serializers.BooleanField(
+        source="value.posture_assessments", required=False, default=False
+    )
 
     class Meta:
         model = GlobalSettings
@@ -415,6 +470,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         """
         current_value_dict = instance.value if isinstance(instance.value, dict) else {}
         value_changed = False
+        idp_groups_changed = False
         new_value_dict = validated_data.get("value", {})
 
         for field_name, field_instance in self.fields.items():
@@ -436,10 +492,23 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
                 if current_value_dict.get(source_key) != new_flag_value:
                     current_value_dict[source_key] = new_flag_value
                     value_changed = True
+                    if source_key == "idp_groups":
+                        idp_groups_changed = True
 
         if value_changed:
             instance.value = current_value_dict
             instance.save(update_fields=["value"])
+
+        if idp_groups_changed:
+            # The groups cache bakes in the idp_groups closure at build time, so
+            # toggling the flag must rebuild it for the change to take effect.
+            from iam.cache_builders import (
+                invalidate_assignments_cache,
+                invalidate_groups_cache,
+            )
+
+            invalidate_groups_cache()
+            invalidate_assignments_cache()
 
         return instance
 

@@ -18,6 +18,21 @@ global:
   # -- Extra allowed hosts (comma separated, without spaces)
   extraAllowedHosts: ""
 
+  ## Extra CA certificate trusted by every pod (backend, Huey and frontend).
+  ## Provide only your CA in the secret: trust is added on top of the system roots,
+  ## not replaced, so public CAs keep working. For Python (backend/Huey) an init
+  ## container merges the system bundle with your CA; for Node (frontend) it is set
+  ## via the additive NODE_EXTRA_CA_CERTS.
+  extraCerts:
+    # -- Trust an extra CA certificate on all pods (added to the default roots, not replacing them)
+    enabled: false
+    # -- Name of an existing secret holding the CA certificate
+    secretName: ""
+    # -- Key inside the secret (also the file name once mounted)
+    fileName: ca.crt
+    # -- Directory where the certificate / merged bundle is mounted
+    mountPath: /etc/ssl/extra-certs
+
   # Default image used by all components
   image:
     # -- If defined, a registry applied to all CISO Assistant deployments
@@ -123,6 +138,13 @@ backend:
 
     # -- Enable Django debug mode
     djangoDebug: false
+
+    ## AI assistant / chat feature
+    ## Note: requires a reachable Qdrant (enable `qdrant.enabled` or provide QDRANT_URL
+    ## via backend.env / backend.huey.env) and an LLM provider configured from the in-app settings.
+    chat:
+      # -- Enable the AI assistant / chat feature (sets ENABLE_CHAT)
+      enabled: false
 
   # -- Set extra volumes for backend
   extraVolumes: []
@@ -383,6 +405,26 @@ ingress:
       #   ...
       #   -----END CERTIFICATE-----
 
+## NetworkPolicy configuration
+networkPolicy:
+  # -- Create a NetworkPolicy for CISO Assistant pods
+  enabled: false
+  # -- Policy types to enable (Ingress and/or Egress)
+  policyTypes:
+    - Ingress
+  # -- Pod selector the policy applies to
+  # @default -- all pods of this release
+  podSelector: {} # @schema additionalProperties: true
+  ## Example:
+  ##   - from:
+  ##       - namespaceSelector:
+  ##           matchLabels:
+  ##             kubernetes.io/metadata.name: ingress-nginx
+  # -- Ingress rules (raw Kubernetes NetworkPolicy `ingress` entries)
+  ingress: []
+  # -- Egress rules (raw Kubernetes NetworkPolicy `egress` entries)
+  egress: []
+
 ## DEPRECATED - Bundled PostgreSQL database configuration (Bitnami chart)
 ## Ref: https://artifacthub.io/packages/helm/bitnami/postgresql
 ## Note: Don't enable if you use SQLite mode or external PgSQL database
@@ -424,3 +466,39 @@ externalPgsql:
   database: ciso-assistant
   # -- Port of an external PostgreSQL to connect
   port: 5432
+
+## Qdrant vector database (AI assistant / RAG)
+## Deployed via the official Qdrant chart (https://github.com/qdrant/qdrant-helm)
+## as a StatefulSet with persistence and health probes out of the box.
+## When enabled, QDRANT_URL is injected into the backend and Huey containers.
+## Any key below is passed through to the Qdrant subchart, refer to its values for
+## the full set of options (replicaCount, persistence, image, resources, ...).
+qdrant: # @schema additionalProperties: true
+  # -- Deploy the bundled Qdrant (official subchart) and inject QDRANT_URL
+  enabled: false
+
+  # -- Number of Qdrant replicas (requires `qdrant.config.cluster.enabled`)
+  replicaCount: 1
+
+  # -- Qdrant storage persistence
+  persistence: # @schema additionalProperties: true
+    accessModes: ["ReadWriteOnce"]
+    size: 10Gi
+    annotations: {} # @schema additionalProperties: true
+    additionalLabels: {} # @schema additionalProperties: true
+    # storageVolumeName: qdrant-storage
+    # storageSubPath: ""
+    # storageClassName: local-path
+    # volumeAttributesClassName: ""
+
+  # -- Qdrant runtime configuration
+  config: # @schema additionalProperties: true
+    cluster: # @schema additionalProperties: true
+      enabled: true
+      p2p: # @schema additionalProperties: true
+        port: 6335
+        enable_tls: false
+      consensus: # @schema additionalProperties: true
+        tick_period_ms: 100
+    service: # @schema additionalProperties: true
+      enable_tls: false

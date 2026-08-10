@@ -37,7 +37,9 @@
 		const echarts = await import('echarts');
 		const el = document.getElementById(chart_id);
 		if (!el) return;
-		const chart = echarts.init(el, null, { renderer: 'svg' });
+		const isDark = document.documentElement.classList.contains('dark');
+		const chart = echarts.init(el, isDark ? 'dark' : null, { renderer: 'svg' });
+		const valueColor = isDark ? '#e5e5e5' : '#333';
 
 		// Capture values at mount time to avoid reactive context issues in ECharts callbacks
 		const percentage = max > 0 ? (value / max) * 100 : 0;
@@ -97,7 +99,7 @@
 								offsetCenter: ['0%', '0%'],
 								fontSize: fontSize,
 								fontWeight: 'bold',
-								color: '#333',
+								color: valueColor,
 								formatter: function () {
 									return isPercentage ? `${displayValue}%` : displayValue;
 								}
@@ -109,7 +111,7 @@
 						height: 60,
 						fontSize: fontSize,
 						fontWeight: 'bold',
-						color: '#333',
+						color: valueColor,
 						backgroundColor: 'transparent',
 						borderWidth: 0
 					}
@@ -117,6 +119,7 @@
 			]
 		};
 
+		option.backgroundColor = 'transparent';
 		chart.setOption(option);
 
 		const handleResize = () => chart.resize();

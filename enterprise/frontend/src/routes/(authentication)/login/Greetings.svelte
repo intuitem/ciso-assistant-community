@@ -9,7 +9,7 @@
 
 <div
 	id="hellothere"
-	class="flex flex-col justify-center items-center lg:w-3/5 text-gray-900 px-4 lg:px-0"
+	class="flex flex-col justify-center items-center lg:w-3/5 text-surface-900-100 px-4 lg:px-0"
 >
 	{#if !clientSettings?.settings.name}
 		<Typewriter mode="loopOnce" cursor={false} interval={50}>

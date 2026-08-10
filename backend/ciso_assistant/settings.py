@@ -22,7 +22,7 @@ from . import meta
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(os.getenv("DJANGO_BASE_DIR", Path(__file__).resolve().parent.parent))
 load_dotenv(BASE_DIR / ".meta")
 
 
@@ -30,7 +30,7 @@ VERSION = os.getenv("CISO_ASSISTANT_VERSION", "unset")
 BUILD = os.getenv("CISO_ASSISTANT_BUILD", "unset")
 SCHEMA_VERSION = meta.SCHEMA_VERSION
 
-LOG_LEVEL = os.environ.get("LOG_LEVEL", "WARNING")
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
 LOG_OUTFILE = os.environ.get("LOG_OUTFILE", "")
 DB_LOG = os.environ.get("DB_LOG", "").lower() == "true"
@@ -45,6 +45,17 @@ def set_ciso_assistant_url(_, __, event_dict):
 
 
 _SENSITIVE_QUERY_PARAMS = frozenset({"code", "token", "id_token", "access_token"})
+
+_QUIET_PATHS = frozenset({"/api/health/"})
+
+
+def quiet_healthcheck(_, __, event_dict):
+    request = event_dict.get("request", "")
+    if isinstance(request, str):
+        for path in _QUIET_PATHS:
+            if path in request:
+                raise structlog.DropEvent
+    return event_dict
 
 
 def redact_sensitive_query_params(_, __, event_dict):
@@ -75,15 +86,35 @@ LOGGING = {
             "processor": structlog.dev.ConsoleRenderer(),
         },
     },
+    # Warning and above go to stderr, the rest to stdout, so systemd/journald
+    # assigns error vs info priority correctly.
+    "filters": {
+        "below_warning": {
+            "()": "django.utils.log.CallbackFilter",
+            "callback": lambda record: record.levelno < logging.WARNING,
+        },
+    },
     "handlers": {
-        "console": {
+        "stdout": {
             "class": "logging.StreamHandler",
+            "stream": "ext://sys.stdout",
+            "formatter": LOG_FORMAT,
+            "filters": ["below_warning"],
+        },
+        "stderr": {
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stderr",
+            "level": "WARNING",
             "formatter": LOG_FORMAT,
         },
     },
     "loggers": {
-        "": {"handlers": ["console"], "level": LOG_LEVEL},
-        "httpx": {"handlers": ["console"], "level": "WARNING", "propagate": False},
+        "": {"handlers": ["stdout", "stderr"], "level": LOG_LEVEL},
+        "httpx": {
+            "handlers": ["stdout", "stderr"],
+            "level": "WARNING",
+            "propagate": False,
+        },
         # Disable Django's default request logger — it logs full URLs including
         # sensitive OAuth2 query params (code, token). Request logging is already
         # handled by django_structlog with query-param redaction.
@@ -95,7 +126,7 @@ if LOG_OUTFILE:
     LOGGING["handlers"]["file"] = {
         "level": LOG_LEVEL,
         "class": "logging.handlers.WatchedFileHandler",
-        "filename": "ciso-assistant.log",
+        "filename": LOG_OUTFILE,
         "formatter": "json",
     }
     LOGGING["loggers"][""]["handlers"].append("file")
@@ -103,6 +134,7 @@ if LOG_OUTFILE:
 structlog.configure(
     processors=[
         structlog.contextvars.merge_contextvars,
+        quiet_healthcheck,
         redact_sensitive_query_params,
         set_ciso_assistant_url,
         structlog.stdlib.filter_by_level,
@@ -216,14 +248,14 @@ LOCAL_STORAGE_DIRECTORY = os.environ.get(
     "LOCAL_STORAGE_DIRECTORY", BASE_DIR / "db/attachments"
 )
 
-EXPOSE_METRICS = os.environ.get("EXPOSE_METRICS", "False").lower() in (
+EXPOSE_METRICS = os.environ.get("EXPOSE_METRICS", "False").strip().lower() in (
     "true",
     "1",
     "yes",
 )
 logger.info("EXPOSE_METRICS: %s", EXPOSE_METRICS)
 
-ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 25)
+ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 50)
 
 USE_S3 = os.getenv("USE_S3", "False").lower() in ("true", "1", "yes")
 USE_AZURE = os.getenv("USE_AZURE", "False").lower() in ("true", "1", "yes")
@@ -421,16 +453,20 @@ INSTALLED_APPS = [
     "tailwind",
     "iam",
     "sec_intel",
+    "threat_modeling",
     "global_settings",
     "pmbok",
     "ebios_rm",
     "tprm",
     "privacy",
     "resilience",
+    "automation",
     "crq",
+    "custom_fields",
     "metrology",
     "chat",
     "doc_management",
+    "portals",
     "core",
     "cal",
     "django_filters",
@@ -448,6 +484,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.saml",
     "allauth.socialaccount.providers.openid_connect",
     "allauth.mfa",
+    "allauth.idp.oidc",
     "huey.contrib.djhuey",
     "storages",
 ]
@@ -535,6 +572,7 @@ def _build_tls12_context():
     context = ssl.create_default_context()
     context.minimum_version = ssl.TLSVersion.TLSv1_2
     context.maximum_version = ssl.TLSVersion.TLSv1_2
+    context.set_ciphers("ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256")
     return context
 
 
@@ -549,6 +587,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "knox.auth.TokenAuthentication",
+        "iam.authentication.OIDCServiceAccountAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -600,7 +639,7 @@ if DEBUG:
 
     if DB_LOG:
         LOGGING["loggers"]["django.db.backends"] = {
-            "handlers": ["console"],
+            "handlers": ["stdout", "stderr"],
             "level": "DEBUG",
             "propagate": False,
         }
@@ -682,6 +721,8 @@ LANGUAGES = [
     ("lt", "Lithuanian"),
     ("ko", "Korean"),
     ("et", "Estonian"),
+    ("sk", "Slovak"),
+    ("sl", "Slovenian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -785,12 +826,38 @@ HEADLESS_FRONTEND_URLS = {
     "socialaccount_login_error": CISO_ASSISTANT_URL + "/login",
 }
 
+ACCOUNT_LOGOUT_REDIRECT_URL = CISO_ASSISTANT_URL + "/login"
+
 SOCIALACCOUNT_PROVIDERS = {
     "saml": {
         "EMAIL_AUTHENTICATION": True,
         "VERIFIED_EMAIL": True,
     },
 }
+
+# Signs id_tokens/jwks only, access tokens stay opaque (default format).
+IDP_OIDC_PRIVATE_KEY = os.environ.get("IDP_OIDC_PRIVATE_KEY", "")
+if not IDP_OIDC_PRIVATE_KEY:
+    _idp_oidc_key_path = Path(
+        os.environ.get(
+            "IDP_OIDC_PRIVATE_KEY_FILE", BASE_DIR / "db" / "idp_oidc_private_key.pem"
+        )
+    )
+    if _idp_oidc_key_path.exists():
+        IDP_OIDC_PRIVATE_KEY = _idp_oidc_key_path.read_text()
+    else:
+        from cryptography.hazmat.primitives import serialization
+        from cryptography.hazmat.primitives.asymmetric import rsa
+
+        _idp_oidc_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        IDP_OIDC_PRIVATE_KEY = _idp_oidc_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        ).decode()
+        _idp_oidc_key_path.parent.mkdir(parents=True, exist_ok=True)
+        _idp_oidc_key_path.touch(mode=0o600)
+        _idp_oidc_key_path.write_text(IDP_OIDC_PRIVATE_KEY)
 
 # MFA / WebAuthn settings
 MFA_SUPPORTED_TYPES = ["recovery_codes", "totp", "webauthn"]
@@ -819,6 +886,26 @@ HUEY = {
 AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
 
-WEBHOOK_ALLOW_PRIVATE_IPS = os.environ.get(
-    "WEBHOOK_ALLOW_PRIVATE_IPS", "False"
+# Run workflow instances in a Huey worker instead of the triggering request.
+# Requires a running Huey consumer; keep False for dev setups without one.
+WORKFLOWS_ASYNC_EXECUTION = (
+    os.environ.get("WORKFLOWS_ASYNC_EXECUTION", "").lower() == "true"
+)
+
+# Kill-switch for inbound workflow webhooks: when disabled, hook
+# URLs answer 404 uniformly, for environments that want no unauthenticated
+# ingress at all.
+WORKFLOWS_INBOUND_HOOKS = (
+    os.environ.get("WORKFLOWS_INBOUND_HOOKS", "true").lower() != "false"
+)
+
+# Per-sender-IP rate limit on the unauthenticated inbound hook endpoint (DRF
+# rate string, e.g. "120/min"). Keyed on the trailing X-Forwarded-For entry.
+WORKFLOWS_WEBHOOK_THROTTLE_RATE = os.environ.get(
+    "WORKFLOWS_WEBHOOK_THROTTLE_RATE", "120/min"
+)
+
+# Allow outbound server-side requests (webhooks, integrations, LLM URLs) to private/loopback addresses
+ALLOW_PRIVATE_NETWORK_REQUESTS = os.environ.get(
+    "ALLOW_PRIVATE_NETWORK_REQUESTS", "False"
 ).lower() in ("true", "1", "yes")

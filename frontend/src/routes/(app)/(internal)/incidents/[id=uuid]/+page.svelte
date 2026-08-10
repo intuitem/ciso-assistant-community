@@ -28,6 +28,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
+	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
@@ -43,7 +44,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import type { TableSource } from '$lib/components/ModelTable/types';
-	import { Popover, Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
 		data: PageData;
@@ -187,7 +188,58 @@
 				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
 	});
 
-	let exportPopupOpen = $state(false);
+	function buildExportGroups(): ExportGroup[] {
+		const id = data.data.id;
+		return [
+			{
+				titleKey: 'incident',
+				options: [
+					{
+						titleKey: 'exportIncidentReport',
+						descriptionKey: 'exportIncidentReportDesc',
+						format: 'MD',
+						href: `/incidents/${id}/export/md`,
+						testId: 'export-option-md'
+					},
+					{
+						titleKey: 'exportIncidentReportPrintable',
+						descriptionKey: 'exportIncidentReportPrintableDesc',
+						format: 'PDF',
+						href: `/incidents/${id}/export/pdf`,
+						testId: 'export-option-pdf'
+					}
+				]
+			},
+			{
+				titleKey: 'doraIncidentReports',
+				options: [
+					{
+						titleKey: 'generateDoraReport',
+						descriptionKey: 'generateDoraReportDesc',
+						format: 'JSON',
+						href: `/dora-incident-reports/new?incident=${id}`,
+						kind: 'navigate',
+						testId: 'export-option-dora'
+					}
+				]
+			}
+		];
+	}
+
+	function modalExport(): void {
+		const modalComponent: ModalComponent = {
+			ref: ExportModal,
+			props: {
+				title: m.exportOptionsTitle(),
+				groups: buildExportGroups()
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
+		};
+		modalStore.trigger(modal);
+	}
 
 	function modalDeleteDoraReport(reportId: string, reportName: string): void {
 		const modalComponent: ModalComponent = {
@@ -285,44 +337,19 @@
 	<DetailView {data} displayModelTable={false}>
 		{#snippet actions()}
 			<div class="flex flex-col space-y-2">
-				<Popover
-					open={exportPopupOpen}
-					onOpenChange={(e) => (exportPopupOpen = e.open)}
-					positioning={{ placement: 'bottom' }}
+				<button
+					type="button"
+					class="btn preset-filled-primary-500 w-full"
+					data-testid="export-button"
+					onclick={modalExport}
 				>
-					<Popover.Trigger class="btn preset-filled-primary-500 w-full">
-						<span data-testid="export-button">
-							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
-						</span>
-					</Popover.Trigger>
-					<Popover.Positioner class="z-50!">
-						<Popover.Content class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
-							<div>
-								<p class="block px-4 py-2 text-sm text-gray-800">{m.incident()}</p>
-								<a
-									href="/incidents/{data.data.id}/export/md"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-									>... {m.asMarkdown()}</a
-								>
-								<a
-									href="/incidents/{data.data.id}/export/pdf"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
-								>
-							</div>
-						</Popover.Content>
-					</Popover.Positioner>
-				</Popover>
-				<a
-					href="/dora-incident-reports/new?incident={data.data.id}"
-					class="btn preset-filled-secondary-500 w-full"
-				>
-					<i class="fa-solid fa-file-shield mr-2"></i>{m.generateDoraReport()}
-				</a>
+					<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+				</button>
 			</div>
 		{/snippet}
 		{#snippet widgets()}
 			<div
-				class="shadow-xl border-l border-t p-4 rounded-sm bg-linear-to-tl from-slate-50 to-white"
+				class="shadow-xl border-l border-t p-4 rounded-sm bg-linear-to-tl from-slate-50 to-white dark:from-surface-900 dark:to-surface-950"
 				hidden={!canEditObject}
 			>
 				{#if canEditObject}
@@ -381,7 +408,7 @@
 										/>
 									</div>
 									<button
-										class="btn bg-gray-300 h-11 w-10"
+										class="btn bg-surface-300-700 h-11 w-10"
 										onclick={(_) => modalEvidenceCreateForm()}
 										type="button"
 										data-testid="add-button-evidence"
@@ -421,7 +448,7 @@
 		{/snippet}
 	</DetailView>
 
-	<div class="card shadow-lg bg-white p-4 space-y-2">
+	<div class="card shadow-lg bg-surface-50-950 p-4 space-y-2">
 		<Tabs value={activeTab} onValueChange={(e) => (activeTab = e.value)}>
 			<Tabs.List>
 				<Tabs.Trigger value="timeline">
@@ -431,7 +458,7 @@
 					<i class="fa-solid fa-file-shield mr-2"></i>{m.doraIncidentReports()}
 					{#if doraRows.length > 0}
 						<span
-							class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary text-gray-700"
+							class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary text-surface-700-300"
 						>
 							{doraRows.length}
 						</span>
@@ -444,7 +471,7 @@
 							<i class="{panel.icon} mr-2"></i>{safeTranslate(panel.labelKey)}
 							{#if related.count !== undefined && related.count > 0}
 								<span
-									class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary text-gray-700"
+									class="ml-2 rounded-full px-2 py-0.5 text-xs preset-tonal-secondary text-surface-700-300"
 								>
 									{related.count}
 								</span>
@@ -470,7 +497,9 @@
 							></div>
 							<div class="flex flex-col">
 								<div class="flex flex-row items-center space-x-3 mb-1">
-									<time class="text-sm font-normal leading-none text-gray-600 dark:text-gray-800">
+									<time
+										class="text-sm font-normal leading-none text-surface-600-400 dark:text-surface-800-200"
+									>
 										{formatDateOrDateTime(meta.timestamp, getLocale())} - {#if meta.author}{meta
 												?.author?.str}{:else}{m.unknownOrDeletedUser()}{/if}</time
 									>
@@ -486,7 +515,7 @@
 										preventDelete={preventDelete(row)}
 									></TableRowActions>
 									{#if formatDateOrDateTime(meta.updated_at, getLocale()) !== formatDateOrDateTime(meta.created_at, getLocale())}
-										<span class="text-xs italic text-gray-500 dark:text-gray-400">
+										<span class="text-xs italic text-surface-600-400 dark:text-surface-400-600">
 											({m.edited()})
 										</span>
 									{/if}
@@ -497,7 +526,7 @@
 									>
 									<a
 										href={`/${actionsURLModel}/${meta.id}`}
-										class="font-semibold capitalize"
+										class="font-semibold"
 										data-testid="name-entry-{rowIndex}">{safeTranslate(meta.entry)}</a
 									>
 								</div>
@@ -505,20 +534,24 @@
 									{#if meta.observation}
 										<MarkdownRenderer
 											content={meta.observation}
-											class="bg-primary-50 rounded-lg p-2"
+											class="bg-primary-50 dark:bg-surface-800 rounded-lg p-2"
 										/>
 									{:else}
-										<p class="italic text-gray-500 dark:text-gray-400">{m.noObservation()}</p>
+										<p class="italic text-surface-600-400 dark:text-surface-400-600">
+											{m.noObservation()}
+										</p>
 									{/if}
 								</div>
 								{#if meta.evidences && meta.evidences.length > 0}
 									<div class="mb-2">
-										<p class="text-xs font-medium text-gray-700 mb-1">{m.associatedEvidences()}:</p>
+										<p class="text-xs font-medium text-surface-700-300 mb-1">
+											{m.associatedEvidences()}:
+										</p>
 										<div class="flex flex-wrap gap-1">
 											{#each meta.evidences as evidence}
 												<a
 													href={`/evidences/${evidence.id}`}
-													class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full hover:bg-blue-200 transition-colors max-w-50"
+													class="inline-flex items-center px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors max-w-50"
 													title={evidence.str}
 												>
 													<i class="fa-solid fa-paperclip mr-1 flex-shrink-0"></i>
@@ -569,7 +602,9 @@
 							>
 								{#snippet addButton()}
 									{#if canEditObject && field?.addExisting}
-										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+										<span
+											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+										>
 											<button
 												class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 												data-testid="select-existing-{panel.urlmodel}"
@@ -580,7 +615,9 @@
 												<i class="fa-solid fa-hand-pointer"></i>
 											</button>
 										</span>
-										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+										<span
+											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
+										>
 											<button
 												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
 												data-testid="add-button-{panel.urlmodel}"
@@ -603,7 +640,7 @@
 				{#if doraRows.length > 0}
 					<table class="w-full text-sm">
 						<thead>
-							<tr class="border-b text-left text-gray-500">
+							<tr class="border-b text-left text-surface-600-400">
 								<th class="py-2 px-3">{m.incidentSubmission()}</th>
 								<th class="py-2 px-3">{safeTranslate('createdAt')}</th>
 								<th class="py-2 px-3">{safeTranslate('updatedAt')}</th>
@@ -613,7 +650,7 @@
 						<tbody>
 							{#each doraRows as report}
 								<tr
-									class="border-b hover:bg-gray-50 cursor-pointer"
+									class="border-b hover:bg-surface-100-900 cursor-pointer"
 									onclick={(e) => {
 										if (!(e.target as HTMLElement).closest('button')) {
 											window.location.href = `/dora-incident-reports/${report.id}`;
@@ -621,15 +658,21 @@
 									}}
 								>
 									<td class="py-2 px-3">
-										<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+										<span
+											class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded"
+										>
 											{safeTranslate(report.incident_submission)}
 										</span>
 										{#if report.is_submitted}
-											<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded ml-1">
+											<span
+												class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs px-2 py-1 rounded ml-1"
+											>
 												<i class="fa-solid fa-lock text-xs mr-1"></i>{m.submitted()}
 											</span>
 										{:else}
-											<span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded ml-1">
+											<span
+												class="bg-surface-200-800 text-surface-600-400 text-xs px-2 py-1 rounded ml-1"
+											>
 												{m.draft()}
 											</span>
 										{/if}
@@ -656,7 +699,7 @@
 						</tbody>
 					</table>
 				{:else}
-					<p class="text-gray-500 text-sm italic py-4">{m.noResultFound()}</p>
+					<p class="text-surface-600-400 text-sm italic py-4">{m.noResultFound()}</p>
 				{/if}
 			</Tabs.Content>
 		</Tabs>

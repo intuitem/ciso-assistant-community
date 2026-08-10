@@ -1,4 +1,5 @@
 import { complianceResultColorMap } from '$lib/utils/constants';
+import { m } from '$paraglide/messages';
 
 export function formatStringToDate(inputString: string, locale = 'en') {
 	const date = new Date(inputString);
@@ -90,7 +91,7 @@ export function getScoreHexColor(
 }
 
 export function formatScoreValue(
-	value: number,
+	value: number | null,
 	max_score: number,
 	fullDonut = false,
 	min_score = 0
@@ -104,7 +105,8 @@ export function formatScoreValue(
 	if (range <= 0) {
 		return 0;
 	}
-	return ((value - min_score) * 100) / range;
+	const boundedValue = Math.max(min_score, Math.min(max_score, value));
+	return ((boundedValue - min_score) * 100) / range;
 }
 
 export function getSecureRedirect(url: any): string {
@@ -132,6 +134,22 @@ export function stringify(value: string | number | boolean | null = null) {
 		.toLowerCase()
 		.normalize('NFD')
 		.replace(/[\u0300-\u036f]/g, '');
+}
+
+/**
+ * Best-effort display name for an actor/approver: "First Last", else email, else
+ * its string representation. Returns '' when none is available so callers can
+ * fall back to their own placeholder.
+ */
+export function formatActorName(
+	actor:
+		| { first_name?: string; last_name?: string; email?: string; str?: string }
+		| null
+		| undefined
+): string {
+	if (!actor) return '';
+	const full = `${actor.first_name || ''} ${actor.last_name || ''}`.trim();
+	return full || actor.email || actor.str || '';
 }
 
 export function isDark(hexcolor: string | undefined): boolean {
@@ -397,6 +415,40 @@ function aggregateComputeResults(resolved: string[]): string | null {
 	if (hasPartial || (hasCompliant && hasNonCompliant)) return 'partially_compliant';
 	if (hasNonCompliant) return 'non_compliant';
 	return 'compliant';
+}
+
+/**
+ * Whether "partially compliant" should be offered when setting a result.
+ * Dropped when `disablePartial`, unless it is already the assessment's persisted
+ * value, so existing data keeps rendering its selected state.
+ */
+function showPartiallyCompliant(disablePartial: boolean, currentResult: string | null): boolean {
+	return !disablePartial || currentResult === 'partially_compliant';
+}
+
+/** Build the {id,label} result options for the bulk result editors. */
+export function requirementResultOptions(
+	disablePartial = false,
+	currentResult: string | null = null
+): { id: string; label: string }[] {
+	const showPartial = showPartiallyCompliant(disablePartial, currentResult);
+	return [
+		{ id: 'not_assessed', label: m.notAssessed() },
+		{ id: 'non_compliant', label: m.nonCompliant() },
+		...(showPartial ? [{ id: 'partially_compliant', label: m.partiallyCompliant() }] : []),
+		{ id: 'compliant', label: m.compliant() },
+		{ id: 'not_applicable', label: m.notApplicable() }
+	];
+}
+
+/** Filter backend-provided {value,label} result choices the same way. */
+export function filterResultChoices<T extends { value: string }>(
+	options: T[],
+	disablePartial = false,
+	currentResult: string | null = null
+): T[] {
+	if (showPartiallyCompliant(disablePartial, currentResult)) return options;
+	return options.filter((o) => o.value !== 'partially_compliant');
 }
 
 /**

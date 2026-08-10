@@ -515,6 +515,79 @@ class TestBestMappingInferences:
         assert "urn:req:B1" in src_ras
         assert src_ras["urn:req:B1"]["used_mapping_set"]["urn"] == "urn:rms:BC"
 
+    def test_multi_hop_coverage_is_weakest_link(self):
+        """Coverage along a path is weakest-link: an origin requirement is only
+        'full' to the final target if EVERY hop is full (equal/superset).
+
+        A1 --equal--> B1 --intersect--> C1  =>  A1 partial to C1
+        The intermediate B1 keeps its own (partial) coverage for the B→C hop.
+        """
+        rms_ab = _rms(
+            source_framework_urn="urn:fw:A",
+            target_framework_urn="urn:fw:B",
+            requirement_mappings=[
+                {
+                    "source_requirement_urn": "urn:req:A1",
+                    "target_requirement_urn": "urn:req:B1",
+                    "relationship": "equal",
+                }
+            ],
+            urn="urn:rms:AB",
+            name="A to B",
+        )
+        rms_bc = _rms(
+            source_framework_urn="urn:fw:B",
+            target_framework_urn="urn:fw:C",
+            requirement_mappings=[
+                {
+                    "source_requirement_urn": "urn:req:B1",
+                    "target_requirement_urn": "urn:req:C1",
+                    "relationship": "intersect",
+                }
+            ],
+            urn="urn:rms:BC",
+            name="B to C",
+        )
+
+        engine = self._build_engine_with_rms([rms_ab, rms_bc])
+        engine.frameworks = {
+            "urn:fw:A": {"min_score": 0, "max_score": 100},
+            "urn:fw:B": {"min_score": 0, "max_score": 100},
+            "urn:fw:C": {"min_score": 0, "max_score": 100},
+        }
+
+        source = _source_audit(
+            {
+                "urn:req:A1": {
+                    "result": "compliant",
+                    "status": "done",
+                    "score": 90,
+                    "is_scored": True,
+                    "observation": "OK",
+                    "documentation_score": 0,
+                    "applied_controls": [],
+                    "security_exceptions": [],
+                    "evidences": [],
+                    "name": "RA from A",
+                    "id": "ra-a1-id",
+                    "source_framework": {"id": "fw-a-id", "name": "Framework A"},
+                }
+            }
+        )
+
+        inferences, best_path = engine.best_mapping_inferences(
+            source, "urn:fw:A", "urn:fw:C"
+        )
+
+        assert best_path == ["urn:fw:A", "urn:fw:B", "urn:fw:C"]
+        src_ras = inferences["requirement_assessments"]["urn:req:C1"][
+            "mapping_inference"
+        ]["source_requirement_assessments"]
+        # Origin A1: full first hop degraded to partial by the intersect second hop.
+        assert src_ras["urn:req:A1"]["coverage"] == "partial"
+        # Intermediate B1: its own B→C hop is intersect → partial.
+        assert src_ras["urn:req:B1"]["coverage"] == "partial"
+
     # T9: indirect path found when no direct path exists
     def test_indirect_path_when_no_direct(self):
         # No direct A→D, only A→C→D

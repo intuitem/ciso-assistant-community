@@ -7,6 +7,8 @@ from core.serializers import (
 )
 from core.models import AppliedControl
 from core.utils import get_global_currency
+from pmbok.models import GenericCollection
+from threat_modeling.models import ThreatModel
 
 from .models import (
     QuantitativeRiskHypothesis,
@@ -78,6 +80,13 @@ class ImpactField(serializers.Field):
 
 
 class QuantitativeRiskStudyWriteSerializer(BaseModelSerializer):
+    genericcollection = serializers.PrimaryKeyRelatedField(
+        source="genericcollection_set",
+        many=True,
+        required=False,
+        queryset=GenericCollection.objects.all(),
+    )
+
     class Meta:
         model = QuantitativeRiskStudy
         exclude = ["created_at", "updated_at"]
@@ -130,6 +139,12 @@ class QuantitativeRiskStudyReadSerializer(BaseModelSerializer):
 
 
 class QuantitativeRiskScenarioWriteSerializer(BaseModelSerializer):
+    FLAGGED_FIELDS = {"threat_models": "threat_modeling"}
+
+    threat_models = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=ThreatModel.objects.all()
+    )
+
     class Meta:
         model = QuantitativeRiskScenario
         exclude = ["created_at", "updated_at"]
@@ -165,10 +180,13 @@ class QuantitativeRiskScenarioWriteSerializer(BaseModelSerializer):
 
 
 class QuantitativeRiskScenarioReadSerializer(BaseModelSerializer):
+    FLAGGED_FIELDS = {"threat_models": "threat_modeling"}
+
     quantitative_risk_study = FieldsRelatedField()
     assets = FieldsRelatedField(many=True)
     owner = FieldsRelatedField(many=True)
     threats = FieldsRelatedField(many=True)
+    threat_models = FieldsRelatedField(many=True)
     vulnerabilities = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
     folder = FieldsRelatedField()
@@ -353,7 +371,7 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
     roc = serializers.DecimalField(max_digits=12, decimal_places=4, read_only=True)
     roc_display = serializers.CharField(read_only=True)
     roc_interpretation = serializers.CharField(read_only=True)
-    roc_calculation_explanation = serializers.CharField(read_only=True)
+    roc_calculation_explanation = serializers.JSONField(read_only=True)
     folder = FieldsRelatedField()
 
     def get_lec_data(self, obj):

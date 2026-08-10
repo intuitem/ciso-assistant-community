@@ -34,6 +34,7 @@
 		choiceUrnFromAlignmentValue,
 		alignmentColorMap,
 		resultBadgeStyle,
+		requirementResultOptions,
 		AUTO_ALIGNMENT_QUESTION_URN
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -46,6 +47,7 @@
 	import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import MappingInferenceView from '$lib/components/ComplianceAssessment/MappingInferenceView.svelte';
 
 	interface Props {
 		data: PageData;
@@ -67,13 +69,6 @@
 		invalidateAllBool = true
 	}: Props = $props();
 
-	const result_options = [
-		{ id: 'not_assessed', label: m.notAssessed() },
-		{ id: 'non_compliant', label: m.nonCompliant() },
-		{ id: 'partially_compliant', label: m.partiallyCompliant() },
-		{ id: 'compliant', label: m.compliant() },
-		{ id: 'not_applicable', label: m.notApplicable() }
-	];
 	const status_options = [
 		{ id: 'to_do', label: m.toDo() },
 		{ id: 'in_progress', label: m.inProgress() },
@@ -376,15 +371,15 @@
 		className="hidden lg:block"
 	/>
 	<div
-		class="card px-6 py-4 bg-white flex flex-col justify-evenly shadow-lg w-full h-full space-y-2"
+		class="card px-6 py-4 bg-surface-50-950 flex flex-col justify-evenly shadow-lg w-full h-full space-y-2"
 	>
 		{#if !questionnaireOnly}
 			<div
-				class="sticky top-0 p-2 z-10 card bg-white items-center justify-evenly flex flex-row w-full"
+				class="sticky top-0 p-2 z-10 card bg-surface-50-950 items-center justify-evenly flex flex-row w-full"
 			>
 				<a
 					href="/compliance-assessments/{complianceAssessment.id}"
-					class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+					class="flex items-center space-x-2 text-primary-800-200 hover:text-primary-600-400"
 					data-testid="back-to-audit"
 				>
 					<i class="fa-solid fa-arrow-left"></i>
@@ -421,7 +416,7 @@
 		<!-- Read-only banner -->
 		{#if isReadOnly}
 			<div
-				class="card bg-yellow-50 border border-yellow-300 px-5 py-3 flex items-center space-x-3 my-2"
+				class="card bg-warning-50-950 border border-warning-300-700 px-5 py-3 flex items-center space-x-3 my-2"
 			>
 				<i class="fa-solid fa-lock text-yellow-600 text-lg"></i>
 				<p class="text-yellow-800 font-medium">
@@ -457,11 +452,13 @@
 							></div>
 
 							<span
-								class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl inline-flex items-center gap-3"
+								class="relative z-10 bg-surface-50-950 px-6 text-orange-600 font-semibold text-xl inline-flex items-center gap-3"
 							>
 								<span>{getTitle(requirementAssessment)}</span>
 								{#if typeof requirementAssessment.requirement?.weight === 'number' && Number.isFinite(requirementAssessment.requirement.weight) && requirementAssessment.requirement.weight !== 1 && requirementAssessment.assessable}
-									<span class="badge text-xs font-medium bg-indigo-100 text-indigo-800">
+									<span
+										class="badge text-xs font-medium bg-indigo-100 dark:bg-indigo-500/20 text-indigo-800 dark:text-indigo-300"
+									>
 										{m.requirementWeight()}: {requirementAssessment.requirement.weight}
 									</span>
 								{/if}
@@ -530,67 +527,9 @@
 													</div>
 												{/if}
 												{#if requirementAssessment.mapping_inference?.result}
-													<div class="my-2">
-														<p class="font-medium">
-															<i class="fa-solid fa-link"></i>
-															{m.mappingInference()}
-														</p>
-														<span class="text-xs text-gray-500"
-															><i class="fa-solid fa-circle-info"></i>
-															{m.mappingInferenceHelpText()}</span
-														>
-														<ul class="list-disc ml-4">
-															<li>
-																<p>
-																	<a
-																		class="anchor"
-																		href="/requirement-assessments/{requirementAssessment
-																			.mapping_inference.source_requirement_assessment.id}"
-																	>
-																		{requirementAssessment.mapping_inference
-																			.source_requirement_assessment.str}
-																	</a>
-																</p>
-																<p class="whitespace-pre-line py-1">
-																	<span class="italic">{m.coverageColon()}</span>
-																	<span class="badge h-fit">
-																		{safeTranslate(
-																			requirementAssessment.mapping_inference
-																				.source_requirement_assessment.coverage
-																		)}
-																	</span>
-																</p>
-																{#if requirementAssessment.mapping_inference.source_requirement_assessment.is_scored}
-																	<p class="whitespace-pre-line py-1">
-																		<span class="italic">{m.scoreSemiColon()}</span>
-																		<span class="badge h-fit">
-																			{safeTranslate(
-																				requirementAssessment.mapping_inference
-																					.source_requirement_assessment.score
-																			)}
-																		</span>
-																	</p>
-																{/if}
-																<p class="whitespace-pre-line py-1">
-																	<span class="italic">{m.suggestionColon()}</span>
-																	<span
-																		class="badge h-fit"
-																		style={resultBadgeStyle(
-																			requirementAssessment.mapping_inference.result
-																		)}
-																	>
-																		{safeTranslate(requirementAssessment.mapping_inference.result)}
-																	</span>
-																</p>
-																{#if requirementAssessment.mapping_inference.annotation}
-																	<p class="whitespace-pre-line py-1">
-																		<span class="italic">{m.annotationColon()}</span>
-																		{requirementAssessment.mapping_inference.annotation}
-																	</p>
-																{/if}
-															</li>
-														</ul>
-													</div>
+													<MappingInferenceView
+														mappingInference={requirementAssessment.mapping_inference}
+													/>
 												{/if}
 											{/if}
 										</div>
@@ -598,7 +537,7 @@
 									<!-- Auditor badge: respondent's alignment answer -->
 									{#if viewerRole === 'auditor' && showRespondentAlignment && requirementAssessment.respondent_alignment}
 										<div class="flex flex-col items-center my-2">
-											<p class="text-xs italic text-surface-600">
+											<p class="text-xs italic text-surface-600-400">
 												{m.respondentAnswered()}
 											</p>
 											<span
@@ -658,7 +597,10 @@
 														</span>
 													{:else}
 														<RadioGroup
-															possibleOptions={result_options}
+															possibleOptions={requirementResultOptions(
+																page.data.settings?.disable_partially_compliant_result,
+																requirementAssessment.result
+															)}
 															key="id"
 															labelKey="label"
 															field="result"
@@ -947,7 +889,7 @@
 																class="text-primary-500"
 															/>
 														{:else}
-															<p class="text-gray-400 italic">{m.noObservation()}</p>
+															<p class="text-surface-400-600 italic">{m.noObservation()}</p>
 														{/if}
 													{:else}
 														<Accordion.Item value="observation">
@@ -985,7 +927,7 @@
 
 												{#if showAppliedControls}
 													{#if requirementAssessment.applied_controls.length === 0 && shallow}
-														<p class="text-gray-400 italic">{m.noAppliedControlYet()}</p>
+														<p class="text-surface-400-600 italic">{m.noAppliedControlYet()}</p>
 													{:else}
 														<Accordion.Item value="appliedControl">
 															<Accordion.ItemTrigger
@@ -1063,7 +1005,7 @@
 
 												{#if showEvidences}
 													{#if requirementAssessment.evidences.length === 0 && shallow}
-														<p class="text-gray-400 italic" data-testid="no-evidence">
+														<p class="text-surface-400-600 italic" data-testid="no-evidence">
 															{m.noEvidences()}
 														</p>
 													{:else}

@@ -39,7 +39,7 @@
 	>
 		{confirmLabel ?? m.confirm()}
 	</button>
-	<button type="button" class="text-xs text-gray-500" onclick={() => (active = false)}>
+	<button type="button" class="text-xs text-surface-600-400" onclick={() => (active = false)}>
 		{m.cancel()}
 	</button>
 {:else}

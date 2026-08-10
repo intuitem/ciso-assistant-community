@@ -151,13 +151,13 @@
 	>
 		<!-- Palette container -->
 		<div
-			class="w-full max-w-lg mx-4 overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black/10 animate-in"
+			class="w-full max-w-lg mx-4 overflow-hidden rounded-xl bg-surface-50-950 shadow-2xl ring-1 ring-black/10 animate-in"
 		>
 			<!-- Search input -->
-			<div class="flex items-center gap-3 px-4 border-b border-gray-200">
-				<i class="fa-solid fa-magnifying-glass text-gray-400 text-sm"></i>
+			<div class="flex items-center gap-3 px-4 border-b border-surface-200-800">
+				<i class="fa-solid fa-magnifying-glass text-surface-400-600 text-sm"></i>
 				<input
-					class="w-full bg-transparent py-3.5 text-sm text-gray-900 placeholder-gray-400 outline-none border-none ring-0 focus:outline-none focus:border-none focus:ring-0 shadow-none"
+					class="w-full bg-transparent py-3.5 text-sm text-surface-900-100 placeholder-surface-400-600 outline-none border-none ring-0 focus:outline-none focus:border-none focus:ring-0 shadow-none"
 					type="text"
 					bind:value={searchText}
 					bind:this={searchInput}
@@ -165,7 +165,7 @@
 				/>
 				<button
 					onclick={() => (opened = false)}
-					class="shrink-0 rounded-md border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 hover:bg-gray-100 cursor-pointer"
+					class="shrink-0 rounded-md border border-surface-200-800 bg-surface-100-900 px-1.5 py-0.5 text-[10px] font-medium text-surface-600-400 hover:bg-surface-200-800 cursor-pointer"
 				>
 					ESC
 				</button>
@@ -176,7 +176,8 @@
 				{#if filteredNavigationCommands.length > 0 || filteredActionCommands.length > 0}
 					{#if filteredNavigationCommands.length > 0}
 						<div class="px-3 py-2">
-							<span class="text-[11px] font-semibold uppercase tracking-wider text-gray-400 px-1"
+							<span
+								class="text-[11px] font-semibold uppercase tracking-wider text-surface-400-600 px-1"
 								>{m.commandPaletteNavigation()}</span
 							>
 						</div>
@@ -184,7 +185,9 @@
 							{#each filteredNavigationCommands as navigationCommand, index}
 								<button
 									class="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors cursor-pointer
-										{selected === index ? 'bg-violet-50 text-violet-900' : 'text-gray-700 hover:bg-gray-50'}"
+										{selected === index
+										? 'bg-violet-50 text-violet-900'
+										: 'text-surface-700-300 hover:bg-surface-100-900'}"
 									data-cmdk-nav-btn=""
 									onmouseenter={() => {
 										selected = index;
@@ -195,7 +198,7 @@
 										<i
 											class="{navigationCommand.icon} w-4 text-center text-xs {selected === index
 												? 'text-violet-500'
-												: 'text-gray-400'}"
+												: 'text-surface-400-600'}"
 										></i>
 									{/if}
 									<span class="flex-1 truncate">{navigationCommand.label}</span>
@@ -208,7 +211,8 @@
 					{/if}
 					{#if filteredActionCommands.length > 0}
 						<div class="px-3 py-2">
-							<span class="text-[11px] font-semibold uppercase tracking-wider text-gray-400 px-1"
+							<span
+								class="text-[11px] font-semibold uppercase tracking-wider text-surface-400-600 px-1"
 								>{m.commandPaletteActions()}</span
 							>
 						</div>
@@ -217,7 +221,9 @@
 								{@const globalIndex = filteredNavigationCommands.length + index}
 								<button
 									class="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors cursor-pointer
-										{selected === globalIndex ? 'bg-violet-50 text-violet-900' : 'text-gray-700 hover:bg-gray-50'}"
+										{selected === globalIndex
+										? 'bg-violet-50 text-violet-900'
+										: 'text-surface-700-300 hover:bg-surface-100-900'}"
 									data-cmdk-nav-btn=""
 									onmouseenter={() => {
 										selected = globalIndex;
@@ -228,7 +234,7 @@
 										<i
 											class="{actionCommand.icon} w-4 text-center text-xs {selected === globalIndex
 												? 'text-violet-500'
-												: 'text-gray-400'}"
+												: 'text-surface-400-600'}"
 										></i>
 									{/if}
 									<span class="flex-1 truncate">{actionCommand.label}</span>
@@ -240,7 +246,7 @@
 						</div>
 					{/if}
 				{:else}
-					<div class="flex flex-col items-center justify-center py-10 text-gray-400">
+					<div class="flex flex-col items-center justify-center py-10 text-surface-400-600">
 						<i class="fa-solid fa-magnifying-glass text-2xl mb-2"></i>
 						<span class="text-sm">{m.commandPaletteNoResults()}</span>
 						{#if searchText.trim()}
@@ -264,30 +270,30 @@
 
 			<!-- Footer -->
 			<div
-				class="flex items-center justify-between border-t border-gray-100 bg-gray-50/80 px-4 py-2 text-[11px] text-gray-400"
+				class="flex items-center justify-between border-t border-surface-100-900 bg-surface-100-900/80 px-4 py-2 text-[11px] text-surface-400-600"
 			>
 				<div class="flex items-center gap-3">
 					<span class="flex items-center gap-1">
 						<kbd
-							class="inline-flex items-center justify-center rounded border border-gray-200 bg-white px-1 py-0.5 font-mono text-[10px]"
+							class="inline-flex items-center justify-center rounded border border-surface-200-800 bg-surface-50-950 px-1 py-0.5 font-mono text-[10px]"
 							>↑</kbd
 						>
 						<kbd
-							class="inline-flex items-center justify-center rounded border border-gray-200 bg-white px-1 py-0.5 font-mono text-[10px]"
+							class="inline-flex items-center justify-center rounded border border-surface-200-800 bg-surface-50-950 px-1 py-0.5 font-mono text-[10px]"
 							>↓</kbd
 						>
 						<span class="ml-0.5">{m.commandPaletteNavigate()}</span>
 					</span>
 					<span class="flex items-center gap-1">
 						<kbd
-							class="inline-flex items-center justify-center rounded border border-gray-200 bg-white px-1 py-0.5 font-mono text-[10px]"
+							class="inline-flex items-center justify-center rounded border border-surface-200-800 bg-surface-50-950 px-1 py-0.5 font-mono text-[10px]"
 							>↵</kbd
 						>
 						<span class="ml-0.5">{m.commandPaletteOpen()}</span>
 					</span>
 					<span class="flex items-center gap-1">
 						<kbd
-							class="inline-flex items-center justify-center rounded border border-gray-200 bg-white px-1 py-0.5 font-mono text-[10px]"
+							class="inline-flex items-center justify-center rounded border border-surface-200-800 bg-surface-50-950 px-1 py-0.5 font-mono text-[10px]"
 							>esc</kbd
 						>
 						<span class="ml-0.5">{m.close()}</span>

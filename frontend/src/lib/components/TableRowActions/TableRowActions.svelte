@@ -9,7 +9,7 @@
 
 	import { m } from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import {
 		getModalStore,
 		type ModalStore,
@@ -50,7 +50,7 @@
 		identifierField = 'id',
 		preventDelete = false,
 		preventEdit = false,
-		baseClass = 'space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-700 justify-end',
+		baseClass = 'space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-700-300 justify-end',
 		hasBody = false,
 		head,
 		body,
@@ -129,33 +129,13 @@
 	let canDeleteObject = $derived(
 		!preventDelete &&
 			(model
-				? page.params.id
-					? canPerformAction({
-							user,
-							action: 'delete',
-							model: model.name,
-							domain:
-								model.name === 'folder'
-									? row.meta.id
-									: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
-						})
-					: Object.hasOwn(user.permissions, `delete_${model.name}`)
+				? canPerformActionOnObject({ user, action: 'delete', model: model.name, object: row.meta })
 				: false)
 	);
 	let canEditObject = $derived(
 		!preventEdit &&
 			(model
-				? page.params.id
-					? canPerformAction({
-							user,
-							action: 'change',
-							model: model.name,
-							domain:
-								model.name === 'folder'
-									? row.meta.id
-									: (row.meta.folder?.id ?? row.meta.folder ?? user.root_folder_id)
-						})
-					: Object.hasOwn(user.permissions, `change_${model.name}`)
+				? canPerformActionOnObject({ user, action: 'change', model: model.name, object: row.meta })
 				: false)
 	);
 
@@ -164,7 +144,7 @@
 		canEditObject &&
 			!disableEdit &&
 			URLModel &&
-			!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel) &&
+			!['frameworks', 'risk-matrices'].includes(URLModel) &&
 			editURL
 	);
 	let displayDelete = $derived(canDeleteObject && deleteForm !== null);
@@ -177,6 +157,7 @@
 		{#if displayDetail}
 			<Anchor
 				breadcrumbAction="push"
+				aria-label={m.view()}
 				href={detailURL}
 				class="unstyled cursor-pointer hover:text-primary-500"
 				data-testid="tablerow-detail-button"><i class="fa-solid fa-eye"></i></Anchor

@@ -9,6 +9,7 @@ node_modules
 /tests/reports/*
 /tests/results/*
 **/paraglide
+project.inlang/
 
 # Ignore files for PNPM, NPM and YARN
 pnpm-lock.yaml

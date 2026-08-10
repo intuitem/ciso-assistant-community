@@ -138,10 +138,12 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="findings-assessments"
+	optionsExtraFields={[['folder', 'str']]}
 	field="findings_assessment"
 	cacheLock={cacheLocks['findings_assessment']}
 	bind:cachedValue={formDataCache['findings_assessment']}
 	label={m.findingsAssessment()}
+	helpText={m.findingsAssessmentHelpText()}
 	hidden={initialData.findings_assessment}
 />
 <div class="flex flex-row space-x-2 items-center">
@@ -161,7 +163,7 @@
 	{#if context !== 'create'}
 		<div class="mt-4">
 			<button
-				class="btn bg-gray-300 h-10 w-10"
+				class="btn bg-surface-300-700 h-10 w-10"
 				aria-label={m.addAppliedControl()}
 				onclick={(_) => modalAppliedControlCreateForm('applied_controls')}
 				type="button"><i class="fa-solid fa-plus text-sm"></i></button
@@ -170,6 +172,17 @@
 	{/if}
 </div>
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<AutocompleteSelect
+		{form}
+		lazy
+		optionsEndpoint="assets"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="asset"
+		cacheLock={cacheLocks['asset']}
+		bind:cachedValue={formDataCache['asset']}
+		label={m.asset()}
+	/>
 	<AutocompleteSelect
 		multiple
 		{form}

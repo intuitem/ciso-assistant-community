@@ -1,9 +1,8 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -41,7 +40,7 @@
 	cacheLock={cacheLocks['csf_function']}
 	bind:cachedValue={formDataCache['csf_function']}
 />
-<TextArea
+<MarkdownField
 	{form}
 	field="annotation"
 	label={m.annotation()}
@@ -54,13 +53,6 @@
 	label={m.provider()}
 	cacheLock={cacheLocks['provider']}
 	bind:cachedValue={formDataCache['provider']}
-/>
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
 />
 <AutocompleteSelect
 	multiple

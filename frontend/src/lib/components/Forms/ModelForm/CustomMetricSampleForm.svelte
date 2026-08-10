@@ -168,7 +168,7 @@
 		<label for="value-input" class="text-sm font-semibold block mb-2">
 			{m.value()}
 			{#if unitName}
-				<span class="text-gray-500 font-normal">({unitName})</span>
+				<span class="text-surface-600-400 font-normal">({unitName})</span>
 			{/if}
 		</label>
 		<input

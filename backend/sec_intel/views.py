@@ -1,25 +1,14 @@
 import structlog
+from django.db.models import F
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from django.contrib.auth.models import Permission
-
+from core.permissions import FeatureFlagRequired, IsGlobalAdmin
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
-from iam.models import Folder, RoleAssignment
-from .models import SecurityAdvisory, CWE
+from .models import SecurityAdvisory, CWE, TTPCatalog, Tactic, Technique
 
 logger = structlog.get_logger(__name__)
-
-
-def _is_admin(user) -> bool:
-    """Check if user has admin-level access (change_globalsettings on root folder)."""
-    try:
-        perm = Permission.objects.get(codename="change_globalsettings")
-        return RoleAssignment.is_access_allowed(
-            user=user, perm=perm, folder=Folder.get_root_folder()
-        )
-    except Permission.DoesNotExist:
-        return False
 
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
@@ -80,11 +69,14 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
             return self.get_paginated_response(data)
         return Response(data)
 
-    @action(detail=False, methods=["post"], url_path="sync-kev")
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="sync-kev",
+        permission_classes=[IsAuthenticated, IsGlobalAdmin],
+    )
     def sync_kev(self, request):
         """Sync KEV feed synchronously. Scheduled async via Huey periodic tasks."""
-        if not _is_admin(request.user):
-            return Response({"error": "Admin permission required"}, status=403)
         from sec_intel.feeds import KEVFeed
 
         try:
@@ -102,11 +94,14 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
                 status=502,
             )
 
-    @action(detail=False, methods=["post"], url_path="sync-euvd")
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="sync-euvd",
+        permission_classes=[IsAuthenticated, IsGlobalAdmin],
+    )
     def sync_euvd(self, request):
         """Sync EUVD exploited vulnerabilities synchronously."""
-        if not _is_admin(request.user):
-            return Response({"error": "Admin permission required"}, status=403)
         from sec_intel.feeds import EUVDFeed
 
         try:
@@ -247,11 +242,14 @@ class CWEViewSet(BaseModelViewSet):
             return self.get_paginated_response(data)
         return Response(data)
 
-    @action(detail=False, methods=["post"], url_path="sync-catalog")
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="sync-catalog",
+        permission_classes=[IsAuthenticated, IsGlobalAdmin],
+    )
     def sync_catalog(self, request):
         """Sync CWE catalog from MITRE."""
-        if not _is_admin(request.user):
-            return Response({"error": "Admin permission required"}, status=403)
         from sec_intel.feeds import CWEFeed
 
         try:
@@ -268,3 +266,146 @@ class CWEViewSet(BaseModelViewSet):
                 {"error": "CWE sync failed due to an internal error"},
                 status=502,
             )
+
+
+class TacticViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows tactics to be viewed or edited.
+    """
+
+    feature_flag = "ttps"
+
+    def get_permissions(self):
+        return super().get_permissions() + [FeatureFlagRequired()]
+
+    model = Tactic
+    filterset_fields = ["folder", "provider", "library", "catalog", "urn"]
+    search_fields = ["ref_id", "name", "description"]
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("folder", "library", "catalog")
+
+
+class TechniqueViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows techniques to be viewed or edited.
+    """
+
+    feature_flag = "ttps"
+
+    def get_permissions(self):
+        return super().get_permissions() + [FeatureFlagRequired()]
+
+    model = Technique
+    filterset_fields = [
+        "folder",
+        "provider",
+        "library",
+        "catalog",
+        "tactics",
+        "parent",
+        "is_deprecated",
+        "filtering_labels",
+        "urn",
+    ]
+    search_fields = ["ref_id", "name", "provider", "description"]
+
+    def get_queryset(self):
+        queryset = (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "folder__parent_folder",
+                "library",
+                "parent",  # display_short composes the parent name
+                "catalog",
+            )
+            .prefetch_related(
+                "filtering_labels__folder", "tactics", "reference_controls"
+            )
+        )
+        if not self.request.query_params.get("is_deprecated"):
+            queryset = queryset.filter(is_deprecated=False)
+        return queryset
+
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = set(
+            Technique.objects.filter(provider__isnull=False).values_list(
+                "provider", flat=True
+            )
+        )
+        return Response({p: p for p in providers})
+
+
+def build_catalog_matrix(catalog) -> dict:
+    columns = [
+        {
+            "id": tactic.id,
+            "ref_id": tactic.ref_id,
+            "name": tactic.get_name_translated,
+            "description": tactic.get_description_translated,
+        }
+        for tactic in catalog.tactics.order_by(F("order_id").asc(nulls_last=True))
+    ]
+
+    techniques = (
+        Technique.objects.filter(catalog=catalog, is_deprecated=False)
+        .select_related("parent")
+        .prefetch_related("tactics")
+    )
+
+    children, cells = {}, []
+    for technique in techniques:
+        payload = {
+            "id": technique.id,
+            "ref_id": technique.ref_id,
+            "name": technique.get_name_translated,
+            "tactics": [str(t.id) for t in technique.tactics.all()],
+            "groups": technique.groups or [],
+        }
+        if technique.parent_id:
+            children.setdefault(str(technique.parent_id), []).append(payload)
+        else:
+            cells.append(payload)
+
+    # published matrices order cells by name, sub-techniques by ref_id
+    for cell in cells:
+        cell["children"] = sorted(
+            children.pop(str(cell["id"]), []), key=lambda item: item["ref_id"]
+        )
+    for orphans in children.values():
+        cells.extend({**orphan, "children": []} for orphan in orphans)
+    cells.sort(key=lambda item: item["name"].casefold())
+
+    return {
+        "catalog": {
+            "id": catalog.id,
+            "ref_id": catalog.ref_id,
+            "name": catalog.get_name_translated,
+            "description": catalog.get_description_translated,
+        },
+        "columns": columns,
+        "facets": catalog.grouping_definition or [],
+        "cells": cells,
+    }
+
+
+class TTPCatalogViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows TTP catalogs to be viewed or edited.
+    """
+
+    feature_flag = "ttps"
+
+    def get_permissions(self):
+        return super().get_permissions() + [FeatureFlagRequired()]
+
+    model = TTPCatalog
+    filterset_fields = ["folder", "provider", "library", "urn"]
+    search_fields = ["ref_id", "name", "provider", "description"]
+
+    @action(detail=True, name="Get the catalog rendered as a matrix")
+    def matrix(self, request, pk):
+        return Response(build_catalog_matrix(self.get_object()))

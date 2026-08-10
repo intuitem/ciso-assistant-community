@@ -17,7 +17,10 @@ type SidebarBackendKeys = {
 	organisation_objectives: boolean;
 	organisation_issues: boolean;
 	quantitative_risk_studies: boolean;
+	threat_modeling: boolean;
+	ttps: boolean;
 	terminologies: boolean;
+	custom_fields: boolean;
 	bia: boolean;
 	project_management: boolean;
 	contracts: boolean;
@@ -32,8 +35,13 @@ type SidebarBackendKeys = {
 	advanced_analytics: boolean;
 	journeys: boolean;
 	policy_documents: boolean;
+	document_management: boolean;
 	security_advisories: boolean;
 	cwes: boolean;
+	custom_portals: boolean;
+	idp_groups: boolean;
+	service_accounts: boolean;
+	posture_assessments: boolean;
 };
 
 type SidebarFrontendKeys = {
@@ -55,7 +63,10 @@ type SidebarFrontendKeys = {
 	organisationObjectives: boolean;
 	organisationIssues: boolean;
 	quantitativeRiskStudies: boolean;
+	threatModeling: boolean;
+	ttpCatalogs: boolean;
 	terminologies: boolean;
+	customFields: boolean;
 	businessImpactAnalysis: boolean;
 	projectManagement: boolean;
 	contracts: boolean;
@@ -70,6 +81,10 @@ type SidebarFrontendKeys = {
 	presets: boolean;
 	securityAdvisories: boolean;
 	cwes: boolean;
+	managePortals: boolean;
+	idpGroups: boolean;
+	serviceAccounts: boolean;
+	postureAssessments: boolean;
 };
 
 export function getSidebarVisibleItems(
@@ -94,7 +109,10 @@ export function getSidebarVisibleItems(
 		organisationObjectives: featureFlags?.organisation_objectives ?? false,
 		organisationIssues: featureFlags?.organisation_issues ?? false,
 		quantitativeRiskStudies: featureFlags?.quantitative_risk_studies ?? false,
+		threatModeling: featureFlags?.threat_modeling ?? false,
+		ttpCatalogs: featureFlags?.ttps ?? false,
 		terminologies: featureFlags?.terminologies ?? true,
+		customFields: featureFlags?.custom_fields ?? false,
 		businessImpactAnalysis: featureFlags?.bia ?? true,
 		projectManagement: featureFlags?.project_management ?? false,
 		contracts: featureFlags?.contracts ?? false,
@@ -108,6 +126,13 @@ export function getSidebarVisibleItems(
 		auditDashboard: featureFlags?.auditee_mode ?? false,
 		presets: featureFlags?.journeys ?? true,
 		securityAdvisories: featureFlags?.security_advisories ?? true,
-		cwes: featureFlags?.cwes ?? true
+		cwes: featureFlags?.cwes ?? true,
+		managePortals: featureFlags?.custom_portals ?? false,
+		idpGroups: featureFlags?.idp_groups ?? false,
+		serviceAccounts: featureFlags?.service_accounts ?? false,
+		postureAssessments: featureFlags?.posture_assessments ?? false,
+		documents: featureFlags?.document_management ?? true,
+		documentTemplates: featureFlags?.document_management ?? true,
+		objectClassifications: featureFlags?.document_management ?? true
 	};
 }

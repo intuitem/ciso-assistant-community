@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { logger } from '$lib/server/logger';
 import { getSecureRedirect } from '$lib/utils/helpers';
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
@@ -16,17 +17,23 @@ export const load: PageServerLoad = async ({ fetch, locals, cookies, url }) => {
 	// User is logged in, now we need to fetch allauth's session token
 	// to end the authentication flow
 	const allauthSessionEndpoint = `${BASE_API_URL}/iam/session-token/`;
-	const allauthSessionResponse = await fetch(allauthSessionEndpoint, { method: 'POST' });
+	const ssoSessionKey = cookies.get('sessionid');
+	const allauthSessionResponse = await fetch(allauthSessionEndpoint, {
+		method: 'POST',
+		headers: ssoSessionKey ? { 'X-SSO-Session-Key': ssoSessionKey } : {}
+	});
 
 	if (!allauthSessionResponse.ok) {
-		console.error('Failed to fetch allauth session token:', allauthSessionResponse.status);
+		logger.error('Failed to fetch allauth session token', {
+			status: allauthSessionResponse.status
+		});
 		redirect(302, '/login');
 	}
 
 	const allauthSessionToken = await allauthSessionResponse.json().then((res) => res.token);
 
 	if (!allauthSessionToken || typeof allauthSessionToken !== 'string') {
-		console.error('Session token response missing or invalid token field');
+		logger.error('Session token response missing or invalid token field');
 		redirect(302, '/login');
 	}
 

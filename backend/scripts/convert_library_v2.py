@@ -21,14 +21,16 @@ Note: the "node_id" column can be defined to force an urn suffix. This can be us
 
 import sys
 import re
+import json
 import yaml
 import datetime
 import argparse
 import unicodedata
 import openpyxl
+from copy import deepcopy
 from typing import Any, Dict, List
 from pathlib import Path
-from collections import Counter
+from collections import Counter, defaultdict
 
 SCRIPT_VERSION = "2.1"
 
@@ -58,6 +60,36 @@ def print_error(message: str) -> None:
 # --- Translation helpers ------------------------------------------------------
 
 
+_UNEVALUATED_FORMULA_COUNT = 0
+
+
+def is_unevaluated_formula(value) -> bool:
+    """A spreadsheet formula that was never evaluated to a value."""
+    return isinstance(value, str) and value.lstrip().startswith("=")
+
+
+def _clean_translation(value):
+    global _UNEVALUATED_FORMULA_COUNT
+    if is_unevaluated_formula(value):
+        _UNEVALUATED_FORMULA_COUNT += 1
+        return None
+    return str(value).strip()
+
+
+def reset_unevaluated_formula_count():
+    global _UNEVALUATED_FORMULA_COUNT
+    _UNEVALUATED_FORMULA_COUNT = 0
+
+
+def report_unevaluated_formulas():
+    if _UNEVALUATED_FORMULA_COUNT:
+        print(
+            f"⚠️  [WARNING] Skipped {_UNEVALUATED_FORMULA_COUNT} translation cell(s) "
+            "holding unevaluated formulas. Evaluate them in the spreadsheet and "
+            "paste back as values, or the library ships without those translations."
+        )
+
+
 def extract_translations_from_row(header, row):
     translations = {}
     for i, col_name in enumerate(header):
@@ -65,8 +97,8 @@ def extract_translations_from_row(header, row):
         if match and i < len(row):
             base_key, lang = match.groups()
             value = row[i].value
-            if value:
-                translations.setdefault(lang, {})[base_key] = str(value).strip()
+            if value and (cleaned := _clean_translation(value)):
+                translations.setdefault(lang, {})[base_key] = cleaned
     return translations
 
 
@@ -75,9 +107,9 @@ def extract_translations_from_metadata(meta_dict, prefix):
     pattern = re.compile(r"(\w+)\[(\w+)\]")
     for key, value in meta_dict.items():
         match = pattern.match(key)
-        if match and value:
+        if match and value and (cleaned := _clean_translation(value)):
             base_key, lang = match.groups()
-            translations.setdefault(lang, {})[base_key] = str(value).strip()
+            translations.setdefault(lang, {})[base_key] = cleaned
     return translations
 
 
@@ -249,8 +281,114 @@ def expand_urns_from_prefixed_list(
 # --- question management ------------------------------------------------------------
 
 
+def _parse_multiline_with_pipe(raw: Any) -> list[str]:
+    """Parse newline-separated values, with "|" lines continuing the previous value."""
+    values: list[str] = []
+    for line in str(raw or "").split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        if line.startswith("|") and values:
+            values[-1] += "\n" + line[1:].strip()
+        else:
+            values.append(line)
+    return values
+
+
+def _translated_lines(
+    raw: Any,
+    expected_count: int,
+    context: str,
+    field: str,
+    lang: str,
+) -> list[str] | None:
+    if not raw or not str(raw).strip():
+        return None
+    lines = _parse_multiline_with_pipe(raw)
+    if len(lines) == 1:
+        lines *= expected_count
+    if len(lines) != expected_count:
+        raise ValueError(
+            f"({context}) Invalid translated {field} count for locale '{lang}': "
+            f"{len(lines)} values for {expected_count} expected values."
+        )
+    return lines
+
+
+def _attach_question_translations(
+    question_entry: dict,
+    row_translations: dict | None,
+    question_index: int,
+    question_count: int,
+) -> None:
+    if not row_translations:
+        return
+    for lang, tr in row_translations.items():
+        lines = _translated_lines(
+            tr.get("questions"),
+            question_count,
+            "framework_content",
+            "questions",
+            lang,
+        )
+        if not lines:
+            continue
+        translated_text = lines[question_index].strip()
+        if translated_text and translated_text != "/":
+            question_entry.setdefault("translations", {}).setdefault(lang, {})[
+                "text"
+            ] = translated_text
+
+
+def _attach_choice_translations(
+    choices: list[dict], answer_translations: dict, answer_id: str
+) -> None:
+    if not answer_translations:
+        return
+    for lang, tr in answer_translations.items():
+        value_lines = _translated_lines(
+            tr.get("question_choices"),
+            len(choices),
+            "answers_definition",
+            "question_choices",
+            lang,
+        )
+        if value_lines:
+            for i, value in enumerate(value_lines):
+                translated_value = value.strip()
+                if translated_value and translated_value != "/":
+                    choices[i].setdefault("translations", {}).setdefault(lang, {})[
+                        "value"
+                    ] = translated_value
+
+        description_lines = _per_choice_lines(
+            {"description": tr.get("description")},
+            "description",
+            len(choices),
+            answer_id,
+        )
+        if description_lines:
+            for i, description in enumerate(description_lines):
+                if description and description != "/":
+                    choices[i].setdefault("translations", {}).setdefault(lang, {})[
+                        "description"
+                    ] = description
+
+
+def _node_translations_without_questions(translations: dict) -> dict:
+    node_level_translations = {}
+    for lang, fields in translations.items():
+        filtered = {key: value for key, value in fields.items() if key != "questions"}
+        if filtered:
+            node_level_translations[lang] = filtered
+    return node_level_translations
+
+
 def inject_questions_into_node(
-    qa_data: dict[str, Any], node: Dict[str, Any], answers_dict: dict
+    qa_data: dict[str, Any],
+    node: Dict[str, Any],
+    answers_dict: dict,
+    row_translations: dict | None = None,
 ) -> None:
     """
     Injects parsed questions and their metadata into a requirement node.
@@ -271,7 +409,7 @@ def inject_questions_into_node(
 
     allowed_types = {"unique_choice", "multiple_choice", "text", "date"}
 
-    question_lines = [q.strip() for q in str(raw_question_str).split("\n") if q.strip()]
+    question_lines = _parse_multiline_with_pipe(raw_question_str)
 
     depends_on_lines = None
     if raw_depends_on_str:
@@ -351,6 +489,12 @@ def inject_questions_into_node(
         }
 
         question_entry["text"] = question_text
+        _attach_question_translations(
+            question_entry,
+            row_translations,
+            idx,
+            len(question_lines),
+        )
 
         # Optional: depends_on
         depends_on_block = {}
@@ -418,8 +562,8 @@ def inject_questions_into_node(
         if qtype in {"unique_choice", "multiple_choice"}:
             choices = []
             for j, choice in enumerate(answer_meta["choices"]):
-                # make a shallow copy so we don't mutate the original dict
-                entry = choice.copy()
+                # Keep nested choice translations independent per question.
+                entry = deepcopy(choice)
                 # overwrite / add the per-question urn
                 entry["urn"] = f"{q_urn}:choice:{j + 1}"
                 choices.append(entry)
@@ -571,6 +715,9 @@ def parse_risk_matrix(meta, content_ws, wb):
         "grid": [],
     }
 
+    if meta.get("annotation"):
+        risk_matrix["annotation"] = meta.get("annotation")
+
     translations = extract_translations_from_metadata(meta, "risk_matrix")
     if translations:
         risk_matrix["translations"] = translations
@@ -680,7 +827,13 @@ def _per_choice_lines(data: dict, col: str, n_choices: int, answer_id: str):
 
 # --- Object type handlers -----------------------------------------------------
 
-_SKIPPED_TYPES = {"answers", "implementation_groups", "scores", "urn_prefix"}
+_SKIPPED_TYPES = {
+    "answers",
+    "implementation_groups",
+    "scores",
+    "urn_prefix",
+    "ttp_groups",  # consumed via ttp_catalog meta.grouping_definition
+}
 
 
 def _handle_reference_controls(obj, library, compat_mode, verbose):
@@ -727,6 +880,140 @@ def _handle_reference_controls(obj, library, compat_mode, verbose):
         controls.append(entry)
 
     extend_or_set(library["objects"], "reference_controls", controls)
+
+
+def _handle_ttp_catalog(obj, library, object_blocks, compat_mode, verbose):
+    """Process a ttp_catalog object block into the library."""
+    catalogs = []
+    meta = obj["meta"]
+    base_urn = meta.get("base_urn")
+    header, rows_with_data = parse_content_rows(obj["content_sheet"])
+    if not header:
+        return
+
+    # named block, as framework does for implementation_groups_definition
+    grouping_defs = []
+    grouping_name = meta.get("grouping_definition")
+    if grouping_name and grouping_name in object_blocks:
+        g_header, g_rows = parse_content_rows(
+            object_blocks[grouping_name]["content_sheet"]
+        )
+        for row, data in g_rows:
+            entry = {
+                "ref_id": str(data.get("ref_id", "")).strip(),
+                "name": str(data.get("name", "")).strip(),
+            }
+            set_optional_fields(entry, data, ["description", "dimension"])
+            attach_translations_from_row(entry, g_header, row)
+            grouping_defs.append(entry)
+
+    for row, data in rows_with_data:
+        ref_id = str(data.get("ref_id", "")).strip()
+        if not ref_id:
+            continue
+        entry = {"urn": f"{base_urn}:{ref_id.lower()}", "ref_id": ref_id}
+        set_optional_fields(entry, data, ["name", "description", "annotation"])
+        if grouping_defs:
+            entry["grouping_definition"] = grouping_defs
+        attach_translations_from_row(entry, header, row)
+        catalogs.append(entry)
+
+    extend_or_set(library["objects"], "ttp_catalogs", catalogs)
+
+
+def _handle_tactics(obj, library, compat_mode, verbose):
+    """Process a tactics object block. Sheet order is the column order."""
+    tactics = []
+    meta = obj["meta"]
+    base_urn = meta.get("base_urn")
+    catalog_urn = meta.get("catalog_urn")
+    header, rows_with_data = parse_content_rows(obj["content_sheet"])
+    if not header:
+        return
+
+    for row, data in rows_with_data:
+        ref_id = str(data.get("ref_id", "")).strip()
+        if not ref_id:
+            continue
+        entry = {"urn": f"{base_urn}:{ref_id.lower()}", "ref_id": ref_id}
+        if catalog_urn:
+            entry["catalog_urn"] = catalog_urn
+        set_optional_fields(entry, data, ["name", "description", "annotation"])
+        attach_translations_from_row(entry, header, row)
+        tactics.append(entry)
+
+    extend_or_set(library["objects"], "tactics", tactics)
+
+
+def _handle_techniques(obj, library, prefix_to_urn, compat_mode, verbose):
+    """Process a techniques object block into the library."""
+    techniques = []
+    meta = obj["meta"]
+    base_urn = meta.get("base_urn")
+    catalog_urn = meta.get("catalog_urn")
+    tactics_base_urn = meta.get("tactics_base_urn")
+    header, rows_with_data = parse_content_rows(obj["content_sheet"])
+    if not header:
+        return
+
+    def suffix_for(ref_id: str, node_id_raw) -> str:
+        if node_id_raw and str(node_id_raw).strip():
+            return str(node_id_raw).strip().lower()
+        return ref_id.lower()
+
+    # parent_urn must use the same rule as the parent's own urn, so a sheet
+    # overriding node_id does not break the parent links
+    suffix_by_ref_id = {
+        str(data.get("ref_id", "")).strip(): suffix_for(
+            str(data.get("ref_id", "")).strip(), data.get("node_id")
+        )
+        for _, data in rows_with_data
+        if str(data.get("ref_id", "")).strip()
+    }
+
+    for row, data in rows_with_data:
+        ref_id = str(data.get("ref_id", "")).strip()
+        if not ref_id:
+            continue
+
+        urn_suffix = suffix_for(ref_id, data.get("node_id"))
+        entry = {"urn": f"{base_urn}:{urn_suffix}", "ref_id": ref_id}
+        set_optional_fields(entry, data, ["name", "description", "annotation"])
+        if catalog_urn:
+            entry["catalog_urn"] = catalog_urn
+
+        # explicit ref_id, not the positional `depth`: technique sheets get sorted
+        parent_ref_id = data.get("parent_ref_id")
+        if parent_ref_id and str(parent_ref_id).strip():
+            parent_ref_id = str(parent_ref_id).strip()
+            parent_suffix = suffix_by_ref_id.get(parent_ref_id, parent_ref_id.lower())
+            entry["parent_urn"] = f"{base_urn}:{parent_suffix}"
+
+        if tactic_ref_ids := data.get("tactic_ref_ids"):
+            entry["tactics"] = [
+                f"{tactics_base_urn}:{item.strip().lower()}"
+                for item in re.split(r"\s*,\s*", str(tactic_ref_ids))
+                if item.strip()
+            ]
+
+        if groups := data.get("groups"):
+            entry["groups"] = [
+                item.strip()
+                for item in re.split(r"\s*,\s*", str(groups))
+                if item.strip()
+            ]
+
+        if data.get("reference_controls"):
+            controls = expand_urns_from_prefixed_list(
+                data["reference_controls"], prefix_to_urn, compat_mode, verbose
+            )
+            if controls:
+                entry["reference_controls"] = controls
+
+        attach_translations_from_row(entry, header, row)
+        techniques.append(entry)
+
+    extend_or_set(library["objects"], "techniques", techniques)
 
 
 def _handle_threats(obj, library, compat_mode, verbose):
@@ -788,16 +1075,12 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 if not answer_id or not answer_type or not choices_raw:
                     continue  # Incomplete row
 
-                choices = []
-                for line in choices_raw.split("\n"):
-                    line = line.strip()
-                    if not line:
-                        continue
-                    if line.startswith("|") and choices:
-                        # Multi-line value, append to previous
-                        choices[-1]["value"] += "\n" + line[1:].strip()
-                    else:
-                        choices.append({"urn": "", "value": line})
+                choices = [
+                    {"urn": "", "value": line}
+                    for line in _parse_multiline_with_pipe(choices_raw)
+                ]
+                answer_translations = extract_translations_from_row(header, row)
+                _attach_choice_translations(choices, answer_translations, answer_id)
 
                 # --- Optional: description ---------------------------
                 description_lines = _per_choice_lines(
@@ -856,7 +1139,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                             try:
                                 score_to_add = int(val)
                                 choices[i]["add_score"] = score_to_add
-                            except (TypeError, ValueError):
+                            except TypeError, ValueError:
                                 raise ValueError(
                                     f"(answers_definition) Invalid add_score value '{val}' "
                                     f"for answer ID '{answer_id}', choice #{i + 1}. Must be an integer"
@@ -913,6 +1196,9 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
         "description": meta.get("description"),
     }
 
+    if meta.get("annotation"):
+        framework["annotation"] = meta.get("annotation")
+
     translations = extract_translations_from_metadata(meta, "framework")
     if translations:
         framework["translations"] = translations
@@ -924,6 +1210,18 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
         framework["min_score"] = int(meta["min_score"])
     if "max_score" in meta:
         framework["max_score"] = int(meta["max_score"])
+
+    if meta.get("field_visibility"):
+        try:
+            field_visibility = json.loads(meta["field_visibility"])
+        except json.JSONDecodeError as e:
+            raise ValueError(f"(framework) Invalid field_visibility JSON: {e}")
+        if not isinstance(field_visibility, dict):
+            raise ValueError(
+                "(framework) field_visibility must be a JSON object "
+                '({"field": {"role": "edit"|"read"|"hidden"}})'
+            )
+        framework["field_visibility"] = field_visibility
 
     score_name = meta.get("scores_definition")
     if score_name and score_name in object_blocks:
@@ -1135,7 +1433,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                     if (w := int(data["weight"])) <= 0:
                         raise ValueError
                     node["weight"] = w
-                except (TypeError, ValueError):
+                except TypeError, ValueError:
                     raise ValueError(
                         f"(framework) Invalid weight at row #{row[0].row}: {data['weight']}. Must be a strictly positive integer."
                     )
@@ -1150,7 +1448,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 ):
                     try:
                         node[int_field] = int(data[int_field])
-                    except (TypeError, ValueError):
+                    except TypeError, ValueError:
                         raise ValueError(
                             f"(framework) Invalid {int_field} at row #{row[0].row}: "
                             f"{data[int_field]}. Must be an integer."
@@ -1224,19 +1522,45 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 )
                 if rc:
                     node["reference_controls"] = rc
+            translations = extract_translations_from_row(header, row)
             if "questions" in data and data["questions"]:
                 inject_questions_into_node(
                     data,
                     node,
                     answers_dict,
+                    translations,
                 )
-            attach_translations_from_row(node, header, row)
+            if translations:
+                node_translations = _node_translations_without_questions(translations)
+                if node_translations:
+                    node["translations"] = node_translations
             if node.get("urn") in all_urns:
                 raise ValueError(f"urn already used: {node.get('urn')}")
             all_urns.add(node.get("urn"))
             requirement_nodes.append(node)
 
         framework["requirement_nodes"] = requirement_nodes
+
+        # An implementation group that the definition doesn't declare can never be
+        # selected, so its requirements silently drop out of every scoped audit.
+        defined_igs = {
+            str(ig.get("ref_id", "")).strip()
+            for ig in framework.get("implementation_groups_definition") or []
+        }
+        orphan_igs = defaultdict(list)
+        for node in requirement_nodes:
+            for ig in node.get("implementation_groups") or []:
+                if ig not in defined_igs:
+                    orphan_igs[ig].append(node.get("ref_id") or node.get("urn"))
+        if orphan_igs:
+            details = "; ".join(
+                f"'{ig}' used by {nodes[:3]}{' ...' if len(nodes) > 3 else ''}"
+                for ig, nodes in sorted(orphan_igs.items())
+            )
+            raise ValueError(
+                "(framework) implementation groups used by requirements but missing "
+                f"from the implementation groups definition {sorted(defined_igs)}: {details}"
+            )
 
     library["objects"]["framework"] = framework
 
@@ -1291,7 +1615,7 @@ def _handle_metric_definitions(obj, library, compat_mode, verbose):
         if "default_target" in data and data["default_target"] is not None:
             try:
                 entry["default_target"] = float(data["default_target"])
-            except (TypeError, ValueError):
+            except TypeError, ValueError:
                 raise ValueError(
                     f"(metric_definitions) Invalid default_target '{data['default_target']}' at row #{row[0].row}. Must be a number."
                 )
@@ -1578,6 +1902,9 @@ def validate_name_lengths(library: dict) -> list:
     # Check list-based object types
     for obj_type in (
         "threats",
+        "ttp_catalogs",
+        "tactics",
+        "techniques",
         "reference_controls",
         "risk_matrix",
         "metric_definitions",
@@ -1602,6 +1929,7 @@ def validate_name_lengths(library: dict) -> list:
 def create_library(
     input_file: str, output_file: str, compat_mode: int = 0, verbose: bool = False
 ):
+    reset_unevaluated_formula_count()
     wb = openpyxl.load_workbook(input_file)
     sheets = wb.sheetnames
     object_blocks = {}
@@ -1737,7 +2065,13 @@ def create_library(
     print(f"📦 Found {len(object_blocks)} objects.")
 
     # Step 5: Ordered object insertion (reference_controls before threats)
-    priority_order = ["reference_controls", "threats"]
+    priority_order = [
+        "ttp_catalog",
+        "tactics",
+        "reference_controls",
+        "techniques",
+        "threats",
+    ]
 
     sorted_object_names = sorted(
         object_blocks.keys(),
@@ -1752,6 +2086,13 @@ def create_library(
     handler_map = {
         "reference_controls": lambda obj: _handle_reference_controls(
             obj, library, compat_mode, verbose
+        ),
+        "ttp_catalog": lambda obj: _handle_ttp_catalog(
+            obj, library, object_blocks, compat_mode, verbose
+        ),
+        "tactics": lambda obj: _handle_tactics(obj, library, compat_mode, verbose),
+        "techniques": lambda obj: _handle_techniques(
+            obj, library, prefix_to_urn, compat_mode, verbose
         ),
         "threats": lambda obj: _handle_threats(obj, library, compat_mode, verbose),
         "framework": lambda obj: _handle_framework(
@@ -1790,6 +2131,7 @@ def create_library(
         )
 
     # Step 7: Export to YAML
+    report_unevaluated_formulas()
     print(f'✅ YAML saved as: "{output_file}"')
     if not verbose:
         print(

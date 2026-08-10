@@ -12,7 +12,7 @@
 	import { goto } from '$app/navigation';
 
 	// Base Classes
-	const cBase = 'card bg-surface-50 p-4 w-fit shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-fit shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container';
 
@@ -46,28 +46,33 @@
 		<article class="flex flex-row space-x-8">
 			<div class="flex flex-col space-y-4 items-center">
 				<h4 class="h4">{m.step({ number: 1 })}</h4>
-				<p class="text-surface-900">{$modalStore[0].body ?? '(body missing)'}</p>
+				<p class="text-surface-900-100">{$modalStore[0].body ?? '(body missing)'}</p>
 				{#if totp?.totp_url}
-					<QR
-						data={totp.totp_url.replace(
-							/issuer=[^&]+/,
-							'issuer=' + encodeURIComponent('CISO Assistant')
-						)}
-						anchorInnerFill="black"
-						anchorOuterFill="black"
-						width="400"
-						height="400"
-					/>
+					<div class="bg-white p-3 rounded-container">
+						<QR
+							data={totp.totp_url.replace(
+								/issuer=[^&]+/,
+								'issuer=' + encodeURIComponent('CISO Assistant')
+							)}
+							moduleFill="black"
+							anchorInnerFill="black"
+							anchorOuterFill="black"
+							width="400"
+							height="400"
+						/>
+					</div>
 
 					<div class="flex items-center justify-center w-full space-x-2">
-						<hr class="w-64 items-center bg-gray-200 border-0" />
-						<span class="flex items-center text-gray-600 text-sm">{m.or()}</span>
-						<hr class="w-64 items-center bg-gray-200 border-0" />
+						<hr class="w-64 items-center bg-surface-200-800 border-0" />
+						<span class="flex items-center text-surface-600-400 text-sm">{m.or()}</span>
+						<hr class="w-64 items-center bg-surface-200-800 border-0" />
 					</div>
 
 					<div>
-						<p class="text-center text-surface-900">{m.enterTOTPCodeManually()}</p>
-						<p class="text-center">{totp.secret}</p>
+						<p class="text-center text-surface-900-100">{m.enterTOTPCodeManually()}</p>
+						<p class="text-center font-mono text-sm break-all text-surface-900-100">
+							{totp.secret}
+						</p>
 					</div>
 				{/if}
 			</div>
@@ -76,7 +81,7 @@
 
 			<div class="flex flex-col space-y-4 items-center self-center">
 				<h4 class="h4">{m.step({ number: 2 })}</h4>
-				<p class="text-surface-900">{m.enterCodeGeneratedByApp()}</p>
+				<p class="text-surface-900-100">{m.enterCodeGeneratedByApp()}</p>
 				<!-- Enable for debugging: -->
 				<SuperForm
 					dataType="json"

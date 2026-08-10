@@ -8,6 +8,6 @@
 	let { children } = $props();
 </script>
 
-<div class="bg-white">
+<div class="bg-surface-50-950">
 	{@render children?.()}
 </div>

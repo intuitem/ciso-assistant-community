@@ -103,12 +103,12 @@
 	});
 
 	function getStatusColor(status: string | null): string {
-		if (!status) return 'bg-white border border-dashed border-gray-200';
+		if (!status) return 'bg-surface-50-950 border border-dashed border-surface-200-800';
 		if (status === 'completed') return 'bg-green-100 border border-green-300';
 		if (status === 'in_progress') return 'bg-violet-100 border border-violet-300';
 		if (status === 'pending') return 'bg-red-100 border border-red-300';
-		if (status === 'cancelled') return 'bg-gray-100 border border-gray-300';
-		return 'bg-white border border-dashed border-gray-200';
+		if (status === 'cancelled') return 'bg-surface-100-900 border border-surface-300-700';
+		return 'bg-surface-50-950 border border-dashed border-surface-200-800';
 	}
 
 	function applyFilters() {
@@ -150,14 +150,14 @@
 	<!-- Header bar -->
 	<div class="flex items-start justify-between gap-4">
 		<div
-			class="flex items-center gap-2 bg-white/90 border border-gray-200 rounded-lg px-3 py-1.5 shadow-sm"
+			class="flex items-center gap-2 bg-surface-50-950/90 border border-surface-200-800 rounded-lg px-3 py-1.5 shadow-sm"
 		>
-			<span class="text-sm font-semibold text-gray-800">
+			<span class="text-sm font-semibold text-surface-800-200">
 				{startFormatted.label}
 				{startFormatted.year}
 			</span>
-			<i class="fa-solid fa-arrow-right text-[10px] text-gray-400"></i>
-			<span class="text-sm font-semibold text-gray-800">
+			<i class="fa-solid fa-arrow-right text-[10px] text-surface-500"></i>
+			<span class="text-sm font-semibold text-surface-800-200">
 				{endFormatted.label}
 				{endFormatted.year}
 			</span>
@@ -174,7 +174,7 @@
 				class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150
 					{compactMode
 					? 'bg-violet-50 border-violet-300 text-violet-700'
-					: 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300'}"
+					: 'bg-surface-50-950 border-surface-200-800 text-surface-600-400 hover:bg-surface-50-950 hover:border-surface-300-700'}"
 				onclick={() => (compactMode = !compactMode)}
 				title={compactMode ? m.detailedView() : m.compactView()}
 			>
@@ -186,14 +186,14 @@
 				class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-150
 					{filtersExpanded
 					? 'bg-violet-50 border-violet-300 text-violet-700'
-					: 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300'}"
+					: 'bg-surface-50-950 border-surface-200-800 text-surface-600-400 hover:bg-surface-50-950 hover:border-surface-300-700'}"
 				onclick={() => (filtersExpanded = !filtersExpanded)}
 			>
 				<i class="fa-solid fa-sliders text-[10px]"></i>
 				<span>{m.filters()}</span>
 				{#if activeFilterCount > 0}
 					<span
-						class="inline-flex items-center justify-center w-4 h-4 text-[9px] font-bold rounded-full bg-violet-600 text-white"
+						class="inline-flex items-center justify-center w-4 h-4 text-[9px] font-bold rounded-full bg-violet-600 dark:bg-violet-700 text-white"
 						>{activeFilterCount}</span
 					>
 				{/if}
@@ -203,44 +203,46 @@
 
 	<!-- Collapsible Filters -->
 	{#if filtersExpanded}
-		<div class="bg-gray-50/80 border border-gray-200 rounded-xl p-4 transition-all duration-200">
+		<div
+			class="bg-surface-50-950/80 border border-surface-200-800 rounded-xl p-4 transition-all duration-200"
+		>
 			<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 items-end">
 				<div>
 					<label
 						for="start-period-filter"
-						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+						class="block text-[11px] font-semibold uppercase tracking-wider text-surface-500 mb-1"
 						>{m.startPeriod()}</label
 					>
 					<input
 						id="start-period-filter"
 						type="month"
 						bind:value={startPeriod}
-						class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+						class="w-full px-2.5 py-1.5 text-sm border border-surface-200-800 rounded-lg bg-surface-50-950 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
 					/>
 				</div>
 				<div>
 					<label
 						for="end-period-filter"
-						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+						class="block text-[11px] font-semibold uppercase tracking-wider text-surface-500 mb-1"
 						>{m.endPeriod()}</label
 					>
 					<input
 						id="end-period-filter"
 						type="month"
 						bind:value={endPeriod}
-						class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+						class="w-full px-2.5 py-1.5 text-sm border border-surface-200-800 rounded-lg bg-surface-50-950 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
 					/>
 				</div>
 				<div>
 					<label
 						for="granularity-filter"
-						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+						class="block text-[11px] font-semibold uppercase tracking-wider text-surface-500 mb-1"
 						>{m.granularity()}</label
 					>
 					<select
 						id="granularity-filter"
 						bind:value={selectedGranularity}
-						class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+						class="w-full px-2.5 py-1.5 text-sm border border-surface-200-800 rounded-lg bg-surface-50-950 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
 					>
 						<option value="monthly">{m.monthly()}</option>
 						<option value="weekly">{m.weekly()}</option>
@@ -250,7 +252,7 @@
 				<!-- Filter dropdowns — streamed -->
 				{#await data.filterData}
 					<div class="col-span-4 flex items-end">
-						<div class="flex items-center gap-2 text-xs text-gray-400 py-2">
+						<div class="flex items-center gap-2 text-xs text-surface-500 py-2">
 							<i class="fa-solid fa-spinner fa-spin"></i>
 							{m.loading()}...
 						</div>
@@ -259,13 +261,13 @@
 					<div>
 						<label
 							for="folder-filter"
-							class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+							class="block text-[11px] font-semibold uppercase tracking-wider text-surface-500 mb-1"
 							>{m.folder()}</label
 						>
 						<select
 							id="folder-filter"
 							bind:value={selectedFolder}
-							class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+							class="w-full px-2.5 py-1.5 text-sm border border-surface-200-800 rounded-lg bg-surface-50-950 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
 						>
 							<option value="">{m.allFolders()}</option>
 							{#each filters.allFolders as folder}
@@ -276,13 +278,13 @@
 					<div>
 						<label
 							for="assigned-to-filter"
-							class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+							class="block text-[11px] font-semibold uppercase tracking-wider text-surface-500 mb-1"
 							>{m.assignedTo()}</label
 						>
 						<select
 							id="assigned-to-filter"
 							bind:value={selectedAssignedTo}
-							class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+							class="w-full px-2.5 py-1.5 text-sm border border-surface-200-800 rounded-lg bg-surface-50-950 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
 						>
 							<option value="">{m.allActors()}</option>
 							{#each filters.allActors as actor}
@@ -293,13 +295,13 @@
 					<div>
 						<label
 							for="applied-controls-filter"
-							class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+							class="block text-[11px] font-semibold uppercase tracking-wider text-surface-500 mb-1"
 							>{m.appliedControls()}</label
 						>
 						<select
 							id="applied-controls-filter"
 							bind:value={selectedAppliedControls}
-							class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+							class="w-full px-2.5 py-1.5 text-sm border border-surface-200-800 rounded-lg bg-surface-50-950 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
 						>
 							<option value="">{m.allAppliedControls()}</option>
 							{#each filters.allAppliedControls as control}
@@ -312,13 +314,13 @@
 				<div>
 					<label
 						for="status-filter"
-						class="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-1"
+						class="block text-[11px] font-semibold uppercase tracking-wider text-surface-500 mb-1"
 						>{m.aggregatedStatus()}</label
 					>
 					<select
 						id="status-filter"
 						bind:value={selectedStatus}
-						class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+						class="w-full px-2.5 py-1.5 text-sm border border-surface-200-800 rounded-lg bg-surface-50-950 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
 					>
 						<option value="">{m.allStatuses()}</option>
 						<option value="completed">{m.completed()}</option>
@@ -334,14 +336,14 @@
 						disabled={!filtersValid}
 						class="flex-1 px-3 py-1.5 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-1 transition-all duration-150
 							{filtersValid
-							? 'bg-violet-600 text-white hover:bg-violet-500'
-							: 'bg-gray-300 text-gray-500 cursor-not-allowed'}"
+							? 'bg-violet-600 text-white hover:bg-violet-500 dark:bg-violet-700 dark:hover:bg-violet-600'
+							: 'bg-surface-300-700 text-surface-600-400 cursor-not-allowed'}"
 					>
 						{m.refresh()}
 					</button>
 					<button
 						onclick={resetFilters}
-						class="px-3 py-1.5 text-sm text-gray-500 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all duration-150"
+						class="px-3 py-1.5 text-sm text-surface-600-400 bg-surface-50-950 border border-surface-200-800 rounded-lg hover:bg-surface-50-950 hover:border-surface-300-700 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all duration-150"
 						title={m.reset()}
 					>
 						<i class="fa-solid fa-rotate-left text-xs"></i>
@@ -355,17 +357,17 @@
 	{#await data.reviewData}
 		<div class="space-y-6">
 			{#each [1, 2] as _}
-				<div class="border border-gray-200 rounded-xl overflow-hidden animate-pulse">
-					<div class="bg-gray-100 px-6 py-3 border-b">
-						<div class="h-5 w-40 bg-gray-200 rounded"></div>
+				<div class="border border-surface-200-800 rounded-xl overflow-hidden animate-pulse">
+					<div class="bg-surface-100-900 px-6 py-3 border-b">
+						<div class="h-5 w-40 bg-surface-200-800 rounded"></div>
 					</div>
 					<div class="p-4 space-y-3">
 						{#each [1, 2, 3] as __}
 							<div class="flex gap-3 items-center">
-								<div class="h-4 w-32 bg-gray-100 rounded"></div>
+								<div class="h-4 w-32 bg-surface-100-900 rounded"></div>
 								<div class="flex-1 flex gap-2">
 									{#each [1, 2, 3, 4, 5, 6] as ___}
-										<div class="h-6 flex-1 bg-gray-50 rounded"></div>
+										<div class="h-6 flex-1 bg-surface-50-950 rounded"></div>
 									{/each}
 								</div>
 							</div>
@@ -381,13 +383,15 @@
 
 		<div class="space-y-6">
 			{#each folders as folder}
-				<div class="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
+				<div
+					class="border border-surface-200-800 rounded-xl overflow-hidden bg-surface-50-950 shadow-sm"
+				>
 					<div
-						class="px-5 py-3 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white flex items-center gap-3"
+						class="px-5 py-3 border-b border-surface-200-800 bg-gradient-to-r from-surface-50-950 to-surface-100-900 flex items-center gap-3"
 					>
 						<div class="w-1 h-5 rounded-full bg-violet-500"></div>
-						<h2 class="text-base font-semibold text-gray-800">{folder.folder_name}</h2>
-						<span class="text-xs text-gray-400"
+						<h2 class="text-base font-semibold text-surface-800-200">{folder.folder_name}</h2>
+						<span class="text-xs text-surface-500"
 							>{folder.tasks.length}
 							{m.tasks().toLowerCase()}</span
 						>
@@ -396,9 +400,9 @@
 					<div class="overflow-x-auto overflow-y-auto max-h-[70vh]">
 						<table class="w-full text-sm">
 							<thead class="sticky top-0 z-20">
-								<tr class="bg-gray-50/95 backdrop-blur-sm border-b border-gray-200">
+								<tr class="bg-surface-50-950/95 backdrop-blur-sm border-b border-surface-200-800">
 									<th
-										class="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 sticky left-0 bg-gray-50/95 backdrop-blur-sm z-30"
+										class="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-surface-500 sticky left-0 bg-surface-50-950/95 backdrop-blur-sm z-30"
 										class:min-w-[220px]={!compactMode}
 										class:min-w-[100px]={compactMode}
 										class:w-full={compactMode}
@@ -408,12 +412,12 @@
 									</th>
 									{#each buckets as bucket}
 										<th
-											class="px-1 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 w-14"
+											class="px-1 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-surface-500 w-14"
 											title={granularity === 'weekly' ? `${bucket.start} — ${bucket.end}` : ''}
 										>
 											{getBucketLabel(bucket, granularity)}
 											{#if buckets.length > 12 || startFormatted.year !== endFormatted.year}
-												<div class="text-[10px] text-gray-300 font-normal normal-case">
+												<div class="text-[10px] text-surface-400 font-normal normal-case">
 													{bucket.key.split('-')[0]}
 												</div>
 											{/if}
@@ -421,11 +425,11 @@
 									{/each}
 								</tr>
 							</thead>
-							<tbody class="divide-y divide-gray-100">
+							<tbody class="divide-y divide-surface-100-900">
 								{#each folder.tasks as task}
 									<tr class="hover:bg-violet-50/30 transition-colors duration-100">
 										<td
-											class="px-4 sticky left-0 z-10 bg-white"
+											class="px-4 sticky left-0 z-10 bg-surface-50-950"
 											class:py-2.5={!compactMode}
 											class:py-1.5={compactMode}
 											class:w-full={compactMode}
@@ -436,7 +440,7 @@
 													{#if task.ref_id}
 														<Anchor
 															href="/task-templates/{task.id}"
-															class="inline-block shrink-0 text-[11px] font-mono font-medium bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded hover:bg-violet-100 hover:text-violet-700 transition-colors"
+															class="inline-block shrink-0 text-[11px] font-mono font-medium bg-surface-100-900 text-surface-600-400 px-1.5 py-0.5 rounded hover:bg-violet-100 hover:text-violet-700 transition-colors"
 															title={task.name}
 														>
 															{task.ref_id}
@@ -444,7 +448,7 @@
 													{:else}
 														<Anchor
 															href="/task-templates/{task.id}"
-															class="text-xs text-gray-700 hover:text-violet-600 truncate flex-1 min-w-0 transition-colors"
+															class="text-xs text-surface-700-300 hover:text-violet-600 truncate flex-1 min-w-0 transition-colors"
 															title={task.name}
 														>
 															{task.name}
@@ -455,7 +459,7 @@
 															href={task.link}
 															target="_blank"
 															rel="noopener noreferrer"
-															class="shrink-0 text-gray-400 hover:text-violet-600 transition-colors"
+															class="shrink-0 text-surface-500 hover:text-violet-600 transition-colors"
 															title={task.link}
 														>
 															<i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
@@ -467,13 +471,13 @@
 													<div class="flex items-center gap-2">
 														{#if task.ref_id}
 															<span
-																class="inline-block text-[10px] font-mono font-medium bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded shrink-0"
+																class="inline-block text-[10px] font-mono font-medium bg-surface-100-900 text-surface-600-400 px-1.5 py-0.5 rounded shrink-0"
 																>{task.ref_id}</span
 															>
 														{/if}
 														<Anchor
 															href="/task-templates/{task.id}"
-															class="font-medium text-sm text-gray-800 hover:text-violet-600 transition-colors"
+															class="font-medium text-sm text-surface-800-200 hover:text-violet-600 transition-colors"
 														>
 															{task.name}
 														</Anchor>
@@ -482,7 +486,7 @@
 																href={task.link}
 																target="_blank"
 																rel="noopener noreferrer"
-																class="text-gray-400 hover:text-violet-600 transition-colors shrink-0"
+																class="text-surface-500 hover:text-violet-600 transition-colors shrink-0"
 																title={task.link}
 															>
 																<i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
@@ -490,13 +494,13 @@
 														{/if}
 													</div>
 													{#if task.assigned_to && task.assigned_to.length > 0}
-														<div class="text-[11px] text-gray-400 flex items-center gap-1">
+														<div class="text-[11px] text-surface-500 flex items-center gap-1">
 															<i class="fa-solid fa-user text-[9px]"></i>
 															{task.assigned_to.map((user: { str: string }) => user.str).join(', ')}
 														</div>
 													{/if}
 													{#if task.applied_controls && task.applied_controls.length > 0}
-														<div class="text-[11px] text-gray-400 flex items-center gap-1">
+														<div class="text-[11px] text-surface-500 flex items-center gap-1">
 															<i class="fa-solid fa-shield-halved text-[9px]"></i>
 															{task.applied_controls
 																.map((control: { str: string }) => control.str)
@@ -528,7 +532,7 @@
 															: m.viewTaskNode()}
 													>
 														{#if nodeIds.length > 1 && !compactMode}
-															<span class="text-[10px] font-medium text-gray-500"
+															<span class="text-[10px] font-medium text-surface-600-400"
 																>{nodeIds.length}</span
 															>
 														{/if}
@@ -550,9 +554,9 @@
 				</div>
 			{:else}
 				<div
-					class="text-center py-16 text-gray-400 border border-dashed border-gray-200 rounded-xl"
+					class="text-center py-16 text-surface-500 border border-dashed border-surface-200-800 rounded-xl"
 				>
-					<i class="fa-solid fa-calendar-xmark text-3xl mb-3 text-gray-300"></i>
+					<i class="fa-solid fa-calendar-xmark text-3xl mb-3 text-surface-400"></i>
 					<p>{m.noRecurrentTasksFound()}</p>
 				</div>
 			{/each}
@@ -560,7 +564,7 @@
 
 		<!-- Legend -->
 		<div
-			class="flex items-center gap-5 justify-center text-xs text-gray-500 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl px-5 py-2.5"
+			class="flex items-center gap-5 justify-center text-xs text-surface-600-400 bg-surface-50-950/80 backdrop-blur-sm border border-surface-200-800 rounded-xl px-5 py-2.5"
 		>
 			<div class="flex items-center gap-1.5">
 				<div class="w-3 h-3 rounded-sm bg-green-100 border border-green-300"></div>
@@ -575,11 +579,13 @@
 				<span>{m.pending()}</span>
 			</div>
 			<div class="flex items-center gap-1.5">
-				<div class="w-3 h-3 rounded-sm bg-gray-100 border border-gray-300"></div>
+				<div class="w-3 h-3 rounded-sm bg-surface-100-900 border border-surface-300-700"></div>
 				<span>{m.cancelled()}</span>
 			</div>
 			<div class="flex items-center gap-1.5">
-				<div class="w-3 h-3 rounded-sm bg-white border border-dashed border-gray-200"></div>
+				<div
+					class="w-3 h-3 rounded-sm bg-surface-50-950 border border-dashed border-surface-200-800"
+				></div>
 				<span>{m.noData()}</span>
 			</div>
 		</div>

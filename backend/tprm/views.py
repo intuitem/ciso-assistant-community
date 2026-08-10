@@ -4,8 +4,12 @@ import re
 from django.db.models import ProtectedError
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT
-from iam.models import Folder, RoleAssignment, UserGroup
+from rest_framework.status import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_403_FORBIDDEN,
+    HTTP_409_CONFLICT,
+)
+from iam.models import Folder, Permission, RoleAssignment
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
@@ -50,6 +54,27 @@ import zipfile
 from datetime import datetime
 
 logger = structlog.get_logger(__name__)
+
+# Core models the DORA ROI is built from. Reading the register as a whole
+# requires holding these on the root folder, i.e. instance-wide.
+DORA_ROI_PERMISSIONS = (
+    "view_entity",
+    "view_solution",
+    "view_asset",
+    "view_contract",
+)
+
+
+def has_dora_roi_access(user) -> bool:
+    root_folder = Folder.get_root_folder()
+    return all(
+        RoleAssignment.is_access_allowed(
+            user=user,
+            perm=Permission.objects.get(codename=codename),
+            folder=root_folder,
+        )
+        for codename in DORA_ROI_PERMISSIONS
+    )
 
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
@@ -462,6 +487,9 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         """
         from tprm import dora_linter
 
+        if not has_dora_roi_access(request.user):
+            return Response(status=HTTP_403_FORBIDDEN)
+
         lint_results = dora_linter.lint_dora_roi()
         return Response(lint_results)
 
@@ -702,9 +730,8 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
     @action(detail=False, methods=["get"], name="Export TPRM ecosystem")
     def export_ecosystem(self, request):
         """
-        Export the TPRM ecosystem as a multi-sheet Excel file with three sheets
-        (Entities, Solutions, Contracts) using the same column layout as the
-        data-wizard import
+        Export the TPRM ecosystem as a multi-sheet Excel file with 4 sheets
+        (Entities, Solutions, Contracts, Representatives).
         """
         import pandas as pd  # imported lazily: optional/heavy dependency
 
@@ -717,11 +744,14 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         (viewable_contract_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, Contract
         )
+        (viewable_representative_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Representative
+        )
 
         # Honor the filters/search applied on the entities list page so the
-        # exported "Entities" sheet matches what the user is viewing. The
-        # Solutions/Contracts sheets stay on the full IAM-scoped set since
-        # entity-level filters don't translate to those models.
+        # exported "Entities" sheet matches what the user is viewing.
+        # Solutions/Contracts/Representatives stay on the IAM-scoped set, with
+        # Representatives further limited to the exported entities.
         entities = self.filter_queryset(
             Entity.objects.filter(id__in=viewable_entity_ids).select_related(
                 "folder", "parent_entity"
@@ -740,6 +770,10 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                 )
             )
         )
+        representatives = Representative.objects.filter(
+            id__in=viewable_representative_ids,
+            entity__in=entities,
+        ).select_related("entity")
 
         esc = escape_excel_formula
 
@@ -828,6 +862,22 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                 }
             )
 
+        # --- Representatives sheet ---
+        representatives_rows = []
+        for representative in representatives:
+            representatives_rows.append(
+                {
+                    "email": esc(representative.email),
+                    "first_name": esc(representative.first_name),
+                    "last_name": esc(representative.last_name),
+                    "description": esc(representative.description),
+                    "phone": esc(representative.phone),
+                    "role": esc(representative.role),
+                    "provider_entity_ref_id": esc(representative.entity.ref_id),
+                    "provider": esc(representative.entity.name),
+                }
+            )
+
         entity_columns = [
             "ref_id",
             "name",
@@ -870,6 +920,17 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             "domain",
         ]
 
+        representative_columns = [
+            "email",
+            "first_name",
+            "last_name",
+            "description",
+            "phone",
+            "role",
+            "provider_entity_ref_id",
+            "provider",
+        ]
+
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
             pd.DataFrame(entities_rows, columns=entity_columns).to_excel(
@@ -880,6 +941,9 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             )
             pd.DataFrame(contracts_rows, columns=contract_columns).to_excel(
                 writer, index=False, sheet_name="Contracts"
+            )
+            pd.DataFrame(representatives_rows, columns=representative_columns).to_excel(
+                writer, index=False, sheet_name="Representatives"
             )
 
         buffer.seek(0)
@@ -945,7 +1009,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
 
             try:
                 folder = Folder.objects.get(id=uuid.UUID(str(folder_id)))
-            except (ValueError, AttributeError, Folder.DoesNotExist):
+            except ValueError, AttributeError, Folder.DoesNotExist:
                 return Response(
                     {"error": "Folder not found"},
                     status=status.HTTP_404_NOT_FOUND,
@@ -1149,14 +1213,53 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         return Response(assessments_data)
 
 
-class RepresentativeViewSet(BaseModelViewSet):
+class RepresentativeViewSet(ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows representatives to be viewed or edited.
     """
 
     model = Representative
+    export_config = {
+        "filename": "representatives_export",
+        "fields": {
+            "email": {"source": "email", "label": "email", "escape": True},
+            "first_name": {
+                "source": "first_name",
+                "label": "first_name",
+                "escape": True,
+            },
+            "last_name": {
+                "source": "last_name",
+                "label": "last_name",
+                "escape": True,
+            },
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "phone": {"source": "phone", "label": "phone", "escape": True},
+            "role": {"source": "role", "label": "role", "escape": True},
+            "provider_entity_ref_id": {
+                "source": "entity.ref_id",
+                "label": "provider_entity_ref_id",
+                "escape": True,
+            },
+            "provider": {
+                "source": "entity.name",
+                "label": "provider",
+                "escape": True,
+            },
+        },
+        "select_related": ["entity"],
+        "wrap_columns": ["first_name", "last_name", "description", "role"],
+    }
     filterset_fields = ["entity", "ref_id", "filtering_labels"]
     search_fields = ["email"]
+
+    def get_queryset(self):
+        # folder is serialized via source="entity.folder"; pull it in one join
+        return super().get_queryset().select_related("entity__folder")
 
 
 class SolutionViewSet(ExportMixin, BaseModelViewSet):
@@ -1213,6 +1316,10 @@ class SolutionViewSet(ExportMixin, BaseModelViewSet):
         "dora_alternative_providers_identified",
         "filtering_labels",
     ]
+
+    def get_queryset(self):
+        # folder is serialized via source="provider_entity.folder"; pull it in one join
+        return super().get_queryset().select_related("provider_entity__folder")
 
     @action(detail=False, name="Get data location storage choices")
     def data_location_storage(self, request):

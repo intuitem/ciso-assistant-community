@@ -520,6 +520,348 @@ class TestProcessingEndpoint:
         assert resp.json()["results"]["created"] == 1
 
 
+@pytest.mark.django_db
+class TestProcessingMultiSheetEndpoint:
+    @pytest.fixture
+    def pd_category(self, root_folder):
+        from core.models import Terminology
+
+        return Terminology.objects.filter(
+            name="privacy_health_data",
+            field_path=Terminology.FieldPath.PERSONAL_DATA_CATEGORY,
+        ).first() or Terminology.objects.create(
+            name="privacy_health_data",
+            field_path=Terminology.FieldPath.PERSONAL_DATA_CATEGORY,
+            is_visible=True,
+            folder=root_folder,
+        )
+
+    def _workbook(self):
+        return make_excel_file(
+            {
+                "Processing": [
+                    {
+                        "name": "HR Payroll",
+                        "ref_id": "PRC-100",
+                        "status": "privacy_draft",
+                        "information_channel": "Intranet",
+                        "usage_channel": "HR portal",
+                    }
+                ],
+                "Purposes": [
+                    {"name": "Salary payment", "legal_basis": "privacy_contract"}
+                ],
+                "Personal data": [
+                    {
+                        "name": "Health record",
+                        "category": "privacy_health_data",
+                        "deletion_policy": "privacy_anonymization",
+                        "retention": "5 years",
+                        "is_sensitive": True,
+                    }
+                ],
+                "Data subjects": [
+                    {"name": "Employees", "category": "privacy_employee"}
+                ],
+                "Data recipients": [
+                    {"name": "Payroll provider", "category": "privacy_data_processor"}
+                ],
+                "Contractors": [
+                    {
+                        "name": "ACME Payroll",
+                        "relationship_type": "privacy_data_processor",
+                        "country": "FR",
+                    }
+                ],
+                "Transfers": [
+                    {
+                        "name": "US transfer",
+                        "country": "US",
+                        "transfer_mechanism": "privacy_standard_contractual_clauses",
+                    }
+                ],
+            }
+        )
+
+    def test_multi_sheet_create(
+        self, api_client, domain_folder, all_accessible, pd_category
+    ):
+        resp = _post(
+            api_client,
+            self._workbook().read(),
+            "a.xlsx",
+            "Processing",
+            domain_folder.id,
+        )
+        assert resp.status_code == 200
+        results = resp.json()["results"]
+        assert results["processing"]["created"] == 1
+        for key in (
+            "purposes",
+            "personal_data",
+            "data_subjects",
+            "data_recipients",
+            "contractors",
+            "transfers",
+        ):
+            assert results[key]["created"] == 1, key
+
+        processing = Processing.objects.get(ref_id="PRC-100", folder=domain_folder)
+        assert processing.information_channel == "Intranet"
+        assert processing.purposes.get().legal_basis == "privacy_contract"
+        personal_data = processing.personal_data.get()
+        assert personal_data.category == pd_category
+        assert personal_data.is_sensitive is True
+        assert personal_data.folder == domain_folder
+        assert processing.has_sensitive_personal_data is True
+        assert processing.data_subjects.get().category == "privacy_employee"
+        assert processing.data_recipients.get().category == "privacy_data_processor"
+        contractor = processing.contractors_involved.get()
+        assert contractor.relationship_type == "privacy_data_processor"
+        assert contractor.country == "FR"
+        transfer = processing.data_transfers.get()
+        assert transfer.country == "US"
+        assert transfer.transfer_mechanism == "privacy_standard_contractual_clauses"
+
+    def test_reimport_with_skip_deduplicates_children(
+        self, api_client, domain_folder, all_accessible, pd_category
+    ):
+        _post(
+            api_client,
+            self._workbook().read(),
+            "a.xlsx",
+            "Processing",
+            domain_folder.id,
+        )
+        resp = _post(
+            api_client,
+            self._workbook().read(),
+            "a.xlsx",
+            "Processing",
+            domain_folder.id,
+            HTTP_X_ON_CONFLICT="skip",
+        )
+        results = resp.json()["results"]
+        assert results["processing"]["skipped"] == 1
+        for key in (
+            "purposes",
+            "personal_data",
+            "data_subjects",
+            "data_recipients",
+            "contractors",
+            "transfers",
+        ):
+            assert results[key]["skipped"] == 1, key
+
+        processing = Processing.objects.get(ref_id="PRC-100")
+        assert processing.purposes.count() == 1
+        assert processing.personal_data.count() == 1
+        assert processing.data_subjects.count() == 1
+        assert processing.data_recipients.count() == 1
+        assert processing.contractors_involved.count() == 1
+        assert processing.data_transfers.count() == 1
+
+    def test_choice_labels_accepted(self, api_client, domain_folder, all_accessible):
+        excel = make_excel_file(
+            {
+                "Processing": [{"name": "Labelled", "ref_id": "PRC-101"}],
+                "Purposes": [
+                    {
+                        "name": "Contractual",
+                        "legal_basis": "Performance of a Contract",
+                    }
+                ],
+                "Data subjects": [{"name": "Staff", "category": "Employee"}],
+            }
+        )
+        resp = _post(api_client, excel.read(), "a.xlsx", "Processing", domain_folder.id)
+        results = resp.json()["results"]
+        assert results["purposes"]["created"] == 1
+        assert results["data_subjects"]["created"] == 1
+        processing = Processing.objects.get(ref_id="PRC-101")
+        assert processing.purposes.get().legal_basis == "privacy_contract"
+        assert processing.data_subjects.get().category == "privacy_employee"
+
+    def test_unknown_reference_fails_row(
+        self, api_client, domain_folder, all_accessible
+    ):
+        excel = make_excel_file(
+            {
+                "Processing": [{"name": "Bad refs", "ref_id": "PRC-102"}],
+                "Contractors": [
+                    {
+                        "name": "Ghost",
+                        "entity": "Nonexistent Entity",
+                        "relationship_type": "privacy_data_processor",
+                        "country": "FR",
+                    }
+                ],
+            }
+        )
+        resp = _post(
+            api_client,
+            excel.read(),
+            "a.xlsx",
+            "Processing",
+            domain_folder.id,
+            HTTP_X_ON_CONFLICT="skip",
+        )
+        results = resp.json()["results"]
+        assert results["processing"]["created"] == 1
+        assert results["contractors"]["failed"] == 1
+
+    def test_child_sheets_without_processing_sheet_rejected(
+        self, api_client, domain_folder, all_accessible
+    ):
+        excel = make_excel_file(
+            {"Purposes": [{"name": "Orphan", "legal_basis": "privacy_consent"}]}
+        )
+        resp = _post(api_client, excel.read(), "a.xlsx", "Processing", domain_folder.id)
+        assert "error" in resp.json()["results"]
+
+    def test_multi_row_processing_sheet_warns(
+        self, api_client, domain_folder, all_accessible
+    ):
+        excel = make_excel_file(
+            {
+                "Processing": [
+                    {"name": "First", "ref_id": "PRC-A"},
+                    {"name": "Second", "ref_id": "PRC-B"},
+                ],
+                "Purposes": [{"name": "P1", "legal_basis": "privacy_consent"}],
+            }
+        )
+        resp = _post(api_client, excel.read(), "a.xlsx", "Processing", domain_folder.id)
+        results = resp.json()["results"]
+        assert "warning" in results
+        assert results["processing"]["created"] == 2
+        assert Processing.objects.get(ref_id="PRC-A").purposes.count() == 1
+        assert Processing.objects.get(ref_id="PRC-B").purposes.count() == 0
+
+    def test_uuid_reference_scoped_to_accessible_processings(
+        self, base_context, domain_folder
+    ):
+        from unittest.mock import patch
+
+        from data_wizard.views import PurposeRecordConsumer
+
+        processing = Processing.objects.create(name="Hidden", folder=domain_folder)
+        consumer = PurposeRecordConsumer(base_context)
+        record = {"name": "P", "processing": str(processing.id)}
+
+        with patch(
+            "data_wizard.views.RoleAssignment.get_accessible_object_ids",
+            return_value=([], [], []),
+        ):
+            resolved, error = consumer._resolve_processing(record)
+        assert resolved is None
+        assert "Unknown processing" in error.error
+
+        accessible_consumer = PurposeRecordConsumer(base_context)
+        with patch(
+            "data_wizard.views.RoleAssignment.get_accessible_object_ids",
+            return_value=([processing.id], [], []),
+        ):
+            resolved, error = accessible_consumer._resolve_processing(record)
+        assert error is None
+        assert resolved == processing
+
+    def test_export_reimport_round_trip(self, knox_admin_client, domain_folder):
+        from core.models import Terminology
+        from privacy.models import (
+            DataContractor,
+            DataRecipient,
+            DataSubject,
+            DataTransfer,
+            PersonalData,
+            Purpose,
+        )
+        from tprm.models import Entity
+
+        category = Terminology.objects.filter(
+            field_path=Terminology.FieldPath.PERSONAL_DATA_CATEGORY,
+            name="privacy_health_data",
+        ).first() or Terminology.objects.create(
+            name="privacy_health_data",
+            field_path=Terminology.FieldPath.PERSONAL_DATA_CATEGORY,
+            is_visible=True,
+        )
+        entity = Entity.objects.create(name="ACME Corp", folder=domain_folder)
+        processing = Processing.objects.create(
+            name="Round Trip", ref_id="PRC-RT", folder=domain_folder
+        )
+        Purpose.objects.create(
+            name="Billing", legal_basis="privacy_contract", processing=processing
+        )
+        PersonalData.objects.create(
+            name="Medical file",
+            category=category,
+            retention="3 years",
+            deletion_policy="privacy_anonymization",
+            processing=processing,
+        )
+        DataSubject.objects.create(
+            name="Patients", category="privacy_customer", processing=processing
+        )
+        DataRecipient.objects.create(
+            name="Lab", category="privacy_service_provider", processing=processing
+        )
+        DataContractor.objects.create(
+            name="Host",
+            entity=entity,
+            relationship_type="privacy_data_processor",
+            country="FR",
+            processing=processing,
+        )
+        DataTransfer.objects.create(
+            name="Backup",
+            entity=entity,
+            country="US",
+            transfer_mechanism="privacy_binding_corporate_rules",
+            processing=processing,
+        )
+
+        export = knox_admin_client.get(
+            f"/api/privacy/processings/{processing.id}/export-xlsx/"
+        )
+        assert export.status_code == 200
+        exported_bytes = export.getvalue()
+
+        processing.delete()
+        assert not Purpose.objects.filter(name="Billing").exists()
+
+        resp = _post(
+            knox_admin_client,
+            exported_bytes,
+            "export.xlsx",
+            "Processing",
+            domain_folder.id,
+        )
+        assert resp.status_code == 200
+        results = resp.json()["results"]
+        assert results["processing"]["created"] == 1
+        for key in (
+            "purposes",
+            "personal_data",
+            "data_subjects",
+            "data_recipients",
+            "contractors",
+            "transfers",
+        ):
+            assert results[key]["created"] == 1, key
+
+        recreated = Processing.objects.get(ref_id="PRC-RT", folder=domain_folder)
+        assert recreated.purposes.get().legal_basis == "privacy_contract"
+        assert recreated.personal_data.get().category == category
+        assert recreated.personal_data.get().retention == "3 years"
+        assert recreated.data_subjects.get().category == "privacy_customer"
+        assert recreated.data_recipients.get().category == "privacy_service_provider"
+        assert recreated.contractors_involved.get().entity == entity
+        assert recreated.data_transfers.get().transfer_mechanism == (
+            "privacy_binding_corporate_rules"
+        )
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Field-contract tests — prove each supported field round-trips correctly
 # through a real file upload, not just a unit-layer consumer call.
@@ -971,18 +1313,8 @@ class TestRealAuthAndRBAC:
     def test_restricted_user_cannot_update_hidden_record(
         self, knox_restricted_client, app_ready
     ):
-        """
-        find_existing() locates the record regardless of RBAC (it searches by
-        ref_id/name, not by viewable_ids).  The update is blocked one layer
-        deeper: BaseModelSerializer.update() calls _check_object_perm("change"),
-        which calls RoleAssignment.is_access_allowed() with the real request
-        user.  A user with no role assignments has no "change_asset" permission
-        on any folder, so PermissionDenied is raised → failed == 1, updated == 0,
-        and the record on disk is unchanged.
-
-        This test proves get_accessible_object_ids() / is_access_allowed() are
-        called with the real user and return real results — not a patched shortcut.
-        """
+        # A user with no role assignments holds add_asset on no folder, so the
+        # import is refused before any record is read or written.
         folder = app_ready
         asset = Asset.objects.create(
             name="Hidden Asset", ref_id="RBAC-001", folder=folder
@@ -995,8 +1327,119 @@ class TestRealAuthAndRBAC:
             folder.id,
             HTTP_X_ON_CONFLICT="update",
         )
-        body = resp.json()
-        assert body["results"]["updated"] == 0
-        assert body["results"]["failed"] == 1
+        assert resp.status_code == 403
         asset.refresh_from_db()
         assert asset.description is None
+
+    def test_restricted_user_cannot_create_in_any_folder(
+        self, knox_restricted_client, app_ready, domain_folder
+    ):
+        for folder_id in (app_ready.id, domain_folder.id, None):
+            resp = _post(
+                knox_restricted_client,
+                _csv("name,ref_id\nIntruder,INTRUDE-001\n"),
+                "a.csv",
+                "Asset",
+                folder_id,
+            )
+            assert resp.status_code == 403
+        assert not Asset.objects.filter(ref_id="INTRUDE-001").exists()
+
+    def test_domain_column_cannot_escape_into_a_view_only_folder(self, app_ready):
+        # The gate authorizes the X-Folder-Id folder, but a record's `domain`
+        # column is resolved separately through the accessible-folders map.
+        from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+        from knox.models import AuthToken
+        from rest_framework.test import APIClient
+
+        writable = Folder.objects.create(
+            name="Writable",
+            parent_folder=app_ready,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        readonly = Folder.objects.create(
+            name="Readonly",
+            parent_folder=app_ready,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        user = User.objects.create_user("split@datawizard.test", is_published=True)
+        user.folder = app_ready
+        user.save()
+        for folder, role_name in ((writable, "BI-RL-ANA"), (readonly, "BI-RL-AUD")):
+            group = UserGroup.objects.create(name=f"grp-{role_name}", folder=folder)
+            group.user_set.add(user)
+            assignment = RoleAssignment.objects.create(
+                user_group=group,
+                role=Role.objects.get(name=role_name),
+                folder=folder,
+                is_recursive=True,
+            )
+            assignment.perimeter_folders.add(folder)
+
+        client = APIClient()
+        _, token = AuthToken.objects.create(user=user)
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+
+        resp = _post(
+            client,
+            _csv("name,domain\nESCAPED-ASSET,Readonly\n"),
+            "a.csv",
+            "Asset",
+            writable.id,
+        )
+        assert resp.status_code == 200
+        # Must fail loudly, not be silently redirected into the request folder.
+        assert resp.json()["results"]["failed"] == 1
+        assert resp.json()["results"]["created"] == 0
+        assert not Asset.objects.filter(name="ESCAPED-ASSET").exists()
+
+    def test_domain_scoped_user_can_import_without_a_folder_header(self, app_ready):
+        # The wizard's domain selector is optional; rows carry their own domain.
+        from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+        from knox.models import AuthToken
+        from rest_framework.test import APIClient
+
+        dom = Folder.objects.create(
+            name="MyDomain",
+            parent_folder=app_ready,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        user = User.objects.create_user("dma@datawizard.test", is_published=True)
+        user.folder = app_ready
+        user.save()
+        group = UserGroup.objects.create(name="grp-dma", folder=dom)
+        group.user_set.add(user)
+        assignment = RoleAssignment.objects.create(
+            user_group=group,
+            role=Role.objects.get(name="BI-RL-DMA"),
+            folder=dom,
+            is_recursive=True,
+        )
+        assignment.perimeter_folders.add(dom)
+
+        client = APIClient()
+        _, token = AuthToken.objects.create(user=user)
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+
+        resp = _post(
+            client,
+            _csv("name,domain\nROW-SCOPED-ASSET,MyDomain\n"),
+            "a.csv",
+            "Asset",
+            folder_id=None,
+        )
+        assert resp.status_code == 200
+        assert Asset.objects.get(name="ROW-SCOPED-ASSET").folder_id == dom.id
+
+    def test_restricted_user_cannot_import_users(
+        self, knox_restricted_client, app_ready
+    ):
+        resp = _post(
+            knox_restricted_client,
+            _csv("email\nintruder@evil.test\n"),
+            "u.csv",
+            "User",
+            app_ready.id,
+        )
+        assert resp.status_code == 403
+        assert not User.objects.filter(email="intruder@evil.test").exists()

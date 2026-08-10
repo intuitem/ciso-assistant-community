@@ -4,7 +4,8 @@ from django.urls import reverse
 from django.utils.crypto import get_random_string
 from rest_framework import serializers
 
-from iam.models import Folder
+from core.serializers import BaseModelSerializer
+from iam.models import Folder, RoleAssignment
 from .models import IntegrationProvider, IntegrationConfiguration, SyncMapping
 from .registry import IntegrationRegistry
 
@@ -23,11 +24,6 @@ class IntegrationProviderSerializer(serializers.ModelSerializer):
 
 
 class ConnectionTestSerializer(serializers.Serializer):
-    """
-    Serializer for validating and testing connection credentials before saving.
-    This is not a ModelSerializer, so it doesn't save anything.
-    """
-
     provider = serializers.CharField(write_only=True)
     configuration_id = serializers.PrimaryKeyRelatedField(
         queryset=IntegrationConfiguration.objects.filter(is_active=True),
@@ -35,41 +31,58 @@ class ConnectionTestSerializer(serializers.Serializer):
         required=False,
     )
     credentials = serializers.DictField()
-    # Settings are sometimes needed for the client to initialize correctly
     settings = serializers.DictField(required=False, default=dict)
 
+    def validate_configuration_id(self, config):
+        request = self.context.get("request")
+        if request is None:
+            raise serializers.ValidationError("Configuration not found.")
+        # Viewable, not changeable: a Domain Manager may create a configuration
+        # without holding change_, and must still be able to test it. What keeps
+        # the stored secret safe is the same-connection pinning below, not this.
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, IntegrationConfiguration
+        )
+        if config.id not in viewable_ids:
+            raise serializers.ValidationError("Configuration not found.")
+        return config
+
     def validate(self, data):
-        """
-        Use the IntegrationRegistry to validate provider-specific schema requirements.
-        """
-        provider = data.get("provider")  # This is the IntegrationProvider instance
-        config: IntegrationConfiguration = data.get("configuration_id", None)
-        # The full configuration dictionary to be validated
-        config_data = {
-            "credentials": data.get("credentials", {}),
-            "settings": data.get("settings", {}),
-        }
+        provider = data.get("provider")
+        config: IntegrationConfiguration | None = data.get("configuration_id")
+        credentials = dict(data.get("credentials") or {})
 
-        if not config_data["credentials"].get("api_token") and config:
-            config_data["credentials"]["api_token"] = config.credentials.get(
-                "api_token"
-            )
-        if not config_data["credentials"].get("password") and config:
-            config_data["credentials"]["password"] = config.credentials.get("password")
+        if config:
+            if provider != config.provider.name:
+                raise serializers.ValidationError(
+                    {"provider": "Provider does not match configuration."}
+                )
+            stored = config.credentials or {}
+            # a stored secret is only replayable to the connection it was stored for
+            backfilled = {k for k in stored if not credentials.get(k)}
+            if backfilled and any(
+                v != stored.get(k)
+                for k, v in credentials.items()
+                if k not in backfilled
+            ):
+                raise serializers.ValidationError(
+                    {"credentials": "reenterSecretToTestModifiedConnection"}
+                )
+            credentials.update({k: stored[k] for k in backfilled})
 
-        # Use the validation logic from your registry
         is_valid, errors = IntegrationRegistry.validate_configuration(
-            provider, config_data
+            provider,
+            {"credentials": credentials, "settings": data.get("settings", {})},
         )
 
         if not is_valid:
-            # Raise a validation error that DRF can render nicely
             raise serializers.ValidationError({"provider_specific_errors": errors})
 
+        data["credentials"] = credentials
         return data
 
 
-class IntegrationConfigurationSerializer(serializers.ModelSerializer):
+class IntegrationConfigurationSerializer(BaseModelSerializer):
     """
     Serializer for creating, reading, and updating IntegrationConfiguration instances.
     """
@@ -87,7 +100,7 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
     folder = serializers.StringRelatedField(read_only=True)
     # On write, accept the folder's primary key
     folder_id = serializers.PrimaryKeyRelatedField(
-        queryset=Folder.objects.all(),  # You might want to filter this based on user permissions
+        queryset=Folder.objects.all(),
         source="folder",
         label="Folder ID",
     )
@@ -99,6 +112,17 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
 
     has_api_token = serializers.SerializerMethodField()
     has_webhook_secret = serializers.SerializerMethodField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request is not None and "folder_id" in self.fields:
+            accessible_folders = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, Folder
+            )[0]
+            self.fields["folder_id"].queryset = Folder.objects.filter(
+                id__in=accessible_folders
+            )
 
     class Meta:
         model = IntegrationConfiguration
@@ -141,6 +165,29 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
 
     def get_has_webhook_secret(self, obj: IntegrationConfiguration) -> bool:
         return bool(obj.webhook_secret)
+
+    def update(self, instance, validated_data):
+        """Invalidate the cached remote schema when credentials change.
+
+        Repointing instance_url (or swapping accounts) makes the cached
+        tables/columns/choices describe the wrong instance; drop the row so the
+        next page load lazily re-fetches from the new target.
+        """
+        old_credentials = dict(instance.credentials or {})
+        instance = super().update(instance, validated_data)
+        new_credentials = instance.credentials or {}
+        if "credentials" in validated_data and new_credentials != old_credentials:
+            from integrations.models import IntegrationSchemaCache
+
+            deleted, _ = IntegrationSchemaCache.objects.filter(
+                configuration=instance
+            ).delete()
+            if deleted:
+                logger.info(
+                    "Invalidated schema cache after credential change",
+                    config_id=str(instance.id),
+                )
+        return instance
 
     def to_representation(self, instance):
         """
@@ -187,7 +234,7 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
             # Raise a validation error that DRF can render nicely
             raise serializers.ValidationError({"provider_specific_errors": errors})
 
-        return data
+        return super().validate(data)
 
 
 # Aliases expected by BaseModelViewSet's SerializerFactory

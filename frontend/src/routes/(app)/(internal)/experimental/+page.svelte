@@ -6,7 +6,7 @@
 	$pageTitle = 'Experimental';
 </script>
 
-<div class="bg-white grid grid-cols-2 p-4 gap-4 card">
+<div class="bg-surface-50-950 grid grid-cols-2 p-4 gap-4 card">
 	<Article
 		title={m.requirementsExplorer()}
 		desc={m.visualizeRequirements()}
@@ -26,28 +26,16 @@
 		tags={['assets', 'entities', 'ebios-rm', 'bulk']}
 	/>
 	<Article
-		title={m.matrixEditor()}
-		desc={m.matrixEditorDescription()}
-		link="/experimental/matrix-editor"
-		tags={['risk', 'matrix', 'editor']}
-	/>
-	<Article
-		title="Framework Builder"
-		desc="Create and edit compliance frameworks with a visual builder"
-		link="/experimental/framework-builder"
-		tags={['frameworks', 'builder', 'editor']}
+		title={m.lbListLibraryBuilder()}
+		desc={m.lbListCardDesc()}
+		link="/experimental/library-builder"
+		tags={['libraries', 'builder', 'packager']}
 	/>
 	<Article
 		title="Bulk evidence upload"
 		desc="Upload multiple files or a whole directory as evidences, with conflict-resolution strategies (skip, add revision, replace, rename) and SHA-256 duplicate detection."
 		link="/experimental/evidence-bulk-upload"
 		tags={['evidences', 'bulk', 'upload']}
-	/>
-	<Article
-		title="Preset Editor"
-		desc="Author presets — scaffolds and steps. Create from scratch or fork a library preset."
-		link="/experimental/preset-editor"
-		tags={['presets', 'journey', 'editor']}
 	/>
 	<Article
 		title="Questionnaire Autopilot"
