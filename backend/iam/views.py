@@ -228,9 +228,13 @@ class CurrentUserView(views.APIView):
         user_groups_data = list(request.user.user_groups.values("name", "builtin"))
         user_groups = [(ug["name"], ug["builtin"]) for ug in user_groups_data]
 
-        accessible_domains = RoleAssignment.get_allowed_folder_ids(
+        accessible_domains_ids = RoleAssignment.get_allowed_folder_ids(
             request.user, ("view", Folder)
         )
+        accessible_domains = Folder.objects.filter(
+            id__in=accessible_domains_ids,
+            content_type=Folder.ContentType.DOMAIN,
+        ).values_list("id", flat=True)
 
         domain_permissions = RoleAssignment.get_permissions_per_folder(
             principal=request.user, is_recursive=True
