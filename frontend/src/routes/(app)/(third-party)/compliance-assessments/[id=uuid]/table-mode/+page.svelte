@@ -16,8 +16,7 @@
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import {
 		complianceResultColorMap,
-		complianceResultTailwindColorMap,
-		complianceStatusTailwindColorMap
+		complianceStatusColorMap
 	} from '$lib/utils/constants';
 	import {
 		getFieldVisibility,
@@ -576,15 +575,16 @@
 			</div>
 		{/if}
 		{#if cfg.items?.length}
-			<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
+			<div class="flex flex-wrap gap-2">
 				{#each cfg.items as item}
 					<Anchor
-						class="anchor"
+						class="inline-flex items-center gap-2 rounded-md border border-surface-200 bg-surface-50 px-2.5 py-1 text-sm text-surface-800 transition-colors hover:border-primary-300 hover:bg-primary-50"
 						href="{cfg.hrefBase}/{item.id}"
 						label={item.str}
 						data-testid={cfg.linkTestId}
 					>
-						<i class="fa-solid {cfg.itemIcon} mr-2"></i>{item.str}
+						<i class="fa-solid {cfg.itemIcon} text-surface-400"></i>
+						<span class="truncate max-w-[18rem]">{item.str}</span>
 					</Anchor>
 				{/each}
 			</div>
@@ -612,48 +612,53 @@
 				/>
 			</div>
 		{:else if ra.result !== 'not_applicable'}
-			<div class="flex flex-col gap-1">
-				<span class="text-xs font-semibold text-surface-500 italic"
-					>{complianceAssessment.show_documentation_score
-						? m.implementationScore()
-						: m.score()}</span
-				>
-				<ScoreControl
-					value={ra.score}
-					min={raMin}
-					max={raMax}
-					scoresDefinition={raScoresDef}
-					scored={ra.is_scored}
-					disabled={isReadOnly}
-					onScoredChange={async (v) => {
-						ra.is_scored = v;
-						await update(ra, 'is_scored');
-					}}
-					onChange={(v) => {
-						ra.score = v;
-						updateScore(ra);
-					}}
-				/>
-			</div>
-			{#if complianceAssessment.show_documentation_score}
+			<div class="flex flex-row flex-wrap items-start gap-x-6 gap-y-2">
 				<div class="flex flex-col gap-1">
-					<span class="text-xs font-semibold text-surface-500 italic">{m.documentationScore()}</span
+					<span class="text-xs font-semibold text-surface-500 italic"
+						>{complianceAssessment.show_documentation_score
+							? m.implementationScore()
+							: m.score()}</span
 					>
 					<ScoreControl
-						value={ra.documentation_score}
+						value={ra.score}
 						min={raMin}
 						max={raMax}
 						scoresDefinition={raScoresDef}
-						isDoc
-						scored={ra.is_scored}
 						disabled={isReadOnly}
 						onChange={(v) => {
-							ra.documentation_score = v;
+							ra.score = v;
+							if (!ra.is_scored) {
+								ra.is_scored = true;
+								update(ra, 'is_scored');
+							}
 							updateScore(ra);
 						}}
 					/>
 				</div>
-			{/if}
+				{#if complianceAssessment.show_documentation_score}
+					<div class="flex flex-col gap-1">
+						<span class="text-xs font-semibold text-surface-500 italic"
+							>{m.documentationScore()}</span
+						>
+						<ScoreControl
+							value={ra.documentation_score}
+							min={raMin}
+							max={raMax}
+							scoresDefinition={raScoresDef}
+							isDoc
+							disabled={isReadOnly}
+							onChange={(v) => {
+								ra.documentation_score = v;
+								if (!ra.is_scored) {
+									ra.is_scored = true;
+									update(ra, 'is_scored');
+								}
+								updateScore(ra);
+							}}
+						/>
+					</div>
+				{/if}
+			</div>
 		{/if}
 	{:else if complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && ra.is_scored}
 		{@const raMin = ra.effective_min_score ?? complianceAssessment.min_score}
@@ -1058,7 +1063,7 @@
 
 											<!-- Row B: result / status / score, aligned under the name (editable while collapsed) -->
 											{#if (!questionnaireMode && showResult) || (!shallow && complianceAssessment.scoring_enabled)}
-												<div class="flex flex-wrap items-start gap-x-6 gap-y-3 pl-7">
+												<div class="flex flex-wrap items-start gap-x-6 gap-y-3">
 													{#if !questionnaireMode && showResult}
 														<div class="flex flex-col gap-1">
 															<span class="text-xs font-semibold text-surface-500 italic"
@@ -1075,7 +1080,7 @@
 																<SegmentedControl
 																	options={result_options}
 																	value={requirementAssessment.result}
-																	colorMap={complianceResultTailwindColorMap}
+																	colorMap={complianceResultColorMap}
 																	disabled={isReadOnly}
 																	size="sm"
 																	ariaLabel={m.result()}
@@ -1098,7 +1103,7 @@
 																<SegmentedControl
 																	options={status_options}
 																	value={requirementAssessment.status}
-																	colorMap={complianceStatusTailwindColorMap}
+																	colorMap={complianceStatusColorMap}
 																	disabled={isReadOnly}
 																	size="sm"
 																	ariaLabel={m.status()}
@@ -1348,14 +1353,6 @@
 																triggerTestId: 'evidence-accordion-trigger'
 															})}
 														{/if}
-														{#if showObservation}
-															{@render chip({
-																raId: requirementAssessment.id,
-																key: 'observation',
-																icon: 'fa-comment-dots',
-																label: m.observation()
-															})}
-														{/if}
 													</div>
 
 													{#if showAppliedControls && isSectionOpen(requirementAssessment.id, 'appliedControl')}
@@ -1387,17 +1384,23 @@
 																modalUpdateForm(requirementAssessment, 'selectEvidences')
 														})}
 													{/if}
-													{#if showObservation && isSectionOpen(requirementAssessment.id, 'observation')}
-														<div class="card border border-surface-200 rounded-lg p-3">
-															<TableMarkdownField
-																value={requirementAssessment.observation}
-																disabled={isReadOnly}
-																onSave={async (newValue) => {
-																	requirementAssessment.observation = newValue;
-																	await update(requirementAssessment, 'observation');
-																	requirementAssessment.observationBuffer = newValue;
-																}}
-															/>
+													{#if showObservation}
+														<div class="flex flex-col gap-1.5">
+															<span
+																class="text-xs font-semibold uppercase tracking-wide text-surface-500"
+																>{m.observation()}</span
+															>
+															<div class="card border border-surface-200 rounded-lg p-3">
+																<TableMarkdownField
+																	value={requirementAssessment.observation}
+																	disabled={isReadOnly}
+																	onSave={async (newValue) => {
+																		requirementAssessment.observation = newValue;
+																		await update(requirementAssessment, 'observation');
+																		requirementAssessment.observationBuffer = newValue;
+																	}}
+																/>
+															</div>
 														</div>
 													{/if}
 												{/if}
