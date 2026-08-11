@@ -1,25 +1,30 @@
-from django.db import IntegrityError, transaction
-from rest_framework import serializers
+import structlog
 from django.conf import settings
-from core.models import ComplianceAssessment, Framework, RequirementAssignment
+from django.contrib.auth import get_user_model
+from django.db import IntegrityError, transaction
+from django.utils.translation import gettext_lazy as _
+from rest_framework import serializers
 
+from core.models import (
+    Answer,
+    ComplianceAssessment,
+    Framework,
+    RequirementAssessment,
+    RequirementAssignment,
+)
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.serializers import BaseModelSerializer
 from core.utils import RoleCodename, UserGroupCodename
-from pmbok.models import GenericCollection
 from iam.models import Folder, Role, RoleAssignment, UserGroup
-from django.contrib.auth import get_user_model
+from pmbok.models import GenericCollection
 from tprm.models import (
+    Contract,
     Entity,
     EntityAssessment,
     Representative,
     Solution,
     SolutionSubcontractor,
-    Contract,
 )
-from django.utils.translation import gettext_lazy as _
-
-import structlog
 
 logger = structlog.get_logger(__name__)
 
@@ -364,6 +369,12 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
     selected_implementation_groups = serializers.ListField(
         child=serializers.CharField(), required=False
     )
+    link_audit = serializers.PrimaryKeyRelatedField(
+        queryset=ComplianceAssessment.objects.all(), required=False, allow_null=True
+    )
+    link_mode = serializers.ChoiceField(
+        choices=["move", "copy"], required=False, allow_null=True
+    )
 
     def _extract_audit_data(self, validated_data):
         audit_data = {
@@ -372,59 +383,126 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             "selected_implementation_groups": validated_data.pop(
                 "selected_implementation_groups", None
             ),
+            "link_audit": validated_data.pop("link_audit", None),
+            "link_mode": validated_data.pop("link_mode", None),
         }
         return audit_data
 
-    def _create_or_update_audit(self, instance, audit_data):
-        if audit_data["create_audit"]:
-            if not audit_data.get("framework"):
+    def _lock_instance_without_audit(self, instance, field_name):
+        locked = EntityAssessment.objects.select_for_update().get(pk=instance.pk)
+        if getattr(locked, "compliance_assessment_id", None):
+            raise serializers.ValidationError(
+                {field_name: [_("An audit already exists for this assessment")]}
+            )
+        return locked
+
+    def _make_enclave_folder(self, instance):
+        return Folder.objects.create(
+            content_type=Folder.ContentType.ENCLAVE,
+            name=f"{instance.entity.name}/{instance.name}",
+            parent_folder=instance.folder,
+        )
+
+    def _finalize_linked_audit(self, instance, audit):
+        """Shared tail for create/move/copy."""
+        audit.reviewers.set(instance.reviewers.all())
+        representatives = instance.representatives.all()
+        audit.authors.set(
+            [rep.actor for rep in representatives if hasattr(rep, "actor")]
+        )
+        self._create_requirement_assignment(audit, representatives)
+        instance.compliance_assessment = audit
+        instance.save()
+
+    def _create_audit(self, instance, audit_data):
+        if not audit_data.get("framework"):
+            raise serializers.ValidationError({"framework": [_("Framework required")]})
+
+        with transaction.atomic():
+            locked = self._lock_instance_without_audit(instance, "create_audit")
+            from core.utils import build_initial_field_visibility
+
+            audit = ComplianceAssessment.objects.create(
+                name=locked.name,
+                framework=audit_data["framework"],
+                perimeter=locked.perimeter,
+                selected_implementation_groups=audit_data[
+                    "selected_implementation_groups"
+                ],
+                field_visibility=build_initial_field_visibility(
+                    audit_data["framework"]
+                ),
+            )
+
+            enclave = self._make_enclave_folder(instance)
+            audit.folder = enclave
+            audit.save()
+
+            audit.create_requirement_assessments()
+            self._finalize_linked_audit(instance, audit)
+
+    def _link_existing_audit(self, instance, audit_data):
+        link_mode = audit_data.get("link_mode")
+        if link_mode not in ("move", "copy"):
+            raise serializers.ValidationError(
+                {"link_mode": [_("Select whether to move or copy the audit")]}
+            )
+
+        with transaction.atomic():
+            self._lock_instance_without_audit(instance, "link_audit")
+            source_audit = ComplianceAssessment.objects.select_for_update().get(
+                pk=audit_data["link_audit"].pk
+            )
+            if (
+                EntityAssessment.objects.filter(compliance_assessment=source_audit)
+                .exclude(pk=instance.pk)
+                .exists()
+            ):
                 raise serializers.ValidationError(
-                    {"framework": [_("Framework required")]}
+                    {
+                        "link_audit": [
+                            _(
+                                "This audit is already linked to another entity assessment"
+                            )
+                        ]
+                    }
                 )
 
-            with transaction.atomic():
-                locked = EntityAssessment.objects.select_for_update().get(
-                    pk=instance.pk
-                )  # lock entity assessment until the end of the transaction
-                if getattr(locked, "compliance_assessment_id", None):
-                    raise serializers.ValidationError(
-                        {
-                            "create_audit": [
-                                _("An audit already exists for this assessment")
-                            ]
-                        }
-                    )
+            enclave = self._make_enclave_folder(instance)
+
+            if link_mode == "move":
+                # Evidences/controls stay put — they're shared, not owned by this audit.
+                audit = source_audit
+                audit.folder = enclave
+                audit.save()
+                RequirementAssessment.objects.filter(
+                    compliance_assessment=audit
+                ).update(folder=enclave)
+                Answer.objects.filter(
+                    requirement_assessment__compliance_assessment=audit
+                ).update(folder=enclave)
+            else:
                 from core.utils import build_initial_field_visibility
 
                 audit = ComplianceAssessment.objects.create(
-                    name=locked.name,
-                    framework=audit_data["framework"],
-                    perimeter=locked.perimeter,
-                    selected_implementation_groups=audit_data[
-                        "selected_implementation_groups"
-                    ],
+                    name=instance.name,
+                    framework=source_audit.framework,
+                    perimeter=instance.perimeter,
+                    selected_implementation_groups=source_audit.selected_implementation_groups,
                     field_visibility=build_initial_field_visibility(
-                        audit_data["framework"]
+                        source_audit.framework
                     ),
+                    folder=enclave,
                 )
+                audit.create_requirement_assessments(baseline=source_audit)
 
-                enclave = Folder.objects.create(
-                    content_type=Folder.ContentType.ENCLAVE,
-                    name=f"{instance.entity.name}/{instance.name}",
-                    parent_folder=instance.folder,
-                )
-                audit.folder = enclave
-                audit.save()
+            self._finalize_linked_audit(instance, audit)
 
-                audit.create_requirement_assessments()
-                audit.reviewers.set(instance.reviewers.all())
-                representatives = instance.representatives.all()
-                audit.authors.set(
-                    [rep.actor for rep in representatives if hasattr(rep, "actor")]
-                )
-                self._create_requirement_assignment(audit, representatives)
-                instance.compliance_assessment = audit
-                instance.save()
+    def _create_or_update_audit(self, instance, audit_data):
+        if audit_data["create_audit"]:
+            self._create_audit(instance, audit_data)
+        elif audit_data.get("link_audit"):
+            self._link_existing_audit(instance, audit_data)
         else:
             if instance.compliance_assessment:
                 audit = instance.compliance_assessment

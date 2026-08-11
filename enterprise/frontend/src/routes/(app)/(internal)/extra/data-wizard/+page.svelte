@@ -34,6 +34,7 @@
 	let showModelDropdown = $state(false);
 	let searchInputRef: HTMLInputElement | null = $state(null);
 	let onConflict = $state('stop');
+	let auditLinkMode = $state('');
 
 	// SPA form backing the scope pickers; each renders its own name={field} hidden
 	// input, so the values post with the upload form.
@@ -591,6 +592,73 @@
 				</div>
 				<input type="hidden" name="onConflict" value={onConflict} />
 			</div>
+
+			{#if selectedModel === 'TPRM'}
+				<div
+					class="rounded-lg p-6 mt-6 border-2 border-indigo-200 dark:border-indigo-500/30 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-500/10 dark:to-surface-950"
+				>
+					<label class="block text-sm font-semibold text-surface-900-100 mb-3"
+						>{m.dataWizardAuditLinkMode()}</label
+					>
+					<div class="flex gap-2">
+						<label
+							class="flex-1 cursor-pointer rounded-lg border-2 px-3 py-2 text-center text-sm transition-colors {auditLinkMode ===
+							''
+								? 'border-indigo-500 bg-indigo-100 dark:bg-indigo-900 font-semibold text-indigo-700 dark:text-indigo-300'
+								: 'border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:border-indigo-300'}"
+						>
+							<input
+								type="radio"
+								name="auditLinkModeRadio"
+								value=""
+								bind:group={auditLinkMode}
+								class="sr-only"
+							/>
+							<div class="font-medium">{m.dataWizardAuditLinkModePerRow()}</div>
+							<div class="text-xs text-surface-600-400 mt-0.5">
+								{m.dataWizardAuditLinkModePerRowDescription()}
+							</div>
+						</label>
+						<label
+							class="flex-1 cursor-pointer rounded-lg border-2 px-3 py-2 text-center text-sm transition-colors {auditLinkMode ===
+							'move'
+								? 'border-indigo-500 bg-indigo-100 dark:bg-indigo-900 font-semibold text-indigo-700 dark:text-indigo-300'
+								: 'border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:border-indigo-300'}"
+						>
+							<input
+								type="radio"
+								name="auditLinkModeRadio"
+								value="move"
+								bind:group={auditLinkMode}
+								class="sr-only"
+							/>
+							<div class="font-medium">{m.dataWizardAuditLinkModeMove()}</div>
+							<div class="text-xs text-surface-600-400 mt-0.5">
+								{m.dataWizardAuditLinkModeMoveDescription()}
+							</div>
+						</label>
+						<label
+							class="flex-1 cursor-pointer rounded-lg border-2 px-3 py-2 text-center text-sm transition-colors {auditLinkMode ===
+							'copy'
+								? 'border-indigo-500 bg-indigo-100 dark:bg-indigo-900 font-semibold text-indigo-700 dark:text-indigo-300'
+								: 'border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:border-indigo-300'}"
+						>
+							<input
+								type="radio"
+								name="auditLinkModeRadio"
+								value="copy"
+								bind:group={auditLinkMode}
+								class="sr-only"
+							/>
+							<div class="font-medium">{m.dataWizardAuditLinkModeCopy()}</div>
+							<div class="text-xs text-surface-600-400 mt-0.5">
+								{m.dataWizardAuditLinkModeCopyDescription()}
+							</div>
+						</label>
+					</div>
+					<input type="hidden" name="auditLinkMode" value={auditLinkMode} />
+				</div>
+			{/if}
 
 			<div
 				class="rounded-lg p-6 mt-6 border-2 border-rose-200 dark:border-rose-500/30 bg-gradient-to-br from-rose-50 to-white dark:from-rose-500/10 dark:to-surface-950 space-y-4"

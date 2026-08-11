@@ -1,94 +1,83 @@
 import csv
+import enum
 import io
 import logging
-import structlog
+import re
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from datetime import date, datetime
 from functools import cached_property
 from pathlib import Path
 from types import MappingProxyType
-import re
-import pandas as pd
-from django.http import FileResponse
-from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.parsers import FileUploadParser
+from typing import Any, ClassVar, Final, Mapping, Optional
+from uuid import UUID
 
-from .serializers import LoadFileSerializer
+import pandas as pd
+import structlog
+from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import UploadedFile
+from django.db import IntegrityError, models
+from django.db.models import Q
+from django.http import FileResponse, HttpRequest
+from django.utils import timezone
+from rest_framework import status
+from rest_framework.parsers import FileUploadParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from core.base_models import AbstractBaseModel
-from core.utils import build_questions_dict
+from core.constants import COUNTRY_CHOICES
 from core.models import (
     Actor,
+    AppliedControl,
     Assessment,
     Asset,
     AssetClass,
     ComplianceAssessment,
     Evidence,
+    FilteringLabel,
+    FindingsAssessment,
     Folder,
     Framework,
+    Incident,
     LoadedLibrary,
     Perimeter,
+    Policy,
     RequirementAssessment,
     RequirementNode,
     RiskAssessment,
     RiskMatrix,
-    StoredLibrary,
-    AppliedControl,
-    FindingsAssessment,
     RiskScenario,
-    Policy,
     SecurityException,
-    Incident,
-    TaskTemplate,
+    StoredLibrary,
     TaskNode,
+    TaskTemplate,
+    Terminology,
     Vulnerability,
 )
 from core.serializers import (
-    BaseModelSerializer,
-    AssetWriteSerializer,
-    PerimeterWriteSerializer,
     AppliedControlWriteSerializer,
+    AssetWriteSerializer,
+    BaseModelSerializer,
     ComplianceAssessmentWriteSerializer,
-    RequirementAssessmentWriteSerializer,
+    EvidenceWriteSerializer,
     FindingsAssessmentWriteSerializer,
     FindingWriteSerializer,
-    UserWriteSerializer,
+    FolderWriteSerializer,
+    IncidentWriteSerializer,
+    PerimeterWriteSerializer,
+    PolicyWriteSerializer,
+    ReferenceControlWriteSerializer,
+    RequirementAssessmentWriteSerializer,
     RiskAssessmentWriteSerializer,
     RiskScenarioWriteSerializer,
-    ReferenceControlWriteSerializer,
-    ThreatWriteSerializer,
-    EvidenceWriteSerializer,
-    FolderWriteSerializer,
-    PolicyWriteSerializer,
     SecurityExceptionWriteSerializer,
-    IncidentWriteSerializer,
     TaskTemplateWriteSerializer,
+    ThreatWriteSerializer,
+    UserWriteSerializer,
     VulnerabilityWriteSerializer,
 )
-from ebios_rm.models import (
-    EbiosRMStudy,
-    FearedEvent,
-    RoTo,
-    Stakeholder,
-    StrategicScenario,
-    AttackPath,
-    ElementaryAction,
-    KillChain,
-)
-from ebios_rm.serializers import (
-    ElementaryActionWriteSerializer,
-    EbiosRMStudyWriteSerializer,
-)
-from .ebios_rm_excel_helpers import (
-    extract_elementary_actions,
-    process_excel_file as process_ebios_rm_excel,
-)
-from .egerie_xml_helpers import (
-    process_xml_file as process_egerie_xml,
-    quartile_to_index,
-    map_egerie_status,
-)
-from core.models import Terminology
-from core.utils import AUDITOR_ONLY
+from core.utils import AUDITOR_ONLY, build_questions_dict, get_global_currency
 from data_wizard.arm_helpers import process_arm_file
 from data_wizard.cyfun_helpers import (
     CYFUN_FRAMEWORK_URN,
@@ -96,58 +85,73 @@ from data_wizard.cyfun_helpers import (
     LEVEL_TO_GROUP,
     process_cyfun_file,
 )
-from tprm.models import Entity, Solution, Contract, Representative
-from tprm.serializers import (
-    EntityWriteSerializer,
-    SolutionWriteSerializer,
-    ContractWriteSerializer,
-    RepresentativeWriteSerializer,
+from ebios_rm.models import (
+    AttackPath,
+    EbiosRMStudy,
+    ElementaryAction,
+    FearedEvent,
+    KillChain,
+    RoTo,
+    Stakeholder,
+    StrategicScenario,
 )
-from resilience.models import (
-    BusinessImpactAnalysis,
-    AssetAssessment,
-    EscalationThreshold,
+from ebios_rm.serializers import (
+    EbiosRMStudyWriteSerializer,
+    ElementaryActionWriteSerializer,
 )
-from resilience.serializers import (
-    BusinessImpactAnalysisWriteSerializer,
-    AssetAssessmentWriteSerializer,
-    EscalationThresholdWriteSerializer,
-)
+from iam.models import Permission, RoleAssignment, User
 from privacy.models import (
-    Processing,
-    PersonalData,
-    DataSubject,
-    DataRecipient,
-    DataContractor,
     ART6_LAWFUL_BASIS_CHOICES,
     ART9_SPECIAL_CATEGORY_CONDITION_CHOICES,
     TRANSFER_MECHANISM_CHOICES,
+    DataContractor,
+    DataRecipient,
+    DataSubject,
+    PersonalData,
+    Processing,
 )
 from privacy.serializers import (
+    DataContractorWriteSerializer,
+    DataRecipientWriteSerializer,
+    DataSubjectWriteSerializer,
+    DataTransferWriteSerializer,
+    PersonalDataWriteSerializer,
     ProcessingWriteSerializer,
     PurposeWriteSerializer,
-    PersonalDataWriteSerializer,
-    DataSubjectWriteSerializer,
-    DataRecipientWriteSerializer,
-    DataContractorWriteSerializer,
-    DataTransferWriteSerializer,
 )
-from core.constants import COUNTRY_CHOICES
-from iam.models import Permission, RoleAssignment, User
-from core.models import FilteringLabel
-from core.utils import get_global_currency
-from uuid import UUID
-from django.core.files.uploadedfile import UploadedFile
-from django.db.models import Q
-from django.http import HttpRequest
-from django.utils import timezone
-from django.db import models, IntegrityError
-from django.core.exceptions import ValidationError
-from datetime import datetime, date
-from typing import Optional, Final, ClassVar, Mapping, Any
-from dataclasses import dataclass, field
-from abc import ABC, abstractmethod
-import enum
+from resilience.models import (
+    AssetAssessment,
+    BusinessImpactAnalysis,
+    EscalationThreshold,
+)
+from resilience.serializers import (
+    AssetAssessmentWriteSerializer,
+    BusinessImpactAnalysisWriteSerializer,
+    EscalationThresholdWriteSerializer,
+)
+from tprm.models import Contract, Entity, EntityAssessment, Representative, Solution
+from tprm.serializers import (
+    ContractWriteSerializer,
+    EntityAssessmentWriteSerializer,
+    EntityWriteSerializer,
+    RepresentativeWriteSerializer,
+    SolutionWriteSerializer,
+)
+
+from .ebios_rm_excel_helpers import (
+    extract_elementary_actions,
+)
+from .ebios_rm_excel_helpers import (
+    process_excel_file as process_ebios_rm_excel,
+)
+from .egerie_xml_helpers import (
+    map_egerie_status,
+    quartile_to_index,
+)
+from .egerie_xml_helpers import (
+    process_xml_file as process_egerie_xml,
+)
+from .serializers import LoadFileSerializer
 
 logger = structlog.get_logger(__name__)
 
@@ -3879,6 +3883,9 @@ class LoadFileView(APIView):
             on_conflict = ConflictMode(on_conflict_str)
         except ValueError:
             on_conflict = ConflictMode.STOP
+        default_audit_link_mode = request.META.get("HTTP_X_AUDIT_LINK_MODE") or None
+        if default_audit_link_mode not in ("move", "copy", None):
+            default_audit_link_mode = None
 
         logger.info(
             f"Processing file with model: {model_type}, folder: {folder_id}, perimeter: {perimeter_id}, framework: {framework_id}, matrix: {matrix_id}"
@@ -3911,7 +3918,12 @@ class LoadFileView(APIView):
             match model_type:
                 case ModelType.TPRM:
                     res = self._process_tprm_file(
-                        request, record_file, folders_map, folder_id, on_conflict
+                        request,
+                        record_file,
+                        folders_map,
+                        folder_id,
+                        on_conflict,
+                        default_audit_link_mode,
                     )
                 # Special handling for EBIOS RM Study ARM format (multi-sheet)
                 case ModelType.EBIOS_RM_STUDY_ARM:
@@ -5167,6 +5179,7 @@ class LoadFileView(APIView):
         folders_map,
         folder_id,
         on_conflict=ConflictMode.STOP,
+        default_audit_link_mode: str | None = None,
     ):
         """
         Process TPRM multi-sheet Excel file with Entities, Solutions, and Contracts
@@ -5179,6 +5192,7 @@ class LoadFileView(APIView):
             overall_results = {
                 "entities": {"successful": 0, "failed": 0, "errors": []},
                 "solutions": {"successful": 0, "failed": 0, "errors": []},
+                "entity_assessments": {"successful": 0, "failed": 0, "errors": []},
                 "contracts": {"successful": 0, "failed": 0, "errors": []},
                 "representatives": {"successful": 0, "failed": 0, "errors": []},
             }
@@ -5221,6 +5235,31 @@ class LoadFileView(APIView):
                     return overall_results
             else:
                 logger.warning("No 'Solutions' sheet found in Excel file")
+
+            # Process EntityAssessments sheet (requires entities, may reference solutions)
+            if "EntityAssessments" in excel_data.sheet_names:
+                logger.info("Processing EntityAssessments sheet")
+                entity_assessments_df = normalize_datetime_columns(
+                    pd.read_excel(excel_file, sheet_name="EntityAssessments")
+                ).fillna("")
+                entity_assessments_records = entity_assessments_df.to_dict(
+                    orient="records"
+                )
+                entity_assessments_result = self._process_entity_assessments(
+                    request,
+                    entity_assessments_records,
+                    folders_map,
+                    folder_id,
+                    entity_ref_map,
+                    solution_ref_map,
+                    on_conflict,
+                    default_audit_link_mode,
+                )
+                overall_results["entity_assessments"] = entity_assessments_result
+                if entity_assessments_result.get("stopped"):
+                    return overall_results
+            else:
+                logger.warning("No 'EntityAssessments' sheet found in Excel file")
 
             # Process Contracts sheet last (requires entities and solutions)
             if "Contracts" in excel_data.sheet_names:
@@ -5597,6 +5636,186 @@ class LoadFileView(APIView):
 
         self._log_tprm_import_results("Solution", results)
         return results, ref_id_map
+
+    def _resolve_tprm_perimeter(self, record) -> tuple[Optional[Perimeter], str | None]:
+        """Blank column is not an error — perimeter is optional here."""
+        value = str(
+            record.get("perimeter") or record.get("perimeter_ref_id") or ""
+        ).strip()
+        if not value:
+            return None, None
+
+        try:
+            perimeter = Perimeter.objects.filter(id=value).first()
+            if perimeter:
+                return perimeter, None
+        except ValueError, ValidationError:
+            pass
+
+        perimeter = Perimeter.objects.filter(ref_id=value).first()
+        if perimeter is None:
+            return None, f"Perimeter '{value}' not found"
+        return perimeter, None
+
+    def _process_entity_assessments(
+        self,
+        request,
+        records,
+        folders_map,
+        folder_id,
+        entity_ref_map,
+        solution_ref_map,
+        on_conflict=ConflictMode.STOP,
+        default_audit_link_mode: str | None = None,
+    ):
+        results = self._empty_tprm_results()
+
+        for record in records:
+            try:
+                missing_fields = self._check_missing_tprm_required_fields(
+                    record, ["name", "entity_ref_id"]
+                )
+                if missing_fields:
+                    self._add_tprm_missing_fields_error(results, record, missing_fields)
+                    continue
+
+                entity_ref_id = record.get("entity_ref_id", "").strip()
+                if entity_ref_id not in entity_ref_map:
+                    self._add_tprm_record_error(
+                        results,
+                        record,
+                        f"Entity with ref_id '{entity_ref_id}' not found",
+                    )
+                    continue
+                entity_id = entity_ref_map[entity_ref_id]
+
+                # Get domain from record or use fallback
+                domain = folder_id
+                if record.get("domain") != "":
+                    domain = folders_map.get(
+                        str(record.get("domain")).lower(), folder_id
+                    )
+
+                assessment_data = {
+                    "name": record.get("name"),
+                    "description": record.get("description", ""),
+                    "entity": entity_id,
+                    "folder": domain,
+                }
+
+                perimeter, perimeter_error = self._resolve_tprm_perimeter(record)
+                if perimeter_error:
+                    self._add_tprm_record_error(results, record, perimeter_error)
+                    continue
+                if perimeter:
+                    assessment_data["perimeter"] = str(perimeter.id)
+
+                due_date = _parse_date(record.get("due_date"))
+                if due_date:
+                    assessment_data["due_date"] = due_date
+
+                if record.get("criticality") not in ("", None):
+                    try:
+                        assessment_data["criticality"] = int(record.get("criticality"))
+                    except ValueError, TypeError:
+                        pass
+
+                # Same parsing/error convention as the Contracts sheet.
+                solution_ids = []
+                missing_solution_refs = []
+                solution_ref_id_raw = str(record.get("solution_ref_id", "")).strip()
+                if solution_ref_id_raw:
+                    for sol_ref in re.split(r"[\n\r|,]+", solution_ref_id_raw):
+                        sol_ref = sol_ref.strip()
+                        if not sol_ref:
+                            continue
+                        if sol_ref in solution_ref_map:
+                            solution_ids.append(solution_ref_map[sol_ref])
+                        else:
+                            missing_solution_refs.append(sol_ref)
+                if missing_solution_refs:
+                    results["errors"].append(
+                        {
+                            "record": record,
+                            "error": (
+                                "Unknown solution_ref_id(s) skipped: "
+                                + ", ".join(missing_solution_refs)
+                            ),
+                        }
+                    )
+                if solution_ids:
+                    assessment_data["solutions"] = solution_ids
+
+                audit_ref = str(record.get("audit_ref_id", "")).strip()
+                if audit_ref:
+                    link_mode = (
+                        str(record.get("audit_link_mode", "")).strip().lower()
+                        or default_audit_link_mode
+                        or ""
+                    )
+                    if link_mode not in ("move", "copy"):
+                        self._add_tprm_record_error(
+                            results,
+                            record,
+                            "audit_link_mode must be 'move' or 'copy' (set it on the "
+                            "row or choose a default for the whole file) when "
+                            "audit_ref_id is set",
+                        )
+                        continue
+                    # Pre-existing record: resolved against the DB, not a ref_id_map.
+                    audit = ComplianceAssessment.objects.filter(
+                        ref_id=audit_ref
+                    ).first()
+                    if audit is None:
+                        audit = ComplianceAssessment.objects.filter(
+                            name__iexact=audit_ref
+                        ).first()
+                    if audit is None:
+                        self._add_tprm_record_error(
+                            results,
+                            record,
+                            f"Audit with ref_id or name '{audit_ref}' not found",
+                        )
+                        continue
+                    assessment_data["link_audit"] = str(audit.id)
+                    assessment_data["link_mode"] = link_mode
+
+                # Entity assessments have no ref_id: dedupe by (entity, name).
+                existing_assessment = EntityAssessment.objects.filter(
+                    name__iexact=record.get("name"),
+                    entity_id=entity_id,
+                ).first()
+
+                if existing_assessment:
+                    action = self._handle_tprm_conflict(
+                        request,
+                        results,
+                        record,
+                        on_conflict,
+                        label="Entity assessment",
+                        serializer_class=EntityAssessmentWriteSerializer,
+                        instance=existing_assessment,
+                        data=assessment_data,
+                    )
+                    if action == "stopped":
+                        break
+                    continue
+
+                serializer = EntityAssessmentWriteSerializer(
+                    data=assessment_data, context={"request": request}
+                )
+
+                serializer.is_valid(raise_exception=True)
+                assessment = serializer.save()
+                results["successful"] += 1
+                logger.debug(f"Created entity assessment: {assessment.name}")
+
+            except Exception as e:
+                logger.warning(f"Error creating entity assessment: {str(e)}")
+                self._add_tprm_record_error(results, record, str(e))
+
+        self._log_tprm_import_results("Entity assessment", results)
+        return results
 
     def _process_contracts(
         self,
