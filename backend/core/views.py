@@ -9,6 +9,7 @@ import mimetypes
 import re
 from django_filters.filterset import filterset_factory
 from django_filters.utils import try_dbfield
+from django import forms
 from django_filters.widgets import QueryArrayWidget
 import regex
 import os
@@ -319,6 +320,17 @@ def _serve_attachment(attachment_filter):
     return response
 
 
+class NullableModelMultipleChoiceField(forms.ModelMultipleChoiceField):
+    def clean(self, value):
+        if value is None:
+            return super().clean(value)
+
+        if not isinstance(value, (list, tuple)):
+            value = [value]
+
+        return super().clean(v for v in value if v != "--")
+
+
 class NullableChoiceFilter(df.MultipleChoiceFilter):
     """
     A filter that supports filtering for null values using '--' as a special value.
@@ -360,6 +372,40 @@ class NullableChoiceFilter(df.MultipleChoiceFilter):
         else:
             # No valid values, return empty queryset
             return qs.none()
+
+
+class NullableModelChoiceFilter(df.ModelMultipleChoiceFilter):
+    """
+    A model multiple choice filter which supports filtering for null values using "--" to represent null.
+    """
+
+    field_class = NullableModelMultipleChoiceField
+
+    def filter(self, qs, value):
+        raw_values = []
+        parent_request = getattr(self.parent, "request", None)
+
+        if parent_request is not None:
+            raw_values = self.parent.request.query_params.getlist(self.field_name)
+
+        if not raw_values and hasattr(self.parent.data, "getlist"):
+            raw_values = self.parent.data.getlist(self.field_name)
+
+        if not raw_values:
+            return qs
+
+        has_null = "--" in raw_values
+        has_real = any(v != "--" for v in raw_values)
+
+        filters = Q()
+
+        if has_null:
+            filters |= Q(**{f"{self.field_name}__isnull": True})
+
+        if has_real:
+            filters |= Q(**{f"{self.field_name}__in": value})
+
+        return qs.filter(filters).distinct()
 
 
 def get_mapping_max_depth():
@@ -9512,32 +9558,37 @@ class RequirementViewSet(BaseModelViewSet):
         )
 
 
+class EvidenceFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
+    owner = NullableModelChoiceFilter(queryset=Actor.objects.all())
+
+    class Meta:
+        model = Evidence
+        fields = [
+            "folder",
+            "applied_controls",
+            "requirement_assessments",
+            "name",
+            "timeline_entries",
+            "filtering_labels",
+            "findings",
+            "findings_assessments",
+            "genericcollection",
+            "expiry_date",
+            "contracts",
+            "status",
+            "processings",
+            "data_breaches",
+            "security_exceptions",
+        ]
+
+
 class EvidenceViewSet(BaseModelViewSet):
     """
     API endpoint that allows evidences to be viewed or edited.
     """
 
     model = Evidence
-    filterset_fields = {
-        "folder": ["exact"],
-        "applied_controls": ["exact"],
-        "requirement_assessments": ["exact"],
-        "name": ["exact"],
-        "timeline_entries": ["exact"],
-        "filtering_labels": ["exact"],
-        "findings": ["exact"],
-        "findings_assessments": ["exact"],
-        "security_exceptions": ["exact"],
-        "genericcollection": ["exact"],
-        "owner": ["exact"],
-        "status": ["exact"],
-        "expiry_date": ["exact"],
-        "contracts": ["exact"],
-        "processings": ["exact"],
-        "data_breaches": ["exact"],
-        "created_at": ["gte", "lt"],
-        "updated_at": ["gte", "lt"],
-    }
+    filterset_class = EvidenceFilterSet
 
     def get_queryset(self):
         return (
