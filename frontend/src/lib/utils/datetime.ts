@@ -1,12 +1,7 @@
 import { page } from '$app/state';
 
 export type DateFormatPreference =
-	| 'auto'
-	| 'iso'
-	| 'ddmmyyyy'
-	| 'mmddyyyy'
-	| 'long_dmy'
-	| 'long_mdy';
+	'auto' | 'iso' | 'ddmmyyyy' | 'mmddyyyy' | 'long_dmy' | 'long_mdy';
 
 const DATE_FORMAT_PREFERENCES: DateFormatPreference[] = [
 	'auto',
