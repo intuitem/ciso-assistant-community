@@ -5786,5 +5786,17 @@
 	"loadMoreAssets": "Charger plus",
 	"noAssetsInClass": "Aucun actif directement dans cette classe.",
 	"createMissingAssetClasses": "Créer les classes d'actifs manquantes",
-	"createMissingAssetClassesHelpText": "Crée les classes d'actifs personnalisées référencées par l'import. Elles sont ajoutées au catalogue global et deviennent visibles par tous les utilisateurs."
+	"createMissingAssetClassesHelpText": "Crée les classes d'actifs personnalisées référencées par l'import. Elles sont ajoutées au catalogue global et deviennent visibles par tous les utilisateurs.",
+	"validationsReceived": "Reçues",
+	"validationsSent": "Envoyées",
+	"validationsHistory": "Historique",
+	"validationFlowsPageDescription": "Traitez ce qui attend votre décision, suivez ce que vous avez envoyé.",
+	"noPendingValidations": "Aucune validation en attente",
+	"noPendingValidationsHint": "Les demandes qui attendent votre décision apparaissent ici. Consultez l'historique pour revoir les décisions passées.",
+	"noSentValidations": "Vous n'avez envoyé aucune demande de validation",
+	"noSentValidationsHint": "Ouvrez un audit, une politique ou tout autre objet et utilisez « Demander une validation » pour lancer un flux.",
+	"noValidationHistory": "Aucune validation clôturée",
+	"noValidationHistoryHint": "Les demandes approuvées, rejetées, révoquées ou abandonnées auxquelles vous avez participé apparaissent ici.",
+	"noLinkedObjects": "Aucun objet lié",
+	"andNMoreObjects": "et {count} de plus"
 }

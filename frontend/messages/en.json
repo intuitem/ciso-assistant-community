@@ -6004,5 +6004,17 @@
 	"loadMoreAssets": "Load more",
 	"noAssetsInClass": "No assets directly in this class.",
 	"createMissingAssetClasses": "Create missing asset classes",
-	"createMissingAssetClassesHelpText": "Create the custom asset classes referenced by the import. They are added to the global catalogue and become visible to every user."
+	"createMissingAssetClassesHelpText": "Create the custom asset classes referenced by the import. They are added to the global catalogue and become visible to every user.",
+	"validationsReceived": "Received",
+	"validationsSent": "Sent",
+	"validationsHistory": "History",
+	"validationFlowsPageDescription": "Approve what is waiting on you, follow up on what you sent.",
+	"noPendingValidations": "You don't have any pending validation",
+	"noPendingValidationsHint": "Requests waiting for your decision show up here. Switch to History to review past decisions.",
+	"noSentValidations": "You haven't sent any validation request",
+	"noSentValidationsHint": "Open an audit, a policy or any other object and use “Request validation” to start a flow.",
+	"noValidationHistory": "No closed validation yet",
+	"noValidationHistoryHint": "Approved, rejected, revoked and dropped requests you took part in show up here.",
+	"noLinkedObjects": "No linked object",
+	"andNMoreObjects": "and {count} more"
 }
