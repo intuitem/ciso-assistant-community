@@ -806,13 +806,12 @@ class TestPermissionCheck:
 
 @pytest.mark.django_db
 class TestFocusMode:
-    def test_focus_mode_is_a_pure_intersection(self):
+    def test_focus_mode_listing_scope(self):
         """
-        Ensure focus mode behaves as a PURE INTERSECTION over the accessible folders, THROUGH THE PUBLIC API (`RoleAssignment.get_allowed_folder_ids`/`RoleAssignment.get_viewable_object_ids`):
+        Ensure focus mode intersects the accessible folders with the focus subtree PLUS the root folder, THROUGH THE PUBLIC API (`RoleAssignment.get_allowed_folder_ids`/`RoleAssignment.get_viewable_object_ids`):
 
-        - Focus mode MUST NEVER extend the accessible folders (especially not with the root folder, for anyone: not even for users with a role assignment on the root folder).
-        - Unpublished root folder objects are NOT reachable while a focus folder is set (even for users with a role assignment on the root folder).
-        - Published root folder objects (like the `User` objects, which are always published) REMAIN visible through the normal `is_published` inheritance (e.g. so the user pickers keep working in focus mode).
+        - Focus mode MUST NEVER extend the accessible folders: the root folder stays in scope ONLY for users with a role assignment covering it (#4470 parity: corpus-level objects stay available to admins in focus mode).
+        - Published root folder objects (like the `User` objects, which are always published) remain visible to everyone through the normal `is_published` inheritance (e.g. so the user pickers keep working in focus mode).
         """
         from core.context import focus_folder_id_var
 
@@ -854,27 +853,53 @@ class TestFocusMode:
 
         token = focus_folder_id_var.set(domain.id)
         try:
-            for user in [admin_user, domain_user]:
-                allowed_folder_ids = set(
-                    RoleAssignment.get_allowed_folder_ids(
-                        user, ("view", AppliedControl)
-                    )
+            admin_allowed_folder_ids = set(
+                RoleAssignment.get_allowed_folder_ids(
+                    admin_user, ("view", AppliedControl)
                 )
-                assert domain.id in allowed_folder_ids, (
-                    f"The focused folder itself MUST be accessible ({user.email!r})."
-                )
-                assert root_folder.id not in allowed_folder_ids, (
-                    f"Focus mode MUST be a pure intersection: the root folder MUST NOT be part of the accessible folders ({user.email!r})."
-                )
+            )
+            assert domain.id in admin_allowed_folder_ids, (
+                "The focused folder itself MUST be accessible (admin)."
+            )
+            assert root_folder.id in admin_allowed_folder_ids, (
+                "The root folder MUST stay accessible in focus mode for a user with a role assignment covering it (#4470 parity)."
+            )
 
+            admin_viewable_ids = set(
+                RoleAssignment.get_viewable_object_ids(admin_user, AppliedControl)
+            )
+            assert control_in_domain.id in admin_viewable_ids, (
+                "The focused folder objects MUST be visible (admin)."
+            )
+            assert unpublished_control_in_root.id in admin_viewable_ids, (
+                "Root folder objects MUST stay visible in focus mode for a user with a role assignment on the root folder (#4470 parity)."
+            )
+
+            domain_user_allowed_folder_ids = set(
+                RoleAssignment.get_allowed_folder_ids(
+                    domain_user, ("view", AppliedControl)
+                )
+            )
+            assert domain.id in domain_user_allowed_folder_ids, (
+                "The focused folder itself MUST be accessible (domain user)."
+            )
+            assert root_folder.id not in domain_user_allowed_folder_ids, (
+                "The root folder focus inclusion MUST NOT grant root folder access to users without any role assignment on it."
+            )
+
+            domain_user_viewable_ids = set(
+                RoleAssignment.get_viewable_object_ids(domain_user, AppliedControl)
+            )
+            assert control_in_domain.id in domain_user_viewable_ids, (
+                "The focused folder objects MUST be visible (domain user)."
+            )
+            assert unpublished_control_in_root.id not in domain_user_viewable_ids, (
+                "Unpublished root folder objects MUST NOT be visible to users without any role assignment on the root folder."
+            )
+
+            for user in [admin_user, domain_user]:
                 viewable_ids = set(
                     RoleAssignment.get_viewable_object_ids(user, AppliedControl)
-                )
-                assert control_in_domain.id in viewable_ids, (
-                    f"The focused folder objects MUST be visible ({user.email!r})."
-                )
-                assert unpublished_control_in_root.id not in viewable_ids, (
-                    f"Unpublished root folder objects MUST NOT be visible in focus mode ({user.email!r})."
                 )
                 assert published_control_in_root.id in viewable_ids, (
                     f"Published root folder objects MUST remain visible in focus mode (through the `is_published` inheritance) ({user.email!r})."
@@ -888,3 +913,135 @@ class TestFocusMode:
                 )
         finally:
             focus_folder_id_var.reset(token)
+
+    def test_focus_mode_point_checks(self):
+        """
+        Ensure the point checks (`RoleAssignment.is_access_allowed`/`RoleAssignment.is_object_accessible`) enforce the SAME focus mode scope as the listings (a point check is a membership check in the listing accessible folder set):
+
+        - A folder outside the focus subtree is NOT accessible while a focus folder is set (even for users with a role assignment covering it).
+        - The ROOT folder stays in scope for users with a role assignment covering it (#4470 parity: corpus-level operations keep working for admins in focus mode).
+        - Published root folder objects stay visible in focus mode through the normal `is_published` inheritance.
+        """
+        from core.context import focus_folder_id_var
+
+        root_folder = Folder.get_root_folder()
+        domain1 = Folder.objects.create(name="domain1")
+        domain2 = Folder.objects.create(name="domain2")
+
+        role = Role.objects.create(name="role")
+        role.permissions.set(
+            Permission.objects.filter(codename__in=BASIC_PERMISSION_LIST)
+        )
+        view_control_permission = Permission.objects.get(
+            codename="view_appliedcontrol"
+        )
+
+        admin_user = User.objects.create_user("admin_point@gmail.com")
+        admin_role_assignment = RoleAssignment.objects.create(
+            user=admin_user, role=role, is_recursive=True
+        )
+        admin_role_assignment.perimeter_folders.add(root_folder)
+
+        domain1_user = User.objects.create_user("domain1_point@gmail.com")
+        domain1_role_assignment = RoleAssignment.objects.create(
+            user=domain1_user, role=role, is_recursive=True
+        )
+        domain1_role_assignment.perimeter_folders.add(domain1)
+
+        unpublished_control_in_root = AppliedControl.objects.create(
+            name="unpublished_control_in_root", folder=root_folder
+        )
+        AppliedControl.objects.filter(id=unpublished_control_in_root.id).update(
+            is_published=False
+        )
+        published_control_in_root = AppliedControl.objects.create(
+            name="published_control_in_root", folder=root_folder
+        )
+        control_in_domain1 = AppliedControl.objects.create(
+            name="control_in_domain1", folder=domain1
+        )
+        control_in_domain2 = AppliedControl.objects.create(
+            name="control_in_domain2", folder=domain2
+        )
+
+        token = focus_folder_id_var.set(domain1.id)
+        try:
+            assert (
+                RoleAssignment.is_access_allowed(
+                    user=admin_user, perm=view_control_permission, folder=domain2
+                )
+                is False
+            ), (
+                "A folder outside the focus subtree MUST NOT be accessible while a focus folder is set."
+            )
+            assert (
+                RoleAssignment.is_access_allowed(
+                    user=admin_user, perm=view_control_permission, folder=domain1
+                )
+                is True
+            ), "The focus subtree MUST remain accessible."
+            assert (
+                RoleAssignment.is_access_allowed(
+                    user=admin_user, perm=view_control_permission, folder=root_folder
+                )
+                is True
+            ), (
+                "The root folder MUST stay point-accessible in focus mode for a user with a role assignment covering it (#4470 parity)."
+            )
+            assert (
+                RoleAssignment.is_access_allowed(
+                    user=domain1_user, perm=view_control_permission, folder=root_folder
+                )
+                is False
+            ), (
+                "The root folder focus inclusion MUST NOT grant root folder access to users without any role assignment on it."
+            )
+
+            assert (
+                RoleAssignment.is_object_accessible(
+                    admin_user, "view", AppliedControl, control_in_domain2.id
+                )
+                is False
+            ), (
+                "Objects outside the focus subtree MUST NOT be point-accessible while a focus folder is set."
+            )
+            assert (
+                RoleAssignment.is_object_accessible(
+                    admin_user, "view", AppliedControl, control_in_domain1.id
+                )
+                is True
+            ), "The focus subtree objects MUST remain point-accessible."
+            assert (
+                RoleAssignment.is_object_accessible(
+                    admin_user, "view", AppliedControl, unpublished_control_in_root.id
+                )
+                is True
+            ), (
+                "Root folder objects MUST stay point-accessible in focus mode for a user with a role assignment on the root folder (#4470 parity)."
+            )
+            assert (
+                RoleAssignment.is_object_accessible(
+                    domain1_user, "view", AppliedControl, unpublished_control_in_root.id
+                )
+                is False
+            ), (
+                "The root folder focus inclusion MUST NOT grant unpublished root folder objects to users without any role assignment on the root folder."
+            )
+            for user in [admin_user, domain1_user]:
+                assert (
+                    RoleAssignment.is_object_accessible(
+                        user, "view", AppliedControl, published_control_in_root.id
+                    )
+                    is True
+                ), (
+                    f"Published root folder objects MUST stay visible in focus mode (through the `is_published` inheritance) ({user.email!r})."
+                )
+        finally:
+            focus_folder_id_var.reset(token)
+
+        assert (
+            RoleAssignment.is_access_allowed(
+                user=admin_user, perm=view_control_permission, folder=domain2
+            )
+            is True
+        ), "The focus boundary MUST be lifted once the focus folder is unset."
