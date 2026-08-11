@@ -12,12 +12,19 @@ from ..utils.response_formatter import (
 )
 
 
-async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
+async def get_risk_scenarios(
+    folder: str = None,
+    risk_assessment: str = None,
+    limit: int = None,
+    offset: int = None,
+):
     """List risk scenarios from Risk Registry; filter by folder or assessment
 
     Args:
         folder: Folder ID/name
         risk_assessment: Risk assessment ID/name
+        limit: Max rows to return (default 100)
+        offset: Row to start from, for paging through large registers
     """
     try:
         from ..resolvers import resolve_folder_id, resolve_risk_assessment_id
@@ -35,6 +42,10 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
             params["risk_assessment"] = resolve_risk_assessment_id(risk_assessment)
             filters["risk_assessment"] = risk_assessment
 
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
         res = make_get_request("/risk-scenarios/", params=params)
 
         if res.status_code != 200:
@@ -46,7 +57,7 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
         if not scenarios:
             return empty_response("risk scenarios", filters)
 
-        result = found_line(scenarios, "risk scenarios")
+        result = found_line(scenarios, "risk scenarios", paginated=True, offset=offset)
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -146,7 +157,9 @@ async def get_risk_scenario(scenario_id: str):
         )
 
 
-async def get_applied_controls(folder: str = None):
+async def get_applied_controls(
+    folder: str = None, limit: int = None, offset: int = None
+):
     """List applied controls from action plan; filter by folder
 
     Args:
@@ -163,6 +176,10 @@ async def get_applied_controls(folder: str = None):
             params["folder"] = resolve_folder_id(folder)
             filters["folder"] = folder
 
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
         res = make_get_request("/applied-controls/", params=params)
 
         if res.status_code != 200:
@@ -174,7 +191,7 @@ async def get_applied_controls(folder: str = None):
         if not controls:
             return empty_response("applied controls", filters)
 
-        result = found_line(controls, "applied controls")
+        result = found_line(controls, "applied controls", paginated=True, offset=offset)
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -713,7 +730,7 @@ async def get_threats(
         return f"Error in get_threats: {str(e)}"
 
 
-async def get_assets(folder: str = None):
+async def get_assets(folder: str = None, limit: int = None, offset: int = None):
     """List assets with IDs, names, and types
 
     Args:
@@ -730,6 +747,10 @@ async def get_assets(folder: str = None):
             params["folder"] = resolve_folder_id(folder)
             filters["folder"] = folder
 
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
         res = make_get_request("/assets/", params=params)
 
         if res.status_code != 200:
@@ -741,7 +762,7 @@ async def get_assets(folder: str = None):
         if not assets:
             return empty_response("assets", filters)
 
-        result = found_line(assets, "assets")
+        result = found_line(assets, "assets", paginated=True, offset=offset)
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -987,6 +1008,8 @@ async def get_business_impact_analyses(folder: str = None):
 async def get_requirement_assessments(
     compliance_assessment_id_or_name: str = None,
     ref_id: str = None,
+    limit: int = None,
+    offset: int = None,
 ):
     """List requirement assessments (audit requirements) with IDs and results. Use IDs with update_requirement_assessment()
 
@@ -1025,6 +1048,10 @@ async def get_requirement_assessments(
         if ref_id:
             params["ref_id"] = ref_id
 
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
         res = make_get_request("/requirement-assessments/", params=params)
 
         if res.status_code != 200:
@@ -1036,7 +1063,15 @@ async def get_requirement_assessments(
         if not req_assessments:
             return "No requirement assessments found"
 
-        result = found_line(req_assessments, "requirement assessments") + "\n\n"
+        result = (
+            found_line(
+                req_assessments,
+                "requirement assessments",
+                paginated=True,
+                offset=offset,
+            )
+            + "\n\n"
+        )
         result += "|ID|Ref|Description|Requirement|Assessment|Status|Result|Scored|Score|DocScore|TargetScore|\n"
         result += "|---|---|---|---|---|---|---|---|---|---|---|\n"
 
@@ -1354,6 +1389,8 @@ async def get_vulnerabilities(
     status: str = None,
     severity: int = None,
     search: str = None,
+    limit: int = None,
+    offset: int = None,
 ):
     """List vulnerabilities with optional filters
 
@@ -1382,6 +1419,10 @@ async def get_vulnerabilities(
             params["search"] = search
             filters["search"] = search
 
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
         res = make_get_request("/vulnerabilities/", params=params)
 
         if res.status_code != 200:
@@ -1393,7 +1434,9 @@ async def get_vulnerabilities(
         if not vulnerabilities:
             return empty_response("vulnerabilities", filters)
 
-        result = found_line(vulnerabilities, "vulnerabilities")
+        result = found_line(
+            vulnerabilities, "vulnerabilities", paginated=True, offset=offset
+        )
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"

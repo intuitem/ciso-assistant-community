@@ -9,14 +9,21 @@ from typing import Optional, Dict, Any
 from ..config import MAX_RESPONSE_CHARS
 
 
+# success_response appends a truncation notice plus [SUCCESS]/NEXT/WARNING lines
+# after _cap runs, so the cap has to leave room for them or the final response
+# overshoots MAX_RESPONSE_CHARS.
+_METADATA_HEADROOM = 400
+
+
 def _cap(data: str) -> str:
     """Bound a single tool response. Truncates on a row boundary so a markdown
-    table never ends mid-row."""
-    if len(data) <= MAX_RESPONSE_CHARS:
+    table never ends mid-row, leaving headroom for the appended metadata."""
+    budget = MAX_RESPONSE_CHARS - _METADATA_HEADROOM
+    if len(data) <= budget:
         return data
-    cut = data.rfind("\n", 0, MAX_RESPONSE_CHARS)
+    cut = data.rfind("\n", 0, budget)
     if cut <= 0:
-        cut = MAX_RESPONSE_CHARS
+        cut = budget
     return (
         data[:cut] + f"\n\n[TRUNCATED at {cut} of {len(data)} characters. "
         "Re-run with filters or a smaller limit to see the rest.]\n"

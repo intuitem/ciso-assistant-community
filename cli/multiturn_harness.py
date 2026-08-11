@@ -16,6 +16,7 @@ measure whether response bloat degrades later turns.
 
 import argparse
 import asyncio
+import json
 import os
 import sys
 import requests
@@ -110,10 +111,17 @@ def main():
             messages = [{"role": "system", "content": SYSTEM}]
             for ti, (prompt, expected) in enumerate(convo):
                 messages.append({"role": "user", "content": prompt})
-                d = chat(model, messages, specs)
-                msg = d["choices"][0]["message"]
-                calls = msg.get("tool_calls") or []
                 total += 1
+                # A failure on one turn must not abandon the remaining turns,
+                # conversations and models.
+                try:
+                    d = chat(model, messages, specs)
+                    msg = d["choices"][0]["message"]
+                    calls = msg.get("tool_calls") or []
+                except Exception as e:
+                    print(f"  c{ci} t{ti}: ERROR {type(e).__name__}", flush=True)
+                    messages.append({"role": "assistant", "content": ""})
+                    continue
                 if not calls:
                     print(
                         f"  c{ci} t{ti}: NO TOOL CALL           want {sorted(expected)[0]}",
@@ -126,22 +134,38 @@ def main():
                 name = calls[0]["function"]["name"]
                 ok = name in expected
                 hits += ok
-                # Execute the real tool so the next turn sees real output.
-                try:
-                    payload = (
-                        asyncio.run(fns[name]()) if name in fns else "(unavailable)"
-                    )
-                except Exception as e:
-                    payload = f"(tool error: {type(e).__name__})"
-                ctx_chars += len(payload)
+                # Execute EVERY emitted call with its own arguments and reply to
+                # each id. Tools like count_objects(object_type) are required-arg,
+                # so invoking them bare raised TypeError and fed the model an
+                # error string instead of real output.
                 messages.append({"role": "assistant", "tool_calls": calls})
-                messages.append(
-                    {
-                        "role": "tool",
-                        "tool_call_id": calls[0].get("id", "0"),
-                        "content": payload,
-                    }
-                )
+                payload = ""
+                for call in calls:
+                    cname = call["function"]["name"]
+                    try:
+                        cargs = json.loads(call["function"].get("arguments") or "{}")
+                        if not isinstance(cargs, dict):
+                            raise ValueError("arguments must be an object")
+                    except Exception:
+                        cargs = {}
+                    try:
+                        result = (
+                            asyncio.run(fns[cname](**cargs))
+                            if cname in fns
+                            else "(unavailable)"
+                        )
+                    except Exception as e:
+                        result = f"(tool error: {type(e).__name__}: {e})"
+                    ctx_chars += len(result)
+                    if cname == name:
+                        payload = result
+                    messages.append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": call.get("id", "0"),
+                            "content": result,
+                        }
+                    )
                 mark = "ok " if ok else "WRONG"
                 print(
                     f"  c{ci} t{ti}: {mark} {name:<28} result {len(payload):>7} chars"

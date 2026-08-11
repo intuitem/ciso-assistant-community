@@ -6,7 +6,7 @@ Records which tool it picked, so 45-tool (read-only) and 102-tool (full)
 surfaces can be compared on identical prompts.
 
   export LM_API_TOKEN=...
-  uv run python toolsel.py --models qwen/qwen3-4b-2507,qwen/qwen3-8b
+  uv run python tools_selection_harness.py --models qwen/qwen3-4b-2507,qwen/qwen3-8b
 """
 
 import argparse
@@ -231,10 +231,18 @@ def ask(model, tools, prompt, timeout=180):
         d = r.json()
     except Exception as e:
         return None, f"{type(e).__name__}"
-    msg = d["choices"][0]["message"]
-    calls = msg.get("tool_calls") or []
+    try:
+        msg = d["choices"][0]["message"]
+        calls = msg.get("tool_calls") or []
+    except (AttributeError, IndexError, KeyError, TypeError):
+        return None, "INVALID_RESPONSE"
     if not calls:
         return None, "NO_TOOL_CALL"
+    if len(calls) > 1:
+        # SYSTEM asks for exactly one call. Scoring calls[0] here would count a
+        # scattergun response as correct whenever the first pick happens to match,
+        # inflating measured accuracy.
+        return None, "MULTIPLE_TOOL_CALLS"
     fn = calls[0]["function"]
     return (fn["name"], fn.get("arguments") or ""), None
 

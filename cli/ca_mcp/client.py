@@ -67,19 +67,33 @@ class ResultList(list):
     total = None
 
 
-def found_line(items, noun):
+def found_line(items, noun, paginated=False, offset=0):
     """'Found N of TOTAL x' when the page is short of the total, else 'Found N x'.
 
     Bounding responses without this makes every count a lie: the tool would
     report the page size as though it were the total.
+
+    Only advertise `offset` when the calling tool actually accepts it
+    (paginated=True). Telling a model to retry with a parameter the schema
+    rejects makes the truncation disclosed but not recoverable, which is worse
+    than saying nothing -- it burns a turn on a call that cannot succeed.
     """
     n = len(items)
     total = getattr(items, "total", None)
-    if total is not None and total > n:
-        return (
-            f"Found {n} of {total} {noun} (showing first {n}; pass offset={n} for more)"
-        )
-    return f"Found {n} {noun}"
+    if total is None:
+        return f"Found {n} {noun}"
+    start = int(offset or 0)
+    end = start + n
+    if start == 0 and end >= total:
+        return f"Found {n} {noun}"
+    if end >= total:
+        return f"Found {n} of {total} {noun} (rows {start + 1}-{end}; end of results)"
+    how = (
+        f"pass offset={end} for the next page"
+        if paginated
+        else "narrow the query with filters, or use count_objects for totals"
+    )
+    return f"Found {n} of {total} {noun} (rows {start + 1}-{end}; {how})"
 
 
 def pagination_hint(data, shown):

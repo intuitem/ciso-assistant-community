@@ -6,6 +6,8 @@ These tools ask the API for exact counts instead and return no rows at all, so
 the answer is both correct and cheap regardless of register size.
 """
 
+import re
+
 from ..client import make_get_request
 from ..utils.response_formatter import (
     success_response,
@@ -39,6 +41,9 @@ COUNTABLE = {
 }
 
 MAX_GROUPS = 25
+
+# Django field names: no separators, no traversal.
+FIELD_NAME = re.compile(r"[a-z][a-z0-9_]*")
 
 
 def _count(endpoint, params):
@@ -124,6 +129,18 @@ async def count_objects(
                 f"{object_type}{scope_str}: **{total}**{caveat}",
                 "count_objects",
                 "This is an exact count from the server, not a row count.",
+            )
+
+        # group_by is caller-controlled and lands in a URL path. A value with "/"
+        # or ".." would re-point the request at a different API path (relative-path
+        # injection inside API_URL, not SSRF). A field-name charset check removes
+        # that without maintaining a per-type whitelist.
+        if not FIELD_NAME.fullmatch(group_by):
+            return error_response(
+                "Invalid group_by field",
+                f"'{group_by}' is not a valid field name.",
+                "Use a plain field name such as status, treatment, severity or priority.",
+                retry_allowed=True,
             )
 
         choices_res = make_get_request(f"/{endpoint}/{group_by}/")

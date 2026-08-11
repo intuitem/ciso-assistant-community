@@ -1,6 +1,6 @@
 """Library management MCP tools for CISO Assistant"""
 
-from ..client import make_get_request, make_post_request, fetch_all_results, found_line
+from ..client import make_post_request, fetch_all_results, found_line
 
 
 async def get_stored_libraries(

@@ -328,10 +328,10 @@ def run_http():
     elif config.ALLOWED_HOSTS:
         # Keep loopback allowed so local tooling (Inspector, curl) still reaches
         # the server once a public hostname is configured.
+        # https only: trusting http://<public-host> as an Origin would weaken the
+        # rebinding check for no benefit. Loopback plaintext is in LOOPBACK_ORIGINS.
         origins = config.ALLOWED_ORIGINS or [
-            f"{scheme}://{host}"
-            for host in config.ALLOWED_HOSTS
-            for scheme in ("https", "http")
+            f"https://{host}" for host in config.ALLOWED_HOSTS
         ]
         mcp.settings.transport_security = TransportSecuritySettings(
             enable_dns_rebinding_protection=True,

@@ -136,7 +136,15 @@ async def get_all_audits_with_metrics(
 
             result += "\n"
 
-        return result
+        # The fetch above is intentionally unbounded (max_items=None) so the
+        # per-audit counts are computed over every audit. The *output* still has
+        # to be bounded: one section per audit grows without limit otherwise.
+        return success_response(
+            result,
+            "get_all_audits_with_metrics",
+            "Use get_audit_gap_analysis for the requirement-level detail of one audit, "
+            "or filter by folder/framework/status to narrow this report.",
+        )
     except Exception as e:
         return f"Error in get_all_audits_with_metrics: {str(e)}"
 
