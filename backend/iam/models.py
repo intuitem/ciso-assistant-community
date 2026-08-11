@@ -1964,7 +1964,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
             for perimeter_folder in role_assignment.perimeter_folders.all():
                 folders = [perimeter_folder]
-                if is_recursive:
+                if role_assignment.is_recursive and is_recursive:
                     folders = itertools.chain(
                         folders, perimeter_folder.descendants.all()
                     )
