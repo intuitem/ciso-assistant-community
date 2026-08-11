@@ -598,7 +598,9 @@ class TestPermissionCheck:
                 domain1_user, "change", FilteringLabel, label_in_root.id
             )
             is False
-        ), "Changing a root folder label MUST require the permission on the root folder."
+        ), (
+            "Changing a root folder label MUST require the permission on the root folder."
+        )
 
         assert (
             RoleAssignment.is_access_allowed(
