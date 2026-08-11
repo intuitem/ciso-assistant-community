@@ -15,30 +15,7 @@ from ..utils.response_formatter import (
     http_error_response,
 )
 
-# object_type -> API collection path. Deliberately a small local map rather than
-# a shared registry: converging with backend/chat's MODEL_MAP is a separate,
-# larger decision (workstream A6).
-COUNTABLE = {
-    "applied_controls": "applied-controls",
-    "assets": "assets",
-    "compliance_assessments": "compliance-assessments",
-    "entities": "entities",
-    "entity_assessments": "entity-assessments",
-    "evidences": "evidences",
-    "findings": "findings",
-    "folders": "folders",
-    "incidents": "incidents",
-    "perimeters": "perimeters",
-    "requirement_assessments": "requirement-assessments",
-    "risk_acceptances": "risk-acceptances",
-    "risk_assessments": "risk-assessments",
-    "risk_scenarios": "risk-scenarios",
-    "security_exceptions": "security-exceptions",
-    "solutions": "solutions",
-    "task_templates": "task-templates",
-    "threats": "threats",
-    "vulnerabilities": "vulnerabilities",
-}
+from .generic_tools import OBJECTS as COUNTABLE
 
 MAX_GROUPS = 25
 

@@ -15,24 +15,49 @@ Tested MCP clients: Claude Desktop, Claude Code, LM Studio, OpenWebUI
 
 MCP (Model Context Protocol) allows AI assistants like Claude to interact with external tools and services. Think of it as giving your AI a set of capabilities to read and write data in CISO Assistant.
 
-The CISO Assistant MCP server provides **90+ tools** covering:
+The CISO Assistant MCP server provides **105 tools** covering:
 
 * Risk management (assessments, scenarios, matrices)
 * Compliance audits (frameworks, requirements)
 * Asset management
 * Third-party risk management (TPRM)
 * EBIOS RM methodology
-* And more...
+* Privacy / GDPR records (processings, personal data, data subjects, breaches, right requests)
+* Findings, evidences, policies and managed documents
+* Threat models, TTP catalogs (tactics, techniques) and CWEs
 
-### Why stdio Transport?
+Most tools are dedicated to one object type. Three are generic and work across
+every supported type: `list_objects`, `get_object` and `count_objects`.
 
-The MCP server uses **stdio (standard input/output)** transport instead of HTTP. Here's why:
+Use `count_objects` for any question whose answer is a number — "how many
+vulnerabilities are exploitable?", "what is the breakdown of controls by
+status?". It returns exact server-side counts rather than counting rows, so the
+answer stays correct however large the register is.
 
-1. **Local file access** - stdio allows the server to read and process local files on your machine, which HTTP-based servers cannot do securely.
-2. **Network control** - All API calls to CISO Assistant go through your local machine. You have full visibility and control over network traffic, and can use your existing firewall rules and proxies.
-3. **No open ports** - Unlike HTTP servers, stdio doesn't require opening any ports on your machine, reducing your attack surface.
-4. **Simpler security model** - The AI client spawns the MCP server as a subprocess. No need for API keys between the client and MCP server, or dealing with CORS and network authentication.
-5. **Works offline** - The MCP server itself runs locally. Only the actual CISO Assistant API calls require network access.
+### Choosing a transport
+
+The server speaks two transports. **stdio is the default and the right choice for
+most people.**
+
+**stdio (default)** — the AI client starts the MCP server as a subprocess on your
+machine.
+
+1. **No open ports** - nothing listens on the network, so there is no new attack surface.
+2. **Network control** - every API call to CISO Assistant leaves from your own machine, through your existing firewall rules and proxies.
+3. **Simpler security model** - no credential travels between the client and the MCP server, and there is no CORS or network authentication to configure.
+4. **Works offline** - the server itself runs locally; only the CISO Assistant API calls need the network.
+
+Use stdio with Claude Desktop, Claude Code, LM Studio, Cursor and any other client
+that can launch a local process.
+
+**Streamable HTTP** — the server listens on a port and several users share it.
+Choose this only when the client cannot start a local process, which is the case
+for **ChatGPT** and **Microsoft Copilot Studio**, since those run in the vendor's
+cloud rather than on your machine.
+
+The trade-off is real: HTTP means a listening service, and for a cloud client it
+means that service must be reachable from the internet. See
+[Streamable HTTP transport](#streamable-http-transport) below.
 
 ### Step 0: Get the MCP Server Code
 
@@ -392,6 +417,75 @@ Save the `mcp.json` file and restart LM Studio for the changes to take effect
 
 ***
 
+### Streamable HTTP transport
+
+Only needed for clients that cannot start a local process — ChatGPT and Microsoft
+Copilot Studio. If your client can launch a subprocess, use stdio instead.
+
+#### Start the server
+
+```bash
+cd cli
+API_URL=http://localhost:8000/api \
+CA_MCP_TRANSPORT=http \
+CA_MCP_ALLOWED_HOSTS=your-public-hostname \
+uv run python ca_mcp.py
+```
+
+The server listens on `127.0.0.1:8001/mcp` by default.
+
+#### Each user brings their own token
+
+In HTTP mode the server holds **no** credential of its own. Every request must
+carry the caller's Personal Access Token, and the call runs with exactly that
+user's permissions and domain scope. A request without a token is rejected rather
+than served with a shared identity.
+
+Send the token either way:
+
+```
+Authorization: Token <PAT>
+X-CISO-Token: <PAT>
+```
+
+Use `X-CISO-Token` if the client reserves or rewrites `Authorization`.
+
+#### Read-only by default
+
+The HTTP endpoint exposes **only read tools (48)**. Set
+`CA_MCP_READ_ONLY=false` to expose the write tools as well — a deliberate choice,
+since an agent driven by a third-party orchestrator would then be able to modify
+your GRC data.
+
+#### Connecting ChatGPT
+
+Requires developer mode. Create a new plugin, set the connection to your server
+URL ending in `/mcp`, choose **Access token / API key** with a **Custom Header**
+named `Authorization`, then enter the PAT itself when prompted for the key. Enter
+the token on its own, with no `Token` or `Bearer` prefix in the value field.
+
+#### Connecting Microsoft Copilot Studio
+
+On your agent, go to **Tools** → **Add a tool** → **New tool** → **Model Context
+Protocol**. Fill in the server name, description and URL, then choose **API key**
+authentication with type **Header** and the header name `Authorization`. Write a
+precise server description: the agent's orchestrator uses it to decide whether to
+call your server at all.
+
+Two prerequisites are outside CISO Assistant's control. The environment needs
+**Copilot Credits** allocated to it, and because MCP access rides on Power
+Platform connectors, a tenant data policy governing connectors also governs this.
+
+#### Exposing the server
+
+Both clients call from the vendor's cloud, so a self-hosted instance behind a
+corporate firewall is unreachable without either a public HTTPS hostname or a
+tunnel. Set `CA_MCP_ALLOWED_HOSTS` to the hostname the client will use; requests
+arriving with any other `Host` header are refused. Loopback addresses stay
+allowed so local tools keep working.
+
+***
+
 ### Troubleshooting
 
 #### "Connection refused" or "Cannot connect to API"
@@ -466,12 +560,26 @@ Once connected, try these example prompts:
 * "Create an entity assessment for Acme Corp"
 * "What contracts are expiring soon?"
 
+**Count and measure:**
+
+* "How many vulnerabilities do we have?"
+* "Give me a breakdown of applied controls by status"
+* "What proportion of our risk scenarios are still open?"
+
+**Privacy and GDPR:**
+
+* "List our processing activities"
+* "What personal data categories do we hold?"
+* "Show the open data subject right requests"
+
 ***
 
 ### FAQ
 
-* What about ChatGPT compatiblity?
-  * chatGPT custom mcp support has been introduced on Q4/2025 but is not mature enough yet. Users can set it up but would require enabling developper mode, some extra proxification and internet exposure which we don't recommend for now. We're monitoring their MCP support and we'll update the page accordingly.
+* What about ChatGPT compatibility?
+  * Supported, via the [Streamable HTTP transport](#streamable-http-transport). It needs developer mode enabled in ChatGPT, and because ChatGPT calls from OpenAI's cloud your server has to be reachable from the internet. That exposure is the part to weigh: the endpoint is read-only by default and every request carries its own token, but it is still a public listener. For a single user on their own machine, stdio remains the better option.
+* What about Microsoft Copilot Studio?
+  * The same HTTP transport applies. Beyond reachability, the Power Platform environment needs Copilot Credits allocated to it, and tenant data policies covering connectors also cover MCP access.
 
 ### Need Help?
 
@@ -485,6 +593,31 @@ Once connected, try these example prompts:
 
 | Variable             | Required | Default                     | Description                               |
 | -------------------- | -------- | --------------------------- | ----------------------------------------- |
-| `TOKEN`              | Yes      | -                           | Personal Access Token from CISO Assistant |
+| `TOKEN`              | stdio only | -                         | Personal Access Token. Not used in HTTP mode, where each request carries its own |
 | `API_URL`            | No       | `http://localhost:8000/api` | CISO Assistant API endpoint               |
-| `VERIFY_CERTIFICATE` | No       | `false`                     | SSL certificate verification              |
+| `VERIFY_CERTIFICATE` | No       | `true`                      | SSL certificate verification. Set to `false` for self-signed certificates |
+
+Additional variables for the HTTP transport:
+
+| Variable                    | Default     | Description                                     |
+| --------------------------- | ----------- | ----------------------------------------------- |
+| `CA_MCP_TRANSPORT`          | `stdio`     | Set to `http` for Streamable HTTP               |
+| `CA_MCP_READ_ONLY`          | `true`      | Expose only read tools                          |
+| `CA_MCP_HOST`               | `127.0.0.1` | Listen address                                  |
+| `CA_MCP_PORT`               | `8001`      | Listen port                                     |
+| `CA_MCP_PATH`               | `/mcp`      | Endpoint path                                   |
+| `CA_MCP_ALLOWED_HOSTS`      | -           | Comma-separated hostnames accepted in the `Host` header. Loopback is always allowed |
+| `CA_MCP_ALLOW_ENV_TOKEN`    | `false`     | Allow HTTP callers with no token to be served using `TOKEN`. Collapses every caller into one identity |
+
+Response size limits, which apply to both transports:
+
+| Variable                     | Default | Description                                |
+| ---------------------------- | ------- | ------------------------------------------ |
+| `CA_MCP_PAGE_LIMIT`          | `100`   | Rows returned per list call                |
+| `CA_MCP_MAX_ITEMS`           | `200`   | Cap when a tool follows pagination itself  |
+| `CA_MCP_MAX_RESPONSE_CHARS`  | `20000` | Cap on a single tool response              |
+
+Lists say how much they are showing — `Found 100 of 1592 vulnerabilities (rows
+1-100; pass offset=100 for the next page)` — so a truncated answer is never
+mistaken for a complete one. Counts and percentages are computed over the whole
+set regardless of these limits.

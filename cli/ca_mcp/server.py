@@ -41,6 +41,7 @@ from .tools.read_tools import (
 )
 
 from .tools.aggregate_tools import count_objects
+from .tools.generic_tools import list_objects, get_object
 
 from .tools.analysis_tools import (
     get_all_audits_with_metrics,
@@ -145,6 +146,8 @@ from .tools.ebios_rm_tools import (
 
 READ_TOOLS = [
     count_objects,
+    list_objects,
+    get_object,
     get_risk_scenarios,
     get_risk_scenario,
     get_applied_controls,
