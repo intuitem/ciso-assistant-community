@@ -934,9 +934,7 @@ class TestFocusMode:
         role.permissions.set(
             Permission.objects.filter(codename__in=BASIC_PERMISSION_LIST)
         )
-        view_control_permission = Permission.objects.get(
-            codename="view_appliedcontrol"
-        )
+        view_control_permission = Permission.objects.get(codename="view_appliedcontrol")
 
         admin_user = User.objects.create_user("admin_point@gmail.com")
         admin_role_assignment = RoleAssignment.objects.create(
