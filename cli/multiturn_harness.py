@@ -132,7 +132,10 @@ def main():
                     )
                     continue
                 name = calls[0]["function"]["name"]
-                ok = name in expected
+                # SYSTEM asks for exactly one call. Counting a hit on calls[0]
+                # alone would score a scattergun response as correct whenever the
+                # first pick happens to match, inflating measured accuracy.
+                ok = len(calls) == 1 and name in expected
                 hits += ok
                 # Execute EVERY emitted call with its own arguments and reply to
                 # each id. Tools like count_objects(object_type) are required-arg,
@@ -166,9 +169,10 @@ def main():
                             "content": result,
                         }
                     )
-                mark = "ok " if ok else "WRONG"
+                mark = "ok " if ok else ("MULTI" if len(calls) > 1 else "WRONG")
                 print(
                     f"  c{ci} t{ti}: {mark} {name:<28} result {len(payload):>7} chars"
+                    + (f"  [{len(calls)} calls]" if len(calls) > 1 else "")
                     + ("" if ok else f"  want {sorted(expected)[0]}"),
                     flush=True,
                 )
