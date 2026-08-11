@@ -46,7 +46,7 @@ Sessão de brainstorm dedicada (design lead → 3 candidatos de mark comparados 
 1. ~~Regenerar o `favicon.ico` binário~~ — ✅ resolvido em 2026-08-10.
 2. `README.md` principal do repositório recebeu apenas uma nota de identificação do fork (não uma reformulação completa) — e as demais 300+ referências fora do escopo aprovado (CI/CD, packaging, conectores de terceiros, `product-docs/`) seguem deliberadamente não tocadas; decisão de negócio separada sobre se/quando estender o rebranding a essas áreas.
 3. Antes do lançamento comercial: implementar o mecanismo de disponibilização de código-fonte exigido pela AGPL (§3).
-4. Rebuild da imagem Docker do frontend (pendência compartilhada com o T2) — o ambiente rodando via `docker-compose` ainda serve a imagem pré-compilada com a marca antiga, então o rebranding só é visível rodando o frontend a partir do código-fonte até que a imagem seja reconstruída.
+4. ~~Rebuild da imagem Docker do frontend~~ — ✅ resolvido em 2026-08-11: imagem `ciso-assistant-community-frontend:latest` construída localmente via `docker-compose-build.yml` (foi necessário subir a RAM alocada ao Docker Desktop de 7.75GB para ~15.8GB — o build do SvelteKit/Vite estourava OOM no limite anterior) e o container `frontend` em execução foi recriado com essa imagem. Verificado via `curl https://localhost:8443/` — título "CISO TSI | Login" e favicon novo servidos corretamente.
 
 ## 7. Critérios de aceite
 

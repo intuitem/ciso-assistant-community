@@ -27,7 +27,7 @@ Transformar o CISO Assistant Community (GRC open source, francês/inglês) em **
 ### 2.2 Pendências residuais (fora do escopo desta rodada)
 
 - ~~Regenerar o `favicon.ico` binário~~ — ✅ resolvido em 2026-08-10.
-- Rebuild da imagem Docker do frontend para expor o rebranding/i18n em produção.
+- ~~Rebuild da imagem Docker do frontend para expor o rebranding/i18n em produção~~ — ✅ resolvido em 2026-08-11 (ver detalhes no [T4](PLAN-BR-T4-REBRANDING.md#6-pendente)).
 - Mecanismo de disponibilização de código-fonte exigido pela AGPL, antes do lançamento comercial como SaaS pago.
 - Extensão do rebranding textual às ~300 referências fora do escopo aprovado (CI/CD, packaging, `product-docs/`, conectores de terceiros) — decisão de negócio separada.
 
