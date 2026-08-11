@@ -115,7 +115,10 @@ def _flatten(value):
     if value is None:
         return "--"
     if isinstance(value, dict):
-        return str(value.get("str") or value.get("name") or value.get("id") or "--")
+        # Fall through rather than return: a relation name containing "|" or a
+        # newline would otherwise break the markdown table, and long ones would
+        # skip MAX_CELL.
+        value = value.get("str") or value.get("name") or value.get("id") or "--"
     if isinstance(value, list):
         return ", ".join(_flatten(v) for v in value[:3]) + (
             "…" if len(value) > 3 else ""
@@ -126,7 +129,12 @@ def _flatten(value):
 
 def _columns(rows, fields):
     if fields:
-        return [f for f in fields if FIELD_NAME.fullmatch(f)]
+        # Silently dropping bad names yields a successful id-only table, which
+        # reads as "this object has no such data" rather than "you typo'd".
+        bad = [f for f in fields if not FIELD_NAME.fullmatch(f)]
+        if bad:
+            raise ValueError("invalid field name(s): " + ", ".join(map(str, bad)))
+        return list(fields)
     present = {k for row in rows for k in row}
     cols = [c for c in PREFERRED if c in present]
     if not cols:
@@ -186,14 +194,22 @@ async def list_objects(
         if not rows:
             return empty_response(object_type, filters)
 
-        cols = _columns(rows, fields)
+        try:
+            cols = _columns(rows, fields)
+        except ValueError as e:
+            return error_response(
+                "Invalid fields",
+                str(e),
+                "Use plain field names as shown in the table header, or omit fields.",
+                retry_allowed=True,
+            )
         out = found_line(rows, object_type, paginated=True, offset=offset or 0)
         if filters:
             out += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         out += "\n\n|id|" + "|".join(cols) + "|\n|" + "---|" * (len(cols) + 1) + "\n"
         for row in rows:
             cells = [_flatten(row.get(c)) for c in cols]
-            out += f"|{row.get('id', '--')}|" + "|".join(cells) + "|\n"
+            out += f"|{_flatten(row.get('id', '--'))}|" + "|".join(cells) + "|\n"
 
         return success_response(
             out,

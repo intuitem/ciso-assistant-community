@@ -50,6 +50,14 @@ def make_get_request(endpoint, params=None):
     url = f"{API_URL}{endpoint}"
     params = dict(params or {})
     params.setdefault("limit", DEFAULT_PAGE_LIMIT)
+    # A caller-supplied limit must not escape the bounded-response contract:
+    # an MCP client can ask for any number, and every returned row then gets
+    # fetched and formatted. Clamp instead of trusting it.
+    try:
+        requested = int(params["limit"])
+        params["limit"] = max(1, min(requested, MAX_TOTAL_ITEMS))
+    except (TypeError, ValueError):
+        params["limit"] = DEFAULT_PAGE_LIMIT
     return requests.get(
         url,
         headers=get_headers(),

@@ -432,18 +432,43 @@ CA_MCP_ALLOWED_HOSTS=your-public-hostname \
 uv run python ca_mcp.py
 ```
 
-The server listens on `127.0.0.1:8001/mcp` by default.
+The server listens on `127.0.0.1:8001/mcp`.
+
+#### Making it reachable
+
+`CA_MCP_ALLOWED_HOSTS` validates the `Host` header of incoming requests — it does
+**not** change what the server binds to. Left at its default the server is
+loopback-only, which is the safe default and means a cloud client cannot reach it
+yet.
+
+Put an HTTPS reverse proxy or a tunnel in front, forwarding `/mcp` to
+`127.0.0.1:8001`, and set `CA_MCP_ALLOWED_HOSTS` to the public hostname the client
+will use. That keeps TLS termination, certificates and access logging in
+infrastructure you already run.
+
+Binding directly to a non-loopback address with `CA_MCP_HOST=0.0.0.0` is possible
+but puts a plaintext HTTP listener on the network; both clients require HTTPS, so
+you would still need TLS in front. If you do bind widely, restrict the port by
+firewall.
+
+For a server that should not be published at all, ChatGPT offers a Secure MCP
+Tunnel, which reaches a private or on-premises server without a public listener.
 
 #### Each user brings their own token
 
-In HTTP mode the server holds **no** credential of its own. Every request must
-carry the caller's Personal Access Token, and the call runs with exactly that
-user's permissions and domain scope. A request without a token is rejected rather
-than served with a shared identity.
+By default the server holds **no** credential of its own in HTTP mode. Every
+request must carry the caller's Personal Access Token, and the call runs with
+exactly that user's permissions and domain scope. A request without a token is
+rejected rather than served with a shared identity.
+
+Setting `CA_MCP_ALLOW_ENV_TOKEN=true` changes that: requests arriving without a
+token are served using the server's own `TOKEN`. Every caller then shares one
+identity and one set of permissions, and the audit trail can no longer tell them
+apart. Only use it for a single-user deployment.
 
 Send the token either way:
 
-```
+```text
 Authorization: Token <PAT>
 X-CISO-Token: <PAT>
 ```
@@ -479,10 +504,10 @@ Platform connectors, a tenant data policy governing connectors also governs this
 #### Exposing the server
 
 Both clients call from the vendor's cloud, so a self-hosted instance behind a
-corporate firewall is unreachable without either a public HTTPS hostname or a
-tunnel. Set `CA_MCP_ALLOWED_HOSTS` to the hostname the client will use; requests
-arriving with any other `Host` header are refused. Loopback addresses stay
-allowed so local tools keep working.
+corporate firewall needs either a published HTTPS endpoint or a tunnel — see
+Making it reachable above. Set `CA_MCP_ALLOWED_HOSTS` to the hostname the client
+will use; requests arriving with any other `Host` header are refused. Loopback
+addresses stay allowed so local tools keep working.
 
 ***
 
@@ -577,7 +602,7 @@ Once connected, try these example prompts:
 ### FAQ
 
 * What about ChatGPT compatibility?
-  * Supported, via the [Streamable HTTP transport](#streamable-http-transport). It needs developer mode enabled in ChatGPT, and because ChatGPT calls from OpenAI's cloud your server has to be reachable from the internet. That exposure is the part to weigh: the endpoint is read-only by default and every request carries its own token, but it is still a public listener. For a single user on their own machine, stdio remains the better option.
+  * Supported, via the [Streamable HTTP transport](#streamable-http-transport). It needs developer mode enabled in ChatGPT, and because ChatGPT calls from OpenAI's cloud the server must be reachable from there — either published behind an HTTPS reverse proxy, or connected through OpenAI's Secure MCP Tunnel, which reaches a private server without a public listener. The endpoint is read-only by default and every request carries its own token. For a single user on their own machine, stdio remains simpler and exposes nothing.
 * What about Microsoft Copilot Studio?
   * The same HTTP transport applies. Beyond reachability, the Power Platform environment needs Copilot Credits allocated to it, and tenant data policies covering connectors also cover MCP access.
 
@@ -593,7 +618,7 @@ Once connected, try these example prompts:
 
 | Variable             | Required | Default                     | Description                               |
 | -------------------- | -------- | --------------------------- | ----------------------------------------- |
-| `TOKEN`              | stdio only | -                         | Personal Access Token. Not used in HTTP mode, where each request carries its own |
+| `TOKEN`              | stdio only | -                         | Personal Access Token. Unused in HTTP mode by default, where each request carries its own; used as a shared fallback if `CA_MCP_ALLOW_ENV_TOKEN=true` |
 | `API_URL`            | No       | `http://localhost:8000/api` | CISO Assistant API endpoint               |
 | `VERIFY_CERTIFICATE` | No       | `true`                      | SSL certificate verification. Set to `false` for self-signed certificates |
 
