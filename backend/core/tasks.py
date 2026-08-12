@@ -690,7 +690,11 @@ def send_email_now(subject, message, recipient, html_message=None):
         if html_message:
             msg.content_subtype = "html"
             msg.body = html_message
-        msg.send()
+        sent = msg.send()
+    # Backends can report 0 sent without raising (fail_silently paths,
+    # filtered recipients); that is a delivery failure, not a success.
+    if sent != 1:
+        raise RuntimeError(f"email backend reported {sent} of 1 messages sent")
 
 
 @task()

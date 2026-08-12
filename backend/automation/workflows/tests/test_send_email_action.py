@@ -141,6 +141,18 @@ class TestSendEmail:
             "sending to 'a@tests.local' failed" in m for m in error_messages(instance)
         )
 
+    def test_zero_messages_sent_fails_the_node(self, settings, monkeypatch):
+        enable_mailing(settings)
+        monkeypatch.setattr(
+            "core.tasks.EmailMessage.send", lambda self, fail_silently=False: 0
+        )
+        version = email_flow({"recipients": "a@tests.local", "subject": "S"})
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert any(
+            "sending to 'a@tests.local' failed" in m for m in error_messages(instance)
+        )
+
     def test_no_recipients_fails_the_node(self, settings):
         enable_mailing(settings)
         version = email_flow({"recipients": "", "subject": "S"})

@@ -11,6 +11,7 @@ import re
 import uuid
 from urllib.parse import urlsplit
 
+import structlog
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db.models import Q
@@ -32,6 +33,8 @@ from core.models import (
     Vulnerability,
 )
 from tprm.models import Entity, EntityAssessment
+
+logger = structlog.get_logger(__name__)
 
 TEMPLATE_RE = re.compile(r"\{\{\s*([\w.]+)\s*\}\}")
 
@@ -572,12 +575,20 @@ class SendEmailAction(BaseAction):
             try:
                 send_email_now(subject, body, email)
             except Exception as e:
+                # Raw exception text stays out of the run log (it can carry
+                # SMTP server internals); full detail goes to the server log.
+                logger.error(
+                    "send_email action delivery failure",
+                    recipient=email,
+                    instance_id=str(instance.id),
+                    error=str(e),
+                )
                 # A retry re-sends to every recipient, including the
                 # `position` that already went out; accepted over losing the
                 # remaining ones.
                 raise ActionError(
                     f"send_email: sending to '{email}' failed"
-                    f" ({position} of {len(recipients)} sent): {e}"
+                    f" ({position} of {len(recipients)} sent)"
                 )
         return {"recipients": recipients, "subject": subject}
 
