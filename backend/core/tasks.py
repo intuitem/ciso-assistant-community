@@ -675,6 +675,24 @@ def send_notification_email_expired_eta(owner_email, controls):
         )
 
 
+def send_email_now(subject, message, recipient, html_message=None):
+    """Synchronous send that propagates failures to the caller, unlike the
+    fire-and-forget send_notification_email task."""
+    ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
+    with get_connection(ssl_context=ssl_context) as connection:
+        msg = EmailMessage(
+            subject=subject,
+            body=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[recipient],
+            connection=connection,
+        )
+        if html_message:
+            msg.content_subtype = "html"
+            msg.body = html_message
+        msg.send()
+
+
 @task()
 def send_notification_email(subject, message, owner_email, html_message=None):
     try:
@@ -683,19 +701,7 @@ def send_notification_email(subject, message, owner_email, html_message=None):
             recipient=owner_email,
             has_html=html_message is not None,
         )
-        ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
-        with get_connection(ssl_context=ssl_context) as connection:
-            msg = EmailMessage(
-                subject=subject,
-                body=message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[owner_email],
-                connection=connection,
-            )
-            if html_message:
-                msg.content_subtype = "html"
-                msg.body = html_message
-            msg.send()
+        send_email_now(subject, message, owner_email, html_message)
         logger.info(
             "Notification email sent successfully",
             recipient=owner_email,
@@ -710,6 +716,15 @@ def send_notification_email(subject, message, owner_email, html_message=None):
         )
 
 
+def missing_email_settings():
+    required_settings = ["EMAIL_HOST", "EMAIL_PORT", "DEFAULT_FROM_EMAIL"]
+    return [
+        setting
+        for setting in required_settings
+        if not hasattr(settings, setting) or not getattr(settings, setting)
+    ]
+
+
 def check_email_configuration(owner_email, controls):
     notifications_enable_mailing = GlobalSettings.objects.get(name="general").value.get(
         "notifications_enable_mailing", False
@@ -720,13 +735,7 @@ def check_email_configuration(owner_email, controls):
         )
         return False
 
-    # Check required email settings
-    required_settings = ["EMAIL_HOST", "EMAIL_PORT", "DEFAULT_FROM_EMAIL"]
-    missing_settings = [
-        setting
-        for setting in required_settings
-        if not hasattr(settings, setting) or not getattr(settings, setting)
-    ]
+    missing_settings = missing_email_settings()
 
     if missing_settings:
         error_msg = f"Cannot send email notification: Missing email settings: {', '.join(missing_settings)}"

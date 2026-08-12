@@ -12,6 +12,7 @@ import uuid
 from urllib.parse import urlsplit
 
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db.models import Q
 
 from core.models import (
@@ -535,8 +536,22 @@ class SendEmailAction(BaseAction):
     action_type = "send_email"
 
     def execute(self, config, instance):
-        from core.tasks import send_notification_email
+        # Synchronous send, unlike the notification digests: delivery failures
+        # must fail the node so the retry policy applies, instead of
+        # disappearing into a queue the run can never observe.
+        from core.tasks import missing_email_settings, send_email_now
+        from global_settings.models import GlobalSettings
 
+        general = GlobalSettings.objects.filter(name="general").first()
+        if not (general and (general.value or {}).get("notifications_enable_mailing")):
+            raise ActionError(
+                "send_email: mailing is disabled (enable it under Extra/Settings)"
+            )
+        missing = missing_email_settings()
+        if missing:
+            raise ActionError(
+                f"send_email: email is not configured (missing {', '.join(missing)})"
+            )
         recipients = [
             email.strip()
             for email in render(
@@ -546,10 +561,24 @@ class SendEmailAction(BaseAction):
         ]
         if not recipients:
             raise ActionError("send_email: no recipients configured")
+        for email in recipients:
+            try:
+                validate_email(email)
+            except ValidationError:
+                raise ActionError(f"send_email: invalid recipient '{email}'")
         subject = render(config.get("subject", ""), _render_context(instance))
         body = render(config.get("body", ""), _render_context(instance))
-        for email in recipients:
-            send_notification_email(subject, body, email)
+        for position, email in enumerate(recipients):
+            try:
+                send_email_now(subject, body, email)
+            except Exception as e:
+                # A retry re-sends to every recipient, including the
+                # `position` that already went out; accepted over losing the
+                # remaining ones.
+                raise ActionError(
+                    f"send_email: sending to '{email}' failed"
+                    f" ({position} of {len(recipients)} sent): {e}"
+                )
         return {"recipients": recipients, "subject": subject}
 
 
