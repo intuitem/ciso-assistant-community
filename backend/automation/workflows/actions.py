@@ -302,9 +302,9 @@ def _read_fields(entry):
     RequirementAssessment and ValidationFlow have no name), plus the entry's
     own fields."""
     model_fields = {field.name for field in entry["model"]._meta.concrete_fields}
-    return [
-        field for field in BASE_READ_FIELDS if field in model_fields
-    ] + entry["fields"]
+    return [field for field in BASE_READ_FIELDS if field in model_fields] + entry[
+        "fields"
+    ]
 
 
 def _requirements_breakdown(assessment):
