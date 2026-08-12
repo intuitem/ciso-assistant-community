@@ -156,12 +156,10 @@ class Folder(NameDescriptionMixin):
     @staticmethod
     def get_focused_folder() -> Optional[Folder]:
         focused_folder_id = Folder.get_focused_folder_id()
+        if focused_folder_id:
+            return
 
-        focused_folder = (
-            Folder.objects.filter(id=focused_folder_id).first()
-            if focused_folder_id
-            else None
-        )
+        focused_folder = Folder.objects.filter(id=focused_folder_id).first()
         return focused_folder
 
     class ContentType(models.TextChoices):
