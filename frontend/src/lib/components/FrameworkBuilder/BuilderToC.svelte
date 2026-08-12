@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { getBuilderContext } from './builder-state';
 	import { getTocCollapsedContext } from './collapse-state';
+	import { m } from '$paraglide/messages';
 
 	import type { BuilderNode } from './builder-state';
 
@@ -248,18 +249,18 @@
 <div
 	class="flex-shrink-0 transition-all duration-200 {collapsed
 		? 'w-10'
-		: 'w-64'} sticky self-start overflow-y-auto border-r border-gray-200 bg-white"
+		: 'w-64'} sticky self-start overflow-y-auto border-r border-surface-200-800 bg-surface-50-950"
 	style="top: {topOffset}px; max-height: calc(100vh - {topOffset}px)"
 >
 	<!-- Header -->
-	<div class="flex items-center justify-between p-2 border-b border-gray-100">
+	<div class="flex items-center justify-between p-2 border-b border-surface-100-900">
 		{#if !collapsed}
-			<span class="text-sm font-semibold text-gray-700">Table of Contents</span>
+			<span class="text-sm font-semibold text-surface-700-300">{m.tableOfContents()}</span>
 		{/if}
 		<button
 			class="btn btn-sm preset-tonal-surface"
 			onclick={toggleCollapse}
-			title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+			title={collapsed ? m.builderExpandSidebar() : m.builderCollapseSidebar()}
 		>
 			<i class="fa-solid {collapsed ? 'fa-angles-right' : 'fa-angles-left'} text-xs"></i>
 		</button>
@@ -267,21 +268,21 @@
 
 	{#if !collapsed}
 		<!-- Search -->
-		<div class="px-2 py-2 border-b border-gray-100">
+		<div class="px-2 py-2 border-b border-surface-100-900">
 			<div class="relative">
 				<input
 					bind:this={searchInput}
 					bind:value={searchQuery}
 					onkeydown={handleSearchKeydown}
 					type="text"
-					placeholder="Search nodes..."
-					class="w-full px-3 py-1.5 pr-7 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+					placeholder={m.builderSearchNodes()}
+					class="input w-full px-3 py-1.5 pr-7 text-xs border border-surface-200-800 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
 				/>
 				<div class="absolute inset-y-0 right-0 flex items-center pr-2">
 					{#if searchQuery}
 						<button
 							onclick={clearSearch}
-							class="text-gray-400 hover:text-gray-600 transition-colors"
+							class="text-surface-500 hover:text-surface-600-400 transition-colors"
 							tabindex={-1}
 						>
 							<i class="fa-solid fa-times text-[10px]"></i>
@@ -295,47 +296,47 @@
 
 		<!-- Bulk expand/collapse — only shown when there are collapsible branches -->
 		{#if $rootNodesStore.some((n) => n.children.length > 0)}
-			<div class="px-2 pb-1 flex items-center gap-1 border-b border-gray-100">
+			<div class="px-2 pb-1 flex items-center gap-1 border-b border-surface-100-900">
 				<button
 					type="button"
-					class="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1 text-[10px] text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+					class="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1 text-[10px] text-surface-600-400 hover:text-surface-700-300 hover:bg-surface-100-900 rounded transition-colors"
 					onclick={() => tocCollapsed.collapseAll(collectAllParentIds($rootNodesStore))}
-					title="Collapse all"
-					aria-label="Collapse all"
+					title={m.collapseAll()}
+					aria-label={m.collapseAll()}
 				>
 					<i class="fa-solid fa-angles-up text-[10px]"></i>
-					<span>Collapse all</span>
+					<span>{m.collapseAll()}</span>
 				</button>
 				<button
 					type="button"
-					class="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1 text-[10px] text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+					class="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1 text-[10px] text-surface-600-400 hover:text-surface-700-300 hover:bg-surface-100-900 rounded transition-colors"
 					onclick={() => tocCollapsed.expandAll()}
-					title="Expand all"
-					aria-label="Expand all"
+					title={m.expandAll()}
+					aria-label={m.expandAll()}
 				>
 					<i class="fa-solid fa-angles-down text-[10px]"></i>
-					<span>Expand all</span>
+					<span>{m.expandAll()}</span>
 				</button>
 			</div>
 		{/if}
 
 		<!-- Navigation -->
-		<nav class="toc-nav p-2 space-y-0.5" role="navigation" aria-label="Table of Contents">
+		<nav class="toc-nav p-2 space-y-0.5" role="navigation" aria-label={m.tableOfContents()}>
 			<!-- Framework metadata entry (pinned, hidden during search) -->
 			{#if !searchQuery}
 				<button
 					class="w-full text-left px-2 py-2 text-xs rounded-md transition-colors flex items-center gap-1.5
 						{$activeSectionStore === FRAMEWORK_ID
 						? 'bg-primary-100 text-primary-700 font-medium border-l-2 border-primary-500'
-						: 'text-gray-600 hover:bg-gray-100'}"
+						: 'text-surface-600-400 hover:bg-surface-100-900'}"
 					onclick={() => scrollToNode(FRAMEWORK_ID)}
 					aria-current={$activeSectionStore === FRAMEWORK_ID ? 'location' : undefined}
 				>
-					<i class="fa-solid fa-file-lines text-gray-400 text-[10px]"></i>
-					<span>Framework</span>
+					<i class="fa-solid fa-file-lines text-surface-500 text-[10px]"></i>
+					<span>{m.framework()}</span>
 				</button>
 
-				<hr class="my-1 border-gray-100" />
+				<hr class="my-1 border-surface-100-900" />
 			{/if}
 
 			<!-- Node entries -->
@@ -351,19 +352,19 @@
 							: n.assessable
 								? 'fa-square-check text-green-500'
 								: hasChildren
-									? 'fa-folder text-gray-400'
+									? 'fa-folder text-surface-500'
 									: 'fa-circle-dot text-gray-300'}
 				<div class="flex items-center" style="padding-left: {0.5 + entry.depth * 0.75}rem">
 					{#if hasChildren}
 						<button
 							type="button"
-							class="flex-shrink-0 w-4 h-4 flex items-center justify-center text-gray-400 hover:text-gray-600"
+							class="flex-shrink-0 w-4 h-4 flex items-center justify-center text-surface-500 hover:text-surface-600-400"
 							onclick={(e) => {
 								e.stopPropagation();
 								tocCollapsed.toggle(n.id);
 							}}
-							title={isCollapsed ? 'Expand' : 'Collapse'}
-							aria-label={isCollapsed ? 'Expand' : 'Collapse'}
+							title={isCollapsed ? m.builderExpand() : m.builderCollapse()}
+							aria-label={isCollapsed ? m.builderExpand() : m.builderCollapse()}
 						>
 							<i class="fa-solid {isCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'} text-[8px]"
 							></i>
@@ -377,7 +378,7 @@
 						class="flex-1 text-left py-1.5 text-xs rounded-md transition-colors flex items-center gap-1.5
 							{$activeSectionStore === n.id
 							? 'bg-primary-100 text-primary-700 font-medium border-l-2 border-primary-500'
-							: 'text-gray-600 hover:bg-gray-100'}
+							: 'text-surface-600-400 hover:bg-surface-100-900'}
 							{focusedIndex === index ? 'ring-2 ring-primary-300' : ''}"
 						onclick={() => {
 							focusedIndex = index;
@@ -386,18 +387,19 @@
 						onkeydown={(e) => handleButtonKeydown(e, index)}
 						onfocus={() => (focusedIndex = index)}
 						aria-current={$activeSectionStore === n.id ? 'location' : undefined}
-						aria-label="Jump to: {n.ref_id || n.name || 'Untitled'}"
+						aria-label={m.builderJumpTo({ label: n.ref_id || n.name || m.builderUntitled() })}
 						tabindex={focusedIndex === index ? 0 : -1}
 					>
 						<i class="fa-solid {icon} text-[10px] flex-shrink-0"></i>
-						<span class="truncate flex-1">{n.ref_id || n.name || 'Untitled'}</span>
+						<span class="truncate flex-1">{n.ref_id || n.name || m.builderUntitled()}</span>
 						{#if $activeLanguageStore && hasUntranslated([entry.node], $activeLanguageStore)}
-							<span class="text-amber-500 text-[8px] flex-shrink-0" title="Has untranslated items"
-								>&#9679;</span
+							<span
+								class="text-amber-500 text-[8px] flex-shrink-0"
+								title={m.builderHasUntranslatedItems()}>&#9679;</span
 							>
 						{/if}
 						{#if hasChildren}
-							<span class="text-[10px] text-gray-400 ml-1 tabular-nums flex-shrink-0"
+							<span class="text-[10px] text-surface-500 ml-1 tabular-nums flex-shrink-0"
 								>{countDescendants([entry.node])}</span
 							>
 						{/if}
@@ -407,15 +409,15 @@
 
 			<!-- Empty state -->
 			{#if $rootNodesStore.length === 0}
-				<p class="text-xs text-gray-400 px-2 py-4">No nodes yet</p>
+				<p class="text-xs text-surface-500 px-2 py-4">{m.builderNoNodesYet()}</p>
 			{:else if searchQuery && filteredNodes.length === 0}
 				<div class="text-center py-4">
-					<p class="text-xs text-gray-400">No matching nodes</p>
+					<p class="text-xs text-surface-500">{m.builderNoMatchingNodes()}</p>
 					<button
 						onclick={clearSearch}
-						class="mt-1 text-xs text-primary-600 hover:text-primary-800 underline"
+						class="mt-1 text-xs text-primary-600 hover:text-primary-800-200 underline"
 					>
-						Clear search
+						{m.clearSearch()}
 					</button>
 				</div>
 			{/if}
@@ -423,8 +425,10 @@
 
 		<!-- Footer: search result count -->
 		{#if searchQuery && filteredNodes.length > 0}
-			<div class="px-2 py-1.5 border-t border-gray-100 text-[10px] text-gray-400 text-center">
-				{filteredNodes.length} of {allEntries.length} nodes
+			<div
+				class="px-2 py-1.5 border-t border-surface-100-900 text-[10px] text-surface-500 text-center"
+			>
+				{m.builderNodesOf({ filtered: filteredNodes.length, total: allEntries.length })}
 			</div>
 		{/if}
 	{/if}

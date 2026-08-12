@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { resolveBreakdownColor } from '$lib/utils/constants';
 	import MarkdownRenderer from '../MarkdownRenderer.svelte';
 
 	interface Props {
@@ -49,13 +50,33 @@
 	// Helper to determine builtin metric type
 	function getBuiltinMetricType(metricKey: string): string {
 		if (!metricKey) return 'number';
-		if (metricKey === 'progress') return 'percentage';
+		if (metricKey === 'progress' || metricKey.endsWith('_progress')) return 'percentage';
 		if (metricKey.endsWith('_breakdown')) return 'breakdown';
 		return 'number';
 	}
 
-	// Color palette for breakdown charts (will be replaced with risk/compliance palette later)
-	const BREAKDOWN_COLORS: string[] = [];
+	// Threshold-based color resolution for scalar widgets (kpi_card, gauge).
+	// widget_config.thresholds is an array of {op, value, color} evaluated in order; first match wins.
+	// Supported ops: '<', '<=', '>', '>=', '==', '!='. Non-numeric values bypass thresholds.
+	type Threshold = { op: string; value: number; color: string };
+	function resolveThresholdColor(rawValue: unknown): string | null {
+		const thresholds = (widget?.widget_config?.thresholds ?? []) as Threshold[];
+		if (!Array.isArray(thresholds) || thresholds.length === 0) return null;
+		const v = typeof rawValue === 'number' ? rawValue : Number(rawValue);
+		if (!Number.isFinite(v)) return null;
+		for (const t of thresholds) {
+			if (!t || typeof t.value !== 'number' || typeof t.color !== 'string') continue;
+			const matches =
+				(t.op === '<' && v < t.value) ||
+				(t.op === '<=' && v <= t.value) ||
+				(t.op === '>' && v > t.value) ||
+				(t.op === '>=' && v >= t.value) ||
+				(t.op === '==' && v === t.value) ||
+				(t.op === '!=' && v !== t.value);
+			if (matches) return t.color;
+		}
+		return null;
+	}
 
 	// Format breakdown key for display (e.g., 'non_compliant' -> 'Non Compliant')
 	function formatBreakdownKey(key: string): string {
@@ -121,6 +142,9 @@
 	// Get latest value for KPI/Gauge
 	const latestValue = $derived(chartData.length > 0 ? chartData[chartData.length - 1][1] : null);
 
+	// Threshold-resolved color for the latest scalar value (null when no threshold matches)
+	const thresholdColor = $derived(resolveThresholdColor(latestValue));
+
 	// For breakdown metrics, get the latest breakdown data
 	const latestBreakdown = $derived(
 		isBreakdownMetric && chartData.length > 0 ? chartData[chartData.length - 1][1] : null
@@ -138,26 +162,28 @@
 		return Array.from(keys).sort();
 	});
 
-	// Prepare pie chart data from latest breakdown (uses ECharts default colors)
+	// Prepare pie chart data from latest breakdown — color per-slice via the semantic resolver
 	const pieChartData = $derived(
 		latestBreakdown && typeof latestBreakdown === 'object'
-			? Object.entries(latestBreakdown).map(([key, value]) => ({
+			? Object.entries(latestBreakdown).map(([key, value], idx) => ({
 					name: formatBreakdownKey(key),
-					value: value as number
+					value: value as number,
+					itemStyle: { color: resolveBreakdownColor(key, idx) }
 				}))
 			: []
 	);
 
-	// Prepare stacked bar/area data for breakdown time series (uses ECharts default colors)
+	// Prepare stacked bar/area data for breakdown time series — series color via the semantic resolver
 	const breakdownTimeSeriesData = $derived(() => {
 		if (!isBreakdownMetric) return { categories: [], series: [] };
 		const keys = breakdownKeys();
 		const categories = chartData.map(([date]) => new Date(date).toLocaleDateString());
-		const series = keys.map((key) => ({
+		const series = keys.map((key, idx) => ({
 			name: formatBreakdownKey(key),
 			type: widget.chart_type === 'area' ? 'line' : 'bar',
 			stack: 'total',
 			areaStyle: widget.chart_type === 'area' ? {} : undefined,
+			itemStyle: { color: resolveBreakdownColor(key, idx) },
 			data: chartData.map(([, breakdown]) =>
 				breakdown && typeof breakdown === 'object' ? breakdown[key] || 0 : 0
 			)
@@ -185,9 +211,14 @@
 		const container = document.getElementById(chartId);
 		if (!container) return;
 
-		chartInstance = echarts.init(container, null, { renderer: 'svg' });
+		chartInstance = echarts.init(
+			container,
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 
 		const option = getChartOption(echarts);
+		option.backgroundColor = 'transparent';
 		chartInstance.setOption(option);
 
 		const resizeHandler = () => chartInstance?.resize();
@@ -311,7 +342,9 @@
 							avoidLabelOverlap: true,
 							itemStyle: {
 								borderRadius: 4,
-								borderColor: '#fff',
+								borderColor: document.documentElement.classList.contains('dark')
+									? '#1e293b'
+									: '#fff',
 								borderWidth: 2
 							},
 							label: {
@@ -357,7 +390,9 @@
 							avoidLabelOverlap: true,
 							itemStyle: {
 								borderRadius: 4,
-								borderColor: '#fff',
+								borderColor: document.documentElement.classList.contains('dark')
+									? '#1e293b'
+									: '#fff',
 								borderWidth: 2
 							},
 							label: {
@@ -487,6 +522,7 @@
 				// Calculate target position on the gauge (as a ratio from 0 to 1)
 				const targetRatio =
 					widget.show_target && targetValue != null ? targetValue / gaugeMax : null;
+				const gaugeColor = thresholdColor ?? 'rgb(59, 130, 246)';
 				return {
 					series: [
 						{
@@ -499,7 +535,7 @@
 							center: ['50%', '60%'],
 							radius: '90%',
 							itemStyle: {
-								color: 'rgb(59, 130, 246)'
+								color: gaugeColor
 							},
 							progress: {
 								show: true,
@@ -543,7 +579,8 @@
 											? `{value} ${unitSymbol}`
 											: '{value}',
 								fontSize: 20,
-								offsetCenter: [0, '40%']
+								offsetCenter: [0, '40%'],
+								color: gaugeColor
 							},
 							data: [
 								{
@@ -558,7 +595,8 @@
 					]
 				};
 
-			case 'sparkline':
+			case 'sparkline': {
+				const sparkColor = thresholdColor ?? 'rgb(59, 130, 246)';
 				return {
 					grid: { top: 5, right: 5, bottom: 5, left: 5 },
 					xAxis: { type: 'category', show: false, data: chartData.map((d) => d[0]) },
@@ -568,15 +606,16 @@
 							type: 'line',
 							smooth: true,
 							symbol: 'none',
-							lineStyle: { width: 2, color: 'rgb(59, 130, 246)' },
+							lineStyle: { width: 2, color: sparkColor },
 							areaStyle: {
 								opacity: 0.2,
-								color: 'rgb(59, 130, 246)'
+								color: sparkColor
 							},
 							data: chartData.map((d) => d[1])
 						}
 					]
 				};
+			}
 
 			case 'donut':
 				// For percentage metrics, show as actual vs remaining
@@ -601,7 +640,9 @@
 							avoidLabelOverlap: true,
 							itemStyle: {
 								borderRadius: 4,
-								borderColor: '#fff',
+								borderColor: document.documentElement.classList.contains('dark')
+									? '#1e293b'
+									: '#fff',
 								borderWidth: 2
 							},
 							label: {
@@ -658,9 +699,15 @@
 		<div class="flex items-baseline gap-3">
 			<!-- Main value and unit -->
 			<div class="flex items-baseline gap-1">
-				<span class="text-4xl font-bold text-primary-600">{formatValueOnly(latestValue)}</span>
+				<span
+					class="text-4xl font-bold {thresholdColor ? '' : 'text-primary-600'}"
+					style={thresholdColor ? `color: ${thresholdColor}` : ''}
+					>{formatValueOnly(latestValue)}</span
+				>
 				{#if unitSymbol}
-					<span class="text-2xl font-medium text-primary-500 lowercase"
+					<span
+						class="text-2xl font-medium lowercase {thresholdColor ? '' : 'text-primary-500'}"
+						style={thresholdColor ? `color: ${thresholdColor}; opacity: 0.85` : ''}
 						>{safeTranslate(unitSymbol)}</span
 					>
 				{/if}
@@ -697,24 +744,24 @@
 	{#if pieChartData.length > 0}
 		<div id={chartId} class="w-full {height}"></div>
 	{:else}
-		<div class="flex items-center justify-center h-full bg-gray-50 rounded-lg">
-			<p class="text-gray-400 text-sm">{m.noDataAvailable()}</p>
+		<div class="flex items-center justify-center h-full bg-surface-50-950 rounded-lg">
+			<p class="text-surface-400-600 text-sm">{m.noDataAvailable()}</p>
 		</div>
 	{/if}
 {:else if widget.chart_type === 'table' && !isBreakdownMetric}
 	<!-- Table for scalar values -->
 	<div class="overflow-auto h-full">
 		<table class="w-full text-sm">
-			<thead class="bg-gray-50 sticky top-0">
+			<thead class="bg-surface-50-950 sticky top-0">
 				<tr>
-					<th class="px-3 py-2 text-left font-medium text-gray-600">{m.timestamp()}</th>
-					<th class="px-3 py-2 text-right font-medium text-gray-600">{m.value()}</th>
+					<th class="px-3 py-2 text-left font-medium text-surface-600-400">{m.timestamp()}</th>
+					<th class="px-3 py-2 text-right font-medium text-surface-600-400">{m.value()}</th>
 				</tr>
 			</thead>
-			<tbody class="divide-y divide-gray-100">
+			<tbody class="divide-y divide-surface-100-900">
 				{#each [...chartData].reverse().slice(0, 20) as [timestamp, value]}
-					<tr class="hover:bg-gray-50">
-						<td class="px-3 py-2 text-gray-600">
+					<tr class="hover:bg-surface-50-950">
+						<td class="px-3 py-2 text-surface-600-400">
 							{new Date(timestamp).toLocaleString()}
 						</td>
 						<td class="px-3 py-2 text-right font-medium">
@@ -725,7 +772,7 @@
 			</tbody>
 		</table>
 		{#if chartData.length === 0}
-			<div class="flex items-center justify-center h-32 text-gray-400">
+			<div class="flex items-center justify-center h-32 text-surface-400-600">
 				{m.noDataAvailable()}
 			</div>
 		{/if}
@@ -735,19 +782,19 @@
 	<div class="overflow-auto h-full">
 		{#if latestBreakdown && typeof latestBreakdown === 'object'}
 			<table class="w-full text-sm">
-				<thead class="bg-gray-50 sticky top-0">
+				<thead class="bg-surface-50-950 sticky top-0">
 					<tr>
-						<th class="px-3 py-2 text-left font-medium text-gray-600">{m.category()}</th>
-						<th class="px-3 py-2 text-right font-medium text-gray-600">{m.count()}</th>
+						<th class="px-3 py-2 text-left font-medium text-surface-600-400">{m.category()}</th>
+						<th class="px-3 py-2 text-right font-medium text-surface-600-400">{m.count()}</th>
 					</tr>
 				</thead>
-				<tbody class="divide-y divide-gray-100">
+				<tbody class="divide-y divide-surface-100-900">
 					{#each Object.entries(latestBreakdown) as [key, count], index}
-						<tr class="hover:bg-gray-50">
-							<td class="px-3 py-2 text-gray-600 flex items-center gap-2">
+						<tr class="hover:bg-surface-50-950">
+							<td class="px-3 py-2 text-surface-600-400 flex items-center gap-2">
 								<span
 									class="w-3 h-3 rounded-full"
-									style="background-color: {BREAKDOWN_COLORS[index % BREAKDOWN_COLORS.length]}"
+									style="background-color: {resolveBreakdownColor(key, index)}"
 								></span>
 								{formatBreakdownKey(key)}
 							</td>
@@ -759,7 +806,7 @@
 				</tbody>
 			</table>
 		{:else}
-			<div class="flex items-center justify-center h-32 text-gray-400">
+			<div class="flex items-center justify-center h-32 text-surface-400-600">
 				{m.noDataAvailable()}
 			</div>
 		{/if}
@@ -769,7 +816,7 @@
 	<div id={chartId} class="w-full {height}"></div>
 {:else}
 	<!-- No data -->
-	<div class="flex items-center justify-center h-full bg-gray-50 rounded-lg">
-		<p class="text-gray-400 text-sm">{m.noDataAvailable()}</p>
+	<div class="flex items-center justify-center h-full bg-surface-50-950 rounded-lg">
+		<p class="text-surface-400-600 text-sm">{m.noDataAvailable()}</p>
 	</div>
 {/if}

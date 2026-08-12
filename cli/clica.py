@@ -11,7 +11,7 @@ import os
 from dotenv import load_dotenv
 import json
 from rich import print as rprint
-from typing import Optional, Callable, Dict
+from typing import Optional, Dict
 import uuid
 
 from icecream import ic
@@ -20,8 +20,6 @@ cli_cfg = dict()
 auth_data = dict()
 
 GLOBAL_FOLDER_ID: Optional[str] = None
-
-CLICA_CONFG_PATH = ".clica_config.yaml"
 
 load_dotenv(".clica.env")
 
@@ -41,6 +39,12 @@ VERIFY_CERTIFICATE = os.getenv("VERIFY_CERTIFICATE", "true").lower() in (
     "yes",
     "on",
 )
+
+# Set CLICA_DEBUG=1 to enable ic() debug prints across the CLI.
+if os.getenv("CLICA_DEBUG"):
+    ic(API_URL, VERIFY_CERTIFICATE)
+else:
+    ic.disable()
 
 
 def ids_map(model, folder=None):
@@ -371,6 +375,23 @@ DATA_WIZARD_COMMANDS = [
         "supports_conflict": False,
     },
     {
+        "command": "import_cyfun_assessment",
+        "model_type": "CyFunAssessment",
+        "help": (
+            "Import an official CyFun 2025 self-assessment workbook (Excel).\n"
+            "Creates a new assessment on the CyFun 2025 framework (auto-loaded if missing)\n"
+            "with documentation/implementation scores and comments.\n"
+            "\nNote: always creates a new assessment; conflict management is not applicable."
+        ),
+        "requires_folder": False,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+        "supports_conflict": False,
+        "show_folder_option": True,
+        "show_perimeter_option": True,
+    },
+    {
         "command": "import_findings_assessments",
         "model_type": "FindingsAssessment",
         "help": (
@@ -458,10 +479,16 @@ DATA_WIZARD_COMMANDS = [
             "Import privacy processings from CSV/Excel.\n"
             "\nRequired columns: name\n\n"
             "Optional columns: ref_id, description, status, "
+            "information_channel, usage_channel, "
             "dpia_required (true/false), dpia_reference, "
             "processing_nature (comma-separated), "
             "assigned_to (comma-separated user emails), "
             "labels (comma-separated), domain\n"
+            "\nMulti-sheet Excel workbooks (as produced by the processing "
+            "XLSX export) are also supported: a 'Processing' sheet plus "
+            "optional 'Purposes', 'Personal data', 'Data subjects', "
+            "'Data recipients', 'Contractors' and 'Transfers' sheets "
+            "recreate the processing with its sub-objects.\n"
             "\nConflict detection: by name + folder"
         ),
         "requires_folder": True,
@@ -526,11 +553,12 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "TPRM",
         "help": (
             "Import TPRM records from a multi-sheet Excel file.\n"
-            "Expected sheets: Entities, Solutions, Contracts (processed in order).\n"
+            "Expected sheets: Entities, Solutions, Contracts, Representatives (processed in order).\n"
             "\nEntities columns: name*, ref_id, description, domain\n"
             "Solutions columns: name*, ref_id, description, provider_entity_ref_id*\n"
             "Contracts columns: name*, ref_id, description, provider_entity_ref_id*, solution_ref_id\n"
-            "\nConflict detection: by name + folder (entities/solutions/contracts)"
+            "Representatives columns: email*, first_name, last_name, description, phone, role, provider_entity_ref_id*\n"
+            "\nConflict detection: by name + folder (entities/solutions/contracts), by email (representatives)"
         ),
         "requires_folder": True,
         "requires_perimeter": False,
@@ -567,6 +595,23 @@ DATA_WIZARD_COMMANDS = [
         "requires_matrix": True,
     },
     {
+        "command": "import_ebios_rm_study_egerie_xml",
+        "model_type": "EbiosRMStudyEgerieXML",
+        "help": (
+            "Import an EBIOS RM study from an Egerie Suite XML export (analyse_*.xml).\n"
+            "Creates the study, primary + supporting assets, feared events, RoTo couples, "
+            "stakeholders, strategic scenarios, attack paths, elementary actions, "
+            "operational scenarios, and applied controls.\n"
+            "Egerie 0..1 scales are mapped onto the chosen risk matrix; controls are "
+            "imported without scenario linking.\n"
+            "\nConflict detection: by name within the study (or folder for assets/EAs/controls)"
+        ),
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": True,
+    },
+    {
         "command": "import_vulnerabilities",
         "model_type": "Vulnerability",
         "help": "Import vulnerabilities using the Data Wizard backend.",
@@ -592,6 +637,16 @@ DATA_WIZARD_COMMANDS = [
         "show_folder_option": True,
         "show_perimeter_option": True,
         "show_matrix_option": True,
+    },
+    {
+        "command": "import_tasks",
+        "model_type": "TaskTemplate",
+        "help": "Import task templates and past task node occurrences (multi-sheet Excel or CSV) using the Data Wizard backend.",
+        "requires_folder": False,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+        "show_folder_option": True,
     },
 ]
 
@@ -625,10 +680,12 @@ def register_data_wizard_command(config: Dict[str, object]) -> None:
     show_matrix_option = config.get("show_matrix_option", requires_matrix)
     supports_name_option = model_type in {
         "ComplianceAssessment",
+        "CyFunAssessment",
         "RiskAssessment",
         "FindingsAssessment",
         "EbiosRMStudyARM",
         "EbiosRMStudyExcel",
+        "EbiosRMStudyEgerieXML",
     }
 
     @cli.command(name=cli_name, help=help_text)
@@ -1196,6 +1253,110 @@ def restore_full(src_dir, verify_hashes):
         rprint("[bold green]Full restore completed successfully![/bold green]")
 
     rprint("[dim]Note: You will need to regenerate your Personal Access Token[/dim]")
+
+
+@cli.command(name="export-domain")
+@click.option("--folder", required=True, help="Domain name or UUID to export.")
+@click.option(
+    "--output",
+    default=None,
+    type=click.Path(dir_okay=False),
+    help="Output zip path (default: ./<folder>-domain-export.zip).",
+)
+def export_domain(folder, output):
+    """Export a domain (folder) as a zip archive."""
+    if not TOKEN:
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    folder_id = resolve_folder_id(folder, required=True)
+    headers = {"Authorization": f"Token {TOKEN}"}
+    url = f"{API_URL}/folders/{folder_id}/export/"
+    out_path = Path(output) if output else Path(f"./{folder}-domain-export.zip")
+
+    with requests.get(
+        url,
+        headers=headers,
+        verify=VERIFY_CERTIFICATE,
+        stream=True,
+        timeout=(10, 3600),
+    ) as res:
+        if res.status_code != 200:
+            rprint(
+                f"[bold red]Error exporting domain: {res.status_code} {res.reason}[/bold red]",
+                file=sys.stderr,
+            )
+            rprint(res.text, file=sys.stderr)
+            sys.exit(1)
+
+        with open(out_path, "wb") as f:
+            for chunk in res.iter_content(chunk_size=1024 * 1024):
+                f.write(chunk)
+    rprint(f"[green]✓ Domain exported to {out_path}[/green]")
+
+
+@cli.command(name="import-domain")
+@click.option("--file", required=True, help="Path to the domain export zip to import.")
+@click.option("--name", default=None, help="Name for the imported domain.")
+@click.option(
+    "--load-missing-libraries",
+    is_flag=True,
+    default=False,
+    help="Load libraries referenced by the dump that are missing on the target.",
+)
+@click.option(
+    "--create-missing-asset-classes",
+    is_flag=True,
+    default=False,
+    help="Create the custom asset classes referenced by the dump. They become visible to every user.",
+)
+def import_domain(file, name, load_missing_libraries, create_missing_asset_classes):
+    """Import a domain (folder) from an export zip."""
+    if not TOKEN:
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    file_path = Path(file)
+    if not file_path.exists():
+        rprint(f"[bold red]File not found: {file_path}[/bold red]", file=sys.stderr)
+        sys.exit(1)
+
+    domain_name = name or file_path.stem
+    headers = {
+        "Authorization": f"Token {TOKEN}",
+        "Content-Disposition": f'attachment; filename="{file_path.name}"',
+        "X-CISOAssistantDomainName": domain_name,
+    }
+    url = f"{API_URL}/folders/import/"
+    params = {
+        "load_missing_libraries": str(load_missing_libraries).lower(),
+        "create_missing_asset_classes": str(create_missing_asset_classes).lower(),
+    }
+    with open(file_path, "rb") as f:
+        res = requests.post(
+            url,
+            headers=headers,
+            params=params,
+            data=f,
+            verify=VERIFY_CERTIFICATE,
+            timeout=(10, 3600),
+        )
+
+    if res.status_code != 200:
+        rprint(
+            f"[bold red]Error importing domain: {res.status_code} {res.reason}[/bold red]",
+            file=sys.stderr,
+        )
+        rprint(res.text, file=sys.stderr)
+        sys.exit(1)
+
+    rprint(f"[green]✓ Domain '{domain_name}' imported successfully[/green]")
 
 
 if __name__ == "__main__":

@@ -32,6 +32,29 @@ CHAT_TOOL_REPLAY_ENABLED = (
 )
 TOOL_REPLAY_TURNS = int(os.environ.get("CHAT_TOOL_REPLAY_TURNS", 2))
 
+
+class Verdict:
+    """Canonical questionnaire verdict strings.
+
+    Used end-to-end: LLM JSON output → AgentAction.payload['status'] →
+    refiner downgrade rules → frontend banded review → xlsx export. One
+    source of truth so a typo anywhere in the chain can't silently corrupt
+    a verdict. Kept in sync with the matching TS module at
+    ``frontend/src/lib/utils/questionnaire-verdict.ts``.
+    """
+
+    YES = "yes"
+    PARTIAL = "partial"
+    NO = "no"
+    NEEDS_INFO = "needs_info"
+
+    ALL = frozenset({YES, PARTIAL, NO, NEEDS_INFO})
+
+    @classmethod
+    def is_valid(cls, value: str) -> bool:
+        return value in cls.ALL
+
+
 # ISO language code → English name (for LLM instructions)
 LANG_MAP = {
     "fr": "French",

@@ -48,7 +48,8 @@ Once complete, a `docker-compose.yml` file is automatically generated.
 The initialization script handles everything (pull, start, and admin account creation):
 
 ```bash
-./docker-compose.sh
+./docker-compose.sh     # Linux/MacOS
+./docker-compose.ps1    # Windows
 ```
 
 > This script only works on a fresh install (no existing `db/` folder). For all subsequent operations, use the manual commands below.
@@ -65,7 +66,7 @@ docker compose up -d         # restart
 To create an admin account manually:
 
 ```bash
-docker compose exec -it backend poetry run python manage.py createsuperuser
+docker compose exec -it backend uv run python manage.py createsuperuser
 ```
 
 ### 5. Connect
@@ -140,7 +141,7 @@ Database migrations are applied automatically on restart.
 
 ## Troubleshooting
 
-| Symptom                 | What to do                                                                          |
-| ----------------------- | ----------------------------------------------------------------------------------- |
-| Application won't start | Run `docker compose logs backend` to check errors                                 |
+| Symptom                 | What to do                                                                    |
+| ----------------------- | ----------------------------------------------------------------------------- |
+| Application won't start | Run `docker compose logs backend` to check errors                             |
 | License error           | Check `LICENSE_SEATS` and `LICENSE_EXPIRATION` values in `docker-compose.yml` |

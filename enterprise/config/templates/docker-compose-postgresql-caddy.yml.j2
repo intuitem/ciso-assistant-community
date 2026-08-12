@@ -65,9 +65,9 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://backend:8000/api/health/ || exit 1"]
       interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 60s
+      timeout: 10s
+      retries: 30
+      start_period: 150s
 
   huey:
     container_name: huey
@@ -116,7 +116,7 @@ services:
       - /bin/sh
       - -c
       - |
-        poetry run python manage.py run_huey -w 2 --scheduler-interval 60
+        python manage.py run_huey -w 2 --scheduler-interval 60
 
   frontend:
     container_name: frontend
@@ -146,7 +146,7 @@ services:
 
   caddy:
     container_name: caddy
-    image: caddy:2.11.2
+    image: caddy:2.11.4
     environment:
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
     depends_on:

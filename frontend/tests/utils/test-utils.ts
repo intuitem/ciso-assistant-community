@@ -299,8 +299,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'status', type: type.SELECT },
 			{ name: 'expiration_date', type: type.DATE },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'owners', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
-			{ name: 'approver', type: type.SELECT_AUTOCOMPLETE }
+			{ name: 'owners', type: type.SELECT_MULTIPLE_AUTOCOMPLETE }
 		]);
 		await use(sPage);
 	},
@@ -344,7 +343,7 @@ export const test = base.extend<Fixtures>({
 	},
 
 	ebiosRmStudyPage: async ({ page }, use) => {
-		const bPage = new PageContent(page, '/ebios-rm', /Ebios RM stud(ies|y)/, [
+		const bPage = new PageContent(page, '/ebios-rm', /EBIOS RM stud(ies|y)/, [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
@@ -811,8 +810,7 @@ export class TestContent {
 					status: 'Draft',
 					expiration_date: '2100-01-01',
 					folder: vars.folderName,
-					owners: [LoginPage.defaultEmail],
-					approver: LoginPage.defaultEmail
+					owners: [LoginPage.defaultEmail]
 				},
 				editParams: {
 					name: '',

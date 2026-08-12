@@ -1,12 +1,12 @@
 <script lang="ts">
 	import Select from '../Select.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import * as m from '$paraglide/messages.js';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	interface Props {
@@ -31,13 +31,6 @@
 	const disableDoubleDash = true;
 </script>
 
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 <TextField
 	type="datetime-local"
 	step="1"
@@ -74,13 +67,6 @@
 	options={model.selectOptions['detection']}
 	cacheLock={cacheLocks['detection']}
 	bind:cachedValue={formDataCache['detection']}
-/>
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
 />
 <Select
 	{form}
@@ -142,7 +128,7 @@
 		optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
 		field="qualifications"
 		optionsLabelField="translated_name"
-		label={m.qualifications()}
+		label={safeTranslate('qualifications')}
 	/>
 	<AutocompleteSelect
 		multiple

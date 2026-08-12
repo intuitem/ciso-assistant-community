@@ -48,7 +48,9 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 	const focusModeEnabled = locals.featureflags?.focus_mode ?? false;
 	if (locals.user && focusModeEnabled) {
 		try {
-			const treeRes = await fetch(`${BASE_API_URL}/folders/org_tree/?include_perimeters=false`);
+			const treeRes = await fetch(
+				`${BASE_API_URL}/folders/org_tree/?include_perimeters=false&no_focus=true`
+			);
 			if (treeRes.ok) {
 				orgTree = await treeRes.json();
 			}
@@ -72,12 +74,17 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		? env.PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS
 		: 7;
 
+	const LICENSE_EXPIRATION_MESSAGE = Object.hasOwn(env, 'PUBLIC_LICENSE_EXPIRATION_MESSAGE')
+		? env.PUBLIC_LICENSE_EXPIRATION_MESSAGE
+		: '';
+
 	return {
 		user: locals.user,
 		settings: locals.settings,
 		featureflags: locals.featureflags,
 		licenseStatus,
 		LICENSE_EXPIRATION_NOTIFY_DAYS,
+		LICENSE_EXPIRATION_MESSAGE,
 		orgTree
 	};
 }) satisfies LayoutServerLoad;

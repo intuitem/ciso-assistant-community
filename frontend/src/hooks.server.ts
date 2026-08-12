@@ -1,12 +1,17 @@
 import { BASE_API_URL, DEFAULT_LANGUAGE } from '$lib/utils/constants';
-import { safeTranslate } from '$lib/utils/i18n';
+import { safeTranslate, setUseRiskCategoryLabel } from '$lib/utils/i18n';
 import type { User } from '$lib/utils/types';
 import { redirect, type Handle, type HandleFetch, type RequestEvent } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 
 import { loadFeatureFlags } from '$lib/feature-flags';
+import { logger, installJsonConsole } from '$lib/server/logger';
 import { paraglideMiddleware } from '$paraglide/server';
 import { defineCustomServerStrategy } from '$paraglide/runtime';
+
+// Runs once at server start. When LOG_FORMAT=json, routes the whole SSR stdout
+// stream (including not-yet-migrated console.* call sites) through JSON output.
+installJsonConsole();
 
 const fallbackLocaleStore = new WeakMap<Request, string>();
 
@@ -14,9 +19,31 @@ defineCustomServerStrategy('custom-fallback', {
 	getLocale: (request) => fallbackLocaleStore.get(request) ?? DEFAULT_LANGUAGE
 });
 
+const RETRYABLE_STATUSES = new Set([429, 502, 503, 504]);
+
+async function fetchWithRetry(
+	url: string,
+	init?: RequestInit,
+	retries = 3,
+	delay = 2000
+): Promise<Response> {
+	for (let attempt = 0; attempt < retries; attempt++) {
+		try {
+			const response = await fetch(url, { ...init, signal: AbortSignal.timeout(1000) });
+			if (response.ok || !RETRYABLE_STATUSES.has(response.status) || attempt === retries - 1) {
+				return response;
+			}
+		} catch (error) {
+			if (attempt === retries - 1) throw error;
+		}
+		await new Promise((r) => setTimeout(r, delay * (attempt + 1)));
+	}
+	throw new Error('unreachable');
+}
+
 async function fetchDefaultLanguage(): Promise<string> {
 	try {
-		const response = await fetch(`${BASE_API_URL}/settings/general/default-language/`, {
+		const response = await fetchWithRetry(`${BASE_API_URL}/settings/general/default-language/`, {
 			headers: { 'content-type': 'application/json' }
 		});
 		if (response.ok) {
@@ -25,7 +52,7 @@ async function fetchDefaultLanguage(): Promise<string> {
 			if (typeof language === 'string' && language.length > 0) return language;
 		}
 	} catch (error) {
-		console.error('Unable to fetch default language', error);
+		logger.error('Unable to fetch default language', { error });
 	}
 	return DEFAULT_LANGUAGE;
 }
@@ -59,18 +86,33 @@ function applyUserLocale(event: RequestEvent, user: User | undefined) {
 async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 	let csrfToken = event.cookies.get('csrftoken') || '';
 	if (!csrfToken) {
-		const response = await fetch(`${BASE_API_URL}/csrf/`, {
-			credentials: 'include',
-			headers: { 'content-type': 'application/json' }
-		});
-		const data = await response.json();
-		csrfToken = data.csrfToken;
-		event.cookies.set('csrftoken', csrfToken, {
-			httpOnly: false,
-			sameSite: 'lax',
-			path: '/',
-			secure: true
-		});
+		try {
+			const response = await fetchWithRetry(`${BASE_API_URL}/csrf/`, {
+				credentials: 'include',
+				headers: { 'content-type': 'application/json' }
+			});
+			if (!response.ok) {
+				logger.error('CSRF endpoint returned an error status', {
+					status: response.status
+				});
+				return csrfToken;
+			}
+			const data = await response.json();
+			const token = data?.csrfToken;
+			if (typeof token !== 'string' || token.length === 0) {
+				logger.error('CSRF endpoint returned an invalid token payload');
+				return csrfToken;
+			}
+			csrfToken = token;
+			event.cookies.set('csrftoken', csrfToken, {
+				httpOnly: false,
+				sameSite: 'lax',
+				path: '/',
+				secure: true
+			});
+		} catch (error) {
+			logger.error('Unable to fetch CSRF token', { error });
+		}
 	}
 	return csrfToken;
 }
@@ -107,6 +149,13 @@ async function validateUserSession(event: RequestEvent): Promise<User | null> {
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
+	// Inbound webhook passthrough: unauthenticated by design (the
+	// URL secret is the credential) — skip locale middleware, CSRF-token fetch
+	// and session validation, none of which apply to machine deliveries.
+	if (event.url.pathname.startsWith('/api/workflows/hooks/')) {
+		return resolve(event);
+	}
+
 	const localeForRequest = await ensureDefaultLocale(event);
 	fallbackLocaleStore.set(event.request, localeForRequest);
 
@@ -121,7 +170,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 			applyUserLocale(event, event.locals.user);
 			return await resolve(event, {
 				transformPageChunk: ({ html }) => {
-					return html.replace('%lang%', locale);
+					return html
+						.replace('%lang%', locale)
+						.replace('%theme%', event.locals.user?.preferences?.ui?.theme ?? '');
 				}
 			});
 		}
@@ -149,6 +200,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 				}
 			});
 			event.locals.settings = await generalSettings.json();
+			setUseRiskCategoryLabel(event.locals.settings?.use_risk_category_label);
 
 			const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/`, {
 				credentials: 'include',
@@ -160,14 +212,16 @@ export const handle: Handle = async ({ event, resolve }) => {
 			try {
 				event.locals.featureflags = await featureFlagSettings.json();
 			} catch (e) {
-				console.error('Error fetching feature flags', e);
+				logger.error('Error fetching feature flags', { error: e });
 				event.locals.featureflags = {};
 			}
 		}
 
 		return await resolve(event, {
 			transformPageChunk: ({ html }) => {
-				return html.replace('%lang%', locale);
+				return html
+					.replace('%lang%', locale)
+					.replace('%theme%', event.locals.user?.preferences?.ui?.theme ?? '');
 			}
 		});
 	});

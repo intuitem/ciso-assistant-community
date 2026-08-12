@@ -26,7 +26,7 @@
 	let { data }: Props = $props();
 
 	const foldersWithAssessments = $derived(
-		(data?.folders ?? []).filter((f) => (f?.compliance_assessments?.length ?? 0) > 0)
+		data.folderRecaps.filter((folderRecap) => folderRecap.compliance_assessments.length > 0)
 	);
 
 	const model = URL_MODEL_MAP['folders'];
@@ -39,17 +39,17 @@
 		});
 </script>
 
-<div class="p-4 space-y-6 bg-gray-50 min-h-screen card">
-	<h2 class="text-2xl font-extrabold text-gray-800 mb-4">{m.overallCompliance()}</h2>
+<div class="p-4 space-y-6 bg-surface-50-950 min-h-screen card">
+	<h2 class="text-2xl font-extrabold text-surface-950-50 mb-4">{m.overallCompliance()}</h2>
 
 	<div class="space-y-6">
 		{#if foldersWithAssessments.length === 0}
 			<div class="flex items-center justify-center min-h-[60vh]">
 				<div class="text-center max-w-lg">
-					<p class="text-xl font-bold text-gray-800">
+					<p class="text-xl font-bold text-surface-950-50">
 						{m.createYourFirstAuditToSeeRecapPage()}
 					</p>
-					<p class="mt-2 text-sm text-gray-600">
+					<p class="mt-2 text-sm text-surface-600-400">
 						{m.AuditExistsYoullSeeOverallCompliance()}
 					</p>
 				</div>
@@ -57,7 +57,7 @@
 		{:else}
 			{#each foldersWithAssessments as folder}
 				<div
-					class="bg-white shadow-lg rounded-xl border border-gray-200 overflow-hidden transition hover:shadow-xl transform w-full"
+					class="bg-surface-50-950 shadow-lg rounded-xl border border-surface-200-800 overflow-hidden transition hover:shadow-xl transform w-full"
 				>
 					<div
 						class="p-4 bg-gradient-to-r from-primary-400 to-primary-500 text-white flex justify-between items-center"
@@ -68,8 +68,12 @@
 					</div>
 
 					{#if folder.overallCompliance?.values?.length > 0}
-						<div class="px-4 py-3 bg-gradient-to-r from-primary-50 to-primary-100 rounded-b-lg">
-							<p class="text-sm font-semibold text-primary-700 mb-2">{m.globalOverall()}</p>
+						<div
+							class="px-4 py-3 bg-gradient-to-r from-primary-50 to-primary-100 dark:from-surface-800 dark:to-surface-900 rounded-b-lg"
+						>
+							<p class="text-sm font-semibold text-primary-700 dark:text-primary-300 mb-2">
+								{m.globalOverall()}
+							</p>
 							<div class="flex h-6 rounded-lg overflow-hidden shadow-inner">
 								{#each folder.overallCompliance.values.sort((a, b) => REQUIREMENT_ASSESSMENT_STATUS.indexOf(a.name) - REQUIREMENT_ASSESSMENT_STATUS.indexOf(b.name)) as sp}
 									<div
@@ -90,12 +94,14 @@
 
 					<div class="p-4 space-y-4">
 						{#each folder.compliance_assessments as assessment}
-							<div class="bg-gray-50 rounded-lg p-4 shadow-inner transition hover:bg-gray-100">
+							<div
+								class="bg-surface-50-950 rounded-lg p-4 shadow-inner transition hover:bg-surface-100-900"
+							>
 								<div class="flex justify-between items-center mb-4">
 									<div>
 										<p class="text-sm font-semibold">{m.name()}</p>
 										<a
-											class="text-blue-600 hover:underline text-lg font-bold"
+											class="text-blue-600 dark:text-blue-400 hover:underline text-lg font-bold"
 											href="/compliance-assessments/{assessment.id}"
 										>
 											{assessment.name}
@@ -108,13 +114,13 @@
 								</div>
 
 								<div class="flex flex-col lg:flex-row items-center justify-between gap-4">
-									{#if assessment.globalScore.maturity_score >= 0}
+									{#if assessment.global_score.maturity_score >= 0}
 										<div class="flex justify-center items-center lg:order-1">
 											<div class="relative">
 												<Progress
 													value={formatScoreValue(
-														assessment.globalScore.maturity_score,
-														assessment.globalScore.max_score
+														assessment.global_score.maturity_score,
+														assessment.global_score.max_score
 													)}
 													min={0}
 													max={100}
@@ -123,14 +129,14 @@
 														<Progress.CircleTrack />
 														<Progress.CircleRange
 															class={displayScoreColor(
-																assessment.globalScore.maturity_score,
-																assessment.globalScore.max_score
+																assessment.global_score.maturity_score,
+																assessment.global_score.max_score
 															)}
 														/>
 													</Progress.Circle>
 													<div class="absolute inset-0 flex items-center justify-center">
 														<p class="font-semibold text-2xl">
-															{assessment.globalScore.maturity_score}
+															{assessment.global_score.maturity_score}
 														</p>
 													</div>
 												</Progress>

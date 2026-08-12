@@ -1,8 +1,6 @@
 import os
 
-from django.apps import AppConfig
 from django.core.management import call_command
-from django.db.models.signals import post_migrate
 from structlog import get_logger
 
 from django.conf import settings
@@ -11,6 +9,9 @@ from core.utils import RoleCodename, UserGroupCodename
 logger = get_logger(__name__)
 
 READER_PERMISSIONS_LIST = [
+    "view_customfielddefinition",
+    "view_compliance_assessment_full",
+    "view_object_audittrail",
     "view_appliedcontrol",
     "view_asset",
     "view_complianceassessment",
@@ -18,11 +19,19 @@ READER_PERMISSIONS_LIST = [
     "view_entityassessment",
     "view_evidence",
     "view_evidencerevision",
+    "view_documentcontainer",
+    "view_documenttemplate",
     "view_manageddocument",
     "view_documentrevision",
     "view_documentattachment",
     "view_folder",
     "view_framework",
+    "view_ttpcatalog",
+    "view_tactic",
+    "view_technique",
+    "view_threatmodel",
+    "view_threatmodelnode",
+    "view_threatmodeledge",
     "view_loadedlibrary",
     "view_policy",
     "view_perimeter",
@@ -42,6 +51,7 @@ READER_PERMISSIONS_LIST = [
     "view_riskscenario",
     "view_validationflow",
     "view_solution",
+    "view_solutionsubcontractor",
     "view_contract",
     "view_storedlibrary",
     "view_threat",
@@ -60,10 +70,14 @@ READER_PERMISSIONS_LIST = [
     "view_attackpath",
     "view_operationalscenario",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "view_globalsettings",
     "view_securityexception",
     "view_finding",
     "view_findingsassessment",
+    "view_postureassessment",
+    "view_postureresult",
     "view_incident",
     "view_timelineentry",
     "view_comment",
@@ -77,7 +91,6 @@ READER_PERMISSIONS_LIST = [
     "view_assetcapability",
     # privacy,
     "view_processing",
-    "view_processingnature",
     "view_purpose",
     "view_personaldata",
     "view_datasubject",
@@ -96,9 +109,28 @@ READER_PERMISSIONS_LIST = [
     "view_quantitativeriskstudy",
     "view_quantitativeriskscenario",
     "view_quantitativeriskhypothesis",
+    # workflows
+    "view_workflow",
+    "view_workflowversion",
+    "view_workflownode",
+    "view_workflowedge",
+    "view_workflowvariable",
+    "view_conditiongroup",
+    "view_condition",
+    "view_workflowinstance",
+    "view_workflowtoken",
+    "view_workflowinstancelog",
+    "view_workflowsecret",
+    "view_workflowtrigger",
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    "view_project",
+    "view_responsibilityrole",
+    "view_responsibilitymatrix",
+    "view_responsibilitymatrixactivity",
+    "view_responsibilitymatrixactor",
+    "view_responsibilityassignment",
     # metrology
     "view_metricdefinition",
     "view_metricinstance",
@@ -112,6 +144,11 @@ READER_PERMISSIONS_LIST = [
     "view_preset",
     "view_presetjourney",
     "view_presetjourneystep",
+    # portals
+    "view_portal",
+    "view_portalpreset",
+    "view_publicdocument",
+    "view_frameworksnapshot",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -119,9 +156,18 @@ READER_PERMISSIONS_LIST = [
     "delete_chatsession",
     "view_chatmessage",
     "view_indexeddocument",
+    # Questionnaire Autopilot — read-only at this role. AgentAction is the
+    # AI's audit trail and must stay immutable; QuestionnaireRun is shared
+    # across users in a domain. Write permissions live in ANALYST and up.
+    "view_questionnairerun",
+    "view_questionnairequestion",
+    "view_agentrun",
+    "view_agentaction",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
+    "view_customfielddefinition",
+    "view_compliance_assessment_full",
     "view_perimeter",
     "view_riskassessment",
     "view_appliedcontrol",
@@ -148,10 +194,18 @@ APPROVER_PERMISSIONS_LIST = [
     "view_answer",
     "view_evidence",
     "view_evidencerevision",
+    "view_documentcontainer",
+    "view_documenttemplate",
     "view_manageddocument",
     "view_documentrevision",
     "view_documentattachment",
     "view_framework",
+    "view_ttpcatalog",
+    "view_tactic",
+    "view_technique",
+    "view_threatmodel",
+    "view_threatmodelnode",
+    "view_threatmodeledge",
     "view_storedlibrary",
     "view_loadedlibrary",
     "view_user",
@@ -167,10 +221,14 @@ APPROVER_PERMISSIONS_LIST = [
     "view_attackpath",
     "view_operationalscenario",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "view_globalsettings",
     "view_securityexception",
     "view_finding",
     "view_findingsassessment",
+    "view_postureassessment",
+    "view_postureresult",
     "view_incident",
     "view_timelineentry",
     "view_tasknode",
@@ -185,7 +243,6 @@ APPROVER_PERMISSIONS_LIST = [
     "view_campaign",
     # privacy,
     "view_processing",
-    "view_processingnature",
     "view_purpose",
     "view_personaldata",
     "view_datasubject",
@@ -201,15 +258,39 @@ APPROVER_PERMISSIONS_LIST = [
     "view_quantitativeriskstudy",
     "view_quantitativeriskscenario",
     "view_quantitativeriskhypothesis",
+    # workflows
+    "view_workflow",
+    "view_workflowversion",
+    "view_workflownode",
+    "view_workflowedge",
+    "view_workflowvariable",
+    "view_conditiongroup",
+    "view_condition",
+    "view_workflowinstance",
+    "view_workflowtoken",
+    "view_workflowinstancelog",
+    "view_workflowsecret",
+    "view_workflowtrigger",
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    "view_project",
+    "view_responsibilityrole",
+    "view_responsibilitymatrix",
+    "view_responsibilitymatrixactivity",
+    "view_responsibilitymatrixactor",
+    "view_responsibilityassignment",
     # integrations
     "view_syncmapping",
     # presets
     "view_preset",
     "view_presetjourney",
     "view_presetjourneystep",
+    # portals
+    "view_portal",
+    "view_portalpreset",
+    "view_publicdocument",
+    "view_frameworksnapshot",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -217,9 +298,19 @@ APPROVER_PERMISSIONS_LIST = [
     "delete_chatsession",
     "view_chatmessage",
     "view_indexeddocument",
+    # Questionnaire Autopilot — read-only at this role. AgentAction is the
+    # AI's audit trail and must stay immutable; QuestionnaireRun is shared
+    # across users in a domain. Write permissions live in ANALYST and up.
+    "view_questionnairerun",
+    "view_questionnairequestion",
+    "view_agentrun",
+    "view_agentaction",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
+    "view_customfielddefinition",
+    "view_compliance_assessment_full",
+    "view_object_audittrail",
     "add_filteringlabel",
     "view_filteringlabel",
     "view_libraryfilteringlabel",
@@ -233,6 +324,7 @@ ANALYST_PERMISSIONS_LIST = [
     "add_riskassessment",
     "add_riskscenario",
     "add_solution",
+    "add_solutionsubcontractor",
     "add_contract",
     "add_threat",
     "add_securityadvisory",
@@ -261,6 +353,7 @@ ANALYST_PERMISSIONS_LIST = [
     "change_riskassessment",
     "change_riskscenario",
     "change_solution",
+    "change_solutionsubcontractor",
     "change_contract",
     "change_threat",
     "change_securityadvisory",
@@ -283,6 +376,7 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_riskassessment",
     "delete_riskscenario",
     "delete_solution",
+    "delete_solutionsubcontractor",
     "delete_contract",
     "delete_threat",
     "delete_securityadvisory",
@@ -295,6 +389,21 @@ ANALYST_PERMISSIONS_LIST = [
     "view_evidence",
     "view_folder",
     "view_framework",
+    "view_ttpcatalog",
+    "view_tactic",
+    "view_technique",
+    "add_threatmodel",
+    "view_threatmodel",
+    "change_threatmodel",
+    "delete_threatmodel",
+    "add_threatmodelnode",
+    "view_threatmodelnode",
+    "change_threatmodelnode",
+    "delete_threatmodelnode",
+    "add_threatmodeledge",
+    "view_threatmodeledge",
+    "change_threatmodeledge",
+    "delete_threatmodeledge",
     "view_loadedlibrary",
     "view_policy",
     "view_perimeter",
@@ -315,6 +424,7 @@ ANALYST_PERMISSIONS_LIST = [
     "view_riskmatrix",
     "view_riskscenario",
     "view_solution",
+    "view_solutionsubcontractor",
     "view_contract",
     "view_storedlibrary",
     "view_threat",
@@ -351,6 +461,8 @@ ANALYST_PERMISSIONS_LIST = [
     "change_operationalscenario",
     "delete_operationalscenario",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
@@ -364,6 +476,14 @@ ANALYST_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "change_findingsassessment",
     "delete_findingsassessment",
+    "add_postureassessment",
+    "view_postureassessment",
+    "change_postureassessment",
+    "delete_postureassessment",
+    "add_postureresult",
+    "view_postureresult",
+    "change_postureresult",
+    "delete_postureresult",
     "add_incident",
     "view_incident",
     "change_incident",
@@ -410,7 +530,6 @@ ANALYST_PERMISSIONS_LIST = [
     "change_processing",
     "view_processing",
     "delete_processing",
-    "view_processingnature",
     "add_purpose",
     "change_purpose",
     "view_purpose",
@@ -466,6 +585,14 @@ ANALYST_PERMISSIONS_LIST = [
     "change_evidencerevision",
     "delete_evidencerevision",
     # document management
+    "add_documentcontainer",
+    "view_documentcontainer",
+    "change_documentcontainer",
+    "delete_documentcontainer",
+    "add_documenttemplate",
+    "view_documenttemplate",
+    "change_documenttemplate",
+    "delete_documenttemplate",
     "add_manageddocument",
     "view_manageddocument",
     "change_manageddocument",
@@ -487,6 +614,20 @@ ANALYST_PERMISSIONS_LIST = [
     "change_databreach",
     "view_databreach",
     "delete_databreach",
+    # workflows — view-only for v1 (analyst is a workflow consumer, not an
+    # author/operator yet); expand when the analyst tier is fleshed out.
+    "view_workflow",
+    "view_workflowversion",
+    "view_workflownode",
+    "view_workflowedge",
+    "view_workflowvariable",
+    "view_conditiongroup",
+    "view_condition",
+    "view_workflowinstance",
+    "view_workflowtoken",
+    "view_workflowinstancelog",
+    "view_workflowsecret",
+    "view_workflowtrigger",
     # pmbok
     "view_genericcollection",
     "add_genericcollection",
@@ -496,6 +637,30 @@ ANALYST_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    "view_project",
+    "add_project",
+    "change_project",
+    "delete_project",
+    "view_responsibilityrole",
+    "add_responsibilityrole",
+    "change_responsibilityrole",
+    "delete_responsibilityrole",
+    "view_responsibilitymatrix",
+    "add_responsibilitymatrix",
+    "change_responsibilitymatrix",
+    "delete_responsibilitymatrix",
+    "view_responsibilitymatrixactivity",
+    "add_responsibilitymatrixactivity",
+    "change_responsibilitymatrixactivity",
+    "delete_responsibilitymatrixactivity",
+    "view_responsibilitymatrixactor",
+    "add_responsibilitymatrixactor",
+    "change_responsibilitymatrixactor",
+    "delete_responsibilitymatrixactor",
+    "view_responsibilityassignment",
+    "add_responsibilityassignment",
+    "change_responsibilityassignment",
+    "delete_responsibilityassignment",
     # metrology
     "view_metricdefinition",
     "view_metricinstance",
@@ -531,6 +696,23 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
+    # portals
+    "view_portal",
+    "add_portal",
+    "change_portal",
+    "delete_portal",
+    "view_portalpreset",
+    "add_portalpreset",
+    "change_portalpreset",
+    "delete_portalpreset",
+    "view_publicdocument",
+    "add_publicdocument",
+    "change_publicdocument",
+    "delete_publicdocument",
+    "view_frameworksnapshot",
+    "add_frameworksnapshot",
+    "change_frameworksnapshot",
+    "delete_frameworksnapshot",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -540,9 +722,31 @@ ANALYST_PERMISSIONS_LIST = [
     "add_indexeddocument",
     "view_indexeddocument",
     "delete_indexeddocument",
+    "add_questionnairerun",
+    "view_questionnairerun",
+    "change_questionnairerun",
+    "delete_questionnairerun",
+    "add_questionnairequestion",
+    "view_questionnairequestion",
+    "change_questionnairequestion",
+    "delete_questionnairequestion",
+    "add_agentrun",
+    "view_agentrun",
+    "change_agentrun",
+    "delete_agentrun",
+    "add_agentaction",
+    "view_agentaction",
+    "change_agentaction",
+    "delete_agentaction",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
+    "add_customfielddefinition",
+    "view_customfielddefinition",
+    "change_customfielddefinition",
+    "delete_customfielddefinition",
+    "view_compliance_assessment_full",
+    "view_object_audittrail",
     "add_filteringlabel",
     "view_filteringlabel",
     "view_libraryfilteringlabel",
@@ -560,6 +764,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_riskmatrix",
     "add_riskscenario",
     "add_solution",
+    "add_solutionsubcontractor",
     "add_contract",
     "add_threat",
     "add_securityadvisory",
@@ -588,6 +793,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_riskmatrix",
     "change_riskscenario",
     "change_solution",
+    "change_solutionsubcontractor",
     "change_contract",
     "change_threat",
     "change_securityadvisory",
@@ -616,6 +822,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_vulnerability",
     "delete_riskscenario",
     "delete_solution",
+    "delete_solutionsubcontractor",
     "delete_contract",
     "delete_threat",
     "delete_securityadvisory",
@@ -631,6 +838,30 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_framework",
     "change_framework",
     "delete_framework",
+    "add_ttpcatalog",
+    "view_ttpcatalog",
+    "change_ttpcatalog",
+    "delete_ttpcatalog",
+    "add_threatmodel",
+    "view_threatmodel",
+    "change_threatmodel",
+    "delete_threatmodel",
+    "add_threatmodelnode",
+    "view_threatmodelnode",
+    "change_threatmodelnode",
+    "delete_threatmodelnode",
+    "add_threatmodeledge",
+    "view_threatmodeledge",
+    "change_threatmodeledge",
+    "delete_threatmodeledge",
+    "add_tactic",
+    "view_tactic",
+    "change_tactic",
+    "delete_tactic",
+    "add_technique",
+    "view_technique",
+    "change_technique",
+    "delete_technique",
     "view_loadedlibrary",
     "view_policy",
     "view_perimeter",
@@ -659,6 +890,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_riskmatrix",
     "view_riskscenario",
     "view_solution",
+    "view_solutionsubcontractor",
     "view_contract",
     "view_storedlibrary",
     "view_threat",
@@ -700,6 +932,8 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_operationalscenario",
     "delete_operationalscenario",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
@@ -713,6 +947,14 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "change_findingsassessment",
     "delete_findingsassessment",
+    "add_postureassessment",
+    "view_postureassessment",
+    "change_postureassessment",
+    "delete_postureassessment",
+    "add_postureresult",
+    "view_postureresult",
+    "change_postureresult",
+    "delete_postureresult",
     "add_incident",
     "view_incident",
     "change_incident",
@@ -773,7 +1015,6 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_processing",
     "view_processing",
     "delete_processing",
-    "view_processingnature",
     "add_purpose",
     "change_purpose",
     "view_purpose",
@@ -829,6 +1070,14 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_evidencerevision",
     "delete_evidencerevision",
     # document management
+    "add_documentcontainer",
+    "view_documentcontainer",
+    "change_documentcontainer",
+    "delete_documentcontainer",
+    "add_documenttemplate",
+    "view_documenttemplate",
+    "change_documenttemplate",
+    "delete_documenttemplate",
     "add_manageddocument",
     "view_manageddocument",
     "change_manageddocument",
@@ -850,6 +1099,48 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_databreach",
     "view_databreach",
     "delete_databreach",
+    # workflows
+    "view_workflow",
+    "add_workflow",
+    "change_workflow",
+    "delete_workflow",
+    "view_workflowversion",
+    "add_workflowversion",
+    "change_workflowversion",
+    "delete_workflowversion",
+    "view_workflownode",
+    "add_workflownode",
+    "change_workflownode",
+    "delete_workflownode",
+    "view_workflowedge",
+    "add_workflowedge",
+    "change_workflowedge",
+    "delete_workflowedge",
+    "view_workflowvariable",
+    "add_workflowvariable",
+    "change_workflowvariable",
+    "delete_workflowvariable",
+    "view_conditiongroup",
+    "add_conditiongroup",
+    "change_conditiongroup",
+    "delete_conditiongroup",
+    "view_condition",
+    "add_condition",
+    "change_condition",
+    "delete_condition",
+    "view_workflowinstance",
+    "add_workflowinstance",
+    "change_workflowinstance",
+    "delete_workflowinstance",
+    "view_workflowtoken",
+    "change_workflowtoken",
+    "view_workflowinstancelog",
+    "view_workflowsecret",
+    "add_workflowsecret",
+    "change_workflowsecret",
+    "delete_workflowsecret",
+    "view_workflowtrigger",
+    "change_workflowtrigger",
     # pmbok
     "view_genericcollection",
     "add_genericcollection",
@@ -859,6 +1150,30 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    "view_project",
+    "add_project",
+    "change_project",
+    "delete_project",
+    "view_responsibilityrole",
+    "add_responsibilityrole",
+    "change_responsibilityrole",
+    "delete_responsibilityrole",
+    "view_responsibilitymatrix",
+    "add_responsibilitymatrix",
+    "change_responsibilitymatrix",
+    "delete_responsibilitymatrix",
+    "view_responsibilitymatrixactivity",
+    "add_responsibilitymatrixactivity",
+    "change_responsibilitymatrixactivity",
+    "delete_responsibilitymatrixactivity",
+    "view_responsibilitymatrixactor",
+    "add_responsibilitymatrixactor",
+    "change_responsibilitymatrixactor",
+    "delete_responsibilitymatrixactor",
+    "view_responsibilityassignment",
+    "add_responsibilityassignment",
+    "change_responsibilityassignment",
+    "delete_responsibilityassignment",
     # metrology
     "view_metricdefinition",
     "add_metricdefinition",
@@ -881,9 +1196,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_dashboardwidget",
     "delete_dashboardwidget",
     # integrations
-    "add_integrationconfiguration",
     "view_integrationconfiguration",
-    "delete_integrationconfiguration",
     "add_syncmapping",
     "view_syncmapping",
     "change_syncmapping",
@@ -899,6 +1212,23 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
+    # portals
+    "view_portal",
+    "add_portal",
+    "change_portal",
+    "delete_portal",
+    "view_portalpreset",
+    "add_portalpreset",
+    "change_portalpreset",
+    "delete_portalpreset",
+    "view_publicdocument",
+    "add_publicdocument",
+    "change_publicdocument",
+    "delete_publicdocument",
+    "view_frameworksnapshot",
+    "add_frameworksnapshot",
+    "change_frameworksnapshot",
+    "delete_frameworksnapshot",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -908,9 +1238,32 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_indexeddocument",
     "view_indexeddocument",
     "delete_indexeddocument",
+    "add_questionnairerun",
+    "view_questionnairerun",
+    "change_questionnairerun",
+    "delete_questionnairerun",
+    "add_questionnairequestion",
+    "view_questionnairequestion",
+    "change_questionnairequestion",
+    "delete_questionnairequestion",
+    "add_agentrun",
+    "view_agentrun",
+    "change_agentrun",
+    "delete_agentrun",
+    "add_agentaction",
+    "view_agentaction",
+    "change_agentaction",
+    "delete_agentaction",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
+    "add_customfielddefinition",
+    "view_customfielddefinition",
+    "change_customfielddefinition",
+    "delete_customfielddefinition",
+    "view_central_auditlog",
+    "view_compliance_assessment_full",
+    "view_object_audittrail",
     "add_user",
     "view_user",
     "view_actor",
@@ -923,6 +1276,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_usergroup",
     "change_usergroup",
     "delete_usergroup",
+    "add_idpgroup",
+    "view_idpgroup",
+    "change_idpgroup",
+    "delete_idpgroup",
     "add_event",
     "view_event",
     "change_event",
@@ -1016,6 +1373,14 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_evidencerevision",
     "delete_evidencerevision",
     # document management
+    "add_documentcontainer",
+    "view_documentcontainer",
+    "change_documentcontainer",
+    "delete_documentcontainer",
+    "add_documenttemplate",
+    "view_documenttemplate",
+    "change_documenttemplate",
+    "delete_documenttemplate",
     "add_manageddocument",
     "view_manageddocument",
     "change_manageddocument",
@@ -1033,6 +1398,30 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_framework",
     "change_framework",
     "delete_framework",
+    "add_ttpcatalog",
+    "view_ttpcatalog",
+    "change_ttpcatalog",
+    "delete_ttpcatalog",
+    "add_threatmodel",
+    "view_threatmodel",
+    "change_threatmodel",
+    "delete_threatmodel",
+    "add_threatmodelnode",
+    "view_threatmodelnode",
+    "change_threatmodelnode",
+    "delete_threatmodelnode",
+    "add_threatmodeledge",
+    "view_threatmodeledge",
+    "change_threatmodeledge",
+    "delete_threatmodeledge",
+    "add_tactic",
+    "view_tactic",
+    "change_tactic",
+    "delete_tactic",
+    "add_technique",
+    "view_technique",
+    "change_technique",
+    "delete_technique",
     "view_requirementnode",
     "add_requirementnode",
     "change_requirementnode",
@@ -1052,6 +1441,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_loadedlibrary",
     "add_loadedlibrary",
     "delete_loadedlibrary",
+    "view_librarydraft",
+    "add_librarydraft",
+    "change_librarydraft",
+    "delete_librarydraft",
     "backup",
     "restore",
     "view_globalsettings",
@@ -1064,6 +1457,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_customwordtemplate",
     "change_customwordtemplate",
     "delete_customwordtemplate",
+    "view_customdochtmltemplate",
+    "add_customdochtmltemplate",
+    "change_customdochtmltemplate",
+    "delete_customdochtmltemplate",
     "view_ssosettings",
     "change_ssosettings",
     "view_requirementmappingset",
@@ -1079,9 +1476,13 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_representative",
     "delete_representative",
     "add_solution",
+    "add_solutionsubcontractor",
     "change_solution",
+    "change_solutionsubcontractor",
     "view_solution",
+    "view_solutionsubcontractor",
     "delete_solution",
+    "delete_solutionsubcontractor",
     "add_contract",
     "change_contract",
     "view_contract",
@@ -1150,12 +1551,19 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "change_findingsassessment",
     "delete_findingsassessment",
+    "add_postureassessment",
+    "view_postureassessment",
+    "change_postureassessment",
+    "delete_postureassessment",
+    "add_postureresult",
+    "view_postureresult",
+    "change_postureresult",
+    "delete_postureresult",
     # privacy,
     "add_processing",
     "change_processing",
     "view_processing",
     "delete_processing",
-    "view_processingnature",
     "add_purpose",
     "change_purpose",
     "view_purpose",
@@ -1210,7 +1618,6 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_tasknode",
     "change_tasknode",
     "delete_tasknode",
-    "view_logentry",
     # resilience,
     "add_businessimpactanalysis",
     "view_businessimpactanalysis",
@@ -1259,8 +1666,59 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     # terminologies
     "add_terminology",
     "view_terminology",
+    "view_objectclassification",
+    "view_classificationlevel",
     "change_terminology",
     "delete_terminology",
+    # classifications
+    "add_objectclassification",
+    "change_objectclassification",
+    "delete_objectclassification",
+    "add_classificationlevel",
+    "change_classificationlevel",
+    "delete_classificationlevel",
+    # workflows
+    "view_workflow",
+    "add_workflow",
+    "change_workflow",
+    "delete_workflow",
+    "view_workflowversion",
+    "add_workflowversion",
+    "change_workflowversion",
+    "delete_workflowversion",
+    "view_workflownode",
+    "add_workflownode",
+    "change_workflownode",
+    "delete_workflownode",
+    "view_workflowedge",
+    "add_workflowedge",
+    "change_workflowedge",
+    "delete_workflowedge",
+    "view_workflowvariable",
+    "add_workflowvariable",
+    "change_workflowvariable",
+    "delete_workflowvariable",
+    "view_conditiongroup",
+    "add_conditiongroup",
+    "change_conditiongroup",
+    "delete_conditiongroup",
+    "view_condition",
+    "add_condition",
+    "change_condition",
+    "delete_condition",
+    "view_workflowinstance",
+    "add_workflowinstance",
+    "change_workflowinstance",
+    "delete_workflowinstance",
+    "view_workflowtoken",
+    "change_workflowtoken",
+    "view_workflowinstancelog",
+    "view_workflowsecret",
+    "add_workflowsecret",
+    "change_workflowsecret",
+    "delete_workflowsecret",
+    "view_workflowtrigger",
+    "change_workflowtrigger",
     # pmbok
     "view_genericcollection",
     "add_genericcollection",
@@ -1270,6 +1728,30 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    "view_project",
+    "add_project",
+    "change_project",
+    "delete_project",
+    "view_responsibilityrole",
+    "add_responsibilityrole",
+    "change_responsibilityrole",
+    "delete_responsibilityrole",
+    "view_responsibilitymatrix",
+    "add_responsibilitymatrix",
+    "change_responsibilitymatrix",
+    "delete_responsibilitymatrix",
+    "view_responsibilitymatrixactivity",
+    "add_responsibilitymatrixactivity",
+    "change_responsibilitymatrixactivity",
+    "delete_responsibilitymatrixactivity",
+    "view_responsibilitymatrixactor",
+    "add_responsibilitymatrixactor",
+    "change_responsibilitymatrixactor",
+    "delete_responsibilitymatrixactor",
+    "view_responsibilityassignment",
+    "add_responsibilityassignment",
+    "change_responsibilityassignment",
+    "delete_responsibilityassignment",
     # metrology
     "view_metricdefinition",
     "add_metricdefinition",
@@ -1323,6 +1805,23 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
+    # portals
+    "view_portal",
+    "add_portal",
+    "change_portal",
+    "delete_portal",
+    "view_portalpreset",
+    "add_portalpreset",
+    "change_portalpreset",
+    "delete_portalpreset",
+    "view_publicdocument",
+    "add_publicdocument",
+    "change_publicdocument",
+    "delete_publicdocument",
+    "view_frameworksnapshot",
+    "add_frameworksnapshot",
+    "change_frameworksnapshot",
+    "delete_frameworksnapshot",
     # chat
     "add_chatsession",
     "view_chatsession",
@@ -1333,6 +1832,22 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_indexeddocument",
     "change_indexeddocument",
     "delete_indexeddocument",
+    "add_questionnairerun",
+    "view_questionnairerun",
+    "change_questionnairerun",
+    "delete_questionnairerun",
+    "add_questionnairequestion",
+    "view_questionnairequestion",
+    "change_questionnairequestion",
+    "delete_questionnairequestion",
+    "add_agentrun",
+    "view_agentrun",
+    "change_agentrun",
+    "delete_agentrun",
+    "add_agentaction",
+    "view_agentaction",
+    "change_agentaction",
+    "delete_agentaction",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
@@ -1386,6 +1901,9 @@ AUDITEE_PERMISSIONS_LIST = [
     "change_appliedcontrol",
     "delete_appliedcontrol",
     "view_framework",
+    "view_ttpcatalog",
+    "view_tactic",
+    "view_technique",
     # comments
     "add_comment",
     "view_comment",
@@ -1394,43 +1912,107 @@ AUDITEE_PERMISSIONS_LIST = [
 ]
 
 
-def startup(sender: AppConfig, **kwargs):
+TECHNICAL_TESTER_PERMISSIONS_LIST = [
+    "add_postureassessment",
+    "view_postureassessment",
+    "change_postureassessment",
+    "delete_postureassessment",
+    "add_postureresult",
+    "view_postureresult",
+    "change_postureresult",
+    "delete_postureresult",
+    "view_asset",
+    "view_framework",
+    "view_ttpcatalog",
+    "view_tactic",
+    "view_technique",
+    "view_requirementnode",
+    "view_folder",
+    "view_perimeter",
+    "view_securityexception",
+    "add_findingsassessment",
+    "view_findingsassessment",
+    "change_findingsassessment",
+    "delete_findingsassessment",
+    "add_finding",
+    "view_finding",
+    "change_finding",
+    "delete_finding",
+]
+
+
+def ensure_admin_user():
+    """Ensure the designated superuser exists and is in the admin group.
+
+    - FORCE_CREATE_ADMIN + email + user doesn't exist: create superuser
+    - FORCE_CREATE_ADMIN + email + user exists: promote to superuser
+    - Admin group empty + email + user doesn't exist: create superuser
+    - Always: sync all is_superuser users into the admin group
     """
-    Implement CISO Assistant 1.0 default Roles and User Groups during migrate
-    This makes sure root folder and global groups are defined before any other object is created
-    Create superuser if CISO_ASSISTANT_SUPERUSER_EMAIL defined
+    from iam.models import Folder, User, UserGroup
+
+    administrators = UserGroup.objects.get(
+        name="BI-UG-ADM", folder=Folder.get_root_folder()
+    )
+    admin_group_empty = (
+        User.objects.filter(user_groups=administrators).distinct().count() == 0
+    )
+
+    superuser_email = settings.CISO_ASSISTANT_SUPERUSER_EMAIL
+    if superuser_email:
+        superuser_exists = User.objects.filter(email=superuser_email).exists()
+
+        if not superuser_exists and (settings.FORCE_CREATE_ADMIN or admin_group_empty):
+            try:
+                User.objects.create_superuser(email=superuser_email, is_superuser=True)
+            except Exception as e:
+                logger.error("Error creating superuser", exc_info=True)
+        elif superuser_exists and settings.FORCE_CREATE_ADMIN:
+            user = User.objects.get(email=superuser_email)
+            if not user.is_superuser:
+                user.is_superuser = True
+                user.save(update_fields=["is_superuser", "is_active"])
+
+    for u in User.objects.filter(is_superuser=True):
+        u.user_groups.add(administrators)
+
+
+def startup(sender=None, **kwargs):
     """
+    Implement CISO Assistant 1.0 default Roles and User Groups during migrate.
+    This makes sure root folder and global groups are defined before any other
+    object is created.  Create superuser if CISO_ASSISTANT_SUPERUSER_EMAIL defined.
+
+    Connected to ``post_migrate`` without a sender filter.  Django emits
+    that signal once per app in ``INSTALLED_APPS`` order, but only for apps
+    that have a ``models`` module.  We wait for the last such app so that
+    every permission row (including those from apps after ``core`` such as
+    ``integrations`` and ``webhooks``) already exists when we call
+    ``role.permissions.set()``.
+    """
+    from django.apps import apps
+
+    migratable = [c for c in apps.get_app_configs() if c.models_module is not None]
+    if sender != migratable[-1]:
+        return
+
     from django.contrib.auth.models import Permission
 
-    from core.models import AssetCapability, AssetClass, Terminology
+    from core.models import (
+        AssetCapability,
+        AssetClass,
+        ObjectClassification,
+        Terminology,
+    )
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
-    from privacy.models import ProcessingNature
+    from privacy.models import create_default_privacy_terminologies
     from global_settings.models import GlobalSettings
     from integrations.models import IntegrationProvider
 
-    # first load in memory of the frameworks and mappings
     from core.mappings.engine import engine
 
     print("startup handler: initialize database")
-
-    reader_permissions = Permission.objects.filter(codename__in=READER_PERMISSIONS_LIST)
-
-    approver_permissions = Permission.objects.filter(
-        codename__in=APPROVER_PERMISSIONS_LIST
-    )
-
-    analyst_permissions = Permission.objects.filter(
-        codename__in=ANALYST_PERMISSIONS_LIST
-    )
-
-    domain_manager_permissions = Permission.objects.filter(
-        codename__in=DOMAIN_MANAGER_PERMISSIONS_LIST
-    )
-
-    administrator_permissions = Permission.objects.filter(
-        codename__in=ADMINISTRATOR_PERMISSIONS_LIST
-    )
 
     # if root folder does not exist, then create it
     if not Folder.objects.filter(content_type=Folder.ContentType.ROOT).exists():
@@ -1443,17 +2025,28 @@ def startup(sender: AppConfig, **kwargs):
             name="Main", folder=Folder.get_root_folder(), builtin=True
         )
         main.owned_folders.add(Folder.get_root_folder())
-    # update builtin roles to facilitate migrations
-    reader, created = Role.objects.get_or_create(name="BI-RL-AUD", builtin=True)
-    reader.permissions.set(reader_permissions)
-    approver, created = Role.objects.get_or_create(name="BI-RL-APP", builtin=True)
-    approver.permissions.set(approver_permissions)
-    analyst, created = Role.objects.get_or_create(name="BI-RL-ANA", builtin=True)
-    analyst.permissions.set(analyst_permissions)
-    domain_manager, created = Role.objects.get_or_create(name="BI-RL-DMA", builtin=True)
-    domain_manager.permissions.set(domain_manager_permissions)
-    administrator, created = Role.objects.get_or_create(name="BI-RL-ADM", builtin=True)
-    administrator.permissions.set(administrator_permissions)
+
+    # Sync builtin role permissions — all permission rows exist at this point
+    for name, perm_list in (
+        ("BI-RL-AUD", READER_PERMISSIONS_LIST),
+        ("BI-RL-APP", APPROVER_PERMISSIONS_LIST),
+        ("BI-RL-ANA", ANALYST_PERMISSIONS_LIST),
+        ("BI-RL-DMA", DOMAIN_MANAGER_PERMISSIONS_LIST),
+        ("BI-RL-ADM", ADMINISTRATOR_PERMISSIONS_LIST),
+        (
+            RoleCodename.THIRD_PARTY_RESPONDENT.value,
+            THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST,
+        ),
+        (RoleCodename.AUDITEE.value, AUDITEE_PERMISSIONS_LIST),
+        (RoleCodename.TECHNICAL_TESTER.value, TECHNICAL_TESTER_PERMISSIONS_LIST),
+    ):
+        role, _ = Role.objects.get_or_create(name=name, builtin=True)
+        role.permissions.set(Permission.objects.filter(codename__in=perm_list))
+    # backfill builtin groups (e.g. technical tester) on pre-existing domains
+    for folder in Folder.objects.filter(
+        content_type=Folder.ContentType.DOMAIN, create_iam_groups=True
+    ):
+        Folder.create_default_ug_and_ra(folder)
     # if global administrators user group does not exist, then create it
     if not UserGroup.objects.filter(
         name="BI-UG-ADM", folder=Folder.get_root_folder()
@@ -1520,22 +2113,6 @@ def startup(sender: AppConfig, **kwargs):
         )
         ra2.perimeter_folders.add(global_approvers.folder)
 
-    third_party_respondent_permissions = Permission.objects.filter(
-        codename__in=THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST
-    )
-    third_party_respondent, created = Role.objects.get_or_create(
-        name=RoleCodename.THIRD_PARTY_RESPONDENT.value, builtin=True
-    )
-    third_party_respondent.permissions.set(third_party_respondent_permissions)
-
-    auditee_permissions = Permission.objects.filter(
-        codename__in=AUDITEE_PERMISSIONS_LIST
-    )
-    auditee, created = Role.objects.get_or_create(
-        name=RoleCodename.AUDITEE.value, builtin=True
-    )
-    auditee.permissions.set(auditee_permissions)
-
     # if global auditees user group does not exist, then create it
     if not UserGroup.objects.filter(
         name=UserGroupCodename.GLOBAL_AUDITEE.value, folder=Folder.get_root_folder()
@@ -1547,7 +2124,7 @@ def startup(sender: AppConfig, **kwargs):
         )
         ra = RoleAssignment.objects.create(
             user_group=global_auditees,
-            role=auditee,
+            role=Role.objects.get(name=RoleCodename.AUDITEE.value),
             is_recursive=True,
             builtin=True,
             folder=Folder.get_root_folder(),
@@ -1572,11 +2149,11 @@ def startup(sender: AppConfig, **kwargs):
     except Exception as e:
         logger.error("Error creating default accreditation category", exc_info=True)
 
-    # Create default Processing natures
+    # Create default privacy terminologies (processing natures, personal data categories)
     try:
-        ProcessingNature.create_default_values()
+        create_default_privacy_terminologies()
     except Exception as e:
-        logger.error("Error creating default ProcessingNature", exc_info=True)
+        logger.error("Error creating default privacy terminologies", exc_info=True)
 
     # Create default AssetClass
     try:
@@ -1607,6 +2184,28 @@ def startup(sender: AppConfig, **kwargs):
     except Exception as e:
         logger.error("Error creating default Metric Units", exc_info=True)
 
+    try:
+        Terminology.create_default_project_statuses()
+    except Exception as e:
+        logger.error("Error creating default Project Statuses", exc_info=True)
+
+    try:
+        Terminology.create_default_project_health()
+    except Exception as e:
+        logger.error("Error creating default Project Health", exc_info=True)
+
+    try:
+        ObjectClassification.create_default_classifications()
+    except Exception as e:
+        logger.error("Error creating default classifications", exc_info=True)
+
+    try:
+        from pmbok.models import ResponsibilityRole
+
+        ResponsibilityRole.create_default_roles()
+    except Exception as e:
+        logger.error("Error creating default Responsibility Roles", exc_info=True)
+
     # Init integration providers
 
     try:
@@ -1628,35 +2227,19 @@ def startup(sender: AppConfig, **kwargs):
     call_command("autoloadlibraries")
     call_command("sync_event_types")
 
+    # Runs here (not in doc_management post_migrate) so the root folder the
+    # template folder FK needs already exists.
+    try:
+        call_command("sync_document_templates")
+    except Exception as e:
+        logger.error("Error syncing built-in document templates", exc_info=True)
+
     try:
         call_command("backfill_builtin_metrics")
     except Exception as e:
         logger.error("Error backfilling builtin metrics", exc_info=True)
 
-    # add administrators group to superusers (for resiliency)
-    administrators = UserGroup.objects.get(
-        name="BI-UG-ADM", folder=Folder.get_root_folder()
-    )
-    if (
-        User.objects.filter(user_groups=administrators).distinct().count() == 0
-        or settings.FORCE_CREATE_ADMIN
-    ):
-        # if superuser defined and does not exist, then create it
-        if (
-            settings.CISO_ASSISTANT_SUPERUSER_EMAIL
-            and not User.objects.filter(
-                email=settings.CISO_ASSISTANT_SUPERUSER_EMAIL
-            ).exists()
-        ):
-            try:
-                User.objects.create_superuser(
-                    email=settings.CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
-                )
-            except Exception as e:
-                logger.error("Error creating superuser", exc_info=True)
-
-        for u in User.objects.filter(is_superuser=True):
-            u.user_groups.add(administrators)
+    ensure_admin_user()
 
     # reset global setings in case of an issue
     default_settings = {
@@ -1671,6 +2254,8 @@ def startup(sender: AppConfig, **kwargs):
         "daily_rate": 500,
         "mapping_max_depth": 3,
         "show_warning_external_links": True,
+        "show_get_started": True,
+        "personal_folders": False,
         "allow_assignments_to_entities": False,
         "enforce_mfa": False,
     }
@@ -1750,14 +2335,3 @@ def startup(sender: AppConfig, **kwargs):
             get_graph()
         except Exception as e:
             logger.debug("knowledge_graph_prewarm_skipped", error=e)
-
-
-class CoreConfig(AppConfig):
-    default_auto_field = "django.db.models.BigAutoField"
-    name = "core"
-    verbose_name = "Core"
-
-    def ready(self):
-        # avoid post_migrate handler if we are in the main, as it interferes with restore
-        if not os.environ.get("RUN_MAIN"):
-            post_migrate.connect(startup, sender=self)

@@ -7,7 +7,6 @@
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
@@ -30,14 +29,6 @@
 
 	let openAccordionItems = $state([]);
 </script>
-
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 
 <AutocompleteSelect
 	{form}
@@ -255,6 +246,17 @@
 					label={m.remediationMeasures()}
 				/>
 
+				<AutocompleteSelect
+					{form}
+					field="evidences"
+					multiple
+					optionsEndpoint="evidences"
+					optionsExtraFields={[['folder', 'str']]}
+					cacheLock={cacheLocks['evidences']}
+					bind:cachedValue={formDataCache['evidences']}
+					label={m.evidences()}
+				/>
+
 				<TextField
 					{form}
 					field="reference_link"
@@ -275,11 +277,3 @@
 		</Accordion.ItemContent>
 	</Accordion.Item>
 </Accordion>
-
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>

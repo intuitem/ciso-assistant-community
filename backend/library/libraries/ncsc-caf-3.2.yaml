@@ -1,20 +1,22 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
 urn: urn:intuitem:risk:library:ncsc-caf-3.2
 locale: en
 ref_id: ncsc-caf-3.2
-name: Cyber Assessment Framework
+name: NCSC - Cyber Assessment Framework (CAF) v3.2
 description: 'National Cyber Security Centre - Cyber Assessment Framework
 
   https://www.ncsc.gov.uk/collection/cyber-assessment-framework'
 copyright: NCSC https://www.ncsc.gov.uk/collection/cyber-assessment-framework
-version: 1
-publication_date: 2024-06-30
+version: 2
+publication_date: 2026-05-19
 provider: NCSC
 packager: intuitem
 objects:
   framework:
     urn: urn:intuitem:risk:framework:ncsc-caf-3.2
     ref_id: ncsc-caf-3.2
-    name: Cyber Assessment Framework
+    name: NCSC - Cyber Assessment Framework (CAF) v3.2
     description: 'National Cyber Security Centre - Cyber Assessment Framework
 
       https://www.ncsc.gov.uk/collection/cyber-assessment-framework'

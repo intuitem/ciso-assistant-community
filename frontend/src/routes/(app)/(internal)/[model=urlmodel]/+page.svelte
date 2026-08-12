@@ -3,7 +3,13 @@
 	import { page } from '$app/state';
 
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import ImportWorkflowModal from '$lib/components/Modals/ImportWorkflowModal.svelte';
+	import ExportModal, {
+		type ExportGroup,
+		type ExportOption
+	} from '$lib/components/Modals/ExportModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { buildCustomFieldFilters, listViewFields } from '$lib/utils/table';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { driverInstance } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
@@ -27,7 +33,11 @@
 	let { data, form }: Props = $props();
 	const toastStore = getToastStore();
 	let URLModel = $derived(data.URLModel);
-	let exportPopupOpen = $state(false);
+	// Static (per-model) filters merged with dynamic custom-field filters.
+	const tableFilters = $derived({
+		...listViewFields[URLModel]?.filters,
+		...buildCustomFieldFilters(data.customFields ?? [])
+	});
 	let pullCatalogOpen = $state(false);
 	let currentFilterSearch = $state(page.url.search);
 
@@ -46,6 +56,70 @@
 
 	const modalStore: ModalStore = getModalStore();
 
+	function buildTableExportOptions(filterSearch: string): ExportOption[] {
+		const opts: ExportOption[] = [
+			{
+				titleKey: 'exportTableCsv',
+				descriptionKey: 'exportTableCsvDesc',
+				format: 'CSV',
+				href: `${URLModel}/export/${filterSearch}`,
+				testId: filterSearch ? 'export-option-csv-filtered' : 'export-option-csv-all'
+			},
+			{
+				titleKey: 'exportTableXlsx',
+				descriptionKey: 'exportTableXlsxDesc',
+				format: 'XLSX',
+				href: `${URLModel}/export/xlsx/${filterSearch}`,
+				testId: filterSearch ? 'export-option-xlsx-filtered' : 'export-option-xlsx-all'
+			}
+		];
+		if (URLModel === 'entities') {
+			opts.push({
+				titleKey: 'exportTableEcosystem',
+				descriptionKey: 'exportTableEcosystemDesc',
+				format: 'XLSX',
+				href: `/entities/export/ecosystem/${filterSearch}`,
+				testId: filterSearch ? 'export-option-ecosystem-filtered' : 'export-option-ecosystem-all'
+			});
+		}
+		if (URLModel === 'applied-controls') {
+			opts.push({
+				titleKey: 'exportTableMss',
+				descriptionKey: 'exportTableMssDesc',
+				format: 'XLSX',
+				href: `/applied-controls/export/mss-xlsx/${filterSearch}`,
+				testId: filterSearch ? 'export-option-mss-filtered' : 'export-option-mss-all'
+			});
+		}
+		return opts;
+	}
+
+	function modalExport(): void {
+		const hasFilters = currentFilterSearch.length > 0;
+		const groups: ExportGroup[] = hasFilters
+			? [
+					{
+						titleKey: 'exportGroupCurrentView',
+						options: buildTableExportOptions(currentFilterSearch)
+					},
+					{ titleKey: 'exportGroupEntireTable', options: buildTableExportOptions('') }
+				]
+			: [{ titleKey: '', options: buildTableExportOptions('') }];
+
+		const modalComponent: ModalComponent = {
+			ref: ExportModal,
+			props: {
+				title: m.exportOptionsTitle(),
+				groups
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
+		};
+		modalStore.trigger(modal);
+	}
+
 	function modalCreateForm(): void {
 		let modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -59,6 +133,21 @@
 			component: modalComponent,
 			// Data
 			title: safeTranslate('add-' + data.model.localName)
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalWorkflowImportForm(): void {
+		let modalComponent: ModalComponent = {
+			ref: ImportWorkflowModal,
+			props: {
+				form: data.model['workflowImportForm']
+			}
+		};
+		let modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate('importWorkflow')
 		};
 		modalStore.trigger(modal);
 	}
@@ -133,6 +222,7 @@
 		{#key URLModel}
 			<ModelTable
 				source={data.table}
+				{tableFilters}
 				deleteForm={data.deleteForm}
 				{URLModel}
 				disableEdit={['user-groups', 'validation-flows'].includes(URLModel)}
@@ -141,8 +231,17 @@
 			>
 				{#snippet addButton()}
 					<div class="relative">
-						<div class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
-							{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications'].includes(URLModel)}
+						<div class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
+							{#if URLModel === 'document-containers'}
+								<a
+									href="/documents/new"
+									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+									data-testid="add-button"
+									title={safeTranslate('add-' + data.model.localName)}
+									aria-label={safeTranslate('add-' + data.model.localName)}
+									><i class="fa-solid fa-file-circle-plus"></i>
+								</a>
+							{:else if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications'].includes(URLModel)}
 								<button
 									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 									data-testid="add-button"
@@ -152,14 +251,25 @@
 									onclick={handlers(modalCreateForm, handleClickForGT)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</button>
-								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings', 'task-templates', 'entities', 'solutions', 'contracts'].includes(URLModel)}
+								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings', 'task-templates', 'entities', 'solutions', 'contracts', 'representatives'].includes(URLModel)}
 									<button
 										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 										title={m.exportButton()}
 										data-testid="export-button"
-										onclick={() => (exportPopupOpen = !exportPopupOpen)}
+										onclick={modalExport}
 									>
 										<i class="fa-solid fa-download"></i>
+									</button>
+								{/if}
+								{#if URLModel === 'workflows'}
+									<button
+										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										title={m.importWorkflow()}
+										aria-label={m.importWorkflow()}
+										data-testid="import-workflow-button"
+										onclick={modalWorkflowImportForm}
+									>
+										<i class="fa-solid fa-file-import"></i>
 									</button>
 								{/if}
 								{#if URLModel === 'vulnerabilities'}
@@ -211,10 +321,17 @@
 										aria-label={m.kanbanMode()}
 										data-testid="kanban-mode-button"><i class="fa-solid fa-table-columns"></i></a
 									>
+									<a
+										href="{URLModel}/analytics/{currentFilterSearch}"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.appliedControlsAnalytics()}
+										aria-label={m.appliedControlsAnalytics()}
+										data-testid="analytics-button"><i class="fa-solid fa-chart-pie"></i></a
+									>
 								{/if}
 								{#if URLModel === 'security-advisories'}
 									<button
-										class="inline-block p-3 w-12 focus:relative bg-blue-50 hover:bg-blue-100"
+										class="inline-block p-3 w-12 focus:relative bg-blue-100 hover:bg-blue-200 dark:bg-blue-500/20 dark:hover:bg-blue-500/30"
 										title={m.syncKev()}
 										aria-label={m.syncKev()}
 										data-testid="sync-kev-button"
@@ -246,7 +363,7 @@
 										}}>🇺🇸</button
 									>
 									<button
-										class="inline-block p-3 w-12 focus:relative bg-yellow-50 hover:bg-yellow-100"
+										class="inline-block p-3 w-12 focus:relative bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-500/20 dark:hover:bg-yellow-500/30"
 										title={m.syncEuvd()}
 										aria-label={m.syncEuvd()}
 										data-testid="sync-euvd-button"
@@ -276,6 +393,15 @@
 												}
 											});
 										}}>🇪🇺</button
+									>
+								{/if}
+								{#if URLModel === 'document-templates'}
+									<a
+										href="{URLModel}/import"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.importTemplates()}
+										aria-label={m.importTemplates()}
+										data-testid="import-templates-button"><i class="fa-solid fa-file-import"></i></a
 									>
 								{/if}
 								{#if URLModel === 'cwes'}
@@ -320,6 +446,13 @@
 								{/if}
 								{#if URLModel === 'assets'}
 									<Anchor
+										href="assets/tree/"
+										class="inline-block p-3 btn-mini-quaternary w-12 focus:relative"
+										title={m.assetsTree()}
+										label={m.assetsTree()}
+										data-testid="tree-button"><i class="fa-solid fa-sitemap"></i></Anchor
+									>
+									<Anchor
 										href="assets/graph/"
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 										title={m.exploreButton()}
@@ -338,7 +471,7 @@
 								{/if}
 								{#if URLModel === 'folders'}
 									<button
-										class="text-gray-50 inline-block border-e p-3 bg-sky-400 hover:bg-sky-300 w-12 focus:relative"
+										class="text-white inline-block border-e p-3 bg-sky-400 hover:bg-sky-300 w-12 focus:relative"
 										data-testid="import-button"
 										title={safeTranslate('importFolder')}
 										aria-label={safeTranslate('importFolder')}
@@ -390,37 +523,6 @@
 								{/if}
 							{/if}
 						</div>
-						{#if exportPopupOpen}
-							<!-- svelte-ignore a11y_no_static_element_interactions -->
-							<div
-								class="fixed inset-0 z-40"
-								onclick={() => (exportPopupOpen = false)}
-								onkeydown={() => {}}
-							></div>
-							<div
-								class="absolute right-0 z-50 mt-1 card whitespace-nowrap bg-white py-2 w-fit shadow-lg"
-							>
-								<div class="flex flex-col">
-									<a
-										href="{URLModel}/export/"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										onclick={() => (exportPopupOpen = false)}>... {m.asCSV()}</a
-									>
-									<a
-										href="{URLModel}/export/xlsx/"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										onclick={() => (exportPopupOpen = false)}>... {m.asXLSX()}</a
-									>
-									{#if URLModel === 'entities'}
-										<a
-											href="/entities/export/ecosystem/"
-											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-											onclick={() => (exportPopupOpen = false)}>... {m.exportEcosystem()}</a
-										>
-									{/if}
-								</div>
-							</div>
-						{/if}
 					</div>
 				{/snippet}
 				{#snippet badge(key, row)}

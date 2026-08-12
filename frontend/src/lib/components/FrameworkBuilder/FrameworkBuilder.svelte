@@ -18,6 +18,7 @@
 		createHandleGatedDragHandlers
 	} from './builder-utils.svelte';
 	import { locales as supportedLocales } from '$paraglide/runtime';
+	import { m } from '$paraglide/messages';
 	import { installKeyboardHandlers } from './keyboard';
 	import {
 		createCollapsedStore,
@@ -33,18 +34,39 @@
 	import OutcomesEditor from './OutcomesEditor.svelte';
 	import ImplementationGroupsEditor from './ImplementationGroupsEditor.svelte';
 	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
+	import { initReferentialCatalog } from './referential-catalog';
 
 	interface Props {
 		framework: Framework;
 		requirementNodes: RequirementNode[];
 		questions: Question[];
 		editingDraft?: DraftJSON | null;
+		/** Adapter path for the _action protocol (defaults to the live-framework builder) */
+		apiTarget?: string | null;
+		/** Toolbar link overrides for non-live hosts (null preview hides the link) */
+		links?: { back?: string; preview?: string | null; exportYaml?: string } | null;
 	}
 
-	let { framework, requirementNodes, questions, editingDraft = null }: Props = $props();
+	let {
+		framework,
+		requirementNodes,
+		questions,
+		editingDraft = null,
+		apiTarget = null,
+		links = null
+	}: Props = $props();
 
-	const builder = createBuilderState(framework, requirementNodes, questions, editingDraft);
+	const builder = createBuilderState(
+		framework,
+		requirementNodes,
+		questions,
+		editingDraft,
+		apiTarget ? { apiTarget } : undefined
+	);
 	setBuilderContext(builder);
+	// Threats / reference controls pickable on nodes; hosts without the
+	// reference-catalog action leave the store errored and the UI hidden.
+	initReferentialCatalog(builder.apiTarget);
 
 	const cardCollapsed = createCollapsedStore(`fw-builder:${framework.id}:cards:collapsed`);
 	setCardCollapsedContext(cardCollapsed);
@@ -58,7 +80,6 @@
 		errors: errorsStore,
 		saving: savingStore,
 		unsaved: unsavedStore,
-		unpublished: unpublishedStore,
 		activeLanguage: activeLanguageStore
 	} = builder;
 
@@ -79,6 +100,8 @@
 	const urnCopy = createCopyHandler();
 	let helpOpen = $state(false);
 	let showSettings = $state(false);
+	// Compliance assessments lock the URN namespace + ref_id inputs once present.
+	let lockUrnEdits = $derived($frameworkStore.has_compliance_assessments);
 	let showScoringSettings = $state(false);
 	let showScalesEditor = $state(false);
 	let newLangCode = $state('');
@@ -88,9 +111,9 @@
 		const parts: string[] = [];
 		const rules = ($frameworkStore.outcomes_definition ?? []).length;
 		const groups = ($frameworkStore.implementation_groups_definition ?? []).length;
-		if (rules > 0) parts.push(`${rules} outcome rule${rules > 1 ? 's' : ''}`);
-		if (groups > 0) parts.push(`${groups} group${groups > 1 ? 's' : ''}`);
-		return parts.length > 0 ? parts.join(', ') : 'No rules or groups configured';
+		if (rules > 0) parts.push(m.builderOutcomeRuleSummary({ count: rules }));
+		if (groups > 0) parts.push(m.builderImplementationGroupsSummaryShort({ count: groups }));
+		return parts.length > 0 ? parts.join(', ') : m.builderNoRulesOrGroupsConfigured();
 	});
 
 	interface ScaleEntry {
@@ -201,23 +224,15 @@
 		}
 	}
 
-	// Warn on SvelteKit navigation — different message depending on save state
+	// Warn on SvelteKit navigation only for unsaved local edits: once saved,
+	// the library-draft document is the persisted state (publishing is a
+	// separate, library-level concern).
 	beforeNavigate((navigation) => {
 		if (navigation.to?.route?.id === navigation.from?.route?.id) return;
 		let hasUnsaved = false;
-		let hasUnpublished = false;
 		unsavedStore.subscribe((v) => (hasUnsaved = v))();
-		unpublishedStore.subscribe((v) => (hasUnpublished = v))();
 		if (hasUnsaved) {
-			if (!confirm('You have unsaved changes that will be lost. Leave anyway?')) {
-				navigation.cancel();
-			}
-		} else if (hasUnpublished) {
-			if (
-				!confirm(
-					'You have unpublished changes. Your draft is saved and you can resume later. Leave anyway?'
-				)
-			) {
+			if (!confirm(m.builderUnsavedChangesNavigation())) {
 				navigation.cancel();
 			}
 		}
@@ -302,9 +317,10 @@
 
 <svelte:window onkeydown={handleGlobalKey} />
 
-<div class="card !p-0 bg-white shadow-lg overflow-visible">
+<div class="card !p-0 bg-surface-50-950 shadow-lg overflow-visible">
 	<BuilderMinimap
 		frameworkId={framework.id}
+		{links}
 		onOpenHelp={() => (helpOpen = true)}
 		onExpandAllCards={() => cardCollapsed.expandAll()}
 		onCollapseAllCards={() => cardCollapsed.collapseAll(collectAllParentIds($rootNodesStore))}
@@ -314,20 +330,20 @@
 		<BuilderToC />
 
 		<div class="flex-1 min-w-0">
-			<div class="{$activeLanguageStore ? 'max-w-5xl' : 'max-w-3xl'} mx-auto px-6 py-8 space-y-8">
+			<div class="max-w-5xl mx-auto px-6 py-8 space-y-8">
 				<!-- Framework metadata -->
 				<div class="space-y-2" data-framework-metadata>
 					{#if $activeLanguageStore}
 						<div class="grid grid-cols-2 gap-4">
 							<div>
-								<span class="text-[10px] text-gray-400 uppercase tracking-wider"
+								<span class="text-[10px] text-surface-500 uppercase tracking-wider"
 									>{$frameworkStore.locale?.toUpperCase() ?? 'BASE'}</span
 								>
 								<input
 									type="text"
 									value={$frameworkStore.name}
 									readonly
-									class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent py-1 text-gray-400 cursor-default"
+									class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent py-1 text-surface-500 cursor-default"
 								/>
 								<textarea
 									value={$frameworkStore.description ?? ''}
@@ -343,7 +359,7 @@
 								<input
 									type="text"
 									value={getTranslation($frameworkStore.translations, $activeLanguageStore, 'name')}
-									placeholder="Translate name..."
+									placeholder={m.builderTranslateName()}
 									class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-blue-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1"
 									onblur={(e) => {
 										builder.updateFramework({
@@ -362,7 +378,7 @@
 										$activeLanguageStore,
 										'description'
 									)}
-									placeholder="Translate description..."
+									placeholder={m.builderTranslateDescription()}
 									rows="2"
 									class="w-full text-sm bg-transparent border-0 border-b border-transparent hover:border-blue-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
 									onblur={(e) => {
@@ -382,17 +398,17 @@
 						<input
 							type="text"
 							value={$frameworkStore.name}
-							placeholder="Framework name"
-							class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1"
+							placeholder={m.builderFrameworkNamePlaceholder()}
+							class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1"
 							onblur={(e) => {
 								builder.updateFramework({ name: e.currentTarget.value });
 							}}
 						/>
 						<textarea
 							value={$frameworkStore.description ?? ''}
-							placeholder="Framework description (optional)"
+							placeholder={m.builderFrameworkDescriptionPlaceholder()}
 							rows="2"
-							class="w-full text-sm text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
+							class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
 							onblur={(e) => {
 								builder.updateFramework({ description: e.currentTarget.value || null });
 							}}
@@ -401,14 +417,14 @@
 					{#if $frameworkStore.urn}
 						<button
 							type="button"
-							class="inline-flex items-center gap-1 text-xs font-mono text-gray-300 hover:text-gray-500 transition-colors truncate max-w-full text-left group/urn"
+							class="inline-flex items-center gap-1 text-xs font-mono text-gray-300 hover:text-surface-600-400 transition-colors truncate max-w-full text-left group/urn"
 							onclick={() => urnCopy.copy($frameworkStore.urn ?? '')}
 						>
 							<i
 								class="fa-solid {urnCopy.copied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"
 							></i>
 							{#if urnCopy.copied}
-								<span class="text-green-500">Copied!</span>
+								<span class="text-green-500">{m.copied()}</span>
 							{:else}
 								{$frameworkStore.urn}
 							{/if}
@@ -420,73 +436,98 @@
 				</div>
 
 				<!-- Framework Settings (collapsed by default) -->
-				<div class="border border-gray-200 rounded-lg overflow-hidden">
+				<div class="border border-surface-200-800 rounded-lg overflow-hidden">
 					<button
 						type="button"
-						class="w-full flex items-center justify-between px-4 py-2.5 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+						class="w-full flex items-center justify-between px-4 py-2.5 bg-surface-50-950 hover:bg-surface-100-900 transition-colors text-left"
 						onclick={() => (showSettings = !showSettings)}
 					>
 						<div class="flex items-center gap-2">
 							<i
 								class="fa-solid {showSettings
 									? 'fa-chevron-down'
-									: 'fa-chevron-right'} text-[10px] text-gray-400"
+									: 'fa-chevron-right'} text-[10px] text-surface-500"
 							></i>
-							<span class="text-xs font-semibold text-gray-600 uppercase tracking-wider"
-								>Framework Settings</span
+							<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wider"
+								>{m.builderFrameworkSettings()}</span
 							>
 							{#if !showSettings}
-								<span class="text-xs text-gray-400">{settingsSummary}</span>
+								<span class="text-xs text-surface-500">{settingsSummary}</span>
 							{/if}
 						</div>
-						<i class="fa-solid fa-gear text-xs text-gray-400"></i>
+						<i class="fa-solid fa-gear text-xs text-surface-500"></i>
 					</button>
 					{#if showSettings}
-						<div class="px-4 py-4 space-y-6 border-t border-gray-200">
+						<div class="px-4 py-4 space-y-6 border-t border-surface-200-800">
 							<!-- Annotation -->
 							<div>
-								<span class="text-xs font-medium text-gray-500 uppercase tracking-wider"
-									>Annotation</span
+								<span class="text-xs font-medium text-surface-600-400 uppercase tracking-wider"
+									>{m.annotation()}</span
 								>
 								<textarea
 									value={$frameworkStore.annotation ?? ''}
-									placeholder="Framework annotation (optional guidance text)"
+									placeholder={m.builderFrameworkAnnotationPlaceholder()}
 									rows="2"
-									class="mt-1 w-full text-sm text-gray-500 bg-transparent border border-gray-200 rounded-lg px-3 py-2 hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+									class="mt-1 w-full text-sm text-surface-600-400 bg-transparent border border-surface-200-800 rounded-lg px-3 py-2 hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 									onblur={(e) => {
 										builder.updateFramework({ annotation: e.currentTarget.value || null });
 									}}
 								></textarea>
 							</div>
 
-							<!-- URN namespace -->
+							<!-- URN namespace + ref_id -->
 							<div>
-								<label class="block">
-									<span class="text-xs text-gray-500 uppercase tracking-wider font-medium"
-										>URN namespace</span
+								<div class="flex gap-3">
+									<label class="block">
+										<span class="text-xs text-surface-600-400 uppercase tracking-wider font-medium"
+											>{m.builderUrnNamespace()}</span
+										>
+										<input
+											type="text"
+											value={$frameworkStore.urn_namespace ?? 'custom'}
+											placeholder="custom"
+											pattern="[a-zA-Z0-9_-]+"
+											class="mt-1 w-48 text-sm font-mono border border-surface-200-800 rounded bg-surface-100-900 px-2 py-1 text-surface-950-50 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
+												? 'text-surface-500 cursor-not-allowed'
+												: ''}"
+											readonly={lockUrnEdits}
+											onblur={(e) => {
+												if (lockUrnEdits) return;
+												const val =
+													e.currentTarget.value.replace(/[^a-zA-Z0-9_-]/g, '') || 'custom';
+												builder.updateFramework({ urn_namespace: val });
+											}}
+										/>
+									</label>
+									<label class="block">
+										<span class="text-xs text-surface-600-400 uppercase tracking-wider font-medium"
+											>{m.frameworkRefId()}</span
+										>
+										<input
+											type="text"
+											value={$frameworkStore.ref_id ?? ''}
+											placeholder="my-framework"
+											pattern="[a-zA-Z0-9_-]+"
+											class="mt-1 w-48 text-sm font-mono border border-surface-200-800 rounded bg-surface-100-900 px-2 py-1 text-surface-950-50 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
+												? 'text-surface-500 cursor-not-allowed'
+												: ''}"
+											readonly={lockUrnEdits}
+											onblur={(e) => {
+												if (lockUrnEdits) return;
+												const val = e.currentTarget.value.replace(/[^a-zA-Z0-9_-]/g, '');
+												builder.updateFramework({ ref_id: val || null });
+											}}
+										/>
+									</label>
+								</div>
+								<p class="text-[10px] text-surface-500 mt-0.5">
+									{m.urnPreview()}
+									<code
+										>urn:{$frameworkStore.urn_namespace ??
+											'custom'}:risk:framework:{$frameworkStore.ref_id || '…'}</code
 									>
-									<input
-										type="text"
-										value={$frameworkStore.urn_namespace ?? 'custom'}
-										placeholder="custom"
-										pattern="[a-zA-Z0-9_-]+"
-										class="mt-1 w-48 text-sm font-mono border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {$frameworkStore.editing_version >
-										1
-											? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-											: ''}"
-										readonly={$frameworkStore.editing_version > 1}
-										onblur={(e) => {
-											if ($frameworkStore.editing_version > 1) return;
-											const val = e.currentTarget.value.replace(/[^a-zA-Z0-9_-]/g, '') || 'custom';
-											builder.updateFramework({ urn_namespace: val });
-										}}
-									/>
-								</label>
-								<p class="text-[10px] text-gray-400 mt-0.5">
-									Organization in URN prefix (urn:<b>{$frameworkStore.urn_namespace ?? 'custom'}</b
-									>:risk:...).
-									{#if $frameworkStore.editing_version > 1}
-										Locked after first publish.
+									{#if lockUrnEdits}
+										{m.urnLockedComplianceAssessment()}
 									{/if}
 								</p>
 							</div>
@@ -495,7 +536,7 @@
 							<div class="space-y-1.5">
 								<button
 									type="button"
-									class="flex items-center gap-1.5 text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700 transition-colors"
+									class="flex items-center gap-1.5 text-xs font-medium text-surface-600-400 uppercase tracking-wider hover:text-surface-700-300 transition-colors"
 									onclick={() => (showScoringSettings = !showScoringSettings)}
 								>
 									<i
@@ -503,17 +544,19 @@
 											? 'fa-chevron-down'
 											: 'fa-chevron-right'} text-[9px]"
 									></i>
-									Scoring settings
+									{m.builderScoringSettings()}
 								</button>
 								{#if showScoringSettings}
-									<div class="border border-gray-200 rounded-lg bg-gray-50/50 px-3 py-3 space-y-3">
+									<div
+										class="border border-surface-200-800 rounded-lg bg-surface-50-950/50 px-3 py-3 space-y-3"
+									>
 										<div class="grid grid-cols-3 gap-3">
 											<label class="block">
-												<span class="text-xs text-gray-500">Min score</span>
+												<span class="text-xs text-surface-600-400">{m.minScore()}</span>
 												<input
 													type="number"
 													value={$frameworkStore.min_score}
-													class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+													class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 													onblur={(e) => {
 														builder.updateFramework({
 															min_score: parseInt(e.currentTarget.value) || 0
@@ -522,11 +565,11 @@
 												/>
 											</label>
 											<label class="block">
-												<span class="text-xs text-gray-500">Max score</span>
+												<span class="text-xs text-surface-600-400">{m.maxScore()}</span>
 												<input
 													type="number"
 													value={$frameworkStore.max_score}
-													class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+													class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 													onblur={(e) => {
 														builder.updateFramework({
 															max_score: parseInt(e.currentTarget.value) || 100
@@ -535,27 +578,26 @@
 												/>
 											</label>
 											<label class="block">
-												<span class="text-xs text-gray-500">Aggregation</span>
+												<span class="text-xs text-surface-600-400">{m.aggregation()}</span>
 												<select
 													value={getAggregation()}
-													class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
+													class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-surface-50-950"
 													onchange={(e) => setAggregation(e.currentTarget.value)}
 												>
-													<option value="average">Average</option>
-													<option value="sum">Sum</option>
+													<option value="average">{m.average()}</option>
+													<option value="sum">{m.sum()}</option>
 												</select>
 											</label>
 										</div>
-										<p class="text-xs text-gray-400">
-											<strong>Average</strong> divides total score by number of questions.
-											<strong>Sum</strong> adds all scores directly. Use Sum for binary (0/1) scoring.
+										<p class="text-xs text-surface-500">
+											{m.builderAggregationHint()}
 										</p>
 
 										<!-- Scale entries editor -->
-										<div class="border-t border-gray-200 pt-3 space-y-2">
+										<div class="border-t border-surface-200-800 pt-3 space-y-2">
 											<button
 												type="button"
-												class="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
+												class="flex items-center gap-1.5 text-xs font-medium text-surface-600-400 hover:text-surface-700-300 transition-colors"
 												onclick={() => (showScalesEditor = !showScalesEditor)}
 											>
 												<i
@@ -563,22 +605,23 @@
 														? 'fa-chevron-down'
 														: 'fa-chevron-right'} text-[9px]"
 												></i>
-												Score scale ({scaleEntries.length}
-												{scaleEntries.length === 1 ? 'level' : 'levels'})
+												{m.builderScoreScale()} ({m.builderScaleLevel({
+													count: scaleEntries.length
+												})})
 											</button>
 											{#if showScalesEditor}
 												<div class="space-y-1.5">
 													{#each scaleEntries as entry, idx}
 														<div
-															class="bg-white border border-gray-200 rounded px-2 py-1.5 space-y-1"
+															class="bg-surface-50-950 border border-surface-200-800 rounded px-2 py-1.5 space-y-1"
 														>
 															<div class="flex items-start gap-2">
 																<label class="block w-16 shrink-0">
-																	<span class="text-[10px] text-gray-400">Score</span>
+																	<span class="text-[10px] text-surface-500">{m.score()}</span>
 																	<input
 																		type="number"
 																		value={entry.score}
-																		class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																		class="input w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																		onblur={(e) => {
 																			const entries = [...scaleEntries];
 																			entries[idx].score = parseInt(e.currentTarget.value) || 0;
@@ -587,12 +630,12 @@
 																	/>
 																</label>
 																<label class="block flex-1 min-w-0">
-																	<span class="text-[10px] text-gray-400">Name</span>
+																	<span class="text-[10px] text-surface-500">{m.name()}</span>
 																	<input
 																		type="text"
 																		value={entry.name}
-																		placeholder="e.g. Partial"
-																		class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																		placeholder={m.builderScaleNamePlaceholder()}
+																		class="input w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																		onblur={(e) => {
 																			const entries = [...scaleEntries];
 																			entries[idx].name = e.currentTarget.value;
@@ -601,12 +644,13 @@
 																	/>
 																</label>
 																<label class="block flex-1 min-w-0">
-																	<span class="text-[10px] text-gray-400">Description</span>
+																	<span class="text-[10px] text-surface-500">{m.description()}</span
+																	>
 																	<input
 																		type="text"
 																		value={entry.description}
-																		placeholder="Optional"
-																		class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																		placeholder={m.builderScaleDescriptionPlaceholder()}
+																		class="input w-full text-sm border border-surface-200-800 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																		onblur={(e) => {
 																			const entries = [...scaleEntries];
 																			entries[idx].description = e.currentTarget.value;
@@ -629,17 +673,19 @@
 															{#if $activeLanguageStore}
 																{@const lang = $activeLanguageStore}
 																<div
-																	class="flex items-start gap-2 pl-16 border-t border-gray-100 pt-1"
+																	class="flex items-start gap-2 pl-16 border-t border-surface-100-900 pt-1"
 																>
 																	<label class="block flex-1 min-w-0">
 																		<span class="text-[10px] text-blue-500"
-																			>{lang.toUpperCase()} Name</span
+																			>{m.builderScaleNameTranslate({
+																				lang: lang.toUpperCase()
+																			})}</span
 																		>
 																		<input
 																			type="text"
 																			value={getTranslation(entry.translations, lang, 'name')}
-																			placeholder="Translate name..."
-																			class="w-full text-sm border border-blue-100 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																			placeholder={m.builderTranslateName()}
+																			class="input w-full text-sm border border-blue-100 dark:border-blue-900/40 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																			onblur={(e) => {
 																				const entries = [...scaleEntries];
 																				entries[idx].translations = withTranslation(
@@ -654,7 +700,9 @@
 																	</label>
 																	<label class="block flex-1 min-w-0">
 																		<span class="text-[10px] text-blue-500"
-																			>{lang.toUpperCase()} Description</span
+																			>{m.builderScaleDescriptionTranslate({
+																				lang: lang.toUpperCase()
+																			})}</span
 																		>
 																		<input
 																			type="text"
@@ -663,8 +711,8 @@
 																				lang,
 																				'description'
 																			)}
-																			placeholder="Translate description..."
-																			class="w-full text-sm border border-blue-100 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+																			placeholder={m.builderTranslateDescription()}
+																			class="input w-full text-sm border border-blue-100 dark:border-blue-900/40 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 																			onblur={(e) => {
 																				const entries = [...scaleEntries];
 																				entries[idx].translations = withTranslation(
@@ -690,7 +738,7 @@
 															setScaleEntries(entries);
 														}}
 													>
-														<i class="fa-solid fa-plus mr-1"></i>Add scale level
+														<i class="fa-solid fa-plus mr-1"></i>{m.builderAddScaleLevel()}
 													</button>
 												</div>
 											{/if}
@@ -732,17 +780,17 @@
 
 							<!-- Languages -->
 							<div class="space-y-1.5">
-								<span class="text-xs font-medium text-gray-500 uppercase tracking-wider"
-									>Languages</span
+								<span class="text-xs font-medium text-surface-600-400 uppercase tracking-wider"
+									>{m.builderLanguagesSection()}</span
 								>
-								<p class="text-xs text-gray-400">
-									Set the base language and add target languages for translation.
+								<p class="text-xs text-surface-500">
+									{m.builderLanguagesHint()}
 								</p>
 								<div class="flex items-center gap-2 py-1">
-									<span class="text-sm text-gray-600 w-24">Base language</span>
+									<span class="text-sm text-surface-600-400 w-24">{m.builderBaseLanguage()}</span>
 									<select
 										value={$frameworkStore.locale ?? 'en'}
-										class="text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
+										class="text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-surface-50-950"
 										onchange={(e) => builder.setBaseLocale(e.currentTarget.value)}
 									>
 										{#each supportedLocales as code}
@@ -751,7 +799,7 @@
 									</select>
 								</div>
 								<div class="space-y-1">
-									<span class="text-xs text-gray-500">Target languages</span>
+									<span class="text-xs text-surface-600-400">{m.builderTargetLanguages()}</span>
 									<div class="flex flex-wrap gap-1.5">
 										{#each $frameworkStore.available_languages ?? [] as lang}
 											<span
@@ -772,9 +820,9 @@
 										<div class="flex items-center gap-1.5 mt-1">
 											<select
 												bind:value={newLangCode}
-												class="text-xs border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
+												class="text-xs border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-surface-50-950"
 											>
-												<option value="">Add a language...</option>
+												<option value="">{m.builderAddLanguagePlaceholder()}</option>
 												{#each addableLocales as code}
 													<option value={code}>{localeLabel(code)}</option>
 												{/each}
@@ -788,7 +836,7 @@
 													newLangCode = '';
 												}}
 											>
-												<i class="fa-solid fa-plus mr-0.5"></i>Add
+												<i class="fa-solid fa-plus mr-0.5"></i>{m.builderAdd()}
 											</button>
 										</div>
 									{/if}
@@ -820,14 +868,14 @@
 
 					<AddNodeMenu
 						parent={null}
-						triggerLabel={'+ Add top-level node'}
-						triggerClass="w-full py-4 border-2 border-dashed border-gray-200 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
+						triggerLabel={m.builderAddTopLevelNode()}
+						triggerClass="w-full py-4 border-2 border-dashed border-surface-200-800 rounded-lg text-sm text-surface-500 hover:text-surface-600-400 hover:border-surface-300-700 transition-colors"
 					/>
 				{/if}
 
 				<!-- Global errors -->
 				{#each [...$errorsStore.entries()] as [key, message] (key)}
-					{#if key.startsWith('add-') || key.startsWith('reorder-') || key === 'save-draft' || key === 'publish' || key === 'discard'}
+					{#if key.startsWith('add-') || key.startsWith('reorder-') || key === 'save-draft'}
 						<div class="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
 							{message}
 						</div>

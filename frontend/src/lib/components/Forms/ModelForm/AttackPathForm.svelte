@@ -1,11 +1,10 @@
 <script lang="ts">
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import Checkbox from '../Checkbox.svelte';
-	import TextArea from '../TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 
 	interface Props {
@@ -39,21 +38,6 @@
 	label={m.strategicScenario()}
 	hidden={initialData['strategic_scenario']}
 />
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.folder()}
-	hidden
-/>
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 <AutocompleteSelect
 	{form}
 	multiple
@@ -75,7 +59,7 @@
 	label={m.selected()}
 	helpText={m.attackPathIsSelectedHelpText()}
 />
-<TextArea
+<MarkdownField
 	{form}
 	field="justification"
 	label={m.justification()}

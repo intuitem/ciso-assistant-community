@@ -8,6 +8,8 @@ from typing import Protocol, Iterator
 import json
 import structlog
 
+from chat.embedding_models import DEFAULT_EMBEDDING_MODEL
+
 logger = structlog.get_logger(__name__)
 
 
@@ -20,10 +22,17 @@ DEFAULT_SYSTEM_PROMPT = (
     "(ISO 27001, NIST CSF, NIS2, GDPR, SOC2, etc.) and can answer questions about their requirements.\n\n"
     "RULES:\n"
     "- Answer ONLY based on the provided context. Never invent data, counts, or object names.\n"
+    "- Report counts exactly as given. Never add, subtract or estimate numbers yourself — "
+    "if a total you need is not present, say which query would produce it instead of "
+    "computing one.\n"
     "- If the context doesn't contain enough information, say so clearly.\n"
     "- When citing framework requirements, always include the framework name and reference ID "
     "(e.g. 'ISO 27001 A.8.1', 'NIST CSF PR.AC-1'). These are your sources.\n"
     "- Be concise and precise. Prefer structured output (lists, tables) for data.\n"
+    "- Query results carry ratings you must read before saying data is missing: risk "
+    "scenarios come with 'Current/Residual/Inherent risk level breakdown' counts and "
+    "per-scenario current_risk=/residual_risk= labels; findings and vulnerabilities "
+    "come with a 'Severity breakdown'. '--' means not rated.\n"
     "- You can read data and propose creating new objects. You cannot modify or delete anything.\n"
     "- Only propose creating objects when the user EXPLICITLY asks to create something. "
     "Never proactively suggest creating objects unless asked.\n"
@@ -57,6 +66,22 @@ TOOL_SYSTEM_PROMPT = (
     "- 'risk scenarios with no controls' → model='risk_scenario', has_no_related=['applied_controls']\n"
     "- 'my domains' → model='folder', action='list'\n"
     "- 'summarize risks' → model='risk_scenario', action='summary'\n"
+    "- 'how many high risks' / 'combien de risques élevés' → model='risk_scenario', "
+    "action='count', risk_level=['high'] (use the level wording the user used; add "
+    "risk_level_scope='residual' when they ask about residual risk)\n"
+    "- 'high or very high risks' / 'risques élevés ou très élevés' → ONE call with "
+    "risk_level=['high','very high']. Never run two queries and add the numbers.\n"
+    "- 'how many are non-compliant' / 'combien ne sont pas conformes' / 'gaps' → "
+    "model='requirement_assessment', action='count', result=['non_compliant'] "
+    "(on an audit page this is scoped to that audit automatically)\n"
+    "- 'non-compliant OR partially compliant' / 'non conformes ou partiellement "
+    "conformes' → ONE call with result=['non_compliant','partially_compliant']. "
+    "Filters accept several values — never run two queries and add the numbers.\n"
+    "- 'where are the gaps' / 'compliance breakdown' → "
+    "model='requirement_assessment', action='summary'\n"
+    "- 'open findings' / 'constats ouverts' → model='finding', action='summary'\n"
+    "- 'critical findings' / 'constats critiques' → model='finding', action='list', "
+    "severity=['critical']\n"
     "- 'where are we on X' / 'status of X' → model='compliance_assessment', search='X'\n"
     "- 'did we audit X' / 'audit on X' → model='compliance_assessment', search='X' (do NOT add domain filter)\n"
     "- 'list audits' / 'list assessments' → model='compliance_assessment', action='list'\n\n"
@@ -195,7 +220,7 @@ class LLM(Protocol):
 class SentenceTransformerEmbedder:
     """Local embeddings using sentence-transformers. No external service needed."""
 
-    def __init__(self, model_name: str = "paraphrase-multilingual-MiniLM-L12-v2"):
+    def __init__(self, model_name: str = DEFAULT_EMBEDDING_MODEL):
         from sentence_transformers import SentenceTransformer
 
         self.model = SentenceTransformer(model_name)
@@ -280,22 +305,29 @@ class OllamaLLM:
         model: str = "mistral",
         base_url: str = "http://localhost:11434",
         system_prompt: str = "",
+        temperature_enabled: bool = True,
+        temperature: float = 0,
     ):
         import httpx
 
         self.model = model
         self.base_url = base_url
         self.system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
+        self.temperature_enabled = temperature_enabled
+        self.temperature = temperature
         self.client = httpx.Client(timeout=120)
+
+    def _options(self) -> dict:
+        return {"temperature": self.temperature} if self.temperature_enabled else {}
 
     def generate(
         self, prompt: str, context: str, history: list[dict] | None = None
     ) -> str:
         messages = _build_messages(self.system_prompt, prompt, context, history)
-        resp = self.client.post(
-            f"{self.base_url}/api/chat",
-            json={"model": self.model, "messages": messages, "stream": False},
-        )
+        body: dict = {"model": self.model, "messages": messages, "stream": False}
+        if options := self._options():
+            body["options"] = options
+        resp = self.client.post(f"{self.base_url}/api/chat", json=body)
         resp.raise_for_status()
         return strip_thinking(resp.json()["message"]["content"])
 
@@ -305,10 +337,13 @@ class OllamaLLM:
         import httpx
 
         messages = _build_messages(self.system_prompt, prompt, context, history)
+        body: dict = {"model": self.model, "messages": messages, "stream": True}
+        if options := self._options():
+            body["options"] = options
         with httpx.stream(
             "POST",
             f"{self.base_url}/api/chat",
-            json={"model": self.model, "messages": messages, "stream": True},
+            json=body,
             timeout=120,
         ) as resp:
             for line in resp.iter_lines():
@@ -334,17 +369,19 @@ class OllamaLLM:
                 messages.append({"role": msg["role"], "content": msg["content"]})
         messages.append({"role": "user", "content": prompt})
 
+        import httpx
+
+        body: dict = {
+            "model": self.model,
+            "messages": messages,
+            "tools": tools,
+            "stream": False,
+        }
+        if options := self._options():
+            body["options"] = options
+
         try:
-            resp = self.client.post(
-                f"{self.base_url}/api/chat",
-                json={
-                    "model": self.model,
-                    "messages": messages,
-                    "tools": tools,
-                    "stream": False,
-                    "options": {"temperature": 0},
-                },
-            )
+            resp = self.client.post(f"{self.base_url}/api/chat", json=body)
             resp.raise_for_status()
             data = resp.json()
             message = data.get("message", {})
@@ -367,6 +404,8 @@ class OllamaLLM:
                 "no_tool_called",
                 content=message.get("content", "")[:200],
             )
+        except httpx.HTTPStatusError as e:
+            logger.warning("tool_call_failed", status=e.response.status_code)
         except Exception as e:
             logger.warning("tool_call_failed", error=e)
 
@@ -382,12 +421,16 @@ class OpenAICompatibleLLM:
         base_url: str = "http://localhost:1234/v1",
         system_prompt: str = "",
         api_key: str = "",
+        temperature_enabled: bool = True,
+        temperature: float = 0,
     ):
         import httpx
 
         self.model = model
         self.base_url = base_url.rstrip("/")
         self.system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
+        self.temperature_enabled = temperature_enabled
+        self.temperature = temperature
         headers = {}
         if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
@@ -404,6 +447,8 @@ class OpenAICompatibleLLM:
         body: dict = {"messages": messages, "stream": False}
         if self.model:
             body["model"] = self.model
+        if self.temperature_enabled:
+            body["temperature"] = self.temperature
         resp = self.client.post(self._chat_url(), json=body)
         resp.raise_for_status()
         return strip_thinking(resp.json()["choices"][0]["message"]["content"])
@@ -417,6 +462,8 @@ class OpenAICompatibleLLM:
         body: dict = {"messages": messages, "stream": True}
         if self.model:
             body["model"] = self.model
+        if self.temperature_enabled:
+            body["temperature"] = self.temperature
 
         headers = {}
         if self._api_key:
@@ -446,7 +493,7 @@ class OpenAICompatibleLLM:
                         yield ("thinking", reasoning)
                     if content := delta.get("content"):
                         yield ("raw", content)
-                except (json.JSONDecodeError, KeyError, IndexError):
+                except json.JSONDecodeError, KeyError, IndexError:
                     continue
 
     def stream(
@@ -466,14 +513,17 @@ class OpenAICompatibleLLM:
                 messages.append({"role": msg["role"], "content": msg["content"]})
         messages.append({"role": "user", "content": prompt})
 
+        import httpx
+
         body: dict = {
             "messages": messages,
             "tools": tools,
             "stream": False,
-            "temperature": 0,
         }
         if self.model:
             body["model"] = self.model
+        if self.temperature_enabled:
+            body["temperature"] = self.temperature
 
         try:
             resp = self.client.post(self._chat_url(), json=body)
@@ -506,6 +556,8 @@ class OpenAICompatibleLLM:
                 "no_tool_called",
                 content=message.get("content", "")[:200],
             )
+        except httpx.HTTPStatusError as e:
+            logger.warning("tool_call_failed", status=e.response.status_code)
         except Exception as e:
             logger.warning("tool_call_failed", error=e)
 
@@ -613,6 +665,10 @@ def get_chat_settings() -> dict:
                 ),
                 "openai_model": gs.value.get("openai_model", ""),
                 "openai_api_key": gs.value.get("openai_api_key", ""),
+                "chat_temperature_enabled": gs.value.get(
+                    "chat_temperature_enabled", True
+                ),
+                "chat_temperature": gs.value.get("chat_temperature", 0),
             }
     except Exception as e:
         logger.warning("chat_settings_load_failed", error=e)
@@ -626,6 +682,8 @@ def get_chat_settings() -> dict:
         "openai_api_base": "http://localhost:1234/v1",
         "openai_model": "",
         "openai_api_key": "",
+        "chat_temperature_enabled": True,
+        "chat_temperature": 0,
     }
 
 
@@ -695,6 +753,8 @@ def get_llm() -> LLM:
                     base_url=base_url,
                     system_prompt=settings["chat_system_prompt"],
                     api_key=api_key,
+                    temperature_enabled=settings.get("chat_temperature_enabled", True),
+                    temperature=settings.get("chat_temperature", 0),
                 )
                 logger.info(
                     "llm_initialized",
@@ -732,6 +792,8 @@ def get_llm() -> LLM:
                 model=settings["ollama_model"],
                 base_url=settings["ollama_base_url"],
                 system_prompt=settings["chat_system_prompt"],
+                temperature_enabled=settings.get("chat_temperature_enabled", True),
+                temperature=settings.get("chat_temperature", 0),
             )
             logger.info(
                 "llm_initialized",

@@ -10,6 +10,7 @@ from structlog import get_logger
 
 from .models import SSOSettings
 from iam.models import User
+from .oidc.views import oidc_redirect
 from .serializers import SSOSettingsWriteSerializer
 
 logger = get_logger(__name__)
@@ -30,6 +31,16 @@ class RedirectToProviderView(APIView):
         next_url = form.cleaned_data["callback_url"]
         process = form.cleaned_data["process"]
         try:
+            # OIDC uses our custom redirect to send a long, standard-compliant
+            # state + nonce. Other providers (SAML, ...) use allauth's default.
+            if provider.id == "openid_connect":
+                return oidc_redirect(
+                    request,
+                    provider,
+                    process=process,
+                    next_url=next_url,
+                    headless=True,
+                )
             return provider.redirect(
                 request,
                 process,
@@ -64,9 +75,10 @@ class SSOSettingsViewSet(BaseModelViewSet):
         force_sso = serializer.validated_data.get("force_sso", False)
 
         if is_enabled and force_sso:
-            for user in User.objects.all():
-                if not user.keep_local_login:
-                    user.set_unusable_password()
+            users = list(User.objects.filter(keep_local_login=False))
+            for user in users:
+                user.set_unusable_password()
+            User.objects.bulk_update(users, ["password"])
 
         return Response(serializer.data)
 

@@ -32,7 +32,7 @@
 	}: Props = $props();
 
 	// Base Classes
-	const cBase = 'card bg-surface-50 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container';
 

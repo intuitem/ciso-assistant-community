@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -19,58 +22,58 @@
 		{
 			id: '--',
 			label: '--',
-			color: 'bg-gray-100',
-			borderColor: 'border-gray-300',
-			cardAccent: 'border-l-gray-400',
-			headerText: 'text-gray-600'
+			color: 'bg-surface-200-800',
+			borderColor: 'border-surface-300-700',
+			cardAccent: 'border-l-surface-400-600',
+			headerText: 'text-surface-600-400'
 		},
 		{
 			id: 'to_do',
 			label: m.toDo(),
-			color: 'bg-blue-50',
-			borderColor: 'border-blue-300',
+			color: 'bg-blue-50 dark:bg-blue-950/40',
+			borderColor: 'border-blue-300 dark:border-blue-800',
 			cardAccent: 'border-l-blue-400',
-			headerText: 'text-blue-700'
+			headerText: 'text-blue-700 dark:text-blue-300'
 		},
 		{
 			id: 'in_progress',
 			label: m.inProgress(),
-			color: 'bg-violet-50',
-			borderColor: 'border-violet-300',
+			color: 'bg-violet-50 dark:bg-violet-950/40',
+			borderColor: 'border-violet-300 dark:border-violet-800',
 			cardAccent: 'border-l-violet-400',
-			headerText: 'text-violet-700'
+			headerText: 'text-violet-700 dark:text-violet-300'
 		},
 		{
 			id: 'on_hold',
 			label: m.onHold(),
-			color: 'bg-yellow-50',
-			borderColor: 'border-yellow-300',
+			color: 'bg-yellow-50 dark:bg-yellow-950/40',
+			borderColor: 'border-yellow-300 dark:border-yellow-800',
 			cardAccent: 'border-l-yellow-400',
-			headerText: 'text-yellow-700'
+			headerText: 'text-yellow-700 dark:text-yellow-300'
 		},
 		{
 			id: 'active',
 			label: m.active(),
-			color: 'bg-green-50',
-			borderColor: 'border-green-300',
+			color: 'bg-green-50 dark:bg-green-950/40',
+			borderColor: 'border-green-300 dark:border-green-800',
 			cardAccent: 'border-l-green-400',
-			headerText: 'text-green-700'
+			headerText: 'text-green-700 dark:text-green-300'
 		},
 		{
 			id: 'degraded',
 			label: m.degraded(),
-			color: 'bg-orange-50',
-			borderColor: 'border-orange-300',
+			color: 'bg-orange-50 dark:bg-orange-950/40',
+			borderColor: 'border-orange-300 dark:border-orange-800',
 			cardAccent: 'border-l-orange-400',
-			headerText: 'text-orange-700'
+			headerText: 'text-orange-700 dark:text-orange-300'
 		},
 		{
 			id: 'deprecated',
 			label: m.deprecated(),
-			color: 'bg-red-50',
-			borderColor: 'border-red-300',
+			color: 'bg-red-50 dark:bg-red-950/40',
+			borderColor: 'border-red-300 dark:border-red-800',
 			cardAccent: 'border-l-red-400',
-			headerText: 'text-red-700'
+			headerText: 'text-red-700 dark:text-red-300'
 		}
 	];
 
@@ -82,26 +85,26 @@
 
 	// Priority color helper (API returns "P1", "P2", etc.)
 	function getPriorityColor(priority: string | null): string {
-		if (!priority || priority === '--') return 'bg-gray-100 text-gray-600';
+		if (!priority || priority === '--') return 'bg-surface-200-800 text-surface-600-400';
 		const colorMap: Record<string, string> = {
 			P1: 'bg-red-100 text-red-800',
 			P2: 'bg-orange-100 text-orange-800',
 			P3: 'bg-yellow-100 text-yellow-800',
 			P4: 'bg-green-100 text-green-800'
 		};
-		return colorMap[priority] || 'bg-gray-100 text-gray-600';
+		return colorMap[priority] || 'bg-surface-200-800 text-surface-600-400';
 	}
 
 	// Priority flag color helper
 	function getPriorityFlagColor(priority: string | null): string {
-		if (!priority || priority === '--') return 'text-gray-400';
+		if (!priority || priority === '--') return 'text-surface-400-600';
 		const colorMap: Record<string, string> = {
 			P1: 'text-red-500',
 			P2: 'text-orange-500',
 			P3: 'text-yellow-500',
 			P4: 'text-green-500'
 		};
-		return colorMap[priority] || 'text-gray-400';
+		return colorMap[priority] || 'text-surface-400-600';
 	}
 
 	// Effort display helper
@@ -301,25 +304,24 @@
 	// Format date for display
 	function formatDate(dateStr: string | null): string {
 		if (!dateStr) return '--';
-		const date = new Date(dateStr);
-		return date.toLocaleDateString();
+		return formatDateOrDateTime(dateStr, getLocale());
 	}
 
 	const folders = $derived(getUniqueFolders());
 </script>
 
-<div class="flex flex-col h-full min-h-screen bg-gray-50 p-4">
+<div class="flex flex-col h-full min-h-screen bg-surface-100-900 p-4">
 	<!-- Header -->
 	<div class="flex justify-between items-center mb-4">
 		<a
 			href={data.backUrl}
-			class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+			class="flex items-center space-x-2 text-primary-800-200 hover:text-primary-600-400"
 		>
 			<i class="fa-solid fa-arrow-left"></i>
-			<span>{data.backLabel}</span>
+			<span>{safeTranslate(data.backLabel)}</span>
 		</a>
 		<div class="flex items-center space-x-4">
-			<span class="text-sm text-gray-600">
+			<span class="text-sm text-surface-600-400">
 				{appliedControls.length}
 				{m.appliedControls().toLowerCase()}
 			</span>
@@ -328,7 +330,7 @@
 				class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg border transition-colors
 					{compactMode
 					? 'bg-primary-100 border-primary-300 text-primary-700'
-					: 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'}"
+					: 'bg-surface-50-950 border-surface-300-700 text-surface-600-400 hover:bg-surface-100-900'}"
 				onclick={() => (compactMode = !compactMode)}
 				title={compactMode ? m.detailedView() : m.compactView()}
 			>
@@ -342,10 +344,10 @@
 	<div class="flex-1 overflow-auto">
 		<div class="min-w-max">
 			<!-- Column Headers -->
-			<div class="flex sticky top-0 z-10 bg-gray-50 pb-2">
+			<div class="flex sticky top-0 z-10 bg-surface-100-900 pb-2">
 				<div class="w-48 flex-shrink-0 px-2">
 					<!-- Folder column header -->
-					<div class="h-10 flex items-center font-semibold text-gray-700">
+					<div class="h-10 flex items-center font-semibold text-surface-700-300">
 						<i class="fa-solid fa-folder mr-2"></i>
 						{m.domain()}
 					</div>
@@ -358,7 +360,7 @@
 						>
 							<span>{column.label}</span>
 							<span
-								class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs font-bold rounded-full bg-white/70"
+								class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-xs font-bold rounded-full bg-surface-50-950/70"
 							>
 								{count}
 							</span>
@@ -371,24 +373,24 @@
 			{#each folders as folder}
 				{@const isCollapsed = collapsedFolders.has(folder.id)}
 				{@const folderCount = getFolderControlCount(folder.id)}
-				<div class="mb-2 border-b border-gray-200 pb-2">
+				<div class="mb-2 border-b border-surface-200-800 pb-2">
 					<!-- Folder Header Row (clickable to collapse) -->
 					<div class="flex">
 						<div class="w-48 flex-shrink-0 px-2">
 							<button
 								type="button"
-								class="w-full flex items-center gap-2 py-2 font-medium text-gray-700 hover:text-gray-900 text-left group"
+								class="w-full flex items-center gap-2 py-2 font-medium text-surface-700-300 hover:text-surface-900-100 text-left group"
 								onclick={() => toggleFolder(folder.id)}
 							>
 								<i
-									class="fa-solid fa-chevron-right text-xs text-gray-400 group-hover:text-gray-600 transition-transform {isCollapsed
+									class="fa-solid fa-chevron-right text-xs text-surface-400-600 group-hover:text-surface-600-400 transition-transform {isCollapsed
 										? ''
 										: 'rotate-90'}"
 								></i>
 								<span class="truncate" title={folder.str || folder.name}>
 									{folder.str || folder.name}
 								</span>
-								<span class="text-xs text-gray-400 font-normal flex-shrink-0">
+								<span class="text-xs text-surface-400-600 font-normal flex-shrink-0">
 									{folderCount}
 								</span>
 							</button>
@@ -443,7 +445,7 @@
 										{/if}
 
 										{#if controls.length === 0 && !(draggedControl && dragOverStatus === column.id && dragOverFolder === folder.id)}
-											<div class="text-xs text-gray-400 text-center py-4 italic">
+											<div class="text-xs text-surface-400-600 text-center py-4 italic">
 												{m.noControlsInCategory()}
 											</div>
 										{:else}
@@ -453,7 +455,7 @@
 													{#if compactMode}
 														<!-- Compact card -->
 														<div
-															class="bg-white rounded px-2 py-1.5 cursor-move hover:shadow-sm transition-all border border-gray-200 border-l-[3px] {column.cardAccent} {draggedControl?.id ===
+															class="bg-surface-50-950 rounded px-2 py-1.5 cursor-move hover:shadow-sm transition-all border border-surface-200-800 border-l-[3px] {column.cardAccent} {draggedControl?.id ===
 															control.id
 																? 'opacity-40 scale-95'
 																: ''} {overdue ? 'ring-1 ring-red-300' : ''}"
@@ -475,10 +477,11 @@
 																{/if}
 																<a
 																	href="/applied-controls/{control.id}"
-																	class="text-xs text-gray-900 hover:text-primary-600 truncate flex-1"
+																	class="text-xs text-surface-900-100 hover:text-primary-600 truncate flex-1"
 																	title={control.name}
 																>
-																	{#if control.ref_id}<span class="font-mono text-gray-400 mr-1"
+																	{#if control.ref_id}<span
+																			class="font-mono text-surface-400-600 mr-1"
 																			>{control.ref_id}</span
 																		>{/if}{control.name || 'Unnamed Control'}
 																</a>
@@ -488,7 +491,9 @@
 																	></i>
 																{/if}
 																{#if control.progress_field !== null && control.progress_field !== undefined}
-																	<div class="flex-shrink-0 w-10 bg-gray-200 rounded-full h-1.5">
+																	<div
+																		class="flex-shrink-0 w-10 bg-surface-200-800 rounded-full h-1.5"
+																	>
 																		<div
 																			class="h-1.5 rounded-full {control.progress_field >= 100
 																				? 'bg-green-500'
@@ -503,7 +508,7 @@
 																	<div class="flex -space-x-1 flex-shrink-0">
 																		{#each getOwnerInitials(control.owner).slice(0, 2) as owner}
 																			<span
-																				class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-200 text-gray-600 text-[9px] font-medium ring-1 ring-white"
+																				class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-surface-200-800 text-surface-600-400 text-[9px] font-medium ring-1 ring-surface-50-950"
 																				title={owner.name}
 																			>
 																				{owner.initials}
@@ -516,7 +521,7 @@
 													{:else}
 														<!-- Detailed card -->
 														<div
-															class="bg-white rounded-lg shadow-sm p-3 cursor-move hover:shadow-md transition-all border border-gray-200 border-l-[3px] {column.cardAccent} {draggedControl?.id ===
+															class="bg-surface-50-950 rounded-lg shadow-sm p-3 cursor-move hover:shadow-md transition-all border border-surface-200-800 border-l-[3px] {column.cardAccent} {draggedControl?.id ===
 															control.id
 																? 'opacity-40 scale-95'
 																: ''} {overdue ? 'ring-1 ring-red-300' : ''}"
@@ -530,13 +535,13 @@
 															<div class="flex items-start justify-between gap-2 mb-2">
 																<div class="min-w-0">
 																	{#if control.ref_id}
-																		<span class="text-[10px] font-mono text-gray-400"
+																		<span class="text-[10px] font-mono text-surface-400-600"
 																			>{control.ref_id}</span
 																		>
 																	{/if}
 																	<a
 																		href="/applied-controls/{control.id}"
-																		class="font-medium text-sm text-gray-900 hover:text-primary-600 line-clamp-2 block"
+																		class="font-medium text-sm text-surface-900-100 hover:text-primary-600 line-clamp-2 block"
 																		title={control.name}
 																	>
 																		{control.name || 'Unnamed Control'}
@@ -554,7 +559,7 @@
 															</div>
 
 															<!-- Card Details -->
-															<div class="space-y-1.5 text-xs text-gray-600">
+															<div class="space-y-1.5 text-xs text-surface-600-400">
 																<!-- Progress Bar -->
 																{#if control.progress_field !== null && control.progress_field !== undefined}
 																	<div class="flex flex-col space-y-1">
@@ -562,7 +567,7 @@
 																			<span>{m.progress()}</span>
 																			<span class="font-medium">{control.progress_field}%</span>
 																		</div>
-																		<div class="w-full bg-gray-200 rounded-full h-1.5">
+																		<div class="w-full bg-surface-200-800 rounded-full h-1.5">
 																			<div
 																				class="h-1.5 rounded-full transition-all {control.progress_field >=
 																				100
@@ -602,14 +607,14 @@
 																	<div class="flex flex-wrap gap-1">
 																		{#if control.csf_function}
 																			<span
-																				class="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px]"
+																				class="px-1.5 py-0.5 bg-surface-100-900 text-surface-600-400 rounded text-[10px]"
 																			>
 																				{control.csf_function}
 																			</span>
 																		{/if}
 																		{#if control.category}
 																			<span
-																				class="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px]"
+																				class="px-1.5 py-0.5 bg-surface-100-900 text-surface-600-400 rounded text-[10px]"
 																			>
 																				{control.category}
 																			</span>
@@ -623,7 +628,7 @@
 																	<div class="flex -space-x-1">
 																		{#each getOwnerInitials(control.owner) as owner}
 																			<span
-																				class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-[10px] font-medium ring-1 ring-white"
+																				class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-surface-200-800 text-surface-600-400 text-[10px] font-medium ring-1 ring-surface-50-950"
 																				title={owner.name}
 																			>
 																				{owner.initials}
@@ -634,7 +639,7 @@
 																	<div class="flex items-center gap-1.5">
 																		{#if control.control_impact}
 																			<span
-																				class="px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded text-[10px]"
+																				class="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 rounded text-[10px]"
 																				title={m.controlImpact()}
 																			>
 																				{getImpactDisplay(control.control_impact)}
@@ -642,7 +647,7 @@
 																		{/if}
 																		{#if control.effort}
 																			<span
-																				class="px-1.5 py-0.5 bg-indigo-100 text-indigo-700 rounded text-[10px]"
+																				class="px-1.5 py-0.5 bg-indigo-100 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 rounded text-[10px]"
 																				title={m.effort()}
 																			>
 																				{getEffortDisplay(control.effort)}
@@ -666,9 +671,9 @@
 
 			<!-- Empty state if no folders -->
 			{#if folders.length === 0}
-				<div class="flex items-center justify-center py-12 text-gray-500">
+				<div class="flex items-center justify-center py-12 text-surface-600-400">
 					<div class="text-center">
-						<i class="fa-solid fa-folder-open text-4xl mb-4 text-gray-300"></i>
+						<i class="fa-solid fa-folder-open text-4xl mb-4 text-surface-300-700"></i>
 						<p>{m.noControlsInCategory()}</p>
 					</div>
 				</div>

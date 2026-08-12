@@ -25,7 +25,10 @@
 		"hr",
 		"zh",
 		"lt",
-		"ko"
+		"ko",
+		"et",
+		"sk",
+		"sl"
 	],
 	"modules": [
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@4/dist/index.js",

@@ -21,7 +21,9 @@
 		control_impact: 'controlImpact',
 		effort: 'effort',
 		annual_cost: 'cost',
-		risk_scenarios: 'matchingScenarios'
+		risk_scenarios: 'matchingScenarios',
+		created_at: 'createdAt',
+		updated_at: 'updatedAt'
 	};
 
 	const appliedControls: TableSource = {
@@ -30,12 +32,19 @@
 		meta: []
 	};
 
+	// Backend's action-plan endpoint returns controls linked via either
+	// `risk_scenarios` (extra applied_controls) OR `risk_scenarios_e`
+	// (existing_applied_controls), so the gate must mirror that.
 	let hasAppliedControls = $derived(
-		data.scenariosTable.body.some((riskScenario) => riskScenario.applied_controls.length > 0)
+		data.scenariosTable.body.some(
+			(riskScenario) =>
+				(riskScenario.applied_controls?.length ?? 0) > 0 ||
+				(riskScenario.existing_applied_controls?.length ?? 0) > 0
+		)
 	);
 </script>
 
-<div class="bg-white p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
+<div class="bg-surface-50-950 p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
 	<p class="font-semibold text-lg">
 		{#if data.risk_assessment.perimeter}
 			{m.perimeter()}:
@@ -65,21 +74,31 @@
 <ActionPlanBudgetOverview
 	budgetEndpoint={`/risk-assessments/${page.params.id}/action-plan/budget-overview`}
 />
-<div class="flex flex-col space-y-4 bg-white p-4 shadow rounded-lg space-x-2">
+<div class="flex flex-col space-y-4 bg-surface-50-950 p-4 shadow rounded-lg space-x-2">
 	<div class="flex justify-between items-center w-full">
 		<div class="flex-1">
 			<p class="text-xl font-extrabold">{m.associatedAppliedControls()}</p>
-			<p class="text-sm text-gray-500">
+			<p class="text-sm text-surface-600-400">
 				{m.actionPlanHelpText()}
 			</p>
 		</div>
 		{#if hasAppliedControls}
-			<div class="flex gap-2 ml-auto">
+			<div class="flex gap-2 ml-auto items-center">
+				<Anchor
+					breadcrumbAction="push"
+					href={`/risk-assessments/${page.params.id}/action-plan/analytics`}
+					label={m.analytics()}
+					class="btn text-gray-100 bg-linear-to-r from-sky-500 to-cyan-500 h-fit"
+					title={m.appliedControlsAnalytics()}
+					aria-label={m.appliedControlsAnalytics()}
+					data-testid="analytics-button"
+					><i class="fa-solid fa-chart-pie mr-2" aria-hidden="true"></i>{m.analytics()}</Anchor
+				>
 				<Anchor
 					breadcrumbAction="push"
 					href={`/applied-controls/flash-mode?risk_assessments=${page.params.id}&backUrl=${encodeURIComponent(page.url.pathname)}&backLabel=${encodeURIComponent(m.actionPlan())}`}
 					class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
-					><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
+					><i class="fa-solid fa-bolt mr-2" aria-hidden="true"></i> {m.flashMode()}</Anchor
 				>
 			</div>
 		{/if}
@@ -92,6 +111,8 @@
 			rowsPerPage={true}
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			baseEndpoint="/risk-assessments/{page.params.id}/action-plan"
+			columnSelector={true}
+			columnStateKey="applied-controls:risk-action-plan"
 			fields={[
 				'ref_id',
 				'name',

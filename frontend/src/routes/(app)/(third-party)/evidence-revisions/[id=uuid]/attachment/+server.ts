@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { contentDispositionHeader } from '$lib/utils/contentDisposition';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -59,7 +60,7 @@ export const GET: RequestHandler = async ({ fetch, setHeaders, params }) => {
 
 		setHeaders({
 			'Content-Type': contentType,
-			'Content-Disposition': `attachment; filename="${fileName}"`
+			'Content-Disposition': contentDispositionHeader(fileName)
 		});
 
 		return new Response(stream, {

@@ -5,7 +5,7 @@
 - [ ] Build machine has internet access
 - [ ] RHEL/Rocky/AlmaLinux 8 or 9 installed
 - [ ] Build tools installed: `rpm-build rsync curl gcc make openssl-devel bzip2-devel libffi-devel zlib-devel`
-- [ ] Poetry installed for Python dependency management
+- [ ] uv installed for Python dependency management
 - [ ] pnpm installed for Node.js dependency management
 - [ ] Git repository is clean (committed changes)
 - [ ] Version number updated if needed (set VERSION env var)

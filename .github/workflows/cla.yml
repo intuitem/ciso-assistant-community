@@ -12,18 +12,28 @@ concurrency:
 
 # explicitly configure permissions, in case your GITHUB_TOKEN workflow permissions are set to read-only in repository settings
 permissions:
-  actions: write
-  contents: write
-  pull-requests: write
-  statuses: write
+  contents: read
 
 jobs:
   CLAAssistant:
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: write
+      statuses: write
     steps:
+      # Local actions referenced with ./ require the repo to be checked out
+      # first. Under pull_request_target the default ref is the (trusted) base
+      # branch — do NOT check out the PR head, that would run untrusted code
+      # with the write-scoped GITHUB_TOKEN/PERSONAL_ACCESS_TOKEN.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: "CLA Assistant"
         if: (github.event.comment.body == 'recheck' || github.event.comment.body == 'I have read the CLA Document and I hereby sign the CLA') || github.event_name == 'pull_request_target'
-        uses: contributor-assistant/github-action@v2.3.0
+        # Vendored, patched fork of contributor-assistant/github-action@v2.6.1
+        # (archived upstream): deps bumped to clear CVEs, runtime on node24.
+        # dist/ is reproducible from src/; see .github/actions/cla-assistant/README.md.
+        uses: ./.github/actions/cla-assistant
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # the below token should have repo scope and must be manually added by you in the repository's secret

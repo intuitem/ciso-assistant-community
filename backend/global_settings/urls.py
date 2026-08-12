@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.urls import include, path
 from rest_framework import routers
 
@@ -11,6 +12,7 @@ from .views import (
     FeatureFlagsViewSet,
     VulnerabilitySlaViewSet,
     SecIntelFeedsViewSet,
+    InfraConfigViewSet,
 )
 from .routers import DefaultSettingsRouter
 
@@ -47,6 +49,13 @@ settings_router.register(
     SecIntelFeedsViewSet,
     basename="sec-intel-feeds",
 )
+
+if getattr(settings, "ENABLE_INFRA_CONFIG_MANAGEMENT", False):
+    settings_router.register(
+        r"infra-config",
+        InfraConfigViewSet,
+        basename="infra-config",
+    )
 
 
 urlpatterns = [

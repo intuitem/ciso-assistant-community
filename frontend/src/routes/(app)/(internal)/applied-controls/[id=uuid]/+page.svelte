@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton-svelte';
@@ -68,3 +69,9 @@
 		{/if}
 	{/snippet}
 </DetailView>
+
+{#if page.data?.featureflags?.comments}
+	<div class="mt-4">
+		<CommentsPanel parentType="applied_control" parentId={data.data.id} />
+	</div>
+{/if}

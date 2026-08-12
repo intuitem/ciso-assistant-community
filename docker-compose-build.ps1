@@ -1,0 +1,137 @@
+#Requires -Version 5.0
+
+[CmdletBinding(PositionalBinding = $false)]
+param(
+    [Alias("f")]
+    [string] $DockerComposeFile = "docker-compose-build.yml",
+
+    [Parameter(ValueFromRemainingArguments = $true, DontShow = $true)]
+    [string[]] $UnsupportedArguments = @()
+)
+
+$ErrorActionPreference = "Stop"
+Set-StrictMode -Version Latest
+
+$BackendCheckAttempts = 60
+$BackendCheckDelaySeconds = 10
+
+if ($UnsupportedArguments.Count -gt 0) {
+    Write-Host "Unknown argument(s): $($UnsupportedArguments -join ', '). Supported arguments: -f <compose-file>." -ForegroundColor Red
+    exit 1
+}
+
+function Invoke-Checked {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $FilePath,
+
+        [string[]] $Arguments = @()
+    )
+
+    & $FilePath @Arguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "Command failed with exit code ${LASTEXITCODE}: $FilePath $($Arguments -join ' ')"
+    }
+}
+
+function Invoke-DockerCompose {
+    param(
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [string[]] $Arguments
+    )
+
+    $composeArguments = @("compose", "-f", $DockerComposeFile) + $Arguments
+    Invoke-Checked -FilePath "docker" -Arguments $composeArguments
+}
+
+function Prepare-MetaFile {
+    $version = (& git describe --tags --always)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unable to determine CISO Assistant version with git describe."
+    }
+
+    $build = (& git rev-parse --short HEAD)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unable to determine CISO Assistant build with git rev-parse."
+    }
+
+    $meta = "CISO_ASSISTANT_VERSION=$version`nCISO_ASSISTANT_BUILD=$build`n"
+    [System.IO.File]::WriteAllText((Join-Path (Get-Location) ".meta"), $meta, [System.Text.Encoding]::ASCII)
+    Copy-Item -Path ".meta" -Destination ".\backend\ciso_assistant\.meta" -Force
+    Copy-Item -Path ".meta" -Destination ".\backend\.meta" -Force
+}
+
+function Wait-ForBackend {
+    for ($i = 1; $i -le $BackendCheckAttempts; $i++) {
+        & docker compose -f $DockerComposeFile exec -T backend curl --fail --silent http://localhost:8000/api/health/ *> $null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "Backend is ready!" -ForegroundColor Green
+            return
+        }
+
+        if ($i -eq $BackendCheckAttempts) {
+            $timeoutSeconds = $BackendCheckAttempts * $BackendCheckDelaySeconds
+            Write-Host "Backend did not become ready within ${timeoutSeconds}s. Recent backend logs:" -ForegroundColor Red
+            Invoke-DockerCompose logs --tail=50 backend
+            exit 1
+        }
+
+        Start-Sleep -Seconds $BackendCheckDelaySeconds
+    }
+}
+
+Push-Location $PSScriptRoot
+try {
+    if (-not (Test-Path -Path $DockerComposeFile -PathType Leaf)) {
+        throw "Compose file not found: $DockerComposeFile"
+    }
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        throw "git was not found in PATH."
+    }
+
+    if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+        throw "docker was not found in PATH."
+    }
+
+    $env:DOCKER_BUILDKIT = "1"
+    $env:COMPOSE_DOCKER_CLI_BUILD = "1"
+
+    Write-Host "Using Docker Compose file: `"$DockerComposeFile`"" -ForegroundColor Cyan
+    Write-Host ""
+
+    if (Test-Path -Path "db\ciso-assistant.sqlite3" -PathType Leaf) {
+        Write-Host "The database seems already created." -ForegroundColor Yellow
+        Write-Host "For successive runs, you can now use `"docker compose -f $DockerComposeFile up`"." -ForegroundColor Yellow
+        exit 0
+    }
+
+    Prepare-MetaFile
+
+    Write-Host "Building containers..." -ForegroundColor Cyan
+    Invoke-DockerCompose build --pull
+
+    New-Item -Path ".\db" -ItemType Directory -Force | Out-Null
+
+    Write-Host ""
+    Write-Host "Starting services..." -ForegroundColor Cyan
+    Invoke-DockerCompose up --detach
+
+    Write-Host ""
+    Write-Host "Waiting for CISO Assistant backend to be ready, please wait..." -ForegroundColor Cyan
+    Wait-ForBackend
+
+    Write-Host ""
+    Write-Host "Initialize your superuser account..." -ForegroundColor Cyan
+    # Keep TTY allocation for the interactive Django prompts in Windows terminals.
+    Invoke-DockerCompose exec backend python manage.py createsuperuser
+
+    Write-Host ""
+    Write-Host "CISO Assistant is ready!" -ForegroundColor Green
+    Write-Host "Connect to CISO Assistant on `"https://localhost:8443`"" -ForegroundColor Green
+    Write-Host "For successive runs, you can now use `"docker compose -f $DockerComposeFile up`"" -ForegroundColor Green
+    Write-Host "If the webpage doesn't load, please wait 2-3 minutes" -ForegroundColor Green
+}
+finally {
+    Pop-Location
+}

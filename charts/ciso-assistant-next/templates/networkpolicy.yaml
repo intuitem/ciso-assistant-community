@@ -1,0 +1,27 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "ciso-assistant.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ciso-assistant.labels" (dict "context" .) | nindent 4 }}
+spec:
+  podSelector:
+    {{- if .Values.networkPolicy.podSelector }}
+    {{- toYaml .Values.networkPolicy.podSelector | nindent 4 }}
+    {{- else }}
+    matchLabels:
+      {{- include "ciso-assistant.selectorLabels" (dict "context" .) | nindent 6 }}
+    {{- end }}
+  policyTypes:
+    {{- toYaml .Values.networkPolicy.policyTypes | nindent 4 }}
+  {{- with .Values.networkPolicy.ingress }}
+  ingress:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.networkPolicy.egress }}
+  egress:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

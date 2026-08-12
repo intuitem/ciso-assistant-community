@@ -1,0 +1,915 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:ncnicc-1-2025
+locale: en
+ref_id: ncnicc-1-2025
+name: National Cybersecurity Controls for Non-CNI Private Sector Entities (NCNICC-1:2025)
+description: 'NCA cybersecurity controls for non-Critical-National-Infrastructure
+  private-sector entities in Saudi Arabia (NCNICC-1:2025). Scoped by entity size:
+  Category A (>250 employees OR >SAR 200M revenue) implements all 65 controls; Category
+  B (6-249 employees OR SAR 3M-200M revenue) implements 26 mandatory controls. Reference:
+  https://nca.gov.sa'
+copyright: "\xA9 NCA"
+version: 1
+publication_date: 2026-06-08
+provider: NCA
+packager: community
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:ncnicc-1-2025
+    ref_id: ncnicc-1-2025
+    name: National Cybersecurity Controls for Non-CNI Private Sector Entities (NCNICC-1:2025)
+    description: NCA framework of mandatory cybersecurity controls for non-CNI private-sector
+      entities in Saudi Arabia. Category A implements all 3 components / 22 sub-components
+      / 65 controls; Category B implements the controls marked mandatory for it (26
+      controls).
+    implementation_groups_definition:
+    - ref_id: A
+      name: Category A (Large)
+      description: '>250 full-time employees OR >SAR 200M annual revenue. Implements
+        all 3 components / 22 sub-components / 65 controls.'
+    - ref_id: B
+      name: Category B (SME)
+      description: 6-249 full-time employees OR SAR 3M-200M annual revenue. Implements
+        the controls mandatory for Category B (26 controls).
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Cybersecurity Governance
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1
+      ref_id: 1-1
+      name: Cybersecurity Management
+      description: To ensure top management's support in implementing and managing
+        cybersecurity programs within the entity.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-1-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-1
+      ref_id: 1-1-1
+      description: An administrative unit responsible for cybersecurity must be established
+        within the entity, reporting to the head of the entity or their delegate,
+        and independent from the Information Technology unit.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-1
+      ref_id: 1-1-2
+      description: The head of the cybersecurity unit and its supervisory and sensitive
+        positions must be filled by full-time, highly-competent Saudi national professionals
+        in the field of cybersecurity.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-1-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-1
+      ref_id: 1-1-3
+      description: The authorizing official must define, document and approve the
+        cybersecurity governance organizational structure, roles and responsibilities
+        for the entity, and assign the relevant persons, providing the necessary support
+        while avoiding conflicts of interest.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1
+      ref_id: 1-2
+      name: Cybersecurity Policies and Procedures
+      description: To ensure that cybersecurity requirements are documented and published,
+        and that the entity complies with them.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-2-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-2
+      ref_id: 1-2-1
+      description: Cybersecurity policies must be defined, documented, approved, and
+        published to the relevant personnel of the entity.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-2-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-2
+      ref_id: 1-2-2
+      description: The cybersecurity unit must ensure the implementation of the entity's
+        cybersecurity policies.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-2-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-2
+      ref_id: 1-2-3
+      description: The cybersecurity unit must periodically review the entity's cybersecurity
+        policies.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1
+      ref_id: 1-3
+      name: Cybersecurity Risk Management
+      description: To ensure cybersecurity risks are managed in a systematic manner
+        aimed at protecting the entity's information and technology assets.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-3-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-3
+      ref_id: 1-3-1
+      description: A cybersecurity risk management methodology and its procedures
+        must be defined, documented and approved within the entity.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-3-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-3
+      ref_id: 1-3-2
+      description: The cybersecurity risk management methodology and its procedures
+        must be implemented within the entity.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-3-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-3
+      ref_id: 1-3-3
+      description: The cybersecurity risk management methodology and its procedures
+        must be reviewed periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1
+      ref_id: 1-4
+      name: Periodic Cybersecurity Review and Audit
+      description: To ensure cybersecurity controls are implemented and operating
+        in accordance with the entity's organizational policies and procedures, the
+        national legislative and regulatory requirements issued by the National Cybersecurity
+        Authority (NCA), and internationally-mandated requirements.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-4-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-4
+      ref_id: 1-4-1
+      description: Cybersecurity controls must be reviewed and audited by a party
+        independent from the entity's cybersecurity unit, as approved by the Authority,
+        to assess the entity's compliance with the cybersecurity controls for non-CNI
+        private-sector entities.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-4-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-4
+      ref_id: 1-4-2
+      description: The cybersecurity unit must periodically review the implementation
+        of cybersecurity controls.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1
+      ref_id: 1-5
+      name: Cybersecurity Awareness and Training Program
+      description: To ensure that the entity's personnel have the necessary security
+        awareness and understand their cybersecurity responsibilities.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-5-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-5
+      ref_id: 1-5-1
+      description: Cybersecurity awareness programs must cover the main cyber-threat
+        topics relevant to protecting the entity (e.g., phishing, ransomware, strong
+        passwords, safe social-media practices, and reporting incidents and suspicious
+        behavior), tailored to staff roles and needs.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-5-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-5
+      ref_id: 1-5-2
+      description: The entity's approved cybersecurity awareness programs must be
+        implemented.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-5-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:1-5
+      ref_id: 1-5-3
+      description: The entity's approved cybersecurity awareness programs must be
+        reviewed periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Cybersecurity Defense
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2
+      ref_id: 2-1
+      name: Asset Management
+      description: To ensure the entity maintains an accurate and up-to-date inventory
+        of all information and technology assets, with the relevant details, to support
+        operations and cybersecurity requirements and to achieve the confidentiality,
+        integrity, accuracy and availability of those assets.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-1-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-1
+      ref_id: 2-1-1
+      description: Cybersecurity requirements for managing the entity's information
+        and technology assets must be defined, documented and approved.
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-1
+      ref_id: 2-1-2
+      description: The cybersecurity requirements for asset management must be implemented.
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-1-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-1
+      ref_id: 2-1-3
+      description: The cybersecurity requirements for asset management must be reviewed
+        periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2
+      ref_id: 2-2
+      name: Identity and Access Management
+      description: To ensure cybersecurity protection of logical access to the entity's
+        information and technology assets, to prevent unauthorized access and restrict
+        access to what is required to conduct business.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-2-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-2
+      ref_id: 2-2-1
+      description: 'Cybersecurity requirements for identity and access management
+        must be defined, documented and approved, covering at minimum: (1) user authentication
+        based on secure management of username and password; (2) Multi-Factor Authentication
+        (MFA) for remote access, including email and external applications; (3) authorization
+        of users based on Need-to-Know/Need-to-Use, Least Privilege, and Segregation
+        of Duties; (4) Privileged Access Management; (5) periodic review of identities
+        and access privileges.'
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-2-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-2
+      ref_id: 2-2-2
+      description: The identity and access management cybersecurity requirements must
+        be implemented.
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-2-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-2
+      ref_id: 2-2-3
+      description: The identity and access management cybersecurity requirements must
+        be reviewed periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2
+      ref_id: 2-3
+      name: Protection of Systems and Information Processing Devices
+      description: To protect the entity's systems and information-processing devices,
+        including user devices, servers and network devices, from cybersecurity risks.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-3-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-3
+      ref_id: 2-3-1
+      description: 'Cybersecurity requirements for protecting systems and information-processing
+        devices must be defined, documented and approved, covering at minimum: (1)
+        protection against viruses, suspicious programs/activities and malware on
+        servers, user and mobile devices using modern, securely-managed protection
+        technologies; (2) changing default configurations (e.g., deactivating unnecessary
+        services, changing default passwords, restricting removable media); (3) centralized
+        clock synchronization from an accurate, trusted source, including sources
+        provided by the Saudi Standards, Metrology and Quality Organization (SASO).'
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-3-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-3
+      ref_id: 2-3-2
+      description: The system and device protection cybersecurity requirements must
+        be implemented.
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-3-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-3
+      ref_id: 2-3-3
+      description: The system and device protection cybersecurity requirements must
+        be reviewed periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2
+      ref_id: 2-4
+      name: Email Protection
+      description: To protect the entity's email from cybersecurity risks.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-4-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-4
+      ref_id: 2-4-1
+      description: 'Cybersecurity requirements for email protection must be defined,
+        documented and approved, covering at minimum: (1) analysis and filtering of
+        email, especially phishing and spam, using modern email protection technologies;
+        (2) authenticating the entity''s email domain via the Hassen platform using
+        SPF, DKIM and DMARC; (3) protection against Advanced Persistent Threats (APT),
+        including zero-day malware, managed securely [Category A only].'
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-4-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-4
+      ref_id: 2-4-2
+      description: The email protection cybersecurity requirements must be implemented.
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-4-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-4
+      ref_id: 2-4-3
+      description: The email protection cybersecurity requirements must be reviewed
+        periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2
+      ref_id: 2-5
+      name: Network Security Management
+      description: To protect the entity's networks from cybersecurity risks.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-5-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-5
+      ref_id: 2-5-1
+      description: 'Cybersecurity requirements for network security management must
+        be defined, documented and approved, covering at minimum: (1) network firewalls
+        and secure access gateways; (2) secure isolation and physical/logical segmentation
+        of network segments; (3) wireless network security using secure authentication
+        and encryption; (4) secure browsing and internet connectivity, including strict
+        restriction of suspicious websites, file-sharing/storage sites and remote-access
+        sites [Category A only]; (5) restricting and managing network ports, protocols
+        and services; (6) advanced Intrusion Prevention Systems (IPS) [Category A
+        only]; (7) protection against Distributed Denial of Service (DDoS) attacks
+        [Category A only].'
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-5-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-5
+      ref_id: 2-5-2
+      description: The network security management cybersecurity requirements must
+        be implemented.
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-5-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-5
+      ref_id: 2-5-3
+      description: The network security management cybersecurity requirements must
+        be reviewed periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2
+      ref_id: 2-6
+      name: Mobile Device Security
+      description: To protect the entity's mobile devices (including laptops, smartphones
+        and tablets) from cybersecurity risks, and to ensure secure handling and protection
+        of sensitive and business information during transfer and storage when personal
+        devices (BYOD) are permitted.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-6-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-6
+      ref_id: 2-6-1
+      description: Cybersecurity requirements for mobile device security and personal
+        devices (BYOD), where permitted to connect to the entity's network, must be
+        defined, documented and approved.
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-6-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-6
+      ref_id: 2-6-2
+      description: The mobile device and BYOD security cybersecurity requirements
+        must be implemented.
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-6-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-6
+      ref_id: 2-6-3
+      description: The mobile device and BYOD security cybersecurity requirements
+        must be reviewed periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2
+      ref_id: 2-7
+      name: Data and Information Protection
+      description: To ensure the confidentiality, integrity, accuracy and availability
+        of the entity's data and information, in accordance with the entity's organizational
+        policies and procedures and the relevant legislative and regulatory requirements.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-7-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-7
+      ref_id: 2-7-1
+      description: 'Cybersecurity requirements for protecting and handling the entity''s
+        data and information, in accordance with relevant legislative/regulatory requirements,
+        must be defined, documented and approved, covering at minimum: (1) Data Leakage
+        Prevention and Rights Management technologies [Category A only]; (2) a brand
+        protection service to protect the entity''s identity from impersonation [Category
+        A only]; (3) security of printers, scanners and copiers; (4) secure disposal
+        and reuse of assets, including paper documents and storage media.'
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-7-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-7
+      ref_id: 2-7-2
+      description: The data and information protection cybersecurity requirements
+        must be implemented according to the data classification level.
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-7-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-7
+      ref_id: 2-7-3
+      description: The data and information protection cybersecurity requirements
+        must be reviewed periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2
+      ref_id: 2-8
+      name: Cryptography
+      description: To ensure the proper and effective use of cryptography to protect
+        the entity's technical assets.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-8-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-8
+      ref_id: 2-8-1
+      description: 'Cybersecurity requirements for cryptography must be defined, documented
+        and approved, covering at minimum: (1) encryption of data at rest and in transit;
+        (2) use of secure, modern encryption methods and algorithms for data creation,
+        storage and transmission and for all network communications, per the (basic
+        level) of the National Cryptographic Standards issued by the Authority [Category
+        A only].'
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-8-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-8
+      ref_id: 2-8-2
+      description: The cryptography cybersecurity requirements must be implemented.
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-8-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-8
+      ref_id: 2-8-3
+      description: The cryptography cybersecurity requirements must be reviewed periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2
+      ref_id: 2-9
+      name: Backup Management
+      description: To protect the entity's data, information and the technical configurations
+        of its systems and applications from unexpected damage caused by cybersecurity
+        risks.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-9-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-9
+      ref_id: 2-9-1
+      description: 'Cybersecurity requirements for backup management must be defined,
+        documented and approved, covering at minimum: (1) periodic backup of critical
+        business systems; (2) periodic testing of the effectiveness of backup restoration.'
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-9-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-9
+      ref_id: 2-9-2
+      description: The backup management cybersecurity requirements must be implemented.
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-9-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-9
+      ref_id: 2-9-3
+      description: The backup management cybersecurity requirements must be reviewed
+        periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2
+      ref_id: 2-10
+      name: Vulnerability Management
+      description: To ensure timely detection and effective remediation of technical
+        vulnerabilities, to prevent or reduce the likelihood of their exploitation
+        in cyberattacks and to minimize impact on the entity's business.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-10-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-10
+      ref_id: 2-10-1
+      description: 'Cybersecurity requirements for technical vulnerability management
+        must be defined, documented and approved, covering at minimum: (1) regular
+        patch management of systems, software and devices; (2) periodic vulnerability
+        scanning of all the entity''s assets [Category A only]; (3) periodic vulnerability
+        scanning of external-facing applications; (4) management and remediation of
+        vulnerabilities based on classification, including testing fixes before deployment.'
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-10-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-10
+      ref_id: 2-10-2
+      description: The vulnerability management cybersecurity requirements must be
+        implemented.
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-10-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-10
+      ref_id: 2-10-3
+      description: The vulnerability management cybersecurity requirements must be
+        reviewed periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2
+      ref_id: 2-11
+      name: Penetration Testing
+      description: To test and evaluate the effectiveness of the entity's cybersecurity
+        defense capabilities by simulating real cyberattack techniques and methods,
+        and to discover unknown security weaknesses in the technical infrastructure
+        that could lead to a cyber breach.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-11-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-11
+      ref_id: 2-11-1
+      description: 'Cybersecurity requirements for penetration testing must be defined,
+        documented and approved, covering at minimum the testing of all externally-provided
+        (internet-facing) services and their technical components, including: infrastructure,
+        websites, web applications, mobile applications, email and remote access.'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-11-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-11
+      ref_id: 2-11-2
+      description: The penetration testing cybersecurity requirements must be implemented.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-11-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-11
+      ref_id: 2-11-3
+      description: The penetration testing cybersecurity requirements must be reviewed
+        periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2
+      ref_id: 2-12
+      name: Cybersecurity Event Logs and Monitoring Management
+      description: To ensure timely collection, analysis and monitoring of cybersecurity
+        event logs, for proactive detection of potential cyberattacks or for post-incident
+        analysis.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-12-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-12
+      ref_id: 2-12-1
+      description: 'Cybersecurity requirements for event log and monitoring management
+        must be defined, documented and approved, covering at minimum: (1) enabling
+        cybersecurity event logs on the entity''s critical information assets; (2)
+        subscribing to a Managed Security Operations Center (Managed SOC) service
+        provider licensed by the Authority [Category A only].'
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-12-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-12
+      ref_id: 2-12-2
+      description: The event log and monitoring management cybersecurity requirements
+        must be implemented.
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-12-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-12
+      ref_id: 2-12-3
+      description: The event log and monitoring management cybersecurity requirements
+        must be reviewed periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2
+      ref_id: 2-13
+      name: Cybersecurity Incident and Threat Management
+      description: To ensure timely detection and identification of cybersecurity
+        incidents and their effective management and handling.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-13-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-13
+      ref_id: 2-13-1
+      description: 'Cybersecurity requirements for incident and threat management
+        must be defined, documented and approved, covering at minimum: (1) detailed
+        incident-response plans for cybersecurity incidents (e.g., data breach, ransomware)
+        and the related escalation mechanisms [Category A only]; (2) notifying the
+        Authority upon the occurrence of a cybersecurity incident; (3) sharing cybersecurity
+        information with the Authority.'
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-13-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-13
+      ref_id: 2-13-2
+      description: The incident and threat management cybersecurity requirements must
+        be implemented.
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-13-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-13
+      ref_id: 2-13-3
+      description: The incident and threat management cybersecurity requirements must
+        be reviewed periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2
+      ref_id: 2-14
+      name: Physical Security
+      description: To protect the entity's information and technology assets from
+        unauthorized physical access, as well as from loss, theft and sabotage.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-14-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-14
+      ref_id: 2-14-1
+      description: 'Cybersecurity requirements for the physical security of information
+        and technology assets must be defined, documented and approved, covering at
+        minimum: (1) protecting physical access to IT rooms and sensitive electronic
+        devices; (2) protecting physical access to information and technology assets
+        (e.g., computers, storage media, printers) and documents [Category A only];
+        (3) protecting surveillance system (CCTV) logs.'
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-14-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-14
+      ref_id: 2-14-2
+      description: The physical security cybersecurity requirements must be implemented.
+      implementation_groups:
+      - A
+      - B
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-14-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-14
+      ref_id: 2-14-3
+      description: The physical security cybersecurity requirements must be reviewed
+        periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-15
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2
+      ref_id: 2-15
+      name: Web Application Protection
+      description: To protect the entity's external web applications from cybersecurity
+        risks.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-15-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-15
+      ref_id: 2-15-1
+      description: 'Cybersecurity requirements for protecting external web applications
+        must be defined, documented and approved, covering at minimum: (1) a Web Application
+        Firewall (WAF); (2) multi-tier architecture; (3) secure protocols (e.g., HTTPS);
+        (4) a clear secure-usage policy for users; (5) authentication, with the appropriate
+        authentication factors and their number determined based on an assessment
+        of the potential impact of authentication failure or bypass for user logins.'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-15-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-15
+      ref_id: 2-15-2
+      description: The web application protection cybersecurity requirements must
+        be implemented.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-15-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:2-15
+      ref_id: 2-15-3
+      description: The web application protection cybersecurity requirements must
+        be reviewed periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Third-Party and Cloud Computing Cybersecurity
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:3-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:3
+      ref_id: 3-1
+      name: Third-Party Cybersecurity
+      description: To protect the entity's assets from cybersecurity risks related
+        to third parties, including IT outsourcing and managed services.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:3-1-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:3-1
+      ref_id: 3-1-1
+      description: 'Cybersecurity requirements must be defined, documented and approved
+        within the entity''s contracts and agreements with third parties (e.g., a
+        Service Level Agreement, SLA), covering at minimum: (1) a requirement to maintain
+        information confidentiality (non-disclosure); (2) communication procedures
+        in the event of a cybersecurity incident involving third parties that may
+        affect the entity''s data or the services provided to it.'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:3-1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:3-1
+      ref_id: 3-1-2
+      description: The third-party cybersecurity requirements must be implemented.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:3-1-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:3-1
+      ref_id: 3-1-3
+      description: The third-party cybersecurity requirements must be reviewed periodically.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:3-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:3
+      ref_id: 3-2
+      name: Cloud Computing and Hosting Cybersecurity
+      description: To appropriately and effectively address cybersecurity risks and
+        implement cybersecurity requirements for cloud computing and hosting, and
+        to protect the entity's information and technology assets on cloud computing
+        services hosted, processed or managed by third parties.
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:3-2-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:3-2
+      ref_id: 3-2-1
+      description: 'Cybersecurity requirements for the use of cloud computing and
+        hosting services must be defined, documented and approved, ensuring compliance
+        with relevant legislative and regulatory requirements. In addition to the
+        applicable controls within main components (1) and (2) and sub-component (3-1)
+        necessary to protect the entity''s data or services, the requirements must
+        cover at minimum: (1) classifying data before hosting it with cloud/hosting
+        service providers, and returning it to the entity in a usable format upon
+        service termination; (2) isolating the entity''s environment (especially virtual
+        servers) from the environments of other tenants in cloud computing services.'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:3-2-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:3-2
+      ref_id: 3-2-2
+      description: The cloud computing and hosting cybersecurity requirements must
+        be implemented.
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:ncnicc-1-2025:3-2-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ncnicc-1-2025:3-2
+      ref_id: 3-2-3
+      description: The cloud computing and hosting cybersecurity requirements must
+        be reviewed periodically.
+      implementation_groups:
+      - A

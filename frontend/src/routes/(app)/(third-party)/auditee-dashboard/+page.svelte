@@ -10,7 +10,7 @@
 	let { data }: Props = $props();
 
 	const assignmentStatusBadgeStyle: Record<string, string> = {
-		draft: 'bg-gray-100 text-gray-600',
+		draft: 'bg-surface-100-900 text-surface-600-400',
 		in_progress: 'bg-amber-50 text-amber-700',
 		submitted: 'bg-blue-50 text-blue-700',
 		closed: 'bg-emerald-50 text-emerald-700',
@@ -18,7 +18,7 @@
 	};
 
 	const statusAccentColor: Record<string, string> = {
-		draft: 'border-l-gray-300',
+		draft: 'border-l-surface-300-700',
 		in_progress: 'border-l-amber-400',
 		submitted: 'border-l-blue-400',
 		closed: 'border-l-emerald-500',
@@ -71,18 +71,18 @@
 <div class="flex flex-col space-y-6 p-3">
 	{#if data.dashboard.length === 0}
 		<div class="flex flex-col items-center justify-center py-20">
-			<div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-5">
-				<i class="fa-solid fa-clipboard-check text-2xl text-gray-300"></i>
+			<div class="w-16 h-16 rounded-2xl bg-surface-100-900 flex items-center justify-center mb-5">
+				<i class="fa-solid fa-clipboard-check text-2xl text-surface-300-700"></i>
 			</div>
-			<p class="text-gray-400">{m.noAuditAssignments()}</p>
+			<p class="text-surface-400-600">{m.noAuditAssignments()}</p>
 		</div>
 	{:else}
 		{#each auditsByFolder as [folderName, audits], fi}
 			<section class="space-y-3">
 				<h3
-					class="text-xs font-semibold text-gray-400 uppercase tracking-widest flex items-center gap-2 {fi >
+					class="text-xs font-semibold text-surface-400-600 uppercase tracking-widest flex items-center gap-2 {fi >
 					0
-						? 'pt-5 border-t border-gray-200'
+						? 'pt-5 border-t border-surface-200-800'
 						: ''}"
 				>
 					<i class="fa-solid fa-folder-open"></i>
@@ -91,32 +91,32 @@
 				<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
 					{#each audits as audit, ai}
 						<div
-							class="audit-card card bg-white shadow-sm border-l-[3px] {statusAccentColor[
+							class="audit-card card bg-surface-50-950 shadow-sm border-l-[3px] {statusAccentColor[
 								audit.assignment_status
 							] ??
-								'border-l-gray-300'} p-5 flex flex-col space-y-4 hover:shadow-md hover:-translate-y-px transition-all duration-200"
+								'border-l-surface-300-700'} p-5 flex flex-col space-y-4 hover:shadow-md hover:-translate-y-px transition-all duration-200"
 							style="animation-delay: {ai * 50}ms"
 						>
 							<div class="flex items-start justify-between gap-3">
 								<div class="flex-1 min-w-0">
-									<h4 class="font-semibold text-[15px] text-gray-900 leading-snug">
+									<h4 class="font-semibold text-[15px] text-surface-950-50 leading-snug">
 										{audit.name}
 									</h4>
 									{#if audit.framework}
-										<p class="text-xs text-gray-500 mt-1 truncate">
-											<i class="fa-solid fa-book mr-1 text-gray-400"></i>{audit.framework}
+										<p class="text-xs text-surface-500-500 mt-1 truncate">
+											<i class="fa-solid fa-book mr-1 text-surface-400-600"></i>{audit.framework}
 										</p>
 									{/if}
 									{#if audit.actor}
-										<p class="text-xs text-gray-500 mt-0.5 truncate">
-											<i class="fa-solid fa-user mr-1 text-gray-400"></i>{audit.actor}
+										<p class="text-xs text-surface-500-500 mt-0.5 truncate">
+											<i class="fa-solid fa-user mr-1 text-surface-400-600"></i>{audit.actor}
 										</p>
 									{/if}
 								</div>
 								<span
 									class="flex-shrink-0 text-[11px] font-medium px-2.5 py-1 rounded-full {assignmentStatusBadgeStyle[
 										audit.assignment_status
-									] ?? 'bg-gray-100 text-gray-600'}"
+									] ?? 'bg-surface-100-900 text-surface-600-400'}"
 								>
 									{assignmentStatusLabel[audit.assignment_status]?.() ??
 										safeTranslate(audit.status)}
@@ -124,19 +124,21 @@
 							</div>
 
 							<div class="flex-1">
-								<div class="flex justify-between items-baseline text-xs text-gray-500 mb-1.5">
+								<div
+									class="flex justify-between items-baseline text-xs text-surface-500-500 mb-1.5"
+								>
 									<span>{m.progress()}</span>
-									<span class="font-semibold text-gray-700 tabular-nums"
+									<span class="font-semibold text-surface-700-300 tabular-nums"
 										>{audit.assessed_requirements}/{audit.total_requirements}</span
 									>
 								</div>
-								<div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+								<div class="w-full bg-surface-100-900 rounded-full h-2 overflow-hidden">
 									<div
 										class="h-2 rounded-full transition-all duration-500 ease-out"
 										style="width: {audit.progress_percent}%; background: linear-gradient(90deg, var(--color-primary-500), var(--color-primary-400));"
 									></div>
 								</div>
-								<p class="text-[11px] text-gray-400 mt-1 tabular-nums">
+								<p class="text-[11px] text-surface-400-600 mt-1 tabular-nums">
 									{audit.progress_percent}%
 								</p>
 							</div>

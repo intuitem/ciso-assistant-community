@@ -1,36 +1,52 @@
 #Requires -Version 5.0
 
-# Check if database file exists
-if (Test-Path "db/ciso-assistant.sqlite3") {
-    Write-Output "The database seems already created. You should launch 'docker compose up -d' instead."
-    Write-Output "`nFor a clean start, you can remove the db folder, and then run 'docker compose rm -fs' and start over"
+$DockerComposeFile = "docker-compose.yml"
+$BackendCheckAttempts = 60
+$BackendCheckDelaySeconds = 10
+
+function Wait-ForBackend {
+    for ($i = 1; $i -le $BackendCheckAttempts; $i++) {
+        & docker compose -f $DockerComposeFile exec -T backend curl --fail --silent http://localhost:8000/api/health/ *> $null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "Backend is ready!" -ForegroundColor Green
+            return
+        }
+
+        if ($i -eq $BackendCheckAttempts) {
+            $timeoutSeconds = $BackendCheckAttempts * $BackendCheckDelaySeconds
+            Write-Host "Backend did not become ready within ${timeoutSeconds}s. Recent backend logs:" -ForegroundColor Red
+            docker compose -f $DockerComposeFile logs --tail=50 backend
+            exit 1
+        }
+
+        Start-Sleep -Seconds $BackendCheckDelaySeconds
+    }
+}
+
+if (-not (Test-Path -Path $DockerComposeFile -PathType Leaf)) {
+    Write-Host "Compose file not found: $DockerComposeFile" -ForegroundColor Red
     exit 1
 }
 
-Write-Output "Starting CISO Assistant services..."
-docker compose pull
+# Check if database file exists
+if (Test-Path "db/ciso-assistant.sqlite3") {
+    Write-Host "The database seems already created. You should launch 'docker compose up -d' instead." -ForegroundColor Yellow
+    Write-Host "For a clean start, you can remove the db folder, and then run 'docker compose rm -fs' and start over" -ForegroundColor Yellow
+    exit 1
+}
 
-Write-Output "Initializing the database. This can take a minute, please wait.."
-docker compose up -d
+Write-Host "Starting CISO Assistant services..." -ForegroundColor Cyan
+docker compose -f $DockerComposeFile pull
 
-Write-Output "Waiting for CISO Assistant backend to be ready..."
-do {
-    $backendReady = $false
-    try {
-        $result = docker compose exec -T backend curl -f http://localhost:8000/api/health/ 2>$null
-        if ($LASTEXITCODE -eq 0) {
-            $backendReady = $true
-        }
-    }
-    catch {
-        Write-Output "Backend is not ready - waiting 10s..."
-        Start-Sleep -Seconds 10
-    }
-} while (-not $backendReady)
+Write-Host ""
+Write-Host "Waiting for CISO Assistant backend to be ready, please wait..." -ForegroundColor Cyan
+docker compose -f $DockerComposeFile up -d
+Wait-ForBackend
 
-Write-Output "`nBackend is ready!"
-Write-Output "Creating superuser..."
-docker compose exec backend poetry run python manage.py createsuperuser
+Write-Host ""
+Write-Host "Creating superuser..." -ForegroundColor Cyan
+docker compose -f $DockerComposeFile exec backend python manage.py createsuperuser
 
-Write-Output "`nInitialization complete!"
-Write-Output "You can now access CISO Assistant at https://localhost:8443 (or the host:port you've specified)"
+Write-Host ""
+Write-Host "Initialization complete!" -ForegroundColor Green
+Write-Host "You can now access CISO Assistant at https://localhost:8443 (or the host:port you've specified)" -ForegroundColor Green

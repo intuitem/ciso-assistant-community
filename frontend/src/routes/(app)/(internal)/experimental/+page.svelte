@@ -6,7 +6,7 @@
 	$pageTitle = 'Experimental';
 </script>
 
-<div class="bg-white grid grid-cols-2 p-4 gap-4 card">
+<div class="bg-surface-50-950 grid grid-cols-2 p-4 gap-4 card">
 	<Article
 		title={m.requirementsExplorer()}
 		desc={m.visualizeRequirements()}
@@ -26,16 +26,10 @@
 		tags={['assets', 'entities', 'ebios-rm', 'bulk']}
 	/>
 	<Article
-		title={m.matrixEditor()}
-		desc={m.matrixEditorDescription()}
-		link="/experimental/matrix-editor"
-		tags={['risk', 'matrix', 'editor']}
-	/>
-	<Article
-		title="Framework Builder"
-		desc="Create and edit compliance frameworks with a visual builder"
-		link="/experimental/framework-builder"
-		tags={['frameworks', 'builder', 'editor']}
+		title={m.lbListLibraryBuilder()}
+		desc={m.lbListCardDesc()}
+		link="/experimental/library-builder"
+		tags={['libraries', 'builder', 'packager']}
 	/>
 	<Article
 		title="Bulk evidence upload"
@@ -44,10 +38,22 @@
 		tags={['evidences', 'bulk', 'upload']}
 	/>
 	<Article
-		title="Preset Editor"
-		desc="Author presets — scaffolds and steps. Create from scratch or fork a library preset."
-		link="/experimental/preset-editor"
-		tags={['presets', 'journey', 'editor']}
+		title="Questionnaire Autopilot"
+		desc="Upload a customer security questionnaire (.xlsx), scope it to a folder, then map its columns. LLM prefill comes next."
+		link="/experimental/questionnaire-autopilot"
+		tags={['agentic', 'questionnaire', 'vendor-due-diligence']}
+	/>
+	<Article
+		title="Asset Whiteboard"
+		desc="Place and link assets on a freeform canvas, per domain. Drawn edges update parent_assets in real time; positions saved in your browser."
+		link="/experimental/asset-board"
+		tags={['assets', 'graph', 'canvas', 'prototype']}
+	/>
+	<Article
+		title="Analytics Export"
+		desc="Export all analytics dashboard data as a multi-sheet Excel file (Summary, Risk Levels, Compliance, Controls, Incidents) — ready to use in Power BI or any reporting tool."
+		link="/experimental/analytics-export"
+		tags={['analytics', 'export', 'xlsx', 'reporting']}
 	/>
 	<!-- <Article -->
 	<!-- 	title="Multi-file evidence (UX prototype)" -->

@@ -19,13 +19,14 @@ from core.models import (
     ReferenceControl,
     Terminology,
     Threat,
-    _create_questions_from_data,
+    _sync_questions_from_data,
 )
+from sec_intel.models import Tactic, Technique, TTPCatalog
 from metrology.models import MetricDefinition
 from django.db import transaction
 from iam.models import Folder
 
-from django.db.utils import OperationalError
+from django.db.utils import IntegrityError, OperationalError
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -36,12 +37,21 @@ def upsert_preset_from_stored_library(stored_library: StoredLibrary) -> Preset:
     preset_content = stored_library.content.get("preset", {}) or {}
     journey = preset_content.get("journey", {}) or {}
     defaults = {
-        "name": stored_library.name,
-        "description": stored_library.description or "",
+        # The preset object may carry its own name/description (authored in
+        # the library builder); legacy preset libraries fall back to the
+        # library metadata, with which they are one-to-one.
+        "name": preset_content.get("name") or stored_library.name,
+        "description": preset_content.get("description")
+        or stored_library.description
+        or "",
         "ref_id": stored_library.ref_id,
         "version": stored_library.version,
         "provider": stored_library.provider,
-        "translations": stored_library.translations or {},
+        # Same precedence as name/description: the preset object's own
+        # translations (authored in the builder) win over the library's.
+        "translations": preset_content.get("translations")
+        or stored_library.translations
+        or {},
         "profile": preset_content.get("profile", {}) or {},
         "feature_flags": preset_content.get("feature_flags", {}) or {},
         "scaffolded_objects": preset_content.get("scaffolded_objects", []) or [],
@@ -49,9 +59,14 @@ def upsert_preset_from_stored_library(stored_library: StoredLibrary) -> Preset:
         "dependencies": list(stored_library.dependencies or []),
         "folder": Folder.get_root_folder(),
     }
-    preset, _ = Preset.objects.update_or_create(
-        urn=stored_library.urn, defaults=defaults
-    )
+    # The Preset row is keyed on a `:preset:` URN. Hand-authored preset
+    # libraries already carry one as their library URN (see the shipped
+    # preset-*.yaml files); builder-authored libraries use a generic
+    # `:library:` URN, so swap the type token to get the same shape. This
+    # keeps builder presets consistent with shipped ones and lets a
+    # migration mint the matching URN onto a live row for adopt-in-place.
+    preset_urn = stored_library.urn.replace(":library:", ":preset:", 1)
+    preset, _ = Preset.objects.update_or_create(urn=preset_urn, defaults=defaults)
     return preset
 
 
@@ -100,47 +115,80 @@ class RequirementNodeImporter:
         parent_urn = self.requirement_data.get("parent_urn")
         if parent_urn:
             parent_urn = parent_urn.lower()
-        requirement_node = RequirementNode.objects.create(
-            folder=Folder.get_root_folder(),
+
+        # update_or_create scoped to the framework: identical to create()
+        # for fresh imports, updates in place when the framework row was
+        # adopted (see FrameworkImporter.import_framework).
+        requirement_node, _ = RequirementNode.objects.update_or_create(
             framework=framework_object,
             urn=self.requirement_data["urn"].lower(),
-            parent_urn=parent_urn,
-            assessable=self.requirement_data.get("assessable"),
-            ref_id=self.requirement_data.get("ref_id"),
-            annotation=self.requirement_data.get("annotation"),
-            typical_evidence=self.requirement_data.get("typical_evidence"),
-            provider=framework_object.provider,
-            order_id=self.index,
-            name=self.requirement_data.get("name"),
-            description=self.requirement_data.get("description"),
-            implementation_groups=self.requirement_data.get("implementation_groups"),
-            display_mode=self.requirement_data.get(
-                "display_mode", RequirementNode.DisplayMode.DEFAULT
+            defaults=dict(
+                folder=Folder.get_root_folder(),
+                parent_urn=parent_urn,
+                assessable=self.requirement_data.get("assessable"),
+                ref_id=self.requirement_data.get("ref_id"),
+                annotation=self.requirement_data.get("annotation"),
+                typical_evidence=self.requirement_data.get("typical_evidence"),
+                provider=framework_object.provider,
+                order_id=self.index,
+                name=self.requirement_data.get("name"),
+                description=self.requirement_data.get("description"),
+                implementation_groups=self.requirement_data.get(
+                    "implementation_groups"
+                ),
+                display_mode=self.requirement_data.get(
+                    "display_mode", RequirementNode.DisplayMode.DEFAULT
+                ),
+                weight=self.requirement_data.get("weight", 1),
+                min_score=self.requirement_data.get("min_score"),
+                max_score=self.requirement_data.get("max_score"),
+                scores_definition_ref=self.requirement_data.get(
+                    "scores_definition_ref"
+                ),
+                locale=framework_object.locale,
+                default_locale=framework_object.default_locale,
+                translations=self.requirement_data.get("translations", {}),
+                is_published=True,
             ),
-            weight=self.requirement_data.get("weight", 1),
-            locale=framework_object.locale,
-            default_locale=framework_object.default_locale,
-            translations=self.requirement_data.get("translations", {}),
-            is_published=True,
+        )
+        requirement_node.clean()
+
+        # Sync Question + QuestionChoice objects: pure create for fresh
+        # imports, upsert-and-prune for adopted nodes that already carry
+        # question rows.
+        questions_data = self.requirement_data.get("questions")
+        _sync_questions_from_data(
+            requirement_node,
+            questions_data if isinstance(questions_data, dict) else {},
         )
 
-        # Create Question + QuestionChoice objects from questions data
-        questions_data = self.requirement_data.get("questions")
-        if questions_data and isinstance(questions_data, dict):
-            _create_questions_from_data(requirement_node, questions_data)
-
+        # Use .set() rather than .add(): on the adopt-in-place / re-import
+        # path the node already exists, and a link removed in the document
+        # must be removed from the live row too (add-only would strand it).
+        threats = []
         for threat in self.requirement_data.get("threats", []):
-            logger.info(
-                f"Parsing the threats for {self.requirement_data.get('ref_id')}"
-            )
-            requirement_node.threats.add(Threat.objects.get(urn=threat.lower()))
-
-        for reference_control in self.requirement_data.get("reference_controls", []):
-            logger.info(
-                f"Parsing the reference controls for {self.requirement_data.get('ref_id')}"
-            )
             try:
-                ref = ReferenceControl.objects.get(urn=reference_control.lower())
+                threats.append(Threat.objects.get(urn=threat.lower()))
+            except Threat.DoesNotExist as exc:
+                threat_name = threat or "unknown"
+                requirement_identifier = self.requirement_data.get(
+                    "ref_id", self.requirement_data.get("urn")
+                )
+                error_message = (
+                    f"Unknown threat '{threat_name}' "
+                    f"referenced in requirement '{requirement_identifier}'."
+                )
+                logger.error(error_message)
+                raise ValueError(error_message) from exc
+        if threats or requirement_node.threats.exists():
+            requirement_node.threats.set(threats)
+
+        reference_controls = []
+        for reference_control in self.requirement_data.get("reference_controls", []):
+            try:
+                reference_controls.append(
+                    ReferenceControl.objects.get(urn=reference_control.lower())
+                )
             except ReferenceControl.DoesNotExist as exc:
                 reference_control_name = reference_control or "unknown"
                 requirement_identifier = self.requirement_data.get(
@@ -152,7 +200,8 @@ class RequirementNodeImporter:
                 )
                 logger.error(error_message)
                 raise ValueError(error_message) from exc
-            requirement_node.reference_controls.add(ref)
+        if reference_controls or requirement_node.reference_controls.exists():
+            requirement_node.reference_controls.set(reference_controls)
 
 
 class RequirementMappingImporter:
@@ -345,28 +394,154 @@ class FrameworkImporter:
         if isinstance(scores_definition, list):
             scores_definition = {"scale": scores_definition}
 
-        framework_object = Framework.objects.create(
-            folder=Folder.get_root_folder(),
-            library=library_object,
-            urn=self.framework_data["urn"].lower(),
-            ref_id=self.framework_data["ref_id"],
-            name=self.framework_data.get("name"),
-            description=self.framework_data.get("description"),
-            min_score=min_score,
-            max_score=max_score,
-            scores_definition=scores_definition,
-            implementation_groups_definition=self.framework_data.get(
-                "implementation_groups_definition"
+        # update_or_create: identical to create() for normal loads (no row
+        # exists yet) and adopts a pre-existing library-less framework in
+        # place — same URN family, same rows, audits untouched (the adopted
+        # live-framework path). Adoption is restricted to genuinely
+        # library-less rows of the same locale: a framework URN that already
+        # belongs to a library (or a different locale of one) is a real
+        # collision, so we preserve the loader's historical hard failure
+        # rather than silently re-homing another library's framework and
+        # cascade-pruning its requirement nodes / assessments.
+        framework_urn = self.framework_data["urn"].lower()
+        existing = Framework.objects.filter(urn=framework_urn).first()
+        if existing is not None and (
+            existing.library_id is not None or existing.locale != library_object.locale
+        ):
+            raise IntegrityError(
+                f"Framework {framework_urn} already exists and belongs to a "
+                f"library; cannot be adopted by {library_object.urn}"
+            )
+        framework_object, framework_created = Framework.objects.update_or_create(
+            urn=framework_urn,
+            defaults=dict(
+                folder=Folder.get_root_folder(),
+                library=library_object,
+                ref_id=self.framework_data["ref_id"],
+                name=self.framework_data.get("name"),
+                description=self.framework_data.get("description"),
+                annotation=self.framework_data.get("annotation"),
+                min_score=min_score,
+                max_score=max_score,
+                scores_definition=scores_definition,
+                implementation_groups_definition=self.framework_data.get(
+                    "implementation_groups_definition"
+                ),
+                outcomes_definition=self.framework_data.get("outcomes_definition", []),
+                field_visibility=self.framework_data.get("field_visibility") or {},
+                provider=library_object.provider,
+                locale=library_object.locale,
+                default_locale=library_object.default_locale,
+                translations=self.framework_data.get("translations", {}),
+                is_published=True,
             ),
-            outcomes_definition=self.framework_data.get("outcomes_definition", []),
-            provider=library_object.provider,
-            locale=library_object.locale,
-            default_locale=library_object.default_locale,
-            translations=self.framework_data.get("translations", {}),
-            is_published=True,
         )
         for requirement_node in self._requirement_nodes:
             requirement_node.import_requirement_node(framework_object)
+        if not framework_created:
+            # Adopted framework: live nodes absent from the document were
+            # deleted in the draft. No-op for fresh imports.
+            RequirementNode.objects.filter(framework=framework_object).exclude(
+                urn__in=[
+                    rn.requirement_data["urn"].lower() for rn in self._requirement_nodes
+                ]
+            ).delete()
+
+
+class ReferentialImporterMixin:
+    REQUIRED_FIELDS = {"ref_id", "urn"}
+
+    def __init__(self, data: dict, index: int = 0):
+        self.data = data
+        self.index = index
+        self._object = None
+
+    def is_valid(self) -> Union[str, None]:
+        if missing_fields := self.REQUIRED_FIELDS - set(self.data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+
+    def _common(self, library_object: LoadedLibrary) -> dict:
+        return dict(
+            library=library_object,
+            urn=self.data["urn"].lower(),
+            ref_id=self.data["ref_id"],
+            name=self.data.get("name"),
+            description=self.data.get("description"),
+            annotation=self.data.get("annotation"),
+            provider=library_object.provider,
+            is_published=True,
+            locale=library_object.locale,
+            translations=self.data.get("translations", {}),
+            default_locale=library_object.default_locale,
+        )
+
+    def _resolve(self, model, urn: str, field: str):
+        identifier = self.data.get("ref_id", self.data.get("urn"))
+        if not urn:
+            message = f"Missing {field} reference in '{identifier}'."
+            logger.error(message)
+            raise ValueError(message)
+        try:
+            return model.objects.get(urn=urn.lower())
+        except model.DoesNotExist as exc:
+            message = f"Unknown {field} '{urn}' referenced in '{identifier}'."
+            logger.error(message)
+            raise ValueError(message) from exc
+
+
+class TTPCatalogImporter(ReferentialImporterMixin):
+    def import_object(self, library_object: LoadedLibrary):
+        self._object = TTPCatalog.objects.create(
+            **self._common(library_object),
+            grouping_definition=self.data.get("grouping_definition"),
+        )
+
+
+class TacticImporter(ReferentialImporterMixin):
+    REQUIRED_FIELDS = {"ref_id", "urn", "catalog_urn"}
+
+    def import_object(self, library_object: LoadedLibrary):
+        self._object = Tactic.objects.create(
+            **self._common(library_object),
+            catalog=self._resolve(TTPCatalog, self.data["catalog_urn"], "TTP catalog"),
+            order_id=self.data.get("order_id", self.index),
+        )
+
+
+class TechniqueImporter(ReferentialImporterMixin):
+    def import_object(self, library_object: LoadedLibrary):
+        catalog = None
+        if catalog_urn := self.data.get("catalog_urn"):
+            catalog = self._resolve(TTPCatalog, catalog_urn, "TTP catalog")
+        self._object = Technique.objects.create(
+            **self._common(library_object),
+            catalog=catalog,
+            order_id=self.data.get("order_id", self.index),
+            groups=self.data.get("groups"),
+            is_deprecated=self.data.get("is_deprecated", False),
+        )
+
+    def link_object(self):
+        """Resolve links whose targets may not exist at create time."""
+        if self._object is None:
+            return
+
+        if parent_urn := self.data.get("parent_urn"):
+            self._object.parent = self._resolve(
+                Technique, parent_urn, "parent technique"
+            )
+            self._object.save(update_fields=["parent"])
+
+        for field, model, key in (
+            ("tactics", Tactic, "tactic"),
+            ("reference_controls", ReferenceControl, "reference control"),
+        ):
+            targets = [
+                self._resolve(model, urn, key) for urn in self.data.get(field, [])
+            ]
+            # .set() not .add(): links removed from the document must be dropped
+            if targets or getattr(self._object, field).exists():
+                getattr(self._object, field).set(targets)
 
 
 class ThreatImporter:
@@ -387,6 +562,7 @@ class ThreatImporter:
             ref_id=self.threat_data["ref_id"],
             name=self.threat_data.get("name"),
             description=self.threat_data.get("description"),
+            annotation=self.threat_data.get("annotation"),
             provider=library_object.provider,
             is_published=True,
             locale=library_object.locale,
@@ -433,6 +609,7 @@ class ReferenceControlImporter:
             ref_id=self.reference_control_data["ref_id"],
             name=self.reference_control_data.get("name"),
             description=self.reference_control_data.get("description"),
+            annotation=self.reference_control_data.get("annotation"),
             provider=library_object.provider,
             typical_evidence=self.reference_control_data.get("typical_evidence"),
             category=self.reference_control_data.get("category"),
@@ -522,22 +699,46 @@ class RiskMatrixImporter:
             for key, value in self.risk_matrix_data.items()
             if key in self.MATRIX_FIELDS
         }
-        matrix = RiskMatrix.objects.create(
-            library=library_object,
-            folder=Folder.get_root_folder(),
-            name=self.risk_matrix_data.get("name"),
-            description=self.risk_matrix_data.get("description"),
-            urn=self.risk_matrix_data["urn"].lower(),
-            provider=library_object.provider,
-            ref_id=self.risk_matrix_data.get("ref_id"),
-            json_definition=matrix_data,
-            is_enabled=self.risk_matrix_data.get("is_enabled", True),
-            locale=library_object.locale,
-            default_locale=library_object.default_locale,  # Change this in the future ?
-            translations=self.risk_matrix_data.get("translations", {}),
-            is_published=True,
+        # update_or_create: identical to create() for normal loads (no row
+        # exists yet) and adopts a pre-existing library-less matrix in place —
+        # same row id, so risk assessments built on it stay attached (the
+        # migration-wrapped / adopted-matrix path, mirroring the framework
+        # importer). Adoption is restricted to genuinely library-less rows of
+        # the same locale: a matrix URN that already belongs to a library (or
+        # a different locale of one) is a real collision, so we preserve the
+        # loader's historical hard failure rather than silently re-homing
+        # another library's matrix.
+        matrix_urn = self.risk_matrix_data["urn"].lower()
+        existing = RiskMatrix.objects.filter(urn=matrix_urn).first()
+        if existing is not None and (
+            existing.library_id is not None or existing.locale != library_object.locale
+        ):
+            raise IntegrityError(
+                f"Risk matrix {matrix_urn} already exists and belongs to a "
+                f"library; cannot be adopted by {library_object.urn}"
+            )
+        matrix, created = RiskMatrix.objects.update_or_create(
+            urn=matrix_urn,
+            defaults=dict(
+                library=library_object,
+                folder=Folder.get_root_folder(),
+                name=self.risk_matrix_data.get("name"),
+                description=self.risk_matrix_data.get("description"),
+                annotation=self.risk_matrix_data.get("annotation"),
+                provider=library_object.provider,
+                ref_id=self.risk_matrix_data.get("ref_id"),
+                json_definition=matrix_data,
+                is_enabled=self.risk_matrix_data.get("is_enabled", True),
+                locale=library_object.locale,
+                default_locale=library_object.default_locale,  # Change this in the future ?
+                translations=self.risk_matrix_data.get("translations", {}),
+                is_published=True,
+            ),
         )
-        logger.info("Risk matrix created", matrix=matrix)
+        logger.info(
+            "Risk matrix created" if created else "Risk matrix adopted in place",
+            matrix=matrix,
+        )
         return matrix
 
 
@@ -546,6 +747,9 @@ class LibraryImporter:
 
     REQUIRED_FIELDS = {"ref_id", "urn", "locale", "objects", "version"}
     OBJECT_FIELDS = [
+        "ttp_catalogs",
+        "tactics",
+        "techniques",
         "threats",
         "reference_controls",
         "metric_definitions",
@@ -555,6 +759,8 @@ class LibraryImporter:
         "frameworks",
         "requirement_mapping_set",  # This field name is deprecated
         "requirement_mapping_sets",
+        "preset",
+        "workflows",
     ]
     NON_DEPRECATED_OBJECT_FIELDS = [
         field
@@ -565,11 +771,61 @@ class LibraryImporter:
     def __init__(self, library: StoredLibrary):
         self._library = library
         self._frameworks = []
+        self._ttp_catalogs = []
+        self._tactics = []
+        self._techniques = []
         self._threats = []
         self._reference_controls = []
         self._metric_definitions = []
         self._risk_matrices = []
         self._requirement_mapping_sets = []
+        self._workflows = []
+
+    def init_workflows(self, workflows: List[dict]) -> Union[str, None]:
+        """Structural validation of workflow objects; actual
+        creation happens in import_objects via the workflows app."""
+        from automation.workflows.import_export import (
+            WorkflowImportError,
+            validate_workflow_document,
+        )
+
+        if not isinstance(workflows, list) or not workflows:
+            return "objects.workflows must be a non-empty list"
+        for index, entry in enumerate(workflows):
+            try:
+                validate_workflow_document(entry)
+            except WorkflowImportError as e:
+                return f"objects.workflows[{index}]: {e.message}"
+        self._workflows = workflows
+
+    def _init_referential(self, data, importer_cls, attr, label):
+        importers, errors = [], []
+        for index, item in enumerate(data):
+            importer = importer_cls(item, index)
+            importers.append(importer)
+            if (error := importer.is_valid()) is not None:
+                errors.append((index, error))
+        setattr(self, attr, importers)
+        if errors:
+            index, error = errors[0]
+            return (
+                f"[{label.upper()}_ERROR] {len(errors)} invalid {label}"
+                f"{'s' if len(errors) > 1 else ''} detected, entry {index + 1} "
+                f"has the following error : {error}"
+            )
+
+    def init_ttp_catalogs(self, data) -> Union[str, None]:
+        return self._init_referential(
+            data, TTPCatalogImporter, "_ttp_catalogs", "ttp_catalog"
+        )
+
+    def init_tactics(self, data) -> Union[str, None]:
+        return self._init_referential(data, TacticImporter, "_tactics", "tactic")
+
+    def init_techniques(self, data) -> Union[str, None]:
+        return self._init_referential(
+            data, TechniqueImporter, "_techniques", "technique"
+        )
 
     def init_threats(self, threats: List[dict]) -> Union[str, None]:
         threat_importers = []
@@ -801,6 +1057,16 @@ class LibraryImporter:
                 )
                 return requirement_mapping_set_import_error
 
+        for key, initialiser in (
+            ("ttp_catalogs", self.init_ttp_catalogs),
+            ("tactics", self.init_tactics),
+            ("techniques", self.init_techniques),
+        ):
+            if key in library_objects:
+                if (error := initialiser(library_objects[key])) is not None:
+                    logger.error("TTP import error", key=key, error=error)
+                    return error
+
         if "threats" in library_objects:
             threat_data = library_objects["threats"]
             if (threat_import_error := self.init_threats(threat_data)) is not None:
@@ -841,6 +1107,14 @@ class LibraryImporter:
                 )
             ) is not None:
                 return metric_definition_import_error
+
+        if "workflows" in library_objects:
+            if (
+                workflow_import_error := self.init_workflows(
+                    library_objects["workflows"]
+                )
+            ) is not None:
+                return workflow_import_error
 
     def check_and_import_dependencies(self) -> Union[str, None]:
         """Check and import library dependencies."""
@@ -913,11 +1187,24 @@ class LibraryImporter:
     def import_objects(self, library_object: LoadedLibrary):
         """Import library objects."""
 
+        for ttp_catalog in self._ttp_catalogs:
+            ttp_catalog.import_object(library_object)
+
+        for tactic in self._tactics:
+            tactic.import_object(library_object)
+
+        for technique in self._techniques:
+            technique.import_object(library_object)
+
         for threat in self._threats:
             threat.import_threat(library_object)
 
         for reference_control in self._reference_controls:
             reference_control.import_reference_control(library_object)
+
+        # after reference controls: techniques link to them and to parents
+        for technique in self._techniques:
+            technique.link_object()
 
         for metric_definition in self._metric_definitions:
             metric_definition.import_metric_definition(library_object)
@@ -930,6 +1217,27 @@ class LibraryImporter:
 
         for requirement_mapping_set in self._requirement_mapping_sets:
             requirement_mapping_set.load(library_object)
+
+        # Workflows divorce at load: created as plain user documents
+        # with provenance stamped, no FK to the library — unload leaves them,
+        # update never mutates them.
+        if self._workflows:
+            from iam.models import Folder as IamFolder
+
+            from automation.workflows.import_export import import_workflow
+
+            for entry in self._workflows:
+                _workflow, warnings = import_workflow(
+                    entry,
+                    IamFolder.get_root_folder(),
+                    source_version=self._library.version,
+                )
+                for warning in warnings:
+                    logger.warning(
+                        "Workflow library load warning",
+                        library=self._library.urn,
+                        warning=warning,
+                    )
 
     @transaction.atomic
     def _import_library(self):
@@ -952,6 +1260,9 @@ class LibraryImporter:
         if error_msg is not None:
             return error_msg
 
+        from automation.workflows.graph import GraphValidationError
+        from automation.workflows.import_export import WorkflowImportError
+
         for _ in range(10):
             try:
                 self._import_library()
@@ -961,6 +1272,14 @@ class LibraryImporter:
                     time.sleep(3)
                 else:
                     raise e
+            except (WorkflowImportError, GraphValidationError) as e:
+                # A malformed workflow object must surface as the error-string
+                # contract, not a 500 (structural checks run at init_workflows,
+                # but save_graph can still reject at load).
+                logger.error(
+                    "Workflow library load error", error=e, library=self._library
+                )
+                return getattr(e, "message", str(e))
             except Exception as e:
                 logger.error("Library import error", error=e, library=self._library)
                 raise e

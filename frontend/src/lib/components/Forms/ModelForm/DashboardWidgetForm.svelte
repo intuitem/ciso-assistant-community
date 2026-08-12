@@ -1,9 +1,9 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import ThresholdsEditor from './ThresholdsEditor.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -14,7 +14,6 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
-		data?: any;
 		object?: any;
 		debug?: boolean;
 	}
@@ -25,7 +24,6 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		data = {},
 		object = {},
 		debug = false
 	}: Props = $props();
@@ -37,27 +35,24 @@
 		<div class="text-xs space-y-2">
 			<div>
 				<strong>object:</strong>
-				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(object, null, 2)}</pre>
+				<pre class="bg-surface-50-950 p-2 rounded mt-1">{JSON.stringify(object, null, 2)}</pre>
 			</div>
 			<div>
 				<strong>initialData:</strong>
-				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(initialData, null, 2)}</pre>
+				<pre class="bg-surface-50-950 p-2 rounded mt-1">{JSON.stringify(initialData, null, 2)}</pre>
 			</div>
 			<div>
 				<strong>formDataCache:</strong>
-				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(formDataCache, null, 2)}</pre>
+				<pre class="bg-surface-50-950 p-2 rounded mt-1">{JSON.stringify(
+						formDataCache,
+						null,
+						2
+					)}</pre>
 			</div>
 		</div>
 	</div>
 {/if}
 
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="dashboards"
@@ -107,12 +102,12 @@
 		cacheLock={cacheLocks['time_range']}
 		bind:cachedValue={formDataCache['time_range']}
 		label={m.timeRange()}
+		disableDoubleDash={true}
 	/>
 </div>
 
 <!-- Aggregation hidden for now -->
 <input type="hidden" name="aggregation" value={formDataCache['aggregation'] || 'none'} />
-
 <Checkbox
 	{form}
 	field="show_target"
@@ -120,3 +115,5 @@
 	cacheLock={cacheLocks['show_target']}
 	bind:cachedValue={formDataCache['show_target']}
 />
+
+<ThresholdsEditor {form} {object} chartType={formDataCache['chart_type'] ?? object?.chart_type} />

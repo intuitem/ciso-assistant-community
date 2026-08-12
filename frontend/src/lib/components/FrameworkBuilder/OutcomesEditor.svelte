@@ -2,6 +2,7 @@
 	import { getTranslation, withTranslation, type OutcomeRule } from './builder-state';
 	import { createDragHandlers } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		outcomes: OutcomeRule[];
@@ -43,23 +44,30 @@
 		rules = copy;
 		persist();
 	});
+
+	// Split the hint message around its {trueLiteral} placeholder so we can render
+	// a real <code> element in the middle without resorting to {@html}. The NUL
+	// sentinel is safe because translations are baked at build time.
+	const hintParts = $derived(m.builderOutcomeRulesHint({ trueLiteral: '\x00' }).split('\x00'));
 </script>
 
 <div class="space-y-1.5">
 	<div class="flex items-center justify-between">
-		<span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Outcome rules</span>
+		<span class="text-xs font-medium text-surface-600-400 uppercase tracking-wider"
+			>{m.builderOutcomeRules()}</span
+		>
 		<button
 			type="button"
 			class="text-xs text-blue-600 hover:text-blue-700 font-medium"
 			onclick={addRule}
 		>
-			<i class="fa-solid fa-plus mr-1"></i>Add rule
+			<i class="fa-solid fa-plus mr-1"></i>{m.builderAddRule()}
 		</button>
 	</div>
 
 	{#each rules as rule, index (index)}
 		<div
-			class="border border-gray-200 rounded-lg bg-gray-50/50 transition-all {drag.draggedIndex ===
+			class="border border-surface-200-800 rounded-lg bg-surface-50-950/50 transition-all {drag.draggedIndex ===
 			index
 				? 'opacity-50'
 				: ''}"
@@ -72,32 +80,32 @@
 		>
 			<!-- Collapsed row -->
 			<div class="flex items-center gap-2 px-3 py-2">
-				<span class="cursor-grab text-gray-300 hover:text-gray-500">
+				<span class="cursor-grab text-gray-300 hover:text-surface-600-400">
 					<i class="fa-solid fa-grip-vertical text-xs"></i>
 				</span>
 
 				{#if rule.color}
 					<span
-						class="w-3 h-3 rounded-full shrink-0 border border-gray-200"
+						class="w-3 h-3 rounded-full shrink-0 border border-surface-200-800"
 						style="background-color: {rule.color}"
 					></span>
 				{/if}
 
-				<span class="text-sm font-medium text-gray-700 truncate min-w-0">
-					{rule.ref_id || 'Untitled rule'}
+				<span class="text-sm font-medium text-surface-700-300 truncate min-w-0">
+					{rule.ref_id || m.builderUntitledRule()}
 				</span>
 
 				{#if rule.annotation}
-					<span class="text-xs text-gray-400 truncate min-w-0">{rule.annotation}</span>
+					<span class="text-xs text-surface-500 truncate min-w-0">{rule.annotation}</span>
 				{/if}
 
-				<span class="ml-auto text-xs text-gray-400 font-mono truncate max-w-[200px]">
+				<span class="ml-auto text-xs text-surface-500 font-mono truncate max-w-[200px]">
 					{rule.expression || '...'}
 				</span>
 
 				<button
 					type="button"
-					class="text-gray-400 hover:text-gray-600 text-xs"
+					class="text-surface-500 hover:text-surface-600-400 text-xs"
 					onclick={() => (expandedIndex = expandedIndex === index ? null : index)}
 				>
 					<i class="fa-solid {expandedIndex === index ? 'fa-chevron-up' : 'fa-chevron-down'}"></i>
@@ -108,14 +116,14 @@
 
 			<!-- Expanded details -->
 			{#if expandedIndex === index}
-				<div class="px-3 pb-3 pt-1 border-t border-gray-200 space-y-2">
+				<div class="px-3 pb-3 pt-1 border-t border-surface-200-800 space-y-2">
 					<div class="grid grid-cols-2 gap-2">
 						<label class="block">
-							<span class="text-xs text-gray-500">Ref ID</span>
+							<span class="text-xs text-surface-600-400">{m.frameworkRefId()}</span>
 							<input
 								type="text"
 								value={rule.ref_id}
-								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+								class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 								onblur={(e) => {
 									rules[index].ref_id = e.currentTarget.value;
 									persist();
@@ -123,12 +131,12 @@
 							/>
 						</label>
 						<label class="block">
-							<span class="text-xs text-gray-500">Label</span>
+							<span class="text-xs text-surface-600-400">{m.builderLabel()}</span>
 							<input
 								type="text"
 								value={rule.annotation}
-								placeholder="e.g. High compliance"
-								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+								placeholder={m.builderLabelHint()}
+								class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 								onblur={(e) => {
 									rules[index].annotation = e.currentTarget.value;
 									persist();
@@ -138,12 +146,12 @@
 					</div>
 
 					<label class="block">
-						<span class="text-xs text-gray-500">CEL Expression</span>
+						<span class="text-xs text-surface-600-400">{m.builderCelExpression()}</span>
 						<textarea
 							value={rule.expression}
-							placeholder={'e.g. assessment.score_sum >= 150 or "true" for catch-all'}
+							placeholder={m.builderCelExpressionPlaceholder()}
 							rows="2"
-							class="w-full text-sm font-mono border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-y"
+							class="input w-full text-sm font-mono border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-y"
 							onblur={(e) => {
 								rules[index].expression = e.currentTarget.value;
 								persist();
@@ -152,12 +160,12 @@
 					</label>
 
 					<label class="block">
-						<span class="text-xs text-gray-500">Color</span>
+						<span class="text-xs text-surface-600-400">{m.builderColor()}</span>
 						<div class="flex items-center gap-2">
 							<input
 								type="color"
 								value={rule.color ?? '#6b7280'}
-								class="w-8 h-8 rounded border border-gray-200 cursor-pointer"
+								class="w-8 h-8 rounded border border-surface-200-800 cursor-pointer"
 								onchange={(e) => {
 									rules[index].color = e.currentTarget.value;
 									persist();
@@ -166,13 +174,13 @@
 							{#if rule.color}
 								<button
 									type="button"
-									class="text-xs text-gray-400 hover:text-gray-600"
+									class="text-xs text-surface-500 hover:text-surface-600-400"
 									onclick={() => {
 										rules[index].color = null;
 										persist();
 									}}
 								>
-									Clear
+									{m.builderClearAction()}
 								</button>
 							{/if}
 						</div>
@@ -180,13 +188,15 @@
 
 					{#if activeLanguage}
 						{@const lang = activeLanguage}
-						<label class="block border-t border-gray-200 pt-2">
-							<span class="text-xs text-blue-500">{lang.toUpperCase()} Label</span>
+						<label class="block border-t border-surface-200-800 pt-2">
+							<span class="text-xs text-blue-500"
+								>{m.builderCelLabelTranslate({ lang: lang.toUpperCase() })}</span
+							>
 							<input
 								type="text"
 								value={getTranslation(rule.translations, lang, 'annotation')}
-								placeholder="Translate label..."
-								class="w-full text-sm border border-blue-100 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+								placeholder={m.builderTranslateLabel()}
+								class="input w-full text-sm border border-blue-100 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 								onblur={(e) => {
 									rules[index].translations = withTranslation(
 										rules[index].translations,
@@ -205,94 +215,107 @@
 	{/each}
 
 	{#if rules.length === 0}
-		<p class="text-xs text-gray-400 text-center py-2">No outcome rules yet. Add one above.</p>
+		<p class="text-xs text-surface-500 text-center py-2">{m.builderNoOutcomeRules()}</p>
 	{/if}
 
-	<p class="text-xs text-gray-400">
-		All matching rules are included in the computed outcomes. Use <code
-			class="font-mono bg-gray-100 px-1 rounded">true</code
-		> as a catch-all.
+	<p class="text-xs text-surface-500">
+		{hintParts[0] ?? ''}<code class="font-mono bg-surface-100-900 px-1 rounded">"true"</code
+		>{hintParts[1] ?? ''}
 	</p>
 
 	<button
 		type="button"
-		class="text-xs text-gray-400 hover:text-gray-600"
+		class="text-xs text-surface-500 hover:text-surface-600-400"
 		onclick={() => (showCelRef = !showCelRef)}
 	>
 		<i class="fa-solid {showCelRef ? 'fa-chevron-up' : 'fa-chevron-down'} mr-1"></i>
-		CEL context reference
+		{m.builderCelContextReference()}
 	</button>
 	{#if showCelRef}
 		<div
-			class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-3 font-mono space-y-3"
+			class="text-xs text-surface-600-400 bg-surface-50-950 border border-surface-200-800 rounded-lg p-3 font-mono space-y-3"
 		>
-			<div class="font-sans font-semibold text-gray-600">Assessment</div>
+			<div class="font-sans font-semibold text-surface-600-400">
+				{m.builderCelGroupAssessment()}
+			</div>
 			<div class="space-y-1 ml-2">
-				<div><span class="text-gray-700">assessment.score_sum</span> — total points scored</div>
 				<div>
-					<span class="text-gray-700">assessment.score_max</span> — total possible points
+					<span class="text-surface-700-300">assessment.score_sum</span> — {m.builderCelScoreSum()}
 				</div>
 				<div>
-					<span class="text-gray-700">assessment.answered_count</span> — answered requirements
+					<span class="text-surface-700-300">assessment.score_max</span> — {m.builderCelScoreMax()}
 				</div>
 				<div>
-					<span class="text-gray-700">assessment.total_count</span> — total assessable requirements
+					<span class="text-surface-700-300">assessment.answered_count</span> — {m.builderCelAnsweredCount()}
+				</div>
+				<div>
+					<span class="text-surface-700-300">assessment.total_count</span> — {m.builderCelTotalCount()}
 				</div>
 			</div>
 
-			<div class="font-sans font-semibold text-gray-600 pt-1 border-t border-gray-200">
-				Requirements (by node_id)
+			<div
+				class="font-sans font-semibold text-surface-600-400 pt-1 border-t border-surface-200-800"
+			>
+				{m.builderCelGroupRequirements()}
 			</div>
 			<div class="space-y-1 ml-2">
 				<div>
-					<span class="text-gray-700">requirements["NODE_ID"].score</span> — requirement score
+					<span class="text-surface-700-300">requirements["NODE_ID"].score</span> — {m.builderCelReqScore()}
 				</div>
 				<div>
-					<span class="text-gray-700">requirements["NODE_ID"].max_score</span> — requirement max score
+					<span class="text-surface-700-300">requirements["NODE_ID"].max_score</span> —
+					{m.builderCelReqMaxScore()}
 				</div>
 				<div>
-					<span class="text-gray-700">requirements["NODE_ID"].result</span> — requirement result
+					<span class="text-surface-700-300">requirements["NODE_ID"].result</span> —
+					{m.builderCelReqResult()}
 				</div>
 				<div>
-					<span class="text-gray-700">requirements["NODE_ID"].status</span> — requirement status
+					<span class="text-surface-700-300">requirements["NODE_ID"].status</span> —
+					{m.builderCelReqStatus()}
 				</div>
-				<div class="text-gray-400 italic">
-					node_id = the part of the URN after the slug (e.g. "1.2" from
-					urn:custom:risk:req_node:my-fw:1.2)
+				<div class="text-surface-500 italic">
+					{m.builderCelNodeIdHint()}
 				</div>
 			</div>
 
-			<div class="font-sans font-semibold text-gray-600 pt-1 border-t border-gray-200">
-				Answers (by question node_id)
+			<div
+				class="font-sans font-semibold text-surface-600-400 pt-1 border-t border-surface-200-800"
+			>
+				{m.builderCelGroupAnswers()}
 			</div>
 			<div class="space-y-1 ml-2">
 				<div>
-					<span class="text-gray-700">answers["Q_NODE_ID"].score</span> — answer score (add_score × weight)
+					<span class="text-surface-700-300">answers["Q_NODE_ID"].score</span> — {m.builderCelAnswerScore()}
 				</div>
 				<div>
-					<span class="text-gray-700">answers["Q_NODE_ID"].value</span> — free-text answer value
+					<span class="text-surface-700-300">answers["Q_NODE_ID"].value</span> — {m.builderCelAnswerValue()}
 				</div>
 				<div>
-					<span class="text-gray-700">answers["Q_NODE_ID"].selected_choices</span> — list of selected
-					choice node_ids
+					<span class="text-surface-700-300">answers["Q_NODE_ID"].selected_choices</span> —
+					{m.builderCelAnswerSelectedChoices()}
 				</div>
 				<div>
-					<span class="text-gray-700">answers["Q_NODE_ID"].weight</span> — question weight
+					<span class="text-surface-700-300">answers["Q_NODE_ID"].weight</span> —
+					{m.builderCelAnswerWeight()}
 				</div>
 				<div>
-					<span class="text-gray-700">answers["Q_NODE_ID"].type</span> — question type (unique_choice,
-					multiple_choice, text)
+					<span class="text-surface-700-300">answers["Q_NODE_ID"].type</span> —
+					{m.builderCelAnswerType()}
 				</div>
 			</div>
 
-			<div class="font-sans font-semibold text-gray-600 pt-1 border-t border-gray-200">Other</div>
+			<div
+				class="font-sans font-semibold text-surface-600-400 pt-1 border-t border-surface-200-800"
+			>
+				{m.builderCelGroupOther()}
+			</div>
 			<div class="space-y-1 ml-2">
 				<div>
-					<span class="text-gray-700">computed_outcomes</span> — map of previously computed outcome ref_ids
+					<span class="text-surface-700-300">computed_outcomes</span> — {m.builderCelComputedOutcomes()}
 				</div>
 				<div>
-					<span class="text-gray-700">hidden_requirements</span> — list of node_ids hidden by visibility
-					expressions
+					<span class="text-surface-700-300">hidden_requirements</span> — {m.builderCelHiddenRequirements()}
 				</div>
 			</div>
 		</div>

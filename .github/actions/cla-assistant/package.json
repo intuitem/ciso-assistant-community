@@ -1,0 +1,32 @@
+{
+  "name": "cla-assistant-action",
+  "version": "2.6.1-intuitem.1",
+  "description": "GitHub Action for storing CLA signatures (vendored, patched fork of contributor-assistant/github-action@v2.6.1)",
+  "main": "lib/main.js",
+  "scripts": {
+    "build": "tsc && ncc build lib/main.js -o dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/contributor-assistant/github-action.git"
+  },
+  "keywords": [
+    "actions",
+    "node",
+    "cla"
+  ],
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0"
+  },
+  "overrides": {
+    "undici": "^6.26.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "@vercel/ncc": "^0.38.3",
+    "typescript": "^5.7.3"
+  },
+  "author": "ibakshay",
+  "license": "Apache-2.0"
+}

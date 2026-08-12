@@ -23,7 +23,8 @@ const schema = z.object({
 		enable_incoming_sync: z.boolean().default(false),
 		table_name: z.string(),
 		field_map: z.record(z.string(), z.any()).default({}).optional(),
-		value_map: z.record(z.string(), z.any()).default({}).optional()
+		value_map: z.record(z.string(), z.any()).default({}).optional(),
+		models: z.record(z.string(), z.any()).default({}).optional()
 	})
 });
 
@@ -45,6 +46,15 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 			provider_id: provider.id
 		};
 	}
+	// Seed the nested per-model structure so the asset FieldMapper's form paths
+	// (settings.models.asset.*) exist for binding.
+	config.settings = config.settings ?? {};
+	config.settings.models = config.settings.models ?? {};
+	config.settings.models.asset = config.settings.models.asset ?? {
+		field_map: {},
+		value_map: {}
+	};
+
 	const form = await superValidate(config, zod(schema), { errors: false });
 	return {
 		form,
@@ -79,8 +89,25 @@ export const actions: Actions = {
 				});
 
 		if (!response.ok) {
-			console.error('Failed to save ServiceNow integration config:', await response.text());
-			setFlash({ type: 'error', message: 'Failed to save ServiceNow integration config' }, event);
+			const rawBody = await response.text();
+			let detail = '';
+			try {
+				const parsed = JSON.parse(rawBody);
+				detail =
+					typeof parsed === 'string'
+						? parsed
+						: parsed.detail || parsed.error || JSON.stringify(parsed);
+			} catch {
+				detail = rawBody.slice(0, 200);
+			}
+			console.error('Failed to save ServiceNow integration config:', detail);
+			setFlash(
+				{
+					type: 'error',
+					message: `Failed to save ServiceNow integration config: ${detail}`
+				},
+				event
+			);
 			return fail(400, { form: form });
 		}
 		setFlash(

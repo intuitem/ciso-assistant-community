@@ -1,19 +1,21 @@
 import io
-import matplotlib
-from numpy import char
-from .models import *
 from math import ceil
-from docxtpl import InlineImage
-from docx.shared import Cm
+
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from icecream import ic
-
-from django.utils.translation import gettext_lazy as _
-# from icecream import ic
-
 from django.db.models import Count
+from django.utils.timezone import now
+from docx.shared import Cm
+from docxtpl import InlineImage
 from library.helpers import get_referential_translation
+
+from .models import (
+    AppliedControl,
+    ComplianceAssessment,
+    RequirementAssessment,
+    RequirementNode,
+)
 
 matplotlib.use("Agg")
 
@@ -429,6 +431,28 @@ def gen_audit_context(id, doc, tree, lang):
 
         return category_scores
 
+    def _build_safe_audit_context(audit):
+        return {
+            "id": str(audit.id),
+            "name": audit.name or "-",
+            "description": audit.description or "-",
+            "ref_id": audit.ref_id or "-",
+            "framework": {
+                "name": audit.framework.name or "-",
+                "description": audit.framework.description or "-",
+                "ref_id": audit.framework.ref_id or "-",
+                "min_score": audit.min_score
+                if audit.min_score is not None
+                else audit.framework.min_score,
+                "max_score": audit.max_score
+                if audit.max_score is not None
+                else audit.framework.max_score,
+            },
+            "selected_implementation_groups": [
+                str(x) for x in audit.get_selected_implementation_groups()
+            ],
+        }
+
     audit = ComplianceAssessment.objects.get(id=id)
 
     context = dict()
@@ -535,12 +559,36 @@ def gen_audit_context(id, doc, tree, lang):
             "opportunity_for_improvement": "Opportunité d'amélioration",
             "good_practice": "Bonne pratique",
         },
+        "nl": {
+            "compliant": "Compliant",
+            "partially_compliant": "Gedeeltelijk compliant",
+            "non_compliant": "Niet compliant",
+            "not_applicable": "Niet van toepassing",
+            "not_assessed": "Niet beoordeeld",
+            "to_do": "Te doen",
+            "on_hold": "In de wacht",
+            "in_progress": "In uitvoering",
+            "deprecated": "Verouderd",
+            "active": "Actief",
+            "policy": "Beleid",
+            "process": "Proces",
+            "technical": "Technisch",
+            "physical": "Fysiek",
+            "procedure": "Procedure",
+            "in_review": "In beoordeling",
+            "done": "Gedaan",
+            "major_nonconformity": "Ernstige niet-naleving",
+            "minor_nonconformity": "Kleine niet-naleving",
+            "observation_sensitive_point": "Observatie / aandachtspunt",
+            "opportunity_for_improvement": "Verbetermogelijkheid",
+            "good_practice": "Goede praktijk",
+        },
     }
 
     def safe_translate(lang: str, key: str) -> str:
         if key is None or key == "--":
             return "-"
-        return i18n_dict[lang].get(key, key)
+        return i18n_dict.get(lang, i18n_dict["en"]).get(key, key)
 
     donut_data = [
         {
@@ -675,7 +723,7 @@ def gen_audit_context(id, doc, tree, lang):
     ac_chart = InlineImage(doc, hbar_buffer, width=Cm(15))
     IGs = ", ".join([str(x) for x in audit.get_selected_implementation_groups()])
     context = {
-        "audit": audit,
+        "audit": _build_safe_audit_context(audit),
         "date": now().strftime("%d/%m/%Y"),
         "contributors": f"{authors}\n{reviewers}",
         "req": aggregated,

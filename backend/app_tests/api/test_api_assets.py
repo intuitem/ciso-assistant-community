@@ -273,3 +273,160 @@ class TestAssetListIAMScope:
             f"scoped reader saw asset {asset_in_b.id} from another folder; "
             f"results: {ids}"
         )
+
+    def _build_export_fixture(self):
+        """Two folders × two asset types — A is in-scope, B is out-of-scope.
+        Returns (client, assets) for the scoped reader of folder A."""
+        root = Folder.get_root_folder()
+        folder_a = Folder.objects.create(
+            name=f"perf-test-A-{uuid.uuid4().hex[:6]}",
+            parent_folder=root,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        folder_b = Folder.objects.create(
+            name=f"perf-test-B-{uuid.uuid4().hex[:6]}",
+            parent_folder=root,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        assets = {
+            "a_pr": Asset.objects.create(
+                folder=folder_a,
+                name=f"asset-A-PR-{uuid.uuid4().hex[:6]}",
+                type=Asset.Type.PRIMARY,
+            ),
+            "a_sp": Asset.objects.create(
+                folder=folder_a,
+                name=f"asset-A-SP-{uuid.uuid4().hex[:6]}",
+                type=Asset.Type.SUPPORT,
+            ),
+            "b_pr": Asset.objects.create(
+                folder=folder_b,
+                name=f"asset-B-PR-{uuid.uuid4().hex[:6]}",
+                type=Asset.Type.PRIMARY,
+            ),
+            "b_sp": Asset.objects.create(
+                folder=folder_b,
+                name=f"asset-B-SP-{uuid.uuid4().hex[:6]}",
+                type=Asset.Type.SUPPORT,
+            ),
+        }
+        return _client_for(_make_scoped_reader(folder_a)), assets
+
+    def test_scoped_reader_export_csv_respects_scope_and_filter(self):
+        """CSV export must honor both IAM scope and list filters: the
+        scoped reader hitting /api/assets/export_csv/?type=PR sees only
+        their folder's PR asset."""
+        client, assets = self._build_export_fixture()
+        r = client.get("/api/assets/export_csv/?type=PR")
+        assert r.status_code == status.HTTP_200_OK, r.content
+        assert r["Content-Type"] == "text/csv; charset=utf-8"
+        content = r.content.decode("utf-8")
+
+        assert assets["a_pr"].name in content, (
+            f"scoped reader should see PR asset {assets['a_pr'].name} from their folder"
+        )
+        assert assets["a_sp"].name not in content, (
+            f"scoped reader should not see SP asset {assets['a_sp'].name} (filtered by type)"
+        )
+        assert assets["b_pr"].name not in content, (
+            f"scoped reader should not see PR asset {assets['b_pr'].name} from another folder"
+        )
+        assert assets["b_sp"].name not in content, (
+            f"scoped reader should not see SP asset {assets['b_sp'].name} from another folder"
+        )
+
+    def test_scoped_reader_export_xlsx_respects_scope_and_filter(self):
+        """XLSX export shares ExportMixin._get_export_queryset with CSV; this
+        regression-guards against a future override that re-skips
+        filter_queryset on the xlsx path."""
+        import io
+        from openpyxl import load_workbook
+
+        client, assets = self._build_export_fixture()
+        r = client.get("/api/assets/export_xlsx/?type=PR")
+        assert r.status_code == status.HTTP_200_OK, r.content
+        assert (
+            r["Content-Type"]
+            == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        wb = load_workbook(io.BytesIO(r.content), read_only=True)
+        cells = {
+            str(c.value)
+            for ws in wb.worksheets
+            for row in ws.iter_rows()
+            for c in row
+            if c.value is not None
+        }
+
+        assert assets["a_pr"].name in cells
+        assert assets["a_sp"].name not in cells
+        assert assets["b_pr"].name not in cells
+        assert assets["b_sp"].name not in cells
+
+
+@pytest.mark.django_db
+class TestAssetFullEndpoint:
+    """`/api/assets/full/` — bulk full-detail read. Must match the per-id
+    detail payload (including the graph-derived objectives/capabilities/
+    comparison fields computed once per page) and honor IAM like list."""
+
+    @staticmethod
+    def _bulk_map(client):
+        r = client.get("/api/assets/full/?limit=1000")
+        assert r.status_code == status.HTTP_200_OK, r.content
+        body = r.json()
+        results = body.get("results", body) if isinstance(body, dict) else body
+        return {it["id"]: it for it in results}
+
+    def test_full_matches_detail_payload(self, authenticated_client):
+        """Bulk record == detail record for both a primary asset and a
+        supporting asset that aggregates objectives from its primary parent
+        (exercises the optimized comparison/capability reuse)."""
+        root = Folder.get_root_folder()
+        folder = Folder.objects.create(
+            name=f"full-{uuid.uuid4().hex[:6]}",
+            parent_folder=root,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        primary = Asset.objects.create(
+            folder=folder, name="primary", type=Asset.Type.PRIMARY
+        )
+        support = Asset.objects.create(
+            folder=folder, name="support", type=Asset.Type.SUPPORT
+        )
+        support.parent_assets.add(primary)
+
+        bulk = self._bulk_map(authenticated_client)
+        for asset in (primary, support):
+            d = authenticated_client.get(f"/api/assets/{asset.id}/")
+            assert d.status_code == status.HTTP_200_OK, d.content
+            assert bulk[str(asset.id)] == d.json(), (
+                f"bulk vs detail mismatch for asset {asset.id}"
+            )
+
+    def test_full_respects_iam_scope(self):
+        """Reader scoped to folder A must not see an asset from folder B in
+        /full/ results (queryset-level IAM scoping)."""
+        root = Folder.get_root_folder()
+        folder_a = Folder.objects.create(
+            name=f"full-A-{uuid.uuid4().hex[:6]}",
+            parent_folder=root,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        folder_b = Folder.objects.create(
+            name=f"full-B-{uuid.uuid4().hex[:6]}",
+            parent_folder=root,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        asset_a = Asset.objects.create(
+            folder=folder_a, name="a", type=Asset.Type.PRIMARY
+        )
+        asset_b = Asset.objects.create(
+            folder=folder_b, name="b", type=Asset.Type.PRIMARY
+        )
+
+        bulk = self._bulk_map(_client_for(_make_scoped_reader(folder_a)))
+        assert str(asset_a.id) in bulk
+        assert str(asset_b.id) not in bulk, (
+            f"scoped reader saw cross-folder asset {asset_b.id} in /full/"
+        )

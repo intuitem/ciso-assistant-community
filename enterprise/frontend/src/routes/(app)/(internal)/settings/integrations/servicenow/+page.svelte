@@ -7,6 +7,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import FieldMapper from '$lib/components/Forms/FieldMapper.svelte';
+	import { ASSET_LOCAL_FIELDS } from '$lib/components/Forms/integrationModels';
 	import WebhookSecretGenerator from '$lib/components/Forms/WebhookSecretGenerator.svelte';
 	import { z } from 'zod';
 	import { m } from '$paraglide/messages';
@@ -40,7 +41,10 @@
 			enable_incoming_sync: z.boolean().default(false),
 			table_name: z.string(),
 			field_map: z.record(z.string(), z.any()).default({}).optional(),
-			value_map: z.record(z.string(), z.any()).default({}).optional()
+			value_map: z.record(z.string(), z.any()).default({}).optional(),
+			// Per-model mapping (asset, ...). AppliedControl stays at the top level
+			// for backward compatibility; the backend reads both.
+			models: z.record(z.string(), z.any()).default({}).optional()
 		})
 	});
 
@@ -166,7 +170,7 @@
 							{#if testConnectionState.loading}
 								<LoadingSpinner />
 							{:else if testConnectionState.success === true}
-								<span class="text-success-700 font-semibold">{m.connectionSuccessful()}</span>
+								<span class="text-success-700-300 font-semibold">{m.connectionSuccessful()}</span>
 							{:else if testConnectionState.success === false}
 								<span class="text-error-500 font-semibold">{m.connectionFailed()}</span>
 							{/if}
@@ -219,7 +223,26 @@
 					<p class="text-sm text-surface-500 -mt-3">{m.webhookEndpointUrlHelpText()}</p>
 				{/if}
 				{#if page.data?.config?.id}
-					<FieldMapper {form} integrationId={page.data?.config?.id} />
+					<FieldMapper
+						{form}
+						integrationId={page.data?.config?.id}
+						initialConfig={page.data?.config?.settings}
+						title={m.serviceNowIntegrationMappingsDescription()}
+						description={m.serviceNowIntegrationMappingsHelpText()}
+						remoteFieldLabel={m.serviceNowColumn()}
+						tableHelpText={m.serviceNowTableHelpText()}
+					/>
+					<FieldMapper
+						{form}
+						integrationId={page.data?.config?.id}
+						modelKey="asset"
+						valuePathPrefix="settings.models.asset"
+						localFields={ASSET_LOCAL_FIELDS}
+						initialConfig={page.data?.config?.settings?.models?.asset}
+						title={m.assets()}
+						remoteFieldLabel={m.serviceNowColumn()}
+						tableHelpText={m.serviceNowTableHelpText()}
+					/>
 				{/if}
 				<button
 					class="text-center btn preset-filled-primary-500 font-semibold w-full"

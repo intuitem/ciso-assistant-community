@@ -79,11 +79,10 @@ export async function handleErrorResponse({
 		return message(form, { warning: res.warning });
 	}
 	if (res.error || res.detail) {
-		setFlash(
-			{ type: 'error', message: safeTranslate(res.error || res.detail), timeout: 10000 },
-			event
-		);
-		return message(form, { error: res.error || res.detail });
+		const rawError = res.error || res.detail;
+		const errorKey = Array.isArray(rawError) ? rawError[0] : rawError;
+		setFlash({ type: 'error', message: safeTranslate(errorKey), timeout: 10000 }, event);
+		return message(form, { error: rawError });
 	}
 	Object.entries(res).forEach(([key, value]) => {
 		if (Array.isArray(value)) {
@@ -119,6 +118,25 @@ export async function defaultWriteFormAction({
 	if (!form.valid) {
 		console.error(form.errors);
 		return message(form, { status: 400 });
+	}
+
+	// `dataType: 'form'` submissions (models with a file field, e.g. Evidence) can't
+	// encode an empty array: a cleared multiselect renders no inputs, so superValidate
+	// drops the field and the relation would never be cleared. AutocompleteSelect emits
+	// `__empty_arrays` markers for such fields — restore them as explicit empty arrays.
+	const schemaShape = (schema as any).shape ?? {};
+	for (const emptyField of formData.getAll('__empty_arrays')) {
+		if (
+			typeof emptyField === 'string' &&
+			emptyField in schemaShape &&
+			form.data[emptyField] === undefined
+		) {
+			form.data[emptyField] = [];
+		}
+	}
+
+	if (urlModel === 'service-accounts') {
+		normalizeServiceAccountAuthorization(form.data);
 	}
 
 	const endpoint = getEndpoint({ action, urlModel, event });
@@ -184,6 +202,15 @@ export async function defaultWriteFormAction({
 		return message(form, { redirect: `/${urlModel}/${writtenObject.id}` });
 	}
 	return message(form, { object: writtenObject });
+}
+
+export function normalizeServiceAccountAuthorization(data: Record<string, any>): void {
+	const mode = data.authorization_mode;
+	delete data.authorization_mode;
+	// 'role' and 'global_admin' both link a builtin role; global_admin is the
+	// explicit BI-RL-ADM case (form forces role + Global perimeter, recursive).
+	if (mode === 'custom') delete data.role;
+	else delete data.permissions;
 }
 
 export async function nestedWriteFormAction({

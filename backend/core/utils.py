@@ -16,6 +16,9 @@ import calendar
 from dateutil import relativedelta as rd
 from uuid import UUID
 
+# Re-export so callers can import from a single utils module.
+from .friendly_names import generate_friendly_name  # noqa: F401
+
 logger = structlog.get_logger(__name__)
 
 
@@ -34,9 +37,46 @@ def extract_node_id(urn: str | None) -> str | None:
     return node_id if node_id else None
 
 
-def is_compute_result_truthy(compute_result: str | None) -> bool:
-    """Return True if a QuestionChoice.compute_result value is truthy."""
-    return compute_result is not None and compute_result not in ("false", "0", "")
+def resolve_compute_result(compute_result: str | None) -> str | None:
+    """Map a QuestionChoice.compute_result string to a Result value."""
+    if compute_result is None:
+        return None
+    value = compute_result.strip().lower()
+    if value == "":
+        return None
+    if value in ("true", "1", "compliant"):
+        return "compliant"
+    if value in ("false", "0", "non_compliant"):
+        return "non_compliant"
+    if value == "partially_compliant":
+        return "partially_compliant"
+    if value == "not_applicable":
+        return "not_applicable"
+    logger.warning(
+        "Unknown compute_result value ignored", compute_result=compute_result
+    )
+    return None
+
+
+def aggregate_compute_results(resolved_results: list[str | None]) -> str | None:
+    """Aggregate resolved compute_result values: not_applicable is neutral, else worst-wins."""
+    contributing = [r for r in resolved_results if r is not None]
+    if not contributing:
+        return None
+
+    non_na = [r for r in contributing if r != "not_applicable"]
+    if not non_na:
+        return "not_applicable"
+
+    has_compliant = any(r == "compliant" for r in non_na)
+    has_non_compliant = any(r == "non_compliant" for r in non_na)
+    has_partial = any(r == "partially_compliant" for r in non_na)
+
+    if has_partial or (has_compliant and has_non_compliant):
+        return "partially_compliant"
+    if has_non_compliant:
+        return "non_compliant"
+    return "compliant"
 
 
 # Currency formatting conventions: (position, space)
@@ -70,6 +110,7 @@ _CURRENCY_FORMAT = {
     "NOK": ("after", True),
     "DKK": ("after", True),
     "PLN": ("after", True),
+    "XPF": ("after", True),
 }
 
 
@@ -143,6 +184,7 @@ class RoleCodename(Enum):
     READER = "BI-RL-AUD"
     THIRD_PARTY_RESPONDENT = "BI-RL-TPR"
     AUDITEE = "BI-RL-ADE"
+    TECHNICAL_TESTER = "BI-RL-TST"
 
     def __str__(self) -> str:
         return self.value
@@ -159,32 +201,267 @@ class UserGroupCodename(Enum):
     READER = "BI-UG-AUD"
     THIRD_PARTY_RESPONDENT = "BI-UG-TPR"
     AUDITEE = "BI-UG-ADE"
+    TECHNICAL_TESTER = "BI-UG-TST"
 
     def __str__(self) -> str:
         return self.value
 
 
-BUILTIN_ROLE_CODENAMES = {
-    str(RoleCodename.ADMINISTRATOR): _("Administrator"),
-    str(RoleCodename.DOMAIN_MANAGER): _("Domain manager"),
-    str(RoleCodename.ANALYST): _("Analyst"),
-    str(RoleCodename.APPROVER): _("Approver"),
-    str(RoleCodename.READER): _("Reader"),
-    str(RoleCodename.THIRD_PARTY_RESPONDENT): _("Third-party respondent"),
-    str(RoleCodename.AUDITEE): _("Auditee"),
+# Translations for builtin role names, following the library localization pattern.
+# Structure: {role_codename: {locale: {"name": translated_name}}}
+# The English name serves as the base; other locales provide translations.
+BUILTIN_ROLE_TRANSLATIONS = {
+    "BI-RL-ADM": {
+        "en": {"name": "Administrator"},
+        "ar": {"name": "المسؤول"},
+        "cs": {"name": "Administrátor"},
+        "da": {"name": "Administrator"},
+        "de": {"name": "Administrator"},
+        "el": {"name": "Διαχειριστής"},
+        "es": {"name": "Administrador"},
+        "et": {"name": "Administraator"},
+        "fr": {"name": "Administrateur"},
+        "hi": {"name": "प्रशासक"},
+        "hr": {"name": "Administrator"},
+        "hu": {"name": "Adminisztrátor"},
+        "id": {"name": "Administrator"},
+        "it": {"name": "Amministratore"},
+        "ko": {"name": "관리자"},
+        "lt": {"name": "Administratorius"},
+        "nl": {"name": "Beheerder"},
+        "pl": {"name": "Administrator"},
+        "pt": {"name": "Administrador"},
+        "ro": {"name": "Administrator"},
+        "sv": {"name": "Administratör"},
+        "tr": {"name": "Yönetici"},
+        "uk": {"name": "Адміністратор"},
+        "ur": {"name": "ایڈمنسٹریٹر"},
+        "zh": {"name": "管理员"},
+    },
+    "BI-RL-DMA": {
+        "en": {"name": "Domain manager"},
+        "ar": {"name": "مدير النطاق"},
+        "cs": {"name": "Správce domény"},
+        "da": {"name": "Domæneansvarlig"},
+        "de": {"name": "Bereichsverantwortlicher"},
+        "el": {"name": "Υπεύθυνος τομέα"},
+        "es": {"name": "Gerente de dominio"},
+        "et": {"name": "Valdkonnahaldur"},
+        "fr": {"name": "Gestionnaire de domaine"},
+        "hi": {"name": "डोमेन प्रबंधक"},
+        "hr": {"name": "Upravitelj domene"},
+        "hu": {"name": "Tartománykezelő"},
+        "id": {"name": "Manajer domain"},
+        "it": {"name": "Gestore del dominio"},
+        "ko": {"name": "도메인 관리자"},
+        "lt": {"name": "Srities vadovas"},
+        "nl": {"name": "Domeinbeheerder"},
+        "pl": {"name": "Menadżer domeny"},
+        "pt": {"name": "Gerente de domínio"},
+        "ro": {"name": "Manager de domeniu"},
+        "sv": {"name": "Domänansvarig"},
+        "tr": {"name": "Etki alanı yöneticisi"},
+        "uk": {"name": "Менеджер домену"},
+        "ur": {"name": "ڈومین مینیجر"},
+        "zh": {"name": "域管理员"},
+    },
+    "BI-RL-ANA": {
+        "en": {"name": "Analyst"},
+        "ar": {"name": "المحلل"},
+        "cs": {"name": "Analytik"},
+        "da": {"name": "Analytiker"},
+        "de": {"name": "Analyst"},
+        "el": {"name": "Αναλυτής"},
+        "es": {"name": "Analista"},
+        "et": {"name": "Analüütik"},
+        "fr": {"name": "Analyste"},
+        "hi": {"name": "विश्लेषक"},
+        "hr": {"name": "Analitičar"},
+        "hu": {"name": "Elemző"},
+        "id": {"name": "Analis"},
+        "it": {"name": "Analista"},
+        "ko": {"name": "분석가"},
+        "lt": {"name": "Analitikas"},
+        "nl": {"name": "Analist"},
+        "pl": {"name": "Analityk"},
+        "pt": {"name": "Analista"},
+        "ro": {"name": "Analist"},
+        "sv": {"name": "Analytiker"},
+        "tr": {"name": "Analist"},
+        "uk": {"name": "Аналітик"},
+        "ur": {"name": "تجزیہ کار"},
+        "zh": {"name": "分析师"},
+    },
+    "BI-RL-APP": {
+        "en": {"name": "Approver"},
+        "ar": {"name": "الموافق"},
+        "cs": {"name": "Schvalovatel"},
+        "da": {"name": "Godkender"},
+        "de": {"name": "Genehmiger"},
+        "el": {"name": "Εγκρίνων"},
+        "es": {"name": "Aprobador"},
+        "et": {"name": "Kinnitaja"},
+        "fr": {"name": "Approbateur"},
+        "hi": {"name": "स्वीकर्ता"},
+        "hr": {"name": "Odobravatelj"},
+        "hu": {"name": "Jóváhagyó"},
+        "id": {"name": "Penyetuju"},
+        "it": {"name": "Approvatore"},
+        "ko": {"name": "승인자"},
+        "lt": {"name": "Tvirtintojas"},
+        "nl": {"name": "Goedkeurder"},
+        "pl": {"name": "Akceptujący"},
+        "pt": {"name": "Aprovador"},
+        "ro": {"name": "Aprobator"},
+        "sv": {"name": "Godkännare"},
+        "tr": {"name": "Onaylayan"},
+        "uk": {"name": "Затверджувач"},
+        "ur": {"name": "منظور کنندہ"},
+        "zh": {"name": "审批者"},
+    },
+    "BI-RL-AUD": {
+        "en": {"name": "Reader"},
+        "ar": {"name": "القارئ"},
+        "cs": {"name": "Čtečka"},
+        "da": {"name": "Læser"},
+        "de": {"name": "Leser"},
+        "el": {"name": "Αναγνώστης"},
+        "es": {"name": "Lector"},
+        "et": {"name": "Lugeja"},
+        "fr": {"name": "Lecteur"},
+        "hi": {"name": "रीडर"},
+        "hr": {"name": "Čitatelj"},
+        "hu": {"name": "Olvasó"},
+        "id": {"name": "Pembaca"},
+        "it": {"name": "Lettore"},
+        "ko": {"name": "열람자"},
+        "lt": {"name": "Skaitytojas"},
+        "nl": {"name": "Lezer"},
+        "pl": {"name": "Czytelnik"},
+        "pt": {"name": "Leitor"},
+        "ro": {"name": "Cititor"},
+        "sv": {"name": "Läsare"},
+        "tr": {"name": "Okuyucu"},
+        "uk": {"name": "Читач"},
+        "ur": {"name": "ریڈر"},
+        "zh": {"name": "阅读者"},
+    },
+    "BI-RL-TPR": {
+        "en": {"name": "Third-party respondent"},
+        "ar": {"name": "المجيب من طرف ثالث"},
+        "cs": {"name": "Respondent třetí strany"},
+        "da": {"name": "Tredjepartsrespondent"},
+        "de": {"name": "Drittanbieter-Befragter"},
+        "el": {"name": "Ερωτώμενος τρίτου μέρους"},
+        "es": {"name": "Encuestado de terceros"},
+        "et": {"name": "Kolmanda osapoole vastaja"},
+        "fr": {"name": "Répondant tiers"},
+        "hi": {"name": "तृतीय-पक्ष प्रतिवादी"},
+        "hr": {"name": "Ispitanik treće strane"},
+        "hu": {"name": "Harmadik fél válaszadója"},
+        "id": {"name": "Responden pihak ketiga"},
+        "it": {"name": "Rispondente di terze parti"},
+        "ko": {"name": "제3자 응답자"},
+        "lt": {"name": "Trečiosios šalies respondentas"},
+        "nl": {"name": "Externe respondent"},
+        "pl": {"name": "Respondent strony trzeciej"},
+        "pt": {"name": "Respondente terceiro"},
+        "ro": {"name": "Respondent terță parte"},
+        "sv": {"name": "Tredjepartsrespondent"},
+        "tr": {"name": "Üçüncü taraf yanıtlayıcı"},
+        "uk": {"name": "Респондент третьої сторони"},
+        "ur": {"name": "فریق ثالث جواب دہندہ"},
+        "zh": {"name": "第三方受访者"},
+    },
+    "BI-RL-ADE": {
+        "en": {"name": "Respondent"},
+        "ar": {"name": "المجيب"},
+        "cs": {"name": "Respondent"},
+        "da": {"name": "Respondent"},
+        "de": {"name": "Befragter"},
+        "el": {"name": "Ερωτώμενος"},
+        "es": {"name": "Encuestado"},
+        "et": {"name": "Vastaja"},
+        "fr": {"name": "Répondant"},
+        "hi": {"name": "प्रतिवादी"},
+        "hr": {"name": "Ispitanik"},
+        "hu": {"name": "Válaszadó"},
+        "id": {"name": "Responden"},
+        "it": {"name": "Rispondente"},
+        "ko": {"name": "응답자"},
+        "lt": {"name": "Respondentas"},
+        "nl": {"name": "Respondent"},
+        "pl": {"name": "Respondent"},
+        "pt": {"name": "Respondente"},
+        "ro": {"name": "Respondent"},
+        "sv": {"name": "Respondent"},
+        "tr": {"name": "Yanıtlayıcı"},
+        "uk": {"name": "Респондент"},
+        "ur": {"name": "جواب دہندہ"},
+        "zh": {"name": "受访者"},
+    },
+    "BI-RL-TST": {
+        "en": {"name": "Technical tester"},
+        "ar": {"name": "مختبِر تقني"},
+        "cs": {"name": "Technický tester"},
+        "da": {"name": "Teknisk tester"},
+        "de": {"name": "Technischer Tester"},
+        "el": {"name": "Τεχνικός δοκιμαστής"},
+        "es": {"name": "Probador técnico"},
+        "et": {"name": "Tehniline testija"},
+        "fr": {"name": "Testeur technique"},
+        "hi": {"name": "तकनीकी परीक्षक"},
+        "hr": {"name": "Tehnički tester"},
+        "hu": {"name": "Műszaki tesztelő"},
+        "id": {"name": "Penguji teknis"},
+        "it": {"name": "Tester tecnico"},
+        "ko": {"name": "기술 테스터"},
+        "lt": {"name": "Techninis testuotojas"},
+        "nl": {"name": "Technisch tester"},
+        "pl": {"name": "Tester techniczny"},
+        "pt": {"name": "Testador técnico"},
+        "ro": {"name": "Tester tehnic"},
+        "sv": {"name": "Teknisk testare"},
+        "tr": {"name": "Teknik test uzmanı"},
+        "uk": {"name": "Технічний тестувальник"},
+        "ur": {"name": "تکنیکی ٹیسٹر"},
+        "zh": {"name": "技术测试员"},
+    },
 }
 
+
+def get_translated_builtin_role_name(role_codename: str) -> str:
+    """Return the translated display name for a builtin role codename.
+
+    Uses the same locale-resolution pattern as library objects:
+    check BUILTIN_ROLE_TRANSLATIONS for the current Django language,
+    fall back to English, then to the raw codename.
+    """
+    from django.utils.translation import get_language
+
+    translations = BUILTIN_ROLE_TRANSLATIONS.get(role_codename, {})
+    lang = get_language() or "en"
+    # Try exact locale, then base language (e.g. "fr-FR" → "fr")
+    locale_trans = translations.get(lang) or translations.get(lang.split("-")[0], {})
+    return locale_trans.get("name") or translations.get("en", {}).get(
+        "name", role_codename
+    )
+
+
 BUILTIN_USERGROUP_CODENAMES = {
-    str(UserGroupCodename.ADMINISTRATOR): _("Administrator"),
-    str(UserGroupCodename.GLOBAL_READER): _("Reader"),
-    str(UserGroupCodename.GLOBAL_APPROVER): _("Approver"),
-    str(UserGroupCodename.GLOBAL_AUDITEE): _("Auditee"),
-    str(UserGroupCodename.DOMAIN_MANAGER): _("Domain manager"),
-    str(UserGroupCodename.ANALYST): _("Analyst"),
-    str(UserGroupCodename.APPROVER): _("Approver"),
-    str(UserGroupCodename.READER): _("Reader"),
-    str(UserGroupCodename.THIRD_PARTY_RESPONDENT): _("Third-party respondent"),
-    str(UserGroupCodename.AUDITEE): _("Auditee"),
+    str(UserGroupCodename.ADMINISTRATOR): str(RoleCodename.ADMINISTRATOR),
+    str(UserGroupCodename.GLOBAL_READER): str(RoleCodename.READER),
+    str(UserGroupCodename.GLOBAL_APPROVER): str(RoleCodename.APPROVER),
+    str(UserGroupCodename.GLOBAL_AUDITEE): str(RoleCodename.AUDITEE),
+    str(UserGroupCodename.DOMAIN_MANAGER): str(RoleCodename.DOMAIN_MANAGER),
+    str(UserGroupCodename.ANALYST): str(RoleCodename.ANALYST),
+    str(UserGroupCodename.APPROVER): str(RoleCodename.APPROVER),
+    str(UserGroupCodename.READER): str(RoleCodename.READER),
+    str(UserGroupCodename.THIRD_PARTY_RESPONDENT): str(
+        RoleCodename.THIRD_PARTY_RESPONDENT
+    ),
+    str(UserGroupCodename.AUDITEE): str(RoleCodename.AUDITEE),
+    str(UserGroupCodename.TECHNICAL_TESTER): str(RoleCodename.TECHNICAL_TESTER),
 }
 
 # NOTE: This is set to "Main" now, but will be changed to a unique identifier
@@ -835,7 +1112,7 @@ def _is_question_visible(question, answers_by_urn, questions_by_urn=None, visite
         # Single-value answer can only satisfy "all" if there's exactly one expected answer
         return len(dep_answers) == 1 and target_answer == dep_answers[0]
 
-    return True
+    return False
 
 
 def build_answers_dict(answers_qs):
@@ -897,10 +1174,23 @@ def _build_answer_context(questions_qs, answers_qs):
 
 
 def update_selected_implementation_groups(compliance_assessment):
-    """Recalculate selected IGs based on all visible answers in the assessment."""
-    from core.models import Answer, Question
+    """Recalculate dynamic IGs from visible answers, preserving manually-picked ones.
 
-    igs_to_select = set()
+    An IG is "dynamic" iff at least one QuestionChoice in the framework lists it in
+    select_implementation_groups. Those get fully recomputed here. Any other IG already
+    on the assessment is treated as a manual pick and left untouched.
+    """
+    from core.models import Answer, Question, QuestionChoice
+
+    dynamic_eligible_igs: set[str] = set()
+    for select_list in QuestionChoice.objects.filter(
+        question__requirement_node__framework=compliance_assessment.framework,
+        select_implementation_groups__isnull=False,
+    ).values_list("select_implementation_groups", flat=True):
+        if select_list:
+            dynamic_eligible_igs.update(select_list)
+
+    igs_to_select: set[str] = set()
 
     requirement_assessments = (
         compliance_assessment.requirement_assessments.select_related(
@@ -946,7 +1236,12 @@ def update_selected_implementation_groups(compliance_assessment):
                 if ig.get("default_selected"):
                     igs_to_select.add(ig["ref_id"])
 
-    compliance_assessment.selected_implementation_groups = list(igs_to_select)
+    current = set(compliance_assessment.selected_implementation_groups or [])
+    manual_only = current - dynamic_eligible_igs
+
+    compliance_assessment.selected_implementation_groups = list(
+        manual_only | igs_to_select
+    )
     compliance_assessment.save(update_fields=["selected_implementation_groups"])
 
 
@@ -977,9 +1272,9 @@ def build_questions_dict(node):
             if choice.add_score is not None:
                 choice_data["add_score"] = choice.add_score
             if choice.compute_result is not None:
-                choice_data["compute_result"] = is_compute_result_truthy(
-                    choice.compute_result
-                )
+                resolved = resolve_compute_result(choice.compute_result)
+                if resolved is not None:
+                    choice_data["compute_result"] = resolved
             if choice.description:
                 choice_data["description"] = choice.description
             if choice.color:
@@ -995,6 +1290,7 @@ def build_questions_dict(node):
         q_data = {
             "type": question.type,
             "text": question.text or "",
+            "weight": question.weight,
         }
         if question.annotation:
             q_data["annotation"] = question.annotation
@@ -1007,128 +1303,31 @@ def build_questions_dict(node):
     return result if result else None
 
 
-def _resolve_auditee_role_ids():
-    """Resolve role IDs for auditee + higher roles via IAM snapshot cache."""
-    from iam.cache_builders import get_roles_state
-
-    role_id_by_name = get_roles_state().role_id_by_name
-    auditee_id = role_id_by_name.get(RoleCodename.AUDITEE.value)
-    higher_ids = frozenset(
-        role_id_by_name[rc.value]
-        for rc in (
-            RoleCodename.ANALYST,
-            RoleCodename.DOMAIN_MANAGER,
-            RoleCodename.ADMINISTRATOR,
-        )
-        if rc.value in role_id_by_name
-    )
-    return auditee_id, higher_ids
+AUDITOR_VIEW_PERM = "view_compliance_assessment_full"
+AUDIT_ACCESS_PERM = "view_complianceassessment"
 
 
-def _resolve_respondent_role_ids():
-    """Resolve role IDs for respondent roles (auditee + third-party respondent) + higher roles."""
-    from iam.cache_builders import get_roles_state
+def get_respondent_scoped_folder_ids(user) -> set:
+    """Return folder IDs where *user* sees audits as a **respondent** — i.e. the
+    scoped, field-stripped view applies.
 
-    role_id_by_name = get_roles_state().role_id_by_name
-    respondent_ids = frozenset(
-        role_id_by_name[rc.value]
-        for rc in (RoleCodename.AUDITEE, RoleCodename.THIRD_PARTY_RESPONDENT)
-        if rc.value in role_id_by_name
-    )
-    higher_ids = frozenset(
-        role_id_by_name[rc.value]
-        for rc in (
-            RoleCodename.ANALYST,
-            RoleCodename.DOMAIN_MANAGER,
-            RoleCodename.ADMINISTRATOR,
-        )
-        if rc.value in role_id_by_name
-    )
-    return respondent_ids, higher_ids
-
-
-def get_respondent_filtered_folder_ids(user) -> set:
-    """Return folder IDs where *user* holds a respondent role (auditee or third-party
-    respondent) but NO higher role. Mirrors :func:`get_auditee_filtered_folder_ids`
-    but widens the role set so third-party respondents are also guarded.
-    """
-    from iam.models import _iter_assignment_lites_for_user
-    from iam.cache_builders import (
-        get_folder_state,
-        iter_descendant_ids,
-    )
-
-    respondent_role_ids, higher_role_ids = _resolve_respondent_role_ids()
-    if not respondent_role_ids:
-        return set()
-
-    state = get_folder_state()
-    folder_roles: dict[UUID, set] = {}
-
-    for a in _iter_assignment_lites_for_user(user):
-        role_id = a.role_id
-        if role_id not in respondent_role_ids and role_id not in higher_role_ids:
-            continue
-        for pf_id in a.perimeter_folder_ids:
-            if a.is_recursive:
-                target_ids = iter_descendant_ids(state, pf_id, include_start=True)
-            else:
-                target_ids = (pf_id,)
-            for fid in target_ids:
-                folder_roles.setdefault(fid, set()).add(role_id)
-
-    return {
-        fid
-        for fid, role_ids in folder_roles.items()
-        if role_ids & respondent_role_ids and role_ids.isdisjoint(higher_role_ids)
-    }
-
-
-def get_auditee_filtered_folder_ids(user) -> set:
-    """Return folder IDs where *user* holds the auditee role but NO higher role.
-
-    "Higher" means analyst, domain-manager or administrator — any role that
-    already grants full access to compliance data. For those folders the
-    normal queryset is sufficient; only the returned set needs assignment
-    filtering.
+    A user is a respondent on a folder when they can access compliance
+    assessments there (``view_complianceassessment``) but have NOT been granted
+    the full auditor view (``view_compliance_assessment_full``). This is permission-based and
+    **default-deny**: any role not explicitly granted ``view_compliance_assessment_full`` is
+    treated as a respondent. Auditor-side roles (reader, approver, analyst,
+    domain-manager, administrator) hold ``view_compliance_assessment_full`` and are therefore
+    excluded; auditee and third-party respondent do not and are included.
 
     Uses the IAM snapshot caches exclusively (no extra DB queries).
     """
-    from iam.models import _iter_assignment_lites_for_user
-    from iam.cache_builders import (
-        get_folder_state,
-        iter_descendant_ids,
-    )
+    from iam.models import RoleAssignment
 
-    auditee_role_id, higher_role_ids = _resolve_auditee_role_ids()
-    if auditee_role_id is None:
-        return set()
-
-    state = get_folder_state()
-
-    # folder_id -> set of role_ids the user has on that folder
-    folder_roles: dict[UUID, set] = {}
-
-    for a in _iter_assignment_lites_for_user(user):
-        role_id = a.role_id
-        if role_id != auditee_role_id and role_id not in higher_role_ids:
-            continue  # irrelevant role
-
-        # expand perimeter folders
-        for pf_id in a.perimeter_folder_ids:
-            if a.is_recursive:
-                target_ids = iter_descendant_ids(state, pf_id, include_start=True)
-            else:
-                target_ids = (pf_id,)
-
-            for fid in target_ids:
-                folder_roles.setdefault(fid, set()).add(role_id)
-
-    # Return only folders where user is auditee and has NO higher role
+    perms_per_folder = RoleAssignment.get_permissions_per_folder(user, recursive=True)
     return {
-        fid
-        for fid, role_ids in folder_roles.items()
-        if auditee_role_id in role_ids and role_ids.isdisjoint(higher_role_ids)
+        UUID(folder_id)
+        for folder_id, codenames in perms_per_folder.items()
+        if AUDIT_ACCESS_PERM in codenames and AUDITOR_VIEW_PERM not in codenames
     }
 
 

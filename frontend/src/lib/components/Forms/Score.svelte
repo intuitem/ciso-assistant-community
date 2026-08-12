@@ -2,6 +2,7 @@
 	import { run } from 'svelte/legacy';
 
 	import { displayScoreColor } from '$lib/utils/helpers';
+	import { getLocale } from '$paraglide/runtime.js';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
@@ -9,6 +10,11 @@
 		score: number;
 		name: string;
 		description: string;
+		description_doc?: string;
+		translations?: Record<
+			string,
+			Partial<Record<'name' | 'description' | 'description_doc', string>>
+		>;
 	}
 
 	interface Props {
@@ -61,6 +67,15 @@
 	run(() => {
 		$value = !disabled ? ($value ?? min_score) : $value;
 	});
+
+	function localizedScoreField(
+		definition: ScoresDefinition,
+		field: 'name' | 'description' | 'description_doc'
+	) {
+		const locale = getLocale();
+		const language = locale.split('-')[0];
+		return definition.translations?.[language]?.[field] ?? definition[field];
+	}
 </script>
 
 {@render left?.()}
@@ -86,6 +101,8 @@
 				{/if}
 				<input
 					data-testid="range-slider-input"
+					id={field}
+					aria-label={label}
 					name={field}
 					type="range"
 					class="input px-0"
@@ -100,13 +117,15 @@
 			<div class="shrink-0 relative">
 				<Progress
 					value={fullDonut ? max_score : $value}
-					min={0}
+					min={min_score}
 					max={max_score}
 					data-testid="progress-ring-svg"
 				>
 					<Progress.Circle class="[--size:--spacing(12)]">
 						<Progress.CircleTrack />
-						<Progress.CircleRange class={displayScoreColor($value, max_score, inversedColors)} />
+						<Progress.CircleRange
+							class={displayScoreColor($value, max_score, inversedColors, min_score)}
+						/>
 					</Progress.Circle>
 					<div class="absolute inset-0 flex items-center justify-center">
 						<span class="text-xs font-bold">{$value}</span>
@@ -120,11 +139,11 @@
 					{#if !disabled && scores_definition && $value !== null}
 						{#each scores_definition as definition}
 							{#if definition.score === $value}
-								<p class="font-bold">{definition.name}</p>
-								{#if isDoc && definition.description_doc}
-									{definition.description_doc}
-								{:else if definition.description}
-									{definition.description}
+								<p class="font-bold">{localizedScoreField(definition, 'name')}</p>
+								{#if isDoc && localizedScoreField(definition, 'description_doc')}
+									{localizedScoreField(definition, 'description_doc')}
+								{:else if localizedScoreField(definition, 'description')}
+									{localizedScoreField(definition, 'description')}
 								{/if}
 							{/if}
 						{/each}
@@ -133,7 +152,7 @@
 			</div>
 		</div>
 		{#if helpText}
-			<p class="text-sm text-gray-500">{helpText}</p>
+			<p class="text-sm text-surface-600-400">{helpText}</p>
 		{/if}
 	</div>
 {/if}

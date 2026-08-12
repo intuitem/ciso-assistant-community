@@ -27,3 +27,16 @@ cli/db_backup
 /.claude/*
 !/.claude/skills/
 /frontend/project.inlang/cache
+
+# Ignore Windows-specific dev script helpers
+# > Backend
+backend.ps1
+backend/.win_native_dev_runserver.py
+# > Tools
+tools/convert_library_v2.bat
+
+# > Power BI (working files embed instance data; only the .pbit template ships)
+automation/powerbi/**/*.pbix
+automation/powerbi/connector/bin/
+automation/powerbi/connector/obj/
+*.pfx

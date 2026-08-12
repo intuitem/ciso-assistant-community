@@ -43,10 +43,12 @@ from allauth.socialaccount.providers.saml.views import (
 from allauth.utils import ValidationError
 
 # === Application-specific imports ===
-from core.permissions import IsAdministrator  # ou une permission plus adaptée
+from core.permissions import IsGlobalAdmin  # ou une permission plus adaptée
 from iam.models import User
 from iam.sso.errors import AuthError
 from iam.sso.models import SSOSettings
+from iam.sso.redirects import get_sso_authenticate_url
+from iam.sso.slo import stash_saml_slo_state
 from iam.utils import generate_token
 from global_settings.models import GlobalSettings
 
@@ -149,6 +151,7 @@ class FinishACSView(SAMLViewMixin, View):
             )
             login.state["process"] = AuthProcess.LOGIN
             login.state["next"] = next_url
+        login.state["next"] = get_sso_authenticate_url(login.state["next"])
         try:
             attribute_mapping = provider.app.settings.get("attribute_mapping", {})
             # our parameter is either:
@@ -181,14 +184,12 @@ class FinishACSView(SAMLViewMixin, View):
             user.last_name = idp_last_names[0] if idp_last_names else user.last_name
             user.save()
             token = generate_token(user)
-            login.state["next"] = (
-                f"{settings.CISO_ASSISTANT_URL.rstrip('/')}/sso/authenticate"
-            )
             pre_social_login(request, login)
             if request.user.is_authenticated:
                 get_account_adapter(request).logout(request)
             login._accept_login(request)  # complete_social_login not working
             record_authentication(request, login)
+            stash_saml_slo_state(request, auth)
         except User.DoesNotExist as e:
             # NOTE: We might want to allow signup some day
             error = AuthError.USER_DOES_NOT_EXIST
@@ -239,7 +240,7 @@ class GenerateSAMLKeyView(SAMLViewMixin, APIView):
     Accessible only to admins (to be adapted as needed).
     """
 
-    permission_classes = [IsAdministrator]
+    permission_classes = [IsGlobalAdmin]
 
     def post(self, request, organization_slug):
         try:
@@ -301,7 +302,7 @@ class GenerateSAMLKeyView(SAMLViewMixin, APIView):
 
 
 class DownloadSAMLPublicCertView(SAMLViewMixin, APIView):
-    permission_classes = [IsAdministrator]
+    permission_classes = [IsGlobalAdmin]
 
     def get(self, request, organization_slug):
         provider = self.get_provider(organization_slug)

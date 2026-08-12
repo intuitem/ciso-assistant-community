@@ -1,7 +1,11 @@
+import io
+import re
 import uuid
 
+import pandas as pd
+
 from core.constants import COUNTRY_CHOICES
-from core.models import Actor
+from core.models import Actor, Terminology
 from core.serializers import ActorReadSerializer
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
@@ -9,6 +13,7 @@ from core.views import (
     escape_excel_formula,
 )
 from django_filters.rest_framework import DjangoFilterBackend
+from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -16,10 +21,10 @@ from django.db.models import Count
 from itertools import chain
 from collections import defaultdict
 
+from core.utils import camel_case
 from iam.models import Folder, RoleAssignment
 
 from .models import (
-    ProcessingNature,
     Purpose,
     PersonalData,
     DataSubject,
@@ -94,10 +99,6 @@ class PersonalDataViewSet(BaseModelViewSet):
     model = PersonalData
     filterset_fields = ["processing", "category", "assets"]
 
-    @action(detail=False, name="Get category choices")
-    def category(self, request):
-        return Response(dict(PersonalData.PERSONAL_DATA_CHOICES))
-
     @action(detail=False, name="Get deletion policy choices")
     def deletion_policy(self, request):
         return Response(dict(PersonalData.DELETION_POLICY_CHOICES))
@@ -142,7 +143,7 @@ class PersonalDataViewSet(BaseModelViewSet):
 
         try:
             processing_uuid = uuid.UUID(str(processing_id))
-        except (ValueError, AttributeError):
+        except ValueError, AttributeError:
             return Response(
                 {"error": "Invalid processing ID"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -161,7 +162,13 @@ class PersonalDataViewSet(BaseModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        valid_categories = {c[0] for c in PersonalData.PERSONAL_DATA_CHOICES}
+        category_terms = {
+            str(t.id): t
+            for t in Terminology.objects.filter(
+                field_path=Terminology.FieldPath.PERSONAL_DATA_CATEGORY,
+                is_visible=True,
+            )
+        }
         valid_deletion_policies = {c[0] for c in PersonalData.DELETION_POLICY_CHOICES}
 
         if deletion_policy and deletion_policy not in valid_deletion_policies:
@@ -170,30 +177,33 @@ class PersonalDataViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        existing_categories = set(
-            PersonalData.objects.filter(processing=processing).values_list(
+        existing_categories = {
+            str(c)
+            for c in PersonalData.objects.filter(processing=processing).values_list(
                 "category", flat=True
             )
-        )
+        }
 
         created_items = []
         skipped_items = []
         errors = []
 
         for category in categories:
-            if category not in valid_categories:
+            category = str(category)
+            term = category_terms.get(category)
+            if term is None:
                 errors.append({"category": category, "error": "Invalid category"})
                 continue
 
             if category in existing_categories:
                 existing = PersonalData.objects.filter(
-                    processing=processing, category=category
+                    processing=processing, category=term
                 ).first()
                 if existing:
                     skipped_items.append(
                         {
                             "id": str(existing.id),
-                            "category": existing.category,
+                            "category": str(existing.category),
                             "name": str(existing),
                         }
                     )
@@ -201,7 +211,7 @@ class PersonalDataViewSet(BaseModelViewSet):
 
             pd = PersonalData.objects.create(
                 processing=processing,
-                category=category,
+                category=term,
                 retention=retention,
                 deletion_policy=deletion_policy,
                 is_sensitive=is_sensitive,
@@ -209,7 +219,7 @@ class PersonalDataViewSet(BaseModelViewSet):
             created_items.append(
                 {
                     "id": str(pd.id),
-                    "category": pd.category,
+                    "category": str(pd.category),
                     "name": str(pd),
                 }
             )
@@ -327,7 +337,16 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         "filtering_labels",
         "assigned_to",
         "perimeters",
+        "personal_data__category",
+        "data_subjects__category",
     ]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related("personal_data__category", "data_subjects")
+        )
 
     export_config = {
         "fields": {
@@ -373,6 +392,181 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         "select_related": ["folder"],
         "prefetch_related": ["filtering_labels", "nature", "assigned_to"],
     }
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="export-xlsx",
+        name="Export processing as XLSX",
+    )
+    def export_record_xlsx(self, request, pk):
+        processing = self.get_object()
+
+        def txt(value):
+            return escape_excel_formula(value) if isinstance(value, str) else value
+
+        processing_rows = [
+            {
+                "ref_id": txt(processing.ref_id),
+                "name": txt(processing.name),
+                "description": txt(processing.description or ""),
+                "domain": txt(processing.folder.name),
+                "status": processing.status,
+                "processing_nature": ",".join(
+                    txt(n.name) for n in processing.nature.all()
+                ),
+                "information_channel": txt(processing.information_channel),
+                "usage_channel": txt(processing.usage_channel),
+                "dpia_required": processing.dpia_required,
+                "dpia_reference": txt(processing.dpia_reference),
+                "assigned_to": ",".join(
+                    txt(a.user.email if a.user else str(a))
+                    for a in processing.assigned_to.all()
+                ),
+                "labels": ",".join(
+                    txt(label.label) for label in processing.filtering_labels.all()
+                ),
+            }
+        ]
+
+        sheets = [
+            ("Processing", list(processing_rows[0].keys()), processing_rows),
+            (
+                "Purposes",
+                ["name", "description", "legal_basis", "article_9_condition"],
+                [
+                    {
+                        "name": txt(purpose.name or ""),
+                        "description": txt(purpose.description or ""),
+                        "legal_basis": purpose.legal_basis,
+                        "article_9_condition": purpose.article_9_condition or "",
+                    }
+                    for purpose in processing.purposes.all()
+                ],
+            ),
+            (
+                "Personal data",
+                [
+                    "name",
+                    "description",
+                    "category",
+                    "retention",
+                    "deletion_policy",
+                    "is_sensitive",
+                    "assets",
+                ],
+                [
+                    {
+                        "name": txt(item.name or ""),
+                        "description": txt(item.description or ""),
+                        "category": txt(item.category.name),
+                        "retention": txt(item.retention),
+                        "deletion_policy": item.deletion_policy,
+                        "is_sensitive": item.is_sensitive,
+                        "assets": ",".join(
+                            txt(asset.name) for asset in item.assets.all()
+                        ),
+                    }
+                    for item in processing.personal_data.select_related(
+                        "category"
+                    ).prefetch_related("assets")
+                ],
+            ),
+            (
+                "Data subjects",
+                ["name", "description", "category"],
+                [
+                    {
+                        "name": txt(subject.name or ""),
+                        "description": txt(subject.description or ""),
+                        "category": subject.category,
+                    }
+                    for subject in processing.data_subjects.all()
+                ],
+            ),
+            (
+                "Data recipients",
+                ["name", "description", "category"],
+                [
+                    {
+                        "name": txt(recipient.name or ""),
+                        "description": txt(recipient.description or ""),
+                        "category": recipient.category,
+                    }
+                    for recipient in processing.data_recipients.all()
+                ],
+            ),
+            (
+                "Contractors",
+                [
+                    "name",
+                    "description",
+                    "entity",
+                    "relationship_type",
+                    "country",
+                    "documentation_link",
+                ],
+                [
+                    {
+                        "name": txt(contractor.name or ""),
+                        "description": txt(contractor.description or ""),
+                        "entity": txt(contractor.entity.name)
+                        if contractor.entity
+                        else "",
+                        "relationship_type": contractor.relationship_type,
+                        "country": contractor.country,
+                        "documentation_link": txt(contractor.documentation_link),
+                    }
+                    for contractor in processing.contractors_involved.select_related(
+                        "entity"
+                    )
+                ],
+            ),
+            (
+                "Transfers",
+                [
+                    "name",
+                    "description",
+                    "entity",
+                    "country",
+                    "transfer_mechanism",
+                    "guarantees",
+                    "documentation_link",
+                ],
+                [
+                    {
+                        "name": txt(transfer.name or ""),
+                        "description": txt(transfer.description or ""),
+                        "entity": txt(transfer.entity.name) if transfer.entity else "",
+                        "country": transfer.country,
+                        "transfer_mechanism": transfer.transfer_mechanism,
+                        "guarantees": txt(transfer.guarantees),
+                        "documentation_link": txt(transfer.documentation_link),
+                    }
+                    for transfer in processing.data_transfers.select_related("entity")
+                ],
+            ),
+        ]
+
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            for sheet_name, columns, rows in sheets:
+                pd.DataFrame(rows, columns=columns).to_excel(
+                    writer, sheet_name=sheet_name, index=False
+                )
+        buffer.seek(0)
+
+        slug = re.sub(
+            r"[^A-Za-z0-9_-]+", "-", processing.ref_id or processing.name
+        ).strip("-")[:60] or str(processing.id)
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="processing-{slug}.xlsx"'
+        )
+        return response
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -463,24 +657,38 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         )
 
         # Aggregate data breaches by breach type
+        breach_type_labels = dict(DataBreach.BREACH_TYPE_CHOICES)
         breach_types = (
             DataBreach.objects.filter(id__in=viewable_data_breaches)
             .values("breach_type")
             .annotate(count=Count("id"))
         )
         breach_type_data = [
-            {"name": item["breach_type"], "value": item["count"]}
+            {
+                "name": breach_type_labels.get(
+                    item["breach_type"], item["breach_type"]
+                ),
+                "localName": camel_case(item["breach_type"]),
+                "value": item["count"],
+            }
             for item in breach_types
         ]
 
         # Aggregate right requests by request type
+        request_type_labels = dict(RightRequest.REQUEST_TYPE_CHOICES)
         request_types = (
             RightRequest.objects.filter(id__in=viewable_right_requests)
             .values("request_type")
             .annotate(count=Count("id"))
         )
         request_type_data = [
-            {"name": item["request_type"], "value": item["count"]}
+            {
+                "name": request_type_labels.get(
+                    item["request_type"], item["request_type"]
+                ),
+                "localName": camel_case(item["request_type"]),
+                "value": item["count"],
+            }
             for item in request_types
         ]
 
@@ -491,13 +699,13 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
 
         # Get all personal data with their processings and legal bases
         personal_data = (
-            PersonalData.objects.select_related("processing")
+            PersonalData.objects.select_related("processing", "category")
             .prefetch_related("processing__purposes", "processing__data_transfers")
             .filter(id__in=viewable_personal_data)
         )
 
         for pd in personal_data:
-            pd_category = pd.category
+            pd_category = pd.category.name
             processing_name = (
                 pd.processing.name if pd.processing else "Unknown Processing"
             )
@@ -592,11 +800,6 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         )
 
 
-class ProcessingNatureViewSet(BaseModelViewSet):
-    model = ProcessingNature
-    search_fields = ["name"]
-
-
 class RightRequestViewSet(BaseModelViewSet):
     """
     API endpoint that allows right requests to be viewed or edited.
@@ -645,6 +848,7 @@ class DataBreachViewSet(BaseModelViewSet):
         "authorities",
         "affected_processings",
         "incident",
+        "evidences",
     ]
 
     @action(detail=False, name="Get breach type choices")

@@ -1,28 +1,23 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
+	import type { CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
 		form: SuperValidated<any>;
-		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
-		data?: any;
 		debug?: boolean;
 	}
 
 	let {
 		form,
-		model,
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		data = {},
 		debug = false
 	}: Props = $props();
 </script>
@@ -34,30 +29,20 @@
 		<div class="text-xs space-y-2">
 			<div>
 				<strong>initialData:</strong>
-				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(initialData, null, 2)}</pre>
+				<pre class="bg-surface-50-950 p-2 rounded mt-1">{JSON.stringify(initialData, null, 2)}</pre>
 			</div>
 			<div>
 				<strong>formDataCache:</strong>
-				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(formDataCache, null, 2)}</pre>
+				<pre class="bg-surface-50-950 p-2 rounded mt-1">{JSON.stringify(
+						formDataCache,
+						null,
+						2
+					)}</pre>
 			</div>
 		</div>
 	</div>
 {/if}
 
-<FolderTreeSelect
-	{form}
-	field="folder"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-/>
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 <AutocompleteSelect
 	{form}
 	multiple

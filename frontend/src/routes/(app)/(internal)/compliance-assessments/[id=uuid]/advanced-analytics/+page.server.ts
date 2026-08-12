@@ -62,6 +62,13 @@ export const load = (async ({ fetch, params }) => {
 			exceptions: []
 		}));
 
+	const combinedTreePromise = fetch(`${endpoint}/combined_tree/`)
+		.then(async (res) => {
+			if (!res.ok) throw new Error(`combined_tree failed: ${res.status}`);
+			return res.json();
+		})
+		.catch(() => ({ tree: {}, strategy: 'none', ancestors: [], canonical_scale: {} }));
+
 	return {
 		URLModel,
 		compliance_assessment,
@@ -74,7 +81,8 @@ export const load = (async ({ fetch, params }) => {
 			mappingProjection: mappingProjectionPromise,
 			evidenceCoverage: evidenceCoveragePromise,
 			threats: threatsPromise,
-			exceptions: exceptionsPromise
+			exceptions: exceptionsPromise,
+			combinedTree: combinedTreePromise
 		}
 	};
 }) satisfies PageServerLoad;

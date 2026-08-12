@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { get } from 'svelte/store';
 	import { getBuilderContext } from './builder-state';
+	import { m } from '$paraglide/messages';
 
 	const builder = getBuilderContext();
 
@@ -37,58 +38,58 @@
 </script>
 
 <div class="max-w-3xl mx-auto py-16 px-6">
-	<h2 class="text-xl font-semibold text-gray-800 mb-2">
-		How do you want to structure this framework?
+	<h2 class="text-xl font-semibold text-surface-800-200 mb-2">
+		{m.builderEmptyStateTitle()}
 	</h2>
-	<p class="text-sm text-gray-500 mb-8">
-		Pick a starting shape — you can change the structure at any time.
+	<p class="text-sm text-surface-600-400 mb-8">
+		{m.builderEmptyStateSubtitle()}
 	</p>
 
 	<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
 		<button
 			type="button"
-			class="text-left p-4 border border-gray-200 rounded-lg bg-white hover:border-blue-400 hover:shadow-sm transition"
+			class="text-left p-4 border border-surface-200-800 rounded-lg bg-surface-50-950 hover:border-blue-400 hover:shadow-sm transition"
 			onclick={seedFlat}
 		>
-			<div class="text-3xl mb-2 text-gray-400">≡</div>
-			<div class="text-sm font-medium text-gray-800">Flat list</div>
-			<p class="text-xs text-gray-500 mt-1">
-				All requirements at one level. Like Google SAIF (12 requirements).
+			<div class="text-3xl mb-2 text-surface-500">≡</div>
+			<div class="text-sm font-medium text-surface-800-200">{m.builderEmptyFlat()}</div>
+			<p class="text-xs text-surface-600-400 mt-1">
+				{m.builderEmptyFlatHint()}
 			</p>
 		</button>
 
 		<button
 			type="button"
-			class="text-left p-4 border border-gray-200 rounded-lg bg-white hover:border-blue-400 hover:shadow-sm transition"
+			class="text-left p-4 border border-surface-200-800 rounded-lg bg-surface-50-950 hover:border-blue-400 hover:shadow-sm transition"
 			onclick={seedGrouped}
 		>
-			<div class="text-3xl mb-2 text-gray-400">□</div>
-			<div class="text-sm font-medium text-gray-800">Grouped</div>
-			<p class="text-xs text-gray-500 mt-1">
-				Sections containing requirements. Like OWASP MASVS (8 sections → 24 reqs).
+			<div class="text-3xl mb-2 text-surface-500">□</div>
+			<div class="text-sm font-medium text-surface-800-200">{m.builderEmptyGrouped()}</div>
+			<p class="text-xs text-surface-600-400 mt-1">
+				{m.builderEmptyGroupedHint()}
 			</p>
 		</button>
 
 		<button
 			type="button"
-			class="text-left p-4 border border-gray-200 rounded-lg bg-white hover:border-blue-400 hover:shadow-sm transition"
+			class="text-left p-4 border border-surface-200-800 rounded-lg bg-surface-50-950 hover:border-blue-400 hover:shadow-sm transition"
 			onclick={seedHierarchy}
 		>
-			<div class="text-3xl mb-2 text-gray-400">▼</div>
-			<div class="text-sm font-medium text-gray-800">Hierarchy</div>
-			<p class="text-xs text-gray-500 mt-1">
-				Multi-level nesting. Like NIST CSF 2.0 (6 → 23 → 106).
+			<div class="text-3xl mb-2 text-surface-500">▼</div>
+			<div class="text-sm font-medium text-surface-800-200">{m.builderEmptyHierarchy()}</div>
+			<p class="text-xs text-surface-600-400 mt-1">
+				{m.builderEmptyHierarchyHint()}
 			</p>
 		</button>
 
 		<button
 			type="button"
-			class="text-left p-4 border border-gray-200 rounded-lg bg-white hover:border-gray-400 hover:shadow-sm transition"
+			class="text-left p-4 border border-surface-200-800 rounded-lg bg-surface-50-950 hover:border-gray-400 hover:shadow-sm transition"
 			onclick={seedBlank}
 		>
-			<div class="text-3xl mb-2 text-gray-400">○</div>
-			<div class="text-sm font-medium text-gray-800">Blank canvas</div>
-			<p class="text-xs text-gray-500 mt-1">Start from zero — add one empty node.</p>
+			<div class="text-3xl mb-2 text-surface-500">○</div>
+			<div class="text-sm font-medium text-surface-800-200">{m.builderEmptyBlank()}</div>
+			<p class="text-xs text-surface-600-400 mt-1">{m.builderEmptyBlankHint()}</p>
 		</button>
 	</div>
 </div>

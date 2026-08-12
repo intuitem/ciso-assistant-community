@@ -8,6 +8,7 @@ mcp = FastMCP("ciso-assistant")
 # Import all tools to register them with the MCP server
 from .tools.read_tools import (
     get_risk_scenarios,
+    get_risk_scenario,
     get_applied_controls,
     get_audits_progress,
     get_folders,
@@ -29,11 +30,14 @@ from .tools.read_tools import (
     get_task_template_details,
     get_vulnerabilities,
     get_vulnerability,
+    get_asset_classes,
+    get_users,
 )
 
 from .tools.analysis_tools import (
     get_all_audits_with_metrics,
     get_audit_gap_analysis,
+    get_audit_global_score,
 )
 
 from .tools.library_tools import (
@@ -133,6 +137,7 @@ from .tools.ebios_rm_tools import (
 
 # Register all tools with MCP decorators
 mcp.tool()(get_risk_scenarios)
+mcp.tool()(get_risk_scenario)
 mcp.tool()(get_applied_controls)
 mcp.tool()(get_audits_progress)
 mcp.tool()(get_folders)
@@ -154,9 +159,12 @@ mcp.tool()(get_task_templates)
 mcp.tool()(get_task_template_details)
 mcp.tool()(get_vulnerabilities)
 mcp.tool()(get_vulnerability)
+mcp.tool()(get_asset_classes)
+mcp.tool()(get_users)
 
 mcp.tool()(get_all_audits_with_metrics)
 mcp.tool()(get_audit_gap_analysis)
+mcp.tool()(get_audit_global_score)
 
 mcp.tool()(get_stored_libraries)
 mcp.tool()(get_loaded_libraries)

@@ -1,5 +1,11 @@
 """
 Management command to bulk-index existing model objects into Qdrant for chat RAG.
+
+Re-runnable; safe to invoke against a populated index — Qdrant upsert replaces
+points by id. Useful to:
+  - Backfill the index for a folder after enabling chat for the first time.
+  - Refresh the index after extending `_build_object_text` with new fields.
+  - Index a single folder ahead of running questionnaire-autopilot on it.
 """
 
 import uuid
@@ -9,17 +15,27 @@ from django.core.management.base import BaseCommand, CommandError
 
 from chat.rag import COLLECTION_NAME, get_qdrant_client
 from chat.signals import INDEXED_MODELS
-from chat.tasks import _build_object_text, _normalize_model_name
+from chat.tasks import _resolve_folder_id
+from chat.text import _build_object_text, _normalize_model_name
 
 
 class Command(BaseCommand):
-    help = "Bulk-index existing model objects into Qdrant for chat RAG"
+    help = (
+        "Bulk-index existing model objects into Qdrant for chat / agentic RAG. "
+        "Restrict with --folder to scope to one folder."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--models",
             nargs="*",
-            help="Specific models to index (e.g. core.AppliedControl). Defaults to all indexed models.",
+            help="Specific models to index (e.g. core.AppliedControl). "
+            "Defaults to all indexed models.",
+        )
+        parser.add_argument(
+            "--folder",
+            help="UUID of a folder. Restricts indexing to objects whose resolved "
+            "folder is this one. Without this flag, every object is indexed.",
         )
         parser.add_argument(
             "--batch-size",
@@ -27,28 +43,47 @@ class Command(BaseCommand):
             default=100,
             help="Number of objects to embed and upsert per batch (default: 100)",
         )
+        parser.add_argument(
+            "--dry-run",
+            action="store_true",
+            help="List what would be indexed without contacting Qdrant or the embedder.",
+        )
 
     def handle(self, *args, **options):
-        from qdrant_client.models import PointStruct
-
-        from chat.providers import get_embedder
-
         models_to_index = options["models"] or INDEXED_MODELS
         batch_size = options["batch_size"]
+        folder_filter = options.get("folder")
+        dry_run = options.get("dry_run", False)
 
-        # Verify collection exists
-        client = get_qdrant_client()
-        collections = [c.name for c in client.get_collections().collections]
-        if COLLECTION_NAME not in collections:
-            raise CommandError(
-                f"Collection '{COLLECTION_NAME}' does not exist. Run 'init_qdrant' first."
-            )
+        client = None
+        embedder = None
+        if not dry_run:
+            client = get_qdrant_client()
+            collections = [c.name for c in client.get_collections().collections]
+            if COLLECTION_NAME not in collections:
+                raise CommandError(
+                    f"Collection '{COLLECTION_NAME}' does not exist. "
+                    "Run 'init_qdrant' first."
+                )
+            from chat.providers import get_embedder
 
-        embedder = get_embedder()
-        total_indexed = 0
+            embedder = get_embedder()
+
+        scope_label = f"folder={folder_filter}" if folder_filter else "all folders"
+        mode_label = "[dry-run] " if dry_run else ""
+        self.stdout.write(f"{mode_label}Indexing scope: {scope_label}")
+
+        grand_total_indexed = 0
+        grand_total_skipped = 0
 
         for model_path in models_to_index:
-            app_label, model_name = model_path.split(".")
+            try:
+                app_label, model_name = model_path.split(".")
+            except ValueError:
+                self.stderr.write(
+                    self.style.WARNING(f"Bad model path '{model_path}', skipping")
+                )
+                continue
             try:
                 model_class = apps.get_model(app_label, model_name)
             except LookupError:
@@ -58,26 +93,49 @@ class Command(BaseCommand):
                 continue
 
             queryset = model_class.objects.all()
-            count = queryset.count()
-            self.stdout.write(f"Indexing {count} {model_path} objects...")
+            total = queryset.count()
+            indexed = 0
+            skipped = 0
 
-            batch_texts = []
-            batch_objects = []
+            self.stdout.write(f"  {model_path}: scanning {total} object(s)…")
+
+            batch_texts: list[str] = []
+            batch_objects: list = []
 
             for obj in queryset.iterator():
-                text = _build_object_text(obj, model_name)
-                raw_folder_id = getattr(obj, "folder_id", None)
-                if not text or not raw_folder_id:
-                    continue
-                folder_id = str(raw_folder_id)
+                folder_id = _resolve_folder_id(obj)
                 if not folder_id:
+                    skipped += 1
+                    continue
+                if folder_filter and folder_id != folder_filter:
+                    continue
+
+                text = _build_object_text(obj, model_name)
+                if not text:
+                    skipped += 1
                     continue
 
                 batch_texts.append(text)
                 batch_objects.append((obj, text, folder_id))
 
                 if len(batch_texts) >= batch_size:
-                    total_indexed += self._flush_batch(
+                    if not dry_run:
+                        indexed += self._flush_batch(
+                            client,
+                            embedder,
+                            batch_objects,
+                            batch_texts,
+                            app_label,
+                            model_name,
+                        )
+                    else:
+                        indexed += len(batch_texts)
+                    batch_texts = []
+                    batch_objects = []
+
+            if batch_texts:
+                if not dry_run:
+                    indexed += self._flush_batch(
                         client,
                         embedder,
                         batch_objects,
@@ -85,18 +143,22 @@ class Command(BaseCommand):
                         app_label,
                         model_name,
                     )
-                    batch_texts = []
-                    batch_objects = []
+                else:
+                    indexed += len(batch_texts)
 
-            # Flush remaining
-            if batch_texts:
-                total_indexed += self._flush_batch(
-                    client, embedder, batch_objects, batch_texts, app_label, model_name
-                )
+            grand_total_indexed += indexed
+            grand_total_skipped += skipped
+            self.stdout.write(
+                f"  {model_path}: indexed {indexed}, skipped {skipped}"
+                + (" [dry-run]" if dry_run else "")
+            )
 
-            self.stdout.write(f"  Done: {model_path}")
-
-        self.stdout.write(self.style.SUCCESS(f"Indexed {total_indexed} objects total."))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"{mode_label}Done — indexed {grand_total_indexed}, "
+                f"skipped {grand_total_skipped}."
+            )
+        )
 
     def _flush_batch(
         self, client, embedder, batch_objects, batch_texts, app_label, model_name

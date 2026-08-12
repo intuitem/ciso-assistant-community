@@ -1,11 +1,11 @@
-import ipaddress
 import uuid
-from urllib.parse import urlparse
+from auditlog.registry import auditlog
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from core.base_models import NameDescriptionMixin
 from core.models import Actor
+from core.net_safety import BlockedRequestError, assert_public_url
 from iam.models import Folder, FolderMixin
 
 
@@ -34,12 +34,52 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
         THIN = "thin", "Thin"
         FULL = "full", "Full"
 
+    class Kind(models.TextChoices):
+        INTEGRATION = "integration", "Integration"
+        AUDIT_SINK = "audit_sink", "Audit sink"
+
+    class Transport(models.TextChoices):
+        HTTP = "http", "HTTP"
+        KAFKA = "kafka", "Kafka"
+
+    class BodyFormat(models.TextChoices):
+        CISO_NATIVE = "ciso_native", "CISO Assistant (HMAC-signed)"
+        OCSF = "ocsf", "OCSF"
+        RAW = "raw", "Raw LogEntry"
+
     payload_format = models.CharField(
         verbose_name="Payload Format",
         max_length=10,
         choices=PayloadFormats.choices,
         default=PayloadFormats.FULL,
         help_text="The format of the webhook payload sent to this endpoint.",
+    )
+
+    # An "audit_sink" forwards the audit log (LogEntry stream) to an external
+    # SIEM; an "integration" is the user-facing model-event webhook. Audit sinks
+    # are admin/org-managed and hidden from the user webhook list.
+    kind = models.CharField(
+        max_length=20,
+        choices=Kind.choices,
+        default=Kind.INTEGRATION,
+    )
+    transport = models.CharField(
+        max_length=10,
+        choices=Transport.choices,
+        default=Transport.HTTP,
+        help_text="Delivery transport (audit sinks only).",
+    )
+    body_format = models.CharField(
+        max_length=20,
+        choices=BodyFormat.choices,
+        default=BodyFormat.OCSF,
+        help_text="Canonical event schema for audit sinks.",
+    )
+    headers = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Static headers added to each request, e.g. "
+        '{"Authorization": "Splunk <token>"}. Used for audit-sink auth.',
     )
 
     owner = models.ForeignKey(
@@ -52,10 +92,24 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
     )
 
     url = models.URLField(
-        max_length=512, help_text="The consumer URL to send webhook events to."
+        max_length=2048,
+        blank=True,
+        default="",
+        help_text="Consumer URL (HTTP transport).",
     )
 
-    secret = models.CharField(max_length=100, help_text="HMAC signing secret.")
+    kafka_config = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Kafka transport: {bootstrap_servers, topic, config:{...}}.",
+    )
+
+    secret = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        help_text="HMAC signing secret (integration webhooks only).",
+    )
 
     event_types = models.ManyToManyField(
         WebhookEventType,
@@ -78,34 +132,32 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
         return f"{self.owner} - {self.url}"
 
     def clean(self):
-        """
-        Model-level validation for SSRF mitigation.
-        """
         super().clean()
-
+        if self.transport != self.Transport.HTTP:
+            return
+        if getattr(settings, "ALLOW_PRIVATE_NETWORK_REQUESTS", False):
+            return
         try:
-            hostname = urlparse(self.url).hostname
-            if not hostname:
-                raise ValidationError("The URL provided is invalid.")
-
-            # Try to parse the hostname as an IP address
-            ip = ipaddress.ip_address(hostname)
-
-            if not settings.WEBHOOK_ALLOW_PRIVATE_IPS and (
-                ip.is_private or ip.is_loopback or ip.is_reserved
-            ):
-                raise ValidationError(
-                    "In production, the URL cannot be an internal, loopback, or reserved IP address."
-                )
-        except ValueError:
-            # It's a domain name, not an IP address. This is fine.
-            # We are NOT resolving DNS here, as that's a blocking network call
-            # and belongs in a proxy solution.
-            pass
+            assert_public_url(self.url, allowed_schemes=("http", "https"))
+        except BlockedRequestError:
+            raise ValidationError(
+                {
+                    "url": "URL must point to a public host "
+                    "(no private, loopback, or internal addresses)."
+                }
+            )
 
     def save(self, *args, **kwargs):
-        """
-        On save, ensure a secret exists if one wasn't provided.
-        """
-        self.full_clean()  # Run validation
+        """Run full model validation (clean + field checks) before persisting."""
+        self.full_clean()
         super().save(*args, **kwargs)
+
+
+# secret, headers (SIEM token) and kafka_config (SASL password) are redacted.
+auditlog.register(
+    WebhookEndpoint,
+    exclude_fields=["created_at", "updated_at", "is_published"],
+    mask_fields=["headers", "kafka_config", "secret"],
+    mask_callable="global_settings.utils.redact_secret_value",
+    m2m_fields={"event_types", "target_folders"},
+)

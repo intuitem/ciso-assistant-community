@@ -40,7 +40,11 @@
 		const LabelLayout = (await import('echarts/features')).LabelLayout;
 		echarts.use([LabelLayout]);
 
-		let chart_t = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+		let chart_t = echarts.init(
+			document.getElementById(chart_id),
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 
 		// Count visible nodes at depth 2 to determine tree size category
 		const visibleAtDepth2 = countVisibleNodes(tree as treeType, 2);
@@ -119,6 +123,7 @@
 			]
 		};
 
+		option.backgroundColor = 'transparent';
 		chart_t.setOption(option);
 
 		// Resize after Svelte updates the container height
@@ -132,7 +137,7 @@
 
 {#if tree.length === 0}
 	<div class="flex flex-col justify-center items-center h-full">
-		<span class="text-center text-gray-600"
+		<span class="text-center text-surface-600-400"
 			>Not enough data yet. Refresh when more content is available.</span
 		>
 	</div>

@@ -13,9 +13,11 @@
 	import type { PageData, ActionData } from './$types';
 	import RiskLevel from './RiskLevel.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
+	import { goto } from '$lib/utils/breadcrumbs';
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -54,7 +56,7 @@
 			var currentUrl = window.location.href;
 			var url = new URL(currentUrl);
 			var nextValue = getSecureRedirect(url.searchParams.get('next'));
-			if (nextValue) window.location.href = nextValue;
+			if (nextValue) goto(nextValue);
 		}
 	}
 
@@ -88,6 +90,24 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalThreatModelCreateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.threatModelCreateForm,
+				formAction: '?/createThreatModel',
+				model: data.threatModelModel,
+				invalidateAll: false,
+				debug: false
+			}
+		};
+		modalStore.trigger({
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate('add-' + data.threatModelModel.localName)
+		});
+	}
+
 	let refreshKey = $state(false);
 	run(() => {
 		if (form?.newControl) {
@@ -103,6 +123,17 @@
 						}
 					: current
 			);
+			form = null;
+		}
+	});
+
+	run(() => {
+		if (form?.newThreatModel) {
+			refreshKey = !refreshKey;
+			_form.form.update((current: Record<string, any>) => ({
+				...current,
+				threat_models: form?.newThreatModel
+			}));
 			form = null;
 		}
 	});
@@ -126,17 +157,17 @@
 	>
 		<!-- ── Context Bar ── -->
 		<div class="flex flex-col sm:flex-row gap-3">
-			<div class="card px-5 py-3 bg-white shadow-lg flex-1">
+			<div class="card px-5 py-3 bg-surface-50-950 shadow-lg flex-1">
 				<div class="flex items-center gap-2 mb-2">
 					<i class="fa-solid fa-layer-group text-xs text-indigo-400"></i>
-					<span class="text-xs font-semibold uppercase tracking-wider text-gray-400"
+					<span class="text-xs font-semibold uppercase tracking-wider text-surface-400-600"
 						>{m.scope()}</span
 					>
 				</div>
 				<div class="flex flex-wrap gap-x-6 gap-y-1">
 					{#if data.scenario.risk_assessment.perimeter}
 						<div>
-							<p class="text-xs text-gray-400">{m.perimeter()}</p>
+							<p class="text-xs text-surface-400-600">{m.perimeter()}</p>
 							<Anchor
 								class="anchor text-sm font-semibold"
 								href="/perimeters/{data.scenario.perimeter.id}"
@@ -145,7 +176,7 @@
 						</div>
 					{/if}
 					<div>
-						<p class="text-xs text-gray-400">{m.riskAssessment()}</p>
+						<p class="text-xs text-surface-400-600">{m.riskAssessment()}</p>
 						<Anchor
 							class="anchor text-sm font-semibold"
 							href="/risk-assessments/{data.scenario.risk_assessment.id}"
@@ -153,7 +184,7 @@
 						>
 					</div>
 					<div>
-						<p class="text-xs text-gray-400">{m.riskMatrix()}</p>
+						<p class="text-xs text-surface-400-600">{m.riskMatrix()}</p>
 						<Anchor
 							class="anchor text-sm font-semibold"
 							href="/risk-matrices/{data.scenario.risk_matrix.id}"
@@ -163,10 +194,10 @@
 					</div>
 				</div>
 			</div>
-			<div class="card px-5 py-3 bg-white shadow-lg flex-1">
+			<div class="card px-5 py-3 bg-surface-50-950 shadow-lg flex-1">
 				<div class="flex items-center gap-2 mb-2">
 					<i class="fa-solid fa-user-gear text-xs text-indigo-400"></i>
-					<span class="text-xs font-semibold uppercase tracking-wider text-gray-400"
+					<span class="text-xs font-semibold uppercase tracking-wider text-surface-400-600"
 						>{m.ownership()}</span
 					>
 				</div>
@@ -199,10 +230,10 @@
 
 		<!-- ── Identity & Relations ── -->
 		<div class="flex flex-col lg:flex-row gap-3">
-			<div class="card px-5 py-4 bg-white shadow-lg lg:w-5/12 space-y-3">
+			<div class="card px-5 py-4 bg-surface-50-950 shadow-lg lg:w-5/12 space-y-3">
 				<div class="flex items-center gap-2 mb-1">
 					<i class="fa-solid fa-fingerprint text-xs text-indigo-400"></i>
-					<span class="text-xs font-semibold uppercase tracking-wider text-gray-400"
+					<span class="text-xs font-semibold uppercase tracking-wider text-surface-400-600"
 						>{m.identification()}</span
 					>
 				</div>
@@ -216,10 +247,12 @@
 				</div>
 				<MarkdownField form={_form} field="description" rows={6} label={m.description()} />
 			</div>
-			<div class="card px-5 py-4 bg-white shadow-lg lg:w-7/12 max-h-[26rem] overflow-y-auto">
+			<div
+				class="card px-5 py-4 bg-surface-50-950 shadow-lg lg:w-7/12 max-h-[26rem] overflow-y-auto"
+			>
 				<div class="flex items-center gap-2 mb-3">
 					<i class="fa-solid fa-diagram-project text-xs text-indigo-400"></i>
-					<span class="text-xs font-semibold uppercase tracking-wider text-gray-400"
+					<span class="text-xs font-semibold uppercase tracking-wider text-surface-400-600"
 						>{m.associatedObjects()}</span
 					>
 				</div>
@@ -236,6 +269,7 @@
 							classes: 'text-blue-500'
 						}}
 						field="assets"
+						portalDropdown
 						optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
 						label={m.assets()}
 					/>
@@ -247,6 +281,7 @@
 						optionsExtraFields={[['folder', 'str']]}
 						optionsLabelField="auto"
 						field="threats"
+						portalDropdown
 						label={m.threats()}
 					/>
 					<AutocompleteSelect
@@ -257,6 +292,7 @@
 						optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
 						optionsExtraFields={[['folder', 'str']]}
 						field="vulnerabilities"
+						portalDropdown
 						label={m.vulnerabilities()}
 					/>
 					<AutocompleteSelect
@@ -267,6 +303,7 @@
 						optionsLabelField="auto"
 						optionsExtraFields={[['folder', 'str']]}
 						field="incidents"
+						portalDropdown
 						label={m.incidents()}
 					/>
 					<AutocompleteSelect
@@ -275,6 +312,7 @@
 						optionsEndpoint="security-exceptions"
 						optionsExtraFields={[['folder', 'str']]}
 						field="security_exceptions"
+						portalDropdown
 						label={m.securityExceptions()}
 					/>
 				</div>
@@ -283,10 +321,10 @@
 
 		<!-- ── Risk Origin & Antecedent Scenarios ── -->
 		<div class="flex flex-col sm:flex-row gap-3">
-			<div class="card px-5 py-4 bg-white shadow-lg flex-1">
+			<div class="card px-5 py-4 bg-surface-50-950 shadow-lg flex-1">
 				<div class="flex items-center gap-2 mb-2">
 					<i class="fa-solid fa-crosshairs text-xs text-indigo-400"></i>
-					<span class="text-xs font-semibold uppercase tracking-wider text-gray-400"
+					<span class="text-xs font-semibold uppercase tracking-wider text-surface-400-600"
 						>{m.riskOrigin()}</span
 					>
 				</div>
@@ -300,10 +338,10 @@
 					helpText={m.riskOriginHelpText()}
 				/>
 			</div>
-			<div class="card px-5 py-4 bg-white shadow-lg flex-1">
+			<div class="card px-5 py-4 bg-surface-50-950 shadow-lg flex-1">
 				<div class="flex items-center gap-2 mb-2">
 					<i class="fa-solid fa-timeline text-xs text-indigo-400"></i>
-					<span class="text-xs font-semibold uppercase tracking-wider text-gray-400"
+					<span class="text-xs font-semibold uppercase tracking-wider text-surface-400-600"
 						>{m.antecedentScenarios()}</span
 					>
 				</div>
@@ -322,6 +360,42 @@
 					helpText={m.antecedentScenariosHelpText()}
 				/>
 			</div>
+			{#if page.data.featureflags?.threat_modeling}
+				<div class="card px-5 py-4 bg-surface-50-950 shadow-lg flex-1">
+					<div class="flex items-center gap-2 mb-2">
+						<i class="fa-solid fa-diagram-project text-xs text-indigo-400"></i>
+						<span class="text-xs font-semibold uppercase tracking-wider text-surface-400-600"
+							>{m.threatModel()}</span
+						>
+					</div>
+					<div class="flex items-center gap-2">
+						<div class="flex-1">
+							{#key refreshKey}
+								<AutocompleteSelect
+									form={_form}
+									nullable
+									optionsEndpoint="threat-models"
+									optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
+									optionsExtraFields={[['folder', 'str']]}
+									optionsLabelField="auto"
+									field="threat_models"
+									label={m.threatModel()}
+									helpText={m.threatModelHelpText()}
+								/>
+							{/key}
+						</div>
+						<button
+							class="btn preset-tonal-primary shrink-0 h-10 w-10"
+							onclick={(_) => modalThreatModelCreateForm()}
+							type="button"
+							title={safeTranslate('add-' + data.threatModelModel.localName)}
+							aria-label={safeTranslate('add-' + data.threatModelModel.localName)}
+						>
+							<i class="fa-solid fa-plus text-sm"></i>
+						</button>
+					</div>
+				</div>
+			{/if}
 		</div>
 
 		<input type="hidden" name="urlmodel" value={data.model.urlModel} />
@@ -331,12 +405,12 @@
 			{#if page.data?.featureflags?.inherent_risk}
 				<!-- Inherent Risk -->
 				<div
-					class="card px-5 pt-4 pb-14 bg-white shadow-lg border-l-4 border-l-orange-400 rounded-b-none"
+					class="card px-5 pt-4 pb-14 bg-surface-50-950 shadow-lg border-l-4 border-l-orange-400 rounded-b-none"
 				>
 					<div class="flex items-center gap-2 mb-3">
 						<i class="fa-solid fa-fire text-sm text-orange-400"></i>
-						<h4 class="text-base font-bold text-gray-800">{m.inherentRisk()}</h4>
-						<span class="text-xs text-gray-400 ml-1">{m.riskOptionHelper()}</span>
+						<h4 class="text-base font-bold text-surface-800-200">{m.inherentRisk()}</h4>
+						<span class="text-xs text-surface-400-600 ml-1">{m.riskOptionHelper()}</span>
 					</div>
 					<div class="flex items-center gap-4 flex-wrap">
 						<div class="min-w-36">
@@ -349,7 +423,7 @@
 							/>
 						</div>
 						<span
-							class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400 text-xs font-bold select-none mt-5"
+							class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-200-800 text-surface-400-600 text-xs font-bold select-none mt-5"
 							>&times;</span
 						>
 						<div class="min-w-36">
@@ -362,7 +436,7 @@
 							/>
 						</div>
 						<span
-							class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400 text-xs font-bold select-none mt-5"
+							class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-200-800 text-surface-400-600 text-xs font-bold select-none mt-5"
 							>=</span
 						>
 						<div>
@@ -380,21 +454,21 @@
 				</div>
 				<!-- Flow connector -->
 				<div class="flex items-center pl-6 -my-px">
-					<div class="w-0.5 h-5 bg-gray-300"></div>
-					<i class="fa-solid fa-chevron-down text-[10px] text-gray-300 -ml-[5px] mt-3"></i>
+					<div class="w-0.5 h-5 bg-surface-300-700"></div>
+					<i class="fa-solid fa-chevron-down text-[10px] text-surface-300-700 -ml-[5px] mt-3"></i>
 				</div>
 			{/if}
 
 			<!-- Current Risk -->
 			<div
-				class="card px-5 pt-4 pb-14 bg-white shadow-lg border-l-4 border-l-amber-400 {page.data
-					?.featureflags?.inherent_risk
+				class="card px-5 pt-4 pb-14 bg-surface-50-950 shadow-lg border-l-4 border-l-amber-400 {page
+					.data?.featureflags?.inherent_risk
 					? 'rounded-none'
 					: 'rounded-b-none'}"
 			>
 				<div class="flex items-center gap-2 mb-3">
 					<i class="fa-solid fa-gauge-high text-sm text-amber-500"></i>
-					<h4 class="text-base font-bold text-gray-800">{m.currentRisk()}</h4>
+					<h4 class="text-base font-bold text-surface-800-200">{m.currentRisk()}</h4>
 				</div>
 				<div class="flex flex-col xl:flex-row xl:items-center gap-6">
 					<!-- Existing controls -->
@@ -438,7 +512,7 @@
 								/>
 							</div>
 							<span
-								class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400 text-xs font-bold select-none mt-5"
+								class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-200-800 text-surface-400-600 text-xs font-bold select-none mt-5"
 								>&times;</span
 							>
 							<div class="min-w-36">
@@ -451,7 +525,7 @@
 								/>
 							</div>
 							<span
-								class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400 text-xs font-bold select-none mt-5"
+								class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-200-800 text-surface-400-600 text-xs font-bold select-none mt-5"
 								>=</span
 							>
 							<div>
@@ -472,17 +546,17 @@
 
 			<!-- Flow connector -->
 			<div class="flex items-center pl-6 -my-px">
-				<div class="w-0.5 h-5 bg-gray-300"></div>
-				<i class="fa-solid fa-chevron-down text-[10px] text-gray-300 -ml-[5px] mt-3"></i>
+				<div class="w-0.5 h-5 bg-surface-300-700"></div>
+				<i class="fa-solid fa-chevron-down text-[10px] text-surface-300-700 -ml-[5px] mt-3"></i>
 			</div>
 
 			<!-- Residual Risk -->
 			<div
-				class="card px-5 pt-4 pb-14 bg-white shadow-lg border-l-4 border-l-emerald-400 rounded-t-none"
+				class="card px-5 pt-4 pb-14 bg-surface-50-950 shadow-lg border-l-4 border-l-emerald-400 rounded-t-none"
 			>
 				<div class="flex items-center gap-2 mb-3">
 					<i class="fa-solid fa-shield-halved text-sm text-emerald-500"></i>
-					<h4 class="text-base font-bold text-gray-800">{m.residualRisk()}</h4>
+					<h4 class="text-base font-bold text-surface-800-200">{m.residualRisk()}</h4>
 				</div>
 				<div class="flex flex-col xl:flex-row xl:items-center gap-6">
 					<!-- Extra controls -->
@@ -526,7 +600,7 @@
 								/>
 							</div>
 							<span
-								class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400 text-xs font-bold select-none mt-5"
+								class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-200-800 text-surface-400-600 text-xs font-bold select-none mt-5"
 								>&times;</span
 							>
 							<div class="min-w-36">
@@ -539,7 +613,7 @@
 								/>
 							</div>
 							<span
-								class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400 text-xs font-bold select-none mt-5"
+								class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-200-800 text-surface-400-600 text-xs font-bold select-none mt-5"
 								>=</span
 							>
 							<div>
@@ -560,10 +634,10 @@
 		</div>
 
 		<!-- ── Assessment Details ── -->
-		<div class="card px-5 py-4 bg-white shadow-lg">
+		<div class="card px-5 py-4 bg-surface-50-950 shadow-lg">
 			<div class="flex items-center gap-2 mb-3">
 				<i class="fa-solid fa-clipboard-check text-xs text-indigo-400"></i>
-				<span class="text-xs font-semibold uppercase tracking-wider text-gray-400"
+				<span class="text-xs font-semibold uppercase tracking-wider text-surface-400-600"
 					>{m.assessmentDetails()}</span
 				>
 			</div>
@@ -573,7 +647,7 @@
 					multiple
 					optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
 					field="qualifications"
-					label={m.qualifications()}
+					label={safeTranslate('qualifications')}
 					optionsLabelField="translated_name"
 				/>
 				<Select
@@ -602,9 +676,15 @@
 			</div>
 		</div>
 
+		{#if page.data?.featureflags?.comments}
+			<div class="my-3">
+				<CommentsPanel parentType="risk_scenario" parentId={data.scenario.id} />
+			</div>
+		{/if}
+
 		<!-- ── Sticky Footer ── -->
 		<div
-			class="flex flex-row justify-between gap-4 sticky bottom-0 bg-white/80 backdrop-blur-md pt-3 pb-3 px-1 -mx-1 border-t border-gray-200 z-10"
+			class="flex flex-row justify-between gap-4 sticky bottom-0 bg-surface-50-950/80 backdrop-blur-md pt-3 pb-3 px-1 -mx-1 border-t border-surface-200-800 z-10"
 		>
 			<button
 				class="btn preset-tonal-surface font-semibold w-full"
