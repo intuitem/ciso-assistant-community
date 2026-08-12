@@ -1245,15 +1245,19 @@
 							</div>
 							<div class="text-surface-600-400">
 								<p class="text-xl font-semibold mb-2">{m.noOperationsData()}</p>
-								<p class="text-sm text-surface-600-400">{m.createIncidents()}</p>
+								{#if page.data?.featureflags?.incidents}
+									<p class="text-sm text-surface-600-400">{m.createIncidents()}</p>
+								{/if}
 							</div>
-							<a
-								href="/incidents"
-								class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 transition-colors"
-							>
-								<i class="fas fa-plus text-sm"></i>
-								{m.createIncident()}
-							</a>
+							{#if page.data?.featureflags?.incidents}
+								<a
+									href="/incidents"
+									class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 transition-colors"
+								>
+									<i class="fas fa-plus text-sm"></i>
+									{m.createIncident()}
+								</a>
+							{/if}
 						</div>
 					{/if}
 				{:catch error}
