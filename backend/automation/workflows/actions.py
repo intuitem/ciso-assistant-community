@@ -25,9 +25,12 @@ from core.models import (
     Framework,
     Incident,
     Perimeter,
+    RiskAcceptance,
     RiskAssessment,
     RiskMatrix,
+    RiskScenario,
     SecurityException,
+    ValidationFlow,
     Vulnerability,
 )
 from tprm.models import Entity, EntityAssessment
@@ -294,6 +297,16 @@ class CreateObjectAction(BaseAction):
 BASE_READ_FIELDS = ["id", "name", "created_at", "updated_at"]
 
 
+def _read_fields(entry):
+    """BASE_READ_FIELDS trimmed to columns the model actually has (e.g.
+    RequirementAssessment and ValidationFlow have no name), plus the entry's
+    own fields."""
+    model_fields = {field.name for field in entry["model"]._meta.concrete_fields}
+    return [
+        field for field in BASE_READ_FIELDS if field in model_fields
+    ] + entry["fields"]
+
+
 def _requirements_breakdown(assessment):
     """Total assessable requirement assessments and their count per result —
     stable shape: every result key present, zeroes included."""
@@ -308,7 +321,15 @@ def _requirements_breakdown(assessment):
 READABLE_MODELS = {
     "applied_control": {
         "model": AppliedControl,
-        "fields": ["description", "ref_id", "status", "eta", "priority", "link"],
+        "fields": [
+            "description",
+            "ref_id",
+            "status",
+            "eta",
+            "expiry_date",
+            "priority",
+            "link",
+        ],
     },
     "evidence": {
         "model": Evidence,
@@ -369,6 +390,45 @@ READABLE_MODELS = {
     "entity_assessment": {
         "model": EntityAssessment,
         "fields": ["description", "status", "eta", "due_date"],
+    },
+    "requirement_assessment": {
+        "model": RequirementAssessment,
+        "fields": [
+            "status",
+            "result",
+            "extended_result",
+            "score",
+            "is_scored",
+            "documentation_score",
+            "eta",
+            "due_date",
+        ],
+        # Output-only identifiers: a bare row is unusable without knowing
+        # which requirement of which audit it assesses.
+        "computed": {
+            "requirement_ref_id": lambda ra: ra.requirement.ref_id,
+            "requirement_name": lambda ra: ra.requirement.name,
+            "compliance_assessment_name": lambda ra: ra.compliance_assessment.name,
+        },
+    },
+    "risk_scenario": {
+        "model": RiskScenario,
+        "fields": [
+            "description",
+            "ref_id",
+            "treatment",
+            "inherent_level",
+            "current_level",
+            "residual_level",
+        ],
+    },
+    "risk_acceptance": {
+        "model": RiskAcceptance,
+        "fields": ["description", "state", "expiry_date", "justification"],
+    },
+    "validation_flow": {
+        "model": ValidationFlow,
+        "fields": ["ref_id", "status", "validation_deadline"],
     },
 }
 
@@ -481,7 +541,7 @@ class ReadObjectsAction(BaseAction):
         entry = READABLE_MODELS.get(config.get("model"))
         if entry is None:
             raise ActionError(f"read_objects: unknown model '{config.get('model')}'")
-        fields = BASE_READ_FIELDS + entry["fields"]
+        fields = _read_fields(entry)
         context = _render_context(instance)
         query = _read_filters_to_q(config.get("filters"), set(fields), context)
 
@@ -924,7 +984,7 @@ def validate_read_config(node):
                 f"Unknown readable model '{config.get('model')}'",
             )
         ]
-    fields = set(BASE_READ_FIELDS) | set(entry["fields"])
+    fields = set(_read_fields(entry))
 
     from .events import validate_filter_tree, walk_conditions
 

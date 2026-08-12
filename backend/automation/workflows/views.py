@@ -167,13 +167,13 @@ class WorkflowViewSet(BaseModelViewSet):
     def readable_models(self, request):
         """The read_objects registry: field lists double as the
         filter/order whitelist the builder offers."""
-        from .actions import BASE_READ_FIELDS, READABLE_MODELS
+        from .actions import READABLE_MODELS, _read_fields
 
         return Response(
             [
                 {
                     "key": key,
-                    "fields": BASE_READ_FIELDS + entry["fields"],
+                    "fields": _read_fields(entry),
                     # Output-only aggregates; not filterable/orderable.
                     "computed": sorted((entry.get("computed") or {}).keys()),
                 }

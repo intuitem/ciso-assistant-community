@@ -378,3 +378,144 @@ class TestReadValidation:
             {"type": "read_objects", "model": "applied_control"}
         ) == ["view_appliedcontrol"]
         assert required_permissions({"type": "read_objects", "model": "nope"}) == []
+
+
+@pytest.mark.django_db
+class TestRegistryIntegrity:
+    def test_every_field_is_a_concrete_scoped_column(self):
+        """The field list doubles as the filter/order whitelist, so a
+        non-column entry would explode at query time; the scope filter
+        assumes a concrete folder FK."""
+        from automation.workflows.actions import READABLE_MODELS, _read_fields
+
+        for key, entry in READABLE_MODELS.items():
+            columns = {f.name for f in entry["model"]._meta.concrete_fields}
+            assert "folder" in columns, key
+            for field in _read_fields(entry):
+                assert field in columns, f"{key}.{field}"
+
+
+@pytest.mark.django_db
+class TestNamelessModels:
+    def test_validation_flow_reads_without_name_column(self):
+        from core.models import ValidationFlow
+
+        domain = make_domain("Domain validations")
+        ValidationFlow.objects.create(folder=domain)
+        version = read_flow(domain, {"model": "validation_flow", "mode": "list"})
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        output = read_output(instance)
+        assert output["count"] == 1
+        row = output["results"][0]
+        assert "name" not in row
+        assert row["status"] == "submitted"
+        assert row["ref_id"]
+
+    def test_name_is_not_filterable_on_nameless_models(self):
+        domain = make_domain("Domain nameless filter")
+        version = read_flow(
+            domain,
+            {
+                "model": "validation_flow",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [{"field": "name", "op": "eq", "value": "x"}],
+                },
+            },
+        )
+        read_node = version.nodes.get(type=WorkflowNode.Type.ACTION)
+        codes = [code for code, _message in validate_read_config(read_node)]
+        assert codes == ["action_read_invalid_filters"]
+
+
+@pytest.mark.django_db
+class TestDeadlineSweepModels:
+    def test_risk_acceptance_expiry_filter(self):
+        from core.models import RiskAcceptance
+
+        domain = make_domain("Domain acceptances")
+        RiskAcceptance.objects.create(
+            name="Expiring", folder=domain, expiry_date=date(2026, 1, 1)
+        )
+        RiskAcceptance.objects.create(
+            name="Far out", folder=domain, expiry_date=date(2030, 1, 1)
+        )
+        version = read_flow(
+            domain,
+            {
+                "model": "risk_acceptance",
+                "mode": "list",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [
+                        {"field": "expiry_date", "op": "lt", "value": "2027-01-01"}
+                    ],
+                },
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        output = read_output(instance)
+        assert output["count"] == 1
+        assert output["results"][0]["name"] == "Expiring"
+
+    def test_requirement_assessment_sweep_carries_identifiers(self):
+        from core.models import (
+            ComplianceAssessment,
+            Framework,
+            Perimeter,
+            RequirementAssessment,
+            RequirementNode,
+        )
+
+        domain = make_domain("Domain requirements")
+        framework = Framework.objects.create(
+            name="FW", urn="urn:test:fw:ra", folder=Folder.get_root_folder()
+        )
+        requirements = [
+            RequirementNode.objects.create(
+                name=f"Req {i}",
+                ref_id=f"R{i}",
+                urn=f"urn:test:fw:ra:req{i}",
+                framework=framework,
+                assessable=True,
+                folder=Folder.get_root_folder(),
+            )
+            for i in range(2)
+        ]
+        perimeter = Perimeter.objects.create(name="P", folder=domain)
+        assessment = ComplianceAssessment.objects.create(
+            name="Audit", framework=framework, perimeter=perimeter, folder=domain
+        )
+        for requirement, result in zip(requirements, ["compliant", "non_compliant"]):
+            RequirementAssessment.objects.create(
+                compliance_assessment=assessment,
+                requirement=requirement,
+                folder=domain,
+                result=result,
+            )
+
+        version = read_flow(
+            domain,
+            {
+                "model": "requirement_assessment",
+                "mode": "list",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [
+                        {"field": "result", "op": "eq", "value": "non_compliant"}
+                    ],
+                },
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        output = read_output(instance)
+        assert output["count"] == 1
+        row = output["results"][0]
+        assert "name" not in row
+        assert row["result"] == "non_compliant"
+        assert row["requirement_ref_id"] == "R1"
+        assert row["requirement_name"] == "Req 1"
+        assert row["compliance_assessment_name"] == "Audit"
