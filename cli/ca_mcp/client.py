@@ -242,6 +242,7 @@ def fetch_all_results(endpoint, params=None, max_items=MAX_TOTAL_ITEMS):
         # process results...
     """
     results_list = []
+    total = None
     next_url = endpoint
 
     # Only apply params to the first request
@@ -279,6 +280,7 @@ def fetch_all_results(endpoint, params=None, max_items=MAX_TOTAL_ITEMS):
         # Handle paginated response
         if isinstance(data, dict) and "results" in data:
             results = data.get("results", [])
+            total = data.get("count", total)
             results_list.extend(results)
             next_url = data.get("next")  # Get next page URL
             current_params = (
@@ -288,7 +290,6 @@ def fetch_all_results(endpoint, params=None, max_items=MAX_TOTAL_ITEMS):
             # the model's context; stop at a bound. The notice rides on the
             # list rather than the error slot, which callers treat as fatal.
             if max_items is not None and len(results_list) >= max_items:
-                total = data.get("count")
                 capped = ResultList(results_list[:max_items])
                 capped.total = total
                 capped.truncation_note = (
@@ -305,4 +306,8 @@ def fetch_all_results(endpoint, params=None, max_items=MAX_TOTAL_ITEMS):
             error_msg = f"Unexpected API response format: {type(data)}"
             return results_list, error_msg
 
-    return results_list, None
+    # carry the server's count so an offset page can still say "of N"; a bare
+    # list loses it and page 2 reads as though it were the whole set
+    out = ResultList(results_list)
+    out.total = total
+    return out, None
