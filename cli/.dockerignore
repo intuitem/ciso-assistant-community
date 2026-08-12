@@ -1,0 +1,15 @@
+*.pyc
+*.DS_Store
+.git*
+**/.venv/
+**/__pycache__/
+# local credentials — these carry a real PAT and must never reach a layer
+.mcp.env
+.clica.env
+*.env
+!*.env.template
+!*.env.example
+# sample data and docs, not needed at runtime
+*.csv
+*.md
+Dockerfile

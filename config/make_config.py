@@ -194,6 +194,30 @@ def get_config():
     else:
         config["kafka_dispatcher"] = {"enabled": False}
 
+    # MCP server. Opt-in: it publishes a tool surface that external AI
+    # orchestrators can drive, so an install that only wants the GRC app should
+    # not gain one by default.
+    enable_mcp = questionary.confirm(
+        "Would you like to expose the MCP server for AI assistants "
+        "(Claude, Copilot Studio, ChatGPT)? It is served at /mcp behind your proxy.",
+        default=False,
+    ).ask()
+
+    if enable_mcp:
+        config["mcp"] = {
+            "enabled": True,
+            # Writes let an orchestrator change GRC records. Read-only is the
+            # safe starting point; turning it off should be a decision, not a
+            # default inherited from the local stdio setup.
+            "read_only": questionary.confirm(
+                "Restrict the MCP server to read-only tools? "
+                "(recommended; answer No to also allow create/update/delete)",
+                default=True,
+            ).ask(),
+        }
+    else:
+        config["mcp"] = {"enabled": False}
+
     # Debug mode should be explicitly opted into, even for SQLite deployments.
     config["enable_debug"] = questionary.confirm(
         "Enable debug mode?", default=False

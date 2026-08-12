@@ -102,6 +102,49 @@ services:
     ports:
       - 127.0.0.1:6333:6333
 
+  # MCP server for external AI orchestrators (Copilot Studio, ChatGPT, ...).
+  # Opt-in: `docker compose --profile mcp up -d`. Off by default because it is a
+  # network-reachable tool surface, and an install that only wants the GRC app
+  # should not gain one implicitly.
+  # No `ports:` — reachable only through caddy at /mcp, so TLS terminates once
+  # and no plaintext credential-bearing port is published on the host.
+  mcp:
+    container_name: mcp
+    image: ghcr.io/intuitem/ciso-assistant-community/mcp:latest
+    pull_policy: always
+    profiles:
+      - mcp
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - API_URL=http://backend:8000/api
+      - CA_MCP_TRANSPORT=streamable-http
+      - CA_MCP_HOST=0.0.0.0
+      - CA_MCP_PORT=8001
+      # Writes are off by default: a third-party orchestrator driving 57 write
+      # tools is a different risk class from a local stdio server. Set to false
+      # deliberately, and only behind an identity you trust.
+      - CA_MCP_READ_ONLY=true
+      # Must list the Host header the client actually sends, port included —
+      # this is compared against Host, it does not change the bind address.
+      - CA_MCP_ALLOWED_HOSTS=localhost:8443
+      # Each caller presents its own PAT; never serve everyone the server's.
+      - CA_MCP_ALLOW_ENV_TOKEN=false
+      - HOME=/tmp
+      - XDG_CACHE_HOME=/tmp/.cache
+      - XDG_CONFIG_HOME=/tmp/.config
+      - XDG_DATA_HOME=/tmp/.local/share
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
+    user: "1001:1001"
+
   caddy:
     container_name: caddy
     image: caddy:2.11.4
@@ -118,6 +161,7 @@ services:
     command: |
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000
+      reverse_proxy /mcp* mcp:8001
       reverse_proxy /* frontend:3000
       tls internal
       }" > Caddyfile && caddy run'

@@ -422,13 +422,38 @@ Save the `mcp.json` file and restart LM Studio for the changes to take effect
 Only needed for clients that cannot start a local process — ChatGPT and Microsoft
 Copilot Studio. If your client can launch a subprocess, use stdio instead.
 
-#### Start the server
+#### Option A: Docker Compose (recommended)
+
+If you deployed CISO Assistant with Docker Compose, the MCP server ships as an
+optional service on the same stack. It is off by default — enable it with a
+profile:
+
+```bash
+docker compose --profile mcp up -d
+```
+
+That starts the server and routes it through the proxy you already run, so it is
+served at `https://<your-host>:8443/mcp` on the existing certificate. Nothing new
+is published on the host: the container has no `ports:` mapping and is reachable
+only through the proxy.
+
+{% hint style="info" %}
+The service defaults to **read-only**. To allow an assistant to create or modify
+records, set `CA_MCP_READ_ONLY=false` in the `mcp` service environment and
+recreate it. See [Read-only by default](#read-only-by-default) before you do.
+{% endhint %}
+
+If you generated your deployment with `config/make_config.py`, answer yes to the
+MCP question and the service, the proxy route and the read-only choice are
+written into your compose file for Caddy, Traefik or BunkerWeb alike.
+
+#### Option B: Run from source
 
 ```bash
 cd cli
 API_URL=http://localhost:8000/api \
 CA_MCP_TRANSPORT=http \
-CA_MCP_ALLOWED_HOSTS=your-public-hostname \
+CA_MCP_ALLOWED_HOSTS=your-public-hostname:port \
 uv run python ca_mcp.py
 ```
 
@@ -444,7 +469,16 @@ yet.
 Put an HTTPS reverse proxy or a tunnel in front, forwarding `/mcp` to
 `127.0.0.1:8001`, and set `CA_MCP_ALLOWED_HOSTS` to the public hostname the client
 will use. That keeps TLS termination, certificates and access logging in
-infrastructure you already run.
+infrastructure you already run. Option A does all of this for you.
+
+{% hint style="warning" %}
+`CA_MCP_ALLOWED_HOSTS` is matched against the `Host` header **exactly, port
+included**. A client connecting to `https://grc.example.com:8443/mcp` sends
+`Host: grc.example.com:8443`, so a value of `grc.example.com` alone is rejected
+with **421 Misdirected Request**. On the default HTTPS port the port is omitted
+instead. When in doubt list both forms, comma-separated:
+`grc.example.com,grc.example.com:8443`.
+{% endhint %}
 
 Binding directly to a non-loopback address with `CA_MCP_HOST=0.0.0.0` is possible
 but puts a plaintext HTTP listener on the network; both clients require HTTPS, so
@@ -631,7 +665,7 @@ Additional variables for the HTTP transport:
 | `CA_MCP_HOST`               | `127.0.0.1` | Listen address                                  |
 | `CA_MCP_PORT`               | `8001`      | Listen port                                     |
 | `CA_MCP_PATH`               | `/mcp`      | Endpoint path                                   |
-| `CA_MCP_ALLOWED_HOSTS`      | -           | Comma-separated hostnames accepted in the `Host` header. Loopback is always allowed |
+| `CA_MCP_ALLOWED_HOSTS`      | -           | Comma-separated hostnames accepted in the `Host` header, port included. Validates `Host`; does **not** set the listen address. Loopback is always allowed |
 | `CA_MCP_ALLOW_ENV_TOKEN`    | `false`     | Allow HTTP callers with no token to be served using `TOKEN`. Collapses every caller into one identity |
 
 Response size limits, which apply to both transports:

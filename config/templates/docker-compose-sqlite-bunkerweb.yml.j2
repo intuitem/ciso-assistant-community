@@ -112,6 +112,40 @@ services:
     networks:
       - bw-services
 
+  {% if mcp.enabled %}
+  mcp:
+    container_name: mcp
+    image: ghcr.io/intuitem/ciso-assistant-community/mcp:latest
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      - API_URL=http://backend:8000/api
+      - CA_MCP_TRANSPORT=streamable-http
+      - CA_MCP_HOST=0.0.0.0
+      - CA_MCP_PORT=8001
+      - CA_MCP_READ_ONLY={{ mcp.read_only | lower }}
+      # Compared against the Host header, not a bind address. Both forms are
+      # listed because a client keeps the port in Host for non-default ports
+      # and drops it for 443.
+      - CA_MCP_ALLOWED_HOSTS={{ fqdn }},{{ fqdn }}:{{ port }}
+      # Each caller presents its own PAT; never serve everyone the server's.
+      - CA_MCP_ALLOW_ENV_TOKEN=false
+      - HOME=/tmp
+      - XDG_CACHE_HOME=/tmp/.cache
+      - XDG_CONFIG_HOME=/tmp/.config
+      - XDG_DATA_HOME=/tmp/.local/share
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
+    user: "1001:1001"
+  {% endif %}
+
   bunkerweb:
     image: bunkerity/bunkerweb:1.6.1
     ports:
@@ -143,7 +177,9 @@ services:
       - {{ fqdn }}_REVERSE_PROXY_HOST=http://frontend:3000
       - {{ fqdn }}_REVERSE_PROXY_URL_2=/api/
       - {{ fqdn }}_REVERSE_PROXY_HOST_2=http://backend:8000
-      {% if can_do_tls %}- {{ fqdn }}_AUTO_LETS_ENCRYPT=yes{% elif use_custom_cert %}
+      {% if mcp.enabled %}- {{ fqdn }}_REVERSE_PROXY_URL_3=/mcp
+      - {{ fqdn }}_REVERSE_PROXY_HOST_3=http://mcp:8001
+      {% endif %}      {% if can_do_tls %}- {{ fqdn }}_AUTO_LETS_ENCRYPT=yes{% elif use_custom_cert %}
       - {{ fqdn }}_USE_CUSTOM_SSL=yes
       - {{ fqdn }}_CUSTOM_SSL_CERT=/etc/bunkerweb/cert.pem
       - {{ fqdn }}_CUSTOM_SSL_KEY=/etc/bunkerweb/key.pem{% else %}

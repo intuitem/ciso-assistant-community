@@ -30,11 +30,22 @@ def _strip_scheme(value: str) -> str | None:
 
 
 def _request_headers():
+    """Headers of the originating HTTP request, or None under stdio.
+
+    The streamable-HTTP transport builds a Starlette Request from the ASGI
+    scope and hands it to the session as message metadata, which the lowlevel
+    server assigns to RequestContext.request -- so this is the real request,
+    headers included. Under stdio there is no such request and this is None.
+    """
     try:
         request = request_ctx.get().request
     except LookupError:
         return None
     return getattr(request, "headers", None)
+
+
+def _is_http() -> bool:
+    return config.TRANSPORT in ("http", "streamable-http")
 
 
 def _describe(source: str, token: str) -> None:
@@ -58,11 +69,16 @@ def get_request_token() -> str:
     per-user scoping the transport exists to provide.
     """
     headers = _request_headers()
-    if headers is None:
+
+    # Absence of headers is only ever legitimate under stdio. Deciding that on
+    # the transport rather than on "headers happened to be None" keeps the HTTP
+    # path fail-closed: if the SDK ever stops surfacing the request, callers get
+    # an error instead of silently sharing the server's own identity.
+    if headers is None and not _is_http():
         return config.TOKEN
 
     for name in ("authorization", CUSTOM_HEADER):
-        token = _strip_scheme(headers.get(name) or "")
+        token = _strip_scheme((headers or {}).get(name) or "")
         if token:
             _describe(name, token)
             return token

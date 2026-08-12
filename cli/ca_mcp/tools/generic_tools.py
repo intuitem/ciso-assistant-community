@@ -84,6 +84,9 @@ OBJECTS = {
     "portal_presets": "portal-presets",
     "validation_flows": "validation-flows",
     "library_drafts": "library-drafts",
+    # libraries — several hundred rows, so count_objects/offset matter here
+    "stored_libraries": "stored-libraries",
+    "loaded_libraries": "loaded-libraries",
     # IAM (all RBAC-gated server-side)
     "actors": "actors",
     "teams": "teams",
@@ -125,6 +128,23 @@ def _flatten(value):
         )
     text = str(value).replace("\n", " ").replace("|", "\\|")
     return text[:MAX_CELL] + "…" if len(text) > MAX_CELL else text
+
+
+def _detail(value):
+    """Render an API value for the detail view, in full.
+
+    MAX_CELL exists to keep a table row narrow; applying it here would silently
+    truncate exactly what get_object promises to return whole -- descriptions,
+    policy text, observations. The overall response cap is the bound that
+    matters, and it is applied once at the end rather than per field.
+    """
+    if value is None:
+        return "--"
+    if isinstance(value, dict):
+        return str(value.get("str") or value.get("name") or value.get("id") or value)
+    if isinstance(value, list):
+        return ", ".join(_detail(v) for v in value) if value else "--"
+    return str(value)
 
 
 def _columns(rows, fields):
@@ -261,7 +281,7 @@ async def get_object(object_type: str, object_id: str):
         title = obj.get("name") or obj.get("ref_id") or object_id
         out = f"## {object_type}: {title}\n\n"
         for key in sorted(obj):
-            out += f"**{key}:** {_flatten(obj[key])}\n"
+            out += f"**{key}:** {_detail(obj[key])}\n"
 
         return success_response(
             out, "get_object", "Use this data to answer the question."

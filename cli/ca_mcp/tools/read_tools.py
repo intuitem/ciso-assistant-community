@@ -1296,7 +1296,9 @@ async def get_task_templates(
         if not tasks:
             return "No task found"
 
-        result = found_line(tasks, "task templates") + "\n\n"
+        result = (
+            found_line(tasks, "task templates", paginated=True, offset=offset) + "\n\n"
+        )
         result += "|ID|Name|Description|Ref ID|Status|Recurrent|Enabled|Task Date|\n"
         result += "|---|---|---|---|---|---|---|---|\n"
 

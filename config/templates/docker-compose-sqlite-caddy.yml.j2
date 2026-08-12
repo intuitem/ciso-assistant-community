@@ -105,6 +105,40 @@ services:
     restart: always
     user: "1001:1001"
 
+  {% if mcp.enabled %}
+  mcp:
+    container_name: mcp
+    image: ghcr.io/intuitem/ciso-assistant-community/mcp:latest
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      - API_URL=http://backend:8000/api
+      - CA_MCP_TRANSPORT=streamable-http
+      - CA_MCP_HOST=0.0.0.0
+      - CA_MCP_PORT=8001
+      - CA_MCP_READ_ONLY={{ mcp.read_only | lower }}
+      # Compared against the Host header, not a bind address. Both forms are
+      # listed because a client keeps the port in Host for non-default ports
+      # and drops it for 443.
+      - CA_MCP_ALLOWED_HOSTS={{ fqdn }},{{ fqdn }}:{{ port }}
+      # Each caller presents its own PAT; never serve everyone the server's.
+      - CA_MCP_ALLOW_ENV_TOKEN=false
+      - HOME=/tmp
+      - XDG_CACHE_HOME=/tmp/.cache
+      - XDG_CONFIG_HOME=/tmp/.config
+      - XDG_DATA_HOME=/tmp/.local/share
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
+    user: "1001:1001"
+  {% endif %}
+
   caddy:
     container_name: caddy
     image: caddy:2.11.4
@@ -123,7 +157,8 @@ services:
       - {{ cert_config.key_path }}:/etc/caddy/key.pem:ro{% endif %}
     command: |
       sh -c 'echo "$$CISO_ASSISTANT_URL {
-        reverse_proxy /api/* backend:8000
+        reverse_proxy /api/* backend:8000{% if mcp.enabled %}
+        reverse_proxy /mcp* mcp:8001{% endif %}
         reverse_proxy /* frontend:3000{% if not can_do_tls %}{% if use_custom_cert %}
         tls /etc/caddy/cert.pem /etc/caddy/key.pem{% else %}
         tls internal{% endif %}{% endif %}

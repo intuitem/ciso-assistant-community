@@ -1,10 +1,15 @@
 """Main MCP server entry point for CISO Assistant"""
 
+import asyncio
+import contextvars
+import functools
 import logging
 
+import anyio.to_thread
 from mcp.server.fastmcp import FastMCP
 
 from . import config
+from .utils.response_formatter import _cap
 
 logger = logging.getLogger(__name__)
 
@@ -290,16 +295,47 @@ def _annotations(fn, is_read):
     )
 
 
+def _offload(fn):
+    """Run a tool in a worker thread instead of on the event loop.
+
+    Tools are declared `async def` but every call they make is blocking
+    `requests` I/O, so awaiting one pins the loop for its full duration. Under
+    stdio that is invisible: one client, one call at a time. Under HTTP the
+    server is shared, and a single slow aggregate stalls every other caller --
+    including a trivial tools/list -- until it finishes.
+
+    Wrapping here rather than converting the tools to `def` because FastMCP
+    calls sync tools inline on the loop too (func_metadata: `return fn(...)`),
+    so the blocking would simply move. functools.wraps keeps the signature and
+    docstring FastMCP derives the schema and description from.
+    """
+
+    @functools.wraps(fn)
+    async def runner(*args, **kwargs):
+        context = contextvars.copy_context()
+        result = await anyio.to_thread.run_sync(
+            lambda: context.run(asyncio.run, fn(*args, **kwargs))
+        )
+        # Backstop for the response cap. Tools that format through
+        # success_response are already bounded; the dozen or so that return a
+        # raw string were not, and relying on each one to remember is how a new
+        # tool ships unbounded. Already-capped responses are under budget, so
+        # this is a no-op for them.
+        return _cap(result) if isinstance(result, str) else result
+
+    return runner
+
+
 def register_tools(read_only: bool = False):
     """Register tools with the MCP server, optionally omitting writes."""
     global _registered
     if _registered:
         return
     for tool in READ_TOOLS:
-        mcp.tool(annotations=_annotations(tool, is_read=True))(tool)
+        mcp.tool(annotations=_annotations(tool, is_read=True))(_offload(tool))
     if not read_only:
         for tool in WRITE_TOOLS:
-            mcp.tool(annotations=_annotations(tool, is_read=False))(tool)
+            mcp.tool(annotations=_annotations(tool, is_read=False))(_offload(tool))
     _registered = True
 
 

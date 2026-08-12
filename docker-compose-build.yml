@@ -101,6 +101,43 @@ services:
     ports:
       - 127.0.0.1:6333:6333
 
+  # See docker-compose.yml for the rationale behind the profile, the missing
+  # `ports:` and the read-only default.
+  mcp:
+    container_name: mcp
+    build:
+      context: ./cli
+      dockerfile: Dockerfile
+      args:
+        PYTHON_BUILD_IMAGE: ${PYTHON_BUILD_IMAGE:-python:3.14-slim}
+        PYTHON_RUNTIME_IMAGE: ${PYTHON_RUNTIME_IMAGE:-python:3.14-slim}
+    profiles:
+      - mcp
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - API_URL=http://backend:8000/api
+      - CA_MCP_TRANSPORT=streamable-http
+      - CA_MCP_HOST=0.0.0.0
+      - CA_MCP_PORT=8001
+      - CA_MCP_READ_ONLY=true
+      - CA_MCP_ALLOWED_HOSTS=localhost:8443
+      - CA_MCP_ALLOW_ENV_TOKEN=false
+      - HOME=/tmp
+      - XDG_CACHE_HOME=/tmp/.cache
+      - XDG_CONFIG_HOME=/tmp/.config
+      - XDG_DATA_HOME=/tmp/.local/share
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
+    user: "1001:1001"
+
   caddy:
     container_name: caddy
     image: ${CADDY_IMAGE:-caddy:2.11.4}
@@ -114,6 +151,7 @@ services:
     command: |
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000
+      reverse_proxy /mcp* mcp:8001
       reverse_proxy /* frontend:3000
       }" > Caddyfile && caddy run'
 
