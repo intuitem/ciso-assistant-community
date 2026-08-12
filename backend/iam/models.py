@@ -146,6 +146,24 @@ class Folder(NameDescriptionMixin):
         folder = _get_root_folder()
         return getattr(folder, "id", None)
 
+    def is_root(self) -> bool:
+        return self.id == self.get_root_folder_id()
+
+    @staticmethod
+    def get_focused_folder_id() -> Optional[uuid.UUID]:
+        return focus_folder_id_var.get()
+
+    @staticmethod
+    def get_focused_folder() -> Optional[Folder]:
+        focused_folder_id = Folder.get_focused_folder_id()
+
+        focused_folder = (
+            Folder.objects.filter(id=focused_folder_id).first()
+            if focused_folder_id
+            else None
+        )
+        return focused_folder
+
     class ContentType(models.TextChoices):
         """content type for a folder"""
 
@@ -1424,6 +1442,16 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 user, perm
             ).exists()
 
+        focused_folder_id = Folder.get_focused_folder_id()
+        if focused_folder_id is not None:
+            is_folder_focused = (
+                folder.id == focused_folder_id
+                or folder.ancestors.filter(id=focused_folder_id).exists()
+            )
+
+            if (not is_folder_focused) and (not folder.is_root()):
+                return False
+
         allowed_folder_set = RoleAssignment._get_directly_allowed_folder_ids(user, perm)
 
         direct_flat_folder_id_set = set(allowed_folder_set.direct_flat_folder_ids)
@@ -1508,6 +1536,14 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         folder_chain_ids_queryset = folder_chain_queryset.values_list("id", flat=True)
 
         folder_chain_id_set = set(folder_chain_ids_queryset)
+
+        focused_folder_id = Folder.get_focused_folder_id()
+
+        if focused_folder_id is not None:
+            is_object_focused = focused_folder_id in folder_chain_ids_queryset
+
+            if (not is_object_focused) and (not iam_folder.is_root()):
+                return False
 
         is_directly_accessible = iam_folder.id in directly_accessible_folder_id_set
         is_indirectly_accessible = bool(
@@ -1717,13 +1753,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         direct_flat_folder_ids = allowed_folder_set.direct_flat_folder_ids
         direct_recursive_folder_ids = allowed_folder_set.direct_recursive_folder_ids
 
-        focused_folder_id = focus_folder_id_var.get()
-
-        focused_folder = (
-            Folder.objects.filter(id=focused_folder_id).first()
-            if focused_folder_id
-            else None
-        )
+        focused_folder = Folder.get_focused_folder()
 
         effective_focused_folder = base_folder
 
