@@ -156,7 +156,7 @@ class Folder(NameDescriptionMixin):
     @staticmethod
     def get_focused_folder() -> Optional[Folder]:
         focused_folder_id = Folder.get_focused_folder_id()
-        if focused_folder_id:
+        if focused_folder_id is None:
             return
 
         focused_folder = Folder.objects.filter(id=focused_folder_id).first()
