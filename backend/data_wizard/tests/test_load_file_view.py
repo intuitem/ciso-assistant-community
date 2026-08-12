@@ -1646,3 +1646,40 @@ class TestTprmEntityAssessmentAuditLink:
         audit.refresh_from_db()
         assert audit.folder_id == original_folder_id
         assert entity_assessment.compliance_assessment_id != audit.id
+
+    def test_same_named_assessment_in_different_domain_does_not_collide(
+        self, api_client, domain_folder, other_folder, all_accessible
+    ):
+        """Dedup must be scoped per-domain, like Entities/Contracts already are."""
+        audit_a = _make_audit(domain_folder, name="Vendor Audit A", ref_id="AUD-X-A")
+        audit_b = _make_audit(other_folder, name="Vendor Audit B", ref_id="AUD-X-B")
+
+        excel_a = _tprm_excel_with_audit("ENT-CROSS", "AUD-X-A", "move")
+        resp_a = _post(
+            api_client, excel_a.read(), "tprm.xlsx", "TPRM", domain_folder.id
+        )
+        assert resp_a.status_code == 200, resp_a.json()
+        assert resp_a.json()["results"]["entity_assessments"]["successful"] == 1
+
+        # The entity itself is a global match by ref_id, so the second import
+        # must opt into updating it rather than treating it as a conflict.
+        excel_b = _tprm_excel_with_audit("ENT-CROSS", "AUD-X-B", "move")
+        resp_b = _post(
+            api_client,
+            excel_b.read(),
+            "tprm.xlsx",
+            "TPRM",
+            other_folder.id,
+            HTTP_X_ON_CONFLICT="update",
+        )
+        assert resp_b.status_code == 200, resp_b.json()
+        results_b = resp_b.json()["results"]["entity_assessments"]
+        assert results_b["successful"] == 1, results_b
+
+        assessments = list(EntityAssessment.objects.filter(name="Vendor Review"))
+        assert len(assessments) == 2
+        by_folder = {a.folder_id: a for a in assessments}
+        assert (
+            by_folder[domain_folder.id].compliance_assessment.ref_id == audit_a.ref_id
+        )
+        assert by_folder[other_folder.id].compliance_assessment.ref_id == audit_b.ref_id

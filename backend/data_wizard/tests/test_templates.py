@@ -15,12 +15,15 @@ import pytest
 from core.models import (
     AppliedControl,
     Asset,
+    ComplianceAssessment,
     Finding,
     FindingsAssessment,
+    Framework,
     Incident,
     Perimeter,
     Policy,
     ReferenceControl,
+    RequirementNode,
     RiskAssessment,
     RiskMatrix,
     SecurityException,
@@ -350,11 +353,37 @@ class TestSimpleTemplates:
         assert proc.name == "processing 2"
 
 
+def _make_audit(folder, name, ref_id):
+    """Pre-existing audit for the EntityAssessments sheet's audit_ref_id to link to."""
+    fw = Framework.objects.create(name=f"{name} FW", folder=folder, is_published=True)
+    RequirementNode.objects.create(
+        framework=fw,
+        urn=f"urn:test:{ref_id}:req:1",
+        ref_id="REQ1",
+        assessable=True,
+        folder=folder,
+        is_published=True,
+    )
+    audit = ComplianceAssessment.objects.create(
+        name=name, ref_id=ref_id, framework=fw, folder=folder
+    )
+    audit.create_requirement_assessments()
+    return audit
+
+
 @pytest.mark.django_db
 class TestMultiSheetTemplates:
     def test_third_parties_template(
         self, api_client, domain_folder, template_domains, all_accessible
     ):
+        # The template's EntityAssessments sheet links these by ref_id/name.
+        _make_audit(domain_folder, name="ISO 27002 SOA audit", ref_id="ISO 27002 SOA")
+        _make_audit(
+            domain_folder,
+            name="GDPR review for HR platform",
+            ref_id="GDPR-HR",
+        )
+
         resp = _post_template(
             api_client,
             "third_parties_template.xlsx",
@@ -365,7 +394,9 @@ class TestMultiSheetTemplates:
         results = resp.json()["results"]
         assert results["entities"]["successful"] == 3
         assert results["solutions"]["successful"] == 3
-        assert results["entity_assessments"]["successful"] == 2
+        assert results["entity_assessments"]["successful"] == 2, results[
+            "entity_assessments"
+        ]
         assert results["contracts"]["successful"] == 3
         assert results["representatives"]["successful"] == 3
         parent = Entity.objects.get(ref_id="ENT-001")

@@ -5794,10 +5794,11 @@ class LoadFileView(APIView):
                     assessment_data["link_audit"] = str(audit.id)
                     assessment_data["link_mode"] = link_mode
 
-                # Entity assessments have no ref_id: dedupe by (entity, name).
+                # Entity assessments dedupe by (entity, name, folder)
                 existing_assessment = EntityAssessment.objects.filter(
                     name__iexact=record.get("name"),
                     entity_id=entity_id,
+                    folder_id=domain,
                 ).first()
 
                 if existing_assessment:
