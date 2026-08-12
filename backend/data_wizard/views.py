@@ -3883,7 +3883,10 @@ class LoadFileView(APIView):
             on_conflict = ConflictMode(on_conflict_str)
         except ValueError:
             on_conflict = ConflictMode.STOP
-        default_audit_link_mode = request.META.get("HTTP_X_AUDIT_LINK_MODE") or None
+        default_audit_link_mode = request.META.get("HTTP_X_AUDIT_LINK_MODE")
+        default_audit_link_mode = (
+            default_audit_link_mode.strip().lower() if default_audit_link_mode else None
+        )
         if default_audit_link_mode not in ("move", "copy", None):
             default_audit_link_mode = None
 
@@ -5649,8 +5652,13 @@ class LoadFileView(APIView):
             perimeter = Perimeter.objects.filter(id=value).first()
             if perimeter:
                 return perimeter, None
-        except ValueError, ValidationError:
-            pass
+        except (ValueError, ValidationError) as exc:
+            # Invalid UUID/ID format is expected for some imports; fall back to ref_id lookup.
+            logger.debug(
+                "Failed perimeter lookup by id, falling back to ref_id",
+                value=value,
+                error=str(exc),
+            )
 
         perimeter = Perimeter.objects.filter(ref_id=value).first()
         if perimeter is None:
@@ -5669,6 +5677,9 @@ class LoadFileView(APIView):
         default_audit_link_mode: str | None = None,
     ):
         results = self._empty_tprm_results()
+        (_, accessible_audit_ids, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
 
         for record in records:
             try:
@@ -5718,7 +5729,10 @@ class LoadFileView(APIView):
                     try:
                         assessment_data["criticality"] = int(record.get("criticality"))
                     except ValueError, TypeError:
-                        pass
+                        logger.warning(
+                            "Invalid criticality value skipped during entity assessment import",
+                            criticality=record.get("criticality"),
+                        )
 
                 # Same parsing/error convention as the Contracts sheet.
                 solution_ids = []
@@ -5764,11 +5778,11 @@ class LoadFileView(APIView):
                         continue
                     # Pre-existing record: resolved against the DB, not a ref_id_map.
                     audit = ComplianceAssessment.objects.filter(
-                        ref_id=audit_ref
+                        ref_id=audit_ref, id__in=accessible_audit_ids
                     ).first()
                     if audit is None:
                         audit = ComplianceAssessment.objects.filter(
-                            name__iexact=audit_ref
+                            name__iexact=audit_ref, id__in=accessible_audit_ids
                         ).first()
                     if audit is None:
                         self._add_tprm_record_error(

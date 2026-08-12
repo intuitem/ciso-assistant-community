@@ -453,6 +453,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             source_audit = ComplianceAssessment.objects.select_for_update().get(
                 pk=audit_data["link_audit"].pk
             )
+            self._check_object_perm(source_audit, "change")
             if (
                 EntityAssessment.objects.filter(compliance_assessment=source_audit)
                 .exclude(pk=instance.pk)
@@ -474,6 +475,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 # Evidences/controls stay put — they're shared, not owned by this audit.
                 audit = source_audit
                 audit.folder = enclave
+                audit.perimeter = instance.perimeter
                 audit.save()
                 RequirementAssessment.objects.filter(
                     compliance_assessment=audit
