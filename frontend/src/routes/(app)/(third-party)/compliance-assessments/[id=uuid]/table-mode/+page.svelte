@@ -256,6 +256,21 @@
 		})
 	);
 
+	// Audit-wide scores shown in the header, refreshed from the backend after a
+	// score edit (the aggregate is server-computed).
+	let auditScores = $state(data.scores);
+	$effect(() => {
+		auditScores = data.scores;
+	});
+	async function refreshScores() {
+		try {
+			const res = await fetch(`/compliance-assessments/${complianceAssessment.id}/global-score`);
+			if (res.ok) auditScores = await res.json();
+		} catch {
+			/* keep the last known scores on failure */
+		}
+	}
+
 	async function updateScore(requirementAssessment: Record<string, any>) {
 		const score = requirementAssessment.score;
 		const documentationScore = requirementAssessment.documentation_score;
@@ -271,6 +286,7 @@
 					score: score,
 					documentation_score: documentationScore
 				});
+				await refreshScores();
 			}
 		}, 500); // There must be 500ms without a score change for a request to be sent and modify the score of the RequirementAsessment in the backend
 	}
@@ -362,7 +378,13 @@
 	}
 	function isRowVisible(index: number) {
 		const row = sectionInfo.rows[index];
-		return !row || row.ancestors.every((id) => !collapsedSections[id]);
+		if (row && !row.ancestors.every((id) => !collapsedSections[id])) return false;
+		if (!tocFilterResult) return true;
+		const ra = requirementAssessments[index];
+		const isSplash = ra.display_mode === 'splash' || ra.requirement?.display_mode === 'splash';
+		if (isSplash) return false;
+		if (row?.isHeading) return filterSections.has(ra.id);
+		return ra.result === tocFilterResult;
 	}
 
 	// Collapses/expands SECTIONS only (never mass-opens the per-item chips, which would
@@ -416,6 +438,19 @@
 	// --- Table of contents (left column, toggled from the header) ---
 	let tocCollapsed = $state(false);
 	let tocFilterResult = $state<string | null>(null);
+
+	// Sections holding at least one requirement matching the active result filter,
+	// so the filtered list keeps its section context.
+	const filterSections = $derived.by(() => {
+		const s = new Set<string>();
+		if (!tocFilterResult) return s;
+		requirementAssessments.forEach((ra, i) => {
+			if (ra.assessable && ra.result === tocFilterResult) {
+				for (const id of sectionInfo.rows[i]?.ancestors ?? []) s.add(id);
+			}
+		});
+		return s;
+	});
 
 	const tocSections = $derived(
 		requirementAssessments.map((ra, index) => {
@@ -753,11 +788,11 @@
 						{#if !shallow && showToc}
 							<button
 								type="button"
-								class="btn btn-sm preset-tonal-surface shrink-0"
+								class="btn btn-sm shrink-0 border font-medium preset-tonal-surface border-surface-300"
 								onclick={() => (tocCollapsed = !tocCollapsed)}
 								aria-pressed={!tocCollapsed}
 							>
-								<i class="fa-solid {tocCollapsed ? 'fa-list' : 'fa-angles-left'} mr-2"></i>
+								<i class="fa-solid {tocCollapsed ? 'fa-list-ul' : 'fa-angles-left'} mr-2"></i>
 								{m.tableOfContents()}
 							</button>
 						{/if}
@@ -800,9 +835,9 @@
 									class="inline-flex items-center gap-1 rounded-md bg-surface-100 px-2 py-1 text-surface-700"
 								>
 									{m.score()}:
-									<span class="font-semibold">{fmtScore(data.scores?.implementation_score)}</span>
-									{#if data.scores?.max_score}<span class="text-surface-400"
-											>/{data.scores.max_score}</span
+									<span class="font-semibold">{fmtScore(auditScores?.implementation_score)}</span>
+									{#if auditScores?.max_score}<span class="text-surface-400"
+											>/{auditScores.max_score}</span
 										>{/if}
 								</span>
 								{#if complianceAssessment.show_documentation_score}
@@ -810,9 +845,9 @@
 										class="inline-flex items-center gap-1 rounded-md bg-surface-100 px-2 py-1 text-surface-700"
 									>
 										{m.documentationScore()}:
-										<span class="font-semibold">{fmtScore(data.scores?.documentation_score)}</span>
-										{#if data.scores?.max_score}<span class="text-surface-400"
-												>/{data.scores.max_score}</span
+										<span class="font-semibold">{fmtScore(auditScores?.documentation_score)}</span>
+										{#if auditScores?.max_score}<span class="text-surface-400"
+												>/{auditScores.max_score}</span
 											>{/if}
 									</span>
 								{/if}
