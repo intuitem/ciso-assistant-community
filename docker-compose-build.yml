@@ -101,16 +101,16 @@ services:
     ports:
       - 127.0.0.1:6333:6333
 
-  # See docker-compose.yml for the rationale behind the profile, the missing
-  # `ports:` and the read-only default.
+  # see docker-compose.yml for the profile / no-ports / read-only rationale
   mcp:
     container_name: mcp
     build:
       context: ./cli
       dockerfile: Dockerfile
+      # DHI via the GHCR mirror; see cli/Dockerfile for why not dhi.io
       args:
-        PYTHON_BUILD_IMAGE: ${PYTHON_BUILD_IMAGE:-python:3.14-slim}
-        PYTHON_RUNTIME_IMAGE: ${PYTHON_RUNTIME_IMAGE:-python:3.14-slim}
+        PYTHON_BUILD_IMAGE: ${PYTHON_BUILD_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14-dev}
+        PYTHON_RUNTIME_IMAGE: ${PYTHON_RUNTIME_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14}
     profiles:
       - mcp
     depends_on:

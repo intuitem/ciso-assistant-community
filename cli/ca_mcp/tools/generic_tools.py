@@ -84,7 +84,7 @@ OBJECTS = {
     "portal_presets": "portal-presets",
     "validation_flows": "validation-flows",
     "library_drafts": "library-drafts",
-    # libraries — several hundred rows, so count_objects/offset matter here
+    # libraries
     "stored_libraries": "stored-libraries",
     "loaded_libraries": "loaded-libraries",
     # IAM (all RBAC-gated server-side)
@@ -131,12 +131,8 @@ def _flatten(value):
 
 
 def _detail(value):
-    """Render an API value for the detail view, in full.
-
-    MAX_CELL exists to keep a table row narrow; applying it here would silently
-    truncate exactly what get_object promises to return whole -- descriptions,
-    policy text, observations. The overall response cap is the bound that
-    matters, and it is applied once at the end rather than per field.
+    """Render an API value in full: MAX_CELL keeps a table row narrow, but would
+    truncate exactly what get_object promises to return whole.
     """
     if value is None:
         return "--"

@@ -194,9 +194,7 @@ def get_config():
     else:
         config["kafka_dispatcher"] = {"enabled": False}
 
-    # MCP server. Opt-in: it publishes a tool surface that external AI
-    # orchestrators can drive, so an install that only wants the GRC app should
-    # not gain one by default.
+    # MCP server, opt-in: it publishes a tool surface external AI agents can drive
     enable_mcp = questionary.confirm(
         "Would you like to expose the MCP server for AI assistants "
         "(Claude, Copilot Studio, ChatGPT)? It is served at /mcp behind your proxy.",
@@ -206,9 +204,6 @@ def get_config():
     if enable_mcp:
         config["mcp"] = {
             "enabled": True,
-            # Writes let an orchestrator change GRC records. Read-only is the
-            # safe starting point; turning it off should be a decision, not a
-            # default inherited from the local stdio setup.
             "read_only": questionary.confirm(
                 "Restrict the MCP server to read-only tools? "
                 "(recommended; answer No to also allow create/update/delete)",

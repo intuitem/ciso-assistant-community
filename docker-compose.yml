@@ -102,12 +102,8 @@ services:
     ports:
       - 127.0.0.1:6333:6333
 
-  # MCP server for external AI orchestrators (Copilot Studio, ChatGPT, ...).
-  # Opt-in: `docker compose --profile mcp up -d`. Off by default because it is a
-  # network-reachable tool surface, and an install that only wants the GRC app
-  # should not gain one implicitly.
-  # No `ports:` — reachable only through caddy at /mcp, so TLS terminates once
-  # and no plaintext credential-bearing port is published on the host.
+  # MCP server for external AI orchestrators. Opt-in: `docker compose --profile mcp up -d`.
+  # No `ports:` — reachable only through caddy at /mcp.
   mcp:
     container_name: mcp
     image: ghcr.io/intuitem/ciso-assistant-community/mcp:latest
@@ -123,14 +119,10 @@ services:
       - CA_MCP_TRANSPORT=streamable-http
       - CA_MCP_HOST=0.0.0.0
       - CA_MCP_PORT=8001
-      # Writes are off by default: a third-party orchestrator driving 57 write
-      # tools is a different risk class from a local stdio server. Set to false
-      # deliberately, and only behind an identity you trust.
       - CA_MCP_READ_ONLY=true
-      # Must list the Host header the client actually sends, port included —
-      # this is compared against Host, it does not change the bind address.
+      # matched against the Host header, port included; does not set the bind address
       - CA_MCP_ALLOWED_HOSTS=localhost:8443
-      # Each caller presents its own PAT; never serve everyone the server's.
+      # each caller presents its own PAT
       - CA_MCP_ALLOW_ENV_TOKEN=false
       - HOME=/tmp
       - XDG_CACHE_HOME=/tmp/.cache

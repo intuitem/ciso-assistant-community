@@ -119,11 +119,8 @@ services:
       - CA_MCP_HOST=0.0.0.0
       - CA_MCP_PORT=8001
       - CA_MCP_READ_ONLY={{ mcp.read_only | lower }}
-      # Compared against the Host header, not a bind address. Both forms are
-      # listed because a client keeps the port in Host for non-default ports
-      # and drops it for 443.
+      # matched against the Host header; both forms, since the port is dropped for 443
       - CA_MCP_ALLOWED_HOSTS={{ fqdn }},{{ fqdn }}:{{ port }}
-      # Each caller presents its own PAT; never serve everyone the server's.
       - CA_MCP_ALLOW_ENV_TOKEN=false
       - HOME=/tmp
       - XDG_CACHE_HOME=/tmp/.cache

@@ -296,18 +296,9 @@ def _annotations(fn, is_read):
 
 
 def _offload(fn):
-    """Run a tool in a worker thread instead of on the event loop.
-
-    Tools are declared `async def` but every call they make is blocking
-    `requests` I/O, so awaiting one pins the loop for its full duration. Under
-    stdio that is invisible: one client, one call at a time. Under HTTP the
-    server is shared, and a single slow aggregate stalls every other caller --
-    including a trivial tools/list -- until it finishes.
-
-    Wrapping here rather than converting the tools to `def` because FastMCP
-    calls sync tools inline on the loop too (func_metadata: `return fn(...)`),
-    so the blocking would simply move. functools.wraps keeps the signature and
-    docstring FastMCP derives the schema and description from.
+    """Run a tool in a worker thread: tools are `async def` but do blocking I/O,
+    which under HTTP stalls every other caller. Converting them to `def` would not
+    help -- FastMCP calls sync tools inline on the loop too.
     """
 
     @functools.wraps(fn)
@@ -316,11 +307,7 @@ def _offload(fn):
         result = await anyio.to_thread.run_sync(
             lambda: context.run(asyncio.run, fn(*args, **kwargs))
         )
-        # Backstop for the response cap. Tools that format through
-        # success_response are already bounded; the dozen or so that return a
-        # raw string were not, and relying on each one to remember is how a new
-        # tool ships unbounded. Already-capped responses are under budget, so
-        # this is a no-op for them.
+        # backstop: tools returning a raw string bypass success_response's cap
         return _cap(result) if isinstance(result, str) else result
 
     return runner

@@ -7,15 +7,11 @@ requires-python = ">=3.12"
 dependencies = [
     "click>=8.1.0",
     "icecream>=2.1.0",
-    # HTTP transport needs streamable_http_app and TransportSecuritySettings,
-    # neither of which exists at the old 1.6.0 floor -- a clean resolve would
-    # install a version that cannot import. 1.28.1 is the version this is
-    # tested against.
+    # 1.6.0 floor predates streamable_http_app/TransportSecuritySettings
     "mcp[cli]>=1.28.1",
     "python-dotenv>=1.0.0",
     "requests>=2.32.3",
     "rich>=13.0.0",
-    # imported by ca_mcp.server.run_http
     "uvicorn>=0.30.0",
 ]
 

@@ -39,9 +39,7 @@ async def get_stored_libraries(
         if not libraries:
             return "No stored libraries found"
 
-        # A truncated catalogue is not a cosmetic loss here: the URN is the key
-        # import_stored_library needs, so a library that never gets listed
-        # cannot be imported at all.
+        # truncation here hides the URN import_stored_library needs
         result = (
             found_line(libraries, "stored libraries", paginated=True, offset=offset)
             + "\n\n"
