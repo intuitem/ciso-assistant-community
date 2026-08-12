@@ -652,9 +652,9 @@ class SolutionReadSerializer(BaseModelSerializer):
     subcontracting_chain = SolutionSubcontractorReadSerializer(
         many=True, read_only=True
     )
-    dora_ict_service_type = serializers.CharField(
-        source="get_dora_ict_service_type_display", default=""
-    )
+    # Raw EBA code (e.g. "eba_TA:S02"), not the display label.
+    # So the frontend can map to translation via safeTranslate.
+    dora_ict_service_type = serializers.CharField(default="")
     data_location_storage = serializers.CharField(
         source="get_data_location_storage_display", default=""
     )

@@ -104,6 +104,14 @@
 			hoverClass: 'hover:border-pink-400 hover:bg-pink-50',
 			label: m.requirementMappingSets()
 		},
+		workflows: {
+			type: 'string',
+			field: 'object_type',
+			icon: findIconInSidebar('projectManagement', 'workflows', 'fa-diagram-project'),
+			selectedClass: 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-indigo-200',
+			hoverClass: 'hover:border-indigo-400 hover:bg-indigo-50',
+			label: m.workflows()
+		},
 		preset: {
 			type: 'string',
 			field: 'object_type',

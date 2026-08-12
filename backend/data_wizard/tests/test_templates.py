@@ -410,6 +410,10 @@ class TestAssessmentTemplates:
         first = Finding.objects.get(ref_id="tls.001")
         assert first.name == "weak ciphers detected"
         assert first.status == "dismissed"
+        assert first.asset.name == "web frontend"
+        assert first.asset.folder == domain_folder
+        assert first.asset.type == Asset.Type.SUPPORT
+        assert results["details"]["assets_created"] == 3
 
     def test_risk_assessment_template(
         self,
@@ -434,6 +438,14 @@ class TestAssessmentTemplates:
         scenarios = ra.risk_scenarios.order_by("ref_id")
         assert [s.ref_id for s in scenarios] == ["R01", "R02", "R03", "R04"]
         assert scenarios.get(ref_id="R01").treatment == "avoid"
+        assert set(
+            scenarios.get(ref_id="R01").assets.values_list("name", flat=True)
+        ) == {"erp", "database server"}
+        assert list(
+            scenarios.get(ref_id="R02").assets.values_list("name", flat=True)
+        ) == ["erp"]
+        assert not scenarios.get(ref_id="R03").assets.exists()
+        assert results["details"]["assets_created"] == 3
 
     def test_business_impact_analysis_template(
         self,

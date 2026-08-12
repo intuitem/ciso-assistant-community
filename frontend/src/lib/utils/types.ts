@@ -45,6 +45,10 @@ export const URL_MODEL = [
 	'risk-matrices',
 	'risk-assessments',
 	'threats',
+	'ttp-catalogs',
+	'tactics',
+	'techniques',
+	'threat-models',
 	'risk-scenarios',
 	'applied-controls',
 	'policies',
@@ -57,6 +61,7 @@ export const URL_MODEL = [
 	'users',
 	'user-groups',
 	'idp-groups',
+	'service-accounts',
 	'roles',
 	'role-assignments',
 	'compliance-assessments',
@@ -147,6 +152,9 @@ export const URL_MODEL = [
 	'responsibility-matrix-activities',
 	'responsibility-matrix-actors',
 	'responsibility-assignments',
+	// workflows
+	'workflows',
+	'workflow-versions',
 	// metrology
 	'metric-definitions',
 	'metric-instances',
