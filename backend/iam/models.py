@@ -222,8 +222,14 @@ class Folder(NameDescriptionMixin):
         But SQLite don't need this anyway as the SQLite `transation.atomic()` already protect from this race condition.
         """
         root_folder_id = Folder.get_root_folder_id()
-        if root_folder_id is not None:
+        if root_folder_id is None:
+            return
+        try:
             Folder.objects.select_for_update().get(pk=root_folder_id)
+        except Folder.DoesNotExist:
+            # Invalidate the `Folder._CACHED_ROOT_FOLDER` cached value if it's stale.
+            # (For example `Folder._CACHED_ROOT_FOLDER` can become stale after pytest flushes the DB)
+            Folder._CACHED_ROOT_FOLDER = None
 
     def _update_descendants_at_creation(self):
         """Update the `ancestor.descendants` `ManyToManyField` for each `ancestor` of the newly created `self` `Folder` instance."""
