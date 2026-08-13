@@ -5771,6 +5771,14 @@ class AppliedControl(
     is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
+    inherited_controls = models.ManyToManyField(
+        "self",
+        symmetrical=False,
+        related_name="inheriting_controls",
+        blank=True,
+        verbose_name=_("Inherited Controls"),
+    )
+
     objectives = models.ManyToManyField(
         "OrganisationObjective",
         blank=True,

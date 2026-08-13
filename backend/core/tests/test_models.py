@@ -723,6 +723,17 @@ class TestAppliedControl:
         assert applied_control.category == "technical"
         assert applied_control.csf_function == "identify"
 
+    def test_applied_control_inherited_controls(self):
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        parent_control = AppliedControl.objects.create(name="Parent Control", folder=root_folder)
+        child_control = AppliedControl.objects.create(name="Child Control", folder=root_folder)
+        child_control.inherited_controls.add(parent_control)
+        
+        assert child_control.inherited_controls.count() == 1
+        assert child_control.inherited_controls.first() == parent_control
+        assert parent_control.inheriting_controls.count() == 1
+        assert parent_control.inheriting_controls.first() == child_control
+
 
 @pytest.mark.django_db
 class TestPolicy:
