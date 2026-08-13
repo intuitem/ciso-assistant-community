@@ -121,7 +121,7 @@ class Folder(NameDescriptionMixin):
 
     @staticmethod
     def _init_root_folder():
-        """Initialize (create) the root `Folder` if it doesn't exist yet."""
+        """Initialize (create) and cache the root `Folder` if it doesn't exist yet."""
         root_folder, _ = Folder.objects.get_or_create(
             content_type=Folder.ContentType.ROOT,
             builtin=True,
@@ -143,7 +143,7 @@ class Folder(NameDescriptionMixin):
 
     @staticmethod
     def get_root_folder_id() -> uuid.UUID | None:
-        folder = _get_root_folder()
+        folder = Folder.get_root_folder()
         return getattr(folder, "id", None)
 
     def is_root(self) -> bool:
@@ -237,13 +237,14 @@ class Folder(NameDescriptionMixin):
         for ancestor in ancestors:
             ancestor.descendants.add(self)
 
-    def _update_descendants_on_parent_folder_change(self):
+    def _update_descendants_on_parent_folder_change(self, old_instance: Folder):
         """
         Update the `descendants` of both the old and new ancestors of this `Folder`.
 
+        The `old_instance` argument MUST be `self` as it's currently stored in the DB (equal to `Folder.objects.get(pk=self.pk)`).
+
         If `self.parent_folder` didn't change (compared to the current `old_instance` `Folder` stored in the DB), this function does nothing.
         """
-        old_instance = Folder.objects.get(pk=self.pk)
 
         if old_instance.parent_folder_id == self.parent_folder_id:
             return
@@ -303,7 +304,6 @@ class Folder(NameDescriptionMixin):
         """
 
         is_create = self._state.adding
-        is_modification = not is_create
         is_root_folder = self.parent_folder is None
         has_root_content_type = self.content_type == Folder.ContentType.ROOT
 
@@ -331,7 +331,8 @@ class Folder(NameDescriptionMixin):
                             "There can't be more than one folder with a ROOT content_type."
                         )
 
-            if is_modification:
+            else:
+                # If it's a `Folder` modification (not a create).
                 current_folder = Folder.objects.get(pk=self.pk)
 
                 old_content_type = current_folder.content_type
@@ -383,7 +384,10 @@ class Folder(NameDescriptionMixin):
                 super().save(*args, **kwargs)
                 self._update_descendants_at_creation()
             else:
-                self._update_descendants_on_parent_folder_change()
+                assert current_folder is not None, (
+                    "The `current_folder` (snapshot of `self` as it exists in the DB) MUST NOT be `None`."
+                )
+                self._update_descendants_on_parent_folder_change(current_folder)
                 super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
@@ -404,15 +408,33 @@ class Folder(NameDescriptionMixin):
 
         return subfolders
 
-    # Should we update data-model.md now that this method is a generator ?
-    def get_parent_folders(self, include_self: bool = False) -> QuerySet[Folder]:
-        """Return the list of parent folders"""
+    def get_parent_folders(self, include_self: bool = False) -> list[Folder]:
+        """Return the list of parent folders (oredered from nearest parent to the furthest (root folder))."""
 
-        parents = self.ancestors.all()
+        # We use `self.ancestors` instead of (`while (current_parent := current_parent.parent_folder) is not None`) to avoid N+1 queries.
+        # As this would perform one SQL query each time we read the `current_parent.parent_folder` attribute.
+        parent_folders = list(self.ancestors.all())
+        parent_map = {
+            parent_folder.id: parent_folder for parent_folder in parent_folders
+        }
+        ordered_parent_folders = []
+
         if include_self:
-            parents = Folder.objects.filter(Q(id=self.id) | Q(id__in=parents))
+            ordered_parent_folders.append(self)
 
-        return parents
+        current_parent = self
+
+        while (current_parent_id := current_parent.parent_folder_id) is not None:
+            current_parent = parent_map.get(current_parent_id)
+            assert current_parent is not None, (
+                "The `self.ancestors` relationship is inconsistent with the parent_folder FOREIGN KEY chain."
+            )
+
+            ordered_parent_folders.append(current_parent)
+
+            current_parent_id = current_parent.parent_folder_id
+
+        return ordered_parent_folders
 
     def get_folder_full_path(self, *, include_root: bool = False) -> list[Folder]:
         """
@@ -1419,14 +1441,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         perm: Permission,
         folder: Folder,
     ) -> bool:
-        """
-        Determines if a user has specified permission on a specified folder.
-        Cached path:
-        - role permissions: Roles cache
-        - assignments: Assignments cache (+ groups cache)
-        - folder ancestry: Folder cache
-        """
+        """Return `True` if ther `user` `User` has the `perm` `Permission` the `folder` `Folder`, return `False` otherwise."""
         from core.models import FilteringLabel
+
+        if isinstance(user, User):
+            return False
 
         model = perm.content_type.model_class()
         perm_prefix = perm.codename.split("_")[0]
@@ -1487,6 +1506,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         id: uuid.UUID,
     ) -> bool:
         from core.models import Actor, FilteringLabel
+
+        if not isinstance(user, User):
+            return False
 
         if model is Permission:
             return perm_prefix == "view"
@@ -1596,13 +1618,14 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return focused_folder_ids
 
     @staticmethod
-    def _filter_accessible_folder_ids_by_focus_folder(
-        focused_folder: Folder,
+    def _filter_accessible_folder_ids_by_base_folder(
+        base_folder: Folder,
+        is_focus_mode: bool,
         direct_flat_folder_ids: Iterable[uuid.UUID],
         direct_recursive_folder_ids: Iterable[uuid.UUID],
     ) -> QuerySet[uuid.UUID]:
         """
-        Return the accessible folder IDs rooted from the `focused_folder` `Folder` from the direct flat and direct recursive folder IDs.
+        Return the accessible folder IDs rooted from the `base_folder` `Folder` from the direct flat and direct recursive folder IDs.
 
         `direct_flat_folder_ids` is list of Folder IDs (`Folder.id`) from non-recursive role assignments folders (`RoleAssignment.perimeter_folders`).
 
@@ -1611,16 +1634,19 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         root_folder_id = Folder.get_root_folder_id()
 
-        if root_folder_id is not None:
-            is_root_accessible = (root_folder_id in direct_flat_folder_ids) or (
-                root_folder_id in direct_recursive_folder_ids
-            )
-        else:
-            is_root_accessible = False
-
+        # We add the root folder to the return value (when users are in focus mode (`is_focus_mode is True`)).
+        # It's better better for UX as preventing users in focus mode to access the root folder prevent them from seeing tons important global objects.
         root_queryset = Folder.objects.none()
-        if is_root_accessible:
-            root_queryset = Folder.objects.filter(id=root_folder_id)
+        if is_focus_mode:
+            if root_folder_id is not None:
+                is_root_accessible = (root_folder_id in direct_flat_folder_ids) or (
+                    root_folder_id in direct_recursive_folder_ids
+                )
+            else:
+                is_root_accessible = False
+
+            if is_root_accessible:
+                root_queryset = Folder.objects.filter(id=root_folder_id)
 
         root_queryset = root_queryset.values_list("id", flat=True)
 
@@ -1628,29 +1654,29 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             id__in=direct_recursive_folder_ids
         )
 
-        # `True` if the user has the `perm_codename` permission on the focus folder itself OR an ancestor `Folder` of the `focused_folder`.
+        # `True` if the user has the `perm_codename` permission on the focus folder itself OR an ancestor `Folder` of the `base_folder`.
         is_whole_focus_folder_tree_accessible = direct_recursive_folders.filter(
-            Q(id=focused_folder.id) | Q(descendants=focused_folder.id)
+            Q(id=base_folder.id) | Q(descendants=base_folder.id)
         ).exists()
 
         if is_whole_focus_folder_tree_accessible:
-            # A non-strict folder supertree of the `focused_folder` tree is accessible
+            # A non-strict folder supertree of the `base_folder` tree is accessible
             # Therefore all the focused folder tree can be accessed.
-            focused_folder_tree = Folder.objects.filter(id=focused_folder.id).union(
-                Folder.objects.filter(ancestors=focused_folder.id)
+            base_folder_tree = Folder.objects.filter(id=base_folder.id).union(
+                Folder.objects.filter(ancestors=base_folder.id)
             )
 
-            accessible_folder_ids = focused_folder_tree.values_list("id", flat=True)
+            accessible_folder_ids = base_folder_tree.values_list("id", flat=True)
             return accessible_folder_ids.union(root_queryset)
 
         accessible_direct_flat_folder_ids = (
             RoleAssignment._get_focus_accessible_folder_ids(
-                focused_folder.id, direct_flat_folder_ids
+                base_folder.id, direct_flat_folder_ids
             )
         )
         accessible_direct_recursive_folder_ids = (
             RoleAssignment._get_focus_accessible_folder_ids(
-                focused_folder.id, direct_recursive_folder_ids
+                base_folder.id, direct_recursive_folder_ids
             )
         )
         directly_accessible_folder_ids = accessible_direct_flat_folder_ids.union(
@@ -1667,6 +1693,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         accessible_folder_ids = directly_accessible_folder_ids.union(
             indirectly_accessible_folder_ids
         )
+
         return accessible_folder_ids.union(root_queryset)
 
     @staticmethod
@@ -1753,11 +1780,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         focused_folder = Folder.get_focused_folder()
 
-        effective_focused_folder = base_folder
+        effective_base_folder = base_folder
 
         if focused_folder is not None:
             if base_folder is None:
-                effective_focused_folder = focused_folder
+                effective_base_folder = focused_folder
 
             elif base_folder != focused_folder:
                 # We only keep `base_folder` as the `effective_focused_folder` if it's a descendant of `focused_folder`
@@ -1766,21 +1793,24 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 ).exists()
 
                 if base_is_descendant_of_focus:
-                    effective_focused_folder = base_folder
+                    effective_base_folder = base_folder
                 elif focus_is_descendant_of_base := focused_folder.ancestors.filter(
                     pk=base_folder.pk
                 ).exists():
                     # If `focused_folder` is a descendant of `base_folder`, the effective focus folder is narrowed down to `focused_folder`.
-                    effective_focused_folder = focused_folder
+                    effective_base_folder = focused_folder
                 else:
                     # `base_folder` and `focused_folder` are in disjoint folder subtrees.
                     # Which means their intersection is empty (so we return an empty queryset for it).
                     return Folder.objects.none().values_list("id", flat=True)
 
         # Folder ID of the focused folder (when the user is in `Focus mode`)
-        if effective_focused_folder is not None:
-            return RoleAssignment._filter_accessible_folder_ids_by_focus_folder(
-                effective_focused_folder,
+        if effective_base_folder is not None:
+            is_focus_mode = focused_folder is not None
+
+            return RoleAssignment._filter_accessible_folder_ids_by_base_folder(
+                effective_base_folder,
+                is_focus_mode,
                 direct_flat_folder_ids,
                 direct_recursive_folder_ids,
             )
@@ -2047,7 +2077,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     def get_permissions(
         principal: AbstractBaseUser | AnonymousUser | UserGroup,
     ) -> dict[str, dict[str, str]]:
-        """Get all permissions attached to a user/group (direct or indirect), using caches.
+        """Get all permissions attached to a user/group (direct or indirect).
 
         Returns: {codename: {"str": Permission.name}}
         """
@@ -2071,6 +2101,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return {
             perm_codename: {"str": perm_name}
             for perm_codename, perm_name in perm_name_pairs
+            # `perm_codename` can be `None` if a `Role` has no permission (`role.permissions.count() == 0`).
+            # In such case `"role__permissions__codename"` would return `None`.
+            if perm_codename is not None
         }
 
     @classmethod
@@ -2080,7 +2113,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         is_recursive: bool = False,
     ) -> dict[str, set[str]]:
         """
-        Get permissions grouped by folder ID, using caches.
+        Get permissions grouped by folder ID.
 
         - Always adds permissions on the explicit perimeter folders in assignments.
         - If `is_recursive=True` AND assignment.is_recursive=True, propagates to descendants.

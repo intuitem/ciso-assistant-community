@@ -39,8 +39,11 @@ def check_folder_ancestors(folder: Folder, expected_ancestor_names: list[str]):
     }
 
     for expected_ancestor_name in expected_ancestor_names:
-        if expected_ancestor_name not in ancestor_names:
-            assert f"Expected ancestor {ancestor_names!r} not found in the folder ancestors."
+        is_ancestor_found = expected_ancestor_name in ancestor_names
+
+        assert is_ancestor_found, (
+            f"Expected ancestor {ancestor_names!r} not found in the folder ancestors."
+        )
 
         ancestor_names.remove(expected_ancestor_name)
 
