@@ -1442,7 +1442,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         """Return `True` if ther `user` `User` has the `perm` `Permission` the `folder` `Folder`, return `False` otherwise."""
         from core.models import FilteringLabel
 
-        if isinstance(user, User):
+        if not isinstance(user, User):
             return False
 
         model = perm.content_type.model_class()
