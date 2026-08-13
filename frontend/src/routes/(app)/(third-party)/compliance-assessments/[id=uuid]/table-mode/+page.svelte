@@ -14,10 +14,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
-	import {
-		complianceResultColorMap,
-		complianceStatusColorMap
-	} from '$lib/utils/constants';
+	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 	import {
 		getFieldVisibility,
 		hasComputedResult,
@@ -78,9 +75,7 @@
 
 	// Initialize hide suggestion state
 	let hideSuggestionHashmap: Record<string, boolean> = $state({});
-	// Local reactive copy so optimistic field edits (result/status/score/observation)
-	// update the UI without a full invalidateAll. Re-synced whenever `data` is reloaded
-	// (e.g. after a questionnaire answer that the backend recomputes).
+	// Reactive copy of the loaded assessments; re-synced on data reload
 	let requirementAssessments = $state(data.requirement_assessments);
 	$effect(() => {
 		requirementAssessments = data.requirement_assessments;
@@ -140,8 +135,7 @@
 		return requirement.ref_id ?? requirement.requirement?.ref_id ?? '';
 	}
 
-	// Title without the leading ref_id so it isn't shown twice next to the ref chip.
-	// Only strips when a real separator (whitespace, dash, colon...) follows the ref_id.
+	// Title with a leading ref_id stripped (only when a separator follows)
 	function getDisplayTitle(requirementAssessment: Record<string, any>) {
 		const title = getTitle(requirementAssessment) ?? '';
 		const refId = getRefId(requirementAssessment);
@@ -152,8 +146,7 @@
 		return title;
 	}
 
-	// Detail sections (observation / applied controls / evidences) are toggle chips
-	// sharing the per-requirement open-set kept in accordionItems.
+	// Detail chips share the per-requirement open-set
 	function isSectionOpen(raId: string, key: string) {
 		return (accordionItems[raId] ?? []).includes(key);
 	}
@@ -162,7 +155,7 @@
 		accordionItems[raId] = open.includes(key) ? open.filter((k) => k !== key) : [...open, key];
 	}
 
-	// Function to update requirement assessments, the data argument contain fields as keys and the associated values as values.
+	// Patch one or more fields of a requirement assessment
 	async function updateBulk(
 		requirementAssessment: Record<string, any>,
 		data: { [key: string]: string | number | boolean | null }
@@ -181,10 +174,7 @@
 		return res;
 	}
 
-	// Function to update requirement assessments.
-	// `refresh` forces a reload only when the backend recomputes derived fields from
-	// the change (e.g. answers / respondent alignment -> result/score). Direct edits
-	// (result/status/score/observation) update reactively, so they skip invalidateAll.
+	// Patch a single field; refresh only when the backend recomputes derived fields
 	async function update(
 		requirementAssessment: Record<string, any>,
 		field: string,
@@ -205,8 +195,7 @@
 		}
 	}
 
-	// Auditor comfort toggle (no longer tied to third parties): assessment mode shows
-	// everything with answers read-only; questionnaire mode shows only the questions.
+	// Auditor view toggle: assessment (answers read-only) vs questions-only
 	let questionnaireMode = $state(questionnaireOnly);
 
 	const modalStore: ModalStore = getModalStore();
@@ -256,8 +245,7 @@
 		})
 	);
 
-	// Audit-wide scores shown in the header, refreshed from the backend after a
-	// score edit (the aggregate is server-computed).
+	// Header scores, refetched after a score edit
 	let auditScores = $state(data.scores);
 	$effect(() => {
 		auditScores = data.scores;
@@ -327,11 +315,9 @@
 		)
 	);
 
-	// Sections start expanded (all requirements visible); the header toggle
-	// collapses/expands every section. It does NOT touch the per-item chips.
+	// Header toggle collapses/expands sections, not the item chips
 	let allExpanded = $state(true);
-	// Section structure derived from the real tree (urn / parent_urn), not ref_id:
-	// per-row ancestor headings, nesting depth, and assessable count under each heading.
+	// Section tree from urn/parent_urn: ancestors, depth, per-heading counts
 	const sectionInfo = $derived.by(() => {
 		// urn -> parent_urn for the whole framework tree.
 		const parentByUrn: Record<string, string | null> = {};
@@ -387,8 +373,7 @@
 		return ra.result === tocFilterResult;
 	}
 
-	// Collapses/expands SECTIONS only (never mass-opens the per-item chips, which would
-	// render every controls/evidences/observation panel at once).
+	// Collapse/expand SECTIONS only, never the item chips
 	function setAllExpanded(expanded: boolean) {
 		const next: Record<string, boolean> = {};
 		if (!expanded) {
@@ -400,32 +385,25 @@
 
 	let showToc = $state(true);
 
-	// Offset (px) so the page header sticks just below the app's sticky AppBar,
-	// whose height is dynamic (title, breadcrumbs, sidebar state).
+	// AppBar height; the page header sticks below it
 	let stickyTop = $state(0);
-	// Header height so the TOC column can stick right below the (sticky) page header.
+	// Header height (for the sticky TOC column)
 	let headerHeight = $state(0);
-	// Sticky "current section" bar height, so scroll targets clear it on auto-scroll.
+	// Sticky section-bar height, for the scroll offset
 	let stickySectionHeight = $state(0);
 	// Whether the audit has any section headings (flat audits pin no sticky bar).
 	const hasSections = $derived(sectionInfo.rows.some((r) => r.isHeading));
-	// Total space a scrolled-to element must clear (AppBar + header + section bar).
-	// Reserve the section-bar height even when it isn't rendered yet, since the
-	// target becomes the active sticky bar right after the auto-scroll; skip it
-	// entirely when the audit is flat and no bar can ever appear.
+	// Space a scrolled-to element must clear (AppBar + header + section bar)
 	const scrollOffset = $derived(
 		stickyTop + headerHeight + (hasSections ? stickySectionHeight || 52 : 0) + 4
 	);
 
-	// Scroll-spy: id of the section enclosing the topmost visible row. A single
-	// sticky bar shows it, so sections never stack. Null in flat audits.
+	// Scroll-spy: section enclosing the topmost visible row (null when flat)
 	let activeSectionId = $state<string | null>(null);
 	const activeSection = $derived(
 		activeSectionId ? requirementAssessments.find((ra) => ra.id === activeSectionId) : null
 	);
-	// Row id -> enclosing section id (itself if it's a heading, else nearest ancestor
-	// heading). Used by the scroll-spy so a leaf row shows its own branch, not a
-	// sibling branch's deepest heading that merely sits above it in the document.
+	// Row id -> enclosing section id (self if heading, else nearest ancestor)
 	const sectionByRow = $derived.by(() => {
 		const map: Record<string, string | null> = {};
 		requirementAssessments.forEach((ra, i) => {
@@ -439,8 +417,7 @@
 	let tocCollapsed = $state(false);
 	let tocFilterResult = $state<string | null>(null);
 
-	// Sections holding at least one requirement matching the active result filter,
-	// so the filtered list keeps its section context.
+	// Sections with a requirement matching the active result filter
 	const filterSections = $derived.by(() => {
 		const s = new Set<string>();
 		if (!tocFilterResult) return s;
@@ -506,7 +483,7 @@
 
 		const cleanups: Array<() => void> = [];
 
-		// Track the app AppBar height so our header sticks right below it.
+		// Track the AppBar height
 		const appbar = document.querySelector('.sticky.top-0.z-50') as HTMLElement | null;
 		if (appbar) {
 			const measure = () => (stickyTop = appbar.getBoundingClientRect().height);
@@ -583,10 +560,7 @@
 	</button>
 {/snippet}
 
-<!--
-	Panel body for a related-object section (applied controls, evidences).
-	cfg carries the per-section labels, icons, items, test ids and modal callbacks.
--->
+<!-- Related-object panel (controls / evidences): create/select + item list -->
 {#snippet detailPanel(cfg: Record<string, any>)}
 	<div class="card border border-surface-200 rounded-lg p-3 space-y-2">
 		{#if !shallow && !isReadOnly}
@@ -768,8 +742,6 @@
 									<i class="fa-solid fa-file-lines mr-2"></i>{m.evidences()}
 								</Anchor>
 							</div>
-						{/if}
-						{#if !shallow}
 							<button
 								type="button"
 								class="btn btn-sm preset-tonal-surface"
@@ -1076,7 +1048,7 @@
 											method="post"
 											class="flex flex-col gap-3 table-mode-form"
 										>
-											<!-- Row A: foldable title -->
+											<!-- Row A: title -->
 											<div class="flex items-center gap-3 flex-wrap">
 												<div class="flex items-center gap-2 min-w-0">
 													{#if getRefId(requirementAssessment)}
@@ -1113,7 +1085,7 @@
 												{/if}
 											</div>
 
-											<!-- Description: always visible, even when the body is collapsed -->
+											<!-- Description -->
 											{#if requirementAssessment.requirement.description}
 												<div class="text-sm text-surface-700" data-testid="description">
 													<MarkdownRenderer
@@ -1122,7 +1094,7 @@
 												</div>
 											{/if}
 
-											<!-- Row B: result / status / score, aligned under the name (editable while collapsed) -->
+											<!-- Row B: result / status / score -->
 											{#if !questionnaireMode && (showResult || (!shallow && complianceAssessment.scoring_enabled))}
 												<div class="flex flex-wrap items-start gap-x-6 gap-y-3">
 													{#if !questionnaireMode && showResult}
@@ -1357,151 +1329,173 @@
 												>
 													{#if showResult && hasComputedResult(requirementAssessment.requirement.questions)}
 														<div class="flex flex-col gap-1">
-															<span class="text-xs font-semibold text-surface-500 italic">{m.result()}</span>
-															<span class="badge text-sm font-semibold w-fit" style={resultBadgeStyle(requirementAssessment.result)}>
+															<span class="text-xs font-semibold text-surface-500 italic"
+																>{m.result()}</span
+															>
+															<span
+																class="badge text-sm font-semibold w-fit"
+																style={resultBadgeStyle(requirementAssessment.result)}
+															>
 																{safeTranslate(requirementAssessment.result)}
 															</span>
 														</div>
 													{/if}
 													{#if showScore && complianceAssessment.scoring_enabled && hasComputedScore(requirementAssessment.requirement.questions)}
-														{@const raMin = requirementAssessment.effective_min_score ?? complianceAssessment.min_score}
-														{@const raMax = requirementAssessment.effective_max_score ?? complianceAssessment.max_score}
-														{@const raScoresDef = requirementAssessment.effective_scores_definition ?? data.scores.scores_definition}
+														{@const raMin =
+															requirementAssessment.effective_min_score ??
+															complianceAssessment.min_score}
+														{@const raMax =
+															requirementAssessment.effective_max_score ??
+															complianceAssessment.max_score}
+														{@const raScoresDef =
+															requirementAssessment.effective_scores_definition ??
+															data.scores.scores_definition}
 														<div class="flex flex-col gap-1">
-															<span class="text-xs font-semibold text-surface-500 italic">{m.score()}</span>
-															<ScoreControl editable={false} value={requirementAssessment.score} min={raMin} max={raMax} scoresDefinition={raScoresDef} />
+															<span class="text-xs font-semibold text-surface-500 italic"
+																>{m.score()}</span
+															>
+															<ScoreControl
+																editable={false}
+																value={requirementAssessment.score}
+																min={raMin}
+																max={raMax}
+																scoresDefinition={raScoresDef}
+															/>
 														</div>
 													{/if}
 												</div>
 											{/if}
 											{#if !questionnaireMode}
-											<div class="flex flex-col gap-3">
-												<!-- Related objects: controls / evidences -->
-												{#if shallow}
-													{#if showAppliedControls}
-														{#if requirementAssessment.applied_controls.length === 0}
-															<p class="text-surface-400 italic text-sm">
-																{m.noAppliedControlYet()}
-															</p>
-														{:else}
-															<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
-																{#each requirementAssessment.applied_controls as item}
-																	<Anchor
-																		class="anchor"
-																		href="/applied-controls/{item.id}"
-																		label={item.str}
-																	>
-																		<i class="fa-solid fa-fire-extinguisher mr-2"></i>{item.str}
-																	</Anchor>
-																{/each}
-															</div>
-														{/if}
-													{/if}
-													{#if showEvidences}
-														{#if requirementAssessment.evidences.length === 0}
-															<p class="text-surface-400 italic text-sm" data-testid="no-evidence">
-																{m.noEvidences()}
-															</p>
-														{:else}
-															<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
-																{#each requirementAssessment.evidences as item}
-																	<Anchor
-																		class="anchor"
-																		href="/evidences/{item.id}"
-																		label={item.str}
-																		data-testid="evidence-link"
-																	>
-																		<i class="fa-solid fa-file-lines mr-2"></i>{item.str}
-																	</Anchor>
-																{/each}
-															</div>
-														{/if}
-													{/if}
-												{:else}
-													<div class="flex flex-wrap gap-2 items-center">
+												<div class="flex flex-col gap-3">
+													<!-- Related objects: controls / evidences -->
+													{#if shallow}
 														{#if showAppliedControls}
-															{@render chip({
-																raId: requirementAssessment.id,
-																key: 'appliedControl',
-																icon: 'fa-fire-extinguisher',
-																label: m.appliedControl(),
-																count: requirementAssessment.applied_controls.length
-															})}
+															{#if requirementAssessment.applied_controls.length === 0}
+																<p class="text-surface-400 italic text-sm">
+																	{m.noAppliedControlYet()}
+																</p>
+															{:else}
+																<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
+																	{#each requirementAssessment.applied_controls as item}
+																		<Anchor
+																			class="anchor"
+																			href="/applied-controls/{item.id}"
+																			label={item.str}
+																		>
+																			<i class="fa-solid fa-fire-extinguisher mr-2"></i>{item.str}
+																		</Anchor>
+																	{/each}
+																</div>
+															{/if}
 														{/if}
 														{#if showEvidences}
-															{@render chip({
-																raId: requirementAssessment.id,
-																key: 'evidence',
-																icon: 'fa-file-lines',
-																label: m.evidence(),
-																count: requirementAssessment.evidences.length,
-																countTestId: 'evidence-count',
-																triggerTestId: 'evidence-accordion-trigger'
+															{#if requirementAssessment.evidences.length === 0}
+																<p
+																	class="text-surface-400 italic text-sm"
+																	data-testid="no-evidence"
+																>
+																	{m.noEvidences()}
+																</p>
+															{:else}
+																<div class="flex flex-wrap gap-x-4 gap-y-1 items-center">
+																	{#each requirementAssessment.evidences as item}
+																		<Anchor
+																			class="anchor"
+																			href="/evidences/{item.id}"
+																			label={item.str}
+																			data-testid="evidence-link"
+																		>
+																			<i class="fa-solid fa-file-lines mr-2"></i>{item.str}
+																		</Anchor>
+																	{/each}
+																</div>
+															{/if}
+														{/if}
+													{:else}
+														<div class="flex flex-wrap gap-2 items-center">
+															{#if showAppliedControls}
+																{@render chip({
+																	raId: requirementAssessment.id,
+																	key: 'appliedControl',
+																	icon: 'fa-fire-extinguisher',
+																	label: m.appliedControl(),
+																	count: requirementAssessment.applied_controls.length
+																})}
+															{/if}
+															{#if showEvidences}
+																{@render chip({
+																	raId: requirementAssessment.id,
+																	key: 'evidence',
+																	icon: 'fa-file-lines',
+																	label: m.evidence(),
+																	count: requirementAssessment.evidences.length,
+																	countTestId: 'evidence-count',
+																	triggerTestId: 'evidence-accordion-trigger'
+																})}
+															{/if}
+														</div>
+
+														{#if showAppliedControls && isSectionOpen(requirementAssessment.id, 'appliedControl')}
+															{@render detailPanel({
+																items: requirementAssessment.applied_controls,
+																hrefBase: '/applied-controls',
+																itemIcon: 'fa-fire-extinguisher',
+																emptyLabel: m.noAppliedControlYet(),
+																createLabel: m.addAppliedControl(),
+																selectLabel: m.selectAppliedControls(),
+																onCreate: () => modalMeasureCreateForm(requirementAssessment),
+																onSelect: () =>
+																	modalUpdateForm(requirementAssessment, 'selectAppliedControls')
 															})}
 														{/if}
-													</div>
-
-													{#if showAppliedControls && isSectionOpen(requirementAssessment.id, 'appliedControl')}
-														{@render detailPanel({
-															items: requirementAssessment.applied_controls,
-															hrefBase: '/applied-controls',
-															itemIcon: 'fa-fire-extinguisher',
-															emptyLabel: m.noAppliedControlYet(),
-															createLabel: m.addAppliedControl(),
-															selectLabel: m.selectAppliedControls(),
-															onCreate: () => modalMeasureCreateForm(requirementAssessment),
-															onSelect: () =>
-																modalUpdateForm(requirementAssessment, 'selectAppliedControls')
-														})}
-													{/if}
-													{#if showEvidences && isSectionOpen(requirementAssessment.id, 'evidence')}
-														{@render detailPanel({
-															items: requirementAssessment.evidences,
-															hrefBase: '/evidences',
-															itemIcon: 'fa-file-lines',
-															emptyLabel: m.noEvidences(),
-															createLabel: m.addEvidence(),
-															selectLabel: m.selectEvidence(),
-															createTestId: 'create-evidence-button',
-															selectTestId: 'select-evidence-button',
-															linkTestId: 'evidence-link',
-															onCreate: () => modalEvidenceCreateForm(requirementAssessment),
-															onSelect: () =>
-																modalUpdateForm(requirementAssessment, 'selectEvidences')
-														})}
-													{/if}
-													{#if showObservation}
-														<div class="flex flex-col gap-1.5">
-															<span
-																class="text-xs font-semibold uppercase tracking-wide text-surface-500"
-																>{m.observation()}</span
-															>
-															<div class="card border border-surface-200 rounded-lg p-3">
-																<TableMarkdownField
-																	value={requirementAssessment.observation}
-																	disabled={isReadOnly}
-																	onSave={async (newValue) => {
-																		requirementAssessment.observation = newValue;
-																		await update(requirementAssessment, 'observation');
-																		requirementAssessment.observationBuffer = newValue;
-																	}}
-																/>
+														{#if showEvidences && isSectionOpen(requirementAssessment.id, 'evidence')}
+															{@render detailPanel({
+																items: requirementAssessment.evidences,
+																hrefBase: '/evidences',
+																itemIcon: 'fa-file-lines',
+																emptyLabel: m.noEvidences(),
+																createLabel: m.addEvidence(),
+																selectLabel: m.selectEvidence(),
+																createTestId: 'create-evidence-button',
+																selectTestId: 'select-evidence-button',
+																linkTestId: 'evidence-link',
+																onCreate: () => modalEvidenceCreateForm(requirementAssessment),
+																onSelect: () =>
+																	modalUpdateForm(requirementAssessment, 'selectEvidences')
+															})}
+														{/if}
+														{#if showObservation}
+															<div class="flex flex-col gap-1.5">
+																<span
+																	class="text-xs font-semibold uppercase tracking-wide text-surface-500"
+																	>{m.observation()}</span
+																>
+																<div class="card border border-surface-200 rounded-lg p-3">
+																	<TableMarkdownField
+																		value={requirementAssessment.observation}
+																		disabled={isReadOnly}
+																		onSave={async (newValue) => {
+																			requirementAssessment.observation = newValue;
+																			await update(requirementAssessment, 'observation');
+																			requirementAssessment.observationBuffer = newValue;
+																		}}
+																	/>
+																</div>
 															</div>
-														</div>
+														{/if}
 													{/if}
-												{/if}
 
-												{#if shallow && showObservation}
-													{#if requirementAssessment.observation}
-														<MarkdownRenderer
-															content={requirementAssessment.observation}
-															class="text-primary-500"
-														/>
-													{:else}
-														<p class="text-surface-400 italic text-sm">{m.noObservation()}</p>
+													{#if shallow && showObservation}
+														{#if requirementAssessment.observation}
+															<MarkdownRenderer
+																content={requirementAssessment.observation}
+																class="text-primary-500"
+															/>
+														{:else}
+															<p class="text-surface-400 italic text-sm">{m.noObservation()}</p>
+														{/if}
 													{/if}
-												{/if}
-											</div>
+												</div>
 											{/if}
 										</form>
 									</div>

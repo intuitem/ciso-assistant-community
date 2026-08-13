@@ -39,13 +39,13 @@
 		const c = (hex ?? '').replace('#', '');
 		return [parseInt(c.slice(0, 2), 16), parseInt(c.slice(2, 4), 16), parseInt(c.slice(4, 6), 16)];
 	}
-	// Mix a hex toward `target`; `amount` is the weight of the target (0..1).
+	// Mix a hex toward target; amount = target weight
 	function mix(hex: string, target: [number, number, number], amount: number): string {
 		const [r, g, b] = rgb(hex);
 		const m = (a: number, t: number) => Math.round(a * (1 - amount) + t * amount);
 		return `rgb(${m(r, target[0])} ${m(g, target[1])} ${m(b, target[2])})`;
 	}
-	// Readable label color on the filled segment: white on dark fills, a darkened tone otherwise.
+	// Filled-segment label color
 	function selectedFg(hex: string): string {
 		const [r, g, b] = rgb(hex);
 		const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
@@ -72,7 +72,11 @@
 			onclick={() => onChange(option.value)}
 			onpointerenter={() => (hovered = option.value)}
 			onpointerleave={() => (hovered = null)}
-			style:background-color={selected ? tint : hover ? mix(tint, [255, 255, 255], 0.82) : undefined}
+			style:background-color={selected
+				? tint
+				: hover
+					? mix(tint, [255, 255, 255], 0.82)
+					: undefined}
 			style:color={selected ? selectedFg(tint) : hover ? mix(tint, [0, 0, 0], 0.55) : undefined}
 			class="rounded-md font-medium whitespace-nowrap transition-colors duration-150 {sizeClasses} {selected
 				? 'shadow-sm'

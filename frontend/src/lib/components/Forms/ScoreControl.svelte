@@ -10,9 +10,8 @@
 	}
 
 	/**
-	 * Fresh, controlled score widget (no superForm dependency).
-	 * Compact enough to live in a row header: optional on/off toggle + slider + ring.
-	 * Set `editable={false}` for a read-only ring (computed or locked scores).
+	 * Controlled score widget: optional toggle + slider + ring.
+	 * `editable={false}` renders a read-only ring.
 	 */
 	interface Props {
 		value?: number | null;
@@ -48,8 +47,7 @@
 	const active = $derived(scored !== false);
 	const sliderDisabled = $derived(disabled || !active);
 
-	// Internal display value so the slider/ring react immediately to dragging,
-	// even when the parent keeps the score on a non-reactive object.
+	// Internal value; slider/ring react during drag
 	let internal = $state(value ?? min);
 	$effect(() => {
 		internal = value ?? min;
