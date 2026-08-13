@@ -735,6 +735,32 @@ class FolderScopeError(ValueError):
     """Raised when an existing-record lookup cannot be scoped to a folder."""
 
 
+def _parse_bool_cell(value: object) -> bool:
+    """Coerce a spreadsheet cell into a bool for import.
+
+    FR aliases ("oui", "vrai") and Excel-checkbox "x" are truthy so localised
+    or template-authored imports read correctly.
+    """
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return False
+    if isinstance(value, (int, float)):
+        return value != 0
+    if isinstance(value, str):
+        return value.strip().lower() in {
+            "true",
+            "yes",
+            "y",
+            "1",
+            "1.0",
+            "oui",
+            "vrai",
+            "x",
+        }
+    return False
+
+
 @dataclass
 class Result:
     created: int = 0
@@ -2958,15 +2984,7 @@ class ProcessingChildConsumerMixin:
     def create_context(self):
         return None, None
 
-    @staticmethod
-    def _parse_bool(value: object) -> bool:
-        if isinstance(value, bool):
-            return value
-        if isinstance(value, (int, float)):
-            return value != 0
-        if isinstance(value, str):
-            return value.strip().lower() in {"true", "yes", "y", "1"}
-        return False
+    _parse_bool = staticmethod(_parse_bool_cell)
 
     @staticmethod
     def _choice_key(value: object, choices) -> Optional[str]:
@@ -3465,17 +3483,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer):
             return [v.strip() for v in value.split(",") if v.strip()]
         return []
 
-    @staticmethod
-    def _parse_bool(value: object) -> bool:
-        if isinstance(value, bool):
-            return value
-        if value is None:
-            return False
-        if isinstance(value, (int, float)):
-            return value != 0
-        if isinstance(value, str):
-            return value.strip().lower() in {"true", "yes", "y", "1"}
-        return False
+    _parse_bool = staticmethod(_parse_bool_cell)
 
     def _resolve_bia(
         self, record: dict
@@ -4851,16 +4859,8 @@ class LoadFileView(APIView):
                     ):
                         override_cell = record.get("is_score_overridden")
                         if override_cell not in (None, ""):
-                            requirement_data["is_score_overridden"] = str(
+                            requirement_data["is_score_overridden"] = _parse_bool_cell(
                                 override_cell
-                            ).strip().lower() in (
-                                "true",
-                                "1",
-                                "1.0",
-                                "yes",
-                                "oui",
-                                "vrai",
-                                "x",
                             )
                         else:
                             requirement_data["is_score_overridden"] = (

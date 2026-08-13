@@ -7623,6 +7623,9 @@ class ComplianceAssessment(Assessment):
                         baseline_assessment.documentation_score
                     )
                     assessment.is_scored = baseline_assessment.is_scored
+                    assessment.is_score_overridden = (
+                        baseline_assessment.is_score_overridden
+                    )
                     assessment.observation = baseline_assessment.observation
                     updates.append(assessment)
 
@@ -7645,6 +7648,7 @@ class ComplianceAssessment(Assessment):
                         "score",
                         "documentation_score",
                         "is_scored",
+                        "is_score_overridden",
                         "observation",
                     ],
                     batch_size=1000,
