@@ -432,8 +432,6 @@ class Folder(NameDescriptionMixin):
 
             ordered_parent_folders.append(current_parent)
 
-            current_parent_id = current_parent.parent_folder_id
-
         return ordered_parent_folders
 
     def get_folder_full_path(self, *, include_root: bool = False) -> list[Folder]:
