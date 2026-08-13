@@ -725,14 +725,38 @@ class TestAppliedControl:
 
     def test_applied_control_inherited_controls(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        parent_control = AppliedControl.objects.create(name="Parent Control", folder=root_folder)
-        child_control = AppliedControl.objects.create(name="Child Control", folder=root_folder)
+        parent_control = AppliedControl(name="Parent Control", folder=root_folder)
+        parent_control.save(skip_sync=True)
+        child_control = AppliedControl(name="Child Control", folder=root_folder)
+        child_control.save(skip_sync=True)
         child_control.inherited_controls.add(parent_control)
         
         assert child_control.inherited_controls.count() == 1
         assert child_control.inherited_controls.first() == parent_control
         assert parent_control.inheriting_controls.count() == 1
         assert parent_control.inheriting_controls.first() == child_control
+
+    def test_applied_control_filterset(self):
+        from core.views import AppliedControlFilterSet
+        
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        parent_control = AppliedControl(name="Parent Control", folder=root_folder)
+        parent_control.save(skip_sync=True)
+        child_control = AppliedControl(name="Child Control", folder=root_folder)
+        child_control.save(skip_sync=True)
+        child_control.inherited_controls.add(parent_control)
+
+        qs = AppliedControl.objects.all()
+
+        # Test filtering child by parent
+        f = AppliedControlFilterSet({"inherited_controls": parent_control.id}, queryset=qs)
+        assert f.qs.count() == 1
+        assert child_control in f.qs
+        
+        # Test filtering parent by child
+        f = AppliedControlFilterSet({"inheriting_controls": child_control.id}, queryset=qs)
+        assert f.qs.count() == 1
+        assert parent_control in f.qs
 
 
 @pytest.mark.django_db
