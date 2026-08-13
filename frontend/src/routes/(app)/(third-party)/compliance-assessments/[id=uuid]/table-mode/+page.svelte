@@ -205,9 +205,9 @@
 		}
 	}
 
-	let questionnaireMode = $state(
-		questionnaireOnly ? true : !hasQuestions ? false : page.data.user.is_third_party ? true : false
-	);
+	// Auditor comfort toggle (no longer tied to third parties): assessment mode shows
+	// everything with answers read-only; questionnaire mode shows only the questions.
+	let questionnaireMode = $state(questionnaireOnly);
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -744,6 +744,32 @@
 					</a>
 					<div class="flex items-center gap-4 shrink-0">
 						{#if !shallow}
+							<div class="flex items-center gap-1">
+								<Anchor
+									href="/compliance-assessments/{complianceAssessment.id}/edit?next={page.url
+										.pathname}"
+									label={m.edit()}
+									class="btn btn-sm preset-tonal-surface"
+								>
+									<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
+								</Anchor>
+								<Anchor
+									href="/compliance-assessments/{complianceAssessment.id}/action-plan"
+									label={m.actionPlan()}
+									class="btn btn-sm preset-tonal-surface"
+								>
+									<i class="fa-solid fa-list-check mr-2"></i>{m.actionPlan()}
+								</Anchor>
+								<Anchor
+									href="/compliance-assessments/{complianceAssessment.id}/evidences-list"
+									label={m.evidences()}
+									class="btn btn-sm preset-tonal-surface"
+								>
+									<i class="fa-solid fa-file-lines mr-2"></i>{m.evidences()}
+								</Anchor>
+							</div>
+						{/if}
+						{#if !shallow}
 							<button
 								type="button"
 								class="btn btn-sm preset-tonal-surface"
@@ -753,7 +779,7 @@
 								{allExpanded ? m.collapseAll() : m.expandAll()}
 							</button>
 						{/if}
-						{#if !hasQuestions}
+						{#if hasQuestions}
 							<div class="flex items-center justify-center space-x-4">
 								{#if questionnaireMode}
 									<p class="font-bold text-sm">{m.assessmentMode()}</p>
@@ -1097,7 +1123,7 @@
 											{/if}
 
 											<!-- Row B: result / status / score, aligned under the name (editable while collapsed) -->
-											{#if (!questionnaireMode && showResult) || (!shallow && complianceAssessment.scoring_enabled)}
+											{#if !questionnaireMode && (showResult || (!shallow && complianceAssessment.scoring_enabled))}
 												<div class="flex flex-wrap items-start gap-x-6 gap-y-3">
 													{#if !questionnaireMode && showResult}
 														<div class="flex flex-col gap-1">
@@ -1159,7 +1185,7 @@
 											{/if}
 
 											<!-- Additional information (annotation / typical evidence / mapping inference) -->
-											{#if requirementAssessment.requirement.annotation || requirementAssessment.requirement.typical_evidence || requirementAssessment.mapping_inference?.result}
+											{#if !questionnaireMode && (requirementAssessment.requirement.annotation || requirementAssessment.requirement.typical_evidence || requirementAssessment.mapping_inference?.result)}
 												<div class="card p-3 preset-tonal-secondary text-sm cursor-auto w-full">
 													<h2
 														class="font-medium text-sm flex flex-row justify-between items-center"
@@ -1282,8 +1308,8 @@
 														questions={requirementAssessment.requirement.questions}
 														initialValue={requirementAssessment.answers}
 														field="answers"
-														disabled={isReadOnly}
-														{shallow}
+														disabled={isReadOnly || !questionnaireMode}
+														shallow={shallow || !questionnaireMode}
 														onChange={async (urn, newAnswer) => {
 															requirementAssessment.answers[urn] = newAnswer;
 															await updateBulk(requirementAssessment, {
@@ -1313,7 +1339,8 @@
 															)
 														}}
 														field="respondent_alignment"
-														disabled={isReadOnly}
+														disabled={isReadOnly || !questionnaireMode}
+														shallow={shallow || !questionnaireMode}
 														onChange={(_urn, choiceUrn) => {
 															const newAlignment = alignmentValueFromChoiceUrn(choiceUrn);
 															requirementAssessment.respondent_alignment = newAlignment;
@@ -1324,6 +1351,30 @@
 													/>
 												</div>
 											{/if}
+											{#if questionnaireMode && ((showResult && hasComputedResult(requirementAssessment.requirement.questions)) || (showScore && complianceAssessment.scoring_enabled && hasComputedScore(requirementAssessment.requirement.questions)))}
+												<div
+													class="mt-2 inline-flex w-fit flex-wrap items-center gap-x-8 gap-y-2 rounded-lg border border-surface-300 bg-surface-50 px-4 py-2.5 shadow-sm"
+												>
+													{#if showResult && hasComputedResult(requirementAssessment.requirement.questions)}
+														<div class="flex flex-col gap-1">
+															<span class="text-xs font-semibold text-surface-500 italic">{m.result()}</span>
+															<span class="badge text-sm font-semibold w-fit" style={resultBadgeStyle(requirementAssessment.result)}>
+																{safeTranslate(requirementAssessment.result)}
+															</span>
+														</div>
+													{/if}
+													{#if showScore && complianceAssessment.scoring_enabled && hasComputedScore(requirementAssessment.requirement.questions)}
+														{@const raMin = requirementAssessment.effective_min_score ?? complianceAssessment.min_score}
+														{@const raMax = requirementAssessment.effective_max_score ?? complianceAssessment.max_score}
+														{@const raScoresDef = requirementAssessment.effective_scores_definition ?? data.scores.scores_definition}
+														<div class="flex flex-col gap-1">
+															<span class="text-xs font-semibold text-surface-500 italic">{m.score()}</span>
+															<ScoreControl editable={false} value={requirementAssessment.score} min={raMin} max={raMax} scoresDefinition={raScoresDef} />
+														</div>
+													{/if}
+												</div>
+											{/if}
+											{#if !questionnaireMode}
 											<div class="flex flex-col gap-3">
 												<!-- Related objects: controls / evidences -->
 												{#if shallow}
@@ -1451,6 +1502,7 @@
 													{/if}
 												{/if}
 											</div>
+											{/if}
 										</form>
 									</div>
 								{/if}
