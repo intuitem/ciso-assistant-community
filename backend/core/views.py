@@ -3896,10 +3896,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get action plan Excel")
     def action_plan_excel(self, request, pk):
-        object_ids_view = RoleAssignment.get_viewable_object_ids(
-            request.user, RiskAssessment
-        )
-        if UUID(pk) not in object_ids_view:
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", RiskAssessment, UUID(pk)
+        ):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
@@ -4084,10 +4083,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get risk assessment XLSX")
     def risk_assessment_xlsx(self, request, pk):
-        object_ids_view = RoleAssignment.get_viewable_object_ids(
-            request.user, RiskAssessment
-        )
-        if UUID(pk) not in object_ids_view:
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", RiskAssessment, UUID(pk)
+        ):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
@@ -5838,10 +5836,9 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        object_ids_view = RoleAssignment.get_viewable_object_ids(
-            request.user, AppliedControl
-        )
-        if UUID(pk) not in object_ids_view:
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", AppliedControl, UUID(pk)
+        ):
             return Response(
                 {"results": "applied control not found"},
                 status=status.HTTP_404_NOT_FOUND,
@@ -8182,8 +8179,9 @@ class FolderViewSet(BaseModelViewSet):
         """
         Returns the quality check of assessments for a specific folder.
         """
-        viewable_objects = RoleAssignment.get_viewable_object_ids(request.user, Folder)
-        if UUID(pk) not in viewable_objects:
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", Folder, UUID(pk)
+        ):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         folder = self.get_object()
@@ -10387,10 +10385,9 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        object_ids_view = RoleAssignment.get_viewable_object_ids(
-            request.user, OrganisationObjective
-        )
-        if UUID(pk) not in object_ids_view:
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", OrganisationObjective, UUID(pk)
+        ):
             return Response(
                 {"results": "organisation objective not found"},
                 status=status.HTTP_404_NOT_FOUND,
@@ -10458,10 +10455,9 @@ class CampaignViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get campaign metrics")
     def metrics(self, request, pk):
-        viewable_objects = RoleAssignment.get_viewable_object_ids(
-            request.user, Campaign
-        )
-        if UUID(pk) not in viewable_objects:
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", Campaign, UUID(pk)
+        ):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
@@ -11040,10 +11036,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], name="Audit as an Excel")
     def xlsx(self, request, pk):
-        viewable_objects = RoleAssignment.get_viewable_object_ids(
-            request.user, ComplianceAssessment
-        )
-        if UUID(pk) not in viewable_objects:
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", ComplianceAssessment, UUID(pk)
+        ):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
@@ -11200,10 +11195,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], name="CyFun Excel Export")
     def cyfun_xlsx(self, request, pk):
-        viewable_objects = RoleAssignment.get_viewable_object_ids(
-            request.user, ComplianceAssessment
-        )
-        if UUID(pk) not in viewable_objects:
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", ComplianceAssessment, UUID(pk)
+        ):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
@@ -11359,13 +11353,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get action plan CSV")
     def action_plan_csv(self, request, pk):
-        object_ids_view = RoleAssignment.get_viewable_object_ids(
-            request.user, ComplianceAssessment
-        )
-        if UUID(pk) not in object_ids_view:
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", ComplianceAssessment, UUID(pk)
+        ):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
+
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
         requirement_assessments = compliance_assessment.get_requirement_assessments(
             include_non_assessable=False
@@ -11445,13 +11439,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get action plan XLSX")
     def action_plan_xlsx(self, request, pk):
-        object_ids_view = RoleAssignment.get_viewable_object_ids(
-            request.user, ComplianceAssessment
-        )
-        if UUID(pk) not in object_ids_view:
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", ComplianceAssessment, UUID(pk)
+        ):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
+
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
         requirement_assessments = compliance_assessment.get_requirement_assessments(
             include_non_assessable=False
@@ -12844,20 +12838,17 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Get viewable objects for permission checking
-        viewable_objects = RoleAssignment.get_viewable_object_ids(
-            request.user, ComplianceAssessment
-        )
-
-        # Check permissions for base audit
-        if UUID(pk) not in viewable_objects:
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", ComplianceAssessment, UUID(pk)
+        ):
             return Response(
                 {"error": "Permission denied for base audit"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        # Check permissions for comparison audit
-        if UUID(compare_id) not in viewable_objects:
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", ComplianceAssessment, UUID(compare_id)
+        ):
             return Response(
                 {"error": "Permission denied for comparison audit"},
                 status=status.HTTP_403_FORBIDDEN,
@@ -15242,10 +15233,9 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], name="Findings Assessment as Excel")
     def xlsx(self, request, pk):
-        viewable_objects = RoleAssignment.get_viewable_object_ids(
-            request.user, FindingsAssessment
-        )
-        if UUID(pk) not in viewable_objects:
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", FindingsAssessment, UUID(pk)
+        ):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
@@ -15350,10 +15340,9 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], name="Findings Assessment as Markdown")
     def md(self, request, pk):
-        viewable_objects = RoleAssignment.get_viewable_object_ids(
-            request.user, FindingsAssessment
-        )
-        if UUID(pk) not in viewable_objects:
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", FindingsAssessment, UUID(pk)
+        ):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
@@ -15470,10 +15459,9 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], name="Findings Assessment as PDF")
     def pdf(self, request, pk):
-        viewable_objects = RoleAssignment.get_viewable_object_ids(
-            request.user, FindingsAssessment
-        )
-        if UUID(pk) not in viewable_objects:
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", FindingsAssessment, UUID(pk)
+        ):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
@@ -15929,10 +15917,9 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=True, methods=["get"], name="Incident as PDF")
     def pdf(self, request, pk):
-        viewable_objects = RoleAssignment.get_viewable_object_ids(
-            request.user, Incident
-        )
-        if UUID(pk) not in viewable_objects:
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", Incident, UUID(pk)
+        ):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
@@ -15978,10 +15965,9 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=True, methods=["get"], name="Incident as Markdown")
     def md(self, request, pk):
-        viewable_objects = RoleAssignment.get_viewable_object_ids(
-            request.user, Incident
-        )
-        if UUID(pk) not in viewable_objects:
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", Incident, UUID(pk)
+        ):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
