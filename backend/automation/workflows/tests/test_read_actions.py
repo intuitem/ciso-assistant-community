@@ -473,9 +473,10 @@ class TestDeadlineSweepModels:
         framework = Framework.objects.create(
             name="FW", urn="urn:test:fw:ra", folder=Folder.get_root_folder()
         )
+        # R1 is ref_id-only (no name), like most shipped framework nodes.
         requirements = [
             RequirementNode.objects.create(
-                name=f"Req {i}",
+                name="Req 0" if i == 0 else None,
                 ref_id=f"R{i}",
                 urn=f"urn:test:fw:ra:req{i}",
                 framework=framework,
@@ -517,5 +518,6 @@ class TestDeadlineSweepModels:
         assert "name" not in row
         assert row["result"] == "non_compliant"
         assert row["requirement_ref_id"] == "R1"
-        assert row["requirement_name"] == "Req 1"
+        # display_short falls back to ref_id when the node has no name.
+        assert row["requirement_name"] == "R1"
         assert row["compliance_assessment_name"] == "Audit"

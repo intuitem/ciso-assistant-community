@@ -404,10 +404,12 @@ READABLE_MODELS = {
             "due_date",
         ],
         # Output-only identifiers: a bare row is unusable without knowing
-        # which requirement of which audit it assesses.
+        # which requirement of which audit it assesses. display_short, not
+        # .name: most shipped framework nodes are ref_id-only (name is null),
+        # and it's what __str__ and the API serializers render.
         "computed": {
             "requirement_ref_id": lambda ra: ra.requirement.ref_id,
-            "requirement_name": lambda ra: ra.requirement.name,
+            "requirement_name": lambda ra: ra.requirement.display_short,
             "compliance_assessment_name": lambda ra: ra.compliance_assessment.name,
         },
     },
