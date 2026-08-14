@@ -17,7 +17,7 @@ from rest_framework.views import APIView
 from rest_framework.pagination import LimitOffsetPagination
 from core.models import EvidenceRevision
 from core.utils import compare_schema_versions
-from iam.models import User
+from iam.models import User, Folder
 from serdes.serializers import LoadBackupSerializer
 
 from django.db.models.signals import post_save
@@ -137,6 +137,8 @@ class LoadBackupView(APIView):
                         "auditlog.logentry",
                     ],
                 )
+                # Invalidate the root folder cache (as the backup may have changed the root folder).
+                Folder._init_root_folder()
 
         except Exception as e:
             logger.error("Error while loading backup", exc_info=e)

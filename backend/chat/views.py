@@ -8,7 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.http import StreamingHttpResponse
 from django.utils import timezone
-from rest_framework import viewsets, status
+from rest_framework import status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied as DRFPermissionDenied
 from rest_framework.permissions import IsAuthenticated
@@ -1515,8 +1515,8 @@ class QuestionnaireQuestionViewSet(BaseModelViewSet):
         # The question's questionnaire run carries the folder; only allow
         # controls in that same folder, and only those the user can read.
         run_folder = question.questionnaire_run.folder
-        readable_ac_ids, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, AppliedControl
+        readable_ac_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, AppliedControl
         )
         ids_set = set(str(i) for i in ids) & set(str(i) for i in readable_ac_ids)
         valid_acs = AppliedControl.objects.filter(id__in=ids_set, folder=run_folder)
