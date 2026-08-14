@@ -5699,7 +5699,7 @@ class LoadFileView(APIView):
         on_conflict=ConflictMode.STOP,
     ):
         results = self._empty_tprm_results()
-        accessible_audit_ids = RoleAssignment.get_changeable_object_ids(
+        changeable_audit_ids = RoleAssignment.get_changeable_object_ids(
             request.user, ComplianceAssessment
         )
 
@@ -5795,11 +5795,11 @@ class LoadFileView(APIView):
                     # when no ref_id is given.
                     if audit_ref:
                         audit = ComplianceAssessment.objects.filter(
-                            ref_id=audit_ref, id__in=accessible_audit_ids
+                            ref_id=audit_ref, id__in=changeable_audit_ids
                         ).first()
                     else:
                         audit = ComplianceAssessment.objects.filter(
-                            name__iexact=audit_name, id__in=accessible_audit_ids
+                            name__iexact=audit_name, id__in=changeable_audit_ids
                         ).first()
                     if audit is None:
                         self._add_tprm_record_error(
