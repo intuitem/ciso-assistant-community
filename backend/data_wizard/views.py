@@ -736,11 +736,7 @@ class FolderScopeError(ValueError):
 
 
 def _parse_bool_cell(value: object) -> bool:
-    """Coerce a spreadsheet cell into a bool for import.
-
-    FR aliases ("oui", "vrai") and Excel-checkbox "x" are truthy so localised
-    or template-authored imports read correctly.
-    """
+    """Coerce a spreadsheet cell into a bool. Accepts FR aliases and 'x'."""
     if isinstance(value, bool):
         return value
     if value is None:
@@ -4851,21 +4847,17 @@ class LoadFileView(APIView):
                         if has_any_answer:
                             requirement_data["answers"] = answers
 
-                    # Override flag: explicit column wins; else a score without
-                    # answers is a manual override.
-                    if (
+                    override_cell = record.get("is_score_overridden")
+                    if override_cell not in (None, ""):
+                        requirement_data["is_score_overridden"] = _parse_bool_cell(
+                            override_cell
+                        )
+                    elif (
                         requirement_data.get("score") not in (None, "")
                         and requirement_assessment.requirement.questions.exists()
                     ):
-                        override_cell = record.get("is_score_overridden")
-                        if override_cell not in (None, ""):
-                            requirement_data["is_score_overridden"] = _parse_bool_cell(
-                                override_cell
-                            )
-                        else:
-                            requirement_data["is_score_overridden"] = (
-                                "answers" not in requirement_data
-                            )
+                        # Imported score on question-driven requirement = override
+                        requirement_data["is_score_overridden"] = True
 
                     req_serializer = RequirementAssessmentWriteSerializer(
                         instance=requirement_assessment,
