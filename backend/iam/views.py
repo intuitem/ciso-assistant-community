@@ -570,6 +570,21 @@ class SCIMTokenViewSet(views.APIView):
                 {"error": "Name must be at most 255 characters."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        try:
+            sso_settings = GlobalSettings.objects.get(
+                name=GlobalSettings.Names.SSO
+            ).value
+        except GlobalSettings.DoesNotExist:
+            sso_settings = {}
+        if not sso_settings.get("is_enabled", False):
+            return Response(
+                {
+                    "error": "SSO must be configured and enabled before generating a "
+                    "SCIM token. SCIM-provisioned accounts sign in exclusively "
+                    "through SSO — set up SSO first."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         token_prefix = knox_settings.TOKEN_PREFIX
         with transaction.atomic():
             instance, raw_token = get_token_model().objects.create(
