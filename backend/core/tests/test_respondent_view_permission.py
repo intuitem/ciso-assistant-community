@@ -20,7 +20,7 @@ def _stub_perms(monkeypatch, perms_by_folder):
     monkeypatch.setattr(
         iam.models.RoleAssignment,
         "get_permissions_per_folder",
-        staticmethod(lambda principal, recursive=False: perms_by_folder),
+        staticmethod(lambda principal, is_recursive=False: perms_by_folder),
     )
 
 
