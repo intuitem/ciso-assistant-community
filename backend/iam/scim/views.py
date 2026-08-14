@@ -267,7 +267,10 @@ class SCIMUserViewSet(ViewSet):
                     "uniqueness",
                 )
             user.is_scim_managed = True
-            _update_user_from_scim_data(user, data)
+            if matched_by_external_id:
+                _update_user_from_scim_data(user, data)
+            else:
+                _update_user_from_scim_data_no_email(user, data)
             err = _save_user_or_scim_error(user)
             if err:
                 return err
@@ -852,9 +855,9 @@ def _set_members(idp_group, ids):
     idp_group.users.set(resolved)
 
 
-def _update_user_from_scim_data(user, data):
+def _update_user_from_scim_data(user, data, allow_email_update=True):
     name_data = data.get("name", {})
-    if "userName" in data:
+    if allow_email_update and "userName" in data:
         user.email = data["userName"]
     if "givenName" in name_data:
         user.first_name = name_data["givenName"]
@@ -864,9 +867,21 @@ def _update_user_from_scim_data(user, data):
         user.is_active = _to_bool(data["active"])
     if data.get("externalId"):
         user.scim_external_id = data["externalId"]
-    new_email = _primary_email(data.get("emails", []))
-    if new_email:
-        user.email = new_email
+    if allow_email_update:
+        new_email = _primary_email(data.get("emails", []))
+        if new_email:
+            user.email = new_email
+
+
+def _update_user_from_scim_data_no_email(user, data):
+    """Same as _update_user_from_scim_data but never writes user.email.
+
+    Used the first time a pre-existing account is linked by email match
+    alone: the SCIM caller hasn't proven it owns
+    that identity, so this request must not be allowed to redirect the
+    account's email and with it, where password resets get sent.
+    """
+    _update_user_from_scim_data(user, data, allow_email_update=False)
 
 
 def _apply_user_replace_dict(user, value_dict):

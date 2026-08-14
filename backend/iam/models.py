@@ -1011,6 +1011,9 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         """
         from global_settings.models import GlobalSettings
 
+        if self.is_scim_managed and not self.keep_local_login:
+            return False
+
         try:
             sso_settings = GlobalSettings.objects.get(
                 name=GlobalSettings.Names.SSO
