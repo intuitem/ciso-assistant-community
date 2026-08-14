@@ -197,9 +197,10 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         # Only configurations the caller can reach: the ids are consumed as a
         # "is an integration usable here" signal, and an unscoped list handed
         # every domain's configuration UUIDs to any authenticated user.
-        accessible_config_ids = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, IntegrationConfiguration
-        )[0]
+        accessible_config_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, IntegrationConfiguration
+        )
+
         settings.value["enabled_integrations"] = [
             {
                 "id": provider.id,
@@ -278,9 +279,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         """
         from metrology.models import Dashboard
 
-        accessible_ids, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Dashboard
-        )
+        accessible_ids = RoleAssignment.get_viewable_object_ids(request.user, Dashboard)
         dashboards = Dashboard.objects.filter(id__in=accessible_ids).order_by("name")
         choices = {"": "—"}
         for d in dashboards:

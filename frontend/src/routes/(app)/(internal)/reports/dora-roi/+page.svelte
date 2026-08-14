@@ -44,8 +44,9 @@
 			const refDate = `${new Date().getFullYear() - 1}-12-31`;
 			const now = new Date();
 			const pad = (n: number) => n.toString().padStart(2, '0');
-			const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}T${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}z`;
-			return `${key}_${code}.${level}_${country}_DORA010100_DORA_${refDate}_${timestamp}.zip`;
+			const milliseconds = now.getMilliseconds().toString().padStart(3, '0');
+			const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}${milliseconds}`;
+			return `${code}.${level}_${country}_DORA010100_DORA_${refDate}_${timestamp}.zip`;
 		}
 		const authority = competentAuthority || 'UNKNOWN';
 		return `${key}_${code}.${level}_${authority}_DOR_DORA_ROI.zip`;

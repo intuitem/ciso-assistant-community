@@ -210,7 +210,7 @@ class TestAssetsAuthenticated:
 # IAM-scoped visibility on /api/assets/.
 #
 # Locks down the queryset-level filter (`BaseModelViewSet.get_queryset`
-# materialising `RoleAssignment.get_accessible_object_ids`) for a reader
+# materialising `RoleAssignment._get_accessible_ids`) for a reader
 # scoped to a single domain folder: an asset in a sibling folder must
 # not appear in their list at all (and a fortiori not as a masked
 # placeholder — masking is for related-field references, not list rows).
@@ -244,7 +244,7 @@ class TestAssetListIAMScope:
     def test_scoped_reader_does_not_see_cross_folder_asset(self, authenticated_client):
         """Reader scoped to folder A must not see an asset in folder B
         in `/api/assets/` results — that asset is outside their scope at
-        the queryset level (handled by `get_accessible_object_ids`,
+        the queryset level (handled by `_get_accessible_ids`,
         before any post-filter masking)."""
         root = Folder.get_root_folder()
         folder_a = Folder.objects.create(

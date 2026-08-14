@@ -7,7 +7,6 @@ from django.db import transaction
 from allauth.idp.oidc.adapter import get_adapter as get_oidc_adapter
 from allauth.idp.oidc.models import Client
 
-from iam.cache_builders import invalidate_roles_cache
 from iam.models import (
     ALLOWED_PERMISSION_APPS,
     IGNORED_PERMISSION_MODELS,
@@ -93,7 +92,6 @@ def provision_service_account(
         if role is None:
             role = Role.objects.create(name=f"SA-{client_id}", folder=root_folder)
             role.permissions.set(permissions)
-            invalidate_roles_cache()
         role_assignment = RoleAssignment.objects.create(
             user=user,
             role=role,
@@ -124,7 +122,6 @@ def _switch_role(service_account: ServiceAccount, new_role: Role) -> None:
         role_assignment.save()
     if not old_role.builtin:
         old_role.delete()
-    invalidate_roles_cache()
 
 
 def _detach_to_dedicated_role(
@@ -173,7 +170,6 @@ def update_service_account(
                 service_account.role.permissions.set(
                     _validated_permissions(permission_ids)
                 )
-                invalidate_roles_cache()
         role_assignment = service_account.role_assignment
         if role_assignment is not None:
             if folder_ids is not None:
@@ -183,5 +179,5 @@ def update_service_account(
                 role_assignment.perimeter_folders.set(folders)
             if is_recursive is not None:
                 role_assignment.is_recursive = is_recursive
-            role_assignment.save()  # invalidates the assignments cache
+            role_assignment.save()
     return service_account

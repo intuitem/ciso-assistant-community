@@ -7,12 +7,11 @@ from core.serializers import (
     UserWriteSerializer as CommunityUserWriteSerializer,
 )
 from core.serializer_fields import FieldsRelatedField
-from iam.models import RoleAssignment, ServiceAccount, User, Role
+from iam.models import RoleAssignment, ServiceAccount, User, Role, Folder
 from iam.serializers import (
     ServiceAccountWriteSerializer as CommunityServiceAccountWriteSerializer,
 )
-from iam.cache_builders import get_folder_path, CacheNotReadyError
-import uuid
+from django.core.exceptions import ValidationError
 
 from global_settings.models import GlobalSettings
 from global_settings.serializers import (
@@ -168,14 +167,19 @@ class LogEntrySerializer(serializers.ModelSerializer):
     def get_folder(self, obj):
         # additional_data now carries folder_id (the old enrichment stored a "folder"
         # path string). Resolve it to the full path via the in-memory folders cache.
+
         folder_id = (obj.additional_data or {}).get("folder_id")
         if not folder_id:
             return None
+
         try:
-            path = get_folder_path(uuid.UUID(str(folder_id)))
-        except ValueError, KeyError, CacheNotReadyError:
-            return None
-        return "/".join(f.name for f in path) or None
+            folder = Folder.objects.filter(id=folder_id).first()
+            if folder is None:
+                return
+        except ValidationError:
+            return
+
+        return folder.get_folder_full_path_string()
 
     def get_content_type(self, obj):
         return obj.content_type.name
