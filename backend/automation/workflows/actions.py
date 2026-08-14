@@ -38,7 +38,13 @@ TEMPLATE_RE = re.compile(r"\{\{\s*([\w.]+)\s*\}\}")
 
 
 class ActionError(Exception):
-    pass
+    """Deliberate action failure. retryable=False marks permanent problems
+    (static config, validation) that no retry can change: the engine fails
+    the node immediately instead of burning the retry schedule."""
+
+    def __init__(self, message, retryable=True):
+        super().__init__(message)
+        self.retryable = retryable
 
 
 class DeferredDispatch:
@@ -564,7 +570,8 @@ class SendEmailAction(BaseAction):
         missing = missing_email_settings()
         if missing:
             raise ActionError(
-                f"send_email: email is not configured (missing {', '.join(missing)})"
+                f"send_email: email is not configured (missing {', '.join(missing)})",
+                retryable=False,
             )
         recipients = [
             email.strip()
@@ -574,7 +581,7 @@ class SendEmailAction(BaseAction):
             if email.strip()
         ]
         if not recipients:
-            raise ActionError("send_email: no recipients configured")
+            raise ActionError("send_email: no recipients configured", retryable=False)
         for email in recipients:
             # Validate the addr-spec only: display-name recipients
             # ('Jane Doe <jane@x>') delivered before the delivery rework and
@@ -583,7 +590,9 @@ class SendEmailAction(BaseAction):
             try:
                 validate_email(parseaddr(email)[1])
             except ValidationError:
-                raise ActionError(f"send_email: invalid recipient '{email}'")
+                raise ActionError(
+                    f"send_email: invalid recipient '{email}'", retryable=False
+                )
         subject = render(config.get("subject", ""), _render_context(instance))
         body = render(config.get("body", ""), _render_context(instance))
         return DeferredDispatch(

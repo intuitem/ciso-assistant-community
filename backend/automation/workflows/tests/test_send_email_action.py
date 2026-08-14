@@ -323,6 +323,17 @@ class TestSendEmail:
         assert instance.status == WorkflowInstance.Status.COMPLETED
         assert [message.to for message in mail.outbox] == [["a@tests.local"]]
 
+    def test_config_errors_do_not_burn_the_retry_schedule(self, settings):
+        # Permanent problems (invalid recipient here) are non-retryable: the
+        # node must fail immediately even with retries configured, not
+        # re-execute a doomed send on the retry schedule.
+        configure_smtp(settings)
+        version = email_flow({"recipients": "not-an-email", "subject": "S"})
+        version.nodes.filter(type=WorkflowNode.Type.ACTION).update(retry_max_attempts=3)
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert not instance.tokens.filter(status=WorkflowToken.Status.RETRYING).exists()
+
     def test_zero_messages_sent_fails_the_node(
         self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
     ):

@@ -540,6 +540,7 @@ def _process(token):
     _set_iteration_overlay(token)
 
     failure = None
+    failure_retryable = True
     try:
         # Savepoint: a DB error here would otherwise poison run_instance's
         # atomic block and take _handle_failure's error token down with it.
@@ -602,17 +603,20 @@ def _process(token):
                 _advance(token)
             except (ActionError, EngineError) as e:
                 failure = str(e)
+                failure_retryable = getattr(e, "retryable", True)
     except Exception as e:  # noqa: BLE001 — a buggy action must not 500 the request
         failure = f"{type(e).__name__}: {e}"
     if failure is not None:
-        _handle_failure(token, failure)
+        _handle_failure(token, failure, retryable=failure_retryable)
 
 
-def _handle_failure(token, message):
-    """Retry policy: schedule a delayed Huey re-execution while
-    attempts remain on action/subprocess nodes, else park the token in error."""
+def _handle_failure(token, message, retryable=True):
+    """Retry policy: schedule a delayed Huey re-execution while attempts
+    remain on action/subprocess nodes, else park the token in error.
+    retryable=False (permanent config/validation failures) skips the retry
+    schedule and fails immediately — no retry can change the outcome."""
     node = token.current_node
-    retryable = node.type in (
+    retryable = retryable and node.type in (
         WorkflowNode.Type.ACTION,
         WorkflowNode.Type.SUBPROCESS,
     )
