@@ -1307,7 +1307,7 @@ AUDITOR_VIEW_PERM = "view_compliance_assessment_full"
 AUDIT_ACCESS_PERM = "view_complianceassessment"
 
 
-def get_respondent_scoped_folder_ids(user) -> set:
+def get_respondent_scoped_folder_ids(user) -> set[UUID]:
     """Return folder IDs where *user* sees audits as a **respondent** — i.e. the
     scoped, field-stripped view applies.
 
@@ -1323,7 +1323,9 @@ def get_respondent_scoped_folder_ids(user) -> set:
     """
     from iam.models import RoleAssignment
 
-    perms_per_folder = RoleAssignment.get_permissions_per_folder(user, recursive=True)
+    perms_per_folder = RoleAssignment.get_permissions_per_folder(
+        user, is_recursive=True
+    )
     return {
         UUID(folder_id)
         for folder_id, codenames in perms_per_folder.items()

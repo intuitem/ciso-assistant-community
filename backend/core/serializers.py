@@ -201,7 +201,6 @@ class BaseModelSerializer(serializers.ModelSerializer):
         if not request or not request.user.is_authenticated:
             return
         user = request.user
-        root_folder = Folder.get_root_folder()
         accessible_cache: dict = {}
         for field_name, value in validated_data.items():
             if not isinstance(value, list) or not value:
@@ -211,9 +210,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
             related_model = type(value[0])
             if related_model not in accessible_cache:
                 try:
-                    ids = RoleAssignment.get_accessible_object_ids(
-                        root_folder, user, related_model
-                    )[0]
+                    ids = RoleAssignment.get_viewable_object_ids(user, related_model)
                     accessible_cache[related_model] = {str(i) for i in ids}
                 except NotImplementedError, Permission.DoesNotExist:
                     accessible_cache[related_model] = None
@@ -2312,6 +2309,7 @@ class FolderWriteSerializer(BaseModelSerializer):
         exclude = [
             "builtin",
             "content_type",
+            "descendants",
         ]
 
     def update(self, instance, validated_data):
@@ -2390,7 +2388,7 @@ class FolderReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = Folder
-        fields = "__all__"
+        exclude = ["descendants"]
 
 
 class FolderImportExportSerializer(BaseModelSerializer):

@@ -739,11 +739,7 @@ def accessible_stored_library_ids(user):
     from core.models import StoredLibrary
     from iam.models import Folder, RoleAssignment
 
-    return set(
-        RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, StoredLibrary
-        )[0]
-    )
+    return set(RoleAssignment.get_viewable_object_ids(user, StoredLibrary))
 
 
 def check_identity_conflicts(
@@ -778,9 +774,7 @@ def check_identity_conflicts(
     def scope(queryset, model):
         if user is None:
             return queryset
-        ids = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, model
-        )[0]
+        ids = RoleAssignment.get_viewable_object_ids(user, model)
         return queryset.filter(id__in=ids)
 
     conflicts = []
