@@ -1425,6 +1425,7 @@
 	"createUser": "Create user",
 	"createUserHelpText": "Create or link a third party user to the representative based on the email",
 	"userLinkedToRepresentative": "A user is already linked to this representative.",
+	"auditAlreadyLinkedToEntityAssessment": "This audit is already linked to another entity assessment.",
 	"nameDuplicate": "Name already exists",
 	"noAnswer": "No answer",
 	"clearAnswer": "Clear answer",

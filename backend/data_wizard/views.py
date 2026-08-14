@@ -5359,13 +5359,19 @@ class LoadFileView(APIView):
     def _resolve_tprm_entity(
         self, record, ref_field, name_field, entity_ref_map, entity_name_map
     ):
-        """Resolve an entity by ref_id, falling back to name — one of the two is required."""
+        """Resolve an entity by ref_id, or by name when no ref_id is given.
+
+        A ref_id that is present but unknown fails the lookup instead of
+        falling back to the name: a typo'd ref must surface as a row error,
+        not silently bind to a same-named entity.
+        """
         ref = str(record.get(ref_field, "")).strip()
         name = str(record.get(name_field, "")).strip()
-        entity_id = entity_ref_map.get(ref) if ref else None
-        if entity_id is None and name:
-            entity_id = entity_name_map.get(name.lower())
-        return entity_id, ref, name
+        if ref:
+            return entity_ref_map.get(ref), ref, name
+        if name:
+            return entity_name_map.get(name.lower()), ref, name
+        return None, ref, name
 
     def _log_tprm_import_results(self, label, results) -> None:
         logger.info(
@@ -5693,8 +5699,10 @@ class LoadFileView(APIView):
         on_conflict=ConflictMode.STOP,
     ):
         results = self._empty_tprm_results()
-        (_, accessible_audit_ids, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
+        # Change scope, not view: resolving audit_ref_id/audit_name feeds
+        # link_audit, which relocates the audit into the enclave.
+        accessible_audit_ids = RoleAssignment.get_changeable_object_ids(
+            request.user, ComplianceAssessment
         )
 
         for record in records:
@@ -5784,12 +5792,14 @@ class LoadFileView(APIView):
                 audit_ref = str(record.get("audit_ref_id", "")).strip()
                 audit_name = str(record.get("audit_name", "")).strip()
                 if audit_ref or audit_name:
-                    audit = None
+                    # Same strict convention as entity lookups: a provided but
+                    # unknown ref_id fails the row; the name is only consulted
+                    # when no ref_id is given.
                     if audit_ref:
                         audit = ComplianceAssessment.objects.filter(
                             ref_id=audit_ref, id__in=accessible_audit_ids
                         ).first()
-                    if audit is None and audit_name:
+                    else:
                         audit = ComplianceAssessment.objects.filter(
                             name__iexact=audit_name, id__in=accessible_audit_ids
                         ).first()

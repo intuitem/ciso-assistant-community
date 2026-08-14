@@ -1530,6 +1530,24 @@ class TestTprmEntityAssessmentAuditLink:
         assert results["entity_assessments"]["failed"] == 1
         assert not EntityAssessment.objects.filter(name="Vendor Review").exists()
 
+    def test_unknown_audit_ref_id_does_not_fall_back_to_name(
+        self, api_client, domain_folder, all_accessible
+    ):
+        """A typo'd audit_ref_id must fail the row, not silently link by name."""
+        _make_audit(domain_folder, name="Real Audit", ref_id="AUD-REAL")
+
+        excel = _tprm_excel_with_audit(
+            "ENT-STRICT", audit_ref_id="AUD-TYPO", audit_name="Real Audit"
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["entity_assessments"]["failed"] == 1, results[
+            "entity_assessments"
+        ]
+        assert not EntityAssessment.objects.filter(name="Vendor Review").exists()
+
     def test_audit_resolved_by_name_when_ref_id_absent(
         self, api_client, domain_folder, all_accessible
     ):
@@ -1706,3 +1724,29 @@ class TestTprmEntityResolutionByName:
 
         assert resp.status_code == 200, resp.json()
         assert resp.json()["results"]["solutions"]["failed"] == 1
+
+    def test_unknown_ref_id_fails_even_when_name_would_match(
+        self, api_client, domain_folder, all_accessible
+    ):
+        """A typo'd ref_id must surface as an error, not silently bind by name."""
+        excel = make_excel_file(
+            {
+                "Entities": [
+                    {"ref_id": "ENT-42", "name": "Strict Corp", "description": ""}
+                ],
+                "Solutions": [
+                    {
+                        "ref_id": "SOL-STRICT",
+                        "name": "Strict Solution",
+                        "provider_entity_ref_id": "ENT-042",
+                        "provider_entity_name": "Strict Corp",
+                    }
+                ],
+            }
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["entities"]["successful"] == 1, results["entities"]
+        assert results["solutions"]["failed"] == 1, results["solutions"]

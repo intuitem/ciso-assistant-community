@@ -501,7 +501,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `name` | **Yes** | Solution name |
 | `description` | No | |
 | `provider_entity_ref_id` | Conditional | Provider entity reference; one of ref_id/name required |
-| `provider_entity_name` | Conditional | Fallback lookup by entity name, used only when `provider_entity_ref_id` is absent or doesn't match |
+| `provider_entity_name` | Conditional | Lookup by entity name, used only when `provider_entity_ref_id` is not provided (a provided but unknown ref_id fails the row) |
 | `criticality` | No | |
 
 **Missing Solution Fields:**
@@ -523,7 +523,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 |-------|----------|-------|
 | `name` | **Yes** | Assessment name |
 | `entity_ref_id` | Conditional | Provider entity reference; one of ref_id/name required |
-| `entity_name` | Conditional | Fallback lookup by entity name, used only when `entity_ref_id` is absent or doesn't match |
+| `entity_name` | Conditional | Lookup by entity name, used only when `entity_ref_id` is not provided (a provided but unknown ref_id fails the row) |
 | `description` | No | |
 | `domain` | No | Folder lookup, falls back to the form-selected folder |
 | `perimeter` / `perimeter_ref_id` | No | Perimeter lookup by id, then by ref_id |
@@ -531,11 +531,11 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `criticality` | No | Integer (1-4); invalid values skipped with a warning |
 | `solution_ref_id` | No | Newline/pipe/comma-separated solution ref_ids; unknown refs are reported as warnings |
 | `audit_ref_id` | No | Links to an existing `ComplianceAssessment`, resolved by ref_id, scoped to audits the importing user can access |
-| `audit_name` | No | Fallback lookup by name, used only when `audit_ref_id` is absent or doesn't match |
+| `audit_name` | No | Lookup by name, used only when `audit_ref_id` is not provided (a provided but unknown ref_id fails the row) |
 
 **Conflict detection:** by `entity` + `name` + `folder` (dedup is domain-scoped, matching Entities/Contracts).
 
-**Special considerations:** linking to an existing audit always re-parents it (`move`) into the entity assessment's folder/perimeter.
+**Special considerations:** linking to an existing audit always re-parents it (`move`) into the entity assessment's dedicated enclave folder; its perimeter is cleared, since enclave audits carry no perimeter. Audits must pre-exist (typically imported first into a temporary domain); resolution is scoped to audits the importing user can change, and a provided but unknown `audit_ref_id` fails the row rather than falling back to the name.
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
@@ -556,7 +556,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `name` | **Yes** | Contract name |
 | `description` | No | |
 | `provider_entity_ref_id` | Conditional | Provider entity reference; one of ref_id/name required |
-| `provider_entity_name` | Conditional | Fallback lookup by entity name, used only when `provider_entity_ref_id` is absent or doesn't match |
+| `provider_entity_name` | Conditional | Lookup by entity name, used only when `provider_entity_ref_id` is not provided (a provided but unknown ref_id fails the row) |
 | `domain` | No | Folder lookup |
 | `solution_ref_id` | No | Solution reference |
 | `status` | No | |
@@ -582,7 +582,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 |-------|----------|-------|
 | `email` | **Yes** | Unique identifier for the representative |
 | `provider_entity_ref_id` | Conditional | Entity reference; one of ref_id/name required |
-| `provider_entity_name` | Conditional | Fallback lookup by entity name, used only when `provider_entity_ref_id` is absent or doesn't match |
+| `provider_entity_name` | Conditional | Lookup by entity name, used only when `provider_entity_ref_id` is not provided (a provided but unknown ref_id fails the row) |
 | `first_name` | No | |
 | `last_name` | No | |
 | `description` | No | |

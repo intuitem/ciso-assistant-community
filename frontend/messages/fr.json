@@ -4224,6 +4224,7 @@
 	"errorUnloadingLibrary": "Erreur lors du déchargement de la bibliothèque",
 	"librarySuccessfullyUnloaded": "La bibliothèque a été déchargée avec succès",
 	"userLinkedToRepresentative": "Un utilisateur est déjà lié à ce représentant.",
+	"auditAlreadyLinkedToEntityAssessment": "Cet audit est déjà lié à une autre évaluation d'entité.",
 	"expectedEvidence": "Preuves attendues",
 	"taskNodeLegacyEvidence": "L'ancien champ preuve est obsolète. Les preuves sont maintenant au niveau de la tâche et partagées entre les occurrences en attente de révision.\n Pour les déplacer vers les preuves attendues ou les supprimer de l'occurrence, utilisez les boutons",
 	"taskNodeNewEvidence": "Preuves liées globalement à la tâche et partagées entre les occurrences. Vous pouvez ajouter une révision dans l'onglet 'Preuves' ci-dessous",

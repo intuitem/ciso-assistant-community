@@ -557,7 +557,7 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `name` <mark style="color:$danger;">\*</mark>
 * `description`
 * `provider_entity_ref_id` - one of `provider_entity_ref_id` or `provider_entity_name` is required
-* `provider_entity_name` - fallback lookup by entity name, used only when `provider_entity_ref_id` is absent or doesn't match
+* `provider_entity_name` - lookup by entity name, used only when `provider_entity_ref_id` is not provided (a provided but unknown ref_id fails the row)
 * `criticality`  (Integer in \[1,4])
 
 > [!NOTE]
@@ -569,7 +569,7 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `name` <mark style="color:$danger;">\*</mark>
 * `description`
 * `provider_entity_ref_id` - one of `provider_entity_ref_id` or `provider_entity_name` is required
-* `provider_entity_name` - fallback lookup by entity name, used only when `provider_entity_ref_id` is absent or doesn't match
+* `provider_entity_name` - lookup by entity name, used only when `provider_entity_ref_id` is not provided (a provided but unknown ref_id fails the row)
 * `solution_ref_id` accepts multiple solution references (newline/pipe/comma)
 * `status`  can be `draft` , `active`,`expired` or `terminated`
 * `start_date` (YYYY-MM-DD format [https://en.wikipedia.org/wiki/ISO\_8601](https://en.wikipedia.org/wiki/ISO_8601))
@@ -589,7 +589,7 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 
 * `name` <mark style="color:$danger;">\*</mark>
 * `entity_ref_id` - one of `entity_ref_id` or `entity_name` is required
-* `entity_name` - fallback lookup by entity name, used only when `entity_ref_id` is absent or doesn't match
+* `entity_name` - lookup by entity name, used only when `entity_ref_id` is not provided (a provided but unknown ref_id fails the row)
 * `description`
 * `domain`
 * `perimeter` or `perimeter_ref_id`
@@ -597,13 +597,16 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `criticality` (Integer in \[1,4])
 * `solution_ref_id` accepts multiple solution references (newline/pipe/comma)
 * `audit_ref_id` - links the assessment to an existing audit, resolved by `ref_id`
-* `audit_name` - fallback lookup by audit name, used only when `audit_ref_id` is absent or doesn't match
+* `audit_name` - lookup by audit name, used only when `audit_ref_id` is not provided (a provided but unknown ref_id fails the row)
 
 > [!NOTE]
 > Conflict detection: by `entity` + `name` + `folder`
 
 > [!NOTE]
-> Linking to an existing audit always **moves** it: the audit is relocated into the entity assessment's own folder/perimeter.
+> Linking to an existing audit always **moves** it: the audit is relocated into the entity assessment's dedicated enclave folder, and its perimeter is cleared (enclave audits carry no perimeter).
+
+> [!NOTE]
+> **Recommended workflow for importing entity assessments with audits:** the EntityAssessments sheet links to audits, it does not create them. First import or create the audits, for example in a temporary domain created for the import. Each row matches its audit by `audit_ref_id` when provided, otherwise by `audit_name`; a ref_id on the audit is optional, but is the recommended identifier when several audits could share a name. The importing user must have edit rights on the audits — audits the user cannot modify are reported as *not found*. Each matched audit is moved out of the temporary domain into the entity assessment's enclave, so once the import succeeds that domain no longer contains them and can be deleted.
 
 #### Representatives
 
@@ -614,7 +617,7 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `phone`
 * `role`
 * `provider_entity_ref_id` - one of `provider_entity_ref_id` or `provider_entity_name` is required
-* `provider_entity_name` - fallback lookup by entity name, used only when `provider_entity_ref_id` is absent or doesn't match
+* `provider_entity_name` - lookup by entity name, used only when `provider_entity_ref_id` is not provided (a provided but unknown ref_id fails the row)
 
 > [!NOTE]
 > Conflict detection: by `email`

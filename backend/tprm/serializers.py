@@ -418,10 +418,11 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             locked = self._lock_instance_without_audit(instance, "create_audit")
             from core.utils import build_initial_field_visibility
 
+            # Enclave audits carry no perimeter: the enclave folder, not the
+            # entity assessment's perimeter, governs their placement.
             audit = ComplianceAssessment.objects.create(
                 name=locked.name,
                 framework=audit_data["framework"],
-                perimeter=locked.perimeter,
                 selected_implementation_groups=audit_data[
                     "selected_implementation_groups"
                 ],
@@ -443,27 +444,29 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             source_audit = ComplianceAssessment.objects.select_for_update().get(
                 pk=audit_data["link_audit"].pk
             )
-            self._check_object_perm(source_audit, "change")
+            # Linking relocates the audit itself, so the user needs
+            # change_complianceassessment in the audit's current folder —
+            # not this serializer's own change_entityassessment.
+            self._check_object_perm(
+                source_audit, "change", model=ComplianceAssessment
+            )
             if (
                 EntityAssessment.objects.filter(compliance_assessment=source_audit)
                 .exclude(pk=instance.pk)
                 .exists()
             ):
+                # i18n key resolved by the frontend (safeTranslate / messages/*.json)
                 raise serializers.ValidationError(
-                    {
-                        "link_audit": [
-                            _(
-                                "This audit is already linked to another entity assessment"
-                            )
-                        ]
-                    }
+                    {"link_audit": ["auditAlreadyLinkedToEntityAssessment"]}
                 )
 
             enclave = self._make_enclave_folder(instance)
 
             audit = source_audit
             audit.folder = enclave
-            audit.perimeter = instance.perimeter
+            # Enclave audits carry no perimeter — drop the one it had in its
+            # previous domain.
+            audit.perimeter = None
             audit.save()
             RequirementAssessment.objects.filter(compliance_assessment=audit).update(
                 folder=enclave

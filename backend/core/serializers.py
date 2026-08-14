@@ -134,9 +134,18 @@ class BaseModelSerializer(serializers.ModelSerializer):
         return attrs
 
     def _check_object_perm(
-        self, instance_or_data, action: str, *, folder: Folder | None = None
+        self,
+        instance_or_data,
+        action: str,
+        *,
+        folder: Folder | None = None,
+        model: type[models.Model] | None = None,
     ) -> None:
-        """Check that the requesting user has *action* permission on the resolved folder."""
+        """Check that the requesting user has *action* permission on the resolved folder.
+
+        `model` overrides the permission codename's model when the checked
+        object is not an instance of the serializer's own model.
+        """
         if folder is None:
             folder = Folder.get_folder(instance_or_data)
         if folder is None:
@@ -144,10 +153,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request is None:
             return
+        model = model or self.Meta.model
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(
-                codename=f"{action}_{self.Meta.model._meta.model_name}",
+                codename=f"{action}_{model._meta.model_name}",
             ),
             folder=folder,
         ):
