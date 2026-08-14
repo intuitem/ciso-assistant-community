@@ -556,7 +556,8 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `ref_id`
 * `name` <mark style="color:$danger;">\*</mark>
 * `description`
-* `provider_entity_ref_id` <mark style="color:$danger;">\*</mark>
+* `provider_entity_ref_id` - one of `provider_entity_ref_id` or `provider_entity_name` is required
+* `provider_entity_name` - fallback lookup by entity name, used only when `provider_entity_ref_id` is absent or doesn't match
 * `criticality`  (Integer in \[1,4])
 
 > [!NOTE]
@@ -567,7 +568,8 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `ref_id`
 * `name` <mark style="color:$danger;">\*</mark>
 * `description`
-* `provider_entity_ref_id`
+* `provider_entity_ref_id` - one of `provider_entity_ref_id` or `provider_entity_name` is required
+* `provider_entity_name` - fallback lookup by entity name, used only when `provider_entity_ref_id` is absent or doesn't match
 * `solution_ref_id` accepts multiple solution references (newline/pipe/comma)
 * `status`  can be `draft` , `active`,`expired` or `terminated`
 * `start_date` (YYYY-MM-DD format [https://en.wikipedia.org/wiki/ISO\_8601](https://en.wikipedia.org/wiki/ISO_8601))
@@ -586,7 +588,8 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 #### Entity assessments
 
 * `name` <mark style="color:$danger;">\*</mark>
-* `entity_ref_id` <mark style="color:$danger;">\*</mark>
+* `entity_ref_id` - one of `entity_ref_id` or `entity_name` is required
+* `entity_name` - fallback lookup by entity name, used only when `entity_ref_id` is absent or doesn't match
 * `description`
 * `domain`
 * `perimeter` or `perimeter_ref_id`
@@ -610,7 +613,8 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `description`
 * `phone`
 * `role`
-* `provider_entity_ref_id` <mark style="color:$danger;">\*</mark>
+* `provider_entity_ref_id` - one of `provider_entity_ref_id` or `provider_entity_name` is required
+* `provider_entity_name` - fallback lookup by entity name, used only when `provider_entity_ref_id` is absent or doesn't match
 
 > [!NOTE]
 > Conflict detection: by `email`

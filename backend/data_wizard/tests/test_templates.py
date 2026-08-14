@@ -392,8 +392,8 @@ class TestMultiSheetTemplates:
         )
         assert resp.status_code == 200, resp.json()
         results = resp.json()["results"]
-        assert results["entities"]["successful"] == 3
-        assert results["solutions"]["successful"] == 3
+        assert results["entities"]["successful"] == 4, results["entities"]
+        assert results["solutions"]["successful"] == 4, results["solutions"]
         assert results["entity_assessments"]["successful"] == 3, results[
             "entity_assessments"
         ]
@@ -403,6 +403,11 @@ class TestMultiSheetTemplates:
         assert parent.name == "ACME Corporation"
         europe = Entity.objects.get(ref_id="ENT-002")
         assert europe.parent_entity == parent
+
+        nameless = Entity.objects.get(name="Nameless Ventures")
+        assert nameless.ref_id == ""
+        solution = Solution.objects.get(ref_id="SOL-004")
+        assert solution.provider_entity_id == nameless.id
         sol = Solution.objects.get(ref_id="SOL-001")
         assert sol.provider_entity == Entity.objects.get(ref_id="ENT-003")
         contract = Contract.objects.get(ref_id="CON-001")

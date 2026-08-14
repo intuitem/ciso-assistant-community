@@ -1605,3 +1605,104 @@ class TestTprmEntityAssessmentAuditLink:
             by_folder[domain_folder.id].compliance_assessment.ref_id == audit_a.ref_id
         )
         assert by_folder[other_folder.id].compliance_assessment.ref_id == audit_b.ref_id
+
+
+# TPRM import — entities may have no ref_id; other sheets fall back to entity name
+
+
+@pytest.mark.django_db
+class TestTprmEntityResolutionByName:
+    def test_entity_without_ref_id_is_created(
+        self, api_client, domain_folder, all_accessible
+    ):
+        from tprm.models import Entity
+
+        excel = make_excel_file(
+            {"Entities": [{"name": "No RefId Corp", "description": ""}]}
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        assert resp.json()["results"]["entities"]["successful"] == 1
+        assert Entity.objects.filter(name="No RefId Corp").exists()
+
+    def test_solution_resolves_provider_by_entity_name(
+        self, api_client, domain_folder, all_accessible
+    ):
+        from tprm.models import Solution
+
+        excel = make_excel_file(
+            {
+                "Entities": [{"name": "NameOnly Corp", "description": ""}],
+                "Solutions": [
+                    {
+                        "ref_id": "SOL-NAME",
+                        "name": "Some Solution",
+                        "provider_entity_name": "NameOnly Corp",
+                    }
+                ],
+            }
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["entities"]["successful"] == 1, results["entities"]
+        assert results["solutions"]["successful"] == 1, results["solutions"]
+        assert (
+            Solution.objects.get(ref_id="SOL-NAME").provider_entity.name
+            == "NameOnly Corp"
+        )
+
+    def test_contract_representative_and_entity_assessment_resolve_by_entity_name(
+        self, api_client, domain_folder, all_accessible
+    ):
+        excel = make_excel_file(
+            {
+                "Entities": [{"name": "Full Flow Corp", "description": ""}],
+                "Contracts": [
+                    {
+                        "ref_id": "CON-NAME",
+                        "name": "Some Contract",
+                        "provider_entity_name": "Full Flow Corp",
+                    }
+                ],
+                "Representatives": [
+                    {
+                        "email": "contact@fullflow.test",
+                        "provider_entity_name": "Full Flow Corp",
+                    }
+                ],
+                "EntityAssessments": [
+                    {"entity_name": "Full Flow Corp", "name": "Full Flow Review"}
+                ],
+            }
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["contracts"]["successful"] == 1, results["contracts"]
+        assert results["representatives"]["successful"] == 1, results["representatives"]
+        assert results["entity_assessments"]["successful"] == 1, results[
+            "entity_assessments"
+        ]
+
+    def test_unresolvable_entity_reference_fails_the_row(
+        self, api_client, domain_folder, all_accessible
+    ):
+        excel = make_excel_file(
+            {
+                "Solutions": [
+                    {
+                        "ref_id": "SOL-MISSING",
+                        "name": "Orphan Solution",
+                        "provider_entity_name": "Nobody Corp",
+                    }
+                ]
+            }
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        assert resp.json()["results"]["solutions"]["failed"] == 1

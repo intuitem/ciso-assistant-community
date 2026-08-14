@@ -465,7 +465,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 **Supported Fields:**
 | Field | Required | Notes |
 |-------|----------|-------|
-| `ref_id` | **Yes** | Reference ID |
+| `ref_id` | No | Reference ID; entities without one are matched/referenced by name downstream |
 | `name` | **Yes** | Entity name |
 | `description` | No | |
 | `mission` | No | |
@@ -500,7 +500,8 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `ref_id` | **Yes** | Reference ID |
 | `name` | **Yes** | Solution name |
 | `description` | No | |
-| `provider_entity_ref_id` | **Yes** | Provider entity reference |
+| `provider_entity_ref_id` | Conditional | Provider entity reference; one of ref_id/name required |
+| `provider_entity_name` | Conditional | Fallback lookup by entity name, used only when `provider_entity_ref_id` is absent or doesn't match |
 | `criticality` | No | |
 
 **Missing Solution Fields:**
@@ -521,7 +522,8 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | Field | Required | Notes |
 |-------|----------|-------|
 | `name` | **Yes** | Assessment name |
-| `entity_ref_id` | **Yes** | Provider entity reference |
+| `entity_ref_id` | Conditional | Provider entity reference; one of ref_id/name required |
+| `entity_name` | Conditional | Fallback lookup by entity name, used only when `entity_ref_id` is absent or doesn't match |
 | `description` | No | |
 | `domain` | No | Folder lookup, falls back to the form-selected folder |
 | `perimeter` / `perimeter_ref_id` | No | Perimeter lookup by id, then by ref_id |
@@ -553,7 +555,8 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `ref_id` | **Yes** | Reference ID |
 | `name` | **Yes** | Contract name |
 | `description` | No | |
-| `provider_entity_ref_id` | **Yes** | Provider entity reference |
+| `provider_entity_ref_id` | Conditional | Provider entity reference; one of ref_id/name required |
+| `provider_entity_name` | Conditional | Fallback lookup by entity name, used only when `provider_entity_ref_id` is absent or doesn't match |
 | `domain` | No | Folder lookup |
 | `solution_ref_id` | No | Solution reference |
 | `status` | No | |
@@ -578,7 +581,8 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | Field | Required | Notes |
 |-------|----------|-------|
 | `email` | **Yes** | Unique identifier for the representative |
-| `provider_entity_ref_id` | **Yes** | Entity reference |
+| `provider_entity_ref_id` | Conditional | Entity reference; one of ref_id/name required |
+| `provider_entity_name` | Conditional | Fallback lookup by entity name, used only when `provider_entity_ref_id` is absent or doesn't match |
 | `first_name` | No | |
 | `last_name` | No | |
 | `description` | No | |

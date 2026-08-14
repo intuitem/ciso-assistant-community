@@ -5193,6 +5193,7 @@ class LoadFileView(APIView):
 
             # Track ref_id to actual ID mappings
             entity_ref_map = {}  # ref_id -> actual UUID
+            entity_name_map = {}  # lowercased name -> actual UUID (fallback)
             solution_ref_map = {}  # ref_id -> actual UUID
 
             # Process Entities sheet first
@@ -5202,8 +5203,10 @@ class LoadFileView(APIView):
                     pd.read_excel(excel_file, sheet_name="Entities")
                 ).fillna("")
                 entities_records = entities_df.to_dict(orient="records")
-                entities_result, entity_ref_map = self._process_entities(
-                    request, entities_records, folders_map, folder_id, on_conflict
+                entities_result, entity_ref_map, entity_name_map = (
+                    self._process_entities(
+                        request, entities_records, folders_map, folder_id, on_conflict
+                    )
                 )
                 overall_results["entities"] = entities_result
                 if entities_result.get("stopped"):
@@ -5222,6 +5225,7 @@ class LoadFileView(APIView):
                     request,
                     solutions_records,
                     entity_ref_map,
+                    entity_name_map,
                     on_conflict,
                 )
                 overall_results["solutions"] = solutions_result
@@ -5245,6 +5249,7 @@ class LoadFileView(APIView):
                     folders_map,
                     folder_id,
                     entity_ref_map,
+                    entity_name_map,
                     solution_ref_map,
                     on_conflict,
                 )
@@ -5267,6 +5272,7 @@ class LoadFileView(APIView):
                     folders_map,
                     folder_id,
                     entity_ref_map,
+                    entity_name_map,
                     solution_ref_map,
                     on_conflict,
                 )
@@ -5287,6 +5293,7 @@ class LoadFileView(APIView):
                     request,
                     representatives_records,
                     entity_ref_map,
+                    entity_name_map,
                     on_conflict,
                 )
                 overall_results["representatives"] = representatives_result
@@ -5353,6 +5360,17 @@ class LoadFileView(APIView):
         else:
             error = "Missing mandatory fields: " + ", ".join(missing_fields)
         self._add_tprm_record_error(results, record, error)
+
+    def _resolve_tprm_entity(
+        self, record, ref_field, name_field, entity_ref_map, entity_name_map
+    ):
+        """Resolve an entity by ref_id, falling back to name — one of the two is required."""
+        ref = str(record.get(ref_field, "")).strip()
+        name = str(record.get(name_field, "")).strip()
+        entity_id = entity_ref_map.get(ref) if ref else None
+        if entity_id is None and name:
+            entity_id = entity_name_map.get(name.lower())
+        return entity_id, ref, name
 
     def _log_tprm_import_results(self, label, results) -> None:
         logger.info(
@@ -5421,17 +5439,19 @@ class LoadFileView(APIView):
         """Process entities from TPRM import"""
         results = self._empty_tprm_results()
         ref_id_map = {}  # Map ref_id to actual UUID
+        name_map = {}  # Map lowercased name to actual UUID — fallback when ref_id is absent
 
         for record in records:
             try:
                 missing_fields = self._check_missing_tprm_required_fields(
-                    record, ["ref_id", "name"]
+                    record, ["name"]
                 )
                 if missing_fields:
                     self._add_tprm_missing_fields_error(results, record, missing_fields)
                     continue
 
                 ref_id = record.get("ref_id", "").strip()
+                name = record.get("name", "").strip()
 
                 # Get domain from record or use fallback
                 domain = folder_id
@@ -5474,16 +5494,20 @@ class LoadFileView(APIView):
                 if legal_identifiers:
                     entity_data["legal_identifiers"] = legal_identifiers
 
-                # Check for existing entity by ref_id or name
-                existing_entity = Entity.objects.filter(ref_id=ref_id).first()
+                # Check for existing entity by ref_id (if provided), else by name
+                existing_entity = None
+                if ref_id:
+                    existing_entity = Entity.objects.filter(ref_id=ref_id).first()
                 if not existing_entity:
                     existing_entity = Entity.objects.filter(
-                        name__iexact=record.get("name"),
+                        name__iexact=name,
                         folder_id=domain,
                     ).first()
 
                 if existing_entity:
-                    ref_id_map[ref_id] = str(existing_entity.id)
+                    if ref_id:
+                        ref_id_map[ref_id] = str(existing_entity.id)
+                    name_map[name.lower()] = str(existing_entity.id)
                     action = self._handle_tprm_conflict(
                         request,
                         results,
@@ -5505,7 +5529,9 @@ class LoadFileView(APIView):
 
                 serializer.is_valid(raise_exception=True)
                 entity = serializer.save()
-                ref_id_map[ref_id] = str(entity.id)
+                if ref_id:
+                    ref_id_map[ref_id] = str(entity.id)
+                name_map[name.lower()] = str(entity.id)
                 results["successful"] += 1
                 logger.debug(f"Created entity: {entity.name} with ref_id: {ref_id}")
 
@@ -5535,13 +5561,14 @@ class LoadFileView(APIView):
                 logger.warning(f"Error linking parent entity: {str(e)}")
 
         self._log_tprm_import_results("Entity", results)
-        return results, ref_id_map
+        return results, ref_id_map, name_map
 
     def _process_solutions(
         self,
         request,
         records,
         entity_ref_map,
+        entity_name_map,
         on_conflict=ConflictMode.STOP,
     ):
         """Process solutions from TPRM import"""
@@ -5551,25 +5578,29 @@ class LoadFileView(APIView):
         for record in records:
             try:
                 missing_fields = self._check_missing_tprm_required_fields(
-                    record, ["ref_id", "name", "provider_entity_ref_id"]
+                    record, ["ref_id", "name"]
                 )
                 if missing_fields:
                     self._add_tprm_missing_fields_error(results, record, missing_fields)
                     continue
 
                 ref_id = record.get("ref_id", "").strip()
-                provider_ref_id = record.get("provider_entity_ref_id", "").strip()
-
-                # Lookup provider entity UUID
-                if provider_ref_id not in entity_ref_map:
+                provider_entity_id, provider_ref_id, provider_name = (
+                    self._resolve_tprm_entity(
+                        record,
+                        "provider_entity_ref_id",
+                        "provider_entity_name",
+                        entity_ref_map,
+                        entity_name_map,
+                    )
+                )
+                if provider_entity_id is None:
                     self._add_tprm_record_error(
                         results,
                         record,
-                        f"Provider entity with ref_id '{provider_ref_id}' not found",
+                        f"Provider entity with ref_id '{provider_ref_id}' or name '{provider_name}' not found",
                     )
                     continue
-
-                provider_entity_id = entity_ref_map[provider_ref_id]
 
                 # Prepare solution data (used by both update and create)
                 solution_data = {
@@ -5662,6 +5693,7 @@ class LoadFileView(APIView):
         folders_map,
         folder_id,
         entity_ref_map,
+        entity_name_map,
         solution_ref_map,
         on_conflict=ConflictMode.STOP,
     ):
@@ -5673,21 +5705,26 @@ class LoadFileView(APIView):
         for record in records:
             try:
                 missing_fields = self._check_missing_tprm_required_fields(
-                    record, ["name", "entity_ref_id"]
+                    record, ["name"]
                 )
                 if missing_fields:
                     self._add_tprm_missing_fields_error(results, record, missing_fields)
                     continue
 
-                entity_ref_id = record.get("entity_ref_id", "").strip()
-                if entity_ref_id not in entity_ref_map:
+                entity_id, entity_ref_id, entity_name = self._resolve_tprm_entity(
+                    record,
+                    "entity_ref_id",
+                    "entity_name",
+                    entity_ref_map,
+                    entity_name_map,
+                )
+                if entity_id is None:
                     self._add_tprm_record_error(
                         results,
                         record,
-                        f"Entity with ref_id '{entity_ref_id}' not found",
+                        f"Entity with ref_id '{entity_ref_id}' or name '{entity_name}' not found",
                     )
                     continue
-                entity_id = entity_ref_map[entity_ref_id]
 
                 # Get domain from record or use fallback
                 domain = folder_id
@@ -5815,6 +5852,7 @@ class LoadFileView(APIView):
         folders_map,
         folder_id,
         entity_ref_map,
+        entity_name_map,
         solution_ref_map,
         on_conflict=ConflictMode.STOP,
     ):
@@ -5824,25 +5862,29 @@ class LoadFileView(APIView):
         for record in records:
             try:
                 missing_fields = self._check_missing_tprm_required_fields(
-                    record, ["ref_id", "name", "provider_entity_ref_id"]
+                    record, ["ref_id", "name"]
                 )
                 if missing_fields:
                     self._add_tprm_missing_fields_error(results, record, missing_fields)
                     continue
 
                 ref_id = record.get("ref_id", "").strip()
-                provider_ref_id = record.get("provider_entity_ref_id", "").strip()
-
-                # Lookup provider entity UUID
-                if provider_ref_id not in entity_ref_map:
+                provider_entity_id, provider_ref_id, provider_name = (
+                    self._resolve_tprm_entity(
+                        record,
+                        "provider_entity_ref_id",
+                        "provider_entity_name",
+                        entity_ref_map,
+                        entity_name_map,
+                    )
+                )
+                if provider_entity_id is None:
                     self._add_tprm_record_error(
                         results,
                         record,
-                        f"Provider entity with ref_id '{provider_ref_id}' not found",
+                        f"Provider entity with ref_id '{provider_ref_id}' or name '{provider_name}' not found",
                     )
                     continue
-
-                provider_entity_id = entity_ref_map[provider_ref_id]
 
                 # Get domain from record or use fallback
                 domain = folder_id
@@ -5964,6 +6006,7 @@ class LoadFileView(APIView):
         request,
         records,
         entity_ref_map,
+        entity_name_map,
         on_conflict=ConflictMode.STOP,
     ):
         """Process representatives from TPRM import."""
@@ -5972,21 +6015,28 @@ class LoadFileView(APIView):
         for record in records:
             try:
                 missing_fields = self._check_missing_tprm_required_fields(
-                    record, ["email", "provider_entity_ref_id"]
+                    record, ["email"]
                 )
                 if missing_fields:
                     self._add_tprm_missing_fields_error(results, record, missing_fields)
                     continue
 
                 email = str(record.get("email", "")).strip()
-                provider_ref_id = str(record.get("provider_entity_ref_id", "")).strip()
-                provider_entity_id = entity_ref_map.get(provider_ref_id)
+                provider_entity_id, provider_ref_id, provider_name = (
+                    self._resolve_tprm_entity(
+                        record,
+                        "provider_entity_ref_id",
+                        "provider_entity_name",
+                        entity_ref_map,
+                        entity_name_map,
+                    )
+                )
 
                 if not provider_entity_id:
                     self._add_tprm_record_error(
                         results,
                         record,
-                        f"Provider entity with ref_id '{provider_ref_id}' not found",
+                        f"Provider entity with ref_id '{provider_ref_id}' or name '{provider_name}' not found",
                     )
                     continue
 
