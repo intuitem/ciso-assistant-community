@@ -169,6 +169,23 @@ class TestSendEmail:
         assert instance.status == WorkflowInstance.Status.COMPLETED
         assert len(mail.outbox) == 1
 
+    def test_console_backend_needs_no_smtp_settings(
+        self, settings, dispatch, django_capture_on_commit_callbacks
+    ):
+        # MAIL_DEBUG deployments swap in the console backend with no
+        # EMAIL_HOST/EMAIL_PORT; the settings precheck must not fail the node
+        # in exactly the environments meant for testing workflows.
+        settings.EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+        settings.EMAIL_HOST = None
+        settings.EMAIL_PORT = None
+        settings.DEFAULT_FROM_EMAIL = "noreply@ciso.assistant"
+        version = email_flow({"recipients": "a@tests.local", "subject": "S"})
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        dispatch.run()
+        instance.refresh_from_db()
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+
     def test_missing_email_settings_fail_the_node(self, settings):
         settings.EMAIL_HOST = None
         settings.EMAIL_PORT = None

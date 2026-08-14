@@ -728,7 +728,11 @@ def send_notification_email(subject, message, owner_email, html_message=None):
 
 
 def missing_email_settings():
+    # The console backend (MAIL_DEBUG) never opens an SMTP connection, so
+    # EMAIL_HOST/EMAIL_PORT only bind when the backend would use them.
     required_settings = ["EMAIL_HOST", "EMAIL_PORT", "DEFAULT_FROM_EMAIL"]
+    if getattr(settings, "EMAIL_BACKEND", "").endswith("console.EmailBackend"):
+        required_settings = ["DEFAULT_FROM_EMAIL"]
     return [
         setting
         for setting in required_settings
