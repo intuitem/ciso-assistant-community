@@ -134,9 +134,18 @@ class BaseModelSerializer(serializers.ModelSerializer):
         return attrs
 
     def _check_object_perm(
-        self, instance_or_data, action: str, *, folder: Folder | None = None
+        self,
+        instance_or_data,
+        action: str,
+        *,
+        folder: Folder | None = None,
+        model: type[models.Model] | None = None,
     ) -> None:
-        """Check that the requesting user has *action* permission on the resolved folder."""
+        """Check that the requesting user has *action* permission on the resolved folder.
+
+        `model` overrides the permission codename's model when the checked
+        object is not an instance of the serializer's own model.
+        """
         if folder is None:
             folder = Folder.get_folder(instance_or_data)
         if folder is None:
@@ -144,10 +153,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request is None:
             return
+        model = model or self.Meta.model
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(
-                codename=f"{action}_{self.Meta.model._meta.model_name}",
+                codename=f"{action}_{model._meta.model_name}",
             ),
             folder=folder,
         ):
@@ -201,7 +211,6 @@ class BaseModelSerializer(serializers.ModelSerializer):
         if not request or not request.user.is_authenticated:
             return
         user = request.user
-        root_folder = Folder.get_root_folder()
         accessible_cache: dict = {}
         for field_name, value in validated_data.items():
             if not isinstance(value, list) or not value:
@@ -211,9 +220,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
             related_model = type(value[0])
             if related_model not in accessible_cache:
                 try:
-                    ids = RoleAssignment.get_accessible_object_ids(
-                        root_folder, user, related_model
-                    )[0]
+                    ids = RoleAssignment.get_viewable_object_ids(user, related_model)
                     accessible_cache[related_model] = {str(i) for i in ids}
                 except NotImplementedError, Permission.DoesNotExist:
                     accessible_cache[related_model] = None
@@ -2312,6 +2319,7 @@ class FolderWriteSerializer(BaseModelSerializer):
         exclude = [
             "builtin",
             "content_type",
+            "descendants",
         ]
 
     def update(self, instance, validated_data):
@@ -2390,7 +2398,7 @@ class FolderReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = Folder
-        fields = "__all__"
+        exclude = ["descendants"]
 
 
 class FolderImportExportSerializer(BaseModelSerializer):
