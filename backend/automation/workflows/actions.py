@@ -531,9 +531,7 @@ def _read_condition_to_q(condition, entry, allowed_fields, context):
         query = Q(**{f"{field}__in": value})
         return ~query if op == "not_in" else query
     query = Q(**{f"{field}__{lookup}": value})
-    if op in ("gt", "lt", "gte", "lte") and field in entry.get(
-        "unrated_sentinels", ()
-    ):
+    if op in ("gt", "lt", "gte", "lte") and field in entry.get("unrated_sentinels", ()):
         query &= Q(**{f"{field}__gte": 0})
     return ~query if op == "neq" else query
 
