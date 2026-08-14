@@ -1488,6 +1488,8 @@ class LibraryUpdater:
                                 ra.is_scored = (
                                     new_score is not None and self.strategy != "reset"
                                 )
+                                if self.strategy == "reset":
+                                    ra.is_score_overridden = False
                                 if ra.pk not in ra_pks_to_update:
                                     ra_pks_to_update.add(ra.pk)
                                     requirement_assessment_objects_to_update.append(ra)
@@ -1621,7 +1623,13 @@ class LibraryUpdater:
                 if requirement_assessment_objects_to_update:
                     RequirementAssessment.objects.bulk_update(
                         requirement_assessment_objects_to_update,
-                        ["score", "is_scored", "documentation_score", "result"],
+                        [
+                            "score",
+                            "is_scored",
+                            "is_score_overridden",
+                            "documentation_score",
+                            "result",
+                        ],
                         batch_size=100,
                     )
 
