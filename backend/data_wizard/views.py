@@ -731,26 +731,24 @@ class FolderScopeError(ValueError):
     """Raised when an existing-record lookup cannot be scoped to a folder."""
 
 
-def _parse_bool_cell(value: object) -> bool:
-    """Coerce a spreadsheet cell into a bool. Accepts FR aliases and 'x'."""
+def _parse_bool_cell(value: object) -> Optional[bool]:
+    """Parse a boolean cell. Returns None when the token is unrecognized."""
     if isinstance(value, bool):
         return value
-    if value is None:
-        return False
     if isinstance(value, (int, float)):
         return value != 0
     if isinstance(value, str):
-        return value.strip().lower() in {
-            "true",
-            "yes",
-            "y",
-            "1",
-            "1.0",
-            "oui",
-            "vrai",
-            "x",
-        }
-    return False
+        token = value.strip().lower()
+        if token in {"true", "yes", "y", "1", "1.0", "oui", "vrai", "x"}:
+            return True
+        if token in {"false", "no", "n", "0", "0.0", "non", "faux"}:
+            return False
+    return None
+
+
+def _bool_cell_or_false(value: object) -> bool:
+    """Lenient variant: blanks and unrecognized tokens read as False."""
+    return _parse_bool_cell(value) is True
 
 
 @dataclass
@@ -2976,7 +2974,7 @@ class ProcessingChildConsumerMixin:
     def create_context(self):
         return None, None
 
-    _parse_bool = staticmethod(_parse_bool_cell)
+    _parse_bool = staticmethod(_bool_cell_or_false)
 
     @staticmethod
     def _choice_key(value: object, choices) -> Optional[str]:
@@ -3473,7 +3471,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer):
             return [v.strip() for v in value.split(",") if v.strip()]
         return []
 
-    _parse_bool = staticmethod(_parse_bool_cell)
+    _parse_bool = staticmethod(_bool_cell_or_false)
 
     def _resolve_bia(
         self, record: dict
@@ -4843,9 +4841,17 @@ class LoadFileView(APIView):
 
                     override_cell = record.get("is_score_overridden")
                     if override_cell not in (None, ""):
-                        requirement_data["is_score_overridden"] = _parse_bool_cell(
-                            override_cell
-                        )
+                        override_value = _parse_bool_cell(override_cell)
+                        if override_value is None:
+                            results["failed"] += 1
+                            results["errors"].append(
+                                {
+                                    "record": record,
+                                    "error": f"Invalid is_score_overridden value '{override_cell}': expected a boolean",
+                                }
+                            )
+                            continue
+                        requirement_data["is_score_overridden"] = override_value
                     elif (
                         requirement_data.get("score") not in (None, "")
                         and requirement_assessment.requirement.questions.exists()

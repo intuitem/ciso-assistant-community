@@ -214,7 +214,9 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 * score
   * integer within the requirement's effective scale — the audit's `min_score`/`max_score`, or the requirement's own bounds when it overrides them. Out-of-range values are rejected.
 * is\_score\_overridden
-  * `true` / `false` (also accepts `1`, `oui`, `vrai`, `x`). Only meaningful on requirements that carry questions: it decides whether the imported score is pinned or recomputed from the answers. Leave the column out and any imported score on a question-driven requirement is pinned automatically.
+  * text: `true`, `yes`, `y`, `1`, `oui`, `vrai`, `x` for true — `false`, `no`, `n`, `0`, `non`, `faux` for false. Any other text is rejected and the row fails, so a typo can't silently clear an existing override.
+  * numbers: `0` is false, any other number is true.
+  * Only meaningful on requirements that carry questions: it decides whether the imported score is pinned or recomputed from the answers. Leave the cell blank (or the column out entirely) and any imported score on a question-driven requirement is pinned automatically.
 * observations
 
 ### Special considerations
