@@ -26,7 +26,6 @@ export const actions: Actions = {
 		const matrix = formData.get('matrix') as string;
 		const target = formData.get('target') as string;
 		const onConflict = (formData.get('onConflict') as string) || 'stop';
-		const auditLinkMode = (formData.get('auditLinkMode') as string) || '';
 
 		if (!file?.name || file?.name === 'undefined') {
 			// Using the fail function from SvelteKit
@@ -56,8 +55,7 @@ export const actions: Actions = {
 					'X-Framework-Id': framework ?? '',
 					'X-Matrix-Id': matrix ?? '',
 					'X-Target-Id': target ?? '',
-					'X-On-Conflict': onConflict,
-					'X-Audit-Link-Mode': auditLinkMode
+					'X-On-Conflict': onConflict
 				},
 				body: file
 			});

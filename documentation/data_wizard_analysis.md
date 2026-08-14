@@ -26,7 +26,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `Policy` | Single sheet CSV/Excel | **Supported** |
 | `SecurityException` | Single sheet CSV/Excel | **Supported** |
 | `Incident` | Single sheet CSV/Excel | **Supported** |
-| `TPRM` | Multi-sheet Excel (Entities, Solutions, Contracts) | **Supported** |
+| `TPRM` | Multi-sheet Excel (Entities, Solutions, EntityAssessments, Contracts, Representatives) | **Supported** |
 | `EbiosRMStudyARM` | Multi-sheet Excel (ARM format) | **Supported** |
 | `EbiosRMStudyExcel` | Multi-sheet Excel (Native export format) | **Supported** |
 | `BusinessImpactAnalysis` | Multi-sheet Excel (Summary, Assessments, Thresholds) | **Supported** |
@@ -515,6 +515,36 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `filtering_labels` | M2M | Medium |
 | All other DORA fields | Various | Medium |
 
+#### EntityAssessments Sheet
+
+**Supported Fields:**
+| Field | Required | Notes |
+|-------|----------|-------|
+| `name` | **Yes** | Assessment name |
+| `entity_ref_id` | **Yes** | Provider entity reference |
+| `description` | No | |
+| `domain` | No | Folder lookup, falls back to the form-selected folder |
+| `perimeter` / `perimeter_ref_id` | No | Perimeter lookup by id, then by ref_id |
+| `due_date` | No | Date (YYYY-MM-DD) |
+| `criticality` | No | Integer (1-4); invalid values skipped with a warning |
+| `solution_ref_id` | No | Newline/pipe/comma-separated solution ref_ids; unknown refs are reported as warnings |
+| `audit_ref_id` | No | Links to an existing `ComplianceAssessment`, resolved by ref_id, scoped to audits the importing user can access |
+| `audit_name` | No | Fallback lookup by name, used only when `audit_ref_id` is absent or doesn't match |
+
+**Conflict detection:** by `entity` + `name` + `folder` (dedup is domain-scoped, matching Entities/Contracts).
+
+**Special considerations:** linking to an existing audit always re-parents it (`move`) into the entity assessment's folder/perimeter.
+
+**Missing Fields from Model:**
+| Field | Type | Priority |
+|-------|------|----------|
+| `penetration`, `dependency`, `maturity`, `trust` | IntegerField | Medium |
+| `representatives` | M2M User | Medium (Representatives sheet creates standalone contacts, not linked to a specific assessment) |
+| `evidence` | FK | Low |
+| `conclusion` | CharField | Low |
+| `reference_link` | URLField | Low |
+| `authors`, `reviewers`, `status`, `version` | Various (inherited from `Assessment`) | Low |
+
 #### Contracts Sheet
 
 **Supported Fields:**
@@ -541,6 +571,27 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `overarching_contract` | FK | Low |
 | All DORA-related fields | Various | Medium |
 | `filtering_labels` | M2M | Medium |
+
+#### Representatives Sheet
+
+**Supported Fields:**
+| Field | Required | Notes |
+|-------|----------|-------|
+| `email` | **Yes** | Unique identifier for the representative |
+| `provider_entity_ref_id` | **Yes** | Entity reference |
+| `first_name` | No | |
+| `last_name` | No | |
+| `description` | No | |
+| `phone` | No | |
+| `role` | No | |
+
+**Conflict detection:** by `email`.
+
+**Missing Fields from Model:**
+| Field | Type | Priority |
+|-------|------|----------|
+| `ref_id` | CharField | Low |
+| `user` | FK User | Medium (no login account is created from the import; use the UI's "Create user" option for that) |
 
 ---
 
@@ -799,8 +850,8 @@ Each sheet imports past occurrences for one template. The sheet name is `"{count
 | Model | Status | Priority to Add |
 |-------|--------|-----------------|
 | Entity | Yes (via TPRM import) | Done |
-| EntityAssessment | **Not supported** | **High** |
-| Representative | **Not supported** | **High** |
+| EntityAssessment | Yes (via TPRM import) | Done |
+| Representative | Yes (via TPRM import) | Done |
 | Solution | Yes (via TPRM import) | Done |
 | Contract | Yes (via TPRM import) | Done |
 
@@ -838,8 +889,8 @@ Each sheet imports past occurrences for one template. The sheet name is `"{count
 |----------|-------|
 | **Total Models Identified** | ~70 |
 | **Models with Direct Import Support** | 21 |
-| **Models with Indirect Import Support** | ~12 (via EBIOS/TPRM) |
-| **Models NOT Supported** | ~40 |
+| **Models with Indirect Import Support** | ~14 (via EBIOS/TPRM) |
+| **Models NOT Supported** | ~38 |
 
 ---
 
@@ -855,8 +906,8 @@ Each sheet imports past occurrences for one template. The sheet name is `"{count
 
 ### High Priority (TPRM Completion)
 
-6. **Representative** - Contact information for entities
-7. **EntityAssessment** - Third-party risk assessments
+6. ~~**Representative**~~ - ✅ Now supported
+7. ~~**EntityAssessment**~~ - ✅ Now supported, including linking to an existing audit
 
 ### High Priority (Privacy/GDPR Compliance)
 

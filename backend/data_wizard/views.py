@@ -3883,13 +3883,6 @@ class LoadFileView(APIView):
             on_conflict = ConflictMode(on_conflict_str)
         except ValueError:
             on_conflict = ConflictMode.STOP
-        default_audit_link_mode = request.META.get("HTTP_X_AUDIT_LINK_MODE")
-        default_audit_link_mode = (
-            default_audit_link_mode.strip().lower() if default_audit_link_mode else None
-        )
-        if default_audit_link_mode not in ("move", "copy", None):
-            default_audit_link_mode = None
-
         logger.info(
             f"Processing file with model: {model_type}, folder: {folder_id}, perimeter: {perimeter_id}, framework: {framework_id}, matrix: {matrix_id}"
         )
@@ -3926,7 +3919,6 @@ class LoadFileView(APIView):
                         folders_map,
                         folder_id,
                         on_conflict,
-                        default_audit_link_mode,
                     )
                 # Special handling for EBIOS RM Study ARM format (multi-sheet)
                 case ModelType.EBIOS_RM_STUDY_ARM:
@@ -5182,7 +5174,6 @@ class LoadFileView(APIView):
         folders_map,
         folder_id,
         on_conflict=ConflictMode.STOP,
-        default_audit_link_mode: str | None = None,
     ):
         """
         Process TPRM multi-sheet Excel file with Entities, Solutions, and Contracts
@@ -5256,7 +5247,6 @@ class LoadFileView(APIView):
                     entity_ref_map,
                     solution_ref_map,
                     on_conflict,
-                    default_audit_link_mode,
                 )
                 overall_results["entity_assessments"] = entity_assessments_result
                 if entity_assessments_result.get("stopped"):
@@ -5674,7 +5664,6 @@ class LoadFileView(APIView):
         entity_ref_map,
         solution_ref_map,
         on_conflict=ConflictMode.STOP,
-        default_audit_link_mode: str | None = None,
     ):
         results = self._empty_tprm_results()
         (_, accessible_audit_ids, _) = RoleAssignment.get_accessible_object_ids(
@@ -5761,38 +5750,25 @@ class LoadFileView(APIView):
                     assessment_data["solutions"] = solution_ids
 
                 audit_ref = str(record.get("audit_ref_id", "")).strip()
-                if audit_ref:
-                    link_mode = (
-                        str(record.get("audit_link_mode", "")).strip().lower()
-                        or default_audit_link_mode
-                        or ""
-                    )
-                    if link_mode not in ("move", "copy"):
-                        self._add_tprm_record_error(
-                            results,
-                            record,
-                            "audit_link_mode must be 'move' or 'copy' (set it on the "
-                            "row or choose a default for the whole file) when "
-                            "audit_ref_id is set",
-                        )
-                        continue
-                    # Pre-existing record: resolved against the DB, not a ref_id_map.
-                    audit = ComplianceAssessment.objects.filter(
-                        ref_id=audit_ref, id__in=accessible_audit_ids
-                    ).first()
-                    if audit is None:
+                audit_name = str(record.get("audit_name", "")).strip()
+                if audit_ref or audit_name:
+                    audit = None
+                    if audit_ref:
                         audit = ComplianceAssessment.objects.filter(
-                            name__iexact=audit_ref, id__in=accessible_audit_ids
+                            ref_id=audit_ref, id__in=accessible_audit_ids
+                        ).first()
+                    if audit is None and audit_name:
+                        audit = ComplianceAssessment.objects.filter(
+                            name__iexact=audit_name, id__in=accessible_audit_ids
                         ).first()
                     if audit is None:
                         self._add_tprm_record_error(
                             results,
                             record,
-                            f"Audit with ref_id or name '{audit_ref}' not found",
+                            f"Audit with ref_id '{audit_ref}' or name '{audit_name}' not found",
                         )
                         continue
                     assessment_data["link_audit"] = str(audit.id)
-                    assessment_data["link_mode"] = link_mode
 
                 # Entity assessments dedupe by (entity, name, folder)
                 existing_assessment = EntityAssessment.objects.filter(

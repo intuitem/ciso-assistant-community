@@ -354,7 +354,7 @@ class TestSimpleTemplates:
 
 
 def _make_audit(folder, name, ref_id):
-    """Pre-existing audit for the EntityAssessments sheet's audit_ref_id to link to."""
+    """Pre-existing audit for the EntityAssessments sheet's audit_ref_id/audit_name columns to link to."""
     fw = Framework.objects.create(name=f"{name} FW", folder=folder, is_published=True)
     RequirementNode.objects.create(
         framework=fw,
@@ -394,7 +394,7 @@ class TestMultiSheetTemplates:
         results = resp.json()["results"]
         assert results["entities"]["successful"] == 3
         assert results["solutions"]["successful"] == 3
-        assert results["entity_assessments"]["successful"] == 2, results[
+        assert results["entity_assessments"]["successful"] == 3, results[
             "entity_assessments"
         ]
         assert results["contracts"]["successful"] == 3

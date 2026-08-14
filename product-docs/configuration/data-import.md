@@ -583,6 +583,25 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 > [!NOTE]
 > Conflict detection: by `name` + `folder`
 
+#### Entity assessments
+
+* `name` <mark style="color:$danger;">\*</mark>
+* `entity_ref_id` <mark style="color:$danger;">\*</mark>
+* `description`
+* `domain`
+* `perimeter` or `perimeter_ref_id`
+* `due_date` (YYYY-MM-DD format)
+* `criticality` (Integer in \[1,4])
+* `solution_ref_id` accepts multiple solution references (newline/pipe/comma)
+* `audit_ref_id` - links the assessment to an existing audit, resolved by `ref_id`
+* `audit_name` - fallback lookup by audit name, used only when `audit_ref_id` is absent or doesn't match
+
+> [!NOTE]
+> Conflict detection: by `entity` + `name` + `folder`
+
+> [!NOTE]
+> Linking to an existing audit always **moves** it: the audit is relocated into the entity assessment's own folder/perimeter.
+
 #### Representatives
 
 * `email` <mark style="color:$danger;">\*</mark>

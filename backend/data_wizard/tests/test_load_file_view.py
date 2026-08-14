@@ -1472,44 +1472,28 @@ def _make_audit(folder, name="Vendor Audit", ref_id="AUD-001"):
     return audit
 
 
-def _tprm_excel_with_audit(entity_ref_id, audit_ref_id, link_mode):
+def _tprm_excel_with_audit(entity_ref_id, audit_ref_id=None, audit_name=None):
+    row = {
+        "entity_ref_id": entity_ref_id,
+        "name": "Vendor Review",
+    }
+    if audit_ref_id is not None:
+        row["audit_ref_id"] = audit_ref_id
+    if audit_name is not None:
+        row["audit_name"] = audit_name
     return make_excel_file(
         {
             "Entities": [
                 {"ref_id": entity_ref_id, "name": "Vendor Corp", "description": ""}
             ],
-            "EntityAssessments": [
-                {
-                    "entity_ref_id": entity_ref_id,
-                    "name": "Vendor Review",
-                    "audit_ref_id": audit_ref_id,
-                    "audit_link_mode": link_mode,
-                }
-            ],
-        }
-    )
-
-
-def _tprm_excel_with_audit_no_row_mode(entity_ref_id, audit_ref_id):
-    return make_excel_file(
-        {
-            "Entities": [
-                {"ref_id": entity_ref_id, "name": "Vendor Corp", "description": ""}
-            ],
-            "EntityAssessments": [
-                {
-                    "entity_ref_id": entity_ref_id,
-                    "name": "Vendor Review",
-                    "audit_ref_id": audit_ref_id,
-                }
-            ],
+            "EntityAssessments": [row],
         }
     )
 
 
 @pytest.mark.django_db
 class TestTprmEntityAssessmentAuditLink:
-    def test_move_relocates_audit_and_its_requirement_assessments(
+    def test_linking_relocates_audit_and_its_requirement_assessments(
         self, api_client, domain_folder, all_accessible
     ):
         from core.models import RequirementAssessment
@@ -1517,7 +1501,7 @@ class TestTprmEntityAssessmentAuditLink:
         audit = _make_audit(domain_folder, name="Vendor Audit Move", ref_id="AUD-MOVE")
         original_folder_id = audit.folder_id
 
-        excel = _tprm_excel_with_audit("ENT-MOVE", "AUD-MOVE", "move")
+        excel = _tprm_excel_with_audit("ENT-MOVE", audit_ref_id="AUD-MOVE")
         resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
 
         assert resp.status_code == 200, resp.json()
@@ -1535,40 +1519,10 @@ class TestTprmEntityAssessmentAuditLink:
         ra = RequirementAssessment.objects.get(compliance_assessment=audit)
         assert ra.folder_id == audit.folder_id
 
-    def test_copy_leaves_original_audit_untouched(
-        self, api_client, domain_folder, all_accessible
-    ):
-        from core.models import RequirementAssessment
-
-        audit = _make_audit(domain_folder, name="Vendor Audit Copy", ref_id="AUD-COPY")
-        original_folder_id = audit.folder_id
-        original_ra = RequirementAssessment.objects.get(compliance_assessment=audit)
-
-        excel = _tprm_excel_with_audit("ENT-COPY", "AUD-COPY", "copy")
-        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
-
-        assert resp.status_code == 200, resp.json()
-        results = resp.json()["results"]
-        assert results["entity_assessments"]["successful"] == 1, results[
-            "entity_assessments"
-        ]
-
-        entity_assessment = EntityAssessment.objects.get(name="Vendor Review")
-        audit.refresh_from_db()
-
-        assert audit.folder_id == original_folder_id
-        assert RequirementAssessment.objects.get(pk=original_ra.pk).folder_id == (
-            original_folder_id
-        )
-        assert entity_assessment.compliance_assessment_id != audit.id
-        assert (
-            entity_assessment.compliance_assessment.framework_id == audit.framework_id
-        )
-
     def test_unknown_audit_ref_id_fails_the_row_only(
         self, api_client, domain_folder, all_accessible
     ):
-        excel = _tprm_excel_with_audit("ENT-MISS", "AUD-NOPE", "move")
+        excel = _tprm_excel_with_audit("ENT-MISS", audit_ref_id="AUD-NOPE")
         resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
 
         assert resp.status_code == 200, resp.json()
@@ -1576,35 +1530,16 @@ class TestTprmEntityAssessmentAuditLink:
         assert results["entity_assessments"]["failed"] == 1
         assert not EntityAssessment.objects.filter(name="Vendor Review").exists()
 
-    def test_row_without_link_mode_fails_without_a_header_default(
-        self, api_client, domain_folder, all_accessible
-    ):
-        _make_audit(domain_folder, name="Vendor Audit NoMode", ref_id="AUD-NOMODE")
-        excel = _tprm_excel_with_audit_no_row_mode("ENT-NOMODE", "AUD-NOMODE")
-        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
-
-        assert resp.status_code == 200, resp.json()
-        results = resp.json()["results"]
-        assert results["entity_assessments"]["failed"] == 1
-        assert not EntityAssessment.objects.filter(name="Vendor Review").exists()
-
-    def test_header_default_link_mode_applies_when_row_is_blank(
+    def test_audit_resolved_by_name_when_ref_id_absent(
         self, api_client, domain_folder, all_accessible
     ):
         audit = _make_audit(
-            domain_folder, name="Vendor Audit HeaderDefault", ref_id="AUD-HDR"
+            domain_folder, name="Vendor Audit ByName", ref_id="AUD-BYNAME"
         )
         original_folder_id = audit.folder_id
 
-        excel = _tprm_excel_with_audit_no_row_mode("ENT-HDR", "AUD-HDR")
-        resp = _post(
-            api_client,
-            excel.read(),
-            "tprm.xlsx",
-            "TPRM",
-            domain_folder.id,
-            HTTP_X_AUDIT_LINK_MODE="move",
-        )
+        excel = _tprm_excel_with_audit("ENT-BYNAME", audit_name="Vendor Audit ByName")
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
 
         assert resp.status_code == 200, resp.json()
         results = resp.json()["results"]
@@ -1617,35 +1552,22 @@ class TestTprmEntityAssessmentAuditLink:
         assert entity_assessment.compliance_assessment_id == audit.id
         assert audit.folder_id != original_folder_id
 
-    def test_row_link_mode_overrides_header_default(
+    def test_audit_ref_id_takes_precedence_over_audit_name(
         self, api_client, domain_folder, all_accessible
     ):
-        audit = _make_audit(
-            domain_folder, name="Vendor Audit Override", ref_id="AUD-OVR"
-        )
-        original_folder_id = audit.folder_id
+        """ref_id is tried first, name is only a fallback — same convention as elsewhere."""
+        target = _make_audit(domain_folder, name="Target Audit", ref_id="AUD-TARGET")
+        decoy = _make_audit(domain_folder, name="Decoy Audit", ref_id="AUD-DECOY")
 
-        # Header says "move", row says "copy" — the row wins.
-        excel = _tprm_excel_with_audit("ENT-OVR", "AUD-OVR", "copy")
-        resp = _post(
-            api_client,
-            excel.read(),
-            "tprm.xlsx",
-            "TPRM",
-            domain_folder.id,
-            HTTP_X_AUDIT_LINK_MODE="move",
+        excel = _tprm_excel_with_audit(
+            "ENT-PRECEDENCE", audit_ref_id="AUD-TARGET", audit_name="Decoy Audit"
         )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
 
         assert resp.status_code == 200, resp.json()
-        results = resp.json()["results"]
-        assert results["entity_assessments"]["successful"] == 1, results[
-            "entity_assessments"
-        ]
-
         entity_assessment = EntityAssessment.objects.get(name="Vendor Review")
-        audit.refresh_from_db()
-        assert audit.folder_id == original_folder_id
-        assert entity_assessment.compliance_assessment_id != audit.id
+        assert entity_assessment.compliance_assessment_id == target.id
+        assert entity_assessment.compliance_assessment_id != decoy.id
 
     def test_same_named_assessment_in_different_domain_does_not_collide(
         self, api_client, domain_folder, other_folder, all_accessible
@@ -1654,7 +1576,7 @@ class TestTprmEntityAssessmentAuditLink:
         audit_a = _make_audit(domain_folder, name="Vendor Audit A", ref_id="AUD-X-A")
         audit_b = _make_audit(other_folder, name="Vendor Audit B", ref_id="AUD-X-B")
 
-        excel_a = _tprm_excel_with_audit("ENT-CROSS", "AUD-X-A", "move")
+        excel_a = _tprm_excel_with_audit("ENT-CROSS", audit_ref_id="AUD-X-A")
         resp_a = _post(
             api_client, excel_a.read(), "tprm.xlsx", "TPRM", domain_folder.id
         )
@@ -1663,7 +1585,7 @@ class TestTprmEntityAssessmentAuditLink:
 
         # The entity itself is a global match by ref_id, so the second import
         # must opt into updating it rather than treating it as a conflict.
-        excel_b = _tprm_excel_with_audit("ENT-CROSS", "AUD-X-B", "move")
+        excel_b = _tprm_excel_with_audit("ENT-CROSS", audit_ref_id="AUD-X-B")
         resp_b = _post(
             api_client,
             excel_b.read(),

@@ -372,9 +372,6 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
     link_audit = serializers.PrimaryKeyRelatedField(
         queryset=ComplianceAssessment.objects.all(), required=False, allow_null=True
     )
-    link_mode = serializers.ChoiceField(
-        choices=["move", "copy"], required=False, allow_null=True
-    )
 
     def _extract_audit_data(self, validated_data):
         audit_data = {
@@ -384,7 +381,6 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 "selected_implementation_groups", None
             ),
             "link_audit": validated_data.pop("link_audit", None),
-            "link_mode": validated_data.pop("link_mode", None),
         }
         return audit_data
 
@@ -404,7 +400,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         )
 
     def _finalize_linked_audit(self, instance, audit):
-        """Shared tail for create/move/copy."""
+        """Shared tail for create/link."""
         audit.reviewers.set(instance.reviewers.all())
         representatives = instance.representatives.all()
         audit.authors.set(
@@ -442,12 +438,6 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             self._finalize_linked_audit(instance, audit)
 
     def _link_existing_audit(self, instance, audit_data):
-        link_mode = audit_data.get("link_mode")
-        if link_mode not in ("move", "copy"):
-            raise serializers.ValidationError(
-                {"link_mode": [_("Select whether to move or copy the audit")]}
-            )
-
         with transaction.atomic():
             self._lock_instance_without_audit(instance, "link_audit")
             source_audit = ComplianceAssessment.objects.select_for_update().get(
@@ -471,32 +461,16 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
             enclave = self._make_enclave_folder(instance)
 
-            if link_mode == "move":
-                # Evidences/controls stay put — they're shared, not owned by this audit.
-                audit = source_audit
-                audit.folder = enclave
-                audit.perimeter = instance.perimeter
-                audit.save()
-                RequirementAssessment.objects.filter(
-                    compliance_assessment=audit
-                ).update(folder=enclave)
-                Answer.objects.filter(
-                    requirement_assessment__compliance_assessment=audit
-                ).update(folder=enclave)
-            else:
-                from core.utils import build_initial_field_visibility
-
-                audit = ComplianceAssessment.objects.create(
-                    name=instance.name,
-                    framework=source_audit.framework,
-                    perimeter=instance.perimeter,
-                    selected_implementation_groups=source_audit.selected_implementation_groups,
-                    field_visibility=build_initial_field_visibility(
-                        source_audit.framework
-                    ),
-                    folder=enclave,
-                )
-                audit.create_requirement_assessments(baseline=source_audit)
+            audit = source_audit
+            audit.folder = enclave
+            audit.perimeter = instance.perimeter
+            audit.save()
+            RequirementAssessment.objects.filter(compliance_assessment=audit).update(
+                folder=enclave
+            )
+            Answer.objects.filter(
+                requirement_assessment__compliance_assessment=audit
+            ).update(folder=enclave)
 
             self._finalize_linked_audit(instance, audit)
 
