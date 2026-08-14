@@ -846,6 +846,7 @@
 	"assessmentMode": "Bedömningsläge",
 	"createAudit": "Skapa revision",
 	"createAuditHelpText": "Skapa en revision tillsammans med enhetsbedömningen",
+	"thirdPartiesImportHelpText": "Importera enheter, representanter, lösningar, enhetsbedömningar och kontrakt för dina tredje parter från Excel-mallen med flera flikar",
 	"questionnaire": "Frågeformulär",
 	"conclusion": "Slutsats",
 	"blocker": "Blockerare",

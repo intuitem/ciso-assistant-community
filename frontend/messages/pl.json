@@ -892,6 +892,7 @@
 	"assessmentMode": "Tryb oceny",
 	"createAudit": "Utwórz audyt",
 	"createAuditHelpText": "Utwórz audyt obok oceny podmiotu",
+	"thirdPartiesImportHelpText": "Importuj podmioty, przedstawicieli, rozwiązania, oceny podmiotów i umowy Twoich stron trzecich z wieloarkuszowego szablonu Excel",
 	"questionnaire": "Kwestionariusz",
 	"conclusion": "Wniosek",
 	"blocker": "Bloker",

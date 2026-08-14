@@ -847,6 +847,7 @@
 	"assessmentMode": "मूल्यांकन मोड",
 	"createAudit": "ऑडिट बनाएं",
 	"createAuditHelpText": "इकाई मूल्यांकन के साथ-साथ एक ऑडिट बनाएं",
+	"thirdPartiesImportHelpText": "मल्टी-शीट एक्सेल टेम्पलेट से अपनी तृतीय पक्ष इकाइयां, प्रतिनिधि, समाधान, इकाई मूल्यांकन और अनुबंध आयात करें",
 	"questionnaire": "प्रश्नावली",
 	"conclusion": "निष्कर्ष",
 	"blocker": "अवरोधक",

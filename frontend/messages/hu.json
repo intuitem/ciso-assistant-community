@@ -850,6 +850,7 @@
 	"assessmentMode": "Értékelési mód",
 	"createAudit": "Audit létrehozása",
 	"createAuditHelpText": "Audit létrehozása az entitásértékeléssel párhuzamosan",
+	"thirdPartiesImportHelpText": "Importálja vállalatait, képviselőit, megoldásait, vállalatértékeléseit és szerződéseit a többlapos Excel-sablonból",
 	"questionnaire": "Kérdőív",
 	"conclusion": "Következtetés",
 	"blocker": "Blokkoló",
