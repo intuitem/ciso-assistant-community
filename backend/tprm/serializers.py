@@ -447,9 +447,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             # Linking relocates the audit itself, so the user needs
             # change_complianceassessment in the audit's current folder —
             # not this serializer's own change_entityassessment.
-            self._check_object_perm(
-                source_audit, "change", model=ComplianceAssessment
-            )
+            self._check_object_perm(source_audit, "change", model=ComplianceAssessment)
             if (
                 EntityAssessment.objects.filter(compliance_assessment=source_audit)
                 .exclude(pk=instance.pk)
