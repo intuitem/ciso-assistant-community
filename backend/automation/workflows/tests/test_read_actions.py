@@ -521,3 +521,61 @@ class TestDeadlineSweepModels:
         # display_short falls back to ref_id when the node has no name.
         assert row["requirement_name"] == "R1"
         assert row["compliance_assessment_name"] == "Audit"
+
+
+def make_scenarios(domain):
+    """One rated (current_level=1) and one unrated (-1 sentinel) scenario."""
+    from core.models import Perimeter, RiskAssessment, RiskMatrix, RiskScenario
+
+    perimeter = Perimeter.objects.create(name="P", folder=domain)
+    matrix = RiskMatrix.objects.create(name="M", folder=Folder.get_root_folder())
+    assessment = RiskAssessment.objects.create(
+        name="RA", perimeter=perimeter, risk_matrix=matrix, folder=domain
+    )
+    rated = RiskScenario.objects.create(
+        name="Rated", risk_assessment=assessment, folder=domain
+    )
+    RiskScenario.objects.create(
+        name="Unrated", risk_assessment=assessment, folder=domain
+    )
+    # save() resets levels to -1 while proba/impact are unset; rate one row
+    # at the column level.
+    RiskScenario.objects.filter(id=rated.id).update(current_level=1)
+    return assessment
+
+
+@pytest.mark.django_db
+class TestRiskScenarioLevels:
+    def test_threshold_filters_skip_unrated_scenarios(self):
+        domain = make_domain("Domain scenario levels")
+        make_scenarios(domain)
+        version = read_flow(
+            domain,
+            {
+                "model": "risk_scenario",
+                "mode": "list",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [{"field": "current_level", "op": "lte", "value": 2}],
+                },
+            },
+        )
+        output = read_output(start_instance(version))
+        assert [row["name"] for row in output["results"]] == ["Rated"]
+
+    def test_eq_minus_one_still_targets_unrated_rows(self):
+        domain = make_domain("Domain unrated eq")
+        make_scenarios(domain)
+        version = read_flow(
+            domain,
+            {
+                "model": "risk_scenario",
+                "mode": "list",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [{"field": "current_level", "op": "eq", "value": -1}],
+                },
+            },
+        )
+        output = read_output(start_instance(version))
+        assert [row["name"] for row in output["results"]] == ["Unrated"]

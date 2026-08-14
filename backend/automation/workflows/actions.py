@@ -423,6 +423,11 @@ READABLE_MODELS = {
             "current_level",
             "residual_level",
         ],
+        # Matrix-index levels store -1 for "not rated" (RiskScenario.save
+        # resets them while proba/impact are unset). Range filters must not
+        # sweep un-assessed scenarios in — same >= 0 guard as
+        # within_tolerance. eq -1 stays available to target unrated rows.
+        "unrated_sentinels": {"inherent_level", "current_level", "residual_level"},
     },
     "risk_acceptance": {
         "model": RiskAcceptance,
@@ -459,7 +464,7 @@ _READ_OP_LOOKUPS = {
 }
 
 
-def _read_condition_to_q(condition, allowed_fields, context):
+def _read_condition_to_q(condition, entry, allowed_fields, context):
     field = condition.get("field")
     if field not in allowed_fields:
         raise ActionError(f"read_objects: '{field}' is not a filterable field")
@@ -485,17 +490,21 @@ def _read_condition_to_q(condition, allowed_fields, context):
         query = Q(**{f"{field}__in": value})
         return ~query if op == "not_in" else query
     query = Q(**{f"{field}__{lookup}": value})
+    if op in ("gt", "lt", "gte", "lte") and field in entry.get(
+        "unrated_sentinels", ()
+    ):
+        query &= Q(**{f"{field}__gte": 0})
     return ~query if op == "neq" else query
 
 
-def _read_group_to_q(group, allowed_fields, context):
+def _read_group_to_q(group, entry, allowed_fields, context):
     operator = group.get("operator", "and")
     parts = [
-        _read_condition_to_q(condition, allowed_fields, context)
+        _read_condition_to_q(condition, entry, allowed_fields, context)
         for condition in group.get("conditions", [])
     ]
     parts += [
-        _read_group_to_q(child, allowed_fields, context)
+        _read_group_to_q(child, entry, allowed_fields, context)
         for child in group.get("children", [])
     ]
     if not parts:
@@ -512,10 +521,10 @@ def _read_group_to_q(group, allowed_fields, context):
     return ~combined if operator == "not" else combined
 
 
-def _read_filters_to_q(tree, allowed_fields, context):
+def _read_filters_to_q(tree, entry, allowed_fields, context):
     if tree in (None, {}):
         return Q()
-    return _read_group_to_q(tree, allowed_fields, context)
+    return _read_group_to_q(tree, entry, allowed_fields, context)
 
 
 def _serialize_read_row(obj, fields, computed=None):
@@ -545,7 +554,7 @@ class ReadObjectsAction(BaseAction):
             raise ActionError(f"read_objects: unknown model '{config.get('model')}'")
         fields = _read_fields(entry)
         context = _render_context(instance)
-        query = _read_filters_to_q(config.get("filters"), set(fields), context)
+        query = _read_filters_to_q(config.get("filters"), entry, set(fields), context)
 
         order_by = config.get("order_by") or "-created_at"
         if order_by.lstrip("-") not in fields:
