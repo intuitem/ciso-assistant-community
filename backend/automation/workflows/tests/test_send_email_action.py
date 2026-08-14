@@ -68,10 +68,7 @@ def email_flow(config):
     return version
 
 
-def enable_mailing(settings):
-    general, _ = GlobalSettings.objects.get_or_create(name="general")
-    general.value = {**(general.value or {}), "notifications_enable_mailing": True}
-    general.save()
+def configure_smtp(settings):
     settings.EMAIL_HOST = "smtp.tests.local"
     settings.EMAIL_PORT = "25"
     settings.DEFAULT_FROM_EMAIL = "ciso@tests.local"
@@ -106,7 +103,7 @@ class TestSendEmail:
     def test_delivery_runs_outside_the_engine_transaction(
         self, settings, dispatch, django_capture_on_commit_callbacks
     ):
-        enable_mailing(settings)
+        configure_smtp(settings)
         version = email_flow({"recipients": "a@tests.local", "subject": "S"})
         with django_capture_on_commit_callbacks(execute=True):
             instance = start_instance(version)
@@ -120,7 +117,7 @@ class TestSendEmail:
     def test_sends_to_each_recipient(
         self, settings, dispatch, django_capture_on_commit_callbacks
     ):
-        enable_mailing(settings)
+        configure_smtp(settings)
         version = email_flow(
             {
                 "recipients": "a@tests.local, b@tests.local",
@@ -144,7 +141,7 @@ class TestSendEmail:
     def test_duplicate_task_delivery_is_ignored(
         self, settings, dispatch, django_capture_on_commit_callbacks
     ):
-        enable_mailing(settings)
+        configure_smtp(settings)
         version = email_flow({"recipients": "a@tests.local", "subject": "S"})
         with django_capture_on_commit_callbacks(execute=True):
             instance = start_instance(version)
@@ -154,19 +151,25 @@ class TestSendEmail:
         assert instance.status == WorkflowInstance.Status.COMPLETED
         assert len(mail.outbox) == 1
 
-    def test_mailing_disabled_fails_the_node(self, settings):
-        settings.EMAIL_HOST = "smtp.tests.local"
-        settings.DEFAULT_FROM_EMAIL = "ciso@tests.local"
+    def test_notifications_toggle_does_not_gate_workflow_email(
+        self, settings, dispatch, django_capture_on_commit_callbacks
+    ):
+        # notifications_enable_mailing governs the digest notifications only;
+        # send_email nodes delivered with it off before the sync rework and
+        # must keep doing so.
+        configure_smtp(settings)
+        general, _ = GlobalSettings.objects.get_or_create(name="general")
+        general.value = {**(general.value or {}), "notifications_enable_mailing": False}
+        general.save()
         version = email_flow({"recipients": "a@tests.local", "subject": "S"})
-        instance = start_instance(version)
-        assert instance.status == WorkflowInstance.Status.FAILED
-        assert any("mailing is disabled" in m for m in error_messages(instance))
-        assert not mail.outbox
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        dispatch.run()
+        instance.refresh_from_db()
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert len(mail.outbox) == 1
 
     def test_missing_email_settings_fail_the_node(self, settings):
-        general, _ = GlobalSettings.objects.get_or_create(name="general")
-        general.value = {**(general.value or {}), "notifications_enable_mailing": True}
-        general.save()
         settings.EMAIL_HOST = None
         settings.EMAIL_PORT = None
         settings.DEFAULT_FROM_EMAIL = None
@@ -180,7 +183,7 @@ class TestSendEmail:
         assert not mail.outbox
 
     def test_invalid_recipient_fails_before_any_send(self, settings):
-        enable_mailing(settings)
+        configure_smtp(settings)
         version = email_flow(
             {"recipients": "a@tests.local, not-an-email", "subject": "S"}
         )
@@ -194,7 +197,7 @@ class TestSendEmail:
     def test_transport_failure_fails_the_node(
         self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
     ):
-        enable_mailing(settings)
+        configure_smtp(settings)
 
         def broken_send(
             subject, message, recipient, html_message=None, connection=None
@@ -216,7 +219,7 @@ class TestSendEmail:
     def test_one_dead_recipient_does_not_starve_the_rest(
         self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
     ):
-        enable_mailing(settings)
+        configure_smtp(settings)
         import core.tasks as core_tasks
 
         real_send = core_tasks.send_email_now
@@ -251,7 +254,7 @@ class TestSendEmail:
     def test_failed_delivery_feeds_the_retry_policy(
         self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
     ):
-        enable_mailing(settings)
+        configure_smtp(settings)
         version = email_flow({"recipients": "a@tests.local", "subject": "S"})
         version.nodes.filter(type=WorkflowNode.Type.ACTION).update(
             retry_max_attempts=1, retry_delay_seconds=5
@@ -292,7 +295,7 @@ class TestSendEmail:
     def test_zero_messages_sent_fails_the_node(
         self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
     ):
-        enable_mailing(settings)
+        configure_smtp(settings)
         monkeypatch.setattr(
             "core.tasks.EmailMessage.send", lambda self, fail_silently=False: 0
         )
@@ -307,7 +310,7 @@ class TestSendEmail:
         )
 
     def test_no_recipients_fails_the_node(self, settings):
-        enable_mailing(settings)
+        configure_smtp(settings)
         version = email_flow({"recipients": "", "subject": "S"})
         instance = start_instance(version)
         assert instance.status == WorkflowInstance.Status.FAILED

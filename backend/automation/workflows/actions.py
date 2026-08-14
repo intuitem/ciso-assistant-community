@@ -554,15 +554,12 @@ class SendEmailAction(BaseAction):
         # transaction holds the instance-tree locks. The task resumes or
         # fails the node, so delivery errors still feed the retry policy.
         from core.tasks import missing_email_settings
-        from global_settings.models import GlobalSettings
 
         from .tasks import send_email_task
 
-        general = GlobalSettings.objects.filter(name="general").first()
-        if not (general and (general.value or {}).get("notifications_enable_mailing")):
-            raise ActionError(
-                "send_email: mailing is disabled (enable it under Extra/Settings)"
-            )
+        # No notifications_enable_mailing gate: that toggle governs the digest
+        # notifications, and send_email nodes are explicit user-authored
+        # actions that delivered regardless of it before the sync rework.
         missing = missing_email_settings()
         if missing:
             raise ActionError(
