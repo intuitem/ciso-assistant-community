@@ -650,8 +650,8 @@ class WorkflowInstanceViewSet(BaseModelViewSet):
         trigger node, or the sole trigger node)."""
         # Scope the lookup to versions the user can view, so out-of-scope
         # UUIDs 404 like everywhere else instead of confirming existence.
-        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, WorkflowVersion
+        viewable_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, WorkflowVersion
         )
         version = get_object_or_404(
             WorkflowVersion.objects.filter(id__in=viewable_ids),

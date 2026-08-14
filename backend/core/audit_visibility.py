@@ -7,8 +7,9 @@ reference object may not see.
 """
 
 from __future__ import annotations
+from uuid import UUID
 
-from typing import Iterable
+from typing import Iterable, Optional
 
 from core.models import (
     AppliedControl,
@@ -52,10 +53,10 @@ def _allowed_folder_ids(folder: Folder) -> set:
     return allowed
 
 
-def _accessible_ids(folder: Folder, admin, model: type):
+def _accessible_ids(folder: Folder, admin, model: type) -> Optional[set[UUID]]:
     """Return the set of IDs accessible to the admin for a given model, from folder."""
     try:
-        view_ids, _, _ = RoleAssignment.get_accessible_object_ids(folder, admin, model)
+        view_ids = RoleAssignment.get_viewable_object_ids(admin, model, folder)
     except NotImplementedError:
         return None
     return set(view_ids)

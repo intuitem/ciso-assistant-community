@@ -1460,10 +1460,8 @@ class QuantitativeRiskStudyActionPlanList(ActionPlanList):
             quantitative_risk_hypotheses_added__in=hypotheses
         ).distinct()
 
-        viewable_controls, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(),
-            self.request.user,
-            AppliedControl,
+        viewable_controls = RoleAssignment.get_viewable_object_ids(
+            self.request.user, AppliedControl
         )
         return qs.filter(id__in=viewable_controls)
 

@@ -750,8 +750,8 @@ class TestProcessingMultiSheetEndpoint:
         record = {"name": "P", "processing": str(processing.id)}
 
         with patch(
-            "data_wizard.views.RoleAssignment.get_accessible_object_ids",
-            return_value=([], [], []),
+            "data_wizard.views.RoleAssignment._get_accessible_ids",
+            return_value=[],
         ):
             resolved, error = consumer._resolve_processing(record)
         assert resolved is None
@@ -759,8 +759,8 @@ class TestProcessingMultiSheetEndpoint:
 
         accessible_consumer = PurposeRecordConsumer(base_context)
         with patch(
-            "data_wizard.views.RoleAssignment.get_accessible_object_ids",
-            return_value=([processing.id], [], []),
+            "data_wizard.views.RoleAssignment._get_accessible_ids",
+            return_value=[processing.id],
         ):
             resolved, error = accessible_consumer._resolve_processing(record)
         assert error is None
@@ -1292,7 +1292,7 @@ class TestRealAuthAndRBAC:
 
     def test_admin_update_mode_sees_existing_record(self, knox_admin_client, app_ready):
         """
-        With real RBAC, the admin's get_accessible_object_ids() returns the
+        With real RBAC, the admin's get_changeable_object_ids() returns the
         existing record so UPDATE mode can find and patch it.
         """
         folder = app_ready
