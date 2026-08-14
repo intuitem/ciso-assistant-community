@@ -149,9 +149,7 @@ class PersonalDataViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Processing
-        )
+        viewable_ids = RoleAssignment.get_viewable_object_ids(request.user, Processing)
         try:
             processing = Processing.objects.filter(id__in=viewable_ids).get(
                 id=processing_uuid
@@ -587,41 +585,28 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="aggregated metrics")
     def agg_metrics(self, request):
-        (viewable_processings, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Processing,
+        viewable_processings = RoleAssignment.get_viewable_object_ids(
+            request.user, Processing
         )
-        (viewable_data_contractors, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=DataContractor,
+        viewable_data_contractors = RoleAssignment.get_viewable_object_ids(
+            request.user, DataContractor
         )
-        (viewable_data_transfers, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=DataTransfer,
+        viewable_data_transfers = RoleAssignment.get_viewable_object_ids(
+            request.user, DataTransfer
         )
-        (viewable_right_requests, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=RightRequest,
+        viewable_right_requests = RoleAssignment.get_viewable_object_ids(
+            request.user, RightRequest
         )
-        (viewable_data_breaches, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=DataBreach,
+        viewable_data_breaches = RoleAssignment.get_viewable_object_ids(
+            request.user, DataBreach
         )
-        (viewable_personal_data, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=PersonalData,
+        viewable_personal_data = RoleAssignment.get_viewable_object_ids(
+            request.user, PersonalData
         )
-        (viewable_data_recipients, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=DataRecipient,
+        viewable_data_recipients = RoleAssignment.get_viewable_object_ids(
+            request.user, DataRecipient
         )
+
         processings_count = len(viewable_processings)
 
         pd_categories = PersonalData.get_categories_count(
