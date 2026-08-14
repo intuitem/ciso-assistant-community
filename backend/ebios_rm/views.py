@@ -1255,9 +1255,7 @@ class OperatingModeViewSet(BaseModelViewSet):
         from iam.models import RoleAssignment, Folder
 
         accessible_ea_ids = set(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), request.user, ElementaryAction
-            )[0]
+            RoleAssignment.get_viewable_object_ids(request.user, ElementaryAction)
         )
         seen_ea_ids = set()
         errors = []

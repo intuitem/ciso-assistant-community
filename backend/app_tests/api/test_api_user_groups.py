@@ -65,7 +65,7 @@ def _domain_manager_role() -> Role:
         Permission.objects.filter(
             codename__in=[
                 # view_folder is required for any object under the domain to be
-                # visible at all (see get_accessible_object_ids).
+                # visible at all (see get_viewable_object_ids).
                 "view_folder",
                 "view_usergroup",
                 "change_usergroup",
