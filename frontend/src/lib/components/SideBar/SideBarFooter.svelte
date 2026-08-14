@@ -142,6 +142,13 @@
 							class="unstyled cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-surface-200-800 disabled:text-surface-400-600 text-surface-950-50"
 							data-testid="docs-button"><i class="fa-solid fa-book mr-2"></i>{m.onlineDocs()}</a
 						>
+						<a
+							href="https://github.com/tarcisiolisboayamada/ciso-assistant-community/tree/ciso-tsi"
+							target="_blank"
+							class="unstyled cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-surface-200-800 disabled:text-surface-400-600 text-surface-950-50"
+							data-testid="source-code-button"
+							><i class="fa-solid fa-code mr-2"></i>{m.sourceCode()}</a
+						>
 						<form action="/logout" method="POST" onsubmit={() => breadcrumbs.clear()}>
 							<button class="w-full" type="submit" data-testid="logout-button">
 								<span

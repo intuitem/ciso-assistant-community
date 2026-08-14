@@ -979,6 +979,7 @@
 	"taintedFormMessage": "Do you want to leave this page? Changes you made may not be saved.",
 	"riskScenariosStatus": "Risk scenarios status",
 	"onlineDocs": "Online documentation",
+	"sourceCode": "Source code",
 	"warning": "Warning",
 	"missingMandatoyObjects1": "Some mandatory objects to {model} are not created or imported yet",
 	"missingMandatoyObjects2": "Please add them before proceeding",

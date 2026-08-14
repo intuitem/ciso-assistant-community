@@ -979,6 +979,7 @@
  "taintedFormMessage": "Você deseja sair desta página? As alterações que você fez podem não ser salvas.",
  "riskScenariosStatus": "Status dos cenários de risco",
  "onlineDocs": "Documentação online",
+ "sourceCode": "Código-fonte",
  "warning": "Aviso",
  "missingMandatoyObjects1": "Alguns objetos obrigatórios para {model} ainda não foram criados ou importados",
  "missingMandatoyObjects2": "Por favor, adicione-os antes de prosseguir",

@@ -23,12 +23,13 @@ Transformar o CISO Assistant Community (GRC open source, francês/inglês) em **
 
 - **T3 — Maturidade de TSI + Gestão de Terceiros**: jornada guiada única, adaptada do preset NIST CSF 2.0 existente (que já usa o conceito de *Tiers* = maturidade), com a etapa de terceiros aprofundada usando o aparato completo de TPRM.
 - **T4 — Rebranding visual**: nome comercial (**CISO TSI**), troca textual (i18n + UI) e identidade visual (ícone, lockup, paleta retonalizada, favicon) implementados.
+- **T5 — Conformidade AGPL**: mecanismo de disponibilização de código-fonte (link "Código-fonte" na UI + disciplina de sincronia com o fork público) implementado.
 
 ### 2.2 Pendências residuais (fora do escopo desta rodada)
 
 - ~~Regenerar o `favicon.ico` binário~~ — ✅ resolvido em 2026-08-10.
 - ~~Rebuild da imagem Docker do frontend para expor o rebranding/i18n em produção~~ — ✅ resolvido em 2026-08-11 (ver detalhes no [T4](PLAN-BR-T4-REBRANDING.md#6-pendente)).
-- Mecanismo de disponibilização de código-fonte exigido pela AGPL, antes do lançamento comercial como SaaS pago.
+- ~~Mecanismo de disponibilização de código-fonte exigido pela AGPL, antes do lançamento comercial como SaaS pago~~ — ✅ resolvido em 2026-08-13, ver [T5](PLAN-BR-T5-AGPL-COMPLIANCE.md).
 - Extensão do rebranding textual às ~300 referências fora do escopo aprovado (CI/CD, packaging, `product-docs/`, conectores de terceiros) — decisão de negócio separada.
 
 ### 2.3 Fora do escopo (por ora)
@@ -73,6 +74,7 @@ frontend/src/lib/assets/ciso.svg   ── logo (via Logo.svelte) ── frontend
 | [T2 — i18n pt-BR](PLAN-BR-T2-I18N-PTBR.md) | `frontend/messages/pt.json` completo | — |
 | [T3 — Maturidade TSI + Terceiros](PLAN-BR-T3-TSI-TERCEIROS.md) | `preset-tsi-terceiros.yaml` | T2 |
 | [T4 — Rebranding visual](PLAN-BR-T4-REBRANDING.md) | assets, tema, nome | — |
+| [T5 — Conformidade AGPL](PLAN-BR-T5-AGPL-COMPLIANCE.md) | link de código-fonte, disciplina de release | T4 |
 
 ## 7. Trabalho ao final
 
