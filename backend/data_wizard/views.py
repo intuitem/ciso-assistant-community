@@ -4216,7 +4216,12 @@ class LoadFileView(APIView):
         on_conflict=ConflictMode.STOP,
         target_id=None,
     ):
-        results = {"successful": 0, "failed": 0, "errors": []}
+        results = {
+            "successful": 0,
+            "failed": 0,
+            "auto_pinned_scores": 0,
+            "errors": [],
+        }
         try:
             if target_id is not None:
                 # Reconcile into an existing audit (and its already generated
@@ -4852,6 +4857,7 @@ class LoadFileView(APIView):
                     ):
                         # Imported score on question-driven requirement = override
                         requirement_data["is_score_overridden"] = True
+                        results["auto_pinned_scores"] += 1
 
                     req_serializer = RequirementAssessmentWriteSerializer(
                         instance=requirement_assessment,
@@ -4893,7 +4899,7 @@ class LoadFileView(APIView):
                 results["errors"].append({"record": record, "error": str(e)})
 
         logger.info(
-            f"Compliance Assessment import complete. Success: {results['successful']}, Failed: {results['failed']}"
+            f"Compliance Assessment import complete. Success: {results['successful']}, Failed: {results['failed']}, Auto-pinned scores: {results['auto_pinned_scores']}"
         )
         return results
 
