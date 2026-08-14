@@ -1423,6 +1423,19 @@ class LibraryUpdater:
 
                     # update answers or score for each ra for the current requirement_node, when relevant
                     for ra in existing_requirement_assessment_objects.get(urn, []):
+                        # Runs regardless of is_scored/score: a pin on a null
+                        # score would otherwise survive the reset and freeze
+                        # the RA against future recomputes.
+                        if (
+                            self.strategy == "reset"
+                            and ra.is_score_overridden
+                            and ra.compliance_assessment in ca_with_scale_change
+                        ):
+                            ra.is_score_overridden = False
+                            if ra.pk not in ra_pks_to_update:
+                                ra_pks_to_update.add(ra.pk)
+                                requirement_assessment_objects_to_update.append(ra)
+
                         if (
                             ra.is_scored
                             and ra.score is not None
@@ -1488,8 +1501,6 @@ class LibraryUpdater:
                                 ra.is_scored = (
                                     new_score is not None and self.strategy != "reset"
                                 )
-                                if self.strategy == "reset":
-                                    ra.is_score_overridden = False
                                 if ra.pk not in ra_pks_to_update:
                                     ra_pks_to_update.add(ra.pk)
                                     requirement_assessment_objects_to_update.append(ra)
