@@ -5699,8 +5699,6 @@ class LoadFileView(APIView):
         on_conflict=ConflictMode.STOP,
     ):
         results = self._empty_tprm_results()
-        # Change scope, not view: resolving audit_ref_id/audit_name feeds
-        # link_audit, which relocates the audit into the enclave.
         accessible_audit_ids = RoleAssignment.get_changeable_object_ids(
             request.user, ComplianceAssessment
         )
