@@ -1,9 +1,14 @@
 """send_email action: delivery failures must fail the node.
 
-The action sends synchronously (not through the fire-and-forget huey task),
-so an SMTP error, an unconfigured mailer or a disabled mailing toggle all
-surface as ActionError and feed the node retry policy instead of logging a
-clean ACTION_EXECUTED row while nothing was sent.
+Delivery is dispatched to a huey task (DeferredDispatch): the engine parks
+the token WAITING and the task sends outside the engine transaction, so SMTP
+I/O never runs while the instance-tree locks are held. The task hands the
+token back — success advances the run, any delivery failure fails the node
+and feeds the per-node retry policy instead of logging a clean
+ACTION_EXECUTED row while nothing was sent.
+
+Huey is not immediate in tests: the `dispatch` fixture captures the enqueue
+and `dispatch.run()` executes the task body synchronously.
 """
 
 import uuid
@@ -13,9 +18,16 @@ from django.core import mail
 
 from global_settings.models import GlobalSettings
 from iam.models import Folder
+from automation.workflows import tasks as workflow_tasks
 from automation.workflows.engine import start_instance
 from automation.workflows.graph import save_graph
-from automation.workflows.models import Workflow, WorkflowInstance, WorkflowVersion
+from automation.workflows.models import (
+    Workflow,
+    WorkflowInstance,
+    WorkflowNode,
+    WorkflowToken,
+    WorkflowVersion,
+)
 from automation.workflows.tests.helpers import publisher_user
 
 
@@ -69,9 +81,45 @@ def error_messages(instance):
     return [log.message or "" for log in instance.logs.filter(event_type="error")]
 
 
+@pytest.fixture
+def dispatch(monkeypatch):
+    """Capture send_email_task enqueues instead of hitting the huey queue;
+    run(i) executes the captured task body synchronously."""
+    captured = []
+    deliver = workflow_tasks.send_email_task.call_local
+    monkeypatch.setattr(
+        workflow_tasks, "send_email_task", lambda **kwargs: captured.append(kwargs)
+    )
+
+    class Dispatch:
+        calls = captured
+
+        @staticmethod
+        def run(index=0):
+            deliver(**captured[index])
+
+    return Dispatch
+
+
 @pytest.mark.django_db
 class TestSendEmail:
-    def test_sends_to_each_recipient(self, settings):
+    def test_delivery_runs_outside_the_engine_transaction(
+        self, settings, dispatch, django_capture_on_commit_callbacks
+    ):
+        enable_mailing(settings)
+        version = email_flow({"recipients": "a@tests.local", "subject": "S"})
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        # Parked, nothing sent: the send happens in the task, after commit.
+        assert instance.status == WorkflowInstance.Status.ACTIVE
+        token = instance.tokens.get(current_node__type=WorkflowNode.Type.ACTION)
+        assert token.status == WorkflowToken.Status.WAITING
+        assert not mail.outbox
+        assert dispatch.calls[0]["token_id"] == str(token.id)
+
+    def test_sends_to_each_recipient(
+        self, settings, dispatch, django_capture_on_commit_callbacks
+    ):
         enable_mailing(settings)
         version = email_flow(
             {
@@ -80,7 +128,10 @@ class TestSendEmail:
                 "body": "Control is overdue",
             }
         )
-        instance = start_instance(version)
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        dispatch.run()
+        instance.refresh_from_db()
         assert instance.status == WorkflowInstance.Status.COMPLETED
         assert sorted(message.to[0] for message in mail.outbox) == [
             "a@tests.local",
@@ -89,6 +140,19 @@ class TestSendEmail:
         log = instance.logs.get(event_type="action_executed")
         assert log.data["recipients"] == ["a@tests.local", "b@tests.local"]
         assert log.data["subject"] == "Reminder"
+
+    def test_duplicate_task_delivery_is_ignored(
+        self, settings, dispatch, django_capture_on_commit_callbacks
+    ):
+        enable_mailing(settings)
+        version = email_flow({"recipients": "a@tests.local", "subject": "S"})
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        dispatch.run()
+        dispatch.run()  # huey may deliver twice; the WAITING pre-check drops it
+        instance.refresh_from_db()
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert len(mail.outbox) == 1
 
     def test_mailing_disabled_fails_the_node(self, settings):
         settings.EMAIL_HOST = "smtp.tests.local"
@@ -127,30 +191,119 @@ class TestSendEmail:
         )
         assert not mail.outbox
 
-    def test_transport_failure_fails_the_node(self, settings, monkeypatch):
+    def test_transport_failure_fails_the_node(
+        self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
+    ):
         enable_mailing(settings)
 
-        def broken_send(subject, message, recipient, html_message=None):
+        def broken_send(
+            subject, message, recipient, html_message=None, connection=None
+        ):
             raise ConnectionRefusedError("connection refused")
 
         monkeypatch.setattr("core.tasks.send_email_now", broken_send)
         version = email_flow({"recipients": "a@tests.local", "subject": "S"})
-        instance = start_instance(version)
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        dispatch.run()
+        instance.refresh_from_db()
         assert instance.status == WorkflowInstance.Status.FAILED
         assert any(
-            "sending to 'a@tests.local' failed" in m for m in error_messages(instance)
+            "delivery failed for a@tests.local" in m and "(0 of 1 sent)" in m
+            for m in error_messages(instance)
         )
 
-    def test_zero_messages_sent_fails_the_node(self, settings, monkeypatch):
+    def test_one_dead_recipient_does_not_starve_the_rest(
+        self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
+    ):
+        enable_mailing(settings)
+        import core.tasks as core_tasks
+
+        real_send = core_tasks.send_email_now
+
+        def flaky(subject, message, recipient, html_message=None, connection=None):
+            if recipient == "gone@tests.local":
+                raise ConnectionRefusedError("mailbox gone")
+            return real_send(subject, message, recipient, html_message, connection)
+
+        monkeypatch.setattr("core.tasks.send_email_now", flaky)
+        version = email_flow(
+            {
+                "recipients": "a@tests.local, gone@tests.local, c@tests.local",
+                "subject": "S",
+            }
+        )
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        dispatch.run()
+        instance.refresh_from_db()
+        assert instance.status == WorkflowInstance.Status.FAILED
+        # The dead address fails the node but the others still got their mail.
+        assert sorted(message.to[0] for message in mail.outbox) == [
+            "a@tests.local",
+            "c@tests.local",
+        ]
+        assert any(
+            "gone@tests.local" in m and "(2 of 3 sent)" in m
+            for m in error_messages(instance)
+        )
+
+    def test_failed_delivery_feeds_the_retry_policy(
+        self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
+    ):
+        enable_mailing(settings)
+        version = email_flow({"recipients": "a@tests.local", "subject": "S"})
+        version.nodes.filter(type=WorkflowNode.Type.ACTION).update(
+            retry_max_attempts=1, retry_delay_seconds=5
+        )
+        scheduled = {}
+        monkeypatch.setattr(
+            "automation.workflows.tasks.retry_token_task.schedule",
+            lambda args, delay: scheduled.update(token_id=args[0], delay=delay),
+        )
+        import core.tasks as core_tasks
+
+        real_send = core_tasks.send_email_now
+        state = {"broken": True}
+
+        def flaky(subject, message, recipient, html_message=None, connection=None):
+            if state["broken"]:
+                raise ConnectionRefusedError("connection refused")
+            return real_send(subject, message, recipient, html_message, connection)
+
+        monkeypatch.setattr("core.tasks.send_email_now", flaky)
+
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        with django_capture_on_commit_callbacks(execute=True):
+            dispatch.run()  # first delivery fails -> RETRYING, retry scheduled
+        token = instance.tokens.get(status=WorkflowToken.Status.RETRYING)
+        assert scheduled == {"token_id": str(token.id), "delay": 5}
+
+        state["broken"] = False
+        with django_capture_on_commit_callbacks(execute=True):
+            # The consumer re-runs the node, which re-renders and re-dispatches.
+            workflow_tasks.retry_token_task.call_local(scheduled["token_id"])
+        dispatch.run(1)
+        instance.refresh_from_db()
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert [message.to for message in mail.outbox] == [["a@tests.local"]]
+
+    def test_zero_messages_sent_fails_the_node(
+        self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
+    ):
         enable_mailing(settings)
         monkeypatch.setattr(
             "core.tasks.EmailMessage.send", lambda self, fail_silently=False: 0
         )
         version = email_flow({"recipients": "a@tests.local", "subject": "S"})
-        instance = start_instance(version)
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        dispatch.run()
+        instance.refresh_from_db()
         assert instance.status == WorkflowInstance.Status.FAILED
         assert any(
-            "sending to 'a@tests.local' failed" in m for m in error_messages(instance)
+            "delivery failed for a@tests.local" in m for m in error_messages(instance)
         )
 
     def test_no_recipients_fails_the_node(self, settings):

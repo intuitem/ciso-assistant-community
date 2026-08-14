@@ -675,17 +675,24 @@ def send_notification_email_expired_eta(owner_email, controls):
         )
 
 
-def send_email_now(subject, message, recipient, html_message=None):
+def send_email_now(subject, message, recipient, html_message=None, connection=None):
     """Synchronous send that propagates failures to the caller, unlike the
-    fire-and-forget send_notification_email task."""
-    ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
-    with get_connection(ssl_context=ssl_context) as connection:
+    fire-and-forget send_notification_email task. Pass `connection` to batch
+    several sends over one SMTP session (the caller owns its lifecycle)."""
+    from contextlib import nullcontext
+
+    if connection is None:
+        ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
+        scope = get_connection(ssl_context=ssl_context)
+    else:
+        scope = nullcontext(connection)
+    with scope as conn:
         msg = EmailMessage(
             subject=subject,
             body=message,
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[recipient],
-            connection=connection,
+            connection=conn,
         )
         if html_message:
             msg.content_subtype = "html"

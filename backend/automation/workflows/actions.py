@@ -11,7 +11,6 @@ import re
 import uuid
 from urllib.parse import urlsplit
 
-import structlog
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db.models import Q
@@ -34,13 +33,24 @@ from core.models import (
 )
 from tprm.models import Entity, EntityAssessment
 
-logger = structlog.get_logger(__name__)
-
 TEMPLATE_RE = re.compile(r"\{\{\s*([\w.]+)\s*\}\}")
 
 
 class ActionError(Exception):
     pass
+
+
+class DeferredDispatch:
+    """Returned by an action's execute() instead of an output dict when its
+    side effect must run outside the engine transaction (network I/O must not
+    hold the instance-tree locks). The engine parks the token WAITING and
+    enqueues `task` after commit with token_id added to `kwargs`; the task
+    hands the token back through engine.complete_deferred_action /
+    engine.fail_deferred_action."""
+
+    def __init__(self, task, kwargs):
+        self.task = task
+        self.kwargs = kwargs
 
 
 def dig(data, path):
@@ -539,11 +549,14 @@ class SendEmailAction(BaseAction):
     action_type = "send_email"
 
     def execute(self, config, instance):
-        # Synchronous send, unlike the notification digests: delivery failures
-        # must fail the node so the retry policy applies, instead of
-        # disappearing into a queue the run can never observe.
-        from core.tasks import missing_email_settings, send_email_now
+        # Config errors fail the node here; delivery happens in a huey task
+        # (DeferredDispatch) so SMTP I/O never runs while the engine
+        # transaction holds the instance-tree locks. The task resumes or
+        # fails the node, so delivery errors still feed the retry policy.
+        from core.tasks import missing_email_settings
         from global_settings.models import GlobalSettings
+
+        from .tasks import send_email_task
 
         general = GlobalSettings.objects.filter(name="general").first()
         if not (general and (general.value or {}).get("notifications_enable_mailing")):
@@ -571,26 +584,10 @@ class SendEmailAction(BaseAction):
                 raise ActionError(f"send_email: invalid recipient '{email}'")
         subject = render(config.get("subject", ""), _render_context(instance))
         body = render(config.get("body", ""), _render_context(instance))
-        for position, email in enumerate(recipients):
-            try:
-                send_email_now(subject, body, email)
-            except Exception as e:
-                # Raw exception text stays out of the run log (it can carry
-                # SMTP server internals); full detail goes to the server log.
-                logger.error(
-                    "send_email action delivery failure",
-                    recipient=email,
-                    instance_id=str(instance.id),
-                    error=str(e),
-                )
-                # A retry re-sends to every recipient, including the
-                # `position` that already went out; accepted over losing the
-                # remaining ones.
-                raise ActionError(
-                    f"send_email: sending to '{email}' failed"
-                    f" ({position} of {len(recipients)} sent)"
-                )
-        return {"recipients": recipients, "subject": subject}
+        return DeferredDispatch(
+            send_email_task,
+            {"subject": subject, "body": body, "recipients": recipients},
+        )
 
 
 @register
