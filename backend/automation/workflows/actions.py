@@ -12,7 +12,16 @@ import uuid
 from urllib.parse import urlsplit
 
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.db.models import (
+    BooleanField,
+    DateField,
+    DecimalField,
+    FloatField,
+    ForeignKey,
+    IntegerField,
+    Q,
+    UUIDField,
+)
 
 from core.models import (
     AppliedControl,
@@ -464,6 +473,29 @@ _READ_OP_LOOKUPS = {
 }
 
 
+def _concrete_field(model, name):
+    """Concrete column by name or attname (FK columns are whitelisted by
+    attname, e.g. compliance_assessment_id)."""
+    for field in model._meta.concrete_fields:
+        if field.name == name or field.attname == name:
+            return field
+    return None
+
+
+def _allowed_ops(field):
+    """Operators that make sense for the column's type. An untyped op either
+    crashes at query time or — worse — compiles on both databases with
+    different rows: 'contains' on a boolean LIKEs against 'true'/'false' on
+    PostgreSQL (casts to text) but against 0/1 on SQLite."""
+    if isinstance(field, BooleanField):
+        return {"eq", "neq", "is_null"}
+    if isinstance(field, (ForeignKey, UUIDField)):
+        return {"eq", "neq", "in", "not_in", "is_null"}
+    if isinstance(field, (DateField, IntegerField, FloatField, DecimalField)):
+        return set(_READ_OP_LOOKUPS) - {"contains"}
+    return set(_READ_OP_LOOKUPS)
+
+
 def _read_condition_to_q(condition, entry, allowed_fields, context):
     field = condition.get("field")
     if field not in allowed_fields:
@@ -472,6 +504,10 @@ def _read_condition_to_q(condition, entry, allowed_fields, context):
     lookup = _READ_OP_LOOKUPS.get(op)
     if lookup is None:
         raise ActionError(f"read_objects: unknown operator '{op}'")
+    if op not in _allowed_ops(_concrete_field(entry["model"], field)):
+        raise ActionError(
+            f"read_objects: operator '{op}' is not valid for field '{field}'"
+        )
     value = render(condition.get("value"), context)
     if op == "is_null":
         return Q(
@@ -1006,12 +1042,25 @@ def validate_read_config(node):
         errors.append(("action_read_invalid_filters", f"Invalid filters: {e}"))
     else:
         for condition in walk_conditions(tree or {}):
-            if condition.get("field") not in fields:
+            field = condition.get("field")
+            op = condition.get("op", "eq")
+            if field not in fields:
                 errors.append(
                     (
                         "action_read_invalid_filters",
-                        f"'{condition.get('field')}' is not a filterable field of "
+                        f"'{field}' is not a filterable field of "
                         f"'{config.get('model')}'",
+                    )
+                )
+            elif op not in _READ_OP_LOOKUPS:
+                errors.append(
+                    ("action_read_invalid_filters", f"Unknown operator '{op}'")
+                )
+            elif op not in _allowed_ops(_concrete_field(entry["model"], field)):
+                errors.append(
+                    (
+                        "action_read_invalid_filters",
+                        f"Operator '{op}' is not valid for '{field}'",
                     )
                 )
             if condition.get("changed"):

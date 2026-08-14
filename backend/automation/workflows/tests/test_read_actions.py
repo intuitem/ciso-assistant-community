@@ -579,3 +579,48 @@ class TestRiskScenarioLevels:
         )
         output = read_output(start_instance(version))
         assert [row["name"] for row in output["results"]] == ["Unrated"]
+
+
+@pytest.mark.django_db
+class TestOperatorTypeGating:
+    def _flow(self, op, value):
+        domain = make_domain(f"Domain op gate {op}")
+        return read_flow(
+            domain,
+            {
+                "model": "requirement_assessment",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [{"field": "is_scored", "op": op, "value": value}],
+                },
+            },
+        )
+
+    def test_boolean_contains_is_rejected_at_publish_time(self):
+        version = self._flow("contains", "tru")
+        read_node = version.nodes.get(type=WorkflowNode.Type.ACTION)
+        codes = [code for code, _message in validate_read_config(read_node)]
+        assert codes == ["action_read_invalid_filters"]
+
+    def test_boolean_eq_still_validates(self):
+        version = self._flow("eq", True)
+        read_node = version.nodes.get(type=WorkflowNode.Type.ACTION)
+        assert validate_read_config(read_node) == []
+
+    def test_boolean_contains_is_rejected_at_run_time(self):
+        # Published configs predate the publish gate: the same check must
+        # fail loud at execution instead of diverging across databases.
+        from automation.workflows.actions import (
+            READABLE_MODELS,
+            ActionError,
+            _read_condition_to_q,
+        )
+
+        entry = READABLE_MODELS["requirement_assessment"]
+        with pytest.raises(ActionError, match="not valid for field"):
+            _read_condition_to_q(
+                {"field": "is_scored", "op": "contains", "value": "tru"},
+                entry,
+                {"is_scored"},
+                {},
+            )
