@@ -389,8 +389,10 @@ class TestRegistryIntegrity:
         from automation.workflows.actions import READABLE_MODELS, _read_fields
 
         for key, entry in READABLE_MODELS.items():
-            columns = {f.name for f in entry["model"]._meta.concrete_fields}
-            assert "folder" in columns, key
+            concrete = entry["model"]._meta.concrete_fields
+            # FK columns are whitelisted by attname (*_id).
+            columns = {f.name for f in concrete} | {f.attname for f in concrete}
+            assert "folder" in {f.name for f in concrete}, key
             for field in _read_fields(entry):
                 assert field in columns, f"{key}.{field}"
 
@@ -579,6 +581,104 @@ class TestRiskScenarioLevels:
         )
         output = read_output(start_instance(version))
         assert [row["name"] for row in output["results"]] == ["Unrated"]
+
+
+@pytest.mark.django_db
+class TestAssessmentScoping:
+    def test_requirement_assessment_filterable_by_audit(self):
+        from core.models import (
+            ComplianceAssessment,
+            Framework,
+            Perimeter,
+            RequirementAssessment,
+            RequirementNode,
+        )
+
+        domain = make_domain("Domain audit scoping")
+        framework = Framework.objects.create(
+            name="FW", urn="urn:test:fw:scope", folder=Folder.get_root_folder()
+        )
+        requirement = RequirementNode.objects.create(
+            ref_id="R1",
+            urn="urn:test:fw:scope:req1",
+            framework=framework,
+            assessable=True,
+            folder=Folder.get_root_folder(),
+        )
+        perimeter = Perimeter.objects.create(name="P", folder=domain)
+        audits = [
+            ComplianceAssessment.objects.create(
+                name=f"Audit {i}",
+                framework=framework,
+                perimeter=perimeter,
+                folder=domain,
+            )
+            for i in range(2)
+        ]
+        for audit in audits:
+            RequirementAssessment.objects.create(
+                compliance_assessment=audit,
+                requirement=requirement,
+                folder=domain,
+                result="non_compliant",
+            )
+
+        version = read_flow(
+            domain,
+            {
+                "model": "requirement_assessment",
+                "mode": "list",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [
+                        {
+                            "field": "compliance_assessment_id",
+                            "op": "eq",
+                            "value": str(audits[0].id),
+                        }
+                    ],
+                },
+            },
+        )
+        output = read_output(start_instance(version))
+        assert output["count"] == 1
+        row = output["results"][0]
+        assert row["compliance_assessment_id"] == str(audits[0].id)
+        assert row["compliance_assessment_name"] == "Audit 0"
+
+    def test_risk_scenario_filterable_by_risk_assessment(self):
+        from core.models import Perimeter, RiskAssessment, RiskMatrix, RiskScenario
+
+        domain = make_domain("Domain scenario scoping")
+        assessment = make_scenarios(domain)
+        perimeter = Perimeter.objects.create(name="P2", folder=domain)
+        matrix = RiskMatrix.objects.create(name="M2", folder=Folder.get_root_folder())
+        other = RiskAssessment.objects.create(
+            name="Other", perimeter=perimeter, risk_matrix=matrix, folder=domain
+        )
+        RiskScenario.objects.create(
+            name="Elsewhere", risk_assessment=other, folder=domain
+        )
+
+        version = read_flow(
+            domain,
+            {
+                "model": "risk_scenario",
+                "mode": "list",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [
+                        {
+                            "field": "risk_assessment_id",
+                            "op": "eq",
+                            "value": str(assessment.id),
+                        }
+                    ],
+                },
+            },
+        )
+        output = read_output(start_instance(version))
+        assert {row["name"] for row in output["results"]} == {"Rated", "Unrated"}
 
 
 @pytest.mark.django_db

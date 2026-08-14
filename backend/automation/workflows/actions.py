@@ -302,7 +302,8 @@ class CreateObjectAction(BaseAction):
 # Explicit registry of models workflows may read. Each entry lists
 # the readable simple fields on top of BASE_READ_FIELDS; the combined set is
 # both the serialized output AND the filter/order whitelist — no "__" paths,
-# no relations, so filters cannot tunnel into other objects.
+# no relations, so filters cannot tunnel into other objects. FK columns are
+# listed by attname (*_id): the raw id value, still no join.
 BASE_READ_FIELDS = ["id", "name", "created_at", "updated_at"]
 
 
@@ -411,6 +412,8 @@ READABLE_MODELS = {
             "documentation_score",
             "eta",
             "due_date",
+            # Lets sweeps target one audit instead of every audit in scope.
+            "compliance_assessment_id",
         ],
         # Output-only identifiers: a bare row is unusable without knowing
         # which requirement of which audit it assesses. display_short, not
@@ -431,6 +434,8 @@ READABLE_MODELS = {
             "inherent_level",
             "current_level",
             "residual_level",
+            # ref_id ("R.1") collides across assessments; scope by id instead.
+            "risk_assessment_id",
         ],
         # Matrix-index levels store -1 for "not rated" (RiskScenario.save
         # resets them while proba/impact are unset). Range filters must not
