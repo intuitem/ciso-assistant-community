@@ -105,7 +105,7 @@ Each requirement assessment is normalised against its own resolved scale before 
 - **Average** and **Average of averages** — every requirement contributes a ratio in `[0..1]` (its score over its own range), the audit weighted-averages those ratios, then denormalises onto the audit's scale. A binary requirement scored 1/1 contributes 100%, exactly like a 5/5 on a 0..5 requirement.
 - **Sum** — kept as a raw weighted sum on each requirement's own scale. The audit's theoretical maximum aggregates the per-requirement maxes, so 100% remains achievable when every requirement hits its own ceiling.
 
-The donut display in the requirement tree mirrors the same normalisation: every node shows `score / max` against its resolved range, so an offset scale like 1..4 renders the minimum at 0% (not 25%).
+The donut display in the requirement tree mirrors the same normalisation: each node's fill is computed against its resolved range, so an offset scale like 1..4 renders the minimum at 0% (not 25%).
 
 #### Anchor N/A with mixed scales
 
@@ -119,11 +119,13 @@ To deviate from the computed value for a specific reason, an auditor can toggle 
 
 - unlocks the score field so a manual value can be entered;
 - pins that value — subsequent answer changes no longer recompute the score (the result, when it is answer-driven, still follows the answers);
-- keeps the automatic score visible next to the manual one, with a warning when the two diverge, so the deviation stays auditable.
+- keeps the automatic score visible next to the manual one, with a warning when the two diverge, so the deviation stays auditable. That automatic value is a live preview computed from the answers entered so far; the questionnaire has to be fully answered before it is the value the audit would actually store.
 
 Turning **Override score** back off hands the score back to the questionnaire and immediately recomputes it from the current answers.
 
-On **import**, a score supplied for a question-driven requirement is treated as an override automatically: the imported value is kept instead of being recomputed from the imported answers. This is what lets a filled-in scoring template drive the audit even when the framework defines questions.
+On **import**, a score supplied for a question-driven requirement is treated as an override automatically: the imported value is kept instead of being recomputed from the imported answers. This is what lets a filled-in scoring template drive the audit even when the framework defines questions. Add an `is_score_overridden` column to the sheet to decide explicitly per row — a falsy value there hands the score back to the questionnaire.
+
+**Cloning** an audit carries the pin over: a requirement pinned in the baseline stays pinned in the copy, with the same score.
 
 ## Lifecycle controls
 

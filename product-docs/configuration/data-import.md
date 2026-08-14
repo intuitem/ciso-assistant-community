@@ -212,7 +212,9 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
   * `in_review`
   * `done`
 * score
-  * integer from `0 to 100`
+  * integer within the requirement's effective scale — the audit's `min_score`/`max_score`, or the requirement's own bounds when it overrides them. Out-of-range values are rejected.
+* is\_score\_overridden
+  * `true` / `false` (also accepts `1`, `oui`, `vrai`, `x`). Only meaningful on requirements that carry questions: it decides whether the imported score is pinned or recomputed from the answers. Leave the column out and any imported score on a question-driven requirement is pinned automatically.
 * observations
 
 ### Special considerations
