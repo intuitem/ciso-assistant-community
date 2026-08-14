@@ -236,9 +236,7 @@ class DocumentContainerViewSet(BaseModelViewSet):
         to) and incoming (linked from)."""
         container = self.get_object()
         accessible = set(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), request.user, DocumentContainer
-            )[0]
+            RoleAssignment.get_viewable_object_ids(request.user, DocumentContainer)
         )
         outgoing = [
             {"id": str(r.target_container_id), "str": r.target_container.name}
@@ -573,9 +571,9 @@ class ManagedDocumentViewSet(BaseModelViewSet):
         # TODO(revisit): custom templates in Global aren't shared to domain-only
         # users (only built-ins are). If Global should act as a shared library,
         # also OR in root-folder templates here.
-        accessible_ids = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, DocumentTemplate
-        )[0]
+        accessible_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, DocumentTemplate
+        )
 
         def for_locale(locale):
             qs = DocumentTemplate.objects.filter(locale=locale).filter(
@@ -845,9 +843,11 @@ class DocumentAttachmentViewSet(BaseModelViewSet):
             pk_uuid = UUID(pk)
         except ValueError, AttributeError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        object_ids_view = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, DocumentAttachment
-        )[0]
+
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, DocumentAttachment
+        )
+
         if pk_uuid not in object_ids_view:
             return Response(status=status.HTTP_403_FORBIDDEN)
         attachment = self.get_object()
@@ -900,9 +900,10 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             pk_uuid = UUID(pk)
         except ValueError, AttributeError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        object_ids_view = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, DocumentRevision
-        )[0]
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, DocumentRevision
+        )
+
         if pk_uuid not in object_ids_view:
             return Response(status=status.HTTP_403_FORBIDDEN)
         revision = self.get_object()
@@ -1312,9 +1313,10 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             revision.content,
             extensions=["tables", "fenced_code", "toc", "nl2br"],
         )
-        accessible_ids = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, DocumentAttachment
-        )[0]
+        accessible_ids = RoleAssignment.get_viewable_object_ids(
+            user, DocumentAttachment
+        )
+
         content_html = mark_safe(self._inline_images(content_html, set(accessible_ids)))
         author_name = ""
         if revision.author:
