@@ -533,8 +533,15 @@ export const actions: Actions = {
 			body: JSON.stringify({ name: 'SCIM provisioning token' })
 		});
 		if (!response.ok) {
-			setFlash({ type: 'error', message: m.scimTokenGenerationFailed() }, event);
-			return fail(response.status, { error: 'Failed to generate SCIM token' });
+			let detail: string | undefined;
+			try {
+				detail = (await response.json())?.error;
+			} catch {
+				/* body wasn't JSON — fall back to the generic message below */
+			}
+			const message = detail || m.scimTokenGenerationFailed();
+			setFlash({ type: 'error', message }, event);
+			return fail(response.status, { error: message });
 		}
 		const data = await response.json();
 		return { token: data.token, id: data.id, name: data.name };
