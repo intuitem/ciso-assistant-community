@@ -199,6 +199,20 @@ class TestSendEmail:
         )
         assert not mail.outbox
 
+    def test_display_name_recipient_is_accepted(
+        self, settings, dispatch, django_capture_on_commit_callbacks
+    ):
+        configure_smtp(settings)
+        version = email_flow(
+            {"recipients": "Jane Doe <jane@tests.local>", "subject": "S"}
+        )
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        dispatch.run()
+        instance.refresh_from_db()
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert mail.outbox[0].to == ["Jane Doe <jane@tests.local>"]
+
     def test_invalid_recipient_fails_before_any_send(self, settings):
         configure_smtp(settings)
         version = email_flow(

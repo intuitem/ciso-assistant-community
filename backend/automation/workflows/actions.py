@@ -9,6 +9,7 @@ output_mapping into instance variables. String config values support
 import datetime
 import re
 import uuid
+from email.utils import parseaddr
 from urllib.parse import urlsplit
 
 from django.core.exceptions import ValidationError
@@ -575,8 +576,12 @@ class SendEmailAction(BaseAction):
         if not recipients:
             raise ActionError("send_email: no recipients configured")
         for email in recipients:
+            # Validate the addr-spec only: display-name recipients
+            # ('Jane Doe <jane@x>') delivered before the delivery rework and
+            # must keep working. (Commas inside quoted display names were
+            # already broken by the comma-split above; unchanged.)
             try:
-                validate_email(email)
+                validate_email(parseaddr(email)[1])
             except ValidationError:
                 raise ActionError(f"send_email: invalid recipient '{email}'")
         subject = render(config.get("subject", ""), _render_context(instance))
