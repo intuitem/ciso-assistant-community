@@ -1,6 +1,7 @@
 import csv
 import io
 import logging
+import math
 import structlog
 from functools import cached_property
 from pathlib import Path
@@ -731,11 +732,19 @@ class FolderScopeError(ValueError):
     """Raised when an existing-record lookup cannot be scoped to a folder."""
 
 
-def _parse_bool_cell(value: object) -> Optional[bool]:
-    """Parse a boolean cell. Returns None when the token is unrecognized."""
+def _parse_bool_cell(value: object, *, binary_only: bool = False) -> Optional[bool]:
+    """Parse a boolean cell. Returns None when the value is unrecognized.
+
+    binary_only additionally rejects numbers other than 0/1, for columns where
+    a stray 2 is a data error rather than spreadsheet truthiness.
+    """
     if isinstance(value, bool):
         return value
     if isinstance(value, (int, float)):
+        if math.isnan(value) or math.isinf(value):
+            return None
+        if binary_only and value not in (0, 1):
+            return None
         return value != 0
     if isinstance(value, str):
         token = value.strip().lower()
@@ -747,7 +756,7 @@ def _parse_bool_cell(value: object) -> Optional[bool]:
 
 
 def _bool_cell_or_false(value: object) -> bool:
-    """Lenient variant: blanks and unrecognized tokens read as False."""
+    """Lenient variant: blanks and unrecognized values read as False."""
     return _parse_bool_cell(value) is True
 
 
@@ -4841,7 +4850,9 @@ class LoadFileView(APIView):
 
                     override_cell = record.get("is_score_overridden")
                     if override_cell not in (None, ""):
-                        override_value = _parse_bool_cell(override_cell)
+                        override_value = _parse_bool_cell(
+                            override_cell, binary_only=True
+                        )
                         if override_value is None:
                             results["failed"] += 1
                             results["errors"].append(
