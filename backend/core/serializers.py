@@ -5508,6 +5508,20 @@ class ObjectClassificationWriteSerializer(BaseModelSerializer):
 
 
 class ValidationFlowWriteSerializer(BaseModelSerializer):
+    ALLOWED_STATUS_TRANSITIONS = {
+        ValidationFlow.Status.SUBMITTED: {
+            ValidationFlow.Status.ACCEPTED,
+            ValidationFlow.Status.REJECTED,
+            ValidationFlow.Status.CHANGE_REQUESTED,
+            ValidationFlow.Status.DROPPED,
+        },
+        ValidationFlow.Status.ACCEPTED: {ValidationFlow.Status.REVOKED},
+        ValidationFlow.Status.CHANGE_REQUESTED: {
+            ValidationFlow.Status.SUBMITTED,
+            ValidationFlow.Status.DROPPED,
+        },
+    }
+
     ref_id = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     event_notes = serializers.CharField(
         required=False, allow_blank=True, allow_null=True, write_only=True
@@ -5606,6 +5620,17 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
                 raise PermissionDenied(
                     {
                         "error": "This validation is in a terminal state and cannot be modified"
+                    }
+                )
+
+            if (
+                new_status != current_status
+                and new_status
+                not in self.ALLOWED_STATUS_TRANSITIONS.get(current_status, set())
+            ):
+                raise serializers.ValidationError(
+                    {
+                        "status": f"Cannot transition a validation from '{current_status}' to '{new_status}'"
                     }
                 )
 
