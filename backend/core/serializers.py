@@ -5537,6 +5537,13 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         required=False, allow_blank=True, allow_null=True, write_only=True
     )
 
+    def validate_status(self, value):
+        if self.instance is None and value != ValidationFlow.Status.SUBMITTED:
+            raise serializers.ValidationError(
+                f"A new validation must start as '{ValidationFlow.Status.SUBMITTED}'"
+            )
+        return value
+
     def create(self, validated_data: dict) -> ValidationFlow:
         """
         Override create to automatically set the requester to the current user
@@ -5593,61 +5600,66 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         # Check if status is being modified
         if "status" in validated_data:
             new_status = validated_data["status"]
-            current_status = instance.status
-
-            # Define who can modify based on current status
-            if current_status in ["submitted", "accepted"]:
-                # For submitted status: approver can do any action, requester can only drop
-                if current_status == "submitted" and new_status == "dropped":
-                    # Allow requester to drop their own request
-                    if (
-                        instance.requester != request_user
-                        and instance.approver != request_user
-                    ):
-                        raise PermissionDenied(
-                            {
-                                "error": "Only the requester or approver can drop this validation"
-                            }
-                        )
-                else:
-                    # Only approver can change status from submitted or accepted (for other actions)
-                    if instance.approver != request_user:
-                        raise PermissionDenied(
-                            {
-                                "error": "Only the assigned approver can modify this validation"
-                            }
-                        )
-            elif current_status == "change_requested":
-                # Only requester can change status from change_requested
-                if instance.requester != request_user:
-                    raise PermissionDenied(
-                        {
-                            "error": "Only the requester can resubmit or drop this validation"
-                        }
-                    )
-            else:
-                # Terminal states (rejected, revoked, dropped, expired) cannot be modified
-                raise PermissionDenied(
-                    {
-                        "error": "This validation is in a terminal state and cannot be modified"
-                    }
-                )
-
-            if (
-                new_status != current_status
-                and new_status
-                not in self.ALLOWED_STATUS_TRANSITIONS.get(current_status, set())
-            ):
-                raise serializers.ValidationError(
-                    {
-                        "status": f"Cannot transition a validation from '{current_status}' to '{new_status}'"
-                    }
-                )
 
             # Extract event notes from validated_data (passed from actions)
             event_notes = validated_data.pop("event_notes", None)
 
             with transaction.atomic():
+                # Re-read under lock: concurrent requests must not both validate the same starting status
+                instance = ValidationFlow.objects.select_for_update().get(
+                    pk=instance.pk
+                )
+                current_status = instance.status
+
+                # Define who can modify based on current status
+                if current_status in ["submitted", "accepted"]:
+                    # For submitted status: approver can do any action, requester can only drop
+                    if current_status == "submitted" and new_status == "dropped":
+                        # Allow requester to drop their own request
+                        if (
+                            instance.requester != request_user
+                            and instance.approver != request_user
+                        ):
+                            raise PermissionDenied(
+                                {
+                                    "error": "Only the requester or approver can drop this validation"
+                                }
+                            )
+                    else:
+                        # Only approver can change status from submitted or accepted (for other actions)
+                        if instance.approver != request_user:
+                            raise PermissionDenied(
+                                {
+                                    "error": "Only the assigned approver can modify this validation"
+                                }
+                            )
+                elif current_status == "change_requested":
+                    # Only requester can change status from change_requested
+                    if instance.requester != request_user:
+                        raise PermissionDenied(
+                            {
+                                "error": "Only the requester can resubmit or drop this validation"
+                            }
+                        )
+                else:
+                    # Terminal states (rejected, revoked, dropped, expired) cannot be modified
+                    raise PermissionDenied(
+                        {
+                            "error": "This validation is in a terminal state and cannot be modified"
+                        }
+                    )
+
+                if (
+                    new_status != current_status
+                    and new_status
+                    not in self.ALLOWED_STATUS_TRANSITIONS.get(current_status, set())
+                ):
+                    raise serializers.ValidationError(
+                        {
+                            "status": f"Cannot transition a validation from '{current_status}' to '{new_status}'"
+                        }
+                    )
+
                 # Update the instance
                 updated_instance = super().update(instance, validated_data)
 
