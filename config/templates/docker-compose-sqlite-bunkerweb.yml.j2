@@ -141,6 +141,8 @@ services:
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
     user: "1001:1001"
+    networks:
+      - bw-services
   {% endif %}
 
   bunkerweb:
@@ -176,7 +178,7 @@ services:
       - {{ fqdn }}_REVERSE_PROXY_HOST_2=http://backend:8000
       {% if mcp.enabled %}- {{ fqdn }}_REVERSE_PROXY_URL_3=/mcp
       - {{ fqdn }}_REVERSE_PROXY_HOST_3=http://mcp:8001
-      {% endif %}      {% if can_do_tls %}- {{ fqdn }}_AUTO_LETS_ENCRYPT=yes{% elif use_custom_cert %}
+      {% endif %}{% if can_do_tls %}- {{ fqdn }}_AUTO_LETS_ENCRYPT=yes{% elif use_custom_cert %}
       - {{ fqdn }}_USE_CUSTOM_SSL=yes
       - {{ fqdn }}_CUSTOM_SSL_CERT=/etc/bunkerweb/cert.pem
       - {{ fqdn }}_CUSTOM_SSL_KEY=/etc/bunkerweb/key.pem{% else %}
