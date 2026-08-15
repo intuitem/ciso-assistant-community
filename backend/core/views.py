@@ -903,6 +903,24 @@ def get_or_create_personal_folder(user):
     return folder
 
 
+def actor_prefetch(field_name: str) -> Prefetch:
+    """Prefetch an ``Actor`` M2M (``authors``, ``reviewers``, ...) with its target joined in.
+
+    ``FieldsRelatedField`` always renders ``str(actor)``, and ``Actor.__str__`` resolves
+    ``.specific`` — a forward OneToOne hop to user/team/entity. A bare
+    ``prefetch_related("authors")`` therefore trades N queries for N+1: one for the
+    actors, then up to three more per actor (user, then team, then entity, in the
+    order ``.specific`` tries them).
+
+    Returns a fresh instance per call: a ``Prefetch`` may only be registered once per
+    queryset, and sharing one across querysets shares its inner queryset too.
+    """
+    return Prefetch(
+        field_name,
+        queryset=Actor.objects.select_related("user", "team", "entity"),
+    )
+
+
 class AutocompleteMixin:
     """Adds a lightweight, server-paginated ``autocomplete`` action for entity
     pickers (search/ordering/filtering come from the viewset's existing filter
@@ -3664,8 +3682,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             "risk_matrix",
             "ebios_rm_study",
         ).prefetch_related(
-            "authors",
-            "reviewers",
+            actor_prefetch("authors"),
+            actor_prefetch("reviewers"),
             "risk_scenarios",
         )
 
@@ -10860,24 +10878,21 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         qs = self.get_queryset_minimalistic()
 
-        qs = (
-            qs.select_related(
-                "folder",
-                "folder__parent_folder",  # For get_folder_full_path() optimization
-                "framework",  # Displayed in table
-                "perimeter",  # Displayed in table
-            )
-            .prefetch_related(
-                "authors",  # Optional table column
-            )
-            .annotate(
-                _has_questions=Exists(
-                    Question.objects.filter(
-                        requirement_node__framework=OuterRef("framework")
-                    )
+        qs = qs.select_related(
+            "folder",
+            "folder__parent_folder",  # For get_folder_full_path() optimization
+            "framework",  # Displayed in table
+            "perimeter",  # Displayed in table
+        ).annotate(
+            _has_questions=Exists(
+                Question.objects.filter(
+                    requirement_node__framework=OuterRef("framework")
                 )
             )
         )
+
+        if self.action == "list":
+            qs = qs.prefetch_related(actor_prefetch("authors"))  # Optional table column
 
         # No requirement_assessments prefetch on the list action: progress is
         # served by `_get_optimized_object_data` (no-IG audits) or the model's
@@ -10893,8 +10908,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             ).prefetch_related(
                 "assets",  # ManyToManyField serialized as FieldsRelatedField
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
-                "authors",  # ManyToManyField from Assessment parent class
-                "reviewers",  # ManyToManyField from Assessment parent class
+                actor_prefetch("authors"),  # ManyToManyField from Assessment parent
+                actor_prefetch("reviewers"),  # ManyToManyField from Assessment parent
                 Prefetch(
                     "requirement_assessments",
                     queryset=RequirementAssessment.objects.select_related(
@@ -15141,7 +15156,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             .select_related("folder", "perimeter")
             .prefetch_related(
                 "evidences",
-                "authors",
+                actor_prefetch("authors"),
                 "filtering_labels__folder",
             )
             .annotate(
@@ -15355,7 +15370,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
         findings_assessment = (
             FindingsAssessment.objects.select_related("folder")
-            .prefetch_related("authors", "reviewers")
+            .prefetch_related(actor_prefetch("authors"), actor_prefetch("reviewers"))
             .get(id=pk)
         )
         findings = (
@@ -15474,7 +15489,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
         findings_assessment = (
             FindingsAssessment.objects.select_related("folder")
-            .prefetch_related("authors", "reviewers")
+            .prefetch_related(actor_prefetch("authors"), actor_prefetch("reviewers"))
             .get(id=pk)
         )
         findings = (
