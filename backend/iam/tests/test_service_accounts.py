@@ -12,12 +12,21 @@ from allauth.idp.oidc.models import Client, Token
 from core.startup import startup
 from django.contrib.auth.models import Permission
 from django.utils import timezone
+from global_settings import utils as ff_utils
 from global_settings.models import GlobalSettings
+from global_settings.utils import clear_feature_flags_cache
 from iam.models import Folder, Role, RoleAssignment, ServiceAccount, User, UserGroup
 from iam.service_accounts import get_selectable_permissions
 
 TOKEN_ENDPOINT = "/api/identity/o/api/token"
 SA_ENDPOINT = "/api/iam/service-accounts/"
+
+
+@pytest.fixture(autouse=True)
+def _enterprise_build(monkeypatch):
+    """service_accounts is enterprise-only (ff_is_enabled short-circuits it on
+    CE); these tests exercise the EE-gated behavior from the CE test bed."""
+    monkeypatch.setattr(ff_utils, "_is_enterprise", lambda: True)
 
 
 @pytest.fixture
@@ -29,6 +38,8 @@ def app_config():
     )
     ff_settings.value = {**(ff_settings.value or {}), "service_accounts": True}
     ff_settings.save()
+    # Direct ORM write: bypasses the serializer, the single invalidation point.
+    clear_feature_flags_cache()
 
 
 @pytest.fixture
@@ -178,6 +189,7 @@ class TestServiceAccountProvisioning:
         )
         ff_settings.value = {**(ff_settings.value or {}), "service_accounts": False}
         ff_settings.save()
+        clear_feature_flags_cache()
         assert admin_client.get(SA_ENDPOINT).status_code == 403
         assert admin_client.get(f"{SA_ENDPOINT}permissions/").status_code == 403
 

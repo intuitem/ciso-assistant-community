@@ -2,6 +2,7 @@ import pytest
 from rest_framework import status
 
 from global_settings.models import GlobalSettings
+from global_settings.utils import clear_feature_flags_cache
 from iam.models import Folder
 
 CF_URL = "/api/custom-fields/"
@@ -19,6 +20,9 @@ class TestCustomFieldsAPI:
         )
         gs.value = {**(gs.value or {}), "custom_fields": True}
         gs.save()
+        # Direct ORM write: bypasses the serializer, the single invalidation
+        # point of the feature-flags cache.
+        clear_feature_flags_cache()
 
     def _make_choice_def(self, client, folder_id, key="tier"):
         return client.post(
@@ -193,6 +197,7 @@ class TestCustomFieldsAPI:
         gs = GlobalSettings.objects.get(name=GlobalSettings.Names.FEATURE_FLAGS)
         gs.value = {**gs.value, "custom_fields": False}
         gs.save()
+        clear_feature_flags_cache()
         # reads degrade to an empty list (no hard error), writes are forbidden
         listing = authenticated_client.get(CF_URL)
         assert listing.status_code == status.HTTP_200_OK

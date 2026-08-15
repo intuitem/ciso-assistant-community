@@ -498,6 +498,12 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         if value_changed:
             instance.value = current_value_dict
             instance.save(update_fields=["value"])
+            # Flags are only ever written through this serializer (CE and EE),
+            # so this is the single invalidation point for the read cache.
+            # Local import: utils imports this module at load time.
+            from global_settings.utils import clear_feature_flags_cache
+
+            clear_feature_flags_cache()
 
         return instance
 

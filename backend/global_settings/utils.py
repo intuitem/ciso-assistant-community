@@ -1,10 +1,28 @@
+import functools
 import json
+
+from django.apps import apps
+from django.core.cache import cache
 
 from global_settings.models import GlobalSettings
 from global_settings.serializers import FeatureFlagsSerializer
 import structlog
 
 logger = structlog.get_logger(__name__)
+
+FEATURE_FLAGS_CACHE_KEY = "global_settings.feature_flags"
+# With the default LocMemCache this is per-process: the post_save/post_delete
+# invalidation (see SettingsConfig.ready) is immediate in the worker that
+# handled the write; other workers converge within the TTL.
+FEATURE_FLAGS_CACHE_TTL = 30  # seconds
+
+# Flags that only the enterprise build seeds and exposes (see
+# enterprise_core/apps.py and enterprise_core/serializers.py). CE never
+# evaluates them: they are False by construction, without touching the
+# settings row.
+ENTERPRISE_ONLY_FEATURE_FLAGS = frozenset({"idp_groups", "service_accounts"})
+
+_CACHE_MISS = object()
 
 SETTINGS_MASK_PLACEHOLDER = "**********"
 
@@ -74,18 +92,46 @@ def redact_secret_value(value: str) -> str:
     return SETTINGS_MASK_PLACEHOLDER
 
 
+@functools.cache
+def _is_enterprise() -> bool:
+    """True when running the enterprise build — the EE settings overlay
+    appends the enterprise_core app to INSTALLED_APPS."""
+    return apps.is_installed("enterprise_core")
+
+
+def clear_feature_flags_cache():
+    cache.delete(FEATURE_FLAGS_CACHE_KEY)
+
+
+def get_feature_flags() -> dict | None:
+    """Return the feature-flags dict, cached for FEATURE_FLAGS_CACHE_TTL
+    seconds so per-request RBAC resolution doesn't hit the settings table.
+    Returns None when the row is absent or malformed — warned once per TTL,
+    not once per flag check."""
+    flags = cache.get(FEATURE_FLAGS_CACHE_KEY, _CACHE_MISS)
+    if flags is not _CACHE_MISS:
+        return flags
+    ff_settings = (
+        GlobalSettings.objects.filter(name=GlobalSettings.Names.FEATURE_FLAGS)
+        .only("value")
+        .first()
+    )
+    if ff_settings is None or not isinstance(ff_settings.value, dict):
+        logger.warning("Feature flags settings not found, returning False")
+        flags = None
+    else:
+        flags = ff_settings.value
+    cache.set(FEATURE_FLAGS_CACHE_KEY, flags, FEATURE_FLAGS_CACHE_TTL)
+    return flags
+
+
 def ff_is_enabled(feature_flag: str):
-    ff_settings = GlobalSettings.objects.filter(
-        name=GlobalSettings.Names.FEATURE_FLAGS
-    ).first()
-    if ff_settings is None:
-        logger.warning(
-            "Feature flags settings not found, returning False",
-            feature_flag=feature_flag,
-        )
+    if feature_flag in ENTERPRISE_ONLY_FEATURE_FLAGS and not _is_enterprise():
         return False
 
-    flags: dict[str, bool] = ff_settings.value
+    flags = get_feature_flags()
+    if flags is None:
+        return False
 
     if (flag := flags.get(feature_flag)) is None:
         logger.warning(
