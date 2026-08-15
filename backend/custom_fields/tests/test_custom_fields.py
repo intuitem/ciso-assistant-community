@@ -18,6 +18,7 @@ from custom_fields.models import (
     coerce_value,
 )
 from global_settings.models import GlobalSettings
+from global_settings.utils import clear_feature_flags_cache
 from iam.models import Folder
 from pmbok.models import Project
 
@@ -28,6 +29,9 @@ def _enable_custom_fields():
     )
     gs.value = {**(gs.value or {}), "custom_fields": True}
     gs.save()
+    # Direct ORM write: bypasses the serializer, the single invalidation
+    # point of the feature-flags cache.
+    clear_feature_flags_cache()
 
 
 @pytest.fixture
