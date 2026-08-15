@@ -1,19 +1,21 @@
 """
-Tests for ff_is_enabled: cached lookups, cache invalidation at the single
-write point (FeatureFlagsSerializer.update), and the CE short-circuit for
-enterprise-only flags.
+Tests for ff_is_enabled: cached lookups, cache invalidation at the write
+points, and the edition gating derived from the FeatureFlags serializer
+(enterprise-only flags short-circuit to False on CE).
 """
 
 import pytest
 
-from global_settings import utils
+from global_settings import utils as ff_utils
 from global_settings.models import GlobalSettings
 from global_settings.serializers import FeatureFlagsSerializer
 from global_settings.utils import (
-    ENTERPRISE_ONLY_FEATURE_FLAGS,
     clear_feature_flags_cache,
     ff_is_enabled,
+    get_supported_feature_flags,
 )
+
+ENTERPRISE_ONLY_SAMPLE = ("idp_groups", "service_accounts", "custom_fields")
 
 
 @pytest.fixture
@@ -23,8 +25,8 @@ def flags_row(db):
     )
     gs.value = {"incidents": True, "xrays": False}
     gs.save(update_fields=["value"])
-    # Direct ORM writes bypass the serializer (the single invalidation
-    # point), and the audit-log handler warms the cache during save.
+    # Direct ORM writes bypass the write-point invalidation, and the
+    # audit-log handler warms the cache during save.
     clear_feature_flags_cache()
     return gs
 
@@ -76,16 +78,37 @@ def test_serializer_update_invalidates_cache(flags_row):
     assert ff_is_enabled("incidents") is False
 
 
-def test_enterprise_only_flags_short_circuit_on_ce(db, django_assert_num_queries):
-    # CE (enterprise_core not installed): False without any settings query.
-    for flag in ENTERPRISE_ONLY_FEATURE_FLAGS:
+def test_unsupported_flags_short_circuit_on_ce(flags_row, django_assert_num_queries):
+    # Enterprise-only flags are outside CE's SUPPORTED_FEATURE_FLAGS:
+    # False without any settings query, even when the row carries them.
+    flags_row.value = {**flags_row.value, "idp_groups": True}
+    flags_row.save(update_fields=["value"])
+    clear_feature_flags_cache()
+    for flag in ENTERPRISE_ONLY_SAMPLE:
         with django_assert_num_queries(0):
             assert ff_is_enabled(flag) is False
 
 
-def test_enterprise_only_flags_resolve_normally_on_ee(flags_row, monkeypatch):
-    monkeypatch.setattr(utils, "_is_enterprise", lambda: True)
+def test_supported_flags_resolve_normally_when_extended(flags_row, monkeypatch):
+    # On EE the FeatureFlags serializer (resolved via MODULE_PATHS) declares
+    # the extra flags; a supported flag resolves against the row normally.
+    supported = get_supported_feature_flags() | {"idp_groups"}
+    monkeypatch.setattr(ff_utils, "get_supported_feature_flags", lambda: supported)
     flags_row.value = {**flags_row.value, "idp_groups": True}
     flags_row.save(update_fields=["value"])
     clear_feature_flags_cache()
     assert ff_is_enabled("idp_groups") is True
+
+
+def test_supported_flags_derived_from_serializer():
+    # The supported set is derived from the edition's FeatureFlags serializer,
+    # the single source of truth — CE flags in, enterprise-only flags out.
+    supported = get_supported_feature_flags()
+    declared = {
+        field.source.split(".")[-1]
+        for field in FeatureFlagsSerializer().fields.values()
+        if getattr(field, "source", None) and field.source.startswith("value.")
+    }
+    assert supported == declared
+    assert "incidents" in supported
+    assert "idp_groups" not in supported

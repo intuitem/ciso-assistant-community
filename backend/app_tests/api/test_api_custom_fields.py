@@ -1,6 +1,7 @@
 import pytest
 from rest_framework import status
 
+from global_settings import utils as ff_utils
 from global_settings.models import GlobalSettings
 from global_settings.utils import clear_feature_flags_cache
 from iam.models import Folder
@@ -14,14 +15,19 @@ class TestCustomFieldsAPI:
     """End-to-end HTTP coverage through the real router + RBAC stack."""
 
     @pytest.fixture(autouse=True)
-    def enable_custom_fields(self, authenticated_client):
+    def enable_custom_fields(self, authenticated_client, monkeypatch):
+        # custom_fields is enterprise-only (declared on the EE
+        # FeatureFlagsSerializer, hence unsupported on CE); these tests
+        # exercise the EE-gated behavior from the CE test bed.
+        supported = ff_utils.get_supported_feature_flags() | {"custom_fields"}
+        monkeypatch.setattr(ff_utils, "get_supported_feature_flags", lambda: supported)
         gs, _ = GlobalSettings.objects.get_or_create(
             name=GlobalSettings.Names.FEATURE_FLAGS, defaults={"value": {}}
         )
         gs.value = {**(gs.value or {}), "custom_fields": True}
         gs.save()
-        # Direct ORM write: bypasses the serializer, the single invalidation
-        # point of the feature-flags cache.
+        # Direct ORM write: bypasses the write-point invalidation of the
+        # feature-flags cache.
         clear_feature_flags_cache()
 
     def _make_choice_def(self, client, folder_id, key="tier"):

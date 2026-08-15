@@ -59,11 +59,12 @@ class Utils:
 
 
 @pytest.fixture(autouse=True)
-def _enterprise_build(monkeypatch):
-    """idp_groups is enterprise-only (ff_is_enabled short-circuits it on CE);
-    the IdP-group inheritance tests exercise the EE-gated behavior from the
-    CE test bed."""
-    monkeypatch.setattr(ff_utils, "_is_enterprise", lambda: True)
+def _enterprise_flags(monkeypatch):
+    """idp_groups is enterprise-only (declared on the EE FeatureFlagsSerializer,
+    hence unsupported on CE); the IdP-group inheritance tests exercise the
+    EE-gated behavior from the CE test bed."""
+    supported = ff_utils.get_supported_feature_flags() | {"idp_groups"}
+    monkeypatch.setattr(ff_utils, "get_supported_feature_flags", lambda: supported)
 
 
 @pytest.mark.django_db

@@ -23,10 +23,12 @@ SA_ENDPOINT = "/api/iam/service-accounts/"
 
 
 @pytest.fixture(autouse=True)
-def _enterprise_build(monkeypatch):
-    """service_accounts is enterprise-only (ff_is_enabled short-circuits it on
-    CE); these tests exercise the EE-gated behavior from the CE test bed."""
-    monkeypatch.setattr(ff_utils, "_is_enterprise", lambda: True)
+def _enterprise_flags(monkeypatch):
+    """service_accounts is enterprise-only (declared on the EE
+    FeatureFlagsSerializer, hence unsupported on CE); these tests exercise
+    the EE-gated behavior from the CE test bed."""
+    supported = ff_utils.get_supported_feature_flags() | {"service_accounts"}
+    monkeypatch.setattr(ff_utils, "get_supported_feature_flags", lambda: supported)
 
 
 @pytest.fixture
