@@ -67,6 +67,7 @@ from .tools.write_tools import (
     create_threat,
     create_applied_control,
     create_risk_assessment,
+    sync_risk_assessment_from_ebios_rm,
     create_risk_scenario,
     create_business_impact_analysis,
     create_compliance_assessment,
@@ -208,6 +209,7 @@ WRITE_TOOLS = [
     create_threat,
     create_applied_control,
     create_risk_assessment,
+    sync_risk_assessment_from_ebios_rm,
     create_risk_scenario,
     create_business_impact_analysis,
     create_compliance_assessment,
@@ -285,7 +287,7 @@ def _annotations(fn, is_read):
         return ToolAnnotations(
             readOnlyHint=False, destructiveHint=True, idempotentHint=True
         )
-    if name.startswith("update_"):
+    if name.startswith(("update_", "sync_")):
         return ToolAnnotations(
             readOnlyHint=False, destructiveHint=True, idempotentHint=True
         )
@@ -326,9 +328,20 @@ def register_tools(read_only: bool = False):
     _registered = True
 
 
+def _log_startup(surface):
+    logger.info(
+        "%s | API_URL=%s read_only=%s tools=%d",
+        surface,
+        config.API_URL or "<unset>",
+        config.READ_ONLY,
+        len(READ_TOOLS) if config.READ_ONLY else len(READ_TOOLS) + len(WRITE_TOOLS),
+    )
+
+
 def run_server():
     """Run the MCP server over stdio"""
-    register_tools(read_only=False)
+    register_tools(read_only=config.READ_ONLY)
+    _log_startup("MCP stdio")
     mcp.run(transport="stdio")
 
 
@@ -371,22 +384,21 @@ def run_http():
             "Set it to the public hostname before exposing this server."
         )
 
+    _log_startup(
+        f"MCP Streamable HTTP on {config.HTTP_HOST}:{config.HTTP_PORT}{config.HTTP_PATH}"
+    )
     logger.info(
-        "MCP Streamable HTTP on %s:%s%s (read_only=%s, stateless=%s, json=%s, tools=%d)",
-        config.HTTP_HOST,
-        config.HTTP_PORT,
-        config.HTTP_PATH,
-        config.READ_ONLY,
+        "stateless=%s json_response=%s allow_env_token=%s",
         config.STATELESS,
         config.JSON_RESPONSE,
-        len(READ_TOOLS) if config.READ_ONLY else len(READ_TOOLS) + len(WRITE_TOOLS),
+        config.ALLOW_ENV_TOKEN,
     )
     uvicorn.run(mcp.streamable_http_app(), host=config.HTTP_HOST, port=config.HTTP_PORT)
 
 
 def main():
     logging.basicConfig(level=logging.INFO)
-    if config.TRANSPORT in ("http", "streamable-http"):
+    if config.IS_HTTP:
         run_http()
     else:
         run_server()

@@ -1,15 +1,10 @@
-*.pyc
-*.DS_Store
-.git*
-**/.venv/
+# allowlist: this directory collects credential files, and enumerating them leaks the next one
+*
+!pyproject.toml
+!uv.lock
+!ca_mcp/
+!ca_mcp.py
+!clica.py
+
 **/__pycache__/
-# local credentials — these carry a real PAT and must never reach a layer
-.mcp.env
-.clica.env
-*.env
-!*.env.template
-!*.env.example
-# sample data and docs, not needed at runtime
-*.csv
-*.md
-Dockerfile
+**/*.pyc

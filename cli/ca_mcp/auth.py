@@ -38,10 +38,6 @@ def _request_headers():
     return getattr(request, "headers", None)
 
 
-def _is_http() -> bool:
-    return config.TRANSPORT in ("http", "streamable-http")
-
-
 def _describe(source: str, token: str) -> None:
     """Log where the credential came from, never its value."""
     logger.info(
@@ -65,7 +61,7 @@ def get_request_token() -> str:
     headers = _request_headers()
 
     # gate on transport, not on headers being absent, so HTTP stays fail-closed
-    if headers is None and not _is_http():
+    if headers is None and not config.IS_HTTP:
         return config.TOKEN
 
     for name in ("authorization", CUSTOM_HEADER):

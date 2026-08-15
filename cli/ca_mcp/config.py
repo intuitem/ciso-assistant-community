@@ -41,10 +41,10 @@ DEFAULT_PAGE_LIMIT = int(os.getenv("CA_MCP_PAGE_LIMIT", "100"))
 MAX_TOTAL_ITEMS = int(os.getenv("CA_MCP_MAX_ITEMS", "200"))
 MAX_RESPONSE_CHARS = int(os.getenv("CA_MCP_MAX_RESPONSE_CHARS", "20000"))
 
-# HTTP transport (spike). Read-only by default: the HTTP endpoint is the one
-# surface that can be reached by a third-party orchestrator.
 TRANSPORT = os.getenv("CA_MCP_TRANSPORT", "stdio").lower()
-READ_ONLY = _flag("CA_MCP_READ_ONLY", "true")
+IS_HTTP = TRANSPORT in ("http", "streamable-http")
+# honoured on both transports; only the default differs (stdio is one local user)
+READ_ONLY = _flag("CA_MCP_READ_ONLY", "true" if IS_HTTP else "false")
 HTTP_HOST = os.getenv("CA_MCP_HOST", "127.0.0.1")
 HTTP_PORT = int(os.getenv("CA_MCP_PORT", "8001"))
 HTTP_PATH = os.getenv("CA_MCP_PATH", "/mcp")

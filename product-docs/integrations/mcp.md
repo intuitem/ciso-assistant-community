@@ -631,6 +631,56 @@ Once connected, try these example prompts:
 * "What personal data categories do we hold?"
 * "Show the open data subject right requests"
 
+**EBIOS RM:**
+
+* "List our EBIOS RM studies"
+* "What feared events are in the SuperNova study?"
+* "Show the operational scenarios for that study"
+* "Generate the risk assessment for workshop 5"
+
+### The EBIOS RM workflow
+
+The assistant covers all five workshops — studies, feared events, RO/TO couples, stakeholders,
+strategic scenarios, attack paths, operational scenarios, elementary actions, operating modes and
+kill chains each have read and write tools.
+
+Workshop 5 is the one with a workflow worth knowing, because it crosses back into the general risk
+register.
+
+{% stepper %}
+{% step %}
+#### Create the risk assessment
+
+Ask for a risk assessment on the study and the assistant calls `create_risk_assessment` with the
+study attached. The server seeds it with **one risk scenario per selected operational scenario**,
+carrying across the threats, existing applied controls, and the likelihood and gravity you quoted
+in workshop 4.
+
+You do not need to name a risk matrix. Left out, it comes from the study, so the generated
+scenarios are scored on the scale they were quoted against.
+{% endstep %}
+
+{% step %}
+#### Re-run it later with a sync
+
+A study holds **one** risk assessment. Asking for a second would detach the first, so the assistant
+refuses and tells you which assessment already exists.
+
+To pull newer workshop data into it, ask to sync — `sync_risk_assessment_from_ebios_rm` — and the
+assistant reports what changed, for example `6 updated, 0 created, 0 archived`. Existing treatment
+work on those scenarios is preserved.
+{% endstep %}
+{% endstepper %}
+
+This mirrors the UI, where the same situation raises the **Risk Assessment Options** dialog offering
+**Sync Existing**. See [EBIOS RM study](../guides/ebios-rm.md) for the workshop-by-workshop walkthrough.
+
+{% hint style="info" %}
+Writing requires the write tools. Over HTTP the server is read-only unless
+`CA_MCP_READ_ONLY=false`, so an assistant connected that way can read a study but not generate its
+risk assessment.
+{% endhint %}
+
 ***
 
 ### FAQ
