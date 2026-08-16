@@ -7378,12 +7378,47 @@ class UserFilter(GenericFilterSet):
         ]
 
 
+VALIDATION_FLOW_OPEN_STATUSES = [
+    ValidationFlow.Status.SUBMITTED,
+    ValidationFlow.Status.CHANGE_REQUESTED,
+]
+
+
 class ValidationFlowFilterSet(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     requester = df.ModelMultipleChoiceFilter(queryset=User.objects.all())
     approver = df.ModelMultipleChoiceFilter(queryset=User.objects.all())
 
     linked_models = df.CharFilter(method="filter_linked_models", label="Linked models")
+
+    scope = df.ChoiceFilter(
+        method="filter_scope",
+        label="Scope",
+        choices=[
+            ("received", "Received"),
+            ("sent", "Sent"),
+            ("history", "History"),
+        ],
+    )
+
+    def filter_scope(self, queryset, name, value):
+        """Personal queues: what awaits me, what I sent, what is closed for me."""
+        user = getattr(self.request, "user", None)
+        if user is None or not user.is_authenticated:
+            return queryset.none()
+        if value == "received":
+            return queryset.filter(
+                approver=user, status=ValidationFlow.Status.SUBMITTED
+            )
+        if value == "sent":
+            return queryset.filter(
+                requester=user, status__in=VALIDATION_FLOW_OPEN_STATUSES
+            )
+        if value == "history":
+            return queryset.filter(Q(requester=user) | Q(approver=user)).exclude(
+                status__in=VALIDATION_FLOW_OPEN_STATUSES
+            )
+        return queryset
 
     def filter_linked_models(self, queryset, name, value):
         """
@@ -7542,6 +7577,25 @@ class ValidationFlowViewSet(BaseModelViewSet):
             "contracts": "Contracts",
         }
         return Response(model_types)
+
+    @action(detail=False, methods=["get"], name="Get inbox counts")
+    def inbox_counts(self, request):
+        """Tab badges for the personal queues, in a single query round-trip each."""
+        user = request.user
+        queryset = self.get_queryset()
+        return Response(
+            {
+                "received": queryset.filter(
+                    approver=user, status=ValidationFlow.Status.SUBMITTED
+                ).count(),
+                "sent": queryset.filter(
+                    requester=user, status__in=VALIDATION_FLOW_OPEN_STATUSES
+                ).count(),
+                "history": queryset.filter(Q(requester=user) | Q(approver=user))
+                .exclude(status__in=VALIDATION_FLOW_OPEN_STATUSES)
+                .count(),
+            }
+        )
 
     @action(
         detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated]
