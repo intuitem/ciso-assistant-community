@@ -1193,7 +1193,7 @@
 	"thirdParty": "Tretia strana",
 	"thirdPartyCategory": "Tretie strany",
 	"thirdPartyDescription": "Riadenie subjektov tretích strán a ich zástupcov, zmluvy, riešenia a posudky.",
-	"thirdPartiesImportHelpText": "Importovať tretie strany, riešenia a zmluvy vašich tretích strán z viacstrannej excelovskej šablóny",
+	"thirdPartiesImportHelpText": "Importovať subjekty, zástupcov, riešenia, hodnotenia subjektov a zmluvy vašich tretích strán z viacstrannej excelovskej šablóny",
 	"entityAssessment": "Hodnotenie subjektu",
 	"entityAssessments": "Hodnotenie subjektov",
 	"addEntityAssessment": "Pridať hodnotenie subjektu",
