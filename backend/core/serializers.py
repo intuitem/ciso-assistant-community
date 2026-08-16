@@ -2972,6 +2972,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
     """Optimized serializer for list views - only includes fields needed by the table."""
 
     path = PathField(read_only=True)
+    authors = FieldsRelatedField(many=True)
     folder = FieldsRelatedField()
     framework = FieldsRelatedField()
     perimeter = FieldsRelatedField()
@@ -3012,6 +3013,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "created_at",
             "updated_at",
             "path",
+            "authors",
         ]
 
 
