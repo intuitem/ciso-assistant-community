@@ -2379,6 +2379,7 @@
 	"scimTokenWarning": "Αντιγράψτε αυτό το διακριτικό τώρα. Για λόγους ασφαλείας δεν θα εμφανιστεί ξανά.",
 	"scimTokenRevoked": "Το διακριτικό SCIM ανακλήθηκε",
 	"scimTokenGenerationFailed": "Αποτυχία δημιουργίας διακριτικού SCIM",
+	"scimTokenRequiresSso": "Το SSO πρέπει να είναι ενεργοποιημένο πριν από τη δημιουργία διακριτικού SCIM.",
 	"idpGroup": "Ομάδα IdP",
 	"idpGroups": "Ομάδες IdP",
 	"idpGroupsDescription": "Ενεργοποίηση ομοσπονδίας ομάδων IdP (παροχή SCIM, αντιστοιχίσεις ομάδων IdP και συμμετοχές χρηστών σε ομάδες IdP).",

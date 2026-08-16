@@ -282,6 +282,7 @@
 	"scimTokenWarning": "Kopirajte ta žeton zdaj. Iz varnostnih razlogov ne bo več prikazan.",
 	"scimTokenRevoked": "Žeton SCIM preklican",
 	"scimTokenGenerationFailed": "Ustvarjanje žetona SCIM ni uspelo",
+	"scimTokenRequiresSso": "SSO mora biti omogočen, preden lahko ustvarite žeton SCIM.",
 	"roleAssignments": "Dodelitve vlog",
 	"xRays": "Rentgen (X-rays)",
 	"inspect": "Preglej",

@@ -2206,6 +2206,7 @@
 	"scimTokenWarning": "Zkopírujte tento token nyní. Z bezpečnostních důvodů se již znovu nezobrazí.",
 	"scimTokenRevoked": "Token SCIM odvolán",
 	"scimTokenGenerationFailed": "Nepodařilo se vygenerovat token SCIM",
+	"scimTokenRequiresSso": "Před vygenerováním tokenu SCIM musí být povoleno SSO.",
 	"idpGroup": "Skupina IdP",
 	"idpGroups": "Skupiny IdP",
 	"idpGroupsDescription": "Povolit federaci skupin IdP (provisioning SCIM, mapování skupin IdP a členství uživatelů ve skupinách IdP).",

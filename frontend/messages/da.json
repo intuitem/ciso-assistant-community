@@ -1963,6 +1963,7 @@
 	"scimTokenWarning": "Kopiér dette token nu. Af sikkerhedsmæssige årsager vises det ikke igen.",
 	"scimTokenRevoked": "SCIM-token tilbagekaldt",
 	"scimTokenGenerationFailed": "Kunne ikke generere SCIM-token",
+	"scimTokenRequiresSso": "SSO skal være aktiveret, før du kan generere et SCIM-token.",
 	"idpGroup": "IdP-gruppe",
 	"idpGroups": "IdP-grupper",
 	"idpGroupsDescription": "Aktivér IdP-gruppeføderation (SCIM-provisionering, IdP-gruppemapninger og IdP-gruppemedlemskaber for brugere).",

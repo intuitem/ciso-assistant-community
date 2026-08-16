@@ -5191,6 +5191,7 @@
 	"scimTokenWarning": "Skopírujte si tento token teraz. Z bezpečnostných dôvodov sa už nebude zobrazovať.",
 	"scimTokenRevoked": "Token SCIM bol zrušený",
 	"scimTokenGenerationFailed": "Nepodarilo sa vygenerovať token SCIM",
+	"scimTokenRequiresSso": "Pred vygenerovaním tokenu SCIM musí byť povolené SSO.",
 	"disablePartiallyCompliantResult": "Zakázať hodnotenie „Čiastočný súlad“",
 	"disablePartiallyCompliantResultHelpText": "Ak je táto možnosť povolená, pri hodnotení požiadavky už nebude možné vybrať hodnotenie „Čiastočný súlad“. Existujúce hodnoty zostanú zachované a budú sa naďalej zobrazovať.",
 	"selectedImplementationGroupsDynamicHelpText": "Skupiny implementácie odvodené z odpovedí sa pri uložení automaticky prepočítajú. Manuálne pridané skupiny zostanú zachované.",

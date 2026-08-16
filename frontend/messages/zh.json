@@ -3725,6 +3725,7 @@
 	"scimTokenWarning": "立即复制此令牌。出于安全原因，它将不会再次显示。",
 	"scimTokenRevoked": "SCIM 令牌已吊销",
 	"scimTokenGenerationFailed": "生成 SCIM 令牌失败",
+	"scimTokenRequiresSso": "生成 SCIM 令牌之前必须先启用 SSO。",
 	"idpGroup": "IdP 组",
 	"idpGroups": "IdP 组",
 	"idpGroupsDescription": "启用 IdP 组联合（SCIM 预配、IdP 组映射以及用户的 IdP 组成员资格）。"

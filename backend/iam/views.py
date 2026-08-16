@@ -582,11 +582,7 @@ class SCIMTokenViewSet(views.APIView):
             sso_settings = {}
         if not sso_settings.get("is_enabled", False):
             return Response(
-                {
-                    "error": "SSO must be configured and enabled before generating a "
-                    "SCIM token. SCIM-provisioned accounts sign in exclusively "
-                    "through SSO — set up SSO first."
-                },
+                {"error": "scimTokenRequiresSso"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         token_prefix = knox_settings.TOKEN_PREFIX

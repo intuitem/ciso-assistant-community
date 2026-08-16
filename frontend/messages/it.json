@@ -2908,6 +2908,7 @@
 	"scimTokenWarning": "Copia subito questo token. Per motivi di sicurezza non verrà più mostrato.",
 	"scimTokenRevoked": "Token SCIM revocato",
 	"scimTokenGenerationFailed": "Impossibile generare il token SCIM",
+	"scimTokenRequiresSso": "Lo SSO deve essere abilitato prima di generare un token SCIM.",
 	"idpGroup": "Gruppo IdP",
 	"idpGroups": "Gruppi IdP",
 	"idpGroupsDescription": "Abilita la federazione dei gruppi IdP (provisioning SCIM, mappature dei gruppi IdP e appartenenze ai gruppi IdP degli utenti).",

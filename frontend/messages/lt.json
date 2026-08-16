@@ -4657,6 +4657,7 @@
 	"scimTokenWarning": "Nukopijuokite šį žetoną dabar. Saugumo sumetimais jis nebebus rodomas.",
 	"scimTokenRevoked": "SCIM žetonas atšauktas",
 	"scimTokenGenerationFailed": "Nepavyko sugeneruoti SCIM žetono",
+	"scimTokenRequiresSso": "Prieš sugeneruojant SCIM žetoną, turi būti įjungtas SSO.",
 	"idpGroup": "IdP grupė",
 	"idpGroups": "IdP grupės",
 	"idpGroupsDescription": "Įjungti IdP grupių federaciją (SCIM teikimas, IdP grupių susiejimai ir naudotojų narystės IdP grupėse)."

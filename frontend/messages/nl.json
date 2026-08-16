@@ -3469,6 +3469,7 @@
 	"scimTokenWarning": "Kopieer dit token nu. Om veiligheidsredenen wordt het niet opnieuw weergegeven.",
 	"scimTokenRevoked": "SCIM-token ingetrokken",
 	"scimTokenGenerationFailed": "Kan SCIM-token niet genereren",
+	"scimTokenRequiresSso": "SSO moet zijn ingeschakeld voordat u een SCIM-token kunt genereren.",
 	"idpGroup": "IdP-groep",
 	"idpGroups": "IdP-groepen",
 	"idpGroupsDescription": "IdP-groepsfederatie inschakelen (SCIM-provisioning, IdP-groepskoppelingen en IdP-groepslidmaatschappen van gebruikers).",

@@ -1678,6 +1678,7 @@
 	"scimTokenWarning": "Kopiera denna token nu. Av säkerhetsskäl visas den inte igen.",
 	"scimTokenRevoked": "SCIM-token återkallad",
 	"scimTokenGenerationFailed": "Det gick inte att generera SCIM-token",
+	"scimTokenRequiresSso": "SSO måste vara aktiverat innan du kan generera en SCIM-token.",
 	"idpGroup": "IdP-grupp",
 	"idpGroups": "IdP-grupper",
 	"idpGroupsDescription": "Aktivera IdP-gruppfederation (SCIM-provisionering, IdP-gruppmappningar och IdP-gruppmedlemskap för användare).",

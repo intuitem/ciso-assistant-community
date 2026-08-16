@@ -282,6 +282,7 @@
 	"scimTokenWarning": "Copy this token now. For security reasons it will not be shown again.",
 	"scimTokenRevoked": "SCIM token revoked",
 	"scimTokenGenerationFailed": "Failed to generate SCIM token",
+	"scimTokenRequiresSso": "SSO must be enabled before generating a SCIM token.",
 	"roleAssignments": "Role assignments",
 	"xRays": "X-rays",
 	"inspect": "Inspect",

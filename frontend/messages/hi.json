@@ -1634,6 +1634,7 @@
 	"scimTokenWarning": "इस टोकन को अभी कॉपी करें। सुरक्षा कारणों से इसे दोबारा नहीं दिखाया जाएगा।",
 	"scimTokenRevoked": "SCIM टोकन निरस्त किया गया",
 	"scimTokenGenerationFailed": "SCIM टोकन उत्पन्न करने में विफल",
+	"scimTokenRequiresSso": "SCIM टोकन जनरेट करने से पहले SSO सक्षम होना चाहिए।",
 	"idpGroup": "IdP समूह",
 	"idpGroups": "IdP समूह",
 	"idpGroupsDescription": "IdP समूह फ़ेडरेशन सक्षम करें (SCIM प्रावधान, IdP समूह मैपिंग, और उपयोगकर्ताओं पर IdP समूह सदस्यताएँ)।",

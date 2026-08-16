@@ -2441,6 +2441,7 @@
 	"scimTokenWarning": "Skopiuj ten token teraz. Ze względów bezpieczeństwa nie zostanie ponownie wyświetlony.",
 	"scimTokenRevoked": "Token SCIM unieważniony",
 	"scimTokenGenerationFailed": "Nie udało się wygenerować tokenu SCIM",
+	"scimTokenRequiresSso": "SSO musi być włączone przed wygenerowaniem tokenu SCIM.",
 	"idpGroup": "Grupa IdP",
 	"idpGroups": "Grupy IdP",
 	"idpGroupsDescription": "Włącz federację grup IdP (provisioning SCIM, mapowania grup IdP i członkostwa w grupach IdP użytkowników)."

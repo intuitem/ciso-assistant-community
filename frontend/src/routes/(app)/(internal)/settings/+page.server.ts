@@ -539,7 +539,7 @@ export const actions: Actions = {
 			} catch {
 				/* body wasn't JSON — fall back to the generic message below */
 			}
-			const message = detail || m.scimTokenGenerationFailed();
+			const message = (detail && safeTranslate(detail)) || m.scimTokenGenerationFailed();
 			setFlash({ type: 'error', message }, event);
 			return fail(response.status, { error: message });
 		}

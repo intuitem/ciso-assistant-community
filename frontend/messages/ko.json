@@ -4371,6 +4371,7 @@
 	"scimTokenWarning": "지금 이 토큰을 복사하세요. 보안상의 이유로 다시 표시되지 않습니다.",
 	"scimTokenRevoked": "SCIM 토큰이 취소됨",
 	"scimTokenGenerationFailed": "SCIM 토큰 생성 실패",
+	"scimTokenRequiresSso": "SCIM 토큰을 생성하기 전에 SSO를 활성화해야 합니다.",
 	"idpGroup": "IdP 그룹",
 	"idpGroups": "IdP 그룹",
 	"idpGroupsDescription": "IdP 그룹 페더레이션 활성화(SCIM 프로비저닝, IdP 그룹 매핑 및 사용자의 IdP 그룹 멤버십)."
