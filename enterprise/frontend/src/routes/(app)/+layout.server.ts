@@ -48,7 +48,9 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 	const focusModeEnabled = locals.featureflags?.focus_mode ?? false;
 	if (locals.user && focusModeEnabled) {
 		try {
-			const treeRes = await fetch(`${BASE_API_URL}/folders/org_tree/?include_perimeters=false`);
+			const treeRes = await fetch(
+				`${BASE_API_URL}/folders/org_tree/?include_perimeters=false&no_focus=true`
+			);
 			if (treeRes.ok) {
 				orgTree = await treeRes.json();
 			}

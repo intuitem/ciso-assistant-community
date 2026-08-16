@@ -117,7 +117,8 @@ export const FolderSchema = z.object({
 export const FolderImportSchema = z.object({
 	name: nameSchema,
 	file: z.instanceof(File),
-	load_missing_libraries: z.coerce.boolean().default(false)
+	load_missing_libraries: z.coerce.boolean().default(false),
+	create_missing_asset_classes: z.coerce.boolean().default(false)
 	//NOTE: coerce is used to handle checkbox form values which can be strings ('true'/'false')
 	//or booleans (true/false). Without coerce, form validation fails inconsistently.
 });
@@ -139,6 +140,13 @@ export const RiskMatrixSchema = z.object({
 
 export const LibraryUploadSchema = z.object({
 	file: z.instanceof(File).optional()
+});
+
+export const WorkflowImportSchema = z.object({
+	file: z.instanceof(File),
+	folder: z.string().uuid().optional(),
+	// JSON object of {secretName: value} typed in the import dialog.
+	secrets: z.string().optional()
 });
 
 export const RiskAssessmentSchema = z.object({
@@ -169,6 +177,45 @@ export const ThreatSchema = z.object({
 	annotation: z.string().optional().nullable(),
 	filtering_labels: z.string().optional().array().optional(),
 	findings: z.string().uuid().optional().array().optional()
+});
+
+export const TTPCatalogSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	provider: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
+	annotation: z.string().optional().nullable()
+});
+
+export const TacticSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	provider: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
+	annotation: z.string().optional().nullable(),
+	catalog: z.string().uuid(),
+	order_id: z.number().optional().nullable()
+});
+
+export const ThreatModelSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	catalog: z.string().uuid({ message: 'Select a TTP catalog' })
+});
+
+export const TechniqueSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	provider: z.string().optional().nullable(),
+	ref_id: z.string().optional(),
+	annotation: z.string().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional(),
+	catalog: z.string().uuid().optional().nullable(),
+	parent: z.string().uuid().optional().nullable(),
+	tactics: z.string().uuid().optional().array().optional(),
+	reference_controls: z.string().uuid().optional().array().optional(),
+	is_deprecated: z.boolean().optional()
 });
 
 export const SecurityAdvisorySchema = z.object({
@@ -216,6 +263,19 @@ export const RiskScenarioSchema = z.object({
 	justification: z.string().optional().nullable(),
 	risk_assessment: z.string(),
 	threats: z.string().uuid().optional().array().optional(),
+	// the edit page binds a single value while the relation stays many-to-many,
+	// so accept a scalar and always hand the API a list
+	threat_models: z
+		.preprocess(
+			(value) =>
+				value === undefined || value === null || value === ''
+					? []
+					: Array.isArray(value)
+						? value.filter(Boolean)
+						: [value],
+			z.string().uuid().array()
+		)
+		.optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	incidents: z.string().uuid().optional().array().optional(),
@@ -602,6 +662,7 @@ export const GeneralSettingsSchema = z.object({
 		.optional(),
 	default_landing: z.enum(['analytics', 'respondent', 'portal']).default('analytics').optional(),
 	disable_partially_compliant_result: z.boolean().default(false).optional(),
+	use_risk_category_label: z.boolean().default(false).optional(),
 	personal_folders_parent: z.string().uuid().optional().nullable(),
 	currency: z.enum(CURRENCY_SYMBOLS).default('€'),
 	daily_rate: z.number().default(500).optional(),
@@ -668,6 +729,8 @@ export const FeatureFlagsSchema = z.object({
 	organisation_objectives: z.boolean().optional(),
 	organisation_issues: z.boolean().optional(),
 	quantitative_risk_studies: z.boolean().optional(),
+	threat_modeling: z.boolean().optional(),
+	ttps: z.boolean().optional(),
 	terminologies: z.boolean().optional(),
 	custom_fields: z.boolean().optional(),
 	bia: z.boolean().optional(),
@@ -677,6 +740,7 @@ export const FeatureFlagsSchema = z.object({
 	validation_flows: z.boolean().optional(),
 	focus_mode: z.boolean().optional(),
 	idp_groups: z.boolean().optional(),
+	service_accounts: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
 	audit_log_forwarding: z.boolean().optional(),
 	metrology: z.boolean().optional(),
@@ -1183,6 +1247,17 @@ export const quantitativeRiskScenarioSchema = z.object({
 	status: z.string().optional().default('draft'),
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	threats: z.string().uuid().optional().array().optional(),
+	threat_models: z
+		.preprocess(
+			(value) =>
+				value === undefined || value === null || value === ''
+					? []
+					: Array.isArray(value)
+						? value.filter(Boolean)
+						: [value],
+			z.string().uuid().array()
+		)
+		.optional(),
 	qualifications: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	is_selected: z.boolean().default(true),
@@ -1682,6 +1757,14 @@ export const ClassificationLevelSchema = z.object({
 	translations: z.record(z.string().min(1), z.string().min(1)).optional()
 });
 
+export const AssetClassSchema = z.object({
+	...NameDescriptionMixin,
+	parent: z.string().optional().nullable(),
+	is_visible: z.boolean().default(true),
+	// {locale: {name, description}}
+	translations: z.record(z.string().min(1), z.record(z.string().min(1), z.string())).optional()
+});
+
 export const RoleSchema = z.object({
 	...NameDescriptionMixin,
 	permissions: z.array(z.number()).optional()
@@ -1801,6 +1884,13 @@ export const ResponsibilityAssignmentSchema = z.object({
 	activity: z.string().uuid(),
 	actor: z.string().uuid(),
 	role: z.string().uuid()
+});
+
+export const WorkflowSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	filtering_labels: z.array(z.string().uuid()).optional()
 });
 
 // Metrology
@@ -1931,6 +2021,17 @@ export const IdPGroupSchema = z.object({
 	user_groups: z.array(z.string().uuid().optional()).optional()
 });
 
+export const ServiceAccountSchema = z.object({
+	name: z.string().min(1).max(100),
+	description: z.string().optional().nullable(),
+	authorization_mode: z.enum(['role', 'custom', 'global_admin']).default('custom'),
+	permissions: z.array(z.number()).optional(),
+	role: z.string().uuid().optional().nullable(),
+	folders: z.array(z.string().uuid()).min(1),
+	is_recursive: z.boolean().default(true),
+	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
+});
+
 const SCHEMA_MAP: Record<string, ZodSchema> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1938,6 +2039,10 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'risk-matrices': RiskMatrixSchema,
 	'risk-assessments': RiskAssessmentSchema,
 	threats: ThreatSchema,
+	'ttp-catalogs': TTPCatalogSchema,
+	tactics: TacticSchema,
+	techniques: TechniqueSchema,
+	'threat-models': ThreatModelSchema,
 	'security-advisories': SecurityAdvisorySchema,
 	cwes: CWESchema,
 	'risk-scenarios': RiskScenarioSchema,
@@ -1956,6 +2061,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'evidence-revisions': EvidenceRevisionSchema,
 	users: UserCreateSchema,
 	'idp-groups': IdPGroupSchema,
+	'service-accounts': ServiceAccountSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
 	'feature-flags': FeatureFlagsSchema,
@@ -2007,6 +2113,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	terminologies: TerminologySchema,
 	'object-classifications': ObjectClassificationSchema,
 	'classification-levels': ClassificationLevelSchema,
+	'asset-class': AssetClassSchema,
 	'custom-fields': CustomFieldDefinitionSchema,
 	roles: RoleSchema,
 	'generic-collections': GenericCollectionSchema,
@@ -2017,6 +2124,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'responsibility-matrix-activities': ResponsibilityMatrixActivitySchema,
 	'responsibility-matrix-actors': ResponsibilityMatrixActorSchema,
 	'responsibility-assignments': ResponsibilityAssignmentSchema,
+	workflows: WorkflowSchema,
 	'metric-definitions': MetricDefinitionSchema,
 	'metric-instances': MetricInstanceSchema,
 	'custom-metric-samples': CustomMetricSampleSchema,

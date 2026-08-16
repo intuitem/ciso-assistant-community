@@ -90,6 +90,24 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalThreatModelCreateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.threatModelCreateForm,
+				formAction: '?/createThreatModel',
+				model: data.threatModelModel,
+				invalidateAll: false,
+				debug: false
+			}
+		};
+		modalStore.trigger({
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate('add-' + data.threatModelModel.localName)
+		});
+	}
+
 	let refreshKey = $state(false);
 	run(() => {
 		if (form?.newControl) {
@@ -105,6 +123,17 @@
 						}
 					: current
 			);
+			form = null;
+		}
+	});
+
+	run(() => {
+		if (form?.newThreatModel) {
+			refreshKey = !refreshKey;
+			_form.form.update((current: Record<string, any>) => ({
+				...current,
+				threat_models: form?.newThreatModel
+			}));
 			form = null;
 		}
 	});
@@ -331,6 +360,42 @@
 					helpText={m.antecedentScenariosHelpText()}
 				/>
 			</div>
+			{#if page.data.featureflags?.threat_modeling}
+				<div class="card px-5 py-4 bg-surface-50-950 shadow-lg flex-1">
+					<div class="flex items-center gap-2 mb-2">
+						<i class="fa-solid fa-diagram-project text-xs text-indigo-400"></i>
+						<span class="text-xs font-semibold uppercase tracking-wider text-surface-400-600"
+							>{m.threatModel()}</span
+						>
+					</div>
+					<div class="flex items-center gap-2">
+						<div class="flex-1">
+							{#key refreshKey}
+								<AutocompleteSelect
+									form={_form}
+									nullable
+									optionsEndpoint="threat-models"
+									optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
+									optionsExtraFields={[['folder', 'str']]}
+									optionsLabelField="auto"
+									field="threat_models"
+									label={m.threatModel()}
+									helpText={m.threatModelHelpText()}
+								/>
+							{/key}
+						</div>
+						<button
+							class="btn preset-tonal-primary shrink-0 h-10 w-10"
+							onclick={(_) => modalThreatModelCreateForm()}
+							type="button"
+							title={safeTranslate('add-' + data.threatModelModel.localName)}
+							aria-label={safeTranslate('add-' + data.threatModelModel.localName)}
+						>
+							<i class="fa-solid fa-plus text-sm"></i>
+						</button>
+					</div>
+				</div>
+			{/if}
 		</div>
 
 		<input type="hidden" name="urlmodel" value={data.model.urlModel} />
@@ -582,7 +647,7 @@
 					multiple
 					optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
 					field="qualifications"
-					label={m.qualifications()}
+					label={safeTranslate('qualifications')}
 					optionsLabelField="translated_name"
 				/>
 				<Select

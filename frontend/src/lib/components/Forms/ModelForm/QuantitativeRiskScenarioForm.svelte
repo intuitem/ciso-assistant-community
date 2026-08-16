@@ -1,10 +1,21 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
+	import { getModelInfo } from '$lib/utils/crud';
+	import { ThreatModelSchema } from '$lib/utils/schemas';
+	import { defaults } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { invalidateAll } from '$app/navigation';
+
 	import Select from '../Select.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { run } from 'svelte/legacy';
 
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
@@ -16,6 +27,7 @@
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
 		object?: Record<string, any>;
+		context?: string;
 	}
 
 	let {
@@ -24,7 +36,8 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		object = {}
+		object = {},
+		context = 'default'
 	}: Props = $props();
 
 	// Convert priority values from strings to integers for proper schema validation
@@ -35,6 +48,37 @@
 			});
 		}
 	});
+	const modalStore: ModalStore = getModalStore();
+
+	const threatModelModel = getModelInfo('threat-models');
+
+	function modalThreatModelCreateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				// created already linked when the scenario exists; on create the user
+				// picks it from the refreshed list
+				form: defaults(
+					{
+						folder: $page.data?.scenario?.folder?.id ?? initialData?.folder,
+						...(object?.id ? { quantitative_risk_scenarios: [object.id] } : {})
+					},
+					zod(ThreatModelSchema)
+				),
+				formAction: '/threat-models?/create',
+				model: threatModelModel,
+				debug: false
+			}
+		};
+		modalStore.trigger({
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate('add-' + threatModelModel.localName),
+			response: (r: boolean) => {
+				if (r) invalidateAll();
+			}
+		});
+	}
 </script>
 
 <AutocompleteSelect
@@ -84,6 +128,37 @@
 	label={m.threats()}
 />
 
+{#if $page.data.featureflags?.threat_modeling}
+	<div class="flex flex-row space-x-2 items-center">
+		<div class="w-full">
+			<AutocompleteSelect
+				{form}
+				nullable
+				optionsEndpoint="threat-models"
+				optionsExtraFields={[['folder', 'str']]}
+				optionsLabelField="auto"
+				field="threat_models"
+				cacheLock={cacheLocks['threat_models']}
+				bind:cachedValue={formDataCache['threat_models']}
+				label={m.threatModel()}
+			/>
+		</div>
+		{#if context !== 'create'}
+			<div class="mt-4">
+				<button
+					class="btn preset-tonal-primary h-10 w-10"
+					onclick={() => modalThreatModelCreateForm()}
+					type="button"
+					title={safeTranslate('add-' + threatModelModel.localName)}
+					aria-label={safeTranslate('add-' + threatModelModel.localName)}
+				>
+					<i class="fa-solid fa-plus text-sm"></i>
+				</button>
+			</div>
+		{/if}
+	</div>
+{/if}
+
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<Select
 		{form}
@@ -114,7 +189,7 @@
 		field="qualifications"
 		cacheLock={cacheLocks['qualifications']}
 		bind:cachedValue={formDataCache['qualifications']}
-		label={m.qualifications()}
+		label={safeTranslate('qualifications')}
 	/>
 	<AutocompleteSelect
 		{form}

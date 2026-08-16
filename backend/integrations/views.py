@@ -14,6 +14,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.views import BaseModelViewSet
+from iam.models import RoleAssignment
 from integrations.models import (
     IntegrationConfiguration,
     IntegrationProvider,
@@ -31,13 +32,19 @@ logger = structlog.get_logger(__name__)
 
 
 class ConnectionTestView(APIView):
-    """
-    An endpoint to test connection credentials without saving them.
-    Accepts a POST request with provider_id and credentials.
-    """
-
     def post(self, request, *args, **kwargs):
-        serializer = ConnectionTestSerializer(data=request.data)
+        if not any(
+            RoleAssignment.has_permission_anywhere(request.user, codename)
+            for codename in (
+                "add_integrationconfiguration",
+                "change_integrationconfiguration",
+            )
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        serializer = ConnectionTestSerializer(
+            data=request.data, context={"request": request}
+        )
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

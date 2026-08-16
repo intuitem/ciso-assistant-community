@@ -4,8 +4,12 @@ import re
 from django.db.models import ProtectedError
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT
-from iam.models import Folder, RoleAssignment, UserGroup
+from rest_framework.status import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_403_FORBIDDEN,
+    HTTP_409_CONFLICT,
+)
+from iam.models import Folder, Permission, RoleAssignment
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
@@ -50,6 +54,27 @@ import zipfile
 from datetime import datetime
 
 logger = structlog.get_logger(__name__)
+
+# Core models the DORA ROI is built from. Reading the register as a whole
+# requires holding these on the root folder, i.e. instance-wide.
+DORA_ROI_PERMISSIONS = (
+    "view_entity",
+    "view_solution",
+    "view_asset",
+    "view_contract",
+)
+
+
+def has_dora_roi_access(user) -> bool:
+    root_folder = Folder.get_root_folder()
+    return all(
+        RoleAssignment.is_access_allowed(
+            user=user,
+            perm=Permission.objects.get(codename=codename),
+            folder=root_folder,
+        )
+        for codename in DORA_ROI_PERMISSIONS
+    )
 
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
@@ -272,23 +297,11 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             return HttpResponse("No main entity found", status=400)
 
         # Get accessible objects for the current user
-        (viewable_entities, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Entity,
+        viewable_entities = RoleAssignment.get_viewable_object_ids(request.user, Entity)
+        viewable_contracts = RoleAssignment.get_viewable_object_ids(
+            request.user, Contract
         )
-
-        (viewable_contracts, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Contract,
-        )
-
-        (viewable_assets, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Asset,
-        )
+        viewable_assets = RoleAssignment.get_viewable_object_ids(request.user, Asset)
 
         # Prepare entity lists
         # Subsidiaries: entities with main entity as parent AND dora_provider_person_type set (legal person)
@@ -462,6 +475,9 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         """
         from tprm import dora_linter
 
+        if not has_dora_roi_access(request.user):
+            return Response(status=HTTP_403_FORBIDDEN)
+
         lint_results = dora_linter.lint_dora_roi()
         return Response(lint_results)
 
@@ -476,29 +492,14 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         - Asset hierarchy (parent-child asset relationships)
         """
         # Get accessible objects for the current user
-        (viewable_entities, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Entity,
+        viewable_entities = RoleAssignment.get_viewable_object_ids(request.user, Entity)
+        viewable_contracts = RoleAssignment.get_viewable_object_ids(
+            request.user, Contract
         )
-
-        (viewable_contracts, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Contract,
+        viewable_solutions = RoleAssignment.get_viewable_object_ids(
+            request.user, Solution
         )
-
-        (viewable_solutions, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Solution,
-        )
-
-        (viewable_assets, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Asset,
-        )
+        viewable_assets = RoleAssignment.get_viewable_object_ids(request.user, Asset)
 
         # Get entities, solutions, contracts, and assets
         entities = Entity.objects.filter(id__in=viewable_entities)
@@ -707,17 +708,17 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         """
         import pandas as pd  # imported lazily: optional/heavy dependency
 
-        (viewable_entity_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Entity
+        viewable_entity_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, Entity
         )
-        (viewable_solution_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Solution
+        viewable_solution_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, Solution
         )
-        (viewable_contract_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Contract
+        viewable_contract_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, Contract
         )
-        (viewable_representative_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Representative
+        viewable_representative_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, Representative
         )
 
         # Honor the filters/search applied on the entities list page so the
@@ -1130,10 +1131,8 @@ class EntityAssessmentViewSet(BaseModelViewSet):
     def metrics(self, request):
         assessments_data = []
 
-        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=EntityAssessment,
+        viewable_items = RoleAssignment.get_viewable_object_ids(
+            request.user, EntityAssessment
         )
 
         for ea in EntityAssessment.objects.filter(id__in=viewable_items).select_related(

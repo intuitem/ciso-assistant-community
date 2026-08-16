@@ -15,9 +15,11 @@ from core.serializer_fields import (
     HashSlugRelatedField,
     PathField,
 )
+from core.constants import LEGACY_TTP_LIBRARIES
 from core.utils import time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from tprm.models import Contract, Solution
+from threat_modeling.models import ThreatModel
 from pmbok.models import GenericCollection
 from global_settings.utils import ff_is_enabled
 from iam.models import *
@@ -132,9 +134,18 @@ class BaseModelSerializer(serializers.ModelSerializer):
         return attrs
 
     def _check_object_perm(
-        self, instance_or_data, action: str, *, folder: Folder | None = None
+        self,
+        instance_or_data,
+        action: str,
+        *,
+        folder: Folder | None = None,
+        model: type[models.Model] | None = None,
     ) -> None:
-        """Check that the requesting user has *action* permission on the resolved folder."""
+        """Check that the requesting user has *action* permission on the resolved folder.
+
+        `model` overrides the permission codename's model when the checked
+        object is not an instance of the serializer's own model.
+        """
         if folder is None:
             folder = Folder.get_folder(instance_or_data)
         if folder is None:
@@ -142,10 +153,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request is None:
             return
+        model = model or self.Meta.model
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(
-                codename=f"{action}_{self.Meta.model._meta.model_name}",
+                codename=f"{action}_{model._meta.model_name}",
             ),
             folder=folder,
         ):
@@ -199,7 +211,6 @@ class BaseModelSerializer(serializers.ModelSerializer):
         if not request or not request.user.is_authenticated:
             return
         user = request.user
-        root_folder = Folder.get_root_folder()
         accessible_cache: dict = {}
         for field_name, value in validated_data.items():
             if not isinstance(value, list) or not value:
@@ -209,9 +220,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
             related_model = type(value[0])
             if related_model not in accessible_cache:
                 try:
-                    ids = RoleAssignment.get_accessible_object_ids(
-                        root_folder, user, related_model
-                    )[0]
+                    ids = RoleAssignment.get_viewable_object_ids(user, related_model)
                     accessible_cache[related_model] = {str(i) for i in ids}
                 except NotImplementedError, Permission.DoesNotExist:
                     accessible_cache[related_model] = None
@@ -1048,6 +1057,12 @@ class AppliedControlAutocompleteSerializer(BaseModelSerializer):
 class AssetImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     parent_assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    # Canonical path, not a pk: asset classes are root-folder referentials and
+    # never travel in the dump, so a pk would dangle on the target instance.
+    asset_class = serializers.SerializerMethodField()
+
+    def get_asset_class(self, obj) -> str | None:
+        return obj.asset_class.full_path if obj.asset_class else None
 
     class Meta:
         model = Asset
@@ -1059,6 +1074,7 @@ class AssetImportExportSerializer(BaseModelSerializer):
             "security_objectives",
             "disaster_recovery_objectives",
             "parent_assets",
+            "asset_class",
             "folder",
             "created_at",
             "updated_at",
@@ -1068,17 +1084,42 @@ class AssetImportExportSerializer(BaseModelSerializer):
 class AssetClassReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     parent = FieldsRelatedField()
+    # Needed by the frontend to resolve the folder governing this object.
+    folder = FieldsRelatedField()
     full_path = serializers.CharField()
+    # `name`/`description` stay canonical: the edit form round-trips them.
+    translated_name = serializers.CharField(source="get_name_translated")
+    translated_description = serializers.CharField(
+        source="get_description_translated", allow_blank=True, allow_null=True
+    )
 
     class Meta:
         model = AssetClass
-        exclude = ["created_at", "updated_at", "folder", "is_published"]
+        exclude = ["created_at", "updated_at", "is_published"]
 
 
 class AssetClassWriteSerializer(BaseModelSerializer):
+    # Built-ins are re-seeded at every startup: they are hidable, not editable.
+    BUILTIN_EDITABLE_FIELDS = {"is_visible"}
+
     class Meta:
         model = AssetClass
         exclude = ["created_at", "updated_at", "folder", "is_published"]
+
+    def validate_name(self, value):
+        if "/" in value:
+            raise serializers.ValidationError(
+                "The name cannot contain '/' for an Asset class."
+            )
+        return value
+
+    def validate_parent(self, parent):
+        """Check that the asset class tree will not contain cycles."""
+        if parent is not None and self.instance in parent.ancestors_plus_self():
+            raise serializers.ValidationError(
+                "errorAssetClassGraphMustNotContainCycles"
+            )
+        return parent
 
 
 class ReferenceControlWriteSerializer(BaseModelSerializer):
@@ -1157,6 +1198,10 @@ class ThreatReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    is_legacy_ttp = serializers.SerializerMethodField()
+
+    def get_is_legacy_ttp(self, obj) -> bool:
+        return bool(obj.library and obj.library.urn in LEGACY_TTP_LIBRARIES)
 
     class Meta:
         model = Threat
@@ -1187,13 +1232,33 @@ class ThreatImportExportSerializer(BaseModelSerializer):
         ]
 
 
+REFERENTIAL_IMPORT_EXPORT_FIELDS = [
+    "created_at",
+    "updated_at",
+    "folder",
+    "urn",
+    "ref_id",
+    "provider",
+    "name",
+    "description",
+    "annotation",
+    "translations",
+    "locale",
+    "default_locale",
+    "library",
+]
+
+
 class RiskScenarioWriteSerializer(BaseModelSerializer):
     # Note: Inherent risk fields are always accepted for writing,
     # but only displayed when inherent_risk feature flag is enabled
-    FLAGGED_FIELDS = {}
+    FLAGGED_FIELDS = {"threat_models": "threat_modeling"}
 
     risk_matrix = serializers.PrimaryKeyRelatedField(
         read_only=True, source="risk_assessment.risk_matrix"
+    )
+    threat_models = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=ThreatModel.objects.all()
     )
 
     def validate_risk_assessment(self, value):
@@ -1304,6 +1369,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     version = serializers.StringRelatedField(source="risk_assessment.version")
     operational_scenario = FieldsRelatedField(["id", "name", "ebios_rm_study"])
     threats = FieldsRelatedField(many=True)
+    threat_models = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
     risk_origin = FieldsRelatedField(["id", "name", "description"])
@@ -2253,6 +2319,7 @@ class FolderWriteSerializer(BaseModelSerializer):
         exclude = [
             "builtin",
             "content_type",
+            "descendants",
         ]
 
     def update(self, instance, validated_data):
@@ -2331,7 +2398,7 @@ class FolderReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = Folder
-        fields = "__all__"
+        exclude = ["descendants"]
 
 
 class FolderImportExportSerializer(BaseModelSerializer):
@@ -2905,6 +2972,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
     """Optimized serializer for list views - only includes fields needed by the table."""
 
     path = PathField(read_only=True)
+    authors = FieldsRelatedField(many=True)
     folder = FieldsRelatedField()
     framework = FieldsRelatedField()
     perimeter = FieldsRelatedField()
@@ -2945,6 +3013,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "created_at",
             "updated_at",
             "path",
+            "authors",
         ]
 
 

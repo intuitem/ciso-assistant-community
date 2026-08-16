@@ -101,6 +101,7 @@ GENERAL_SETTINGS_KEYS = [
     "personal_folders",
     "personal_folders_parent",
     "disable_partially_compliant_result",
+    "use_risk_category_label",
 ]
 
 LLM_URL_DEFAULTS = {
@@ -366,6 +367,10 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     quantitative_risk_studies = serializers.BooleanField(
         source="value.quantitative_risk_studies", required=False, default=True
     )
+    threat_modeling = serializers.BooleanField(
+        source="value.threat_modeling", required=False, default=False
+    )
+    ttps = serializers.BooleanField(source="value.ttps", required=False, default=False)
     terminologies = serializers.BooleanField(
         source="value.terminologies", required=False, default=True
     )
@@ -493,17 +498,6 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         if value_changed:
             instance.value = current_value_dict
             instance.save(update_fields=["value"])
-
-        if idp_groups_changed:
-            # The groups cache bakes in the idp_groups closure at build time, so
-            # toggling the flag must rebuild it for the change to take effect.
-            from iam.cache_builders import (
-                invalidate_assignments_cache,
-                invalidate_groups_cache,
-            )
-
-            invalidate_groups_cache()
-            invalidate_assignments_cache()
 
         return instance
 

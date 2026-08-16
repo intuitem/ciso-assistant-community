@@ -45,6 +45,7 @@ from data_wizard.views import (
     ThreatRecordConsumer,
     UserRecordConsumer,
     VulnerabilityRecordConsumer,
+    _resolve_asset_class,
     _resolve_filtering_labels,
 )
 
@@ -57,12 +58,12 @@ from data_wizard.views import (
 def _run(consumer_cls, context, records):
     """Call process_records patching out RoleAssignment permission check."""
 
-    def _all_ids(root_folder, user, model_class):
-        ids = list(model_class.objects.values_list("id", flat=True))
-        return ids, ids, ids
+    def _all_ids(user, perm_prefix, model, folder=None):
+        ids = list(model.objects.values_list("id", flat=True))
+        return ids
 
     with patch(
-        "data_wizard.views.RoleAssignment.get_accessible_object_ids",
+        "data_wizard.views.RoleAssignment._get_accessible_ids",
         side_effect=_all_ids,
     ):
         return consumer_cls(context).process_records(records)
@@ -104,7 +105,89 @@ class TestResolveFilteringLabels:
 
 
 @pytest.mark.django_db
+class TestResolveAssetClass:
+    """The xlsx `asset_class` column carries the canonical path."""
+
+    @pytest.fixture
+    def index(self):
+        from core.models import AssetClass
+
+        parent = AssetClass.objects.create(name="Machines")
+        AssetClass.objects.create(name="Servers", parent=parent)
+        other = AssetClass.objects.create(name="Virtual")
+        AssetClass.objects.create(name="Hypervisors", parent=other)
+        return AssetClass.path_index()
+
+    def test_canonical_path_resolves(self, index):
+        assert _resolve_asset_class("Machines/Servers", index).name == "Servers"
+
+    def test_resolution_is_case_and_space_insensitive(self, index):
+        assert _resolve_asset_class("  machines / servers  ", index).name == "Servers"
+
+    def test_unambiguous_leaf_name_resolves(self, index):
+        assert _resolve_asset_class("Hypervisors", index).name == "Hypervisors"
+
+    def test_ambiguous_leaf_resolves_to_nothing(self, index):
+        from core.models import AssetClass
+
+        AssetClass.objects.create(
+            name="Hypervisors", parent=AssetClass.objects.get(name="Machines")
+        )
+        assert _resolve_asset_class("Hypervisors", AssetClass.path_index()) is None
+
+    def test_unknown_path_resolves_to_nothing(self, index):
+        assert _resolve_asset_class("Nope/Nothing", index) is None
+
+    def test_explicit_path_never_falls_back_to_a_leaf_elsewhere(self, index):
+        # "Servers" exists only under Machines; naming another parent must not
+        # silently reclassify the asset.
+        assert _resolve_asset_class("Virtual/Servers", index) is None
+
+    def test_blank_and_non_string_are_ignored(self, index):
+        assert _resolve_asset_class("", index) is None
+        assert _resolve_asset_class("   ", index) is None
+        assert _resolve_asset_class(None, index) is None
+
+
+@pytest.mark.django_db
 class TestAssetConsumer:
+    def test_asset_class_column_is_imported(self, base_context):
+        from core.models import AssetClass
+
+        parent = AssetClass.objects.create(name="Machines")
+        leaf = AssetClass.objects.create(name="Servers", parent=parent)
+
+        consumer = AssetRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "X", "asset_class": "Machines/Servers"}, [1, 2, 3, 4]
+        )
+
+        assert error is None
+        assert record_data["asset_class"] == leaf.id
+
+    def test_unknown_asset_class_warns_but_keeps_the_row(self, base_context):
+        consumer = AssetRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "X", "asset_class": "Does/Not/Exist"}, [1, 2, 3, 4]
+        )
+
+        assert error is not None and error.is_warning is True
+        assert "Unknown asset_class" in error.error
+        assert record_data["name"] == "X"
+        assert "asset_class" not in record_data
+
+    def test_class_alias_accepted(self, base_context):
+        from core.models import AssetClass
+
+        cls = AssetClass.objects.create(name="Machines")
+
+        consumer = AssetRecordConsumer(base_context)
+        record_data, _ = consumer.prepare_create(
+            {"name": "X", "class": "Machines"}, [1, 2, 3, 4]
+        )
+
+        assert record_data["asset_class"] == cls.id
+
     def test_missing_name_returns_error(self, base_context):
         consumer = AssetRecordConsumer(base_context)
         _, error = consumer.prepare_create({}, [1, 2, 3, 4])
@@ -1085,8 +1168,8 @@ class TestFindingsAssessmentConsumer:
         fa = FindingsAssessment.objects.create(name="Locked", folder=domain_folder)
         ctx = self._findings_context(domain_folder, admin_user, target_id=fa.id)
         with patch(
-            "data_wizard.views.RoleAssignment.get_accessible_object_ids",
-            return_value=([], [], []),
+            "data_wizard.views.RoleAssignment._get_accessible_ids",
+            return_value=[],
         ):
             result = FindingsAssessmentRecordConsumer(ctx).process_records(
                 [{"name": "X", "ref_id": "F-X", "status": "identified"}]

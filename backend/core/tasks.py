@@ -15,10 +15,10 @@ from core.models import (
     TaskTemplate,
     ValidationFlow,
 )
-from iam.models import User
+from iam.models import ServiceAccount, User
 from django.core.mail import get_connection, EmailMessage
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction
 import logging
 from global_settings.models import GlobalSettings
 
@@ -752,7 +752,7 @@ def auditlog_retention_cleanup():
         logger.error(f"Failed to clean up audit logs: {str(e)}")
 
 
-@periodic_task(crontab(hour="*/3"))
+@periodic_task(crontab(minute="0", hour="*/3"))
 def auditlog_prune():
     try:
         call_command("prune_auditlog")
@@ -1463,6 +1463,44 @@ def deactivate_expired_users():
         logger.info(f"Successfully deactivated {count} expired users")
     else:
         logger.debug("No expired users found to deactivate")
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="3", minute="5"))
+def deactivate_expired_service_accounts():
+    """Deactivate service accounts whose expiry_date has passed.
+
+    Uses ServiceAccount.deactivate(), not a plain is_active flip — it also
+    revokes the OIDC client's grant types and deletes outstanding tokens, so
+    an expired account can't keep authenticating on tokens minted earlier.
+    """
+    today = date.today()
+    expired_service_accounts = ServiceAccount.objects.filter(
+        expiry_date__lt=today,
+        expiry_date__isnull=False,
+        is_active=True,
+    )
+
+    count = 0
+    for service_account in expired_service_accounts:
+        try:
+            with transaction.atomic():
+                service_account.deactivate()
+        except Exception as e:
+            logger.error(
+                f"Failed to deactivate expired service account: {service_account.name} (ID: {service_account.id})",
+                error=str(e),
+            )
+            continue
+        count += 1
+        logger.info(
+            f"Deactivated expired service account: {service_account.name} (ID: {service_account.id}), expiry date: {service_account.expiry_date}"
+        )
+
+    if count > 0:
+        logger.info(f"Successfully deactivated {count} expired service accounts")
+    else:
+        logger.debug("No expired service accounts found to deactivate")
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing

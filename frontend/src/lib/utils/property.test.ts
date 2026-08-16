@@ -63,4 +63,15 @@ describe('toCamelCase (property)', () => {
 			})
 		);
 	});
+
+	it('strips parentheses instead of leaving them embedded in the key', () => {
+		expect(toCamelCase('Real time (continuous)')).toBe('realTimeContinuous');
+		expect(toCamelCase('ICT operation management (including maintenance)')).toBe(
+			'iCTOperationManagementIncludingMaintenance'
+		);
+		expect(toCamelCase('Software licencing (excluding SaaS)')).toBe(
+			'softwareLicencingExcludingSaaS'
+		);
+		expect(toCamelCase('foo(bar)')).toBe('fooBar');
+	});
 });

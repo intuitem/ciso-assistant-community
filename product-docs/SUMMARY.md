@@ -26,6 +26,7 @@
   * [Journeys](concepts/journeys.md)
 * Assets and resilience
   * [Assets](concepts/assets.md)
+  * [Asset classes](concepts/asset-classes.md)
   * [Business impact analyses](concepts/business-impact-analyses.md)
 * Operations
   * [Applied controls](concepts/applied-controls.md)
@@ -192,8 +193,10 @@
 * [Overview](integrations/README.md)
 * [API reference](integrations/api.md)
 * [Generating a PAT](integrations/pat.md)
+* [Service accounts](integrations/service-accounts.md)
 * [Outgoing webhooks](integrations/webhooks.md)
 * [Audit log forwarding](integrations/audit-log-forwarding.md)
+* [Hosted AI providers](integrations/ai-providers.md)
 * [MCP setup guide](integrations/mcp.md)
 * [Power BI connector](integrations/powerbi.md)
 * [Third-party integrations](integrations/third-party/README.md)
