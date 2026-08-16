@@ -2015,10 +2015,7 @@ def startup(sender=None, **kwargs):
     print("startup handler: initialize database")
 
     # if root folder does not exist, then create it
-    if not Folder.objects.filter(content_type=Folder.ContentType.ROOT).exists():
-        Folder.objects.create(
-            name="Global", content_type=Folder.ContentType.ROOT, builtin=True
-        )
+    Folder._init_root_folder()
     # if main entity does not exist, then create it
     if not Entity.get_main_entity():
         main = Entity.objects.create(

@@ -3612,7 +3612,7 @@
 	"theFollowingControlsWillBeMovedToExisting": "I seguenti controlli verranno spostati nei controlli esistenti di questo scenario:",
 	"thereWasAnErrorLoading": "Si è verificato un errore durante il caricamento dei dati delle metriche chiave. Prova ad aggiornare la pagina.",
 	"thereWasAnErrorLoadingExecutive": "Si è verificato un errore durante il caricamento dei dati della sintesi esecutiva",
-	"thirdPartiesImportHelpText": "Importa entità, soluzioni e contratti dei tuoi terzi dal modello Excel multi-foglio",
+	"thirdPartiesImportHelpText": "Importa entità, rappresentanti, soluzioni, valutazioni entità e contratti dei tuoi terzi dal modello Excel multi-foglio",
 	"thirdPartyDescription": "Gestione di entità terze e dei loro rappresentanti, contratti, soluzioni e valutazioni.",
 	"timelineEntry": "Voce timeline",
 	"token": "Token",
