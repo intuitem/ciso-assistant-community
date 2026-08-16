@@ -11,7 +11,9 @@
 	import { invalidateAll } from '$app/navigation';
 	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import ValidationFlowActionModal from '$lib/components/Modals/ValidationFlowActionModal.svelte';
+	import { deserialize } from '$app/forms';
 	import {
+		validationFlowErrorMessage,
 		validationFlowItemHref,
 		validationFlowModelLabels,
 		validationStatusColor
@@ -57,11 +59,16 @@
 						formData.append('notes', notes);
 						const response = await fetch(`?/${action}`, {
 							method: 'POST',
-							body: formData
+							body: formData,
+							headers: { 'x-sveltekit-action': 'true' }
 						});
-						if (!response.ok) {
-							const errorData = await response.text();
-							throw new Error(`${response.status} - ${errorData}`);
+						const result = deserialize(await response.text());
+						if (result.type === 'failure' || result.type === 'error') {
+							const message =
+								result.type === 'failure'
+									? validationFlowErrorMessage(result.data?.error)
+									: undefined;
+							throw new Error(message ?? m.anErrorOccurred());
 						}
 					},
 					onSuccess: () => invalidateAll()

@@ -5799,5 +5799,12 @@
 	"noValidationHistory": "Aucune validation clôturée",
 	"noValidationHistoryHint": "Les demandes approuvées, rejetées, révoquées ou abandonnées auxquelles vous avez participé apparaissent ici.",
 	"noLinkedObjects": "Aucun objet lié",
-	"andNMoreObjects": "et {count} de plus"
+	"andNMoreObjects": "et {count} de plus",
+	"validationOnlyRequesterOrApproverCanDrop": "Seul le demandeur ou l'approbateur peut abandonner cette validation",
+	"validationOnlyApproverCanModify": "Seul l'approbateur désigné peut agir sur cette validation",
+	"validationOnlyRequesterCanAct": "Seul le demandeur peut renvoyer ou abandonner cette validation",
+	"validationInTerminalState": "Cette validation est clôturée et ne peut plus être modifiée",
+	"validationStatusTransitionNotAllowed": "Impossible de faire passer cette validation de « {fromStatus} » à « {toStatus} »",
+	"validationMustStartAsSubmitted": "Une nouvelle demande de validation doit débuter au statut « soumis »",
+	"showingMostRecentValidations": "Affichage des {count} validations les plus récentes sur {total}"
 }

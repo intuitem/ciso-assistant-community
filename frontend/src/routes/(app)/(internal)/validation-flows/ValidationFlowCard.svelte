@@ -11,6 +11,7 @@
 		VALIDATION_ACTION_ICONS,
 		validationActionLabels,
 		validationFlowActions,
+		validationFlowErrorMessage,
 		validationFlowLinkedObjects,
 		validationFlowModelLabels,
 		validationStatusColor,
@@ -22,11 +23,9 @@
 	interface Props {
 		flow: any;
 		userId: string;
-		/** Sent flows are about the approver; received and past ones about the requester. */
-		counterpart?: 'requester' | 'approver';
 	}
 
-	let { flow, userId, counterpart = 'requester' }: Props = $props();
+	let { flow, userId }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
 	const modelLabels = validationFlowModelLabels();
@@ -34,6 +33,10 @@
 
 	const linkedObjects = $derived(validationFlowLinkedObjects(flow));
 	const actions = $derived(validationFlowActions(flow, userId));
+	// Show the other party: the approver on flows I requested, the requester otherwise.
+	const counterpart = $derived(
+		String(flow.requester?.id) === String(userId) ? 'approver' : 'requester'
+	);
 	const person = $derived(flow[counterpart]);
 	const isOverdue = $derived(
 		Boolean(flow.validation_deadline) &&
@@ -66,7 +69,11 @@
 						});
 						const result = deserialize(await response.text());
 						if (result.type === 'failure' || result.type === 'error') {
-							throw new Error(m.anErrorOccurred());
+							const message =
+								result.type === 'failure'
+									? validationFlowErrorMessage(result.data?.error)
+									: undefined;
+							throw new Error(message ?? m.anErrorOccurred());
 						}
 					},
 					onSuccess: () => invalidateAll()

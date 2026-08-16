@@ -1,3 +1,4 @@
+import { safeTranslate } from '$lib/utils/i18n';
 import { m } from '$paraglide/messages';
 
 export type ValidationFlowAction =
@@ -16,8 +17,7 @@ export const VALIDATION_FLOW_MODEL_URLS: Record<string, string> = {
 	policies: 'policies',
 	processings: 'processings',
 	accreditations: 'accreditations',
-	contracts: 'contracts',
-	managed_documents: 'managed-documents'
+	contracts: 'contracts'
 };
 
 export function validationFlowModelLabels(): Record<string, string> {
@@ -34,16 +34,32 @@ export function validationFlowModelLabels(): Record<string, string> {
 		policies: m.policies(),
 		processings: m.processings(),
 		accreditations: m.accreditations(),
-		contracts: m.contracts(),
-		managed_documents: m.managedDocuments()
+		contracts: m.contracts()
 	};
 }
 
 export function validationFlowItemHref(key: string, item: any): string {
-	if (key === 'managed_documents' && item.policy?.id) {
-		return `/policies/${item.policy.id}/document`;
-	}
 	return `/${VALIDATION_FLOW_MODEL_URLS[key]}/${item.id}`;
+}
+
+/**
+ * Translated message out of a DRF error body ({error: "key"} or {field: ["key"]}) —
+ * backend errors are camelCase i18n keys, optionally with extra context fields
+ * (e.g. from_status/to_status on rejected transitions).
+ */
+export function validationFlowErrorMessage(body: any): string | undefined {
+	if (typeof body === 'string') return safeTranslate(body);
+	if (!body || typeof body !== 'object') return undefined;
+	const leaf = (value: any) => (Array.isArray(value) ? value[0] : value);
+	const key = leaf(Object.values(body)[0]);
+	if (typeof key !== 'string') return undefined;
+	if (key === 'validationStatusTransitionNotAllowed') {
+		return m.validationStatusTransitionNotAllowed({
+			fromStatus: safeTranslate(String(leaf(body.from_status) ?? '')),
+			toStatus: safeTranslate(String(leaf(body.to_status) ?? ''))
+		});
+	}
+	return safeTranslate(key);
 }
 
 /** Flattened view of everything a flow is about, across all its m2m buckets. */

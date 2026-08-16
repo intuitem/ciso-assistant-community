@@ -5539,9 +5539,7 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
 
     def validate_status(self, value):
         if self.instance is None and value != ValidationFlow.Status.SUBMITTED:
-            raise serializers.ValidationError(
-                f"A new validation must start as '{ValidationFlow.Status.SUBMITTED}'"
-            )
+            raise serializers.ValidationError("validationMustStartAsSubmitted")
         return value
 
     def create(self, validated_data: dict) -> ValidationFlow:
@@ -5621,33 +5619,23 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
                             and instance.approver != request_user
                         ):
                             raise PermissionDenied(
-                                {
-                                    "error": "Only the requester or approver can drop this validation"
-                                }
+                                {"error": "validationOnlyRequesterOrApproverCanDrop"}
                             )
                     else:
                         # Only approver can change status from submitted or accepted (for other actions)
                         if instance.approver != request_user:
                             raise PermissionDenied(
-                                {
-                                    "error": "Only the assigned approver can modify this validation"
-                                }
+                                {"error": "validationOnlyApproverCanModify"}
                             )
                 elif current_status == "change_requested":
                     # Only requester can change status from change_requested
                     if instance.requester != request_user:
                         raise PermissionDenied(
-                            {
-                                "error": "Only the requester can resubmit or drop this validation"
-                            }
+                            {"error": "validationOnlyRequesterCanAct"}
                         )
                 else:
                     # Terminal states (rejected, revoked, dropped, expired) cannot be modified
-                    raise PermissionDenied(
-                        {
-                            "error": "This validation is in a terminal state and cannot be modified"
-                        }
-                    )
+                    raise PermissionDenied({"error": "validationInTerminalState"})
 
                 if (
                     new_status != current_status
@@ -5656,7 +5644,10 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
                 ):
                     raise serializers.ValidationError(
                         {
-                            "status": f"Cannot transition a validation from '{current_status}' to '{new_status}'"
+                            "status": "validationStatusTransitionNotAllowed",
+                            # Context for API consumers and the frontend message
+                            "from_status": current_status,
+                            "to_status": new_status,
                         }
                     )
 

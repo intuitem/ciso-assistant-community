@@ -4,17 +4,21 @@ import { getModelInfo, urlParamModelSelectFields } from '$lib/utils/crud';
 import { formatSelectFieldData } from '$lib/utils/load';
 import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo } from '$lib/utils/types';
-import { fail, type Actions } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { z } from 'zod';
 import { m } from '$paraglide/messages';
-import type { PageServerLoad, RequestEvent } from './$types';
+// Route-local Actions/RequestEvent so `transition(event, ...)` typechecks.
+import type { Actions, PageServerLoad, RequestEvent } from './$types';
 
 const URL_MODEL = 'validation-flows';
 const TABS = ['received', 'sent', 'history', 'all'] as const;
 type Tab = (typeof TABS)[number];
+// Card tabs only show the most recent flows; the "all" tab serves the full,
+// paginated list. The truncation hint on the page compares against inbox counts.
+const CARD_TAB_LIMIT = 100;
 
 export const load: PageServerLoad = async ({ fetch, url }) => {
 	const requestedTab = url.searchParams.get('tab') as Tab | null;
@@ -50,7 +54,9 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	const flows =
 		tab === 'all'
 			? []
-			: await fetch(`${BASE_API_URL}/${URL_MODEL}/?scope=${tab}&ordering=-created_at`)
+			: await fetch(
+					`${BASE_API_URL}/${URL_MODEL}/?scope=${tab}&ordering=-created_at&limit=${CARD_TAB_LIMIT}`
+				)
 					.then((res) => (res.ok ? res.json() : { results: [] }))
 					.then((data) => data.results ?? []);
 

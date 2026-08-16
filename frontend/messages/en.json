@@ -6017,5 +6017,12 @@
 	"noValidationHistory": "No closed validation yet",
 	"noValidationHistoryHint": "Approved, rejected, revoked and dropped requests you took part in show up here.",
 	"noLinkedObjects": "No linked object",
-	"andNMoreObjects": "and {count} more"
+	"andNMoreObjects": "and {count} more",
+	"validationOnlyRequesterOrApproverCanDrop": "Only the requester or the approver can drop this validation",
+	"validationOnlyApproverCanModify": "Only the assigned approver can act on this validation",
+	"validationOnlyRequesterCanAct": "Only the requester can resubmit or drop this validation",
+	"validationInTerminalState": "This validation is closed and can no longer be modified",
+	"validationStatusTransitionNotAllowed": "Cannot move this validation from '{fromStatus}' to '{toStatus}'",
+	"validationMustStartAsSubmitted": "A new validation request must start in the 'submitted' status",
+	"showingMostRecentValidations": "Showing the {count} most recent validations out of {total}"
 }

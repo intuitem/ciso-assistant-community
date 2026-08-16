@@ -8,6 +8,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { hasPermissionAnywhere } from '$lib/utils/access-control';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { listViewFields } from '$lib/utils/table';
 	import { m } from '$paraglide/messages';
@@ -22,15 +23,21 @@
 	let { data }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
-	const userId = page.data.user.id;
+	const user = page.data.user;
+	const userId = user.id;
+	// Same gate ModelTable applies to its own add button on generic list pages.
+	const canCreate = hasPermissionAnywhere(user, `add_${data.model.name}`);
 
 	const tableSource = (() => {
 		const fields = listViewFields['validation-flows'];
 		return {
-			head: fields.body.reduce((acc, key, index) => {
-				acc[key] = fields.head[index];
-				return acc;
-			}, {}),
+			head: fields.body.reduce(
+				(acc: Record<string, string>, key, index) => {
+					acc[key] = fields.head[index];
+					return acc;
+				},
+				{} as Record<string, string>
+			),
 			body: [],
 			filters: fields.filters
 		};
@@ -73,15 +80,17 @@
 	}
 </script>
 
-<div class="relative">
-	<button
-		class="btn btn-sm preset-filled-primary-500 absolute right-0 top-0 z-10"
-		data-testid="add-button"
-		onclick={modalCreateForm}
-	>
-		<i class="fa-solid fa-file-circle-plus mr-2"></i>
-		{safeTranslate('add-' + data.model.localName)}
-	</button>
+<div class="flex flex-col gap-2">
+	{#if canCreate}
+		<button
+			class="btn btn-sm preset-filled-primary-500 self-end"
+			data-testid="add-button"
+			onclick={modalCreateForm}
+		>
+			<i class="fa-solid fa-file-circle-plus mr-2"></i>
+			{safeTranslate('add-' + data.model.localName)}
+		</button>
+	{/if}
 
 	<Tabs value={data.tab} onValueChange={(e) => handleTabChange(e.value)}>
 		<Tabs.List>
@@ -125,13 +134,23 @@
 					{#if data.flows.length}
 						<div class="flex flex-col gap-3">
 							{#each data.flows as flow (flow.id)}
-								<ValidationFlowCard
-									{flow}
-									{userId}
-									counterpart={data.tab === 'sent' ? 'approver' : 'requester'}
-								/>
+								<ValidationFlowCard {flow} {userId} />
 							{/each}
 						</div>
+						{#if data.counts[data.tab] > data.flows.length}
+							<div
+								class="text-sm text-surface-600-400 text-center py-3"
+								data-testid="validation-flows-truncation-hint"
+							>
+								{m.showingMostRecentValidations({
+									count: String(data.flows.length),
+									total: String(data.counts[data.tab])
+								})}
+								<button type="button" class="anchor ml-1" onclick={() => handleTabChange('all')}>
+									{m.all()}
+								</button>
+							</div>
+						{/if}
 					{:else}
 						<div
 							class="flex flex-col items-center justify-center text-center py-16 gap-2"
