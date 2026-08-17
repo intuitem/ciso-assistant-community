@@ -137,8 +137,7 @@
 							>
 						{/if}
 						<a
-							href="https://intuitem.gitbook.io/ciso-assistant"
-							target="_blank"
+							href="/help"
 							class="unstyled cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-surface-200-800 disabled:text-surface-400-600 text-surface-950-50"
 							data-testid="docs-button"><i class="fa-solid fa-book mr-2"></i>{m.onlineDocs()}</a
 						>

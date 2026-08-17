@@ -150,3 +150,32 @@ ul.options.portaled-options > li:not(.active):hover {
 .hide-scrollbar::-webkit-scrollbar {
 	display: none;
 }
+
+.help-hint {
+	border-left-width: 4px;
+	border-radius: 0.375rem;
+	padding: 0.75rem 1rem;
+	margin: 1rem 0;
+}
+.help-hint p:first-child {
+	margin-top: 0;
+}
+.help-hint p:last-child {
+	margin-bottom: 0;
+}
+.help-hint-info {
+	border-color: var(--color-primary-500);
+	background-color: color-mix(in oklab, var(--color-primary-500) 12%, transparent);
+}
+.help-hint-warning {
+	border-color: var(--color-warning-500);
+	background-color: color-mix(in oklab, var(--color-warning-500) 12%, transparent);
+}
+.help-hint-success {
+	border-color: var(--color-success-500);
+	background-color: color-mix(in oklab, var(--color-success-500) 12%, transparent);
+}
+.help-hint-danger {
+	border-color: var(--color-error-500);
+	background-color: color-mix(in oklab, var(--color-error-500) 12%, transparent);
+}
