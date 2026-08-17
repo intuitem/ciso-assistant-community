@@ -844,6 +844,7 @@
 	"assessmentMode": "وضع التقييم",
 	"createAudit": "إنشاء التدقيق",
 	"createAuditHelpText": "إنشاء تدقيق إلى جانب تقييم الكيان",
+	"thirdPartiesImportHelpText": "استيراد الكيانات والممثلين والحلول وتقييمات الكيان وعقود أطرافك الثالثة من قالب إكسل متعدد الأوراق",
 	"questionnaire": "الاستبيان",
 	"conclusion": "خاتمة",
 	"blocker": "مانع",
