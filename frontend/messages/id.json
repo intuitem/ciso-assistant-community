@@ -1851,6 +1851,8 @@
 	"scimTokenRevoked": "Token SCIM dicabut",
 	"scimTokenGenerationFailed": "Gagal membuat token SCIM",
 	"scimTokenRequiresSso": "SSO harus diaktifkan sebelum membuat token SCIM.",
+	"scimTokenNameTooLong": "Nama tidak boleh lebih dari 255 karakter.",
+	"errorSsoRequiredForScimUsers": "SSO tidak dapat dinonaktifkan selama masih ada pengguna yang disediakan melalui SCIM tanpa akses lokal.",
 	"idpGroup": "Grup IdP",
 	"idpGroups": "Grup IdP",
 	"idpGroupsDescription": "Aktifkan federasi grup IdP (penyediaan SCIM, pemetaan grup IdP, dan keanggotaan grup IdP pada pengguna).",

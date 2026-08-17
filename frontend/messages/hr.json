@@ -1809,6 +1809,7 @@
 	"mappingSuggestionTeasing": "Mapiranja su sada predložena! Možete koristiti filtere za istraživanje prijedloga na temelju učitanih okvira.",
 	"errorCreatingPersonalAccessToken": "Došlo je do pogreške pri kreiranju osobnog pristupnog tokena.",
 	"errorMaxPatAmountExceeded": "Prekoračen maksimalan dozvoljen broj tokena za ovog korisnika.",
+	"errorSsoRequiredForScimUsers": "SSO se ne može onemogućiti dok postoje korisnici pripremljeni putem SCIM-a bez lokalnog pristupa.",
 	"campaign": "Kampanja",
 	"campaigns": "Kampanje",
 	"addCampaign": "Započni kampanju",
@@ -4196,6 +4197,7 @@
 	"scimTokenRevoked": "SCIM token opozvan",
 	"scimTokenGenerationFailed": "Generiranje SCIM tokena nije uspjelo",
 	"scimTokenRequiresSso": "SSO mora biti omogućen prije generiranja SCIM tokena.",
+	"scimTokenNameTooLong": "Naziv ne smije imati više od 255 znakova.",
 	"idpGroup": "IdP grupa",
 	"idpGroups": "IdP grupe",
 	"idpGroupsDescription": "Omogući federaciju IdP grupa (SCIM provizioniranje, mapiranja IdP grupa i članstva korisnika u IdP grupama)."

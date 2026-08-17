@@ -571,7 +571,7 @@ class SCIMTokenViewSet(views.APIView):
         name = request.data.get("name") or "SCIM provisioning token"
         if len(name) > 255:
             return Response(
-                {"error": "Name must be at most 255 characters."},
+                {"error": "scimTokenNameTooLong"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:

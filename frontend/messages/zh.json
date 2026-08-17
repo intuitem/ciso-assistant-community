@@ -1948,6 +1948,7 @@
 	"mappingSuggestionTeasing": "现在提供映射建议！您可以使用筛选器浏览基于已加载框架的建议。",
 	"errorCreatingPersonalAccessToken": "创建个人访问令牌时发生错误。",
 	"errorMaxPatAmountExceeded": "该用户已超过允许的最大令牌数量。",
+	"errorSsoRequiredForScimUsers": "只要存在没有本地访问权限的 SCIM 预配用户，就无法禁用 SSO。",
 	"campaignDomainHelpText": "活动将附加到的域。",
 	"ebiosRmStudyDomainHelpText": "更改域会将研究及其所有工作坊对象移至所选域。",
 	"associatedFindingsAssessments": "关联的跟踪",
@@ -3726,6 +3727,7 @@
 	"scimTokenRevoked": "SCIM 令牌已吊销",
 	"scimTokenGenerationFailed": "生成 SCIM 令牌失败",
 	"scimTokenRequiresSso": "生成 SCIM 令牌之前必须先启用 SSO。",
+	"scimTokenNameTooLong": "名称不得超过 255 个字符。",
 	"idpGroup": "IdP 组",
 	"idpGroups": "IdP 组",
 	"idpGroupsDescription": "启用 IdP 组联合（SCIM 预配、IdP 组映射以及用户的 IdP 组成员资格）。"

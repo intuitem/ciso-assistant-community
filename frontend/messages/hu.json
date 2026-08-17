@@ -1667,6 +1667,8 @@
 	"scimTokenRevoked": "SCIM token visszavonva",
 	"scimTokenGenerationFailed": "Nem sikerült a SCIM token generálása",
 	"scimTokenRequiresSso": "Az SSO-t engedélyezni kell a SCIM-token létrehozása előtt.",
+	"scimTokenNameTooLong": "A név legfeljebb 255 karakter hosszú lehet.",
+	"errorSsoRequiredForScimUsers": "Az SSO nem kapcsolható ki, amíg léteznek SCIM-mel kiépített, helyi hozzáféréssel nem rendelkező felhasználók.",
 	"idpGroup": "IdP csoport",
 	"idpGroups": "IdP csoportok",
 	"idpGroupsDescription": "IdP csoportföderáció engedélyezése (SCIM kiépítés, IdP csoport-hozzárendelések és felhasználók IdP csoporttagságai).",

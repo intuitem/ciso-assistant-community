@@ -952,7 +952,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         if self.is_superuser and not self.is_active:
             # avoid deactivation of superuser
             self.is_active = True
-        if not self.is_local:
+        if not self.is_local and not self.is_scim_managed:
             self.set_unusable_password()
         super().save(*args, **kwargs)
         logger.info("user saved", user=self)

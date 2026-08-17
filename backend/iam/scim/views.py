@@ -267,10 +267,9 @@ class SCIMUserViewSet(ViewSet):
                     "uniqueness",
                 )
             user.is_scim_managed = True
-            if matched_by_external_id:
-                _update_user_from_scim_data(user, data)
-            else:
-                _update_user_from_scim_data_no_email(user, data)
+            _update_user_from_scim_data(
+                user, data, allow_email_update=matched_by_external_id
+            )
             err = _save_user_or_scim_error(user)
             if err:
                 return err
@@ -352,7 +351,10 @@ class SCIMUserViewSet(ViewSet):
             data = json.loads(request.body)
         except json.JSONDecodeError, ValueError:
             return _scim_error_response("Invalid JSON body", 400)
-        _update_user_from_scim_data(user, data)
+        allow_email_update = bool(user.scim_external_id)
+        _update_user_from_scim_data(
+            user, data, allow_email_update=allow_email_update
+        )
         err = _save_user_or_scim_error(user)
         if err:
             return err
@@ -377,11 +379,13 @@ class SCIMUserViewSet(ViewSet):
             operations_count=len(operations),
         )
 
+        allow_email_update = bool(user.scim_external_id)
+
         if not operations:
             # Fallback: some clients send a bare resource document, e.g.
             # {"active": false, "userName": "..."} — treat the whole body as
             # a value-dict replace.
-            _apply_user_replace_dict(user, data)
+            _apply_user_replace_dict(user, data, allow_email_update)
         else:
             for op in operations:
                 op_type = op.get("op", "").lower()
@@ -391,9 +395,9 @@ class SCIMUserViewSet(ViewSet):
                     # RFC 7644 §3.5.2.1: on a single-valued attribute, "add"
                     # assigns the value exactly like "replace".
                     if isinstance(value, dict):
-                        _apply_user_replace_dict(user, value)
+                        _apply_user_replace_dict(user, value, allow_email_update)
                     elif path:
-                        _apply_user_replace_path(user, path, value)
+                        _apply_user_replace_path(user, path, value, allow_email_update)
                 elif op_type == "remove":
                     # RFC 7644 §3.5.2.2: "path" is REQUIRED for remove.
                     if not path:
@@ -865,7 +869,7 @@ def _update_user_from_scim_data(user, data, allow_email_update=True):
         user.last_name = name_data["familyName"]
     if "active" in data:
         user.is_active = _to_bool(data["active"])
-    if data.get("externalId"):
+    if allow_email_update and data.get("externalId"):
         user.scim_external_id = data["externalId"]
     if allow_email_update:
         new_email = _primary_email(data.get("emails", []))
@@ -873,25 +877,22 @@ def _update_user_from_scim_data(user, data, allow_email_update=True):
             user.email = new_email
 
 
-def _update_user_from_scim_data_no_email(user, data):
-    _update_user_from_scim_data(user, data, allow_email_update=False)
-
-
-def _apply_user_replace_dict(user, value_dict):
+def _apply_user_replace_dict(user, value_dict, allow_email_update=True):
     name_data = value_dict.get("name", {})
     if "active" in value_dict:
         user.is_active = _to_bool(value_dict["active"])
-    if "userName" in value_dict:
+    if allow_email_update and "userName" in value_dict:
         user.email = value_dict["userName"]
     if "givenName" in name_data:
         user.first_name = name_data["givenName"]
     if "familyName" in name_data:
         user.last_name = name_data["familyName"]
-    if "externalId" in value_dict:
+    if allow_email_update and "externalId" in value_dict:
         user.scim_external_id = value_dict["externalId"] or None
-    new_email = _primary_email(value_dict.get("emails", []))
-    if new_email:
-        user.email = new_email
+    if allow_email_update:
+        new_email = _primary_email(value_dict.get("emails", []))
+        if new_email:
+            user.email = new_email
 
 
 _EMAILS_VALUE_PATH_RE = re.compile(r"^emails(\[[^\]]*\])?\.value$", re.IGNORECASE)
@@ -910,27 +911,30 @@ def _to_bool(val):
     return bool(val)
 
 
-def _apply_user_replace_path(user, path, value):
+def _apply_user_replace_path(user, path, value, allow_email_update=True):
     path_lower = path.lower()
     if path_lower == "active":
         user.is_active = _to_bool(value)
     elif path_lower == "username":
-        user.email = value
+        if allow_email_update:
+            user.email = value
     elif path_lower == "name.givenname":
         user.first_name = value or ""
     elif path_lower == "name.familyname":
         user.last_name = value or ""
     elif path_lower == "externalid":
-        user.scim_external_id = value or None
+        if allow_email_update:
+            user.scim_external_id = value or None
     elif path_lower == "emails":
         # Whole-array replace: pick primary (or first) and store its value.
-        new_email = _primary_email(value)
-        if new_email:
-            user.email = new_email
+        if allow_email_update:
+            new_email = _primary_email(value)
+            if new_email:
+                user.email = new_email
     elif _EMAILS_VALUE_PATH_RE.match(path):
         # IdP-targeted email value update, e.g. emails[type eq "work"].value.
         # Since we only persist one email, any such update writes user.email.
-        if value:
+        if allow_email_update and value:
             user.email = value
 
 
