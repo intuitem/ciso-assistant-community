@@ -848,6 +848,7 @@
 	"assessmentMode": "Mode penilaian",
 	"createAudit": "Buat audit",
 	"createAuditHelpText": "Buat audit bersama penilaian entitas",
+	"thirdPartiesImportHelpText": "Impor entitas, perwakilan, solusi, penilaian entitas, dan kontrak pihak ketiga Anda dari templat Excel multi-lembar",
 	"questionnaire": "Kuesioner",
 	"conclusion": "Kesimpulan",
 	"blocker": "Penghalang",

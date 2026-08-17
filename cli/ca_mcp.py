@@ -3,10 +3,11 @@ CISO Assistant MCP Server - Backward Compatibility Wrapper
 
 This file maintains backward compatibility by importing from the new modular structure.
 The actual implementation is now in the ca_mcp/ module.
+
+Transport is selected by CA_MCP_TRANSPORT (stdio by default, or "http").
 """
 
-from ca_mcp.server import run_server
+from ca_mcp.server import main
 
 if __name__ == "__main__":
-    # Initialize and run the server
-    run_server()
+    main()

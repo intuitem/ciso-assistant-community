@@ -847,6 +847,7 @@
 	"assessmentMode": "Modo de avaliação",
 	"createAudit": "Criar auditoria",
 	"createAuditHelpText": "Crie uma auditoria junto com a avaliação da entidade",
+	"thirdPartiesImportHelpText": "Importe entidades, representantes, soluções, avaliações de entidades e contratos dos seus terceiros a partir do modelo Excel multi-planilhas",
 	"questionnaire": "Questionário",
 	"conclusion": "Conclusão",
 	"blocker": "Bloqueador",
