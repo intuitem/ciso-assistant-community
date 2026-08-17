@@ -874,13 +874,6 @@ def _update_user_from_scim_data(user, data, allow_email_update=True):
 
 
 def _update_user_from_scim_data_no_email(user, data):
-    """Same as _update_user_from_scim_data but never writes user.email.
-
-    Used the first time a pre-existing account is linked by email match
-    alone: the SCIM caller hasn't proven it owns
-    that identity, so this request must not be allowed to redirect the
-    account's email and with it, where password resets get sent.
-    """
     _update_user_from_scim_data(user, data, allow_email_update=False)
 
 
