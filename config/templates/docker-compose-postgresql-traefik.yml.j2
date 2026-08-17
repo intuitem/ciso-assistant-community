@@ -154,6 +154,44 @@ services:
       - "traefik.http.routers.frontend.tls=true"{% if can_do_tls %}
       - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"{% endif %}
 
+  {% if mcp.enabled %}
+  mcp:
+    container_name: mcp
+    image: ghcr.io/intuitem/ciso-assistant-community/mcp:latest
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      - API_URL=http://backend:8000/api
+      - CA_MCP_TRANSPORT=streamable-http
+      - CA_MCP_HOST=0.0.0.0
+      - CA_MCP_PORT=8001
+      - CA_MCP_READ_ONLY={{ mcp.read_only | lower }}
+      # matched against the Host header; both forms, since the port is dropped for 443
+      - CA_MCP_ALLOWED_HOSTS={{ fqdn }},{{ fqdn }}:{{ port }}
+      - CA_MCP_ALLOW_ENV_TOKEN=false
+      - HOME=/tmp
+      - XDG_CACHE_HOME=/tmp/.cache
+      - XDG_CONFIG_HOME=/tmp/.config
+      - XDG_DATA_HOME=/tmp/.local/share
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
+    user: "1001:1001"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mcp.rule=Host(`{{ fqdn }}`) && PathPrefix(`/mcp`)"
+      - "traefik.http.services.mcp.loadbalancer.server.port=8001"
+      - "traefik.http.routers.mcp.entrypoints=websecure"
+      - "traefik.http.routers.mcp.tls=true"{% if can_do_tls %}
+      - "traefik.http.routers.mcp.tls.certresolver=letsencrypt"{% endif %}
+  {% endif %}
+
   traefik:
     container_name: traefik
     image: traefik:v3

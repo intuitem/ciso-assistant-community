@@ -1,6 +1,7 @@
 """EBIOS RM (Risk Management) MCP tools for CISO Assistant"""
 
 from ..client import (
+    found_line,
     make_get_request,
     make_post_request,
     make_patch_request,
@@ -233,7 +234,7 @@ async def get_ebios_rm_studies(
         if not studies:
             return empty_response("EBIOS RM studies", filters)
 
-        result = f"Found {len(studies)} EBIOS RM studies"
+        result = found_line(studies, "EBIOS RM studies")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -305,7 +306,7 @@ async def get_feared_events(
         if not feared_events:
             return empty_response("feared events", filters)
 
-        result = f"Found {len(feared_events)} feared events"
+        result = found_line(feared_events, "feared events")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -380,7 +381,7 @@ async def get_ro_to_couples(
         if not ro_to_couples:
             return empty_response("RoTo couples", filters)
 
-        result = f"Found {len(ro_to_couples)} RoTo couples"
+        result = found_line(ro_to_couples, "RoTo couples")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -454,7 +455,7 @@ async def get_stakeholders(
         if not stakeholders:
             return empty_response("stakeholders", filters)
 
-        result = f"Found {len(stakeholders)} stakeholders"
+        result = found_line(stakeholders, "stakeholders")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -513,7 +514,7 @@ async def get_strategic_scenarios(
         if not scenarios:
             return empty_response("strategic scenarios", filters)
 
-        result = f"Found {len(scenarios)} strategic scenarios"
+        result = found_line(scenarios, "strategic scenarios")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -590,7 +591,7 @@ async def get_attack_paths(
         if not attack_paths:
             return empty_response("attack paths", filters)
 
-        result = f"Found {len(attack_paths)} attack paths"
+        result = found_line(attack_paths, "attack paths")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -650,7 +651,7 @@ async def get_operational_scenarios(
         if not scenarios:
             return empty_response("operational scenarios", filters)
 
-        result = f"Found {len(scenarios)} operational scenarios"
+        result = found_line(scenarios, "operational scenarios")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -729,7 +730,7 @@ async def get_elementary_actions(
         if not actions:
             return empty_response("elementary actions", filters)
 
-        result = f"Found {len(actions)} elementary actions"
+        result = found_line(actions, "elementary actions")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -789,7 +790,7 @@ async def get_operating_modes(
         if not modes:
             return empty_response("operating modes", filters)
 
-        result = f"Found {len(modes)} operating modes"
+        result = found_line(modes, "operating modes")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -872,7 +873,7 @@ async def get_kill_chains(
             )
         )
 
-        result = f"Found {len(kill_chains)} kill chain steps for operating mode\n\n"
+        result = found_line(kill_chains, "kill chain steps for operating mode") + "\n\n"
         result += "**Attack Stages:** 0=Know/Reconnaissance, 1=Enter/Initial Access, 2=Discover/Discovery, 3=Exploit/Exploitation\n\n"
         result += "|ID|Elementary Action|Stage|Highlighted|Logic Op|Antecedents|\n"
         result += "|---|---|---|---|---|---|\n"

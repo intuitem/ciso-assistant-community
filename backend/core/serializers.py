@@ -134,9 +134,18 @@ class BaseModelSerializer(serializers.ModelSerializer):
         return attrs
 
     def _check_object_perm(
-        self, instance_or_data, action: str, *, folder: Folder | None = None
+        self,
+        instance_or_data,
+        action: str,
+        *,
+        folder: Folder | None = None,
+        model: type[models.Model] | None = None,
     ) -> None:
-        """Check that the requesting user has *action* permission on the resolved folder."""
+        """Check that the requesting user has *action* permission on the resolved folder.
+
+        `model` overrides the permission codename's model when the checked
+        object is not an instance of the serializer's own model.
+        """
         if folder is None:
             folder = Folder.get_folder(instance_or_data)
         if folder is None:
@@ -144,10 +153,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request is None:
             return
+        model = model or self.Meta.model
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(
-                codename=f"{action}_{self.Meta.model._meta.model_name}",
+                codename=f"{action}_{model._meta.model_name}",
             ),
             folder=folder,
         ):
@@ -201,7 +211,6 @@ class BaseModelSerializer(serializers.ModelSerializer):
         if not request or not request.user.is_authenticated:
             return
         user = request.user
-        root_folder = Folder.get_root_folder()
         accessible_cache: dict = {}
         for field_name, value in validated_data.items():
             if not isinstance(value, list) or not value:
@@ -211,9 +220,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
             related_model = type(value[0])
             if related_model not in accessible_cache:
                 try:
-                    ids = RoleAssignment.get_accessible_object_ids(
-                        root_folder, user, related_model
-                    )[0]
+                    ids = RoleAssignment.get_viewable_object_ids(user, related_model)
                     accessible_cache[related_model] = {str(i) for i in ids}
                 except NotImplementedError, Permission.DoesNotExist:
                     accessible_cache[related_model] = None
@@ -2312,6 +2319,7 @@ class FolderWriteSerializer(BaseModelSerializer):
         exclude = [
             "builtin",
             "content_type",
+            "descendants",
         ]
 
     def update(self, instance, validated_data):
@@ -2390,7 +2398,7 @@ class FolderReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = Folder
-        fields = "__all__"
+        exclude = ["descendants"]
 
 
 class FolderImportExportSerializer(BaseModelSerializer):
@@ -2964,6 +2972,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
     """Optimized serializer for list views - only includes fields needed by the table."""
 
     path = PathField(read_only=True)
+    authors = FieldsRelatedField(many=True)
     folder = FieldsRelatedField()
     framework = FieldsRelatedField()
     perimeter = FieldsRelatedField()
@@ -3004,6 +3013,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "created_at",
             "updated_at",
             "path",
+            "authors",
         ]
 
 
@@ -5510,10 +5520,29 @@ class ObjectClassificationWriteSerializer(BaseModelSerializer):
 
 
 class ValidationFlowWriteSerializer(BaseModelSerializer):
+    ALLOWED_STATUS_TRANSITIONS = {
+        ValidationFlow.Status.SUBMITTED: {
+            ValidationFlow.Status.ACCEPTED,
+            ValidationFlow.Status.REJECTED,
+            ValidationFlow.Status.CHANGE_REQUESTED,
+            ValidationFlow.Status.DROPPED,
+        },
+        ValidationFlow.Status.ACCEPTED: {ValidationFlow.Status.REVOKED},
+        ValidationFlow.Status.CHANGE_REQUESTED: {
+            ValidationFlow.Status.SUBMITTED,
+            ValidationFlow.Status.DROPPED,
+        },
+    }
+
     ref_id = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     event_notes = serializers.CharField(
         required=False, allow_blank=True, allow_null=True, write_only=True
     )
+
+    def validate_status(self, value):
+        if self.instance is None and value != ValidationFlow.Status.SUBMITTED:
+            raise serializers.ValidationError("validationMustStartAsSubmitted")
+        return value
 
     def create(self, validated_data: dict) -> ValidationFlow:
         """
@@ -5571,50 +5600,59 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         # Check if status is being modified
         if "status" in validated_data:
             new_status = validated_data["status"]
-            current_status = instance.status
-
-            # Define who can modify based on current status
-            if current_status in ["submitted", "accepted"]:
-                # For submitted status: approver can do any action, requester can only drop
-                if current_status == "submitted" and new_status == "dropped":
-                    # Allow requester to drop their own request
-                    if (
-                        instance.requester != request_user
-                        and instance.approver != request_user
-                    ):
-                        raise PermissionDenied(
-                            {
-                                "error": "Only the requester or approver can drop this validation"
-                            }
-                        )
-                else:
-                    # Only approver can change status from submitted or accepted (for other actions)
-                    if instance.approver != request_user:
-                        raise PermissionDenied(
-                            {
-                                "error": "Only the assigned approver can modify this validation"
-                            }
-                        )
-            elif current_status == "change_requested":
-                # Only requester can change status from change_requested
-                if instance.requester != request_user:
-                    raise PermissionDenied(
-                        {
-                            "error": "Only the requester can resubmit or drop this validation"
-                        }
-                    )
-            else:
-                # Terminal states (rejected, revoked, dropped, expired) cannot be modified
-                raise PermissionDenied(
-                    {
-                        "error": "This validation is in a terminal state and cannot be modified"
-                    }
-                )
 
             # Extract event notes from validated_data (passed from actions)
             event_notes = validated_data.pop("event_notes", None)
 
             with transaction.atomic():
+                # Re-read under lock: concurrent requests must not both validate the same starting status
+                instance = ValidationFlow.objects.select_for_update().get(
+                    pk=instance.pk
+                )
+                current_status = instance.status
+
+                # Define who can modify based on current status
+                if current_status in ["submitted", "accepted"]:
+                    # For submitted status: approver can do any action, requester can only drop
+                    if current_status == "submitted" and new_status == "dropped":
+                        # Allow requester to drop their own request
+                        if (
+                            instance.requester != request_user
+                            and instance.approver != request_user
+                        ):
+                            raise PermissionDenied(
+                                {"error": "validationOnlyRequesterOrApproverCanDrop"}
+                            )
+                    else:
+                        # Only approver can change status from submitted or accepted (for other actions)
+                        if instance.approver != request_user:
+                            raise PermissionDenied(
+                                {"error": "validationOnlyApproverCanModify"}
+                            )
+                elif current_status == "change_requested":
+                    # Only requester can change status from change_requested
+                    if instance.requester != request_user:
+                        raise PermissionDenied(
+                            {"error": "validationOnlyRequesterCanAct"}
+                        )
+                else:
+                    # Terminal states (rejected, revoked, dropped, expired) cannot be modified
+                    raise PermissionDenied({"error": "validationInTerminalState"})
+
+                if (
+                    new_status != current_status
+                    and new_status
+                    not in self.ALLOWED_STATUS_TRANSITIONS.get(current_status, set())
+                ):
+                    raise serializers.ValidationError(
+                        {
+                            "status": "validationStatusTransitionNotAllowed",
+                            # Context for API consumers and the frontend message
+                            "from_status": current_status,
+                            "to_status": new_status,
+                        }
+                    )
+
                 # Update the instance
                 updated_instance = super().update(instance, validated_data)
 

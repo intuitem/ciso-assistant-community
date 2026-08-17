@@ -752,7 +752,7 @@ def auditlog_retention_cleanup():
         logger.error(f"Failed to clean up audit logs: {str(e)}")
 
 
-@periodic_task(crontab(hour="*/3"))
+@periodic_task(crontab(minute="0", hour="*/3"))
 def auditlog_prune():
     try:
         call_command("prune_auditlog")

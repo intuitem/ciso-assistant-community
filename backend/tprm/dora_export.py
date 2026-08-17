@@ -104,8 +104,11 @@ def get_dora_export_metadata(
         if len(country) > 2:
             country = country[:2].upper()
         ref_date = f"{date.today().year - 1}-12-31"
-        timestamp = datetime.now().strftime("%Y%m%dT%H%M%Sz")
-        filename = f"{key_name}_{code}.{level}_{country}_DORA010100_DORA_{ref_date}_{timestamp}.zip"
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")[:-3]
+        folder_prefix = (
+            f"{code}.{level}_{country}_DORA010100_DORA_{ref_date}_{timestamp}"
+        )
+        filename = f"{folder_prefix}.zip"
     else:
         filename = f"{folder_prefix}.zip"
 
