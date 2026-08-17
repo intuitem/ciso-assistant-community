@@ -4,6 +4,7 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import ListSelector from '../ListSelector.svelte';
+	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
@@ -38,6 +39,11 @@
 
 	type AuthorizationMode = 'custom' | 'role' | 'global_admin';
 
+	const IDENTITY_SOURCE_OPTIONS = [
+		{ id: 'local', label: m.local() },
+		{ id: 'federated', label: m.federated() }
+	];
+
 	let builtinRoles: BuiltinRole[] = $state([]);
 	let rootFolderId: string = $state('');
 	let permissionsSelector: ReturnType<typeof ListSelector> | undefined = $state();
@@ -46,6 +52,7 @@
 	const { value: permissionsValue } = formFieldProxy(form, 'permissions');
 	const { value: perimeterValue } = formFieldProxy(form, 'folders');
 	const { value: isRecursiveValue } = formFieldProxy(form, 'is_recursive');
+	const { value: identitySource } = formFieldProxy(form, 'identity_source');
 
 	const initialMode: AuthorizationMode =
 		context === 'edit' &&
@@ -149,6 +156,39 @@
 	}
 </script>
 
+{#if context !== 'edit'}
+	<RadioGroup
+		{form}
+		field="identity_source"
+		label={m.identitySource()}
+		helpText={m.identitySourceHelpText()}
+		possibleOptions={IDENTITY_SOURCE_OPTIONS}
+		key="id"
+		labelKey="label"
+		cacheLock={cacheLocks['identity_source']}
+		bind:cachedValue={formDataCache['identity_source']}
+	/>
+{/if}
+{#if $identitySource === 'federated'}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="service-accounts/social-apps"
+		optionsLabelField="name"
+		field="social_app"
+		label={m.identityProvider()}
+		helpText={m.socialAppHelpText()}
+		cacheLock={cacheLocks['social_app']}
+		bind:cachedValue={formDataCache['social_app']}
+	/>
+	<TextField
+		{form}
+		field="federated_subject"
+		label={m.federatedSubject()}
+		helpText={m.federatedSubjectHelpText()}
+		cacheLock={cacheLocks['federated_subject']}
+		bind:cachedValue={formDataCache['federated_subject']}
+	/>
+{/if}
 <div class="flex flex-wrap gap-4">
 	<label class="flex items-center gap-2">
 		<input

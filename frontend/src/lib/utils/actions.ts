@@ -205,12 +205,9 @@ export async function defaultWriteFormAction({
 }
 
 export function normalizeServiceAccountAuthorization(data: Record<string, any>): void {
-	const mode = data.authorization_mode;
 	delete data.authorization_mode;
-	// 'role' and 'global_admin' both link a builtin role; global_admin is the
-	// explicit BI-RL-ADM case (form forces role + Global perimeter, recursive).
-	if (mode === 'custom') delete data.role;
-	else delete data.permissions;
+	if (data.role) delete data.permissions;
+	else delete data.role;
 }
 
 export async function nestedWriteFormAction({

@@ -1,11 +1,15 @@
 """Provisioning and update helpers for OAuth2 service accounts (see ServiceAccount model)."""
 
+import uuid
+
+import requests
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from allauth.idp.oidc.adapter import get_adapter as get_oidc_adapter
 from allauth.idp.oidc.models import Client
+from allauth.socialaccount.models import SocialApp
 
 from iam.models import (
     ALLOWED_PERMISSION_APPS,
@@ -16,6 +20,7 @@ from iam.models import (
     ServiceAccount,
     User,
 )
+from iam.oidc_federation import check_social_app_live
 
 SERVICE_ACCOUNT_EMAIL_DOMAIN = "service-accounts.local"
 
@@ -134,6 +139,72 @@ def _detach_to_dedicated_role(
     _switch_role(service_account, new_role)
 
 
+def provision_federated_service_account(
+    *,
+    name: str,
+    description: str | None,
+    permission_ids: list[int] | None,
+    role_id=None,
+    folder_ids: list,
+    is_recursive: bool,
+    created_by: User | None,
+    social_app: SocialApp,
+    federated_subject: str,
+    expiry_date=None,
+) -> ServiceAccount:
+    role = get_selectable_builtin_role(role_id) if role_id is not None else None
+    permissions = _validated_permissions(permission_ids) if role is None else None
+    folders = list(Folder.objects.filter(id__in=folder_ids))
+    if len(folders) != len(set(folder_ids)) or not folders:
+        raise ValidationError("Invalid perimeter folder selection.")
+    if ServiceAccount.objects.filter(
+        social_app=social_app, federated_subject=federated_subject
+    ).exists():
+        raise ValidationError(
+            "A federated service account is already registered for this "
+            "identity provider client and subject."
+        )
+    try:
+        check_social_app_live(social_app)
+    except (requests.RequestException, KeyError) as e:
+        raise ValidationError(
+            f"Could not verify the registered identity provider: {e}"
+        ) from e
+
+    root_folder = Folder.get_root_folder()
+    with transaction.atomic():
+        user = User.objects._create_user(
+            email=f"sa-{uuid.uuid4().hex}@{SERVICE_ACCOUNT_EMAIL_DOMAIN}",
+            password=None,
+            mailing=False,
+            initial_group=None,
+            first_name=name,
+        )
+        if role is None:
+            role = Role.objects.create(name=f"SA-{user.pk}", folder=root_folder)
+            role.permissions.set(permissions)
+            invalidate_roles_cache()
+        role_assignment = RoleAssignment.objects.create(
+            user=user,
+            role=role,
+            is_recursive=is_recursive,
+            folder=root_folder,
+        )
+        role_assignment.perimeter_folders.set(folders)
+        service_account = ServiceAccount.objects.create(
+            name=name,
+            description=description,
+            identity_source=ServiceAccount.IdentitySource.FEDERATED,
+            social_app=social_app,
+            federated_subject=federated_subject,
+            user=user,
+            role=role,
+            created_by=created_by,
+            expiry_date=expiry_date,
+        )
+    return service_account
+
+
 def update_service_account(
     service_account: ServiceAccount,
     *,
@@ -148,8 +219,9 @@ def update_service_account(
     with transaction.atomic():
         if name is not None:
             service_account.name = name
-            service_account.client.name = name
-            service_account.client.save(update_fields=["name"])
+            if service_account.identity_source == ServiceAccount.IdentitySource.LOCAL:
+                service_account.client.name = name
+                service_account.client.save(update_fields=["name"])
         if description is not UNSET:
             service_account.description = description
         if expiry_date is not UNSET:

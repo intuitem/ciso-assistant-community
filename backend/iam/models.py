@@ -52,6 +52,7 @@ from auditlog.registry import auditlog
 from auditlog.signals import pre_log
 from allauth.mfa.models import Authenticator
 from allauth.idp.oidc.models import Client, Token
+from allauth.socialaccount.models import SocialApp
 from core.context import focus_folder_id_var
 
 ALLOWED_PERMISSION_APPS = (
@@ -2249,20 +2250,40 @@ class SCIMToken(models.Model):
 
 
 class ServiceAccount(AbstractBaseModel):
-    """Machine principal (OIDC Client + dedicated User/Role/RoleAssignment) authenticating via client_credentials."""
+    """Machine principal with local or federated authentication."""
 
     SECRET_PREFIX = "ca_sa."
     _SECRET_PREVIEW_VISIBLE_CHARS = 3
     _SECRET_PREVIEW_MASK = "•" * 8
 
+    class IdentitySource(models.TextChoices):
+        LOCAL = "local", _("Local")
+        FEDERATED = "federated", _("Federated")
+
     # Capped at 100 to match allauth's Client.name, which it's copied into verbatim.
     name = models.CharField(max_length=100, unique=True, verbose_name=_("Name"))
     description = models.TextField(blank=True, null=True)
+    identity_source = models.CharField(
+        max_length=16,
+        choices=IdentitySource.choices,
+        default=IdentitySource.LOCAL,
+        verbose_name=_("Identity source"),
+    )
     client = models.OneToOneField(
         Client,
+        null=True,
+        blank=True,
         on_delete=models.PROTECT,
         related_name="service_account",
     )
+    social_app = models.ForeignKey(
+        SocialApp,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="federated_service_accounts",
+    )
+    federated_subject = models.CharField(max_length=255, null=True, blank=True)
     user = models.OneToOneField(
         User,
         on_delete=models.PROTECT,
@@ -2293,10 +2314,7 @@ class ServiceAccount(AbstractBaseModel):
     class Meta:
         verbose_name = _("Service account")
         verbose_name_plural = _("Service accounts")
-
-    @property
-    def client_id(self) -> str:
-        return self.client.pk
+        unique_together = (("social_app", "federated_subject"),)
 
     @property
     def role_assignment(self) -> RoleAssignment | None:
@@ -2316,24 +2334,31 @@ class ServiceAccount(AbstractBaseModel):
         return visible + cls._SECRET_PREVIEW_MASK
 
     def deactivate(self):
-        """Block token issuance (no grant types) and revoke outstanding tokens."""
+        """Disable the account and revoke local tokens."""
         self.is_active = False
         self.save(update_fields=["is_active", "updated_at"])
-        self.client.set_grant_types([])
-        self.client.save(update_fields=["grant_types"])
-        Token.objects.filter(client=self.client).delete()
+        if self.identity_source == self.IdentitySource.LOCAL:
+            self.client.set_grant_types([])
+            self.client.save(update_fields=["grant_types"])
+            Token.objects.filter(client=self.client).delete()
         self.user.is_active = False
         self.user.save(update_fields=["is_active"])
 
     def activate(self):
         self.is_active = True
         self.save(update_fields=["is_active", "updated_at"])
-        self.client.set_grant_types([Client.GrantType.CLIENT_CREDENTIALS])
-        self.client.save(update_fields=["grant_types"])
+        if self.identity_source == self.IdentitySource.LOCAL:
+            self.client.set_grant_types([Client.GrantType.CLIENT_CREDENTIALS])
+            self.client.save(update_fields=["grant_types"])
         self.user.is_active = True
         self.user.save(update_fields=["is_active"])
 
     def rotate_secret(self, grace_period: timedelta | None = None) -> str:
+        """Rotate the local secret and revoke outstanding tokens."""
+        if self.identity_source != self.IdentitySource.LOCAL:
+            raise ValueError(
+                "Federated service accounts have no local secret to rotate."
+            )
         plain_secret = self.generate_secret()
         if grace_period:
             self.previous_secret_hash = self.client.secret  # already hashed
@@ -2359,7 +2384,8 @@ class ServiceAccount(AbstractBaseModel):
         client, user, role = self.client, self.user, self.role
         with transaction.atomic():
             result = super().delete(*args, **kwargs)
-            client.delete()  # cascades outstanding OIDC tokens
+            if client is not None:
+                client.delete()  # cascades outstanding OIDC tokens
             user.delete()  # cascades the role assignment
             if not role.builtin:
                 role.delete()

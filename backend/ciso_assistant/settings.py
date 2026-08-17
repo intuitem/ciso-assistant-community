@@ -588,6 +588,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "knox.auth.TokenAuthentication",
         "iam.authentication.OIDCServiceAccountAuthentication",
+        "iam.authentication.FederatedServiceAccountAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
