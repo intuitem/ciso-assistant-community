@@ -844,6 +844,7 @@
 	"assessmentMode": "Modul de evaluare",
 	"createAudit": "Creați audit",
 	"createAuditHelpText": "Creați un audit împreună cu evaluarea entității",
+	"thirdPartiesImportHelpText": "Importați entitățile, reprezentanții, soluțiile, evaluările entităților și contractele terților dumneavoastră din șablonul Excel cu mai multe foi",
 	"questionnaire": "Chestionar",
 	"conclusion": "Concluzie",
 	"blocker": "Blocant",

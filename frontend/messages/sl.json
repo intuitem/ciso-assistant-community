@@ -1327,7 +1327,7 @@
 	"thirdParty": "Tretja oseba",
 	"thirdPartyCategory": "Tretje osebe",
 	"thirdPartyDescription": "Upravljanje zunanjih subjektov in njihovih zastopnikov, pogodb, rešitev in ocen.",
-	"thirdPartiesImportHelpText": "Uvozite subjekte, zastopnike, rešitve in pogodbe svojih tretjih oseb iz Excelove predloge z več zavihki",
+	"thirdPartiesImportHelpText": "Uvozite subjekte, zastopnike, rešitve, ocene subjektov in pogodbe svojih tretjih oseb iz Excelove predloge z več zavihki",
 	"entityAssessment": "Ocena subjekta",
 	"entityAssessments": "Ocene subjektov",
 	"addEntityAssessment": "Dodaj oceno subjekta",
