@@ -194,11 +194,52 @@ class EntityAssessmentSerializersTestCase(TestCase):
         self.assertEqual(
             mock_audit_create.call_args[1]["framework"].id, self.framework.id
         )
-        self.assertEqual(mock_audit_create.call_args[1]["perimeter"], self.perimeter)
+        # Enclave audits carry no perimeter, even when the entity assessment has one.
+        self.assertNotIn("perimeter", mock_audit_create.call_args[1])
         self.assertEqual(
             mock_audit_create.call_args[1]["selected_implementation_groups"],
             data["selected_implementation_groups"],
         )
+
+    def test_link_audit_checks_change_complianceassessment_on_audit_folder(self):
+        """Linking an existing audit relocates it, so the gate must be
+        change_complianceassessment in the audit's own folder — not this
+        serializer's change_entityassessment."""
+        audit_folder = Folder.objects.create(name="Audit Folder")
+        audit = ComplianceAssessment.objects.create(
+            name="Linkable Audit", framework=self.framework, folder=audit_folder
+        )
+        assessment = EntityAssessment.objects.create(
+            name="Link Target", entity=self.entity, folder=self.folder
+        )
+        request = MagicMock()
+        request.user = self.user
+
+        checked = []
+
+        def record_access(user, perm, folder):
+            checked.append((perm.codename, folder))
+            return True
+
+        with patch(
+            "iam.models.RoleAssignment.is_access_allowed", side_effect=record_access
+        ):
+            serializer = EntityAssessmentWriteSerializer(
+                instance=assessment,
+                data={"link_audit": audit.id},
+                partial=True,
+                context={"request": request},
+            )
+            self.assertTrue(serializer.is_valid(), serializer.errors)
+            serializer.save()
+
+        self.assertIn(("change_complianceassessment", audit_folder), checked)
+        self.assertNotIn(("change_entityassessment", audit_folder), checked)
+        assessment.refresh_from_db()
+        audit.refresh_from_db()
+        self.assertEqual(assessment.compliance_assessment_id, audit.id)
+        self.assertEqual(audit.folder.content_type, Folder.ContentType.ENCLAVE)
+        self.assertIsNone(audit.perimeter)
 
     @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
     def test_entity_assessment_write_serializer_without_framework(
