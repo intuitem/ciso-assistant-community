@@ -3840,6 +3840,13 @@ class EscalationThresholdRecordConsumer(RecordConsumer):
         }, None
 
 
+def _normalize_answer_token(value) -> str:
+    """Whitespace-collapsed, casefolded key used to match question texts and
+    choice values from an imported `answers` cell against the framework's
+    questions."""
+    return " ".join(str(value).split()).casefold()
+
+
 def normalize_df_columns(df: pd.DataFrame) -> pd.DataFrame:
     normalized = [str(c).strip().lower() for c in df.columns]
     seen, duplicates = set(), set()
@@ -4785,11 +4792,23 @@ class LoadFileView(APIView):
                     answers_cell = record.get("answers")
                     questions_dict = build_questions_dict(ReqNode) if ReqNode else None
                     if answers_cell not in (None, "") and questions_dict:
+                        # accept labels from both the framework base language and the current one (in UI).
+                        questions_translated = ReqNode.get_questions_translated or {}
                         text_to_question = {}
-                        for q_urn, qdef in questions_dict.items():
-                            q_text = qdef.get("text", "")
-                            if q_text:
-                                text_to_question[q_text] = (q_urn, qdef)
+                        choice_value_maps: dict[str, dict[str, str]] = {}
+                        for source in (questions_dict, questions_translated):
+                            for q_urn, qdef in source.items():
+                                q_key = _normalize_answer_token(qdef.get("text", ""))
+                                if q_key:
+                                    # setdefault avoids duplicate if base language == current
+                                    text_to_question.setdefault(q_key, (q_urn, qdef))
+                                value_map = choice_value_maps.setdefault(q_urn, {})
+                                for choice in qdef.get("choices", []):
+                                    value_key = _normalize_answer_token(
+                                        choice.get("value", "")
+                                    )
+                                    if value_key:
+                                        value_map.setdefault(value_key, choice["urn"])
 
                         answers = {}
                         has_any_answer = False
@@ -4807,11 +4826,19 @@ class LoadFileView(APIView):
                             if not a_value:
                                 continue
 
-                            matched = text_to_question.get(q_text)
+                            matched = text_to_question.get(
+                                _normalize_answer_token(q_text)
+                            )
                             if not matched:
+                                logger.warning(
+                                    "Imported answer matches no question of the requirement in the base or current language; skipped",
+                                    question_text=q_text,
+                                    requirement_urn=ReqNode.urn,
+                                )
                                 continue
                             q_urn, qdef = matched
                             q_type = qdef.get("type")
+                            value_to_urn = choice_value_maps.get(q_urn, {})
 
                             if q_type in ("text", "date"):
                                 answers[q_urn] = a_value
@@ -4820,26 +4847,37 @@ class LoadFileView(APIView):
                                 selected = [
                                     v.strip() for v in a_value.split("|") if v.strip()
                                 ]
-                                value_to_urn = {
-                                    c.get("value", ""): c["urn"]
-                                    for c in qdef.get("choices", [])
-                                }
-                                choice_urns = [
-                                    value_to_urn[v]
-                                    for v in selected
-                                    if v in value_to_urn
-                                ]
+                                choice_urns = []
+                                for v in selected:
+                                    choice_urn = value_to_urn.get(
+                                        _normalize_answer_token(v)
+                                    )
+                                    if choice_urn:
+                                        choice_urns.append(choice_urn)
+                                    else:
+                                        logger.warning(
+                                            "Imported answer matches no choice of the question in the base or current language; skipped",
+                                            question_text=q_text,
+                                            answer_value=v,
+                                            requirement_urn=ReqNode.urn,
+                                        )
                                 if choice_urns:
                                     answers[q_urn] = choice_urns
                                     has_any_answer = True
                             elif q_type == "unique_choice":
-                                value_to_urn = {
-                                    c.get("value", ""): c["urn"]
-                                    for c in qdef.get("choices", [])
-                                }
-                                if a_value in value_to_urn:
-                                    answers[q_urn] = value_to_urn[a_value]
+                                choice_urn = value_to_urn.get(
+                                    _normalize_answer_token(a_value)
+                                )
+                                if choice_urn:
+                                    answers[q_urn] = choice_urn
                                     has_any_answer = True
+                                else:
+                                    logger.warning(
+                                        "Imported answer matches no choice of the question in the base or current language; skipped",
+                                        question_text=q_text,
+                                        answer_value=a_value,
+                                        requirement_urn=ReqNode.urn,
+                                    )
 
                         if has_any_answer:
                             requirement_data["answers"] = answers
