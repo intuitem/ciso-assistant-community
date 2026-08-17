@@ -1,7 +1,7 @@
 # CISO Assistant — Audit, Findings and Remediation Target Model
 
-**Status:** Proposed design — consolidated review draft
-**Date:** 16 August 2026
+**Status:** Proposed design — consolidated target model
+**Date:** 17 August 2026
 **Scope:** Audit programme and engagement management, finding publication and validation, findings follow-up, and formal remediation issues
 
 ## 1. Executive summary
@@ -11,6 +11,8 @@ CISO Assistant already provides strong framework-based compliance assessments, f
 1. **Audit engagement management** for auditors who need to manage missions that may not use a framework.
 2. **Finding publication** — immutable, versioned auditor assertions, optionally gated by the global validation system.
 3. **Remediation Issues** for cases where two sides need to formalize, agree, and track a remediation path without necessarily creating Applied Controls.
+
+Delivery is intentionally phased. Remediation Issues come first and operate directly on today's `RequirementAssessment` and `Finding` models. Audit Programmes, Engagements, and the Finding publication mechanism can be delivered later without changing or recreating those Issues.
 
 The design deliberately keeps the following concepts separate:
 
@@ -50,9 +52,11 @@ The model favors explicit links, independent lifecycles, immutable published aud
 | `AuditProgramme` | Audit programme / annual audit plan | Portfolio of planned Engagements |
 | `Engagement` | Audit engagement / mission d'audit | Auditor-side mission workspace; carries the validation configuration |
 | `ComplianceAssessment` | Compliance assessment / audit | Framework-based assessment; existing model |
+| `RequirementAssessment` | Requirement assessment | Assessment result for one framework requirement; existing model and direct Issue-link context |
 | `Finding` | Finding / constat | Stable identity: follow-up state plus a chain of assertion revisions |
 | `FindingRevision` | Finding revision | One immutable published assertion (or the single working draft) |
-| `ValidationFlow` | Validation | Existing global validation request; gates publication when configured |
+| `ValidationFlow` | Validation | Existing global, single-approver validation request, reused unchanged |
+| `ValidationSubmission` | (internal) | One validation round for a Finding draft: assertion manifest and hash, snapshotted layer rules, generated flows, and consumption at publication |
 | `FindingsAssessment` | Follow-up / suivi des constats | Recipient-side collection and coordination of Findings; existing model |
 | `RemediationIssue` | Issue / problème | Formal remediation dialogue, commitment, acceptance, and verification |
 | `CommitmentVersion` | (internal) | One version of an Issue's commitment text and due date |
@@ -66,11 +70,14 @@ The model favors explicit links, independent lifecycles, immutable published aud
 flowchart TD
     AP["AuditProgramme"] -->|0..n| E["Engagement"]
     E <-->|untyped link| CA["ComplianceAssessment"]
+    CA -->|contains| RA["RequirementAssessment"]
     E -->|originates 0..n| F["Finding"]
     F -->|1..n| FR["FindingRevision"]
-    VF["ValidationFlow"] -.->|gates publish when configured| FR
+    FR -->|0..n validation rounds| VS["ValidationSubmission"]
+    VS -->|one per layer × validator| VF["ValidationFlow"]
     F -->|optional follow-up| FA["FindingsAssessment"]
     F <-->|0..n| RI["RemediationIssue"]
+    RA <-->|0..n| RI
     RI -->|0..n| CV["CommitmentVersion"]
     RI -.->|optional independent links| AC["AppliedControl / Task"]
 ```
@@ -80,7 +87,9 @@ Additional rules:
 - Each Engagement belongs to zero or one Audit Programme.
 - Each Finding originates from zero or one Engagement.
 - Each Finding — draft or published — belongs to zero or one Findings Assessment.
+- Each Validation Submission belongs to one Finding Revision and groups the Validation Flows generated for that validation round.
 - A Findings Assessment may aggregate Findings from several Engagements or external sources.
+- Requirement Assessments and Findings may each link directly to Remediation Issues; no Engagement is required.
 - Findings and Remediation Issues have a many-to-many relationship.
 - The Engagement–Findings Assessment relationship is derived through Findings; it is not stored directly.
 - All links grant **zero** access by themselves.
@@ -95,7 +104,7 @@ Additional rules:
 
 | Field | Requirement |
 |---|---|
-| `reference` | Optional programme identifier |
+| `ref_id` | Optional user-managed programme identifier |
 | `name` | Required |
 | `description` | Optional rich text |
 | `objectives` | Optional rich text |
@@ -132,7 +141,7 @@ A cancelled programme may be explicitly reactivated to `draft`, `approved`, or `
 
 | Field | Requirement |
 |---|---|
-| `reference` | Optional mission identifier |
+| `ref_id` | Optional user-managed mission identifier |
 | `name` | Required |
 | `description` | Optional context |
 | `objectives` | Optional rich text |
@@ -144,7 +153,7 @@ A cancelled programme may be explicitly reactivated to `draft`, `approved`, or `
 | `cancellation_reason` | Required when cancelled |
 | `audit_programme` | Optional; at most one |
 | `final_report_document` | Optional reference to an existing Document |
-| Validation layers | Up to three validator lists plus two concurrency flags (see §9) |
+| Validation layers | Up to three validator lists, an approval rule per layer, and two concurrency flags (see §9) |
 | Compliance Assessments | Untyped many-to-many links |
 | Documents | Minutes, workpapers, evidence, draft reports, and other material |
 | Findings | Zero or more originating Findings |
@@ -161,7 +170,7 @@ A cancelled programme may be explicitly reactivated to `draft`, `approved`, or `
 
 Engagement completion is independent of remediation. Open Findings, Issues, Tasks, Applied Controls, or Findings Assessments do not keep an Engagement open.
 
-Before closure, the UI should identify draft Findings that have been neither published nor explicitly discarded. This is a consistency check rather than a lifecycle cascade.
+Before closure, the UI should identify draft Findings that have been neither published nor deleted. This is a consistency check rather than a lifecycle cascade.
 
 A cancelled Engagement may be explicitly reactivated to `planned` or `in_progress`. The prior cancellation actor, date, and reason remain in history, and reactivation has no automatic effect on linked objects.
 
@@ -196,14 +205,17 @@ The assertion content lives in **`FindingRevision` rows**, taking the document-m
 
 - Each revision carries a `version_number` and a status: `draft`, `published`, or `superseded`.
 - **At most one draft revision exists per Finding at any time.** Corrections to a published Finding create a new draft based on the latest published revision.
+- An abandoned draft revision is deleted, following the existing Document revision pattern; no `discarded` revision status is introduced.
 - The Finding holds a **`current_published_revision` pointer**. It moves **only on publish**, atomically: the new revision is stamped `published_at`/`published_by`, the previously published revision becomes `superseded`, and the pointer flips. A coexisting draft never changes what recipient-side readers see.
 - **Assertion fields are frozen at the model level once a revision leaves `draft`.** Published and superseded revisions are never edited; a newer revision supersedes the previous one, it does not rewrite it.
-- Each validation submission and published revision stores an immutable, generated **`assertion_manifest` JSON**, its **`assertion_hash`**, and a manifest schema version. The manifest contains the relevant assertion context and a reference capsule for each referenced object: object type, stable ID or URN, display context, public-hash version, and public hash.
-- Referenced models expose a versioned public-hash method covering their material public fields, not secondary detail. The Finding hash is calculated from a canonical serialization of the manifest. This detects material dependency changes while avoiding irrelevant invalidation and without requiring a snapshot table per referenced model.
+- Each validation submission and published revision stores an immutable, generated **`assertion_manifest` JSON**, its **`assertion_hash`**, and a manifest schema version. The manifest contains the relevant assertion context and a reference capsule for each referenced object: object type, internal UUID or URN, display context, public-hash version, and public hash.
+- Referenced models expose a versioned public-hash method covering their material public fields, not secondary detail. The default — `ref_id`, `name`, and `description` — is implemented once on the shared model base, so individual models carry no code unless they define a custom material-field set; changing a model's hash contract requires incrementing its public-hash version. The Finding hash is calculated from a canonical serialization of the manifest. This detects material dependency changes while avoiding irrelevant invalidation and without requiring a snapshot table per referenced model.
 - Relational fields and live links remain the working data. The stored manifest is the immutable, human-readable validation and publication record; it is generated by the backend and is never manually edited.
 - A published Finding may be **withdrawn** with an actor, date, and reason, recorded on the Finding identity. Withdrawal is a formal retraction and is distinct from revision supersession. A Finding is never deleted to simulate withdrawal.
 
 Withdrawal is terminal for the Finding identity. A withdrawn Finding cannot receive or publish another revision. If the matter must be raised again, a new Finding is created; ordinary corrections use a newer revision without withdrawing the Finding.
+
+Withdrawing a Finding deletes any coexisting unpublished draft after its unresolved validation flows have been dropped. The current published revision and its validation record remain unchanged.
 
 This mechanism is deliberately designed as a general pattern — a lifecycle contract (identity, revision chain, current pointer, single draft, gated publish) with a per-model assertion-manifest payload — so it can be **backported to other models in the future** (assessments, policies), progressively superseding the immutability role of the rudimentary `is_locked` flag. The campaign-deadline role of `is_locked` is a separate concern and is unaffected.
 
@@ -220,9 +232,13 @@ Publication itself does not grant access. Any recipient access is assigned expli
 
 Only a published Finding represents a formal auditor assertion. An Issue created directly from a Requirement Assessment is not automatically included as a Finding in an Engagement's final report. If the matter must become a formal conclusion, the auditor creates and publishes a Finding, then links it to the existing Issue.
 
-`Finding.created_from` is an optional immutable creation-provenance reference. It identifies a Requirement Assessment or another supported source when the Finding is generated from one and is empty for a manually authored Finding. `originating_engagement` remains the separate mission provenance: it may change before first publication, which invalidates any validation submission, and becomes immutable after first publication.
+`Finding.created_from` is an optional source reference. It identifies a Requirement Assessment or another supported source when the Finding is generated from one and is empty for a manually authored Finding. `created_from` and the separate `originating_engagement` reference may both change before first publication; changing either invalidates the current validation submission. Both freeze at first publication.
+
+If a referenced `created_from` object is later deleted, the live relation is set to null. A published revision's assertion manifest continues to preserve the source type, UUID, display context, public-hash version, and public hash.
 
 Findings created directly in a Findings Assessment with no Engagement — externally sourced or transcribed findings — may remain unpublished drafts indefinitely and stay freely editable; with no engagement there is no validation configuration, so publishing them, when desired, is direct.
+
+A Finding carries **its own folder**. Creating a Finding from an Engagement defaults the folder to the Engagement's; creating one from a Findings Assessment defaults it to the Follow-up's. The creator may choose another folder. Linking an existing Finding never changes its folder. Access is always evaluated against the Finding's own folder (§13).
 
 ### 8.3 Assertion fields and follow-up fields
 
@@ -238,7 +254,7 @@ Assertion content belongs to the revision and freezes at publication. Follow-up 
 | Reference controls (recommended) | Linked Applied Controls |
 | Affected assets | Follow-up evidences (existing `Finding.evidences`) |
 | Auditor recommendation (new field) | Recipient responses |
-| — | `ref_id` (stable human reference across revisions) |
+| — | `ref_id` (user-managed human reference shared across revisions) |
 
 For list views and search, the projection depends on the authorized perspective: recipient-side views use `current_published_revision`, while auditor-side working views may show the draft. Any denormalized headline fields are caches only; the selected revision remains the source of truth and draft content must never leak through a recipient-side index.
 
@@ -250,7 +266,7 @@ Publication state is derived rather than stored independently:
 - otherwise, `current_published_revision` exists → `published`;
 - otherwise → `draft`.
 
-A newer unpublished draft may coexist with the current published revision. Publishing the new revision makes it current. It does not reset follow-up state or invalidate linked Issue commitments. Notification of recipients on publication follows the notification rules (future work, §16).
+A newer unpublished draft may coexist with the current published revision. Publishing the new revision makes it current. It does not reset follow-up state or invalidate linked Issue commitments. Notification of recipients on publication follows the notification rules (future work, §17).
 
 Publication requires a non-`--` follow-up status. A published Finding cannot return to `--`. A dismissed Finding must first return to a non-terminal follow-up status before publication, and a Finding that has ever been published cannot subsequently be marked `dismissed`; formal retraction uses withdrawal.
 
@@ -263,18 +279,18 @@ The existing status vocabulary is **kept, not remapped** — it remains the foll
 | `--` | Draft | Not set; legitimate while a never-published Finding is still tentative; default for new drafts |
 | `identified` | Triage | Matter has been identified |
 | `confirmed` | Triage | |
-| `dismissed` | Terminal | Rejected at triage; never used after publication |
+| `dismissed` | Outcome | Rejected at triage; never used after publication |
 | `assigned` | Active | |
 | `in_progress` | Active | |
 | `mitigated` | Active | Risk reduced / compensating control |
 | `resolved` | Resolution | Remediation reported complete; may still require formal verification/closure |
-| `closed` | Terminal | Remediation verified and Finding formally closed |
-| `risk_accepted` | Terminal | **New** — resulting risk accepted |
+| `closed` | Outcome | Remediation verified and Finding formally closed |
+| `risk_accepted` | Outcome | **New** — resulting risk accepted |
 | `deprecated` | — | Grandfathered; valid on existing rows, hidden for new findings |
 
-- No separate "outcome" field is introduced: terminal statuses carry the outcome.
+- No separate "outcome" field is introduced: the follow-up status carries the outcome where applicable.
 - Existing metrics continue to treat both `resolved` and `closed` as dealt with, while the workflow retains their useful distinction between reported resolution and verified closure.
-- Dashboards group statuses into draft / triage / active / resolution / terminal phases; grouping is presentation only — stored codes never change meaning.
+- Dashboards group statuses into draft / triage / active / resolution / outcome phases; grouping is presentation only — stored codes never change meaning.
 
 Finding follow-up remains useful without a Remediation Issue. When an Issue exists, both lifecycles remain independent and are never synchronized automatically.
 
@@ -287,7 +303,7 @@ Finding follow-up remains useful without a Remediation Issue. When an Issue exis
 - Its `category` (pentest, audit, self-identified, responsible disclosure…) is a broad informational classification of the Follow-up, not authoritative provenance and not a constraint on its Findings. Exact provenance, when available, belongs to each Finding and its source relationships.
 - Its status remains manually managed. It may be marked `done` while Findings remain open, after a strong warning and explicit confirmation.
 - Closing it never cascades to Findings, Issues, Tasks, or Applied Controls.
-- **Deleting** a Findings Assessment that contains findings asks the user what to do (§15).
+- **Deleting** a Findings Assessment that contains Findings asks the user what to do (§16). This is a frontend convenience composed from ordinary object operations, not a new bulk-delete domain operation.
 
 Its existing status values, including unset and `deprecated`, remain for backward compatibility. New models do not adopt `deprecated`.
 
@@ -297,41 +313,61 @@ Its existing status values, including unset and `deprecated`, remain for backwar
 
 **Validation is a condition for publishing, nothing more.** It does not freeze content (immutability comes from publication, §8.1), it never retro-affects a published revision, and it is entirely optional.
 
-The gate reuses the **global `ValidationFlow` model** — its inbox, its `FlowEvent` history, its requester/approver separation and deadlines — rather than an embedded reviewer workflow. Review states live on the flow; the revision status stays minimal (`draft`/`published`/`superseded`).
+The gate reuses the **global `ValidationFlow` model, unchanged** — its inbox, its `FlowEvent` history, its requester/approver separation and deadlines — rather than an embedded reviewer workflow. Review states live on the flows; the revision status stays minimal (`draft`/`published`/`superseded`).
 
 ### 9.2 Configuration: validation layers on the Engagement
 
-The Engagement carries up to **three validation layers**. Each layer is a list of validator users; layers 2 and 3 each carry a boolean `wait_for_previous`.
+The Engagement carries up to **three validation layers**. Each layer comprises a list of validator users and an `approval_rule`; layers 2 and 3 also carry a boolean `wait_for_previous`.
 
 - **Validation is required if and only if at least one layer is non-empty.** The configuration *is* the assignment: there is no way to require validation without saying who validates. An engagement with no validators — and any finding without an engagement — publishes directly.
-- **OR within a layer:** any one validator of the layer suffices.
+- **Approval rule within a layer:** `any` requires one acceptance, `all` requires every configured validator, and `quorum` requires `required_approvals` acceptances. `required_approvals` is stored only for `quorum` and must be between 1 and the number of validators.
 - **AND between layers:** every non-empty layer must be satisfied.
 - **`wait_for_previous` = true:** the layer is blocked until all *earlier non-empty* layers are satisfied (empty layers never block). False: the layer may validate concurrently.
 - The three lists must be disjoint.
 - Example — "first X and Y, then Z": X in layer 1; Y in layer 2 with wait = false; Z in layer 3 with wait = true.
 - Assignment to a validation layer grants no access. Every configured validator must independently hold the IAM permission and role required to view and validate the Finding, normally an auditor-side role such as Analyst. Submission does not auto-grant anything.
 
-The plain case "any of these people" is simply layer 1 alone.
+The UI presents **Any validator**, **All validators**, and **At least N validators**. `all` remains dynamic while the Engagement configuration is edited, so adding a validator does not require manually updating a count. A submission snapshots the validator list, rule, and effective threshold. First-response-wins and conditional-escalation policies are outside the target model.
+
+```mermaid
+flowchart TD
+    D["Submit Finding draft"] --> S["Submission: hash and layer snapshot"]
+    S --> A["Create flows for actionable layers"]
+    A --> V["Independent validator decisions"]
+    V --> T{"Approval threshold reached?"}
+    T -->|No, still reachable| V
+    T -->|No, impossible| F["New submission required"]
+    T -->|Yes; others may still respond| W{"Waiting layer remains?"}
+    W -->|Yes| A
+    W -->|No| P["Publication available"]
+```
 
 ### 9.3 Mechanics
 
-- Submitting a draft creates a validation submission identified by `submission_id`. It stores the generated assertion manifest and hash and snapshots the Engagement's layer configuration.
-- The submission creates **one shared ValidationFlow per non-empty layer**, not one per validator. Each layer flow carries its authorized validator list and one current status.
-- Any authorized validator may transition the layer's shared status. `FlowEvent` records the natural user who acted. Several validators in a layer are alternatives acting on one state; there are no sibling flows, votes, or dropped siblings.
-- `wait_for_previous` controls when a layer is actionable. A waiting layer cannot transition until all earlier non-empty prerequisite layers are accepted; a concurrent layer may act immediately.
-- Changing the Engagement's validators affects future submissions, never an in-flight submission whose configuration has already been snapshotted.
-- The publication requirement is exposed as a single predicate — “every non-empty layer of the current submission is accepted for the current assertion hash” — checked by the publish transition.
+- Submitting a draft creates a `ValidationSubmission` identified by `submission_id`. It belongs to the draft Finding Revision, stores the generated assertion manifest and hash, snapshots the Engagement's validators, approval rules, effective thresholds, ordering, and concurrency rules, and groups the generated Validation Flows.
+- The submission creates **one ordinary ValidationFlow per (layer, validator)** — the existing addressed, single-approver flow, unchanged. The submitting auditor is the requester; the validator is the approver.
+- Flows are created **when their layer becomes actionable**: immediately for layer 1 and concurrent layers, and only once all earlier non-empty prerequisite layers are satisfied for a `wait_for_previous` layer. Nobody is solicited before they can act.
+- A layer's outcome is derived from its individual flows. It is **satisfied** when accepted flows reach its snapshotted threshold, **pending** while the threshold remains reachable, and **failed** when terminal decisions make the threshold unreachable.
+- Reaching the threshold makes publication available but does not close sibling flows. Other validators may continue to respond until publication, and their decisions may affect whether the threshold remains satisfied.
+- A layer that reaches its threshold despite **current unresolved** `change_requested` or `rejected` responses is shown as **Satisfied with objections**. This is a derived informational indicator, not another stored lifecycle state and not a veto. A previous objection that the same validator has replaced with acceptance is no longer shown as unresolved.
+- Changing the Engagement's validators or approval rules affects future submissions, never an in-flight submission whose configuration has already been snapshotted.
+- The publication requirement is exposed as a single predicate — “every non-empty layer of the current submission is satisfied for the current assertion hash” — checked by the publish transition.
+- A Finding Revision may have several historical submissions but at most one current, usable submission. Creating a new one supersedes the previous current submission and drops its unresolved flows.
 
 ### 9.4 Rules
 
-- **Any assertion-hash change makes the submission stale.** This includes a draft edit, a relationship change, a change of originating Engagement, or a material public-hash change in a referenced object. Secondary changes excluded from a referenced object's public hash do not invalidate validation.
-- Staleness is detected lazily by recomputing the manifest and hash when validation state is displayed or publication is attempted; cross-model event listeners are not required. A stale draft must be resubmitted under a new `submission_id`.
-- `change_requested` is the shared current state of its layer. Any authorized validator may later change that same state to `accepted`; an accepted layer cannot simultaneously carry an outstanding change request.
-- Publication requires every non-empty layer to be currently `accepted`. There is no publish-with-warning path.
-- Publication atomically recomputes and compares the assertion hash, checks all layers, publishes the revision, and marks the accepted submission as consumed (for example with `used_for_publication_at` or a link to the published revision).
-- A consumed submission, its validator snapshot, and all of its layer states are immutable. Objections after publication use comments, a revised Finding, or terminal withdrawal; they never rewrite the validation record that authorized publication.
-- `rejected`, `revoked`, and `expired` matter only before publication. Retraction of a published Finding is withdrawal (§8.1), never flow revocation.
-- Whether a draft's author may appear among its validators is UI policy (discouraged), not a core data constraint.
+- **Any assertion-hash change invalidates the submission.** This includes a draft edit, a relationship change, a change of source or originating Engagement, or a material public-hash change in a referenced object. Secondary changes excluded from a referenced object's public hash do not invalidate validation.
+- A material local Finding edit immediately clears the current validation association and drops its unresolved flows; returning the content to the same hash does not restore it. Material changes to referenced objects are detected lazily by recomputing the manifest and hash when validation state is displayed, before any validator decision, and at publication; a mismatch performs the same invalidation and flow cleanup. A stale submission cannot receive decisions or authorize publication. No separate persisted `stale` status is required: the current `submission_id` identifies the usable round.
+- When the draft is resubmitted, the previous submission is marked superseded and becomes unusable for publication, its unresolved flows are closed as `dropped`, and completed decisions and their history remain immutable. The new validation round receives a new `submission_id`.
+- `change_requested` is formal feedback on that validator's own flow and contributes no acceptance. There is no requester-side operation to resubmit an individual flow. While the assertion hash remains unchanged, the validator may revise their own current decision after clarification; the `FlowEvent` history is preserved. If the assertion changes, the whole submission is invalidated instead.
+- `rejected`, `revoked`, `expired`, and `dropped` flows contribute no acceptance. A rejection by one validator does not veto a threshold reached by others. If the remaining flows can no longer reach the threshold, the layer fails and the draft must be submitted under a new submission.
+- Revoking an acceptance before publication immediately removes it from the count. If the threshold is no longer met, the layer is no longer satisfied; sibling flows remain available until publication unless the submission itself becomes unusable.
+- If a prerequisite layer loses satisfaction, downstream flows already created for a `wait_for_previous` layer and their completed decisions remain valid, but its pending flows become temporarily non-actionable. They resume when all prerequisites are satisfied again. The publication predicate re-checks every layer at publish time.
+- Publication requires every non-empty layer of the current submission to be satisfied for the current assertion hash. Recorded objections do not block publication after the configured thresholds have been reached; the UI discloses them through the **Satisfied with objections** indicator.
+- Publication atomically locks the revision and current submission, recomputes and compares the assertion hash, checks all layers, publishes the revision, consumes that exact submission, and closes its unresolved flows as `dropped`. The exact accepted manifest and hash are carried into the published revision.
+- A consumed submission, its configuration snapshot, and all of its flows are immutable. Objections after publication use comments, a revised Finding, or terminal withdrawal; they never rewrite the validation record that authorized publication.
+- Flow rejection, revocation, and expiry matter only before publication. Retraction of a published Finding is withdrawal (§8.1), never flow revocation.
+- Finding validation flows follow the global **Allow self-validation** setting exactly as any other validation flow (requester versus approver). No additional Finding-specific author/validator constraint is introduced; authorship, submission, and validation remain visible in the record (§13).
 
 ## 10. Remediation Issues
 
@@ -341,14 +377,18 @@ The plain case "any of these people" is simply layer 1 alone.
 
 An Issue adds:
 
-- explicit Lead and optional Respondent sides;
+- explicit, mandatory Lead and Respondent sides;
 - a structured dialogue using existing Comments;
 - at most one current remediation proposal or agreed commitment;
-- acceptance by all represented sides;
+- bilateral acceptance;
 - target date, execution phase, evidence, verification, and resolution;
 - links to relevant business objects without lifecycle coupling.
 
-An Issue may be created standalone or from a Finding, Requirement Assessment, Risk, or other supported object. **Creation provenance is a first-class, immutable `created_from` reference** set at creation (empty for standalone Issues) — queryable and shown in the UI. Other links are untyped, and later link changes are captured in history.
+An Issue may be created from a **Requirement Assessment** or a **Finding**, in which case that object alone is initially linked. It may also be created standalone and linked later to one or more Requirement Assessments and Findings. There is no stored creation provenance and no minimum-link rule. Ordinary history records creation and subsequent link changes, but no related object retains a privileged source role after creation.
+
+These links have no relationship subtype: they express relevance only.
+
+The doctrine is carried by guidance rather than enforcement: **the Issue view displays a short notice explaining that Issues serve to track commitments, not to track findings** — an ad-hoc, self-identified observation belongs as a Finding in a Follow-up, and an Issue is opened only when two parties need to formalize and track a commitment. Deleting a related object simply detaches its link.
 
 `OrganisationIssue` is not a special source type and has no dedicated relationship to Remediation Issues.
 
@@ -356,48 +396,45 @@ An Issue may be created standalone or from a Finding, Requirement Assessment, Ri
 
 | Field | Requirement |
 |---|---|
-| `reference` | Optional identifier |
+| `ref_id` | Optional user-managed identifier |
 | `title` | Required |
 | `description` | Required self-contained problem context |
 | `priority` | Optional; no Issue severity field |
 | `status` | Required; defaults to `planned` |
-| `created_from` | Optional immutable creation provenance |
 | Commitment | Zero or one current proposed/agreed version; see §10.4 |
-| Acceptance state | Absent without a commitment; otherwise one state per represented side for the current version |
+| Acceptance state | Absent without a commitment; otherwise one state per side for the current version |
 | `resolution` | Required when `done` |
 | `closure_justification` | Required when `done`; authoritative reason why closure is justified |
 | `cancellation_reason` | Required when `cancelled` |
 | `closed_at` | Set on closure and preserved in history on reopening |
-| Related objects | Optional untyped links |
+| Related objects | Optional links to one or more Requirement Assessments and Findings; initialized from the creation context when applicable |
 | Comments, Documents and `evidences` | Existing models; optional Issue evidence M2M |
 
-Issue priority expresses remediation urgency. Severity remains on source Findings, Risks, or assessment results and is not copied into an aggregate Issue field.
+Issue priority expresses remediation urgency. Severity remains on related Findings or assessment results and is not copied into an aggregate Issue field.
+
+An Issue's **initial folder defaults to the creation-context object's folder**, and the creator may choose another. For a Requirement Assessment, this is also the enclosing Compliance Assessment's folder because those folders are synchronized. Creating standalone requires the author to choose a folder. Linking an existing object never changes either object's folder, and later folder changes are independent. Access is always evaluated against the Issue's own folder (§13).
 
 ### 10.3 Actors and sides
 
-Issue participation assigns existing actors—Users, Teams, or Entities—to:
+Issue participation is stored as four plain many-to-many fields to the existing `Actor` model: `lead_representatives`, `respondent_representatives`, `lead_contributors`, and `respondent_contributors`. Each Actor wraps exactly one User, Team, or Entity. No participation through-model, capacity enum, or new Party model is introduced. Assignments name actors; actions are performed by natural users — a decision is always made by a user, and eligibility is resolved through the representative actors.
 
-- side: `lead` or `respondent`;
-- capacity: `representative` or `contributor`.
-
-No new Party model is introduced.
-
-- The Lead side exists conceptually; the Respondent side is optional.
-- Each side may have several representatives and contributors.
-- Representatives of one side act interchangeably as a single logical actor.
+- Every Issue has exactly two logical sides: Lead and Respondent.
+- **Representatives take the side's decisions:** only they may propose, revise, or accept a commitment and perform the side's transitions (§10.6). Eligibility resolves through the listed actors — a User directly, a Team through its members, an Entity through its representatives' user accounts, as for audits today. Representatives of one side act interchangeably as one logical decision-maker.
+- **Contributors are informational only** — a displayed cast of who is involved. The field carries no mechanics: commenting and visibility are governed by ordinary folder permissions, not by participation.
 - Acceptance is recorded once per side, not once per representative.
-- History records the effective actor, represented side, and natural user performing an action.
-- An Issue may temporarily lack representatives; it then cannot progress through representative-dependent actions.
-- On the respondent side, actions are exercised by users holding the respondent role (§13).
-- Contributors may participate in dialogue but cannot propose, revise, or accept a commitment.
+- History records the side and the user performing an action.
+- An Issue may temporarily lack representatives on a side; no representative-dependent action can then be performed for that side. The UI should normally require representatives because the workflow cannot progress without them, but the backend imposes no assignment constraint.
+- Participation does not carry IAM roles. The user performing an action must independently have the required IAM permission.
 
 ### 10.4 Commitment model
 
-An Issue has **zero or one current commitment version** and zero or more historical **`CommitmentVersion` rows**. Each row contains a version number, rich text, optional due date, author, represented actor and side, and timestamp. There is no user-facing Commitment collection and no special dialogue-entry model: the UI shows a single proposed or agreed commitment; versions are plumbing that acceptance can reference reliably.
+An Issue has **zero or one current commitment version** and zero or more historical **`CommitmentVersion` rows**. Each row contains a version number, rich text, optional due date, the authoring user and their side, a timestamp, and **the two per-side acceptance states — state, user, and timestamp for each side — directly on the version row**. There is no separate acceptance table; the audit log provides the event history. There is no user-facing Commitment collection and no special dialogue-entry model: the UI shows a single proposed or agreed commitment; versions are plumbing that acceptance references reliably.
+
+Commitment content is immutable after version creation. Acceptance fields may change only while the version is current and must be updated atomically. Once superseded, the entire version is immutable. Acceptance changes remain available through audit history.
 
 An Issue may be created before a remediation proposal exists—for example, when the Lead formally asks the Respondent to propose a solution. In that state, acceptance is absent and the UI shows **Awaiting remediation proposal**. Any representative of either side may create version 1 or propose a later revision. Before bilateral acceptance the UI calls the current version the **Proposed commitment**; after acceptance it becomes the **Agreed commitment**.
 
-Existing Comments support negotiation. The current commitment version is the authoritative agreement; previous versions and their acceptance events remain queryable history.
+Existing Comments support negotiation. The current commitment version is the authoritative agreement; previous versions and their acceptance changes remain queryable in audit history.
 
 Acceptance covers only:
 
@@ -412,7 +449,7 @@ Creating a version uses optimistic concurrency: the request includes `based_on_v
 
 ### 10.5 Bilateral acceptance
 
-With no current commitment, there are no acceptance states and no acceptance action. When a commitment exists, each represented side has one acceptance state for that version:
+With no current commitment, there are no acceptance states and no acceptance action. When a commitment exists, each side has one acceptance state for that version:
 
 - `pending`
 - `accepted`
@@ -425,13 +462,13 @@ The overall state is derived with the precedence **changes_requested > pending >
 | Any side has requested changes | Changes requested |
 | No changes requested; Lead pending | Pending Lead acceptance |
 | No changes requested; Lead accepted, Respondent pending | Pending Respondent acceptance |
-| All represented sides accepted | Accepted |
+| Both sides accepted | Accepted |
 
-There is no imposed order: either side may accept first. When no Respondent side exists, Lead acceptance is sufficient. Acceptance is distinct from Issue execution status.
+There is no imposed order: either side may accept first. Acceptance is distinct from Issue execution status.
 
-Representatives of a side act as one logical person: the model does not collect votes or require unanimity among representatives. The same natural user may technically act for both sides; a UI policy may discourage or prevent this, but it is not a core data constraint.
+Representatives of a side act as one logical person: the model does not collect votes or require unanimity among representatives. The backend applies the existing global **Allow self-validation** setting: when self-validation is disabled, the same natural user cannot perform commitment actions for both sides of one Issue, including through overlapping Team or Entity representation. Comments are unaffected. The record captures the side and the user of every event (§13).
 
-Acceptance events record the commitment version, side, represented actor, natural user, state, and timestamp. When a current version exists, adding a Respondent side creates its pending acceptance. Removing the side means that its acceptance no longer participates in the current overall state, but the event remains in history. Participant changes do not reset other acceptances; the UI warns before removing a side that has participated.
+Each acceptance records the user, state, and timestamp for its side on the current commitment version; the audit log keeps the full event history. Changing representatives or contributors does not reset either side's acceptance; previous events remain in history.
 
 ### 10.6 Issue lifecycle
 
@@ -448,7 +485,9 @@ Status and acceptance are orthogonal. For example, implementation may continue w
 
 No status changes automatically when acceptance changes. After bilateral acceptance, the UI may offer **Start remediation**, but an authorized user explicitly performs the transition.
 
-The normal path uses `in_review`, but the backend need not require it before `done`. Any non-terminal status may exist before a proposal is made: status describes operational reality, while commitment and acceptance describe formal agreement. Closure requires a current commitment accepted by every represented side and a closure justification.
+Either side's representatives may discuss, propose, revise, and accept the commitment. A Respondent representative may submit completed remediation for review by moving the Issue to `in_review`. Only a Lead representative may move the Issue to `done`, provide the closure justification, cancel it, or reopen a `done` Issue. These domain checks are enforced by the backend in addition to IAM.
+
+The normal path uses `in_review`, but the backend need not require it before `done`. Any non-terminal status may exist before a proposal is made: status describes operational reality, while commitment and acceptance describe formal agreement. Closure requires a current commitment accepted by both sides and a closure justification.
 
 ### 10.7 Terminal outcomes and reopening
 
@@ -472,7 +511,7 @@ Recommended cancellation reasons:
 
 The UI labels this field **Closure justification** in English and **Justification de clôture** in French.
 
-A `done` Issue may be explicitly reopened. Previous closure data stays in history. Reopening makes the commitment and acceptance workflow editable again; a changed remediation path creates a new commitment version and resets acceptance. A genuinely new problem should create a new Issue instead.
+A `done` Issue may be explicitly reopened to a non-terminal status chosen by the user. Previous closure data stays in history. Reopening makes the commitment and acceptance workflow editable again; a changed remediation path creates a new commitment version and resets acceptance. A genuinely new problem should create a new Issue instead.
 
 A cancelled Issue is terminal because it is a formal abandoned workflow record. Renewed handling creates a new Issue rather than reactivating the cancelled one.
 
@@ -487,20 +526,21 @@ The existing Comment model is used for Issue dialogue. No `RemediationIssueEntry
 - Existing `Finding.evidences` and `FindingsAssessment.evidences` remain valid for lightweight follow-up. Issue evidence is independent: evidence is never copied or synchronized automatically between a Finding, its Follow-up, and a linked Issue.
 - A combined activity view may display both contexts when the user can independently access them.
 
-When an Issue is created from a source, the UI may prefill its title and description. The creator must review and explicitly save the copied text because Issue participants may not have access to the source. The Issue content is independent and never synchronized from the source.
+When an Issue is created from another object, the UI may prefill its title and description. The creator must review and explicitly save the copied text because Issue participants may not have access to that object. The Issue content is independent and never synchronized from it.
 
 ### 10.9 Supported creation paths
 
-The model supports both lightweight and formal audit paths:
+The model supports today's audits and Findings immediately, while remaining compatible with the later Engagement model:
 
 1. **Direct remediation:** Requirement Assessment → Remediation Issue.
-2. **Formal audit conclusion:** Requirement Assessment → Finding → Remediation Issue.
-3. **Early collaboration followed by publication:** create the Issue from the Requirement Assessment, then later create the Finding and link it to the same Issue.
-4. **Frameworkless audit:** Engagement → Finding → optional Findings Assessment → optional Remediation Issue.
-5. **External source:** create a Finding directly in a Findings Assessment, with no Engagement.
-6. **Standalone remediation:** create a Remediation Issue with no source object.
+2. **Existing Finding:** Finding → Remediation Issue.
+3. **Formal audit conclusion:** Requirement Assessment → Finding → Remediation Issue.
+4. **Early collaboration followed by publication:** create the Issue from the Requirement Assessment, then later create the Finding and link it to the same Issue.
+5. **Frameworkless audit, later phase:** Engagement → Finding → optional Findings Assessment → optional Remediation Issue.
+6. **External or self-identified source:** create a Finding directly in a Findings Assessment, with no Engagement; create an Issue from it if a formal commitment becomes necessary.
+7. **Standalone commitment:** create a Remediation Issue directly, choosing its folder and linking objects as needed.
 
-The third path never creates a second Issue. The Finding and Requirement Assessment become untyped related objects of the existing remediation case.
+The fourth path never creates a second Issue. The Finding and Requirement Assessment become related objects of the existing remediation case. Likewise, adding an Engagement later never replaces an Issue already created from a Requirement Assessment or Finding.
 
 ## 11. Tasks and Applied Controls
 
@@ -521,16 +561,20 @@ The same independence applies between Findings and their Tasks or Applied Contro
 | Event | Automatic effect |
 |---|---|
 | Link two objects | No access grant and no lifecycle change |
+| Create an object from a parent or context | New object's folder initially defaults to the context folder; creator may choose another |
+| Link an existing object | No folder change on either object |
 | Publish Finding revision | Locks assertion revision; no follow-up status change |
 | Publish a revised Finding | No Issue commitment reset |
 | Withdraw a Finding | Finding becomes terminal; no linked-object closure; show warnings |
-| Assertion hash changes under validation | Current submission becomes stale; resubmission required |
-| Validator requests changes | Shared layer state becomes `change_requested`; publication is blocked until accepted |
+| Assertion hash changes under validation | Current submission becomes unusable; a new submission is required |
+| Validator requests changes | Formal feedback on that flow; contributes no acceptance and does not veto a threshold reached by other validators |
+| A layer reaches its approval threshold | Layer is satisfied and publication may become available; sibling flows remain actionable until publication |
+| A layer can no longer reach its threshold | Layer fails; a new validation submission is required |
 | Validation requirement satisfied | Publish becomes available; no automatic publication |
-| Publish using accepted validation | Validation submission is consumed and sealed |
+| Publish using accepted validation | Validation submission is consumed and sealed; unresolved flows close as `dropped` |
 | Accept commitment | No automatic move to `in_remediation` |
 | Edit accepted commitment (text or due date) | New version; reset both acceptances |
-| Add or remove Issue participants | Record history; no link-based permission or automatic reset of other acceptances |
+| Add or remove Issue participants | Record history; no link-based permission or automatic reset of either side's acceptance |
 | Edit commitment or acceptance on a `done` Issue | Rejected; reopen the Issue first |
 | Complete Applied Control or Task | No automatic Issue or Finding closure |
 | Close Issue | No automatic Finding closure |
@@ -549,11 +593,13 @@ Independent relationships never imply cascading deletion. Internal revision/vers
 | Audit Programme | Detach and preserve its Engagements |
 | Engagement with only draft Findings | Detach and preserve those Findings and linked Compliance Assessments |
 | Engagement with published or withdrawn originating Findings | Protect deletion; the user must retain the Engagement or explicitly delete the Findings if authorized |
-| Findings Assessment containing Findings | Require an explicit API/UI choice: detach by default, or delete only Findings the caller is independently authorized to delete |
+| Findings Assessment containing Findings | Frontend asks for detach by default or deletion of all Findings; no backend bulk-delete operation is introduced |
 | Finding | Delete its owned Finding Revisions, parent-bound Comments, and external link rows; never delete linked Issues, Evidence, Documents, Tasks, or Applied Controls |
 | Remediation Issue | Delete its owned Commitment Versions, parent-bound Comments, and external link rows; never delete linked Findings, Evidence, Documents, Tasks, or Applied Controls |
 
-Database relationships use `SET_NULL`, M2M removal, or `PROTECT` according to this table. Cascading deletion is reserved for true internal children.
+For a non-empty Findings Assessment, the frontend offers **Delete Findings** only when its permission check indicates that the user may delete every contained Finding. It then deletes Findings one by one through their ordinary endpoints. On the first failure it stops and leaves the Findings Assessment in place; Findings already deleted remain deleted. The Findings Assessment is deleted only after every Finding deletion succeeds. This is a comfort feature, not an atomic domain operation. Detach remains the default choice.
+
+Database relationships use `SET_NULL`, M2M removal, or `PROTECT` according to this table. Cascading deletion is reserved for true internal children. In particular, deletion of an object referenced by `Finding.created_from` sets the live reference to null; published manifests retain the recorded context.
 
 Documents, Evidence, Tasks, Applied Controls, Compliance Assessments, and other independently permissioned objects are never deleted merely because a linking Programme, Engagement, Follow-up, Finding, or Issue is deleted.
 
@@ -566,18 +612,32 @@ Documents, Evidence, Tasks, Applied Controls, Compliance Assessments, and other 
 - Issue descriptions must contain enough context for participants who cannot access linked sources.
 - The auditor workspace is private by default; recipients normally interact through published Findings, Findings Assessments, and Issues.
 - User, Team, and Entity actors are reused; no new Party identity model is added.
+- The global **Allow self-validation** setting applies to both Finding validation (as any other validation flow) and bilateral Issue commitment actions: when disabled, the same natural user cannot act for both sides of one Issue. Changes apply prospectively; previously recorded validation and acceptance events remain valid.
 
 **Auditee access reuses the existing respondent role (`BI-RL-ADE`)**, extended with finding, follow-up, and issue permissions:
 
 - Respondents see only Findings that have been formally issued — publication state `published` or `withdrawn` (a withdrawal is information the recipient needs, shown with its status). Drafts are structurally invisible: the base view permission means "published only", and draft visibility requires an additional auditor-side permission. In practice the respondent filter is "has a current published revision".
 - CA does not require field-level IAM permissions, but a caller with object-level change permission cannot submit an arbitrary patch. Backend consistency checks expose and enforce an explicit mutable surface for the requested auditor-side or respondent-side operation.
 - Published assertion content is structurally immutable for everyone. Respondents may modify only respondent-relevant follow-up fields. Analysts can see everything a respondent can see but cannot necessarily modify respondent-owned fields.
-- The folder of the respondent role assignment is the visibility boundary; per-model permissions keep Engagements, Documents, and workpapers invisible without further mechanism.
-- The same role naturally carries Issue-side respondent operations, while consistency rules distinguish representative from contributor capacity. Only representatives may propose, revise, or accept a commitment.
+- The folder of the respondent role assignment is the visibility boundary; per-model permissions keep Engagements, Documents, and workpapers invisible without further mechanism. Per-party isolation reuses the existing enclave pattern: an Issue created from an object defaults to that object's folder, so third-party Issues normally start inside the party's enclave, invisible to other parties.
+- The same role naturally carries Issue-side respondent operations. Only representatives may propose, revise, or accept a commitment; contributors are informational.
+
+These capabilities follow the delivery phases (§16): the Issue-side respondent operations ship with phase 1, while the published-Finding visibility rules belong to the later publication phase — until Finding publication ships, Finding visibility remains governed by ordinary folder permissions.
 
 Before this target model, the Respondent role was defined for participation in audits and had no supported responsibility or authoring semantics for Findings. Any Respondent access to Finding drafts or assertion fields was incidental and is not a compatibility contract. The target model introduces the first explicit Respondent workflow for Findings: access to published assertions and modification of permitted recipient-side follow-up fields. A user who must author, validate, or review Finding assertions requires an auditor-side role such as Analyst.
 
-## 14. Navigation proposal
+## 14. Security
+
+This design introduces no security mechanism of its own; it deliberately rides the existing ones:
+
+- **IAM is the sole access authority.** Every operation is authorized by the existing folder-scoped RBAC, evaluated against each object's own folder (§13). Participation, validation-layer assignment, links, and publication grant no access.
+- **Lead versus Respondent follows the existing pattern:** internal users act through their ordinary auditor-side roles; external respondents act through the existing respondent role (`BI-RL-ADE`) scoped to their enclave folder — exactly as third-party audits work today. The sides of an Issue are workflow semantics on top of IAM, never a parallel permission system.
+- **Integrity guarantees are structural, not procedural:** published assertion content and consumed validation records are immutable at the model level, commitments version instead of mutating, and the audit log records the side and natural user of every decision.
+- The global **Allow self-validation** setting is the single configured segregation-of-duties control, applied to Finding validation and Issue commitment actions alike (§13).
+
+**The threat model is unchanged compared to TPRM and third-party audits:** the same external population (entity respondents) reaches the same boundary (their enclave folder) through the same role. This design adds objects inside that boundary; it adds no new exposure, principal type, or trust relationship.
+
+## 15. Navigation proposal
 
 ### Audit management
 
@@ -588,9 +648,8 @@ Before this target model, the Respondent role was defined for participation in a
 ### Findings and remediation
 
 - Follow-ups
+- Findings
 - Issues
-
-Findings remain primarily accessible from their originating Engagement or Findings Assessment rather than requiring another top-level menu.
 
 Terminology (decided):
 
@@ -605,20 +664,44 @@ Terminology (decided):
 
 "Issue / Problème" follows the convention of localized GRC platforms, and is unambiguous once `OrganisationIssue` is relabeled "Organizational issue / Enjeu organisationnel".
 
-## 15. Migration approach
+## 16. Delivery and migration approach
+
+### 16.1 Phase 1 — Remediation Issues on the current model
+
+Remediation Issues are the first delivery increment. They do not depend on Audit Programmes, Engagements, Finding Revisions, publication, or validation layers.
+
+- Implement `RemediationIssue`, `CommitmentVersion`, participants, bilateral acceptance, lifecycle transitions, Comments, Documents, Evidence, and history.
+- Make Issue creation and linking available directly from the existing `RequirementAssessment` and `Finding` user interfaces and APIs. Contextual creation initializes only that object's link and folder default; linking an existing object later never changes the Issue's folder.
+- Add optional Remediation Issue links to `TaskTemplate` and Applied Controls without lifecycle synchronization.
+- Do not migrate, wrap, or otherwise change existing audits and Findings merely to enable Issues.
+- Do not automatically create Issues from existing audits, Findings, Tasks, or Applied Controls. Existing records acquire only the ability to link to an Issue when a user chooses to formalize remediation.
+- Existing Finding and Findings Assessment behavior, fields, statuses, APIs, and metrics remain unchanged during this phase.
+- Extending the respondent role (`BI-RL-ADE`) with Issue permissions applies to existing role assignments: external respondents who already hold the role for questionnaire work gain Issue visibility in their folders as soon as Issues exist there. This is intended — third-party material is segmented by enclave folders — and release notes must mention it.
+- Review the new relationships and the Comment exactly-one-parent constraint against PostgreSQL behavior, not only SQLite.
+
+An Issue created in phase 1 remains the same object when later audit-management capabilities are introduced. It may acquire additional links, but it is never recreated or silently migrated into another workflow.
+
+### 16.2 Later phase — audit management and Finding publication
+
+Audit Programmes, Engagements, and the Finding publication and validation mechanisms may be delivered in a later increment. At that point:
 
 - Keep `FindingsAssessment` and its existing records, APIs, and status values.
-- Do not infer or create Engagements for existing follow-ups.
+- Do not infer or create Engagements for existing Follow-ups or Compliance Assessments.
 - **Existing Findings migrate as drafts**, not as published: their current assertion fields become the single working draft revision, they remain freely editable, and immutability begins per Finding at its first explicit publish. No publication timestamps or historical assertions are invented.
-- **Finding status migration is purely additive:** every existing value keeps its code and meaning, including `--`, `resolved`, `closed`, and `deprecated`; `risk_accepted` is added. `--` remains the default drafting facility for a tentative, never-published Finding. `resolved` means remediation reported complete, while `closed` means verified formal closure. `deprecated` remains valid on existing rows and is hidden for new Findings. Historical metric buckets require no remapping.
-- `findings_assessment` becomes optional, and its delete behavior changes from CASCADE to **PROTECT**. Deleting a Findings Assessment that contains findings asks the user whether to delete the findings or detach and keep them; published findings default to detach (withdrawal is the retraction instrument, not container deletion). The API takes the equivalent explicit parameter; an unparameterized delete of a non-empty follow-up fails cleanly.
-- Preserve all current Finding follow-up metadata.
-- Do not automatically create Issues from existing Findings, Tasks, or Applied Controls.
-- Add `created_from`, originating Engagement, publication, revision, and Issue-link fields forward-compatibly. Existing `created_from` and originating Engagement values are empty.
-- New M2M and FK additions (ValidationFlow → finding revisions; Comment → remediation issue, including the rewrite of the exactly-one-parent constraint) must be reviewed for PostgreSQL behavior, not only SQLite.
-- Existing history remains authoritative for pre-migration changes.
+- **Finding status migration is purely additive:** every existing value keeps its code and meaning, including `--`, `resolved`, `closed`, and `deprecated`; `risk_accepted` is added. `--` remains the default drafting facility for a tentative, never-published Finding. `resolved` means remediation reported complete, while `closed` means verified formal closure. `deprecated` remains valid on existing rows and is hidden for new Findings. Historical metric buckets require no remapping, but metric definitions that classify statuses as dealt with (for example the unresolved-important exclusion set) must include `risk_accepted` alongside `mitigated`, `resolved`, `dismissed`, and `closed`.
+- `findings_assessment` becomes optional, and its delete behavior changes from CASCADE to **PROTECT**. Deleting a Findings Assessment that contains Findings asks the user whether to detach and keep them or delete them. Detach is the default. The frontend offers deletion only when it believes the user may delete every Finding, performs the ordinary Finding deletions sequentially, stops on the first failure, and deletes the Findings Assessment only after all succeed. There is no bulk-delete API or atomicity guarantee.
+- Preserve all current Finding follow-up metadata, folder assignments, and existing Remediation Issue links.
+- Add Finding `created_from`, originating Engagement, publication, and revision fields forward-compatibly. Existing `created_from` and originating Engagement values are empty.
+- Review the `ValidationSubmission` relationships to Finding Revisions and generated Validation Flows against PostgreSQL behavior, not only SQLite.
 
-## 16. Future work
+### 16.3 Migration invariants
+
+- Existing history remains authoritative for pre-migration changes.
+- No migration invents publication, approval, acceptance, commitment, or provenance history.
+- New links grant no access and trigger no lifecycle transition.
+- Every phase remains usable on its own; deploying Remediation Issues does not force deployment of Engagements.
+
+## 17. Future work
 
 - Bulk generation of draft Findings from non-compliant Requirement Assessments when an Engagement wraps a framework audit.
 - Backport of the publication/revision mechanism to other models (assessments, policies), retiring `is_locked`'s immutability role.
@@ -626,9 +709,9 @@ Terminology (decided):
 - API endpoints and event names.
 - Search, dashboard, and reporting roll-ups across independent lifecycles.
 
-## 17. Review status and residual risks
+## 18. Review status and residual risks
 
-This design was critically reviewed on 16 August 2026; all findings were resolved and the decisions are folded into the present version (respondent-role access, revision mechanism, validation layers, additive status evolution, drafts-first migration, terminology).
+This design was critically reviewed through 17 August 2026; the decisions are folded into the present version (Issue-first delivery, respondent-role access, revision mechanism, validation layers, additive status evolution, drafts-first migration, and terminology).
 
 Residual risks are interaction-design, not entity-structure:
 
@@ -637,7 +720,7 @@ Residual risks are interaction-design, not entity-structure:
 | Users confuse follow-up status, publication state, and Issue acceptance | Show them as clearly labeled independent dimensions; never synchronize them |
 | Issues duplicate comments or Tasks | Create Issues only for formalized remediation; reuse Comments and keep Tasks atomic |
 | Finding and Issue discussions fragment | Distinguish assertion discussion from remediation discussion; provide permission-aware combined activity views |
-| Validation inbox noise on large layers | One shared flow per layer avoids per-validator flow multiplication; waiting layers are not actionable before their prerequisites |
+| Validation inbox noise on large layers | Waiting layers are solicited only when actionable; publication readiness is clearly indicated while remaining validators may still respond until publication |
 | Findings Assessment aggregates unrelated sources | Treat category as broad classification and show each Finding's own provenance; keep one Finding in at most one Follow-up |
 
 The UI must make the escalation path obvious:
