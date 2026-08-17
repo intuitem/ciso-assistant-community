@@ -73,7 +73,7 @@ objects:
       ref_id: '4.1'
       name: Understanding the organization and its context
       description: Determine internal and external issues relevant to privacy, including
-        applicable privacy legislation.
+        applicable privacy legislation, and whether climate change is a relevant issue.
       implementation_groups:
       - clauses
     - urn: urn:intuitem:risk:req_node:iso27701-2025:4.2
@@ -83,7 +83,8 @@ objects:
       ref_id: '4.2'
       name: Understanding the needs and expectations of interested parties
       description: Identify interested parties and their privacy-related requirements,
-        including PII principals and regulators.
+        including PII principals and regulators; these can include requirements related
+        to climate change.
       implementation_groups:
       - clauses
     - urn: urn:intuitem:risk:req_node:iso27701-2025:4.3
