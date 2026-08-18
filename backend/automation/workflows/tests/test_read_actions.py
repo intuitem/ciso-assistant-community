@@ -515,11 +515,12 @@ class TestDeadlineSweepModels:
         output = read_output(instance)
         assert output["count"] == 1
         row = output["results"][0]
-        assert "name" not in row
         assert row["result"] == "non_compliant"
-        assert row["requirement_ref_id"] == "R1"
-        # display_short falls back to ref_id when the node has no name.
-        assert row["requirement_name"] == "R1"
+        # API-shaped identifiers: name is __str__, falling back to the
+        # requirement's ref_id when the node has no name.
+        assert row["name"] == "R1"
+        assert row["requirement"]["ref_id"] == "R1"
+        assert row["requirement"]["name"] is None
         assert row["compliance_assessment"]["name"] == "Audit"
 
 
@@ -664,7 +665,7 @@ class TestAssessableFilter:
         version = read_flow(domain, {"model": "requirement_assessment", "mode": "list"})
         output = read_output(start_instance(version))
         assert output["count"] == 1
-        assert output["results"][0]["requirement_ref_id"] == "1.1"
+        assert output["results"][0]["requirement"]["ref_id"] == "1.1"
 
 
 @pytest.mark.django_db

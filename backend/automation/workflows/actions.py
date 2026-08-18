@@ -438,12 +438,17 @@ READABLE_MODELS = {
             "compliance_assessment",
         ],
         # Output-only identifiers: a bare row is unusable without knowing
-        # which requirement of which audit it assesses. display_short, not
-        # .name: most shipped framework nodes are ref_id-only (name is null),
-        # and it's what __str__ and the API serializers render.
+        # which requirement of which audit it assesses. Same keys as
+        # RequirementAssessmentReadSerializer: "name" is __str__ (falls back
+        # to the requirement's ref_id — most shipped framework nodes are
+        # ref_id-only), "requirement" a subset of its nested node dict.
         "computed": {
-            "requirement_ref_id": lambda ra: ra.requirement.ref_id,
-            "requirement_name": lambda ra: ra.requirement.display_short,
+            "name": lambda ra: str(ra),
+            "requirement": lambda ra: {
+                "id": str(ra.requirement_id),
+                "ref_id": ra.requirement.ref_id,
+                "name": ra.requirement.name,
+            },
             # Subset of the API's FieldsRelatedField dict.
             "compliance_assessment": lambda ra: {
                 "id": str(ra.compliance_assessment_id),
