@@ -1830,6 +1830,7 @@
 	"errorLoadingData": "Fehler beim Laden der Daten",
 	"errorLoadingVulnerabilityData": "Fehler beim Laden der Schwachstellendaten",
 	"errorMaxPatAmountExceeded": "Maximale Anzahl persönlicher Tokens überschritten.",
+	"errorSsoRequiredForScimUsers": "SSO kann nicht deaktiviert werden, solange SCIM-verwaltete Benutzer ohne lokalen Zugriff existieren.",
 	"errorOccuredDuringImport": "Während des Imports ist ein Fehler aufgetreten.",
 	"errorRiskScenarioGraphMustNotContainCycles": "Das Risikoszenario-Diagramm darf keine Zyklen enthalten.",
 	"errorUpdatingObject": "Beim Aktualisieren des {object}-Objekts ist ein Fehler aufgetreten.",
@@ -3576,6 +3577,8 @@
 	"scimTokenWarning": "Kopieren Sie dieses Token jetzt. Aus Sicherheitsgründen wird es nicht erneut angezeigt.",
 	"scimTokenRevoked": "SCIM-Token widerrufen",
 	"scimTokenGenerationFailed": "SCIM-Token konnte nicht erzeugt werden",
+	"scimTokenRequiresSso": "SSO muss aktiviert sein, bevor ein SCIM-Token generiert werden kann.",
+	"scimTokenNameTooLong": "Der Name darf höchstens 255 Zeichen lang sein.",
 	"idpGroup": "IdP-Gruppe",
 	"idpGroups": "IdP-Gruppen",
 	"idpGroupsDescription": "IdP-Gruppenföderation aktivieren (SCIM-Bereitstellung, IdP-Gruppenzuordnungen und IdP-Gruppenmitgliedschaften von Benutzern)."
