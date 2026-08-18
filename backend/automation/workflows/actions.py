@@ -403,6 +403,10 @@ READABLE_MODELS = {
     },
     "requirement_assessment": {
         "model": RequirementAssessment,
+        # create_requirement_assessments seeds an RA row for EVERY node of
+        # the framework, section headers included; every platform aggregate
+        # excludes non-assessable rows, and so do reads.
+        "base_filter": Q(requirement__assessable=True),
         "fields": [
             "status",
             "result",
@@ -608,7 +612,8 @@ class ReadObjectsAction(BaseAction):
 
         queryset = (
             entry["model"]
-            .objects.filter(folder_id__in=_read_scope_folder_ids(instance.folder))
+            .objects.filter(entry.get("base_filter") or Q())
+            .filter(folder_id__in=_read_scope_folder_ids(instance.folder))
             .filter(id__in=authz.viewable_ids(run_identity(instance), entry["model"]))
             .filter(query)
             .order_by(order_by, "id")  # id tie-break keeps pagination stable

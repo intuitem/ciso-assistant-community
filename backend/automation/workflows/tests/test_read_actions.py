@@ -584,6 +584,52 @@ class TestRiskScenarioLevels:
 
 
 @pytest.mark.django_db
+class TestAssessableFilter:
+    def test_non_assessable_rows_are_excluded(self):
+        from core.models import (
+            ComplianceAssessment,
+            Framework,
+            Perimeter,
+            RequirementAssessment,
+            RequirementNode,
+        )
+
+        domain = make_domain("Domain assessable")
+        framework = Framework.objects.create(
+            name="FW", urn="urn:test:fw:hdr", folder=Folder.get_root_folder()
+        )
+        header = RequirementNode.objects.create(
+            name=None,
+            ref_id="1",
+            urn="urn:test:fw:hdr:1",
+            framework=framework,
+            assessable=False,
+            folder=Folder.get_root_folder(),
+        )
+        leaf = RequirementNode.objects.create(
+            name=None,
+            ref_id="1.1",
+            urn="urn:test:fw:hdr:1.1",
+            framework=framework,
+            assessable=True,
+            folder=Folder.get_root_folder(),
+        )
+        perimeter = Perimeter.objects.create(name="P", folder=domain)
+        audit = ComplianceAssessment.objects.create(
+            name="Audit", framework=framework, perimeter=perimeter, folder=domain
+        )
+        for requirement in (header, leaf):
+            RequirementAssessment.objects.create(
+                compliance_assessment=audit, requirement=requirement, folder=domain
+            )
+
+        version = read_flow(domain, {"model": "requirement_assessment", "mode": "list"})
+        output = read_output(start_instance(version))
+        assert output["count"] == 1
+        assert output["results"][0]["requirement_ref_id"] == "1.1"
+
+
+@pytest.mark.django_db
 class TestAssessmentScoping:
     def test_requirement_assessment_filterable_by_audit(self):
         from core.models import (
