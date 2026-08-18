@@ -16,7 +16,7 @@ import pandas as pd
 import structlog
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
-from django.db import IntegrityError, models
+from django.db import IntegrityError, models, transaction
 from django.db.models import Q
 from django.http import FileResponse, HttpRequest
 from django.utils import timezone
@@ -990,8 +990,9 @@ class RecordConsumer[Context = None](ABC):
             )
             if serializer.is_valid():
                 try:
-                    instance = serializer.save()
-                    self.after_create(instance)
+                    with transaction.atomic():
+                        instance = serializer.save()
+                        self.after_create(instance)
                     results.add_created()
                 except Exception as e:
                     results.add_error(Error(record=record, error=str(e)))
@@ -2569,6 +2570,8 @@ class FolderRecordConsumer(RecordConsumer):
             "create_iam_groups": ["iam_group"],
         }
     )
+    IAM_GROUP_TRUE_VALUES: ClassVar[frozenset[str]] = frozenset({"yes", "true", "1"})
+    IAM_GROUP_FALSE_VALUES: ClassVar[frozenset[str]] = frozenset({"no", "false", "0"})
 
     def create_context(self):
         return None, None
@@ -2614,9 +2617,11 @@ class FolderRecordConsumer(RecordConsumer):
             "parent_folder": parent_folder_id,
         }
 
-        iam_group = str(record.get("iam_group", "")).strip()
-        if iam_group:
+        iam_group = str(record.get("iam_group", "")).strip().lower()
+        if iam_group in self.IAM_GROUP_TRUE_VALUES:
             data["create_iam_groups"] = True
+        elif iam_group in self.IAM_GROUP_FALSE_VALUES:
+            data["create_iam_groups"] = False
 
         return data, None
 

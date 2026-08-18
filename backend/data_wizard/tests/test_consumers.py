@@ -25,7 +25,7 @@ from core.models import (
     Threat,
     Vulnerability,
 )
-from iam.models import Folder, User
+from iam.models import Folder, User, UserGroup
 
 from data_wizard.views import (
     AppliedControlRecordConsumer,
@@ -999,10 +999,13 @@ class TestFolderConsumer:
         assert error is None
         assert record_data["parent_folder"] == domain_folder.id
 
-    def test_iam_group_column_sets_create_iam_groups(self, base_context, root_folder):
+    @pytest.mark.parametrize("value", ["yes", "true", "1", "YES", "True"])
+    def test_iam_group_column_sets_create_iam_groups(
+        self, base_context, root_folder, value
+    ):
         consumer = FolderRecordConsumer(base_context)
         record_data, error = consumer.prepare_create(
-            {"name": "TopLevel", "iam_group": "x"}, None
+            {"name": "TopLevel", "iam_group": value}, None
         )
         assert error is None
         assert record_data["create_iam_groups"] is True
@@ -1016,6 +1019,72 @@ class TestFolderConsumer:
         )
         assert error is None
         assert "create_iam_groups" not in record_data
+
+    def test_unrecognized_iam_group_value_omits_create_iam_groups(
+        self, base_context, root_folder
+    ):
+        consumer = FolderRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "TopLevel", "iam_group": "x"}, None
+        )
+        assert error is None
+        assert "create_iam_groups" not in record_data
+
+    @pytest.mark.parametrize("value", ["no", "false", "0", "NO", "False"])
+    def test_falsy_iam_group_column_disables_create_iam_groups(
+        self, base_context, root_folder, value
+    ):
+        consumer = FolderRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "TopLevel", "iam_group": value}, None
+        )
+        assert error is None
+        assert record_data["create_iam_groups"] is False
+
+    def test_disable_removes_iam_groups_without_assigned_users(
+        self, update_context, root_folder
+    ):
+        existing = Folder.objects.create(
+            name="ToDisable",
+            parent_folder=root_folder,
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=True,
+        )
+        Folder.create_default_ug_and_ra(existing)
+        assert UserGroup.objects.filter(folder=existing).exists()
+
+        result = _run(
+            FolderRecordConsumer,
+            update_context,
+            [{"name": "ToDisable", "iam_group": "no"}],
+        )
+        assert result.updated == 1
+        existing.refresh_from_db()
+        assert existing.create_iam_groups is False
+        assert not UserGroup.objects.filter(folder=existing).exists()
+
+    def test_disable_blocked_when_users_assigned(
+        self, update_context, root_folder, admin_user
+    ):
+        existing = Folder.objects.create(
+            name="Locked",
+            parent_folder=root_folder,
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=True,
+        )
+        Folder.create_default_ug_and_ra(existing)
+        ug = UserGroup.objects.filter(folder=existing, builtin=True).first()
+        admin_user.user_groups.add(ug)
+
+        result = _run(
+            FolderRecordConsumer,
+            update_context,
+            [{"name": "Locked", "iam_group": "no"}],
+        )
+        assert result.failed == 1
+        existing.refresh_from_db()
+        assert existing.create_iam_groups is True
+        assert UserGroup.objects.filter(folder=existing).exists()
 
     def test_find_existing_by_name_and_parent(self, base_context, domain_folder):
         existing = Folder.objects.create(
