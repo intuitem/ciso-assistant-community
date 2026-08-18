@@ -2922,6 +2922,23 @@ export const listViewFields = {
 			is_active: USER_IS_ACTIVE_FILTER
 		}
 	},
+	'remediation-issues': {
+		head: ['ref_id', 'name', 'status', 'priority', 'labels', 'domain'],
+		body: ['ref_id', 'name', 'status', 'priority', 'filtering_labels', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
+	'commitment-versions': {
+		head: ['version', 'commitment', 'dueDate', 'leadAcceptance', 'respondentAcceptance'],
+		body: [
+			'version_number',
+			'text',
+			'due_date',
+			'lead_acceptance',
+			'respondent_acceptance'
+		]
+	},
 	'organisation-issues': {
 		head: [
 			'refId',

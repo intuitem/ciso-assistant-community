@@ -5445,6 +5445,7 @@ class Comment(AbstractBaseModel, FolderMixin):
         "risk_scenario",
         "applied_control",
         "finding",
+        "remediation_issue",
     )
 
     body = models.TextField(verbose_name=_("Body"))
@@ -5488,6 +5489,13 @@ class Comment(AbstractBaseModel, FolderMixin):
         blank=True,
         related_name="comments",
     )
+    remediation_issue = models.ForeignKey(
+        "issues.RemediationIssue",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
 
     class Meta:
         ordering = ["created_at"]
@@ -5499,24 +5507,35 @@ class Comment(AbstractBaseModel, FolderMixin):
                         risk_scenario__isnull=True,
                         applied_control__isnull=True,
                         finding__isnull=True,
+                        remediation_issue__isnull=True,
                     )
                     | Q(
                         requirement_assessment__isnull=True,
                         risk_scenario__isnull=False,
                         applied_control__isnull=True,
                         finding__isnull=True,
+                        remediation_issue__isnull=True,
                     )
                     | Q(
                         requirement_assessment__isnull=True,
                         risk_scenario__isnull=True,
                         applied_control__isnull=False,
                         finding__isnull=True,
+                        remediation_issue__isnull=True,
                     )
                     | Q(
                         requirement_assessment__isnull=True,
                         risk_scenario__isnull=True,
                         applied_control__isnull=True,
                         finding__isnull=False,
+                        remediation_issue__isnull=True,
+                    )
+                    | Q(
+                        requirement_assessment__isnull=True,
+                        risk_scenario__isnull=True,
+                        applied_control__isnull=True,
+                        finding__isnull=True,
+                        remediation_issue__isnull=False,
                     )
                 ),
                 name="comment_exactly_one_parent",
@@ -5530,6 +5549,7 @@ class Comment(AbstractBaseModel, FolderMixin):
             or self.risk_scenario
             or self.applied_control
             or self.finding
+            or self.remediation_issue
         )
 
     def save(self, *args, **kwargs):
@@ -10121,6 +10141,14 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         verbose_name="Findings",
         blank=True,
         help_text="Findings related to the task",
+        related_name="task_templates",
+    )
+
+    remediation_issues = models.ManyToManyField(
+        "issues.RemediationIssue",
+        verbose_name="Remediation issues",
+        blank=True,
+        help_text="Remediation issues related to the task",
         related_name="task_templates",
     )
 

@@ -459,6 +459,7 @@ INSTALLED_APPS = [
     "ebios_rm",
     "tprm",
     "privacy",
+    "issues",
     "resilience",
     "automation",
     "crq",

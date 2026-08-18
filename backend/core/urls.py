@@ -186,6 +186,7 @@ urlpatterns = [
     path("chat/", include("chat.urls")),
     path("ebios-rm/", include("ebios_rm.urls")),
     path("", include("doc_management.urls")),
+    path("", include("issues.urls")),
     path("privacy/", include("privacy.urls")),
     path("resilience/", include("resilience.urls")),
     path("automation/", include("automation.urls")),

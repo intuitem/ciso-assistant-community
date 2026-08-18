@@ -41,6 +41,7 @@
 	import VulnerabilitySlaSettingForm from './ModelForm/VulnerabilitySlaSettingForm.svelte';
 	import SecIntelFeedsSettingForm from './ModelForm/SecIntelFeedsSettingForm.svelte';
 	import ProcessingForm from './ModelForm/ProcessingForm.svelte';
+	import RemediationIssueForm from './ModelForm/RemediationIssueForm.svelte';
 	import PurposeForm from './ModelForm/PurposeForm.svelte';
 	import PersonalDataForm from './ModelForm/PersonalDataForm.svelte';
 	import DataSubjectForm from './ModelForm/DataSubjectForm.svelte';
@@ -721,6 +722,8 @@
 			/>
 		{:else if URLModel === 'processings'}
 			<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+		{:else if URLModel === 'remediation-issues'}
+			<RemediationIssueForm {form} {model} {cacheLocks} {formDataCache} {...rest} />
 		{:else if URLModel === 'purposes'}
 			<PurposeForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} {...rest} />
 		{:else if URLModel === 'personal-data'}

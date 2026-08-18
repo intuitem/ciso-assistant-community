@@ -1295,6 +1295,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'requirement_assessments',
+				urlModel: 'remediation-issues'
+			}
 		]
 	},
 	'stored-libraries': {
@@ -2449,6 +2455,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'findings',
 				urlModel: 'task-templates'
+			},
+			{
+				field: 'findings',
+				urlModel: 'remediation-issues'
 			}
 		],
 		selectFields: [
@@ -2782,6 +2792,69 @@ export const URL_MODEL_MAP: ModelMap = {
 			}
 		],
 		filters: [{ field: 'folder' }]
+	},
+	'remediation-issues': {
+		name: 'remediationissue',
+		localName: 'remediationIssue',
+		localNamePlural: 'remediationIssues',
+		verboseName: 'Remediation issue',
+		verboseNamePlural: 'Remediation issues',
+		selectFields: [{ field: 'status' }, { field: 'priority', valueType: 'number' }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'lead_representatives', urlModel: 'actors' },
+			{ field: 'respondent_representatives', urlModel: 'actors' },
+			{ field: 'lead_contributors', urlModel: 'actors' },
+			{ field: 'respondent_contributors', urlModel: 'actors' },
+			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' },
+			{ field: 'findings', urlModel: 'findings' },
+			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'issue',
+				urlModel: 'commitment-versions',
+				disableCreate: true,
+				disableDelete: true,
+				disableEdit: true
+			}
+		],
+		detailViewFields: [
+			{ field: 'folder' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'status' },
+			{ field: 'priority' },
+			{ field: 'acceptance_state' },
+			{ field: 'lead_representatives' },
+			{ field: 'respondent_representatives' },
+			{ field: 'lead_contributors' },
+			{ field: 'respondent_contributors' },
+			{ field: 'requirement_assessments' },
+			{ field: 'findings' },
+			{ field: 'applied_controls' },
+			{ field: 'evidences' },
+			{ field: 'resolution' },
+			{ field: 'closure_justification' },
+			{ field: 'cancellation_reason' },
+			{ field: 'closed_at', type: 'datetime' },
+			{ field: 'filtering_labels' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
+		filters: [{ field: 'folder' }, { field: 'status' }, { field: 'priority' }],
+		markdownFields: ['closure_justification']
+	},
+	'commitment-versions': {
+		name: 'commitmentversion',
+		localName: 'commitmentVersion',
+		localNamePlural: 'commitmentVersions',
+		verboseName: 'Commitment version',
+		verboseNamePlural: 'Commitment versions',
+		foreignKeyFields: [{ field: 'issue', urlModel: 'remediation-issues' }]
 	},
 	'quantitative-risk-studies': {
 		name: 'quantitativeriskstudy',

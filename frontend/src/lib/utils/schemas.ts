@@ -1397,6 +1397,26 @@ export const SecurityExceptionSchema = z.object({
 	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
+export const RemediationIssueSchema = z.object({
+	name: nameSchema,
+	// a self-contained problem context is required (participants may not have
+	// access to the linked sources)
+	description: z.string().min(1),
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	status: z.string().optional().default('planned'),
+	priority: z.number().optional().nullable(),
+	lead_representatives: z.string().uuid().optional().array().optional(),
+	respondent_representatives: z.string().uuid().optional().array().optional(),
+	lead_contributors: z.string().uuid().optional().array().optional(),
+	respondent_contributors: z.string().uuid().optional().array().optional(),
+	requirement_assessments: z.string().uuid().optional().array().optional(),
+	findings: z.string().uuid().optional().array().optional(),
+	evidences: z.string().uuid().optional().array().optional(),
+	applied_controls: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional()
+});
+
 export const FindingSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional(),
@@ -2096,6 +2116,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'security-exceptions': SecurityExceptionSchema,
 	findings: FindingSchema,
 	'findings-assessments': FindingsAssessmentSchema,
+	'remediation-issues': RemediationIssueSchema,
 	'posture-assessments': PostureAssessmentSchema,
 	incidents: IncidentSchema,
 	'timeline-entries': TimelineEntrySchema,

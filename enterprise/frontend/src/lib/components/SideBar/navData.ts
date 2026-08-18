@@ -315,6 +315,12 @@ export const navData = {
 					name: 'followUp',
 					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/findings-assessments'
+				},
+				{
+					name: 'remediationIssues',
+					fa_icon: 'fa-solid fa-handshake',
+					href: '/remediation-issues',
+					permissions: ['view_remediationissue']
 				}
 			]
 		},

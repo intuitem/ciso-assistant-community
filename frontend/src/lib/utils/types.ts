@@ -102,6 +102,8 @@ export const URL_MODEL = [
 	'security-exceptions',
 	'findings',
 	'findings-assessments',
+	'remediation-issues',
+	'commitment-versions',
 	'posture-assessments',
 	// privacy,
 	'processings',
