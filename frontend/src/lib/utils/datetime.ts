@@ -1,4 +1,5 @@
 import { page } from '$app/state';
+import { m } from '$paraglide/messages';
 
 export type DateFormatPreference =
 	'auto' | 'iso' | 'ddmmyyyy' | 'mmddyyyy' | 'long_dmy' | 'long_mdy';
@@ -97,6 +98,22 @@ export function formatDateOrDateTime(isoString: string | null, locale = 'en'): s
 	// (no offset → parsed as local per the ES spec) preserves the calendar date.
 	const date = new Date(hasTime ? isoString : `${isoString}T00:00:00`);
 	return formatDate(date, hasTime, locale);
+}
+
+/**
+ * Render an elapsed duration ("3 days ago"), falling back to an absolute date
+ * beyond a month.
+ */
+export function timeAgo(isoString: string, locale = 'en'): string {
+	const seconds = Math.floor((Date.now() - new Date(isoString).getTime()) / 1000);
+	if (seconds < 60) return m.justNow();
+	const minutes = Math.floor(seconds / 60);
+	if (minutes < 60) return m.minutesAgo({ count: String(minutes) });
+	const hours = Math.floor(minutes / 60);
+	if (hours < 24) return m.hoursAgo({ count: String(hours) });
+	const days = Math.floor(hours / 24);
+	if (days < 30) return m.daysAgo({ count: String(days) });
+	return formatDate(new Date(isoString), false, locale);
 }
 
 /**

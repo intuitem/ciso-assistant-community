@@ -63,9 +63,8 @@ def _validate_accessible_folders(request, value):
     if not request or not hasattr(request, "user"):
         raise serializers.ValidationError("Request context with user is required.")
     user = getattr(request, "user")
-    (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, Folder
-    )
+    viewable_folders_ids = RoleAssignment.get_viewable_object_ids(user, Folder)
+
     if not all(folder.id in viewable_folders_ids for folder in value):
         raise serializers.ValidationError(
             "One or more target folders are not accessible by the user."

@@ -1,4 +1,5 @@
-@import 'tailwindcss';
+/* Restrict the Tailwind source scan to src/ (the default auto-detection can crawl the whole project tree, which makes the app.css transform take minutes in the enterprise .build overlay). */
+@import 'tailwindcss' source('.');
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 @import '@skeletonlabs/skeleton';

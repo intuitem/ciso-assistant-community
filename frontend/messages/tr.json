@@ -892,6 +892,7 @@
 	"assessmentMode": "Değerlendirme modu",
 	"createAudit": "Denetim oluştur",
 	"createAuditHelpText": "Kuruluş değerlendirmesiyle birlikte bir denetim oluştur",
+	"thirdPartiesImportHelpText": "Çok sayfalı Excel şablonundan üçüncü taraflarınızın kuruluşlarını, temsilcilerini, çözümlerini, kuruluş değerlendirmelerini ve sözleşmelerini içe aktarın",
 	"questionnaire": "Anket",
 	"conclusion": "Sonuç",
 	"blocker": "Engelleyici",

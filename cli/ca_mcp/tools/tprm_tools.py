@@ -1,6 +1,7 @@
 """TPRM (Third-Party Risk Management) MCP tools for CISO Assistant"""
 
 from ..client import (
+    found_line,
     make_get_request,
     make_post_request,
     make_patch_request,
@@ -67,7 +68,7 @@ async def get_entities(
         if not entities:
             return empty_response("entities", filters)
 
-        result = f"Found {len(entities)} entities"
+        result = found_line(entities, "entities")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -146,7 +147,7 @@ async def get_entity_assessments(
         if not assessments:
             return empty_response("entity assessments", filters)
 
-        result = f"Found {len(assessments)} entity assessments"
+        result = found_line(assessments, "entity assessments")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -204,7 +205,7 @@ async def get_representatives(entity: str = None):
         if not representatives:
             return empty_response("representatives", filters)
 
-        result = f"Found {len(representatives)} representatives"
+        result = found_line(representatives, "representatives")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -275,7 +276,7 @@ async def get_solutions(
         if not solutions:
             return empty_response("solutions", filters)
 
-        result = f"Found {len(solutions)} solutions"
+        result = found_line(solutions, "solutions")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -352,7 +353,7 @@ async def get_contracts(
         if not contracts:
             return empty_response("contracts", filters)
 
-        result = f"Found {len(contracts)} contracts"
+        result = found_line(contracts, "contracts")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
