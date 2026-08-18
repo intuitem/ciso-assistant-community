@@ -1,17 +1,24 @@
 """Library management MCP tools for CISO Assistant"""
 
-from ..client import make_get_request, make_post_request, fetch_all_results
+from ..client import make_post_request, fetch_all_results, found_line
 
 
 async def get_stored_libraries(
     object_type: str = None,
     provider: str = None,
+    search: str = None,
+    offset: int = None,
 ):
     """List available libraries (frameworks) for import. Use URN/ID with import_stored_library()
+
+    There are several hundred stored libraries, more than one response can hold.
+    Prefer `search` to find one by name; use `offset` to walk the whole catalogue.
 
     Args:
         object_type: Object type (e.g. "framework", "risk_matrix")
         provider: Provider name
+        search: Free-text match on name, description, URN or ref_id
+        offset: Row to start from, for paging past the first response
     """
     try:
         params = {}
@@ -19,6 +26,10 @@ async def get_stored_libraries(
             params["object_type"] = object_type
         if provider:
             params["provider"] = provider
+        if search:
+            params["search"] = search
+        if offset:
+            params["offset"] = offset
 
         # Fetch all stored libraries (with pagination)
         libraries, error = fetch_all_results("/stored-libraries/", params=params)
@@ -28,7 +39,11 @@ async def get_stored_libraries(
         if not libraries:
             return "No stored libraries found"
 
-        result = f"Found {len(libraries)} stored libraries\n\n"
+        # truncation here hides the URN import_stored_library needs
+        result = (
+            found_line(libraries, "stored libraries", paginated=True, offset=offset)
+            + "\n\n"
+        )
         result += "|URN|Name|Version|Provider|\n"
         result += "|---|---|---|---|\n"
 
@@ -45,18 +60,32 @@ async def get_stored_libraries(
         return f"Error in get_stored_libraries: {str(e)}"
 
 
-async def get_loaded_libraries():
-    """List loaded/imported libraries (frameworks) activated in the system"""
+async def get_loaded_libraries(search: str = None, offset: int = None):
+    """List loaded/imported libraries (frameworks) activated in the system
+
+    Args:
+        search: Free-text match on name, description, URN or ref_id
+        offset: Row to start from, for paging past the first response
+    """
     try:
+        params = {}
+        if search:
+            params["search"] = search
+        if offset:
+            params["offset"] = offset
+
         # Fetch all loaded libraries (with pagination)
-        libraries, error = fetch_all_results("/loaded-libraries/")
+        libraries, error = fetch_all_results("/loaded-libraries/", params=params)
         if error:
             return error
 
         if not libraries:
             return "No loaded libraries found"
 
-        result = f"Found {len(libraries)} loaded libraries\n\n"
+        result = (
+            found_line(libraries, "loaded libraries", paginated=True, offset=offset)
+            + "\n\n"
+        )
         result += "|URN|Name|Version|Provider|\n"
         result += "|---|---|---|---|\n"
 

@@ -812,6 +812,7 @@
 	"assessmentMode": "Bewertungsmodus",
 	"createAudit": "Audit erstellen",
 	"createAuditHelpText": "Erstellen Sie ein Audit parallel zur Entitätsbewertung",
+	"thirdPartiesImportHelpText": "Importieren Sie Entitäten, Vertreter, Lösungen, Entitätsbewertungen und Verträge Ihrer Drittparteien aus der mehrseitigen Excel-Vorlage",
 	"questionnaire": "Fragebogen",
 	"conclusion": "Fazit",
 	"blocker": "Blocker",

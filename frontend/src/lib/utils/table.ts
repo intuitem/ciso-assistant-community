@@ -1579,8 +1579,8 @@ export const listViewFields = {
 			'updated_at'
 		],
 		optionalFields: {
-			head: ['createdAt'],
-			body: ['created_at']
+			head: ['authors', 'createdAt'],
+			body: ['authors', 'created_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2799,8 +2799,8 @@ export const listViewFields = {
 			'perimeter'
 		],
 		optionalFields: {
-			head: ['filteringLabels', 'reportedAt'],
-			body: ['filtering_labels', 'reported_at']
+			head: ['authors', 'filteringLabels', 'reportedAt'],
+			body: ['authors', 'filtering_labels', 'reported_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
