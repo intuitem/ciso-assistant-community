@@ -856,6 +856,7 @@
 	"assessmentMode": "Vurderingstilstand",
 	"createAudit": "Opret revision",
 	"createAuditHelpText": "Opret en revision sammen med enhedsvurderingen",
+	"thirdPartiesImportHelpText": "Importér enheder, repræsentanter, løsninger, enhedsvurderinger og kontrakter for dine tredjeparter fra Excel-skabelonen med flere ark",
 	"questionnaire": "Spørgeskema",
 	"conclusion": "Konklusion",
 	"blocker": "Blokering",

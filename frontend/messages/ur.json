@@ -843,6 +843,7 @@
 	"assessmentMode": "تشخیص موڈ",
 	"createAudit": "آڈٹ بنائیں",
 	"createAuditHelpText": "ہستی کی تشخیص کے ساتھ ساتھ ایک آڈٹ بنائیں",
+	"thirdPartiesImportHelpText": "ملٹی شیٹ ایکسل ٹیمپلیٹ سے اپنے تھرڈ پارٹیز کے اداروں، نمائندوں، حل، ہستی کے جائزوں اور معاہدوں کو درآمد کریں",
 	"questionnaire": "سوالنامہ",
 	"conclusion": "نتیجہ",
 	"blocker": "بلاکر",

@@ -2634,7 +2634,7 @@
 	"noAssociatedObjects": "V této kolekci nejsou žádné přidružené objekty",
 	"entitiesGraph": "Ekosystém subjektů",
 	"thirdPartyDescription": "Správa subjektů třetích stran a jejich zástupců, smluv, řešení a hodnocení.",
-	"thirdPartiesImportHelpText": "Importujte subjekty, řešení a smlouvy vašich třetích stran z vícestránkové šablony Excel.",
+	"thirdPartiesImportHelpText": "Importujte subjekty, zástupce, řešení, hodnocení entit a smlouvy vašich třetích stran z vícestránkové šablony Excel.",
 	"defaultCriticality": "Výchozí kritičnost",
 	"tpSolutions": "Řešení třetích stran",
 	"beneficiaryEntity": "Příjemce",
