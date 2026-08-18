@@ -157,81 +157,47 @@ class TestSCIMOwnershipInvariant:
         assert resp.status_code == 200
         adopted = User.objects.get(email="joiner@tests.com")
         assert adopted.is_scim_managed is True
-        assert adopted.scim_external_id is None
+        assert adopted.scim_external_id == "ext-99"
 
-    def test_adoption_by_email_cannot_bootstrap_its_own_trust_anchor(
+    def test_adopted_account_can_have_its_email_changed_by_scim(
         self, enable_idp_groups
     ):
-        """A second call quoting the externalId from the first adoption must
-        not be treated as trusted — that externalId was never persisted."""
+        """SCIM may freely redirect an adopted account's email — on the same
+        request or a later one — because is_local closes the actual
+        exploitation surface (local login / password-reset) regardless."""
         User.objects.create_user("joiner2@tests.com", is_published=True)
         client = _scim_client()
         first = client.post(
             USERS_URL,
             data={
                 "userName": "joiner2@tests.com",
-                "externalId": "attacker-chosen",
-                "emails": [{"value": "attacker@evil.test", "primary": True}],
+                "emails": [{"value": "new-address@tests.com", "primary": True}],
             },
             format="json",
         )
         assert first.status_code == 200
         user = User.objects.get(id=json.loads(first.content)["id"])
-        assert user.email == "joiner2@tests.com"  # email untouched
-        assert user.scim_external_id is None
+        assert user.email == "new-address@tests.com"
 
-        second = client.post(
-            USERS_URL,
-            data={
-                "userName": "joiner2@tests.com",
-                "externalId": "attacker-chosen",
-                "emails": [{"value": "attacker@evil.test", "primary": True}],
-            },
-            format="json",
-        )
-        assert second.status_code == 200
-        user.refresh_from_db()
-        assert user.email == "joiner2@tests.com"
-
-    def test_update_cannot_change_email_without_prior_trust(self, enable_idp_groups):
-        """A PUT right after an email-matched adoption must not be able to
-        do what the adopting POST itself was blocked from doing."""
+    def test_adopted_account_loses_local_login_regardless_of_email_changes(
+        self, enable_idp_groups
+    ):
+        """The real security boundary: once is_scim_managed, is_local is
+        False (unless keep_local_login), so no email SCIM puts on the
+        account ever re-opens local password login or password-reset."""
         User.objects.create_user("joiner3@tests.com", is_published=True)
-        client = _scim_client()
-        created = client.post(
-            USERS_URL, data={"userName": "joiner3@tests.com"}, format="json"
-        )
-        assert created.status_code == 200
-        uid = json.loads(created.content)["id"]
-
-        updated = client.put(
-            f"{USERS_URL}/{uid}",
+        resp = _scim_client().post(
+            USERS_URL,
             data={
                 "userName": "joiner3@tests.com",
                 "emails": [{"value": "attacker@evil.test", "primary": True}],
             },
             format="json",
         )
-        assert updated.status_code == 200
-        user = User.objects.get(id=uid)
-        assert user.email == "joiner3@tests.com"
-
-    def test_update_can_change_email_once_trust_is_established(self, enable_idp_groups):
-        """Once an account genuinely carries a scim_external_id from a prior
-        sync, later syncs may update its email normally."""
-        user = _scim_user("trusted@tests.com", "ext-trusted")
-        resp = _scim_client().put(
-            f"{USERS_URL}/{user.id}",
-            data={
-                "userName": "trusted@tests.com",
-                "externalId": "ext-trusted",
-                "emails": [{"value": "trusted-new@tests.com", "primary": True}],
-            },
-            format="json",
-        )
         assert resp.status_code == 200
-        user.refresh_from_db()
-        assert user.email == "trusted-new@tests.com"
+        user = User.objects.get(id=json.loads(resp.content)["id"])
+        assert user.email == "attacker@evil.test"
+        assert user.is_local is False
 
     def test_cannot_patch_a_non_scim_user(self, enable_idp_groups):
         local = User.objects.create_user("local@tests.com", is_published=True)
