@@ -269,7 +269,7 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         settings_object = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
 
-        if validated_data.get("is_enabled") is False:
+        if not validated_data.get("is_enabled", False):
             has_scim_users_without_local_fallback = User.objects.filter(
                 is_scim_managed=True, keep_local_login=False
             ).exists()
