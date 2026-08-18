@@ -732,6 +732,7 @@ class TestAssessmentScoping:
         row = output["results"][0]
         # Same nested shape as the API's FieldsRelatedField.
         assert row["compliance_assessment"] == {
+            "str": str(audits[0]),
             "id": str(audits[0].id),
             "name": "Audit 0",
         }

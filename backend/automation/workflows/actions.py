@@ -451,6 +451,7 @@ READABLE_MODELS = {
             },
             # Subset of the API's FieldsRelatedField dict.
             "compliance_assessment": lambda ra: {
+                "str": str(ra.compliance_assessment),
                 "id": str(ra.compliance_assessment_id),
                 "name": ra.compliance_assessment.name,
             },
@@ -485,6 +486,7 @@ READABLE_MODELS = {
             "residual_level": lambda s: s.get_residual_risk(),
             # Subset of the API's FieldsRelatedField dict.
             "risk_assessment": lambda s: {
+                "str": str(s.risk_assessment),
                 "id": str(s.risk_assessment_id),
                 "name": s.risk_assessment.name,
             },
