@@ -352,9 +352,7 @@ class SCIMUserViewSet(ViewSet):
         except json.JSONDecodeError, ValueError:
             return _scim_error_response("Invalid JSON body", 400)
         allow_email_update = bool(user.scim_external_id)
-        _update_user_from_scim_data(
-            user, data, allow_email_update=allow_email_update
-        )
+        _update_user_from_scim_data(user, data, allow_email_update=allow_email_update)
         err = _save_user_or_scim_error(user)
         if err:
             return err
