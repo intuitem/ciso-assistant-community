@@ -600,6 +600,30 @@ class TestRiskScenarioLevels:
 
 
 @pytest.mark.django_db
+class TestApiShapeParity:
+    def test_enum_fields_render_display_labels_but_filter_on_raw_values(self):
+        domain = make_domain("Domain enum labels")
+        Incident.objects.create(name="Breach", folder=domain, status="new", severity=1)
+        Incident.objects.create(name="Old", folder=domain, status="closed", severity=5)
+        version = read_flow(
+            domain,
+            {
+                "model": "incident",
+                "mode": "first",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [{"field": "status", "op": "eq", "value": "new"}],
+                },
+            },
+        )
+        obj = read_output(start_instance(version))["object"]
+        # Same shape as IncidentReadSerializer: display labels out, raw in.
+        assert obj["name"] == "Breach"
+        assert obj["status"] == "New"
+        assert obj["severity"] == "Critical"
+
+
+@pytest.mark.django_db
 class TestAssessableFilter:
     def test_non_assessable_rows_are_excluded(self):
         from core.models import (

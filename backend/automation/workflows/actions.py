@@ -304,6 +304,11 @@ class CreateObjectAction(BaseAction):
 # both the serialized output AND the filter/order whitelist — no "__" paths,
 # no relations, so filters cannot tunnel into other objects. FK columns are
 # listed by attname (*_id): the raw id value, still no join.
+#
+# Computed output entries may shadow a listed column to reshape its output
+# to the API read serializer's shape (display labels, matrix cells, nested
+# FK dicts) so workflow rows read like API responses; the column name stays
+# the filter/order surface, comparing on the raw stored value.
 BASE_READ_FIELDS = ["id", "name", "created_at", "updated_at"]
 
 
@@ -340,26 +345,35 @@ READABLE_MODELS = {
             "priority",
             "link",
         ],
+        "computed": {"priority": lambda o: o.get_priority_display()},
     },
     "evidence": {
         "model": Evidence,
         "fields": ["description", "status"],
+        "computed": {"status": lambda o: o.get_status_display()},
     },
     "incident": {
         "model": Incident,
         "fields": ["description", "ref_id", "status", "severity", "link"],
+        "computed": {
+            "status": lambda o: o.get_status_display(),
+            "severity": lambda o: o.get_severity_display(),
+        },
     },
     "asset": {
         "model": Asset,
         "fields": ["description", "ref_id", "type", "reference_link"],
+        "computed": {"type": lambda o: o.get_type_display()},
     },
     "vulnerability": {
         "model": Vulnerability,
         "fields": ["description", "ref_id", "status", "severity", "eta", "due_date"],
+        "computed": {"severity": lambda o: o.get_severity_display()},
     },
     "security_exception": {
         "model": SecurityException,
         "fields": ["description", "ref_id", "status", "severity", "expiration_date"],
+        "computed": {"severity": lambda o: o.get_severity_display()},
     },
     "entity": {
         "model": Entity,
@@ -380,6 +394,10 @@ READABLE_MODELS = {
             "due_date",
             "priority",
         ],
+        "computed": {
+            "severity": lambda o: o.get_severity_display(),
+            "priority": lambda o: o.get_priority_display(),
+        },
     },
     "compliance_assessment": {
         "model": ComplianceAssessment,
@@ -462,6 +480,7 @@ READABLE_MODELS = {
     "risk_acceptance": {
         "model": RiskAcceptance,
         "fields": ["description", "state", "expiry_date", "justification"],
+        "computed": {"state": lambda o: o.get_state_display()},
     },
     "validation_flow": {
         "model": ValidationFlow,
