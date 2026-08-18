@@ -443,7 +443,7 @@ READABLE_MODELS = {
         # to the requirement's ref_id — most shipped framework nodes are
         # ref_id-only), "requirement" a subset of its nested node dict.
         "computed": {
-            "name": lambda ra: str(ra),
+            "name": str,
             "requirement": lambda ra: {
                 "id": str(ra.requirement_id),
                 "ref_id": ra.requirement.ref_id,
@@ -502,7 +502,7 @@ READABLE_MODELS = {
         "model": ValidationFlow,
         "fields": ["ref_id", "status", "validation_deadline"],
         # The API's display key for this nameless model.
-        "computed": {"str": lambda v: str(v)},
+        "computed": {"str": str},
     },
 }
 
