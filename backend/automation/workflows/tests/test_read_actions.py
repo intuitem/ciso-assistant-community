@@ -389,10 +389,8 @@ class TestRegistryIntegrity:
         from automation.workflows.actions import READABLE_MODELS, _read_fields
 
         for key, entry in READABLE_MODELS.items():
-            concrete = entry["model"]._meta.concrete_fields
-            # FK columns are whitelisted by attname (*_id).
-            columns = {f.name for f in concrete} | {f.attname for f in concrete}
-            assert "folder" in {f.name for f in concrete}, key
+            columns = {f.name for f in entry["model"]._meta.concrete_fields}
+            assert "folder" in columns, key
             for field in _read_fields(entry):
                 assert field in columns, f"{key}.{field}"
 
@@ -522,7 +520,7 @@ class TestDeadlineSweepModels:
         assert row["requirement_ref_id"] == "R1"
         # display_short falls back to ref_id when the node has no name.
         assert row["requirement_name"] == "R1"
-        assert row["compliance_assessment_name"] == "Audit"
+        assert row["compliance_assessment"]["name"] == "Audit"
 
 
 def make_scenarios(domain):
@@ -718,7 +716,7 @@ class TestAssessmentScoping:
                     "operator": "and",
                     "conditions": [
                         {
-                            "field": "compliance_assessment_id",
+                            "field": "compliance_assessment",
                             "op": "eq",
                             "value": str(audits[0].id),
                         }
@@ -729,8 +727,11 @@ class TestAssessmentScoping:
         output = read_output(start_instance(version))
         assert output["count"] == 1
         row = output["results"][0]
-        assert row["compliance_assessment_id"] == str(audits[0].id)
-        assert row["compliance_assessment_name"] == "Audit 0"
+        # Same nested shape as the API's FieldsRelatedField.
+        assert row["compliance_assessment"] == {
+            "id": str(audits[0].id),
+            "name": "Audit 0",
+        }
 
     def test_risk_scenario_filterable_by_risk_assessment(self):
         from core.models import Perimeter, RiskAssessment, RiskMatrix, RiskScenario
@@ -755,7 +756,7 @@ class TestAssessmentScoping:
                     "operator": "and",
                     "conditions": [
                         {
-                            "field": "risk_assessment_id",
+                            "field": "risk_assessment",
                             "op": "eq",
                             "value": str(assessment.id),
                         }
