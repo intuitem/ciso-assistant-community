@@ -411,6 +411,8 @@ class TestNamelessModels:
         assert "name" not in row
         assert row["status"] == "submitted"
         assert row["ref_id"]
+        # API parity: the display key for this nameless model is "str".
+        assert row["str"] == row["ref_id"]
 
     def test_name_is_not_filterable_on_nameless_models(self):
         domain = make_domain("Domain nameless filter")

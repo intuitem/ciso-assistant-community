@@ -499,6 +499,8 @@ READABLE_MODELS = {
     "validation_flow": {
         "model": ValidationFlow,
         "fields": ["ref_id", "status", "validation_deadline"],
+        # The API's display key for this nameless model.
+        "computed": {"str": lambda v: str(v)},
     },
 }
 
