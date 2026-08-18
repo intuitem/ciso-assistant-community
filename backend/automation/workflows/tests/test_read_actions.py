@@ -530,7 +530,11 @@ def make_scenarios(domain):
     from core.models import Perimeter, RiskAssessment, RiskMatrix, RiskScenario
 
     perimeter = Perimeter.objects.create(name="P", folder=domain)
-    matrix = RiskMatrix.objects.create(name="M", folder=Folder.get_root_folder())
+    matrix = RiskMatrix.objects.create(
+        name="M",
+        folder=Folder.get_root_folder(),
+        json_definition={"risk": [{"name": "Low"}, {"name": "Medium"}]},
+    )
     assessment = RiskAssessment.objects.create(
         name="RA", perimeter=perimeter, risk_matrix=matrix, folder=domain
     )
@@ -581,6 +585,18 @@ class TestRiskScenarioLevels:
         )
         output = read_output(start_instance(version))
         assert [row["name"] for row in output["results"]] == ["Unrated"]
+
+    def test_levels_serialize_as_matrix_cells(self):
+        domain = make_domain("Domain level labels")
+        make_scenarios(domain)
+        version = read_flow(
+            domain, {"model": "risk_scenario", "mode": "list", "order_by": "name"}
+        )
+        rated, unrated = read_output(start_instance(version))["results"]
+        assert rated["current_level"] == {"name": "Medium", "value": 1}
+        assert unrated["current_level"]["value"] == -1
+        assert unrated["current_level"]["name"] == "--"
+        assert rated["inherent_level"]["value"] == -1
 
 
 @pytest.mark.django_db

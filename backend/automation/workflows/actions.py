@@ -428,6 +428,7 @@ READABLE_MODELS = {
             "requirement_name": lambda ra: ra.requirement.display_short,
             "compliance_assessment_name": lambda ra: ra.compliance_assessment.name,
         },
+        "select_related": ("requirement", "compliance_assessment"),
     },
     "risk_scenario": {
         "model": RiskScenario,
@@ -446,6 +447,17 @@ READABLE_MODELS = {
         # sweep un-assessed scenarios in — same >= 0 guard as
         # within_tolerance. eq -1 stays available to target unrated rows.
         "unrated_sentinels": {"inherent_level", "current_level", "residual_level"},
+        # Same JSON the API serializers expose (current_level =
+        # get_current_risk(): the matrix cell dict, "name" for display,
+        # "value" keeping the comparable index). Shadows the raw column in
+        # the output row; the column names stay the filter/order surface,
+        # comparing on the integer index.
+        "computed": {
+            "inherent_level": lambda s: s.get_inherent_risk(),
+            "current_level": lambda s: s.get_current_risk(),
+            "residual_level": lambda s: s.get_residual_risk(),
+        },
+        "select_related": ("risk_assessment__risk_matrix",),
     },
     "risk_acceptance": {
         "model": RiskAcceptance,
@@ -618,6 +630,9 @@ class ReadObjectsAction(BaseAction):
             .filter(query)
             .order_by(order_by, "id")  # id tie-break keeps pagination stable
         )
+        # Computed callables dereference these per row otherwise.
+        if entry.get("select_related"):
+            queryset = queryset.select_related(*entry["select_related"])
         try:
             if config.get("mode", "list") == "first":
                 obj = queryset.first()
