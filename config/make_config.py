@@ -194,6 +194,25 @@ def get_config():
     else:
         config["kafka_dispatcher"] = {"enabled": False}
 
+    # MCP server, opt-in: it publishes a tool surface external AI agents can drive
+    enable_mcp = questionary.confirm(
+        "Would you like to expose the MCP server for AI assistants "
+        "(Claude, Copilot Studio, ChatGPT)? It is served at /mcp behind your proxy.",
+        default=False,
+    ).ask()
+
+    if enable_mcp:
+        config["mcp"] = {
+            "enabled": True,
+            "read_only": questionary.confirm(
+                "Restrict the MCP server to read-only tools? "
+                "(recommended; answer No to also allow create/update/delete)",
+                default=True,
+            ).ask(),
+        }
+    else:
+        config["mcp"] = {"enabled": False}
+
     # Debug mode should be explicitly opted into, even for SQLite deployments.
     config["enable_debug"] = questionary.confirm(
         "Enable debug mode?", default=False

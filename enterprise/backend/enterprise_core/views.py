@@ -275,6 +275,14 @@ class RoleViewSet(BaseModelViewSet):
         RoleFilter,
     ]
 
+    def get_queryset(self):
+        # Hide only dedicated per-SA roles; a shared builtin role stays visible.
+        return (
+            super()
+            .get_queryset()
+            .exclude(service_accounts__isnull=False, builtin=False)
+        )
+
     def _get_default_permissions(self):
         return Permission.objects.filter(
             codename__in=["view_folder", "view_globalsettings"],

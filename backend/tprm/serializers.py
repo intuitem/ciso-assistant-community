@@ -1,25 +1,30 @@
-from django.db import IntegrityError, transaction
-from rest_framework import serializers
+import structlog
 from django.conf import settings
-from core.models import ComplianceAssessment, Framework, RequirementAssignment
+from django.contrib.auth import get_user_model
+from django.db import IntegrityError, transaction
+from django.utils.translation import gettext_lazy as _
+from rest_framework import serializers
 
+from core.models import (
+    Answer,
+    ComplianceAssessment,
+    Framework,
+    RequirementAssessment,
+    RequirementAssignment,
+)
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.serializers import BaseModelSerializer
 from core.utils import RoleCodename, UserGroupCodename
-from pmbok.models import GenericCollection
 from iam.models import Folder, Role, RoleAssignment, UserGroup
-from django.contrib.auth import get_user_model
+from pmbok.models import GenericCollection
 from tprm.models import (
+    Contract,
     Entity,
     EntityAssessment,
     Representative,
     Solution,
     SolutionSubcontractor,
-    Contract,
 )
-from django.utils.translation import gettext_lazy as _
-
-import structlog
 
 logger = structlog.get_logger(__name__)
 
@@ -364,6 +369,9 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
     selected_implementation_groups = serializers.ListField(
         child=serializers.CharField(), required=False
     )
+    link_audit = serializers.PrimaryKeyRelatedField(
+        queryset=ComplianceAssessment.objects.all(), required=False, allow_null=True
+    )
 
     def _extract_audit_data(self, validated_data):
         audit_data = {
@@ -372,59 +380,106 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             "selected_implementation_groups": validated_data.pop(
                 "selected_implementation_groups", None
             ),
+            "link_audit": validated_data.pop("link_audit", None),
         }
         return audit_data
 
+    def _lock_instance_without_audit(self, instance, field_name):
+        locked = EntityAssessment.objects.select_for_update().get(pk=instance.pk)
+        if getattr(locked, "compliance_assessment_id", None):
+            raise serializers.ValidationError(
+                {field_name: [_("An audit already exists for this assessment")]}
+            )
+        return locked
+
+    def _make_enclave_folder(self, instance):
+        return Folder.objects.create(
+            content_type=Folder.ContentType.ENCLAVE,
+            name=f"{instance.entity.name}/{instance.name}",
+            parent_folder=instance.folder,
+        )
+
+    def _finalize_linked_audit(self, instance, audit):
+        """Shared tail for create/link."""
+        audit.reviewers.set(instance.reviewers.all())
+        representatives = instance.representatives.all()
+        audit.authors.set(
+            [rep.actor for rep in representatives if hasattr(rep, "actor")]
+        )
+        self._create_requirement_assignment(audit, representatives)
+        instance.compliance_assessment = audit
+        instance.save()
+
+    def _create_audit(self, instance, audit_data):
+        if not audit_data.get("framework"):
+            raise serializers.ValidationError({"framework": [_("Framework required")]})
+
+        with transaction.atomic():
+            locked = self._lock_instance_without_audit(instance, "create_audit")
+            from core.utils import build_initial_field_visibility
+
+            # Enclave audits carry no perimeter: the enclave folder, not the
+            # entity assessment's perimeter, governs their placement.
+            audit = ComplianceAssessment.objects.create(
+                name=locked.name,
+                framework=audit_data["framework"],
+                selected_implementation_groups=audit_data[
+                    "selected_implementation_groups"
+                ],
+                field_visibility=build_initial_field_visibility(
+                    audit_data["framework"]
+                ),
+            )
+
+            enclave = self._make_enclave_folder(instance)
+            audit.folder = enclave
+            audit.save()
+
+            audit.create_requirement_assessments()
+            self._finalize_linked_audit(instance, audit)
+
+    def _link_existing_audit(self, instance, audit_data):
+        with transaction.atomic():
+            self._lock_instance_without_audit(instance, "link_audit")
+            source_audit = ComplianceAssessment.objects.select_for_update().get(
+                pk=audit_data["link_audit"].pk
+            )
+            # Linking relocates the audit itself, so the user needs
+            # change_complianceassessment in the audit's current folder —
+            # not this serializer's own change_entityassessment.
+            self._check_object_perm(source_audit, "change", model=ComplianceAssessment)
+            if (
+                EntityAssessment.objects.filter(compliance_assessment=source_audit)
+                .exclude(pk=instance.pk)
+                .exists()
+            ):
+                # i18n key resolved by the frontend (safeTranslate / messages/*.json)
+                raise serializers.ValidationError(
+                    {"link_audit": ["auditAlreadyLinkedToEntityAssessment"]}
+                )
+
+            enclave = self._make_enclave_folder(instance)
+
+            audit = source_audit
+            audit.folder = enclave
+            # Enclave audits carry no perimeter — drop the one it had in its
+            # previous domain.
+            audit.perimeter = None
+            audit.save()
+            RequirementAssessment.objects.filter(compliance_assessment=audit).update(
+                folder=enclave
+            )
+            Answer.objects.filter(
+                requirement_assessment__compliance_assessment=audit
+            ).update(folder=enclave)
+
+            self._finalize_linked_audit(instance, audit)
+
     def _create_or_update_audit(self, instance, audit_data):
         if audit_data["create_audit"]:
-            if not audit_data.get("framework"):
-                raise serializers.ValidationError(
-                    {"framework": [_("Framework required")]}
-                )
-
-            with transaction.atomic():
-                locked = EntityAssessment.objects.select_for_update().get(
-                    pk=instance.pk
-                )  # lock entity assessment until the end of the transaction
-                if getattr(locked, "compliance_assessment_id", None):
-                    raise serializers.ValidationError(
-                        {
-                            "create_audit": [
-                                _("An audit already exists for this assessment")
-                            ]
-                        }
-                    )
-                from core.utils import build_initial_field_visibility
-
-                audit = ComplianceAssessment.objects.create(
-                    name=locked.name,
-                    framework=audit_data["framework"],
-                    perimeter=locked.perimeter,
-                    selected_implementation_groups=audit_data[
-                        "selected_implementation_groups"
-                    ],
-                    field_visibility=build_initial_field_visibility(
-                        audit_data["framework"]
-                    ),
-                )
-
-                enclave = Folder.objects.create(
-                    content_type=Folder.ContentType.ENCLAVE,
-                    name=f"{instance.entity.name}/{instance.name}",
-                    parent_folder=instance.folder,
-                )
-                audit.folder = enclave
-                audit.save()
-
-                audit.create_requirement_assessments()
-                audit.reviewers.set(instance.reviewers.all())
-                representatives = instance.representatives.all()
-                audit.authors.set(
-                    [rep.actor for rep in representatives if hasattr(rep, "actor")]
-                )
-                self._create_requirement_assignment(audit, representatives)
-                instance.compliance_assessment = audit
-                instance.save()
+            self._create_audit(instance, audit_data)
+        elif audit_data.get("link_audit"):
+            self._link_existing_audit(instance, audit_data)
         else:
             if instance.compliance_assessment:
                 audit = instance.compliance_assessment
@@ -652,9 +707,9 @@ class SolutionReadSerializer(BaseModelSerializer):
     subcontracting_chain = SolutionSubcontractorReadSerializer(
         many=True, read_only=True
     )
-    dora_ict_service_type = serializers.CharField(
-        source="get_dora_ict_service_type_display", default=""
-    )
+    # Raw EBA code (e.g. "eba_TA:S02"), not the display label.
+    # So the frontend can map to translation via safeTranslate.
+    dora_ict_service_type = serializers.CharField(default="")
     data_location_storage = serializers.CharField(
         source="get_data_location_storage_display", default=""
     )

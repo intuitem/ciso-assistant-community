@@ -15,12 +15,15 @@ import pytest
 from core.models import (
     AppliedControl,
     Asset,
+    ComplianceAssessment,
     Finding,
     FindingsAssessment,
+    Framework,
     Incident,
     Perimeter,
     Policy,
     ReferenceControl,
+    RequirementNode,
     RiskAssessment,
     RiskMatrix,
     SecurityException,
@@ -31,8 +34,7 @@ from ebios_rm.models import ElementaryAction
 from iam.models import Folder, User, UserGroup
 from privacy.models import Processing
 from resilience.models import BusinessImpactAnalysis
-from tprm.models import Contract, Entity, Representative, Solution
-
+from tprm.models import Contract, Entity, EntityAssessment, Representative, Solution
 
 URL = "/api/data-wizard/load-file/"
 TEMPLATES_DIR = Path(__file__).parent.parent / "import_templates"
@@ -355,11 +357,37 @@ class TestSimpleTemplates:
         assert proc.name == "processing 2"
 
 
+def _make_audit(folder, name, ref_id):
+    """Pre-existing audit for the EntityAssessments sheet's audit_ref_id/audit_name columns to link to."""
+    fw = Framework.objects.create(name=f"{name} FW", folder=folder, is_published=True)
+    RequirementNode.objects.create(
+        framework=fw,
+        urn=f"urn:test:{ref_id}:req:1",
+        ref_id="REQ1",
+        assessable=True,
+        folder=folder,
+        is_published=True,
+    )
+    audit = ComplianceAssessment.objects.create(
+        name=name, ref_id=ref_id, framework=fw, folder=folder
+    )
+    audit.create_requirement_assessments()
+    return audit
+
+
 @pytest.mark.django_db
 class TestMultiSheetTemplates:
     def test_third_parties_template(
         self, api_client, domain_folder, template_domains, all_accessible
     ):
+        # The template's EntityAssessments sheet links these by ref_id/name.
+        _make_audit(domain_folder, name="ISO 27002 SOA audit", ref_id="ISO 27002 SOA")
+        _make_audit(
+            domain_folder,
+            name="GDPR review for HR platform",
+            ref_id="GDPR-HR",
+        )
+
         resp = _post_template(
             api_client,
             "third_parties_template.xlsx",
@@ -368,14 +396,22 @@ class TestMultiSheetTemplates:
         )
         assert resp.status_code == 200, resp.json()
         results = resp.json()["results"]
-        assert results["entities"]["successful"] == 3
-        assert results["solutions"]["successful"] == 3
+        assert results["entities"]["successful"] == 4, results["entities"]
+        assert results["solutions"]["successful"] == 4, results["solutions"]
+        assert results["entity_assessments"]["successful"] == 3, results[
+            "entity_assessments"
+        ]
         assert results["contracts"]["successful"] == 3
         assert results["representatives"]["successful"] == 3
         parent = Entity.objects.get(ref_id="ENT-001")
         assert parent.name == "ACME Corporation"
         europe = Entity.objects.get(ref_id="ENT-002")
         assert europe.parent_entity == parent
+
+        nameless = Entity.objects.get(name="Nameless Ventures")
+        assert nameless.ref_id == ""
+        solution = Solution.objects.get(ref_id="SOL-004")
+        assert solution.provider_entity_id == nameless.id
         sol = Solution.objects.get(ref_id="SOL-001")
         assert sol.provider_entity == Entity.objects.get(ref_id="ENT-003")
         contract = Contract.objects.get(ref_id="CON-001")
@@ -386,6 +422,10 @@ class TestMultiSheetTemplates:
         alexandre = Representative.objects.get(email="alexandre.morel@acmecorp.com")
         assert alexandre.role == "Security Coordinator"
         assert alexandre.entity == parent
+        techvendor = Entity.objects.get(ref_id="ENT-003")
+        review = EntityAssessment.objects.get(name="TechVendor Annual Security Review")
+        assert review.entity == techvendor
+        assert sol in review.solutions.all()
 
 
 @pytest.mark.django_db
