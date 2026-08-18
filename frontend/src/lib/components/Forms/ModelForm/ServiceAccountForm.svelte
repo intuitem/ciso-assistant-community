@@ -154,6 +154,18 @@
 		const role = builtinRoles.find((r) => r.id === roleId);
 		if (role) permissionsSelector?.applyPreset(role.permissions);
 	}
+
+	function handleIdentitySourceChange(value: string): void {
+		if (value !== 'local') return;
+		form.form.update((data) => {
+			const updated = { ...data };
+			delete updated.social_app;
+			delete updated.federated_subject;
+			return updated;
+		});
+		formDataCache['social_app'] = undefined;
+		formDataCache['federated_subject'] = undefined;
+	}
 </script>
 
 {#if context !== 'edit'}
@@ -165,6 +177,7 @@
 		possibleOptions={IDENTITY_SOURCE_OPTIONS}
 		key="id"
 		labelKey="label"
+		onChange={handleIdentitySourceChange}
 		cacheLock={cacheLocks['identity_source']}
 		bind:cachedValue={formDataCache['identity_source']}
 	/>

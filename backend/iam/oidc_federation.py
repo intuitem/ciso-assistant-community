@@ -10,6 +10,9 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Error
 
 DISCOVERY_CACHE_TTL = 60 * 30
 JWKS_CACHE_TTL = 60 * 30
+# Same default allauth's own jwtkit.lookup_kid_jwk applies when a JWK omits 'alg' RFC 7517
+DEFAULT_JWK_ALG = "RS256"
+REQUEST_TIMEOUT = 10
 
 WELL_KNOWN_SUFFIX = "/.well-known/openid-configuration"
 
@@ -26,7 +29,7 @@ def get_openid_config(discovery_url: str) -> dict:
     config = cache.get(cache_key)
     if config is None:
         with get_adapter().get_requests_session() as sess:
-            response = sess.get(discovery_url)
+            response = sess.get(discovery_url, timeout=REQUEST_TIMEOUT)
             response.raise_for_status()
             config = response.json()
         cache.set(cache_key, config, DISCOVERY_CACHE_TTL)
@@ -38,22 +41,34 @@ def resolve_social_app_provider_config(social_app: SocialApp) -> dict:
     return {"issuer": config["issuer"], "jwks_uri": config["jwks_uri"]}
 
 
+def _fetch_and_cache_keys(cache_key: str, keys_url: str) -> dict:
+    with get_adapter().get_requests_session() as sess:
+        response = sess.get(keys_url, timeout=REQUEST_TIMEOUT)
+        response.raise_for_status()
+        keys_data = response.json()
+    cache.set(cache_key, keys_data, JWKS_CACHE_TTL)
+    return keys_data
+
+
 def _cached_fetch_key(credential: str, keys_url: str, lookup):
     header = jwt.get_unverified_header(credential)
     kid = header["kid"]
     cache_key = f"iam:oidc-jwks:{keys_url}"
     keys_data = cache.get(cache_key)
     if keys_data is None:
-        with get_adapter().get_requests_session() as sess:
-            response = sess.get(keys_url)
-            response.raise_for_status()
-            keys_data = response.json()
-        cache.set(cache_key, keys_data, JWKS_CACHE_TTL)
+        keys_data = _fetch_and_cache_keys(cache_key, keys_url)
     key = lookup(keys_data, kid)
+    if not key:
+        keys_data = _fetch_and_cache_keys(cache_key, keys_url)
+        key = lookup(keys_data, kid)
     if not key:
         raise OAuth2Error(f"Invalid 'kid': '{kid}'")
     jwk_alg = next(
-        (k.get("alg") for k in keys_data.get("keys", []) if k.get("kid") == kid),
+        (
+            k.get("alg", DEFAULT_JWK_ALG)
+            for k in keys_data.get("keys", [])
+            if k.get("kid") == kid
+        ),
         None,
     )
     if not jwk_alg or header.get("alg") != jwk_alg:
@@ -87,7 +102,7 @@ def verify_and_decode_cached(
 def check_social_app_live(social_app: SocialApp) -> None:
     provider_config = resolve_social_app_provider_config(social_app)
     with get_adapter().get_requests_session() as sess:
-        response = sess.get(provider_config["jwks_uri"])
+        response = sess.get(provider_config["jwks_uri"], timeout=REQUEST_TIMEOUT)
         response.raise_for_status()
 
 

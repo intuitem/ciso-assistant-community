@@ -379,6 +379,21 @@ class TestFederatedAuthentication:
         response = _bearer_client("not-a-jwt-at-all").get("/api/folders/")
         assert response.status_code == 401
 
+    def test_second_subject_on_shared_social_app_authenticates(
+        self, admin_client, domain_folder, social_app, rsa_keypair, mocked_idp
+    ):
+        private_key, _ = rsa_keypair
+        _create_federated_sa(
+            admin_client, domain_folder, social_app, subject="worker-1", name="sa-1"
+        )
+        _create_federated_sa(
+            admin_client, domain_folder, social_app, subject="worker-2", name="sa-2"
+        )
+
+        token = _mint_jwt(private_key, sub="worker-2")
+        response = _bearer_client(token).get("/api/folders/")
+        assert response.status_code == 200, response.content
+
 
 @pytest.mark.django_db
 class TestFederatedRoleLinked:

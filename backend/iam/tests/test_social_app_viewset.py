@@ -39,7 +39,7 @@ class TestSocialAppViewSet:
         assert mocked_idp["discovery"] == 1
         assert mocked_idp["jwks"] == 1
 
-    def test_create_fails_closed_on_unreachable_idp(self, admin_client):
+    def test_create_fails_closed_on_unreachable_idp(self, admin_client, mocked_idp):
         response = admin_client.post(
             SOCIAL_APPS_ENDPOINT,
             {

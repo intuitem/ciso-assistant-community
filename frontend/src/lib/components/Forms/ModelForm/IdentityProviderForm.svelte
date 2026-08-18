@@ -25,13 +25,6 @@
 
 <TextField
 	{form}
-	field="name"
-	label={m.name()}
-	cacheLock={cacheLocks['name']}
-	bind:cachedValue={formDataCache['name']}
-/>
-<TextField
-	{form}
 	disabled={context === 'edit'}
 	field="provider_id"
 	label={m.providerId()}

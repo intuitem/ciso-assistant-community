@@ -183,7 +183,6 @@ def provision_federated_service_account(
         if role is None:
             role = Role.objects.create(name=f"SA-{user.pk}", folder=root_folder)
             role.permissions.set(permissions)
-            invalidate_roles_cache()
         role_assignment = RoleAssignment.objects.create(
             user=user,
             role=role,

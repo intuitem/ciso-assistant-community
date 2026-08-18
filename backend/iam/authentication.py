@@ -58,11 +58,13 @@ class FederatedServiceAccountAuthentication(BaseAuthentication):
         aud_candidates = aud if isinstance(aud, list) else [aud] if aud else []
         if not aud_candidates:
             return None
+        unverified_subject = unverified.get("sub")
 
         service_account = (
             ServiceAccount.objects.filter(
                 identity_source=ServiceAccount.IdentitySource.FEDERATED,
                 social_app__client_id__in=aud_candidates,
+                federated_subject=unverified_subject,
             )
             .select_related("social_app", "user")
             .first()

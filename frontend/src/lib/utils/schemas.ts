@@ -2037,7 +2037,7 @@ export const ServiceAccountSchema = z.object({
 	description: z.string().optional().nullable(),
 	authorization_mode: z.enum(['role', 'custom', 'global_admin']).default('custom'),
 	identity_source: z.enum(['local', 'federated']).default('local'),
-	social_app: z.coerce.number().optional().nullable(),
+	social_app: z.coerce.number().int().positive().optional().nullable(),
 	federated_subject: z.string().max(255).optional().nullable(),
 	permissions: z.array(z.number()).optional(),
 	role: z.string().uuid().optional().nullable(),
