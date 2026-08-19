@@ -1453,14 +1453,13 @@ class TestRealAuthAndRBAC:
 def _make_audit(folder, name="Vendor Audit", ref_id="AUD-001"):
     from core.models import ComplianceAssessment, Framework, RequirementNode
 
-    fw = Framework.objects.create(name=f"{name} FW", folder=folder, is_published=True)
+    fw = Framework.objects.create(name=f"{name} FW", folder=folder)
     RequirementNode.objects.create(
         framework=fw,
         urn=f"urn:test:{ref_id}:req:1",
         ref_id="REQ1",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
     audit = ComplianceAssessment.objects.create(
         name=name,

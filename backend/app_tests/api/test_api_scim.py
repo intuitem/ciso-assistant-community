@@ -163,7 +163,7 @@ class TestSCIMOwnershipInvariant:
         """SCIM may freely redirect an adopted account's email — on the same
         request or a later one — because is_local closes the actual
         exploitation surface (local login / password-reset) regardless."""
-        User.objects.create_user("joiner2@tests.com", is_published=True)
+        User.objects.create_user("joiner2@tests.com")
         client = _scim_client()
         first = client.post(
             USERS_URL,
@@ -183,7 +183,7 @@ class TestSCIMOwnershipInvariant:
         """The real security boundary: once is_scim_managed, is_local is
         False (unless keep_local_login), so no email SCIM puts on the
         account ever re-opens local password login or password-reset."""
-        User.objects.create_user("joiner3@tests.com", is_published=True)
+        User.objects.create_user("joiner3@tests.com")
         resp = _scim_client().post(
             USERS_URL,
             data={
