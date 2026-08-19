@@ -280,7 +280,7 @@ class TestPermissionCheck:
         ), "Inactive users shouldn't have access to anything."
 
     def test_role_assignment_recursivity(self):
-        """Ensure `RoleAssignment.is_recursive` and `{model_class}.is_published` work as expected."""
+        """Ensure `RoleAssignment.is_recursive` and `ALWAYS_VIEWABLE` (`AppliedControl.VIEWABLE_FROM_DESCENDANTS_MODE`) work as expected."""
 
         folder1 = Folder.objects.create(name="folder1")
         folder2 = Folder.objects.create(name="folder2", parent_folder=folder1)
@@ -362,46 +362,9 @@ class TestPermissionCheck:
             RoleAssignment.is_object_accessible(
                 user, "view", AppliedControl, applied_control.id
             )
-            is False
-        ), (
-            "The previously created `applied_control` shouldn't be accessible (as it's in a ancestor folder)."
-        )
-        assert (
-            RoleAssignment.get_viewable_object_ids(
-                user, AppliedControl, folder3
-            ).count()
-            == 0
-        ), (
-            "The previously created `applied_control` shouldn't be accessible (as it's in a ancestor folder)."
-        )
-
-        assert (
-            RoleAssignment.is_object_accessible(
-                user, "change", AppliedControl, applied_control.id
-            )
-            is False
-        ), (
-            "The user shouldn't have the right to change the previous created applied control (as he doesn't have the 'change_appliedcontrol' permission)."
-        )
-        assert (
-            RoleAssignment.get_changeable_object_ids(
-                user, AppliedControl, folder3
-            ).count()
-            == 0
-        ), (
-            "The user shouldn't have the right to change the previous created applied control (as he doesn't have the 'change_appliedcontrol' permission)."
-        )
-
-        applied_control.folder.is_published = True
-        applied_control.folder.save()
-
-        assert (
-            RoleAssignment.is_object_accessible(
-                user, "view", AppliedControl, applied_control.id
-            )
             is True
         ), (
-            "The previously created `applied_control` should be accessible due to `viewable_from_descendants=True` (as it's in a ancestor folder)."
+            "The previously created `applied_control` should be accessible (AppliedControl is ALWAYS_VIEWABLE, and it's in a ancestor folder)."
         )
         assert (
             RoleAssignment.get_viewable_object_ids(
@@ -409,7 +372,7 @@ class TestPermissionCheck:
             ).count()
             == 1
         ), (
-            "The previously created `applied_control` should be accessible due to `viewable_from_descendants=True` (as it's in a ancestor folder)."
+            "The previously created `applied_control` should be accessible (AppliedControl is ALWAYS_VIEWABLE, and it's in a ancestor folder)."
         )
 
         assert (
@@ -534,9 +497,6 @@ class TestPermissionCheck:
 
         label_in_root = FilteringLabel.objects.create(
             label="label_in_root", folder=root_folder
-        )
-        assert label_in_root.is_published is True, (
-            "Filtering labels MUST always be published."
         )
         label_in_domain1 = FilteringLabel.objects.create(
             label="label_in_domain1", folder=domain1
@@ -815,7 +775,7 @@ class TestFocusMode:
         Ensure focus mode intersects the accessible folders with the focus subtree PLUS the root folder, THROUGH THE PUBLIC API (`RoleAssignment.get_allowed_folder_ids`/`RoleAssignment.get_viewable_object_ids`):
 
         - Focus mode MUST NEVER extend the accessible folders: the root folder stays in scope ONLY for users with a role assignment covering it (#4470 parity: corpus-level objects stay available to admins in focus mode).
-        - Published root folder objects (like the `User` objects, which are always published) remain visible to everyone through the normal `is_published` inheritance (e.g. so the user pickers keep working in focus mode).
+        - Root folder objects (ALWAYS_VIEWABLE, like the `User` objects) remain visible to everyone (e.g. so the user pickers keep working in focus mode).
         """
         from core.context import focus_folder_id_var
 
@@ -841,11 +801,6 @@ class TestFocusMode:
         )
         domain_role_assignment.perimeter_folders.add(domain)
 
-        unpublished_control_in_root = AppliedControl.objects.create(
-            name="unpublished_control_in_root", folder=root_folder
-        )
-        # `PublishInRootFolderMixin.save` forces `is_published=True` for root folder objects: unpublish directly to model an unpublished root-scoped object (like the models without this mixin can have).
-        AppliedControl.objects.filter(id=unpublished_control_in_root.id)
         published_control_in_root = AppliedControl.objects.create(
             name="published_control_in_root", folder=root_folder
         )
@@ -873,9 +828,6 @@ class TestFocusMode:
             assert control_in_domain.id in admin_viewable_ids, (
                 "The focused folder objects MUST be visible (admin)."
             )
-            assert unpublished_control_in_root.id in admin_viewable_ids, (
-                "Root folder objects MUST stay visible in focus mode for a user with a role assignment on the root folder (#4470 parity)."
-            )
 
             domain_user_allowed_folder_ids = set(
                 RoleAssignment.get_allowed_folder_ids(
@@ -895,16 +847,13 @@ class TestFocusMode:
             assert control_in_domain.id in domain_user_viewable_ids, (
                 "The focused folder objects MUST be visible (domain user)."
             )
-            assert unpublished_control_in_root.id not in domain_user_viewable_ids, (
-                "Unpublished root folder objects MUST NOT be visible to users without any role assignment on the root folder."
-            )
 
             for user in [admin_user, domain_user]:
                 viewable_ids = set(
                     RoleAssignment.get_viewable_object_ids(user, AppliedControl)
                 )
                 assert published_control_in_root.id in viewable_ids, (
-                    f"Published root folder objects MUST remain visible in focus mode (through the `is_published` inheritance) ({user.email!r})."
+                    f"Root folder objects (ALWAYS_VIEWABLE) MUST remain visible in focus mode ({user.email!r})."
                 )
 
                 viewable_user_ids = set(
@@ -922,7 +871,7 @@ class TestFocusMode:
 
         - A folder outside the focus subtree is NOT accessible while a focus folder is set (even for users with a role assignment covering it).
         - The ROOT folder stays in scope for users with a role assignment covering it (#4470 parity: corpus-level operations keep working for admins in focus mode).
-        - Published root folder objects stay visible in focus mode through the normal `is_published` inheritance.
+        - Root folder objects (ALWAYS_VIEWABLE) stay visible in focus mode.
         """
         from core.context import focus_folder_id_var
 
@@ -948,10 +897,6 @@ class TestFocusMode:
         )
         domain1_role_assignment.perimeter_folders.add(domain1)
 
-        unpublished_control_in_root = AppliedControl.objects.create(
-            name="unpublished_control_in_root", folder=root_folder
-        )
-        AppliedControl.objects.filter(id=unpublished_control_in_root.id)
         published_control_in_root = AppliedControl.objects.create(
             name="published_control_in_root", folder=root_folder
         )
@@ -1009,22 +954,6 @@ class TestFocusMode:
                 )
                 is True
             ), "The focus subtree objects MUST remain point-accessible."
-            assert (
-                RoleAssignment.is_object_accessible(
-                    admin_user, "view", AppliedControl, unpublished_control_in_root.id
-                )
-                is True
-            ), (
-                "Root folder objects MUST stay point-accessible in focus mode for a user with a role assignment on the root folder (#4470 parity)."
-            )
-            assert (
-                RoleAssignment.is_object_accessible(
-                    domain1_user, "view", AppliedControl, unpublished_control_in_root.id
-                )
-                is False
-            ), (
-                "The root folder focus inclusion MUST NOT grant unpublished root folder objects to users without any role assignment on the root folder."
-            )
             for user in [admin_user, domain1_user]:
                 assert (
                     RoleAssignment.is_object_accessible(
@@ -1032,7 +961,7 @@ class TestFocusMode:
                     )
                     is True
                 ), (
-                    f"Published root folder objects MUST stay visible in focus mode (through the `is_published` inheritance) ({user.email!r})."
+                    f"Root folder objects (ALWAYS_VIEWABLE) MUST stay visible in focus mode ({user.email!r})."
                 )
         finally:
             focus_folder_id_var.reset(token)
