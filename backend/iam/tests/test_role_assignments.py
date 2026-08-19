@@ -401,7 +401,7 @@ class TestPermissionCheck:
             )
             is True
         ), (
-            "The previously created `applied_control` should be accessible due to `is_published=True` (as it's in a ancestor folder)."
+            "The previously created `applied_control` should be accessible due to `viewable_from_descendants=True` (as it's in a ancestor folder)."
         )
         assert (
             RoleAssignment.get_viewable_object_ids(
@@ -409,7 +409,7 @@ class TestPermissionCheck:
             ).count()
             == 1
         ), (
-            "The previously created `applied_control` should be accessible due to `is_published=True` (as it's in a ancestor folder)."
+            "The previously created `applied_control` should be accessible due to `viewable_from_descendants=True` (as it's in a ancestor folder)."
         )
 
         assert (
@@ -437,7 +437,7 @@ class TestPermissionCheck:
         """
 
         root_folder = Folder.get_root_folder()
-        domain = Folder.objects.create(name="customer_domain", is_published=True)
+        domain = Folder.objects.create(name="customer_domain", viewable_from_descendants=True)
         enclave = Folder.objects.create(
             name="enclave",
             parent_folder=domain,
