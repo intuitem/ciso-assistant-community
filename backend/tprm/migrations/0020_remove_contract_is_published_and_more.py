@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("tprm", "0018_assign_third_parties_to_audits"),
+        ("tprm", "0019_null_perimeter_on_enclave_audits"),
     ]
 
     operations = [
