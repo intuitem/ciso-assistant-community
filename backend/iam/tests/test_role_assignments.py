@@ -437,7 +437,9 @@ class TestPermissionCheck:
         """
 
         root_folder = Folder.get_root_folder()
-        domain = Folder.objects.create(name="customer_domain", viewable_from_descendants=True)
+        domain = Folder.objects.create(
+            name="customer_domain", viewable_from_descendants=True
+        )
         enclave = Folder.objects.create(
             name="enclave",
             parent_folder=domain,
