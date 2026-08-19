@@ -72,7 +72,7 @@ class AbstractBaseModel(models.Model):
             return False
         else:
             folder_id = RoleAssignment.get_iam_folder_id(self)
-            folder = Folder.objects.get(folder_id)
+            folder = Folder.objects.get(id=folder_id)
 
             return folder.viewable_from_descendants
 
