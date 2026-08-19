@@ -2443,5 +2443,7 @@
 	"scimTokenGenerationFailed": "Nie udało się wygenerować tokenu SCIM",
 	"idpGroup": "Grupa IdP",
 	"idpGroups": "Grupy IdP",
-	"idpGroupsDescription": "Włącz federację grup IdP (provisioning SCIM, mapowania grup IdP i członkostwa w grupach IdP użytkowników)."
+	"idpGroupsDescription": "Włącz federację grup IdP (provisioning SCIM, mapowania grup IdP i członkostwa w grupach IdP użytkowników).",
+	"viewableFromDescendants": "Widoczne z subdomen",
+	"viewableFromDescendantsHelpText": "Jeśli zaznaczone, obiekty wielu typów w tej domenie będą widoczne ze wszystkich subdomen. Typy obiektów, których to dotyczy: {stringified_model_names}."
 }

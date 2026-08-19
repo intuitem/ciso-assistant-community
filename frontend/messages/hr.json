@@ -4197,5 +4197,7 @@
 	"scimTokenGenerationFailed": "Generiranje SCIM tokena nije uspjelo",
 	"idpGroup": "IdP grupa",
 	"idpGroups": "IdP grupe",
-	"idpGroupsDescription": "Omogući federaciju IdP grupa (SCIM provizioniranje, mapiranja IdP grupa i članstva korisnika u IdP grupama)."
+	"idpGroupsDescription": "Omogući federaciju IdP grupa (SCIM provizioniranje, mapiranja IdP grupa i članstva korisnika u IdP grupama).",
+	"viewableFromDescendants": "Vidljivo iz poddomena",
+	"viewableFromDescendantsHelpText": "Ako je odabrano, objekti više vrsta u ovoj domeni postaju vidljivi iz svih poddomena. Vrste objekata na koje ovo utječe su: {stringified_model_names}."
 }

@@ -41,7 +41,8 @@ The same inheritance also drives reporting: most dashboards and analytics roll u
 
 Some objects exist to be **shared**. Frameworks, threats, risk matrices, reference controls, and other catalogue-style items wouldn't be useful if they were trapped in a single domain — every team needs to be able to pull from the same shared library.
 
-CISO Assistant models this through a built-in flag — **`is_published`** — that any object can carry. An object marked as published is visible inside every sub-domain of its own domain, _as if it had been attached to each one_. Publication is a **visibility** mechanism only; it does not let users in other domains create, update, or delete the object.
+CISO Assistant models this through the — **`Folder.viewable_from_descendants`** — field.
+An object which model is `ALWAYS_VIEWABLE` or a model which is `MAY_BE_VIEWABLE` + a domain(folder) marked as viewable from descendants is visible(viewable) inside every sub-domain of its own domain, _as if it had been attached to each one_. Publication is a **visibility** mechanism only; it does not let users in other domains create, update, or delete the object.
 
 By default:
 

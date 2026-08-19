@@ -1881,13 +1881,34 @@ class ContentTypeListView(APIView):
 
     @method_decorator(cache_page(60 * MED_CACHE_TTL))
     def get(self, request, format=None):
-        content_types = []
-        for model in apps.get_models():
-            content_types.append(
-                {"label": model.__name__, "value": model._meta.model_name}
+        may_be_viewable_from_descendants_filter = (
+            request.query_params.get(
+                "may_be_viewable_from_descendants", "false"
+            ).lower()
+            == "true"
+        )
+
+        model_filter = lambda model: True
+
+        if may_be_viewable_from_descendants_filter:
+            model_filter = lambda model: (
+                getattr(
+                    model,
+                    "VIEWABLE_FROM_DESCENDANTS_MODE",
+                    ViewableFromDescendantsMode.NEVER_VIEWABLE,
+                )
+                == ViewableFromDescendantsMode.MAY_BE_VIEWABLE
             )
-        content_types.sort(key=lambda x: x["label"].lower())
-        return Response(content_types)
+
+        filtered_models = [model for model in apps.get_models() if model_filter(model)]
+
+        content_types = [
+            {"label": model.__name__, "value": model._meta.model_name}
+            for model in filtered_models
+        ]
+
+        sorted_content_types = sorted(content_types, key=lambda x: x["label"].lower())
+        return Response(sorted_content_types)
 
 
 # Risk Assessment

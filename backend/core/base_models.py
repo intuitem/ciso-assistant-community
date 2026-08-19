@@ -1,15 +1,44 @@
+import uuid
+import enum
+
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-import uuid
+
+
+class ViewableFromDescendantsMode(enum.StrEnum):
+    """
+    Represent the descendant viewability mode of a model.
+
+    Describe under what conditions the objects of this model are viewable from the descendant folders of their folder (**IAM folder**).
+
+    An object viewable from descendants can be viewed by any user which has the "view" permission on this model on any descendant folder of the object's folder.
+
+    The `RoleAssignment.get_iam_folder_field` function can be used to get the folder (**IAM folder**) of a model.
+    """
+
+    ALWAYS_VIEWABLE = "always_viewable"
+    """Objects of this model are **ALWAYS** viewable from its descendants."""
+    MAY_BE_VIEWABLE = "may_be_viewable"
+    """Objects of this model are viewable from its descendants **ONLY IF** their folder has their `Folder.viewable_from_descendants` field set to `True`."""
+    NEVER_VIEWABLE = "never_viewable"
+    """Objects of this model are **NEVER** viewable from its descendants."""
 
 
 class AbstractBaseModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
-    is_published = models.BooleanField(_("published"), default=False)
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.NEVER_VIEWABLE
+    """
+    The `VIEWABLE_FROM_DESCENDANTS_MODE` field describes the model's descendant viewability mode (if the descendant folders should view the objects in this folder or not).
+
+    - If `{class}.VIEWABLE_FROM_DESCENDANTS_MODE` is `ViewableFromDescendantsMode.ALWAYS_VIEWABLE` => Objects are **ALWAYS** viewable from their descendant folders.
+    - If `{class}.VIEWABLE_FROM_DESCENDANTS_MODE` is `ViewableFromDescendantsMode.MAY_BE_VIEWABLE` => Objects are viewable from their descendant folders **ONLY IF** their folder has their `Folder.viewable_from_descendants` field set to `True`.
+    - If `{class}.VIEWABLE_FROM_DESCENDANTS_MODE` is `ViewableFromDescendantsMode.NEVER_VIEWABLE` => Objects are **NEVER** viewable from their descendant folders.
+    """
 
     class Meta:
         abstract = True
@@ -30,6 +59,22 @@ class AbstractBaseModel(models.Model):
 
     def __str__(self) -> str:
         return self.name if hasattr(self, "name") and self.name else str(self.id)
+
+    @property
+    def _viewable_from_descendants(self) -> bool:
+        from iam.models import RoleAssignment, Folder
+
+        viewable_by_descendants_mode = self.__class__.VIEWABLE_FROM_DESCENDANTS_MODE
+
+        if viewable_by_descendants_mode == ViewableFromDescendantsMode.ALWAYS_VIEWABLE:
+            return True
+        elif viewable_by_descendants_mode == ViewableFromDescendantsMode.NEVER_VIEWABLE:
+            return False
+        else:
+            folder_id = RoleAssignment.get_iam_folder_id(self)
+            folder = Folder.objects.get(folder_id)
+
+            return folder.viewable_from_descendants
 
     def get_additional_data(self) -> dict:
         # Attached to every django-auditlog LogEntry at creation (create/update/
@@ -218,10 +263,6 @@ class ActorSyncManager(models.Manager):
     """
 
     def bulk_create(self, objs, batch_size=None, ignore_conflicts=False, **kwargs):
-        if self.model.__name__ == "Team":
-            for obj in objs:
-                obj.is_published = True
-
         # Perform the standard bulk_create
         created_objs = super().bulk_create(
             objs, batch_size=batch_size, ignore_conflicts=ignore_conflicts, **kwargs
@@ -237,7 +278,6 @@ class ActorSyncManager(models.Manager):
         for obj in created_objs:
             if obj.pk:  # Only link if the object was actually created
                 actor = Actor(**{field_name: obj})
-                actor.is_published = True
                 actors.append(actor)
 
         # Bulk create the corresponding Actors

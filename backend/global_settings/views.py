@@ -107,8 +107,6 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         obj, _ = self.model.objects.get_or_create(name="feature-flags")
-        obj.is_published = True  # we could do that at creation, but it's ok here
-        obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -153,8 +151,6 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         obj = self.model.objects.get(name="general")
-        obj.is_published = True  # we could do that at creation, but it's ok here
-        obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -386,8 +382,6 @@ class VulnerabilitySlaViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         obj, _ = self.model.objects.get_or_create(name="vulnerability-sla")
-        obj.is_published = True
-        obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -411,8 +405,6 @@ class SecIntelFeedsViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         obj, _ = self.model.objects.get_or_create(name="sec-intel-feeds")
-        obj.is_published = True
-        obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -440,8 +432,6 @@ class InfraConfigViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         obj, _ = self.model.objects.get_or_create(name="infra-config")
-        obj.is_published = True
-        obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)
         return obj
 

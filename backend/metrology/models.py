@@ -9,7 +9,11 @@ from django.db.models import Avg, Count, OuterRef, Q, Subquery, Sum
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from core.base_models import AbstractBaseModel, NameDescriptionMixin
+from core.base_models import (
+    AbstractBaseModel,
+    NameDescriptionMixin,
+    ViewableFromDescendantsMode,
+)
 from core.models import (
     Actor,
     AppliedControl,
@@ -35,7 +39,7 @@ from core.models import (
     Vulnerability,
 )
 from global_settings.models import GlobalSettings
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
+from iam.models import Folder, FolderMixin
 
 
 class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMixin):
@@ -79,7 +83,6 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
             "Format: [{'name': 'Low', 'description': '', 'translations': {'fr': {'name': 'Faible', 'description': ''}}}]"
         ),
     )
-    is_published = models.BooleanField(default=True, verbose_name=_("Published"))
     higher_is_better = models.BooleanField(
         default=True,
         verbose_name=_("Higher is better"),
@@ -99,6 +102,8 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
 
     fields_to_check = ["ref_id", "name"]
 
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
+
     class Meta:
         verbose_name = _("Metric definition")
         verbose_name_plural = _("Metric definitions")
@@ -111,9 +116,7 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         return self.display_short
 
 
-class MetricInstance(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
-):
+class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     class Status(models.TextChoices):
         DRAFT = "draft", _("Draft")
         ACTIVE = "active", _("Active")
@@ -172,7 +175,10 @@ class MetricInstance(
         blank=True,
         null=True,
     )
+
     fields_to_check = ["ref_id", "name"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     class Meta:
         verbose_name = _("Metric instance")

@@ -1657,5 +1657,7 @@
 	"gracePeriod": "अनुग्रह अवधि",
 	"gracePeriodHelpText": "रोटेशन के बाद मौजूदा सीक्रेट इतने समय तक काम करता रहता है, ताकि इंटीग्रेशन बिना डाउनटाइम के अपडेट किए जा सकें। अधिकतम 1 महीने तक सीमित।",
 	"gracePeriodTooLong": "अनुग्रह अवधि 1 महीने से अधिक नहीं हो सकती।",
-	"previousSecretValidUntil": "पिछला क्लाइंट सीक्रेट {date} तक मान्य रहता है।"
+	"previousSecretValidUntil": "पिछला क्लाइंट सीक्रेट {date} तक मान्य रहता है।",
+	"viewableFromDescendants": "उप-डोमेन से दृश्यमान",
+	"viewableFromDescendantsHelpText": "चयनित होने पर, इस फ़ोल्डर में कई प्रकार की वस्तुएं सभी उप-डोमेन से दृश्यमान हो जाती हैं। इससे प्रभावित वस्तु प्रकार हैं: {stringified_model_names}।"
 }

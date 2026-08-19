@@ -36,7 +36,7 @@ from django.utils.translation import gettext_lazy as _
 from structlog import get_logger
 from django.utils.timezone import now
 
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
+from iam.models import Folder, FolderMixin, User
 from custom_fields.host import CustomFieldsMixin
 
 from library.helpers import (
@@ -56,6 +56,7 @@ from .base_models import (
     ActorSyncMixin,
     ETADueDateMixin,
     NameDescriptionMixin,
+    ViewableFromDescendantsMode,
 )
 from .utils import (
     aggregate_compute_results,
@@ -163,7 +164,6 @@ def _sync_questions_from_data(requirement_node, questions_data):
                 requirement_node=requirement_node,
                 urn=q_urn,
                 folder=requirement_node.folder,
-                is_published=True,
                 **question_fields,
             )
 
@@ -234,7 +234,6 @@ def _sync_questions_from_data(requirement_node, questions_data):
                         question=question,
                         urn=c_urn,
                         folder=requirement_node.folder,
-                        is_published=True,
                         **choice_fields,
                     )
             else:
@@ -243,7 +242,6 @@ def _sync_questions_from_data(requirement_node, questions_data):
                     question=question,
                     urn=None,
                     folder=requirement_node.folder,
-                    is_published=True,
                     **choice_fields,
                 )
 
@@ -346,7 +344,7 @@ class I18nObjectMixin(models.Model):
         abstract = True
 
 
-class FilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
+class FilteringLabel(FolderMixin, AbstractBaseModel):
     label = models.CharField(
         max_length=100,
         verbose_name=_("Label"),
@@ -364,6 +362,8 @@ class FilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
 
     fields_to_check = ["label"]
 
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
+
 
 class FilteringLabelMixin(models.Model):
     filtering_labels = models.ManyToManyField(
@@ -374,7 +374,7 @@ class FilteringLabelMixin(models.Model):
         abstract = True
 
 
-class LibraryFilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
+class LibraryFilteringLabel(FolderMixin, AbstractBaseModel):
     @property
     def reference_count(self) -> int:
         return self.stored_libraries.count()
@@ -404,8 +404,12 @@ class LibraryFilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderM
 
     fields_to_check = ["label"]
 
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
+
 
 class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
+
     class Meta:
         abstract = True
         unique_together = [["urn", "locale", "version"]]
@@ -573,7 +577,6 @@ class StoredLibrary(LibraryMixin):
             ]
             new_library = StoredLibrary.objects.create(
                 name=library_data["name"],
-                is_published=True,
                 urn=urn,
                 locale=locale,
                 version=version,
@@ -763,7 +766,7 @@ class LibraryDraft(NameDescriptionMixin, FolderMixin):
     # The library "objects" document (framework, threats, reference_controls,
     # risk_matrices, requirement_mapping_sets, metric_definitions, preset).
     content = models.JSONField(default=dict, blank=True)
-    # Builder lifecycle markers — never overload is_published (IAM visibility).
+
     first_published_at = models.DateTimeField(null=True, blank=True)
     last_published_at = models.DateTimeField(null=True, blank=True)
     # Snapshot of what was last loaded, so the builder can tell a published
@@ -867,7 +870,6 @@ class LibraryUpdater:
         }
         self.referential_object_dict = {
             "provider": self.new_library.provider,
-            "is_published": True,
         }
 
         # The "framework" field will be ignored if the "frameworks" field is defined.
@@ -1955,7 +1957,7 @@ class LoadedLibrary(LibraryMixin):
         )
 
 
-class ObjectClassification(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class ObjectClassification(NameDescriptionMixin, FolderMixin):
     DEFAULT_TLP_LEVELS = [
         {
             "abbreviation": "CLEAR",
@@ -2004,6 +2006,8 @@ class ObjectClassification(NameDescriptionMixin, FolderMixin, PublishInRootFolde
     )
 
     fields_to_check = ["name"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     class Meta:
         verbose_name = _("Object classification")
@@ -2087,7 +2091,7 @@ class ClassificationLevel(NameDescriptionMixin, FolderMixin):
         return t.get("name") or self.abbreviation or self.name
 
 
-class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class Terminology(NameDescriptionMixin, FolderMixin):
     """
     Model to store custom terminology for the application
     """
@@ -2526,7 +2530,6 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             "translations": {"fr": {"name": "événements par seconde"}},
         },
     ]
-    is_published = models.BooleanField(_("published"), default=True)
     field_path = models.CharField(
         max_length=100,
         verbose_name=_("Field path"),
@@ -2551,6 +2554,8 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     )
 
     fields_to_check = ["name", "field_path"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     @classmethod
     def _seed_defaults(cls, items):
@@ -2618,7 +2623,6 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 class Threat(
     ReferentialObjectMixin,
     I18nObjectMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
 ):
     library = models.ForeignKey(
@@ -2629,9 +2633,9 @@ class Threat(
         related_name="threats",
     )
 
-    is_published = models.BooleanField(_("published"), default=True)
-
     fields_to_check = ["ref_id", "name"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         verbose_name = _("Threat")
@@ -2695,9 +2699,10 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
     typical_evidence = models.JSONField(
         verbose_name=_("Typical evidence"), null=True, blank=True
     )
-    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         verbose_name = _("Reference control")
@@ -2749,6 +2754,8 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
             "If the risk matrix is set as disabled, it will not be available for selection for new risk assessments."
         ),
     )
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta(ReferentialObjectMixin.Meta, I18nObjectMixin.Meta):
         # Explicit MRO for the parents' (abstract-only) Meta classes; no
@@ -3202,6 +3209,8 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
                         }
                     )
 
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
+
     class Meta:
         verbose_name = _("RequirementNode")
         verbose_name_plural = _("RequirementNodes")
@@ -3296,6 +3305,8 @@ class Question(AbstractBaseModel, FolderMixin):
         blank=True, null=True, verbose_name=_("Translations")
     )
 
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
+
     class Meta:
         ordering = ["order"]
         verbose_name = _("Question")
@@ -3340,6 +3351,8 @@ class QuestionChoice(AbstractBaseModel, FolderMixin):
         blank=True, null=True, verbose_name=_("Translations")
     )
 
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
+
     class Meta:
         ordering = ["order"]
         unique_together = [("question", "urn")]
@@ -3377,6 +3390,8 @@ class RequirementMappingSet(ReferentialObjectMixin):
         verbose_name=_("Target framework"),
         related_name="target_framework",
     )
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     def save(self, *args, **kwargs) -> None:
         if self.source_framework == self.target_framework:
@@ -3450,6 +3465,8 @@ class RequirementMapping(models.Model):
     )
     annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
 
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
+
     @property
     def coverage(self) -> str:
         if self.relationship == RequirementMapping.Relationship.NOT_RELATED:
@@ -3514,9 +3531,7 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         return self.folder.name + "/" + self.name
 
 
-class SecurityException(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, CustomFieldsMixin
-):
+class SecurityException(NameDescriptionMixin, FolderMixin, CustomFieldsMixin):
     class Status(models.TextChoices):
         DRAFT = "draft", "draft"
         IN_REVIEW = "in_review", "in review"
@@ -3564,13 +3579,14 @@ class SecurityException(
         verbose_name=_("Evidences"),
         related_name="security_exceptions",
     )
-    is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
     link = models.URLField(
         null=True, blank=True, max_length=2048, verbose_name=_("Link")
     )
 
     fields_to_check = ["ref_id", "name"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     def __str__(self):
         return self.name
@@ -3615,7 +3631,6 @@ class Asset(
     IntegrationSyncableMixin,
     NameDescriptionMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
     CustomFieldsMixin,
 ):
@@ -3793,7 +3808,6 @@ class Asset(
         blank=True,
         null=True,
     )
-    is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     is_business_function = models.BooleanField("is_business_function", default=False)
@@ -3825,6 +3839,8 @@ class Asset(
     )
 
     fields_to_check = ["ref_id", "name"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         verbose_name_plural = _("Assets")
@@ -4586,7 +4602,7 @@ class Asset(
         return result
 
 
-class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class AssetClass(NameDescriptionMixin, FolderMixin):
     parent = models.ForeignKey(
         "AssetClass", on_delete=models.CASCADE, blank=True, null=True
     )
@@ -5034,6 +5050,8 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     def __str__(self):
         return self.get_name_translated
 
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
+
     class Meta:
         unique_together = ["name", "parent"]
         constraints = [
@@ -5045,9 +5063,7 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         ]
 
 
-class Evidence(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
-):
+class Evidence(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
         MISSING = "missing", "Missing"
@@ -5055,8 +5071,6 @@ class Evidence(
         APPROVED = "approved", "Approved"
         REJECTED = "rejected", "Rejected"
         EXPIRED = "expired", "Expired"
-
-    is_published = models.BooleanField(_("published"), default=True)
 
     owner = models.ManyToManyField(
         "core.Actor",
@@ -5074,15 +5088,14 @@ class Evidence(
         null=True,
         verbose_name=_("Expiry date"),
     )
+
     fields_to_check = ["name"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         verbose_name = _("Evidence")
         verbose_name_plural = _("Evidences")
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.revisions.update(is_published=self.is_published)
 
     @property
     def last_revision(self):
@@ -5157,6 +5170,8 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
     fields_to_check = ["evidence", "version"]
 
+    VIEWABLE_FROM_DESCENDANTS_MODE = Asset.VIEWABLE_FROM_DESCENDANTS_MODE
+
     class Meta:
         verbose_name = _("Evidence Revision")
         verbose_name_plural = _("Evidence Revisions")
@@ -5168,8 +5183,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         # Set folder to match the evidence's folder
         if hasattr(self.evidence, "folder") and self.evidence.folder:
             self.folder = self.evidence.folder
-
-        self.is_published = self.evidence.is_published
 
         # Compute attachment hash if attachment exists and has changed
         if self.attachment:
@@ -5328,8 +5341,6 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         blank=True,
     )
 
-    is_published = models.BooleanField(_("published"), default=True)
-
     occurred_at = models.DateTimeField(
         null=True, blank=True, verbose_name=_("Occurred at")
     )
@@ -5354,6 +5365,8 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     )
 
     fields_to_check = ["ref_id"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         verbose_name = "Incident"
@@ -5417,7 +5430,8 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
         verbose_name="Evidence",
         blank=True,
     )
-    is_published = models.BooleanField(_("published"), default=True)
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     def __str__(self):
         return f"{self.entry}"
@@ -5450,7 +5464,6 @@ class Comment(AbstractBaseModel, FolderMixin):
     body = models.TextField(verbose_name=_("Body"))
     is_tainted = models.BooleanField(default=False, verbose_name=_("Edited"))
     is_active = models.BooleanField(default=True, verbose_name=_("Active"))
-    is_published = models.BooleanField(default=True)
 
     author = models.ForeignKey(
         "iam.User",
@@ -5488,6 +5501,8 @@ class Comment(AbstractBaseModel, FolderMixin):
         blank=True,
         related_name="comments",
     )
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         ordering = ["created_at"]
@@ -5571,7 +5586,6 @@ class AppliedControl(
     IntegrationSyncableMixin,
     NameDescriptionMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
     CustomFieldsMixin,
 ):
@@ -5768,7 +5782,6 @@ class AppliedControl(
         verbose_name="Security exceptions",
         related_name="applied_controls",
     )
-    is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     objectives = models.ManyToManyField(
@@ -5779,6 +5792,8 @@ class AppliedControl(
     )
 
     fields_to_check = ["ref_id", "name"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         verbose_name = _("Applied control")
@@ -5973,7 +5988,6 @@ class AppliedControl(
 class OrganisationIssue(
     NameDescriptionMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
 ):
     class Category(models.TextChoices):
         UNDEFINED = "--", "Undefined"
@@ -6041,7 +6055,10 @@ class OrganisationIssue(
         default=Status.DRAFT,
         verbose_name=_("Status"),
     )
+
     fields_to_check = ["name"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     class Meta:
         verbose_name = _("Issue")
@@ -6051,7 +6068,6 @@ class OrganisationIssue(
 class OrganisationObjective(
     NameDescriptionMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
 ):
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
@@ -6120,7 +6136,10 @@ class OrganisationObjective(
         blank=True,
         related_name="organisation_objectives",
     )
+
     fields_to_check = ["name"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     class Meta:
         verbose_name = _("Objective")
@@ -6153,7 +6172,6 @@ class Vulnerability(
     NameDescriptionMixin,
     ETADueDateMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
 ):
     class Status(models.TextChoices):
@@ -6213,9 +6231,10 @@ class Vulnerability(
     published_date = models.DateField(
         null=True, blank=True, verbose_name=_("Publication date")
     )
-    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     def save(self, *args, **kwargs):
         from datetime import date
@@ -9876,7 +9895,7 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################
 
 
-class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class RiskAcceptance(NameDescriptionMixin, FolderMixin):
     ACCEPTANCE_STATE = [
         ("created", "Created"),
         ("submitted", "Submitted"),
@@ -9926,6 +9945,8 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin
     )
 
     fields_to_check = ["name"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     class Meta:
         permissions = [
@@ -10527,10 +10548,6 @@ class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
     )
     team_email = models.EmailField(verbose_name="Team Email", blank=True, null=True)
 
-    def save(self, *args, **kwargs):
-        self.is_published = True
-        return super().save(*args, **kwargs)
-
     def get_emails(self) -> list[str]:
         emails = []
         if self.team_email:
@@ -10544,6 +10561,8 @@ class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
         member_emails = self.members.exclude(email="").values_list("email", flat=True)
         emails.extend(member_emails)
         return list(dict.fromkeys(emails))
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         ordering = ["name"]
@@ -10564,6 +10583,8 @@ class Actor(AbstractBaseModel):
         related_name="actor",
     )
 
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
+
     class Meta:
         constraints = [
             # Ensure exactly one field is set (XOR logic)
@@ -10576,10 +10597,6 @@ class Actor(AbstractBaseModel):
                 name="actor_exactly_one_link",
             )
         ]
-
-    def save(self, *args, **kwargs):
-        self.is_published = True
-        return super().save(*args, **kwargs)
 
     @property
     def type(self) -> Literal["user", "team", "entity"]:

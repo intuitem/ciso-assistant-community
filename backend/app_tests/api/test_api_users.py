@@ -199,7 +199,6 @@ class TestUsersAuthenticated:
     def test_update_only_if_admin(self, test):
         is_admin = test.user_group == "BI-UG-ADM"
 
-        # Ensure the user exists with is_published=true (since Users are now IAM-filtered)
         user, created = User.objects.get_or_create(
             email=USER_EMAIL,
             defaults={
@@ -207,7 +206,6 @@ class TestUsersAuthenticated:
                 "last_name": USER_NAME,
                 "password": USER_PASSWORD,
                 "is_active": True,
-                "is_published": True,  # Users are now published and IAM-filtered
             },
         )
 
@@ -257,7 +255,7 @@ class TestUsersAutocomplete:
 
     def test_autocomplete_returns_display_string(self, authenticated_client):
         User.objects.create_user(
-            "alice@tests.com", first_name="Alice", last_name="Smith", is_published=True
+            "alice@tests.com", first_name="Alice", last_name="Smith"
         )
 
         url = reverse("users-autocomplete")
@@ -274,8 +272,8 @@ class TestUsersAutocomplete:
         assert "id" in alice
 
     def test_autocomplete_search_filters(self, authenticated_client):
-        User.objects.create_user("needle@tests.com", is_published=True)
-        User.objects.create_user("haystack@tests.com", is_published=True)
+        User.objects.create_user("needle@tests.com")
+        User.objects.create_user("haystack@tests.com")
 
         url = reverse("users-autocomplete")
         response = authenticated_client.get(url, {"search": "needle"})
@@ -291,8 +289,8 @@ class TestUsersAutocomplete:
         assert "haystack@tests.com" not in emails
 
     def test_autocomplete_id_filter_hydrates_selection(self, authenticated_client):
-        target = User.objects.create_user("target@tests.com", is_published=True)
-        User.objects.create_user("other@tests.com", is_published=True)
+        target = User.objects.create_user("target@tests.com")
+        User.objects.create_user("other@tests.com")
 
         url = reverse("users-autocomplete")
         response = authenticated_client.get(url, {"id": str(target.id)})
@@ -306,9 +304,7 @@ class TestUsersAutocomplete:
         assert [r["email"] for r in rows] == ["target@tests.com"]
 
     def test_autocomplete_returns_active_flag(self, authenticated_client):
-        User.objects.create_user(
-            "inactive@tests.com", is_active=False, is_published=True
-        )
+        User.objects.create_user("inactive@tests.com", is_active=False)
 
         url = reverse("users-autocomplete")
         response = authenticated_client.get(url, {"search": "inactive"})
@@ -321,12 +317,8 @@ class TestUsersAutocomplete:
         assert rows[0]["is_active"] is False
 
     def test_autocomplete_column_icontains(self, authenticated_client):
-        User.objects.create_user(
-            "picker@tests.com", first_name="Wolfgang", is_published=True
-        )
-        User.objects.create_user(
-            "other@tests.com", first_name="Bela", is_published=True
-        )
+        User.objects.create_user("picker@tests.com", first_name="Wolfgang")
+        User.objects.create_user("other@tests.com", first_name="Bela")
 
         url = reverse("users-autocomplete")
         response = authenticated_client.get(url, {"first_name__icontains": "olfg"})
@@ -344,8 +336,8 @@ class TestUsersAutocomplete:
         """Add-only pickers drop users already in the group."""
         folder = Folder.get_root_folder()
         group = UserGroup.objects.create(name="picker-grp", folder=folder)
-        member = User.objects.create_user("member@tests.com", is_published=True)
-        User.objects.create_user("outsider@tests.com", is_published=True)
+        member = User.objects.create_user("member@tests.com")
+        User.objects.create_user("outsider@tests.com")
         group.user_set.add(member)
 
         url = reverse("users-autocomplete")
@@ -361,8 +353,8 @@ class TestUsersAutocomplete:
         assert "outsider@tests.com" in emails
 
     def test_autocomplete_ordering(self, authenticated_client):
-        User.objects.create_user("zzz@tests.com", first_name="Zed", is_published=True)
-        User.objects.create_user("aaa@tests.com", first_name="Ann", is_published=True)
+        User.objects.create_user("zzz@tests.com", first_name="Zed")
+        User.objects.create_user("aaa@tests.com", first_name="Ann")
 
         url = reverse("users-autocomplete")
         asc = authenticated_client.get(url, {"ordering": "email"})

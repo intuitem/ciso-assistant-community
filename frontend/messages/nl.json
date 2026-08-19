@@ -5571,5 +5571,7 @@
 	"chatRemoveAttachment": "Bijlage verwijderen",
 	"dataWizardDownloadTemplate": "Download het Excel-sjabloon",
 	"previewTooLarge": "Het bestand is te groot om een voorbeeld te bekijken. Download het om de inhoud te bekijken.",
-	"previewTruncated": "Voorbeeld is afgekapt. Download het bestand om alles te zien."
+	"previewTruncated": "Voorbeeld is afgekapt. Download het bestand om alles te zien.",
+	"viewableFromDescendants": "Zichtbaar vanuit subdomeinen",
+	"viewableFromDescendantsHelpText": "Indien aangevinkt, worden objecten van meerdere typen in deze map zichtbaar vanuit alle subdomeinen. De objecttypen die hierdoor worden beïnvloed zijn: {stringified_model_names}."
 }

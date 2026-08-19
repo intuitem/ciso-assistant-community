@@ -119,7 +119,7 @@ class UserWriteSerializer(CommunityUserWriteSerializer, EditorPermissionMixin):
 class ClientSettingsWriteSerializer(BaseModelSerializer):
     class Meta:
         model = ClientSettings
-        exclude = ["is_published", "folder"]
+        exclude = ["folder"]
 
 
 class ClientSettingsReadSerializer(BaseModelSerializer):
@@ -142,7 +142,7 @@ class ClientSettingsReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = ClientSettings
-        exclude = ["is_published", "folder"]
+        exclude = ["folder"]
 
 
 class LogEntrySerializer(serializers.ModelSerializer):

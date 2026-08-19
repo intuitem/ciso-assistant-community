@@ -1362,7 +1362,7 @@ class TestRealAuthAndRBAC:
             parent_folder=app_ready,
             content_type=Folder.ContentType.DOMAIN,
         )
-        user = User.objects.create_user("split@datawizard.test", is_published=True)
+        user = User.objects.create_user("split@datawizard.test")
         user.folder = app_ready
         user.save()
         for folder, role_name in ((writable, "BI-RL-ANA"), (readonly, "BI-RL-AUD")):
@@ -1404,7 +1404,7 @@ class TestRealAuthAndRBAC:
             parent_folder=app_ready,
             content_type=Folder.ContentType.DOMAIN,
         )
-        user = User.objects.create_user("dma@datawizard.test", is_published=True)
+        user = User.objects.create_user("dma@datawizard.test")
         user.folder = app_ready
         user.save()
         group = UserGroup.objects.create(name="grp-dma", folder=dom)

@@ -9,8 +9,8 @@ from django.utils.dateparse import parse_date
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 
-from core.base_models import AbstractBaseModel
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
+from core.base_models import AbstractBaseModel, ViewableFromDescendantsMode
+from iam.models import Folder, FolderMixin
 
 
 class FieldType(models.TextChoices):
@@ -79,7 +79,7 @@ def coerce_value(field_type: str, raw):
     return str(raw)
 
 
-class CustomFieldDefinition(FolderMixin, PublishInRootFolderMixin, AbstractBaseModel):
+class CustomFieldDefinition(FolderMixin, AbstractBaseModel):
     """Schema of an org-defined field attached to a host model.
 
     Scoping (design B): the inherited ``folder`` decides where the field applies.
@@ -107,6 +107,8 @@ class CustomFieldDefinition(FolderMixin, PublishInRootFolderMixin, AbstractBaseM
     searchable = models.BooleanField(default=False, verbose_name=_("searchable"))
     filterable = models.BooleanField(default=True, verbose_name=_("filterable"))
     order = models.PositiveSmallIntegerField(default=0, verbose_name=_("order"))
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     class Meta:
         verbose_name = _("custom field definition")

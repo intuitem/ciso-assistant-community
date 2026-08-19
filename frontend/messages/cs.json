@@ -5691,5 +5691,7 @@
 	"importTemplatesSingleNote": "Importujete jen jednu jedinou šablonu? Často je mnohem rychlejší si ji založit manuálně přímo ze seznamu se šablonami.",
 	"unpublishedDocumentsNotice": "Připraveno celkem {count} dokumentů jakožto koncept (draft). Nejsou zatím publikované — uvidíte je tedy jen v pohledu správy (manage).",
 	"authored": "Napsáno v aplikaci",
-	"uploaded": "Nahráno ze souboru"
+	"uploaded": "Nahráno ze souboru",
+	"viewableFromDescendants": "Viditelné ze subdomén",
+	"viewableFromDescendantsHelpText": "Pokud je zaškrtnuto, umožní zobrazení objektů více typů v této doméně ze všech subdomén. Typy objektů, kterých se to týká, jsou: {stringified_model_names}."
 }

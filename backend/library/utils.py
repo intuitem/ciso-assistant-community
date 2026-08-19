@@ -148,7 +148,6 @@ class RequirementNodeImporter:
                 locale=framework_object.locale,
                 default_locale=framework_object.default_locale,
                 translations=self.requirement_data.get("translations", {}),
-                is_published=True,
             ),
         )
         requirement_node.clean()
@@ -433,7 +432,6 @@ class FrameworkImporter:
                 locale=library_object.locale,
                 default_locale=library_object.default_locale,
                 translations=self.framework_data.get("translations", {}),
-                is_published=True,
             ),
         )
         for requirement_node in self._requirement_nodes:
@@ -469,7 +467,6 @@ class ReferentialImporterMixin:
             description=self.data.get("description"),
             annotation=self.data.get("annotation"),
             provider=library_object.provider,
-            is_published=True,
             locale=library_object.locale,
             translations=self.data.get("translations", {}),
             default_locale=library_object.default_locale,
@@ -564,7 +561,6 @@ class ThreatImporter:
             description=self.threat_data.get("description"),
             annotation=self.threat_data.get("annotation"),
             provider=library_object.provider,
-            is_published=True,
             locale=library_object.locale,
             translations=self.threat_data.get("translations", {}),
             default_locale=library_object.default_locale,  # Change this in the future ?
@@ -614,7 +610,6 @@ class ReferenceControlImporter:
             typical_evidence=self.reference_control_data.get("typical_evidence"),
             category=self.reference_control_data.get("category"),
             csf_function=self.reference_control_data.get("csf_function"),
-            is_published=True,
             locale=library_object.locale,
             translations=self.reference_control_data.get("translations", {}),
             default_locale=library_object.default_locale,  # Change this in the future ?
@@ -666,7 +661,6 @@ class MetricDefinitionImporter:
             choices_definition=self.metric_definition_data.get("choices_definition"),
             higher_is_better=self.metric_definition_data.get("higher_is_better", True),
             default_target=self.metric_definition_data.get("default_target"),
-            is_published=True,
             locale=library_object.locale,
             translations=self.metric_definition_data.get("translations", {}),
             default_locale=library_object.default_locale,
@@ -732,7 +726,6 @@ class RiskMatrixImporter:
                 locale=library_object.locale,
                 default_locale=library_object.default_locale,  # Change this in the future ?
                 translations=self.risk_matrix_data.get("translations", {}),
-                is_published=True,
             ),
         )
         logger.info(
@@ -1174,7 +1167,6 @@ class LibraryImporter:
                 "publication_date": self._library.publication_date,
                 "copyright": self._library.copyright,
                 "folder": Folder.get_root_folder(),  # TODO: make this configurable,
-                "is_published": True,
                 "builtin": self._library.builtin,
                 "objects_meta": self._library.objects_meta,
                 "translations": self._library.translations,

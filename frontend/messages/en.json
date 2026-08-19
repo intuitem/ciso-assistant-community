@@ -6004,5 +6004,7 @@
 	"loadMoreAssets": "Load more",
 	"noAssetsInClass": "No assets directly in this class.",
 	"createMissingAssetClasses": "Create missing asset classes",
-	"createMissingAssetClassesHelpText": "Create the custom asset classes referenced by the import. They are added to the global catalogue and become visible to every user."
+	"createMissingAssetClassesHelpText": "Create the custom asset classes referenced by the import. They are added to the global catalogue and become visible to every user.",
+	"viewableFromDescendants": "Viewable from sub-domains",
+	"viewableFromDescendantsHelpText": "If checked, make objects of multiple types in this folder be viewable from all the sub-domains, the types of objects affected by this are: {stringified_model_names}."
 }

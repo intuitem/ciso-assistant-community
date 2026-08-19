@@ -37,7 +37,6 @@ class SSOSettingsQuerySet(QuerySet):
                     name=_settings.name,
                     created_at=_settings.created_at,
                     updated_at=_settings.updated_at,
-                    is_published=_settings.is_published,
                     is_enabled=_settings.value.get("is_enabled"),
                     force_sso=_settings.value.get("force_sso"),
                     slo_enabled=_settings.value.get("slo_enabled", False),

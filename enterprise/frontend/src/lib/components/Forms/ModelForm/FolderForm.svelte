@@ -1,8 +1,10 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Checkbox from '../Checkbox.svelte';
@@ -27,6 +29,30 @@
 		object = {},
 		model
 	}: Props = $props();
+
+	let viewableFromDescendantsHelpText = $state(
+		m.viewableFromDescendantsHelpText({ stringified_model_names: '...' })
+	);
+
+	onMount(() => {
+		initViewableFromDescendantsHelpText();
+	});
+
+	async function initViewableFromDescendantsHelpText() {
+		let stringifiedModelNames = m.anErrorOccurred();
+
+		const req = await fetch('/content-types?may_be_viewable_from_descendants=true');
+		if (req.ok) {
+			const res = await req.json();
+			const modelNames = res.map((model) => safeTranslate(model.label));
+
+			stringifiedModelNames = modelNames.join(' | ');
+		}
+
+		viewableFromDescendantsHelpText = m.viewableFromDescendantsHelpText({
+			stringified_model_names: stringifiedModelNames
+		});
+	}
 
 	const setCreateIamGroups = (value: boolean) => {
 		form.form.update((currentData) => ({
@@ -97,5 +123,11 @@
 		field="create_iam_groups"
 		label={m.createIamGroups()}
 		helpText={m.whenEnabledIamGroupsAreCreatedAutomatically()}
+	/>
+	<Checkbox
+		{form}
+		field="viewable_from_descendants"
+		label={m.viewableFromDescendants()}
+		helpText={viewableFromDescendantsHelpText}
 	/>
 {/if}

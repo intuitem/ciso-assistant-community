@@ -142,11 +142,11 @@ class SyncEvent(models.Model):
 # Sync state (SyncMapping/SyncEvent) is high-volume and intentionally untracked.
 auditlog.register(
     IntegrationProvider,
-    exclude_fields=["created_at", "updated_at", "is_published"],
+    exclude_fields=["created_at", "updated_at"],
 )
 auditlog.register(
     IntegrationConfiguration,
-    exclude_fields=["created_at", "updated_at", "is_published", "last_sync_at"],
+    exclude_fields=["created_at", "updated_at", "last_sync_at"],
     mask_fields=["credentials", "webhook_secret"],
     mask_callable="global_settings.utils.redact_secret_value",
 )

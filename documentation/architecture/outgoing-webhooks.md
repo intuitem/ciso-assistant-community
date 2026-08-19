@@ -3,21 +3,20 @@
 <!--toc:start-->
 
 - [Outgoing webhooks](#outgoing-webhooks)
-  - [Overview & goals](#overview-goals)
-  - [Technical specification & tradeoffs](#technical-specification-tradeoffs)
+  - [Overview \& goals](#overview--goals)
+  - [Technical specification \& tradeoffs](#technical-specification--tradeoffs)
     - [Data models](#data-models)
     - [Architecture: the registry pattern](#architecture-the-registry-pattern)
     - [Event triggering](#event-triggering)
       - [Rationale](#rationale)
     - [Huey task execution](#huey-task-execution)
-    - [Security & consumer management](#security-consumer-management)
+    - [Security \& consumer management](#security--consumer-management)
     - [Payload](#payload)
       - [Payload structure](#payload-structure)
       - [Payload strategy](#payload-strategy)
     - [Webhook headers](#webhook-headers)
     - [Verifying signatures (MVP)](#verifying-signatures-mvp)
-  - [MVP limitations & future iterations](#mvp-limitations-future-iterations)
-  <!--toc:end-->
+  - [MVP limitations \& future iterations](#mvp-limitations--future-iterations)
 
 ## Overview & goals
 
@@ -178,7 +177,6 @@ A "full" payload contains _the entirety_ of the resource that changed.
     "expiry_date": null,
     "link": null,
     "progress_field": 100,
-    "is_published": true,
     "observation": null,
     "sync_mappings": [
       {

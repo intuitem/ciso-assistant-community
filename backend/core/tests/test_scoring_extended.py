@@ -21,7 +21,6 @@ def scoring_setup(db):
     fw = Framework.objects.create(
         name="Extended Scoring FW",
         folder=folder,
-        is_published=True,
         min_score=0,
         max_score=100,
     )
@@ -31,7 +30,6 @@ def scoring_setup(db):
         ref_id="EXT-REQ",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
     # Q1: single choice
     q1 = Question.objects.create(
@@ -43,7 +41,6 @@ def scoring_setup(db):
         order=0,
         weight=1,
         folder=folder,
-        is_published=True,
     )
     q1_good = QuestionChoice.objects.create(
         question=q1,
@@ -54,7 +51,6 @@ def scoring_setup(db):
         compute_result="true",
         order=0,
         folder=folder,
-        is_published=True,
     )
     q1_bad = QuestionChoice.objects.create(
         question=q1,
@@ -65,7 +61,6 @@ def scoring_setup(db):
         compute_result="false",
         order=1,
         folder=folder,
-        is_published=True,
     )
 
     # Q2: single choice
@@ -78,7 +73,6 @@ def scoring_setup(db):
         order=1,
         weight=1,
         folder=folder,
-        is_published=True,
     )
     q2_good = QuestionChoice.objects.create(
         question=q2,
@@ -89,7 +83,6 @@ def scoring_setup(db):
         compute_result="true",
         order=0,
         folder=folder,
-        is_published=True,
     )
     q2_bad = QuestionChoice.objects.create(
         question=q2,
@@ -100,7 +93,6 @@ def scoring_setup(db):
         compute_result="false",
         order=1,
         folder=folder,
-        is_published=True,
     )
 
     perimeter = Perimeter.objects.create(name="Ext Perim", folder=folder)
@@ -109,7 +101,6 @@ def scoring_setup(db):
         framework=fw,
         folder=folder,
         perimeter=perimeter,
-        is_published=True,
         min_score=0,
         max_score=100,
     )
@@ -206,7 +197,6 @@ class TestScoringExtended:
         fw = Framework.objects.create(
             name="Clamp FW",
             folder=folder,
-            is_published=True,
             min_score=0,
             max_score=50,
         )
@@ -216,7 +206,6 @@ class TestScoringExtended:
             ref_id="CL-REQ",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         q = Question.objects.create(
             requirement_node=rn,
@@ -226,7 +215,6 @@ class TestScoringExtended:
             order=0,
             weight=1,
             folder=folder,
-            is_published=True,
         )
         c_high = QuestionChoice.objects.create(
             question=q,
@@ -237,7 +225,6 @@ class TestScoringExtended:
             compute_result="true",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q,
@@ -246,7 +233,6 @@ class TestScoringExtended:
             value="Placeholder",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         perimeter = Perimeter.objects.create(name="Clamp Perim", folder=folder)
@@ -255,7 +241,6 @@ class TestScoringExtended:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=50,
         )
@@ -393,7 +378,6 @@ class TestSemanticComputeResult:
         fw = Framework.objects.create(
             name=f"Sem FW {suffix}",
             folder=folder,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -403,7 +387,6 @@ class TestSemanticComputeResult:
             ref_id="SEM-REQ",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
 
         def _make_question(idx, q_type, choices_spec):
@@ -415,7 +398,6 @@ class TestSemanticComputeResult:
                 order=idx,
                 weight=1,
                 folder=folder,
-                is_published=True,
             )
             created = []
             for i, spec in enumerate(choices_spec):
@@ -429,7 +411,6 @@ class TestSemanticComputeResult:
                         compute_result=spec.get("compute_result"),
                         order=i,
                         folder=folder,
-                        is_published=True,
                     )
                 )
             return q, created
@@ -443,7 +424,6 @@ class TestSemanticComputeResult:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -831,7 +811,6 @@ class TestVisibilityEdgeCases:
         fw = Framework.objects.create(
             name=f"Vis FW {q2_depends_on}",
             folder=folder,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -841,7 +820,6 @@ class TestVisibilityEdgeCases:
             ref_id="VIS-REQ",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         q1_urn = "urn:test:vq1"
         if q2_depends_on and q2_depends_on.get("question") == "VQ1":
@@ -853,7 +831,6 @@ class TestVisibilityEdgeCases:
             type=q1_type,
             order=0,
             folder=folder,
-            is_published=True,
         )
         q2 = Question.objects.create(
             requirement_node=rn,
@@ -863,7 +840,6 @@ class TestVisibilityEdgeCases:
             depends_on=q2_depends_on,
             order=1,
             folder=folder,
-            is_published=True,
         )
         return fw, rn, q1, q2
 
@@ -888,7 +864,6 @@ class TestVisibilityEdgeCases:
             compute_result="true",
             order=0,
             folder=folder,
-            is_published=True,
         )
         c_b = QuestionChoice.objects.create(
             question=q1,
@@ -899,7 +874,6 @@ class TestVisibilityEdgeCases:
             compute_result="true",
             order=1,
             folder=folder,
-            is_published=True,
         )
         # Q2 choices
         q2_c = QuestionChoice.objects.create(
@@ -911,7 +885,6 @@ class TestVisibilityEdgeCases:
             compute_result="true",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q2,
@@ -922,7 +895,6 @@ class TestVisibilityEdgeCases:
             compute_result="false",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         perimeter = Perimeter.objects.create(name="Vis Perim All", folder=folder)
@@ -931,7 +903,6 @@ class TestVisibilityEdgeCases:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -983,7 +954,6 @@ class TestVisibilityEdgeCases:
             compute_result="true",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q1,
@@ -994,7 +964,6 @@ class TestVisibilityEdgeCases:
             compute_result="true",
             order=1,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q2,
@@ -1003,7 +972,6 @@ class TestVisibilityEdgeCases:
             value="X",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q2,
@@ -1012,7 +980,6 @@ class TestVisibilityEdgeCases:
             value="Y",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         perimeter = Perimeter.objects.create(name="Vis Perim All2", folder=folder)
@@ -1021,7 +988,6 @@ class TestVisibilityEdgeCases:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -1066,7 +1032,6 @@ class TestVisibilityEdgeCases:
             compute_result="true",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q1,
@@ -1077,7 +1042,6 @@ class TestVisibilityEdgeCases:
             compute_result="false",
             order=1,
             folder=folder,
-            is_published=True,
         )
         q2_c = QuestionChoice.objects.create(
             question=q2,
@@ -1088,7 +1052,6 @@ class TestVisibilityEdgeCases:
             compute_result="true",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q2,
@@ -1099,7 +1062,6 @@ class TestVisibilityEdgeCases:
             compute_result="false",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         perimeter = Perimeter.objects.create(name="Vis Perim SC", folder=folder)
@@ -1108,7 +1070,6 @@ class TestVisibilityEdgeCases:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -1143,7 +1104,6 @@ class TestVisibilityEdgeCases:
         fw = Framework.objects.create(
             name="Max Agg Framework",
             folder=folder,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -1153,7 +1113,6 @@ class TestVisibilityEdgeCases:
             ref_id="CH-REQ",
             assessable=True,
             folder=folder,
-            is_published=True,
         )
         q1 = Question.objects.create(
             requirement_node=rn,
@@ -1162,7 +1121,6 @@ class TestVisibilityEdgeCases:
             type=Question.Type.UNIQUE_CHOICE,
             order=0,
             folder=folder,
-            is_published=True,
         )
         q1_c = QuestionChoice.objects.create(
             question=q1,
@@ -1173,7 +1131,6 @@ class TestVisibilityEdgeCases:
             compute_result="true",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q1,
@@ -1184,7 +1141,6 @@ class TestVisibilityEdgeCases:
             compute_result="false",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         q2 = Question.objects.create(
@@ -1199,7 +1155,6 @@ class TestVisibilityEdgeCases:
                 "condition": "any",
             },
             folder=folder,
-            is_published=True,
         )
         q2_c = QuestionChoice.objects.create(
             question=q2,
@@ -1210,7 +1165,6 @@ class TestVisibilityEdgeCases:
             compute_result="true",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q2,
@@ -1221,7 +1175,6 @@ class TestVisibilityEdgeCases:
             compute_result="false",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         q3 = Question.objects.create(
@@ -1236,7 +1189,6 @@ class TestVisibilityEdgeCases:
                 "condition": "any",
             },
             folder=folder,
-            is_published=True,
         )
         q3_c = QuestionChoice.objects.create(
             question=q3,
@@ -1247,7 +1199,6 @@ class TestVisibilityEdgeCases:
             compute_result="true",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q3,
@@ -1258,7 +1209,6 @@ class TestVisibilityEdgeCases:
             compute_result="false",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         perimeter = Perimeter.objects.create(name="Chain Perim", folder=folder)
@@ -1267,7 +1217,6 @@ class TestVisibilityEdgeCases:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -1324,7 +1273,6 @@ class TestVisibilityEdgeCases:
             compute_result="true",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q1,
@@ -1335,7 +1283,6 @@ class TestVisibilityEdgeCases:
             compute_result="false",
             order=1,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q2,
@@ -1344,7 +1291,6 @@ class TestVisibilityEdgeCases:
             value="X",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q2,
@@ -1353,7 +1299,6 @@ class TestVisibilityEdgeCases:
             value="Y",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         perimeter = Perimeter.objects.create(name="Vis Perim UA", folder=folder)
@@ -1362,7 +1307,6 @@ class TestVisibilityEdgeCases:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -1396,7 +1340,6 @@ class TestVisibilityEdgeCases:
             compute_result="true",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q1,
@@ -1407,7 +1350,6 @@ class TestVisibilityEdgeCases:
             compute_result="false",
             order=1,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q2,
@@ -1416,7 +1358,6 @@ class TestVisibilityEdgeCases:
             value="X",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q2,
@@ -1425,7 +1366,6 @@ class TestVisibilityEdgeCases:
             value="Y",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         perimeter = Perimeter.objects.create(name="Vis Perim Empty", folder=folder)
@@ -1434,7 +1374,6 @@ class TestVisibilityEdgeCases:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
         )
@@ -1479,7 +1418,6 @@ class TestVisibilityEdgeCases:
             compute_result="true",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q1,
@@ -1490,7 +1428,6 @@ class TestVisibilityEdgeCases:
             compute_result="false",
             order=1,
             folder=folder,
-            is_published=True,
         )
         q2_c = QuestionChoice.objects.create(
             question=q2,
@@ -1501,7 +1438,6 @@ class TestVisibilityEdgeCases:
             compute_result="true",
             order=0,
             folder=folder,
-            is_published=True,
         )
         QuestionChoice.objects.create(
             question=q2,
@@ -1512,7 +1448,6 @@ class TestVisibilityEdgeCases:
             compute_result="false",
             order=1,
             folder=folder,
-            is_published=True,
         )
 
         perimeter = Perimeter.objects.create(name="Vis Perim Foo", folder=folder)
@@ -1521,7 +1456,6 @@ class TestVisibilityEdgeCases:
             framework=fw,
             folder=folder,
             perimeter=perimeter,
-            is_published=True,
             min_score=0,
             max_score=100,
         )

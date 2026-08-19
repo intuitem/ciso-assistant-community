@@ -129,12 +129,12 @@ The following schematic illustrates the fundamental concepts of IAM in CISO Assi
 
 ### 6. Publication mechanism
 
-All objects of CISO Assistant support a built-in flag called _**is\_published.**_&#x20;
+All folder have a _**viewable\_from\_descendants.**_&#x20; field
 
-Objects with the flag _is\_published_ are visible in subdomains as if they were attached to each subdomain of the object's domain. This mechanism only concerns visibility, not creation/udpate/deletion.\
-All objects are currently published, except assessments (audits, risk analysis, BIA, entitiy assessments)
+Objects which model is `ALWAYS_VIEWABLE` or which model is `MAY_BE_VIEWABLE` and which folder has _viewable\_from\_descendants_ set to `True` are visible(viewable) in subdomains as if they were attached to each subdomain of the object's domain.
+This mechanism only concerns visibility, not creation/udpate/deletion.
 
-To avoid an object being published, the simplest solution is to put it in a leaf subdomain.
+To avoid an object being viewable by descendants, the simplest solution is to put it in a leaf subdomain.
 
 The plan is to remove this mechanism by Q2 2026 and introduce dynamic groups instead (e.g. the group of all users).
 

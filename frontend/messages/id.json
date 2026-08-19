@@ -1872,5 +1872,7 @@
 	"gracePeriod": "Masa tenggang",
 	"gracePeriodHelpText": "Rahasia saat ini terus berfungsi selama durasi ini setelah rotasi, sehingga integrasi dapat diperbarui tanpa waktu henti. Dibatasi hingga 1 bulan.",
 	"gracePeriodTooLong": "Masa tenggang tidak boleh lebih dari 1 bulan.",
-	"previousSecretValidUntil": "Rahasia klien sebelumnya tetap berlaku hingga {date}."
+	"previousSecretValidUntil": "Rahasia klien sebelumnya tetap berlaku hingga {date}.",
+	"viewableFromDescendants": "Terlihat dari subdomain",
+	"viewableFromDescendantsHelpText": "Jika dicentang, objek dari berbagai tipe di domain ini akan terlihat dari semua subdomain. Tipe objek yang terpengaruh adalah: {stringified_model_names}."
 }

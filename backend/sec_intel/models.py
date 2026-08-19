@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from core.base_models import ViewableFromDescendantsMode
 
 from core.models import (
     FilteringLabelMixin,
@@ -7,13 +8,11 @@ from core.models import (
     LoadedLibrary,
     ReferentialObjectMixin,
 )
-from iam.models import PublishInRootFolderMixin
 
 
 class SecurityAdvisory(
     ReferentialObjectMixin,
     I18nObjectMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
 ):
     class Source(models.TextChoices):
@@ -74,9 +73,10 @@ class SecurityAdvisory(
     exploited_date_added = models.DateField(
         null=True, blank=True, verbose_name=_("KEV date added")
     )
-    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         verbose_name = _("Security advisory")
@@ -89,7 +89,6 @@ class SecurityAdvisory(
 class CWE(
     ReferentialObjectMixin,
     I18nObjectMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
 ):
     library = models.ForeignKey(
@@ -99,9 +98,10 @@ class CWE(
         blank=True,
         related_name="cwes",
     )
-    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         verbose_name = _("CWE")
@@ -157,7 +157,6 @@ class Tactic(ReferentialObjectMixin, I18nObjectMixin):
 class Technique(
     ReferentialObjectMixin,
     I18nObjectMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
 ):
     library = models.ForeignKey(
@@ -197,9 +196,10 @@ class Technique(
         verbose_name=_("Reference controls"),
     )
     is_deprecated = models.BooleanField(default=False, verbose_name=_("Deprecated"))
-    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["ref_id", "name"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         verbose_name = _("Technique")

@@ -3577,5 +3577,7 @@
 	"scimTokenGenerationFailed": "SCIM-Token konnte nicht erzeugt werden",
 	"idpGroup": "IdP-Gruppe",
 	"idpGroups": "IdP-Gruppen",
-	"idpGroupsDescription": "IdP-Gruppenföderation aktivieren (SCIM-Bereitstellung, IdP-Gruppenzuordnungen und IdP-Gruppenmitgliedschaften von Benutzern)."
+	"idpGroupsDescription": "IdP-Gruppenföderation aktivieren (SCIM-Bereitstellung, IdP-Gruppenzuordnungen und IdP-Gruppenmitgliedschaften von Benutzern).",
+	"viewableFromDescendants": "Sichtbar aus Unterdomänen",
+	"viewableFromDescendantsHelpText": "Wenn aktiviert, werden Objekte mehrerer Typen in diesem Bereich aus allen Unterdomänen sichtbar. Die davon betroffenen Objekttypen sind: {stringified_model_names}."
 }

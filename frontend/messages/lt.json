@@ -4659,5 +4659,7 @@
 	"scimTokenGenerationFailed": "Nepavyko sugeneruoti SCIM žetono",
 	"idpGroup": "IdP grupė",
 	"idpGroups": "IdP grupės",
-	"idpGroupsDescription": "Įjungti IdP grupių federaciją (SCIM teikimas, IdP grupių susiejimai ir naudotojų narystės IdP grupėse)."
+	"idpGroupsDescription": "Įjungti IdP grupių federaciją (SCIM teikimas, IdP grupių susiejimai ir naudotojų narystės IdP grupėse).",
+	"viewableFromDescendants": "Matoma iš subdomenų",
+	"viewableFromDescendantsHelpText": "Jei pažymėta, kelių tipų objektai šioje srityje taps matomi iš visų subdomenų. Objektų tipai, kuriems tai turi įtakos: {stringified_model_names}."
 }

@@ -1678,5 +1678,7 @@
 	"gracePeriod": "رعایتی مدت",
 	"gracePeriodHelpText": "موجودہ سیکرٹ تبدیلی کے بعد اس وقت تک کام کرتا رہتا ہے تاکہ انضمامات کو بغیر کسی رکاوٹ کے اپ ڈیٹ کیا جا سکے۔ زیادہ سے زیادہ 1 ماہ تک محدود۔",
 	"gracePeriodTooLong": "رعایتی مدت 1 ماہ سے زیادہ نہیں ہو سکتی۔",
-	"previousSecretValidUntil": "پچھلا کلائنٹ سیکرٹ {date} تک درست رہتا ہے۔"
+	"previousSecretValidUntil": "پچھلا کلائنٹ سیکرٹ {date} تک درست رہتا ہے۔",
+	"viewableFromDescendants": "ذیلی ڈومینز سے دکھائی دینے والا",
+	"viewableFromDescendantsHelpText": "نشان زد ہونے پر، اس فولڈر میں متعدد اقسام کے آبجیکٹس تمام ذیلی ڈومینز سے دکھائی دیں گے۔ اس سے متاثر ہونے والی آبجیکٹ اقسام یہ ہیں: {stringified_model_names}۔"
 }

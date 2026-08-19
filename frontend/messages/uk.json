@@ -5732,5 +5732,7 @@
 				"countPlural=other": "{count} визначень метрик"
 			}
 		}
-	]
+	],
+	"viewableFromDescendants": "Видимий з піддоменів",
+	"viewableFromDescendantsHelpText": "Якщо позначено, об'єкти кількох типів у цьому домені стають видимими з усіх піддоменів. Типи об'єктів, на які це впливає: {stringified_model_names}."
 }

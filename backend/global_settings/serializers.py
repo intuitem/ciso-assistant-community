@@ -305,7 +305,7 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GlobalSettings
-        exclude = ["is_published", "folder"]
+        exclude = ["folder"]
         read_only_fields = ["name"]
 
 
@@ -449,7 +449,6 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "name",
             "value",
             "folder",
-            "is_published",
         ]
         read_only_fields = ["name"]
 
@@ -537,7 +536,6 @@ class VulnerabilitySlaSerializer(serializers.ModelSerializer):
             "name",
             "value",
             "folder",
-            "is_published",
         ]
         read_only_fields = ["name"]
 
@@ -599,7 +597,6 @@ class InfraConfigSerializer(serializers.ModelSerializer):
             "name",
             "value",
             "folder",
-            "is_published",
         ]
         read_only_fields = ["name"]
 
@@ -688,7 +685,6 @@ class SecIntelFeedsSerializer(serializers.ModelSerializer):
             "name",
             "value",
             "folder",
-            "is_published",
         ]
         read_only_fields = ["name"]
 

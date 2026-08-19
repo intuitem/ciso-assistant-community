@@ -3732,5 +3732,7 @@
 	"workshopThree": "Workshop 3",
 	"workshopTwo": "Workshop 2",
 	"workshops": "Workshop",
-	"yearlyTasksReview": "Riepilogo attività aggregate"
+	"yearlyTasksReview": "Riepilogo attività aggregate",
+	"viewableFromDescendants": "Visibile dai sottodomini",
+	"viewableFromDescendantsHelpText": "Se spuntato, rende visibili dai sottodomini gli oggetti di più tipi presenti in questo dominio. I tipi di oggetto interessati sono: {stringified_model_names}."
 }

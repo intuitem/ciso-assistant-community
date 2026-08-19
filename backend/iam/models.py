@@ -34,6 +34,7 @@ from core.base_models import (
     ActorSyncManager,
     ActorSyncMixin,
     NameDescriptionMixin,
+    ViewableFromDescendantsMode,
 )
 from core.utils import UserGroupCodename, RoleCodename
 from django.utils.http import urlsafe_base64_encode
@@ -125,8 +126,13 @@ class Folder(NameDescriptionMixin):
         root_folder, _ = Folder.objects.get_or_create(
             content_type=Folder.ContentType.ROOT,
             builtin=True,
-            defaults={"name": "Global"},
+            defaults={"name": "Global", "viewable_from_descendants": True},
         )
+        """if not root_folder.viewable_from_descendants:
+            # Self-healing (Use a migrations)
+            root_folder.viewable_from_descendants = True
+            root_folder.save()"""
+
         Folder._CACHED_ROOT_FOLDER = root_folder
 
     @staticmethod
@@ -191,6 +197,12 @@ class Folder(NameDescriptionMixin):
         default=False,
         help_text=_("Automatically provision IAM groups for domain folders."),
     )
+    viewable_from_descendants = models.BooleanField(
+        default=False,
+        help_text=_(
+            "Make all `MAY_BE_VIEWABLE` objects in this folder be viewable from their descendants (descendant folders)."
+        ),
+    )
 
     filtering_labels = models.ManyToManyField(
         "core.FilteringLabel",
@@ -198,7 +210,10 @@ class Folder(NameDescriptionMixin):
         verbose_name=_("Labels"),
         related_name="folders",
     )
+
     fields_to_check = ["name"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         """for Model"""
@@ -316,6 +331,11 @@ class Folder(NameDescriptionMixin):
         with transaction.atomic():
             self._lock_folder_tree()
 
+            if is_root_folder and not self.viewable_from_descendants:
+                raise Folder.InconsistencyError(
+                    "The root folder objects MUST be viewable by descendants."
+                )
+
             if is_create:
                 if is_root_folder:
                     root_folder_already_exists = Folder.objects.filter(
@@ -386,7 +406,6 @@ class Folder(NameDescriptionMixin):
                         )
 
             if is_create:
-                self.is_published = True
                 super().save(*args, **kwargs)
                 self._update_descendants_at_creation()
             else:
@@ -679,25 +698,6 @@ class FolderMixin(models.Model):
         abstract = True
 
 
-class PublishInRootFolderMixin(models.Model):
-    """
-    Set is_published to True if object is attached to the root folder
-    """
-
-    class Meta:
-        abstract = True
-
-    def save(self, *args, **kwargs):
-        # Root folder children must be published
-        if (
-            getattr(self, "folder") == Folder.get_root_folder()
-            and hasattr(self, "is_published")
-            and not self.is_published
-        ):
-            self.is_published = True
-        super().save(*args, **kwargs)
-
-
 class UserGroup(NameDescriptionMixin, FolderMixin):
     """UserGroup objects contain users and can be used as principals in role assignments"""
 
@@ -760,7 +760,6 @@ class UserManager(BaseUserManager):
                 folder=_get_root_folder(),
                 keep_local_login=extra_fields.get("keep_local_login", False),
                 expiry_date=extra_fields.get("expiry_date"),
-                is_published=True,
             ),
         )
         if password:
@@ -935,6 +934,8 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     # See https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#django.contrib.auth.models.CustomUser.USERNAME_FIELD
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         """for Model"""
@@ -1578,25 +1579,39 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if is_accessible:
             return True
 
-        if perm_prefix == "view":
-            has_is_published_field = any(
-                f.name == "is_published" for f in model._meta.get_fields()
+        viewable_by_descendants_mode = getattr(
+            model,
+            "VIEWABLE_FROM_DESCENDANTS_MODE",
+            ViewableFromDescendantsMode.NEVER_VIEWABLE,
+        )
+
+        if (
+            perm_prefix == "view"
+            and viewable_by_descendants_mode
+            != ViewableFromDescendantsMode.NEVER_VIEWABLE
+        ):
+            if (
+                viewable_by_descendants_mode
+                == ViewableFromDescendantsMode.ALWAYS_VIEWABLE
+            ):
+                viewable_from_descendants_filter = {}
+            else:
+                viewable_from_descendants_filter = {"viewable_from_descendants": True}
+
+            # "view" access granted on an ENCLAVE folder MUST not leak the published objects of its ancestors.
+            ancestor_folder_ids = (
+                Folder.objects.filter(
+                    descendants__in=Folder.objects.filter(
+                        id__in=directly_accessible_folder_id_set
+                    ).exclude(content_type=Folder.ContentType.ENCLAVE),
+                    **viewable_from_descendants_filter,
+                )
+                .values_list("id", flat=True)
+                .distinct()
             )
 
-            if has_is_published_field and getattr(obj, "is_published"):
-                # "view" access granted on an ENCLAVE folder MUST not leak the published objects of its ancestors.
-                ancestor_folder_ids = (
-                    Folder.objects.filter(
-                        descendants__in=Folder.objects.filter(
-                            id__in=directly_accessible_folder_id_set
-                        ).exclude(content_type=Folder.ContentType.ENCLAVE)
-                    )
-                    .values_list("id", flat=True)
-                    .distinct()
-                )
-
-                is_accessible = iam_folder.id in ancestor_folder_ids
-                return is_accessible
+            is_accessible = iam_folder.id in ancestor_folder_ids
+            return is_accessible
 
         return False
 
@@ -1974,10 +1989,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if model is Actor:
             return RoleAssignment._get_actor_accessible_ids(user)[perm_prefix_index]
 
-        has_is_published_field = any(
-            f.name == "is_published" for f in model._meta.get_fields()
-        )
-
         allowed_folder_ids = RoleAssignment.get_allowed_folder_ids(
             user, (perm_prefix, model), base_folder=folder
         )
@@ -1987,16 +1998,35 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             **{f"{iam_folder_field}__in": allowed_folder_ids}
         )
 
-        if perm_prefix == "view" and has_is_published_field:
+        viewable_by_descendants_mode = getattr(
+            model,
+            "VIEWABLE_FROM_DESCENDANTS_MODE",
+            ViewableFromDescendantsMode.NEVER_VIEWABLE,
+        )
+
+        if (
+            perm_prefix == "view"
+            and viewable_by_descendants_mode
+            != ViewableFromDescendantsMode.NEVER_VIEWABLE
+        ):
+            if (
+                viewable_by_descendants_mode
+                == ViewableFromDescendantsMode.ALWAYS_VIEWABLE
+            ):
+                viewable_from_descendants_filter = {}
+            else:
+                viewable_from_descendants_filter = {"viewable_from_descendants": True}
+
             # "view" access granted on an ENCLAVE folder MUST not leak the published objects of its ancestors.
             ancestor_folder_ids = Folder.objects.filter(
                 descendants__in=Folder.objects.filter(
                     id__in=allowed_folder_ids
-                ).exclude(content_type=Folder.ContentType.ENCLAVE)
+                ).exclude(content_type=Folder.ContentType.ENCLAVE),
+                **viewable_from_descendants_filter,
             ).distinct()
+
             published_objects_query = Q(
                 **{f"{iam_folder_field}__in": ancestor_folder_ids},
-                is_published=True,
             )
 
             accessible_object_ids_query |= published_objects_query

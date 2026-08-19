@@ -299,7 +299,7 @@ class TestPermissionCheck:
         role_assignment.perimeter_folders.add(folder3)
 
         applied_control = AppliedControl.objects.create(
-            name="applied_control", folder=folder3, is_published=False
+            name="applied_control", folder=folder3
         )
 
         assert (
@@ -392,8 +392,8 @@ class TestPermissionCheck:
             "The user shouldn't have the right to change the previous created applied control (as he doesn't have the 'change_appliedcontrol' permission)."
         )
 
-        applied_control.is_published = True
-        applied_control.save()
+        applied_control.folder.is_published = True
+        applied_control.folder.save()
 
         assert (
             RoleAssignment.is_object_accessible(
@@ -437,7 +437,7 @@ class TestPermissionCheck:
         """
 
         root_folder = Folder.get_root_folder()
-        domain = Folder.objects.create(name="customer_domain")
+        domain = Folder.objects.create(name="customer_domain", is_published=True)
         enclave = Folder.objects.create(
             name="enclave",
             parent_folder=domain,
@@ -445,13 +445,13 @@ class TestPermissionCheck:
         )
 
         published_in_root = AppliedControl.objects.create(
-            name="published_in_root", folder=root_folder, is_published=True
+            name="published_in_root", folder=root_folder
         )
         published_in_domain = AppliedControl.objects.create(
-            name="published_in_domain", folder=domain, is_published=True
+            name="published_in_domain", folder=domain
         )
         control_in_enclave = AppliedControl.objects.create(
-            name="control_in_enclave", folder=enclave, is_published=False
+            name="control_in_enclave", folder=enclave
         )
 
         role = Role.objects.create(name="role")
@@ -514,7 +514,7 @@ class TestPermissionCheck:
         """
         Ensure `FilteringLabel` follows the STANDARD folder-scoped IAM rules, with a SINGLE exception: "add".
 
-        `FilteringLabel` objects are (through the product surface) always stored in the root folder and force-published (`PublishInRootFolderMixin`), so:
+        `FilteringLabel` objects are force-published (`ALWAYS_PUBLISHED`), so:
 
         - "view" needs NO special case: root folder labels are visible to any user holding "view_filteringlabel" on any non-ENCLAVE folder, through the normal `is_published` inheritance (and an ENCLAVE-scoped grant sees nothing).
         - "change"/"delete" need NO special case: they require the permission on the label folder (the root folder), like any other object.
@@ -534,7 +534,7 @@ class TestPermissionCheck:
             label="label_in_root", folder=root_folder
         )
         assert label_in_root.is_published is True, (
-            "Root folder labels MUST be auto-published (`PublishInRootFolderMixin`)."
+            "Filtering labels MUST always be published."
         )
         label_in_domain1 = FilteringLabel.objects.create(
             label="label_in_domain1", folder=domain1
@@ -693,7 +693,7 @@ class TestPermissionCheck:
             "Any Permission should be viewable (even for users with no permissions (no role assigned to them))."
         )
 
-        admin_user = User.objects.create_superuser("admin@tests.com", is_published=True)
+        admin_user = User.objects.create_superuser("admin@tests.com")
         admin_group = UserGroup.objects.get(name="BI-UG-ADM")
         admin_user.folder = admin_group.folder
         admin_user.save()
@@ -843,9 +843,7 @@ class TestFocusMode:
             name="unpublished_control_in_root", folder=root_folder
         )
         # `PublishInRootFolderMixin.save` forces `is_published=True` for root folder objects: unpublish directly to model an unpublished root-scoped object (like the models without this mixin can have).
-        AppliedControl.objects.filter(id=unpublished_control_in_root.id).update(
-            is_published=False
-        )
+        AppliedControl.objects.filter(id=unpublished_control_in_root.id)
         published_control_in_root = AppliedControl.objects.create(
             name="published_control_in_root", folder=root_folder
         )
@@ -951,9 +949,7 @@ class TestFocusMode:
         unpublished_control_in_root = AppliedControl.objects.create(
             name="unpublished_control_in_root", folder=root_folder
         )
-        AppliedControl.objects.filter(id=unpublished_control_in_root.id).update(
-            is_published=False
-        )
+        AppliedControl.objects.filter(id=unpublished_control_in_root.id)
         published_control_in_root = AppliedControl.objects.create(
             name="published_control_in_root", folder=root_folder
         )

@@ -414,7 +414,6 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = Vulnerability
-        exclude = ["is_published"]
 
 
 class VulnerabilityWriteSerializer(BaseModelSerializer):
@@ -424,7 +423,7 @@ class VulnerabilityWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Vulnerability
-        exclude = ["created_at", "updated_at", "is_published"]
+        exclude = ["created_at", "updated_at"]
 
 
 class VulnerabilityImportExportSerializer(BaseModelSerializer):
@@ -1085,7 +1084,7 @@ class AssetClassReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = AssetClass
-        exclude = ["created_at", "updated_at", "is_published"]
+        exclude = ["created_at", "updated_at"]
 
 
 class AssetClassWriteSerializer(BaseModelSerializer):
@@ -1094,7 +1093,7 @@ class AssetClassWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = AssetClass
-        exclude = ["created_at", "updated_at", "folder", "is_published"]
+        exclude = ["created_at", "updated_at", "folder"]
 
     def validate_name(self, value):
         if "/" in value:
@@ -2402,6 +2401,7 @@ class FolderImportExportSerializer(BaseModelSerializer):
             "description",
             "content_type",
             "create_iam_groups",
+            "viewable_from_descendants",
             "created_at",
             "updated_at",
         ]
@@ -2616,7 +2616,6 @@ class EvidenceWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Evidence
-        exclude = ["is_published"]
 
     def create(self, validated_data):
         attachment = validated_data.pop("attachment", None)
@@ -4034,7 +4033,6 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
             "builtin",
             "locale",
             "default_locale",
-            "is_published",
             "translations",
             "frameworks_available",
         ]
@@ -4475,7 +4473,7 @@ class FilteringLabelReadSerializer(BaseModelSerializer):
 class FilteringLabelWriteSerializer(BaseModelSerializer):
     class Meta:
         model = FilteringLabel
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class LibraryFilteringLabelReadSerializer(BaseModelSerializer):
@@ -4490,7 +4488,7 @@ class LibraryFilteringLabelReadSerializer(BaseModelSerializer):
 class LibraryFilteringLabelWriteSerializer(BaseModelSerializer):
     class Meta:
         model = LibraryFilteringLabel
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class SecurityExceptionWriteSerializer(
@@ -5466,7 +5464,7 @@ class TerminologyWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Terminology
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class ClassificationLevelReadSerializer(BaseModelSerializer):
@@ -5485,7 +5483,7 @@ class ClassificationLevelWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = ClassificationLevel
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class ObjectClassificationReadSerializer(BaseModelSerializer):
@@ -5504,7 +5502,7 @@ class ObjectClassificationWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = ObjectClassification
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class ValidationFlowWriteSerializer(BaseModelSerializer):

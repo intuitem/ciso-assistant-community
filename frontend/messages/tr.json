@@ -2436,5 +2436,7 @@
 	"scimTokenGenerationFailed": "SCIM belirteci oluşturulamadı",
 	"idpGroup": "IdP grubu",
 	"idpGroups": "IdP grupları",
-	"idpGroupsDescription": "IdP grup federasyonunu etkinleştirin (SCIM sağlama, IdP grup eşlemeleri ve kullanıcılarda IdP grup üyelikleri)."
+	"idpGroupsDescription": "IdP grup federasyonunu etkinleştirin (SCIM sağlama, IdP grup eşlemeleri ve kullanıcılarda IdP grup üyelikleri).",
+	"viewableFromDescendants": "Alt alan adlarından görüntülenebilir",
+	"viewableFromDescendantsHelpText": "İşaretlenirse, bu etki alanındaki birden fazla türdeki nesne tüm alt alan adlarından görüntülenebilir hale gelir. Bundan etkilenen nesne türleri: {stringified_model_names}."
 }

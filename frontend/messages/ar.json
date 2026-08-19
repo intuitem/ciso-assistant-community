@@ -1682,5 +1682,7 @@
 	"gracePeriod": "فترة السماح",
 	"gracePeriodHelpText": "يستمر السر الحالي في العمل لهذه المدة بعد التدوير، حتى يمكن تحديث عمليات التكامل دون توقف. محدد بشهر واحد.",
 	"gracePeriodTooLong": "لا يمكن أن تتجاوز فترة السماح شهرًا واحدًا.",
-	"previousSecretValidUntil": "يظل سر العميل السابق صالحًا حتى {date}."
+	"previousSecretValidUntil": "يظل سر العميل السابق صالحًا حتى {date}.",
+	"viewableFromDescendants": "قابل للعرض من النطاقات الفرعية",
+	"viewableFromDescendantsHelpText": "في حال تفعيل هذا الخيار، تصبح كائنات من أنواع متعددة في هذا المجلد قابلة للعرض من جميع النطاقات الفرعية، وأنواع الكائنات المتأثرة بهذا هي: {stringified_model_names}."
 }

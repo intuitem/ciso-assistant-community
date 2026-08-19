@@ -4917,5 +4917,7 @@
 	"scimTokenGenerationFailed": "SCIM-i tokeni loomine ebaõnnestus",
 	"idpGroup": "IdP rühm",
 	"idpGroups": "IdP rühmad",
-	"idpGroupsDescription": "Luba IdP rühmade föderatsioon (SCIM ettevalmistamine, IdP rühmade vastendused ja kasutajate IdP rühmade liikmesused)."
+	"idpGroupsDescription": "Luba IdP rühmade föderatsioon (SCIM ettevalmistamine, IdP rühmade vastendused ja kasutajate IdP rühmade liikmesused).",
+	"viewableFromDescendants": "Nähtav alamdomeenidest",
+	"viewableFromDescendantsHelpText": "Kui märgitud, muudetakse selles valdkonnas mitut tüüpi objektid nähtavaks kõigist alamdomeenidest. Mõjutatud objektitüübid on: {stringified_model_names}."
 }

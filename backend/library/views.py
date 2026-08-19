@@ -999,9 +999,7 @@ def _get_readable_stored_library(user, pk_or_urn) -> StoredLibrary | None:
 
     Reading a stored library follows the regular folder-scoped RBAC model
     like any other object; an unreadable library is indistinguishable from
-    a missing one. (Stored rows are is_published, so any role holding
-    view_storedlibrary keeps seeing the catalog — the check only bites
-    where visibility is actually restricted.)
+    a missing one.
     """
     stored = _get_stored_library(pk_or_urn)
     if stored is not None and RoleAssignment.is_object_readable(

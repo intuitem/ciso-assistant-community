@@ -181,7 +181,7 @@ def reader_request(domain):
 
     from iam.models import Role, RoleAssignment, User, UserGroup
 
-    user = User.objects.create_user("reader@chat-import.test", is_published=True)
+    user = User.objects.create_user("reader@chat-import.test")
     group = UserGroup.objects.create(name="readers", folder=domain)
     group.user_set.add(user)
     assignment = RoleAssignment.objects.create(

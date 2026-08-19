@@ -3722,5 +3722,7 @@
 	"scimTokenGenerationFailed": "No se pudo generar el token SCIM",
 	"idpGroup": "Grupo IdP",
 	"idpGroups": "Grupos IdP",
-	"idpGroupsDescription": "Habilitar la federación de grupos IdP (aprovisionamiento SCIM, asignaciones de grupos IdP y pertenencias a grupos IdP en los usuarios)."
+	"idpGroupsDescription": "Habilitar la federación de grupos IdP (aprovisionamiento SCIM, asignaciones de grupos IdP y pertenencias a grupos IdP en los usuarios).",
+	"viewableFromDescendants": "Visible desde subdominios",
+	"viewableFromDescendantsHelpText": "Si está marcado, los objetos de varios tipos en esta carpeta serán visibles desde todos los subdominios. Los tipos de objetos afectados son: {stringified_model_names}."
 }

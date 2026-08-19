@@ -1703,5 +1703,7 @@
 	"gracePeriod": "Perioadă de grație",
 	"gracePeriodHelpText": "Secretul curent continuă să funcționeze pe durata aceasta după rotire, astfel încât integrările să poată fi actualizate fără întrerupere. Limitat la 1 lună.",
 	"gracePeriodTooLong": "Perioada de grație nu poate depăși 1 lună.",
-	"previousSecretValidUntil": "Secretul anterior al clientului rămâne valid până la {date}."
+	"previousSecretValidUntil": "Secretul anterior al clientului rămâne valid până la {date}.",
+	"viewableFromDescendants": "Vizibil din subdomenii",
+	"viewableFromDescendantsHelpText": "Dacă este bifată, obiectele de mai multe tipuri din acest dosar devin vizibile din toate subdomeniile. Tipurile de obiecte afectate sunt: {stringified_model_names}."
 }

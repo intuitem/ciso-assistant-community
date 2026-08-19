@@ -1705,5 +1705,7 @@
 	"gracePeriod": "Período de carência",
 	"gracePeriodHelpText": "O segredo atual continua a funcionar durante este período após a rotação, para que as integrações possam ser atualizadas sem interrupção. Limitado a 1 mês.",
 	"gracePeriodTooLong": "O período de carência não pode ser superior a 1 mês.",
-	"previousSecretValidUntil": "O segredo do cliente anterior permanece válido até {date}."
+	"previousSecretValidUntil": "O segredo do cliente anterior permanece válido até {date}.",
+	"viewableFromDescendants": "Visível a partir dos subdomínios",
+	"viewableFromDescendantsHelpText": "Se marcado, os objetos de vários tipos nesta pasta ficam visíveis a partir de todos os subdomínios. Os tipos de objeto afetados são: {stringified_model_names}."
 }

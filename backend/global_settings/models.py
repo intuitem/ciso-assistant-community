@@ -68,7 +68,7 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
 # tracking it makes auditlog query its non-existent table on create/delete.
 auditlog.register(
     GlobalSettings,
-    exclude_fields=["created_at", "updated_at", "is_published", "ssosettings"],
+    exclude_fields=["created_at", "updated_at", "ssosettings"],
     mask_fields=["value"],
     mask_callable="global_settings.utils.mask_sensitive_settings",
 )

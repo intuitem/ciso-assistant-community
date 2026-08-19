@@ -3727,5 +3727,7 @@
 	"scimTokenGenerationFailed": "生成 SCIM 令牌失败",
 	"idpGroup": "IdP 组",
 	"idpGroups": "IdP 组",
-	"idpGroupsDescription": "启用 IdP 组联合（SCIM 预配、IdP 组映射以及用户的 IdP 组成员资格）。"
+	"idpGroupsDescription": "启用 IdP 组联合（SCIM 预配、IdP 组映射以及用户的 IdP 组成员资格）。",
+	"viewableFromDescendants": "可从子域查看",
+	"viewableFromDescendantsHelpText": "如果勾选，此域中多种类型的对象将可从所有子域查看。受影响的对象类型为：{stringified_model_names}。"
 }

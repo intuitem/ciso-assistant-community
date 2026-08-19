@@ -156,7 +156,7 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
 # secret, headers (SIEM token) and kafka_config (SASL password) are redacted.
 auditlog.register(
     WebhookEndpoint,
-    exclude_fields=["created_at", "updated_at", "is_published"],
+    exclude_fields=["created_at", "updated_at"],
     mask_fields=["headers", "kafka_config", "secret"],
     mask_callable="global_settings.utils.redact_secret_value",
     m2m_fields={"event_types", "target_folders"},

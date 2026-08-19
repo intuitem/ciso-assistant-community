@@ -1701,5 +1701,7 @@
 	"gracePeriod": "Övergångsperiod",
 	"gracePeriodHelpText": "Den nuvarande hemligheten fortsätter att fungera under denna tid efter rotation, så att integrationer kan uppdateras utan driftstopp. Begränsat till 1 månad.",
 	"gracePeriodTooLong": "Övergångsperioden får inte vara längre än 1 månad.",
-	"previousSecretValidUntil": "Den tidigare klienthemligheten förblir giltig till {date}."
+	"previousSecretValidUntil": "Den tidigare klienthemligheten förblir giltig till {date}.",
+	"viewableFromDescendants": "Synlig från underdomäner",
+	"viewableFromDescendantsHelpText": "Om markerad görs objekt av flera typer i denna mapp synliga från alla underdomäner. De objekttyper som påverkas är: {stringified_model_names}."
 }

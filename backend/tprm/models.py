@@ -7,6 +7,7 @@ from core.base_models import (
     ActorSyncMixin,
     NameDescriptionMixin,
     AbstractBaseModel,
+    ViewableFromDescendantsMode,
 )
 from core.models import (
     Actor,
@@ -34,7 +35,7 @@ from core.dora import (
     DORA_REINTEGRATION_POSSIBILITY_CHOICES,
     DORA_DISCONTINUING_IMPACT_CHOICES,
 )
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
+from iam.models import Folder, FolderMixin
 from iam.views import User
 
 from auditlog.registry import auditlog
@@ -44,7 +45,6 @@ class Entity(
     ActorSyncMixin,
     NameDescriptionMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
 ):
     """
@@ -167,6 +167,8 @@ class Entity(
     )
 
     fields_to_check = ["name"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     class Meta:
         verbose_name = _("Entity")

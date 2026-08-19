@@ -2293,7 +2293,6 @@ def startup(sender=None, **kwargs):
             name="vulnerability-sla",
             defaults={
                 "value": vulnerability_sla_defaults,
-                "is_published": True,
                 "folder": Folder.get_root_folder(),
             },
         )
@@ -2314,7 +2313,6 @@ def startup(sender=None, **kwargs):
             name="sec-intel-feeds",
             defaults={
                 "value": sec_intel_defaults,
-                "is_published": True,
                 "folder": Folder.get_root_folder(),
             },
         )

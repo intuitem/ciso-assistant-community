@@ -46,7 +46,7 @@ def _client(user):
 
 @pytest.fixture
 def norole_client(app_ready):
-    user = User.objects.create_user("norole@gs.test", is_published=True)
+    user = User.objects.create_user("norole@gs.test")
     user.folder = app_ready
     user.save()
     return _client(user)
@@ -54,7 +54,7 @@ def norole_client(app_ready):
 
 @pytest.fixture
 def admin_client(app_ready):
-    user = User.objects.create_user("admin@gs.test", is_published=True)
+    user = User.objects.create_user("admin@gs.test")
     group = UserGroup.objects.get(name="BI-UG-ADM", folder=app_ready)
     user.folder = group.folder
     user.save()
@@ -95,7 +95,7 @@ def test_domain_scoped_user_sees_only_their_own(app_ready, victim_config):
         credentials={"instance_url": "https://own.example"},
         settings={},
     )
-    user = User.objects.create_user("dma@gs.test", is_published=True)
+    user = User.objects.create_user("dma@gs.test")
     user.folder = app_ready
     user.save()
     group = UserGroup.objects.create(name="grp-dma", folder=own_folder)

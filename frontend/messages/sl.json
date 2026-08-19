@@ -5602,5 +5602,7 @@
 	"importTemplatesSingleNote": "Uvažate samo eno predlogo? Hitreje jo je ustvariti neposredno s seznama Predlog.",
 	"unpublishedDocumentsNotice": "{count} dokument(ov) je v osnutku, a še ni objavljenih — vidni so v pogledu upravljanja.",
 	"authored": "Ustvarjeno",
-	"uploaded": "Naloženo"
+	"uploaded": "Naloženo",
+	"viewableFromDescendants": "Vidno iz poddomen",
+	"viewableFromDescendantsHelpText": "Če je označeno, postanejo predmeti več vrst v tej domeni vidni iz vseh poddomen. Vrste predmetov, na katere to vpliva, so: {stringified_model_names}."
 }

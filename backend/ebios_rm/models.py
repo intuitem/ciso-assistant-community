@@ -10,7 +10,12 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from core.base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
+from core.base_models import (
+    AbstractBaseModel,
+    ETADueDateMixin,
+    NameDescriptionMixin,
+    ViewableFromDescendantsMode,
+)
 from core.models import (
     Actor,
     AppliedControl,
@@ -909,7 +914,6 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         EXPLOIT = 3, "ebiosExploitation"
 
     ref_id = models.CharField(max_length=100, blank=True, verbose_name="Reference ID")
-    is_published = models.BooleanField(_("published"), default=True)
     threat = models.ForeignKey(
         Threat,
         on_delete=models.SET_NULL,
@@ -943,6 +947,8 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         return self.ICON_MAP.get(self.icon)["fa"] if self.icon else None
 
     fields_to_check = ["ref_id", "name"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     def __str__(self):
         return self.name if hasattr(self, "name") else f"ElementaryAction {self.id}"

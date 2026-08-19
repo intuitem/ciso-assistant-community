@@ -33,7 +33,7 @@ def app_config():
 
 @pytest.fixture
 def admin_client(app_config):
-    admin = User.objects.create_superuser("admin@sa-tests.com", is_published=True)
+    admin = User.objects.create_superuser("admin@sa-tests.com")
     admin_group = UserGroup.objects.get(name="BI-UG-ADM")
     admin.folder = admin_group.folder
     admin.save()

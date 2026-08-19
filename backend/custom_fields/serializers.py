@@ -47,7 +47,7 @@ class CustomFieldDefinitionReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = CustomFieldDefinition
-        exclude = ["content_type", "is_published"]
+        exclude = ["content_type"]
 
     def get_model(self, obj) -> str:
         return f"{obj.content_type.app_label}.{obj.content_type.model}"
@@ -65,7 +65,7 @@ class CustomFieldDefinitionWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = CustomFieldDefinition
-        exclude = ["content_type", "is_published"]
+        exclude = ["content_type"]
 
     def to_representation(self, instance):
         # `model` is write_only; expose it on read so the edit form (which loads the

@@ -2156,7 +2156,7 @@ def duplicate_related_objects(
             # If the object exists in the target folder, link it to the duplicate object
             link_existing_object(duplicate_object, existing_obj, field_name)
 
-        elif obj.folder in target_parent_folders and obj.is_published:
+        elif obj.folder in target_parent_folders and obj._viewable_from_descendants:
             # If the object's folder is a parent and it's published, link it
             link_existing_object(duplicate_object, obj, field_name)
 

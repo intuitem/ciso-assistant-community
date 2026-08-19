@@ -1,5 +1,5 @@
 from django.db import models
-from iam.models import User, FolderMixin, PublishInRootFolderMixin
+from iam.models import User, FolderMixin
 from tprm.models import Entity
 from core.models import Actor, AppliedControl, Asset, Evidence, Incident, Perimeter
 from core.models import FilteringLabelMixin, Terminology
