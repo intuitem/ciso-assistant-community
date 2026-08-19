@@ -2,6 +2,7 @@
 
 from ..client import make_post_request, make_get_request
 from ..resolvers import (
+    resolve_ebios_rm_study_id,
     resolve_folder_id,
     resolve_perimeter_id,
     resolve_risk_matrix_id,
@@ -296,25 +297,69 @@ async def create_applied_control(
 
 async def create_risk_assessment(
     name: str,
-    risk_matrix_id: str,
-    perimeter_id: str,
+    risk_matrix_id: str = None,
+    perimeter_id: str = None,
     description: str = "",
     version: str = "1.0",
     status: str = "planned",
     folder_id: str = None,
+    ebios_rm_study_id: str = None,
 ) -> str:
     """Create risk assessment with risk matrix and perimeter
 
     Args:
         name: Assessment name
-        risk_matrix_id: Risk matrix ID/name (required)
+        risk_matrix_id: Risk matrix ID/name. Optional with ebios_rm_study_id,
+            which supplies the study's own matrix
         perimeter_id: Perimeter ID/name (required)
         description: Description
         version: Version string
         status: planned | in_progress | in_review | done | deprecated
         folder_id: Folder ID/name (inherits from perimeter if not set)
+        ebios_rm_study_id: EBIOS RM study ID/name to attach it to (workshop 5).
+            Generates one risk scenario per selected operational scenario.
+            Refuses if the study already has one; sync that instead.
     """
     try:
+        if ebios_rm_study_id:
+            ebios_rm_study_id = resolve_ebios_rm_study_id(ebios_rm_study_id)
+            if not risk_matrix_id:
+                # the study's scales are what the generated scenarios are scored on
+                study = make_get_request(f"/ebios-rm/studies/{ebios_rm_study_id}/")
+                if study.status_code == 200:
+                    matrix = study.json().get("risk_matrix")
+                    risk_matrix_id = (
+                        matrix.get("id") if isinstance(matrix, dict) else matrix
+                    )
+
+        if ebios_rm_study_id:
+            # creating a second one silently detaches the first, so send the
+            # caller down the same path the workshop-5 page takes
+            existing = make_get_request(
+                "/risk-assessments/", params={"ebios_rm_study": ebios_rm_study_id}
+            )
+            if existing.status_code == 200:
+                rows = existing.json().get("results", [])
+                if rows:
+                    cur = rows[0]
+                    label = cur.get("str") or cur.get("name") or cur.get("id")
+                    return error_response(
+                        "Study already has a risk assessment",
+                        f"'{label}' (ID: {cur.get('id')}) is already linked to this "
+                        "EBIOS RM study. Creating another would detach it.",
+                        "Call sync_risk_assessment_from_ebios_rm with that ID to "
+                        "refresh it from the study, or delete it first to start over.",
+                        retry_allowed=False,
+                    )
+
+        if not risk_matrix_id:
+            return error_response(
+                "Missing risk matrix",
+                "risk_matrix_id is required unless ebios_rm_study_id supplies one.",
+                "Pass risk_matrix_id, or an ebios_rm_study_id whose study has a matrix.",
+                retry_allowed=True,
+            )
+
         # Resolve risk matrix name to ID if needed
         risk_matrix_id = resolve_risk_matrix_id(risk_matrix_id)
 
@@ -339,6 +384,9 @@ async def create_risk_assessment(
         # Folder is optional - if not provided, it inherits from perimeter
         if folder_id:
             payload["folder"] = folder_id
+
+        if ebios_rm_study_id:
+            payload["ebios_rm_study"] = ebios_rm_study_id
 
         res = make_post_request("/risk-assessments/", payload)
 
@@ -487,6 +535,43 @@ async def create_risk_scenario(
             )
         else:
             return http_error_response(res.status_code, res.text)
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
+
+
+async def sync_risk_assessment_from_ebios_rm(risk_assessment_id: str) -> str:
+    """Refresh a risk assessment from its linked EBIOS RM study (workshop 5)
+
+    Use this instead of creating a second assessment for the same study.
+    Scenarios are updated, created, or archived to match the study's current
+    selected objects.
+
+    Args:
+        risk_assessment_id: Risk assessment ID/name linked to an EBIOS RM study
+    """
+    try:
+        risk_assessment_id = resolve_risk_assessment_id(risk_assessment_id)
+        res = make_post_request(
+            f"/risk-assessments/{risk_assessment_id}/sync_from_ebios_rm/", {}
+        )
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        result = (
+            f"Synchronized from EBIOS RM: {data.get('updated', 0)} updated, "
+            f"{data.get('created', 0)} created, {data.get('archived', 0)} archived"
+        )
+        return success_response(
+            result,
+            "sync_risk_assessment_from_ebios_rm",
+            "Use get_risk_scenarios with this assessment to see the current scenarios.",
+        )
     except Exception as e:
         return error_response(
             "Internal Error",

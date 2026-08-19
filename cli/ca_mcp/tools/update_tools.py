@@ -600,9 +600,13 @@ async def update_requirement_assessments(
         resolved_ca_id = resolve_compliance_assessment_id(compliance_assessment_id)
 
         # Fetch all requirement assessments for this compliance assessment once
+        # max_items=None: this lookup drives a bulk write. A capped fetch would
+        # not truncate output, it would silently report existing requirements as
+        # "not found" and skip their updates.
         all_ras, error = fetch_all_results(
             "/requirement-assessments/",
             params={"compliance_assessment": resolved_ca_id},
+            max_items=None,
         )
         if error:
             return f"Error fetching requirement assessments: {error}"

@@ -29,11 +29,11 @@ from core.models import (
     Threat,
     Vulnerability,
 )
+from data_wizard.tests.conftest import make_excel_file
 from ebios_rm.models import ElementaryAction
 from iam.models import User
 from privacy.models import Processing
-
-from data_wizard.tests.conftest import make_excel_file
+from tprm.models import EntityAssessment
 
 URL = "/api/data-wizard/load-file/"
 
@@ -1348,9 +1348,10 @@ class TestRealAuthAndRBAC:
     def test_domain_column_cannot_escape_into_a_view_only_folder(self, app_ready):
         # The gate authorizes the X-Folder-Id folder, but a record's `domain`
         # column is resolved separately through the accessible-folders map.
-        from iam.models import Folder, Role, RoleAssignment, User, UserGroup
         from knox.models import AuthToken
         from rest_framework.test import APIClient
+
+        from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
         writable = Folder.objects.create(
             name="Writable",
@@ -1395,9 +1396,10 @@ class TestRealAuthAndRBAC:
 
     def test_domain_scoped_user_can_import_without_a_folder_header(self, app_ready):
         # The wizard's domain selector is optional; rows carry their own domain.
-        from iam.models import Folder, Role, RoleAssignment, User, UserGroup
         from knox.models import AuthToken
         from rest_framework.test import APIClient
+
+        from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
         dom = Folder.objects.create(
             name="MyDomain",
@@ -1443,3 +1445,308 @@ class TestRealAuthAndRBAC:
         )
         assert resp.status_code == 403
         assert not User.objects.filter(email="intruder@evil.test").exists()
+
+
+# TPRM import — EntityAssessments sheet linking an existing audit
+
+
+def _make_audit(folder, name="Vendor Audit", ref_id="AUD-001"):
+    from core.models import ComplianceAssessment, Framework, RequirementNode
+
+    fw = Framework.objects.create(name=f"{name} FW", folder=folder, is_published=True)
+    RequirementNode.objects.create(
+        framework=fw,
+        urn=f"urn:test:{ref_id}:req:1",
+        ref_id="REQ1",
+        assessable=True,
+        folder=folder,
+        is_published=True,
+    )
+    audit = ComplianceAssessment.objects.create(
+        name=name,
+        ref_id=ref_id,
+        framework=fw,
+        folder=folder,
+    )
+    audit.create_requirement_assessments()
+    return audit
+
+
+def _tprm_excel_with_audit(entity_ref_id, audit_ref_id=None, audit_name=None):
+    row = {
+        "entity_ref_id": entity_ref_id,
+        "name": "Vendor Review",
+    }
+    if audit_ref_id is not None:
+        row["audit_ref_id"] = audit_ref_id
+    if audit_name is not None:
+        row["audit_name"] = audit_name
+    return make_excel_file(
+        {
+            "Entities": [
+                {"ref_id": entity_ref_id, "name": "Vendor Corp", "description": ""}
+            ],
+            "EntityAssessments": [row],
+        }
+    )
+
+
+@pytest.mark.django_db
+class TestTprmEntityAssessmentAuditLink:
+    def test_linking_relocates_audit_and_its_requirement_assessments(
+        self, api_client, domain_folder, all_accessible
+    ):
+        from core.models import RequirementAssessment
+
+        audit = _make_audit(domain_folder, name="Vendor Audit Move", ref_id="AUD-MOVE")
+        original_folder_id = audit.folder_id
+
+        excel = _tprm_excel_with_audit("ENT-MOVE", audit_ref_id="AUD-MOVE")
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["entity_assessments"]["successful"] == 1, results[
+            "entity_assessments"
+        ]
+
+        entity_assessment = EntityAssessment.objects.get(name="Vendor Review")
+        audit.refresh_from_db()
+
+        assert entity_assessment.compliance_assessment_id == audit.id
+        assert audit.folder_id != original_folder_id
+        assert audit.folder.parent_folder_id == entity_assessment.folder_id
+        ra = RequirementAssessment.objects.get(compliance_assessment=audit)
+        assert ra.folder_id == audit.folder_id
+
+    def test_unknown_audit_ref_id_fails_the_row_only(
+        self, api_client, domain_folder, all_accessible
+    ):
+        excel = _tprm_excel_with_audit("ENT-MISS", audit_ref_id="AUD-NOPE")
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["entity_assessments"]["failed"] == 1
+        assert not EntityAssessment.objects.filter(name="Vendor Review").exists()
+
+    def test_unknown_audit_ref_id_does_not_fall_back_to_name(
+        self, api_client, domain_folder, all_accessible
+    ):
+        """A typo'd audit_ref_id must fail the row, not silently link by name."""
+        _make_audit(domain_folder, name="Real Audit", ref_id="AUD-REAL")
+
+        excel = _tprm_excel_with_audit(
+            "ENT-STRICT", audit_ref_id="AUD-TYPO", audit_name="Real Audit"
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["entity_assessments"]["failed"] == 1, results[
+            "entity_assessments"
+        ]
+        assert not EntityAssessment.objects.filter(name="Vendor Review").exists()
+
+    def test_audit_resolved_by_name_when_ref_id_absent(
+        self, api_client, domain_folder, all_accessible
+    ):
+        audit = _make_audit(
+            domain_folder, name="Vendor Audit ByName", ref_id="AUD-BYNAME"
+        )
+        original_folder_id = audit.folder_id
+
+        excel = _tprm_excel_with_audit("ENT-BYNAME", audit_name="Vendor Audit ByName")
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["entity_assessments"]["successful"] == 1, results[
+            "entity_assessments"
+        ]
+
+        entity_assessment = EntityAssessment.objects.get(name="Vendor Review")
+        audit.refresh_from_db()
+        assert entity_assessment.compliance_assessment_id == audit.id
+        assert audit.folder_id != original_folder_id
+
+    def test_audit_ref_id_takes_precedence_over_audit_name(
+        self, api_client, domain_folder, all_accessible
+    ):
+        """ref_id is tried first, name is only a fallback — same convention as elsewhere."""
+        target = _make_audit(domain_folder, name="Target Audit", ref_id="AUD-TARGET")
+        decoy = _make_audit(domain_folder, name="Decoy Audit", ref_id="AUD-DECOY")
+
+        excel = _tprm_excel_with_audit(
+            "ENT-PRECEDENCE", audit_ref_id="AUD-TARGET", audit_name="Decoy Audit"
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        entity_assessment = EntityAssessment.objects.get(name="Vendor Review")
+        assert entity_assessment.compliance_assessment_id == target.id
+        assert entity_assessment.compliance_assessment_id != decoy.id
+
+    def test_same_named_assessment_in_different_domain_does_not_collide(
+        self, api_client, domain_folder, other_folder, all_accessible
+    ):
+        """Dedup must be scoped per-domain, like Entities/Contracts already are."""
+        audit_a = _make_audit(domain_folder, name="Vendor Audit A", ref_id="AUD-X-A")
+        audit_b = _make_audit(other_folder, name="Vendor Audit B", ref_id="AUD-X-B")
+
+        excel_a = _tprm_excel_with_audit("ENT-CROSS", audit_ref_id="AUD-X-A")
+        resp_a = _post(
+            api_client, excel_a.read(), "tprm.xlsx", "TPRM", domain_folder.id
+        )
+        assert resp_a.status_code == 200, resp_a.json()
+        assert resp_a.json()["results"]["entity_assessments"]["successful"] == 1
+
+        # The entity itself is a global match by ref_id, so the second import
+        # must opt into updating it rather than treating it as a conflict.
+        excel_b = _tprm_excel_with_audit("ENT-CROSS", audit_ref_id="AUD-X-B")
+        resp_b = _post(
+            api_client,
+            excel_b.read(),
+            "tprm.xlsx",
+            "TPRM",
+            other_folder.id,
+            HTTP_X_ON_CONFLICT="update",
+        )
+        assert resp_b.status_code == 200, resp_b.json()
+        results_b = resp_b.json()["results"]["entity_assessments"]
+        assert results_b["successful"] == 1, results_b
+
+        assessments = list(EntityAssessment.objects.filter(name="Vendor Review"))
+        assert len(assessments) == 2
+        by_folder = {a.folder_id: a for a in assessments}
+        assert (
+            by_folder[domain_folder.id].compliance_assessment.ref_id == audit_a.ref_id
+        )
+        assert by_folder[other_folder.id].compliance_assessment.ref_id == audit_b.ref_id
+
+
+# TPRM import — entities may have no ref_id; other sheets fall back to entity name
+
+
+@pytest.mark.django_db
+class TestTprmEntityResolutionByName:
+    def test_entity_without_ref_id_is_created(
+        self, api_client, domain_folder, all_accessible
+    ):
+        from tprm.models import Entity
+
+        excel = make_excel_file(
+            {"Entities": [{"name": "No RefId Corp", "description": ""}]}
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        assert resp.json()["results"]["entities"]["successful"] == 1
+        assert Entity.objects.filter(name="No RefId Corp").exists()
+
+    def test_solution_resolves_provider_by_entity_name(
+        self, api_client, domain_folder, all_accessible
+    ):
+        from tprm.models import Solution
+
+        excel = make_excel_file(
+            {
+                "Entities": [{"name": "NameOnly Corp", "description": ""}],
+                "Solutions": [
+                    {
+                        "ref_id": "SOL-NAME",
+                        "name": "Some Solution",
+                        "provider_entity_name": "NameOnly Corp",
+                    }
+                ],
+            }
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["entities"]["successful"] == 1, results["entities"]
+        assert results["solutions"]["successful"] == 1, results["solutions"]
+        assert (
+            Solution.objects.get(ref_id="SOL-NAME").provider_entity.name
+            == "NameOnly Corp"
+        )
+
+    def test_contract_representative_and_entity_assessment_resolve_by_entity_name(
+        self, api_client, domain_folder, all_accessible
+    ):
+        excel = make_excel_file(
+            {
+                "Entities": [{"name": "Full Flow Corp", "description": ""}],
+                "Contracts": [
+                    {
+                        "ref_id": "CON-NAME",
+                        "name": "Some Contract",
+                        "provider_entity_name": "Full Flow Corp",
+                    }
+                ],
+                "Representatives": [
+                    {
+                        "email": "contact@fullflow.test",
+                        "provider_entity_name": "Full Flow Corp",
+                    }
+                ],
+                "EntityAssessments": [
+                    {"entity_name": "Full Flow Corp", "name": "Full Flow Review"}
+                ],
+            }
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["contracts"]["successful"] == 1, results["contracts"]
+        assert results["representatives"]["successful"] == 1, results["representatives"]
+        assert results["entity_assessments"]["successful"] == 1, results[
+            "entity_assessments"
+        ]
+
+    def test_unresolvable_entity_reference_fails_the_row(
+        self, api_client, domain_folder, all_accessible
+    ):
+        excel = make_excel_file(
+            {
+                "Solutions": [
+                    {
+                        "ref_id": "SOL-MISSING",
+                        "name": "Orphan Solution",
+                        "provider_entity_name": "Nobody Corp",
+                    }
+                ]
+            }
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        assert resp.json()["results"]["solutions"]["failed"] == 1
+
+    def test_unknown_ref_id_fails_even_when_name_would_match(
+        self, api_client, domain_folder, all_accessible
+    ):
+        """A typo'd ref_id must surface as an error, not silently bind by name."""
+        excel = make_excel_file(
+            {
+                "Entities": [
+                    {"ref_id": "ENT-42", "name": "Strict Corp", "description": ""}
+                ],
+                "Solutions": [
+                    {
+                        "ref_id": "SOL-STRICT",
+                        "name": "Strict Solution",
+                        "provider_entity_ref_id": "ENT-042",
+                        "provider_entity_name": "Strict Corp",
+                    }
+                ],
+            }
+        )
+        resp = _post(api_client, excel.read(), "tprm.xlsx", "TPRM", domain_folder.id)
+
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["entities"]["successful"] == 1, results["entities"]
+        assert results["solutions"]["failed"] == 1, results["solutions"]

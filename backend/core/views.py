@@ -903,6 +903,24 @@ def get_or_create_personal_folder(user):
     return folder
 
 
+def actor_prefetch(field_name: str) -> Prefetch:
+    """Prefetch an ``Actor`` M2M (``authors``, ``reviewers``, ...) with its target joined in.
+
+    ``FieldsRelatedField`` always renders ``str(actor)``, and ``Actor.__str__`` resolves
+    ``.specific`` — a forward OneToOne hop to whichever of user/team/entity is set.
+    A bare ``prefetch_related("authors")`` therefore trades N queries for N+1: one for
+    the actors, then one per rendered actor. Measured on a page of 20 risk assessments
+    with 6 actors each, authors + reviewers: 123 queries before, 3 after.
+
+    Returns a fresh instance per call: a ``Prefetch`` may only be registered once per
+    queryset, and sharing one across querysets shares its inner queryset too.
+    """
+    return Prefetch(
+        field_name,
+        queryset=Actor.objects.select_related("user", "team", "entity"),
+    )
+
+
 class AutocompleteMixin:
     """Adds a lightweight, server-paginated ``autocomplete`` action for entity
     pickers (search/ordering/filtering come from the viewset's existing filter
@@ -3685,8 +3703,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             "risk_matrix",
             "ebios_rm_study",
         ).prefetch_related(
-            "authors",
-            "reviewers",
+            actor_prefetch("authors"),
+            actor_prefetch("reviewers"),
             "risk_scenarios",
         )
 
@@ -7381,12 +7399,47 @@ class UserFilter(GenericFilterSet):
         ]
 
 
+VALIDATION_FLOW_OPEN_STATUSES = [
+    ValidationFlow.Status.SUBMITTED,
+    ValidationFlow.Status.CHANGE_REQUESTED,
+]
+
+
 class ValidationFlowFilterSet(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     requester = df.ModelMultipleChoiceFilter(queryset=User.objects.all())
     approver = df.ModelMultipleChoiceFilter(queryset=User.objects.all())
 
     linked_models = df.CharFilter(method="filter_linked_models", label="Linked models")
+
+    scope = df.ChoiceFilter(
+        method="filter_scope",
+        label="Scope",
+        choices=[
+            ("received", "Received"),
+            ("sent", "Sent"),
+            ("history", "History"),
+        ],
+    )
+
+    def filter_scope(self, queryset, name, value):
+        """Personal queues: what awaits me, what I sent, what is closed for me."""
+        user = getattr(self.request, "user", None)
+        if user is None or not user.is_authenticated:
+            return queryset.none()
+        if value == "received":
+            return queryset.filter(
+                approver=user, status=ValidationFlow.Status.SUBMITTED
+            )
+        if value == "sent":
+            return queryset.filter(
+                requester=user, status__in=VALIDATION_FLOW_OPEN_STATUSES
+            )
+        if value == "history":
+            return queryset.filter(Q(requester=user) | Q(approver=user)).exclude(
+                status__in=VALIDATION_FLOW_OPEN_STATUSES
+            )
+        return queryset
 
     def filter_linked_models(self, queryset, name, value):
         """
@@ -7545,6 +7598,25 @@ class ValidationFlowViewSet(BaseModelViewSet):
             "contracts": "Contracts",
         }
         return Response(model_types)
+
+    @action(detail=False, methods=["get"], name="Get inbox counts")
+    def inbox_counts(self, request):
+        """Tab badges for the personal queues, in a single query round-trip each."""
+        user = request.user
+        queryset = self.get_queryset()
+        return Response(
+            {
+                "received": queryset.filter(
+                    approver=user, status=ValidationFlow.Status.SUBMITTED
+                ).count(),
+                "sent": queryset.filter(
+                    requester=user, status__in=VALIDATION_FLOW_OPEN_STATUSES
+                ).count(),
+                "history": queryset.filter(Q(requester=user) | Q(approver=user))
+                .exclude(status__in=VALIDATION_FLOW_OPEN_STATUSES)
+                .count(),
+            }
+        )
 
     @action(
         detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated]
@@ -10894,6 +10966,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
         )
 
+        if self.action == "list":
+            qs = qs.prefetch_related(actor_prefetch("authors"))  # Optional table column
+
         # No requirement_assessments prefetch on the list action: progress is
         # served by `_get_optimized_object_data` (no-IG audits) or the model's
         # scalar-only counts (IG audits); nothing else in the list serializer
@@ -10908,8 +10983,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             ).prefetch_related(
                 "assets",  # ManyToManyField serialized as FieldsRelatedField
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
-                "authors",  # ManyToManyField from Assessment parent class
-                "reviewers",  # ManyToManyField from Assessment parent class
+                actor_prefetch("authors"),  # ManyToManyField from Assessment parent
+                actor_prefetch("reviewers"),  # ManyToManyField from Assessment parent
                 Prefetch(
                     "requirement_assessments",
                     queryset=RequirementAssessment.objects.select_related(
@@ -15156,7 +15231,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             .select_related("folder", "perimeter")
             .prefetch_related(
                 "evidences",
-                "authors",
+                actor_prefetch("authors"),
                 "filtering_labels__folder",
             )
             .annotate(
@@ -15370,7 +15445,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
         findings_assessment = (
             FindingsAssessment.objects.select_related("folder")
-            .prefetch_related("authors", "reviewers")
+            .prefetch_related(actor_prefetch("authors"), actor_prefetch("reviewers"))
             .get(id=pk)
         )
         findings = (
@@ -15489,7 +15564,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
         findings_assessment = (
             FindingsAssessment.objects.select_related("folder")
-            .prefetch_related("authors", "reviewers")
+            .prefetch_related(actor_prefetch("authors"), actor_prefetch("reviewers"))
             .get(id=pk)
         )
         findings = (

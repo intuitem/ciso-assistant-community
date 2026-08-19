@@ -3,7 +3,7 @@
 import json
 import sys
 from rich import print as rprint
-from ..client import make_get_request, get_paginated_results
+from ..client import make_get_request, get_paginated_results, found_line
 from ..utils.response_formatter import (
     success_response,
     error_response,
@@ -12,12 +12,19 @@ from ..utils.response_formatter import (
 )
 
 
-async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
+async def get_risk_scenarios(
+    folder: str = None,
+    risk_assessment: str = None,
+    limit: int = None,
+    offset: int = None,
+):
     """List risk scenarios from Risk Registry; filter by folder or assessment
 
     Args:
         folder: Folder ID/name
         risk_assessment: Risk assessment ID/name
+        limit: Max rows to return (default 100)
+        offset: Row to start from, for paging through large registers
     """
     try:
         from ..resolvers import resolve_folder_id, resolve_risk_assessment_id
@@ -35,6 +42,10 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
             params["risk_assessment"] = resolve_risk_assessment_id(risk_assessment)
             filters["risk_assessment"] = risk_assessment
 
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
         res = make_get_request("/risk-scenarios/", params=params)
 
         if res.status_code != 200:
@@ -46,7 +57,7 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
         if not scenarios:
             return empty_response("risk scenarios", filters)
 
-        result = f"Found {len(scenarios)} risk scenarios"
+        result = found_line(scenarios, "risk scenarios", paginated=True, offset=offset)
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -146,7 +157,9 @@ async def get_risk_scenario(scenario_id: str):
         )
 
 
-async def get_applied_controls(folder: str = None):
+async def get_applied_controls(
+    folder: str = None, limit: int = None, offset: int = None
+):
     """List applied controls from action plan; filter by folder
 
     Args:
@@ -163,6 +176,10 @@ async def get_applied_controls(folder: str = None):
             params["folder"] = resolve_folder_id(folder)
             filters["folder"] = folder
 
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
         res = make_get_request("/applied-controls/", params=params)
 
         if res.status_code != 200:
@@ -174,7 +191,7 @@ async def get_applied_controls(folder: str = None):
         if not controls:
             return empty_response("applied controls", filters)
 
-        result = f"Found {len(controls)} applied controls"
+        result = found_line(controls, "applied controls", paginated=True, offset=offset)
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -341,7 +358,7 @@ async def get_folders(name: str = None):
         if not folders:
             return empty_response("folders", filters)
 
-        result = f"Found {len(folders)} folders"
+        result = found_line(folders, "folders")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -404,7 +421,7 @@ async def get_perimeters(folder: str = None, name: str = None):
         if not perimeters:
             return empty_response("perimeters", filters)
 
-        result = f"Found {len(perimeters)} perimeters"
+        result = found_line(perimeters, "perimeters")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -446,7 +463,7 @@ async def get_risk_matrices():
         if not matrices:
             return empty_response("risk matrices", None)
 
-        result = f"Found {len(matrices)} risk matrices\n\n"
+        result = found_line(matrices, "risk matrices") + "\n\n"
         result += "|ID|Name|\n"
         result += "|---|---|\n"
 
@@ -622,7 +639,7 @@ async def get_risk_assessments(folder: str = None, perimeter: str = None):
         if not assessments:
             return "No risk assessments found"
 
-        result = f"Found {len(assessments)} risk assessments"
+        result = found_line(assessments, "risk assessments")
         if folder:
             result += f" (folder: {folder})"
         if perimeter:
@@ -684,8 +701,9 @@ async def get_threats(
         if not threats:
             return "No threats found"
 
-        # Apply limit if specified (0 means no limit)
-        total_count = len(threats)
+        # Apply limit if specified (0 means no limit). Prefer the server-side
+        # total, since slicing drops the ResultList that carries it.
+        total_count = getattr(threats, "total", None) or len(threats)
         if limit > 0:
             threats = threats[:limit]
 
@@ -712,7 +730,7 @@ async def get_threats(
         return f"Error in get_threats: {str(e)}"
 
 
-async def get_assets(folder: str = None):
+async def get_assets(folder: str = None, limit: int = None, offset: int = None):
     """List assets with IDs, names, and types
 
     Args:
@@ -729,6 +747,10 @@ async def get_assets(folder: str = None):
             params["folder"] = resolve_folder_id(folder)
             filters["folder"] = folder
 
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
         res = make_get_request("/assets/", params=params)
 
         if res.status_code != 200:
@@ -740,7 +762,7 @@ async def get_assets(folder: str = None):
         if not assets:
             return empty_response("assets", filters)
 
-        result = f"Found {len(assets)} assets"
+        result = found_line(assets, "assets", paginated=True, offset=offset)
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -795,7 +817,7 @@ async def get_incidents(folder: str = None):
         if not incidents:
             return "No incidents found"
 
-        result = f"Found {len(incidents)} incidents"
+        result = found_line(incidents, "incidents")
         if folder:
             result += f" (folder: {folder})"
         result += "\n\n"
@@ -842,7 +864,7 @@ async def get_security_exceptions(folder: str = None):
         if not exceptions:
             return "No security exceptions found"
 
-        result = f"Found {len(exceptions)} security exceptions"
+        result = found_line(exceptions, "security exceptions")
         if folder:
             result += f" (folder: {folder})"
         result += "\n\n"
@@ -912,7 +934,7 @@ async def get_frameworks(folder: str = None):
         if not frameworks:
             return "No frameworks found"
 
-        result = f"Found {len(frameworks)} frameworks"
+        result = found_line(frameworks, "frameworks")
         if folder:
             result += f" (folder: {folder})"
         result += "\n\n"
@@ -960,7 +982,7 @@ async def get_business_impact_analyses(folder: str = None):
         if not bias:
             return "No Business Impact Analyses found"
 
-        result = f"Found {len(bias)} Business Impact Analyses"
+        result = found_line(bias, "Business Impact Analyses")
         if folder:
             result += f" (folder: {folder})"
         result += "\n\n"
@@ -986,6 +1008,8 @@ async def get_business_impact_analyses(folder: str = None):
 async def get_requirement_assessments(
     compliance_assessment_id_or_name: str = None,
     ref_id: str = None,
+    limit: int = None,
+    offset: int = None,
 ):
     """List requirement assessments (audit requirements) with IDs and results. Use IDs with update_requirement_assessment()
 
@@ -1024,6 +1048,10 @@ async def get_requirement_assessments(
         if ref_id:
             params["ref_id"] = ref_id
 
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
         res = make_get_request("/requirement-assessments/", params=params)
 
         if res.status_code != 200:
@@ -1035,7 +1063,15 @@ async def get_requirement_assessments(
         if not req_assessments:
             return "No requirement assessments found"
 
-        result = f"Found {len(req_assessments)} requirement assessments\n\n"
+        result = (
+            found_line(
+                req_assessments,
+                "requirement assessments",
+                paginated=True,
+                offset=offset,
+            )
+            + "\n\n"
+        )
         result += "|ID|Ref|Description|Requirement|Assessment|Status|Result|Scored|Score|DocScore|TargetScore|\n"
         result += "|---|---|---|---|---|---|---|---|---|---|---|\n"
 
@@ -1081,7 +1117,7 @@ async def get_quantitative_risk_studies():
         if not studies:
             return "No quantitative risk studies found"
 
-        result = f"Found {len(studies)} quantitative risk studies\n\n"
+        result = found_line(studies, "quantitative risk studies") + "\n\n"
         result += "|ID|Name|Status|Distribution Model|Loss Threshold|Folder|\n"
         result += "|---|---|---|---|---|---|\n"
 
@@ -1138,7 +1174,7 @@ async def get_quantitative_risk_scenarios(study_id_or_name: str = None):
         if not scenarios:
             return "No quantitative risk scenarios found"
 
-        result = f"Found {len(scenarios)} quantitative risk scenarios\n\n"
+        result = found_line(scenarios, "quantitative risk scenarios") + "\n\n"
         result += (
             "|ID|Ref|Name|Status|Priority|Current ALE|Residual ALE|Study|Folder|\n"
         )
@@ -1200,7 +1236,7 @@ async def get_quantitative_risk_hypotheses(scenario_id_or_name: str = None):
         if not hypotheses:
             return "No quantitative risk hypotheses found"
 
-        result = f"Found {len(hypotheses)} quantitative risk hypotheses\n\n"
+        result = found_line(hypotheses, "quantitative risk hypotheses") + "\n\n"
         result += "|ID|Ref|Name|Risk Stage|Selected|ALE|ROC|Fresh|Scenario|Folder|\n"
         result += "|---|---|---|---|---|---|---|---|---|---|\n"
 
@@ -1226,7 +1262,10 @@ async def get_quantitative_risk_hypotheses(scenario_id_or_name: str = None):
 async def get_task_templates(
     limit: int = None, offset: int = None, ordering: str = None, search: str = None
 ):
-    """List task templates with IDs, names, and details
+    """List many task templates (summary rows only)
+
+    Returns one row per template. For the full content of a single template,
+    call get_task_template_details with its ID instead.
 
     Args:
         limit: Number of results to return per page
@@ -1257,7 +1296,9 @@ async def get_task_templates(
         if not tasks:
             return "No task found"
 
-        result = f"Found {len(tasks)} task templates\n\n"
+        result = (
+            found_line(tasks, "task templates", paginated=True, offset=offset) + "\n\n"
+        )
         result += "|ID|Name|Description|Ref ID|Status|Recurrent|Enabled|Task Date|\n"
         result += "|---|---|---|---|---|---|---|---|\n"
 
@@ -1279,7 +1320,10 @@ async def get_task_templates(
 
 
 async def get_task_template_details(task_id: str):
-    """Get detailed information for a specific task template
+    """Get the full detail of ONE task template, by ID
+
+    Use this when the user asks about a specific named template. Use
+    get_task_templates to list many.
 
     Args:
         task_id: Task template ID
@@ -1346,6 +1390,8 @@ async def get_vulnerabilities(
     status: str = None,
     severity: int = None,
     search: str = None,
+    limit: int = None,
+    offset: int = None,
 ):
     """List vulnerabilities with optional filters
 
@@ -1374,6 +1420,10 @@ async def get_vulnerabilities(
             params["search"] = search
             filters["search"] = search
 
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
         res = make_get_request("/vulnerabilities/", params=params)
 
         if res.status_code != 200:
@@ -1385,7 +1435,9 @@ async def get_vulnerabilities(
         if not vulnerabilities:
             return empty_response("vulnerabilities", filters)
 
-        result = f"Found {len(vulnerabilities)} vulnerabilities"
+        result = found_line(
+            vulnerabilities, "vulnerabilities", paginated=True, offset=offset
+        )
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -1517,7 +1569,7 @@ async def get_asset_classes(
         if not asset_classes:
             return empty_response("asset classes", filters)
 
-        result = f"Found {len(asset_classes)} asset classes"
+        result = found_line(asset_classes, "asset classes")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -1605,7 +1657,7 @@ async def get_users(
         if not users:
             return empty_response("users", filters)
 
-        result = f"Found {len(users)} users"
+        result = found_line(users, "users")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
