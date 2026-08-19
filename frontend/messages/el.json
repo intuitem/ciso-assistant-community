@@ -1769,6 +1769,7 @@
 	"mappingSuggestionTeasing": "Νέες προτάσεις χαρτογράφησης διαθέσιμες – χρησιμοποιήστε τα φίλτρα για εξερεύνηση.",
 	"errorCreatingPersonalAccessToken": "Σφάλμα δημιουργίας διακριτικού πρόσβασης.",
 	"errorMaxPatAmountExceeded": "Υπέρβαση μέγιστου πλήθους διακριτικών για τον χρήστη.",
+	"errorSsoRequiredForScimUsers": "Το SSO δεν μπορεί να απενεργοποιηθεί όσο υπάρχουν χρήστες με SCIM provisioning χωρίς τοπική πρόσβαση.",
 	"associatedFindingsAssessments": "Συνδεδεμένες παρακολουθήσεις",
 	"hourCount": [
 		{
@@ -2380,6 +2381,8 @@
 	"scimTokenWarning": "Αντιγράψτε αυτό το διακριτικό τώρα. Για λόγους ασφαλείας δεν θα εμφανιστεί ξανά.",
 	"scimTokenRevoked": "Το διακριτικό SCIM ανακλήθηκε",
 	"scimTokenGenerationFailed": "Αποτυχία δημιουργίας διακριτικού SCIM",
+	"scimTokenRequiresSso": "Το SSO πρέπει να είναι ενεργοποιημένο πριν από τη δημιουργία διακριτικού SCIM.",
+	"scimTokenNameTooLong": "Το όνομα δεν πρέπει να υπερβαίνει τους 255 χαρακτήρες.",
 	"idpGroup": "Ομάδα IdP",
 	"idpGroups": "Ομάδες IdP",
 	"idpGroupsDescription": "Ενεργοποίηση ομοσπονδίας ομάδων IdP (παροχή SCIM, αντιστοιχίσεις ομάδων IdP και συμμετοχές χρηστών σε ομάδες IdP).",
