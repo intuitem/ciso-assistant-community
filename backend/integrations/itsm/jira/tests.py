@@ -465,3 +465,145 @@ def test_priority_choices_fall_back_to_instance_when_createmeta_empty(
 
     assert [c["value"] for c in choices] == ["Highest", "Medium"]
     mock_jira.return_value.priorities.assert_called_once()
+
+
+def _fake_issue(key, issue_id, summary):
+    issue = MagicMock()
+    issue.raw = {"key": key, "id": issue_id, "fields": {"summary": summary}}
+    return issue
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_passes_limit(mock_jira, mock_sync, configuration):
+    """The picker limit is forwarded as maxResults with a trimmed field set."""
+    mock_jira.return_value.search_issues.return_value = []
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    client.list_remote_objects({"limit": 20})
+
+    kwargs = mock_jira.return_value.search_issues.call_args[1]
+    assert kwargs["maxResults"] == 20
+    assert kwargs["fields"] == "summary"
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_searches_summaries(mock_jira, mock_sync, configuration):
+    """A free-text term becomes a summary clause, without any key clause."""
+    mock_jira.return_value.search_issues.return_value = []
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    client.list_remote_objects({"search": "physical entry"})
+
+    jql = mock_jira.return_value.search_issues.call_args[0][0]
+    assert 'summary ~ "physical entry*"' in jql
+    assert "key =" not in jql
+    assert jql.endswith("ORDER BY created DESC")
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_search_matches_issue_key(
+    mock_jira, mock_sync, configuration
+):
+    """A key-shaped term also matches on the issue key."""
+    mock_jira.return_value.search_issues.return_value = []
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    client.list_remote_objects({"search": "ciso-40"})
+
+    jql = mock_jira.return_value.search_issues.call_args[0][0]
+    assert 'key = "CISO-40"' in jql
+    assert 'summary ~ "ciso-40*"' in jql
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_digit_search_targets_project_key(
+    mock_jira, mock_sync, configuration
+):
+    """A digit-only term is completed with the configured project key."""
+    mock_jira.return_value.search_issues.return_value = []
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    client.list_remote_objects({"search": "40"})
+
+    jql = mock_jira.return_value.search_issues.call_args[0][0]
+    assert 'key = "PROJ-40"' in jql
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_key_clause_falls_back_on_jql_error(
+    mock_jira, mock_sync, configuration
+):
+    """Jira 400s on a nonexistent key in JQL; retry without the key clause."""
+    mock_jira.return_value.search_issues.side_effect = [
+        Exception("An issue with key 'PROJ-9999' does not exist"),
+        [_fake_issue("PROJ-1", "1", "Something 9999")],
+    ]
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects({"search": "9999"})
+
+    assert [r["key"] for r in results] == ["PROJ-1"]
+    retry_jql = mock_jira.return_value.search_issues.call_args[0][0]
+    assert "key =" not in retry_jql
+    assert 'summary ~ "9999*"' in retry_jql
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_escapes_jql_term(mock_jira, mock_sync, configuration):
+    """Quotes and backslashes in the term cannot break out of the JQL string."""
+    mock_jira.return_value.search_issues.return_value = []
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    client.list_remote_objects({"search": 'a"b\\c'})
+
+    jql = mock_jira.return_value.search_issues.call_args[0][0]
+    assert 'summary ~ "a\\"b\\\\c*"' in jql
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_excludes_mapped_issues(
+    mock_jira, mock_sync, configuration
+):
+    """Issues already linked through a SyncMapping are not offered again."""
+    mock_jira.return_value.search_issues.return_value = [
+        _fake_issue("PROJ-1", "1", "Linked"),
+        _fake_issue("PROJ-2", "2", "Free"),
+    ]
+    mock_sync.objects.filter.return_value.values_list.return_value = ["PROJ-1"]
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects()
+
+    assert [r["key"] for r in results] == ["PROJ-2"]
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_hydrates_ids(mock_jira, mock_sync, configuration):
+    """The id param fetches the given issues directly instead of searching."""
+    issue = MagicMock()
+    issue.key = "PROJ-7"
+    issue.id = "7"
+    issue.fields.summary = "Selected issue"
+    mock_jira.return_value.issue.return_value = issue
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects({"id": "PROJ-7"})
+
+    assert results == [{"key": "PROJ-7", "id": "7", "summary": "Selected issue"}]
+    mock_jira.return_value.issue.assert_called_once_with("PROJ-7", fields="summary")
+    mock_jira.return_value.search_issues.assert_not_called()

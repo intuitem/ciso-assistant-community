@@ -368,6 +368,7 @@
 					{#key $formStore.integration_config}
 						<AutocompleteSelect
 							{form}
+							lazy
 							optionsEndpoint="settings/integrations/configs/{$formStore.integration_config}/remote-objects"
 							optionsLabelField="summary"
 							optionsValueField="key"

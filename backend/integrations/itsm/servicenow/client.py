@@ -129,15 +129,43 @@ class ServiceNowClient(BaseIntegrationClient):
             )
             raise
 
+    # Fields the picker searches when the user types. Matches the display
+    # label sources in ``_display_label``.
+    SEARCH_FIELDS = ("number", "short_description", "name")
+
     def list_remote_objects(
         self, query_params: dict[str, Any] | None = None
     ) -> List[dict[str, Any]]:
+        """List records from the configured table.
+
+        ``query_params`` supports ``search`` (matched against number,
+        short_description and name), ``limit`` and ``id`` (comma-separated
+        sys_ids to hydrate).
+        """
         if query_params is None:
             query_params = {}
 
         # Build Encoded Query
         # Example: active=true^sys_updated_on>=2024-01-01
-        sysparm_query = self.model_settings.get("base_query", "active=true")
+        base_query = self.model_settings.get("base_query", "active=true")
+        sysparm_query = base_query
+
+        ids = str(query_params.get("id", "") or "")
+        search = str(query_params.get("search", "") or "")
+        if ids:
+            id_list = ",".join(i.strip() for i in ids.split(",") if i.strip())
+            sysparm_query = f"{base_query}^sys_idIN{id_list}"
+        elif search:
+            # ^ and , are encoded-query metacharacters; LIKE has no escape
+            # syntax so strip them from the term.
+            term = search.strip().replace("^", "").replace(",", "")
+            if term:
+                # ^NQ ORs complete subqueries, so base_query is repeated in
+                # each branch; a plain ^OR would escape the base_query AND
+                # due to flat left-to-right precedence.
+                sysparm_query = "^NQ".join(
+                    f"{base_query}^{field}LIKE{term}" for field in self.SEARCH_FIELDS
+                )
 
         url = f"{self.base_url}/api/now/table/{self.table}"
         params = {
@@ -145,7 +173,7 @@ class ServiceNowClient(BaseIntegrationClient):
             # Superset of common display fields so labels work across tables
             # (incident uses number/short_description, CMDB/asset tables use name).
             "sysparm_fields": "sys_id,number,name,short_description,sys_updated_on",
-            "sysparm_limit": query_params.get("max_results", 100),
+            "sysparm_limit": query_params.get("limit", 100),
         }
 
         try:
@@ -168,7 +196,8 @@ class ServiceNowClient(BaseIntegrationClient):
                 sys_id = record.get("sys_id")
                 if not sys_id:
                     continue
-                if sys_id not in used_ids:
+                # Hydration by id must return the record even when mapped.
+                if ids or sys_id not in used_ids:
                     results.append(
                         {
                             "key": sys_id,

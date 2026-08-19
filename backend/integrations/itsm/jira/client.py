@@ -1,3 +1,4 @@
+import re
 from typing import Any, Dict
 
 from integrations.models import SyncMapping
@@ -20,6 +21,10 @@ TABLE_NAME_SEPARATOR = ":"
 # Fields that depend on workflow / instance config rather than createmeta and
 # must be surfaced manually to the field mapper.
 SYNTHETIC_FIELDS = ({"name": "status", "label": "Status", "readonly": False},)
+
+# Search terms shaped like an issue key ("CISO-40") also get a ``key =``
+# clause in the picker JQL.
+ISSUE_KEY_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9_]*-\d+$")
 
 
 class JiraClient(BaseIntegrationClient):
@@ -175,10 +180,53 @@ class JiraClient(BaseIntegrationClient):
             logger.error(f"Jira connection test failed: {e}")
             return False
 
+    @staticmethod
+    def _escape_jql_string(value: str) -> str:
+        return value.replace("\\", "\\\\").replace('"', '\\"')
+
+    def _build_list_jql(
+        self, project_key: str, issue_type: str, search: str = ""
+    ) -> tuple[str, str | None]:
+        """Return ``(jql, key_jql)`` for the remote object picker.
+
+        ``jql`` filters on summaries; ``key_jql`` additionally matches the
+        issue key when the search term looks like one. It is a separate
+        query because JQL referencing a nonexistent issue key fails with a
+        400 instead of returning an empty result, so the caller falls back
+        to ``jql`` when it errors.
+        """
+        prefix = f"project = {project_key}"
+        if issue_type:
+            # Scope to the configured issue type so the link picker doesn't
+            # surface issues of other types (e.g. Epics when Task is the
+            # target). Quote the name as it may contain spaces ("User Story").
+            prefix += f' AND issuetype = "{self._escape_jql_string(issue_type)}"'
+
+        if not search:
+            return prefix, None
+
+        term = self._escape_jql_string(search.strip())
+        jql = f'{prefix} AND summary ~ "{term}*"'
+
+        candidate_key = None
+        if ISSUE_KEY_PATTERN.match(search.strip()):
+            candidate_key = search.strip().upper()
+        elif search.strip().isdigit():
+            candidate_key = f"{project_key}-{search.strip()}"
+        key_jql = None
+        if candidate_key:
+            key_jql = f'{prefix} AND (summary ~ "{term}*" OR key = "{candidate_key}")'
+        return jql, key_jql
+
     def list_remote_objects(
         self, query_params: dict[str, Any] | None = None
     ) -> list[dict[str, Any]]:
-        """List issues from the configured Jira project."""
+        """List issues from the configured Jira project.
+
+        ``query_params`` supports ``search`` (matched against issue summaries
+        and, when it looks like one, an issue key), ``limit`` and ``id`` (a
+        comma-separated list of issue keys to hydrate).
+        """
         if not self.jira:
             raise ConnectionError("Jira client not initialized.")
         if query_params is None:
@@ -188,29 +236,54 @@ class JiraClient(BaseIntegrationClient):
         if not project_key:
             raise ValueError("Jira project_key/table_name is not configured")
 
-        jql_query = f"project = {project_key}"
-        if issue_type:
-            # Scope to the configured issue type so the link picker doesn't
-            # surface issues of other types (e.g. Epics when Task is the
-            # target). Quote the name as it may contain spaces ("User Story").
-            escaped = issue_type.replace('"', '\\"')
-            jql_query += f' AND issuetype = "{escaped}"'
+        used_issues = SyncMapping.objects.filter(
+            configuration=self.configuration
+        ).values_list("remote_id", flat=True)
 
-        start_at = query_params.get("start_at", 0)
-        max_results = query_params.get("max_results", 10000)
+        ids = query_params.get("id", "")
+        if ids:
+            results_list = []
+            for remote_id in [i.strip() for i in ids.split(",") if i.strip()]:
+                try:
+                    issue = self.jira.issue(remote_id, fields="summary")
+                except Exception:
+                    logger.warning("Failed to hydrate Jira issue", remote_id=remote_id)
+                    continue
+                results_list.append(
+                    {
+                        "key": issue.key,
+                        "id": issue.id,
+                        "summary": issue.fields.summary,
+                    }
+                )
+            return results_list
 
-        logger.info(
-            f"Searching Jira with JQL: {jql_query}, startAt: {start_at}, maxResults: {max_results}"
-        )
+        search = str(query_params.get("search", "") or "")
+        limit = query_params.get("limit", 50)
+        summary_jql, key_jql = self._build_list_jql(project_key, issue_type, search)
+
+        jql_query = f"{key_jql or summary_jql} ORDER BY created DESC"
+
+        logger.info(f"Searching Jira with JQL: {jql_query}, maxResults: {limit}")
 
         try:
-            used_issues = SyncMapping.objects.filter(
-                configuration=self.configuration
-            ).values_list("remote_id", flat=True)
-            issues = self.jira.search_issues(
-                jql_query,
-                expand="fields",
-            )
+            try:
+                issues = self.jira.search_issues(
+                    jql_query,
+                    maxResults=limit,
+                    fields="summary",
+                )
+            except Exception:
+                if not key_jql:
+                    raise
+                # The key clause 400s when the issue doesn't exist; retry on
+                # summaries only.
+                jql_query = f"{summary_jql} ORDER BY created DESC"
+                issues = self.jira.search_issues(
+                    jql_query,
+                    maxResults=limit,
+                    fields="summary",
+                )
 
             results_list = [
                 {
@@ -222,7 +295,7 @@ class JiraClient(BaseIntegrationClient):
                 if issue.raw["key"] not in used_issues
             ]
             logger.info(
-                f"Fetched {len(results_list)} Jira issues for project {project_key} (batch starting at {start_at})."
+                f"Fetched {len(results_list)} Jira issues for project {project_key}."
             )
             return results_list
 
