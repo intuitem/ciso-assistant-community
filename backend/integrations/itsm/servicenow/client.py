@@ -1,6 +1,7 @@
 import re
 from typing import Any, Dict, List
 import requests
+from django.core.exceptions import ObjectDoesNotExist
 from structlog import get_logger
 from integrations.models import SyncMapping
 from core.models import AppliedControl
@@ -137,9 +138,29 @@ class ServiceNowClient(BaseIntegrationClient):
             )
             raise
 
-    # Fields the picker searches when the user types. Matches the display
-    # label sources in ``_display_label``.
+    # Candidate fields the picker searches when the user types. Matches the
+    # display label sources in ``_display_label``; restricted per table by
+    # ``_searchable_fields`` since not every table has all three.
     SEARCH_FIELDS = ("number", "short_description", "name")
+
+    def _searchable_fields(self) -> tuple[str, ...]:
+        """``SEARCH_FIELDS`` restricted to columns of the configured table.
+
+        A ``^NQ`` branch on a nonexistent field either matches everything
+        (ServiceNow drops invalid conditions by default) or kills the whole
+        query (strict mode), so only emit branches for real columns. Resolved
+        against the DB-backed schema cache (warmed on startup and by the
+        FieldMapper); when the table's columns aren't cached yet, keep all
+        candidates, which is the previous behavior.
+        """
+        try:
+            columns = self.configuration.schema_cache.columns.get(self.table)
+        except ObjectDoesNotExist:
+            return self.SEARCH_FIELDS
+        if not columns:
+            return self.SEARCH_FIELDS
+        names = {c.get("name") for c in columns}
+        return tuple(f for f in self.SEARCH_FIELDS if f in names)
 
     def list_remote_objects(
         self, query_params: dict[str, Any] | None = None
@@ -176,12 +197,13 @@ class ServiceNowClient(BaseIntegrationClient):
             # ^ and , are encoded-query metacharacters; LIKE has no escape
             # syntax so strip them from the term.
             term = search.strip().replace("^", "").replace(",", "")
-            if term:
+            search_fields = self._searchable_fields()
+            if term and search_fields:
                 # ^NQ ORs complete subqueries, so base_query is repeated in
                 # each branch; a plain ^OR would escape the base_query AND
                 # due to flat left-to-right precedence.
                 sysparm_query = "^NQ".join(
-                    f"{base_query}^{field}LIKE{term}" for field in self.SEARCH_FIELDS
+                    f"{base_query}^{field}LIKE{term}" for field in search_fields
                 )
 
         url = f"{self.base_url}/api/now/table/{self.table}"

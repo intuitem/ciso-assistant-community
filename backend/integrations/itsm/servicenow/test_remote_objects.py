@@ -16,6 +16,9 @@ def configuration():
         "password": "p",
     }
     mock_config.settings = {"table_name": "incident", "base_query": "active=true"}
+    # Empty schema cache: searchable-field resolution falls back to all
+    # candidates, like a real config whose columns aren't cached yet.
+    mock_config.schema_cache.columns = {}
     return mock_config
 
 
@@ -156,3 +159,66 @@ def test_hydration_caps_id_list(mock_get, mock_sync, configuration):
 
     query = mock_get.call_args[1]["params"]["sysparm_query"]
     assert query.count(",") == 99
+
+
+@patch("integrations.itsm.servicenow.client.SyncMapping")
+@patch("integrations.itsm.servicenow.client.requests.get")
+def test_search_branches_only_cover_existing_columns(
+    mock_get, mock_sync, configuration
+):
+    """A table lacking a candidate field (incident has no ``name``) gets no
+    branch for it, since ServiceNow turns the invalid condition into a
+    match-everything branch (default) or an empty result (strict mode)."""
+    configuration.schema_cache.columns = {
+        "incident": [{"name": "number"}, {"name": "short_description"}]
+    }
+    mock_get.return_value = _response([])
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = _client(configuration)
+    client.list_remote_objects({"search": "INC001"})
+
+    query = mock_get.call_args[1]["params"]["sysparm_query"]
+    assert query == (
+        "active=true^numberLIKEINC001^NQactive=true^short_descriptionLIKEINC001"
+    )
+
+
+@patch("integrations.itsm.servicenow.client.SyncMapping")
+@patch("integrations.itsm.servicenow.client.requests.get")
+def test_search_with_no_valid_columns_preserves_base_query(
+    mock_get, mock_sync, configuration
+):
+    configuration.schema_cache.columns = {"incident": [{"name": "state"}]}
+    mock_get.return_value = _response([])
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = _client(configuration)
+    client.list_remote_objects({"search": "INC001"})
+
+    query = mock_get.call_args[1]["params"]["sysparm_query"]
+    assert query == "active=true"
+
+
+@patch("integrations.itsm.servicenow.client.SyncMapping")
+@patch("integrations.itsm.servicenow.client.requests.get")
+def test_search_without_schema_cache_row_keeps_all_branches(
+    mock_get, mock_sync, configuration
+):
+    """A config with no schema cache row falls back to all candidates.
+
+    Accessing the reverse one-to-one raises ObjectDoesNotExist on a real
+    config without a cache row; simulate it from inside the guarded lookup.
+    """
+    from django.core.exceptions import ObjectDoesNotExist
+
+    configuration.schema_cache.columns = MagicMock()
+    configuration.schema_cache.columns.get.side_effect = ObjectDoesNotExist()
+    mock_get.return_value = _response([])
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = _client(configuration)
+    client.list_remote_objects({"search": "INC001"})
+
+    query = mock_get.call_args[1]["params"]["sysparm_query"]
+    assert query.count("^NQ") == 2
