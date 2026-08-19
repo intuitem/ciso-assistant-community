@@ -26,6 +26,9 @@ SYNTHETIC_FIELDS = ({"name": "status", "label": "Status", "readonly": False},)
 # clause in the picker JQL.
 ISSUE_KEY_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9_]*-\d+$")
 
+# Each hydration id costs one remote call; cap the client-supplied list.
+MAX_HYDRATION_IDS = 100
+
 
 class JiraClient(BaseIntegrationClient):
     def __init__(self, configuration, model_key="applied_control"):
@@ -242,18 +245,32 @@ class JiraClient(BaseIntegrationClient):
 
         ids = query_params.get("id", "")
         if ids:
+            id_list = [i.strip() for i in ids.split(",") if i.strip()]
+            id_list = id_list[:MAX_HYDRATION_IDS]
             results_list = []
-            for remote_id in [i.strip() for i in ids.split(",") if i.strip()]:
+            for remote_id in id_list:
                 try:
-                    issue = self.jira.issue(remote_id, fields="summary")
+                    issue = self.jira.issue(
+                        remote_id, fields="summary,project,issuetype"
+                    )
                 except Exception:
                     logger.warning("Failed to hydrate Jira issue", remote_id=remote_id)
+                    continue
+                fields = issue.raw["fields"]
+                # Keep hydration inside the picker's scope: the integration's
+                # credentials may see other projects, the caller must not.
+                if fields["project"]["key"].upper() != project_key.upper():
+                    continue
+                if (
+                    issue_type
+                    and fields["issuetype"]["name"].lower() != issue_type.lower()
+                ):
                     continue
                 results_list.append(
                     {
                         "key": issue.key,
                         "id": issue.id,
-                        "summary": issue.fields.summary,
+                        "summary": fields["summary"],
                     }
                 )
             return results_list

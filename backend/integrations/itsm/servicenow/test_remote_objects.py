@@ -115,3 +115,44 @@ def test_list_remote_objects_excludes_mapped_records(
     results = client.list_remote_objects()
 
     assert [r["id"] for r in results] == ["free1"]
+
+
+@patch("integrations.itsm.servicenow.client.SyncMapping")
+@patch("integrations.itsm.servicenow.client.requests.get")
+def test_hydration_rejects_metacharacter_ids(mock_get, mock_sync, configuration):
+    """A crafted id cannot inject an extra encoded-query branch."""
+    mock_get.return_value = _response([])
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = _client(configuration)
+    client.list_remote_objects({"id": "abc123,x^NQactive=false,y^ORactive=false"})
+
+    query = mock_get.call_args[1]["params"]["sysparm_query"]
+    assert query == "active=true^sys_idINabc123"
+
+
+@patch("integrations.itsm.servicenow.client.SyncMapping")
+@patch("integrations.itsm.servicenow.client.requests.get")
+def test_hydration_with_no_valid_ids_skips_remote_call(
+    mock_get, mock_sync, configuration
+):
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = _client(configuration)
+    results = client.list_remote_objects({"id": "x^NQactive=false"})
+
+    assert results == []
+    mock_get.assert_not_called()
+
+
+@patch("integrations.itsm.servicenow.client.SyncMapping")
+@patch("integrations.itsm.servicenow.client.requests.get")
+def test_hydration_caps_id_list(mock_get, mock_sync, configuration):
+    mock_get.return_value = _response([])
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = _client(configuration)
+    client.list_remote_objects({"id": ",".join(f"id{i}" for i in range(500))})
+
+    query = mock_get.call_args[1]["params"]["sysparm_query"]
+    assert query.count(",") == 99

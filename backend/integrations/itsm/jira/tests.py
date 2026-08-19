@@ -590,20 +590,66 @@ def test_list_remote_objects_excludes_mapped_issues(
     assert [r["key"] for r in results] == ["PROJ-2"]
 
 
+def _fake_hydrated_issue(key, issue_id, summary, project="PROJ", issue_type="Task"):
+    issue = MagicMock()
+    issue.key = key
+    issue.id = issue_id
+    issue.raw = {
+        "key": key,
+        "id": issue_id,
+        "fields": {
+            "summary": summary,
+            "project": {"key": project},
+            "issuetype": {"name": issue_type},
+        },
+    }
+    return issue
+
+
 @patch("integrations.itsm.jira.client.SyncMapping")
 @patch("integrations.itsm.jira.client.JIRA")
 def test_list_remote_objects_hydrates_ids(mock_jira, mock_sync, configuration):
     """The id param fetches the given issues directly instead of searching."""
-    issue = MagicMock()
-    issue.key = "PROJ-7"
-    issue.id = "7"
-    issue.fields.summary = "Selected issue"
-    mock_jira.return_value.issue.return_value = issue
+    mock_jira.return_value.issue.return_value = _fake_hydrated_issue(
+        "PROJ-7", "7", "Selected issue"
+    )
     mock_sync.objects.filter.return_value.values_list.return_value = []
 
     client = JiraClient(configuration)
     results = client.list_remote_objects({"id": "PROJ-7"})
 
     assert results == [{"key": "PROJ-7", "id": "7", "summary": "Selected issue"}]
-    mock_jira.return_value.issue.assert_called_once_with("PROJ-7", fields="summary")
+    mock_jira.return_value.issue.assert_called_once_with(
+        "PROJ-7", fields="summary,project,issuetype"
+    )
     mock_jira.return_value.search_issues.assert_not_called()
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_hydration_rejects_out_of_scope_issues(mock_jira, mock_sync, configuration):
+    """Hydration must not leak issues outside the configured project/type."""
+    mock_jira.return_value.issue.side_effect = [
+        _fake_hydrated_issue("OTHER-1", "1", "Other project", project="OTHER"),
+        _fake_hydrated_issue("PROJ-2", "2", "Wrong type", issue_type="Epic"),
+        _fake_hydrated_issue("PROJ-3", "3", "In scope"),
+    ]
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects({"id": "OTHER-1,PROJ-2,PROJ-3"})
+
+    assert [r["key"] for r in results] == ["PROJ-3"]
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_hydration_caps_id_list(mock_jira, mock_sync, configuration):
+    """The client never makes more than MAX_HYDRATION_IDS remote calls."""
+    mock_jira.return_value.issue.return_value = _fake_hydrated_issue("PROJ-1", "1", "x")
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    client.list_remote_objects({"id": ",".join(f"PROJ-{i}" for i in range(500))})
+
+    assert mock_jira.return_value.issue.call_count == 100

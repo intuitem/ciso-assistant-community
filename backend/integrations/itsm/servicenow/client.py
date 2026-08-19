@@ -1,3 +1,4 @@
+import re
 from typing import Any, Dict, List
 import requests
 from structlog import get_logger
@@ -8,6 +9,13 @@ from integrations.base import BaseIntegrationClient
 from .mapper import ServiceNowFieldMapper
 
 logger = get_logger(__name__)
+
+# ServiceNow sys_ids are 32-char hex GUIDs; accept alphanumeric only so no
+# encoded-query metacharacter can pass through hydration.
+SYS_ID_PATTERN = re.compile(r"[0-9a-zA-Z]{1,64}")
+
+# Each hydration id is user-supplied; cap the list like the view caps limit.
+MAX_HYDRATION_IDS = 100
 
 
 class ServiceNowClient(BaseIntegrationClient):
@@ -153,8 +161,17 @@ class ServiceNowClient(BaseIntegrationClient):
         ids = str(query_params.get("id", "") or "")
         search = str(query_params.get("search", "") or "")
         if ids:
-            id_list = ",".join(i.strip() for i in ids.split(",") if i.strip())
-            sysparm_query = f"{base_query}^sys_idIN{id_list}"
+            # sys_ids are alphanumeric; drop anything else so a crafted id
+            # can't inject encoded-query branches (^, ^NQ, ...) past
+            # base_query. Only the server-generated commas delimit the IN.
+            id_list = [
+                i.strip()
+                for i in ids.split(",")
+                if i.strip() and SYS_ID_PATTERN.fullmatch(i.strip())
+            ][:MAX_HYDRATION_IDS]
+            if not id_list:
+                return []
+            sysparm_query = f"{base_query}^sys_idIN{','.join(id_list)}"
         elif search:
             # ^ and , are encoded-query metacharacters; LIKE has no escape
             # syntax so strip them from the term.
