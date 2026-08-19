@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from iam.models import FolderMixin
-from core.base_models import AbstractBaseModel
+from core.base_models import AbstractBaseModel, ViewableFromDescendantsMode
 
 
 def validate_ip_or_cidr(value: str) -> None:
@@ -47,6 +47,10 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
     )
     # Value of the setting.
     value = models.JSONField(default=dict)
+
+    # All sensitive global settings (e.g. `SSO`, `INFRA_CONFIG`) MUST have extra permission checks on their API views.
+    # Otherwise anyone with a `"view_globalsettings"` permission on any folder could view these sensitive global settings (as `GlobalSettings` are always stored in the root folder).
+    ALWAYS_VIEWABLE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         permissions = [

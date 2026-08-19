@@ -43,7 +43,8 @@ class GlobalSettingsSerializerFactory(SerializerFactory):
 
 
 class GlobalSettingsViewSet(viewsets.ModelViewSet):
-    queryset = GlobalSettings.objects.all()
+    # We exclude the SSO settings as they are sensitive and meant to be handled by the `SSOSettingsViewSet` viewset.
+    queryset = GlobalSettings.objects.exclude(name=GlobalSettings.Names.SSO)
     serializer_class = GlobalSettingsSerializer
 
     def create(self, request, *args, **kwargs):

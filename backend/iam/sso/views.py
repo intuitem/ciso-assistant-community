@@ -4,6 +4,8 @@ from allauth.socialaccount import providers
 from allauth.socialaccount.providers.saml.views import render_authentication_error
 from django.core.exceptions import ValidationError
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
+from core.permissions import IsGlobalAdmin
+from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from structlog import get_logger
@@ -58,6 +60,7 @@ class BaseModelViewSet(AbstractBaseModelViewSet):
 
 class SSOSettingsViewSet(BaseModelViewSet):
     model = SSOSettings
+    permission_classes = (permissions.IsAuthenticated, IsGlobalAdmin)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
