@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('enterprise_core', '0003_alter_clientsettings_favicon'),
+        ("enterprise_core", "0003_alter_clientsettings_favicon"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='clientsettings',
-            name='is_published',
+            model_name="clientsettings",
+            name="is_published",
         ),
     ]
