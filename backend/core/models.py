@@ -2864,6 +2864,8 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         related_name="frameworks",
     )
 
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
+
     class Meta:
         verbose_name = _("Framework")
         verbose_name_plural = _("Frameworks")
