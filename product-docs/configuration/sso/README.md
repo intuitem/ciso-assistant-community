@@ -11,6 +11,31 @@ description: Configure Single Sign-On with different SAML or OpenID Connect prov
 * [Keycloak](identity-providers/keycloak.md)
 * [Google Workspace](identity-providers/google-workspace.md)
 
+### Auto-provisioning (JIT)
+
+By default, SSO login is only usable by users who already have a CISO Assistant account. If the email returned by the identity provider does not match an existing user, login is rejected with _"User not found."_
+
+**Auto-provisioning** (just-in-time, or JIT, provisioning) removes that requirement. When enabled, the first successful SSO login for an unknown email automatically creates the account instead of rejecting it, with no administrator action needed. The new account is created without a local password and is placed into whichever **user groups** you configure as defaults, so it starts with exactly the roles you intend for a new user, nothing more.
+
+As with SCIM-provisioned users, an auto-provisioned account stays SSO-only for its whole lifetime (see [Forcing SSO and local-login exceptions](#forcing-sso-and-local-login-exceptions) below): it cannot request a password reset or log in locally, even if Force SSO Login is off, unless an administrator explicitly enables **Keep local login** on that account. This keeps the account's access tied to the identity provider: disable the user there, and they lose access here too, with no local password left behind to fall back on.
+
+Turn it on from **Settings > SSO**:
+
+<figure><img src="../../.gitbook/assets/sso-jit-provisioning.png" alt="The SSO settings tab showing the Enable auto-provisioning checkbox and the Default user groups selector"><figcaption><p>Settings > SSO > Enable auto-provisioning</p></figcaption></figure>
+
+1. **Enable auto-provisioning**: off by default, preserving today's behavior until you opt in.
+2. **Default user groups**: the user group(s) automatically granted to accounts created this way. Pick the lowest-privilege group(s) that make sense for a brand-new user (e.g. a read-only or analyst group scoped to the right folder). You can always add more groups to a user by hand afterward.
+
+{% hint style="info" %}
+This is a **Community** feature. Unlike SCIM and IdP groups (see below), it is available on every edition and is not gated by a feature flag.
+{% endhint %}
+
+{% hint style="warning" %}
+Auto-provisioning trusts the identity provider's assertion that the email is verified and belongs to that user. Only enable it once your IdP integration ([SAML](saml.md) or [OpenID Connect](oidc.md)) is fully configured and tested. Anyone who can authenticate against your IdP with a given email will get a CISO Assistant account with that email.
+{% endhint %}
+
+If your identity provider supports SCIM, [SCIM provisioning and IdP groups](scim.md) gives finer-grained control, including per-group role mapping, and is the better fit for larger organizations. Auto-provisioning is the lightweight alternative for IdPs that don't support SCIM: everyone gets the same default group(s), with no per-user or per-group mapping.
+
 ### Single Logout
 
 By default, logging out of CISO Assistant only ends the local CISO Assistant session. The identity provider session stays open, so clicking **Log in with SSO** again signs the user straight back in without re-authenticating.
@@ -43,7 +68,7 @@ Some accounts get **Keep local login** enabled by default when they are created:
 
 Note that this is only a default on the flag, not a permanent exemption: a regular user promoted to superuser afterwards does not get it automatically, and unticking **Keep local login** on any of these accounts removes their local access like anyone else.
 
-SCIM-provisioned users, by contrast, are SSO-only by design.
+SCIM-provisioned and auto-provisioned (JIT) users, by contrast, are SSO-only by design, regardless of the Force SSO Login setting. Their lifecycle is meant to be governed entirely by the identity provider, so they don't get a local password fallback unless you explicitly grant them **Keep local login**.
 
 {% hint style="warning" %}
 Turning on Force SSO Login **clears the password** of every account that does not have **Keep local login** enabled. Set **Keep local login** on your exception accounts _before_ you enable Force SSO Login — otherwise their passwords are wiped, and re-enabling the flag afterwards does not restore them (the user has to go through a password reset, which requires a working mailer). Always confirm at least one break-glass account can still log in before forcing SSO.

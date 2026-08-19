@@ -178,19 +178,44 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 user_id=str(user.id),
             )
         except User.DoesNotExist:
-            logger.error(
-                "pre_social_login: user not found",
+            from .sso.models import SSOSettings
+
+            try:
+                sso_settings = SSOSettings.objects.get()
+            except SSOSettings.DoesNotExist:
+                sso_settings = None
+
+            if not (sso_settings and sso_settings.jit_provisioning_enabled):
+                logger.error(
+                    "pre_social_login: user not found",
+                    provider=sociallogin.account.provider,
+                )
+                logger.debug(
+                    "pre_social_login: user not found - check DB for this email",
+                    idp_email=email_address,
+                    idp_email_repr=repr(email_address),
+                    provider=sociallogin.account.provider,
+                )
+                return Response(
+                    {"message": "User not found."}, status=HTTP_401_UNAUTHORIZED
+                )
+
+            user = User.objects.create_user(
+                email=email_address,
+                password=None,
+                first_name=sociallogin.user.first_name,
+                last_name=sociallogin.user.last_name,
+                user_groups=sso_settings.default_user_groups,
+            )
+            user.is_jit_provisioned = True
+            user.save(update_fields=["is_jit_provisioned"])
+            logger.info(
+                "pre_social_login: user auto-provisioned via JIT",
                 provider=sociallogin.account.provider,
+                user_id=str(user.id),
             )
-            logger.debug(
-                "pre_social_login: user not found - check DB for this email",
-                idp_email=email_address,
-                idp_email_repr=repr(email_address),
-                provider=sociallogin.account.provider,
-            )
-            return Response(
-                {"message": "User not found."}, status=HTTP_401_UNAUTHORIZED
-            )
+            sociallogin.user = user
+            sociallogin.connect(request, user)
 
     def list_apps(self, request, provider=None, client_id=None):
         """SSOSettings's can be setup in the database, or, via

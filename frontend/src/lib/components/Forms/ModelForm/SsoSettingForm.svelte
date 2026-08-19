@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
@@ -80,6 +81,25 @@
 	<span class="text-orange-500 italic text-sm"
 		><i class="fa-solid fa-circle-exclamation mr-1"></i>{m.forceSSOLoginHelpText2()}</span
 	>
+	<Checkbox
+		{form}
+		field="jit_provisioning_enabled"
+		label={m.enableJitProvisioning()}
+		helpText={m.enableJitProvisioningHelpText()}
+		disabled={!data.is_enabled}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="user-groups"
+		field="default_user_groups"
+		pathField="path"
+		cacheLock={cacheLocks['default_user_groups']}
+		bind:cachedValue={formDataCache['default_user_groups']}
+		label={m.defaultUserGroups()}
+		helpText={m.defaultUserGroupsHelpText()}
+		disabled={!data.is_enabled || !data.jit_provisioning_enabled}
+	/>
 	<Checkbox
 		{form}
 		field="slo_enabled"

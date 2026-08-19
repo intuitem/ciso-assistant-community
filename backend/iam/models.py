@@ -928,6 +928,15 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "scim_external_id, which the provisioning client may omit (RFC 7643)."
         ),
     )
+    is_jit_provisioned = models.BooleanField(
+        default=False,
+        verbose_name=_("JIT provisioned"),
+        help_text=_(
+            "True when this account was auto-provisioned on first SSO login. Like "
+            "SCIM-managed accounts, it stays SSO-only regardless of the global "
+            "'Force SSO' setting, unless 'Keep local login' is set."
+        ),
+    )
     objects = CaseInsensitiveUserManager()
 
     # USERNAME_FIELD is used as the unique identifier for the user
@@ -1268,7 +1277,9 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         """
         from global_settings.models import GlobalSettings
 
-        if self.is_scim_managed and not self.keep_local_login:
+        if (
+            self.is_scim_managed or self.is_jit_provisioned
+        ) and not self.keep_local_login:
             return False
 
         try:

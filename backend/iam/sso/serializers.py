@@ -1,8 +1,10 @@
 from allauth.socialaccount.providers.saml.provider import SAMLProvider
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from rest_framework import serializers
 
 from global_settings.models import GlobalSettings
+from iam.models import UserGroup
 from .models import SSOSettings
 
 from core.serializers import BaseModelSerializer
@@ -29,6 +31,15 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
     slo_enabled = serializers.BooleanField(
         required=False,
         default=False,
+    )
+    jit_provisioning_enabled = serializers.BooleanField(
+        required=False,
+        default=False,
+    )
+    default_user_groups = serializers.ListField(
+        child=serializers.UUIDField(),
+        required=False,
+        default=list,
     )
     provider = serializers.CharField(
         required=False,
@@ -252,6 +263,17 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         except SSOSettings.DoesNotExist:
             return False
 
+    def validate_default_user_groups(self, value):
+        existing_ids = set(
+            UserGroup.objects.filter(id__in=value).values_list("id", flat=True)
+        )
+        unknown_ids = [group_id for group_id in value if group_id not in existing_ids]
+        if unknown_ids:
+            raise serializers.ValidationError(
+                f"Unknown user group id(s): {', '.join(str(i) for i in unknown_ids)}"
+            )
+        return value
+
     class Meta:
         model = SSOSettings
         exclude = ["value"]
@@ -270,10 +292,11 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         settings_object = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
 
         if validated_data.get("is_enabled") is False:
-            has_scim_users_without_local_fallback = User.objects.filter(
-                is_scim_managed=True, keep_local_login=False
+            has_sso_only_users_without_local_fallback = User.objects.filter(
+                Q(is_scim_managed=True) | Q(is_jit_provisioned=True),
+                keep_local_login=False,
             ).exists()
-            if has_scim_users_without_local_fallback:
+            if has_sso_only_users_without_local_fallback:
                 raise serializers.ValidationError(
                     {"is_enabled": "errorSsoRequiredForScimUsers"}
                 )
@@ -297,6 +320,10 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         if "settings" not in validated_data:
             validated_data["settings"] = {}
         validated_data["settings"]["name"] = validated_data.get("provider", "n/a")
+
+        validated_data["default_user_groups"] = [
+            str(group_id) for group_id in validated_data.get("default_user_groups", [])
+        ]
 
         settings_object.value = validated_data
         settings_object.save()
