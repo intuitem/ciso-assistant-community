@@ -185,10 +185,11 @@
 {#if $identitySource === 'federated'}
 	<AutocompleteSelect
 		{form}
+		mandatory
 		optionsEndpoint="service-accounts/social-apps"
 		optionsLabelField="name"
 		field="social_app"
-		label={m.identityProvider()}
+		label={m.socialApp()}
 		helpText={m.socialAppHelpText()}
 		cacheLock={cacheLocks['social_app']}
 		bind:cachedValue={formDataCache['social_app']}
