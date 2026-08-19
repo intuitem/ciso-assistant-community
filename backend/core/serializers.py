@@ -424,6 +424,7 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = Vulnerability
+        fields = "__all__"
 
 
 class VulnerabilityWriteSerializer(BaseModelSerializer):
@@ -2626,6 +2627,7 @@ class EvidenceWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Evidence
+        fields = "__all__"
 
     def create(self, validated_data):
         attachment = validated_data.pop("attachment", None)
