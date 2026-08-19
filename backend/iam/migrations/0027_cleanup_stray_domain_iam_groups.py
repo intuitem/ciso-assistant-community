@@ -14,7 +14,10 @@ def cleanup_stray_domain_iam_groups(apps, schema_editor):
         if not builtin_groups.exists():
             continue
 
-        has_members = User.objects.filter(user_groups__in=builtin_groups).exists()
+        has_members = (
+            User.objects.filter(user_groups__in=builtin_groups).exists()
+            or builtin_groups.filter(idp_groups__isnull=False).exists()
+        )
         if has_members:
             Folder.objects.filter(id=folder.id).update(create_iam_groups=True)
         else:
