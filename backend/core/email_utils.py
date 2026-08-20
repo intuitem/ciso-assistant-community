@@ -53,6 +53,28 @@ def get_locale_for_email(email: str) -> str:
     return "en"
 
 
+def get_disabled_email_templates() -> set:
+    """
+    Return the set of template keys disabled by the administrator.
+    Stored in GlobalSettings(name="general").value["disabled_email_templates"].
+    An absent or malformed entry means every template is enabled.
+    """
+    try:
+        general = GlobalSettings.objects.filter(name="general").first()
+        if general and isinstance(general.value, dict):
+            disabled = general.value.get("disabled_email_templates", [])
+            if isinstance(disabled, list):
+                return {key for key in disabled if isinstance(key, str)}
+    except Exception as e:
+        logger.warning("Failed to resolve disabled email templates: %s", e)
+    return set()
+
+
+def is_email_template_enabled(template_name: str) -> bool:
+    """Whether emails using this template may be sent (enabled by default)."""
+    return template_name not in get_disabled_email_templates()
+
+
 def _load_custom_email_template(
     template_name: str, locale: str
 ) -> Optional[Dict[str, str]]:
@@ -174,7 +196,7 @@ def render_email_template(
     context: Dict,
     locale: Optional[str] = None,
     recipient_email: Optional[str] = None,
-) -> Dict[str, str]:
+) -> Optional[Dict[str, str]]:
     """
     Render email template with context variables.
 
@@ -190,8 +212,17 @@ def render_email_template(
         recipient_email: Email address of recipient, used to resolve locale from user preferences
 
     Returns:
-        Dictionary with 'subject', 'body', and 'html_body' keys, or empty dict if template not found
+        Dictionary with 'subject', 'body', and 'html_body' keys.
+        Returns None if the template is disabled in settings (intentional skip),
+        or an empty dict if the template could not be loaded or rendered (failure).
     """
+    if not is_email_template_enabled(template_name):
+        logger.info(
+            "Email template is disabled in settings, skipping send",
+            template=template_name,
+        )
+        return None
+
     if locale is None and recipient_email:
         locale = get_locale_for_email(recipient_email)
     template_data = load_email_template(template_name, locale)

@@ -1377,6 +1377,9 @@ def resolve_visibility_from_overrides(overrides, field_name):
     Use this when you have a raw dict (e.g. from a queryset `.values()` call).
     For a model instance, prefer `resolve_field_visibility(ca, field)`.
     """
+    # is_score_overridden inherits score's visibility.
+    if field_name == "is_score_overridden":
+        field_name = "score"
     pair = (overrides or {}).get(field_name)
     if isinstance(pair, dict):
         return pair
