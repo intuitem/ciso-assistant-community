@@ -518,7 +518,8 @@ def test_list_remote_objects_search_matches_issue_key(
 
     jql = mock_jira.return_value.search_issues.call_args[0][0]
     assert 'key = "CISO-40"' in jql
-    assert 'summary ~ "ciso-40*"' in jql
+    # The hyphen is a Lucene special, replaced by a space in the summary clause.
+    assert 'summary ~ "ciso 40*"' in jql
 
 
 @patch("integrations.itsm.jira.client.SyncMapping")
@@ -560,7 +561,7 @@ def test_list_remote_objects_key_clause_falls_back_on_jql_error(
 
 @patch("integrations.itsm.jira.client.SyncMapping")
 @patch("integrations.itsm.jira.client.JIRA")
-def test_list_remote_objects_escapes_jql_term(mock_jira, mock_sync, configuration):
+def test_list_remote_objects_sanitizes_jql_term(mock_jira, mock_sync, configuration):
     """Quotes and backslashes in the term cannot break out of the JQL string."""
     mock_jira.return_value.search_issues.return_value = []
     mock_sync.objects.filter.return_value.values_list.return_value = []
@@ -569,7 +570,37 @@ def test_list_remote_objects_escapes_jql_term(mock_jira, mock_sync, configuratio
     client.list_remote_objects({"search": 'a"b\\c'})
 
     jql = mock_jira.return_value.search_issues.call_args[0][0]
-    assert 'summary ~ "a\\"b\\\\c*"' in jql
+    assert 'summary ~ "a b c*"' in jql
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_strips_lucene_specials(
+    mock_jira, mock_sync, configuration
+):
+    """Lucene-reserved characters would 400 (and can never match: the text
+    index drops punctuation), so they become spaces."""
+    mock_jira.return_value.search_issues.return_value = []
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    client.list_remote_objects({"search": "A.7.1 (review)*?"})
+
+    jql = mock_jira.return_value.search_issues.call_args[0][0]
+    assert 'summary ~ "A.7.1 review*"' in jql
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_punctuation_only_search_returns_nothing(mock_jira, mock_sync, configuration):
+    """A term that sanitizes to nothing matches nothing, not everything."""
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects({"search": "*?("})
+
+    assert results == []
+    mock_jira.return_value.search_issues.assert_not_called()
 
 
 @patch("integrations.itsm.jira.client.SyncMapping")
@@ -652,4 +683,58 @@ def test_hydration_caps_id_list(mock_jira, mock_sync, configuration):
     client = JiraClient(configuration)
     client.list_remote_objects({"id": ",".join(f"PROJ-{i}" for i in range(500))})
 
-    assert mock_jira.return_value.issue.call_count == 100
+    assert mock_jira.return_value.issue.call_count == 20
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_hydration_rejects_malformed_ids(mock_jira, mock_sync, configuration):
+    """Ids reach the REST path verbatim, so only key/numeric shapes pass."""
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects(
+        {"id": "../serverInfo,PROJ-1?expand=x,%2e%2e,search"}
+    )
+
+    assert results == []
+    mock_jira.return_value.issue.assert_not_called()
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_hydration_skips_malformed_payloads(mock_jira, mock_sync, configuration):
+    """A response without the expected fields is skipped, not a 500."""
+    broken = MagicMock()
+    broken.raw = {"key": "PROJ-1", "id": "1", "fields": {}}
+    mock_jira.return_value.issue.side_effect = [
+        broken,
+        _fake_hydrated_issue("PROJ-2", "2", "Fine"),
+    ]
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects({"id": "PROJ-1,PROJ-2"})
+
+    assert [r["key"] for r in results] == ["PROJ-2"]
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_over_fetches_by_mapping_count(mock_jira, mock_sync, configuration):
+    """The fetch adds headroom for mapped issues and truncates to the limit,
+    so the lazy/eager probe still sees a full page."""
+    mock_jira.return_value.search_issues.return_value = [
+        _fake_issue(f"PROJ-{i}", str(i), f"Issue {i}") for i in range(53)
+    ]
+    mock_sync.objects.filter.return_value.values_list.return_value = [
+        "PROJ-0",
+        "PROJ-1",
+    ]
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects({"limit": 51})
+
+    assert mock_jira.return_value.search_issues.call_args[1]["maxResults"] == 53
+    assert len(results) == 51
+    assert not {"PROJ-0", "PROJ-1"} & {r["key"] for r in results}

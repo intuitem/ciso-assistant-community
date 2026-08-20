@@ -15,8 +15,13 @@ logger = get_logger(__name__)
 # encoded-query metacharacter can pass through hydration.
 SYS_ID_PATTERN = re.compile(r"[0-9a-zA-Z]{1,64}")
 
-# Each hydration id is user-supplied; cap the list like the view caps limit.
-MAX_HYDRATION_IDS = 100
+# Each hydration id is user-supplied; the picker only hydrates selected
+# values, so a handful is plenty.
+MAX_HYDRATION_IDS = 20
+
+# Ceiling on rows fetched per list call: the requested limit plus headroom
+# for already-mapped records that get filtered out afterwards.
+MAX_LIST_FETCH = 500
 
 
 class ServiceNowClient(BaseIntegrationClient):
@@ -197,8 +202,12 @@ class ServiceNowClient(BaseIntegrationClient):
             # ^ and , are encoded-query metacharacters; LIKE has no escape
             # syntax so strip them from the term.
             term = search.strip().replace("^", "").replace(",", "")
-            search_fields = self._searchable_fields()
-            if term and search_fields:
+            if term:
+                search_fields = self._searchable_fields()
+                if not search_fields:
+                    # No searchable column on this table: returning the base
+                    # query would present unrelated rows as search matches.
+                    return []
                 # ^NQ ORs complete subqueries, so base_query is repeated in
                 # each branch; a plain ^OR would escape the base_query AND
                 # due to flat left-to-right precedence.
@@ -206,20 +215,28 @@ class ServiceNowClient(BaseIntegrationClient):
                     f"{base_query}^{field}LIKE{term}" for field in search_fields
                 )
 
+        used_ids = set(
+            SyncMapping.objects.filter(configuration=self.configuration).values_list(
+                "remote_id", flat=True
+            )
+        )
+
+        limit = query_params.get("limit", 100)
+        # Mapped records are filtered out below, after the fetch. Over-fetch
+        # by the mapping count so the picker's lazy/eager probe still sees a
+        # full page when more than `limit` selectable records exist.
+        fetch_limit = min(limit + len(used_ids), MAX_LIST_FETCH)
+
         url = f"{self.base_url}/api/now/table/{self.table}"
         params = {
             "sysparm_query": sysparm_query,
             # Superset of common display fields so labels work across tables
             # (incident uses number/short_description, CMDB/asset tables use name).
             "sysparm_fields": "sys_id,number,name,short_description,sys_updated_on",
-            "sysparm_limit": query_params.get("limit", 100),
+            "sysparm_limit": fetch_limit,
         }
 
         try:
-            used_ids = SyncMapping.objects.filter(
-                configuration=self.configuration
-            ).values_list("remote_id", flat=True)
-
             response = requests.get(
                 url,
                 auth=self.auth,
@@ -244,7 +261,7 @@ class ServiceNowClient(BaseIntegrationClient):
                             "summary": self._display_label(record, sys_id),
                         }
                     )
-            return results
+            return results[:limit]
 
         except requests.exceptions.RequestException:
             logger.error("Failed to search ServiceNow", exc_info=True)

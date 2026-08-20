@@ -158,7 +158,7 @@ def test_hydration_caps_id_list(mock_get, mock_sync, configuration):
     client.list_remote_objects({"id": ",".join(f"id{i}" for i in range(500))})
 
     query = mock_get.call_args[1]["params"]["sysparm_query"]
-    assert query.count(",") == 99
+    assert query.count(",") == 19
 
 
 @patch("integrations.itsm.servicenow.client.SyncMapping")
@@ -186,18 +186,39 @@ def test_search_branches_only_cover_existing_columns(
 
 @patch("integrations.itsm.servicenow.client.SyncMapping")
 @patch("integrations.itsm.servicenow.client.requests.get")
-def test_search_with_no_valid_columns_preserves_base_query(
+def test_search_with_no_valid_columns_returns_nothing(
     mock_get, mock_sync, configuration
 ):
+    """No searchable column means no matches, not the unfiltered base query."""
     configuration.schema_cache.columns = {"incident": [{"name": "state"}]}
-    mock_get.return_value = _response([])
     mock_sync.objects.filter.return_value.values_list.return_value = []
 
     client = _client(configuration)
-    client.list_remote_objects({"search": "INC001"})
+    results = client.list_remote_objects({"search": "INC001"})
 
-    query = mock_get.call_args[1]["params"]["sysparm_query"]
-    assert query == "active=true"
+    assert results == []
+    mock_get.assert_not_called()
+
+
+@patch("integrations.itsm.servicenow.client.SyncMapping")
+@patch("integrations.itsm.servicenow.client.requests.get")
+def test_list_over_fetches_by_mapping_count(mock_get, mock_sync, configuration):
+    """The fetch adds headroom for mapped records and truncates to the limit,
+    so the lazy/eager probe still sees a full page."""
+    mock_get.return_value = _response(
+        [{"sys_id": f"rec{i}", "number": f"INC{i:03d}"} for i in range(53)]
+    )
+    mock_sync.objects.filter.return_value.values_list.return_value = [
+        "rec0",
+        "rec1",
+    ]
+
+    client = _client(configuration)
+    results = client.list_remote_objects({"limit": 51})
+
+    assert mock_get.call_args[1]["params"]["sysparm_limit"] == 53
+    assert len(results) == 51
+    assert not {"rec0", "rec1"} & {r["id"] for r in results}
 
 
 @patch("integrations.itsm.servicenow.client.SyncMapping")

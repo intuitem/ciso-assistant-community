@@ -26,8 +26,21 @@ SYNTHETIC_FIELDS = ({"name": "status", "label": "Status", "readonly": False},)
 # clause in the picker JQL.
 ISSUE_KEY_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9_]*-\d+$")
 
-# Each hydration id costs one remote call; cap the client-supplied list.
-MAX_HYDRATION_IDS = 100
+# Numeric issue ids are the other id form Jira accepts besides keys.
+ISSUE_ID_PATTERN = re.compile(r"^\d+$")
+
+# Each hydration id costs one remote call; cap the client-supplied list. The
+# picker only hydrates selected values, so a handful is plenty.
+MAX_HYDRATION_IDS = 20
+
+# Ceiling on rows fetched per list call: the requested limit plus headroom
+# for already-mapped issues that get filtered out afterwards.
+MAX_LIST_FETCH = 500
+
+# Lucene-reserved characters inside a ``~`` text query: unescaped they make
+# Jira reject the JQL with a 400, and the text index strips punctuation
+# anyway, so search terms have them replaced with spaces.
+LUCENE_SPECIALS = re.compile(r'[+\-&|!(){}\[\]^~*?:\\"/]')
 
 
 class JiraClient(BaseIntegrationClient):
@@ -187,16 +200,29 @@ class JiraClient(BaseIntegrationClient):
     def _escape_jql_string(value: str) -> str:
         return value.replace("\\", "\\\\").replace('"', '\\"')
 
+    @classmethod
+    def _sanitize_search_term(cls, value: str) -> str:
+        """Prepare a free-text term for use inside ``summary ~ "..."``.
+
+        Lucene-reserved characters make Jira 400 unescaped, and escaped they
+        never match anyway because the text analyzer strips punctuation from
+        the index. Replace them with spaces so the remaining words search
+        naturally. May return an empty string (nothing searchable).
+        """
+        words = LUCENE_SPECIALS.sub(" ", value)
+        return cls._escape_jql_string(" ".join(words.split()))
+
     def _build_list_jql(
         self, project_key: str, issue_type: str, search: str = ""
-    ) -> tuple[str, str | None]:
+    ) -> tuple[str | None, str | None]:
         """Return ``(jql, key_jql)`` for the remote object picker.
 
         ``jql`` filters on summaries; ``key_jql`` additionally matches the
         issue key when the search term looks like one. It is a separate
         query because JQL referencing a nonexistent issue key fails with a
         400 instead of returning an empty result, so the caller falls back
-        to ``jql`` when it errors.
+        to ``jql`` when it errors. ``(None, None)`` means the search term
+        has no searchable content and cannot match anything.
         """
         prefix = f"project = {project_key}"
         if issue_type:
@@ -208,7 +234,9 @@ class JiraClient(BaseIntegrationClient):
         if not search:
             return prefix, None
 
-        term = self._escape_jql_string(search.strip())
+        term = self._sanitize_search_term(search.strip())
+        if not term:
+            return None, None
         jql = f'{prefix} AND summary ~ "{term}*"'
 
         candidate_key = None
@@ -239,55 +267,75 @@ class JiraClient(BaseIntegrationClient):
         if not project_key:
             raise ValueError("Jira project_key/table_name is not configured")
 
-        used_issues = SyncMapping.objects.filter(
-            configuration=self.configuration
-        ).values_list("remote_id", flat=True)
+        used_issues = set(
+            SyncMapping.objects.filter(configuration=self.configuration).values_list(
+                "remote_id", flat=True
+            )
+        )
 
         ids = query_params.get("id", "")
         if ids:
-            id_list = [i.strip() for i in ids.split(",") if i.strip()]
-            id_list = id_list[:MAX_HYDRATION_IDS]
+            # Only key- or numeric-shaped ids may reach jira.issue(): the id
+            # is formatted into the REST path, so anything else could steer
+            # the request elsewhere on the API.
+            id_list = [
+                i.strip()
+                for i in ids.split(",")
+                if i.strip()
+                and (
+                    ISSUE_KEY_PATTERN.match(i.strip())
+                    or ISSUE_ID_PATTERN.match(i.strip())
+                )
+            ][:MAX_HYDRATION_IDS]
             results_list = []
             for remote_id in id_list:
                 try:
                     issue = self.jira.issue(
                         remote_id, fields="summary,project,issuetype"
                     )
-                except Exception:
-                    logger.warning("Failed to hydrate Jira issue", remote_id=remote_id)
-                    continue
-                fields = issue.raw["fields"]
-                # Keep hydration inside the picker's scope: the integration's
-                # credentials may see other projects, the caller must not.
-                if fields["project"]["key"].upper() != project_key.upper():
-                    continue
-                if (
-                    issue_type
-                    and fields["issuetype"]["name"].lower() != issue_type.lower()
-                ):
-                    continue
-                results_list.append(
-                    {
+                    fields = issue.raw["fields"]
+                    # Keep hydration inside the picker's scope: the
+                    # integration's credentials may see other projects, the
+                    # caller must not.
+                    if fields["project"]["key"].upper() != project_key.upper():
+                        continue
+                    if (
+                        issue_type
+                        and fields["issuetype"]["name"].lower() != issue_type.lower()
+                    ):
+                        continue
+                    entry = {
                         "key": issue.key,
                         "id": issue.id,
                         "summary": fields["summary"],
                     }
-                )
+                except Exception:
+                    logger.warning("Failed to hydrate Jira issue", remote_id=remote_id)
+                    continue
+                results_list.append(entry)
             return results_list
 
         search = str(query_params.get("search", "") or "")
         limit = query_params.get("limit", 50)
+        # Mapped issues are filtered out below, after the fetch. Over-fetch
+        # by the mapping count so the picker's lazy/eager probe still sees a
+        # full page when more than `limit` selectable issues exist.
+        fetch_limit = min(limit + len(used_issues), MAX_LIST_FETCH)
         summary_jql, key_jql = self._build_list_jql(project_key, issue_type, search)
+        if summary_jql is None:
+            # The term sanitized down to nothing (pure punctuation): nothing
+            # can match it, and an empty ~ clause would match everything.
+            return []
 
         jql_query = f"{key_jql or summary_jql} ORDER BY created DESC"
 
-        logger.info(f"Searching Jira with JQL: {jql_query}, maxResults: {limit}")
+        logger.info(f"Searching Jira with JQL: {jql_query}, maxResults: {fetch_limit}")
 
         try:
             try:
                 issues = self.jira.search_issues(
                     jql_query,
-                    maxResults=limit,
+                    maxResults=fetch_limit,
                     fields="summary",
                 )
             except Exception:
@@ -298,7 +346,7 @@ class JiraClient(BaseIntegrationClient):
                 jql_query = f"{summary_jql} ORDER BY created DESC"
                 issues = self.jira.search_issues(
                     jql_query,
-                    maxResults=limit,
+                    maxResults=fetch_limit,
                     fields="summary",
                 )
 
@@ -310,7 +358,7 @@ class JiraClient(BaseIntegrationClient):
                 }
                 for issue in issues
                 if issue.raw["key"] not in used_issues
-            ]
+            ][:limit]
             logger.info(
                 f"Fetched {len(results_list)} Jira issues for project {project_key}."
             )
