@@ -5172,7 +5172,7 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
     fields_to_check = ["evidence", "version"]
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = Asset.VIEWABLE_FROM_DESCENDANTS_MODE
+    VIEWABLE_FROM_DESCENDANTS_MODE = Evidence.VIEWABLE_FROM_DESCENDANTS_MODE
 
     class Meta:
         verbose_name = _("Evidence Revision")
