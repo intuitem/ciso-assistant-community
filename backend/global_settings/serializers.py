@@ -102,6 +102,7 @@ GENERAL_SETTINGS_KEYS = [
     "personal_folders_parent",
     "disable_partially_compliant_result",
     "use_risk_category_label",
+    "disabled_email_templates",
 ]
 
 LLM_URL_DEFAULTS = {
@@ -149,6 +150,16 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                 existing_key = instance.value.get("openai_api_key")
                 if existing_key:
                     validated_data["value"]["openai_api_key"] = existing_key
+            # Preserve per-template email toggles if not provided in the update
+            # (they are managed from the email templates settings, not the general form)
+            if "disabled_email_templates" not in validated_data["value"] and isinstance(
+                instance.value, dict
+            ):
+                existing_disabled = instance.value.get("disabled_email_templates")
+                if existing_disabled is not None:
+                    validated_data["value"]["disabled_email_templates"] = (
+                        existing_disabled
+                    )
 
         # Track old currency value for potential propagation
         old_currency = instance.value.get("currency") if instance.value else None
@@ -214,6 +225,13 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                 ):
                     raise serializers.ValidationError(
                         {"default_packager": "Must match [a-z0-9_-]+."}
+                    )
+            if key == "disabled_email_templates":
+                if not isinstance(value, list) or not all(
+                    isinstance(v, str) for v in value
+                ):
+                    raise serializers.ValidationError(
+                        {"disabled_email_templates": "Must be a list of template keys."}
                     )
             if key == "chat_temperature_enabled":
                 if not isinstance(value, bool):
