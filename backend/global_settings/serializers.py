@@ -4,6 +4,7 @@ import uuid
 
 from django.conf import settings as django_settings
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db import transaction
 from rest_framework import serializers
 
 from urllib.parse import urlparse
@@ -144,22 +145,9 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         return ret
 
     def update(self, instance, validated_data):
-        # Preserve existing API key if not provided in the update
-        if "value" in validated_data and isinstance(validated_data["value"], dict):
-            if not validated_data["value"].get("openai_api_key") and instance.value:
-                existing_key = instance.value.get("openai_api_key")
-                if existing_key:
-                    validated_data["value"]["openai_api_key"] = existing_key
-            # Preserve per-template email toggles if not provided in the update
-            # (they are managed from the email templates settings, not the general form)
-            if "disabled_email_templates" not in validated_data["value"] and isinstance(
-                instance.value, dict
-            ):
-                existing_disabled = instance.value.get("disabled_email_templates")
-                if existing_disabled is not None:
-                    validated_data["value"]["disabled_email_templates"] = (
-                        existing_disabled
-                    )
+        # Keys not provided by the client (openai_api_key, per-template email
+        # toggles) are preserved from the row under a lock right before save,
+        # see below.
 
         # Track old currency value for potential propagation
         old_currency = instance.value.get("currency") if instance.value else None
@@ -252,12 +240,31 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                 validated_data["value"][key] = temp
             if key == "default_custom_analytics_dashboard":
                 validated_data["value"][key] = validate_default_dashboard_value(value)
-            setattr(instance, "value", validated_data["value"])
-
         # Get new currency value
         new_currency = validated_data["value"].get("currency")
 
-        instance.save()
+        with transaction.atomic():
+            # Lock and reload the row before merging preserved keys, so this
+            # read-merge-write can't overwrite a concurrent writer (e.g. the
+            # per-template email toggles endpoint).
+            instance = GlobalSettings.objects.select_for_update().get(pk=instance.pk)
+            current = instance.value if isinstance(instance.value, dict) else {}
+            # Preserve existing API key if not provided in the update
+            if not validated_data["value"].get("openai_api_key"):
+                existing_key = current.get("openai_api_key")
+                if existing_key:
+                    validated_data["value"]["openai_api_key"] = existing_key
+            # Preserve per-template email toggles if not provided in the update
+            # (they are managed from the email templates settings, not the
+            # general form)
+            if "disabled_email_templates" not in validated_data["value"]:
+                existing_disabled = current.get("disabled_email_templates")
+                if existing_disabled is not None:
+                    validated_data["value"]["disabled_email_templates"] = (
+                        existing_disabled
+                    )
+            instance.value = validated_data["value"]
+            instance.save()
 
         # If currency has changed, propagate to AppliedControl records
         if old_currency != new_currency and new_currency:
