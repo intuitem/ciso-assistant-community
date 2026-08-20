@@ -39,6 +39,7 @@ from pathlib import Path
 import humanize
 
 from core.models import CustomEmailTemplate, CustomWordTemplate, CustomDocHtmlTemplate
+from global_settings.models import GlobalSettings
 from .models import ClientSettings
 from .serializers import (
     ClientSettingsReadSerializer,
@@ -594,6 +595,10 @@ class CustomEmailTemplateViewSet(BaseModelViewSet):
         )
         override_set = {(k, l) for k, l in overrides}
 
+        from core.email_utils import get_disabled_email_templates
+
+        disabled_templates = get_disabled_email_templates()
+
         result = []
         for key, meta in EMAIL_TEMPLATE_REGISTRY.items():
             result.append(
@@ -605,9 +610,56 @@ class CustomEmailTemplateViewSet(BaseModelViewSet):
                     "overrides": [
                         lang for lang in ["en", "fr"] if (key, lang) in override_set
                     ],
+                    "is_enabled": key not in disabled_templates,
                 }
             )
         return Response(result)
+
+    @action(methods=["post"], detail=False, url_path="set-enabled")
+    def set_enabled(self, request):
+        """Enable or disable sending of a given email template."""
+        if not self._has_permission(request):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        template_key = request.data.get("template_key")
+        is_enabled = request.data.get("is_enabled")
+        if template_key not in EMAIL_TEMPLATE_REGISTRY:
+            return Response(
+                {"error": "Unknown template key"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        if not isinstance(is_enabled, bool):
+            return Response(
+                {"error": "is_enabled must be a boolean"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        with transaction.atomic():
+            general = (
+                GlobalSettings.objects.select_for_update()
+                .filter(name="general")
+                .first()
+            )
+            if general is None:
+                return Response(
+                    {"error": "General settings not initialized"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            value = general.value if isinstance(general.value, dict) else {}
+            disabled = {
+                key
+                for key in value.get("disabled_email_templates", [])
+                if isinstance(key, str)
+            }
+            if is_enabled:
+                disabled.discard(template_key)
+            else:
+                disabled.add(template_key)
+            value["disabled_email_templates"] = sorted(disabled)
+            general.value = value
+            general.save(update_fields=["value"])
+
+        return Response({"template_key": template_key, "is_enabled": is_enabled})
 
     @action(
         methods=["get"],
