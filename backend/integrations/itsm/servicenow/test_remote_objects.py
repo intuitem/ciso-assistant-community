@@ -85,6 +85,19 @@ def test_list_remote_objects_strips_query_metacharacters(
 
 @patch("integrations.itsm.servicenow.client.SyncMapping")
 @patch("integrations.itsm.servicenow.client.requests.get")
+def test_metacharacter_only_search_returns_nothing(mock_get, mock_sync, configuration):
+    """A term that sanitizes to nothing matches nothing, not everything."""
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = _client(configuration)
+    results = client.list_remote_objects({"search": "^^, "})
+
+    assert results == []
+    mock_get.assert_not_called()
+
+
+@patch("integrations.itsm.servicenow.client.SyncMapping")
+@patch("integrations.itsm.servicenow.client.requests.get")
 def test_list_remote_objects_hydrates_ids_even_when_mapped(
     mock_get, mock_sync, configuration
 ):

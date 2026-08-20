@@ -202,18 +202,21 @@ class ServiceNowClient(BaseIntegrationClient):
             # ^ and , are encoded-query metacharacters; LIKE has no escape
             # syntax so strip them from the term.
             term = search.strip().replace("^", "").replace(",", "")
-            if term:
-                search_fields = self._searchable_fields()
-                if not search_fields:
-                    # No searchable column on this table: returning the base
-                    # query would present unrelated rows as search matches.
-                    return []
-                # ^NQ ORs complete subqueries, so base_query is repeated in
-                # each branch; a plain ^OR would escape the base_query AND
-                # due to flat left-to-right precedence.
-                sysparm_query = "^NQ".join(
-                    f"{base_query}^{field}LIKE{term}" for field in search_fields
-                )
+            if not term:
+                # The term sanitized down to nothing: it must match nothing,
+                # not fall through to the unfiltered base query.
+                return []
+            search_fields = self._searchable_fields()
+            if not search_fields:
+                # No searchable column on this table: returning the base
+                # query would present unrelated rows as search matches.
+                return []
+            # ^NQ ORs complete subqueries, so base_query is repeated in
+            # each branch; a plain ^OR would escape the base_query AND
+            # due to flat left-to-right precedence.
+            sysparm_query = "^NQ".join(
+                f"{base_query}^{field}LIKE{term}" for field in search_fields
+            )
 
         used_ids = set(
             SyncMapping.objects.filter(configuration=self.configuration).values_list(
