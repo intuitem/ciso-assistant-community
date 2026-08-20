@@ -11,7 +11,14 @@ class TestOptionsMetadata:
 
     @pytest.mark.parametrize(
         "url_name",
-        ["folders-list", "assets-list", "perimeters-list"],
+        [
+            "folders-list",
+            "assets-list",
+            "perimeters-list",
+            "frameworks-list",
+            "risk-matrices-list",
+            "document-attachments-list",
+        ],
     )
     def test_options_on_collection_endpoint(self, authenticated_client, url_name):
         response = authenticated_client.options(reverse(url_name))
