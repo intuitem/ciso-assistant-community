@@ -5793,7 +5793,6 @@
 	"createMissingAssetClassesHelpText": "Crée les classes d'actifs personnalisées référencées par l'import. Elles sont ajoutées au catalogue global et deviennent visibles par tous les utilisateurs.",
 	"viewableFromDescendants": "Visible depuis les sous-domaines",
 	"viewableFromDescendantsHelpText": "Si coché, rend les objets de plusieurs types de ce domaine visibles depuis tous les sous-domaines. Les types d'objets concernés sont : {stringified_model_names}.",
-	"createMissingAssetClassesHelpText": "Crée les classes d'actifs personnalisées référencées par l'import. Elles sont ajoutées au catalogue global et deviennent visibles par tous les utilisateurs.",
 	"validationsReceived": "Reçues",
 	"validationsSent": "Envoyées",
 	"validationsHistory": "Historique",
