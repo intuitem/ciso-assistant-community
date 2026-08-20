@@ -550,6 +550,7 @@ def get_model_field(model: type[Model], name: str) -> Field | None:
     for field in model._meta.concrete_fields:
         if field.name == name:
             return field
+    return None
 
 
 def _allowed_ops(field: Field | None) -> set[str]:
