@@ -1,4 +1,5 @@
 import json
+import structlog
 from datetime import timedelta
 
 from django.core.exceptions import ValidationError
@@ -36,6 +37,8 @@ from core.models import (
 )
 from global_settings.models import GlobalSettings
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
+
+logger = structlog.getLogger(__name__)
 
 
 class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMixin):
@@ -292,6 +295,13 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
             value_dict = self.value
 
         if not isinstance(value_dict, dict):
+            logger.warning(
+                "CustomMetricSample.value is not an object, expected "
+                '{"result": ...} or {"choice_index": ...}',
+                sample_id=str(self.pk),
+                metric_instance_id=str(self.metric_instance_id),
+                value=value_dict,
+            )
             return None
 
         metric_definition = self.metric_instance.metric_definition
