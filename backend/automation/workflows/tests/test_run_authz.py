@@ -413,7 +413,7 @@ class TestApiParity:
         runner = User.objects.create_user(email="parity@authz.test")
         grant(runner, parent, ["view_appliedcontrol"], recursive=False)
 
-        engine_ids = authz.viewable_ids(runner, AppliedControl)
+        engine_ids = set(authz.viewable_ids(runner, AppliedControl))
 
         factory = APIRequestFactory()
         view = AppliedControlViewSet.as_view({"get": "list"})

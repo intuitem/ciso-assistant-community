@@ -514,7 +514,7 @@ def _read_scope_folder_ids(folder):
     """Instance folder + subtree ONLY — deliberately narrower than
     _accessible_folder_ids: reads of ancestor folders would leak parent-domain
     rows into a child-domain workflow's run log."""
-    return {folder.id, *(f.id for f in folder.get_sub_folders())}
+    return set(folder.get_sub_folders(include_self=True).values_list("id", flat=True))
 
 
 _READ_OP_LOOKUPS = {
