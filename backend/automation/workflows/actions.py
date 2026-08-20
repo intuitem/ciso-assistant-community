@@ -332,7 +332,7 @@ class ReadEntry:
     #: Restriction every read of this model must satisfy.
     base_filter: Q | None = None
     #: Integer columns where -1 means "not rated"; range filters skip it.
-    unrated_sentinels: frozenset[str] = frozenset()
+    skip_unrated: frozenset[str] = frozenset()
     #: Relations the computed callables dereference per row.
     select_related: list[str] = dataclass_field(default_factory=list)
 
@@ -489,9 +489,7 @@ READABLE_MODELS: dict[str, ReadEntry] = {
         ],
         # The level columns hold -1 until the scenario is rated; a range
         # filter must not match those rows (eq -1 still selects them).
-        unrated_sentinels=frozenset(
-            {"inherent_level", "current_level", "residual_level"}
-        ),
+        skip_unrated=frozenset({"inherent_level", "current_level", "residual_level"}),
         # Levels serialize as their matrix cell dict, like the API
         # serializer; filters keep comparing the raw integer column.
         computed={
@@ -600,7 +598,7 @@ def _read_condition_to_q(condition, entry, allowed_fields, context):
         query = Q(**{f"{field}__in": value})
         return ~query if op == "not_in" else query
     query = Q(**{f"{field}__{lookup}": value})
-    if op in ("gt", "lt", "gte", "lte") and field in entry.unrated_sentinels:
+    if op in ("gt", "lt", "gte", "lte") and field in entry.skip_unrated:
         query &= Q(**{f"{field}__gte": 0})
     return ~query if op == "neq" else query
 
