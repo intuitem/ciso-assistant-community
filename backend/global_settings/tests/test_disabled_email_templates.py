@@ -4,7 +4,8 @@ Tests for per-template email toggles (disabled_email_templates).
 Covers:
 - is_email_template_enabled: enabled by default, disabled when listed,
   robust to a missing settings row or malformed value
-- render_email_template: returns {} for a disabled template
+- render_email_template: returns None for a disabled template (intentional
+  skip), and {} when a template fails to load or render
 - User.mailing: skips sending entirely (no legacy fallback) when the
   mapped template key is disabled
 - GeneralSettingsSerializer: preserves disabled_email_templates when a
