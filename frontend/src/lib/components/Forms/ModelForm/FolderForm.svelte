@@ -48,7 +48,6 @@
 	});
 
 	async function initViewableFromDescendantsHelpText() {
-		console.log('PDPDPPDPDD');
 		let stringifiedModelNames = m.anErrorOccurred();
 
 		const req = await fetch('/content-types?may_be_viewable_from_descendants=true');
