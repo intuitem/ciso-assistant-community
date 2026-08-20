@@ -224,6 +224,7 @@ export const actions: Actions = {
 			'status',
 			'score',
 			'is_scored',
+			'is_score_overridden',
 			'documentation_score',
 			'observation',
 			'answers',
