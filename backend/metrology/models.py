@@ -291,6 +291,9 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
         else:
             value_dict = self.value
 
+        if not isinstance(value_dict, dict):
+            return None
+
         metric_definition = self.metric_instance.metric_definition
 
         if metric_definition.category == MetricDefinition.Category.QUALITATIVE:
@@ -312,6 +315,9 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
                 return "N/A"
         else:
             value_dict = self.value
+
+        if not isinstance(value_dict, dict):
+            return "N/A"
 
         metric_definition = self.metric_instance.metric_definition
 

@@ -143,6 +143,13 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
             )
         return value
 
+    def validate_value(self, value):
+        if not isinstance(value, dict):
+            raise serializers.ValidationError(
+                'value must be an object, e.g. {"result": 1.0} for a quantitative '
+            )
+        return value
+
     class Meta:
         model = CustomMetricSample
         exclude = ["folder"]
