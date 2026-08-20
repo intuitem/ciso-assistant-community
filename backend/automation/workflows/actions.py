@@ -19,6 +19,7 @@ from django.db.models import (
     BooleanField,
     DateField,
     DecimalField,
+    Field,
     FloatField,
     ForeignKey,
     IntegerField,
@@ -442,9 +443,8 @@ READABLE_MODELS: dict[str, ReadEntry] = {
     ),
     "requirement_assessment": ReadEntry(
         model=RequirementAssessment,
-        # create_requirement_assessments seeds an RA row for EVERY node of
-        # the framework, section headers included; every platform aggregate
-        # excludes non-assessable rows, and so do reads.
+        # Assessments of non-assessable requirements (section headings)
+        # exist in the database; never read them.
         base_filter=Q(requirement__assessable=True),
         fields=[
             "status",
@@ -458,11 +458,8 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             # Lets sweeps target one audit instead of every audit in scope.
             "compliance_assessment",
         ],
-        # Output-only identifiers: a bare row is unusable without knowing
-        # which requirement of which audit it assesses. Same keys as
-        # RequirementAssessmentReadSerializer: "name" is __str__ (falls back
-        # to the requirement's ref_id — most shipped framework nodes are
-        # ref_id-only), "requirement" a subset of its nested node dict.
+        # Identify the requirement and the audit on every row, under the
+        # same keys and shapes as RequirementAssessmentReadSerializer.
         computed={
             "name": str,
             "requirement": lambda ra: {
@@ -488,21 +485,15 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             "inherent_level",
             "current_level",
             "residual_level",
-            # ref_id ("R.1") collides across assessments; scope by id instead.
             "risk_assessment",
         ],
-        # Matrix-index levels store -1 for "not rated" (RiskScenario.save
-        # resets them while proba/impact are unset). Range filters must not
-        # sweep un-assessed scenarios in — same >= 0 guard as
-        # within_tolerance. eq -1 stays available to target unrated rows.
+        # The level columns hold -1 until the scenario is rated; a range
+        # filter must not match those rows (eq -1 still selects them).
         unrated_sentinels=frozenset(
             {"inherent_level", "current_level", "residual_level"}
         ),
-        # Same JSON the API serializers expose (current_level =
-        # get_current_risk(): the matrix cell dict, "name" for display,
-        # "value" keeping the comparable index). Shadows the raw column in
-        # the output row; the column names stay the filter/order surface,
-        # comparing on the integer index.
+        # Levels serialize as their matrix cell dict, like the API
+        # serializer; filters keep comparing the raw integer column.
         computed={
             "inherent_level": lambda s: s.get_inherent_risk(),
             "current_level": lambda s: s.get_current_risk(),
@@ -554,27 +545,28 @@ _READ_OP_LOOKUPS = {
 }
 
 
-def _concrete_field(model, name):
-    """Concrete column by name or attname (FK columns are whitelisted by
-    attname, e.g. compliance_assessment_id)."""
+def get_model_field(model: type[Model], name: str) -> Field | None:
+    """Return the concrete column named ``name`` on ``model``, or None."""
     for field in model._meta.concrete_fields:
-        if field.name == name or field.attname == name:
+        if field.name == name:
             return field
-    return None
 
 
-def _allowed_ops(field):
-    """Operators that make sense for the column's type. An untyped op either
-    crashes at query time or — worse — compiles on both databases with
-    different rows: 'contains' on a boolean LIKEs against 'true'/'false' on
-    PostgreSQL (casts to text) but against 0/1 on SQLite."""
+def _allowed_ops(field: Field | None) -> set[str]:
+    """Return the operators valid for ``field``'s column type; none for an
+    unknown column (fail closed). An untyped op either crashes at query time
+    or — worse — compiles on both databases with different rows: 'contains'
+    on a boolean LIKEs against 'true'/'false' on PostgreSQL (casts to text)
+    but against 0/1 on SQLite."""
     if isinstance(field, BooleanField):
         return {"eq", "neq", "is_null"}
     if isinstance(field, (ForeignKey, UUIDField)):
         return {"eq", "neq", "in", "not_in", "is_null"}
     if isinstance(field, (DateField, IntegerField, FloatField, DecimalField)):
         return set(_READ_OP_LOOKUPS) - {"contains"}
-    return set(_READ_OP_LOOKUPS)
+    if isinstance(field, Field):
+        return set(_READ_OP_LOOKUPS)
+    return set()
 
 
 def _read_condition_to_q(condition, entry, allowed_fields, context):
@@ -584,10 +576,10 @@ def _read_condition_to_q(condition, entry, allowed_fields, context):
     op = condition.get("op", "eq")
     lookup = _READ_OP_LOOKUPS.get(op)
     if lookup is None:
-        raise ActionError(f"read_objects: unknown operator '{op}'")
-    if op not in _allowed_ops(_concrete_field(entry.model, field)):
+        raise ActionError(f"read_objects: unknown operator {op!r}")
+    if op not in _allowed_ops(get_model_field(entry.model, field)):
         raise ActionError(
-            f"read_objects: operator '{op}' is not valid for field '{field}'"
+            f"read_objects: operator {op!r} is not valid for field {field!r}"
         )
     value = render(condition.get("value"), context)
     if op == "is_null":
@@ -1135,13 +1127,13 @@ def validate_read_config(node):
                 )
             elif op not in _READ_OP_LOOKUPS:
                 errors.append(
-                    ("action_read_invalid_filters", f"Unknown operator '{op}'")
+                    ("action_read_invalid_filters", f"Unknown operator {op!r}")
                 )
-            elif op not in _allowed_ops(_concrete_field(entry.model, field)):
+            elif op not in _allowed_ops(get_model_field(entry.model, field)):
                 errors.append(
                     (
                         "action_read_invalid_filters",
-                        f"Operator '{op}' is not valid for '{field}'",
+                        f"Operator {op!r} is not valid for {field!r}",
                     )
                 )
             if condition.get("changed"):
