@@ -15,7 +15,7 @@ Only a few models would benefit from customizable (user-controlled) object publi
 - We will add the `ViewableFromDescendantsMode` enum with 3 possible values:
   - `ALWAYS_VIEWABLE` will make the model objects be ALWAYS published.
   - `MAY_BE_VIEWABLE` will make the model model objects be published ONLY IF the folder they're in has their `viewable_from_descendants` field set to `True`.
-  - `NOT_VIEWABLE` will make the model objects be NEVER published.
+  - `NEVER_VIEWABLE` will make the model objects be NEVER published.
 
 - Each model class will have a `VIEWABLE_FROM_DESCENDANTS_MODE` attribute (the default being `NEVER_VIEWABLE` for safety reasons).
 
@@ -32,7 +32,7 @@ Only a few models would benefit from customizable (user-controlled) object publi
 
 ## Security considerations
 
-A developer changing/setting `Folder.VIEWABLE_FROM_DESCENDANTS_MODE` to `ALWAYS_VIEWABLE` by mistake could be dangerous.
+A developer changing/setting `SomeModel.VIEWABLE_FROM_DESCENDANTS_MODE` to `ALWAYS_VIEWABLE` by mistake could be dangerous.
 This risk is mitigated by defaulting to `NEVER_VIEWABLE` (even when the attribute isn't defined).
 This makes it so setting it to `ALWAYS_VIEWABLE` would always be visible in a code review.
 

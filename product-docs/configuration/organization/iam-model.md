@@ -129,9 +129,9 @@ The following schematic illustrates the fundamental concepts of IAM in CISO Assi
 
 ### 6. Publication mechanism
 
-All folder have a _**viewable\_from\_descendants.**_&#x20; field
+Folders have a _**viewable\_from\_descendants.**_&#x20; field
 
-Objects which model is `ALWAYS_VIEWABLE` or which model is `MAY_BE_VIEWABLE` and which folder has _viewable\_from\_descendants_ set to `True` are visible(viewable) in subdomains as if they were attached to each subdomain of the object's domain.
+Objects which whose is `ALWAYS_VIEWABLE` or which whose is `MAY_BE_VIEWABLE` and which folder has _viewable\_from\_descendants_ set to `True` are visible(viewable) in subdomains as if they were attached to each subdomain of the object's domain.
 This mechanism only concerns visibility, not creation/udpate/deletion.
 
 To avoid an object being viewable by descendants, the simplest solution is to put it in a leaf subdomain.

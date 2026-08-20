@@ -42,16 +42,16 @@ The same inheritance also drives reporting: most dashboards and analytics roll u
 Some objects exist to be **shared**. Frameworks, threats, risk matrices, reference controls, and other catalogue-style items wouldn't be useful if they were trapped in a single domain — every team needs to be able to pull from the same shared library.
 
 CISO Assistant models this through the — **`Folder.viewable_from_descendants`** — field.
-An object which model is `ALWAYS_VIEWABLE` or a model which is `MAY_BE_VIEWABLE` + a domain(folder) marked as viewable from descendants is visible(viewable) inside every sub-domain of its own domain, _as if it had been attached to each one_. Publication is a **visibility** mechanism only; it does not let users in other domains create, update, or delete the object.
+An object which model is `ALWAYS_VIEWABLE` or a model which is `MAY_BE_VIEWABLE` in a domain(folder) marked as viewable from descendants is visible(viewable) inside every sub-domain of its own domain, _as if it had been attached to each one_.
 
 By default:
 
-- **Catalogue-style objects** (frameworks, threats, matrices, reference controls, libraries, terminologies, …) are published — they live "above" individual domains and are intended to be reused.
-- **Assessments** (audits, risk assessments, BIAs, entity assessments) are **not published** — they belong to a specific domain and stay there.
+- **Catalogue-style objects** (frameworks, threats, matrices, reference controls, libraries, terminologies, …) are visible from descendants — they live "above" individual domains and are intended to be reused.
+- **Assessments** (audits, risk assessments, BIAs, entity assessments) are not visible from descendants — they belong to a specific domain and stay there.
 
-The most common surprise this creates is when a user opens the platform and sees a library of frameworks or threats they "shouldn't" have access to. They aren't seeing them through a permissions hole — they're seeing them because the catalogue is published from a domain that sits above theirs.
+The most common surprise this creates is when a user opens the platform and sees a library of frameworks or threats they "shouldn't" have access to. They aren't seeing them through a permissions hole — they're seeing them because the catalogue is "visible from descendants(domains)" in a domain that sits above theirs.
 
-If you want to keep a specific object _out_ of the published view, the simplest trick is to attach it to a leaf sub-domain (a domain with no children) — nothing inherits from a leaf.
+If you want to exclude a specific object _from_ this mechanism (prevent it from being viewable by descendants), the simplest trick is to attach it to a leaf sub-domain (a domain with no children) — nothing inherits from a leaf.
 
 ## Why you sometimes see items from other domains
 
@@ -60,7 +60,7 @@ Assessments routinely _compose_ objects across the tree. Risk assessments refere
 When you're working inside one assessment, the platform's selectors and pickers don't just show you what's in the assessment's own domain — they show you **everything you have access to**. So a risk scenario authored inside the _France_ domain can pull in:
 
 - A shared applied control attached to the _EMEA_ parent domain (you can see it because of inheritance).
-- A threat from the global library (you can see it because it's published).
+- A threat from the global library (you can see it because it's viewable from descendant domains).
 - An asset attached to a sibling _Germany_ domain (if your role gives you access there).
 
 This is by design — composing across the organisation is the whole point of a centralised GRC platform — but it can be disorienting on day one. The rule is consistent: you see what you have access to, regardless of which domain you started on.
