@@ -369,6 +369,7 @@
 						<AutocompleteSelect
 							{form}
 							lazy
+							minSearchLength={1}
 							optionsEndpoint="settings/integrations/configs/{$formStore.integration_config}/remote-objects"
 							optionsLabelField="summary"
 							optionsValueField="key"
