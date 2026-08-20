@@ -9,6 +9,9 @@ output_mapping into instance variables. String config values support
 import datetime
 import re
 import uuid
+from collections.abc import Callable
+from dataclasses import dataclass
+from dataclasses import field as dataclass_field
 from urllib.parse import urlsplit
 
 from django.core.exceptions import ValidationError
@@ -19,6 +22,7 @@ from django.db.models import (
     FloatField,
     ForeignKey,
     IntegerField,
+    Model,
     Q,
     UUIDField,
 )
@@ -299,27 +303,44 @@ class CreateObjectAction(BaseAction):
         }
 
 
-# Explicit registry of models workflows may read. Each entry lists
-# the readable simple fields on top of BASE_READ_FIELDS; the combined set is
-# both the serialized output AND the filter/order whitelist — no "__" paths,
-# no relations, so filters cannot tunnel into other objects. FK fields are
-# listed under their API name and filter on the id value — still no join.
-#
-# Computed output entries may shadow a listed column to reshape its output
-# to the API read serializer's shape (display labels, matrix cells, nested
-# FK dicts) so workflow rows read like API responses; the column name stays
-# the filter/order surface, comparing on the raw stored value.
+# Columns every readable model exposes, when it has them.
 BASE_READ_FIELDS = ["id", "name", "created_at", "updated_at"]
 
 
-def _read_fields(entry):
-    """BASE_READ_FIELDS trimmed to columns the model actually has (e.g.
-    RequirementAssessment and ValidationFlow have no name), plus the entry's
-    own fields."""
-    model_fields = {field.name for field in entry["model"]._meta.concrete_fields}
-    return [field for field in BASE_READ_FIELDS if field in model_fields] + entry[
-        "fields"
-    ]
+@dataclass(frozen=True)
+class ReadEntry:
+    """One READABLE_MODELS entry: a model workflows may read, and how its
+    rows filter and serialize.
+
+    BASE_READ_FIELDS plus ``fields`` is both the serialized output and the
+    filter/order whitelist: concrete columns only, no "__" paths, so filters
+    cannot tunnel into other objects. FK fields are listed under their API
+    name and filter on the id value — still no join.
+
+    A ``computed`` key may shadow a listed column to reshape its output to
+    the API read serializer's shape (display labels, matrix cells, nested FK
+    dicts) so workflow rows read like API responses; the column name stays
+    the filter/order surface, comparing on the raw stored value.
+    """
+
+    model: type[Model]
+    #: Readable columns on top of BASE_READ_FIELDS.
+    fields: list[str]
+    #: Output-only values, key -> callable(row); never filterable/orderable.
+    computed: dict[str, Callable] = dataclass_field(default_factory=dict)
+    #: Restriction every read of this model must satisfy.
+    base_filter: Q | None = None
+    #: Integer columns where -1 means "not rated"; range filters skip it.
+    unrated_sentinels: frozenset[str] = frozenset()
+    #: Relations the computed callables dereference per row.
+    select_related: list[str] = dataclass_field(default_factory=list)
+
+    def readable_fields(self) -> list[str]:
+        """Return the field names a read node may output, filter and order
+        by: BASE_READ_FIELDS trimmed to columns the model actually has (e.g.
+        RequirementAssessment has no name column), plus ``fields``."""
+        columns = {field.name for field in self.model._meta.concrete_fields}
+        return [field for field in BASE_READ_FIELDS if field in columns] + self.fields
 
 
 def _requirements_breakdown(assessment):
@@ -333,10 +354,10 @@ def _requirements_breakdown(assessment):
     return {"total": total, **by_result}
 
 
-READABLE_MODELS = {
-    "applied_control": {
-        "model": AppliedControl,
-        "fields": [
+READABLE_MODELS: dict[str, ReadEntry] = {
+    "applied_control": ReadEntry(
+        model=AppliedControl,
+        fields=[
             "description",
             "ref_id",
             "status",
@@ -345,47 +366,47 @@ READABLE_MODELS = {
             "priority",
             "link",
         ],
-        "computed": {"priority": lambda o: o.get_priority_display()},
-    },
-    "evidence": {
-        "model": Evidence,
-        "fields": ["description", "status"],
-        "computed": {"status": lambda o: o.get_status_display()},
-    },
-    "incident": {
-        "model": Incident,
-        "fields": ["description", "ref_id", "status", "severity", "link"],
-        "computed": {
+        computed={"priority": lambda o: o.get_priority_display()},
+    ),
+    "evidence": ReadEntry(
+        model=Evidence,
+        fields=["description", "status"],
+        computed={"status": lambda o: o.get_status_display()},
+    ),
+    "incident": ReadEntry(
+        model=Incident,
+        fields=["description", "ref_id", "status", "severity", "link"],
+        computed={
             "status": lambda o: o.get_status_display(),
             "severity": lambda o: o.get_severity_display(),
         },
-    },
-    "asset": {
-        "model": Asset,
-        "fields": ["description", "ref_id", "type", "reference_link"],
-        "computed": {"type": lambda o: o.get_type_display()},
-    },
-    "vulnerability": {
-        "model": Vulnerability,
-        "fields": ["description", "ref_id", "status", "severity", "eta", "due_date"],
-        "computed": {"severity": lambda o: o.get_severity_display()},
-    },
-    "security_exception": {
-        "model": SecurityException,
-        "fields": ["description", "ref_id", "status", "severity", "expiration_date"],
-        "computed": {"severity": lambda o: o.get_severity_display()},
-    },
-    "entity": {
-        "model": Entity,
-        "fields": ["description", "ref_id", "mission", "reference_link"],
-    },
-    "findings_assessment": {
-        "model": FindingsAssessment,
-        "fields": ["description", "ref_id", "status", "eta", "due_date"],
-    },
-    "finding": {
-        "model": Finding,
-        "fields": [
+    ),
+    "asset": ReadEntry(
+        model=Asset,
+        fields=["description", "ref_id", "type", "reference_link"],
+        computed={"type": lambda o: o.get_type_display()},
+    ),
+    "vulnerability": ReadEntry(
+        model=Vulnerability,
+        fields=["description", "ref_id", "status", "severity", "eta", "due_date"],
+        computed={"severity": lambda o: o.get_severity_display()},
+    ),
+    "security_exception": ReadEntry(
+        model=SecurityException,
+        fields=["description", "ref_id", "status", "severity", "expiration_date"],
+        computed={"severity": lambda o: o.get_severity_display()},
+    ),
+    "entity": ReadEntry(
+        model=Entity,
+        fields=["description", "ref_id", "mission", "reference_link"],
+    ),
+    "findings_assessment": ReadEntry(
+        model=FindingsAssessment,
+        fields=["description", "ref_id", "status", "eta", "due_date"],
+    ),
+    "finding": ReadEntry(
+        model=Finding,
+        fields=[
             "description",
             "ref_id",
             "status",
@@ -394,38 +415,38 @@ READABLE_MODELS = {
             "due_date",
             "priority",
         ],
-        "computed": {
+        computed={
             "severity": lambda o: o.get_severity_display(),
             "priority": lambda o: o.get_priority_display(),
         },
-    },
-    "compliance_assessment": {
-        "model": ComplianceAssessment,
-        "fields": ["description", "ref_id", "status", "eta", "due_date"],
+    ),
+    "compliance_assessment": ReadEntry(
+        model=ComplianceAssessment,
+        fields=["description", "ref_id", "status", "eta", "due_date"],
         # Output-only values (never filterable/orderable — they don't exist as
         # queryable columns). Each callable may run its own queries per row,
         # which the list cap bounds.
-        "computed": {
+        computed={
             "computed_outcome": lambda ca: ca.computed_outcome,
             "scores": lambda ca: ca.get_global_score(),
             "requirements": _requirements_breakdown,
         },
-    },
-    "risk_assessment": {
-        "model": RiskAssessment,
-        "fields": ["description", "ref_id", "status", "eta", "due_date"],
-    },
-    "entity_assessment": {
-        "model": EntityAssessment,
-        "fields": ["description", "status", "eta", "due_date"],
-    },
-    "requirement_assessment": {
-        "model": RequirementAssessment,
+    ),
+    "risk_assessment": ReadEntry(
+        model=RiskAssessment,
+        fields=["description", "ref_id", "status", "eta", "due_date"],
+    ),
+    "entity_assessment": ReadEntry(
+        model=EntityAssessment,
+        fields=["description", "status", "eta", "due_date"],
+    ),
+    "requirement_assessment": ReadEntry(
+        model=RequirementAssessment,
         # create_requirement_assessments seeds an RA row for EVERY node of
         # the framework, section headers included; every platform aggregate
         # excludes non-assessable rows, and so do reads.
-        "base_filter": Q(requirement__assessable=True),
-        "fields": [
+        base_filter=Q(requirement__assessable=True),
+        fields=[
             "status",
             "result",
             "extended_result",
@@ -442,7 +463,7 @@ READABLE_MODELS = {
         # RequirementAssessmentReadSerializer: "name" is __str__ (falls back
         # to the requirement's ref_id — most shipped framework nodes are
         # ref_id-only), "requirement" a subset of its nested node dict.
-        "computed": {
+        computed={
             "name": str,
             "requirement": lambda ra: {
                 "id": str(ra.requirement_id),
@@ -456,11 +477,11 @@ READABLE_MODELS = {
                 "name": ra.compliance_assessment.name,
             },
         },
-        "select_related": ("requirement", "compliance_assessment"),
-    },
-    "risk_scenario": {
-        "model": RiskScenario,
-        "fields": [
+        select_related=["requirement", "compliance_assessment"],
+    ),
+    "risk_scenario": ReadEntry(
+        model=RiskScenario,
+        fields=[
             "description",
             "ref_id",
             "treatment",
@@ -474,13 +495,15 @@ READABLE_MODELS = {
         # resets them while proba/impact are unset). Range filters must not
         # sweep un-assessed scenarios in — same >= 0 guard as
         # within_tolerance. eq -1 stays available to target unrated rows.
-        "unrated_sentinels": {"inherent_level", "current_level", "residual_level"},
+        unrated_sentinels=frozenset(
+            {"inherent_level", "current_level", "residual_level"}
+        ),
         # Same JSON the API serializers expose (current_level =
         # get_current_risk(): the matrix cell dict, "name" for display,
         # "value" keeping the comparable index). Shadows the raw column in
         # the output row; the column names stay the filter/order surface,
         # comparing on the integer index.
-        "computed": {
+        computed={
             "inherent_level": lambda s: s.get_inherent_risk(),
             "current_level": lambda s: s.get_current_risk(),
             "residual_level": lambda s: s.get_residual_risk(),
@@ -491,19 +514,19 @@ READABLE_MODELS = {
                 "name": s.risk_assessment.name,
             },
         },
-        "select_related": ("risk_assessment__risk_matrix",),
-    },
-    "risk_acceptance": {
-        "model": RiskAcceptance,
-        "fields": ["description", "state", "expiry_date", "justification"],
-        "computed": {"state": lambda o: o.get_state_display()},
-    },
-    "validation_flow": {
-        "model": ValidationFlow,
-        "fields": ["ref_id", "status", "validation_deadline"],
+        select_related=["risk_assessment__risk_matrix"],
+    ),
+    "risk_acceptance": ReadEntry(
+        model=RiskAcceptance,
+        fields=["description", "state", "expiry_date", "justification"],
+        computed={"state": lambda o: o.get_state_display()},
+    ),
+    "validation_flow": ReadEntry(
+        model=ValidationFlow,
+        fields=["ref_id", "status", "validation_deadline"],
         # The API's display key for this nameless model.
-        "computed": {"str": str},
-    },
+        computed={"str": str},
+    ),
 }
 
 READ_MAX_LIMIT = 100
@@ -562,7 +585,7 @@ def _read_condition_to_q(condition, entry, allowed_fields, context):
     lookup = _READ_OP_LOOKUPS.get(op)
     if lookup is None:
         raise ActionError(f"read_objects: unknown operator '{op}'")
-    if op not in _allowed_ops(_concrete_field(entry["model"], field)):
+    if op not in _allowed_ops(_concrete_field(entry.model, field)):
         raise ActionError(
             f"read_objects: operator '{op}' is not valid for field '{field}'"
         )
@@ -584,7 +607,7 @@ def _read_condition_to_q(condition, entry, allowed_fields, context):
         query = Q(**{f"{field}__in": value})
         return ~query if op == "not_in" else query
     query = Q(**{f"{field}__{lookup}": value})
-    if op in ("gt", "lt", "gte", "lte") and field in entry.get("unrated_sentinels", ()):
+    if op in ("gt", "lt", "gte", "lte") and field in entry.unrated_sentinels:
         query &= Q(**{f"{field}__gte": 0})
     return ~query if op == "neq" else query
 
@@ -644,7 +667,7 @@ class ReadObjectsAction(BaseAction):
         entry = READABLE_MODELS.get(config.get("model"))
         if entry is None:
             raise ActionError(f"read_objects: unknown model '{config.get('model')}'")
-        fields = _read_fields(entry)
+        fields = entry.readable_fields()
         context = _render_context(instance)
         query = _read_filters_to_q(config.get("filters"), entry, set(fields), context)
 
@@ -660,23 +683,21 @@ class ReadObjectsAction(BaseAction):
         from .engine import run_identity
 
         queryset = (
-            entry["model"]
-            .objects.filter(entry.get("base_filter") or Q())
+            entry.model.objects.filter(entry.base_filter or Q())
             .filter(folder_id__in=_read_scope_folder_ids(instance.folder))
-            .filter(id__in=authz.viewable_ids(run_identity(instance), entry["model"]))
+            .filter(id__in=authz.viewable_ids(run_identity(instance), entry.model))
             .filter(query)
             .order_by(order_by, "id")  # id tie-break keeps pagination stable
         )
         # Computed callables dereference these per row otherwise.
-        if entry.get("select_related"):
-            queryset = queryset.select_related(*entry["select_related"])
+        if entry.select_related:
+            queryset = queryset.select_related(*entry.select_related)
         try:
             if config.get("mode", "list") == "first":
                 obj = queryset.first()
-                computed = entry.get("computed")
                 return {
                     "found": obj is not None,
-                    "object": _serialize_read_row(obj, fields, computed)
+                    "object": _serialize_read_row(obj, fields, entry.computed)
                     if obj
                     else None,
                 }
@@ -687,7 +708,7 @@ class ReadObjectsAction(BaseAction):
                 # Unpaged count so threshold conditions work beyond the page.
                 "count": queryset.count(),
                 "results": [
-                    _serialize_read_row(obj, fields, entry.get("computed"))
+                    _serialize_read_row(obj, fields, entry.computed)
                     for obj in queryset[:limit]
                 ],
             }
@@ -1045,7 +1066,7 @@ def required_permissions(action_config):
         entry = READABLE_MODELS.get(action_config.get("model"))
         if entry is None:
             return []
-        return [f"view_{entry['model']._meta.model_name}"]
+        return [f"view_{entry.model._meta.model_name}"]
     return {
         "provision_folder": ["add_folder", "change_folder"],
         "provision_user": ["add_user", "change_user"],
@@ -1091,7 +1112,7 @@ def validate_read_config(node):
                 f"Unknown readable model '{config.get('model')}'",
             )
         ]
-    fields = set(_read_fields(entry))
+    fields = set(entry.readable_fields())
 
     from .events import validate_filter_tree, walk_conditions
 
@@ -1116,7 +1137,7 @@ def validate_read_config(node):
                 errors.append(
                     ("action_read_invalid_filters", f"Unknown operator '{op}'")
                 )
-            elif op not in _allowed_ops(_concrete_field(entry["model"], field)):
+            elif op not in _allowed_ops(_concrete_field(entry.model, field)):
                 errors.append(
                     (
                         "action_read_invalid_filters",

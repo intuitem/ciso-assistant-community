@@ -386,12 +386,12 @@ class TestRegistryIntegrity:
         """The field list doubles as the filter/order whitelist, so a
         non-column entry would explode at query time; the scope filter
         assumes a concrete folder FK."""
-        from automation.workflows.actions import READABLE_MODELS, _read_fields
+        from automation.workflows.actions import READABLE_MODELS
 
         for key, entry in READABLE_MODELS.items():
-            columns = {f.name for f in entry["model"]._meta.concrete_fields}
+            columns = {f.name for f in entry.model._meta.concrete_fields}
             assert "folder" in columns, key
-            for field in _read_fields(entry):
+            for field in entry.readable_fields():
                 assert field in columns, f"{key}.{field}"
 
 
