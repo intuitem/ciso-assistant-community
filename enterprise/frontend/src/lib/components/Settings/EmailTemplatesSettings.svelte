@@ -89,7 +89,13 @@
 			if (!availableRes.ok || !overridesRes.ok) {
 				throw new Error('Failed to load templates');
 			}
-			availableTemplates = await availableRes.json();
+			const available = await availableRes.json();
+			// Default to enabled if the backend doesn't report the flag,
+			// so the Switch stays in controlled mode (checked never undefined).
+			availableTemplates = available.map((t: TemplateInfo) => ({
+				...t,
+				is_enabled: t.is_enabled ?? true
+			}));
 			const data = await overridesRes.json();
 			overrides = data.results || data;
 		} catch {
@@ -100,11 +106,15 @@
 
 	function requestSetEnabled(template: TemplateInfo, isEnabled: boolean) {
 		if (!isEnabled && template.category === 'core') {
+			// Flip the state right away so the switch and its hidden native
+			// input stay in sync; revert if the modal is cancelled/dismissed.
+			template.is_enabled = false;
 			const modal: ModalSettings = {
 				type: 'confirm',
 				title: m.disableCoreEmailTitle(),
 				body: m.disableCoreEmailWarning(),
 				response: (confirmed: boolean) => {
+					template.is_enabled = true;
 					if (confirmed) setTemplateEnabled(template, false);
 				}
 			};
