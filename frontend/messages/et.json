@@ -2741,6 +2741,7 @@
 	"mappingSuggestionTeasing": "Vastenduste soovitused on nüüd saadaval! Kasuta filtreid, et uurida laaditud raamistikest tulenevaid soovitusi.",
 	"errorCreatingPersonalAccessToken": "Isikliku juurdepääsutokeni loomisel ilmnes viga.",
 	"errorMaxPatAmountExceeded": "Selle kasutaja jaoks lubatud tokenite maksimaalne arv on ületatud.",
+	"errorSsoRequiredForScimUsers": "SSO-d ei saa keelata, kuni on olemas SCIM-i kaudu loodud kasutajaid, kellel puudub kohalik juurdepääs.",
 	"campaign": "Kampaania",
 	"campaigns": "Kampaaniad",
 	"addCampaign": "Alusta kampaaniat",
@@ -4915,6 +4916,8 @@
 	"scimTokenWarning": "Kopeerige see token kohe. Turvakaalutlustel seda enam ei kuvata.",
 	"scimTokenRevoked": "SCIM-i token tühistatud",
 	"scimTokenGenerationFailed": "SCIM-i tokeni loomine ebaõnnestus",
+	"scimTokenRequiresSso": "SSO peab olema lubatud enne SCIM-tokeni loomist.",
+	"scimTokenNameTooLong": "Nimi ei tohi olla pikem kui 255 tähemärki.",
 	"idpGroup": "IdP rühm",
 	"idpGroups": "IdP rühmad",
 	"idpGroupsDescription": "Luba IdP rühmade föderatsioon (SCIM ettevalmistamine, IdP rühmade vastendused ja kasutajate IdP rühmade liikmesused)."
