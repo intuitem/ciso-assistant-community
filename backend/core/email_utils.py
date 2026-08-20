@@ -196,7 +196,7 @@ def render_email_template(
     context: Dict,
     locale: Optional[str] = None,
     recipient_email: Optional[str] = None,
-) -> Dict[str, str]:
+) -> Optional[Dict[str, str]]:
     """
     Render email template with context variables.
 
@@ -212,14 +212,16 @@ def render_email_template(
         recipient_email: Email address of recipient, used to resolve locale from user preferences
 
     Returns:
-        Dictionary with 'subject', 'body', and 'html_body' keys, or empty dict if template not found
+        Dictionary with 'subject', 'body', and 'html_body' keys.
+        Returns None if the template is disabled in settings (intentional skip),
+        or an empty dict if the template could not be loaded or rendered (failure).
     """
     if not is_email_template_enabled(template_name):
         logger.info(
             "Email template is disabled in settings, skipping send",
             template=template_name,
         )
-        return {}
+        return None
 
     if locale is None and recipient_email:
         locale = get_locale_for_email(recipient_email)
