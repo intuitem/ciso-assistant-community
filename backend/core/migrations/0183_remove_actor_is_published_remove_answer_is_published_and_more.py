@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0181_customizable_asset_classes"),
+        ("core", "0182_requirementassessment_is_score_overridden.py"),
     ]
 
     operations = [
