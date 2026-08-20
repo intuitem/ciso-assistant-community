@@ -22,6 +22,8 @@ logger = structlog.get_logger(__name__)
 
 User = get_user_model()
 
+DEFAULT_ATTRIBUTE_MAPPING_GROUPS = ["groups"]
+
 
 class AccountAdapter(DefaultAccountAdapter):
     def is_safe_url(self, url):
@@ -109,6 +111,25 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                         return email
         return None
 
+    @staticmethod
+    def _extract_claim_values(extra, claim_names):
+        if not claim_names:
+            return []
+        sources = [
+            extra,
+            extra.get("userinfo", {}) or {},
+            extra.get("id_token", {}) or {},
+        ]
+        values = []
+        for claim in claim_names:
+            for source in sources:
+                value = source.get(claim)
+                if isinstance(value, str) and value:
+                    values.append(value)
+                elif isinstance(value, list):
+                    values.extend(v for v in value if isinstance(v, str) and v)
+        return values
+
     def pre_social_login(self, request, sociallogin):
         extra = sociallogin.account.extra_data
         logger.debug(
@@ -161,6 +182,19 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             idp_email_repr=repr(email_address),
             provider=sociallogin.account.provider,
         )
+
+        from global_settings.utils import ff_is_enabled
+        from .sso.models import SSOSettings
+        from .utils import sync_user_idp_groups
+
+        try:
+            sso_settings = SSOSettings.objects.get()
+        except SSOSettings.DoesNotExist:
+            sso_settings = None
+        jit_provisioning_active = bool(sso_settings) and ff_is_enabled(
+            "jit_provisioning"
+        )
+
         try:
             user = User.objects.get(email__iexact=email_address)
             logger.debug(
@@ -178,14 +212,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 user_id=str(user.id),
             )
         except User.DoesNotExist:
-            from .sso.models import SSOSettings
-
-            try:
-                sso_settings = SSOSettings.objects.get()
-            except SSOSettings.DoesNotExist:
-                sso_settings = None
-
-            if not (sso_settings and sso_settings.jit_provisioning_enabled):
+            if not (jit_provisioning_active and sso_settings.jit_provisioning_enabled):
                 logger.error(
                     "pre_social_login: user not found",
                     provider=sociallogin.account.provider,
@@ -216,6 +243,14 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             )
             sociallogin.user = user
             sociallogin.connect(request, user)
+
+        if jit_provisioning_active:
+            group_claims = (sso_settings.settings or {}).get(
+                "attribute_mapping", {}
+            ).get("groups") or DEFAULT_ATTRIBUTE_MAPPING_GROUPS
+            if group_claims:
+                group_names = self._extract_claim_values(extra, group_claims)
+                sync_user_idp_groups(user, group_names)
 
     def list_apps(self, request, provider=None, client_id=None):
         """SSOSettings's can be setup in the database, or, via

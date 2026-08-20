@@ -96,6 +96,10 @@ def ff_is_enabled(feature_flag: str):
     return flag
 
 
+def idp_group_role_inheritance_enabled() -> bool:
+    return ff_is_enabled("idp_groups") or ff_is_enabled("jit_provisioning")
+
+
 def general_setting_is_enabled(key: str) -> bool:
     """Check whether a boolean key in the 'general' GlobalSettings is enabled.
     Returns False when the settings row or the key is missing."""

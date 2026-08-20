@@ -81,25 +81,27 @@
 	<span class="text-orange-500 italic text-sm"
 		><i class="fa-solid fa-circle-exclamation mr-1"></i>{m.forceSSOLoginHelpText2()}</span
 	>
-	<Checkbox
-		{form}
-		field="jit_provisioning_enabled"
-		label={m.enableJitProvisioning()}
-		helpText={m.enableJitProvisioningHelpText()}
-		disabled={!data.is_enabled}
-	/>
-	<AutocompleteSelect
-		{form}
-		multiple
-		optionsEndpoint="user-groups"
-		field="default_user_groups"
-		pathField="path"
-		cacheLock={cacheLocks['default_user_groups']}
-		bind:cachedValue={formDataCache['default_user_groups']}
-		label={m.defaultUserGroups()}
-		helpText={m.defaultUserGroupsHelpText()}
-		disabled={!data.is_enabled || !data.jit_provisioning_enabled}
-	/>
+	{#if page.data?.featureFlagSettings?.jit_provisioning}
+		<Checkbox
+			{form}
+			field="jit_provisioning_enabled"
+			label={m.enableJitProvisioning()}
+			helpText={m.enableJitProvisioningHelpText()}
+			disabled={!data.is_enabled}
+		/>
+		<AutocompleteSelect
+			{form}
+			multiple
+			optionsEndpoint="user-groups"
+			field="default_user_groups"
+			pathField="path"
+			cacheLock={cacheLocks['default_user_groups']}
+			bind:cachedValue={formDataCache['default_user_groups']}
+			label={m.defaultUserGroups()}
+			helpText={m.defaultUserGroupsHelpText()}
+			disabled={!data.is_enabled || !data.jit_provisioning_enabled}
+		/>
+	{/if}
 	<Checkbox
 		{form}
 		field="slo_enabled"
@@ -219,6 +221,16 @@
 						cacheLock={cacheLocks['oauth_pkce_enabled']}
 						helpText={m.oidcPKCEEnabledHelpText()}
 					/>
+					{#if page.data?.featureFlagSettings?.jit_provisioning}
+						<TextField
+							{form}
+							field="attribute_mapping_groups"
+							label={m.attributeMappingGroups()}
+							helpText={m.attributeMappingGroupsHelpText()}
+							disabled={!data.is_enabled}
+							cacheLock={cacheLocks['attribute_mapping_groups']}
+						/>
+					{/if}
 				</div>
 			</Accordion.ItemContent>
 		</Accordion.Item>
@@ -346,6 +358,16 @@
 						disabled={!data.is_enabled}
 						cacheLock={cacheLocks['attribute_mapping_email']}
 					/>
+					{#if page.data?.featureFlagSettings?.jit_provisioning}
+						<TextField
+							{form}
+							field="attribute_mapping_groups"
+							label={m.attributeMappingGroups()}
+							helpText={m.attributeMappingGroupsHelpText()}
+							disabled={!data.is_enabled}
+							cacheLock={cacheLocks['attribute_mapping_groups']}
+						/>
+					{/if}
 
 					<Checkbox
 						{form}

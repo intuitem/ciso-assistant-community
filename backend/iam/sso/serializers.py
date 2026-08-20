@@ -122,6 +122,16 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         allow_null=True,
         source="settings.attribute_mapping.email",
     )
+    attribute_mapping_groups = serializers.ListField(
+        child=serializers.CharField(
+            required=False,
+            allow_blank=True,
+            allow_null=True,
+        ),
+        required=False,
+        allow_null=True,
+        source="settings.attribute_mapping.groups",
+    )
     idp_entity_id = serializers.CharField(
         required=False,
         allow_blank=True,

@@ -44,13 +44,15 @@ from allauth.utils import ValidationError
 
 # === Application-specific imports ===
 from core.permissions import IsGlobalAdmin  # ou une permission plus adaptée
+from iam.adapter import DEFAULT_ATTRIBUTE_MAPPING_GROUPS
 from iam.models import User
 from iam.sso.errors import AuthError
 from iam.sso.models import SSOSettings
 from iam.sso.redirects import get_sso_authenticate_url
 from iam.sso.slo import stash_saml_slo_state
-from iam.utils import generate_token
+from iam.utils import generate_token, sync_user_idp_groups
 from global_settings.models import GlobalSettings
+from global_settings.utils import ff_is_enabled
 
 DEFAULT_SAML_ATTRIBUTE_MAPPING_EMAIL = SAMLProvider.default_attribute_mapping["email"]
 
@@ -163,6 +165,13 @@ class FinishACSView(SAMLViewMixin, View):
             ] or DEFAULT_SAML_ATTRIBUTE_MAPPING_EMAIL
             emails = [auth.get_attribute(x) or [] for x in email_attributes]
             emails = [x for xs in emails for x in xs]  # flatten
+            idp_first_names = auth.get_attribute(
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
+            )
+            idp_last_names = auth.get_attribute(
+                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
+            )
+            jit_provisioning_active = ff_is_enabled("jit_provisioning")
             user = User.objects.filter(email__iexact=auth.get_nameid()).first()
             if not user and emails:
                 logger.info(
@@ -173,16 +182,38 @@ class FinishACSView(SAMLViewMixin, View):
                 try:
                     user = User.objects.get(email__iexact=emails[0])
                 except User.DoesNotExist:
-                    raise User.DoesNotExist()
-            idp_first_names = auth.get_attribute(
-                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
-            )
-            idp_last_names = auth.get_attribute(
-                "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
-            )
+                    sso_settings = provider.app
+                    if not (
+                        jit_provisioning_active
+                        and sso_settings.jit_provisioning_enabled
+                    ):
+                        raise User.DoesNotExist()
+                    user = User.objects.create_user(
+                        email=emails[0],
+                        password=None,
+                        first_name=idp_first_names[0] if idp_first_names else "",
+                        last_name=idp_last_names[0] if idp_last_names else "",
+                        user_groups=sso_settings.default_user_groups,
+                    )
+                    user.is_jit_provisioned = True
+                    user.save(update_fields=["is_jit_provisioned"])
+                    logger.info(
+                        "SAML: user auto-provisioned via JIT", user_id=str(user.id)
+                    )
+            if not user:
+                raise User.DoesNotExist()
             user.first_name = idp_first_names[0] if idp_first_names else user.first_name
             user.last_name = idp_last_names[0] if idp_last_names else user.last_name
             user.save()
+            if jit_provisioning_active:
+                group_claims_string = attribute_mapping.get("groups", [])
+                group_claims = [
+                    item.strip() for y in group_claims_string for item in y.split(",")
+                ] or DEFAULT_ATTRIBUTE_MAPPING_GROUPS
+                if group_claims:
+                    group_values = [auth.get_attribute(x) or [] for x in group_claims]
+                    group_names = [g for xs in group_values for g in xs]
+                    sync_user_idp_groups(user, group_names)
             token = generate_token(user)
             pre_social_login(request, login)
             if request.user.is_authenticated:

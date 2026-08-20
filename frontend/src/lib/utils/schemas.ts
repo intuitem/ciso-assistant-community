@@ -760,7 +760,8 @@ export const FeatureFlagsSchema = z.object({
 	cwes: z.boolean().optional(),
 	object_audit_trail: z.boolean().optional(),
 	custom_portals: z.boolean().optional(),
-	posture_assessments: z.boolean().optional()
+	posture_assessments: z.boolean().optional(),
+	jit_provisioning: z.boolean().optional()
 });
 
 export const PortalSettingsSchema = z.object({
@@ -813,6 +814,9 @@ export const SSOSettingsSchema = z.object({
 		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
 		.optional(),
 	attribute_mapping_email: z
+		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
+		.optional(),
+	attribute_mapping_groups: z
 		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
 		.optional(),
 	idp_entity_id: z.string().optional(),

@@ -1171,19 +1171,19 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     def get_roles(self):
         """get the list of roles attached to the user — directly via its user
-        groups and, when the idp_groups feature is enabled, via the user groups
+        groups and, when IdP-group role inheritance is enabled, via the user groups
         granted by its IdP groups (groups-of-groups closure). Kept consistent
         with the inheritance-aware ``permissions`` and ``is_admin()`` so the
         current-user payload (and the role-name nav gating it drives) matches
         what the user can actually do."""
-        from global_settings.utils import ff_is_enabled
+        from global_settings.utils import idp_group_role_inheritance_enabled
 
         roles = set(
             self.user_groups.all()
             .values_list("roleassignment__role__name", flat=True)
             .distinct()
         )
-        if ff_is_enabled("idp_groups"):
+        if idp_group_role_inheritance_enabled():
             roles |= set(
                 self.idp_groups.all()
                 .values_list("user_groups__roleassignment__role__name", flat=True)
@@ -1222,33 +1222,20 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     @staticmethod
     def get_admin_users() -> QuerySet["User"]:
-        # Admin membership is reached directly or, when the idp_groups feature
-        # is enabled, via an IdP group whose user_groups include BI-UG-ADM
-        # (groups-of-groups closure).
-        from global_settings.utils import ff_is_enabled
+        from global_settings.utils import idp_group_role_inheritance_enabled
 
         q = Q(user_groups__name="BI-UG-ADM")
-        if ff_is_enabled("idp_groups"):
+        if idp_group_role_inheritance_enabled():
             q |= Q(idp_groups__user_groups__name="BI-UG-ADM")
         return User.objects.filter(q).distinct()
 
     def is_admin(self) -> bool:
-        """Whether the user is a *global administrator*.
-
-        "Admin" here always means global admin: membership of the built-in
-        global administrators group (BI-UG-ADM) — either directly, or via an
-        IdP group mapped to it (when the idp_groups feature flag is enabled).
-        This is the canonical check for "is a global administrator?"; the
-        IsGlobalAdmin permission and the current-user `is_admin` field both
-        resolve to it. It is NOT scoped to any domain — domain managers
-        (BI-UG-DMA) are not admins here.
-        """
-        from global_settings.utils import ff_is_enabled
+        from global_settings.utils import idp_group_role_inheritance_enabled
 
         if self.user_groups.filter(name="BI-UG-ADM").exists():
             return True
         return (
-            ff_is_enabled("idp_groups")
+            idp_group_role_inheritance_enabled()
             and self.idp_groups.filter(user_groups__name="BI-UG-ADM").exists()
         )
 
@@ -1405,11 +1392,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if not user.is_active:
             return RoleAssignment.objects.none()
 
-        from global_settings.utils import ff_is_enabled
+        from global_settings.utils import idp_group_role_inheritance_enabled
 
         filter_query = Q(user=user) | Q(user_group__in=user.user_groups.all())
 
-        if ff_is_enabled("idp_groups"):
+        if idp_group_role_inheritance_enabled():
             filter_query |= Q(
                 user_group__in=UserGroup.objects.filter(
                     idp_groups__in=user.idp_groups.all()

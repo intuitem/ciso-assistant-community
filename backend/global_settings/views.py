@@ -197,8 +197,12 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         # Only configurations the caller can reach: the ids are consumed as a
         # "is an integration usable here" signal, and an unscoped list handed
         # every domain's configuration UUIDs to any authenticated user.
-        accessible_config_ids = RoleAssignment.get_viewable_object_ids(
-            request.user, IntegrationConfiguration
+
+        # NOTE: I got an OperationalError: parser stack overflow here
+        accessible_config_ids = set(
+            RoleAssignment.get_viewable_object_ids(
+                request.user, IntegrationConfiguration
+            )
         )
 
         settings.value["enabled_integrations"] = [
