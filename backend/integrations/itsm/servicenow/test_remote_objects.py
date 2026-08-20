@@ -36,15 +36,16 @@ def _response(records):
 @patch("integrations.itsm.servicenow.client.SyncMapping")
 @patch("integrations.itsm.servicenow.client.requests.get")
 def test_list_remote_objects_passes_limit(mock_get, mock_sync, configuration):
-    mock_get.return_value = _response([])
+    mock_get.return_value = _response(
+        [{"sys_id": f"rec{i}", "number": f"INC{i:03d}"} for i in range(30)]
+    )
     mock_sync.objects.filter.return_value.values_list.return_value = []
 
     client = _client(configuration)
-    client.list_remote_objects({"limit": 20})
+    results = client.list_remote_objects({"limit": 20})
 
-    params = mock_get.call_args[1]["params"]
-    assert params["sysparm_limit"] == 20
-    assert params["sysparm_query"] == "active=true"
+    assert len(results) == 20
+    assert mock_get.call_args[1]["params"]["sysparm_query"] == "active=true"
 
 
 @patch("integrations.itsm.servicenow.client.SyncMapping")
@@ -267,23 +268,49 @@ def test_search_with_no_valid_columns_returns_nothing(
 
 @patch("integrations.itsm.servicenow.client.SyncMapping")
 @patch("integrations.itsm.servicenow.client.requests.get")
-def test_list_over_fetches_by_mapping_count(mock_get, mock_sync, configuration):
-    """The fetch adds headroom for mapped records and truncates to the limit,
-    so the lazy/eager probe still sees a full page."""
-    mock_get.return_value = _response(
-        [{"sys_id": f"rec{i}", "number": f"INC{i:03d}"} for i in range(53)]
-    )
-    mock_sync.objects.filter.return_value.values_list.return_value = [
-        "rec0",
-        "rec1",
+def test_list_paginates_past_mapped_records(mock_get, mock_sync, configuration):
+    """A first page full of mapped records must not shrink the result below
+    the limit while more selectable records exist: that would flip the
+    picker's lazy/eager probe to eager on a truncated list."""
+    mapped = [f"rec{i}" for i in range(100)]
+    mock_get.side_effect = [
+        _response([{"sys_id": sys_id, "number": "INC"} for sys_id in mapped]),
+        _response(
+            [{"sys_id": f"rec{i}", "number": f"INC{i:03d}"} for i in range(100, 160)]
+        ),
     ]
+    mock_sync.objects.filter.return_value.values_list.return_value = mapped
 
     client = _client(configuration)
     results = client.list_remote_objects({"limit": 51})
 
-    assert mock_get.call_args[1]["params"]["sysparm_limit"] == 53
     assert len(results) == 51
-    assert not {"rec0", "rec1"} & {r["id"] for r in results}
+    assert not set(mapped) & {r["id"] for r in results}
+    second_params = mock_get.call_args_list[1][1]["params"]
+    assert second_params["sysparm_offset"] == 100
+
+
+@patch("integrations.itsm.servicenow.client.SyncMapping")
+@patch("integrations.itsm.servicenow.client.requests.get")
+def test_list_scan_budget_bounds_pagination(mock_get, mock_sync, configuration):
+    """Paging past mapped records stops at MAX_LIST_FETCH scanned rows."""
+    mapped = [f"rec{i}" for i in range(1000)]
+    mock_get.side_effect = [
+        _response(
+            [
+                {"sys_id": sys_id, "number": "INC"}
+                for sys_id in mapped[i * 100 : (i + 1) * 100]
+            ]
+        )
+        for i in range(10)
+    ]
+    mock_sync.objects.filter.return_value.values_list.return_value = mapped
+
+    client = _client(configuration)
+    results = client.list_remote_objects({"limit": 51})
+
+    assert results == []
+    assert mock_get.call_count == 5
 
 
 @patch("integrations.itsm.servicenow.client.SyncMapping")

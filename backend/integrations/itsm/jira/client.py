@@ -33,9 +33,13 @@ ISSUE_ID_PATTERN = re.compile(r"^\d+$")
 # picker only hydrates selected values, so a handful is plenty.
 MAX_HYDRATION_IDS = 20
 
-# Ceiling on rows fetched per list call: the requested limit plus headroom
-# for already-mapped issues that get filtered out afterwards.
+# Ceiling on total rows scanned per list call while paging past
+# already-mapped issues that get filtered out of the results.
 MAX_LIST_FETCH = 500
+
+# Rows requested per page while scanning; Jira Cloud caps search/jql pages
+# at 100 rows anyway.
+LIST_PAGE_SIZE = 100
 
 # Lucene-reserved characters inside a ``~`` text query: unescaped they make
 # Jira reject the JQL with a 400, and the text index strips punctuation
@@ -317,10 +321,6 @@ class JiraClient(BaseIntegrationClient):
 
         search = str(query_params.get("search", "") or "")
         limit = query_params.get("limit", 50)
-        # Mapped issues are filtered out below, after the fetch. Over-fetch
-        # by the mapping count so the picker's lazy/eager probe still sees a
-        # full page when more than `limit` selectable issues exist.
-        fetch_limit = min(limit + len(used_issues), MAX_LIST_FETCH)
         summary_jql, key_jql = self._build_list_jql(project_key, issue_type, search)
         if summary_jql is None:
             # The term sanitized down to nothing (pure punctuation): nothing
@@ -329,15 +329,11 @@ class JiraClient(BaseIntegrationClient):
 
         jql_query = f"{key_jql or summary_jql} ORDER BY created DESC"
 
-        logger.info(f"Searching Jira with JQL: {jql_query}, maxResults: {fetch_limit}")
+        logger.info(f"Searching Jira with JQL: {jql_query}, limit: {limit}")
 
         try:
             try:
-                issues = self.jira.search_issues(
-                    jql_query,
-                    maxResults=fetch_limit,
-                    fields="summary",
-                )
+                results_list = self._collect_unmapped(jql_query, limit, used_issues)
             except JIRAError as e:
                 if not key_jql or e.status_code != 400:
                     raise
@@ -345,21 +341,8 @@ class JiraClient(BaseIntegrationClient):
                 # summaries only. Anything else (429, 5xx, auth) is a real
                 # error, not a missing key, and must propagate.
                 jql_query = f"{summary_jql} ORDER BY created DESC"
-                issues = self.jira.search_issues(
-                    jql_query,
-                    maxResults=fetch_limit,
-                    fields="summary",
-                )
+                results_list = self._collect_unmapped(jql_query, limit, used_issues)
 
-            results_list = [
-                {
-                    "key": issue.raw["key"],
-                    "id": issue.raw["id"],
-                    "summary": issue.raw["fields"]["summary"],
-                }
-                for issue in issues
-                if issue.raw["key"] not in used_issues
-            ][:limit]
             logger.info(
                 f"Fetched {len(results_list)} Jira issues for project {project_key}."
             )
@@ -368,6 +351,77 @@ class JiraClient(BaseIntegrationClient):
         except Exception as e:
             logger.error(f"Failed to search Jira issues: JQL='{jql_query}', Error={e}")
             raise
+
+    def _collect_unmapped(
+        self, jql: str, limit: int, used_issues: set
+    ) -> list[dict[str, Any]]:
+        """Collect up to ``limit`` issues not already linked by a SyncMapping.
+
+        Mapped issues are filtered out client-side, so a single over-fetch
+        cannot tell "few matches" from "page full of mapped issues" — the
+        latter would return a short page and silently flip the picker's
+        lazy/eager probe to eager on a truncated list. Instead, keep paging
+        until the page fills or the source (or the MAX_LIST_FETCH scan
+        budget) runs out.
+        """
+        results: list[dict[str, Any]] = []
+        scanned = 0
+        for page in self._iter_search_pages(jql):
+            for issue in page:
+                scanned += 1
+                if issue.raw["key"] in used_issues:
+                    continue
+                results.append(
+                    {
+                        "key": issue.raw["key"],
+                        "id": issue.raw["id"],
+                        "summary": issue.raw["fields"]["summary"],
+                    }
+                )
+                if len(results) >= limit:
+                    return results
+            if scanned >= MAX_LIST_FETCH:
+                logger.warning(
+                    "Jira picker scan budget exhausted before the page filled",
+                    scanned=scanned,
+                    collected=len(results),
+                )
+                break
+        return results
+
+    def _iter_search_pages(self, jql: str):
+        """Yield pages of issues matching ``jql`` until the source runs out.
+
+        Jira Cloud only pages the ``search/jql`` endpoint with a page token
+        (``search_issues`` raises on any non-zero ``startAt`` there); Data
+        Center still pages the classic search API by offset.
+        """
+        if self.jira._is_cloud:
+            token = None
+            while True:
+                page = self.jira.enhanced_search_issues(
+                    jql,
+                    nextPageToken=token,
+                    maxResults=LIST_PAGE_SIZE,
+                    fields="summary",
+                )
+                yield page
+                token = getattr(page, "nextPageToken", None)
+                if not token or not len(page):
+                    return
+        else:
+            start_at = 0
+            while True:
+                page = self.jira.search_issues(
+                    jql,
+                    startAt=start_at,
+                    maxResults=LIST_PAGE_SIZE,
+                    fields="summary",
+                )
+                yield page
+                if len(page) < LIST_PAGE_SIZE:
+                    return
+                start_at += len(page)
 
     # Discovery (powers the FieldMapper RPC actions)
 

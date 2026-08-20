@@ -19,9 +19,12 @@ SYS_ID_PATTERN = re.compile(r"[0-9a-zA-Z]{1,64}")
 # values, so a handful is plenty.
 MAX_HYDRATION_IDS = 20
 
-# Ceiling on rows fetched per list call: the requested limit plus headroom
-# for already-mapped records that get filtered out afterwards.
+# Ceiling on total rows scanned per list call while paging past
+# already-mapped records that get filtered out of the results.
 MAX_LIST_FETCH = 500
+
+# Rows requested per page while scanning.
+LIST_PAGE_SIZE = 100
 
 
 class ServiceNowClient(BaseIntegrationClient):
@@ -242,46 +245,67 @@ class ServiceNowClient(BaseIntegrationClient):
         )
 
         limit = query_params.get("limit", 100)
-        # Mapped records are filtered out below, after the fetch. Over-fetch
-        # by the mapping count so the picker's lazy/eager probe still sees a
-        # full page when more than `limit` selectable records exist.
-        fetch_limit = min(limit + len(used_ids), MAX_LIST_FETCH)
 
         url = f"{self.base_url}/api/now/table/{self.table}"
-        params = {
-            "sysparm_query": sysparm_query,
-            # Superset of common display fields so labels work across tables
-            # (incident uses number/short_description, CMDB/asset tables use name).
-            "sysparm_fields": "sys_id,number,name,short_description,sys_updated_on",
-            "sysparm_limit": fetch_limit,
-        }
 
+        # Mapped records are filtered out client-side, so a single fetch
+        # cannot tell "few matches" from "page full of mapped records" — the
+        # latter would return a short page and silently flip the picker's
+        # lazy/eager probe to eager on a truncated list. Keep paging until
+        # the page fills or the source (or the MAX_LIST_FETCH scan budget)
+        # runs out. Records are deduplicated by sys_id since a row can match
+        # more than one ^NQ branch of the query.
+        results = []
+        seen = set()
+        offset = 0
         try:
-            response = requests.get(
-                url,
-                auth=self.auth,
-                headers=self._get_headers(),
-                params=params,
-                timeout=30,
-                allow_redirects=False,
-            )
-            response.raise_for_status()
+            while True:
+                params = {
+                    "sysparm_query": sysparm_query,
+                    # Superset of common display fields so labels work across tables
+                    # (incident uses number/short_description, CMDB/asset tables use name).
+                    "sysparm_fields": "sys_id,number,name,short_description,sys_updated_on",
+                    "sysparm_limit": LIST_PAGE_SIZE,
+                    "sysparm_offset": offset,
+                }
+                response = requests.get(
+                    url,
+                    auth=self.auth,
+                    headers=self._get_headers(),
+                    params=params,
+                    timeout=30,
+                    allow_redirects=False,
+                )
+                response.raise_for_status()
 
-            results = []
-            for record in response.json().get("result", []):
-                sys_id = record.get("sys_id")
-                if not sys_id:
-                    continue
-                # Hydration by id must return the record even when mapped.
-                if ids or sys_id not in used_ids:
-                    results.append(
-                        {
-                            "key": sys_id,
-                            "id": sys_id,
-                            "summary": self._display_label(record, sys_id),
-                        }
+                records = response.json().get("result", [])
+                for record in records:
+                    sys_id = record.get("sys_id")
+                    if not sys_id or sys_id in seen:
+                        continue
+                    seen.add(sys_id)
+                    # Hydration by id must return the record even when mapped.
+                    if ids or sys_id not in used_ids:
+                        results.append(
+                            {
+                                "key": sys_id,
+                                "id": sys_id,
+                                "summary": self._display_label(record, sys_id),
+                            }
+                        )
+                        if len(results) >= limit:
+                            return results
+
+                offset += len(records)
+                if len(records) < LIST_PAGE_SIZE:
+                    return results
+                if offset >= MAX_LIST_FETCH:
+                    logger.warning(
+                        "ServiceNow picker scan budget exhausted before the page filled",
+                        scanned=offset,
+                        collected=len(results),
                     )
-            return results[:limit]
+                    return results
 
         except requests.exceptions.RequestException:
             logger.error("Failed to search ServiceNow", exc_info=True)
