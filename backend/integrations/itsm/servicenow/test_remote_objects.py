@@ -116,6 +116,58 @@ def test_list_remote_objects_hydrates_ids_even_when_mapped(
 
 @patch("integrations.itsm.servicenow.client.SyncMapping")
 @patch("integrations.itsm.servicenow.client.requests.get")
+def test_search_scopes_every_base_query_branch(mock_get, mock_sync, configuration):
+    """A base_query that itself ORs subqueries with ^NQ gets the search
+    condition on every branch; otherwise a branch matches its whole scope."""
+    configuration.settings = {
+        "table_name": "incident",
+        "base_query": "active=true^NQstate=2",
+    }
+    configuration.schema_cache.columns = {"incident": [{"name": "number"}]}
+    mock_get.return_value = _response([])
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = _client(configuration)
+    client.list_remote_objects({"search": "INC"})
+
+    query = mock_get.call_args[1]["params"]["sysparm_query"]
+    assert query == "active=true^numberLIKEINC^NQstate=2^numberLIKEINC"
+
+
+@patch("integrations.itsm.servicenow.client.SyncMapping")
+@patch("integrations.itsm.servicenow.client.requests.get")
+def test_hydration_scopes_every_base_query_branch(mock_get, mock_sync, configuration):
+    configuration.settings = {
+        "table_name": "incident",
+        "base_query": "active=true^NQstate=2",
+    }
+    mock_get.return_value = _response([])
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = _client(configuration)
+    client.list_remote_objects({"id": "abc123"})
+
+    query = mock_get.call_args[1]["params"]["sysparm_query"]
+    assert query == "active=true^sys_idINabc123^NQstate=2^sys_idINabc123"
+
+
+@patch("integrations.itsm.servicenow.client.SyncMapping")
+@patch("integrations.itsm.servicenow.client.requests.get")
+def test_empty_base_query_appends_bare_condition(mock_get, mock_sync, configuration):
+    """An empty base_query must not produce a leading ^ in the encoded query."""
+    configuration.settings = {"table_name": "incident", "base_query": ""}
+    mock_get.return_value = _response([])
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = _client(configuration)
+    client.list_remote_objects({"id": "abc123"})
+
+    query = mock_get.call_args[1]["params"]["sysparm_query"]
+    assert query == "sys_idINabc123"
+
+
+@patch("integrations.itsm.servicenow.client.SyncMapping")
+@patch("integrations.itsm.servicenow.client.requests.get")
 def test_list_remote_objects_excludes_mapped_records(
     mock_get, mock_sync, configuration
 ):

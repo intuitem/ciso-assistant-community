@@ -148,6 +148,20 @@ class ServiceNowClient(BaseIntegrationClient):
     # ``_searchable_fields`` since not every table has all three.
     SEARCH_FIELDS = ("number", "short_description", "name")
 
+    @staticmethod
+    def _and_onto_branches(base_query: str, condition: str) -> str:
+        """AND ``condition`` onto every top-level ``^NQ`` branch of ``base_query``.
+
+        ``base_query`` is free-form admin config and may itself OR complete
+        subqueries with ``^NQ`` (ServiceNow's own filter UI emits it), so
+        appending the condition to the string as a whole would leave every
+        branch but the last unconstrained, matching its entire scope.
+        """
+        branches = base_query.split("^NQ")
+        return "^NQ".join(
+            f"{branch}^{condition}" if branch else condition for branch in branches
+        )
+
     def _searchable_fields(self) -> tuple[str, ...]:
         """``SEARCH_FIELDS`` restricted to columns of the configured table.
 
@@ -197,7 +211,9 @@ class ServiceNowClient(BaseIntegrationClient):
             ][:MAX_HYDRATION_IDS]
             if not id_list:
                 return []
-            sysparm_query = f"{base_query}^sys_idIN{','.join(id_list)}"
+            sysparm_query = self._and_onto_branches(
+                base_query, f"sys_idIN{','.join(id_list)}"
+            )
         elif search:
             # ^ and , are encoded-query metacharacters; LIKE has no escape
             # syntax so strip them from the term.
@@ -215,7 +231,8 @@ class ServiceNowClient(BaseIntegrationClient):
             # each branch; a plain ^OR would escape the base_query AND
             # due to flat left-to-right precedence.
             sysparm_query = "^NQ".join(
-                f"{base_query}^{field}LIKE{term}" for field in search_fields
+                self._and_onto_branches(base_query, f"{field}LIKE{term}")
+                for field in search_fields
             )
 
         used_ids = set(
