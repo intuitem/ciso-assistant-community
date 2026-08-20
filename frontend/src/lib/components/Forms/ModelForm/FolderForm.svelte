@@ -50,12 +50,17 @@
 	async function initViewableFromDescendantsHelpText() {
 		let stringifiedModelNames = m.anErrorOccurred();
 
-		const req = await fetch('/content-types?may_be_viewable_from_descendants=true');
-		if (req.ok) {
-			const res = await req.json();
-			const modelNames = res.map((model) => safeTranslate(model.label));
+		try {
+			const req = await fetch('/content-types?may_be_viewable_from_descendants=true');
 
-			stringifiedModelNames = modelNames.join(' | ');
+			if (req.ok) {
+				const res = await req.json();
+				const modelNames = res.map((model) => safeTranslate(model.label));
+
+				stringifiedModelNames = modelNames.join(' | ');
+			}
+		} catch (error) {
+			stringifiedModelNames = m.networkErrorWithMessage({ message: error?.message });
 		}
 
 		viewableFromDescendantsHelpText = m.viewableFromDescendantsHelpText({
