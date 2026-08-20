@@ -212,7 +212,11 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
   * `in_review`
   * `done`
 * score
-  * integer from `0 to 100`
+  * integer within the requirement's effective scale — the audit's `min_score`/`max_score`, or the requirement's own bounds when it overrides them. Out-of-range values are rejected.
+* is\_score\_overridden
+  * text: `true`, `yes`, `y`, `1`, `oui`, `vrai`, `x` for true — `false`, `no`, `n`, `0`, `non`, `faux` for false. Any other text is rejected and the row fails, so a typo can't silently clear an existing override.
+  * numbers: only `0` (false) and `1` (true) are accepted; any other number is rejected.
+  * Only meaningful on requirements that carry questions: it decides whether the imported score is pinned or recomputed from the answers. Leave the cell blank (or the column out entirely) and any imported score on a question-driven requirement is pinned automatically.
 * observations
 
 ### Special considerations
@@ -556,7 +560,8 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `ref_id`
 * `name` <mark style="color:$danger;">\*</mark>
 * `description`
-* `provider_entity_ref_id` <mark style="color:$danger;">\*</mark>
+* `provider_entity_ref_id` - one of `provider_entity_ref_id` or `provider_entity_name` is required
+* `provider_entity_name` - lookup by entity name, used only when `provider_entity_ref_id` is not provided (a provided but unknown ref_id fails the row)
 * `criticality`  (Integer in \[1,4])
 
 > [!NOTE]
@@ -567,7 +572,8 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `ref_id`
 * `name` <mark style="color:$danger;">\*</mark>
 * `description`
-* `provider_entity_ref_id`
+* `provider_entity_ref_id` - one of `provider_entity_ref_id` or `provider_entity_name` is required
+* `provider_entity_name` - lookup by entity name, used only when `provider_entity_ref_id` is not provided (a provided but unknown ref_id fails the row)
 * `solution_ref_id` accepts multiple solution references (newline/pipe/comma)
 * `status`  can be `draft` , `active`,`expired` or `terminated`
 * `start_date` (YYYY-MM-DD format [https://en.wikipedia.org/wiki/ISO\_8601](https://en.wikipedia.org/wiki/ISO_8601))
@@ -583,6 +589,29 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 > [!NOTE]
 > Conflict detection: by `name` + `folder`
 
+#### Entity assessments
+
+* `name` <mark style="color:$danger;">\*</mark>
+* `entity_ref_id` - one of `entity_ref_id` or `entity_name` is required
+* `entity_name` - lookup by entity name, used only when `entity_ref_id` is not provided (a provided but unknown ref_id fails the row)
+* `description`
+* `domain`
+* `perimeter` or `perimeter_ref_id`
+* `due_date` (YYYY-MM-DD format)
+* `criticality` (Integer in \[1,4])
+* `solution_ref_id` accepts multiple solution references (newline/pipe/comma)
+* `audit_ref_id` - links the assessment to an existing audit, resolved by `ref_id`
+* `audit_name` - lookup by audit name, used only when `audit_ref_id` is not provided (a provided but unknown ref_id fails the row)
+
+> [!NOTE]
+> Conflict detection: by `entity` + `name` + `folder`
+
+> [!NOTE]
+> Linking to an existing audit always **moves** it: the audit is relocated into the entity assessment's dedicated enclave folder, and its perimeter is cleared (enclave audits carry no perimeter).
+
+> [!NOTE]
+> **Recommended workflow for importing entity assessments with audits:** the EntityAssessments sheet links to audits, it does not create them. First import or create the audits, for example in a temporary domain created for the import. Each row matches its audit by `audit_ref_id` when provided, otherwise by `audit_name`; a ref_id on the audit is optional, but is the recommended identifier when several audits could share a name. The importing user must have edit rights on the audits — audits the user cannot modify are reported as *not found*. Each matched audit is moved out of the temporary domain into the entity assessment's enclave, so once the import succeeds that domain no longer contains them and can be deleted.
+
 #### Representatives
 
 * `email` <mark style="color:$danger;">\*</mark>
@@ -591,7 +620,8 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `description`
 * `phone`
 * `role`
-* `provider_entity_ref_id` <mark style="color:$danger;">\*</mark>
+* `provider_entity_ref_id` - one of `provider_entity_ref_id` or `provider_entity_name` is required
+* `provider_entity_name` - lookup by entity name, used only when `provider_entity_ref_id` is not provided (a provided but unknown ref_id fails the row)
 
 > [!NOTE]
 > Conflict detection: by `email`

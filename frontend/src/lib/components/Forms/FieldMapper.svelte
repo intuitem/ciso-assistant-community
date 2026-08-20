@@ -61,8 +61,7 @@
 		// superform store at valuePathPrefix (see mergeMapsIntoForm); pages can
 		// still override for custom behavior.
 		onMapsChange = null as
-			| ((maps: { field_map: Record<string, any>; value_map: Record<string, any> }) => void)
-			| null
+			((maps: { field_map: Record<string, any>; value_map: Record<string, any> }) => void) | null
 	} = $props();
 
 	// Namespace the `field` attribute (id / label-for / hidden input name /

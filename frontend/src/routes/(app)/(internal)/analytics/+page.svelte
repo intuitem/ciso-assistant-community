@@ -1124,115 +1124,117 @@
 								</div>
 							</div>
 
-							<!-- Third Row: Incident Summary Cards -->
-							<div class="grid grid-cols-1 xl:grid-cols-1 gap-6 items-start">
-								<!-- Summary Cards (full width) -->
-								<div class="xl:col-span-1">
-									<CardGroup title={m.incidentSummary()} icon="fa-solid fa-chart-simple">
-										<SimpleCard
-											count={operationsAnalytics?.summary_stats?.total_incidents ?? 0}
-											label={m.totalIncidents()}
-											href="/incidents/"
-											emphasis={true}
-										/>
-										<SimpleCard
-											count={operationsAnalytics?.summary_stats?.incidents_this_month ?? 0}
-											label={m.incidentsThisMonth()}
-											href="/incidents/"
-											emphasis={true}
-										/>
-										<SimpleCard
-											count={operationsAnalytics?.summary_stats?.open_incidents ?? 0}
-											label={m.openIncidents()}
-											href="/incidents/?status=new&status=ongoing&status=resolved"
-											emphasis={true}
-										/>
-									</CardGroup>
-								</div>
-							</div>
-
-							<!-- Third Row: Severity Breakdown and Qualifications Radar -->
-							<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-								<!-- Severity Breakdown Chart -->
-								<div
-									class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
-								>
-									<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
-										{m.incidentSeverityBreakdown()}
-									</h3>
-									<div class="h-80">
-										<DonutChart
-											name="incident_severity"
-											values={operationsAnalytics?.severity_breakdown ?? []}
-										/>
-									</div>
-								</div>
-
-								<!-- Qualifications Radar Chart -->
-								<div
-									class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
-								>
-									<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
-										{safeTranslate('incidentQualificationsRadar')}
-									</h3>
-									<div class="h-80">
-										{#if operationsAnalytics?.qualifications_breakdown?.labels?.length > 0}
-											<RadarChart
-												name="incident_qualifications"
-												title=""
-												labels={operationsAnalytics?.qualifications_breakdown?.labels ?? []}
-												values={operationsAnalytics?.qualifications_breakdown?.values ?? []}
+							{#if page.data?.featureflags?.incidents}
+								<!-- Third Row: Incident Summary Cards -->
+								<div class="grid grid-cols-1 xl:grid-cols-1 gap-6 items-start">
+									<!-- Summary Cards (full width) -->
+									<div class="xl:col-span-1">
+										<CardGroup title={m.incidentSummary()} icon="fa-solid fa-chart-simple">
+											<SimpleCard
+												count={operationsAnalytics?.summary_stats?.total_incidents ?? 0}
+												label={m.totalIncidents()}
+												href="/incidents/"
+												emphasis={true}
 											/>
-										{:else}
-											<div class="flex items-center justify-center h-full text-surface-600-400">
-												<p>{safeTranslate('noQualificationsData')}</p>
-											</div>
-										{/if}
+											<SimpleCard
+												count={operationsAnalytics?.summary_stats?.incidents_this_month ?? 0}
+												label={m.incidentsThisMonth()}
+												href="/incidents/"
+												emphasis={true}
+											/>
+											<SimpleCard
+												count={operationsAnalytics?.summary_stats?.open_incidents ?? 0}
+												label={m.openIncidents()}
+												href="/incidents/?status=new&status=ongoing&status=resolved"
+												emphasis={true}
+											/>
+										</CardGroup>
 									</div>
 								</div>
-							</div>
 
-							<!-- Fourth Row: Monthly Metrics and Detection Breakdown -->
-							<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
-								<!-- Monthly Incident Metrics (3/5 of width) -->
-								<div class="xl:col-span-3">
+								<!-- Third Row: Severity Breakdown and Qualifications Radar -->
+								<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+									<!-- Severity Breakdown Chart -->
 									<div
 										class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
 									>
 										<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
-											{m.monthlyIncidentMetrics()}
-										</h3>
-										<div class="h-80">
-											<IncidentMonthlyChart
-												name="incident_monthly"
-												title=""
-												months={operationsAnalytics?.monthly_metrics?.months ?? []}
-												monthlyCount={operationsAnalytics?.monthly_metrics?.monthly_counts ?? []}
-												cumulativeCount={operationsAnalytics?.monthly_metrics?.cumulative_counts ??
-													[]}
-											/>
-										</div>
-									</div>
-								</div>
-
-								<!-- Detection Breakdown Chart (2/5 of width) -->
-								<div class="xl:col-span-2">
-									<div
-										class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
-									>
-										<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
-											{m.incidentDetectionBreakdown()}
+											{m.incidentSeverityBreakdown()}
 										</h3>
 										<div class="h-80">
 											<DonutChart
-												name="incident_detection"
-												values={operationsAnalytics?.incident_detection_breakdown ?? []}
-												colors={['#3B82F6', '#EF4444']}
+												name="incident_severity"
+												values={operationsAnalytics?.severity_breakdown ?? []}
 											/>
 										</div>
 									</div>
+
+									<!-- Qualifications Radar Chart -->
+									<div
+										class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
+									>
+										<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+											{safeTranslate('incidentQualificationsRadar')}
+										</h3>
+										<div class="h-80">
+											{#if operationsAnalytics?.qualifications_breakdown?.labels?.length > 0}
+												<RadarChart
+													name="incident_qualifications"
+													title=""
+													labels={operationsAnalytics?.qualifications_breakdown?.labels ?? []}
+													values={operationsAnalytics?.qualifications_breakdown?.values ?? []}
+												/>
+											{:else}
+												<div class="flex items-center justify-center h-full text-surface-600-400">
+													<p>{safeTranslate('noQualificationsData')}</p>
+												</div>
+											{/if}
+										</div>
+									</div>
 								</div>
-							</div>
+
+								<!-- Fourth Row: Monthly Metrics and Detection Breakdown -->
+								<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
+									<!-- Monthly Incident Metrics (3/5 of width) -->
+									<div class="xl:col-span-3">
+										<div
+											class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
+										>
+											<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+												{m.monthlyIncidentMetrics()}
+											</h3>
+											<div class="h-80">
+												<IncidentMonthlyChart
+													name="incident_monthly"
+													title=""
+													months={operationsAnalytics?.monthly_metrics?.months ?? []}
+													monthlyCount={operationsAnalytics?.monthly_metrics?.monthly_counts ?? []}
+													cumulativeCount={operationsAnalytics?.monthly_metrics
+														?.cumulative_counts ?? []}
+												/>
+											</div>
+										</div>
+									</div>
+
+									<!-- Detection Breakdown Chart (2/5 of width) -->
+									<div class="xl:col-span-2">
+										<div
+											class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
+										>
+											<h3 class="text-lg font-semibold text-surface-900-100 mb-4">
+												{m.incidentDetectionBreakdown()}
+											</h3>
+											<div class="h-80">
+												<DonutChart
+													name="incident_detection"
+													values={operationsAnalytics?.incident_detection_breakdown ?? []}
+													colors={['#3B82F6', '#EF4444']}
+												/>
+											</div>
+										</div>
+									</div>
+								</div>
+							{/if}
 						</section>
 					{:else}
 						<div
@@ -1243,15 +1245,19 @@
 							</div>
 							<div class="text-surface-600-400">
 								<p class="text-xl font-semibold mb-2">{m.noOperationsData()}</p>
-								<p class="text-sm text-surface-600-400">{m.createIncidents()}</p>
+								{#if page.data?.featureflags?.incidents}
+									<p class="text-sm text-surface-600-400">{m.createIncidents()}</p>
+								{/if}
 							</div>
-							<a
-								href="/incidents"
-								class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 transition-colors"
-							>
-								<i class="fas fa-plus text-sm"></i>
-								{m.createIncident()}
-							</a>
+							{#if page.data?.featureflags?.incidents}
+								<a
+									href="/incidents"
+									class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 transition-colors"
+								>
+									<i class="fas fa-plus text-sm"></i>
+									{m.createIncident()}
+								</a>
+							{/if}
 						</div>
 					{/if}
 				{:catch error}
