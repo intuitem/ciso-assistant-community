@@ -1,6 +1,7 @@
 import pytest
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
+from jira import JIRAError
 from core.models import AppliedControl
 from integrations.models import IntegrationConfiguration
 from .client import JiraClient
@@ -545,7 +546,7 @@ def test_list_remote_objects_key_clause_falls_back_on_jql_error(
 ):
     """Jira 400s on a nonexistent key in JQL; retry without the key clause."""
     mock_jira.return_value.search_issues.side_effect = [
-        Exception("An issue with key 'PROJ-9999' does not exist"),
+        JIRAError(status_code=400, text="An issue with key 'PROJ-9999' does not exist"),
         [_fake_issue("PROJ-1", "1", "Something 9999")],
     ]
     mock_sync.objects.filter.return_value.values_list.return_value = []
@@ -557,6 +558,25 @@ def test_list_remote_objects_key_clause_falls_back_on_jql_error(
     retry_jql = mock_jira.return_value.search_issues.call_args[0][0]
     assert "key =" not in retry_jql
     assert 'summary ~ "9999*"' in retry_jql
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_key_clause_propagates_non_jql_errors(
+    mock_jira, mock_sync, configuration
+):
+    """A 429/timeout during the key search is a real error, not a missing
+    key: it must not silently degrade to the summary-only fallback."""
+    mock_jira.return_value.search_issues.side_effect = JIRAError(
+        status_code=429, text="Rate limited"
+    )
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    with pytest.raises(JIRAError):
+        client.list_remote_objects({"search": "9999"})
+
+    mock_jira.return_value.search_issues.assert_called_once()
 
 
 @patch("integrations.itsm.jira.client.SyncMapping")

@@ -2,7 +2,7 @@ import re
 from typing import Any, Dict
 
 from integrations.models import SyncMapping
-from jira import JIRA
+from jira import JIRA, JIRAError
 from structlog import get_logger
 
 from core.models import AppliedControl
@@ -338,11 +338,12 @@ class JiraClient(BaseIntegrationClient):
                     maxResults=fetch_limit,
                     fields="summary",
                 )
-            except Exception:
-                if not key_jql:
+            except JIRAError as e:
+                if not key_jql or e.status_code != 400:
                     raise
                 # The key clause 400s when the issue doesn't exist; retry on
-                # summaries only.
+                # summaries only. Anything else (429, 5xx, auth) is a real
+                # error, not a missing key, and must propagate.
                 jql_query = f"{summary_jql} ORDER BY created DESC"
                 issues = self.jira.search_issues(
                     jql_query,
