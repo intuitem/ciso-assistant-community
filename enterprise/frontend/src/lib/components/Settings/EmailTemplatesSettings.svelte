@@ -104,7 +104,12 @@
 		loading = false;
 	}
 
+	// Templates with an in-flight toggle request; their switch is disabled
+	// so a second click can't race the first (last response would win).
+	let pendingToggles = $state<Set<string>>(new Set());
+
 	function requestSetEnabled(template: TemplateInfo, isEnabled: boolean) {
+		if (pendingToggles.has(template.template_key)) return;
 		if (!isEnabled && template.category === 'core') {
 			// Flip the state right away so the switch and its hidden native
 			// input stay in sync; revert if the modal is cancelled/dismissed.
@@ -128,6 +133,8 @@
 		const previous = template.is_enabled;
 		template.is_enabled = isEnabled;
 		error = '';
+		pendingToggles.add(template.template_key);
+		pendingToggles = new Set(pendingToggles);
 		try {
 			const res = await fetch('/fe-api/custom-email-templates/set-enabled', {
 				method: 'POST',
@@ -143,6 +150,9 @@
 		} catch {
 			template.is_enabled = previous;
 			error = 'Failed to update template status';
+		} finally {
+			pendingToggles.delete(template.template_key);
+			pendingToggles = new Set(pendingToggles);
 		}
 	}
 
@@ -501,6 +511,7 @@
 								<Switch
 									name="template-enabled-{template.template_key}"
 									checked={template.is_enabled}
+									disabled={pendingToggles.has(template.template_key)}
 									onCheckedChange={(e) => requestSetEnabled(template, e.checked)}
 								>
 									<Switch.Control>
