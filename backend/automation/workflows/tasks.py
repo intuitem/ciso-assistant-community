@@ -66,6 +66,21 @@ def reap_timed_out_runs():
 
 
 @db_task()
+def dispatch_bulk_event_task(payload, origin_depth=0):
+    """Bulk-write producer counterpart of dispatch_internal_event_task: the
+    payload is already built (there is no LogEntry row for a bulk write), so
+    it dispatches directly."""
+    from .events import dispatch_internal_event
+
+    dispatch_internal_event(
+        payload["event_key"],
+        payload,
+        payload.get("folder_id"),
+        origin_depth=origin_depth,
+    )
+
+
+@db_task()
 def dispatch_internal_event_task(log_entry_id, origin_depth=0):
     from auditlog.models import LogEntry
 

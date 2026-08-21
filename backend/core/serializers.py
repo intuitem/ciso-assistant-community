@@ -3193,6 +3193,15 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                 manual_ras = assessable_ras.exclude(
                     requirement__questions__isnull=False
                 )
+                # The is_scored flips below use QuerySet.update(), which
+                # bypasses the auditlog signals workflow event triggers listen
+                # on — bracket them with the bulk-event seam.
+                from automation.workflows.events import (
+                    emit_bulk_events,
+                    snapshot_for_bulk_events,
+                )
+
+                ra_snapshot = snapshot_for_bulk_events(assessable_ras, ["is_scored"])
                 if updated_instance.scoring_enabled:
                     # Turn on: set is_scored=True, initialize score to the RA's
                     # resolved minimum (Node override falling back to CA) only
@@ -3228,6 +3237,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                 else:
                     # Turn off: only flip is_scored, preserve existing scores
                     assessable_ras.update(is_scored=False)
+                emit_bulk_events(ra_snapshot)
 
                 # QuerySet.update() bypasses the RA save hooks that normally
                 # refresh the audit's daily metrics, so schedule one refresh
@@ -5790,10 +5800,21 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
             "findings_assessments",
         ]
 
+        from automation.workflows.events import (
+            emit_bulk_events,
+            snapshot_for_bulk_events,
+        )
+
         for field_name in assessment_fields:
             related_manager = getattr(validation_flow, field_name)
             if related_manager.exists():
+                # QuerySet.update() bypasses auditlog, so workflow triggers
+                # never see the lock without the bulk-event seam.
+                snapshot = snapshot_for_bulk_events(
+                    related_manager.all(), ["is_locked"]
+                )
                 related_manager.update(is_locked=lock_value)
+                emit_bulk_events(snapshot)
                 logger.info(
                     f"{'Locked' if lock_value else 'Unlocked'} {related_manager.count()} "
                     f"{field_name} for validation flow {validation_flow.ref_id}"

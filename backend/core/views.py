@@ -3134,9 +3134,24 @@ class ReferenceControlViewSet(BaseModelViewSet):
                     syncable_applied_control, field_to_sync, reference_control_value
                 )
 
+        # bulk_update bypasses auditlog, and the compensating save() loop below
+        # produces empty diffs (the values are already written), so without
+        # the seam workflow `changed` filters never see the sync.
+        from automation.workflows.events import (
+            emit_bulk_events,
+            snapshot_for_bulk_events,
+        )
+
+        snapshot = snapshot_for_bulk_events(
+            AppliedControl.objects.filter(
+                pk__in=[control.pk for control in syncable_applied_controls]
+            ),
+            FIELDS_TO_SYNC,
+        )
         AppliedControl.objects.bulk_update(
             syncable_applied_controls, FIELDS_TO_SYNC, batch_size=100
         )
+        emit_bulk_events(snapshot)
 
         skip_sync = all(
             field_to_sync not in AppliedControl.INTEGRATION_SYNCABLE_FIELDS
@@ -3423,6 +3438,16 @@ class VulnerabilityViewSet(BaseModelViewSet):
         object_ids = RoleAssignment.get_viewable_object_ids(request.user, Vulnerability)
         accessible = Vulnerability.objects.filter(id__in=object_ids)
 
+        # The .update() calls below bypass auditlog, so workflow event
+        # triggers would never see the refreshed due dates without the
+        # bulk-event seam; F() expressions resolve on the emit-side re-read.
+        from automation.workflows.events import (
+            emit_bulk_events,
+            snapshot_for_bulk_events,
+        )
+
+        snapshot = snapshot_for_bulk_events(accessible, ["detected_at", "due_date"])
+
         # Backfill missing detected_at from created_at
         accessible.filter(detected_at__isnull=True).update(
             detected_at=Cast(F("created_at"), models.DateField())
@@ -3456,6 +3481,8 @@ class VulnerabilityViewSet(BaseModelViewSet):
                     detected_at__isnull=False,
                 ).update(due_date=F("detected_at") + delta)
             updated += count
+
+        emit_bulk_events(snapshot)
 
         return Response(
             {
@@ -13466,11 +13493,25 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 ras_to_update.append(ra)
 
             if ras_to_update and update_fields:
+                from automation.workflows.events import (
+                    emit_bulk_events,
+                    snapshot_for_bulk_events,
+                )
+
+                # bulk_update bypasses auditlog; the seam keeps workflow event
+                # triggers aware of the merged results.
+                snapshot = snapshot_for_bulk_events(
+                    RequirementAssessment.objects.filter(
+                        pk__in=[ra.pk for ra in ras_to_update]
+                    ),
+                    list(update_fields),
+                )
                 RequirementAssessment.objects.bulk_update(
                     ras_to_update,
                     list(update_fields),
                     batch_size=500,
                 )
+                emit_bulk_events(snapshot)
                 if update_fields & RequirementAssessment._CEL_RELEVANT_FIELDS:
                     ras_to_update[0]._defer_cel_evaluation()
 

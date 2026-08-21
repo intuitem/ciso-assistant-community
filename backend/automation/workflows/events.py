@@ -380,6 +380,104 @@ def forward_log_entry(sender, instance, created, **kwargs):
     )
 
 
+# ---------- bulk-write producer ----------
+#
+# QuerySet.update() / bulk_update() bypass the model save signals auditlog
+# listens on, so the CUD producer above never sees those writes. Call sites
+# that bulk-write models workflows can observe wrap the write in this
+# two-phase seam:
+#
+#     snapshot = snapshot_for_bulk_events(queryset, ["is_scored"])
+#     queryset.update(is_scored=True)
+#     emit_bulk_events(snapshot)
+
+
+def snapshot_for_bulk_events(queryset, fields):
+    """Phase 1, call BEFORE the bulk write with the queryset about to be
+    mutated and the field names being written.
+
+    Returns None when no enabled trigger listens for <model>.updated — that
+    single indexed EXISTS query is the only overhead a call site pays when
+    nothing listens; the pre-write snapshot query runs only when a trigger
+    exists. Otherwise returns an opaque snapshot for emit_bulk_events."""
+    model = queryset.model
+    key = make_event_key(model._meta.model_name, "updated")
+    if not WorkflowTrigger.objects.filter(
+        type=WorkflowTrigger.Type.INTERNAL_EVENT, enabled=True, event_key=key
+    ).exists():
+        return None
+    fields = list(fields)
+    return {
+        "model": model,
+        "event_key": key,
+        "fields": fields,
+        "old": {row["pk"]: row for row in queryset.values("pk", *fields)},
+    }
+
+
+def emit_bulk_events(snapshot):
+    """Phase 2, call AFTER the bulk write, inside the same transaction.
+
+    Re-reads the written fields from the DB (so F() expressions resolve),
+    diffs against the snapshot, and dispatches one <model>.updated event per
+    object whose diff is non-empty, deferred via transaction.on_commit at the
+    current trigger depth — the same loop containment as the auditlog
+    producer. Payloads match payload_from_log_entry's shape; old/new values
+    are stringified like auditlog diffs so transition filters behave the same
+    for both producers. actor_email is None: these are bulk system writes."""
+    if snapshot is None:
+        return
+    from django.db import transaction
+
+    from .engine import current_trigger_depth
+
+    model = snapshot["model"]
+    fields = snapshot["fields"]
+    old_rows = snapshot["old"]
+    if not old_rows:
+        return
+    timestamp = timezone.now().isoformat()
+    payloads = []
+    for obj in model.objects.filter(pk__in=old_rows):
+        old_row = old_rows[obj.pk]
+        changes = {
+            field: [str(old_row[field]), str(getattr(obj, field))]
+            for field in fields
+            if old_row[field] != getattr(obj, field)
+        }
+        if not changes:
+            continue
+        payloads.append(
+            {
+                "event_key": snapshot["event_key"],
+                "model": model._meta.model_name,
+                "app_label": model._meta.app_label,
+                "operation": "updated",
+                "object_id": str(obj.pk),
+                "object_repr": str(obj),
+                "changes": changes,
+                "new_values": {field: diff[1] for field, diff in changes.items()},
+                "folder_id": obj.get_additional_data().get("folder_id"),
+                "actor_email": None,
+                "timestamp": timestamp,
+            }
+        )
+    if not payloads:
+        return
+
+    origin_depth = current_trigger_depth.get()
+
+    def _enqueue():
+        from .tasks import dispatch_bulk_event_task
+
+        # One task per object, mirroring the per-LogEntry granularity of the
+        # CUD producer: one bad payload cannot take down the batch.
+        for payload in payloads:
+            dispatch_bulk_event_task(payload, origin_depth)
+
+    transaction.on_commit(_enqueue)
+
+
 def payload_from_log_entry(log_entry):
     changes = log_entry.changes_dict or {}
     additional = log_entry.additional_data or {}

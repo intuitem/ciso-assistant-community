@@ -1632,17 +1632,34 @@ class LibraryUpdater:
                     )
 
                 if requirement_assessment_objects_to_update:
+                    from automation.workflows.events import (
+                        emit_bulk_events,
+                        snapshot_for_bulk_events,
+                    )
+
+                    # bulk_update bypasses auditlog; the seam keeps workflow
+                    # event triggers aware of the rescaled results.
+                    rescale_fields = [
+                        "score",
+                        "is_scored",
+                        "is_score_overridden",
+                        "documentation_score",
+                        "result",
+                    ]
+                    snapshot = snapshot_for_bulk_events(
+                        RequirementAssessment.objects.filter(
+                            pk__in=[
+                                ra.pk for ra in requirement_assessment_objects_to_update
+                            ]
+                        ),
+                        rescale_fields,
+                    )
                     RequirementAssessment.objects.bulk_update(
                         requirement_assessment_objects_to_update,
-                        [
-                            "score",
-                            "is_scored",
-                            "is_score_overridden",
-                            "documentation_score",
-                            "result",
-                        ],
+                        rescale_fields,
                         batch_size=100,
                     )
+                    emit_bulk_events(snapshot)
 
                 # Keep selected_implementation_groups consistent for dynamic frameworks
                 # This must run even if no RA scalar fields changed, because answer
