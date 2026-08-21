@@ -201,7 +201,9 @@ class TestCustomMetricSampleWriteSerializerValidatesValueShape:
     def test_rejects_unknown_key(self, metric_instance):
         # additionalProperties: False - a well-formed but unrelated dict must
         # not be silently accepted just because it's a dict.
-        errors = self._errors_for_value(metric_instance, {"invalid_key": "invalid_value"})
+        errors = self._errors_for_value(
+            metric_instance, {"invalid_key": "invalid_value"}
+        )
 
         assert "value" in errors
 
