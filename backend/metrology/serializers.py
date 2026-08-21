@@ -180,7 +180,7 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
         elif self.instance is not None:
             value = self.instance.value
         else:
-            value = None
+            value = CustomMetricSample._meta.get_field("value").get_default()
         if value is None:
             return attrs
 

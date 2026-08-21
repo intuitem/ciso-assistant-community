@@ -235,3 +235,14 @@ class TestCustomMetricSampleWriteSerializerValidatesValueShape:
 
         assert not serializer.is_valid()
         assert "value" in serializer.errors
+
+    def test_rejects_omitted_value_on_create(self, metric_instance):
+        serializer = CustomMetricSampleWriteSerializer(
+            data={
+                "metric_instance": str(metric_instance.pk),
+                "timestamp": "2024-01-01T00:00:00Z",
+            }
+        )
+
+        assert not serializer.is_valid()
+        assert "value" in serializer.errors
