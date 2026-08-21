@@ -140,7 +140,10 @@ class WorkflowViewSet(BaseModelViewSet):
             ).delete()
             instance.delete()
 
-    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    # key_prefix versions the cache entry: without it a deploy that changes
+    # the payload shape (updatable_fields/m2m_fields) serves the stale shape
+    # for one TTL. Bump the suffix when the shape changes again.
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL, key_prefix="creatable-models-v2"))
     @action(detail=False, name="Get creatable models", url_path="creatable-models")
     def creatable_models(self, request):
         """The create_object registry, so the builder's forms stay in sync

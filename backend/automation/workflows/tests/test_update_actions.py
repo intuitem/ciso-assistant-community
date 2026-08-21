@@ -227,6 +227,22 @@ class TestUpdateObject:
         vulnerability.refresh_from_db()
         assert vulnerability.status == "potential"
 
+    def test_non_scalar_field_value_is_rejected(self):
+        domain = make_domain("Scalar domain")
+        control = AppliedControl.objects.create(name="Ctl", folder=domain)
+        version = action_flow(
+            domain,
+            {
+                "type": "update_object",
+                "model": "applied_control",
+                "object_id": str(control.id),
+                "fields": {"description": ["not", "a", "scalar"]},
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert any("must be a scalar value" in m for m in error_messages(instance))
+
     def test_target_in_sibling_domain_is_out_of_scope(self):
         ours = make_domain("Ours")
         theirs = make_domain("Theirs")

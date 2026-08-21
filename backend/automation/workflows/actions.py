@@ -244,6 +244,14 @@ def _accessible_folder_ids(folder):
     return ids
 
 
+def _reject_non_scalar(kwargs, action_label):
+    """A dict/list config value would reach setattr unvalidated and fail (or
+    coerce) DB-dependently at save time; reject it cleanly instead."""
+    for key, value in kwargs.items():
+        if value is not None and not isinstance(value, (str, int, float, bool)):
+            raise ActionError(f"{action_label}: '{key}' must be a scalar value")
+
+
 def _validate_choice_values(model, kwargs, action_label):
     """save()/create() never run full_clean, so a bad choice string would
     persist silently into a choice column; reject it here instead. Only
@@ -398,6 +406,7 @@ class CreateObjectAction(BaseAction):
                     )
             kwargs[fk_name] = target
 
+        _reject_non_scalar(kwargs, "create_object")
         _validate_choice_values(entry["model"], kwargs, "create_object")
         resolved_m2m = _resolve_m2m(entry, config, instance, "create_object")
 
@@ -473,6 +482,9 @@ class UpdateObjectAction(BaseAction):
         kwargs = {}
         for key, raw in fields.items():
             if key not in updatable:
+                # Unlike create_object, which silently drops unknown keys, an
+                # update raises: silently ignoring a mutation the author asked
+                # for is worse than failing the node.
                 raise ActionError(f"update_object: '{key}' is not an updatable field")
             value = render(raw, context)
             # Key presence writes the field, an empty value clears it —
@@ -489,6 +501,7 @@ class UpdateObjectAction(BaseAction):
                     raise ActionError(f"update_object: '{key}' cannot be cleared")
                 value = _clearing_value(entry["model"], key)
             kwargs[key] = value
+        _reject_non_scalar(kwargs, "update_object")
         _validate_choice_values(entry["model"], kwargs, "update_object")
         resolved_m2m = _resolve_m2m(entry, config, instance, "update_object")
 
