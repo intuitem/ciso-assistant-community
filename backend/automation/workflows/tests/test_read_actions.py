@@ -15,6 +15,7 @@ from automation.workflows.models import (
     Workflow,
     WorkflowInstance,
     WorkflowNode,
+    WorkflowToken,
     WorkflowVersion,
 )
 from automation.workflows.validation import validate_graph
@@ -414,6 +415,21 @@ class TestNamelessModels:
         # API parity: the display key for this nameless model is "str".
         assert row["str"] == row["ref_id"]
 
+    def test_null_ref_id_rows_read_with_empty_str(self):
+        """ref_id is only auto-assigned in save(); bulk-created rows can hold
+        NULL, and str() must not blow up the whole read on them."""
+        from core.models import ValidationFlow
+
+        domain = make_domain("Domain null ref")
+        flow = ValidationFlow.objects.create(folder=domain)
+        ValidationFlow.objects.filter(id=flow.id).update(ref_id=None)
+        version = read_flow(domain, {"model": "validation_flow", "mode": "list"})
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        row = read_output(instance)["results"][0]
+        assert row["str"] == ""
+        assert row["ref_id"] is None
+
     def test_name_is_not_filterable_on_nameless_models(self):
         domain = make_domain("Domain nameless filter")
         version = read_flow(
@@ -598,6 +614,48 @@ class TestRiskScenarioLevels:
         assert unrated["current_level"]["value"] == -1
         assert unrated["current_level"]["name"] == "--"
         assert rated["inherent_level"]["value"] == -1
+
+    def test_negations_still_exclude_unrated_scenarios(self):
+        """The >= 0 guard must survive negation: 'not', neq and not_in would
+        otherwise flip it into 'OR level < 0' and sweep unrated rows in."""
+        domain = make_domain("Domain unrated negation")
+        make_scenarios(domain)
+        cases = [
+            {
+                "operator": "not",
+                "conditions": [{"field": "current_level", "op": "lte", "value": 0}],
+            },
+            {
+                "operator": "and",
+                "conditions": [{"field": "current_level", "op": "neq", "value": 0}],
+            },
+            {
+                "operator": "and",
+                "conditions": [
+                    {"field": "current_level", "op": "not_in", "value": [0]}
+                ],
+            },
+        ]
+        for filters in cases:
+            version = read_flow(
+                domain, {"model": "risk_scenario", "mode": "list", "filters": filters}
+            )
+            output = read_output(start_instance(version))
+            assert [row["name"] for row in output["results"]] == ["Rated"], filters
+
+    def test_stale_matrix_level_fails_with_clean_error(self):
+        """A library update can shrink the matrix while scenarios keep their
+        old level indices; the read must fail as ActionError, not IndexError."""
+        from core.models import RiskScenario
+
+        domain = make_domain("Domain stale matrix")
+        make_scenarios(domain)
+        RiskScenario.objects.filter(name="Rated").update(current_level=5)
+        version = read_flow(domain, {"model": "risk_scenario", "mode": "list"})
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        token = instance.tokens.get(status=WorkflowToken.Status.ERROR)
+        assert "no longer exists in the risk matrix" in token.error_message
 
 
 @pytest.mark.django_db

@@ -455,7 +455,6 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             "documentation_score",
             "eta",
             "due_date",
-            # Lets sweeps target one audit instead of every audit in scope.
             "compliance_assessment",
         ],
         # Identify the requirement and the audit on every row, under the
@@ -487,8 +486,8 @@ READABLE_MODELS: dict[str, ReadEntry] = {
             "residual_level",
             "risk_assessment",
         ],
-        # The level columns hold -1 until the scenario is rated; a range
-        # filter must not match those rows (eq -1 still selects them).
+        # The level columns hold -1 until the scenario is rated; range and
+        # negated filters must not match those rows (eq -1 still selects them).
         skip_unrated=frozenset({"inherent_level", "current_level", "residual_level"}),
         # Levels serialize as their matrix cell dict, like the API
         # serializer; filters keep comparing the raw integer column.
@@ -568,6 +567,28 @@ def _allowed_ops(field: Field | None) -> set[str]:
     return set()
 
 
+_UNRATED_GUARDED_OPS = ("neq", "not_in", "gt", "lt", "gte", "lte")
+
+
+def _guard_unrated(query, op, field, entry):
+    """AND the >= 0 guard AFTER any negation so negating can't flip it into
+    'OR level < 0': ranges and negations must not sweep unrated (-1) rows in."""
+    if op in _UNRATED_GUARDED_OPS and field in entry.skip_unrated:
+        query &= Q(**{f"{field}__gte": 0})
+    return query
+
+
+def _sentinel_fields_in(group, sentinels):
+    fields = {
+        condition.get("field")
+        for condition in group.get("conditions", [])
+        if condition.get("field") in sentinels
+    }
+    for child in group.get("children", []):
+        fields |= _sentinel_fields_in(child, sentinels)
+    return fields
+
+
 def _read_condition_to_q(condition, entry, allowed_fields, context):
     field = condition.get("field")
     if field not in allowed_fields:
@@ -596,11 +617,13 @@ def _read_condition_to_q(condition, entry, allowed_fields, context):
         if not isinstance(value, list):
             raise ActionError(f"read_objects: '{op}' needs a list value")
         query = Q(**{f"{field}__in": value})
-        return ~query if op == "not_in" else query
+        if op == "not_in":
+            query = ~query
+        return _guard_unrated(query, op, field, entry)
     query = Q(**{f"{field}__{lookup}": value})
-    if op in ("gt", "lt", "gte", "lte") and field in entry.skip_unrated:
-        query &= Q(**{f"{field}__gte": 0})
-    return ~query if op == "neq" else query
+    if op == "neq":
+        query = ~query
+    return _guard_unrated(query, op, field, entry)
 
 
 def _read_group_to_q(group, entry, allowed_fields, context):
@@ -624,7 +647,13 @@ def _read_group_to_q(group, entry, allowed_fields, context):
     for part in parts[1:]:
         combined &= part
     # Same semantics as event filters: NOT(all(results)).
-    return ~combined if operator == "not" else combined
+    if operator == "not":
+        combined = ~combined
+        # The negation above just flipped every per-condition guard inside;
+        # re-assert it for each sentinel field the subtree touches.
+        for field in _sentinel_fields_in(group, entry.skip_unrated):
+            combined &= Q(**{f"{field}__gte": 0})
+    return combined
 
 
 def _read_filters_to_q(tree, entry, allowed_fields, context):
@@ -707,6 +736,13 @@ class ReadObjectsAction(BaseAction):
             # Type mismatches only surface when the queryset evaluates
             # (e.g. "abc" compared against a date field).
             raise ActionError(f"read_objects: invalid filter value ({e})")
+        except IndexError:
+            # A library update can shrink a matrix while scenarios keep
+            # their old level indices; the computed cell lookups then
+            # index past the new lists.
+            raise ActionError(
+                "read_objects: a stored level no longer exists in the risk matrix"
+            )
 
 
 @register
