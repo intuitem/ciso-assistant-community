@@ -554,6 +554,24 @@ class TestWindowOperators:
         output = read_output(instance)
         assert [row["name"] for row in output["results"]] == ["Stale"]
 
+    def test_window_ops_rejected_on_non_date_fields_at_publish(self):
+        domain = make_domain("Domain window non-date")
+        version = self._window_flow(domain, "within_next_days", 7, field="status")
+        read_node = version.nodes.get(type=WorkflowNode.Type.ACTION)
+        errors = validate_read_config(read_node)
+        assert [code for code, _message in errors] == ["action_read_invalid_filters"]
+        assert "only applies to date fields" in errors[0][1]
+
+    def test_extreme_anchor_fails_cleanly(self):
+        domain = make_domain("Domain calendar edge")
+        version = self._window_flow(domain, "within_next_days", 10000)
+        instance = start_with_seeds(version, {"today": "9999-12-31"})
+        assert instance.status != WorkflowInstance.Status.COMPLETED
+        assert any(
+            "calendar range" in (log.message or "")
+            for log in instance.logs.filter(event_type="error")
+        )
+
     def test_huge_day_count_fails_cleanly(self):
         domain = make_domain("Domain huge days")
         version = self._window_flow(domain, "within_next_days", "{{days}}")

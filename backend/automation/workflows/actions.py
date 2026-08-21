@@ -12,7 +12,7 @@ import uuid
 from urllib.parse import urlsplit
 
 from django.core.exceptions import FieldDoesNotExist, ValidationError
-from django.db.models import DateTimeField, Q
+from django.db.models import DateField, DateTimeField, Q
 from django.utils import timezone
 
 from core.models import (
@@ -466,37 +466,63 @@ def _is_datetime_column(model, field_name):
     return isinstance(field, DateTimeField)
 
 
+def _is_date_column(model, field_name):
+    """DateField or DateTimeField (a subclass) — the only columns window
+    operators may target; anything else diverges per DB at query time."""
+    try:
+        field = model._meta.get_field(field_name)
+    except FieldDoesNotExist:
+        return False
+    return isinstance(field, DateField)
+
+
 def _read_condition_to_q(condition, allowed_fields, context, model):
     field = condition.get("field")
     if field not in allowed_fields:
         raise ActionError(f"read_objects: '{field}' is not a filterable field")
     op = condition.get("op", "eq")
     if op in READ_WINDOW_OPS:
+        # Publish validation blocks non-date fields for new graphs; this
+        # guard covers imported/pre-existing ones.
+        if not _is_date_column(model, field):
+            raise ActionError(f"read_objects: '{op}' only applies to date fields")
         days = _window_days(op, render(condition.get("value"), context))
         anchor = _window_anchor(context)
-        if _is_datetime_column(model, field):
-            # Aware midnight bounds; upper bound exclusive at midnight of
-            # day N+1 so all of day N is inside the window.
+        try:
+            if _is_datetime_column(model, field):
+                # Aware midnight bounds; upper bound exclusive at midnight of
+                # day N+1 so all of day N is inside the window.
+                if op == "within_next_days":
+                    return Q(
+                        **{
+                            f"{field}__gte": _day_start(anchor),
+                            f"{field}__lt": _day_start(
+                                anchor + datetime.timedelta(days=days + 1)
+                            ),
+                        }
+                    )
+                return Q(
+                    **{
+                        f"{field}__lt": _day_start(
+                            anchor - datetime.timedelta(days=days)
+                        )
+                    }
+                )
             if op == "within_next_days":
                 return Q(
                     **{
-                        f"{field}__gte": _day_start(anchor),
-                        f"{field}__lt": _day_start(
-                            anchor + datetime.timedelta(days=days + 1)
-                        ),
+                        f"{field}__gte": anchor,
+                        f"{field}__lte": anchor + datetime.timedelta(days=days),
                     }
                 )
-            return Q(
-                **{f"{field}__lt": _day_start(anchor - datetime.timedelta(days=days))}
+            return Q(**{f"{field}__lt": anchor - datetime.timedelta(days=days)})
+        except OverflowError:
+            # A shadowed anchor near date.min/max can push the window off the
+            # calendar even with the day-count cap; fail the clean way.
+            raise ActionError(
+                f"read_objects: '{op}' window falls outside the supported"
+                " calendar range"
             )
-        if op == "within_next_days":
-            return Q(
-                **{
-                    f"{field}__gte": anchor,
-                    f"{field}__lte": anchor + datetime.timedelta(days=days),
-                }
-            )
-        return Q(**{f"{field}__lt": anchor - datetime.timedelta(days=days)})
     lookup = _READ_OP_LOOKUPS.get(op)
     if lookup is None:
         raise ActionError(f"read_objects: unknown operator '{op}'")
@@ -1047,16 +1073,26 @@ def validate_read_config(node):
                         "'changed' only applies to event-trigger filters",
                     )
                 )
-            if condition.get("op") in READ_WINDOW_OPS and not _is_static_day_count(
-                condition.get("value")
-            ):
-                errors.append(
-                    (
-                        "action_read_invalid_filters",
-                        f"'{condition.get('op')}' needs a whole number of days"
-                        f" (0-{MAX_WINDOW_DAYS})",
+            if condition.get("op") in READ_WINDOW_OPS:
+                if not _is_static_day_count(condition.get("value")):
+                    errors.append(
+                        (
+                            "action_read_invalid_filters",
+                            f"'{condition.get('op')}' needs a whole number of days"
+                            f" (0-{MAX_WINDOW_DAYS})",
+                        )
                     )
-                )
+                # Only when the field itself is valid — an unknown field
+                # already got its own error above.
+                if condition.get("field") in fields and not _is_date_column(
+                    entry["model"], condition.get("field")
+                ):
+                    errors.append(
+                        (
+                            "action_read_invalid_filters",
+                            f"'{condition.get('op')}' only applies to date fields",
+                        )
+                    )
 
     if config.get("mode", "list") not in ("list", "first"):
         errors.append(
