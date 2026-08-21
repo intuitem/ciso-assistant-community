@@ -6429,6 +6429,8 @@ class RiskAssessment(Assessment):
         verbose_name=_("Automatic sync to actions"),
     )
 
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
+
     class Meta:
         verbose_name = _("Risk assessment")
         verbose_name_plural = _("Risk assessments")
@@ -7422,6 +7424,8 @@ class ComplianceAssessment(Assessment):
     )
 
     fields_to_check = ["name", "version"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     class Meta:
         verbose_name = _("Compliance assessment")
