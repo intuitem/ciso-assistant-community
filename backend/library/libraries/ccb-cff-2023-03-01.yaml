@@ -9633,9 +9633,9 @@ objects:
       translations:
         fr:
           name: "Att\xE9nuation"
-          description: "Les activit\xE9s de r\xE9ponse de l'organisation sont am\xE9\
-            lior\xE9es par l'int\xE9gration des enseignements tir\xE9s des activit\xE9\
-            s de d\xE9tection/r\xE9ponse actuelles et pr\xE9c\xE9dentes."
+          description: "Des activit\xE9s sont men\xE9es afin d'emp\xEAcher l'extension\
+            \ d'un \xE9v\xE9nement, d'en limiter les cons\xE9quences et de r\xE9soudre\
+            \ l'incident."
           annotation: ''
         nl:
           name: Mitigatie
