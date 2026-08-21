@@ -50,7 +50,7 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
 
     # All sensitive global settings (e.g. `SSO`, `INFRA_CONFIG`) MUST have extra permission checks on their API views.
     # Otherwise anyone with a `"view_globalsettings"` permission on any folder could view these sensitive global settings (as `GlobalSettings` are always stored in the root folder).
-    ALWAYS_VIEWABLE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         permissions = [
