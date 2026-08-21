@@ -134,7 +134,7 @@ Folders have a _**viewable\_from\_descendants.**_&#x20; field
 Objects which whose is `ALWAYS_VIEWABLE` or which whose is `MAY_BE_VIEWABLE` and which folder has _viewable\_from\_descendants_ set to `True` are visible(viewable) in subdomains as if they were attached to each subdomain of the object's domain.
 This mechanism only concerns visibility, not creation/udpate/deletion.
 
-To avoid an object being viewable by descendants, the simplest solution is to put it in a leaf subdomain.
+To avoid an object being viewable from descendants, the simplest solution is to put it in a leaf subdomain.
 
 The plan is to remove this mechanism by Q2 2026 and introduce dynamic groups instead (e.g. the group of all users).
 
