@@ -141,3 +141,46 @@ class TestStubLLM:
         from chat.providers import StubLLM
 
         assert StubLLM().tool_call("prompt", []) is None
+
+class TestBuildMessages:
+    def test_context_is_merged_into_initial_system_message(self):
+        from chat.providers import _build_messages
+
+        messages = _build_messages(
+            system_prompt="System instructions",
+            prompt="User question",
+            context="Risk assessment data",
+        )
+
+        assert [message["role"] for message in messages] == ["system", "user"]
+        assert "System instructions" in messages[0]["content"]
+        assert "[CONTEXT]\nRisk assessment data\n[/CONTEXT]" in messages[0]["content"]
+        assert messages[1] == {"role": "user", "content": "User question"}
+
+    def test_system_history_is_merged_into_initial_system_message(self):
+        from chat.providers import _build_messages
+
+        history = [
+            {"role": "user", "content": "Earlier question"},
+            {"role": "assistant", "content": "Earlier answer"},
+            {"role": "system", "content": "Session summary"},
+        ]
+
+        messages = _build_messages(
+            system_prompt="System instructions",
+            prompt="Follow-up question",
+            context="Current context",
+            history=history,
+        )
+
+        assert sum(message["role"] == "system" for message in messages) == 1
+        assert messages[0]["role"] == "system"
+        assert "System instructions" in messages[0]["content"]
+        assert "Session summary" in messages[0]["content"]
+        assert "[CONTEXT]\nCurrent context\n[/CONTEXT]" in messages[0]["content"]
+
+        assert messages[1:] == [
+            {"role": "user", "content": "Earlier question"},
+            {"role": "assistant", "content": "Earlier answer"},
+            {"role": "user", "content": "Follow-up question"},
+        ]
