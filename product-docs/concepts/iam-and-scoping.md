@@ -44,6 +44,11 @@ Some objects exist to be **shared**. Frameworks, threats, risk matrices, referen
 CISO Assistant models this through the — **`Folder.viewable_from_descendants`** — field.
 An object which model is `ALWAYS_VIEWABLE` or a model which is `MAY_BE_VIEWABLE` in a domain(folder) marked as viewable from descendants is visible(viewable) inside every sub-domain of its own domain, _as if it had been attached to each one_.
 
+This applies for every sub-domains with no exception.
+For example if a domain `A` has a direct sub-domain `B`, and `B` has a direct sub-domain `C`.
+Then as long as `A.viewable_from_descendants` is set ALL its sub-domains will see its `ALWAYS_VIEWABLE`/`MAY_BE_VIEWABLE` objects, even if `B.viewable_from_descendants` is unset (`False`) we can still see objects viewable from descendants from the `B` and `C` folders.
+Basically, the `viewable_from_descendants` field doesn't have any kind of "propagation" mechanism.
+
 By default:
 
 - **Catalogue-style objects** (frameworks, threats, matrices, reference controls, libraries, terminologies, …) are visible from descendants — they live "above" individual domains and are intended to be reused.
