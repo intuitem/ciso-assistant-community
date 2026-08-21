@@ -270,16 +270,22 @@ def _clearing_value(model, field_name):
     return None if getattr(field, "null", False) else ""
 
 
-def _apply_m2m(entry, obj, config, instance, action_label):
-    """Relation writes shared by create_object and update_object. Config shape:
+def _resolve_m2m(entry, config, instance, action_label):
+    """Resolve and scope-check every relation write, shared by create_object
+    and update_object. Config shape:
     {"m2m": {"<field>": {"operation": "add"|"remove"|"set", "ids": [...]}}}.
     Ids are templatable (list, comma-separated string, or a template that
     renders a JSON list); every resolved target must pass the same
-    folder-scope rule as FK targets."""
+    folder-scope rule as FK targets.
+
+    This runs BEFORE any persistent write: an ActionError raised after
+    create()/save() would commit the half-written object inside the engine's
+    savepoint, and every retry would then create a duplicate. Returns
+    [(field_name, operation, targets)] for _apply_m2m to apply post-save."""
     m2m_config = config.get("m2m") or {}
-    applied = {}
+    resolved = []
     if not m2m_config:
-        return applied
+        return resolved
     allowed = entry.get("m2m_fields") or {}
     context = _render_context(instance)
     allowed_folders = None
@@ -332,6 +338,15 @@ def _apply_m2m(entry, obj, config, instance, action_label):
                         "this workflow's scope"
                     )
             targets.append(target)
+        resolved.append((field_name, operation, targets))
+    return resolved
+
+
+def _apply_m2m(obj, resolved):
+    """Apply relation writes pre-resolved by _resolve_m2m; runs after the
+    object is saved, and by then nothing can fail on user input."""
+    applied = {}
+    for field_name, operation, targets in resolved:
         manager = getattr(obj, field_name)
         if operation == "set":
             manager.set(targets)
@@ -380,6 +395,7 @@ class CreateObjectAction(BaseAction):
             kwargs[fk_name] = target
 
         _validate_choice_values(entry["model"], kwargs, "create_object")
+        resolved_m2m = _resolve_m2m(entry, config, instance, "create_object")
 
         obj = None
         created = True
@@ -406,7 +422,7 @@ class CreateObjectAction(BaseAction):
                 obj = entry["model"].objects.create(folder=instance.folder, **kwargs)
         except ValidationError as e:
             raise ActionError(f"create_object: {'; '.join(e.messages)}")
-        m2m = _apply_m2m(entry, obj, config, instance, "create_object")
+        m2m = _apply_m2m(obj, resolved_m2m)
         return {
             "created_object_id": str(obj.id),
             "created_object_name": obj.name,
@@ -465,6 +481,7 @@ class UpdateObjectAction(BaseAction):
                 value = _clearing_value(entry["model"], key)
             kwargs[key] = value
         _validate_choice_values(entry["model"], kwargs, "update_object")
+        resolved_m2m = _resolve_m2m(entry, config, instance, "update_object")
 
         try:
             for key, value in kwargs.items():
@@ -475,7 +492,7 @@ class UpdateObjectAction(BaseAction):
                 obj.save()
         except ValidationError as e:
             raise ActionError(f"update_object: {'; '.join(e.messages)}")
-        m2m = _apply_m2m(entry, obj, config, instance, "update_object")
+        m2m = _apply_m2m(obj, resolved_m2m)
         return {
             "updated_object_id": str(obj.id),
             "updated_object_name": obj.name,

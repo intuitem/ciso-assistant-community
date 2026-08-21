@@ -329,6 +329,23 @@ class TestM2MWrites:
         )
         assert control.evidences.count() == 0
 
+    def test_bad_m2m_id_leaves_no_object_behind(self):
+        # M2M targets resolve BEFORE the create: a failure here must not
+        # persist a half-written object that every retry would duplicate.
+        domain = make_domain("M2M no-orphan")
+        version = action_flow(
+            domain,
+            {
+                "type": "create_object",
+                "model": "applied_control",
+                "fields": {"name": "Orphan candidate"},
+                "m2m": {"evidences": {"operation": "add", "ids": [str(uuid.uuid4())]}},
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert AppliedControl.objects.filter(name="Orphan candidate").count() == 0
+
     def test_unknown_relation_fails(self):
         domain = make_domain("M2M unknown")
         control = AppliedControl.objects.create(name="Ctl", folder=domain)
