@@ -272,6 +272,43 @@ class OllamaEmbedder:
         return resp.json()["embedding"]
 
 
+def _normalize_system_messages(
+    system_prompt: str,
+    history: list[dict] | None = None,
+    context: str = "",
+) -> list[dict]:
+    """Build history with a single system message at position 0.
+
+    Some chat templates, including Qwen, require the system message to
+    appear only at the beginning of the conversation. Merge system messages
+    from history and additional context into the initial system prompt while
+    preserving the order of all non-system history messages.
+    """
+    system_parts = [system_prompt]
+    messages = []
+
+    if history:
+        for msg in history:
+            if msg["role"] == "system":
+                if msg["content"]:
+                    system_parts.append(msg["content"])
+            else:
+                messages.append(
+                    {"role": msg["role"], "content": msg["content"]}
+                )
+
+    if context:
+        system_parts.append(f"[CONTEXT]\n{context}\n[/CONTEXT]")
+
+    return [
+        {
+            "role": "system",
+            "content": "\n\n".join(part for part in system_parts if part),
+        },
+        *messages,
+    ]
+
+
 def _build_messages(
     system_prompt: str,
     prompt: str,
@@ -280,19 +317,12 @@ def _build_messages(
 ) -> list[dict]:
     """Build the message array for LLM calls.
 
-    Uses explicit delimiters to separate system context from user input,
-    making it harder for prompt injection in user messages to be interpreted
-    as system instructions.
+    System instructions, system history, and context are merged into a
+    single leading system message for compatibility with strict chat
+    templates while keeping user and assistant history in its original
+    order.
     """
-    messages = [{"role": "system", "content": system_prompt}]
-    if history:
-        for msg in history:
-            messages.append({"role": msg["role"], "content": msg["content"]})
-    if context:
-        # Context goes in a separate system message so it's clearly not user input
-        messages.append(
-            {"role": "system", "content": f"[CONTEXT]\n{context}\n[/CONTEXT]"}
-        )
+    messages = _normalize_system_messages(system_prompt, history, context)
     messages.append({"role": "user", "content": prompt})
     return messages
 
@@ -363,12 +393,8 @@ class OllamaLLM:
         tools: list[dict],
         history: list[dict] | None = None,
     ) -> dict | None:
-        messages = [{"role": "system", "content": TOOL_SYSTEM_PROMPT}]
-        if history:
-            for msg in history:
-                messages.append({"role": msg["role"], "content": msg["content"]})
+        messages = _normalize_system_messages(TOOL_SYSTEM_PROMPT, history)
         messages.append({"role": "user", "content": prompt})
-
         import httpx
 
         body: dict = {
@@ -507,10 +533,7 @@ class OpenAICompatibleLLM:
         tools: list[dict],
         history: list[dict] | None = None,
     ) -> dict | None:
-        messages = [{"role": "system", "content": TOOL_SYSTEM_PROMPT}]
-        if history:
-            for msg in history:
-                messages.append({"role": msg["role"], "content": msg["content"]})
+        messages = _normalize_system_messages(TOOL_SYSTEM_PROMPT, history)
         messages.append({"role": "user", "content": prompt})
 
         import httpx
