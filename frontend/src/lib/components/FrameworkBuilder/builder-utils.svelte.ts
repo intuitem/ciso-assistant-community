@@ -29,12 +29,7 @@ export function localeLabel(code: string): string {
 // Only `number` and `unique_choice` have a slider variant — this is enforced by
 // the discriminated union below.
 export type NativeStoredType =
-	| 'text'
-	| 'boolean'
-	| 'number'
-	| 'unique_choice'
-	| 'multiple_choice'
-	| 'date';
+	'text' | 'boolean' | 'number' | 'unique_choice' | 'multiple_choice' | 'date';
 export type SliderStoredType = Extract<NativeStoredType, 'number' | 'unique_choice'>;
 
 interface BaseQuestionTypeInfo {

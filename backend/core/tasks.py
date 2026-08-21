@@ -592,7 +592,7 @@ def send_task_node_due_soon_notification(actor_email, task_nodes, days):
             actor_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render task_node_due_soon email template for {actor_email}"
         )
@@ -624,7 +624,7 @@ def send_task_node_overdue_notification(actor_email, task_nodes):
             actor_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render task_node_overdue email template for {actor_email}"
         )
@@ -669,7 +669,7 @@ def send_notification_email_expired_eta(owner_email, controls):
             owner_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render expired_controls email template for {owner_email}"
         )
@@ -752,7 +752,7 @@ def auditlog_retention_cleanup():
         logger.error(f"Failed to clean up audit logs: {str(e)}")
 
 
-@periodic_task(crontab(hour="*/3"))
+@periodic_task(crontab(minute="0", hour="*/3"))
 def auditlog_prune():
     try:
         call_command("prune_auditlog")
@@ -957,7 +957,7 @@ def send_compliance_assessment_due_soon_notification(author_email, assessments, 
             author_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render {template_name} email template for {author_email}"
         )
@@ -988,7 +988,7 @@ def send_applied_control_expiring_soon_notification(owner_email, controls, days)
             owner_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render {template_name} email template for {owner_email}"
         )
@@ -1017,7 +1017,7 @@ def send_notification_email_expired_evidence(owner_email, evidences, days=0):
             owner_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render expired_evidences email template for {owner_email}"
         )
@@ -1048,7 +1048,7 @@ def send_evidence_expiring_soon_notification(owner_email, evidences, days):
             owner_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render {template_name} email template for {owner_email}"
         )
@@ -1081,7 +1081,7 @@ def send_security_exception_expiring_soon_notification(
             owner_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render {template_name} email template for {owner_email}"
         )
@@ -1114,7 +1114,7 @@ def send_notification_email_expired_security_exception(
             owner_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render {template_name} email template for {owner_email}"
         )
@@ -1256,7 +1256,7 @@ def send_validation_flow_created_notification(validation_flow):
         logger.info(
             f"Sent validation flow creation notification to {approver_email} for {validation_flow.ref_id}"
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render validation_flow_created email template for {approver_email}"
         )
@@ -1299,7 +1299,7 @@ def send_validation_flow_updated_notification(
             recipient_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render validation_flow_updated email template for {recipient_email}"
         )
@@ -1336,7 +1336,7 @@ def send_validation_deadline_notification(approver_email, validations, days):
             approver_email,
             rendered.get("html_body"),
         )
-    else:
+    elif rendered is not None:
         logger.error(
             f"Failed to render validation_deadline email template for {approver_email}"
         )
