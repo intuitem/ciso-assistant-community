@@ -2,6 +2,8 @@ import csv
 import enum
 import io
 import logging
+import math
+import structlog
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -733,6 +735,34 @@ class Error:
 
 class FolderScopeError(ValueError):
     """Raised when an existing-record lookup cannot be scoped to a folder."""
+
+
+def _parse_bool_cell(value: object, *, binary_only: bool = False) -> Optional[bool]:
+    """Parse a boolean cell. Returns None when the value is unrecognized.
+
+    binary_only additionally rejects numbers other than 0/1, for columns where
+    a stray 2 is a data error rather than spreadsheet truthiness.
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        if math.isnan(value) or math.isinf(value):
+            return None
+        if binary_only and value not in (0, 1):
+            return None
+        return value != 0
+    if isinstance(value, str):
+        token = value.strip().lower()
+        if token in {"true", "yes", "y", "1", "1.0", "oui", "vrai", "x"}:
+            return True
+        if token in {"false", "no", "n", "0", "0.0", "non", "faux"}:
+            return False
+    return None
+
+
+def _bool_cell_or_false(value: object) -> bool:
+    """Lenient variant: blanks and unrecognized values read as False."""
+    return _parse_bool_cell(value) is True
 
 
 @dataclass
@@ -2958,15 +2988,7 @@ class ProcessingChildConsumerMixin:
     def create_context(self):
         return None, None
 
-    @staticmethod
-    def _parse_bool(value: object) -> bool:
-        if isinstance(value, bool):
-            return value
-        if isinstance(value, (int, float)):
-            return value != 0
-        if isinstance(value, str):
-            return value.strip().lower() in {"true", "yes", "y", "1"}
-        return False
+    _parse_bool = staticmethod(_bool_cell_or_false)
 
     @staticmethod
     def _choice_key(value: object, choices) -> Optional[str]:
@@ -3463,17 +3485,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer):
             return [v.strip() for v in value.split(",") if v.strip()]
         return []
 
-    @staticmethod
-    def _parse_bool(value: object) -> bool:
-        if isinstance(value, bool):
-            return value
-        if value is None:
-            return False
-        if isinstance(value, (int, float)):
-            return value != 0
-        if isinstance(value, str):
-            return value.strip().lower() in {"true", "yes", "y", "1"}
-        return False
+    _parse_bool = staticmethod(_bool_cell_or_false)
 
     def _resolve_bia(
         self, record: dict
@@ -4843,6 +4855,28 @@ class LoadFileView(APIView):
 
                         if has_any_answer:
                             requirement_data["answers"] = answers
+
+                    override_cell = record.get("is_score_overridden")
+                    if override_cell not in (None, ""):
+                        override_value = _parse_bool_cell(
+                            override_cell, binary_only=True
+                        )
+                        if override_value is None:
+                            results["failed"] += 1
+                            results["errors"].append(
+                                {
+                                    "record": record,
+                                    "error": f"Invalid is_score_overridden value '{override_cell}': expected a boolean",
+                                }
+                            )
+                            continue
+                        requirement_data["is_score_overridden"] = override_value
+                    elif (
+                        requirement_data.get("score") not in (None, "")
+                        and requirement_assessment.requirement.questions.exists()
+                    ):
+                        # Imported score on question-driven requirement = override
+                        requirement_data["is_score_overridden"] = True
 
                     req_serializer = RequirementAssessmentWriteSerializer(
                         instance=requirement_assessment,
