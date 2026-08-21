@@ -9,11 +9,13 @@ output_mapping into instance variables. String config values support
 import datetime
 import re
 import uuid
+from collections.abc import Callable
 from email.utils import parseaddr
 from urllib.parse import urlsplit
 
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from django.db import transaction
 from django.db.models import Q
 
 from core.models import (
@@ -32,32 +34,61 @@ from core.models import (
     SecurityException,
     Vulnerability,
 )
+from core.tasks import get_missing_email_settings
 from tprm.models import Entity, EntityAssessment
+
+from .models import WorkflowToken
+from .tasks import send_email_task
 
 TEMPLATE_RE = re.compile(r"\{\{\s*([\w.]+)\s*\}\}")
 
 
 class ActionError(Exception):
-    """Deliberate action failure. retryable=False marks permanent problems
-    (static config, validation) that no retry can change: the engine fails
-    the node immediately instead of burning the retry schedule."""
-
-    def __init__(self, message, retryable=True):
-        super().__init__(message)
-        self.retryable = retryable
+    """Deliberate action failure, routed through the node's retry policy."""
 
 
-class DeferredDispatch:
+class FatalActionError(ActionError):
+    """Permanent action failure (static config, validation) that no retry can
+    change: the engine fails the node immediately instead of burning the
+    retry schedule."""
+
+
+class DeferredTask:
     """Returned by an action's execute() instead of an output dict when its
     side effect must run outside the engine transaction (network I/O must not
-    hold the instance-tree locks). The engine parks the token WAITING and
-    enqueues `task` after commit with token_id added to `kwargs`; the task
-    hands the token back through engine.complete_deferred_action /
-    engine.fail_deferred_action."""
+    hold the instance-tree locks). dispatch() parks the token and enqueues
+    `task`; the task hands the token back through
+    engine.complete_deferred_action / engine.fail_deferred_action."""
 
-    def __init__(self, task, kwargs):
+    def __init__(self, task: Callable[..., None], **kwargs):
+        """`task` is a huey task called after commit with `kwargs` plus the
+        parked token's id as `token_id`."""
         self.task = task
         self.kwargs = kwargs
+
+    def dispatch(self, token: WorkflowToken) -> None:
+        """Park `token` WAITING and enqueue the task after commit. If the
+        worker dies before the task reports back, the token stays WAITING
+        until the run's TTL reaper collects it — the same exposure as an
+        async subprocess wait. No dedicated log row (a new event type would
+        cost a migration): NODE_ENTERED is already written, and the
+        ACTION_EXECUTED/ERROR row lands when the task reports."""
+        token.status = WorkflowToken.Status.WAITING
+        token.save(update_fields=["status", "updated_at"])
+        # on_commit: the WAITING row must be visible before the consumer
+        # runs, or a fast worker finds an ACTIVE token and drops the dispatch.
+        task = self.task
+        kwargs = {"token_id": str(token.id), **self.kwargs}
+        transaction.on_commit(lambda: task(**kwargs))
+
+
+class DeferredSendEmailTask(DeferredTask):
+    def __init__(self, subject: str, body: str, recipients: list[str]):
+        """Deliver `subject`/`body` to each address in `recipients` over one
+        SMTP session, then resume or fail the parked token."""
+        super().__init__(
+            send_email_task, subject=subject, body=body, recipients=recipients
+        )
 
 
 def dig(data, path):
@@ -557,21 +588,16 @@ class SendEmailAction(BaseAction):
 
     def execute(self, config, instance):
         # Config errors fail the node here; delivery happens in a huey task
-        # (DeferredDispatch) so SMTP I/O never runs while the engine
+        # (DeferredSendEmailTask) so SMTP I/O never runs while the engine
         # transaction holds the instance-tree locks. The task resumes or
         # fails the node, so delivery errors still feed the retry policy.
-        from core.tasks import missing_email_settings
 
-        from .tasks import send_email_task
-
-        # No notifications_enable_mailing gate: that toggle governs the digest
-        # notifications, and send_email nodes are explicit user-authored
-        # actions that delivered regardless of it before the sync rework.
-        missing = missing_email_settings()
+        # No notifications_enable_mailing gate: that toggle governs the
+        # digest notifications, not explicit user-authored send_email nodes.
+        missing = get_missing_email_settings()
         if missing:
-            raise ActionError(
-                f"send_email: email is not configured (missing {', '.join(missing)})",
-                retryable=False,
+            raise FatalActionError(
+                f"send_email: email is not configured (missing {', '.join(missing)})"
             )
         recipients = [
             email.strip()
@@ -581,24 +607,18 @@ class SendEmailAction(BaseAction):
             if email.strip()
         ]
         if not recipients:
-            raise ActionError("send_email: no recipients configured", retryable=False)
+            raise FatalActionError("send_email: no recipients configured")
         for email in recipients:
             # Validate the addr-spec only: display-name recipients
-            # ('Jane Doe <jane@x>') delivered before the delivery rework and
-            # must keep working. (Commas inside quoted display names were
-            # already broken by the comma-split above; unchanged.)
+            # ('Jane Doe <jane@x>') are supported. Commas inside quoted
+            # display names are not (the comma-split above).
             try:
                 validate_email(parseaddr(email)[1])
             except ValidationError:
-                raise ActionError(
-                    f"send_email: invalid recipient '{email}'", retryable=False
-                )
+                raise FatalActionError(f"send_email: invalid recipient '{email}'")
         subject = render(config.get("subject", ""), _render_context(instance))
         body = render(config.get("body", ""), _render_context(instance))
-        return DeferredDispatch(
-            send_email_task,
-            {"subject": subject, "body": body, "recipients": recipients},
-        )
+        return DeferredSendEmailTask(subject=subject, body=body, recipients=recipients)
 
 
 @register

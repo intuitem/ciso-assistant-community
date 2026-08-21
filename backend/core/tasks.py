@@ -1,4 +1,5 @@
 from collections import defaultdict
+from contextlib import nullcontext
 from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task
@@ -675,12 +676,19 @@ def send_notification_email_expired_eta(owner_email, controls):
         )
 
 
-def send_email_now(subject, message, recipient, html_message=None, connection=None):
-    """Synchronous send that propagates failures to the caller, unlike the
-    fire-and-forget send_notification_email task. Pass `connection` to batch
-    several sends over one SMTP session (the caller owns its lifecycle)."""
-    from contextlib import nullcontext
+def send_email_now(
+    subject: str,
+    message: str,
+    recipient: str,
+    html_message: str | None = None,
+    connection=None,
+) -> None:
+    """Synchronous send that propagates failures to the caller. Pass
+    `connection` to batch several sends over one SMTP session (the caller
+    owns its lifecycle).
 
+    Raises RuntimeError when the backend reports the message unsent;
+    connection/backend exceptions propagate as-is."""
     if connection is None:
         ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
         scope = get_connection(ssl_context=ssl_context)
@@ -727,16 +735,16 @@ def send_notification_email(subject, message, owner_email, html_message=None):
         )
 
 
-def missing_email_settings():
-    # The console backend (MAIL_DEBUG) never opens an SMTP connection, so
-    # EMAIL_HOST/EMAIL_PORT only bind when the backend would use them.
+def get_missing_email_settings() -> list[str]:
+    """Names of the email settings that are required but unset; empty when
+    email can be sent. The console backend (MAIL_DEBUG) never opens an SMTP
+    connection, so EMAIL_HOST/EMAIL_PORT are only required for the other
+    backends."""
     required_settings = ["EMAIL_HOST", "EMAIL_PORT", "DEFAULT_FROM_EMAIL"]
     if getattr(settings, "EMAIL_BACKEND", "").endswith("console.EmailBackend"):
         required_settings = ["DEFAULT_FROM_EMAIL"]
     return [
-        setting
-        for setting in required_settings
-        if not hasattr(settings, setting) or not getattr(settings, setting)
+        setting for setting in required_settings if not getattr(settings, setting, None)
     ]
 
 
@@ -750,7 +758,7 @@ def check_email_configuration(owner_email, controls):
         )
         return False
 
-    missing_settings = missing_email_settings()
+    missing_settings = get_missing_email_settings()
 
     if missing_settings:
         error_msg = f"Cannot send email notification: Missing email settings: {', '.join(missing_settings)}"

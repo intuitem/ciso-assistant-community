@@ -1,5 +1,19 @@
+import structlog
+from auditlog.models import LogEntry
+from django.conf import settings
+from django.core.mail import get_connection
+from django.db import transaction
+from django.utils import timezone
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task, db_task
+
+from core.tasks import send_email_now
+
+# .engine / .models / .scheduling / .events imports stay function-scoped:
+# engine (via actions) imports this module, so top-level imports would be
+# circular.
+
+logger = structlog.get_logger(__name__)
 
 
 @db_task()
@@ -14,8 +28,6 @@ def run_instance_task(instance_id):
 
 @db_task()
 def retry_token_task(token_id):
-    from django.utils import timezone
-
     from .engine import run_instance
     from .models import WorkflowToken
 
@@ -32,23 +44,17 @@ def retry_token_task(token_id):
 
 
 @db_task()
-def send_email_task(token_id, subject, body, recipients):
+def send_email_task(
+    token_id: str, subject: str, body: str, recipients: list[str]
+) -> None:
     """Deliver a send_email action's mail and hand the token back to the
     engine. Runs outside any engine transaction so SMTP I/O never blocks the
     instance-tree locks. Best-effort across recipients (one dead address must
     not starve the rest); any failure fails the node so the per-node retry
     policy applies — a retry re-sends to every recipient, including the ones
     already served, accepted over losing the failed ones."""
-    import structlog
-    from django.conf import settings
-    from django.core.mail import get_connection
-
-    from core.tasks import send_email_now
-
     from .engine import complete_deferred_action, fail_deferred_action
     from .models import WorkflowToken
-
-    logger = structlog.get_logger(__name__)
 
     token = (
         WorkflowToken.objects.select_related("instance")
@@ -115,8 +121,6 @@ def reap_timed_out_runs():
     _run covers sync + resumed runs; this catches runs parked WAITING on an
     event/subprocess that never resumes — they never re-enter _run on their
     own. Needs the Huey worker running (same as scheduled triggers)."""
-    from django.db import transaction
-
     from .engine import _is_over_ttl, _lock_instance_tree, _timeout_instance
     from .models import WorkflowInstance
 
@@ -138,8 +142,6 @@ def reap_timed_out_runs():
 
 @db_task()
 def dispatch_internal_event_task(log_entry_id, origin_depth=0):
-    from auditlog.models import LogEntry
-
     from .events import dispatch_internal_event, payload_from_log_entry
 
     log_entry = (

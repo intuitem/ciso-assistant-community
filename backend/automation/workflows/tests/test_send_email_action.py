@@ -1,6 +1,6 @@
 """send_email action: delivery failures must fail the node.
 
-Delivery is dispatched to a huey task (DeferredDispatch): the engine parks
+Delivery is dispatched to a huey task (DeferredSendEmailTask): the engine parks
 the token WAITING and the task sends outside the engine transaction, so SMTP
 I/O never runs while the instance-tree locks are held. The task hands the
 token back — success advances the run, any delivery failure fails the node
@@ -18,6 +18,7 @@ from django.core import mail
 
 from global_settings.models import GlobalSettings
 from iam.models import Folder
+from automation.workflows import actions as workflow_actions
 from automation.workflows import tasks as workflow_tasks
 from automation.workflows.engine import start_instance
 from automation.workflows.graph import save_graph
@@ -84,8 +85,10 @@ def dispatch(monkeypatch):
     run(i) executes the captured task body synchronously."""
     captured = []
     deliver = workflow_tasks.send_email_task.call_local
+    # DeferredSendEmailTask binds send_email_task from the actions module,
+    # so that binding is the one to patch.
     monkeypatch.setattr(
-        workflow_tasks, "send_email_task", lambda **kwargs: captured.append(kwargs)
+        workflow_actions, "send_email_task", lambda **kwargs: captured.append(kwargs)
     )
 
     class Dispatch:
@@ -235,7 +238,7 @@ class TestSendEmail:
         ):
             raise ConnectionRefusedError("connection refused")
 
-        monkeypatch.setattr("core.tasks.send_email_now", broken_send)
+        monkeypatch.setattr("automation.workflows.tasks.send_email_now", broken_send)
         version = email_flow({"recipients": "a@tests.local", "subject": "S"})
         with django_capture_on_commit_callbacks(execute=True):
             instance = start_instance(version)
@@ -260,7 +263,7 @@ class TestSendEmail:
                 raise ConnectionRefusedError("mailbox gone")
             return real_send(subject, message, recipient, html_message, connection)
 
-        monkeypatch.setattr("core.tasks.send_email_now", flaky)
+        monkeypatch.setattr("automation.workflows.tasks.send_email_now", flaky)
         version = email_flow(
             {
                 "recipients": "a@tests.local, gone@tests.local, c@tests.local",
@@ -305,7 +308,7 @@ class TestSendEmail:
                 raise ConnectionRefusedError("connection refused")
             return real_send(subject, message, recipient, html_message, connection)
 
-        monkeypatch.setattr("core.tasks.send_email_now", flaky)
+        monkeypatch.setattr("automation.workflows.tasks.send_email_now", flaky)
 
         with django_capture_on_commit_callbacks(execute=True):
             instance = start_instance(version)

@@ -8,6 +8,7 @@ as `waiting`; everything else executes and advances in the same call.
 
 import contextvars
 import re
+from collections.abc import Callable
 from datetime import date, timedelta
 
 from django.db import transaction
@@ -15,7 +16,8 @@ from django.utils import timezone
 
 from .actions import (
     ActionError,
-    DeferredDispatch,
+    DeferredTask,
+    FatalActionError,
     _read_scope_folder_ids,
     _render_context,
     dig,
@@ -312,10 +314,13 @@ def resume_token(token):
         _run(instance)
 
 
-def complete_deferred_action(token, output):
-    """A deferred action's task reports success: persist the output, log the
-    execution and advance — the WAITING re-check under the tree lock makes
-    duplicate task deliveries and operator interference no-ops."""
+def _resume_deferred(
+    token: WorkflowToken, on_resume: Callable[[WorkflowInstance], None]
+) -> None:
+    """Shared scaffolding for a deferred action's task handing its token
+    back: run `on_resume` then the instance under the tree lock and the
+    instance's trigger depth. The WAITING re-check makes duplicate task
+    deliveries and operator interference no-ops."""
     depth_token = current_trigger_depth.set(token.instance.trigger_depth)
     try:
         with transaction.atomic():
@@ -324,39 +329,42 @@ def complete_deferred_action(token, output):
             if token.status != WorkflowToken.Status.WAITING:
                 return
             token.instance = instance
-            node = token.current_node
-            _persist_node_output(node, output, instance)
-            _log(
-                instance,
-                WorkflowInstanceLog.EventType.ACTION_EXECUTED,
-                node=node,
-                message=(node.action_config or {}).get("type", ""),
-                data=_truncate_log_data(output),
-            )
-            _advance(token)
+            on_resume(instance)
             _run(instance)
     finally:
         current_trigger_depth.reset(depth_token)
 
 
-def fail_deferred_action(token, message):
+def complete_deferred_action(token: WorkflowToken, output: dict) -> None:
+    """A deferred action's task reports success: persist the output, log the
+    execution and advance."""
+
+    def on_resume(instance):
+        node = token.current_node
+        _persist_node_output(node, output, instance)
+        _log(
+            instance,
+            WorkflowInstanceLog.EventType.ACTION_EXECUTED,
+            node=node,
+            message=(node.action_config or {}).get("type", ""),
+            data=_truncate_log_data(output),
+        )
+        _advance(token)
+
+    _resume_deferred(token, on_resume)
+
+
+def fail_deferred_action(token: WorkflowToken, message: str) -> None:
     """A deferred action's task reports failure: route through the node's
     retry policy exactly like a synchronous ActionError (mirrors the failed
     async-subprocess path in _refresh_status)."""
-    depth_token = current_trigger_depth.set(token.instance.trigger_depth)
-    try:
-        with transaction.atomic():
-            instance = _lock_instance_tree(token.instance_id)
-            token.refresh_from_db()
-            if token.status != WorkflowToken.Status.WAITING:
-                return
-            token.instance = instance
-            token.status = WorkflowToken.Status.ACTIVE
-            token.save(update_fields=["status", "updated_at"])
-            _handle_failure(token, message)
-            _run(instance)
-    finally:
-        current_trigger_depth.reset(depth_token)
+
+    def on_resume(instance):
+        token.status = WorkflowToken.Status.ACTIVE
+        token.save(update_fields=["status", "updated_at"])
+        _handle_failure(token, message)
+
+    _resume_deferred(token, on_resume)
 
 
 def _reopen(instance):
@@ -579,8 +587,8 @@ def _process(token):
                 if node.type == WorkflowNode.Type.ACTION:
                     config = node.action_config or {}
                     output = execute_action(node, instance) or {}
-                    if isinstance(output, DeferredDispatch):
-                        _defer_action(token, output)
+                    if isinstance(output, DeferredTask):
+                        output.dispatch(token)
                         return
                     _persist_node_output(node, output, instance)
                     _log(
@@ -601,9 +609,11 @@ def _process(token):
                     return
 
                 _advance(token)
+            except FatalActionError as e:
+                failure = str(e)
+                failure_retryable = False
             except (ActionError, EngineError) as e:
                 failure = str(e)
-                failure_retryable = getattr(e, "retryable", True)
     except Exception as e:  # noqa: BLE001 — a buggy action must not 500 the request
         failure = f"{type(e).__name__}: {e}"
     if failure is not None:
@@ -674,25 +684,6 @@ def _handle_failure(token, message, retryable=True):
     transaction.on_commit(
         lambda: retry_token_task.schedule(args=(token_id,), delay=delay)
     )
-
-
-def _defer_action(token, dispatch):
-    """Park the token and enqueue the action's side-effecting task after
-    commit, so network I/O never runs while the engine transaction holds the
-    instance-tree locks. The task hands the token back through
-    complete_deferred_action / fail_deferred_action. If the worker dies
-    before that, the token stays WAITING until the run's TTL reaper collects
-    it — the same exposure as an async subprocess wait. No dedicated log row
-    (a new event type would cost a migration): NODE_ENTERED is already
-    written, and the ACTION_EXECUTED/ERROR row lands when the task reports.
-    """
-    token.status = WorkflowToken.Status.WAITING
-    token.save(update_fields=["status", "updated_at"])
-    # on_commit: the WAITING row must be visible before the consumer runs, or
-    # a fast worker finds an ACTIVE token and drops the dispatch.
-    kwargs = {"token_id": str(token.id), **dispatch.kwargs}
-    task = dispatch.task
-    transaction.on_commit(lambda: task(**kwargs))
 
 
 LOOP_MAX_ITEMS = 100
