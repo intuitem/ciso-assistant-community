@@ -10,7 +10,7 @@ def grandfather_existing_scim_users(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("iam", "0026_delete_cacheversion"),
+        ("iam", "0027_cleanup_stray_domain_iam_groups"),
     ]
     operations = [
         migrations.RunPython(
