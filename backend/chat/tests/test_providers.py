@@ -137,10 +137,11 @@ class TestStubLLM:
         assert token_type == "token"
         assert "context" in content
 
-    def test_tool_call_returns_none(self):
+        def test_tool_call_returns_none(self):
         from chat.providers import StubLLM
 
         assert StubLLM().tool_call("prompt", []) is None
+
 
 class TestBuildMessages:
     def test_context_is_merged_into_initial_system_message(self):
