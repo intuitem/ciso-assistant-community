@@ -5,6 +5,7 @@ is the explicit replacement at the call sites that matter to workflows."""
 import uuid
 
 import pytest
+from django.db import transaction
 from django.utils import timezone
 from rest_framework.test import APIRequestFactory, force_authenticate
 
@@ -12,12 +13,14 @@ from core.models import AppliedControl, Severity, Vulnerability
 from iam.models import Folder
 from automation.workflows.engine import current_trigger_depth
 from automation.workflows.events import (
+    MAX_TRIGGER_DEPTH,
     dispatch_internal_event,
     emit_bulk_events,
+    payload_from_log_entry,
     snapshot_for_bulk_events,
 )
 from automation.workflows.graph import save_graph
-from automation.workflows.models import Workflow, WorkflowVersion
+from automation.workflows.models import Workflow, WorkflowTrigger, WorkflowVersion
 from automation.workflows.tests.helpers import publisher_user
 
 
@@ -204,6 +207,74 @@ class TestBulkEventSeam:
     def test_none_snapshot_is_a_noop(self):
         emit_bulk_events(None)
 
+    def test_rollback_drops_the_emit(
+        self, capture_bulk, django_capture_on_commit_callbacks
+    ):
+        make_workflow("appliedcontrol.updated")
+        control = AppliedControl.objects.create(
+            name="C", folder=Folder.get_root_folder(), status="to_do"
+        )
+        queryset = AppliedControl.objects.filter(pk=control.pk)
+        with django_capture_on_commit_callbacks(execute=True):
+            with pytest.raises(RuntimeError):
+                with transaction.atomic():
+                    snapshot = snapshot_for_bulk_events(queryset, ["status"])
+                    queryset.update(status="active")
+                    emit_bulk_events(snapshot)
+                    raise RuntimeError("abort the write")
+        assert capture_bulk == []
+
+    def test_bulk_payload_matches_auditlog_payload(
+        self, capture_bulk, django_capture_on_commit_callbacks
+    ):
+        """Same change through both producers must yield the same payload
+        (minus actor/timestamp/object identity), so auditlog format drift in
+        `changes` values gets caught here."""
+        from auditlog.models import LogEntry
+
+        make_workflow("appliedcontrol.updated")
+        control = AppliedControl.objects.create(
+            name="Same repr", folder=Folder.get_root_folder(), status="to_do"
+        )
+        queryset = AppliedControl.objects.filter(pk=control.pk)
+
+        # Same object, same to_do -> active transition through both producers;
+        # the silent revert in between bypasses signals by design.
+        with django_capture_on_commit_callbacks(execute=True):
+            snapshot = snapshot_for_bulk_events(queryset, ["status"])
+            queryset.update(status="active")
+            emit_bulk_events(snapshot)
+        bulk_payload = capture_bulk[0][0]
+
+        queryset.update(status="to_do")
+        control.refresh_from_db()
+        control.status = "active"
+        control.save()
+        log_entry = (
+            LogEntry.objects.filter(
+                object_pk=str(control.pk), action=LogEntry.Action.UPDATE
+            )
+            .order_by("-timestamp")
+            .first()
+        )
+        assert log_entry is not None
+        auditlog_payload = payload_from_log_entry(log_entry)
+
+        # save() also recomputes progress_field as a side effect, so compare
+        # the diff maps on the shared field only; everything else must be
+        # byte-identical.
+        excluded = {"actor_email", "timestamp", "changes", "new_values"}
+        assert {k: v for k, v in bulk_payload.items() if k not in excluded} == {
+            k: v for k, v in auditlog_payload.items() if k not in excluded
+        }
+        assert (
+            bulk_payload["changes"]["status"] == auditlog_payload["changes"]["status"]
+        )
+        assert (
+            bulk_payload["new_values"]["status"]
+            == auditlog_payload["new_values"]["status"]
+        )
+
 
 @pytest.mark.django_db
 class TestBulkEventEndToEnd:
@@ -320,3 +391,63 @@ class TestBulkEventEndToEnd:
         assert response.status_code == 200
         assert response.data["updated"] == 1
         assert len(capture_runs) == 1, dispatch_bulk_inline
+
+    def test_validation_acceptance_lock_fires_compliance_trigger(
+        self, dispatch_bulk_inline, capture_runs, django_capture_on_commit_callbacks
+    ):
+        from core.models import (
+            ComplianceAssessment,
+            Framework,
+            Perimeter,
+            ValidationFlow,
+        )
+        from core.serializers import ValidationFlowWriteSerializer
+
+        domain = make_domain("Bulk domain lock")
+        framework = Framework.objects.create(
+            name="FW", urn="urn:test:bulk:lockfw", folder=Folder.get_root_folder()
+        )
+        perimeter = Perimeter.objects.create(name="P", folder=domain)
+        assessment = ComplianceAssessment.objects.create(
+            name="Audit", framework=framework, perimeter=perimeter, folder=domain
+        )
+        flow = ValidationFlow.objects.create(folder=domain)
+        flow.compliance_assessments.add(assessment)
+        make_workflow(
+            "complianceassessment.updated",
+            filters={
+                "operator": "and",
+                "conditions": [
+                    {"field": "is_locked", "op": "eq", "value": "True", "changed": True}
+                ],
+            },
+            folder=domain,
+        )
+
+        with django_capture_on_commit_callbacks(execute=True):
+            ValidationFlowWriteSerializer()._manage_associated_objects_lock(
+                flow, "submitted", "accepted"
+            )
+        assert len(capture_runs) == 1
+
+    def test_bulk_event_chain_stops_at_depth_cap(
+        self, dispatch_bulk_inline, capture_runs, django_capture_on_commit_callbacks
+    ):
+        """A bulk write performed by a run already at MAX_TRIGGER_DEPTH must
+        not start another instance — same containment as the CUD producer."""
+        workflow = make_workflow("appliedcontrol.updated")
+        control = AppliedControl.objects.create(
+            name="C", folder=Folder.get_root_folder(), status="to_do"
+        )
+        queryset = AppliedControl.objects.filter(pk=control.pk)
+        token = current_trigger_depth.set(MAX_TRIGGER_DEPTH)
+        try:
+            with django_capture_on_commit_callbacks(execute=True):
+                snapshot = snapshot_for_bulk_events(queryset, ["status"])
+                queryset.update(status="active")
+                emit_bulk_events(snapshot)
+        finally:
+            current_trigger_depth.reset(token)
+        assert capture_runs == []
+        trigger = workflow.triggers.get(node_ref="on_event")
+        assert trigger.last_result == WorkflowTrigger.Result.SKIPPED_DEPTH
