@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("automation", "0003_workflow_engine"),
+        ("automation", "0004_alter_workflowtoken_status"),
     ]
 
     operations = [
