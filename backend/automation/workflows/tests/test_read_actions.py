@@ -2,9 +2,11 @@
 folder's subtree, filter-tree compilation, modes, and publish validation."""
 
 import uuid
-from datetime import date
+import warnings
+from datetime import date, timedelta
 
 import pytest
+from django.utils import timezone
 
 from core.models import AppliedControl, Incident
 from iam.models import Folder
@@ -451,7 +453,7 @@ class TestTimeContext:
 
 @pytest.mark.django_db
 class TestWindowOperators:
-    def _window_flow(self, domain, op, value):
+    def _window_flow(self, domain, op, value, field="eta"):
         return read_flow(
             domain,
             {
@@ -459,7 +461,7 @@ class TestWindowOperators:
                 "mode": "list",
                 "filters": {
                     "operator": "and",
-                    "conditions": [{"field": "eta", "op": op, "value": value}],
+                    "conditions": [{"field": field, "op": op, "value": value}],
                 },
             },
         )
@@ -521,14 +523,57 @@ class TestWindowOperators:
         instance = start_with_seeds(version, {"days": "-3"})
         assert instance.status != WorkflowInstance.Status.COMPLETED
 
+    def test_within_next_days_zero_on_datetime_column_matches_today(self):
+        domain = make_domain("Domain datetime window")
+        AppliedControl.objects.create(name="Fresh", folder=domain)
+        version = self._window_flow(domain, "within_next_days", 0, field="created_at")
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", RuntimeWarning)
+            instance = start_with_seeds(
+                version, {"today": timezone.localdate().isoformat()}
+            )
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        output = read_output(instance)
+        assert [row["name"] for row in output["results"]] == ["Fresh"]
+
+    def test_older_than_days_on_datetime_column(self):
+        domain = make_domain("Domain stale datetime")
+        stale = AppliedControl.objects.create(name="Stale", folder=domain)
+        AppliedControl.objects.create(name="Fresh", folder=domain)
+        # auto_now_add can't be set at create time; backdate the bulk way.
+        AppliedControl.objects.filter(pk=stale.pk).update(
+            created_at=timezone.now() - timedelta(days=40)
+        )
+        version = self._window_flow(domain, "older_than_days", 30, field="created_at")
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", RuntimeWarning)
+            instance = start_with_seeds(
+                version, {"today": timezone.localdate().isoformat()}
+            )
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        output = read_output(instance)
+        assert [row["name"] for row in output["results"]] == ["Stale"]
+
+    def test_huge_day_count_fails_cleanly(self):
+        domain = make_domain("Domain huge days")
+        version = self._window_flow(domain, "within_next_days", "{{days}}")
+        instance = start_with_seeds(version, {"days": "9999999999"})
+        assert instance.status != WorkflowInstance.Status.COMPLETED
+        assert any(
+            "at most" in (log.message or "")
+            for log in instance.logs.filter(event_type="error")
+        )
+
     def test_publish_validation_of_window_values(self):
         domain = make_domain("Domain window publish")
         for value, expect_error in [
             (7, False),
             ("7", False),
+            (10000, False),
             ("{{lookahead}}", False),
             ("soon", True),
             (-3, True),
+            ("9999999999", True),
         ]:
             version = self._window_flow(domain, "within_next_days", value)
             read_node = version.nodes.get(type=WorkflowNode.Type.ACTION)

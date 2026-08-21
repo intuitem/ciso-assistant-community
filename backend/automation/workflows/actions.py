@@ -11,8 +11,8 @@ import re
 import uuid
 from urllib.parse import urlsplit
 
-from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.core.exceptions import FieldDoesNotExist, ValidationError
+from django.db.models import DateTimeField, Q
 from django.utils import timezone
 
 from core.models import (
@@ -403,6 +403,10 @@ _READ_OP_LOOKUPS = {
 # payloads, where a per-run anchor date does not exist.
 READ_WINDOW_OPS = ("within_next_days", "older_than_days")
 
+# Caps the window size so a bad day count fails cleanly instead of
+# overflowing timedelta (~27 years is far beyond any real sweep).
+MAX_WINDOW_DAYS = 10000
+
 
 def _window_anchor(context):
     """The run's frozen `today` (seeded by create_instance); local date as
@@ -417,14 +421,20 @@ def _window_anchor(context):
 
 
 def _is_static_day_count(value):
-    """Publish-time check for window-operator values: a non-negative integer,
-    a digit string, or a template that can only be checked at run time."""
+    """Publish-time check for window-operator values: an integer or digit
+    string within [0, MAX_WINDOW_DAYS], or a template that can only be
+    checked at run time."""
     if isinstance(value, bool):
         return False
     if isinstance(value, int):
-        return value >= 0
-    return isinstance(value, str) and (
-        "{{" in value or re.fullmatch(r"\d+", value.strip()) is not None
+        return 0 <= value <= MAX_WINDOW_DAYS
+    if not isinstance(value, str):
+        return False
+    if "{{" in value:
+        return True
+    stripped = value.strip()
+    return (
+        re.fullmatch(r"\d+", stripped) is not None and int(stripped) <= MAX_WINDOW_DAYS
     )
 
 
@@ -435,10 +445,28 @@ def _window_days(op, value):
         raise ActionError(f"read_objects: '{op}' needs a whole number of days")
     if days < 0:
         raise ActionError(f"read_objects: '{op}' needs a non-negative number of days")
+    if days > MAX_WINDOW_DAYS:
+        raise ActionError(
+            f"read_objects: '{op}' supports at most {MAX_WINDOW_DAYS} days"
+        )
     return days
 
 
-def _read_condition_to_q(condition, allowed_fields, context):
+def _day_start(day):
+    """Aware midnight of `day` in the active timezone, so windows over
+    DateTimeField columns compare cleanly (no naive-datetime coercion)."""
+    return timezone.make_aware(datetime.datetime.combine(day, datetime.time.min))
+
+
+def _is_datetime_column(model, field_name):
+    try:
+        field = model._meta.get_field(field_name)
+    except FieldDoesNotExist:
+        return False
+    return isinstance(field, DateTimeField)
+
+
+def _read_condition_to_q(condition, allowed_fields, context, model):
     field = condition.get("field")
     if field not in allowed_fields:
         raise ActionError(f"read_objects: '{field}' is not a filterable field")
@@ -446,6 +474,21 @@ def _read_condition_to_q(condition, allowed_fields, context):
     if op in READ_WINDOW_OPS:
         days = _window_days(op, render(condition.get("value"), context))
         anchor = _window_anchor(context)
+        if _is_datetime_column(model, field):
+            # Aware midnight bounds; upper bound exclusive at midnight of
+            # day N+1 so all of day N is inside the window.
+            if op == "within_next_days":
+                return Q(
+                    **{
+                        f"{field}__gte": _day_start(anchor),
+                        f"{field}__lt": _day_start(
+                            anchor + datetime.timedelta(days=days + 1)
+                        ),
+                    }
+                )
+            return Q(
+                **{f"{field}__lt": _day_start(anchor - datetime.timedelta(days=days))}
+            )
         if op == "within_next_days":
             return Q(
                 **{
@@ -478,14 +521,14 @@ def _read_condition_to_q(condition, allowed_fields, context):
     return ~query if op == "neq" else query
 
 
-def _read_group_to_q(group, allowed_fields, context):
+def _read_group_to_q(group, allowed_fields, context, model):
     operator = group.get("operator", "and")
     parts = [
-        _read_condition_to_q(condition, allowed_fields, context)
+        _read_condition_to_q(condition, allowed_fields, context, model)
         for condition in group.get("conditions", [])
     ]
     parts += [
-        _read_group_to_q(child, allowed_fields, context)
+        _read_group_to_q(child, allowed_fields, context, model)
         for child in group.get("children", [])
     ]
     if not parts:
@@ -502,10 +545,10 @@ def _read_group_to_q(group, allowed_fields, context):
     return ~combined if operator == "not" else combined
 
 
-def _read_filters_to_q(tree, allowed_fields, context):
+def _read_filters_to_q(tree, allowed_fields, context, model):
     if tree in (None, {}):
         return Q()
-    return _read_group_to_q(tree, allowed_fields, context)
+    return _read_group_to_q(tree, allowed_fields, context, model)
 
 
 def _serialize_read_row(obj, fields, computed=None):
@@ -535,7 +578,9 @@ class ReadObjectsAction(BaseAction):
             raise ActionError(f"read_objects: unknown model '{config.get('model')}'")
         fields = BASE_READ_FIELDS + entry["fields"]
         context = _render_context(instance)
-        query = _read_filters_to_q(config.get("filters"), set(fields), context)
+        query = _read_filters_to_q(
+            config.get("filters"), set(fields), context, entry["model"]
+        )
 
         order_by = config.get("order_by") or "-created_at"
         if order_by.lstrip("-") not in fields:
@@ -1008,7 +1053,8 @@ def validate_read_config(node):
                 errors.append(
                     (
                         "action_read_invalid_filters",
-                        f"'{condition.get('op')}' needs a whole number of days",
+                        f"'{condition.get('op')}' needs a whole number of days"
+                        f" (0-{MAX_WINDOW_DAYS})",
                     )
                 )
 
