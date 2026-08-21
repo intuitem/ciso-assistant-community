@@ -523,6 +523,12 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         if value_changed:
             instance.value = current_value_dict
             instance.save(update_fields=["value"])
+            # Every flags write must invalidate the read cache; the only other
+            # write path is PresetExecutor._apply_feature_flags, which does
+            # the same. Local import: utils imports this module at load time.
+            from global_settings.utils import clear_feature_flags_cache
+
+            clear_feature_flags_cache()
 
         return instance
 
