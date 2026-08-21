@@ -62,7 +62,7 @@ class DeferredTask:
 
     def __init__(self, task: Callable[..., None], **kwargs):
         """`task` is a huey task called after commit with `kwargs` plus the
-        parked token's id as `token_id`."""
+        parked token's id as `token_id` and its claim as `dispatch_id`."""
         self.task = task
         self.kwargs = kwargs
 
@@ -73,12 +73,21 @@ class DeferredTask:
         async subprocess wait. No dedicated log row (a new event type would
         cost a migration): NODE_ENTERED is already written, and the
         ACTION_EXECUTED/ERROR row lands when the task reports."""
+        dispatch_id = uuid.uuid4()
         token.status = WorkflowToken.Status.WAITING
-        token.save(update_fields=["status", "updated_at"])
+        # dispatch_id is the claim the task CASes on: only the delivery that
+        # clears it runs the side effect, so a duplicate huey delivery is a
+        # no-op rather than a second send.
+        token.dispatch_id = dispatch_id
+        token.save(update_fields=["status", "dispatch_id", "updated_at"])
         # on_commit: the WAITING row must be visible before the consumer
         # runs, or a fast worker finds an ACTIVE token and drops the dispatch.
         task = self.task
-        kwargs = {"token_id": str(token.id), **self.kwargs}
+        kwargs = {
+            "token_id": str(token.id),
+            "dispatch_id": str(dispatch_id),
+            **self.kwargs,
+        }
         transaction.on_commit(lambda: task(**kwargs))
 
 

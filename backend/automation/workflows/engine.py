@@ -314,6 +314,22 @@ def resume_token(token):
         _run(instance)
 
 
+def claim_deferred_action(token_id: str, dispatch_id: str) -> WorkflowToken | None:
+    """Exclusive claim on a parked token's dispatch, returning None when
+    another delivery already took it. Same CAS pattern as retry_token_task:
+    huey may deliver a task twice, and a read-then-act window would let both
+    deliveries run the side effect. The token stays WAITING while in flight,
+    so _run never picks it up mid-delivery."""
+    claimed = WorkflowToken.objects.filter(
+        id=token_id,
+        status=WorkflowToken.Status.WAITING,
+        dispatch_id=dispatch_id,
+    ).update(dispatch_id=None)
+    if not claimed:
+        return None
+    return WorkflowToken.objects.select_related("instance").get(id=token_id)
+
+
 def _resume_deferred(
     token: WorkflowToken, on_resume: Callable[[WorkflowInstance], None]
 ) -> None:

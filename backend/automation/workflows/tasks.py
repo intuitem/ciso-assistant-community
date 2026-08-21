@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import structlog
 from auditlog.models import LogEntry
 from django.conf import settings
@@ -45,7 +47,7 @@ def retry_token_task(token_id):
 
 @db_task()
 def send_email_task(
-    token_id: str, subject: str, body: str, recipients: list[str]
+    token_id: str, dispatch_id: str, subject: str, body: str, recipients: list[str]
 ) -> None:
     """Deliver a send_email action's mail and hand the token back to the
     engine. Runs outside any engine transaction so SMTP I/O never blocks the
@@ -53,18 +55,16 @@ def send_email_task(
     not starve the rest); any failure fails the node so the per-node retry
     policy applies — a retry re-sends to every recipient, including the ones
     already served, accepted over losing the failed ones."""
-    from .engine import complete_deferred_action, fail_deferred_action
-    from .models import WorkflowToken
-
-    token = (
-        WorkflowToken.objects.select_related("instance")
-        .filter(id=token_id, status=WorkflowToken.Status.WAITING)
-        .first()
+    from .engine import (
+        claim_deferred_action,
+        complete_deferred_action,
+        fail_deferred_action,
     )
+
+    token = claim_deferred_action(token_id, dispatch_id)
     if token is None:
         # Duplicate huey delivery, or an operator/reaper moved the token
-        # meanwhile. complete/fail re-check WAITING under the tree lock, so
-        # this unlocked pre-check only exists to avoid sending mail twice.
+        # meanwhile. The claim is exclusive, so no mail goes out twice.
         return
 
     sent, failed = [], []
@@ -85,27 +85,49 @@ def send_email_task(
                         "send_email action delivery failure",
                         recipient=email,
                         instance_id=str(token.instance_id),
-                        error=str(e),
+                        error=e,
                     )
                     failed.append(email)
+                    # A transport-level failure leaves the shared handle
+                    # dead, and Django's open() short-circuits on a non-None
+                    # connection — every later recipient would fail on the
+                    # same socket. Recycle it so one bad send cannot starve
+                    # the rest.
+                    connection.close()
+                    connection.open()
     except Exception as e:
-        # The connection itself failed to open or close; recipients not
-        # already attempted never got their mail.
+        # The connection itself failed to open, recycle or close; recipients
+        # not already attempted never got their mail.
         logger.error(
             "send_email action connection failure",
             instance_id=str(token.instance_id),
-            error=str(e),
+            error=e,
         )
         failed += [r for r in recipients if r not in sent and r not in failed]
 
-    if failed:
-        fail_deferred_action(
-            token,
-            f"send_email: delivery failed for {', '.join(failed)}"
-            f" ({len(sent)} of {len(recipients)} sent)",
+    try:
+        if failed:
+            fail_deferred_action(
+                token,
+                f"send_email: delivery failed for {', '.join(failed)}"
+                f" ({len(sent)} of {len(recipients)} sent)",
+            )
+        else:
+            complete_deferred_action(
+                token, {"recipients": recipients, "subject": subject}
+            )
+    except Exception as e:
+        # The mail is already out; a failed hand-back would otherwise leave
+        # the token WAITING with no trace of why. It still needs operator
+        # action, so make the run identifiable in the server log.
+        logger.error(
+            "send_email action hand-back failure",
+            token_id=str(token.id),
+            instance_id=str(token.instance_id),
+            delivered=len(sent),
+            error=e,
         )
-    else:
-        complete_deferred_action(token, {"recipients": recipients, "subject": subject})
+        raise
 
 
 @db_periodic_task(crontab(minute="*"))
@@ -138,6 +160,38 @@ def reap_timed_out_runs():
                 instance
             ):
                 _timeout_instance(instance)
+
+
+@db_periodic_task(crontab(minute="*/5"))
+def reap_undelivered_dispatches():
+    """Fail tokens parked on a deferred action that no worker ever claimed.
+    A dispatch_id still set past the bound means the enqueued task never ran
+    (worker down when it was dispatched, or dead before it claimed); the
+    token would otherwise stay WAITING for the life of the run. Claiming
+    first makes a late delivery a no-op instead of a double send."""
+    from .engine import claim_deferred_action, fail_deferred_action
+    from .models import WorkflowToken
+
+    cutoff = timezone.now() - timedelta(
+        seconds=settings.WORKFLOWS_DISPATCH_TIMEOUT_SECONDS
+    )
+    stale = WorkflowToken.objects.filter(
+        status=WorkflowToken.Status.WAITING,
+        dispatch_id__isnull=False,
+        updated_at__lt=cutoff,
+    ).values_list("id", "dispatch_id")
+    for token_id, dispatch_id in list(stale):
+        token = claim_deferred_action(str(token_id), str(dispatch_id))
+        if token is None:
+            continue
+        logger.error(
+            "deferred action was never delivered",
+            token_id=str(token_id),
+            instance_id=str(token.instance_id),
+        )
+        fail_deferred_action(
+            token, "deferred action was never delivered (no worker claimed it)"
+        )
 
 
 @db_task()

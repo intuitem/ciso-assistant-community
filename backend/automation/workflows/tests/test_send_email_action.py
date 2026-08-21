@@ -11,10 +11,13 @@ Huey is not immediate in tests: the `dispatch` fixture captures the enqueue
 and `dispatch.run()` executes the task body synchronously.
 """
 
+import smtplib
 import uuid
+from datetime import timedelta
 
 import pytest
 from django.core import mail
+from django.utils import timezone
 
 from global_settings.models import GlobalSettings
 from iam.models import Folder
@@ -360,3 +363,128 @@ class TestSendEmail:
         instance = start_instance(version)
         assert instance.status == WorkflowInstance.Status.FAILED
         assert any("no recipients configured" in m for m in error_messages(instance))
+
+    def test_concurrent_delivery_claims_are_exclusive(
+        self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
+    ):
+        # The token stays WAITING for the whole delivery, so a WAITING
+        # pre-check cannot tell a duplicate apart from the in-flight
+        # original: only the dispatch_id claim can. Freezing the hand-back
+        # reproduces the overlap without threads.
+        configure_smtp(settings)
+        monkeypatch.setattr(
+            "automation.workflows.engine.complete_deferred_action",
+            lambda token, output: None,
+        )
+        version = email_flow({"recipients": "a@tests.local", "subject": "S"})
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        dispatch.run()
+        token = instance.tokens.get(status=WorkflowToken.Status.WAITING)
+        assert token.dispatch_id is None  # claimed by the first delivery
+        dispatch.run()
+        assert len(mail.outbox) == 1
+
+    def test_dropped_connection_does_not_starve_later_recipients(
+        self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
+    ):
+        # Django's open() short-circuits on a non-None connection, so a
+        # dropped socket stays dead for every later recipient unless the
+        # task recycles it. This stands in for that backend behaviour.
+        configure_smtp(settings)
+
+        class DroppingConnection:
+            def __init__(self):
+                self.alive = True
+                self.delivered = []
+                self.reopened = 0
+
+            def open(self):
+                self.alive = True
+                self.reopened += 1
+                return True
+
+            def close(self):
+                self.alive = False
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc_info):
+                self.close()
+
+            def send_messages(self, messages):
+                if not self.alive:
+                    raise smtplib.SMTPServerDisconnected("connection dropped")
+                for message in messages:
+                    if "gone@tests.local" in message.to:
+                        self.alive = False
+                        raise smtplib.SMTPServerDisconnected("connection dropped")
+                    self.delivered.append(message.to[0])
+                return len(messages)
+
+        connection = DroppingConnection()
+        monkeypatch.setattr(
+            "automation.workflows.tasks.get_connection",
+            lambda **kwargs: connection,
+        )
+        version = email_flow(
+            {
+                "recipients": "a@tests.local, gone@tests.local, c@tests.local",
+                "subject": "S",
+            }
+        )
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        dispatch.run()
+        instance.refresh_from_db()
+        assert connection.reopened == 1
+        assert connection.delivered == ["a@tests.local", "c@tests.local"]
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert any(
+            "gone@tests.local" in m and "(2 of 3 sent)" in m
+            for m in error_messages(instance)
+        )
+
+    def test_undelivered_dispatch_is_swept_and_cannot_land_late(
+        self, settings, dispatch, django_capture_on_commit_callbacks
+    ):
+        # No worker ever claims the dispatch: without the sweep the token
+        # stays WAITING for the life of the run. The sweep takes the claim,
+        # so a worker coming back late finds nothing to deliver.
+        configure_smtp(settings)
+        settings.WORKFLOWS_DISPATCH_TIMEOUT_SECONDS = 900
+        version = email_flow({"recipients": "a@tests.local", "subject": "S"})
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        token = instance.tokens.get(status=WorkflowToken.Status.WAITING)
+        assert token.dispatch_id is not None
+        WorkflowToken.objects.filter(id=token.id).update(
+            updated_at=timezone.now() - timedelta(seconds=1800)
+        )
+
+        workflow_tasks.reap_undelivered_dispatches.call_local()
+
+        instance.refresh_from_db()
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert any("never delivered" in m for m in error_messages(instance))
+        dispatch.run()  # the late worker finds the claim already taken
+        assert mail.outbox == []
+
+    def test_sweep_leaves_a_fresh_dispatch_alone(
+        self, settings, dispatch, django_capture_on_commit_callbacks
+    ):
+        configure_smtp(settings)
+        settings.WORKFLOWS_DISPATCH_TIMEOUT_SECONDS = 900
+        version = email_flow({"recipients": "a@tests.local", "subject": "S"})
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+
+        workflow_tasks.reap_undelivered_dispatches.call_local()
+
+        instance.refresh_from_db()
+        assert instance.status == WorkflowInstance.Status.ACTIVE
+        dispatch.run()
+        instance.refresh_from_db()
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert len(mail.outbox) == 1
