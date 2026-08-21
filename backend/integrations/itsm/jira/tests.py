@@ -815,6 +815,30 @@ def test_list_paginates_with_cloud_page_tokens(mock_jira, mock_sync, configurati
 
 @patch("integrations.itsm.jira.client.SyncMapping")
 @patch("integrations.itsm.jira.client.JIRA")
+def test_list_deduplicates_issues_across_pages(mock_jira, mock_sync, configuration):
+    """Issues created mid-scan shift the created DESC pages, so a key can
+    show up on two consecutive pages; it must be returned once."""
+    mapped = [f"PROJ-{i}" for i in range(99)]
+    boundary = _fake_issue("PROJ-99", "99", "On both pages")
+    mock_jira.return_value.search_issues.side_effect = [
+        [_fake_issue(key, key.split("-")[1], "Mapped") for key in mapped] + [boundary],
+        [boundary]
+        + [_fake_issue(f"PROJ-{i}", str(i), f"Issue {i}") for i in range(100, 160)],
+    ]
+    mock_sync.objects.filter.return_value.values_list.return_value = mapped
+    mock_jira.return_value._is_cloud = False
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects({"limit": 51})
+
+    keys = [r["key"] for r in results]
+    assert len(keys) == 51
+    assert len(set(keys)) == 51
+    assert keys.count("PROJ-99") == 1
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
 def test_list_scan_budget_bounds_pagination(mock_jira, mock_sync, configuration):
     """Paging past mapped issues stops at MAX_LIST_FETCH scanned rows."""
     mapped = [f"PROJ-{i}" for i in range(1000)]

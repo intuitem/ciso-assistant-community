@@ -365,15 +365,20 @@ class JiraClient(BaseIntegrationClient):
         budget) runs out.
         """
         results: list[dict[str, Any]] = []
+        # Issues created mid-scan shift the created DESC pages, so a key can
+        # show up on two consecutive pages.
+        seen: set[str] = set()
         scanned = 0
         for page in self._iter_search_pages(jql):
             for issue in page:
                 scanned += 1
-                if issue.raw["key"] in used_issues:
+                key = issue.raw["key"]
+                if key in used_issues or key in seen:
                     continue
+                seen.add(key)
                 results.append(
                     {
-                        "key": issue.raw["key"],
+                        "key": key,
                         "id": issue.raw["id"],
                         "summary": issue.raw["fields"]["summary"],
                     }
