@@ -386,6 +386,56 @@ class TestM2MWrites:
         )
         assert control.evidences.count() == 0
 
+    def test_create_with_required_fk_still_works(self):
+        # _reject_non_scalar must run before the FK loop stores model
+        # instances into kwargs, or every FK-bearing create fails.
+        from core.models import Finding, FindingsAssessment, Perimeter
+
+        domain = make_domain("FK create domain")
+        perimeter = Perimeter.objects.create(name="P", folder=domain)
+        assessment = FindingsAssessment.objects.create(
+            name="FA", folder=domain, perimeter=perimeter
+        )
+        version = action_flow(
+            domain,
+            {
+                "type": "create_object",
+                "model": "finding",
+                "fields": {
+                    "name": "From workflow",
+                    "findings_assessment": str(assessment.id),
+                },
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        finding = Finding.objects.get(name="From workflow")
+        assert finding.findings_assessment == assessment
+
+    def test_set_with_unresolved_template_does_not_clear(self):
+        domain = make_domain("Set guard domain")
+        control = AppliedControl.objects.create(name="Ctl", folder=domain)
+        evidence = Evidence.objects.create(name="E", folder=domain)
+        control.evidences.add(evidence)
+        version = action_flow(
+            domain,
+            {
+                "type": "update_object",
+                "model": "applied_control",
+                "object_id": str(control.id),
+                "m2m": {
+                    "evidences": {
+                        "operation": "set",
+                        "ids": "{{payload.missing}}",
+                    }
+                },
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert any("resolved to no ids" in m for m in error_messages(instance))
+        assert set(control.evidences.all()) == {evidence}
+
     def test_bad_m2m_id_leaves_no_object_behind(self):
         # M2M targets resolve BEFORE the create: a failure here must not
         # persist a half-written object that every retry would duplicate.
@@ -496,6 +546,26 @@ class TestUpdatePermissionsAndValidation:
             }
         )
         assert codes == []
+
+    def test_malformed_relation_spec_is_an_error_not_a_crash(self):
+        codes = self._codes(
+            {
+                "model": "applied_control",
+                "object_id": "{{payload.object_id}}",
+                "m2m": {"evidences": "add"},
+            }
+        )
+        assert codes == ["action_update_invalid_relation"]
+
+    def test_literal_null_clear_fails_publish_like_empty_string(self):
+        codes = self._codes(
+            {
+                "model": "vulnerability",
+                "object_id": "{{payload.object_id}}",
+                "fields": {"status": None},
+            }
+        )
+        assert codes == ["action_update_invalid_value"]
 
     def test_bad_relation_and_operation(self):
         codes = self._codes(

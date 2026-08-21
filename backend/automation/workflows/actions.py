@@ -308,12 +308,18 @@ def _resolve_m2m(entry, config, instance, action_label):
             )
         target_model, _endpoint = allowed[field_name]
         spec = spec or {}
+        if not isinstance(spec, dict):
+            raise ActionError(
+                f"{action_label}: relation '{field_name}' must be an object "
+                "with 'operation' and 'ids'"
+            )
         operation = spec.get("operation", "add")
         if operation not in ("add", "remove", "set"):
             raise ActionError(
                 f"{action_label}: unknown relation operation '{operation}'"
             )
-        raw_ids = render(spec.get("ids", []), context)
+        configured_ids = spec.get("ids", [])
+        raw_ids = render(configured_ids, context)
         if isinstance(raw_ids, str):
             raw_ids = raw_ids.strip()
             if raw_ids.startswith("["):
@@ -350,6 +356,13 @@ def _resolve_m2m(entry, config, instance, action_label):
                         "this workflow's scope"
                     )
             targets.append(target)
+        if operation == "set" and not targets and configured_ids:
+            # A configured-but-unresolved template must not silently clear
+            # the whole relation; an explicit empty list stays a valid clear.
+            raise ActionError(
+                f"{action_label}: {field_name} 'set' resolved to no ids "
+                "(template rendered empty); pass an empty list to clear"
+            )
         resolved.append((field_name, operation, targets))
     return resolved
 
@@ -382,6 +395,10 @@ class CreateObjectAction(BaseAction):
             for key, value in fields.items()
             if key in entry["fields"] and value not in ("", None)
         }
+        # Scalar-only here by construction (FK names are never in
+        # entry["fields"]); must run BEFORE the FK loop stores model
+        # instances into kwargs.
+        _reject_non_scalar(kwargs, "create_object")
         if not kwargs.get("name") and not config.get("upsert"):
             raise ActionError("create_object: 'name' is required")
 
@@ -406,7 +423,6 @@ class CreateObjectAction(BaseAction):
                     )
             kwargs[fk_name] = target
 
-        _reject_non_scalar(kwargs, "create_object")
         _validate_choice_values(entry["model"], kwargs, "create_object")
         resolved_m2m = _resolve_m2m(entry, config, instance, "create_object")
 
@@ -1236,6 +1252,15 @@ def _m2m_config_errors(entry, config, code_prefix):
                 )
             )
             continue
+        if spec is not None and not isinstance(spec, dict):
+            errors.append(
+                (
+                    f"{code_prefix}_invalid_relation",
+                    f"Relation '{field_name}' must be an object with "
+                    "'operation' and 'ids'",
+                )
+            )
+            continue
         operation = (spec or {}).get("operation", "add")
         if operation not in ("add", "remove", "set"):
             errors.append(
@@ -1311,7 +1336,7 @@ def validate_update_config(node):
                 )
             )
             continue
-        if value == "":
+        if value in ("", None):
             field = entry["model"]._meta.get_field(key)
             if key == "name" or (getattr(field, "choices", None) and not field.null):
                 errors.append(
