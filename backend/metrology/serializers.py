@@ -175,7 +175,12 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
     def validate(self, attrs):
         attrs = super().validate(attrs)
 
-        value = attrs.get("value")
+        if "value" in attrs:
+            value = attrs["value"]
+        elif self.instance is not None:
+            value = self.instance.value
+        else:
+            value = None
         if value is None:
             return attrs
 

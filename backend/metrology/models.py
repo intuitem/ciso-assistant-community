@@ -308,7 +308,11 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
 
         if metric_definition.category == MetricDefinition.Category.QUALITATIVE:
             choice_index = value_dict.get("choice_index")
-            if isinstance(choice_index, bool) or not isinstance(choice_index, int):
+            if (
+                isinstance(choice_index, bool)
+                or not isinstance(choice_index, int)
+                or choice_index < 1
+            ):
                 return None
             return choice_index
 
@@ -339,9 +343,13 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
 
         if metric_definition.category == MetricDefinition.Category.QUALITATIVE:
             choice_index = value_dict.get("choice_index")
-            if isinstance(choice_index, bool) or not isinstance(choice_index, int):
+            if (
+                isinstance(choice_index, bool)
+                or not isinstance(choice_index, int)
+                or choice_index < 1
+            ):
                 logger.warning(
-                    "CustomMetricSample.value.choice_index is not an int",
+                    "CustomMetricSample.value.choice_index is not a valid index",
                     sample_id=str(self.pk),
                     metric_instance_id=str(self.metric_instance_id),
                     value_type=type(choice_index).__name__,

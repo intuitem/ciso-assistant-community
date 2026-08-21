@@ -155,6 +155,18 @@ def test_wrongly_typed_choice_index_member_does_not_crash(qualitative_instance):
 
 
 @pytest.mark.django_db
+def test_persisted_choice_index_zero_does_not_crash(qualitative_instance):
+    qualitative_instance.metric_definition.choices_definition = [
+        {"ref_id": "low", "name": "Low"}
+    ]
+    qualitative_instance.metric_definition.save()
+    _sample_with_value(qualitative_instance, {"choice_index": 0})
+
+    assert qualitative_instance.raw_value() is None
+    assert qualitative_instance.current_value() == "N/A"
+
+
+@pytest.mark.django_db
 class TestCustomMetricSampleWriteSerializerValidatesValueShape:
     def _errors_for_value(self, metric_instance, value):
         serializer = CustomMetricSampleWriteSerializer(
@@ -199,8 +211,6 @@ class TestCustomMetricSampleWriteSerializerValidatesValueShape:
         assert "value" in errors
 
     def test_rejects_unknown_key(self, metric_instance):
-        # additionalProperties: False - a well-formed but unrelated dict must
-        # not be silently accepted just because it's a dict.
         errors = self._errors_for_value(
             metric_instance, {"invalid_key": "invalid_value"}
         )
@@ -208,8 +218,20 @@ class TestCustomMetricSampleWriteSerializerValidatesValueShape:
         assert "value" in errors
 
     def test_rejects_choice_index_on_quantitative_metric(self, metric_instance):
-        # additionalProperties: False + required "result" - the wrong key for
-        # the metric's category must be rejected, not silently ignored.
         errors = self._errors_for_value(metric_instance, {"choice_index": 1})
 
         assert "value" in errors
+
+    def test_rejects_metric_instance_change_leaving_stale_value(
+        self, qualitative_instance, metric_instance
+    ):
+        sample = _sample_with_value(qualitative_instance, {"choice_index": 1})
+
+        serializer = CustomMetricSampleWriteSerializer(
+            instance=sample,
+            data={"metric_instance": str(metric_instance.pk)},
+            partial=True,
+        )
+
+        assert not serializer.is_valid()
+        assert "value" in serializer.errors
