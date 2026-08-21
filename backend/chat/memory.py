@@ -212,9 +212,9 @@ def inject_tool_replays(
     return out
 
 
-# Strip role/delimiter markers that could let attacker-controlled tool data
+# Strip role/delimiter markers that could let attacker-controlled data
 # escape framing. Mirrors views._INJECTION_PATTERNS plus our own wrappers.
-_REPLAY_INJECTION_PATTERNS = re.compile(
+_FRAMING_MARKER_PATTERNS = re.compile(
     r"(?:"
     r"\[/?(?:SYSTEM|CONTEXT|INST|SESSION SUMMARY|TOOL OBSERVATION)\]"
     r"|<\|(?:im_start|im_end|system)\|>"
@@ -224,8 +224,9 @@ _REPLAY_INJECTION_PATTERNS = re.compile(
 )
 
 
-def _sanitize_replay_text(text: str) -> str:
-    return _REPLAY_INJECTION_PATTERNS.sub("", text or "")
+def strip_framing_markers(text: str) -> str:
+    """Neutralize delimiter/role markers in text that comes from the database."""
+    return _FRAMING_MARKER_PATTERNS.sub("", text or "")
 
 
 def build_replay_payload(
@@ -242,7 +243,7 @@ def build_replay_payload(
         return None
     if not formatted_result:
         return None
-    sanitized = _sanitize_replay_text(formatted_result)
+    sanitized = strip_framing_markers(formatted_result)
     return {
         "tool": tool_name,
         "args": tool_args or {},

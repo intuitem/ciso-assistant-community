@@ -9,6 +9,7 @@ import json
 import structlog
 
 from chat.embedding_models import DEFAULT_EMBEDDING_MODEL
+from chat.memory import strip_framing_markers
 
 logger = structlog.get_logger(__name__)
 
@@ -275,13 +276,12 @@ class OllamaEmbedder:
 def _normalize_system_messages(
     system_prompt: str,
     history: list[dict] | None = None,
-    context: str = "",
 ) -> list[dict]:
     """Build history with a single system message at position 0.
 
     Some chat templates, including Qwen, require the system message to
     appear only at the beginning of the conversation. Merge system messages
-    from history and additional context into the initial system prompt while
+    from history (session summary) into the initial system prompt while
     preserving the order of all non-system history messages.
     """
     system_parts = [system_prompt]
@@ -293,12 +293,7 @@ def _normalize_system_messages(
                 if msg["content"]:
                     system_parts.append(msg["content"])
             else:
-                messages.append(
-                    {"role": msg["role"], "content": msg["content"]}
-                )
-
-    if context:
-        system_parts.append(f"[CONTEXT]\n{context}\n[/CONTEXT]")
+                messages.append({"role": msg["role"], "content": msg["content"]})
 
     return [
         {
@@ -317,12 +312,16 @@ def _build_messages(
 ) -> list[dict]:
     """Build the message array for LLM calls.
 
-    System instructions, system history, and context are merged into a
-    single leading system message for compatibility with strict chat
-    templates while keeping user and assistant history in its original
-    order.
+    System instructions and system history are merged into a single leading
+    system message for compatibility with strict chat templates. Retrieved
+    context stays on the current user turn: it is per-turn data that must
+    outrank replayed observations from earlier turns, and it carries
+    database text, so it is delimited and stripped of role markers rather
+    than being spliced into the system instructions.
     """
-    messages = _normalize_system_messages(system_prompt, history, context)
+    messages = _normalize_system_messages(system_prompt, history)
+    if context:
+        prompt = f"[CONTEXT]\n{strip_framing_markers(context)}\n[/CONTEXT]\n\n{prompt}"
     messages.append({"role": "user", "content": prompt})
     return messages
 
