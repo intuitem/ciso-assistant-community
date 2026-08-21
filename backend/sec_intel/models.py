@@ -125,6 +125,8 @@ class TTPCatalog(ReferentialObjectMixin, I18nObjectMixin):
 
     fields_to_check = ["ref_id", "name"]
 
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
+
     class Meta:
         verbose_name = _("TTP catalog")
         verbose_name_plural = _("TTP catalogs")
@@ -148,6 +150,8 @@ class Tactic(ReferentialObjectMixin, I18nObjectMixin):
     order_id = models.IntegerField(null=True, verbose_name=_("Order ID"))
 
     fields_to_check = ["ref_id", "name"]
+
+    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         verbose_name = _("Tactic")
