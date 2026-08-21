@@ -4,7 +4,7 @@ import pytest
 
 from integrations.models import IntegrationConfiguration
 
-from .client import ServiceNowClient
+from .client import LIST_ORDERING, ServiceNowClient
 
 
 @pytest.fixture
@@ -45,7 +45,10 @@ def test_list_remote_objects_passes_limit(mock_get, mock_sync, configuration):
     results = client.list_remote_objects({"limit": 20})
 
     assert len(results) == 20
-    assert mock_get.call_args[1]["params"]["sysparm_query"] == "active=true"
+    assert (
+        mock_get.call_args[1]["params"]["sysparm_query"]
+        == f"active=true^{LIST_ORDERING}"
+    )
 
 
 @patch("integrations.itsm.servicenow.client.SyncMapping")
@@ -64,7 +67,7 @@ def test_list_remote_objects_search_ors_full_subqueries(
     assert query == (
         "active=true^numberLIKEINC001"
         "^NQactive=true^short_descriptionLIKEINC001"
-        "^NQactive=true^nameLIKEINC001"
+        f"^NQactive=true^nameLIKEINC001^{LIST_ORDERING}"
     )
 
 
@@ -111,7 +114,7 @@ def test_list_remote_objects_hydrates_ids_even_when_mapped(
     results = client.list_remote_objects({"id": "abc123"})
 
     query = mock_get.call_args[1]["params"]["sysparm_query"]
-    assert query == "active=true^sys_idINabc123"
+    assert query == f"active=true^sys_idINabc123^{LIST_ORDERING}"
     assert [r["id"] for r in results] == ["abc123"]
 
 
@@ -132,7 +135,7 @@ def test_search_scopes_every_base_query_branch(mock_get, mock_sync, configuratio
     client.list_remote_objects({"search": "INC"})
 
     query = mock_get.call_args[1]["params"]["sysparm_query"]
-    assert query == "active=true^numberLIKEINC^NQstate=2^numberLIKEINC"
+    assert query == f"active=true^numberLIKEINC^NQstate=2^numberLIKEINC^{LIST_ORDERING}"
 
 
 @patch("integrations.itsm.servicenow.client.SyncMapping")
@@ -149,7 +152,9 @@ def test_hydration_scopes_every_base_query_branch(mock_get, mock_sync, configura
     client.list_remote_objects({"id": "abc123"})
 
     query = mock_get.call_args[1]["params"]["sysparm_query"]
-    assert query == "active=true^sys_idINabc123^NQstate=2^sys_idINabc123"
+    assert query == (
+        f"active=true^sys_idINabc123^NQstate=2^sys_idINabc123^{LIST_ORDERING}"
+    )
 
 
 @patch("integrations.itsm.servicenow.client.SyncMapping")
@@ -164,7 +169,7 @@ def test_empty_base_query_appends_bare_condition(mock_get, mock_sync, configurat
     client.list_remote_objects({"id": "abc123"})
 
     query = mock_get.call_args[1]["params"]["sysparm_query"]
-    assert query == "sys_idINabc123"
+    assert query == f"sys_idINabc123^{LIST_ORDERING}"
 
 
 @patch("integrations.itsm.servicenow.client.SyncMapping")
@@ -197,7 +202,7 @@ def test_hydration_rejects_metacharacter_ids(mock_get, mock_sync, configuration)
     client.list_remote_objects({"id": "abc123,x^NQactive=false,y^ORactive=false"})
 
     query = mock_get.call_args[1]["params"]["sysparm_query"]
-    assert query == "active=true^sys_idINabc123"
+    assert query == f"active=true^sys_idINabc123^{LIST_ORDERING}"
 
 
 @patch("integrations.itsm.servicenow.client.SyncMapping")
@@ -246,7 +251,7 @@ def test_search_branches_only_cover_existing_columns(
 
     query = mock_get.call_args[1]["params"]["sysparm_query"]
     assert query == (
-        "active=true^numberLIKEINC001^NQactive=true^short_descriptionLIKEINC001"
+        f"active=true^numberLIKEINC001^NQactive=true^short_descriptionLIKEINC001^{LIST_ORDERING}"
     )
 
 

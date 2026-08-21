@@ -26,6 +26,13 @@ MAX_LIST_FETCH = 500
 # Rows requested per page while scanning.
 LIST_PAGE_SIZE = 100
 
+# Deterministic global ordering for offset pagination: newest first, with the
+# immutable sys_id as tiebreaker (sys_updated_on would reshuffle pages when a
+# record is touched mid-scan). ORDERBY tokens apply to the whole encoded
+# query wherever they appear, ^NQ branches included; an ORDERBY an admin put
+# in base_query simply becomes the primary sort with these as tiebreakers.
+LIST_ORDERING = "ORDERBYDESCsys_created_on^ORDERBYsys_id"
+
 
 class ServiceNowClient(BaseIntegrationClient):
     def __init__(self, configuration, model_key="applied_control"):
@@ -261,7 +268,7 @@ class ServiceNowClient(BaseIntegrationClient):
         try:
             while True:
                 params = {
-                    "sysparm_query": sysparm_query,
+                    "sysparm_query": f"{sysparm_query}^{LIST_ORDERING}",
                     # Superset of common display fields so labels work across tables
                     # (incident uses number/short_description, CMDB/asset tables use name).
                     "sysparm_fields": "sys_id,number,name,short_description,sys_updated_on",
