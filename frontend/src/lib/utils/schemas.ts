@@ -492,6 +492,7 @@ export const RequirementAssessmentSchema = z.object({
 	result: z.string(),
 	extended_result: z.string().optional().nullable(),
 	is_scored: z.boolean().optional(),
+	is_score_overridden: z.boolean().optional(),
 	score: z.number().optional().nullable(),
 	documentation_score: z.number().optional().nullable(),
 	comment: z.string().optional().nullable(),
