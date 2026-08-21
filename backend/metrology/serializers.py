@@ -1,3 +1,4 @@
+import jsonschema
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
@@ -14,6 +15,34 @@ from metrology.models import (
     DashboardWidget,
 )
 from metrology.builtin_metrics import get_available_metrics_for_model
+
+QUALITATIVE_VALUE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "choice_index": {
+            "type": "integer",
+            "minimum": 1,
+        },
+    },
+    "required": ["choice_index"],
+    "additionalProperties": False,
+}
+
+QUANTITATIVE_VALUE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "result": {
+            "type": "number",
+        },
+    },
+    "required": ["result"],
+    "additionalProperties": False,
+}
+
+VALUE_SCHEMA_BY_CATEGORY = {
+    MetricDefinition.Category.QUALITATIVE: QUALITATIVE_VALUE_SCHEMA,
+    MetricDefinition.Category.QUANTITATIVE: QUANTITATIVE_VALUE_SCHEMA,
+}
 
 
 # MetricDefinition serializers
@@ -143,12 +172,31 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
             )
         return value
 
-    def validate_value(self, value):
-        if not isinstance(value, dict):
-            raise serializers.ValidationError(
-                'value must be an object, e.g. {"result": 1.0} for a quantitative '
-            )
-        return value
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+
+        value = attrs.get("value")
+        if value is None:
+            return attrs
+
+        metric_instance = attrs.get("metric_instance") or getattr(
+            self.instance, "metric_instance", None
+        )
+        if metric_instance is None:
+            return attrs
+
+        schema = VALUE_SCHEMA_BY_CATEGORY.get(
+            metric_instance.metric_definition.category
+        )
+        if schema is None:
+            return attrs
+
+        try:
+            jsonschema.validate(value, schema)
+        except jsonschema.exceptions.ValidationError as e:
+            raise serializers.ValidationError({"value": e.message})
+
+        return attrs
 
     class Meta:
         model = CustomMetricSample

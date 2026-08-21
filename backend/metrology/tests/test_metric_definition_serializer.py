@@ -75,6 +75,20 @@ def metric_instance(root, quantitative_definition):
     )
 
 
+@pytest.fixture
+def qualitative_definition(root):
+    return MetricDefinition.objects.create(
+        name="Maturity", category=MetricDefinition.Category.QUALITATIVE
+    )
+
+
+@pytest.fixture
+def qualitative_instance(root, qualitative_definition):
+    return MetricInstance.objects.create(
+        name="Process Maturity", folder=root, metric_definition=qualitative_definition
+    )
+
+
 def _sample_with_value(metric_instance, value):
     from django.utils import timezone
 
@@ -117,6 +131,30 @@ def test_well_formed_quantitative_value_still_works(metric_instance):
 
 
 @pytest.mark.django_db
+def test_wrongly_typed_result_member_does_not_crash(metric_instance):
+    # A well-formed object whose "result" member has the wrong type (e.g. a
+    # list) used to still reach `abs(result)` and crash.
+    _sample_with_value(metric_instance, {"result": []})
+
+    assert metric_instance.raw_value() is None
+    assert metric_instance.current_value() == "N/A"
+
+
+@pytest.mark.django_db
+def test_wrongly_typed_choice_index_member_does_not_crash(qualitative_instance):
+    # Same issue on the qualitative side: `choice_index - 1` used to crash on
+    # a non-int "choice_index".
+    qualitative_instance.metric_definition.choices_definition = [
+        {"ref_id": "low", "name": "Low"}
+    ]
+    qualitative_instance.metric_definition.save()
+    _sample_with_value(qualitative_instance, {"choice_index": []})
+
+    assert qualitative_instance.raw_value() is None
+    assert qualitative_instance.current_value() == "N/A"
+
+
+@pytest.mark.django_db
 class TestCustomMetricSampleWriteSerializerValidatesValueShape:
     def _errors_for_value(self, metric_instance, value):
         serializer = CustomMetricSampleWriteSerializer(
@@ -140,7 +178,36 @@ class TestCustomMetricSampleWriteSerializerValidatesValueShape:
 
         assert "value" not in errors
 
-    def test_accepts_choice_index_object(self, metric_instance):
-        errors = self._errors_for_value(metric_instance, {"choice_index": 1})
+    def test_accepts_choice_index_object(self, qualitative_instance):
+        errors = self._errors_for_value(qualitative_instance, {"choice_index": 1})
 
         assert "value" not in errors
+
+    def test_rejects_non_numeric_result_member(self, metric_instance):
+        errors = self._errors_for_value(metric_instance, {"result": []})
+
+        assert "value" in errors
+
+    def test_rejects_non_int_choice_index_member(self, qualitative_instance):
+        errors = self._errors_for_value(qualitative_instance, {"choice_index": []})
+
+        assert "value" in errors
+
+    def test_rejects_choice_index_below_minimum(self, qualitative_instance):
+        errors = self._errors_for_value(qualitative_instance, {"choice_index": 0})
+
+        assert "value" in errors
+
+    def test_rejects_unknown_key(self, metric_instance):
+        # additionalProperties: False - a well-formed but unrelated dict must
+        # not be silently accepted just because it's a dict.
+        errors = self._errors_for_value(metric_instance, {"invalid_key": "invalid_value"})
+
+        assert "value" in errors
+
+    def test_rejects_choice_index_on_quantitative_metric(self, metric_instance):
+        # additionalProperties: False + required "result" - the wrong key for
+        # the metric's category must be rejected, not silently ignored.
+        errors = self._errors_for_value(metric_instance, {"choice_index": 1})
+
+        assert "value" in errors
