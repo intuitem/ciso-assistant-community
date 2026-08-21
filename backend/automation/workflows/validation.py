@@ -15,6 +15,7 @@ from .models import (
 )
 from .actions import validate_create_config as _validate_create_config
 from .actions import validate_read_config as _validate_read_config
+from .actions import validate_update_config as _validate_update_config
 from .triggers import validate_trigger_config
 
 SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
@@ -140,6 +141,8 @@ def validate_graph(version):
             for code, message in _validate_read_config(node):
                 errors.append(_error(code, message, node=node))
             for code, message in _validate_create_config(node):
+                errors.append(_error(code, message, node=node))
+            for code, message in _validate_update_config(node):
                 errors.append(_error(code, message, node=node))
         for ref in sorted(_referenced_node_refs(node) - known_refs):
             errors.append(

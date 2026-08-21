@@ -15,6 +15,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 
 from core.models import (
+    Actor,
     AppliedControl,
     RequirementAssessment,
     Asset,
@@ -132,11 +133,22 @@ class SetVariablesAction(BaseAction):
 # the entry's `match_on` field (within the instance's folder) and updates it
 # instead of creating a duplicate, which the primitive sync flows need.
 # Entries without an explicit `match_on` match on name.
+#
+# The same registry drives update_object. `updatable_fields` (defaulting to
+# `fields`) is the simple-field allowlist for updates; `m2m_fields` maps the
+# writable relations (target model + the frontend endpoint serving its
+# options) usable from both create_object and update_object via the `m2m`
+# config key.
 CREATABLE_MODELS = {
     "applied_control": {
         "model": AppliedControl,
         "fields": ["name", "description", "ref_id"],
         "fk_fields": {},
+        "m2m_fields": {
+            "evidences": (Evidence, "evidences"),
+            "assets": (Asset, "assets"),
+            "owner": (Actor, "actors"),
+        },
     },
     "evidence": {
         "model": Evidence,
@@ -147,6 +159,11 @@ CREATABLE_MODELS = {
         "model": Incident,
         "fields": ["name", "description", "ref_id", "status", "severity", "link"],
         "fk_fields": {},
+        "m2m_fields": {
+            "assets": (Asset, "assets"),
+            "owners": (Actor, "actors"),
+            "applied_controls": (AppliedControl, "applied-controls"),
+        },
     },
     "asset": {
         "model": Asset,
@@ -157,11 +174,19 @@ CREATABLE_MODELS = {
         "model": Vulnerability,
         "fields": ["name", "description", "ref_id", "status", "severity"],
         "fk_fields": {},
+        "m2m_fields": {
+            "applied_controls": (AppliedControl, "applied-controls"),
+            "assets": (Asset, "assets"),
+        },
     },
     "security_exception": {
         "model": SecurityException,
         "fields": ["name", "description", "ref_id", "severity", "expiration_date"],
         "fk_fields": {},
+        "m2m_fields": {
+            "owners": (Actor, "actors"),
+            "evidences": (Evidence, "evidences"),
+        },
     },
     "entity": {
         "model": Entity,
@@ -178,6 +203,11 @@ CREATABLE_MODELS = {
         "fields": ["name", "description", "ref_id", "severity", "status"],
         "fk_fields": {
             "findings_assessment": (FindingsAssessment, "findings-assessments")
+        },
+        "m2m_fields": {
+            "applied_controls": (AppliedControl, "applied-controls"),
+            "evidences": (Evidence, "evidences"),
+            "owner": (Actor, "actors"),
         },
     },
     "compliance_assessment": {
@@ -214,6 +244,101 @@ def _accessible_folder_ids(folder):
     ids |= {f.id for f in folder.get_parent_folders()}
     ids |= {f.id for f in folder.get_sub_folders()}
     return ids
+
+
+def _validate_choice_values(model, kwargs, action_label):
+    """save()/create() never run full_clean, so a bad choice string would
+    persist silently into a choice column; reject it here instead. Only
+    choice fields are checked — everything else keeps its existing behavior."""
+    for key, value in kwargs.items():
+        field = model._meta.get_field(key)
+        choices = getattr(field, "choices", None)
+        if not choices or value in (None, ""):
+            continue
+        valid = [choice for choice, _label in choices]
+        if value not in valid:
+            raise ActionError(
+                f"{action_label}: '{value}' is not a valid {key} "
+                f"(one of {', '.join(str(v) for v in valid)})"
+            )
+
+
+def _clearing_value(model, field_name):
+    """What an explicitly emptied field is written as: NULL when the column
+    is nullable, the empty string otherwise (blank CharFields)."""
+    field = model._meta.get_field(field_name)
+    return None if getattr(field, "null", False) else ""
+
+
+def _apply_m2m(entry, obj, config, instance, action_label):
+    """Relation writes shared by create_object and update_object. Config shape:
+    {"m2m": {"<field>": {"operation": "add"|"remove"|"set", "ids": [...]}}}.
+    Ids are templatable (list, comma-separated string, or a template that
+    renders a JSON list); every resolved target must pass the same
+    folder-scope rule as FK targets."""
+    m2m_config = config.get("m2m") or {}
+    applied = {}
+    if not m2m_config:
+        return applied
+    allowed = entry.get("m2m_fields") or {}
+    context = _render_context(instance)
+    allowed_folders = None
+    for field_name, spec in m2m_config.items():
+        if field_name not in allowed:
+            raise ActionError(
+                f"{action_label}: '{field_name}' is not a writable relation"
+            )
+        target_model, _endpoint = allowed[field_name]
+        spec = spec or {}
+        operation = spec.get("operation", "add")
+        if operation not in ("add", "remove", "set"):
+            raise ActionError(
+                f"{action_label}: unknown relation operation '{operation}'"
+            )
+        raw_ids = render(spec.get("ids", []), context)
+        if isinstance(raw_ids, str):
+            raw_ids = raw_ids.strip()
+            if raw_ids.startswith("["):
+                import json
+
+                try:
+                    raw_ids = json.loads(raw_ids)
+                except ValueError:
+                    raise ActionError(
+                        f"{action_label}: {field_name} ids are not a valid list"
+                    )
+            else:
+                raw_ids = [part for part in raw_ids.split(",")]
+        targets = []
+        for raw in raw_ids:
+            raw = str(raw).strip()
+            if not raw:
+                continue
+            try:
+                target = target_model.objects.filter(id=raw).first()
+            except ValueError, ValidationError:
+                target = None
+            if target is None:
+                raise ActionError(
+                    f"{action_label}: {field_name} '{raw}' does not exist"
+                )
+            target_folder_id = getattr(target, "folder_id", None)
+            if target_folder_id is not None:
+                if allowed_folders is None:
+                    allowed_folders = _accessible_folder_ids(instance.folder)
+                if target_folder_id not in allowed_folders:
+                    raise ActionError(
+                        f"{action_label}: {field_name} '{raw}' is outside "
+                        "this workflow's scope"
+                    )
+            targets.append(target)
+        manager = getattr(obj, field_name)
+        if operation == "set":
+            manager.set(targets)
+        elif targets:
+            getattr(manager, operation)(*targets)
+        applied[field_name] = {"operation": operation, "count": len(targets)}
+    return applied
 
 
 @register
@@ -254,6 +379,8 @@ class CreateObjectAction(BaseAction):
                     )
             kwargs[fk_name] = target
 
+        _validate_choice_values(entry["model"], kwargs, "create_object")
+
         obj = None
         created = True
         if config.get("upsert"):
@@ -279,11 +406,82 @@ class CreateObjectAction(BaseAction):
                 obj = entry["model"].objects.create(folder=instance.folder, **kwargs)
         except ValidationError as e:
             raise ActionError(f"create_object: {'; '.join(e.messages)}")
+        m2m = _apply_m2m(entry, obj, config, instance, "create_object")
         return {
             "created_object_id": str(obj.id),
             "created_object_name": obj.name,
             "created_object_model": config.get("model"),
             "created": created,
+            "m2m": m2m,
+        }
+
+
+@register
+class UpdateObjectAction(BaseAction):
+    action_type = "update_object"
+
+    def execute(self, config, instance):
+        entry = CREATABLE_MODELS.get(config.get("model"))
+        if entry is None:
+            raise ActionError(f"update_object: unknown model '{config.get('model')}'")
+        context = _render_context(instance)
+        object_id = str(render(config.get("object_id", ""), context)).strip()
+        if not object_id:
+            raise ActionError("update_object: 'object_id' is required")
+        if not UUID_RE.match(object_id):
+            raise ActionError("update_object: 'object_id' is not a valid id")
+
+        from . import authz
+        from .engine import run_identity
+
+        # Subtree-only (the read scope, NOT _accessible_folder_ids): a
+        # child-domain workflow must never mutate ancestor-domain rows. The
+        # run identity must also be able to view the target; one message for
+        # both misses so out-of-scope existence doesn't leak.
+        obj = (
+            entry["model"]
+            .objects.filter(id=object_id)
+            .filter(folder_id__in=_read_scope_folder_ids(instance.folder))
+            .filter(id__in=authz.viewable_ids(run_identity(instance), entry["model"]))
+            .first()
+        )
+        if obj is None:
+            raise ActionError("update_object: target not found or out of scope")
+
+        fields = config.get("fields") or {}
+        updatable = entry.get("updatable_fields", entry["fields"])
+        kwargs = {}
+        for key, raw in fields.items():
+            if key not in updatable:
+                raise ActionError(f"update_object: '{key}' is not an updatable field")
+            value = render(raw, context)
+            # Key presence writes the field, an empty value clears it —
+            # deliberately the opposite of create_object's drop-empty filter
+            # (provision_user's is_active handling is the precedent). This
+            # also means an unresolved template clears rather than skips.
+            if value in ("", None):
+                if key == "name":
+                    raise ActionError("update_object: 'name' cannot be cleared")
+                value = _clearing_value(entry["model"], key)
+            kwargs[key] = value
+        _validate_choice_values(entry["model"], kwargs, "update_object")
+
+        try:
+            for key, value in kwargs.items():
+                setattr(obj, key, value)
+            if kwargs:
+                # Fires auditlog and therefore internal events; re-trigger
+                # loops are contained by MAX_TRIGGER_DEPTH.
+                obj.save()
+        except ValidationError as e:
+            raise ActionError(f"update_object: {'; '.join(e.messages)}")
+        m2m = _apply_m2m(entry, obj, config, instance, "update_object")
+        return {
+            "updated_object_id": str(obj.id),
+            "updated_object_name": obj.name,
+            "updated_object_model": config.get("model"),
+            "updated_fields": sorted(kwargs),
+            "m2m": m2m,
         }
 
 
@@ -874,6 +1072,11 @@ def required_permissions(action_config):
         if action_config.get("upsert"):
             codenames.append(f"change_{model_name}")
         return codenames
+    if action_type == "update_object":
+        entry = CREATABLE_MODELS.get(action_config.get("model"))
+        if entry is None:
+            return []
+        return [f"change_{entry['model']._meta.model_name}"]
     if action_type == "read_objects":
         entry = READABLE_MODELS.get(action_config.get("model"))
         if entry is None:
@@ -979,6 +1182,32 @@ def validate_read_config(node):
     return errors
 
 
+def _m2m_config_errors(entry, config, code_prefix):
+    """Publish-time checks for the `m2m` config key, shared by the
+    create_object and update_object validators."""
+    errors = []
+    allowed = entry.get("m2m_fields") or {}
+    for field_name, spec in (config.get("m2m") or {}).items():
+        if field_name not in allowed:
+            errors.append(
+                (
+                    f"{code_prefix}_invalid_relation",
+                    f"'{field_name}' is not a writable relation of "
+                    f"'{config.get('model')}'",
+                )
+            )
+            continue
+        operation = (spec or {}).get("operation", "add")
+        if operation not in ("add", "remove", "set"):
+            errors.append(
+                (
+                    f"{code_prefix}_invalid_relation",
+                    f"Unknown relation operation '{operation}'",
+                )
+            )
+    return errors
+
+
 def validate_create_config(node):
     """Publish-time checks for create_object nodes, same contract as
     validate_read_config."""
@@ -1007,6 +1236,54 @@ def validate_create_config(node):
                     f"'{fk_name}' is required to create a '{config.get('model')}'",
                 )
             )
+    errors.extend(_m2m_config_errors(entry, config, "action_create"))
+    return errors
+
+
+def validate_update_config(node):
+    """Publish-time checks for update_object nodes, same contract as
+    validate_read_config."""
+    config = node.action_config or {}
+    if config.get("type") != "update_object":
+        return []
+    entry = CREATABLE_MODELS.get(config.get("model"))
+    if entry is None:
+        return [
+            (
+                "action_update_unknown_model",
+                f"Unknown updatable model '{config.get('model')}'",
+            )
+        ]
+    errors = []
+    if not str(config.get("object_id") or "").strip():
+        errors.append(
+            (
+                "action_update_missing_target",
+                f"'object_id' is required to update a '{config.get('model')}'",
+            )
+        )
+    updatable = set(entry.get("updatable_fields", entry["fields"]))
+    for key, value in (config.get("fields") or {}).items():
+        if key not in updatable:
+            errors.append(
+                (
+                    "action_update_invalid_field",
+                    f"'{key}' is not an updatable field of '{config.get('model')}'",
+                )
+            )
+            continue
+        # Literal choice values are checkable now; templated ones only at run
+        # time (the runtime check is _validate_choice_values).
+        if isinstance(value, str) and value and "{{" not in value:
+            choices = getattr(entry["model"]._meta.get_field(key), "choices", None)
+            if choices and value not in [choice for choice, _label in choices]:
+                errors.append(
+                    (
+                        "action_update_invalid_value",
+                        f"'{value}' is not a valid {key} of '{config.get('model')}'",
+                    )
+                )
+    errors.extend(_m2m_config_errors(entry, config, "action_update"))
     return errors
 
 

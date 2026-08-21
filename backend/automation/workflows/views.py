@@ -157,6 +157,15 @@ class WorkflowViewSet(BaseModelViewSet):
                         for fk_name, (_model, endpoint) in entry["fk_fields"].items()
                     },
                     "match_on": entry.get("match_on", "name"),
+                    # update_object's allowlists; the builder derives its
+                    # update form from these.
+                    "updatable_fields": entry.get("updatable_fields", entry["fields"]),
+                    "m2m_fields": {
+                        name: endpoint
+                        for name, (_model, endpoint) in (
+                            entry.get("m2m_fields") or {}
+                        ).items()
+                    },
                 }
                 for key, entry in CREATABLE_MODELS.items()
             ]

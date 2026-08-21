@@ -155,6 +155,7 @@
 	// buffering); the engine still executes it for graphs that carry it.
 	const ACTION_TYPES = [
 		'create_object',
+		'update_object',
 		'read_objects',
 		'http_request',
 		'send_email',
@@ -182,7 +183,8 @@
 	const ACTION_CONFIG_DEFAULTS: Record<string, object> = {
 		log: { message: '' },
 		set_variables: { variables: {} },
-		create_object: { model: 'applied_control', fields: { name: '' }, upsert: false },
+		create_object: { model: 'applied_control', fields: { name: '' }, upsert: false, m2m: {} },
+		update_object: { model: 'applied_control', object_id: '', fields: {}, m2m: {} },
 		read_objects: {
 			model: 'applied_control',
 			mode: 'list',
@@ -216,6 +218,35 @@
 
 	function resetCreateFields() {
 		actionConfig.fields = { name: actionConfig.fields?.name ?? '' };
+		actionConfig.m2m = {};
+		onChange();
+	}
+
+	function resetUpdateFields() {
+		actionConfig.fields = {};
+		actionConfig.m2m = {};
+		onChange();
+	}
+
+	// update_object writes every PRESENT key (empty value = clear the field),
+	// so the form models presence explicitly instead of binding all fields.
+	function toggleUpdateField(field: string, on: boolean) {
+		if (on) actionConfig.fields[field] = actionConfig.fields[field] ?? '';
+		else delete actionConfig.fields[field];
+		onChange();
+	}
+
+	function toggleRelation(name: string, on: boolean) {
+		actionConfig.m2m ??= {};
+		if (on) actionConfig.m2m[name] = actionConfig.m2m[name] ?? { operation: 'add', ids: '' };
+		else delete actionConfig.m2m[name];
+		onChange();
+	}
+
+	function appendRelationId(name: string, id: string) {
+		const spec = actionConfig.m2m?.[name];
+		if (!spec || !id) return;
+		spec.ids = spec.ids ? `${spec.ids}, ${id}` : id;
 		onChange();
 	}
 
@@ -256,6 +287,7 @@
 	const OUTPUT_EXAMPLES: Record<string, string> = {
 		http_request: 'body.summary',
 		create_object: 'created_object_id',
+		update_object: 'updated_object_id',
 		read_objects: 'results.0.name',
 		provision_folder: 'folder_id',
 		provision_user: 'user_id',
@@ -790,6 +822,56 @@
 	</span>
 {/snippet}
 
+{#snippet relationEditor()}
+	{#each Object.entries(creatableEntry?.m2m_fields ?? {}) as [relName, endpoint] (relName)}
+		<div class="flex flex-col gap-1">
+			<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+				<input
+					type="checkbox"
+					class="checkbox scale-75"
+					checked={!!actionConfig.m2m?.[relName]}
+					onchange={(e) => toggleRelation(relName, e.currentTarget.checked)}
+				/>
+				{safeTranslate(relName)}
+			</label>
+			{#if actionConfig.m2m?.[relName]}
+				<div class="flex gap-1">
+					<select
+						class="select w-28 text-sm"
+						bind:value={actionConfig.m2m[relName].operation}
+						onchange={onChange}
+					>
+						<option value="add">add</option>
+						<option value="remove">remove</option>
+						<option value="set">set</option>
+					</select>
+					<input
+						type="text"
+						class="input flex-1 text-sm"
+						placeholder={'id, id or {{nodes.read.results.0.id}}'}
+						bind:value={actionConfig.m2m[relName].ids}
+						oninput={onChange}
+					/>
+				</div>
+				{#if fkOptions[endpoint as string]?.length}
+					<select
+						class="select w-full text-sm"
+						onchange={(e) => {
+							appendRelationId(relName, e.currentTarget.value);
+							e.currentTarget.value = '';
+						}}
+					>
+						<option value="">+ {safeTranslate(endpoint as string)}</option>
+						{#each fkOptions[endpoint as string] as option (option.id)}
+							<option value={option.id}>{optionLabel(option)}</option>
+						{/each}
+					</select>
+				{/if}
+			{/if}
+		</div>
+	{/each}
+{/snippet}
+
 {#snippet branchConditions(branch: any)}
 	<div>
 		<div class="flex items-center justify-between mb-1">
@@ -1296,6 +1378,65 @@
 							</select>
 						</label>
 					{/each}
+					{@render relationEditor()}
+				{:else if actionConfig.type === 'update_object'}
+					<label>
+						{@render fieldLabel(safeTranslate('objectToUpdate'))}
+						<select
+							class="select w-full text-sm"
+							bind:value={actionConfig.model}
+							onchange={resetUpdateFields}
+						>
+							{#each creatableModels as entry (entry.key)}
+								<option value={entry.key}>{safeTranslate(entry.key)}</option>
+							{/each}
+						</select>
+					</label>
+					<label>
+						{@render fieldLabel(safeTranslate('objectId'))}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'{{payload.object_id}}'}
+							bind:value={actionConfig.object_id}
+							oninput={onChange}
+						/>
+					</label>
+					<!-- Presence-driven: only checked fields are written; an empty
+					     checked field clears the column on the target. -->
+					{#each creatableEntry?.updatable_fields ?? [] as field (field)}
+						<div class="flex flex-col gap-1">
+							<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+								<input
+									type="checkbox"
+									class="checkbox scale-75"
+									checked={actionConfig.fields != null && field in actionConfig.fields}
+									onchange={(e) => toggleUpdateField(field, e.currentTarget.checked)}
+								/>
+								{safeTranslate(field)}
+							</label>
+							{#if actionConfig.fields != null && field in actionConfig.fields}
+								{#if field === 'description'}
+									<textarea
+										class="input w-full text-sm"
+										rows="2"
+										placeholder={safeTranslate('emptyClearsField')}
+										bind:value={actionConfig.fields[field]}
+										oninput={onChange}
+									></textarea>
+								{:else}
+									<input
+										type="text"
+										class="input w-full text-sm"
+										placeholder={safeTranslate('emptyClearsField')}
+										bind:value={actionConfig.fields[field]}
+										oninput={onChange}
+									/>
+								{/if}
+							{/if}
+						</div>
+					{/each}
+					{@render relationEditor()}
 				{:else if actionConfig.type === 'read_objects'}
 					<label>
 						{@render fieldLabel(m.objectToRead())}

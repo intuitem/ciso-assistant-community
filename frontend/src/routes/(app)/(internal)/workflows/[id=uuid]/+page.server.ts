@@ -49,7 +49,10 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 	const creatableModels = listResults(creatableModelsRaw);
 	const fkEndpoints = [
 		...new Set([
-			...creatableModels.flatMap((entry: any) => Object.values(entry.fk_fields ?? {})),
+			...creatableModels.flatMap((entry: any) => [
+				...Object.values(entry.fk_fields ?? {}),
+				...Object.values(entry.m2m_fields ?? {})
+			]),
 			'folders'
 		])
 	] as string[];
