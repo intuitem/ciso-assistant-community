@@ -405,6 +405,19 @@ class TestM2MWrites:
 
 
 @pytest.mark.django_db
+class TestM2MRegistryIntegrity:
+    def test_every_m2m_target_is_folder_scoped(self):
+        """_resolve_m2m's scope check keys on folder_id; a folder-less target
+        model would silently skip it and be attachable across domains."""
+        from automation.workflows.actions import CREATABLE_MODELS
+
+        for key, entry in CREATABLE_MODELS.items():
+            for name, (target, _endpoint) in (entry.get("m2m_fields") or {}).items():
+                columns = {f.name for f in target._meta.concrete_fields}
+                assert "folder" in columns, f"{key}.{name} targets folder-less model"
+
+
+@pytest.mark.django_db
 class TestUpdatePermissionsAndValidation:
     def test_required_permissions_codename(self):
         assert required_permissions(

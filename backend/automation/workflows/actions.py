@@ -15,7 +15,6 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 
 from core.models import (
-    Actor,
     AppliedControl,
     RequirementAssessment,
     Asset,
@@ -138,7 +137,10 @@ class SetVariablesAction(BaseAction):
 # `fields`) is the simple-field allowlist for updates; `m2m_fields` maps the
 # writable relations (target model + the frontend endpoint serving its
 # options) usable from both create_object and update_object via the `m2m`
-# config key.
+# config key. Only folder-scoped targets are allowed: _resolve_m2m's scope
+# check keys on folder_id, so a folder-less target (e.g. Actor for
+# owner/owners) would be attachable across domains — those relations stay out
+# until they get a proper scoping rule.
 CREATABLE_MODELS = {
     "applied_control": {
         "model": AppliedControl,
@@ -147,7 +149,6 @@ CREATABLE_MODELS = {
         "m2m_fields": {
             "evidences": (Evidence, "evidences"),
             "assets": (Asset, "assets"),
-            "owner": (Actor, "actors"),
         },
     },
     "evidence": {
@@ -161,7 +162,6 @@ CREATABLE_MODELS = {
         "fk_fields": {},
         "m2m_fields": {
             "assets": (Asset, "assets"),
-            "owners": (Actor, "actors"),
             "applied_controls": (AppliedControl, "applied-controls"),
         },
     },
@@ -184,7 +184,6 @@ CREATABLE_MODELS = {
         "fields": ["name", "description", "ref_id", "severity", "expiration_date"],
         "fk_fields": {},
         "m2m_fields": {
-            "owners": (Actor, "actors"),
             "evidences": (Evidence, "evidences"),
         },
     },
@@ -207,7 +206,6 @@ CREATABLE_MODELS = {
         "m2m_fields": {
             "applied_controls": (AppliedControl, "applied-controls"),
             "evidences": (Evidence, "evidences"),
-            "owner": (Actor, "actors"),
         },
     },
     "compliance_assessment": {
