@@ -22,6 +22,7 @@
 		treeToGroups,
 		groupsToTree,
 		FILTER_OPS,
+		READ_FILTER_OPS,
 		type Condition
 	} from './filter-dnf';
 	import { VARIABLE_TYPES } from './builder-constants';
@@ -1385,7 +1386,7 @@
 													bind:value={condition.op}
 													onchange={syncReadFilters}
 												>
-													{#each FILTER_OPS as op (op)}
+													{#each READ_FILTER_OPS as op (op)}
 														<option value={op}>{op}</option>
 													{/each}
 												</select>

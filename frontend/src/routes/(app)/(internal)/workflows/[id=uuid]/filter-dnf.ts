@@ -17,6 +17,10 @@ export const FILTER_OPS = [
 	'is_null'
 ];
 
+// Read filters additionally offer relative date windows anchored on the
+// run's frozen `today`; trigger filters and condition nodes do not.
+export const READ_FILTER_OPS = [...FILTER_OPS, 'within_next_days', 'older_than_days'];
+
 export interface Condition {
 	field: string;
 	op: string;

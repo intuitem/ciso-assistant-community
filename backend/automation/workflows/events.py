@@ -166,14 +166,16 @@ def _workflow_scope(workflow):
 # ---------- filter tree validation ----------
 
 
-def validate_filter_tree(tree):
-    """Shape-check a boolean filter tree. Raises ValueError on bad shape."""
+def validate_filter_tree(tree, extra_ops=frozenset()):
+    """Shape-check a boolean filter tree. Raises ValueError on bad shape.
+    extra_ops widens the operator set for callers with operators of their
+    own (read filters); trigger filters keep the base set."""
     if tree in (None, {}):
         return
-    _validate_group(tree, depth=0)
+    _validate_group(tree, depth=0, extra_ops=frozenset(extra_ops))
 
 
-def _validate_group(group, depth):
+def _validate_group(group, depth, extra_ops=frozenset()):
     if depth > MAX_FILTER_DEPTH:
         raise ValueError("filter tree too deep")
     if not isinstance(group, dict):
@@ -189,12 +191,12 @@ def _validate_group(group, depth):
             not isinstance(condition, dict)
             or not isinstance(condition.get("field"), str)
             or not condition.get("field")
-            or condition.get("op", "eq") not in VALID_FILTER_OPS
+            or condition.get("op", "eq") not in (VALID_FILTER_OPS | extra_ops)
             or not isinstance(condition.get("changed", False), bool)
         ):
             raise ValueError("invalid condition")
     for child in children:
-        _validate_group(child, depth + 1)
+        _validate_group(child, depth + 1, extra_ops)
 
 
 def walk_conditions(group):

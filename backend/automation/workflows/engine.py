@@ -250,7 +250,16 @@ def create_instance(
         entry_node = default_entry_node(version)
 
     payload = payload or {}
-    variables = {v.key: v.default_value for v in version.variables.all()}
+    # Frozen run time context, server timezone: one consistent clock for the
+    # whole run, visible in run debugging. Seeded first, so a declared
+    # variable, input mapping or debug seed of the same name deliberately
+    # takes the name over.
+    seeded_now = timezone.localtime()
+    variables = {
+        "now": seeded_now.isoformat(),
+        "today": seeded_now.date().isoformat(),
+    }
+    variables.update({v.key: v.default_value for v in version.variables.all()})
     for variable_key, path in (entry_node.input_mapping or {}).items():
         value = dig(payload, path)
         if value is not None:

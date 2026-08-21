@@ -378,3 +378,169 @@ class TestReadValidation:
             {"type": "read_objects", "model": "applied_control"}
         ) == ["view_appliedcontrol"]
         assert required_permissions({"type": "read_objects", "model": "nope"}) == []
+
+
+def start_with_seeds(version, initial_variables):
+    """start_instance with debug variable seeds (deterministic `today`)."""
+    from automation.workflows.engine import create_instance, run_instance
+
+    instance = create_instance(version, initial_variables=initial_variables)
+    run_instance(instance)
+    instance.refresh_from_db()
+    return instance
+
+
+@pytest.mark.django_db
+class TestTimeContext:
+    def test_instance_variables_carry_frozen_time_context(self):
+        from datetime import datetime
+
+        domain = make_domain("Domain time ctx")
+        version = read_flow(domain, {"model": "applied_control", "mode": "list"})
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        today = instance.variables["today"]
+        now = instance.variables["now"]
+        assert date.fromisoformat(today).isoformat() == today
+        assert datetime.fromisoformat(now).tzinfo is not None
+        assert now.startswith(today)
+
+    def test_today_template_renders_in_filters(self):
+        from django.utils import timezone
+        from datetime import timedelta
+
+        domain = make_domain("Domain overdue")
+        today = timezone.localdate()
+        AppliedControl.objects.create(
+            name="Overdue", folder=domain, eta=today - timedelta(days=1)
+        )
+        AppliedControl.objects.create(
+            name="Upcoming", folder=domain, eta=today + timedelta(days=1)
+        )
+        version = read_flow(
+            domain,
+            {
+                "model": "applied_control",
+                "mode": "list",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [{"field": "eta", "op": "lt", "value": "{{today}}"}],
+                },
+            },
+        )
+        output = read_output(start_instance(version))
+        assert [row["name"] for row in output["results"]] == ["Overdue"]
+
+    def test_declared_variable_takes_the_name_over(self):
+        domain = make_domain("Domain shadowed today")
+        version = read_flow(
+            domain,
+            {"model": "applied_control", "mode": "list"},
+            variables=[
+                {
+                    "id": str(uuid.uuid4()),
+                    "key": "today",
+                    "type": "string",
+                    "default_value": "2020-01-01",
+                }
+            ],
+        )
+        instance = start_instance(version)
+        assert instance.variables["today"] == "2020-01-01"
+
+
+@pytest.mark.django_db
+class TestWindowOperators:
+    def _window_flow(self, domain, op, value):
+        return read_flow(
+            domain,
+            {
+                "model": "applied_control",
+                "mode": "list",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [{"field": "eta", "op": op, "value": value}],
+                },
+            },
+        )
+
+    def test_within_next_days_hits_the_inclusive_window(self):
+        domain = make_domain("Domain window")
+        for name, eta in [
+            ("Yesterday", "2026-03-09"),
+            ("Anchor day", "2026-03-10"),
+            ("Last day", "2026-03-17"),
+            ("Too far", "2026-03-18"),
+        ]:
+            AppliedControl.objects.create(name=name, folder=domain, eta=eta)
+        AppliedControl.objects.create(name="No eta", folder=domain)
+        version = self._window_flow(domain, "within_next_days", 7)
+        instance = start_with_seeds(version, {"today": "2026-03-10"})
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        output = read_output(instance)
+        assert {row["name"] for row in output["results"]} == {
+            "Anchor day",
+            "Last day",
+        }
+
+    def test_older_than_days_is_strictly_before_the_cutoff(self):
+        domain = make_domain("Domain stale")
+        for name, eta in [
+            ("Stale", "2026-02-07"),
+            ("On cutoff", "2026-02-08"),
+            ("Recent", "2026-03-01"),
+        ]:
+            AppliedControl.objects.create(name=name, folder=domain, eta=eta)
+        version = self._window_flow(domain, "older_than_days", "30")
+        instance = start_with_seeds(version, {"today": "2026-03-10"})
+        output = read_output(instance)
+        assert [row["name"] for row in output["results"]] == ["Stale"]
+
+    def test_window_value_templates_from_variables(self):
+        domain = make_domain("Domain templated days")
+        AppliedControl.objects.create(name="Soon", folder=domain, eta="2026-03-12")
+        AppliedControl.objects.create(name="Later", folder=domain, eta="2026-03-25")
+        version = self._window_flow(domain, "within_next_days", "{{lookahead}}")
+        instance = start_with_seeds(version, {"today": "2026-03-10", "lookahead": "7"})
+        output = read_output(instance)
+        assert [row["name"] for row in output["results"]] == ["Soon"]
+
+    def test_non_integer_days_park_the_token(self):
+        domain = make_domain("Domain bad days")
+        version = self._window_flow(domain, "within_next_days", "{{oops}}")
+        instance = start_with_seeds(version, {"oops": "soon"})
+        assert instance.status != WorkflowInstance.Status.COMPLETED
+        assert any(
+            "whole number of days" in (log.message or "")
+            for log in instance.logs.filter(event_type="error")
+        )
+
+    def test_negative_days_park_the_token(self):
+        domain = make_domain("Domain negative days")
+        version = self._window_flow(domain, "older_than_days", "{{days}}")
+        instance = start_with_seeds(version, {"days": "-3"})
+        assert instance.status != WorkflowInstance.Status.COMPLETED
+
+    def test_publish_validation_of_window_values(self):
+        domain = make_domain("Domain window publish")
+        for value, expect_error in [
+            (7, False),
+            ("7", False),
+            ("{{lookahead}}", False),
+            ("soon", True),
+            (-3, True),
+        ]:
+            version = self._window_flow(domain, "within_next_days", value)
+            read_node = version.nodes.get(type=WorkflowNode.Type.ACTION)
+            codes = [code for code, _message in validate_read_config(read_node)]
+            assert (codes == ["action_read_invalid_filters"]) is expect_error, value
+
+    def test_window_ops_stay_invalid_for_trigger_filters(self):
+        from automation.workflows.events import validate_filter_tree
+
+        tree = {
+            "operator": "and",
+            "conditions": [{"field": "eta", "op": "within_next_days", "value": 7}],
+        }
+        with pytest.raises(ValueError):
+            validate_filter_tree(tree)
