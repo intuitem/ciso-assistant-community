@@ -482,8 +482,13 @@ class UpdateObjectAction(BaseAction):
             # (provision_user's is_active handling is the precedent). This
             # also means an unresolved template clears rather than skips.
             if value in ("", None):
-                if key == "name":
-                    raise ActionError("update_object: 'name' cannot be cleared")
+                field = entry["model"]._meta.get_field(key)
+                # name is required, and a required choice column written as ""
+                # would be silent corruption (a typo'd template renders "").
+                if key == "name" or (
+                    getattr(field, "choices", None) and not field.null
+                ):
+                    raise ActionError(f"update_object: '{key}' cannot be cleared")
                 value = _clearing_value(entry["model"], key)
             kwargs[key] = value
         _validate_choice_values(entry["model"], kwargs, "update_object")
@@ -1295,6 +1300,15 @@ def validate_update_config(node):
                 )
             )
             continue
+        if value == "":
+            field = entry["model"]._meta.get_field(key)
+            if key == "name" or (getattr(field, "choices", None) and not field.null):
+                errors.append(
+                    (
+                        "action_update_invalid_value",
+                        f"'{key}' cannot be cleared on '{config.get('model')}'",
+                    )
+                )
         # Literal choice values are checkable now; templated ones only at run
         # time (the runtime check is _validate_choice_values).
         if isinstance(value, str) and value and "{{" not in value:

@@ -1428,7 +1428,7 @@
 									<input
 										type="text"
 										class="input w-full text-sm"
-										placeholder={safeTranslate('emptyClearsField')}
+										placeholder={field === 'name' ? '' : safeTranslate('emptyClearsField')}
 										bind:value={actionConfig.fields[field]}
 										oninput={onChange}
 									/>

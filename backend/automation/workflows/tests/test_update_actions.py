@@ -206,6 +206,27 @@ class TestUpdateObject:
         incident.refresh_from_db()
         assert incident.severity == 2
 
+    def test_clearing_required_choice_field_is_refused(self):
+        # A typo'd template renders "" — that must not blank a status column.
+        domain = make_domain("Choice clear domain")
+        vulnerability = Vulnerability.objects.create(
+            name="V", folder=domain, status="potential"
+        )
+        version = action_flow(
+            domain,
+            {
+                "type": "update_object",
+                "model": "vulnerability",
+                "object_id": str(vulnerability.id),
+                "fields": {"status": ""},
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert any("cannot be cleared" in m for m in error_messages(instance))
+        vulnerability.refresh_from_db()
+        assert vulnerability.status == "potential"
+
     def test_target_in_sibling_domain_is_out_of_scope(self):
         ours = make_domain("Ours")
         theirs = make_domain("Theirs")
@@ -413,6 +434,19 @@ class TestUpdatePermissionsAndValidation:
             }
         )
         assert codes == ["action_update_invalid_field"]
+
+    def test_literal_empty_on_name_or_required_choice_fails_publish(self):
+        codes = self._codes(
+            {
+                "model": "vulnerability",
+                "object_id": "{{payload.object_id}}",
+                "fields": {"name": "", "status": ""},
+            }
+        )
+        assert codes == [
+            "action_update_invalid_value",
+            "action_update_invalid_value",
+        ]
 
     def test_literal_bad_choice_value(self):
         codes = self._codes(
