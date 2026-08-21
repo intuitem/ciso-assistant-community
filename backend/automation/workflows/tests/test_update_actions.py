@@ -186,6 +186,26 @@ class TestUpdateObject:
         vulnerability.refresh_from_db()
         assert vulnerability.status != "bogus"
 
+    def test_integer_choice_accepts_rendered_string(self):
+        # Templates always render strings; severity columns hold ints.
+        domain = make_domain("Severity domain")
+        from core.models import Incident
+
+        incident = Incident.objects.create(name="Inc", folder=domain)
+        version = action_flow(
+            domain,
+            {
+                "type": "update_object",
+                "model": "incident",
+                "object_id": str(incident.id),
+                "fields": {"severity": "2"},
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        incident.refresh_from_db()
+        assert incident.severity == 2
+
     def test_target_in_sibling_domain_is_out_of_scope(self):
         ours = make_domain("Ours")
         theirs = make_domain("Theirs")

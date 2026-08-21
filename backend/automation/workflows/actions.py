@@ -249,14 +249,20 @@ def _accessible_folder_ids(folder):
 def _validate_choice_values(model, kwargs, action_label):
     """save()/create() never run full_clean, so a bad choice string would
     persist silently into a choice column; reject it here instead. Only
-    choice fields are checked — everything else keeps its existing behavior."""
+    choice fields are checked — everything else keeps its existing behavior.
+    Values are coerced first (field.to_python), since templates always render
+    strings while integer-choice columns (e.g. severity) hold ints."""
     for key, value in kwargs.items():
         field = model._meta.get_field(key)
         choices = getattr(field, "choices", None)
         if not choices or value in (None, ""):
             continue
         valid = [choice for choice, _label in choices]
-        if value not in valid:
+        try:
+            coerced = field.to_python(value)
+        except ValidationError:
+            coerced = object()  # never in valid: falls through to the raise
+        if coerced not in valid:
             raise ActionError(
                 f"{action_label}: '{value}' is not a valid {key} "
                 f"(one of {', '.join(str(v) for v in valid)})"
@@ -1292,14 +1298,21 @@ def validate_update_config(node):
         # Literal choice values are checkable now; templated ones only at run
         # time (the runtime check is _validate_choice_values).
         if isinstance(value, str) and value and "{{" not in value:
-            choices = getattr(entry["model"]._meta.get_field(key), "choices", None)
-            if choices and value not in [choice for choice, _label in choices]:
-                errors.append(
-                    (
-                        "action_update_invalid_value",
-                        f"'{value}' is not a valid {key} of '{config.get('model')}'",
+            field = entry["model"]._meta.get_field(key)
+            choices = getattr(field, "choices", None)
+            if choices:
+                try:
+                    coerced = field.to_python(value)
+                except ValidationError:
+                    coerced = object()
+                if coerced not in [choice for choice, _label in choices]:
+                    errors.append(
+                        (
+                            "action_update_invalid_value",
+                            f"'{value}' is not a valid {key} of "
+                            f"'{config.get('model')}'",
+                        )
                     )
-                )
     errors.extend(_m2m_config_errors(entry, config, "action_update"))
     return errors
 
