@@ -355,9 +355,8 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
                     value_type=type(choice_index).__name__,
                 )
                 return "N/A"
-            if (
-                metric_definition.choices_definition
-                and isinstance(metric_definition.choices_definition, list)
+            if metric_definition.choices_definition and isinstance(
+                metric_definition.choices_definition, list
             ):
                 # choices_definition is 1-indexed.
                 array_index = choice_index - 1
