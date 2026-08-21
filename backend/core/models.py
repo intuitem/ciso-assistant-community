@@ -10491,7 +10491,9 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         return event.event_notes if event else None
 
     def __str__(self) -> str:
-        return self.ref_id
+        # ref_id is nullable and only auto-assigned in save(); bulk-created
+        # rows may not have one.
+        return self.ref_id or ""
 
 
 class FlowEvent(AbstractBaseModel, FolderMixin):
