@@ -13505,6 +13505,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         pk__in=[ra.pk for ra in ras_to_update]
                     ),
                     list(update_fields),
+                    select_related=("requirement",),
                 )
                 RequirementAssessment.objects.bulk_update(
                     ras_to_update,

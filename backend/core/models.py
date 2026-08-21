@@ -1653,6 +1653,7 @@ class LibraryUpdater:
                             ]
                         ),
                         rescale_fields,
+                        select_related=("requirement",),
                     )
                     RequirementAssessment.objects.bulk_update(
                         requirement_assessment_objects_to_update,

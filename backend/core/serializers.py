@@ -3201,7 +3201,11 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     snapshot_for_bulk_events,
                 )
 
-                ra_snapshot = snapshot_for_bulk_events(assessable_ras, ["is_scored"])
+                ra_snapshot = snapshot_for_bulk_events(
+                    assessable_ras,
+                    ["is_scored"],
+                    select_related=("requirement",),
+                )
                 if updated_instance.scoring_enabled:
                     # Turn on: set is_scored=True, initialize score to the RA's
                     # resolved minimum (Node override falling back to CA) only
