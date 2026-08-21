@@ -346,6 +346,10 @@ class PresetExecutor:
         settings_obj.value = value
         settings_obj.save()
 
+        from global_settings.utils import clear_feature_flags_cache
+
+        clear_feature_flags_cache()
+
     def _create_folder(self, folder_name: str | None) -> Folder:
         name = folder_name or self._preset.name
         context = {"request": self._request} if self._request else {}

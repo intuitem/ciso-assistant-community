@@ -952,7 +952,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         if self.is_superuser and not self.is_active:
             # avoid deactivation of superuser
             self.is_active = True
-        if not self.is_local:
+        if not self.is_local and not self.is_scim_managed:
             self.set_unusable_password()
         super().save(*args, **kwargs)
         logger.info("user saved", user=self)
@@ -1025,6 +1025,21 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         Tries the YAML-based template system first (supports custom overrides),
         falls back to the legacy Django HTML templates.
         """
+        template_key = self._TEMPLATE_KEY_MAP.get(email_template_name)
+        if template_key:
+            from core.email_utils import is_email_template_enabled
+
+            # If call to render_email_template (below) fails because the template is disabled (from settings->templates->email templates),
+            # it will still send an email using fallback to legacy Django HTML templates.
+            # This prevents it
+            if not is_email_template_enabled(template_key):
+                logger.info(
+                    "Email template is disabled in settings, skipping send",
+                    template_key=template_key,
+                    recipient=self.email,
+                )
+                return
+
         user_lang = self.get_preferences().get("lang", "en")
         uid = urlsafe_base64_encode(force_bytes(self.pk))
         token = default_token_generator.make_token(self)
@@ -1045,7 +1060,6 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         }
 
         # Try YAML template system (supports custom overrides and Markdown)
-        template_key = self._TEMPLATE_KEY_MAP.get(email_template_name)
         if template_key:
             try:
                 from core.email_utils import render_email_template
@@ -1267,6 +1281,9 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         Indicates whether the user can log in using a local password
         """
         from global_settings.models import GlobalSettings
+
+        if self.is_scim_managed and not self.keep_local_login:
+            return False
 
         try:
             sso_settings = GlobalSettings.objects.get(

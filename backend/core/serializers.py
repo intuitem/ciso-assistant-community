@@ -48,7 +48,15 @@ class SerializerFactory:
     def get_serializer(self, base_name: str, action: str):
         if action in ["list", "retrieve"]:
             serializer_name = f"{base_name}ReadSerializer"
-        elif action in ["create", "update", "partial_update", "destroy"]:
+        elif action in [
+            "create",
+            "update",
+            "partial_update",
+            "destroy",
+            # OPTIONS: DRF describes the shape a client may send, so the
+            # write serializer is the one to answer with.
+            "metadata",
+        ]:
             serializer_name = f"{base_name}WriteSerializer"
         else:
             return None
@@ -134,9 +142,18 @@ class BaseModelSerializer(serializers.ModelSerializer):
         return attrs
 
     def _check_object_perm(
-        self, instance_or_data, action: str, *, folder: Folder | None = None
+        self,
+        instance_or_data,
+        action: str,
+        *,
+        folder: Folder | None = None,
+        model: type[models.Model] | None = None,
     ) -> None:
-        """Check that the requesting user has *action* permission on the resolved folder."""
+        """Check that the requesting user has *action* permission on the resolved folder.
+
+        `model` overrides the permission codename's model when the checked
+        object is not an instance of the serializer's own model.
+        """
         if folder is None:
             folder = Folder.get_folder(instance_or_data)
         if folder is None:
@@ -144,10 +161,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request is None:
             return
+        model = model or self.Meta.model
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(
-                codename=f"{action}_{self.Meta.model._meta.model_name}",
+                codename=f"{action}_{model._meta.model_name}",
             ),
             folder=folder,
         ):
@@ -2337,9 +2355,9 @@ class FolderWriteSerializer(BaseModelSerializer):
 
             auto_groups = UserGroup.objects.filter(folder=instance, builtin=True)
             auto_groups_exist = auto_groups.exists()
-            if (
-                auto_groups_exist
-                and User.objects.filter(user_groups__in=auto_groups).exists()
+            if auto_groups_exist and (
+                User.objects.filter(user_groups__in=auto_groups).exists()
+                or auto_groups.filter(idp_groups__isnull=False).exists()
             ):
                 raise serializers.ValidationError(
                     {"create_iam_groups": "cannotDisableIamGroupsAssignedUsers"}
@@ -2962,6 +2980,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
     """Optimized serializer for list views - only includes fields needed by the table."""
 
     path = PathField(read_only=True)
+    authors = FieldsRelatedField(many=True)
     folder = FieldsRelatedField()
     framework = FieldsRelatedField()
     perimeter = FieldsRelatedField()
@@ -3002,6 +3021,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "created_at",
             "updated_at",
             "path",
+            "authors",
         ]
 
 
@@ -3586,17 +3606,35 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
             # Handle answers if provided in old JSON format
             answers_data = validated_data.pop("answers", None)
 
-            # Question-driven RAs: score and is_scored belong to
-            # recompute_assessment (a committed score means "questionnaire
-            # complete" for progress). Forms round-trip every field on save,
-            # so manual writes are dropped rather than rejected.
+            # Question-driven score is recompute-owned: drop manual writes
+            # unless is_score_overridden pins a value.
+            requirement_has_questions = instance.requirement.questions.exists()
+            override_after = validated_data.get(
+                "is_score_overridden", instance.is_score_overridden
+            )
             if (
-                "score" in validated_data or "is_scored" in validated_data
-            ) and instance.requirement.questions.exists():
+                ("score" in validated_data or "is_scored" in validated_data)
+                and requirement_has_questions
+                and not override_after
+            ):
                 validated_data.pop("score", None)
                 validated_data.pop("is_scored", None)
 
+            was_overridden = instance.is_score_overridden
             instance = super().update(instance, validated_data)
+
+            # Override turned off: resync score from answers below.
+            override_turned_off = (
+                requirement_has_questions and was_overridden and not override_after
+            )
+            score_recomputed = False
+
+            # Override on: is_scored mirrors score presence.
+            if override_after and requirement_has_questions:
+                new_is_scored = instance.score is not None
+                if instance.is_scored != new_is_scored:
+                    instance.is_scored = new_is_scored
+                    instance.save(update_fields=["is_scored"])
 
             if answers_data and isinstance(answers_data, dict):
                 # Convert incoming answers dict to Answer model updates
@@ -3680,6 +3718,11 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
 
                 if has_score_or_result:
                     instance.compute_score_and_result()
+                    score_recomputed = True
+
+            # Resync score when the override was turned off and nothing else recomputed.
+            if override_turned_off and not score_recomputed:
+                instance.compute_score_and_result()
 
             # Auto-map respondent_alignment to result.
             # Skipped when framework questions already drive the result, to avoid
@@ -3690,7 +3733,6 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 "in_progress": RequirementAssessment.Result.PARTIALLY_COMPLIANT,
                 "not_applicable": RequirementAssessment.Result.NOT_APPLICABLE,
             }
-            requirement_has_questions = instance.requirement.questions.exists()
             # Skip auto-map when the auditor explicitly sets result in the same
             # request: SuperForm round-trips the existing respondent_alignment
             # on every submit, and we must not clobber an auditor-edited result
@@ -4118,6 +4160,7 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
             "result",
             "score",
             "is_scored",
+            "is_score_overridden",
             "observation",
             "compliance_assessment",
             "requirement",
@@ -5508,10 +5551,29 @@ class ObjectClassificationWriteSerializer(BaseModelSerializer):
 
 
 class ValidationFlowWriteSerializer(BaseModelSerializer):
+    ALLOWED_STATUS_TRANSITIONS = {
+        ValidationFlow.Status.SUBMITTED: {
+            ValidationFlow.Status.ACCEPTED,
+            ValidationFlow.Status.REJECTED,
+            ValidationFlow.Status.CHANGE_REQUESTED,
+            ValidationFlow.Status.DROPPED,
+        },
+        ValidationFlow.Status.ACCEPTED: {ValidationFlow.Status.REVOKED},
+        ValidationFlow.Status.CHANGE_REQUESTED: {
+            ValidationFlow.Status.SUBMITTED,
+            ValidationFlow.Status.DROPPED,
+        },
+    }
+
     ref_id = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     event_notes = serializers.CharField(
         required=False, allow_blank=True, allow_null=True, write_only=True
     )
+
+    def validate_status(self, value):
+        if self.instance is None and value != ValidationFlow.Status.SUBMITTED:
+            raise serializers.ValidationError("validationMustStartAsSubmitted")
+        return value
 
     def create(self, validated_data: dict) -> ValidationFlow:
         """
@@ -5569,50 +5631,59 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         # Check if status is being modified
         if "status" in validated_data:
             new_status = validated_data["status"]
-            current_status = instance.status
-
-            # Define who can modify based on current status
-            if current_status in ["submitted", "accepted"]:
-                # For submitted status: approver can do any action, requester can only drop
-                if current_status == "submitted" and new_status == "dropped":
-                    # Allow requester to drop their own request
-                    if (
-                        instance.requester != request_user
-                        and instance.approver != request_user
-                    ):
-                        raise PermissionDenied(
-                            {
-                                "error": "Only the requester or approver can drop this validation"
-                            }
-                        )
-                else:
-                    # Only approver can change status from submitted or accepted (for other actions)
-                    if instance.approver != request_user:
-                        raise PermissionDenied(
-                            {
-                                "error": "Only the assigned approver can modify this validation"
-                            }
-                        )
-            elif current_status == "change_requested":
-                # Only requester can change status from change_requested
-                if instance.requester != request_user:
-                    raise PermissionDenied(
-                        {
-                            "error": "Only the requester can resubmit or drop this validation"
-                        }
-                    )
-            else:
-                # Terminal states (rejected, revoked, dropped, expired) cannot be modified
-                raise PermissionDenied(
-                    {
-                        "error": "This validation is in a terminal state and cannot be modified"
-                    }
-                )
 
             # Extract event notes from validated_data (passed from actions)
             event_notes = validated_data.pop("event_notes", None)
 
             with transaction.atomic():
+                # Re-read under lock: concurrent requests must not both validate the same starting status
+                instance = ValidationFlow.objects.select_for_update().get(
+                    pk=instance.pk
+                )
+                current_status = instance.status
+
+                # Define who can modify based on current status
+                if current_status in ["submitted", "accepted"]:
+                    # For submitted status: approver can do any action, requester can only drop
+                    if current_status == "submitted" and new_status == "dropped":
+                        # Allow requester to drop their own request
+                        if (
+                            instance.requester != request_user
+                            and instance.approver != request_user
+                        ):
+                            raise PermissionDenied(
+                                {"error": "validationOnlyRequesterOrApproverCanDrop"}
+                            )
+                    else:
+                        # Only approver can change status from submitted or accepted (for other actions)
+                        if instance.approver != request_user:
+                            raise PermissionDenied(
+                                {"error": "validationOnlyApproverCanModify"}
+                            )
+                elif current_status == "change_requested":
+                    # Only requester can change status from change_requested
+                    if instance.requester != request_user:
+                        raise PermissionDenied(
+                            {"error": "validationOnlyRequesterCanAct"}
+                        )
+                else:
+                    # Terminal states (rejected, revoked, dropped, expired) cannot be modified
+                    raise PermissionDenied({"error": "validationInTerminalState"})
+
+                if (
+                    new_status != current_status
+                    and new_status
+                    not in self.ALLOWED_STATUS_TRANSITIONS.get(current_status, set())
+                ):
+                    raise serializers.ValidationError(
+                        {
+                            "status": "validationStatusTransitionNotAllowed",
+                            # Context for API consumers and the frontend message
+                            "from_status": current_status,
+                            "to_status": new_status,
+                        }
+                    )
+
                 # Update the instance
                 updated_instance = super().update(instance, validated_data)
 
