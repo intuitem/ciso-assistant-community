@@ -484,6 +484,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.saml",
     "allauth.socialaccount.providers.openid_connect",
     "allauth.mfa",
+    "allauth.idp.oidc",
     "huey.contrib.djhuey",
     "storages",
 ]
@@ -586,6 +587,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "knox.auth.TokenAuthentication",
+        "iam.authentication.OIDCServiceAccountAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -833,6 +835,30 @@ SOCIALACCOUNT_PROVIDERS = {
     },
 }
 
+# Signs id_tokens/jwks only, access tokens stay opaque (default format).
+IDP_OIDC_PRIVATE_KEY = os.environ.get("IDP_OIDC_PRIVATE_KEY", "")
+if not IDP_OIDC_PRIVATE_KEY:
+    _idp_oidc_key_path = Path(
+        os.environ.get(
+            "IDP_OIDC_PRIVATE_KEY_FILE", BASE_DIR / "db" / "idp_oidc_private_key.pem"
+        )
+    )
+    if _idp_oidc_key_path.exists():
+        IDP_OIDC_PRIVATE_KEY = _idp_oidc_key_path.read_text()
+    else:
+        from cryptography.hazmat.primitives import serialization
+        from cryptography.hazmat.primitives.asymmetric import rsa
+
+        _idp_oidc_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        IDP_OIDC_PRIVATE_KEY = _idp_oidc_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        ).decode()
+        _idp_oidc_key_path.parent.mkdir(parents=True, exist_ok=True)
+        _idp_oidc_key_path.touch(mode=0o600)
+        _idp_oidc_key_path.write_text(IDP_OIDC_PRIVATE_KEY)
+
 # MFA / WebAuthn settings
 MFA_SUPPORTED_TYPES = ["recovery_codes", "totp", "webauthn"]
 MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = DEBUG  # Allow http://localhost in dev
@@ -859,6 +885,33 @@ HUEY = {
 
 AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
+
+# Run workflow instances in a Huey worker instead of the triggering request.
+# False only moves the engine into the request: a Huey consumer is required
+# either way, since scheduled triggers, TTL reaping and deferred actions
+# (send_email) are all Huey tasks and silently never run without one.
+WORKFLOWS_ASYNC_EXECUTION = (
+    os.environ.get("WORKFLOWS_ASYNC_EXECUTION", "").lower() == "true"
+)
+
+# How long a token may sit parked on a deferred action before the sweep
+# treats the dispatch as lost and fails the node.
+WORKFLOWS_DISPATCH_TIMEOUT_SECONDS = int(
+    os.environ.get("WORKFLOWS_DISPATCH_TIMEOUT_SECONDS", 900)
+)
+
+# Kill-switch for inbound workflow webhooks: when disabled, hook
+# URLs answer 404 uniformly, for environments that want no unauthenticated
+# ingress at all.
+WORKFLOWS_INBOUND_HOOKS = (
+    os.environ.get("WORKFLOWS_INBOUND_HOOKS", "true").lower() != "false"
+)
+
+# Per-sender-IP rate limit on the unauthenticated inbound hook endpoint (DRF
+# rate string, e.g. "120/min"). Keyed on the trailing X-Forwarded-For entry.
+WORKFLOWS_WEBHOOK_THROTTLE_RATE = os.environ.get(
+    "WORKFLOWS_WEBHOOK_THROTTLE_RATE", "120/min"
+)
 
 # Allow outbound server-side requests (webhooks, integrations, LLM URLs) to private/loopback addresses
 ALLOW_PRIVATE_NETWORK_REQUESTS = os.environ.get(

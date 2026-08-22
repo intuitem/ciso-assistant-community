@@ -6,6 +6,7 @@ import FrameworkName from '$lib/components/ModelTable/field/FrameworkName.svelte
 import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/field/UserGroupNameDisplay.svelte';
 import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
+import TriggerTypesDisplay from '$lib/components/ModelTable/field/TriggerTypesDisplay.svelte';
 import { listViewFields } from './table';
 import type { TableBatchAction } from './table';
 import type { urlModel } from './types';
@@ -1025,6 +1026,30 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [{ field: 'user_groups', urlModel: 'user-groups' }],
 		reverseForeignKeyFields: [
 			{ field: 'idp_groups', urlModel: 'users', disableCreate: true, disableDelete: true }
+		],
+		filters: []
+	},
+	'service-accounts': {
+		endpointUrl: 'iam/service-accounts',
+		name: 'serviceaccount',
+		localName: 'serviceAccount',
+		localNamePlural: 'serviceAccounts',
+		verboseName: 'Service account',
+		verboseNamePlural: 'Service accounts',
+		foreignKeyFields: [{ field: 'folders', urlModel: 'folders' }],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'client_id' },
+			{ field: 'secret_preview' },
+			{ field: 'is_active' },
+			{ field: 'expiry_date', type: 'date' },
+			{ field: 'is_recursive' },
+			{ field: 'folders' },
+			{ field: 'created_by' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
 		],
 		filters: []
 	},
@@ -3267,6 +3292,30 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		filters: [{ field: 'activity' }, { field: 'actor' }, { field: 'role' }]
 	},
+	workflows: {
+		name: 'workflow',
+		localName: 'workflow',
+		localNamePlural: 'workflows',
+		verboseName: 'Workflow',
+		verboseNamePlural: 'Workflows',
+		endpointUrl: 'workflows/workflows',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		filters: [{ field: 'folder' }, { field: 'filtering_labels' }]
+	},
+	'workflow-versions': {
+		name: 'workflowversion',
+		localName: 'workflowVersion',
+		localNamePlural: 'workflowVersions',
+		verboseName: 'Workflow version',
+		verboseNamePlural: 'Workflow versions',
+		endpointUrl: 'workflows/workflow-versions',
+		foreignKeyFields: [{ field: 'workflow', urlModel: 'workflows' }],
+		selectFields: [{ field: 'status' }],
+		filters: [{ field: 'workflow' }, { field: 'status' }]
+	},
 	'metric-definitions': {
 		name: 'metricdefinition',
 		localName: 'metricDefinition',
@@ -3471,6 +3520,9 @@ const FIELD_COMPONENT_MAP = {
 	},
 	frameworks: {
 		name: FrameworkName
+	},
+	workflows: {
+		trigger_types: TriggerTypesDisplay
 	}
 };
 

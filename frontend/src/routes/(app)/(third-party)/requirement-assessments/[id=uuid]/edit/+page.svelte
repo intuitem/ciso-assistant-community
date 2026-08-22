@@ -790,25 +790,59 @@
 					{#if page.data.compliance_assessment_score.scoring_enabled}
 						{#if computedScore !== null || hasComputedScore(page.data.requirementAssessment.requirement.questions)}
 							{#if showScore}
-								<div class="flex flex-row items-center space-x-4">
-									<span class="font-medium">{m.score()}</span>
-									<div class="shrink-0 relative">
-										<Progress
-											value={formatScoreValue(computedScore, resolvedMax, false, resolvedMin)}
-											min={0}
-											max={100}
+								<div class="flex flex-col space-y-2" data-testid="score-field">
+									<div class="flex flex-row items-center space-x-4">
+										<span class="font-medium"
+											>{$formStore.is_score_overridden ? m.automaticScore() : m.score()}</span
 										>
-											<Progress.Circle class="[--size:--spacing(10)]">
-												<Progress.CircleTrack />
-												<Progress.CircleRange
-													class={displayScoreColor(computedScore, resolvedMax, false, resolvedMin)}
-												/>
-											</Progress.Circle>
-											<div class="absolute inset-0 flex items-center justify-center">
-												<span class="text-xs font-bold">{computedScore ?? '–'}</span>
-											</div>
-										</Progress>
+										<div class="shrink-0 relative">
+											<Progress
+												value={formatScoreValue(computedScore, resolvedMax, false, resolvedMin)}
+												min={0}
+												max={100}
+											>
+												<Progress.Circle class="[--size:--spacing(10)]">
+													<Progress.CircleTrack />
+													<Progress.CircleRange
+														class={displayScoreColor(
+															computedScore,
+															resolvedMax,
+															false,
+															resolvedMin
+														)}
+													/>
+												</Progress.Circle>
+												<div class="absolute inset-0 flex items-center justify-center">
+													<span class="text-xs font-bold">{computedScore ?? '–'}</span>
+												</div>
+											</Progress>
+										</div>
+										{#if isAuditor}
+											<Checkbox
+												{form}
+												field="is_score_overridden"
+												label={m.overrideScore()}
+												helpText={m.overrideScoreHelpText()}
+												checkboxComponent="switch"
+											/>
+										{/if}
 									</div>
+									{#if $formStore.is_score_overridden}
+										<Score
+											{form}
+											min_score={resolvedMin}
+											max_score={resolvedMax}
+											scores_definition={resolvedScoresDef}
+											field="score"
+											label={m.score()}
+										/>
+										{#if computedScore !== null && $formStore.score !== computedScore}
+											<p class="text-warning-700-300 text-sm flex items-center gap-1">
+												<i class="fa-solid fa-triangle-exclamation"></i>
+												{m.scoreDeviatesFromAuto({ score: computedScore })}
+											</p>
+										{/if}
+									{/if}
 								</div>
 							{/if}
 						{:else if data.result !== 'not_applicable'}

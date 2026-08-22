@@ -29,8 +29,8 @@ def client_for(email, group_name, folder):
 def client_with_role(email, folder, codenames):
     """Client for a user holding a custom role with exactly *codenames* on *folder*.
 
-    Include "view_folder": the IAM walk skips assignments whose role can't see
-    folders at all (see RoleAssignment.get_accessible_object_ids).
+    Include "view_folder": the IAM walk skipped (in the past) assignments whose role can't see
+    folders at all.
     """
     user = User.objects.create_user(email, is_published=True)
     role = Role.objects.create(name=f"role-{email}", folder=Folder.get_root_folder())
