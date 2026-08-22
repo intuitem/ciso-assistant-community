@@ -834,6 +834,8 @@ class DocumentAttachmentViewSet(BaseModelViewSet):
     API endpoint for serving document attachment files.
     """
 
+    http_method_names = ["get", "head", "options"]
+
     model = DocumentAttachment
 
     @action(detail=True, methods=["get"])

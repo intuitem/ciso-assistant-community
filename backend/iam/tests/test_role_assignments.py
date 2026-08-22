@@ -4,7 +4,9 @@ from django.db import models
 from django.contrib.auth.models import Permission
 import pytest
 
+from global_settings import utils as ff_utils
 from global_settings.models import GlobalSettings
+from global_settings.utils import clear_feature_flags_cache
 from iam.models import RoleAssignment, User, UserGroup, IdPGroup, Role, Folder
 from core.models import (
     AppliedControl,
@@ -41,6 +43,9 @@ class Utils:
             "idp_groups": True,
         }
         settings.save(update_fields=["value"])
+        # Direct ORM write: bypasses the serializer, the single invalidation
+        # point of the feature-flags cache.
+        clear_feature_flags_cache()
 
     @staticmethod
     def unset_idp_groups_feature_flag():
@@ -50,6 +55,16 @@ class Utils:
             "idp_groups": False,
         }
         settings.save(update_fields=["value"])
+        clear_feature_flags_cache()
+
+
+@pytest.fixture(autouse=True)
+def _enterprise_flags(monkeypatch):
+    """idp_groups is enterprise-only (declared on the EE FeatureFlagsSerializer,
+    hence unsupported on CE); the IdP-group inheritance tests exercise the
+    EE-gated behavior from the CE test bed."""
+    supported = ff_utils.get_supported_feature_flags() | {"idp_groups"}
+    monkeypatch.setattr(ff_utils, "get_supported_feature_flags", lambda: supported)
 
 
 @pytest.mark.django_db
