@@ -42,8 +42,15 @@ class SerializerFactory:
     """
 
     def __init__(self, *modules: str):
+        # Flatten modules because some callers pass a list as an argument
+        flat_modules = []
+        for mod in modules:
+            if isinstance(mod, list):
+                flat_modules.extend(mod)
+            elif mod:
+                flat_modules.append(mod)
         # Reverse to prioritize later modules
-        self.modules = list(reversed(modules))
+        self.modules = list(reversed(flat_modules))
 
     def get_serializer(self, base_name: str, action: str):
         if action in ["list", "retrieve"]:
