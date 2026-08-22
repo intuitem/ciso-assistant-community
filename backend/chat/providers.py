@@ -294,10 +294,11 @@ def _normalize_system_messages(
     preserving the order of all non-system history messages.
 
     ``directives`` carries platform-authored, per-turn response constraints.
-    They sit next to the system prompt so the model does not treat them as
-    user-supplied instructions it has been told to decline.
+    They ride in the system message so the model does not treat them as
+    user-supplied instructions it has been told to decline, and go last so
+    they outrank any instruction the summary carries over from user text.
     """
-    system_parts = [system_prompt, directives]
+    system_parts = [system_prompt]
     messages = []
 
     if history:
@@ -308,6 +309,8 @@ def _normalize_system_messages(
                     system_parts.append(strip_framing_markers(msg["content"]))
             else:
                 messages.append({"role": msg["role"], "content": msg["content"]})
+
+    system_parts.append(directives)
 
     return [
         {
