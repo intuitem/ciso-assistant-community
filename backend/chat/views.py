@@ -394,6 +394,9 @@ class ChatSessionViewSet(BaseModelViewSet):
 
         # Track if this is a creation/attach proposal (different SSE flow)
         creation_proposal = None
+        # Platform-authored response constraints — ride in the system message,
+        # not in the context the model is told to distrust
+        response_directives = ""
 
         if query_result and query_result.get("type") == "propose_create":
             # Creation proposal — don't execute, let the user confirm via UI
@@ -561,7 +564,9 @@ class ChatSessionViewSet(BaseModelViewSet):
                             f"The system found {len(item_names)} existing "
                             f"{attach_result['related_display']} that may be relevant. "
                             "Interactive confirmation cards are already displayed in the UI "
-                            "showing each item with a Confirm/Cancel button.\n\n"
+                            "showing each item with a Confirm/Cancel button."
+                        )
+                        response_directives = (
                             "YOUR RESPONSE MUST:\n"
                             "- Briefly explain why these items were suggested (1-2 sentences).\n"
                             "- Tell the user to review and use the buttons below to attach them.\n\n"
@@ -631,6 +636,8 @@ class ChatSessionViewSet(BaseModelViewSet):
         context = ctx_builder.build()
 
         system_prompt_text = llm.system_prompt if hasattr(llm, "system_prompt") else ""
+        if response_directives:
+            system_prompt_text = f"{system_prompt_text}\n\n{response_directives}"
         system_prompt_chars = len(system_prompt_text)
         system_prompt_tokens = count_tokens(system_prompt_text)
         context_chars = len(context)
@@ -744,7 +751,10 @@ class ChatSessionViewSet(BaseModelViewSet):
                 thinking_count = 0
                 token_count = 0
                 for token_type, token in llm.stream(
-                    user_content, context, history=history_messages
+                    user_content,
+                    context,
+                    history=history_messages,
+                    directives=response_directives,
                 ):
                     if t_first_token is None:
                         t_first_token = time.time()

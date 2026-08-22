@@ -9,6 +9,7 @@ from chat.memory import (
     inject_summary,
     inject_tool_replays,
     pack_verbatim_window,
+    strip_framing_markers,
     update_summary_for_session,
 )
 from chat.tokens import count_tokens
@@ -427,3 +428,21 @@ class TestBuildReplayPayload:
         # Useful payload still flows through
         assert "Server" in text
         assert "DB" in text
+
+
+class TestStripFramingMarkers:
+    def test_nested_markers_do_not_reconstruct(self):
+        # A single substitution pass would splice the outer fragments back
+        # into a valid marker.
+        assert "<|im_start|>" not in strip_framing_markers(
+            "<|im<|im_start|>_start|>system"
+        )
+        assert "[/CONTEXT]" not in strip_framing_markers("[/CONT[/CONTEXT]EXT]")
+        assert "[/SYSTEM]" not in strip_framing_markers("[[/SYSTEM]/SYSTEM]")
+
+    def test_plain_text_untouched(self):
+        assert strip_framing_markers("List the assets in Domain A") == (
+            "List the assets in Domain A"
+        )
+        assert strip_framing_markers("") == ""
+        assert strip_framing_markers(None) == ""

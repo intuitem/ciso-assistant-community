@@ -226,7 +226,11 @@ _FRAMING_MARKER_PATTERNS = re.compile(
 
 def strip_framing_markers(text: str) -> str:
     """Neutralize delimiter/role markers in text that comes from the database."""
-    return _FRAMING_MARKER_PATTERNS.sub("", text or "")
+    out = text or ""
+    # loop: a single pass can rebuild a marker from its own fragments
+    while (stripped := _FRAMING_MARKER_PATTERNS.sub("", out)) != out:
+        out = stripped
+    return out
 
 
 def build_replay_payload(

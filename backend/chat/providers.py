@@ -199,11 +199,19 @@ class LLM(Protocol):
     """Interface for LLM providers."""
 
     def generate(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> str: ...
 
     def stream(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> Iterator[tuple[str, str]]:
         """Stream response as (type, content) tuples. Type is 'token' or 'thinking'."""
         ...
@@ -276,6 +284,7 @@ class OllamaEmbedder:
 def _normalize_system_messages(
     system_prompt: str,
     history: list[dict] | None = None,
+    directives: str = "",
 ) -> list[dict]:
     """Build history with a single system message at position 0.
 
@@ -283,15 +292,20 @@ def _normalize_system_messages(
     appear only at the beginning of the conversation. Merge system messages
     from history (session summary) into the initial system prompt while
     preserving the order of all non-system history messages.
+
+    ``directives`` carries platform-authored, per-turn response constraints.
+    They sit next to the system prompt so the model does not treat them as
+    user-supplied instructions it has been told to decline.
     """
-    system_parts = [system_prompt]
+    system_parts = [system_prompt, directives]
     messages = []
 
     if history:
         for msg in history:
             if msg["role"] == "system":
                 if msg["content"]:
-                    system_parts.append(msg["content"])
+                    # session summary — LLM output over user data, not trusted
+                    system_parts.append(strip_framing_markers(msg["content"]))
             else:
                 messages.append({"role": msg["role"], "content": msg["content"]})
 
@@ -304,26 +318,44 @@ def _normalize_system_messages(
     ]
 
 
+def _merge_adjacent_roles(messages: list[dict]) -> list[dict]:
+    """Collapse consecutive same-role messages into one.
+
+    Strict chat templates (Mistral family) reject arrays where roles do not
+    alternate; replayed tool observations land as a user message right
+    before the current user turn.
+    """
+    merged: list[dict] = []
+    for msg in messages:
+        if merged and merged[-1]["role"] == msg["role"]:
+            merged[-1]["content"] = f"{merged[-1]['content']}\n\n{msg['content']}"
+        else:
+            merged.append(dict(msg))
+    return merged
+
+
 def _build_messages(
     system_prompt: str,
     prompt: str,
     context: str,
     history: list[dict] | None = None,
+    directives: str = "",
 ) -> list[dict]:
     """Build the message array for LLM calls.
 
-    System instructions and system history are merged into a single leading
-    system message for compatibility with strict chat templates. Retrieved
-    context stays on the current user turn: it is per-turn data that must
-    outrank replayed observations from earlier turns, and it carries
-    database text, so it is delimited and stripped of role markers rather
-    than being spliced into the system instructions.
+    System instructions, platform directives and system history are merged
+    into a single leading system message for compatibility with strict chat
+    templates, and adjacent same-role messages are collapsed so roles
+    alternate. Retrieved context stays on the current user turn: it is
+    per-turn data that must outrank replayed observations from earlier
+    turns, and it carries database text, so it is delimited and stripped of
+    role markers rather than being spliced into the system instructions.
     """
-    messages = _normalize_system_messages(system_prompt, history)
+    messages = _normalize_system_messages(system_prompt, history, directives)
     if context:
         prompt = f"[CONTEXT]\n{strip_framing_markers(context)}\n[/CONTEXT]\n\n{prompt}"
     messages.append({"role": "user", "content": prompt})
-    return messages
+    return _merge_adjacent_roles(messages)
 
 
 class OllamaLLM:
@@ -350,9 +382,15 @@ class OllamaLLM:
         return {"temperature": self.temperature} if self.temperature_enabled else {}
 
     def generate(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> str:
-        messages = _build_messages(self.system_prompt, prompt, context, history)
+        messages = _build_messages(
+            self.system_prompt, prompt, context, history, directives
+        )
         body: dict = {"model": self.model, "messages": messages, "stream": False}
         if options := self._options():
             body["options"] = options
@@ -361,11 +399,17 @@ class OllamaLLM:
         return strip_thinking(resp.json()["message"]["content"])
 
     def _raw_stream(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> Iterator[str]:
         import httpx
 
-        messages = _build_messages(self.system_prompt, prompt, context, history)
+        messages = _build_messages(
+            self.system_prompt, prompt, context, history, directives
+        )
         body: dict = {"model": self.model, "messages": messages, "stream": True}
         if options := self._options():
             body["options"] = options
@@ -382,9 +426,15 @@ class OllamaLLM:
                         yield content
 
     def stream(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> Iterator[tuple[str, str]]:
-        return filter_thinking_tokens(self._raw_stream(prompt, context, history))
+        return filter_thinking_tokens(
+            self._raw_stream(prompt, context, history, directives)
+        )
 
     def tool_call(
         self,
@@ -394,6 +444,7 @@ class OllamaLLM:
     ) -> dict | None:
         messages = _normalize_system_messages(TOOL_SYSTEM_PROMPT, history)
         messages.append({"role": "user", "content": prompt})
+        messages = _merge_adjacent_roles(messages)
         import httpx
 
         body: dict = {
@@ -466,9 +517,15 @@ class OpenAICompatibleLLM:
         return f"{self.base_url}/chat/completions"
 
     def generate(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> str:
-        messages = _build_messages(self.system_prompt, prompt, context, history)
+        messages = _build_messages(
+            self.system_prompt, prompt, context, history, directives
+        )
         body: dict = {"messages": messages, "stream": False}
         if self.model:
             body["model"] = self.model
@@ -479,11 +536,17 @@ class OpenAICompatibleLLM:
         return strip_thinking(resp.json()["choices"][0]["message"]["content"])
 
     def _raw_stream(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> Iterator[tuple[str, str]]:
         import httpx
 
-        messages = _build_messages(self.system_prompt, prompt, context, history)
+        messages = _build_messages(
+            self.system_prompt, prompt, context, history, directives
+        )
         body: dict = {"messages": messages, "stream": True}
         if self.model:
             body["model"] = self.model
@@ -522,9 +585,15 @@ class OpenAICompatibleLLM:
                     continue
 
     def stream(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> Iterator[tuple[str, str]]:
-        return _merge_thinking_stream(self._raw_stream(prompt, context, history))
+        return _merge_thinking_stream(
+            self._raw_stream(prompt, context, history, directives)
+        )
 
     def tool_call(
         self,
@@ -534,6 +603,7 @@ class OpenAICompatibleLLM:
     ) -> dict | None:
         messages = _normalize_system_messages(TOOL_SYSTEM_PROMPT, history)
         messages.append({"role": "user", "content": prompt})
+        messages = _merge_adjacent_roles(messages)
 
         import httpx
 
@@ -644,12 +714,20 @@ class StubLLM:
     """Fallback when no LLM is available — returns retrieval results only."""
 
     def generate(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> str:
         return f"[No LLM configured — showing retrieved context]\n\n{context}"
 
     def stream(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> Iterator[tuple[str, str]]:
         yield ("token", self.generate(prompt, context))
 
