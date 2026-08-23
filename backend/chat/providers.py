@@ -9,7 +9,7 @@ import json
 import structlog
 
 from chat.embedding_models import DEFAULT_EMBEDDING_MODEL
-from chat.memory import strip_framing_markers
+from chat.memory import strip_framing_markers, wrap_session_summary
 
 logger = structlog.get_logger(__name__)
 
@@ -304,11 +304,20 @@ def _normalize_system_messages(
     if history:
         for msg in history:
             if msg["role"] == "system":
-                if msg["content"]:
-                    # session summary — LLM output over user data, not trusted
-                    system_parts.append(strip_framing_markers(msg["content"]))
+                # session summary — LLM output over user data, not trusted:
+                # strip its markers, then re-delimit so the model can tell it
+                # apart from the platform instructions it sits next to
+                summary = strip_framing_markers(msg["content"] or "").strip()
+                if summary:
+                    system_parts.append(wrap_session_summary(summary))
             else:
                 messages.append({"role": msg["role"], "content": msg["content"]})
+
+    # Strict templates (Mistral family) also require the first non-system
+    # message to be a user turn; the verbatim window can start on an assistant
+    # one when the budget cuts mid-pair.
+    while messages and messages[0]["role"] != "user":
+        messages.pop(0)
 
     system_parts.append(directives)
 

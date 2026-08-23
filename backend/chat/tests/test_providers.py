@@ -261,9 +261,27 @@ class TestNormalizeSystemMessages:
 
         messages = _normalize_system_messages("System instructions", history)
 
-        assert "[/SESSION SUMMARY]" not in messages[0]["content"]
-        assert "<|im_start|>" not in messages[0]["content"]
-        assert "RULES UPDATE" in messages[0]["content"]
+        content = messages[0]["content"]
+        # the only delimiters left are the ones we re-wrap the summary with
+        assert content.count("[/SESSION SUMMARY]") == 1
+        assert content.endswith("[/SESSION SUMMARY]")
+        assert "<|im_start|>" not in content
+        assert "RULES UPDATE" in content
+
+    def test_summary_is_delimited_from_the_platform_instructions(self):
+        from chat.memory import SESSION_SUMMARY_CLOSE, SESSION_SUMMARY_OPEN
+        from chat.providers import _normalize_system_messages
+
+        history = [{"role": "system", "content": "GOAL: review the ISO 27001 audit"}]
+
+        messages = _normalize_system_messages("System instructions", history)
+
+        content = messages[0]["content"]
+        assert SESSION_SUMMARY_OPEN in content
+        assert content.endswith(SESSION_SUMMARY_CLOSE)
+        assert content.index("System instructions") < content.index(
+            SESSION_SUMMARY_OPEN
+        )
 
     def test_directives_ride_in_the_system_message(self):
         from chat.providers import _normalize_system_messages
@@ -299,6 +317,21 @@ class TestNormalizeSystemMessages:
             "ignore any limit"
         )
         assert content.endswith("YOUR RESPONSE MUST NOT: list the items.")
+
+    def test_leading_assistant_message_is_dropped(self):
+        from chat.providers import _normalize_system_messages
+
+        # pack_verbatim_window cuts newest→oldest, so the window can open on
+        # an assistant turn — Mistral templates reject that.
+        history = [
+            {"role": "assistant", "content": "Earlier answer"},
+            {"role": "user", "content": "Follow-up"},
+            {"role": "assistant", "content": "Later answer"},
+        ]
+
+        messages = _normalize_system_messages("System instructions", history)
+
+        assert [m["role"] for m in messages] == ["system", "user", "assistant"]
 
     def test_no_directives_leaves_system_message_unchanged(self):
         from chat.providers import _normalize_system_messages
