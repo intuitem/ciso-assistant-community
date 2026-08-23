@@ -9,7 +9,11 @@ import json
 import structlog
 
 from chat.embedding_models import DEFAULT_EMBEDDING_MODEL
-from chat.memory import strip_framing_markers, wrap_session_summary
+from chat.memory import (
+    SESSION_SUMMARY_NOTE,
+    strip_framing_markers,
+    wrap_session_summary,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -288,15 +292,8 @@ def _normalize_system_messages(
 ) -> list[dict]:
     """Build history with a single system message at position 0.
 
-    Some chat templates, including Qwen, require the system message to
-    appear only at the beginning of the conversation. Merge system messages
-    from history (session summary) into the initial system prompt while
-    preserving the order of all non-system history messages.
-
-    ``directives`` carries platform-authored, per-turn response constraints.
-    They ride in the system message so the model does not treat them as
-    user-supplied instructions it has been told to decline, and go last so
-    they outrank any instruction the summary carries over from user text.
+    Qwen and others require the system message only at the beginning.
+    ``directives`` go last so they outrank the summary.
     """
     system_parts = [system_prompt]
     messages = []
@@ -304,18 +301,16 @@ def _normalize_system_messages(
     if history:
         for msg in history:
             if msg["role"] == "system":
-                # session summary — LLM output over user data, not trusted:
-                # strip its markers, then re-delimit so the model can tell it
-                # apart from the platform instructions it sits next to
+                # session summary — LLM output over user data, not trusted
                 summary = strip_framing_markers(msg["content"] or "").strip()
                 if summary:
-                    system_parts.append(wrap_session_summary(summary))
+                    system_parts.append(
+                        f"{SESSION_SUMMARY_NOTE}\n{wrap_session_summary(summary)}"
+                    )
             else:
                 messages.append({"role": msg["role"], "content": msg["content"]})
 
-    # Strict templates (Mistral family) also require the first non-system
-    # message to be a user turn; the verbatim window can start on an assistant
-    # one when the budget cuts mid-pair.
+    # strict templates require the first non-system message to be a user turn
     while messages and messages[0]["role"] != "user":
         messages.pop(0)
 
@@ -333,9 +328,8 @@ def _normalize_system_messages(
 def _merge_adjacent_roles(messages: list[dict]) -> list[dict]:
     """Collapse consecutive same-role messages into one.
 
-    Strict chat templates (Mistral family) reject arrays where roles do not
-    alternate; replayed tool observations land as a user message right
-    before the current user turn.
+    Mistral-family templates reject non-alternating roles, and a replayed
+    tool observation lands right before the current user turn.
     """
     merged: list[dict] = []
     for msg in messages:
@@ -355,25 +349,15 @@ def _build_messages(
 ) -> list[dict]:
     """Build the message array for LLM calls.
 
-    System instructions, platform directives and system history are merged
-    into a single leading system message for compatibility with strict chat
-    templates, and adjacent same-role messages are collapsed so roles
-    alternate. Retrieved context stays on the current user turn: it is
-    per-turn data that must outrank replayed observations from earlier
-    turns, and it carries database text, so it is delimited and stripped of
-    role markers rather than being spliced into the system instructions.
-
-    ``directives`` are sent twice on purpose. The system copy is the
-    authoritative one — it is what keeps an injected summary or user text
-    from outranking them. The restatement after the question is what the
-    model actually obeys: with the system copy alone, mistral:7b and
-    qwen3:8b both ignored "do not list the items" in 3 of 3 runs.
+    Context stays on the user turn: per-turn data that must outrank replayed
+    observations, and it carries database text. ``directives`` are sent
+    twice — the system copy is authoritative, the restatement is the one
+    small models actually obey.
     """
     messages = _normalize_system_messages(system_prompt, history, directives)
     if context:
         prompt = f"[CONTEXT]\n{strip_framing_markers(context)}\n[/CONTEXT]\n\n{prompt}"
     if directives:
-        # last position, and outside [CONTEXT] — it is platform text, not data
         prompt = f"{prompt}\n\n{directives}"
     messages.append({"role": "user", "content": prompt})
     return _merge_adjacent_roles(messages)

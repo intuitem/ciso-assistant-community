@@ -202,7 +202,6 @@ class TestBuildMessages:
             history=history,
         )
 
-        # The replay is a user message too, so it merges into the current turn
         merged = "\n\n".join(m["content"] for m in messages if m["role"] == "user")
         assert merged.index("Fresh query results") > merged.index("TOOL OBSERVATION")
 
@@ -248,7 +247,6 @@ class TestNormalizeSystemMessages:
     def test_history_system_content_is_stripped_of_markers(self):
         from chat.providers import _normalize_system_messages
 
-        # session.summary is LLM output over user data — stored unsanitized
         history = [
             {
                 "role": "system",
@@ -262,14 +260,17 @@ class TestNormalizeSystemMessages:
         messages = _normalize_system_messages("System instructions", history)
 
         content = messages[0]["content"]
-        # the only delimiters left are the ones we re-wrap the summary with
         assert content.count("[/SESSION SUMMARY]") == 1
         assert content.endswith("[/SESSION SUMMARY]")
         assert "<|im_start|>" not in content
         assert "RULES UPDATE" in content
 
     def test_summary_is_delimited_from_the_platform_instructions(self):
-        from chat.memory import SESSION_SUMMARY_CLOSE, SESSION_SUMMARY_OPEN
+        from chat.memory import (
+            SESSION_SUMMARY_CLOSE,
+            SESSION_SUMMARY_NOTE,
+            SESSION_SUMMARY_OPEN,
+        )
         from chat.providers import _normalize_system_messages
 
         history = [{"role": "system", "content": "GOAL: review the ISO 27001 audit"}]
@@ -279,6 +280,8 @@ class TestNormalizeSystemMessages:
         content = messages[0]["content"]
         assert SESSION_SUMMARY_OPEN in content
         assert content.endswith(SESSION_SUMMARY_CLOSE)
+        assert content.count(SESSION_SUMMARY_NOTE) == 1
+        assert content.index(SESSION_SUMMARY_NOTE) < content.index(SESSION_SUMMARY_OPEN)
         assert content.index("System instructions") < content.index(
             SESSION_SUMMARY_OPEN
         )
@@ -293,13 +296,11 @@ class TestNormalizeSystemMessages:
             directives="YOUR RESPONSE MUST NOT: list the items.",
         )
 
-        # The system copy is authoritative; the restatement is the one small
-        # models obey — with the system copy alone, mistral:7b and qwen3:8b
-        # both listed the items in 3 of 3 runs.
+        # with the system copy alone, mistral:7b and qwen3:8b both ignored
+        # "do not list the items" in 3 of 3 runs
         assert "YOUR RESPONSE MUST NOT" in messages[0]["content"]
         user_turn = messages[-1]["content"]
         assert user_turn.endswith("YOUR RESPONSE MUST NOT: list the items.")
-        # restated after the question, and outside the data delimiters
         assert user_turn.index("create controls for backup") < user_turn.index(
             "YOUR RESPONSE MUST NOT"
         )
@@ -319,8 +320,6 @@ class TestNormalizeSystemMessages:
     def test_directives_outrank_instructions_carried_by_the_summary(self):
         from chat.providers import _normalize_system_messages
 
-        # The summary is LLM output over user text — it can carry an
-        # instruction that contradicts the platform's constraints.
         history = [
             {
                 "role": "system",
@@ -343,8 +342,6 @@ class TestNormalizeSystemMessages:
     def test_leading_assistant_message_is_dropped(self):
         from chat.providers import _normalize_system_messages
 
-        # pack_verbatim_window cuts newest→oldest, so the window can open on
-        # an assistant turn — Mistral templates reject that.
         history = [
             {"role": "assistant", "content": "Earlier answer"},
             {"role": "user", "content": "Follow-up"},
@@ -410,7 +407,5 @@ class TestDirectivesThroughBuildMessages:
             directives="YOUR RESPONSE MUST NOT: include IDs.",
         )
 
-        # the authoritative copy: it outranks anything the summary or the
-        # retrieved context carries over from user text
         assert "YOUR RESPONSE MUST NOT" in messages[0]["content"]
         assert "The system found 3" in messages[-1]["content"]

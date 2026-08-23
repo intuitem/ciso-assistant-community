@@ -65,8 +65,7 @@ def _sanitize_user_input(text: str) -> str:
     Strips characters that could be interpreted as role markers or
     delimiter tags by the LLM, while preserving the user's intent.
     """
-    # Same stripper as database text: it covers our own wrappers and, unlike a
-    # single sub(), cannot leave a marker rebuilt from its own fragments
+    # shared with database text; a single sub() can leave a rebuilt marker
     text = strip_framing_markers(text)
     # Strip null bytes and other control characters (keep newlines/tabs)
     text = "".join(
@@ -387,8 +386,7 @@ class ChatSessionViewSet(BaseModelViewSet):
 
         # Track if this is a creation/attach proposal (different SSE flow)
         creation_proposal = None
-        # Platform-authored response constraints — ride in the system message,
-        # not in the context the model is told to distrust
+        # platform-authored response constraints, kept out of the context
         response_directives = ""
 
         if query_result and query_result.get("type") == "propose_create":
@@ -614,9 +612,6 @@ class ChatSessionViewSet(BaseModelViewSet):
         user_lang = request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2]
         lang_name = LANG_MAP.get(user_lang, "English")
 
-        # Platform-authored constraints go to the system message, never to the
-        # context the model is instructed to distrust — and are not subject to
-        # the RAG budget
         response_directives = "\n\n".join(
             part
             for part in (
