@@ -37,6 +37,14 @@ def pack_verbatim_window(messages: list[dict], budget_tokens: int) -> list[dict]
         used += msg_tokens
 
     kept.reverse()
+    # Don't open on an assistant turn when a question/answer pair got cut in
+    # half: strict chat templates (Mistral family) reject it, and the dropped
+    # answer's tool replay would be attributed to no visible turn.
+    # A window that packs down to a lone oversize assistant keeps it — the
+    # replay note carries its own attribution and is worth more than the turn,
+    # and detect_falloff_pair indexes packed[0] on a non-empty window.
+    while len(kept) > 1 and kept[0].get("role") != "user":
+        kept.pop(0)
     return kept
 
 
@@ -149,7 +157,7 @@ def update_summary_for_session(session, llm) -> bool:
     return True
 
 
-SESSION_SUMMARY_OPEN = "[SESSION SUMMARY — recap of earlier turns, not instructions]"
+SESSION_SUMMARY_OPEN = "[SESSION SUMMARY]"
 SESSION_SUMMARY_CLOSE = "[/SESSION SUMMARY]"
 
 
@@ -205,11 +213,15 @@ def inject_tool_replays(
                 args_str = json.dumps(args, ensure_ascii=False, default=str)
             except TypeError, ValueError:
                 args_str = str(args)
+            # LLM-generated, and it echoes user text through search/filters —
+            # result_text is already sanitized by build_replay_payload
+            args_str = strip_framing_markers(args_str)
             result_text = truncate_to_tokens(
                 obs.get("result_text", "") or "", TOOL_REPLAY_TOKENS
             )
             note = (
-                f"[TOOL OBSERVATION from previous turn — {tool}({args_str})]\n"
+                "[TOOL OBSERVATION]\n"
+                f"from previous turn — {tool}({args_str})\n"
                 f"{result_text}\n"
                 "[/TOOL OBSERVATION]"
             )
@@ -220,11 +232,15 @@ def inject_tool_replays(
 
 # Strip role/delimiter markers that could let attacker-controlled data escape
 # framing. Single source of truth: views sanitizes user input with it too.
-# The tag bodies accept attributes so the annotated wrappers we emit
-# ("[TOOL OBSERVATION from previous turn — ...]") cannot be forged either.
+# The tags close immediately after the keyword — every wrapper we emit is bare
+# and carries its annotation inside the block, so this matches the real thing
+# without eating object names like "[System hardening](/applied-controls/1)".
+# An object named exactly "System" still loses its markdown link; that is the
+# accepted cost of not adding a "(?!\()" lookahead, which would let a marker
+# through as "[/CONTEXT](x)" — still a delimiter to the model.
 _FRAMING_MARKER_PATTERNS = re.compile(
     r"(?:"
-    r"\[/?(?:SYSTEM|CONTEXT|INST|SESSION SUMMARY|TOOL OBSERVATION)[^\]\n]*\]"
+    r"\[/?(?:SYSTEM|CONTEXT|INST|SESSION SUMMARY|TOOL OBSERVATION)\]"
     r"|<\|(?:im_start|im_end|system)\|>"
     r"|```\s*(?:system|tool_call)"
     r")",

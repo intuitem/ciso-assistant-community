@@ -362,10 +362,19 @@ def _build_messages(
     per-turn data that must outrank replayed observations from earlier
     turns, and it carries database text, so it is delimited and stripped of
     role markers rather than being spliced into the system instructions.
+
+    ``directives`` are sent twice on purpose. The system copy is the
+    authoritative one — it is what keeps an injected summary or user text
+    from outranking them. The restatement after the question is what the
+    model actually obeys: with the system copy alone, mistral:7b and
+    qwen3:8b both ignored "do not list the items" in 3 of 3 runs.
     """
     messages = _normalize_system_messages(system_prompt, history, directives)
     if context:
         prompt = f"[CONTEXT]\n{strip_framing_markers(context)}\n[/CONTEXT]\n\n{prompt}"
+    if directives:
+        # last position, and outside [CONTEXT] — it is platform text, not data
+        prompt = f"{prompt}\n\n{directives}"
     messages.append({"role": "user", "content": prompt})
     return _merge_adjacent_roles(messages)
 

@@ -641,14 +641,17 @@ class ChatSessionViewSet(BaseModelViewSet):
         context = ctx_builder.build()
 
         system_prompt_text = llm.system_prompt if hasattr(llm, "system_prompt") else ""
+        # _build_messages sends the directives twice — count both copies
+        user_turn_text = user_content
         if response_directives:
             system_prompt_text = f"{system_prompt_text}\n\n{response_directives}"
+            user_turn_text = f"{user_content}\n\n{response_directives}"
         system_prompt_chars = len(system_prompt_text)
         system_prompt_tokens = count_tokens(system_prompt_text)
         context_chars = len(context)
         context_tokens = count_tokens(context)
-        user_chars = len(user_content)
-        user_tokens = count_tokens(user_content)
+        user_chars = len(user_turn_text)
+        user_tokens = count_tokens(user_turn_text)
         history_chars = sum(len(m.get("content", "")) for m in history_messages)
         history_tokens = sum(
             count_tokens(m.get("content", "")) for m in history_messages

@@ -283,6 +283,28 @@ class TestNormalizeSystemMessages:
             SESSION_SUMMARY_OPEN
         )
 
+    def test_directives_are_restated_on_the_user_turn(self):
+        from chat.providers import _build_messages
+
+        messages = _build_messages(
+            system_prompt="System instructions",
+            prompt="create controls for backup",
+            context="3 controls proposed",
+            directives="YOUR RESPONSE MUST NOT: list the items.",
+        )
+
+        # The system copy is authoritative; the restatement is the one small
+        # models obey — with the system copy alone, mistral:7b and qwen3:8b
+        # both listed the items in 3 of 3 runs.
+        assert "YOUR RESPONSE MUST NOT" in messages[0]["content"]
+        user_turn = messages[-1]["content"]
+        assert user_turn.endswith("YOUR RESPONSE MUST NOT: list the items.")
+        # restated after the question, and outside the data delimiters
+        assert user_turn.index("create controls for backup") < user_turn.index(
+            "YOUR RESPONSE MUST NOT"
+        )
+        assert user_turn.index("[/CONTEXT]") < user_turn.index("YOUR RESPONSE MUST NOT")
+
     def test_directives_ride_in_the_system_message(self):
         from chat.providers import _normalize_system_messages
 
@@ -377,7 +399,7 @@ class TestMergeAdjacentRoles:
 
 
 class TestDirectivesThroughBuildMessages:
-    def test_directives_stay_out_of_the_user_turn(self):
+    def test_directives_are_never_only_on_the_user_turn(self):
         from chat.providers import _build_messages
 
         messages = _build_messages(
@@ -388,6 +410,7 @@ class TestDirectivesThroughBuildMessages:
             directives="YOUR RESPONSE MUST NOT: include IDs.",
         )
 
+        # the authoritative copy: it outranks anything the summary or the
+        # retrieved context carries over from user text
         assert "YOUR RESPONSE MUST NOT" in messages[0]["content"]
-        assert "YOUR RESPONSE MUST NOT" not in messages[-1]["content"]
         assert "The system found 3" in messages[-1]["content"]
