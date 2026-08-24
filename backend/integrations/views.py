@@ -177,8 +177,7 @@ class IntegrationConfigurationViewSet(BaseModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-    @action(detail=True, methods=["get"], url_path="remote-objects")
-    def list_remote_objects(self, request, pk=None):
+    def _list_remote_objects(self, request, pk):
         from integrations.syncable import get_spec
 
         instance = self.get_object()
@@ -189,8 +188,17 @@ class IntegrationConfigurationViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
+            limit = int(request.query_params.get("limit", 50))
+        except TypeError, ValueError:
+            limit = 50
+        query_params = {
+            "search": request.query_params.get("search", ""),
+            "id": request.query_params.get("id", ""),
+            "limit": max(1, min(limit, 100)),
+        }
+        try:
             client = IntegrationRegistry.get_client(instance, model_key)
-            remote_objects = client.list_remote_objects()
+            remote_objects = client.list_remote_objects(query_params=query_params)
             return Response(remote_objects, status=status.HTTP_200_OK)
         except Exception:
             logger.error(
@@ -202,6 +210,16 @@ class IntegrationConfigurationViewSet(BaseModelViewSet):
                 {"status": "error", "message": "An unexpected error occurred"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+    @action(detail=True, methods=["get"], url_path="remote-objects")
+    def list_remote_objects(self, request, pk=None):
+        return self._list_remote_objects(request, pk)
+
+    # The AutocompleteSelect lazy mode appends /autocomplete to its options
+    # endpoint; same behavior as remote-objects, which also accepts search.
+    @action(detail=True, methods=["get"], url_path="remote-objects/autocomplete")
+    def remote_objects_autocomplete(self, request, pk=None):
+        return self._list_remote_objects(request, pk)
 
     @action(detail=True, methods=["post"], url_path="rpc")
     def execute_rpc(self, request, pk=None):

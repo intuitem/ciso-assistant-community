@@ -40,3 +40,8 @@ automation/powerbi/**/*.pbix
 automation/powerbi/connector/bin/
 automation/powerbi/connector/obj/
 *.pfx
+
+# > MCP local client config (holds a personal access token)
+cli/.mcp.json
+.mcp.json
+cli/.mcp.env

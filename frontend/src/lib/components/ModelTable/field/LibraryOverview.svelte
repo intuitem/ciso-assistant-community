@@ -8,11 +8,7 @@
 	}
 
 	type ReferentialObject =
-		| 'reference_controls'
-		| 'threats'
-		| 'framework'
-		| 'risk_matrix'
-		| 'requirement_mapping_set';
+		'reference_controls' | 'threats' | 'framework' | 'risk_matrix' | 'requirement_mapping_set';
 
 	let { cell, ...rest }: Props = $props();
 	let display = $derived(Object.entries(cell));

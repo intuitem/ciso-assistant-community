@@ -167,15 +167,15 @@ class WorkflowViewSet(BaseModelViewSet):
     def readable_models(self, request):
         """The read_objects registry: field lists double as the
         filter/order whitelist the builder offers."""
-        from .actions import BASE_READ_FIELDS, READABLE_MODELS
+        from .actions import READABLE_MODELS
 
         return Response(
             [
                 {
                     "key": key,
-                    "fields": BASE_READ_FIELDS + entry["fields"],
+                    "fields": entry.readable_fields(),
                     # Output-only aggregates; not filterable/orderable.
-                    "computed": sorted((entry.get("computed") or {}).keys()),
+                    "computed": sorted(entry.computed.keys()),
                 }
                 for key, entry in READABLE_MODELS.items()
             ]
@@ -650,8 +650,8 @@ class WorkflowInstanceViewSet(BaseModelViewSet):
         trigger node, or the sole trigger node)."""
         # Scope the lookup to versions the user can view, so out-of-scope
         # UUIDs 404 like everywhere else instead of confirming existence.
-        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, WorkflowVersion
+        viewable_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, WorkflowVersion
         )
         version = get_object_or_404(
             WorkflowVersion.objects.filter(id__in=viewable_ids),
