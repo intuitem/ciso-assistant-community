@@ -3,6 +3,7 @@
 		hydrateDraft,
 		buildTree,
 		nodePassesIgFilter,
+		type ImplementationGroup,
 		type RequirementNode,
 		type BuilderQuestion,
 		type BuilderNode,
@@ -42,13 +43,9 @@
 		return buildTree(nodes, questions);
 	});
 
-	const igDefs: Array<{ ref_id: string; name: string; description?: string }> = $derived(
+	const igDefs: ImplementationGroup[] = $derived(
 		Array.isArray(meta.implementation_groups_definition)
-			? (meta.implementation_groups_definition as Array<{
-					ref_id: string;
-					name: string;
-					description?: string;
-				}>)
+			? (meta.implementation_groups_definition as ImplementationGroup[])
 			: []
 	);
 	const availableLanguages: string[] = $derived(meta.available_languages ?? []);
@@ -129,12 +126,14 @@
 
 	// --- Helpers ---
 
-	/** Resolve an IG ref_id to its display name and tooltip from the framework definition */
+	/** Resolve an IG ref_id to its display name and tooltip from the framework
+	 * definition, applying the preview language like every other field */
 	function igChip(refId: string): { label: string; title: string } {
 		const def = igDefs.find((d) => d.ref_id === refId);
+		const label = t(def?.translations, 'name', def?.name ?? null) || refId;
 		return {
-			label: def?.name || refId,
-			title: def?.description || def?.name || refId
+			label,
+			title: t(def?.translations, 'description', def?.description ?? null) || label
 		};
 	}
 
@@ -220,6 +219,7 @@
 			>
 			{#each igDefs as ig}
 				{@const active = selectedGroups.has(ig.ref_id)}
+				{@const chip = igChip(ig.ref_id)}
 				<button
 					type="button"
 					class="px-3 py-1 rounded-full text-xs font-medium transition-colors border
@@ -227,9 +227,9 @@
 						? 'bg-purple-600 text-white border-purple-600'
 						: 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'}"
 					onclick={() => toggleGroup(ig.ref_id)}
-					title={ig.description || ig.name}
+					title={chip.title}
 				>
-					{ig.name || ig.ref_id}
+					{chip.label}
 				</button>
 			{/each}
 			{#if selectedGroups.size > 0}
