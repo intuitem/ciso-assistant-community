@@ -1448,7 +1448,9 @@ def bulk_update_with_log(model, rows, fields, batch_size=500):
     # One transaction: a half-written trail is worse than a failed call.
     with transaction.atomic():
         # Stored values first: after bulk_update there is nothing left to diff.
-        stored = model.objects.in_bulk([row.pk for row in rows])
+        # Locked, because at READ COMMITTED two concurrent writers would both
+        # read the pre-change value and log the same "from".
+        stored = model.objects.select_for_update().in_bulk([row.pk for row in rows])
         model.objects.bulk_update(rows, fields, batch_size=batch_size)
         for row in rows:
             old = stored.get(row.pk)
