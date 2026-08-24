@@ -4,8 +4,10 @@ Inspired from Azure IAM model"""
 from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
+from datetime import timedelta
 from typing import Any, Dict, Generator, List, Optional, Tuple
 from typing import TYPE_CHECKING, Set, cast
+import secrets
 import uuid
 from allauth.account.models import EmailAddress
 from django.utils import timezone
@@ -47,6 +49,7 @@ logger = structlog.get_logger(__name__)
 from auditlog.registry import auditlog
 from auditlog.signals import pre_log
 from allauth.mfa.models import Authenticator
+from allauth.idp.oidc.models import Client, Token
 from core.context import focus_folder_id_var
 from django.shortcuts import get_object_or_404
 from iam.cache_builders import (
@@ -89,6 +92,7 @@ IGNORED_PERMISSION_MODELS = (
     "historicalmetric",
     "idpgroup",
     "scimtoken",
+    "serviceaccount",
 )
 
 
@@ -1024,7 +1028,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def get_editors(cls) -> List["User"]:
         return [
             user
-            for user in cls.objects.all()
+            for user in cls.objects.exclude(service_account__isnull=False)
             if user.is_editor and not user.is_third_party
         ]
 
@@ -1719,6 +1723,127 @@ class SCIMToken(models.Model):
         return f"{self.name} : {self.auth_token.digest}"
 
 
+class ServiceAccount(AbstractBaseModel):
+    """Machine principal (OIDC Client + dedicated User/Role/RoleAssignment) authenticating via client_credentials."""
+
+    SECRET_PREFIX = "ca_sa."
+    _SECRET_PREVIEW_VISIBLE_CHARS = 3
+    _SECRET_PREVIEW_MASK = "•" * 8
+
+    # Capped at 100 to match allauth's Client.name, which it's copied into verbatim.
+    name = models.CharField(max_length=100, unique=True, verbose_name=_("Name"))
+    description = models.TextField(blank=True, null=True)
+    client = models.OneToOneField(
+        Client,
+        on_delete=models.PROTECT,
+        related_name="service_account",
+    )
+    user = models.OneToOneField(
+        User,
+        on_delete=models.PROTECT,
+        related_name="service_account",
+    )
+    role = models.ForeignKey(
+        Role,
+        on_delete=models.PROTECT,
+        related_name="service_accounts",
+    )
+    created_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="created_service_accounts",
+    )
+    is_active = models.BooleanField(default=True)
+    expiry_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Expiry date"),
+    )
+    previous_secret_hash = models.CharField(max_length=200, null=True, blank=True)
+    previous_secret_expires_at = models.DateTimeField(null=True, blank=True)
+    secret_preview = models.CharField(max_length=32, blank=True, default="")
+
+    class Meta:
+        verbose_name = _("Service account")
+        verbose_name_plural = _("Service accounts")
+
+    @property
+    def client_id(self) -> str:
+        return self.client.pk
+
+    @property
+    def role_assignment(self) -> RoleAssignment | None:
+        return RoleAssignment.objects.filter(user=self.user, role=self.role).first()
+
+    @classmethod
+    def generate_secret(cls) -> str:
+        # token_urlsafe rather than allauth's default (Django's SECRET_KEY
+        # charset): the secret travels in form-encoded token requests and
+        # shell command lines, where &, +, %, ! and $ corrupt or split the
+        # value. 32 bytes = 43 chars of [A-Za-z0-9_-], ~256 bits.
+        return cls.SECRET_PREFIX + secrets.token_urlsafe(32)
+
+    @classmethod
+    def secret_preview_for(cls, secret: str) -> str:
+        visible = secret[: len(cls.SECRET_PREFIX) + cls._SECRET_PREVIEW_VISIBLE_CHARS]
+        return visible + cls._SECRET_PREVIEW_MASK
+
+    def deactivate(self):
+        """Block token issuance (no grant types) and revoke outstanding tokens."""
+        self.is_active = False
+        self.save(update_fields=["is_active", "updated_at"])
+        self.client.set_grant_types([])
+        self.client.save(update_fields=["grant_types"])
+        Token.objects.filter(client=self.client).delete()
+        self.user.is_active = False
+        self.user.save(update_fields=["is_active"])
+
+    def activate(self):
+        self.is_active = True
+        self.save(update_fields=["is_active", "updated_at"])
+        self.client.set_grant_types([Client.GrantType.CLIENT_CREDENTIALS])
+        self.client.save(update_fields=["grant_types"])
+        self.user.is_active = True
+        self.user.save(update_fields=["is_active"])
+
+    def rotate_secret(self, grace_period: timedelta | None = None) -> str:
+        plain_secret = self.generate_secret()
+        if grace_period:
+            self.previous_secret_hash = self.client.secret  # already hashed
+            self.previous_secret_expires_at = timezone.now() + grace_period
+        else:
+            self.previous_secret_hash = None
+            self.previous_secret_expires_at = None
+        self.secret_preview = self.secret_preview_for(plain_secret)
+        self.save(
+            update_fields=[
+                "previous_secret_hash",
+                "previous_secret_expires_at",
+                "secret_preview",
+                "updated_at",
+            ]
+        )
+        self.client.set_secret(plain_secret)
+        self.client.save(update_fields=["secret"])
+        Token.objects.filter(client=self.client).delete()
+        return plain_secret
+
+    def delete(self, *args, **kwargs):
+        client, user, role = self.client, self.user, self.role
+        with transaction.atomic():
+            result = super().delete(*args, **kwargs)
+            client.delete()  # cascades outstanding OIDC tokens
+            user.delete()  # cascades the role assignment
+            if not role.builtin:
+                role.delete()
+        return result
+
+    def __str__(self):
+        return self.name
+
+
 common_exclude = ["created_at", "updated_at"]
 auditlog.register(
     User,
@@ -1743,6 +1868,7 @@ auditlog.register(Role, exclude_fields=common_exclude)
 auditlog.register(UserGroup, exclude_fields=common_exclude)
 auditlog.register(PersonalAccessToken)
 auditlog.register(SCIMToken)
+auditlog.register(ServiceAccount, exclude_fields=common_exclude)
 
 
 def _skip_builtin_rbac(sender, instance, **kwargs):

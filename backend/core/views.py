@@ -76,6 +76,7 @@ from django.views.decorators.vary import vary_on_cookie
 from django.core.cache import cache
 
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from core.constants import LEGACY_TTP_LIBRARIES
 from core.permissions import FeatureFlagRequired
 from core.helpers import get_instance_metrics
 from core.instance_metrics import (
@@ -1575,13 +1576,20 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             )
 
         # Build index of concrete objects that will be deleted
+        # Excludes the previewed object only, not its whole model: a
+        # self-referential cascade would otherwise hide every descendant.
+        def is_the_subject(model, obj):
+            return model is type(instance) and str(getattr(obj, "pk", "")) == str(
+                instance.pk
+            )
+
         deleted_index = set()
         for model, objs in collector.model_objs.items():
-            if model is type(instance):
-                continue
             if getattr(model._meta, "auto_created", False):
                 continue  # skip through rows here; we will bubble endpoints separately
             for o in objs:
+                if is_the_subject(model, o):
+                    continue
                 deleted_index.add((model.__name__, str(getattr(o, "pk", ""))))
 
         def add_grouped(bucket, obj):
@@ -1631,18 +1639,26 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
         deleted_bucket = {"by_model": {}, "_seen": set()}
         affected_bucket = {"by_model": {}, "_seen": set()}
+        blocked_bucket = {"by_model": {}, "_seen": set()}
+
+        # 0) PROTECT/RESTRICT references: NestedObjects.collect() swallows the
+        # ProtectedError and parks the blockers here.
+        for obj in getattr(collector, "protected", ()):
+            if is_hidden_model(type(obj)) or not is_visible(obj):
+                continue
+            add_grouped(blocked_bucket, obj)
 
         # 1) Concrete deletions
         through_rows = []
         for model, instances in collector.model_objs.items():
-            if model is type(instance):
-                continue
             if getattr(model._meta, "auto_created", False):
                 through_rows.append((model, list(instances)))
                 continue
             if is_hidden_model(model):
                 continue
             for obj in instances:
+                if is_the_subject(model, obj):
+                    continue
                 add_grouped(deleted_bucket, obj)
 
         # 2) Bubble endpoints from through rows (M2M join tables)
@@ -1754,6 +1770,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         # 3) Sort and respond
         deleted_groups, deleted_count = finalize(deleted_bucket)
         affected_groups, affected_count = finalize(affected_bucket)
+        blocked_groups, blocked_count = finalize(blocked_bucket)
 
         def flatten(groups):
             return [
@@ -1780,6 +1797,13 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 "related_objects": flatten(affected_groups),
                 "message": "These objects will NOT be deleted but will lose one or more relationships.",
                 "level": "info",
+            },
+            "blocked": {
+                "count": blocked_count,
+                "grouped_objects": blocked_groups,
+                "related_objects": flatten(blocked_groups),
+                "message": "Deletion is blocked while these objects still reference this one.",
+                "level": "error",
             },
         }
         return Response(payload)
@@ -1992,7 +2016,7 @@ class ThreatViewSet(BaseModelViewSet):
     search_fields = ["ref_id", "name", "provider", "description"]
 
     def get_queryset(self):
-        return (
+        queryset = (
             super()
             .get_queryset()
             .select_related(
@@ -2004,6 +2028,10 @@ class ThreatViewSet(BaseModelViewSet):
                 "filtering_labels__folder",  # FieldsRelatedField includes folder
             )
         )
+        # opt-in: the list page keeps them so existing links stay auditable
+        if self.request.query_params.get("exclude_legacy_ttp") == "true":
+            queryset = queryset.exclude(library__urn__in=LEGACY_TTP_LIBRARIES)
+        return queryset
 
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
@@ -2044,6 +2072,9 @@ class ThreatViewSet(BaseModelViewSet):
 class AssetFilter(TimestampRangeFilterMixin, GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
     asset_class = df.ModelMultipleChoiceFilter(queryset=AssetClass.objects.all())
+    asset_class__isnull = df.BooleanFilter(
+        field_name="asset_class", lookup_expr="isnull"
+    )
     # BIA report: only assets assessed in the given BIA.
     bia = df.UUIDFilter(method="filter_bia")
     # Add-only pickers: drop assets already assessed in the given BIA.
@@ -2534,6 +2565,47 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
 
         return Response(asset_data)
 
+    @action(detail=False, url_path="class-tree", name="Get assets by class tree")
+    def class_tree(self, request):
+        """Asset class tree annotated with accessible asset counts.
+
+        Cost is O(number of classes), not O(number of assets): the counts come
+        from a single GROUP BY, and the assets themselves are fetched per class
+        by the paginated list endpoint.
+        """
+        # order_by() is cleared first: a queryset's ordering fields are added to
+        # the GROUP BY, which would silently make this one row per asset.
+        scoped = self.filter_queryset(self.get_queryset()).order_by()
+
+        direct_counts = {
+            row["asset_class"]: row["total"]
+            for row in scoped.values("asset_class").annotate(total=Count("id"))
+        }
+
+        def annotate(nodes):
+            annotated = []
+            for node in nodes:
+                children = annotate(node["children"])
+                direct = direct_counts.get(UUID(node["id"]), 0)
+                annotated.append(
+                    {
+                        **node,
+                        "children": children,
+                        "direct_count": direct,
+                        "total_count": direct
+                        + sum(child["total_count"] for child in children),
+                    }
+                )
+            return annotated
+
+        return Response(
+            {
+                "tree": annotate(AssetClass.build_tree()),
+                "unclassified_count": direct_counts.get(None, 0),
+                "total_count": sum(direct_counts.values()),
+            }
+        )
+
     @action(detail=False, name="Get assets graph")
     def graph(self, request):
         nodes = []
@@ -2700,16 +2772,8 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
             "asset_class": {
                 "source": "asset_class",
                 "label": "asset_class",
-                # Handle missing asset_class safely and trim a leading 'assetClass/' segment if present
-                "format": lambda ac: (
-                    (
-                        ac.full_path.replace("assetClass/", "", 1)
-                        if ac.full_path.startswith("assetClass/")
-                        else ac.full_path.replace("assetClass", "")
-                    )
-                    if ac
-                    else ""
-                ),
+                # Canonical path: a translated one could not be re-imported.
+                "format": lambda ac: ac.full_path if ac else "",
                 "escape": True,
             },
             "folder": {"source": "folder.name", "label": "folder", "escape": True},
@@ -2954,14 +3018,15 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
 
 class AssetClassViewSet(BaseModelViewSet):
     model = AssetClass
-    filterset_fields = ["parent", "name"]
+    filterset_fields = ["parent", "name", "builtin", "is_visible"]
 
     ordering = ["parent", "name"]
     search_fields = ["name", "description"]
 
     @action(detail=False, name="Get Asset Class Tree")
     def tree(self, request):
-        return Response(AssetClass.build_tree())
+        visible_only = request.query_params.get("visible_only") == "true"
+        return Response(AssetClass.build_tree(visible_only=visible_only))
 
 
 class ReferenceControlViewSet(BaseModelViewSet):
@@ -6467,7 +6532,10 @@ class UserRolesOnFolderList(generics.ListAPIView):
             if uid in visible_ids and roles  # roles non-empty in raw_map
         }
 
-        return User.objects.filter(id__in=self._user_roles_map.keys())
+        # Service account users are managed via /api/iam/service-accounts/.
+        return User.objects.filter(id__in=self._user_roles_map.keys()).exclude(
+            service_account__isnull=False
+        )
 
     def get_serializer_context(self):
         ctx = super().get_serializer_context()
@@ -7535,6 +7603,10 @@ class ActorViewSet(BaseModelViewSet):
             third_parties = Actor.objects.filter(user__is_third_party=True)
             queryset = queryset.exclude(id__in=third_parties)
 
+        # Service account users are managed via /api/iam/service-accounts/
+        # and must never surface in owner/assignee pickers.
+        queryset = queryset.exclude(user__service_account__isnull=False)
+
         return queryset.order_by("type_rank", "display_name")
 
 
@@ -7564,7 +7636,10 @@ class UserViewSet(AutocompleteMixin, BaseModelViewSet):
     def get_queryset(self):
         # Use base IAM filtering
         # but ensure current user is always included
-        queryset = super().get_queryset() | User.objects.filter(pk=self.request.user.pk)
+        # Service account users are managed via /api/iam/service-accounts/.
+        queryset = (
+            super().get_queryset() | User.objects.filter(pk=self.request.user.pk)
+        ).exclude(service_account__isnull=False)
 
         # The autocomplete path serializes only id/name/email — skip the
         # user_groups prefetch so it stays lightweight at scale.
@@ -7913,6 +7988,9 @@ class RoleAssignmentViewSet(BaseModelViewSet):
     ordering = ["builtin", "folder"]
     filterset_fields = ["folder"]
 
+    def get_queryset(self):
+        return super().get_queryset().exclude(user__service_account__isnull=False)
+
 
 class FolderFilter(GenericFilterSet):
     parent_folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
@@ -8242,6 +8320,10 @@ class FolderViewSet(BaseModelViewSet):
             request.query_params.get("load_missing_libraries", "false").lower()
             == "true"
         )
+        create_missing_asset_classes = (
+            request.query_params.get("create_missing_asset_classes", "false").lower()
+            == "true"
+        )
         try:
             if not RoleAssignment.is_access_allowed(
                 user=request.user,
@@ -8254,7 +8336,11 @@ class FolderViewSet(BaseModelViewSet):
             )
             parsed_data = domain_io.process_uploaded_file(request.data["file"])
             result = domain_io.import_objects(
-                parsed_data, domain_name, load_missing_libraries, user=request.user
+                parsed_data,
+                domain_name,
+                load_missing_libraries,
+                user=request.user,
+                create_missing_asset_classes=create_missing_asset_classes,
             )
             return Response(result, status=status.HTTP_200_OK)
 
