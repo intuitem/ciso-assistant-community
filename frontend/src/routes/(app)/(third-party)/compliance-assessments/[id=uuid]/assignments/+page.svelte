@@ -1005,6 +1005,7 @@
 										assignment.status === 'submitted' ||
 										assignment.status === 'closed' ||
 										assignment.status === 'changes_requested' ||
+										assignment.status === 'in_progress' ||
 										canModifyAssignment(assignment.status)}
 									{#if hasActions}
 										<div
