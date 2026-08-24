@@ -264,7 +264,7 @@ objects:
 
         This overview shall be updated at least annually.'
       implementation_groups:
-      - "Ketenhygi\xEBne"
+      - "ketenhygi\xEBne"
       translations:
         nl:
           description: 'De organisatie heeft uitgewerkt welke functionarissen met
@@ -282,7 +282,7 @@ objects:
         that risks are identified and appropriately managed, and that security requirements
         are properly defined.
       implementation_groups:
-      - "Ketenhygi\xEBne"
+      - "ketenhygi\xEBne"
       translations:
         nl:
           description: "Bij nieuwe informatiesystemen en bij significante wijzigingen\
@@ -1243,7 +1243,7 @@ objects:
         \ in accordance with mutual agreements, to the relevant colleagues within\
         \ the government\u2019s security domain."
       implementation_groups:
-      - "Ketenhygi\xEBne"
+      - "ketenhygi\xEBne"
       translations:
         nl:
           description: "In geval van concrete beveiligingsrisico\u2019s worden waarschuwingen,\
