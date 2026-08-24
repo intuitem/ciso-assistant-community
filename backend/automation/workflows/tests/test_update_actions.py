@@ -142,7 +142,7 @@ class TestSimpleFieldWrites:
                 "fields": {"name": "Renamed", "status": "active"},
             },
         )
-        instance = start_instance(version)
+        start_instance(version)
         control.refresh_from_db()
         # Identity is stable, so create_object's upsert keeps matching.
         assert control.name == "Keep me"
@@ -209,6 +209,22 @@ class TestIntegrityGuardrail:
         assert assessment.status == "in_progress"
         assert instance.status == WorkflowInstance.Status.COMPLETED
 
+    def test_a_value_outside_the_column_choices_is_refused(self):
+        """save() enforces max_length and clean() but never choices."""
+        domain = make_domain("Choices")
+        control = AppliedControl.objects.create(name="C", folder=domain, status="to_do")
+        version = update_flow(
+            domain,
+            {
+                "model": "applied_control",
+                "id": str(control.id),
+                "fields": {"status": "banana"},
+            },
+        )
+        assert start_instance(version).status == WorkflowInstance.Status.FAILED
+        control.refresh_from_db()
+        assert control.status == "to_do"
+
     def test_transition_guarded_models_are_not_updatable(self):
         """RiskAcceptance.set_state stamps revoked_at and reverts scenario
         treatments; ValidationFlow's transitions live in the write serializer
@@ -219,7 +235,7 @@ class TestIntegrityGuardrail:
     def test_exception_may_expire_but_never_be_approved(self):
         domain = make_domain("Exception")
         exception = SecurityException.objects.create(name="SE", folder=domain)
-        version = update_flow(
+        approve = update_flow(
             domain,
             {
                 "model": "security_exception",
@@ -227,7 +243,19 @@ class TestIntegrityGuardrail:
                 "fields": {"status": "approved"},
             },
         )
-        assert start_instance(version).status == WorkflowInstance.Status.FAILED
+        assert start_instance(approve).status == WorkflowInstance.Status.FAILED
+
+        expire = update_flow(
+            domain,
+            {
+                "model": "security_exception",
+                "id": str(exception.id),
+                "fields": {"status": "expired"},
+            },
+        )
+        assert start_instance(expire).status == WorkflowInstance.Status.COMPLETED
+        exception.refresh_from_db()
+        assert exception.status == "expired"
 
     def test_evidence_may_expire_but_never_be_approved(self):
         domain = make_domain("Evidence review")
@@ -522,6 +550,22 @@ class TestUpdateValidation:
             "action_update_relation_not_writable",
             "action_update_bad_relation_op",
         }
+
+    def test_a_value_outside_the_column_choices_is_refused_at_publish(self):
+        codes = {
+            c
+            for c, _ in validate_update_config(
+                self._node(
+                    {
+                        "type": "update_object",
+                        "model": "applied_control",
+                        "id": "{{payload.object_id}}",
+                        "fields": {"status": "banana"},
+                    }
+                )
+            )
+        }
+        assert codes == {"action_update_value_not_allowed"}
 
     def test_blank_inputs_are_ignored_like_they_are_at_runtime(self):
         """The builder renders an input per writable field and keeps keys

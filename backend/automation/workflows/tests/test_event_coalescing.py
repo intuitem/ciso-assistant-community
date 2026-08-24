@@ -4,6 +4,7 @@ the bulk writes that used to reach neither the audit trail nor the events."""
 import uuid
 
 import pytest
+from auditlog.cid import correlation_id
 
 from core.models import AppliedControl, ComplianceAssessment, Framework, Perimeter
 from core.models import RequirementAssessment, RequirementNode
@@ -163,7 +164,11 @@ class TestBulkUpdateEmitsEvents:
         )
         rows = self.make_audit(folder)
         rows[0].result = "compliant"
-        bulk_update_with_log(RequirementAssessment, rows, ["result"])
+        token = correlation_id.set("one-merge")
+        try:
+            bulk_update_with_log(RequirementAssessment, rows, ["result"])
+        finally:
+            correlation_id.reset(token)
         entry = LogEntry.objects.filter(
             object_pk=str(rows[0].pk), action=LogEntry.Action.UPDATE
         ).first()
@@ -171,6 +176,9 @@ class TestBulkUpdateEmitsEvents:
         assert body["event_key"] == "requirementassessment.updated"
         assert body["new_values"]["result"] == "compliant"
         assert body["folder_id"] == str(folder.id)
+        # The bulk write carries the request's correlation id, which is the
+        # only field the coalescing path reads.
+        assert body["cid"] == "one-merge"
 
     def test_a_bare_bulk_update_still_says_nothing(self):
         """The contrast, and the creation-time paths that keep the bare call."""

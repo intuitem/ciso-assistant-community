@@ -1059,6 +1059,15 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
 M2M_OPERATIONS = ("add", "remove", "set")
 
 
+def _writable_values(entry, key):
+    """The fence on a field: an explicit allowed_values, else the column's own
+    choices. save() enforces max_length and clean() but never choices."""
+    if key in entry.allowed_values:
+        return entry.allowed_values[key]
+    choices = getattr(get_model_field(entry.model, key), "choices", None)
+    return frozenset(str(choice[0]) for choice in choices) if choices else None
+
+
 def _as_id_list(value):
     """A JSON array or a comma-separated string of ids."""
     if isinstance(value, str):
@@ -1115,7 +1124,7 @@ class UpdateObjectAction(BaseAction):
         for key, value in fields.items():
             if key not in entry.fields or value in ("", None):
                 continue
-            allowed = entry.allowed_values.get(key)
+            allowed = _writable_values(entry, key)
             if allowed is not None and str(value) not in allowed:
                 raise FatalActionError(
                     f"update_object: a workflow may not set {config.get('model')}"
@@ -1775,7 +1784,7 @@ def validate_update_config(node):
                 )
             )
             continue
-        allowed = entry.allowed_values.get(key)
+        allowed = _writable_values(entry, key)
         if allowed is not None and not _is_templated(value):
             if str(value) not in allowed:
                 errors.append(

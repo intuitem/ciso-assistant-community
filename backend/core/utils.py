@@ -1436,29 +1436,33 @@ def bulk_update_with_log(model, rows, fields, batch_size=500):
     per-object ``save()`` would. Returns the number of rows that changed."""
     from auditlog.diff import model_instance_diff
     from auditlog.models import LogEntry
+    from django.db import transaction
 
     rows = [row for row in rows if row.pk is not None]
     fields = list(fields)
     if not rows or not fields:
         return 0
 
-    # Stored values first: after bulk_update there is nothing left to diff.
-    stored = model.objects.in_bulk([row.pk for row in rows])
-    model.objects.bulk_update(rows, fields, batch_size=batch_size)
-
     use_json = getattr(settings, "AUDITLOG_STORE_JSON_CHANGES", False)
     logged = 0
-    for row in rows:
-        old = stored.get(row.pk)
-        if old is None:
-            continue
-        changes = model_instance_diff(
-            old, row, fields_to_check=fields, use_json_for_changes=use_json
-        )
-        if not changes:
-            continue
-        # log_create fills content_type, cid and additional_data (folder_id,
-        # which the dispatcher scopes on); the middleware fills the actor.
-        LogEntry.objects.log_create(row, action=LogEntry.Action.UPDATE, changes=changes)
-        logged += 1
+    # One transaction: a half-written trail is worse than a failed call.
+    with transaction.atomic():
+        # Stored values first: after bulk_update there is nothing left to diff.
+        stored = model.objects.in_bulk([row.pk for row in rows])
+        model.objects.bulk_update(rows, fields, batch_size=batch_size)
+        for row in rows:
+            old = stored.get(row.pk)
+            if old is None:
+                continue
+            changes = model_instance_diff(
+                old, row, fields_to_check=fields, use_json_for_changes=use_json
+            )
+            if not changes:
+                continue
+            # log_create fills content_type, cid and additional_data (folder_id,
+            # which the dispatcher scopes on); the middleware fills the actor.
+            LogEntry.objects.log_create(
+                row, action=LogEntry.Action.UPDATE, changes=changes
+            )
+            logged += 1
     return logged
