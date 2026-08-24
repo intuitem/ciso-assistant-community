@@ -457,8 +457,8 @@ class AssetAssessmentViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        (viewable_bias, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, BusinessImpactAnalysis
+        viewable_bias = RoleAssignment.get_viewable_object_ids(
+            request.user, BusinessImpactAnalysis
         )
         try:
             bia = BusinessImpactAnalysis.objects.filter(id__in=viewable_bias).get(
@@ -481,9 +481,7 @@ class AssetAssessmentViewSet(BaseModelViewSet):
                 {"error": "permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
 
-        (viewable_assets, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Asset
-        )
+        viewable_assets = RoleAssignment.get_viewable_object_ids(request.user, Asset)
         viewable_asset_ids = {str(a) for a in viewable_assets}
 
         existing_assets = {
@@ -570,9 +568,7 @@ class AssetAssessmentViewSet(BaseModelViewSet):
         all_asset_ids = {a.id for a in all_assets}
 
         # Get viewable asset IDs using the standard pattern
-        viewable_asset_ids = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(), user=request.user, object_type=Asset
-        )[0]
+        viewable_asset_ids = RoleAssignment.get_viewable_object_ids(request.user, Asset)
 
         # Filter to only assets that are both in our tree and viewable
         accessible_asset_ids = all_asset_ids & set(viewable_asset_ids)
