@@ -669,6 +669,10 @@ class WorkflowToken(AbstractBaseModel, FolderMixin):
     )
     error_message = models.TextField(blank=True)
     retry_count = models.PositiveIntegerField(default=0)
+    # Set when a token is parked WAITING for a deferred task and cleared by
+    # the delivery that claims it, so a duplicate huey delivery cannot run
+    # the side effect twice. The token stays WAITING while in flight.
+    dispatch_id = models.UUIDField(null=True, blank=True, editable=False)
     # Iteration context STACK: [{item, index}, ...] — nested loops
     # push/pop; {{item}}/{{index}} resolve to the innermost entry.
     iteration_context = models.JSONField(default=list, blank=True)

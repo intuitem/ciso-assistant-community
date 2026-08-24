@@ -76,6 +76,7 @@
 		lazy?: boolean;
 		lazyLimit?: number;
 		lazyThreshold?: number;
+		minSearchLength?: number;
 		maxVisibleChips?: number;
 		portalDropdown?: boolean;
 	}
@@ -129,6 +130,7 @@
 		lazy = false,
 		lazyLimit = 20,
 		lazyThreshold = 50,
+		minSearchLength = 2,
 		maxVisibleChips: _maxVisibleChips = 3,
 		portalDropdown = false
 	}: Props = $props();
@@ -350,7 +352,7 @@
 
 	async function lazySearch(searchTerm: string) {
 		if (!effectiveLazy || !optionsEndpoint) return;
-		if (!searchTerm || searchTerm.length < 2) {
+		if (!searchTerm || searchTerm.length < minSearchLength) {
 			// Keep only already-selected options visible
 			options = selected.length > 0 ? [...selected] : [];
 			lazyHasSearched = false;
@@ -608,7 +610,7 @@
 		const handler = () => {
 			const text = el.value;
 			if (lazyDebounceTimer) clearTimeout(lazyDebounceTimer);
-			if (text.length >= 2) {
+			if (text.length >= minSearchLength) {
 				lazySearchPending = true;
 			} else {
 				lazySearchPending = false;
