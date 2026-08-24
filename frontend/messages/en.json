@@ -2335,6 +2335,7 @@
 	"tourHelpFinalTitle": "Help & Tour",
 	"tourHelpFinalDescription": "Remember, you can always restart the tour from here!",
 	"documentationScore": "Documentation score",
+	"isScored": "Is scored",
 	"implementationScore": "Implementation score",
 	"useDocumentationScore": "Use documentation score",
 	"useDocumentationScoreHelpText": "A second score (the documentation score) will be available for scoring the requirements.",
