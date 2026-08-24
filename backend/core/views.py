@@ -17604,6 +17604,10 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             "reviewer_only": True,
             "observation": "clear",
         },
+        ("in_progress", "draft"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
     }
 
     @action(detail=True, methods=["post"], url_path="set_status")

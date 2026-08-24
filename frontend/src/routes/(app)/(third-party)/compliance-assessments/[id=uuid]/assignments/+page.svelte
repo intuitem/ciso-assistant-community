@@ -1095,7 +1095,7 @@
 													</Popover.Positioner>
 												</Popover>
 											{/if}
-											{#if assignment.status === 'submitted' || assignment.status === 'changes_requested'}
+											{#if assignment.status === 'submitted' || assignment.status === 'changes_requested' || assignment.status === 'in_progress'}
 												<button
 													class="btn btn-sm preset-tonal text-xs"
 													onclick={() => handleSetStatus(assignment.id, 'draft')}
