@@ -35,6 +35,7 @@ from .memory import (
     inject_summary,
     inject_tool_replays,
     pack_verbatim_window,
+    strip_framing_markers,
     update_summary_for_session,
 )
 from .metrics import build_turn_metrics, record_metric
@@ -57,16 +58,6 @@ from .serializers import (
 
 logger = structlog.get_logger(__name__)
 
-# Patterns that attempt to impersonate system/assistant roles or override instructions
-_INJECTION_PATTERNS = re.compile(
-    r"(?:"
-    r"\[/?(?:SYSTEM|CONTEXT|INST)\]"  # Fake delimiter tags
-    r"|<\|(?:im_start|im_end|system)\|>"  # ChatML role markers
-    r"|```\s*(?:system|tool_call)"  # Fenced role blocks
-    r")",
-    re.IGNORECASE,
-)
-
 
 def _sanitize_user_input(text: str) -> str:
     """
@@ -74,8 +65,8 @@ def _sanitize_user_input(text: str) -> str:
     Strips characters that could be interpreted as role markers or
     delimiter tags by the LLM, while preserving the user's intent.
     """
-    # Remove injection patterns
-    text = _INJECTION_PATTERNS.sub("", text)
+    # shared with database text; a single sub() can leave a rebuilt marker
+    text = strip_framing_markers(text)
     # Strip null bytes and other control characters (keep newlines/tabs)
     text = "".join(
         c for c in text if c == "\n" or c == "\t" or (c >= " " and c <= "\U0010ffff")
@@ -173,6 +164,7 @@ class ChatSessionViewSet(BaseModelViewSet):
         context_refs = []
         context = ""
         enrichment = ""
+        page_context_prefix = ""
         query_result = None
 
         # Parse page context into structured reference
@@ -394,6 +386,8 @@ class ChatSessionViewSet(BaseModelViewSet):
 
         # Track if this is a creation/attach proposal (different SSE flow)
         creation_proposal = None
+        # platform-authored response constraints, kept out of the context
+        response_directives = ""
 
         if query_result and query_result.get("type") == "propose_create":
             # Creation proposal — don't execute, let the user confirm via UI
@@ -401,7 +395,9 @@ class ChatSessionViewSet(BaseModelViewSet):
             context = (
                 f"The system is proposing to create {len(query_result.get('items', []))} "
                 f"{query_result['display_name']}. "
-                "Interactive confirmation cards are already displayed in the UI.\n\n"
+                "Interactive confirmation cards are already displayed in the UI."
+            )
+            response_directives = (
                 "YOUR RESPONSE MUST:\n"
                 "- Tell the user you're proposing to create these items (1 sentence).\n"
                 "- Tell them to review and use the Confirm/Cancel buttons below.\n\n"
@@ -428,7 +424,9 @@ class ChatSessionViewSet(BaseModelViewSet):
                 f"The system found {len(query_result.get('items', []))} existing "
                 f"{query_result['related_display']} that can be attached to the current "
                 f"{query_result['parent_display']}. "
-                "Interactive confirmation cards are already displayed in the UI.\n\n"
+                "Interactive confirmation cards are already displayed in the UI."
+            )
+            response_directives = (
                 "YOUR RESPONSE MUST:\n"
                 "- Briefly explain why these items were suggested (1 sentence).\n"
                 "- Tell the user to review and use the Confirm/Cancel buttons below.\n\n"
@@ -453,35 +451,36 @@ class ChatSessionViewSet(BaseModelViewSet):
                 }
             )
         elif query_result and query_result.get("type") == "multi_query":
-            parts = [
-                "INSTRUCTIONS: Multiple queries were executed to answer your question. "
+            response_directives = (
+                "Multiple queries were executed to answer the question. "
                 "Present ALL results to the user in a clear, structured way. "
-                "Do NOT hallucinate additional information.\n"
-            ]
+                "Do NOT hallucinate additional information."
+            )
+            parts = []
             for i, sub in enumerate(query_result.get("results", []), 1):
                 parts.append(f"--- Query {i}: {sub.get('display_name', '')} ---")
                 parts.append(format_query_result(sub))
             context = "\n\n".join(parts)
         elif query_result and query_result.get("type") == "search_library":
-            context = (
-                "INSTRUCTIONS: The following data comes from the frameworks knowledge base. "
+            response_directives = (
+                "The context data comes from the frameworks knowledge base. "
                 "Present this information to the user in a clear, structured way. "
                 "When citing requirements, always include the framework name and reference ID. "
-                "Do NOT hallucinate additional information beyond what is provided.\n\n"
-                + query_result.get("text", "No results found.")
+                "Do NOT hallucinate additional information beyond what is provided."
             )
+            context = query_result.get("text", "No results found.")
         elif query_result:
-            context = (
-                "INSTRUCTIONS: The following data comes from a database query. "
+            response_directives = (
+                "The context data comes from a database query. "
                 "Present ONLY this data to the user. Use the total_count as the authoritative count. "
                 "The listed items are one page of results. Do NOT add explanations, "
                 "framework references, or commentary beyond what is in the data. "
                 "Do NOT hallucinate additional information. "
                 "IMPORTANT: Items include markdown links like [Name](/path/id) — "
                 "you MUST preserve these links exactly as-is in your response so the user "
-                "can click them. Do NOT rewrite, shorten, or remove the links.\n\n"
-                + format_query_result(query_result)
+                "can click them. Do NOT rewrite, shorten, or remove the links."
             )
+            context = format_query_result(query_result)
             url_slug = query_result.get("url_slug", "")
             for obj in query_result.get("objects", []):
                 context_refs.append(
@@ -561,7 +560,9 @@ class ChatSessionViewSet(BaseModelViewSet):
                             f"The system found {len(item_names)} existing "
                             f"{attach_result['related_display']} that may be relevant. "
                             "Interactive confirmation cards are already displayed in the UI "
-                            "showing each item with a Confirm/Cancel button.\n\n"
+                            "showing each item with a Confirm/Cancel button."
+                        )
+                        response_directives = (
                             "YOUR RESPONSE MUST:\n"
                             "- Briefly explain why these items were suggested (1-2 sentences).\n"
                             "- Tell the user to review and use the buttons below to attach them.\n\n"
@@ -611,12 +612,16 @@ class ChatSessionViewSet(BaseModelViewSet):
         user_lang = request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2]
         lang_name = LANG_MAP.get(user_lang, "English")
 
-        ctx_builder = ContextBuilder(max_tokens=RAG_CONTEXT_TOKENS)
-        ctx_builder.add(
-            "language",
-            f"LANGUAGE: You MUST respond in {lang_name}.",
-            priority=10,
+        response_directives = "\n\n".join(
+            part
+            for part in (
+                f"LANGUAGE: You MUST respond in {lang_name}.",
+                response_directives,
+            )
+            if part
         )
+
+        ctx_builder = ContextBuilder(max_tokens=RAG_CONTEXT_TOKENS)
         if page_context_prefix and not query_result:
             ctx_builder.add("page_context", page_context_prefix, priority=8)
         ctx_builder.add("main_context", context, priority=9)
@@ -631,12 +636,17 @@ class ChatSessionViewSet(BaseModelViewSet):
         context = ctx_builder.build()
 
         system_prompt_text = llm.system_prompt if hasattr(llm, "system_prompt") else ""
+        # _build_messages sends the directives twice — count both copies
+        user_turn_text = user_content
+        if response_directives:
+            system_prompt_text = f"{system_prompt_text}\n\n{response_directives}"
+            user_turn_text = f"{user_content}\n\n{response_directives}"
         system_prompt_chars = len(system_prompt_text)
         system_prompt_tokens = count_tokens(system_prompt_text)
         context_chars = len(context)
         context_tokens = count_tokens(context)
-        user_chars = len(user_content)
-        user_tokens = count_tokens(user_content)
+        user_chars = len(user_turn_text)
+        user_tokens = count_tokens(user_turn_text)
         history_chars = sum(len(m.get("content", "")) for m in history_messages)
         history_tokens = sum(
             count_tokens(m.get("content", "")) for m in history_messages
@@ -744,7 +754,10 @@ class ChatSessionViewSet(BaseModelViewSet):
                 thinking_count = 0
                 token_count = 0
                 for token_type, token in llm.stream(
-                    user_content, context, history=history_messages
+                    user_content,
+                    context,
+                    history=history_messages,
+                    directives=response_directives,
                 ):
                     if t_first_token is None:
                         t_first_token = time.time()
