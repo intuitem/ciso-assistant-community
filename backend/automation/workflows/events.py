@@ -17,6 +17,8 @@ d dispatch events at depth d, which start instances at depth d+1, capped at
 MAX_TRIGGER_DEPTH.
 """
 
+from datetime import timedelta
+
 from django.utils import timezone
 
 import structlog
@@ -28,6 +30,9 @@ from .models import Condition, WorkflowInstance, WorkflowNode, WorkflowTrigger
 logger = structlog.get_logger(__name__)
 
 MAX_TRIGGER_DEPTH = 5
+
+# How long one user action's events keep collapsing into its first run.
+COALESCE_WINDOW = timedelta(minutes=5)
 
 CUD_ACTIONS = ["created", "updated", "deleted"]
 
@@ -129,6 +134,21 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
             # No run identity, no automatic execution.
             _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_NO_IDENTITY)
             continue
+        # One user action, one run: every LogEntry a request writes shares a
+        # correlation id, so a bulk edit arrives here once per row with the
+        # same cid. Windowed, not unique-constrained: the cid can come from an
+        # inbound x-correlation-id header, and a client reusing one must not
+        # silence a trigger for good. No cid (shell, task) means no grouping.
+        cid = (payload or {}).get("cid") or ""
+        if (
+            cid
+            and trigger.instances.filter(
+                trigger_cid=cid,
+                created_at__gte=timezone.now() - COALESCE_WINDOW,
+            ).exists()
+        ):
+            _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_COALESCED)
+            continue
         try:
             instance = create_instance(
                 version,
@@ -137,6 +157,7 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
                 entry_node=entry,
                 trigger_registration=trigger,
                 trigger_depth=origin_depth + 1,
+                trigger_cid=cid,
             )
         except EngineError:
             _bookkeep(trigger, WorkflowTrigger.Result.ERROR)
@@ -393,6 +414,7 @@ def payload_from_log_entry(log_entry):
         "object_repr": log_entry.object_repr,
         "changes": changes,
         "new_values": {field: diff[1] for field, diff in changes.items()},
+        "cid": log_entry.cid or "",
         "folder_id": additional.get("folder_id"),
         "actor_email": getattr(log_entry.actor, "email", None),
         "timestamp": log_entry.timestamp.isoformat() if log_entry.timestamp else None,

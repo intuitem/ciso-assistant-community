@@ -32,11 +32,13 @@ from django.db.models import (
 )
 
 from core.models import (
+    Actor,
     AppliedControl,
     RequirementAssessment,
     Asset,
     ComplianceAssessment,
     Evidence,
+    FilteringLabel,
     Finding,
     FindingsAssessment,
     Framework,
@@ -53,6 +55,7 @@ from core.models import (
 from core.tasks import get_missing_email_settings
 from tprm.models import Entity, EntityAssessment
 
+from .context import RESERVED_VARIABLE_KEYS, VARIABLE_KEY_RE, temporal_seeds
 from .models import WorkflowToken
 from .tasks import send_email_task
 
@@ -197,6 +200,59 @@ class SetVariablesAction(BaseAction):
         values = render(config.get("variables", {}), _render_context(instance))
         instance.variables.update(values)
         return values
+
+
+def _as_date(value, label):
+    """ISO date or ISO datetime; a datetime keeps only its date."""
+    if isinstance(value, datetime.datetime):
+        return value.date()
+    if isinstance(value, datetime.date):
+        return value
+    try:
+        parsed = datetime.datetime.fromisoformat(str(value).strip())
+    except ValueError, TypeError:
+        raise FatalActionError(
+            f"date_offset: {label} '{value}' is not an ISO date (YYYY-MM-DD)"
+        )
+    return parsed.date()
+
+
+def _as_offset(value, label):
+    if value in ("", None):
+        return 0
+    try:
+        return int(value)
+    except ValueError, TypeError:
+        raise FatalActionError(f"date_offset: '{label}' must be a whole number")
+
+
+@register
+class DateOffsetAction(BaseAction):
+    action_type = "date_offset"
+
+    def execute(self, config, instance):
+        context = _render_context(instance)
+        base = render(config.get("base", ""), context)
+        if base in ("", None):
+            # The run's own today, not the wall clock: retries must not drift.
+            base = (
+                instance.variables.get("today")
+                or temporal_seeds(instance.trigger_registration)["today"]
+            )
+        base_date = _as_date(base, "base")
+        result = base_date + datetime.timedelta(
+            days=_as_offset(render(config.get("days"), context), "days"),
+            weeks=_as_offset(render(config.get("weeks"), context), "weeks"),
+        )
+        output = str(config.get("output") or "").strip()
+        if output:
+            if not VARIABLE_KEY_RE.match(output) or output in RESERVED_VARIABLE_KEYS:
+                raise FatalActionError(
+                    f"date_offset: '{output}' is not a writable variable name"
+                )
+            # In-memory like set_variables; _persist_node_output flushes it.
+            instance.variables[output] = result.isoformat()
+        return {"result": result.isoformat(), "base": base_date.isoformat()}
 
 
 # Explicit registry of models workflows may create: each entry
@@ -805,6 +861,329 @@ class ReadObjectsAction(BaseAction):
             )
 
 
+@dataclass(frozen=True)
+class UpdateEntry:
+    """One UPDATABLE_MODELS entry, drawn on one line: automation may record
+    that time passed and may attach work, but may not render the judgment.
+
+    ``fields`` is what a run may write; ``allowed_values`` narrows a field to
+    the values that are facts rather than decisions. Plain columns only —
+    anything whose transition lives outside save() stays off the registry.
+    """
+
+    model: type[Model]
+    #: Never `name`: identity stays stable so create_object's upsert matches.
+    fields: list[str]
+    allowed_values: dict[str, frozenset] = dataclass_field(default_factory=dict)
+    #: name -> (target model, frontend options endpoint)
+    m2m_fields: dict[str, tuple[type[Model], str]] = dataclass_field(
+        default_factory=dict
+    )
+
+
+_ACTOR = (Actor, "actors")
+_LABELS = (FilteringLabel, "filtering-labels")
+_CONTROLS = (AppliedControl, "applied-controls")
+_EVIDENCES = (Evidence, "evidences")
+_ASSETS = (Asset, "assets")
+_EXCEPTIONS = (SecurityException, "security-exceptions")
+
+# Lifecycle only; the verdict lives in the results, which are not writable.
+_ASSESSMENT_STATUSES = frozenset(
+    {"planned", "in_progress", "in_review", "done", "deprecated"}
+)
+
+UPDATABLE_MODELS: dict[str, UpdateEntry] = {
+    "applied_control": UpdateEntry(
+        model=AppliedControl,
+        fields=[
+            "status",
+            "priority",
+            "effort",
+            "start_date",
+            "eta",
+            "expiry_date",
+            "description",
+            "ref_id",
+            "link",
+            "observation",
+        ],
+        m2m_fields={
+            "owner": _ACTOR,
+            "evidences": _EVIDENCES,
+            "assets": _ASSETS,
+            "filtering_labels": _LABELS,
+        },
+    ),
+    "evidence": UpdateEntry(
+        model=Evidence,
+        fields=["status", "expiry_date", "description"],
+        # A lapsed date and a missing file are facts; approving is not.
+        allowed_values={"status": frozenset({"expired", "missing"})},
+        m2m_fields={"owner": _ACTOR, "filtering_labels": _LABELS},
+    ),
+    "incident": UpdateEntry(
+        model=Incident,
+        fields=["status", "severity", "description", "ref_id", "link"],
+        m2m_fields={
+            "owners": _ACTOR,
+            "assets": _ASSETS,
+            "applied_controls": _CONTROLS,
+            "filtering_labels": _LABELS,
+        },
+    ),
+    "asset": UpdateEntry(
+        model=Asset,
+        fields=["description", "ref_id", "reference_link", "observation"],
+        m2m_fields={
+            "owner": _ACTOR,
+            "security_exceptions": _EXCEPTIONS,
+            "filtering_labels": _LABELS,
+        },
+    ),
+    "vulnerability": UpdateEntry(
+        model=Vulnerability,
+        fields=["status", "severity", "description", "ref_id", "eta", "due_date"],
+        m2m_fields={
+            "applied_controls": _CONTROLS,
+            "assets": _ASSETS,
+            "security_exceptions": _EXCEPTIONS,
+            "filtering_labels": _LABELS,
+        },
+    ),
+    "security_exception": UpdateEntry(
+        model=SecurityException,
+        fields=[
+            "status",
+            "severity",
+            "description",
+            "ref_id",
+            "expiration_date",
+            "observation",
+        ],
+        # Granting or refusing an exception stays human; expiring it is a date.
+        allowed_values={"status": frozenset({"expired", "deprecated"})},
+        m2m_fields={"owners": _ACTOR, "evidences": _EVIDENCES},
+    ),
+    "entity": UpdateEntry(
+        model=Entity,
+        fields=["description", "ref_id", "mission", "reference_link"],
+        m2m_fields={"filtering_labels": _LABELS},
+    ),
+    "findings_assessment": UpdateEntry(
+        model=FindingsAssessment,
+        fields=["status", "eta", "due_date", "description", "ref_id", "observation"],
+        allowed_values={"status": _ASSESSMENT_STATUSES},
+        m2m_fields={"evidences": _EVIDENCES, "filtering_labels": _LABELS},
+    ),
+    "finding": UpdateEntry(
+        model=Finding,
+        fields=[
+            "status",
+            "severity",
+            "priority",
+            "eta",
+            "due_date",
+            "description",
+            "ref_id",
+            "observation",
+        ],
+        # All but `dismissed`: that one is a person judging it harmless.
+        allowed_values={
+            "status": frozenset(
+                {
+                    "--",
+                    "identified",
+                    "confirmed",
+                    "assigned",
+                    "in_progress",
+                    "mitigated",
+                    "resolved",
+                    "closed",
+                    "deprecated",
+                }
+            )
+        },
+        m2m_fields={
+            "owner": _ACTOR,
+            "applied_controls": _CONTROLS,
+            "evidences": _EVIDENCES,
+            "filtering_labels": _LABELS,
+        },
+    ),
+    "compliance_assessment": UpdateEntry(
+        model=ComplianceAssessment,
+        fields=["status", "eta", "due_date", "description", "ref_id", "observation"],
+        allowed_values={"status": _ASSESSMENT_STATUSES},
+        m2m_fields={"evidences": _EVIDENCES, "assets": _ASSETS},
+    ),
+    "risk_assessment": UpdateEntry(
+        model=RiskAssessment,
+        fields=["status", "eta", "due_date", "description", "ref_id", "observation"],
+        allowed_values={"status": _ASSESSMENT_STATUSES},
+    ),
+    "entity_assessment": UpdateEntry(
+        model=EntityAssessment,
+        # No `conclusion`: that is the reviewer's verdict on the third party.
+        fields=["status", "eta", "due_date", "description", "observation"],
+        allowed_values={"status": _ASSESSMENT_STATUSES},
+    ),
+    "requirement_assessment": UpdateEntry(
+        model=RequirementAssessment,
+        # Progress and attached work only: a workflow that answers an audit
+        # destroys its evidentiary value.
+        fields=["status", "eta", "due_date", "observation"],
+        m2m_fields={
+            "applied_controls": _CONTROLS,
+            "evidences": _EVIDENCES,
+            "security_exceptions": _EXCEPTIONS,
+        },
+    ),
+    "risk_scenario": UpdateEntry(
+        model=RiskScenario,
+        # No treatment, no ratings: attach the control, leave the call.
+        fields=["description", "ref_id"],
+        m2m_fields={
+            "applied_controls": _CONTROLS,
+            "owner": _ACTOR,
+            "assets": _ASSETS,
+        },
+    ),
+}
+
+# RiskAcceptance and ValidationFlow are deliberately absent: their state moves
+# through set_state() and the write serializer's transition table + FlowEvent,
+# not through save(), so a column write here would skip revoked_at, the
+# scenario treatments it reverts, and the flow's own history.
+
+M2M_OPERATIONS = ("add", "remove", "set")
+
+
+def _as_id_list(value):
+    """A JSON array or a comma-separated string of ids."""
+    if isinstance(value, str):
+        parsed = json_loads_or_none(value)
+        value = (
+            parsed
+            if isinstance(parsed, list)
+            else [item.strip() for item in value.split(",") if item.strip()]
+        )
+    if not isinstance(value, list):
+        return None
+    return [str(item).strip() for item in value if str(item).strip()]
+
+
+@register
+class UpdateObjectAction(BaseAction):
+    action_type = "update_object"
+
+    def execute(self, config, instance):
+        entry = UPDATABLE_MODELS.get(config.get("model"))
+        if entry is None:
+            raise ActionError(f"update_object: unknown model '{config.get('model')}'")
+        context = _render_context(instance)
+        target_id = str(render(config.get("id", ""), context) or "").strip()
+        if not target_id:
+            raise ActionError("update_object: 'id' is required")
+
+        from . import authz
+        from .engine import run_identity
+
+        # Subtree AND changeable by the run identity: the same two-part scope
+        # as a read, with change instead of view.
+        try:
+            obj = (
+                entry.model.objects.filter(
+                    folder_id__in=_read_scope_folder_ids(instance.folder)
+                )
+                .filter(
+                    id__in=authz.changeable_ids(run_identity(instance), entry.model)
+                )
+                .filter(id=target_id)
+                .first()
+            )
+        except ValueError, ValidationError:
+            obj = None
+        if obj is None:
+            raise ActionError(
+                f"update_object: no {config.get('model')} '{target_id}' "
+                "in this workflow's scope"
+            )
+
+        fields = render(config.get("fields") or {}, context)
+        updated = {}
+        for key, value in fields.items():
+            if key not in entry.fields or value in ("", None):
+                continue
+            allowed = entry.allowed_values.get(key)
+            if allowed is not None and str(value) not in allowed:
+                raise FatalActionError(
+                    f"update_object: a workflow may not set {config.get('model')}"
+                    f".{key} to '{value}'"
+                )
+            setattr(obj, key, value)
+            updated[key] = value
+        if updated:
+            try:
+                obj.save()
+            except ValidationError as e:
+                raise ActionError(f"update_object: {'; '.join(e.messages)}")
+
+        relations = {}
+        for field_name, spec in (config.get("m2m") or {}).items():
+            relations[field_name] = self._apply_m2m(
+                entry, obj, field_name, spec or {}, context, instance
+            )
+        return {
+            "object_id": str(obj.id),
+            "str": str(obj),
+            "updated_fields": sorted(updated),
+            "relations": relations,
+        }
+
+    def _apply_m2m(self, entry, obj, field_name, spec, context, instance):
+        relation = entry.m2m_fields.get(field_name)
+        if relation is None:
+            raise FatalActionError(
+                f"update_object: '{field_name}' is not a writable relation"
+            )
+        target_model, _endpoint = relation
+        operation = spec.get("op", "add")
+        if operation not in M2M_OPERATIONS:
+            raise FatalActionError(
+                f"update_object: unknown relation operation '{operation}'"
+            )
+        ids = _as_id_list(render(spec.get("values"), context))
+        if not ids:
+            # `set` would clear the relation, add/remove would no-op.
+            raise FatalActionError(f"update_object: '{field_name}' has no values")
+        try:
+            rows = list(target_model.objects.filter(id__in=ids))
+        except ValueError, ValidationError:
+            raise FatalActionError(f"update_object: '{field_name}' has invalid ids")
+        if len(rows) != len(set(ids)):
+            found = {str(row.id) for row in rows}
+            missing = ", ".join(sorted(set(ids) - found))
+            raise ActionError(f"update_object: {field_name} '{missing}' does not exist")
+        # As with create_object's FKs: ancestors allowed, since actors and
+        # labels live in root.
+        allowed_folders = _accessible_folder_ids(instance.folder)
+        for row in rows:
+            folder_id = getattr(row, "folder_id", None)
+            if folder_id is not None and folder_id not in allowed_folders:
+                raise ActionError(
+                    f"update_object: {field_name} is outside this workflow's scope"
+                )
+        manager = getattr(obj, field_name)
+        if operation == "add":
+            manager.add(*rows)
+        elif operation == "remove":
+            manager.remove(*rows)
+        else:
+            manager.set(rows)
+        return {"op": operation, "count": len(rows)}
+
+
 @register
 class SendEmailAction(BaseAction):
     action_type = "send_email"
@@ -1165,6 +1544,11 @@ def required_permissions(action_config):
         if action_config.get("upsert"):
             codenames.append(f"change_{model_name}")
         return codenames
+    if action_type == "update_object":
+        entry = UPDATABLE_MODELS.get(action_config.get("model"))
+        if entry is None:
+            return []
+        return [f"change_{entry.model._meta.model_name}"]
     if action_type == "read_objects":
         entry = READABLE_MODELS.get(action_config.get("model"))
         if entry is None:
@@ -1312,6 +1696,125 @@ def validate_create_config(node):
                 )
             )
     return errors
+
+
+def validate_date_offset_config(node):
+    """Publish-time checks for date_offset nodes. Templated values are only
+    knowable at runtime and pass here."""
+    config = node.action_config or {}
+    if config.get("type") != "date_offset":
+        return []
+    errors = []
+    output = str(config.get("output") or "").strip()
+    if output and (
+        not VARIABLE_KEY_RE.match(output) or output in RESERVED_VARIABLE_KEYS
+    ):
+        errors.append(
+            (
+                "action_date_offset_bad_output",
+                f"'{output}' is not a writable variable name",
+            )
+        )
+    for key in ("days", "weeks"):
+        value = config.get(key)
+        if value in ("", None) or _is_templated(value):
+            continue
+        try:
+            int(value)
+        except ValueError, TypeError:
+            errors.append(
+                (
+                    "action_date_offset_bad_offset",
+                    f"'{key}' must be a whole number",
+                )
+            )
+    base = config.get("base")
+    if base not in ("", None) and not _is_templated(base):
+        try:
+            datetime.datetime.fromisoformat(str(base).strip())
+        except ValueError, TypeError:
+            errors.append(
+                (
+                    "action_date_offset_bad_base",
+                    f"'{base}' is not an ISO date (YYYY-MM-DD)",
+                )
+            )
+    return errors
+
+
+def validate_update_config(node):
+    """Publish-time checks for update_object nodes: what the whitelists would
+    refuse mid-run is refused here."""
+    config = node.action_config or {}
+    if config.get("type") != "update_object":
+        return []
+    entry = UPDATABLE_MODELS.get(config.get("model"))
+    if entry is None:
+        return [
+            (
+                "action_update_unknown_model",
+                f"Unknown updatable model '{config.get('model')}'",
+            )
+        ]
+    errors = []
+    if not str(config.get("id") or "").strip():
+        errors.append(("action_update_missing_id", "Which object to update is not set"))
+    fields = {
+        key: value
+        for key, value in (config.get("fields") or {}).items()
+        if value not in ("", None)
+    }
+    if not fields and not (config.get("m2m") or {}):
+        errors.append(("action_update_nothing_to_write", "This step writes nothing"))
+    for key, value in fields.items():
+        if key not in entry.fields:
+            errors.append(
+                (
+                    "action_update_field_not_writable",
+                    f"A workflow may not write '{key}' on '{config.get('model')}'",
+                )
+            )
+            continue
+        allowed = entry.allowed_values.get(key)
+        if allowed is not None and not _is_templated(value):
+            if str(value) not in allowed:
+                errors.append(
+                    (
+                        "action_update_value_not_allowed",
+                        f"'{key}' may only be set to {', '.join(sorted(allowed))}",
+                    )
+                )
+    for field_name, spec in (config.get("m2m") or {}).items():
+        if field_name not in entry.m2m_fields:
+            errors.append(
+                (
+                    "action_update_relation_not_writable",
+                    f"'{field_name}' is not a writable relation on "
+                    f"'{config.get('model')}'",
+                )
+            )
+            continue
+        operation = (spec or {}).get("op", "add")
+        if operation not in M2M_OPERATIONS:
+            errors.append(
+                (
+                    "action_update_bad_relation_op",
+                    f"Unknown relation operation '{operation}'",
+                )
+            )
+        values = (spec or {}).get("values")
+        if not _is_templated(values) and not _as_id_list(values):
+            errors.append(
+                (
+                    "action_update_relation_no_values",
+                    f"'{field_name}' has no ids to link",
+                )
+            )
+    return errors
+
+
+def _is_templated(value):
+    return isinstance(value, str) and TEMPLATE_RE.search(value) is not None
 
 
 def authorize_action(node, instance):

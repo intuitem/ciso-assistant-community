@@ -24,6 +24,7 @@ from .actions import (
     execute_action,
     render,
 )
+from .context import temporal_seeds
 from .models import (
     WorkflowInstance,
     WorkflowInstanceLog,
@@ -248,6 +249,7 @@ def create_instance(
     trigger_depth=0,
     entry_node=None,
     initial_variables=None,
+    trigger_cid="",
 ):
     if entry_node is None:
         entry_node = default_entry_node(version)
@@ -262,6 +264,8 @@ def create_instance(
     # caller (manual-run endpoint) validates keys and types beforehand.
     if initial_variables:
         variables.update(initial_variables)
+    # Engine-owned last; these keys are reserved, so nothing authored is lost.
+    variables.update(temporal_seeds(trigger_registration))
     if payload:
         variables["payload"] = payload
 
@@ -280,6 +284,7 @@ def create_instance(
             parent_token=parent_token,
             trigger_registration=trigger_registration,
             trigger_depth=trigger_depth,
+            trigger_cid=trigger_cid,
         )
         _log(
             instance,
