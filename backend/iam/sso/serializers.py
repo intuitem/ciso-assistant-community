@@ -34,12 +34,10 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
     )
     jit_provisioning_enabled = serializers.BooleanField(
         required=False,
-        default=False,
     )
     default_user_groups = serializers.ListField(
         child=serializers.UUIDField(),
         required=False,
-        default=list,
     )
     provider = serializers.CharField(
         required=False,
@@ -308,7 +306,7 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
             ).exists()
             if has_sso_only_users_without_local_fallback:
                 raise serializers.ValidationError(
-                    {"is_enabled": "errorSsoRequiredForScimUsers"}
+                    {"is_enabled": "errorSsoRequiredForManagedUsers"}
                 )
 
         # Use stored secret and sp_private_key if no transmitted
@@ -331,8 +329,17 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
             validated_data["settings"] = {}
         validated_data["settings"]["name"] = validated_data.get("provider", "n/a")
 
+        # Use stored jit_provisioning_enabled and default_user_groups if not transmitted
+        validated_data["jit_provisioning_enabled"] = validated_data.get(
+            "jit_provisioning_enabled",
+            settings_object.value.get("jit_provisioning_enabled", False),
+        )
         validated_data["default_user_groups"] = [
-            str(group_id) for group_id in validated_data.get("default_user_groups", [])
+            str(group_id)
+            for group_id in validated_data.get(
+                "default_user_groups",
+                settings_object.value.get("default_user_groups", []),
+            )
         ]
 
         settings_object.value = validated_data

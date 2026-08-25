@@ -233,9 +233,8 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 first_name=sociallogin.user.first_name,
                 last_name=sociallogin.user.last_name,
                 user_groups=sso_settings.default_user_groups,
+                is_jit_provisioned=True,
             )
-            user.is_jit_provisioned = True
-            user.save(update_fields=["is_jit_provisioned"])
             logger.info(
                 "pre_social_login: user auto-provisioned via JIT",
                 provider=sociallogin.account.provider,

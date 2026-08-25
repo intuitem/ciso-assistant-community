@@ -761,6 +761,7 @@ class UserManager(BaseUserManager):
                 keep_local_login=extra_fields.get("keep_local_login", False),
                 expiry_date=extra_fields.get("expiry_date"),
                 is_published=True,
+                is_jit_provisioned=extra_fields.get("is_jit_provisioned", False),
             ),
         )
         if password:

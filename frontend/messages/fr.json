@@ -3474,7 +3474,7 @@
 	"displayAle": "Perte annuelle attendue",
 	"errorCreatingPersonalAccessToken": "Une erreur s'est produite lors de la création du jeton d'accès personnel.",
 	"errorMaxPatAmountExceeded": "Nombre maximum de jetons autorisés dépassé pour cet utilisateur.",
-	"errorSsoRequiredForScimUsers": "Le SSO ne peut pas être désactivé tant qu'il existe des utilisateurs provisionnés par SCIM ou par auto-provisionnement sans accès local.",
+	"errorSsoRequiredForManagedUsers": "Le SSO ne peut pas être désactivé tant qu'il existe des utilisateurs provisionnés par SCIM ou par auto-provisionnement sans accès local.",
 	"evidencesHelpText": "Ce tableau montre toutes les preuves associées à cette évaluation de conformité, soit directement par les évaluations d'exigences, soit indirectement par les mesures appliquées.",
 	"featureFlagSettingsUpdated": "Paramètres des indicateurs de fonctionnalités mis à jour. Veuillez actualiser la page pour appliquer les modifications.",
 	"featureFlags": "Fonctionnalités",

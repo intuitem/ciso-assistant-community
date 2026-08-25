@@ -194,17 +194,13 @@ class FinishACSView(SAMLViewMixin, View):
                         first_name=idp_first_names[0] if idp_first_names else "",
                         last_name=idp_last_names[0] if idp_last_names else "",
                         user_groups=sso_settings.default_user_groups,
+                        is_jit_provisioned=True,
                     )
-                    user.is_jit_provisioned = True
-                    user.save(update_fields=["is_jit_provisioned"])
                     logger.info(
                         "SAML: user auto-provisioned via JIT", user_id=str(user.id)
                     )
             if not user:
                 raise User.DoesNotExist()
-            user.first_name = idp_first_names[0] if idp_first_names else user.first_name
-            user.last_name = idp_last_names[0] if idp_last_names else user.last_name
-            user.save()
             if jit_provisioning_active:
                 group_claims_string = attribute_mapping.get("groups", [])
                 group_claims = [
