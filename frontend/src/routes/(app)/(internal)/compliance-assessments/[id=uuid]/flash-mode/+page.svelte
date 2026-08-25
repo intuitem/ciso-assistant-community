@@ -55,7 +55,11 @@
 		| { type: 'assessment'; data: (typeof data.requirement_assessments)[0] }
 		| { type: 'splash'; data: Record<string, any> };
 
-	const assessmentItems: NavItem[] = data.requirement_assessments
+	const requirementAssessments = $state(
+		data.requirement_assessments.map((ra: Record<string, any>) => ({ ...ra }))
+	);
+
+	const assessmentItems: NavItem[] = requirementAssessments
 		.filter((ra: Record<string, any>) => ra.name || ra.description)
 		.map((ra: Record<string, any>) => ({ type: 'assessment' as const, data: ra }));
 
