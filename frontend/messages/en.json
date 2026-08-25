@@ -2578,6 +2578,7 @@
 	"enableJitProvisioningHelpText": "Automatically create an account, with the default user groups below, for users authenticating via SSO for the first time.",
 	"defaultUserGroups": "Default user groups",
 	"defaultUserGroupsHelpText": "User groups automatically granted to users created by auto-provisioning.",
+	"defaultUserGroupsWarning": "Applied once, at account creation only. Changing or removing this setting later does not affect users already provisioned. For group membership that stays in sync over time, use IdP group mapping instead.",
 	"lastOccurrenceStatus": "Last occurrence status",
 	"showAllEvents": "Show all events",
 	"featureFlags": "Feature flags",

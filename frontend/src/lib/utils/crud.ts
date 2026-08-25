@@ -967,7 +967,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		flaggedFields: {
 			idp_groups: ['idp_groups', 'jit_provisioning']
 		},
-		foreignKeyFields: [{ field: 'user_groups', urlModel: 'user-groups' }],
+		foreignKeyFields: [
+			{ field: 'user_groups', urlModel: 'user-groups' },
+			{ field: 'idp_groups', urlModel: 'idp-groups' }
+		],
 		filters: []
 	},
 	teams: {

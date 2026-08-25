@@ -101,6 +101,9 @@
 			helpText={m.defaultUserGroupsHelpText()}
 			disabled={!data.is_enabled || !data.jit_provisioning_enabled}
 		/>
+		<span class="text-orange-500 italic text-sm"
+			><i class="fa-solid fa-circle-exclamation mr-1"></i>{m.defaultUserGroupsWarning()}</span
+		>
 	{/if}
 	<Checkbox
 		{form}

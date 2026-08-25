@@ -10,7 +10,7 @@ description: >-
 SCIM 2.0 lets your identity provider (Okta, Microsoft Entra ID, Keycloak, …) push users into CISO Assistant automatically, so you no longer have to create accounts by hand. **IdP groups** are the bridge between a group that exists in your identity provider and the CISO Assistant user groups it should grant.
 
 {% hint style="info" %}
-This is a **PRO** feature. It is gated by the `IdP groups` feature flag (see [feature-flags.md](../settings/feature-flags.md "mention")). While the flag is off, the **IdP groups** menu, the **SCIM** settings tab and the **IdP groups** column on the users table stay hidden. The flag is enabled by default on PRO instances.
+SCIM provisioning itself — the **SCIM** settings tab and pushing users in from your IdP — is a **PRO** feature, gated by the `idp_groups` [feature flag](../settings/feature-flags.md "mention") (enabled by default on PRO instances). The **IdP groups** menu and the **IdP groups** column on the users table described below are Community-available: either `idp_groups` or the Community `jit_provisioning` flag (see [Auto-provisioning (JIT)](README.md#auto-provisioning-jit)) unlocks them, so IdP group mapping works for SSO auto-provisioned users too, without SCIM.
 {% endhint %}
 
 <figure><img src="../../.gitbook/assets/scim-feature-flag.png" alt=""><figcaption><p>The <strong>IdP groups</strong> feature flag in Settings › Feature flags.</p></figcaption></figure>

@@ -1818,7 +1818,7 @@
 	"errorLoadingData": "Fout bij laden van gegevens",
 	"errorLoadingVulnerabilityData": "Fout bij laden van kwetsbaarheidsgegevens",
 	"errorMaxPatAmountExceeded": "Maximaal aantal toegestane tokens voor deze gebruiker overschreden.",
-	"errorSsoRequiredForScimUsers": "SSO kan niet worden uitgeschakeld zolang er door SCIM beheerde gebruikers zonder lokale toegang bestaan.",
+	"errorSsoRequiredForManagedUsers": "SSO kan niet worden uitgeschakeld zolang er door SCIM beheerde of automatisch ingerichte gebruikers zonder lokale toegang bestaan.",
 	"errorOccuredDuringImport": "Er is een fout opgetreden tijdens het importeren",
 	"errorRiskScenarioGraphMustNotContainCycles": "De risicoscenariografiek mag geen cycli bevatten.",
 	"errorUpdatingObject": "Er is een fout opgetreden bij het bijwerken van het {object}-object.",
@@ -5578,5 +5578,14 @@
 	"chatRemoveAttachment": "Bijlage verwijderen",
 	"dataWizardDownloadTemplate": "Download het Excel-sjabloon",
 	"previewTooLarge": "Het bestand is te groot om een voorbeeld te bekijken. Download het om de inhoud te bekijken.",
-	"previewTruncated": "Voorbeeld is afgekapt. Download het bestand om alles te zien."
+	"previewTruncated": "Voorbeeld is afgekapt. Download het bestand om alles te zien.",
+	"enableJitProvisioning": "Automatische inrichting inschakelen",
+	"enableJitProvisioningHelpText": "Maakt automatisch een account aan, met de onderstaande standaard gebruikersgroepen, voor gebruikers die voor het eerst inloggen via SSO.",
+	"defaultUserGroups": "Standaard gebruikersgroepen",
+	"defaultUserGroupsHelpText": "Gebruikersgroepen die automatisch worden toegekend aan gebruikers die zijn aangemaakt via automatische inrichting.",
+	"defaultUserGroupsWarning": "Wordt slechts één keer toegepast, bij het aanmaken van het account. Deze instelling later wijzigen of verwijderen heeft geen effect op reeds ingerichte gebruikers. Gebruik voor groepslidmaatschap dat na verloop van tijd gesynchroniseerd blijft, in plaats daarvan IdP-groepskoppeling.",
+	"attributeMappingGroups": "Attribuutkoppeling voor groepen",
+	"attributeMappingGroupsHelpText": "Naam/namen van de claim die de IdP-groepslidmaatschappen van de gebruiker bevat. Hier gevonden groepen worden bij elke aanmelding gesynchroniseerd met IdP-groepen en verlenen de CISO Assistant-gebruikersgroepen waaraan een beheerder ze heeft gekoppeld.",
+	"jitProvisioning": "SSO automatische inrichting (JIT)",
+	"jitProvisioningDescription": "Schakelt het automatisch aanmaken van accounts bij de eerste SSO-aanmelding in, evenals het synchroniseren van hun IdP-groepslidmaatschappen, zonder dat SCIM nodig is."
 }

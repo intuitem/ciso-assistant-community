@@ -25,6 +25,9 @@ def sync_user_idp_groups(user, group_names) -> None:
         name.strip() for name in group_names if isinstance(name, str) and name.strip()
     }
     groups = [IdPGroup.objects.get_or_create(name=name)[0] for name in names]
+    IdPGroup.objects.filter(id__in=[g.id for g in groups]).exclude(
+        source=IdPGroup.Source.SSO
+    ).update(source=IdPGroup.Source.SSO)
     user.idp_groups.set(groups)
 
 

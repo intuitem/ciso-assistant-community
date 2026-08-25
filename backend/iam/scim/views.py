@@ -498,6 +498,7 @@ class SCIMGroupViewSet(ViewSet):
         # Auto-create on first push: the group grants nothing until an admin
         # wires its user_groups, so accepting unknown groups is safe.
         idp_group, created = IdPGroup.objects.get_or_create(name=display_name)
+        _mark_scim_sourced(idp_group)
         _add_members(idp_group, _member_ids(data.get("members", [])))
         logger.info(
             "SCIM: group provisioned",
@@ -630,6 +631,7 @@ class SCIMGroupViewSet(ViewSet):
                 _set_members(idp_group, ids)
             elif action == "clear":
                 idp_group.users.clear()
+                _mark_scim_sourced(idp_group)
 
         return _scim_response(scim_group_to_dict(idp_group, request))
 
@@ -823,16 +825,24 @@ def _resolve_user_ids(ids):
     )
 
 
+def _mark_scim_sourced(idp_group):
+    if idp_group.source != IdPGroup.Source.SCIM:
+        idp_group.source = IdPGroup.Source.SCIM
+        idp_group.save(update_fields=["source"])
+
+
 def _add_members(idp_group, ids):
     valid = _resolve_user_ids(ids)
     if valid:
         idp_group.users.add(*valid)
+        _mark_scim_sourced(idp_group)
 
 
 def _remove_members(idp_group, ids):
     valid = _resolve_user_ids(ids)
     if valid:
         idp_group.users.remove(*valid)
+        _mark_scim_sourced(idp_group)
 
 
 def _set_members(idp_group, ids):
@@ -850,6 +860,7 @@ def _set_members(idp_group, ids):
         )
         return
     idp_group.users.set(resolved)
+    _mark_scim_sourced(idp_group)
 
 
 def _update_user_from_scim_data(user, data):

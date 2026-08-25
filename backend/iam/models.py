@@ -2218,12 +2218,23 @@ class IdPGroup(AbstractBaseModel, FolderMixin):
     ``user_groups`` (the CISO groups it grants) is admin-managed. Folder-scoped
     (defaults to the root folder) so it participates in RBAC like UserGroup."""
 
+    class Source(models.TextChoices):
+        SCIM = "scim", _("SCIM")
+        SSO = "sso", _("SSO")
+
     name = models.CharField(max_length=512, unique=True, verbose_name=_("Name"))
     user_groups = models.ManyToManyField(
         UserGroup,
         related_name="idp_groups",
         blank=True,
         verbose_name=_("User groups"),
+    )
+    source = models.CharField(
+        max_length=8,
+        choices=Source.choices,
+        null=True,
+        blank=True,
+        verbose_name=_("Source"),
     )
 
     class Meta:

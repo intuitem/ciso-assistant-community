@@ -2516,6 +2516,7 @@
 	"enableJitProvisioningHelpText": "Créer automatiquement un compte, avec les groupes d'utilisateurs par défaut ci-dessous, pour les utilisateurs s'authentifiant via SSO pour la première fois.",
 	"defaultUserGroups": "Groupes d'utilisateurs par défaut",
 	"defaultUserGroupsHelpText": "Groupes d'utilisateurs automatiquement attribués aux utilisateurs créés par l'auto-provisionnement.",
+	"defaultUserGroupsWarning": "Appliqué une seule fois, à la création du compte. Modifier ou supprimer ce paramètre par la suite n'affecte pas les utilisateurs déjà provisionnés. Pour une appartenance aux groupes qui reste synchronisée dans le temps, utilisez plutôt le mappage des groupes IdP.",
 	"lastOccurrenceStatus": "Statut de la dernière occurrence",
 	"nextOccurrence": "Prochaine occurrence",
 	"taskTemplate": "Tâche",

@@ -26,15 +26,19 @@ Turn it on from **Settings > SSO**:
 1. **Enable auto-provisioning**: off by default, preserving today's behavior until you opt in.
 2. **Default user groups**: the user group(s) automatically granted to accounts created this way. Pick the lowest-privilege group(s) that make sense for a brand-new user (e.g. a read-only or analyst group scoped to the right folder). You can always add more groups to a user by hand afterward.
 
+{% hint style="warning" %}
+**Default user groups** is applied once, at account creation, and nowhere else. Changing or removing it afterward does not touch any user already auto-provisioned — they keep whatever groups they were given on their first login, however long ago that was. It is not a standing policy you can dial up or down later, and it is not how you take a permission back. If you need group membership that stays in sync with the identity provider over time — including revoking it — that's what [IdP group mapping](scim.md) does; auto-provisioning's default groups are just a one-time starting point for brand-new accounts.
+{% endhint %}
+
 {% hint style="info" %}
-This is a **Community** feature. Unlike SCIM and IdP groups (see below), it is available on every edition and is not gated by a feature flag.
+This is a **Community** feature, gated by the `jit_provisioning` [feature flag](../settings/feature-flags.md "mention") (on by default). Turning it on also unlocks the **IdP groups** menu and column described in [SCIM provisioning and IdP groups](scim.md), so auto-provisioned users can inherit roles through IdP group mapping without needing the PRO-only `idp_groups` flag.
 {% endhint %}
 
 {% hint style="warning" %}
 Auto-provisioning trusts the identity provider's assertion that the email is verified and belongs to that user. Only enable it once your IdP integration ([SAML](saml.md) or [OpenID Connect](oidc.md)) is fully configured and tested. Anyone who can authenticate against your IdP with a given email will get a CISO Assistant account with that email.
 {% endhint %}
 
-If your identity provider supports SCIM, [SCIM provisioning and IdP groups](scim.md) gives finer-grained control, including per-group role mapping, and is the better fit for larger organizations. Auto-provisioning is the lightweight alternative for IdPs that don't support SCIM: everyone gets the same default group(s), with no per-user or per-group mapping.
+**Default user groups** covers only the first login. For role assignment that keeps tracking the identity provider afterward — including on IdPs without SCIM — configure **Groups attribute mapping** in the SSO advanced settings so SAML or OIDC assertions carry the user's IdP groups directly, and map those groups under [SCIM provisioning and IdP groups](scim.md). If your identity provider supports SCIM, that same IdP group mapping applies there too, with group membership pushed by the IdP instead of read from the login assertion, and is the better fit for larger organizations.
 
 ### Single Logout
 
