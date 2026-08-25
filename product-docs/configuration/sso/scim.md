@@ -17,10 +17,10 @@ SCIM provisioning itself — the **SCIM** settings tab and pushing users in from
 
 ### How it works
 
-Authentication and provisioning are two separate concerns, handled by two complementary mechanisms:
+Authentication and provisioning are two separate concerns, handled by complementary mechanisms:
 
 * Your IdP **authenticates** users through [SAML](saml.md "mention") or [OpenID Connect (OIDC)](oidc.md "mention").
-* Your IdP **provisions** users and their group memberships through SCIM.
+* Your IdP **provisions** users and their group memberships, either through SCIM, or — for IdPs without SCIM, or for auto-provisioned users — by carrying the user's groups directly in the SAML/OIDC login assertion (see [Groups attribute mapping](README.md#auto-provisioning-jit)). Both feed the same **IdP group** membership.
 
 The link between the two worlds is the **IdP group** — a faithful mirror of a group that exists in your identity provider. An administrator maps each IdP group to one or more **user groups**. A user who belongs to an IdP group then inherits the roles of every user group it is mapped to.
 
@@ -43,9 +43,9 @@ Creating or editing an IdP group asks for two things:
 
 <figure><img src="../../.gitbook/assets/scim-idp-group-form.png" alt=""><figcaption><p>Creating an IdP group: its IdP-side name and the user groups it grants.</p></figcaption></figure>
 
-The **members** of an IdP group are managed by SCIM and shown read-only. You will also find an **IdP groups** column on the **Organization > Users** table, listing the IdP groups each user belongs to.
+The **members** of an IdP group are synced automatically — by SCIM if it's configured, or by the group claim in the user's SAML/OIDC login assertion otherwise — and shown read-only. You will also find an **IdP groups** column on the **Organization > Users** table, listing the IdP groups each user belongs to.
 
-<figure><img src="../../.gitbook/assets/scim-users-idp-groups-column.png" alt=""><figcaption><p>The IdP groups column on the users table shows SCIM-managed memberships.</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/scim-users-idp-groups-column.png" alt=""><figcaption><p>The IdP groups column on the users table shows each user's synced IdP group memberships.</p></figcaption></figure>
 
 {% hint style="info" %}
 IdP groups are administered globally and are only visible to administrators, just like [user groups](../organization/user-groups.md "mention") and roles.

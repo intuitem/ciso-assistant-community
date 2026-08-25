@@ -4925,7 +4925,7 @@
 	"idpGroup": "IdP rühm",
 	"idpGroups": "IdP rühmad",
 	"idpGroupsDescription": "Luba IdP rühmade föderatsioon (SCIM ettevalmistamine, IdP rühmade vastendused ja kasutajate IdP rühmade liikmesused).",
-	"enableJitProvisioning": "Luba automaatne teenuse pakkumine",
+	"enableJitProvisioning": "Luba kasutajakontode automaatne loomine",
 	"enableJitProvisioningHelpText": "Loob automaatselt konto koos allpool toodud vaikimisi kasutajarühmadega kasutajatele, kes autentivad SSO kaudu esimest korda.",
 	"defaultUserGroups": "Vaikimisi kasutajarühmad",
 	"defaultUserGroupsHelpText": "Kasutajarühmad, mis antakse automaatselt automaatse provisioneerimise teel loodud kasutajatele.",

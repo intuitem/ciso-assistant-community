@@ -4673,7 +4673,7 @@
 	"defaultUserGroupsHelpText": "Naudotojų grupės, automatiškai suteikiamos naudotojams, sukurtiems per automatinį parengimą.",
 	"defaultUserGroupsWarning": "Taikoma tik vieną kartą, kuriant paskyrą. Vėlesnis šio nustatymo keitimas ar pašalinimas neturi įtakos jau parengtiems naudotojams. Jei norite narystės grupėse, kuri išlieka sinchronizuota laikui bėgant, naudokite IdP grupių susiejimą.",
 	"attributeMappingGroups": "Grupių atributo susiejimas",
-	"attributeMappingGroupsHelpText": "Reikalavimo (claim) pavadinimas (-ai), perteikiantis naudotojo IdP grupių narystes. Čia rastos grupės sinchronizuojamos su IdP grupėmis kiekvieno prisijungimo metu ir suteikia tas CISO Assistant naudotojų grupes, su kuriomis jas susiejo administratorius.",
+	"attributeMappingGroupsHelpText": "Atributo (claim) pavadinimas (-ai), perteikiantis naudotojo IdP grupių narystes. Čia rastos grupės sinchronizuojamos su IdP grupėmis kiekvieno prisijungimo metu ir suteikia tas CISO Assistant naudotojų grupes, su kuriomis jas susiejo administratorius.",
 	"jitProvisioning": "SSO automatinis parengimas (JIT)",
 	"jitProvisioningDescription": "Įjungia automatinį paskyrų kūrimą pirmo prisijungimo per SSO metu ir jų IdP grupių narysčių sinchronizavimą, nereikalaujant SCIM."
 }
