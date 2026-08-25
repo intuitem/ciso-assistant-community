@@ -443,17 +443,13 @@ export const APPLIED_CONTROL_EFFORT_FILTER: ListViewFilterConfig = {
 	}
 };
 
-export const FINDING_FILING_FILTER: ListViewFilterConfig = {
+export const FINDINGS_BINDER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'findingsAssessment',
-		options: [
-			{ label: 'unfiled', value: 'true' },
-			{ label: 'filed', value: 'false' }
-		],
-		optionsLabelField: 'label',
-		optionsValueField: 'value',
-		multiple: false,
+		optionsEndpoint: 'findings-assessments',
+		optionsValueField: 'id',
+		multiple: true,
 		enableDoubleDash: true
 	}
 };
@@ -2846,7 +2842,7 @@ export const listViewFields = {
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
-			findings_assessment__isnull: FINDING_FILING_FILTER,
+			findings_assessment: FINDINGS_BINDER_FILTER,
 			filtering_labels: LABELS_FILTER,
 			severity: FINDINGS_SEVERITY_FILTER,
 			status: FINDINGS_STATUS_FILTER,

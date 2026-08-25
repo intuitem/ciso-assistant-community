@@ -181,20 +181,49 @@ class TestTaskTemplates:
         assert [t["id"] for t in res.json()["task_templates"]] == [str(task.id)]
 
 
-class TestFilingFilter:
-    def test_isnull_filter_splits_filed_from_unfiled(self, setup):
-        unfiled = Finding.objects.create(name="Orphan", folder=setup["domain"])
-        filed = Finding.objects.create(
-            name="Bound", folder=setup["domain"], findings_assessment=setup["binder"]
+class TestBinderFilter:
+    @pytest.fixture
+    def findings(self, setup):
+        return {
+            "unfiled": Finding.objects.create(name="Orphan", folder=setup["domain"]),
+            "here": Finding.objects.create(
+                name="Bound",
+                folder=setup["domain"],
+                findings_assessment=setup["binder"],
+            ),
+            "elsewhere": Finding.objects.create(
+                name="Other",
+                folder=setup["other_domain"],
+                findings_assessment=setup["other_binder"],
+            ),
+        }
+
+    def ids(self, res):
+        assert res.status_code == 200, res.json()
+        return {r["id"] for r in res.json()["results"]}
+
+    def test_double_dash_selects_the_unfiled(self, setup, findings):
+        res = setup["client"].get("/api/findings/?findings_assessment=--")
+        assert self.ids(res) == {str(findings["unfiled"].id)}
+
+    def test_a_binder_selects_its_own(self, setup, findings):
+        res = setup["client"].get(
+            f"/api/findings/?findings_assessment={setup['binder'].id}"
         )
+        assert self.ids(res) == {str(findings["here"].id)}
 
-        res = setup["client"].get("/api/findings/?findings_assessment__isnull=true")
-        assert res.status_code == 200
-        assert [r["id"] for r in res.json()["results"]] == [str(unfiled.id)]
+    def test_double_dash_combines_with_a_binder(self, setup, findings):
+        res = setup["client"].get(
+            f"/api/findings/?findings_assessment=--&findings_assessment={setup['binder'].id}"
+        )
+        assert self.ids(res) == {
+            str(findings["unfiled"].id),
+            str(findings["here"].id),
+        }
 
-        res = setup["client"].get("/api/findings/?findings_assessment__isnull=false")
-        assert res.status_code == 200
-        assert [r["id"] for r in res.json()["results"]] == [str(filed.id)]
+    def test_no_filter_returns_everything(self, setup, findings):
+        res = setup["client"].get("/api/findings/")
+        assert self.ids(res) == {str(f.id) for f in findings.values()}
 
 
 class TestReparenting:

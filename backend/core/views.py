@@ -15714,25 +15714,35 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         return Response(sunburst_data)
 
 
+class FindingFilterSet(GenericFilterSet):
+    # "--" selects the findings with no binder, alongside any picked binders.
+    findings_assessment = NullableModelChoiceFilter(
+        queryset=FindingsAssessment.objects.all()
+    )
+
+    class Meta:
+        model = Finding
+        fields = {
+            "name": ["exact"],
+            "owner": ["exact"],
+            "folder": ["exact"],
+            "status": ["exact"],
+            "severity": ["exact"],
+            "priority": ["exact"],
+            "asset": ["exact"],
+            "filtering_labels": ["exact"],
+            "applied_controls": ["exact"],
+            "evidences": ["exact"],
+            "vulnerabilities": ["exact"],
+            "due_date": ["exact"],
+            "created_at": ["gte", "lt"],
+            "updated_at": ["gte", "lt"],
+        }
+
+
 class FindingViewSet(BaseModelViewSet):
     model = Finding
-    filterset_fields = {
-        "name": ["exact"],
-        "owner": ["exact"],
-        "folder": ["exact"],
-        "status": ["exact"],
-        "severity": ["exact"],
-        "priority": ["exact"],
-        "findings_assessment": ["exact", "isnull"],
-        "asset": ["exact"],
-        "filtering_labels": ["exact"],
-        "applied_controls": ["exact"],
-        "evidences": ["exact"],
-        "vulnerabilities": ["exact"],
-        "due_date": ["exact"],
-        "created_at": ["gte", "lt"],
-        "updated_at": ["gte", "lt"],
-    }
+    filterset_class = FindingFilterSet
     ordering = ["ref_id"]
 
     def get_queryset(self) -> models.query.QuerySet:
