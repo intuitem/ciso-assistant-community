@@ -2,19 +2,12 @@ urn: urn:intuitem:risk:library:unesco-ai-maturity-framework
 locale: en
 ref_id: UNESCO-AI-MATURITY
 name: UNESCO AI Maturity Framework
-description: 'Based on the UNESCO AI Maturity Framework - A self-positioning guide for public administrations
-  (2025, SHS/REI/AI/FLMAT Rev. 3), developed within the "AI-Ready Flemish Public Administration" project
-  funded by the European Commission DG REFORM. A reflective self-assessment of organisational AI readiness
-  across 6 pillars and 29 categories: Strategy & Value; People & Culture; Technology & Infrastructure;
-  AI Operations & Ecosystem; AI Governance, Ethics & Risk; and Data. Each category describes four progressive
-  maturity levels (Basic, Ready, Dynamic, Advanced); assessors read the descriptors and record the level
-  that best reflects current practice as the implementation score. The framework prescribes no target
-  level - it helps an organisation understand where it is, where it aims to be, and what is required to
-  get there.'
-copyright: '© UNESCO 2025. Licensed under the Attribution-ShareAlike 3.0 IGO (CC-BY-SA 3.0 IGO) licence:
-  http://creativecommons.org/licenses/by-sa/3.0/igo/'
+description: |-
+  Based on the UNESCO AI Maturity Framework - A self-positioning guide for public administrations (2025, SHS/REI/AI/FLMAT Rev. 3), developed within the "AI-Ready Flemish Public Administration" project funded by the European Commission DG REFORM. A reflective self-assessment of organisational AI readiness across 6 pillars and 29 categories: Strategy & Value; People & Culture; Technology & Infrastructure; AI Operations & Ecosystem; AI Governance, Ethics & Risk; and Data. Each category describes four progressive maturity levels (Basic, Ready, Dynamic, Advanced); assessors read the descriptors and record the level that best reflects current practice as the implementation score. The framework prescribes no target level - it helps an organisation understand where it is, where it aims to be, and what is required to get there.
+  https://unesdoc.unesco.org/ark:/48223/pf0000397145
+copyright: © UNESCO 2025. Licensed under the Attribution-ShareAlike 3.0 IGO (CC-BY-SA 3.0 IGO) licence.
 version: 1
-publication_date: 2026-08-23
+publication_date: 2026-08-25
 provider: UNESCO
 packager: intuitem
 objects:
@@ -22,15 +15,9 @@ objects:
     urn: urn:intuitem:risk:framework:unesco-ai-maturity-framework
     ref_id: UNESCO-AI-MATURITY
     name: UNESCO AI Maturity Framework
-    description: 'Based on the UNESCO AI Maturity Framework - A self-positioning guide for public administrations
-      (2025, SHS/REI/AI/FLMAT Rev. 3), developed within the "AI-Ready Flemish Public Administration" project
-      funded by the European Commission DG REFORM. A reflective self-assessment of organisational AI readiness
-      across 6 pillars and 29 categories: Strategy & Value; People & Culture; Technology & Infrastructure;
-      AI Operations & Ecosystem; AI Governance, Ethics & Risk; and Data. Each category describes four
-      progressive maturity levels (Basic, Ready, Dynamic, Advanced); assessors read the descriptors and
-      record the level that best reflects current practice as the implementation score. The framework
-      prescribes no target level - it helps an organisation understand where it is, where it aims to be,
-      and what is required to get there.'
+    description: |-
+      Based on the UNESCO AI Maturity Framework - A self-positioning guide for public administrations (2025, SHS/REI/AI/FLMAT Rev. 3), developed within the "AI-Ready Flemish Public Administration" project funded by the European Commission DG REFORM. A reflective self-assessment of organisational AI readiness across 6 pillars and 29 categories: Strategy & Value; People & Culture; Technology & Infrastructure; AI Operations & Ecosystem; AI Governance, Ethics & Risk; and Data. Each category describes four progressive maturity levels (Basic, Ready, Dynamic, Advanced); assessors read the descriptors and record the level that best reflects current practice as the implementation score. The framework prescribes no target level - it helps an organisation understand where it is, where it aims to be, and what is required to get there.
+      https://unesdoc.unesco.org/ark:/48223/pf0000397145
     min_score: 0
     max_score: 4
     scores_definition:
