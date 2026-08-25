@@ -172,6 +172,11 @@
 					field: 'posture_assessments',
 					label: m.postureAssessments(),
 					description: m.postureAssessmentsDescription()
+				},
+				{
+					field: 'commitment_management',
+					label: m.commitmentManagement(),
+					description: m.commitmentManagementDescription()
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		},

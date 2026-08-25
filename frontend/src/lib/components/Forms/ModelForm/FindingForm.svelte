@@ -10,7 +10,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { getModelInfo } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { AppliedControlSchema } from '$lib/utils/schemas';
+	import { AppliedControlSchema, TaskTemplateSchema } from '$lib/utils/schemas';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
@@ -70,6 +70,7 @@
 	const modalStore = getModalStore();
 
 	const appliedControlModel = getModelInfo('applied-controls');
+	const taskTemplateModel = getModelInfo('task-templates');
 
 	onMount(async () => {
 		if (!model.selectOptions) {
@@ -82,26 +83,21 @@
 		}
 	});
 
-	function modalAppliedControlCreateForm(field: string): void {
+	// Both remediation vehicles are creatable from the finding, pre-linked to it.
+	function modalRemediationCreateForm(remediationModel: ModelInfo, schema: any): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
-				form: defaults(
-					{
-						findings: [page.data.object.id]
-					},
-					zod(AppliedControlSchema)
-				),
-				formAction: '/applied-controls?/create',
-				model: appliedControlModel,
+				form: defaults({ findings: [page.data.object.id] }, zod(schema)),
+				formAction: `/${remediationModel.urlModel}?/create`,
+				model: remediationModel,
 				debug: false
 			}
 		};
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			// Data
-			title: safeTranslate('add-' + appliedControlModel.localName),
+			title: safeTranslate('add-' + remediationModel.localName),
 			response: (r: boolean) => {
 				if (r) {
 					invalidateAll();
@@ -205,24 +201,38 @@
 				<button
 					class="btn bg-surface-300-700 h-10 w-10"
 					aria-label={m.addAppliedControl()}
-					onclick={(_) => modalAppliedControlCreateForm('applied_controls')}
+					onclick={(_) => modalRemediationCreateForm(appliedControlModel, AppliedControlSchema)}
 					type="button"><i class="fa-solid fa-plus text-sm"></i></button
 				>
 			</div>
 		{/if}
 	</div>
-	<AutocompleteSelect
-		multiple
-		lazy
-		{form}
-		optionsEndpoint="task-templates"
-		optionsLabelField="auto"
-		optionsExtraFields={[['folder', 'str']]}
-		field="task_templates"
-		cacheLock={cacheLocks['task_templates']}
-		bind:cachedValue={formDataCache['task_templates']}
-		label={m.taskTemplates()}
-	/>
+	<div class="flex flex-row space-x-2 items-center">
+		<div class="w-full">
+			<AutocompleteSelect
+				multiple
+				lazy
+				{form}
+				optionsEndpoint="task-templates"
+				optionsLabelField="auto"
+				optionsExtraFields={[['folder', 'str']]}
+				field="task_templates"
+				cacheLock={cacheLocks['task_templates']}
+				bind:cachedValue={formDataCache['task_templates']}
+				label={m.taskTemplates()}
+			/>
+		</div>
+		{#if context !== 'create'}
+			<div class="mt-4">
+				<button
+					class="btn bg-surface-300-700 h-10 w-10"
+					aria-label={m.addTaskTemplate()}
+					onclick={(_) => modalRemediationCreateForm(taskTemplateModel, TaskTemplateSchema)}
+					type="button"><i class="fa-solid fa-plus text-sm"></i></button
+				>
+			</div>
+		{/if}
+	</div>
 	<AutocompleteSelect
 		{form}
 		lazy

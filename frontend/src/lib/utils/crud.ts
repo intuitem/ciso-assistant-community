@@ -1,6 +1,7 @@
 // define the content of forms
 
 import EvidenceFileName from '$lib/components/ModelTable/field/EvidenceFileName.svelte';
+import CommitmentTarget from '$lib/components/ModelTable/field/CommitmentTarget.svelte';
 import LanguageDisplay from '$lib/components/ModelTable/field/LanguageDisplay.svelte';
 import FrameworkName from '$lib/components/ModelTable/field/FrameworkName.svelte';
 import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svelte';
@@ -115,6 +116,9 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 	folderPermsNeeded?: { action: 'add' | 'view' | 'change' | 'delete'; model: string }[]; // Permissions needed on the folder to display this reverse foreign key field
 	defaultFilters?: { [key: string]: any[] }; // Default filters to initialize the table with (user can change/remove them)
 	expectedCountField?: string; // Field on parent payload that holds related items (for masked count)
+	// Offer the column picker on this nested table, and widen its head to the model's
+	// optional columns so there is something to pick.
+	columnSelector?: boolean;
 	addExisting?: {
 		parentField: string; // M2M field name on the parent model (e.g., 'elementary_actions')
 		optionsEndpoint?: string; // Defaults to the reverse FK's urlModel
@@ -483,6 +487,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'appliedControls',
 		verboseName: 'Applied control',
 		verboseNamePlural: 'Applied controls',
+		flaggedFields: {
+			commitment_state: 'commitment_management',
+			committed_eta: 'commitment_management',
+			committed_by: 'commitment_management',
+			commitment_notes: 'commitment_management'
+		},
 		detailViewFields: [
 			{ field: 'id' },
 			{ field: 'folder' },
@@ -521,7 +531,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' },
 			{ field: 'quantitative_risk_scenarios', urlModel: 'quantitative-risk-scenarios' },
 			{ field: 'assets', urlModel: 'assets' },
-			{ field: 'task_templates', urlModel: 'task-templates' }
+			{ field: 'task_templates', urlModel: 'task-templates' },
+			{ field: 'findings', urlModel: 'findings' }
 		],
 		reverseForeignKeyFields: [
 			{
@@ -2327,7 +2338,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [
-			{ field: 'findings_assessment', urlModel: 'findings' },
+			{ field: 'findings_assessment', urlModel: 'findings', columnSelector: true },
 			{
 				field: 'findings_assessments',
 				urlModel: 'evidences',
@@ -2339,28 +2350,34 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		selectFields: [{ field: 'status' }, { field: 'category' }],
 		markdownFields: ['objectives'],
+		// Ordered deliberately: DetailView only shows the first ten rows before the
+		// "show all" toggle, so what a reader needs at a glance goes first and the
+		// bookkeeping (timestamps, version, id) sits below the fold.
 		detailViewFields: [
-			{ field: 'id' },
-			{ field: 'perimeter' },
 			{ field: 'ref_id' },
 			{ field: 'name' },
-			{ field: 'description' },
+			{ field: 'folder' },
+			{ field: 'perimeter' },
 			{ field: 'category' },
+			{ field: 'status' },
 			{ field: 'objectives' },
+			{ field: 'description' },
 			{ field: 'authors' },
+			{ field: 'due_date', type: 'date' },
 			{ field: 'reviewers' },
-			{ field: 'created_at', type: 'datetime' },
-			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'start_date', type: 'date' },
+			{ field: 'eta', type: 'date' },
 			{ field: 'reported_at', type: 'date' },
 			{ field: 'budget' },
 			{ field: 'expenses' },
 			{ field: 'reference_link' },
-			{ field: 'version' },
-			{ field: 'status' },
 			{ field: 'observation' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
-			{ field: 'is_locked' }
+			{ field: 'version' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'is_locked' },
+			{ field: 'id' }
 		]
 	},
 	'posture-assessments': {
@@ -2394,6 +2411,17 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'status' },
 			{ field: 'observation' }
+		]
+	},
+	commitments: {
+		name: 'commitment',
+		localName: 'commitment',
+		localNamePlural: 'commitments',
+		verboseName: 'Commitment',
+		verboseNamePlural: 'Commitments',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'committed_by', urlModel: 'actors' }
 		]
 	},
 	findings: {
@@ -2456,7 +2484,11 @@ export const URL_MODEL_MAP: ModelMap = {
 			},
 			{
 				field: 'findings',
-				urlModel: 'task-templates'
+				urlModel: 'task-templates',
+				addExisting: {
+					parentField: 'task_templates',
+					lazy: true
+				}
 			}
 		],
 		selectFields: [
@@ -2576,6 +2608,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'taskTemplates',
 		verboseName: 'Task template',
 		verboseNamePlural: 'Task templates',
+		flaggedFields: {
+			commitment_state: 'commitment_management',
+			committed_eta: 'commitment_management',
+			committed_by: 'commitment_management',
+			commitment_notes: 'commitment_management'
+		},
 		selectFields: [{ field: 'status' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
@@ -3504,6 +3542,9 @@ export const URL_MODEL_MAP: ModelMap = {
 export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
 
 const FIELD_COMPONENT_MAP = {
+	commitments: {
+		target: CommitmentTarget
+	},
 	evidences: {
 		attachment: EvidenceFileName
 	},

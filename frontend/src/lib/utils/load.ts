@@ -165,10 +165,17 @@ export const loadDetail = async ({ event, model, id }) => {
 				)
 				.map(async (e) => {
 					const tableFieldsRef = listViewFields[e.urlModel];
-					const tableFields = {
-						head: [...tableFieldsRef.head],
-						body: [...tableFieldsRef.body]
-					};
+					// A table offering the column picker needs the optional columns in its head:
+					// that head is the universe the picker chooses from.
+					const tableFields = e.columnSelector
+						? {
+								head: [...tableFieldsRef.head, ...(tableFieldsRef.optionalFields?.head ?? [])],
+								body: [...tableFieldsRef.body, ...(tableFieldsRef.optionalFields?.body ?? [])]
+							}
+						: {
+								head: [...tableFieldsRef.head],
+								body: [...tableFieldsRef.body]
+							};
 					const index = tableFields.body.indexOf(e.field);
 					if (index > -1) {
 						tableFields.head.splice(index, 1);

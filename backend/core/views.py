@@ -151,6 +151,7 @@ from weasyprint import HTML
 
 from core.helpers import *
 from core.models import (
+    Commitment,
     AppliedControl,
     ComplianceAssessment,
     RequirementMappingSet,
@@ -205,6 +206,8 @@ from django.contrib.admin.utils import NestedObjects
 from django.db import router
 from global_settings.models import GlobalSettings
 from global_settings.utils import ff_is_enabled, general_setting_is_enabled
+
+from core import commitment
 
 import structlog
 
@@ -406,6 +409,26 @@ class NullableModelChoiceFilter(df.ModelMultipleChoiceFilter):
             filters |= Q(**{f"{self.field_name}__in": value})
 
         return qs.filter(filters).distinct()
+
+
+class CommitmentStateFilter(df.MultipleChoiceFilter):
+    """Filters hosts by the state of their live commitment.
+
+    Both lookups sit in one `filter()` call on purpose: on a multi-valued relation that
+    constrains a single related row, which is what "the current one" means here.
+    """
+
+    def filter(self, qs, value):
+        if not value:
+            return qs
+        undefined = Commitment.State.UNDEFINED in value
+        states = [v for v in value if v != Commitment.State.UNDEFINED]
+        query = Q()
+        if states:
+            query |= Q(commitments__is_current=True, commitments__state__in=states)
+        if undefined:
+            query |= Q(commitments__isnull=True) | ~Q(commitments__is_current=True)
+        return qs.filter(query).distinct()
 
 
 def get_mapping_max_depth():
@@ -4924,6 +4947,10 @@ class AppliedControlFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
     status = df.MultipleChoiceFilter(
         choices=AppliedControl.Status.choices, lookup_expr="icontains"
     )
+    # The promises live in their own table, so this reaches through the live cycle.
+    commitment_state = CommitmentStateFilter(
+        choices=Commitment.State.choices, label="Commitment state"
+    )
     is_assigned = df.BooleanFilter(method="filter_is_assigned")
     linked_models = df.MultipleChoiceFilter(
         choices=[("--", "--")] + APPLIED_CONTROL_LINKED_FIELDS,
@@ -5073,7 +5100,146 @@ class AppliedControlFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
         }
 
 
-class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
+def scoped_findings_prefetch(request, lookup="findings"):
+    """Prefetch only the findings of the binders being filtered on, when there are any.
+
+    On a binder's action plan, a control's *other* findings are noise at best and
+    misleading at worst: the column is read as "what this answers here".
+    """
+    binder_ids = request.query_params.getlist("findings_assessments") if request else []
+    if not binder_ids:
+        return lookup
+    return Prefetch(
+        lookup,
+        queryset=Finding.objects.filter(findings_assessment__in=binder_ids),
+    )
+
+
+class CommitmentRegisterViewSet(BaseModelViewSet):
+    """Read-only register of every promise, across the models that carry them.
+
+    Read-only on purpose: taking a step depends on who is accountable for the *host*
+    object, so transitions stay on the host's own endpoint and the register links out.
+    """
+
+    model = Commitment
+    http_method_names = ["get", "head", "options"]
+    feature_flag = "commitment_management"
+    permission_classes = BaseModelViewSet.permission_classes + [FeatureFlagRequired]
+    ordering = ["-created_at"]
+    search_fields = ["notes"]
+    filterset_fields = {
+        "state": ["exact"],
+        "folder": ["exact"],
+        "committed_by": ["exact"],
+        "is_current": ["exact"],
+        "committed_eta": ["exact", "lte", "gte"],
+    }
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "committed_by", "content_type")
+            .prefetch_related("target")
+        )
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get state choices")
+    def state(self, request):
+        return Response(dict(Commitment.State.choices))
+
+
+class CommitmentActionsMixin:
+    """Serves the legal next commitment states so the UI never offers an illegal one.
+
+    The map itself is enforced in the write serializer; this only mirrors it.
+    """
+
+    @action(detail=True, methods=["get", "post"], name="Commitment transitions")
+    def commitment_transitions(self, request, pk=None):
+        """GET the legal next steps; POST one to take it.
+
+        POST accepts {commitment_state, commitment_notes?, commitment_date?} and runs
+        through the write serializer, so the map, the side and the note/date
+        requirements are enforced in exactly one place.
+        """
+        if not ff_is_enabled("commitment_management"):
+            return Response(
+                {"error": "This feature is not enabled."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        obj = self.get_object()
+
+        if request.method == "POST":
+            return self._perform_commitment_transition(request, obj)
+
+        return Response(self._commitment_payload(request, obj))
+
+    def _commitment_payload(self, request, obj):
+        if getattr(obj, "is_recurrent", False):
+            return {"state": obj.commitment_state, "transitions": []}
+
+        transitions = []
+        accountable = commitment.user_is_accountable(obj, request.user)
+        for target, config in commitment.allowed_targets(obj.commitment_state).items():
+            transitions.append(
+                {
+                    "value": target,
+                    "label": str(Commitment.State(target).label),
+                    "side": config["side"],
+                    "requires_note": bool(config.get("requires_note")),
+                    "requires_date": bool(config.get("requires_date")),
+                    "allowed": commitment.side_allows(config["side"], accountable),
+                }
+            )
+        current = obj.commitment
+        return {
+            "state": obj.commitment_state,
+            # The promised date is a normal field of the object, named differently per
+            # model: the client needs to know which one it is editing.
+            "date_field": obj.COMMITMENT_DATE_FIELD,
+            "date": obj.commitment_date,
+            "committed_eta": obj.committed_eta,
+            "committed_by": str(current.committed_by)
+            if current and current.committed_by
+            else None,
+            "committed_at": current.committed_at if current else None,
+            "notes": current.notes if current else None,
+            "reopen_count": obj.commitment_reopen_count,
+            "history": [
+                commitment.serialize_commitment(entry)
+                for entry in obj.commitment_history
+            ],
+            "transitions": transitions,
+        }
+
+    def _perform_commitment_transition(self, request, obj):
+        data = {"commitment_state": request.data.get("commitment_state")}
+        notes = request.data.get("commitment_notes")
+        if notes:
+            data["commitment_notes"] = notes
+        promised_date = request.data.get("commitment_date")
+        if promised_date:
+            # Both: the promise is frozen on the commitment, and the object's own date
+            # moves with it so the two do not disagree the moment it is made.
+            data["commitment_date"] = promised_date
+            data[obj.COMMITMENT_DATE_FIELD] = promised_date
+
+        serializer = self.get_serializer_class(action="partial_update")(
+            obj, data=data, partial=True, context=self.get_serializer_context()
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(self._commitment_payload(request, self.get_object()))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get commitment state choices")
+    def commitment_state(self, request):
+        return Response(dict(Commitment.State.choices))
+
+
+class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows applied controls to be viewed or edited.
     """
@@ -5253,9 +5419,13 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
                 "filtering_labels__folder",
                 "assets",
                 "custom_field_values__definition",
+                # The commitment state is an opt-in column: one query, not one per row.
+                "commitments__committed_by",
+                scoped_findings_prefetch(self.request),
             )
 
         return qs.prefetch_related(
+            "commitments__committed_by",
             "owner",
             "filtering_labels__folder",
             "findings",  # Used for findings_count
@@ -16449,14 +16619,7 @@ class TimelineEntryViewSet(BaseModelViewSet):
 
 class CommentViewSet(BaseModelViewSet):
     model = Comment
-    filterset_fields = [
-        "requirement_assessment",
-        "risk_scenario",
-        "applied_control",
-        "finding",
-        "is_active",
-        "author",
-    ]
+    filterset_fields = [*Comment.PARENT_FIELDS, "is_active", "author"]
     search_fields = ["body"]
     ordering = ["created_at"]
 
@@ -16464,14 +16627,7 @@ class CommentViewSet(BaseModelViewSet):
         return (
             super()
             .get_queryset()
-            .select_related(
-                "folder",
-                "author",
-                "requirement_assessment",
-                "risk_scenario",
-                "applied_control",
-                "finding",
-            )
+            .select_related("folder", "author", *Comment.PARENT_FIELDS)
         )
 
     def perform_create(self, serializer):
@@ -16493,6 +16649,22 @@ class CommentViewSet(BaseModelViewSet):
 
 class TaskTemplateFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+
+    # A task can hang off the binder itself or off one of its findings; the action plan
+    # wants both, the way the applied-control filter walks findings back to the binder.
+    findings_assessments = df.ModelMultipleChoiceFilter(
+        method="filter_findings_assessments",
+        queryset=FindingsAssessment.objects.all(),
+        label="Findings assessments",
+    )
+
+    def filter_findings_assessments(self, queryset, name, value):
+        if not value:
+            return queryset
+        return queryset.filter(
+            Q(findings_assessment__in=value)
+            | Q(findings__findings_assessment__in=value)
+        ).distinct()
 
     next_occurrence_status = df.MultipleChoiceFilter(
         choices=TaskNode.TASK_STATUS_CHOICES, method="filter_next_occurrence_status"
@@ -16542,8 +16714,33 @@ class TaskTemplateFilter(GenericFilterSet):
         )
 
 
-class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
+def _bucket_by_date(due, today):
+    """Same buckets as the applied-control analytics, so the two pages read alike."""
+    if due is None:
+        return "no_eta"
+    if due < today:
+        return "overdue"
+    if due <= today + timedelta(days=30):
+        return "due_30d"
+    if due <= today + timedelta(days=90):
+        return "due_90d"
+    return "later"
+
+
+class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet):
     model = TaskTemplate
+
+    def get_queryset(self):
+        # The commitment state is an opt-in column: one query, not one per row.
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related(
+                "commitments__committed_by",
+                scoped_findings_prefetch(self.request),
+            )
+        )
+
     filterset_fields = [
         "assigned_to",
         "is_recurrent",
@@ -16554,6 +16751,90 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
     ]
     search_fields = ["ref_id", "name"]
     filterset_class = TaskTemplateFilter
+
+    @action(detail=False, methods=["get"], name="Get task analytics")
+    def analytics(self, request):
+        """Aggregates over the filtered task queryset.
+
+        Deliberately not a copy of the applied-control analytics: tasks carry no cost,
+        priority, category or CSF function, so the dimensions that matter here are who
+        holds them, when they are due, and — with the flag on — whether the promises
+        made about them are being kept.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+        # `str(actor)` resolves a OneToOne hop, so the actor prefetch has to join the
+        # target in; `commitments` is already prefetched by get_queryset.
+        tasks = list(queryset.prefetch_related(actor_prefetch("assigned_to")))
+        today = timezone.localdate()
+
+        # One query for every occurrence, grouped in python: the per-template lookup
+        # the serializer uses would be a query per row.
+        next_node_by_template: dict = {}
+        for node in (
+            TaskNode.objects.filter(task_template__in=[t.id for t in tasks])
+            .order_by("due_date")
+            .only("task_template_id", "status", "due_date")
+        ):
+            next_node_by_template.setdefault(node.task_template_id, node)
+
+        by_status: dict = {}
+        due_buckets = {
+            key: {"key": key, "count": 0}
+            for key in ("overdue", "due_30d", "due_90d", "later", "no_eta")
+        }
+        assignee_counts: dict = {}
+        recurrence = {"one_time": 0, "recurrent": 0}
+        commitment_states: dict = {}
+        slipped = breached = 0
+        commitment_enabled = ff_is_enabled("commitment_management")
+
+        for task in tasks:
+            node = next_node_by_template.get(task.id)
+
+            status = (node.status if node else None) or "_unset"
+            entry = by_status.setdefault(status, {"key": status, "count": 0})
+            entry["count"] += 1
+
+            due = node.due_date if node else task.task_date
+            due_buckets[_bucket_by_date(due, today)]["count"] += 1
+
+            recurrence["recurrent" if task.is_recurrent else "one_time"] += 1
+
+            for actor in task.assigned_to.all():
+                bucket = assignee_counts.setdefault(
+                    str(actor.id),
+                    {"key": str(actor.id), "label": str(actor), "count": 0},
+                )
+                bucket["count"] += 1
+
+            if commitment_enabled and not task.is_recurrent:
+                state = task.commitment_state or "--"
+                bucket = commitment_states.setdefault(state, {"key": state, "count": 0})
+                bucket["count"] += 1
+                if task.commitment_has_slipped:
+                    slipped += 1
+                if task.commitment_is_breached:
+                    breached += 1
+
+        payload = {
+            "count": len(tasks),
+            "by_status": sorted(by_status.values(), key=lambda b: -b["count"]),
+            "due_buckets": list(due_buckets.values()),
+            "by_assignee": sorted(assignee_counts.values(), key=lambda b: -b["count"])[
+                :10
+            ],
+            "unassigned": sum(1 for t in tasks if not t.assigned_to.all()),
+            "recurrence": recurrence,
+        }
+        if commitment_enabled:
+            payload["commitment"] = {
+                "by_state": sorted(
+                    commitment_states.values(), key=lambda b: -b["count"]
+                ),
+                "slipped": slipped,
+                "breached": breached,
+            }
+        return Response(payload)
 
     export_config = {
         "filename": "task_templates",

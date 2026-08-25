@@ -22,6 +22,8 @@ from tprm.models import Contract, Solution
 from threat_modeling.models import ThreatModel
 from pmbok.models import GenericCollection
 from global_settings.utils import ff_is_enabled
+
+from core.commitment import COMMITMENT_LIST_FIELDS, CommitmentSerializerMixin
 from iam.models import *
 from django.contrib.auth.models import Permission
 
@@ -1456,7 +1458,9 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
         ]
 
 
-class AppliedControlWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
+class AppliedControlWriteSerializer(
+    CommitmentSerializerMixin, CustomFieldsSerializerMixin, BaseModelSerializer
+):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
     )
@@ -1486,7 +1490,11 @@ class AppliedControlWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerial
         required=False, default=False, write_only=True
     )
 
+    def validate(self, attrs):
+        return self.validate_commitment(super().validate(attrs))
+
     def create(self, validated_data: Any):
+        self.pop_commitment(validated_data)
         validated_data.pop("create_remote_object", None)
         validated_data.pop("remote_object_id", None)
         validated_data.pop("integration_config", None)
@@ -1514,7 +1522,10 @@ class AppliedControlWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerial
     def update(self, instance, validated_data):
         # Track old owners before update
         old_owner_ids = set(instance.owner.values_list("id", flat=True))
+        old_folder_id = instance.folder_id
 
+        commitment_data = dict(validated_data)
+        self.pop_commitment(validated_data)
         findings = validated_data.pop("findings", None)
         task_templates = validated_data.pop("task_templates", None)
         incidents = validated_data.pop("incidents", None)
@@ -1537,6 +1548,12 @@ class AppliedControlWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerial
             self._send_assignment_notifications(
                 updated_instance, list(newly_assigned_ids)
             )
+
+        if old_folder_id != updated_instance.folder_id:
+            # A commitment is only ever as visible as the object it is about.
+            updated_instance.commitments.update(folder=updated_instance.folder)
+
+        self.apply_commitment(updated_instance, commitment_data)
 
         return updated_instance
 
@@ -1715,13 +1732,14 @@ class AppliedControlBulkReadSerializer(AppliedControlReadSerializer):
         return BaseModelSerializer.to_representation(self, instance)
 
 
-class AppliedControlListSerializer(BaseModelSerializer):
+class AppliedControlListSerializer(CommitmentSerializerMixin, BaseModelSerializer):
     """
     Lightweight serializer for the applied controls list view.
 
     Drops the per-row DB-touching fields from `AppliedControlReadSerializer`
     that the list table does not render:
-      - `findings_count` (source="findings.count" → COUNT per row)
+      - `findings_count` (source="findings.count" → COUNT per row); the related
+        findings themselves are served instead, prefetched
       - `ranking_score` (iterates non-prefetched risk_scenarios → 1 query per row)
       - `annual_cost` / `annual_cost_display` / `currency`
         (property hits GlobalSettings per row, called twice)
@@ -1732,6 +1750,9 @@ class AppliedControlListSerializer(BaseModelSerializer):
     to skip the unconditional `SyncMapping` query in Write.to_representation
     that would otherwise also fire per row on the list.
     """
+
+    # Only what the table renders: the full history would be dead weight per row.
+    COMMITMENT_FIELD_NAMES = COMMITMENT_LIST_FIELDS
 
     folder = FieldsRelatedField()
     reference_control = FieldsRelatedField()
@@ -1744,6 +1765,8 @@ class AppliedControlListSerializer(BaseModelSerializer):
     owner = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     assets = FieldsRelatedField(many=True)
+    # The action plan shows which findings a control answers, not how many.
+    findings = FieldsRelatedField(many=True)
     is_assigned = serializers.SerializerMethodField()
     linked_models = serializers.SerializerMethodField()
 
@@ -1772,6 +1795,7 @@ class AppliedControlListSerializer(BaseModelSerializer):
             "owner",
             "filtering_labels",
             "assets",
+            "findings",
             "is_assigned",
             "linked_models",
             "created_at",
@@ -4907,6 +4931,29 @@ class FindingReadSerializer(FindingWriteSerializer):
         fields = "__all__"
 
 
+class CommitmentReadSerializer(BaseModelSerializer):
+    """The cross-model register: every promise, whoever it is about."""
+
+    folder = FieldsRelatedField()
+    committed_by = FieldsRelatedField()
+    target = serializers.SerializerMethodField()
+    target_type = serializers.SerializerMethodField()
+    is_breached = serializers.BooleanField(read_only=True)
+
+    def get_target(self, obj):
+        target = obj.target
+        if target is None:
+            return None
+        return {"id": str(target.id), "str": str(target)}
+
+    def get_target_type(self, obj):
+        return obj.content_type.model
+
+    class Meta:
+        model = Commitment
+        exclude = ["content_type", "object_id", "is_published"]
+
+
 class PresetReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     is_user_authored = serializers.SerializerMethodField()
@@ -5172,8 +5219,7 @@ class CommentWriteSerializer(BaseModelSerializer):
             parent_count = sum(1 for f in self.PARENT_FIELDS if data.get(f) is not None)
             if parent_count != 1:
                 raise serializers.ValidationError(
-                    "Exactly one parent (requirement_assessment, risk_scenario, "
-                    "applied_control, or finding) must be set."
+                    f"Exactly one parent ({', '.join(self.PARENT_FIELDS)}) must be set."
                 )
         else:
             for field_name in self.PARENT_FIELDS:
@@ -5279,7 +5325,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
         return TimelineEntryReadSerializer(obj.timeline_entries.all(), many=True).data
 
 
-class TaskTemplateReadSerializer(BaseModelSerializer):
+class TaskTemplateReadSerializer(CommitmentSerializerMixin, BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     incidents = FieldsRelatedField(many=True)
@@ -5326,7 +5372,7 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
         return task_node.observation if task_node else ""
 
 
-class TaskTemplateWriteSerializer(BaseModelSerializer):
+class TaskTemplateWriteSerializer(CommitmentSerializerMixin, BaseModelSerializer):
     status = serializers.CharField(required=False)
     observation = serializers.CharField(
         required=False, allow_blank=True, allow_null=True
@@ -5360,7 +5406,11 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
                 data["observation"] = ""
         return data
 
+    def validate(self, attrs):
+        return self.validate_commitment(super().validate(attrs))
+
     def create(self, validated_data):
+        self.pop_commitment(validated_data)
         assigned_to_data = validated_data.get("assigned_to", [])
         incidents = validated_data.pop("incidents", [])
         tasknode_data = self._extract_tasknode_fields(validated_data)
@@ -5381,6 +5431,8 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         # Track old assigned users before update
         old_assigned_ids = set(instance.assigned_to.values_list("id", flat=True))
+        commitment_data = dict(validated_data)
+        self.pop_commitment(validated_data)
 
         # Track old folder before update
         old_folder_id = instance.folder_id
@@ -5401,6 +5453,8 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
                 TaskNode.objects.filter(task_template=instance).update(
                     folder=instance.folder
                 )
+                # A commitment is only ever as visible as the object it is about.
+                instance.commitments.update(folder=instance.folder)
 
         # Get new assigned users after update
         new_assigned_ids = set(instance.assigned_to.values_list("id", flat=True))
@@ -5409,6 +5463,8 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
         newly_assigned_ids = new_assigned_ids - old_assigned_ids
         if newly_assigned_ids:
             self._send_assignment_notifications(instance, list(newly_assigned_ids))
+
+        self.apply_commitment(instance, commitment_data)
 
         return instance
 

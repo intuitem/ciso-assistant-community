@@ -289,6 +289,8 @@ export const RiskScenarioSchema = z.object({
 
 export const AppliedControlSchema = z.object({
 	...NameDescriptionMixin,
+	commitment_state: z.string().optional(),
+	commitment_notes: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	category: z.string().optional().nullable(),
 	csf_function: z.string().optional().nullable(),
@@ -760,7 +762,8 @@ export const FeatureFlagsSchema = z.object({
 	cwes: z.boolean().optional(),
 	object_audit_trail: z.boolean().optional(),
 	custom_portals: z.boolean().optional(),
-	posture_assessments: z.boolean().optional()
+	posture_assessments: z.boolean().optional(),
+	commitment_management: z.boolean().optional()
 });
 
 export const PortalSettingsSchema = z.object({
@@ -1569,6 +1572,8 @@ export const TimelineEntrySchema = z.object({
 
 export const TaskTemplateSchema = z.object({
 	...NameDescriptionMixin,
+	commitment_state: z.string().optional(),
+	commitment_notes: z.string().optional().nullable(),
 	folder: z.string(),
 	status: z.string().default('pending'),
 	assigned_to: z.string().optional().array().optional(),

@@ -76,6 +76,9 @@
 		displayModelTable?: boolean;
 		dateFieldsToFormat?: string[];
 		widgets?: import('svelte').Snippet;
+		/** Lets a caller keep the widget column out of the layout when its only
+		 * widget is behind a feature flag that is off. */
+		widgetsEnabled?: boolean;
 		actions?: import('svelte').Snippet;
 		disableCreate?: boolean;
 		disableEdit?: boolean;
@@ -108,6 +111,7 @@
 			'commission_date'
 		],
 		widgets,
+		widgetsEnabled = true,
 		actions,
 		disableCreate = false,
 		disableEdit = false,
@@ -169,7 +173,7 @@
 		return data.model?.detailViewFields?.find((field) => field.field === fieldName);
 	};
 
-	let hasWidgets = $derived(!!widgets);
+	let hasWidgets = $derived(!!widgets && widgetsEnabled);
 	let relatedFieldNames = $derived(
 		new Set(data.model?.foreignKeyFields?.map((field) => field.field) ?? [])
 	);
@@ -1007,6 +1011,8 @@
 								deleteForm={model.deleteForm}
 								URLModel={urlmodel}
 								expectedCount={getExpectedCount(urlmodel, field)}
+								columnSelector={field?.columnSelector}
+								columnStateKey={`${data.urlModel}:${urlmodel}`}
 								fields={fieldsToUse}
 								defaultFilters={field.defaultFilters || {}}
 								extraBatchActions={tableBatchActions(field)}

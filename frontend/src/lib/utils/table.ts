@@ -17,6 +17,7 @@ import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWit
 import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
 import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
 import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
+import ChangeChoiceField from '$lib/components/ContextMenu/ChangeChoiceField.svelte';
 import ToggleRecoveryFlags from '$lib/components/ContextMenu/asset-assessments/ToggleRecoveryFlags.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
@@ -192,6 +193,28 @@ export const PROJECT_HEALTH_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'name',
 		label: 'health',
 		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const COMMITMENT_STATE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'commitmentState',
+		optionsEndpoint: 'applied-controls/commitment_state',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		multiple: true
+	}
+};
+
+export const COMMITMENT_OWNER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'committedBy',
+		optionsEndpoint: 'actors',
+		optionsLabelField: 'str',
+		optionsValueField: 'id',
 		multiple: true
 	}
 };
@@ -1806,11 +1829,28 @@ export const listViewFields = {
 			'filtering_labels'
 		],
 		optionalFields: {
-			head: ['progress', 'startDate', 'expiryDate', 'createdAt', 'updatedAt'],
-			body: ['progress_field', 'start_date', 'expiry_date', 'created_at', 'updated_at']
+			head: [
+				'commitmentState',
+				'committedDate',
+				'progress',
+				'startDate',
+				'expiryDate',
+				'createdAt',
+				'updatedAt'
+			],
+			body: [
+				'commitment_state',
+				'committed_eta',
+				'progress_field',
+				'start_date',
+				'expiry_date',
+				'created_at',
+				'updated_at'
+			]
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
+			commitment_state: COMMITMENT_STATE_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
 			assets: ASSET_FILTER,
 			category: APPLIED_CONTROL_CATEGORY_FILTER,
@@ -2811,6 +2851,19 @@ export const listViewFields = {
 			status: POSTURE_ASSESSMENT_STATUS_FILTER
 		}
 	},
+	commitments: {
+		head: ['target', 'state', 'committedDate', 'committedBy', 'domain'],
+		body: ['target', 'state', 'committed_eta', 'committed_by', 'folder'],
+		optionalFields: {
+			head: ['commitmentNotes', 'createdAt', 'updatedAt'],
+			body: ['notes', 'created_at', 'updated_at']
+		},
+		filters: {
+			folder: DOMAIN_FILTER,
+			state: COMMITMENT_STATE_FILTER,
+			committed_by: COMMITMENT_OWNER_FILTER
+		}
+	},
 	findings: {
 		head: [
 			'ref_id',
@@ -3416,6 +3469,11 @@ export type FilterKeys = {
 }[keyof typeof listViewFields];
 
 export const contextMenuActions = {
+	findings: [
+		{ component: ChangeChoiceField, props: { field: 'status', labelKey: 'changeStatus' } },
+		{ component: ChangeChoiceField, props: { field: 'severity', labelKey: 'changeSeverity' } },
+		{ component: ChangeChoiceField, props: { field: 'priority', labelKey: 'changePriority' } }
+	],
 	'applied-controls': [
 		{ component: ChangeStatus, props: {} },
 		{ component: ChangeImpact, props: {} },
@@ -3502,6 +3560,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		}
 	],
 	'applied-controls': [
+		{
+			type: 'change_field',
+			label: 'commitment',
+			icon: 'fa-solid fa-handshake',
+			field: 'commitment_state',
+			optionsEndpoint: 'applied-controls/commitment_state'
+		},
 		{
 			type: 'group',
 			label: 'changeAttributes',
@@ -3806,6 +3871,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	],
 	'task-templates': [
 		{
+			type: 'change_field',
+			label: 'commitment',
+			icon: 'fa-solid fa-handshake',
+			field: 'commitment_state',
+			optionsEndpoint: 'applied-controls/commitment_state'
+		},
+		{
 			type: 'change_m2m',
 			label: 'changeAssignee',
 			icon: 'fa-solid fa-user-pen',
@@ -3864,7 +3936,7 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		},
 		{
 			type: 'change_field',
-			label: 'changeSeverity',
+			label: 'batchChangeSeverity',
 			icon: 'fa-solid fa-arrow-up-wide-short',
 			field: 'severity',
 			optionsEndpoint: 'vulnerabilities/severity'
@@ -4044,8 +4116,17 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	]
 };
 
-export function getBatchActions(model: urlModel): BatchActionConfig[] {
-	return batchActions[model] ?? [];
+export function getBatchActions(
+	model: urlModel,
+	featureFlags: Record<string, boolean> = {}
+): BatchActionConfig[] {
+	const flaggedFields = getModelInfo(model)?.flaggedFields;
+	const enabled = (action: BatchActionConfig): boolean => {
+		const flag = action.field ? flaggedFields?.[action.field] : undefined;
+		if (flag && !featureFlags[flag]) return false;
+		return action.type !== 'group' || (action.children ?? []).some(enabled);
+	};
+	return (batchActions[model] ?? []).filter(enabled);
 }
 
 export function getListViewFields({
@@ -4067,6 +4148,14 @@ export function getListViewFields({
 	let head = [...baseEntry.head];
 	let body = [...baseEntry.body];
 
+	// Optional fields are appended after the defaults but are hidden by default in the UI.
+	if (includeOptional && baseEntry.optionalFields) {
+		head = [...head, ...baseEntry.optionalFields.head];
+		body = [...body, ...baseEntry.optionalFields.body];
+	}
+
+	// Applied after the optional columns are in place: a flagged field offered only
+	// as an opt-in column must disappear with its flag too.
 	if (model?.flaggedFields) {
 		const indicesToPop = body
 			.map((field: string, index: number) => {
@@ -4078,12 +4167,6 @@ export function getListViewFields({
 
 		head = head.filter((_, index) => !indicesToPop.includes(index));
 		body = body.filter((_, index) => !indicesToPop.includes(index));
-	}
-
-	// Optional fields are appended after the defaults but are hidden by default in the UI.
-	if (includeOptional && baseEntry.optionalFields) {
-		head = [...head, ...baseEntry.optionalFields.head];
-		body = [...body, ...baseEntry.optionalFields.body];
 	}
 
 	return {

@@ -2,7 +2,11 @@ import json
 import os
 import re
 import hashlib
+import operator
 from datetime import date, datetime
+from functools import reduce
+
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from pathlib import Path
 from typing import Self, Union, List, Optional, Literal, Tuple, Final, Iterable
 import statistics
@@ -5458,13 +5462,19 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
         Incident.objects.filter(pk=incident.pk).update(updated_at=now())
 
 
+# Adding a parent is a one-line change here; the XOR constraint below is generated
+# from it rather than hand-enumerated, which grows with the square of this list.
+COMMENT_PARENT_FIELDS = (
+    "requirement_assessment",
+    "risk_scenario",
+    "applied_control",
+    "finding",
+    "task_template",
+)
+
+
 class Comment(AbstractBaseModel, FolderMixin):
-    PARENT_FIELDS = (
-        "requirement_assessment",
-        "risk_scenario",
-        "applied_control",
-        "finding",
-    )
+    PARENT_FIELDS = COMMENT_PARENT_FIELDS
 
     body = models.TextField(verbose_name=_("Body"))
     is_tainted = models.BooleanField(default=False, verbose_name=_("Edited"))
@@ -5507,36 +5517,29 @@ class Comment(AbstractBaseModel, FolderMixin):
         blank=True,
         related_name="comments",
     )
+    task_template = models.ForeignKey(
+        "TaskTemplate",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
 
     class Meta:
         ordering = ["created_at"]
         constraints = [
             models.CheckConstraint(
-                condition=(
-                    Q(
-                        requirement_assessment__isnull=False,
-                        risk_scenario__isnull=True,
-                        applied_control__isnull=True,
-                        finding__isnull=True,
-                    )
-                    | Q(
-                        requirement_assessment__isnull=True,
-                        risk_scenario__isnull=False,
-                        applied_control__isnull=True,
-                        finding__isnull=True,
-                    )
-                    | Q(
-                        requirement_assessment__isnull=True,
-                        risk_scenario__isnull=True,
-                        applied_control__isnull=False,
-                        finding__isnull=True,
-                    )
-                    | Q(
-                        requirement_assessment__isnull=True,
-                        risk_scenario__isnull=True,
-                        applied_control__isnull=True,
-                        finding__isnull=False,
-                    )
+                condition=reduce(
+                    operator.or_,
+                    (
+                        Q(
+                            **{
+                                f"{field}__isnull": field != parent
+                                for field in COMMENT_PARENT_FIELDS
+                            }
+                        )
+                        for parent in COMMENT_PARENT_FIELDS
+                    ),
                 ),
                 name="comment_exactly_one_parent",
             )
@@ -5544,12 +5547,11 @@ class Comment(AbstractBaseModel, FolderMixin):
 
     @property
     def parent_object(self):
-        return (
-            self.requirement_assessment
-            or self.risk_scenario
-            or self.applied_control
-            or self.finding
-        )
+        for field in self.PARENT_FIELDS:
+            parent = getattr(self, field, None)
+            if parent is not None:
+                return parent
+        return None
 
     def save(self, *args, **kwargs):
         content_object = self.parent_object
@@ -5577,6 +5579,188 @@ class Comment(AbstractBaseModel, FolderMixin):
         return f"Comment by {self.author} on {self.created_at}"
 
 
+class Commitment(AbstractBaseModel, FolderMixin):
+    """One negotiation cycle over a promise to deliver by a date.
+
+    A row per cycle rather than a set of columns on the host: reopening an agreed
+    commitment closes the current row and opens a new one, so the sequence of promised
+    dates survives instead of each one overwriting the last. The current row is the one
+    with `is_current`; the rest are the history.
+
+    Attached by generic key so a model can carry commitments without growing columns for
+    an optional, flag-gated feature.
+    """
+
+    class State(models.TextChoices):
+        UNDEFINED = "--", _("Undefined")
+        IN_NEGOTIATION = "in_negotiation", _("In negotiation")
+        COMMITTED = "committed", _("Committed")
+        DECLINED = "declined", _("Declined")
+        FULFILLED = "fulfilled", _("Fulfilled")
+
+    # A cycle is over once it reaches one of these: reopening starts a new row.
+    CLOSING_STATES = (State.COMMITTED, State.DECLINED, State.FULFILLED)
+
+    content_type = models.ForeignKey(
+        "contenttypes.ContentType", on_delete=models.CASCADE
+    )
+    object_id = models.UUIDField()
+    target = GenericForeignKey("content_type", "object_id")
+
+    state = models.CharField(
+        max_length=32,
+        choices=State.choices,
+        default=State.IN_NEGOTIATION,
+        verbose_name=_("Commitment state"),
+    )
+    committed_eta = models.DateField(
+        null=True,
+        blank=True,
+        help_text=_("The date promised, frozen when the commitment is made"),
+        verbose_name=_("Committed date"),
+    )
+    committed_by = models.ForeignKey(
+        "core.Actor",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="commitments",
+        verbose_name=_("Committed by"),
+    )
+    committed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text=_("When the promise was made — not the date promised"),
+        verbose_name=_("Committed at"),
+    )
+    notes = models.TextField(null=True, blank=True, verbose_name=_("Commitment notes"))
+    is_current = models.BooleanField(default=True, verbose_name=_("Is current"))
+
+    fields_to_check = []
+
+    class Meta:
+        verbose_name = _("Commitment")
+        verbose_name_plural = _("Commitments")
+        ordering = ["created_at"]
+        indexes = [models.Index(fields=["content_type", "object_id"])]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["content_type", "object_id"],
+                condition=models.Q(is_current=True),
+                name="unique_current_commitment_per_object",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.get_state_display()} commitment on {self.target}"
+
+    def save(self, *args, **kwargs):
+        # Denormalized for IAM scoping: a commitment is only ever as visible as the
+        # object it is about.
+        if self.target is not None and self.folder_id != self.target.folder_id:
+            self.folder_id = self.target.folder_id
+            if "update_fields" in kwargs and kwargs["update_fields"] is not None:
+                kwargs["update_fields"] = set(kwargs["update_fields"]) | {"folder"}
+        super().save(*args, **kwargs)
+
+    @property
+    def is_breached(self) -> bool:
+        """The promised date passed without delivery. Derived, never stored."""
+        return bool(
+            self.committed_eta
+            and self.state != self.State.FULFILLED
+            and self.committed_eta < date.today()
+        )
+
+
+class CommitmentMixin(models.Model):
+    """Lets a model carry commitments — the promise an owner makes to deliver by a date.
+
+    Adds no columns: the promises live in `Commitment`, reached through a generic
+    relation, the way `CustomFieldsMixin` reaches custom field values.
+    """
+
+    # Subclasses point these at their own date / accountable-actor fields.
+    COMMITMENT_DATE_FIELD = "eta"
+    COMMITMENT_ACTOR_FIELD = "owner"
+
+    commitments = GenericRelation(
+        Commitment,
+        content_type_field="content_type",
+        object_id_field="object_id",
+    )
+
+    class Meta:
+        abstract = True
+
+    def refresh_from_db(self, *args, **kwargs):
+        # `refresh_from_db` leaves cached_property values in __dict__, so without this
+        # a reloaded object would still answer from the promises it saw before.
+        super().refresh_from_db(*args, **kwargs)
+        self.__dict__.pop("commitment_entries", None)
+
+    @cached_property
+    def commitment_entries(self) -> list:
+        """Every cycle, cached: the panel and the serializers read these repeatedly, and
+        `commitments.all()` would otherwise issue a query per access when not prefetched.
+        """
+        return list(self.commitments.all())
+
+    @property
+    def commitment(self):
+        """The live negotiation cycle, if any."""
+        for entry in self.commitment_entries:
+            if entry.is_current:
+                return entry
+        return None
+
+    @property
+    def commitment_history(self):
+        """Closed cycles, oldest first — the sequence of promises made and reopened."""
+        return [entry for entry in self.commitment_entries if not entry.is_current]
+
+    @property
+    def commitment_state(self) -> str:
+        current = self.commitment
+        return current.state if current else Commitment.State.UNDEFINED
+
+    @property
+    def committed_eta(self):
+        current = self.commitment
+        return current.committed_eta if current else None
+
+    @property
+    def committed_by(self):
+        current = self.commitment
+        return current.committed_by if current else None
+
+    @property
+    def commitment_notes(self):
+        current = self.commitment
+        return current.notes if current else None
+
+    @property
+    def commitment_reopen_count(self) -> int:
+        """A cycle per row, so the count of closed ones is the number of reopenings."""
+        return len(self.commitment_history)
+
+    @property
+    def commitment_date(self):
+        return getattr(self, self.COMMITMENT_DATE_FIELD, None)
+
+    @property
+    def commitment_has_slipped(self) -> bool:
+        """The current date is later than the one promised."""
+        promised = self.committed_eta
+        current = self.commitment_date
+        return bool(promised and current and current > promised)
+
+    @property
+    def commitment_is_breached(self) -> bool:
+        current = self.commitment
+        return bool(current and current.is_breached)
+
+
 def _get_default_applied_control_cost():
     return {
         "currency": "€",
@@ -5593,6 +5777,7 @@ class AppliedControl(
     PublishInRootFolderMixin,
     FilteringLabelMixin,
     CustomFieldsMixin,
+    CommitmentMixin,
 ):
     INTEGRATION_MODEL_KEY = "applied_control"
 
@@ -10063,7 +10248,14 @@ class TaskTemplateManager(models.Manager):
         return super().create(**kwargs)
 
 
-class TaskTemplate(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
+class TaskTemplate(
+    NameDescriptionMixin, FolderMixin, FilteringLabelMixin, CommitmentMixin
+):
+    # A recurrent template is a definition, not a single promise: commitment lives
+    # on one-time tasks only (hidden entirely otherwise).
+    COMMITMENT_DATE_FIELD = "task_date"
+    COMMITMENT_ACTOR_FIELD = "assigned_to"
+
     objects = TaskTemplateManager()
 
     SCHEDULE_JSONSCHEMA = {

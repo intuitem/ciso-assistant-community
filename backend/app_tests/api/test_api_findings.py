@@ -171,6 +171,17 @@ class TestTaskTemplates:
         row = next(r for r in res.json()["results"] if r["id"] == str(finding.id))
         assert [t["id"] for t in row["task_templates"]] == [str(task.id)]
 
+    def test_object_endpoint_exposes_task_templates(self, setup):
+        # The "select existing" modal seeds itself from /object/ and PATCHes the whole
+        # list back: if the field were missing there, picking one would wipe the rest.
+        first = TaskTemplate.objects.create(name="First", folder=setup["domain"])
+        finding = Finding.objects.create(name="Orphan", folder=setup["domain"])
+        finding.task_templates.set([first])
+
+        res = setup["client"].get(f"/api/findings/{finding.id}/object/")
+        assert res.status_code == 200
+        assert res.json()["task_templates"] == [str(first.id)]
+
     def test_read_serializer_exposes_task_templates(self, setup):
         task = TaskTemplate.objects.create(name="Remediate", folder=setup["domain"])
         finding = Finding.objects.create(name="Orphan", folder=setup["domain"])

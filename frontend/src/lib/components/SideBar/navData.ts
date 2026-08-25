@@ -266,6 +266,12 @@ export const navData = {
 					href: '/findings'
 				},
 				{
+					name: 'commitments',
+					fa_icon: 'fa-solid fa-handshake',
+					href: '/commitments',
+					permissions: ['view_commitment']
+				},
+				{
 					name: 'followUp',
 					fa_icon: 'fas fa-th-list',
 					href: '/findings-assessments'

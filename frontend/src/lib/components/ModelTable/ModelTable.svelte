@@ -8,6 +8,20 @@
 	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { CUSTOM_ACTIONS_COMPONENT, getFieldComponentMap, URL_MODEL_MAP } from '$lib/utils/crud';
+
+	// A filter on a flag-gated field must go away with its flag, like its column does.
+	function filtersForActiveFlags(urlModel: string) {
+		const filters = listViewFields[urlModel].filters ?? {};
+		const flaggedFields = URL_MODEL_MAP[urlModel]?.flaggedFields;
+		if (!flaggedFields) return filters;
+		const featureFlags = page.data?.featureflags ?? {};
+		return Object.fromEntries(
+			Object.entries(filters).filter(([field]) => {
+				const flag = flaggedFields[field];
+				return !flag || featureFlags[flag];
+			})
+		);
+	}
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { onMount, tick, untrack } from 'svelte';
@@ -165,7 +179,7 @@
 		tableFilters = URLModel &&
 		listViewFields[URLModel] &&
 		Object.hasOwn(listViewFields[URLModel], 'filters')
-			? listViewFields[URLModel].filters
+			? filtersForActiveFlags(URLModel)
 			: {},
 		folderId = '',
 		forcePreventDelete = false,
@@ -721,7 +735,7 @@
 
 	const currentBatchActions: BatchActionConfig[] = $derived(
 		URLModel && model
-			? getBatchActions(URLModel).filter((a) =>
+			? getBatchActions(URLModel, page.data?.featureflags ?? {}).filter((a) =>
 					a.type === 'delete'
 						? !disableDelete && hasPermissionAnywhere(user, `delete_${model.name}`)
 						: !disableEdit && hasPermissionAnywhere(user, `change_${model.name}`)

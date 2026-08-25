@@ -225,8 +225,8 @@
 				{tableFilters}
 				deleteForm={data.deleteForm}
 				{URLModel}
-				disableEdit={['user-groups', 'validation-flows'].includes(URLModel)}
-				disableDelete={['user-groups'].includes(URLModel)}
+				disableEdit={['user-groups', 'validation-flows', 'commitments'].includes(URLModel)}
+				disableDelete={['user-groups', 'commitments'].includes(URLModel)}
 				onFilterChange={handleFilterChange}
 			>
 				{#snippet addButton()}
@@ -241,7 +241,7 @@
 									aria-label={safeTranslate('add-' + data.model.localName)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</a>
-							{:else if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications'].includes(URLModel)}
+							{:else if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications', 'commitments'].includes(URLModel)}
 								<button
 									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 									data-testid="add-button"

@@ -85,6 +85,7 @@ type SidebarFrontendKeys = {
 	idpGroups: boolean;
 	serviceAccounts: boolean;
 	postureAssessments: boolean;
+	commitments: boolean;
 };
 
 export function getSidebarVisibleItems(
@@ -131,6 +132,7 @@ export function getSidebarVisibleItems(
 		idpGroups: featureFlags?.idp_groups ?? false,
 		serviceAccounts: featureFlags?.service_accounts ?? false,
 		postureAssessments: featureFlags?.posture_assessments ?? false,
+		commitments: featureFlags?.commitment_management ?? false,
 		documents: featureFlags?.document_management ?? true,
 		documentTemplates: featureFlags?.document_management ?? true,
 		objectClassifications: featureFlags?.document_management ?? true

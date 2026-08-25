@@ -568,6 +568,7 @@
 				{origin}
 				{initialData}
 				{context}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'vulnerabilities'}
@@ -884,6 +885,7 @@
 				{formDataCache}
 				{initialData}
 				{context}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'task-nodes'}
