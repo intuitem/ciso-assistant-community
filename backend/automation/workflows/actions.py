@@ -198,6 +198,11 @@ class SetVariablesAction(BaseAction):
         # In-memory update only; the engine flushes variables + node_outputs in
         # one write via _persist_node_output right after every action runs.
         values = render(config.get("variables", {}), _render_context(instance))
+        reserved = RESERVED_VARIABLE_KEYS & values.keys()
+        if reserved:
+            raise FatalActionError(
+                f"set_variables: {', '.join(sorted(reserved))} is set by the engine"
+            )
         instance.variables.update(values)
         return values
 
@@ -924,7 +929,8 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
     ),
     "incident": UpdateEntry(
         model=Incident,
-        fields=["status", "severity", "description", "ref_id", "link"],
+        # No status/severity: their TimelineEntry is written by the viewset.
+        fields=["description", "ref_id", "link"],
         m2m_fields={
             "owners": _ACTOR,
             "assets": _ASSETS,
@@ -1189,6 +1195,19 @@ class UpdateObjectAction(BaseAction):
         elif operation == "remove":
             manager.remove(*rows)
         else:
+            # `set` detaches whatever it does not list, which `remove` would
+            # have refused when the target sits outside the scope.
+            displaced = [
+                row
+                for row in manager.exclude(id__in=[row.id for row in rows])
+                if getattr(row, "folder_id", None) is not None
+                and row.folder_id not in allowed_folders
+            ]
+            if displaced:
+                raise ActionError(
+                    f"update_object: '{field_name}' would detach objects "
+                    "outside this workflow's scope"
+                )
             manager.set(rows)
         return {"op": operation, "count": len(rows)}
 
@@ -1705,6 +1724,17 @@ def validate_create_config(node):
                 )
             )
     return errors
+
+
+def validate_set_variables_config(node):
+    config = node.action_config or {}
+    if config.get("type") != "set_variables":
+        return []
+    reserved = RESERVED_VARIABLE_KEYS & (config.get("variables") or {}).keys()
+    return [
+        ("action_set_variables_reserved", f"'{key}' is set by the engine on every run")
+        for key in sorted(reserved)
+    ]
 
 
 def validate_date_offset_config(node):

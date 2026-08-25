@@ -16,6 +16,7 @@ from .models import (
 from .actions import validate_create_config as _validate_create_config
 from .actions import validate_date_offset_config as _validate_date_offset_config
 from .actions import validate_read_config as _validate_read_config
+from .actions import validate_set_variables_config as _validate_set_variables_config
 from .actions import validate_update_config as _validate_update_config
 from .context import RESERVED_VARIABLE_KEYS
 from .triggers import validate_trigger_config
@@ -157,6 +158,8 @@ def validate_graph(version):
             for code, message in _validate_date_offset_config(node):
                 errors.append(_error(code, message, node=node))
             for code, message in _validate_update_config(node):
+                errors.append(_error(code, message, node=node))
+            for code, message in _validate_set_variables_config(node):
                 errors.append(_error(code, message, node=node))
         for ref in sorted(_referenced_node_refs(node) - known_refs):
             errors.append(

@@ -225,6 +225,10 @@ class TestIntegrityGuardrail:
         control.refresh_from_db()
         assert control.status == "to_do"
 
+    def test_incident_status_and_severity_are_not_writable(self):
+        """Their TimelineEntry is written by IncidentViewSet.perform_update."""
+        assert not {"status", "severity"} & set(UPDATABLE_MODELS["incident"].fields)
+
     def test_transition_guarded_models_are_not_updatable(self):
         """RiskAcceptance.set_state stamps revoked_at and reverts scenario
         treatments; ValidationFlow's transitions live in the write serializer
@@ -426,6 +430,24 @@ class TestRelationWrites:
             },
         )
         assert start_instance(version).status == WorkflowInstance.Status.FAILED
+
+    def test_set_may_not_detach_an_out_of_scope_link(self):
+        domain = make_domain("Displacing")
+        elsewhere = make_domain("Elsewhere links")
+        assessment = make_requirement_assessment(domain)
+        foreign = AppliedControl.objects.create(name="Foreign", folder=elsewhere)
+        mine = AppliedControl.objects.create(name="Mine", folder=domain)
+        assessment.applied_controls.add(foreign)
+        version = update_flow(
+            domain,
+            {
+                "model": "requirement_assessment",
+                "id": str(assessment.id),
+                "m2m": {"applied_controls": {"op": "set", "values": str(mine.id)}},
+            },
+        )
+        assert start_instance(version).status == WorkflowInstance.Status.FAILED
+        assert [c.name for c in assessment.applied_controls.all()] == ["Foreign"]
 
     def test_relation_target_outside_scope_is_refused(self):
         domain = make_domain("Here")

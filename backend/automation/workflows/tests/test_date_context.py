@@ -167,6 +167,38 @@ class TestReservedVariableKeys:
 
 
 @pytest.mark.django_db
+class TestSeedsAreEngineOwned:
+    def test_set_variables_may_not_overwrite_a_seed(self):
+        version = flow(
+            make_domain("Overwrite"),
+            [
+                {
+                    "label": "Cheat",
+                    "type": "set_variables",
+                    "variables": {"today": "1999-01-01"},
+                }
+            ],
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert instance.variables["today"] == timezone.localdate().isoformat()
+
+    def test_publish_refuses_it_too(self):
+        version = flow(
+            make_domain("Overwrite publish"),
+            [
+                {
+                    "label": "Cheat",
+                    "type": "set_variables",
+                    "variables": {"now": "noon"},
+                }
+            ],
+        )
+        codes = {error["code"] for error in validate_graph(version)}
+        assert "action_set_variables_reserved" in codes
+
+
+@pytest.mark.django_db
 class TestDateOffsetAction:
     def test_defaults_to_the_run_date_and_writes_a_variable(self):
         version = flow(

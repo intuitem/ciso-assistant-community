@@ -1,5 +1,5 @@
-"""One user action, one run: coalescing on the auditlog correlation id, and
-the bulk writes that used to reach neither the audit trail nor the events."""
+"""One run per user action and object, and the bulk writes that used to reach
+neither the audit trail nor the events."""
 
 import uuid
 
@@ -20,15 +20,18 @@ from automation.workflows.tests.test_event_triggers import (  # noqa: F401
 )
 
 
-def event(cid=None, **kwargs):
-    body = payload(**kwargs)
+SAME_OBJECT = str(uuid.uuid4())
+
+
+def event(cid=None, object_id=SAME_OBJECT, **kwargs):
+    body = payload(object_id=object_id, **kwargs)
     body["cid"] = cid or ""
     return body
 
 
 @pytest.mark.django_db
 class TestCorrelationCoalescing:
-    def test_one_correlation_id_starts_one_run(self, capture_runs):
+    def test_one_object_in_one_user_action_starts_one_run(self, capture_runs):
         workflow = make_workflow()
         cid = str(uuid.uuid4())
         first = dispatch_internal_event("appliedcontrol.updated", event(cid), None)
@@ -43,6 +46,17 @@ class TestCorrelationCoalescing:
             get_registration(workflow).last_result
             == WorkflowTrigger.Result.SKIPPED_COALESCED
         )
+
+    def test_a_bulk_over_several_objects_still_runs_per_object(self, capture_runs):
+        """The key is the object too: a bulk edit that touches 3 rows in one
+        request is 3 runs, not 1. Only repeats of the same row collapse."""
+        make_workflow()
+        cid = str(uuid.uuid4())
+        for _ in range(3):
+            dispatch_internal_event(
+                "appliedcontrol.updated", event(cid, object_id=str(uuid.uuid4())), None
+            )
+        assert WorkflowInstance.objects.count() == 3
 
     def test_separate_user_actions_each_get_a_run(self, capture_runs):
         make_workflow()

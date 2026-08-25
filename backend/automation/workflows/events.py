@@ -19,6 +19,7 @@ MAX_TRIGGER_DEPTH.
 
 from datetime import timedelta
 
+from django.db import transaction
 from django.utils import timezone
 
 import structlog
@@ -134,31 +135,26 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
             # No run identity, no automatic execution.
             _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_NO_IDENTITY)
             continue
-        # One user action, one run: every LogEntry a request writes shares a
-        # correlation id, so a bulk edit arrives here once per row with the
-        # same cid. Windowed, not unique-constrained: the cid can come from an
-        # inbound x-correlation-id header, and a client reusing one must not
-        # silence a trigger for good. No cid (shell, task) means no grouping.
+        # One run per (trigger, user action, object): a save that writes
+        # several LogEntries for one object is one run, while a bulk edit still
+        # gets a run per object. Windowed, not unique-constrained: the cid can
+        # come from an inbound x-correlation-id header, and a client reusing
+        # one must not silence a trigger for good.
         cid = (payload or {}).get("cid") or ""
-        if (
-            cid
-            and trigger.instances.filter(
-                trigger_cid=cid,
-                created_at__gte=timezone.now() - COALESCE_WINDOW,
-            ).exists()
-        ):
-            _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_COALESCED)
-            continue
         try:
-            instance = create_instance(
-                version,
-                trigger=WorkflowInstance.Trigger.INTERNAL_EVENT,
-                payload=payload,
-                entry_node=entry,
-                trigger_registration=trigger,
-                trigger_depth=origin_depth + 1,
-                trigger_cid=cid,
-            )
+            with transaction.atomic():
+                if cid and _already_running(trigger, cid, payload):
+                    _bookkeep(trigger, WorkflowTrigger.Result.SKIPPED_COALESCED)
+                    continue
+                instance = create_instance(
+                    version,
+                    trigger=WorkflowInstance.Trigger.INTERNAL_EVENT,
+                    payload=payload,
+                    entry_node=entry,
+                    trigger_registration=trigger,
+                    trigger_depth=origin_depth + 1,
+                    trigger_cid=cid,
+                )
         except EngineError:
             _bookkeep(trigger, WorkflowTrigger.Result.ERROR)
             continue
@@ -166,6 +162,17 @@ def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
         _bookkeep(trigger, WorkflowTrigger.Result.TRIGGERED, fired=True)
         started.append(instance)
     return started
+
+
+def _already_running(trigger, cid, payload):
+    """Locks the trigger row first: two dispatch workers must not both read
+    "nothing started yet" for the same user action."""
+    WorkflowTrigger.objects.select_for_update().filter(pk=trigger.pk).first()
+    return trigger.instances.filter(
+        trigger_cid=cid,
+        payload__object_id=(payload or {}).get("object_id"),
+        created_at__gte=timezone.now() - COALESCE_WINDOW,
+    ).exists()
 
 
 def _bookkeep(trigger, result, fired=False):
