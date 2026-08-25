@@ -10,8 +10,8 @@ description: 'Centre For Cybersecurity Belgium - CyberFundamentals Framework
   https://ccb.belgium.be'
 copyright: All texts, layouts, designs and other elements of any nature in this document
   are subject to copyright law.
-version: 6
-publication_date: 2025-06-18
+version: 7
+publication_date: 2026-08-21
 provider: CCB
 packager: intuitem
 translations:
@@ -9633,9 +9633,9 @@ objects:
       translations:
         fr:
           name: "Att\xE9nuation"
-          description: "Les activit\xE9s de r\xE9ponse de l'organisation sont am\xE9\
-            lior\xE9es par l'int\xE9gration des enseignements tir\xE9s des activit\xE9\
-            s de d\xE9tection/r\xE9ponse actuelles et pr\xE9c\xE9dentes."
+          description: "Des activit\xE9s sont men\xE9es afin d'emp\xEAcher l'extension\
+            \ d'un \xE9v\xE9nement, d'en att\xE9nuer les effets et de r\xE9soudre\
+            \ l'incident."
           annotation: ''
         nl:
           name: Mitigatie
@@ -9662,73 +9662,6 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.mi-1
       ref_id: IMPORTANT_RS.MI-1.1
-      implementation_groups:
-      - I
-      - E
-      translations:
-        fr:
-          name: null
-          description: null
-          annotation: null
-        nl:
-          name: null
-          description: null
-          annotation: null
-    - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.mi-2
-      assessable: false
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.mi
-      ref_id: RS.MI-2
-      description: Incidents are mitigated
-      translations:
-        fr:
-          name: null
-          description: "Les incidents sont att\xE9nu\xE9s."
-          annotation: null
-        nl:
-          name: null
-          description: Incidenten worden gemitigeerd.
-          annotation: null
-    - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-2.1
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.mi-2
-      ref_id: IMPORTANT_RS.MI-2.1
-      implementation_groups:
-      - I
-      - E
-      translations:
-        fr:
-          name: null
-          description: null
-          annotation: null
-        nl:
-          name: null
-          description: null
-          annotation: null
-    - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.mi-3
-      assessable: false
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.mi
-      ref_id: RS.MI-3
-      description: Newly identified vulnerabilities are mitigated or documented as
-        accepted risks
-      translations:
-        fr:
-          name: null
-          description: "Les vuln\xE9rabilit\xE9s nouvellement identifi\xE9es sont\
-            \ att\xE9nu\xE9es ou document\xE9es comme des risques accept\xE9s."
-          annotation: null
-        nl:
-          name: null
-          description: Nieuw vastgestelde kwetsbaarheden worden gemitigeerd of gedocumenteerd
-            als aanvaarde risico's.
-          annotation: null
-    - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.mi-3.1
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.mi-3
-      ref_id: IMPORTANT_RS.MI-3.1
       description: The organization shall implement an incident handling capability
         for information/cybersecurity incidents on its business critical systems that
         includes preparation, detection and analysis, containment, eradication, recovery

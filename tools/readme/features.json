@@ -14,11 +14,17 @@
     "Platform"
   ],
   "features": [
-    { "name": "Audit and campaigns management", "group": "Compliance & frameworks" },
+    {
+      "name": "Audit and campaigns management",
+      "group": "Compliance & frameworks"
+    },
     { "name": "Automatic mapping", "group": "Compliance & frameworks" },
     { "name": "Mapping explorer", "group": "Compliance & frameworks" },
-    { "name": "Custom frameworks supported", "group": "Compliance & frameworks" },
-    { "name": "+167 frameworks included", "group": "Compliance & frameworks" },
+    {
+      "name": "Custom frameworks supported",
+      "group": "Compliance & frameworks"
+    },
+    { "name": "+200 frameworks included", "group": "Compliance & frameworks" },
     { "name": "Policies management", "group": "Compliance & frameworks" },
     { "name": "Document management", "group": "Compliance & frameworks" },
     { "name": "Evidence management", "group": "Compliance & frameworks" },
@@ -33,17 +39,26 @@
 
     { "name": "Third-party risk management", "group": "Third-party risk" },
 
-    { "name": "Action plan tracking and prioritization", "group": "Operations & remediation" },
+    {
+      "name": "Action plan tracking and prioritization",
+      "group": "Operations & remediation"
+    },
     { "name": "Findings tracking", "group": "Operations & remediation" },
     { "name": "Recommendations engine", "group": "Operations & remediation" },
     { "name": "Control plan", "group": "Operations & remediation" },
     { "name": "Task management", "group": "Operations & remediation" },
     { "name": "Kanban boards", "group": "Operations & remediation" },
     { "name": "Periodic checks", "group": "Operations & remediation" },
-    { "name": "Technical posture management", "group": "Operations & remediation" },
+    {
+      "name": "Technical posture management",
+      "group": "Operations & remediation"
+    },
     { "name": "Exceptions tracking", "group": "Operations & remediation" },
     { "name": "Incidents management", "group": "Operations & remediation" },
-    { "name": "Validation & approval flows", "group": "Operations & remediation" },
+    {
+      "name": "Validation & approval flows",
+      "group": "Operations & remediation"
+    },
     { "name": "Email reminders", "group": "Operations & remediation" },
 
     { "name": "Analytics and dashboards", "group": "Reporting & analytics" },
@@ -52,8 +67,14 @@
     { "name": "Advanced insights", "group": "Reporting & analytics" },
     { "name": "Custom metrics tracking", "group": "Reporting & analytics" },
 
-    { "name": "Assignments & respondent mode", "group": "Collaboration & productivity" },
-    { "name": "Comments & collaboration", "group": "Collaboration & productivity" },
+    {
+      "name": "Assignments & respondent mode",
+      "group": "Collaboration & productivity"
+    },
+    {
+      "name": "Comments & collaboration",
+      "group": "Collaboration & productivity"
+    },
     { "name": "Universal search", "group": "Collaboration & productivity" },
     { "name": "Command palette", "group": "Collaboration & productivity" },
 
@@ -63,8 +84,14 @@
     { "name": "Kafka integration", "group": "Automation & integrations" },
     { "name": "MCP support", "group": "Automation & integrations" },
     { "name": "Outgoing webhooks", "group": "Automation & integrations" },
-    { "name": "Jira & ServiceNow integrations", "group": "Automation & integrations" },
-    { "name": "Consultant features (e.g. single-domain export/import)", "group": "Automation & integrations" },
+    {
+      "name": "Jira & ServiceNow integrations",
+      "group": "Automation & integrations"
+    },
+    {
+      "name": "Consultant features (e.g. single-domain export/import)",
+      "group": "Automation & integrations"
+    },
 
     { "name": "Flexible RBAC", "group": "Security & access" },
     { "name": "SSO with SAML or OIDC", "group": "Security & access" },
