@@ -1394,14 +1394,10 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         from global_settings.utils import idp_group_role_inheritance_enabled
 
-        filter_query = Q(user=user) | Q(user_group__in=user.user_groups.all())
+        filter_query = Q(user=user) | Q(user_group__user=user)
 
         if idp_group_role_inheritance_enabled():
-            filter_query |= Q(
-                user_group__in=UserGroup.objects.filter(
-                    idp_groups__in=user.idp_groups.all()
-                )
-            )
+            filter_query |= Q(user_group__idp_groups__users=user)
 
         user_role_assignments = RoleAssignment.objects.filter(filter_query).distinct()
 
