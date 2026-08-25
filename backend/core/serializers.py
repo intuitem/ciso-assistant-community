@@ -48,7 +48,15 @@ class SerializerFactory:
     def get_serializer(self, base_name: str, action: str):
         if action in ["list", "retrieve"]:
             serializer_name = f"{base_name}ReadSerializer"
-        elif action in ["create", "update", "partial_update", "destroy"]:
+        elif action in [
+            "create",
+            "update",
+            "partial_update",
+            "destroy",
+            # OPTIONS: DRF describes the shape a client may send, so the
+            # write serializer is the one to answer with.
+            "metadata",
+        ]:
             serializer_name = f"{base_name}WriteSerializer"
         else:
             return None
@@ -2347,9 +2355,9 @@ class FolderWriteSerializer(BaseModelSerializer):
 
             auto_groups = UserGroup.objects.filter(folder=instance, builtin=True)
             auto_groups_exist = auto_groups.exists()
-            if (
-                auto_groups_exist
-                and User.objects.filter(user_groups__in=auto_groups).exists()
+            if auto_groups_exist and (
+                User.objects.filter(user_groups__in=auto_groups).exists()
+                or auto_groups.filter(idp_groups__isnull=False).exists()
             ):
                 raise serializers.ValidationError(
                     {"create_iam_groups": "cannotDisableIamGroupsAssignedUsers"}

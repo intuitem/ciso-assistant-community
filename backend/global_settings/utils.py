@@ -1,10 +1,23 @@
+import functools
+import importlib
 import json
+
+from django.conf import settings as django_settings
+from django.core.cache import cache
 
 from global_settings.models import GlobalSettings
 from global_settings.serializers import FeatureFlagsSerializer
 import structlog
 
 logger = structlog.get_logger(__name__)
+
+FEATURE_FLAGS_CACHE_KEY = "global_settings.feature_flags"
+# With the default LocMemCache this is per-process: the invalidation at the
+# write points is immediate in the worker that handled the write; other
+# workers converge within the TTL.
+FEATURE_FLAGS_CACHE_TTL = 30  # seconds
+
+_CACHE_MISS = object()
 
 SETTINGS_MASK_PLACEHOLDER = "**********"
 
@@ -74,18 +87,59 @@ def redact_secret_value(value: str) -> str:
     return SETTINGS_MASK_PLACEHOLDER
 
 
+@functools.cache
+def get_supported_feature_flags() -> frozenset:
+    """Flags supported by this edition, derived from the edition's
+    FeatureFlags serializer — the single source of truth. The enterprise
+    overlay swaps that serializer in via MODULE_PATHS["serializers"], so no
+    separate flag list exists anywhere."""
+    serializer_class = FeatureFlagsSerializer
+    module_path = django_settings.MODULE_PATHS.get("serializers")
+    if module_path:
+        module = importlib.import_module(module_path)
+        serializer_class = getattr(module, "FeatureFlagsSerializer", serializer_class)
+    return frozenset(
+        field.source.split(".")[-1]
+        for field in serializer_class().fields.values()
+        if getattr(field, "source", None) and field.source.startswith("value.")
+    )
+
+
+def clear_feature_flags_cache():
+    cache.delete(FEATURE_FLAGS_CACHE_KEY)
+
+
+def get_feature_flags() -> dict | None:
+    """Return the feature-flags dict, cached for FEATURE_FLAGS_CACHE_TTL
+    seconds so per-request RBAC resolution doesn't hit the settings table.
+    Returns None when the row is absent or malformed — warned once per TTL,
+    not once per flag check."""
+    flags = cache.get(FEATURE_FLAGS_CACHE_KEY, _CACHE_MISS)
+    if flags is not _CACHE_MISS:
+        return flags
+    ff_settings = (
+        GlobalSettings.objects.filter(name=GlobalSettings.Names.FEATURE_FLAGS)
+        .only("value")
+        .first()
+    )
+    if ff_settings is None or not isinstance(ff_settings.value, dict):
+        logger.warning("Feature flags settings not found, returning False")
+        flags = None
+    else:
+        flags = ff_settings.value
+    cache.set(FEATURE_FLAGS_CACHE_KEY, flags, FEATURE_FLAGS_CACHE_TTL)
+    return flags
+
+
 def ff_is_enabled(feature_flag: str):
-    ff_settings = GlobalSettings.objects.filter(
-        name=GlobalSettings.Names.FEATURE_FLAGS
-    ).first()
-    if ff_settings is None:
-        logger.warning(
-            "Feature flags settings not found, returning False",
-            feature_flag=feature_flag,
-        )
+    if feature_flag not in get_supported_feature_flags():
+        # Not a flag of this edition (e.g. an enterprise-only flag on CE):
+        # False by construction, without touching the settings row.
         return False
 
-    flags: dict[str, bool] = ff_settings.value
+    flags = get_feature_flags()
+    if flags is None:
+        return False
 
     if (flag := flags.get(feature_flag)) is None:
         logger.warning(
