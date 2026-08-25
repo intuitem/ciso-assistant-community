@@ -510,7 +510,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         Q(perimeter__in=perimeters) | Q(folder__in=folders)
     ).distinct()
     findings = Finding.objects.filter(
-        findings_assessment__in=findings_assessments
+        Q(folder__in=folders) | Q(findings_assessment__in=findings_assessments)
     ).distinct()
 
     risk_acceptances = RiskAcceptance.objects.filter(

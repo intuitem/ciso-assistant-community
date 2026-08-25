@@ -450,7 +450,7 @@
 				data-focusindex="1"
 			/>
 		{/if}
-		{#if shape.folder && !customFolder && URLModel !== 'validation-flows'}
+		{#if shape.folder && !customFolder && !['validation-flows', 'findings'].includes(URLModel)}
 			{#key folderKey}
 				<FolderTreeSelect
 					{form}

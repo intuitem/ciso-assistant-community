@@ -15723,7 +15723,7 @@ class FindingViewSet(BaseModelViewSet):
         "status": ["exact"],
         "severity": ["exact"],
         "priority": ["exact"],
-        "findings_assessment": ["exact"],
+        "findings_assessment": ["exact", "isnull"],
         "asset": ["exact"],
         "filtering_labels": ["exact"],
         "applied_controls": ["exact"],
@@ -15740,7 +15740,9 @@ class FindingViewSet(BaseModelViewSet):
             super()
             .get_queryset()
             .select_related("folder", "findings_assessment")
-            .prefetch_related("filtering_labels", "applied_controls", "evidences")
+            .prefetch_related(
+                "filtering_labels", "applied_controls", "task_templates", "evidences"
+            )
         )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))

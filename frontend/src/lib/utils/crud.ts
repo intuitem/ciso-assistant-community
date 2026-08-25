@@ -2338,6 +2338,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			}
 		],
 		selectFields: [{ field: 'status' }, { field: 'category' }],
+		markdownFields: ['objectives'],
 		detailViewFields: [
 			{ field: 'id' },
 			{ field: 'perimeter' },
@@ -2345,11 +2346,16 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'category' },
+			{ field: 'objectives' },
 			{ field: 'authors' },
 			{ field: 'reviewers' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'start_date', type: 'date' },
 			{ field: 'reported_at', type: 'date' },
+			{ field: 'budget' },
+			{ field: 'expenses' },
+			{ field: 'reference_link' },
 			{ field: 'version' },
 			{ field: 'status' },
 			{ field: 'observation' },
@@ -2396,6 +2402,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'findings',
 		verboseName: 'Finding',
 		verboseNamePlural: 'Findings',
+		markdownFields: ['recommendation'],
 		foreignKeyFields: [
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
 			{ field: 'asset', urlModel: 'assets' },
@@ -2407,6 +2414,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'threats', urlModel: 'threats' },
 			{ field: 'reference_controls', urlModel: 'reference-controls' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'task_templates', urlModel: 'task-templates' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		reverseForeignKeyFields: [
@@ -3542,7 +3550,7 @@ export function getFieldComponentMap(URLModel: string) {
 	const listViewConfig = listViewFields[URLModel] ?? { body: [] };
 
 	const markdownFields = getMarkdownFields(URLModel);
-	for (const field of listViewConfig.body) {
+	for (const field of [...listViewConfig.body, ...(listViewConfig.optionalFields?.body ?? [])]) {
 		if (markdownFields.has(field) && !fieldComponentMap[field]) {
 			fieldComponentMap[field] = MarkdownDescription;
 		}

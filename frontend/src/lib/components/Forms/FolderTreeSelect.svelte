@@ -17,6 +17,8 @@
 		nullable?: boolean;
 		disabled?: boolean;
 		hidden?: boolean;
+		/** Force the required marker when the schema cannot express the condition. */
+		required?: boolean;
 		cacheLock?: CacheLock;
 		cachedValue?: any;
 		// Called whenever the selected value changes
@@ -50,6 +52,7 @@
 		nullable = false,
 		disabled = false,
 		hidden = false,
+		required = false,
 		cacheLock = {
 			promise: new Promise((res) => res(null)),
 			resolve: (x: any) => x
@@ -263,7 +266,7 @@
 		{#if label !== undefined}
 			<label class="block text-sm font-semibold mb-1" for="folder-tree-select-btn-{field}">
 				{label}
-				{#if $constraints?.required}
+				{#if required || $constraints?.required}
 					<span class="text-red-500">*</span>
 				{/if}
 			</label>

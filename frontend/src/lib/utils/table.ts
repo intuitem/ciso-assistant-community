@@ -443,6 +443,21 @@ export const APPLIED_CONTROL_EFFORT_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const FINDING_FILING_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'findingsAssessment',
+		options: [
+			{ label: 'unfiled', value: 'true' },
+			{ label: 'filed', value: 'false' }
+		],
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		multiple: false,
+		enableDoubleDash: true
+	}
+};
+
 export const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2804,32 +2819,34 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'name',
-			'description',
+			'domain',
 			'findings_assessment',
 			'severity',
-			'priority',
 			'owner',
 			'status',
 			'applied_controls',
+			'taskTemplates',
 			'labels'
 		],
 		body: [
 			'ref_id',
 			'name',
-			'description',
+			'folder',
 			'findings_assessment',
 			'severity',
-			'priority',
 			'owner',
 			'status',
 			'applied_controls',
+			'task_templates',
 			'filtering_labels'
 		],
 		optionalFields: {
-			head: ['createdAt', 'updatedAt'],
-			body: ['created_at', 'updated_at']
+			head: ['description', 'priority', 'createdAt', 'updatedAt'],
+			body: ['description', 'priority', 'created_at', 'updated_at']
 		},
 		filters: {
+			folder: DOMAIN_FILTER,
+			findings_assessment__isnull: FINDING_FILING_FILTER,
 			filtering_labels: LABELS_FILTER,
 			severity: FINDINGS_SEVERITY_FILTER,
 			status: FINDINGS_STATUS_FILTER,
@@ -3701,6 +3718,14 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			icon: 'fa-solid fa-arrow-right-arrow-left',
 			field: 'status',
 			optionsEndpoint: 'findings/status'
+		},
+		{
+			type: 'change_field',
+			label: 'batchChangeFindingsAssessment',
+			icon: 'fa-solid fa-folder-tree',
+			field: 'findings_assessment',
+			optionsEndpoint: 'findings-assessments',
+			enableDoubleDash: true
 		},
 		{
 			type: 'change_m2m',

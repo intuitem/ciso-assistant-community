@@ -9721,6 +9721,37 @@ class FindingsAssessment(Assessment, FilteringLabelMixin):
 
     reported_at = models.DateField(null=True, blank=True, verbose_name=_("Reported at"))
 
+    start_date = models.DateField(null=True, blank=True, verbose_name=_("Start date"))
+
+    objectives = models.TextField(null=True, blank=True, verbose_name=_("Objectives"))
+
+    budget = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        verbose_name=_("Budget"),
+    )
+
+    expenses = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        help_text=_("Budget consumed so far"),
+        verbose_name=_("Expenses"),
+    )
+
+    reference_link = models.URLField(
+        null=True,
+        blank=True,
+        max_length=2048,
+        help_text=_("External url for follow-up (eg. report, Jira ticket)"),
+        verbose_name=_("Reference link"),
+    )
+
     def get_findings_metrics(self):
         findings = self.findings.all()
         total_count = findings.count()
@@ -9808,7 +9839,12 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
     ]
 
     findings_assessment = models.ForeignKey(
-        FindingsAssessment, on_delete=models.CASCADE, related_name="findings"
+        FindingsAssessment,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="findings",
+        verbose_name=_("Findings assessment"),
     )
     threats = models.ManyToManyField(
         Threat,
@@ -9887,6 +9923,9 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
     )
 
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    recommendation = models.TextField(
+        null=True, blank=True, verbose_name=_("Recommendation")
+    )
 
     class Meta:
         verbose_name = _("Finding")
@@ -9894,12 +9933,14 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
 
     @property
     def is_locked(self) -> bool:
-        return self.findings_assessment.is_locked
+        return self.findings_assessment.is_locked if self.findings_assessment else False
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+        if not self.findings_assessment_id:
+            return
         # Update parent findings assessment's updated_at timestamp
-        FindingsAssessment.objects.filter(id=self.findings_assessment.id).update(
+        FindingsAssessment.objects.filter(id=self.findings_assessment_id).update(
             updated_at=timezone.now()
         )
         self.findings_assessment.upsert_daily_metrics()

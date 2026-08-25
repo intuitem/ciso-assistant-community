@@ -4796,28 +4796,86 @@ class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
 
 
 class FindingWriteSerializer(BaseModelSerializer):
+    # Reverse M2M (declared on TaskTemplate): DRF does not pick it up from Meta.
+    task_templates = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=TaskTemplate.objects.all()
+    )
+
     def validate(self, attrs):
-        if (
-            hasattr(self, "instance")
-            and self.instance
-            and self.instance.findings_assessment.is_locked
-        ):
+        current_assessment = getattr(self.instance, "findings_assessment", None)
+        if current_assessment and current_assessment.is_locked:
             raise serializers.ValidationError(
                 "⚠️ Cannot modify the finding when the findings assessment is locked."
+            )
+        target_assessment = attrs.get("findings_assessment")
+        if target_assessment and target_assessment.is_locked:
+            raise serializers.ValidationError(
+                {
+                    "findings_assessment": "⚠️ Cannot attach the finding to a locked findings assessment."
+                }
             )
         return super().validate(attrs)
 
     class Meta:
         model = Finding
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
     def create(self, validated_data):
         findings_assessment = validated_data.get("findings_assessment")
-        if not findings_assessment:
-            raise serializers.ValidationError({"findings_assessment": "mandatory"})
-        validated_data["folder"] = findings_assessment.folder
+        if findings_assessment:
+            validated_data["folder"] = findings_assessment.folder
+        elif not validated_data.get("folder"):
+            raise serializers.ValidationError(
+                {
+                    "folder": "A domain is required for a finding without a findings assessment."
+                }
+            )
+        task_templates = validated_data.pop("task_templates", [])
 
-        return super().create(validated_data)
+        finding = super().create(validated_data)
+        if task_templates:
+            finding.task_templates.set(task_templates)
+
+        return finding
+
+    def update(self, instance, validated_data):
+        task_templates = validated_data.pop("task_templates", None)
+        reparented = "findings_assessment" in validated_data
+        findings_assessment = (
+            validated_data["findings_assessment"]
+            if reparented
+            else instance.findings_assessment
+        )
+        previous_assessment = instance.findings_assessment
+
+        if findings_assessment:
+            # A bound finding lives in its assessment's folder: moving it means
+            # detaching it, or moving the assessment.
+            if (
+                not reparented
+                and "folder" in validated_data
+                and validated_data["folder"] != instance.folder
+            ):
+                raise serializers.ValidationError(
+                    {
+                        "folder": "Detach the finding from its findings assessment to move it to another domain."
+                    }
+                )
+            if findings_assessment.folder != instance.folder:
+                self._check_object_perm(
+                    instance, "add", folder=findings_assessment.folder
+                )
+            validated_data["folder"] = findings_assessment.folder
+
+        updated_instance = super().update(instance, validated_data)
+
+        if task_templates is not None:
+            updated_instance.task_templates.set(task_templates)
+
+        if previous_assessment and previous_assessment != findings_assessment:
+            previous_assessment.upsert_daily_metrics()
+
+        return updated_instance
 
 
 class FindingReadSerializer(FindingWriteSerializer):
@@ -4834,8 +4892,11 @@ class FindingReadSerializer(FindingWriteSerializer):
     applied_controls = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
+    task_templates = FieldsRelatedField(many=True)
     perimeter = FieldsRelatedField(
-        source="findings_assessment.perimeter", fields=["id", "name", "folder"]
+        source="findings_assessment.perimeter",
+        fields=["id", "name", "folder"],
+        allow_null=True,
     )
     folder = FieldsRelatedField()
     severity = serializers.CharField(source="get_severity_display")

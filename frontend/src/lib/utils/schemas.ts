@@ -1407,7 +1407,9 @@ export const FindingSchema = z.object({
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	reference_controls: z.string().uuid().optional().array().optional(),
-	findings_assessment: z.string(),
+	task_templates: z.string().uuid().optional().array().optional(),
+	findings_assessment: z.string().optional().nullable(),
+	folder: z.string().optional(),
 	asset: z.string().optional().nullable(),
 	severity: z.number().default(-1),
 	priority: z.number().optional().nullable(),
@@ -1415,7 +1417,8 @@ export const FindingSchema = z.object({
 	evidences: z.string().uuid().optional().array().optional(),
 	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	recommendation: z.string().optional().nullable()
 });
 
 export const FindingsAssessmentSchema = z.object({
@@ -1435,6 +1438,11 @@ export const FindingsAssessmentSchema = z.object({
 	evidences: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
 	reported_at: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	start_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	objectives: z.string().optional().nullable(),
+	budget: z.coerce.number().optional().nullable(),
+	expenses: z.coerce.number().optional().nullable(),
+	reference_link: z.string().url().optional().nullable().or(z.literal('')),
 	is_locked: z.boolean().optional().default(false)
 });
 
