@@ -1,0 +1,1353 @@
+urn: urn:intuitem:risk:library:aiuc-1
+locale: en
+ref_id: AIUC-1
+name: AIUC-1 — AI agent standard
+description: 'AIUC-1 is a security, safety and reliability standard for AI agents, published by the Artificial
+  Intelligence Underwriting Company (AIUC). It covers six pillars: Data & Privacy, Security, Safety, Reliability,
+  Accountability and Society.'
+copyright: DRAFT — LOCAL EVALUATION ONLY, NOT FOR DISTRIBUTION. AIUC-1 content is (c) AIUC, all rights
+  reserved. No licence to reproduce or redistribute has been granted. See https://www.aiuc-1.com/legal/terms
+version: 1
+publication_date: '2026-04-15'
+provider: AIUC
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:aiuc-1
+    ref_id: AIUC-1
+    name: AIUC-1 — AI agent standard
+    description: AIUC-1 release of 2026-04-15.
+    implementation_groups_definition:
+    - ref_id: M
+      name: Mandatory
+      description: Required for AIUC-1 certification.
+    - ref_id: O
+      name: Optional
+      description: Not required for certification.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:aiuc-1:a
+      assessable: false
+      depth: 1
+      ref_id: A
+      name: Data & Privacy
+    - urn: urn:intuitem:risk:req_node:aiuc-1:a001
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:a
+      ref_id: A001
+      name: Establish input data policy
+      description: Establish and communicate AI input data policies covering how customer data is used
+        for model training, inference processing, data retention periods, and customer data rights
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Data Retention, Model Training Data, Opt-Out
+
+
+        Typical evidence:
+
+        - A001.1 Documentation: Policy for input data ownership, usage and retention
+
+        - A001.2 Config: Data retention implementation
+
+        - A001.3 Documentation: Data subject right processes'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:a002
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:a
+      ref_id: A002
+      name: Establish output data policy
+      description: Establish AI output ownership, usage, opt-in/out and deletion policies to customers
+        and communicate these policies
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Data Ownership, Usage, Deletion, Consent, Opt-Out
+
+
+        Typical evidence:
+
+        - A002.1 Documentation: Output usage and ownership policy
+
+        - A002.2 Config: Opt-in/opt-out and output deletion implementation'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:a003
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:a
+      ref_id: A003
+      name: Limit AI agent data access
+      description: Implement safeguards to limit AI agent data access based on task, user role, agent
+        role and context
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Data Collection, Data Access, Agent Permissions, Access Permissions
+
+
+        Typical evidence:
+
+        - A003.1 Config: Data access scoping
+
+        - A003.2 Config: Agent identity management
+
+        - A003.3 Config: Agent access and permissions management'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:a004
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:a
+      ref_id: A004
+      name: Protect IP & trade secrets
+      description: Implement safeguards or technical controls to prevent AI systems from leaking company
+        intellectual property or confidential information
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Intellectual Property, Confidential Information, Data Protections
+
+
+        Typical evidence:
+
+        - A004.1 Documentation: User guidance on confidential information
+
+        - A004.2 Documentation: foundational model IP protections
+
+        - A004.3 Config: IP detection implementation
+
+        - A004.4 Config: IP disclosure monitoring'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:a005
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:a
+      ref_id: A005
+      name: Prevent cross-customer data exposure
+      description: Implement safeguards to prevent cross-customer data exposure
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Cross-Customer Data, Model Training, Data Rights
+
+
+        Typical evidence:
+
+        - A005.1 Documentation: Consent for combined data usage
+
+        - A005.2 Config: Customer data isolation controls
+
+        - A005.3 Config: Privacy-enhancing controls'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:a006
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:a
+      ref_id: A006
+      name: Prevent PII leakage
+      description: Establish safeguards to prevent personal data leakage through AI outputs and logs
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Personal Data Leakage
+
+
+        Typical evidence:
+
+        - A006.1 Config: PII detection and filtering
+
+        - A006.2 Config: DLP system integration'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:a007
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:a
+      ref_id: A007
+      name: Prevent IP violations
+      description: Implement safeguards and technical controls to prevent AI outputs from violating copyrights,
+        trademarks, or other third-party intellectual property rights
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Intellectual Property, Copyright Protection
+
+
+        Typical evidence:
+
+        - A007.1 Documentation: Model provider IP infringement protections
+
+        - A007.2 Config: IP infringement filtering
+
+        - A007.3 Logs: User-facing notices'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:a008
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:a
+      ref_id: A008
+      name: Prevent leakage of credentials and secrets
+      description: Implement safeguards to detect and prevent leakage of secrets in AI system inputs,
+        outputs, logs, and credential storage
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Typical evidence:
+
+        - A008.1 Config: Secrets detection in user inputs
+
+        - A008.2 Config: Secrets handling in generated code
+
+        - A008.3 Config: Secure storage of user-provided credentials
+
+        - A008.4 Documentation: User-facing warnings for detected secrets
+
+        - A008.5 Config: Secrets redaction in logs and stored artifacts'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:b
+      assessable: false
+      depth: 1
+      ref_id: B
+      name: Security
+    - urn: urn:intuitem:risk:req_node:aiuc-1:b001
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:b
+      ref_id: B001
+      name: Third-party testing of adversarial robustness
+      description: Implement adversarial testing program to validate system resilience against adversarial
+        inputs and prompt injection attempts in line with adversarial threat taxonomy
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 3 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Adversarial Testing, Red Teaming, Prompt Injection, Jailbreak
+
+
+        Typical evidence:
+
+        - B001.1 Report: adversarial testing results
+
+        - B001.2 Documentation: Security program integration'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:b002
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:b
+      ref_id: B002
+      name: Detect adversarial input
+      description: Implement monitoring capabilities to detect and enable responding to adversarial inputs
+        and prompt injection attempts
+      implementation_groups:
+      - O
+      annotation: 'Review frequency: Every 3 months
+
+
+        Control type: Detective
+
+
+        Keywords: Monitor, Adversarial, Jailbreak, Prompt Injection
+
+
+        Typical evidence:
+
+        - B002.1 Config: Adversarial input detection and alerting
+
+        - B002.2 Logs: Adversarial incident and response
+
+        - B002.3 Documentation: Updates to detection config
+
+        - B002.4 Config: Pre-processing adversarial detection
+
+        - B002.5 Config: AI security alerts'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:b003
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:b
+      ref_id: B003
+      name: Manage public release of technical details
+      description: Implement controls to prevent over-disclosure of technical information about AI systems
+        and organizational details that could enable adversarial targeting
+      implementation_groups:
+      - O
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Public Disclosure, Open-Source, External Threats
+
+
+        Typical evidence:
+
+        - B003.1 Documentation: Technical information disclosure guidelines
+
+        - B003.2 Documentation: Public disclosure approval records'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:b004
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:b
+      ref_id: B004
+      name: Prevent AI endpoint scraping
+      description: Implement safeguards to prevent probing or scraping of external AI endpoints
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Scraping, Probing, Rate Limiting, Query Quotas, Zero Trust
+
+
+        Typical evidence:
+
+        - B004.1 Config: Anomalous usage detection
+
+        - B004.2 Config: Rate limits
+
+        - B004.3 Report: External pentest of AI endpoints
+
+        - B004.4 Documentation: Vulnerability remediation'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:b005
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:b
+      ref_id: B005
+      name: Implement real-time input filtering
+      description: Implement real-time input filtering using automated moderation tools
+      implementation_groups:
+      - O
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Detective
+
+
+        Keywords: Prompt Injection, Jailbreak, Adversarial Input Protection
+
+
+        Typical evidence:
+
+        - B005.1 Config: Input filtering
+
+        - B005.2 Documentation: Input moderation approach
+
+        - B005.3 Demonstration: Warning for blocked inputs
+
+        - B005.4 Logs: Input filtering
+
+        - B005.5 Documentation: Input filter performance'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:b006
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:b
+      ref_id: B006
+      name: Prevent unauthorized AI agent actions
+      description: Implement safeguards to prevent AI agents from performing actions beyond intended scope
+        and authorized privileges
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Access Permissions, Agent Permissions
+
+
+        Typical evidence:
+
+        - B006.1 Config: Agent service access restrictions
+
+        - B006.2 Config: Agent security monitoring and alerting
+
+        - B006.3 Config: Execution-level safeguards'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:b007
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:b
+      ref_id: B007
+      name: Enforce user access privileges to AI systems
+      description: Establish and maintain user access controls and admin privileges for AI systems in
+        line with policy
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 3 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Access Controls, Organizational Policy
+
+
+        Typical evidence:
+
+        - B007.1 Config: User access controls
+
+        - B007.2 Documentation: Access reviews'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:b008
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:b
+      ref_id: B008
+      name: Protect AI system deployment environment
+      description: Implement security measures for AI system deployment environments including encryption,
+        access controls and authorization
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Model Environment, Encryption, Access Controls
+
+
+        Typical evidence:
+
+        - B008.1 Config: API and agentic interface authentication
+
+        - B008.2 Config: API and agentic interface transport security
+
+        - B008.5 Config: Model integrity verification
+
+        - B008.3 Config: Agentic interface data integrity
+
+        - B008.4 Config: Model hosting security'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:b009
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:b
+      ref_id: B009
+      name: Limit output over-exposure
+      description: Implement output limitations and obfuscation techniques to safeguard against information
+        leakage
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Output Obfuscation, Fidelity Reduction, Information Leakage, Adversarial Use, Response
+        Filtering
+
+
+        Typical evidence:
+
+        - B009.1 Config: Output volume limits
+
+        - B009.2 Demonstration: User output notices
+
+        - B009.3 Config: Output precision controls'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:b010
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:b
+      ref_id: B010
+      name: Promote secure patterns in generated code
+      description: Implement safeguards to promote secure patterns and prevent known vulnerabilities in
+        generated code
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Typical evidence:
+
+        - B010.1 Config: Secure defaults for common vulnerability classes
+
+        - B010.2 Config: Secure defaults for authentication and authorization
+
+        - B010.3 Config: Safe dependency specification in generated code
+
+        - B010.4 Config: Secure session and cookie defaults
+
+        - B010.5 Config: Input validation and error handling defaults
+
+        - B010.6 Config: Logging defaults in generated code'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:c
+      assessable: false
+      depth: 1
+      ref_id: C
+      name: Safety
+    - urn: urn:intuitem:risk:req_node:aiuc-1:c001
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:c
+      ref_id: C001
+      name: Define AI risk taxonomy
+      description: Establish a risk taxonomy based on system capabilities and deployment context
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Risk Taxonomy, Severity Rating
+
+
+        Typical evidence:
+
+        - C001.1 Documentation: AI risk taxonomy
+
+        - C001.2 Documentation: Risk taxonomy reviews'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:c002
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:c
+      ref_id: C002
+      name: Conduct pre-deployment testing
+      description: Conduct internal testing of AI systems prior to deployment across risk categories for
+        system changes requiring formal review or approval
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Internal Testing, Pre-Deployment Testing
+
+
+        Typical evidence:
+
+        - C002.1 Documentation: Pre-deployment test and approval records
+
+        - C002.2 Config: SDLC integration
+
+        - C002.3 Documentation: Vulnerability scan results'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:c003
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:c
+      ref_id: C003
+      name: Prevent harmful outputs
+      description: Implement safeguards or technical controls to prevent harmful outputs including distressed
+        outputs, angry responses, high-risk advice, offensive content, bias, and deception
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Harmful Outputs, Distressed, Angry, Advice, Offensive, Bias
+
+
+        Typical evidence:
+
+        - C003.1 Config: Harmful output filtering
+
+        - C003.2 Config: Guardrails for high-risk advice
+
+        - C003.3 Config: Guardrails for biased outputs
+
+        - C003.4 Documentation: Filtering performance benchmarks'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:c004
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:c
+      ref_id: C004
+      name: Prevent out-of-scope outputs
+      description: Implement safeguards or technical controls to prevent out-of-scope outputs (e.g. political
+        discussion, healthcare advice)
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Out-of-Scope, Political Discussion, Technical Controls
+
+
+        Typical evidence:
+
+        - C004.1 Config: out-of-scope guardrails
+
+        - C004.2 Logs: Out-of-scope attempts
+
+        - C004.3 Demonstration: User guidance on scope'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:c005
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:c
+      ref_id: C005
+      name: Prevent agent-specific high risk outputs
+      description: Implement safeguards or technical controls to prevent agent-specific high-risk outputs
+        as defined in risk taxonomy
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: High-Risk Outputs, Risk Taxonomy, Technical Controls
+
+
+        Typical evidence:
+
+        - C005.1 Config: Risk detection and response
+
+        - C005.2 Documentation: Human review workflows
+
+        - C005.3 Config: Automated response mechanisms'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:c006
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:c
+      ref_id: C006
+      name: Prevent output vulnerabilities
+      description: Implement safeguards to prevent security vulnerabilities in outputs from impacting
+        users
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 3 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Harmful Outputs, Code Injection, Data Exfiltration
+
+
+        Typical evidence:
+
+        - C006.1 Config: Output sanitization
+
+        - C006.2 Demonstration: Content handling and labelling for untrusted content
+
+        - C006.3 Config: Adversarial output detection'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:c007
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:c
+      ref_id: C007
+      name: Flag high risk outputs for human review
+      description: Implement an alerting system that flags high-risk outputs for human review
+      implementation_groups:
+      - O
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Human Review, Escalation
+
+
+        Typical evidence:
+
+        - C007.1 Documentation: Definition of high-risk output criteria
+
+        - C007.2 Config: High-risk detection mechanisms
+
+        - C007.3 Documentation: Human review workflows'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:c008
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:c
+      ref_id: C008
+      name: Monitor AI risk categories
+      description: Implement monitoring of AI systems across risk categories
+      implementation_groups:
+      - O
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Detective
+
+
+        Keywords: Monitoring, High-Risk Outputs
+
+
+        Typical evidence:
+
+        - C008.1 Logs: AI risk monitoring
+
+        - C008.2 Documentation: Monitoring findings
+
+        - C008.3 Config: Security tooling'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:c009
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:c
+      ref_id: C009
+      name: Enable real-time feedback and intervention
+      description: Implement mechanisms to enable real-time user feedback collection, intervention and
+        actioning mechanisms
+      implementation_groups:
+      - O
+      annotation: 'Review frequency: Every 3 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Feedback, Intervention, User Control, Transparency
+
+
+        Typical evidence:
+
+        - C009.1 Demonstration: User intervention mechanisms
+
+        - C009.2 Documentation: User feedback & intervention reviews'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:c010
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:c
+      ref_id: C010
+      name: Third-party testing for harmful outputs
+      description: Appoint expert third parties to evaluate system robustness to harmful outputs including
+        distressed outputs, angry responses, high-risk advice, offensive content, bias, and deception
+        at least every 3 months
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 3 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Harmful Outputs, Distressed, Angry, Advice, Offensive, Bias, Risk Severity, Toxigen,
+        Third-Party Testing
+
+
+        Typical evidence:
+
+        - C010.1 Report: Harmful output testing'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:c011
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:c
+      ref_id: C011
+      name: Third-party testing for out-of-scope outputs
+      description: Appoint expert third parties to evaluate system robustness to out-of-scope outputs
+        at least every 3 months (e.g. political discussion, healthcare advice)
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 3 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Out-of-Scope, Political Discussion, Third-Party Testing
+
+
+        Typical evidence:
+
+        - C011.1 Report: Out-of-scope output testing'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:c012
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:c
+      ref_id: C012
+      name: Third-party testing for customer-defined risk
+      description: Appoint expert third-parties to evaluate system robustness to additional high-risk
+        outputs as defined in risk taxonomy at least every 3 months
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 3 months
+
+
+        Control type: Preventative
+
+
+        Keywords: High-Risk Outputs, Risk Taxonomy, Third-Party Testing
+
+
+        Typical evidence:
+
+        - C012.1 Third-party evaluation report assessing customer-defined risk'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:d
+      assessable: false
+      depth: 1
+      ref_id: D
+      name: Reliability
+    - urn: urn:intuitem:risk:req_node:aiuc-1:d001
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:d
+      ref_id: D001
+      name: Prevent hallucinated outputs
+      description: Implement safeguards or technical controls to prevent hallucinated outputs
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Hallucinations, Technical Controls
+
+
+        Typical evidence:
+
+        - D001.1 Config: Groundedness filter
+
+        - D001.2 Demonstration: User-facing citations & source attributions
+
+        - D001.3 Demonstration: User-facing uncertainty labels'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:d002
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:d
+      ref_id: D002
+      name: Third-party testing for hallucinations
+      description: Appoint expert third-parties to evaluate hallucinated outputs at least every 3 months
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 3 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Hallucinations, Third-Party Testing
+
+
+        Typical evidence:
+
+        - D002.1 Report: Hallucination testing results'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:d003
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:d
+      ref_id: D003
+      name: Restrict unsafe tool calls
+      description: Implement safeguards or technical controls to prevent tool calls in AI systems from
+        executing unauthorized actions, accessing restricted information, or making decisions beyond their
+        intended scope
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Tool Calls, Tool Selection, Technical Controls
+
+
+        Typical evidence:
+
+        - D003.1 Config: Tool authorization & validation
+
+        - D003.2 Config: Rate limits for tools
+
+        - D003.3 Config: Tool call log
+
+        - D003.4 Config: Human-approval workflows
+
+        - D003.5 Documentation: tool call log reviews'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:d004
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:d
+      ref_id: D004
+      name: Third-party testing of tool calls
+      description: Appoint expert third-parties to evaluate tool calls in AI systems, including executing
+        unauthorized actions, accessing restricted information, or making decisions beyond their intended
+        scope at least every 3 months
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 3 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Tool Calls, Tool Selection, Third-Party Testing
+
+
+        Typical evidence:
+
+        - D004.1 Report: Tool call testing'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:e
+      assessable: false
+      depth: 1
+      ref_id: E
+      name: Accountability
+    - urn: urn:intuitem:risk:req_node:aiuc-1:e001
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:e
+      ref_id: E001
+      name: AI failure plan for security breaches
+      description: Document AI failure plan for AI privacy and security breaches assigning accountable
+        owners and establishing notification and remediation with third-party support as needed (e.g.
+        legal, PR, insurers)
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Incident Response, Security, Privacy, Regulatory Deadlines
+
+
+        Typical evidence:
+
+        - E001.1 Documentation: AI failure plan for security breaches'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:e002
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:e
+      ref_id: E002
+      name: AI failure plan for harmful outputs
+      description: Document AI failure plan for harmful AI outputs that cause significant customer harm
+        assigning accountable owners and establishing remediation with third-party support as needed (e.g.
+        legal, PR, insurers)
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Incident Response, Emergency Response, Harmful Outputs, Hallucinations, Vendors
+
+
+        Typical evidence:
+
+        - E002.1 Documentation: AI failure plan for harmful outputs
+
+        - E002.2 Documentation: Additional harmful output failure procedures'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:e003
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:e
+      ref_id: E003
+      name: AI failure plan for hallucinations
+      description: Document AI failure plan for hallucinated AI outputs that cause substantial customer
+        financial loss assigning accountable owners and establishing remediation with third-party support
+        as needed (e.g. legal, PR, insurers)
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Hallucinations, Incident Response, Customer Loss
+
+
+        Typical evidence:
+
+        - E003.1 Documentation: AI failure plan for hallucinations
+
+        - E003.2 Documentation: Additional hallucination failure procedures'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:e004
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:e
+      ref_id: E004
+      name: Assign accountability
+      description: Document which AI system changes across the development & deployment lifecycle require
+        formal review or approval, assign a lead accountable for each, and document their approval with
+        supporting evidence
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Decision Owners, Deployment
+
+
+        Typical evidence:
+
+        - E004.1 Documentation: Change approval policy and records
+
+        - E004.2 Config: Code signing implementation'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:e005
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:e
+      ref_id: E005
+      name: Document data storage security
+      description: Document data storage security practices considering data sensitivity, regulatory requirements,
+        security controls, and operational needs
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Deployment, Cloud Security, On-Premise Security, Data Residency
+
+
+        Typical evidence:
+
+        - E005.1 Documentation: Data storage security practices'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:e006
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:e
+      ref_id: E006
+      name: Conduct vendor due diligence
+      description: Establish AI vendor due diligence processes for foundation and upstream model providers
+        covering data handling, PII controls, security and compliance
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Vendor Due Diligence, Open-Source, Foundation Models, Upstream Models
+
+
+        Typical evidence:
+
+        - E006.1 Documentation: Vendor due diligence'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:e008
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:e
+      ref_id: E008
+      name: Review internal processes
+      description: Establish regular internal reviews of key processes and document review records and
+        approvals
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Internal Reviews, Documentation
+
+
+        Typical evidence:
+
+        - E008.1 Documentation: Internal review
+
+        - E008.2 Documentation: External feedback integration'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:e009
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:e
+      ref_id: E009
+      name: Monitor third-party access
+      description: Implement systems to monitor and log third-party API connections, sessions, and data
+        access
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Access, Logins
+
+
+        Typical evidence:
+
+        - E009.1 Config: Third-party access monitoring
+
+        - E009.2 Config: Anomalous third-party access alerting'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:e010
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:e
+      ref_id: E010
+      name: Establish AI acceptable use policy
+      description: Establish and implement an AI acceptable use policy
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Acceptable Use, Breach
+
+
+        Typical evidence:
+
+        - E010.1 Documentation: AI acceptable use policy
+
+        - E010.2 Config: AUP violation detection
+
+        - E010.3 Demonstration: User notification for AUP breaches
+
+        - E010.4 Documentation: Guardrails enforcing acceptable use'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:e011
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:e
+      ref_id: E011
+      name: Record processing locations
+      description: Document AI data processing locations
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Data Processing, Storage Location, Data Protections
+
+
+        Typical evidence:
+
+        - E011.1 Documentation: AI processing locations
+
+        - E011.2 Documentation: Data transfer compliance'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:e012
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:e
+      ref_id: E012
+      name: Document regulatory compliance
+      description: Document applicable AI laws and standards, required data protections, and strategies
+        for compliance
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 6 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Regulatory, EU, NY, NIST, ISO, GDPR
+
+
+        Typical evidence:
+
+        - E012.1 Documentation: Regulatory compliance reviews'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:e013
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:e
+      ref_id: E013
+      name: Implement quality management system
+      description: Establish a quality management system for AI systems proportionate to the size of the
+        organization
+      implementation_groups:
+      - O
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: EU, Quality management, Regulatory
+
+
+        Typical evidence:
+
+        - E013.1 Documentation: Quality objectives and risk management
+
+        - E013.2 Documentation: Change management procedures
+
+        - E013.3 Config: Issue tracking and monitoring
+
+        - E013.4 Documentation: Data management procedures
+
+        - E013.5 Documentation: Stakeholder communication procedures'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:e015
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:e
+      ref_id: E015
+      name: Log AI system activity
+      description: Maintain logs of AI system processes, actions, and agent outputs where permitted to
+        support incident investigation, auditing, and explanation of AI system behavior
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Detective
+
+
+        Keywords: Explainability, Logs
+
+
+        Typical evidence:
+
+        - E015.1 Config: Logging implementation
+
+        - E015.3 Config: Log storage
+
+        - E015.4 Config: Log integrity protection
+
+        - E015.2 Config: AI agent logging implementation'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:e016
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:e
+      ref_id: E016
+      name: Implement AI disclosure mechanisms
+      description: Implement clear disclosure mechanisms to inform users when they are interacting with
+        AI systems rather than humans
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Labelling, Transparency
+
+
+        Typical evidence:
+
+        - E016.1 Demonstration: Text AI disclosure
+
+        - E016.2 Demonstration: Voice AI disclosure
+
+        - E016.3 Demonstration: Labelling AI-generated content
+
+        - E016.4 Demonstration: Automation AI disclosure
+
+        - E016.5 Demonstration: System response to AI inquiry'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:e017
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:e
+      ref_id: E017
+      name: Document system transparency policy
+      description: Establish a system transparency policy and maintain a repository of model cards, datasheets,
+        and interpretability reports for major systems
+      implementation_groups:
+      - O
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Transparency, System Cards
+
+
+        Typical evidence:
+
+        - E017.1 Documentation: AI system transparency documentation
+
+        - E017.2 Documentation: Transparency report sharing policy
+
+        - E017.3 Documentation: Platform and deployer security responsibilities'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:f
+      assessable: false
+      depth: 1
+      ref_id: F
+      name: Society
+    - urn: urn:intuitem:risk:req_node:aiuc-1:f001
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:f
+      ref_id: F001
+      name: Prevent AI cyber misuse
+      description: Implement or document guardrails to prevent AI-enabled misuse for cyber attacks and
+        exploitation
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Preventative
+
+
+        Keywords: Cyber Attacks
+
+
+        Typical evidence:
+
+        - F001.1 Documentation: Foundation model cyber capabilities
+
+        - F001.2 Config: Cyber use detection'
+    - urn: urn:intuitem:risk:req_node:aiuc-1:f002
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:aiuc-1:f
+      ref_id: F002
+      name: Prevent catastrophic misuse
+      description: Implement or document guardrails to prevent AI-enabled catastrophic system misuse (chemical
+        / bio / radio / nuclear)
+      implementation_groups:
+      - M
+      annotation: 'Review frequency: Every 12 months
+
+
+        Control type: Detective
+
+
+        Keywords: CBRN, Chemical, Bioweapon, Radioactive, Nuclear
+
+
+        Typical evidence:
+
+        - F002.1 Documentation: Foundation model CBRN capabilities
+
+        - F002.2 Config: Catastrophic misuse monitoring'
