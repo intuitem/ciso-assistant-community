@@ -2065,7 +2065,7 @@ class ObjectClassification(NameDescriptionMixin, FolderMixin, PublishInRootFolde
             )
 
 
-class ClassificationLevel(NameDescriptionMixin, FolderMixin):
+class ClassificationLevel(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     object_classification = models.ForeignKey(
         ObjectClassification,
         on_delete=models.CASCADE,
