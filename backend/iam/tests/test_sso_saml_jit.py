@@ -96,7 +96,7 @@ def _call_finish_acs(auth, sso_settings=None):
 @pytest.mark.django_db
 class TestSAMLMainBehavior:
     def test_existing_user_is_matched_by_nameid(self):
-        user = User.objects.create_user(email="alice@example.com", password="pw")
+        User.objects.create_user(email="alice@example.com", password="pw")
         _make_sso_settings()
         auth = _make_mock_auth(nameid="alice@example.com")
 

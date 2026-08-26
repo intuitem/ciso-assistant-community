@@ -1,6 +1,8 @@
 import pytest
+from django.test import RequestFactory
 
 from iam.models import IdPGroup, User
+from iam.scim.serializers import scim_group_to_dict
 from iam.scim.views import _add_members, _set_members
 from iam.utils import sync_user_idp_groups
 
@@ -91,3 +93,12 @@ class TestScimSsoMembershipIsolation:
 
         members = set(group.users.all())
         assert members == {sso_user}
+
+    def test_serialized_group_excludes_sso_members(self):
+        group, scim_user, sso_user = self._shared_group_with_mixed_members()
+        request = RequestFactory().get("/api/scim/v2/Groups")
+
+        payload = scim_group_to_dict(group, request)
+
+        member_ids = {m["value"] for m in payload["members"]}
+        assert member_ids == {str(scim_user.id)}
