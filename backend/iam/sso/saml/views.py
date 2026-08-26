@@ -201,6 +201,9 @@ class FinishACSView(SAMLViewMixin, View):
                     )
             if not user:
                 raise User.DoesNotExist()
+            user.first_name = idp_first_names[0] if idp_first_names else user.first_name
+            user.last_name = idp_last_names[0] if idp_last_names else user.last_name
+            user.save()
             if jit_provisioning_active:
                 group_claims_string = attribute_mapping.get("groups", [])
                 group_claims = [
