@@ -43,6 +43,7 @@
 		}
 
 		// Ensure the container is clean before initializing
+		// eslint-disable-next-line svelte/no-dom-manipulating -- echarts.init() requires an empty container
 		chartContainer.innerHTML = '';
 		chart = echarts.init(
 			chartContainer,

@@ -21,7 +21,9 @@
 		try {
 			const saved = localStorage.getItem(STORAGE_KEY);
 			if (saved) return JSON.parse(saved);
-		} catch {}
+		} catch {
+			// best effort
+		}
 		return { compliance: '', risk: [], groups: [] };
 	}
 

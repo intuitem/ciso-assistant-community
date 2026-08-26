@@ -1,5 +1,5 @@
 function getCookieDict(): { [key: string]: string } {
-	let cookies = {};
+	const cookies = {};
 	document.cookie.split(';').forEach((cookie_string) => {
 		cookie_string = cookie_string.trim(); // Remove possible whitespaces
 		const cookie_key = cookie_string.split('=')[0];
@@ -25,7 +25,7 @@ function setCookie(
 	samesite_lax: boolean = true,
 	path: string = '/'
 ) {
-	let cookie_info = [`${cookie_name}=${cookie_value}`];
+	const cookie_info = [`${cookie_name}=${cookie_value}`];
 	if (secure) cookie_info.push('Secure');
 	if (samesite_lax) cookie_info.push('SameSite=Lax');
 	cookie_info.push(`path=${path}`);

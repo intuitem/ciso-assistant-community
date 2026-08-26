@@ -12,14 +12,10 @@
 
 	let { groups, onupdate, activeLanguage = null }: Props = $props();
 
-	let items: ImplementationGroup[] = $state(groups.map((g) => ({ ...g })));
+	let items: ImplementationGroup[] = $derived(groups.map((g) => ({ ...g })));
 	let expandedIndex: number | null = $state(null);
 
 	// Sync from parent when groups prop changes (e.g. after reload)
-	$effect(() => {
-		items = groups.map((g) => ({ ...g }));
-	});
-
 	function persist() {
 		onupdate(items.map((g) => ({ ...g })));
 	}

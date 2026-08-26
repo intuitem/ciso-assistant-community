@@ -18,6 +18,7 @@ export const POST = async ({ fetch, cookies, locals }) => {
 		logger.info('User logged out', { user_id: locals.user?.id });
 
 		// Preserve the Django session until the SLO endpoint consumes it.
+		// eslint-disable-next-line eslint-plugin-intuitem-sveltekit/secure-redirect -- deliberate off-origin redirect to the backend SSO logout endpoint
 		redirect(302, `${BACKEND_API_EXPOSED_URL}/iam/sso/logout/`);
 	}
 

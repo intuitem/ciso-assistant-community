@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/valid-prop-names-in-kit-pages -- also imported as <AuditTableMode> by entity-assessments */
 	import { run } from 'svelte/legacy';
 
 	import { page } from '$app/state';
@@ -211,7 +212,6 @@
 	let addedEvidence = $state(0);
 
 	const requirementAssessmentScores = Object.fromEntries(
-		// svelte-ignore state_referenced_locally
 		requirementAssessments.map((requirement) => {
 			return [requirement.id, [requirement.is_scored, requirement.score]];
 		})
@@ -291,7 +291,6 @@
 	});
 
 	const accordionItems: Record<string, ['' | 'observation' | 'evidence']> = $state(
-		// svelte-ignore state_referenced_locally
 		requirementAssessments.reduce((acc, requirementAssessment) => {
 			const requirement =
 				requirementHashmap[requirementAssessment.requirement] ?? requirementAssessment;
@@ -737,7 +736,7 @@
 																	form={isScoredForms[requirementAssessment.id]}
 																	field="is_scored"
 																	disabled={isReadOnly}
-																	label={''}
+																	label=""
 																	helpText={m.scoringHelpText()}
 																	checkboxComponent="switch"
 																	classes="h-full flex flex-row items-center justify-center my-1"

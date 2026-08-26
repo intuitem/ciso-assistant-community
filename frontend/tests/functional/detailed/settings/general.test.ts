@@ -1,8 +1,8 @@
 import { LoginPage } from '../../../utils/login-page.js';
 import { TestContent, test, expect, type Page } from '../../../utils/test-utils.js';
 
-let vars = TestContent.generateTestVars();
-let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
+const vars = TestContent.generateTestVars();
+const testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
 test.describe.configure({ mode: 'serial' });
 

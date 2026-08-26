@@ -161,6 +161,7 @@ export function slugifyFrameworkName(name: string, frameworkId: string): string 
 	const normalized = name
 		.normalize('NFKD')
 		.replace(/[̀-ͯ]/g, '') // strip combining diacritical marks
+		// eslint-disable-next-line no-control-regex -- deliberate ASCII-range filter
 		.replace(/[^\x00-\x7F]/g, ''); // strip non-ASCII
 	let slug = normalized
 		.toLowerCase()

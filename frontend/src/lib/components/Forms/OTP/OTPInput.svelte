@@ -41,7 +41,7 @@
 
 	const { value, errors } = formFieldProxy(form, field);
 
-	let codes: string[] = $state([
+	let codes: string[] = $derived([
 		...$value.slice(0, numOfInputs).split(''),
 		...Array(numOfInputs <= $value.length ? 0 : numOfInputs - $value.length).fill('')
 	]);
@@ -59,13 +59,6 @@
 			form.submit();
 		}
 	}
-
-	$effect(() => {
-		codes = [
-			...$value.slice(0, numOfInputs).split(''),
-			...Array(numOfInputs <= $value.length ? 0 : numOfInputs - $value.length).fill('')
-		];
-	});
 
 	run(() => {
 		if ($errors && clearOnError) {

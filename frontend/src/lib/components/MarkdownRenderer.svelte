@@ -61,6 +61,7 @@
 	<div
 		class="prose prose-sm dark:prose-invert max-w-none wrap-break-word whitespace-pre-line {className}"
 	>
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized via sanitizeHtml() above -->
 		{@html renderedContent}
 	</div>
 {:else}

@@ -5,14 +5,17 @@ import type { RequestHandler } from './$types';
 
 // Remove unsafe characters and normalize the filename (but keep Unicode letters)
 function sanitizeFileName(name: string): string {
-	return name
-		.normalize('NFKC') // Normalize Unicode
-		.replace(/[\x00-\x1F<>:"/\\|?*\u007F;'`’‘“”()\[\]{}]/g, '-') // Remove dangerous characters
-		.replace(/\s+/g, '-') // Replace whitespace with dash
-		.replace(/\.+$/g, '') // Remove trailing dots
-		.replace(/^-+|-+$/g, '') // Trim leading/trailing dashes
-		.replace(/-+/g, '-') // Collapse multiple dashes
-		.substring(0, 100); // Truncate to avoid overly long names
+	return (
+		name
+			.normalize('NFKC') // Normalize Unicode
+			// eslint-disable-next-line no-control-regex -- deliberate filename control-char sanitisation
+			.replace(/[\x00-\x1F<>:"/\\|?*\u007F;'`’‘“”()[\]{}]/g, '-') // Remove dangerous characters
+			.replace(/\s+/g, '-') // Replace whitespace with dash
+			.replace(/\.+$/g, '') // Remove trailing dots
+			.replace(/^-+|-+$/g, '') // Trim leading/trailing dashes
+			.replace(/-+/g, '-') // Collapse multiple dashes
+			.substring(0, 100)
+	); // Truncate to avoid overly long names
 }
 
 // Format date as YYYY-MM-DD_HH-MM-SS (safe and readable)

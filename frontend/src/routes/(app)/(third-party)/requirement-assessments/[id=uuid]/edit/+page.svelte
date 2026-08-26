@@ -334,7 +334,7 @@
 			requirementAssessmentForm.form.update(
 				(current: Record<string, any>) => ({
 					...current,
-					applied_controls: [...current.applied_controls, ...form?.newControls]
+					applied_controls: [...current.applied_controls, ...form.newControls]
 				}),
 				{ taint: false }
 			);
@@ -864,7 +864,7 @@
 												<Checkbox
 													{form}
 													field="is_scored"
-													label={''}
+													label=""
 													helpText={m.scoringHelpText()}
 													checkboxComponent="switch"
 													classes="h-full flex flex-row items-center justify-center my-1"

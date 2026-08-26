@@ -358,46 +358,42 @@
 			{#snippet content()}
 				{@const counters = data.data?.counters || {}}
 				<div class="grid grid-cols-2 gap-2">
-					<Card
-						count={String(counters.selected_asset_count ?? 0)}
-						label={m.assets()}
-						section={''}
-					/>
+					<Card count={String(counters.selected_asset_count ?? 0)} label={m.assets()} section="" />
 					<Card
 						count={String(counters.selected_feared_event_count ?? 0)}
 						label={m.fearedEvents()}
-						section={''}
+						section=""
 					/>
 					<Card
 						count={String(counters.compliance_assessment_count ?? 0)}
 						label={m.complianceAssessments()}
-						section={''}
+						section=""
 					/>
-					<Card count={String(counters.roto_count ?? 0)} label={m.roToCouples()} section={''} />
+					<Card count={String(counters.roto_count ?? 0)} label={m.roToCouples()} section="" />
 					<Card
 						count={String(counters.stakeholder_count ?? 0)}
 						label={m.stakeholders()}
-						section={''}
+						section=""
 					/>
 					<Card
 						count={String(counters.strategic_scenario_count ?? 0)}
 						label={m.strategicScenarios()}
-						section={''}
+						section=""
 					/>
 					<Card
 						count={String(counters.operational_scenario_count ?? 0)}
 						label={m.operationalScenarios()}
-						section={''}
+						section=""
 					/>
 					<Card
 						count={String(counters.compliance_applied_control_count ?? 0)}
 						label={m.appliedControlsFromAudits()}
-						section={''}
+						section=""
 					/>
 					<Card
 						count={String(counters.risk_assessment_applied_control_count ?? 0)}
 						label={m.appliedControlsFromRiskAssessment()}
-						section={''}
+						section=""
 					/>
 				</div>
 			{/snippet}

@@ -34,12 +34,12 @@ export const actions: Actions = {
 			});
 		}
 
-		let endpoint = '';
-		let bodyKey = '';
-		let containerKey = '';
-		let containerId = '';
-		let itemTypePlural = '';
-		let itemTypeSingular = '';
+		let endpoint: string;
+		let bodyKey: string;
+		let containerKey: string;
+		let containerId: string;
+		let itemTypePlural: string;
+		let itemTypeSingular: string;
 
 		if (type === 'assets') {
 			if (!folderId) {

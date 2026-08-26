@@ -241,7 +241,6 @@
 {#if $modalStore.length > 0}
 	{#key $modalStore}
 		<!-- Backdrop -->
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="modal-backdrop {classesBackdrop} {backdropOverflow}"
 			data-testid="modal-backdrop"

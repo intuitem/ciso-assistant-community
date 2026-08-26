@@ -21,12 +21,11 @@ export const load: PageServerLoad = async (event) => {
 	}
 	const authenticators = authenticatorsResponse.data;
 
-	let totp = null;
 	let recoveryCodes = null;
 
 	const totpEndpoint = `${authenticatorsEndpoint}/totp`;
 	const totpResponse = await event.fetch(totpEndpoint).then((res) => res.json());
-	totp = totpResponse.meta;
+	const totp = totpResponse.meta;
 
 	if (
 		Array.isArray(authenticators) &&

@@ -8,7 +8,7 @@ import { test, expect } from './base';
 // These imports are dependencies required to run the _start entry point with eval(finalCode) .
 import { expect as baseExpect } from '@playwright/test';
 import { test as base } from '@playwright/test';
-var __EVAL_DEPENDENCIES__ = [baseExpect, base];
+const __EVAL_DEPENDENCIES__ = [baseExpect, base];
 // The __EVAL_DEPENDENCIES__ variable is unused, its goal is to "register" the imported variables by storing them in a variable.
 // By being stored in a list these variables get loaded into the global scope (an import doesn't load the imported variable into the global scope if it's unused).
 // Doing so gives the ability to the eval function to access them.
@@ -140,12 +140,12 @@ class HotReloadingCompiler {
 		};
 		this.sourceFiles[filePath] = sourceFileInfo;
 		for (const dependency of dependencies) {
-			if (!this.dependencyTree.hasOwnProperty(dependency)) {
+			if (!Object.prototype.hasOwnProperty.call(this.dependencyTree, dependency)) {
 				this.dependencyTree[dependency] = [sourceFileInfo];
 			} else {
 				this.dependencyTree[dependency]!.push(sourceFileInfo);
 			}
-			if (!this.sourceFiles.hasOwnProperty(dependency)) {
+			if (!Object.prototype.hasOwnProperty.call(this.sourceFiles, dependency)) {
 				// Recursively register source files specified by the //include directive.
 				this.registerSourceCode(dependency);
 			}
@@ -307,7 +307,7 @@ export const HotReload = new (class {
 		options: runOptions = {}
 	) {
 		const compiler = new HotReloadingCompiler(options.hotReloaderPath ?? './tests/hot-reload');
-		let bundledCode = '';
+		let bundledCode: string;
 		try {
 			bundledCode = compiler.precompile();
 		} catch (e) {

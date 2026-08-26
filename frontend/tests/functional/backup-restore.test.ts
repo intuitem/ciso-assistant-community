@@ -65,7 +65,7 @@ test('Database export should generate valid backup file', async ({ logedPage, pa
 			try {
 				jsonData = JSON.parse(jsonString);
 			} catch (error) {
-				throw new Error('Decompressed content is not valid JSON');
+				throw new Error('Decompressed content is not valid JSON', { cause: error });
 			}
 			expect(jsonData).toBeDefined();
 			// expect(jsonData).toHaveProperty('meta');

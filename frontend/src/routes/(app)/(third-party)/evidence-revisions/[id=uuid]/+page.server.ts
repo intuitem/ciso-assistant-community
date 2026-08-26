@@ -40,6 +40,7 @@ export const actions: Actions = {
 		const response = await event.fetch(endpoint, requestInitOptions);
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 		setFlash({ type: 'success', message: m.attachmentDeleted() }, event);
+		// eslint-disable-next-line eslint-plugin-intuitem-sveltekit/secure-redirect -- urlmodel comes from the URL_MODEL allowlist (src/params/urlmodel.ts)
 		return redirect(302, `/${urlmodel}/${id}`);
 	}
 };

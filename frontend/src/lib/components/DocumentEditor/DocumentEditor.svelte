@@ -1414,7 +1414,6 @@
 							{#each revisions as revision}
 								{@const isActive = currentRevision?.id === revision.id}
 								{@const style = getStatusStyle(revision.status)}
-								<!-- svelte-ignore a11y_no_static_element_interactions -->
 								<div
 									class="w-full text-left px-3 py-2.5 rounded-lg transition-colors cursor-pointer {isActive
 										? 'bg-primary-50-950 ring-1 ring-primary-200 dark:ring-primary-500/40'

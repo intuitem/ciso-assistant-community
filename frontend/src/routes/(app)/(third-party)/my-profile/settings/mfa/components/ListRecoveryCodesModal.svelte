@@ -29,7 +29,7 @@
 			<div class="flex flex-col space-y-4 mx-auto card p-4 max-w-lg">
 				<div class="flex flex-wrap justify-evenly">
 					{#each $recoveryCodes.unused_codes as code}
-						<pre>{code} </pre>
+						<pre>{code}&nbsp;</pre>
 					{/each}
 				</div>
 				<span class="flex flex-row space-x-2 justify-end">

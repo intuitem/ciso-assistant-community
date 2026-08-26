@@ -39,7 +39,7 @@ export function formatSelectFieldData(
 	const isNumber = selectField.valueType === 'number';
 	const isOptionList = Array.isArray(responseData);
 
-	let fieldOptions = [];
+	let fieldOptions;
 
 	if (isOptionList) {
 		fieldOptions = responseData.map((option) => ({
@@ -120,6 +120,7 @@ export const loadDetail = async ({ event, model, id }) => {
 				? m.objectNotReachableFromCurrentFocus()
 				: m.objectNotFound();
 			setFlash({ type: 'warning', message }, event);
+			// eslint-disable-next-line eslint-plugin-intuitem-sveltekit/secure-redirect -- urlModel comes from the URL_MODEL allowlist (src/params/urlmodel.ts)
 			throw redirect(302, `/${model.urlModel}`);
 		}
 		// Let other errors (403, 500, etc.) propagate with appropriate error

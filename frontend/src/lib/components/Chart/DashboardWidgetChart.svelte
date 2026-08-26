@@ -515,7 +515,7 @@
 					]
 				};
 
-			case 'gauge':
+			case 'gauge': {
 				// For percentage metrics, always use 100 as max; otherwise use target or 100 as fallback
 				const gaugeMax = unitName === 'percentage' ? 100 : (targetValue ?? 100);
 				const gaugeValue = latestValue || 0;
@@ -594,7 +594,7 @@
 						}
 					]
 				};
-
+			}
 			case 'sparkline': {
 				const sparkColor = thresholdColor ?? 'rgb(59, 130, 246)';
 				return {
@@ -617,7 +617,7 @@
 				};
 			}
 
-			case 'donut':
+			case 'donut': {
 				// For percentage metrics, show as actual vs remaining
 				const donutValue = latestValue || 0;
 				const maxValue = unitName === 'percentage' ? 100 : (targetValue ?? 100);
@@ -663,7 +663,7 @@
 						}
 					]
 				};
-
+			}
 			default:
 				return {};
 		}

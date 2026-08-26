@@ -358,8 +358,8 @@
 					<SuperForm
 						class="flex flex-col space-y-3"
 						action={formAction}
-						dataType={'json'}
-						enctype={'application/x-www-form-urlencoded'}
+						dataType="json"
+						enctype="application/x-www-form-urlencoded"
 						data={timelineForm}
 						{_form}
 						{invalidateAll}
@@ -511,7 +511,7 @@
 										detailURL={`/${actionsURLModel}/${meta.id}`}
 										editURL={`/${actionsURLModel}/${meta.id}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
 										{row}
-										identifierField={'id'}
+										identifierField="id"
 										preventDelete={preventDelete(row)}
 									></TableRowActions>
 									{#if formatDateOrDateTime(meta.updated_at, getLocale()) !== formatDateOrDateTime(meta.created_at, getLocale())}

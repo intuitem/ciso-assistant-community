@@ -63,7 +63,7 @@
 		: m.attachmentHelpText()}
 	field="attachment"
 	label={m.attachment()}
-	allowedExtensions={'*'}
+	allowedExtensions="*"
 />
 <TextField
 	{form}

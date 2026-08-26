@@ -34,7 +34,7 @@ export const load: PageServerLoad = async (event) => {
 
 	const checks = flattenChecks(tree.tree);
 	const from = event.url.searchParams.get('from');
-	let prefill: Record<string, string> = {};
+	const prefill: Record<string, string> = {};
 	let prefillDropped = 0;
 	if (from && asset) {
 		const sourceRun = await event.fetch(`${endpoint}/runs/${from}/`);

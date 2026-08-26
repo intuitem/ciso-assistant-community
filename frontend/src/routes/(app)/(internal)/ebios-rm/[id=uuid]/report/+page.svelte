@@ -106,7 +106,7 @@
 			const impactData = scenario[`${risk}_impact`];
 			const probability = probabilityData?.value ?? -1;
 			const impact = impactData?.value ?? -1;
-			probability >= 0 && impact >= 0 ? grid[probability][impact].push(scenario) : undefined;
+			if (probability >= 0 && impact >= 0) grid[probability][impact].push(scenario);
 		});
 		return grid;
 	};

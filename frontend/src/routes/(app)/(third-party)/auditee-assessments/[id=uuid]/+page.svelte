@@ -400,7 +400,6 @@
 	}
 
 	const requirementAssessmentScores = Object.fromEntries(
-		// svelte-ignore state_referenced_locally
 		requirementAssessments.map((requirement) => {
 			return [requirement.id, [requirement.is_scored, requirement.score]];
 		})
@@ -512,7 +511,6 @@
 	});
 
 	let accordionItems: Record<string, string[]> = $state(
-		// svelte-ignore state_referenced_locally
 		requirementAssessments.reduce(
 			(acc, requirementAssessment) => {
 				return { ...acc, [requirementAssessment.id]: [] };
@@ -1150,7 +1148,7 @@
 														form={isScoredForms[requirementAssessment.id]}
 														field="is_scored"
 														disabled={!canEditScore}
-														label={''}
+														label=""
 														helpText={m.scoringHelpText()}
 														checkboxComponent="switch"
 														classes="h-full flex flex-row items-center justify-center my-1"

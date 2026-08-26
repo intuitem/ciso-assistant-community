@@ -19,7 +19,7 @@ test('every library can be loaded', async ({ logedPage, librariesPage, page }) =
 		libraries.map(async (library) => await library.innerText())
 	);
 
-	let previousRemainingLibrary = '';
+	let previousRemainingLibrary: string;
 	let nextRemainingLibrary = libraryNames[0];
 	for (let i = 1; i < Math.min(12, libraries.length); i++) {
 		console.log('library:' + nextRemainingLibrary);
@@ -56,7 +56,7 @@ test('every library can be deleted', async ({ logedPage, librariesPage, page }) 
 		expect(librariesPage.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
 	}
 
-	let previousRemainingLibrary = '';
+	let previousRemainingLibrary: string;
 	let nextRemainingLibrary = '';
 	let count = 0;
 	do {

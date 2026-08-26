@@ -71,9 +71,8 @@ for (const key of testPages) {
 					items[key].build.str || items[key].build.name || items[key].build.email
 				]);
 				//wait fore the file to load to prevent crashing
-				page.url().includes('evidences')
-					? await pages[key].page.getByTestId('attachment-name-title').waitFor({ state: 'visible' })
-					: null;
+				if (page.url().includes('evidences'))
+					await pages[key].page.getByTestId('attachment-name-title').waitFor({ state: 'visible' });
 			});
 
 			test(`${items[key].displayName} item details are showing properly`, async ({
@@ -81,7 +80,7 @@ for (const key of testPages) {
 				page
 			}) => {
 				await pages[key].itemDetail.verifyItem(items[key].build);
-				page.url().includes('evidences') ? await pages[key].page.waitForTimeout(1000) : null; // prevent crashing
+				if (page.url().includes('evidences')) await pages[key].page.waitForTimeout(1000); // prevent crashing
 			});
 
 			test(`user can edit ${items[key].displayName.toLowerCase()} item`, async ({
@@ -105,9 +104,8 @@ for (const key of testPages) {
 					);
 				}
 				//wait fore the file to load to prevent crashing
-				page.url().includes('evidences')
-					? await pages[key].page.getByTestId('attachment-name-title').waitFor({ state: 'visible' })
-					: null;
+				if (page.url().includes('evidences'))
+					await pages[key].page.getByTestId('attachment-name-title').waitFor({ state: 'visible' });
 
 				await pages[key].itemDetail.verifyItem(editedValues);
 			});

@@ -185,13 +185,14 @@ export async function defaultWriteFormAction({
 		}
 	}
 
-	let flashParams = {
+	const flashParams = {
 		type: 'success',
 		message: getSuccessMessage({ urlModel, action }) as string
 	};
 
 	if (urlModel == 'users') {
-		((flashParams.type = 'warning'), (flashParams.message += safeTranslate('userHasNoRights')));
+		flashParams.type = 'warning';
+		flashParams.message += safeTranslate('userHasNoRights');
 	}
 	setFlash(flashParams, event);
 

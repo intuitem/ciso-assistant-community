@@ -21,6 +21,7 @@ export const load: LayoutServerLoad = async (event) => {
 
 	// Block editing for validation flows
 	if (URLModel === 'validation-flows') {
+		// eslint-disable-next-line eslint-plugin-intuitem-sveltekit/secure-redirect -- URLModel comes from the URL_MODEL allowlist (src/params/urlmodel.ts)
 		throw redirect(302, `/${URLModel}/${event.params.id}`);
 	}
 
@@ -42,6 +43,7 @@ export const load: LayoutServerLoad = async (event) => {
 			);
 			throw redirect(
 				302,
+				// eslint-disable-next-line eslint-plugin-intuitem-sveltekit/secure-redirect -- URLModel comes from the URL_MODEL allowlist (src/params/urlmodel.ts)
 				getSecureRedirect(event.url.searchParams.get('next')) ||
 					`/${model.urlModel}/${riskAcceptance.id}`
 			);

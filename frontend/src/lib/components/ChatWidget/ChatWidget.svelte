@@ -84,7 +84,9 @@
 
 	$effect(() => {
 		// Auto-scroll when new content arrives, unless user manually scrolled up
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions -- $effect dependency tracking
 		messages.length;
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions -- $effect dependency tracking
 		isTyping;
 		if (!userScrolledUp) {
 			scrollToBottom();

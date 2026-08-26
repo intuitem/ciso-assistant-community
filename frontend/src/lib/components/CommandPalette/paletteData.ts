@@ -26,7 +26,7 @@ const flattenNavData = (navData: typeof import('../SideBar/navData').navData) =>
 
 	return result;
 };
-export let navigationLinks: NavigationLink[] = flattenNavData(navData);
+export const navigationLinks: NavigationLink[] = flattenNavData(navData);
 navigationLinks.push({
 	label: 'myProfile',
 	href: '/my-profile',

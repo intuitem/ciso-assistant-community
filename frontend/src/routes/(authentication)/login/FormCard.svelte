@@ -49,7 +49,7 @@
 	}
 
 	run(() => {
-		form && form.mfaFlow ? modalMFAAuthenticate() : null;
+		if (form && form.mfaFlow) modalMFAAuthenticate();
 	});
 
 	function getSSOCallbackURL(callbackURL: string): string {

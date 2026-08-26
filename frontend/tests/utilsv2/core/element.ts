@@ -184,9 +184,9 @@ export class Element {
 	/** Print the super-element chain of the element with all its non-empty context sources. */
 	doShowContextChain() {
 		console.log(
-			`[Super-Element Chain] len=${this._chain.length} ${this._chain.map((obj, index) => {
-				`[${index}] ${obj.constructor.name}`;
-			})}`
+			`[Super-Element Chain] len=${this._chain.length} ${this._chain.map(
+				(obj, index) => `[${index}] ${obj.constructor.name}`
+			)}`
 		);
 		const printContext = (name, context) =>
 			console.log(`[${name}] ${JSON.stringify(context, null, 2)}`);
@@ -194,9 +194,9 @@ export class Element {
 		if (this._context) {
 			printContext('this._context', this._context);
 		}
-		// @ts-ignore
+		// @ts-ignore: static CONTEXT is not visible through the `constructor` type
 		if (this.constructor.CONTEXT) {
-			// @ts-ignore
+			// @ts-ignore: static CONTEXT is not visible through the `constructor` type
 			printContext('this.constructor.CONTEXT', this.constructor.CONTEXT);
 		}
 
@@ -205,16 +205,16 @@ export class Element {
 			if (superElement._context) {
 				printContext(`chain[${i}].context`, superElement._context);
 			}
-			// @ts-ignore
+			// @ts-ignore: static CONTEXT is not visible through the `constructor` type
 			if (superElement.constructor.CONTEXT) {
-				// @ts-ignore
+				// @ts-ignore: static CONTEXT is not visible through the `constructor` type
 				printContext(`chain[${i}].constructor.CONTEXT`, superElement.constructor.CONTEXT);
 			}
 		}
 
-		// @ts-ignore
+		// @ts-ignore: static CONTEXT is not visible through the `constructor` type
 		if (this._page.constructor.CONTEXT) {
-			// @ts-ignore
+			// @ts-ignore: static CONTEXT is not visible through the `constructor` type
 			printContext('this._page.constructor.CONTEXT', this._page.constructor.CONTEXT);
 		}
 	}

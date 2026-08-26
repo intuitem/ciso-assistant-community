@@ -75,7 +75,7 @@ export function unsafeTranslate(
 			}
 		}
 		if (typeof key === 'string' && key) {
-			let res = key.match('^([^:]+):([^:]+)$');
+			const res = key.match('^([^:]+):([^:]+)$');
 			if (res) {
 				return (
 					(Object.hasOwn(m, res[1]) && typeof m[res[1]] === 'function'

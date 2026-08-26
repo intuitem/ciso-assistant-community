@@ -47,7 +47,6 @@
 	);
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class="card bg-surface-50-950 p-6 w-full max-w-lg shadow-xl space-y-4 rounded-xl"
 	onchange={handleFilePicked}
