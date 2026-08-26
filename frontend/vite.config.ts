@@ -15,6 +15,16 @@ export default defineConfig({
 		tailwindcss(),
 		sveltekit()
 	],
+	optimizeDeps: {
+		// @svelte-put/qr exports ./svg/QR.svelte under the "svelte" condition only.
+		// Vite 8's dep scanner doesn't apply it, so scope the condition to the
+		// scanner rather than resolve.conditions (which would break SSR node/browser).
+		rolldownOptions: {
+			resolve: {
+				conditionNames: ['svelte', 'module', 'browser', 'import', 'default']
+			}
+		}
+	},
 	test: {
 		include: ['{src}/**/*.{test,spec}.{js,ts}']
 	}
