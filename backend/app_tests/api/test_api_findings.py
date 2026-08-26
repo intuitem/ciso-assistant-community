@@ -40,6 +40,160 @@ def create_finding(client, **payload):
     return client.post("/api/findings/", payload, format="json")
 
 
+def set_flag(enabled: bool):
+    from global_settings.models import GlobalSettings
+    from global_settings.utils import clear_feature_flags_cache
+
+    gs, _ = GlobalSettings.objects.get_or_create(
+        name=GlobalSettings.Names.FEATURE_FLAGS, defaults={"value": {}}
+    )
+    gs.value = {**(gs.value or {}), "findings_from_requirements": enabled}
+    gs.save()
+    clear_feature_flags_cache()
+
+
+class TestFindingsFromRequirements:
+    """A finding raised from a requirement lands in the audit's own binder."""
+
+    @pytest.fixture
+    def audit(self, setup):
+        from core.models import (
+            ComplianceAssessment,
+            Framework,
+            RequirementAssessment,
+            RequirementNode,
+        )
+
+        framework = Framework.objects.create(
+            name="F", folder=Folder.get_root_folder(), is_published=True
+        )
+        node = RequirementNode.objects.create(
+            framework=framework,
+            urn="urn:test:req:1",
+            ref_id="1",
+            assessable=True,
+            folder=Folder.get_root_folder(),
+            is_published=True,
+        )
+        assessment = ComplianceAssessment.objects.create(
+            name="ISO audit", folder=setup["domain"], framework=framework
+        )
+        # Requirement assessments are created by the audit's create flow, not by the
+        # model's save, so make the one under test explicitly.
+        return assessment, RequirementAssessment.objects.create(
+            compliance_assessment=assessment,
+            requirement=node,
+            folder=setup["domain"],
+        )
+
+    def test_the_setting_gates_it(self, setup, audit):
+        _, requirement_assessment = audit
+        set_flag(False)
+        res = setup["client"].post(
+            f"/api/requirement-assessments/{requirement_assessment.id}/findings-binder/"
+        )
+        assert res.status_code == 403
+
+    def test_the_binder_is_created_once_and_bound_to_the_audit(self, setup, audit):
+        assessment, requirement_assessment = audit
+        set_flag(True)
+        endpoint = (
+            f"/api/requirement-assessments/{requirement_assessment.id}/findings-binder/"
+        )
+
+        first = setup["client"].post(endpoint)
+        assert first.status_code == 201, first.json()
+        second = setup["client"].post(endpoint)
+        assert second.status_code == 200
+        assert second.json()["id"] == first.json()["id"]
+
+        binder = FindingsAssessment.objects.get(id=first.json()["id"])
+        assert binder.compliance_assessment == assessment
+        assert binder.folder == assessment.folder
+        assert binder.category == "audit"
+        set_flag(False)
+
+    def test_the_binder_name_distinguishes_it_from_the_audit(self, setup, audit):
+        assessment, requirement_assessment = audit
+        set_flag(True)
+        binder_id = (
+            setup["client"]
+            .post(
+                f"/api/requirement-assessments/{requirement_assessment.id}/findings-binder/"
+            )
+            .json()["id"]
+        )
+        binder = FindingsAssessment.objects.get(id=binder_id)
+        assert binder.name != assessment.name
+        assert "findings" in binder.name.lower()
+        set_flag(False)
+
+    def test_a_requirement_assessment_can_carry_several_findings(self, setup, audit):
+        assessment, requirement_assessment = audit
+        set_flag(True)
+        binder_id = (
+            setup["client"]
+            .post(
+                f"/api/requirement-assessments/{requirement_assessment.id}/findings-binder/"
+            )
+            .json()["id"]
+        )
+
+        for name in ("Major nonconformity", "Minor nonconformity"):
+            res = setup["client"].post(
+                "/api/findings/",
+                {
+                    "name": name,
+                    "findings_assessment": binder_id,
+                    "requirement_assessment": str(requirement_assessment.id),
+                    "requirement_node": str(requirement_assessment.requirement_id),
+                },
+                format="json",
+            )
+            assert res.status_code == 201, res.json()
+
+        listed = setup["client"].get(
+            f"/api/findings/?requirement_assessment={requirement_assessment.id}"
+        )
+        assert {f["name"] for f in listed.json()["results"]} == {
+            "Major nonconformity",
+            "Minor nonconformity",
+        }
+        # And each one links back to what raised it.
+        assert listed.json()["results"][0]["requirement_assessment"]["id"] == str(
+            requirement_assessment.id
+        )
+        set_flag(False)
+
+    def test_the_audit_lists_its_findings_through_the_binder(self, setup, audit):
+        assessment, requirement_assessment = audit
+        set_flag(True)
+        binder_id = (
+            setup["client"]
+            .post(
+                f"/api/requirement-assessments/{requirement_assessment.id}/findings-binder/"
+            )
+            .json()["id"]
+        )
+
+        res = setup["client"].post(
+            "/api/findings/",
+            {
+                "name": "Nonconformity",
+                "findings_assessment": binder_id,
+                "requirement_node": str(requirement_assessment.requirement_id),
+            },
+            format="json",
+        )
+        assert res.status_code == 201, res.json()
+
+        listed = setup["client"].get(
+            f"/api/findings-assessments/?compliance_assessment={assessment.id}"
+        )
+        assert [b["id"] for b in listed.json()["results"]] == [binder_id]
+        set_flag(False)
+
+
 class TestStandaloneFinding:
     def test_create_without_assessment_requires_a_folder(self, setup):
         res = create_finding(setup["client"], name="Orphan")

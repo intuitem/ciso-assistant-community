@@ -96,6 +96,9 @@
 	} = getFieldVisibility(complianceAssessment, viewerRole);
 
 	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
+	const showFindings = $derived(
+		!!page.data?.featureflags?.findings_from_requirements && !page.data.user.is_third_party
+	);
 
 	function pickDefaultTab(): string {
 		if (canShowAppliedControls) return 'applied_controls';
@@ -310,6 +313,9 @@
 					{#if showEvidences}
 						<Tabs.Trigger value="evidence">{m.evidences()}</Tabs.Trigger>
 					{/if}
+					{#if showFindings}
+						<Tabs.Trigger value="findings">{m.findings()}</Tabs.Trigger>
+					{/if}
 					<Tabs.Indicator />
 				</Tabs.List>
 				{#if canShowAppliedControls}
@@ -344,6 +350,18 @@
 								expectedCount={countMasked(data.requirementAssessment.evidences)}
 								baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment
 									.id}"
+							/>
+						</div>
+					</Tabs.Content>
+				{/if}
+				{#if showFindings}
+					<Tabs.Content value="findings">
+						<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+							<ModelTable
+								source={data.tables['findings']}
+								hideFilters={true}
+								URLModel="findings"
+								baseEndpoint="/findings?requirement_assessment={page.data.requirementAssessment.id}"
 							/>
 						</div>
 					</Tabs.Content>

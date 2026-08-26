@@ -467,6 +467,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     commitment_management = serializers.BooleanField(
         source="value.commitment_management", required=False, default=False
     )
+    findings_from_requirements = serializers.BooleanField(
+        source="value.findings_from_requirements", required=False, default=False
+    )
 
     class Meta:
         model = GlobalSettings

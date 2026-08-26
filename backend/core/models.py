@@ -9906,6 +9906,16 @@ class FindingsAssessment(Assessment, FilteringLabelMixin):
 
     reported_at = models.DateField(null=True, blank=True, verbose_name=_("Reported at"))
 
+    compliance_assessment = models.ForeignKey(
+        "ComplianceAssessment",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="findings_assessments",
+        help_text=_("The audit whose findings this binder captures"),
+        verbose_name=_("Audit"),
+    )
+
     start_date = models.DateField(null=True, blank=True, verbose_name=_("Start date"))
 
     objectives = models.TextField(null=True, blank=True, verbose_name=_("Objectives"))
@@ -10097,6 +10107,16 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         blank=True,
         related_name="findings",
         verbose_name=_("Requirement"),
+    )
+    # The catalog node above is shared by every audit on that framework, so it cannot
+    # say which assessment raised the finding. This can, and it is the way back.
+    requirement_assessment = models.ForeignKey(
+        "RequirementAssessment",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="findings",
+        verbose_name=_("Requirement assessment"),
     )
     asset = models.ForeignKey(
         Asset,

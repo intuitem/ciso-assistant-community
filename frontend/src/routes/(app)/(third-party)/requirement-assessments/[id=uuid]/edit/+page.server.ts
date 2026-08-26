@@ -111,7 +111,7 @@ export const load = (async ({ fetch, params }) => {
 	const tables: Record<string, any> = {};
 
 	await Promise.all(
-		['applied-controls', 'evidences', 'security-exceptions'].map(async (key) => {
+		['applied-controls', 'evidences', 'security-exceptions', 'findings'].map(async (key) => {
 			const table: TableSource = {
 				head: headData(key),
 				body: [],

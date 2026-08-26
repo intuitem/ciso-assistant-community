@@ -925,6 +925,15 @@
 					{/if}
 				</div>
 				{#if !page.data.user.is_third_party}
+					{#each page.data?.featureflags?.findings_from_requirements ? (data.compliance_assessment.findings_assessments ?? []) : [] as binder}
+						<Anchor
+							href={`/findings-assessments/${binder.id}`}
+							class="btn preset-filled-secondary-500 h-fit"
+							breadcrumbAction="push"
+							data-testid="go-to-findings-binder-button"
+							><i class="fa-solid fa-bug mr-2"></i>{m.findings()}</Anchor
+						>
+					{/each}
 					<Anchor
 						href={`${page.url.pathname}/action-plan`}
 						class="btn preset-filled-primary-500 h-fit"

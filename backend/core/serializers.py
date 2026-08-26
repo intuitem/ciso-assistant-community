@@ -2918,6 +2918,8 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
     campaign = FieldsRelatedField()
+    # The binder raised from this audit's requirements, so the page can link to it.
+    findings_assessments = FieldsRelatedField(many=True)
     framework = FieldsRelatedField(
         [
             "id",
@@ -4797,6 +4799,8 @@ class FindingsAssessmentWriteSerializer(BaseModelSerializer):
 class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
+    # The audit this binder captures findings for — the way back.
+    compliance_assessment = FieldsRelatedField()
     findings_count = serializers.IntegerField(source="findings.count")
     treatment_progress = serializers.IntegerField(read_only=True, default=0)
     evidences = FieldsRelatedField(many=True)
@@ -4909,6 +4913,8 @@ class FindingReadSerializer(FindingWriteSerializer):
     # No standalone page exists for requirement nodes: omit "id" so the
     # generic detail view renders plain text instead of a dead link.
     requirement_node = FieldsRelatedField(["ref_id", "name"])
+    # This one does have a page — it is the way back to what raised the finding.
+    requirement_assessment = FieldsRelatedField()
     asset = FieldsRelatedField()
     threats = FieldsRelatedField(many=True)
     vulnerabilities = FieldsRelatedField(many=True)

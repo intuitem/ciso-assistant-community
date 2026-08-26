@@ -1283,6 +1283,11 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
+		// The audit's findings are reachable through the binder raised from its
+		// requirements — no second list to build.
+		reverseForeignKeyFields: [
+			{ field: 'compliance_assessment', urlModel: 'findings-assessments', disableCreate: true }
+		],
 		selectFields: [{ field: 'status' }, { field: 'score_calculation_method' }],
 		filters: [{ field: 'status' }]
 	},
@@ -2335,6 +2340,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'authors', urlModel: 'actors' },
 			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'owner', urlModel: 'actors', urlParams: 'is_third_party=false' },
+			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [
@@ -2360,6 +2366,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter' },
 			{ field: 'category' },
 			{ field: 'status' },
+			{ field: 'compliance_assessment' },
 			{ field: 'objectives' },
 			{ field: 'description' },
 			{ field: 'authors' },
@@ -2443,6 +2450,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reference_controls', urlModel: 'reference-controls' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'task_templates', urlModel: 'task-templates' },
+			{ field: 'requirement_assessment', urlModel: 'requirement-assessments' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		reverseForeignKeyFields: [
@@ -2490,6 +2498,38 @@ export const URL_MODEL_MAP: ModelMap = {
 					lazy: true
 				}
 			}
+		],
+		// Ordered deliberately: DetailView shows the first ten rows before "show all", so
+		// what identifies and triages a finding goes first, its links next, and the
+		// bookkeeping last. `path` and `is_published` are internal and stay out.
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'severity' },
+			{ field: 'status' },
+			{ field: 'priority' },
+			{ field: 'owner' },
+			{ field: 'findings_assessment' },
+			{ field: 'requirement_assessment' },
+			{ field: 'due_date', type: 'date' },
+			{ field: 'folder' },
+			{ field: 'description' },
+			{ field: 'observation' },
+			{ field: 'recommendation' },
+			{ field: 'eta', type: 'date' },
+			{ field: 'asset' },
+			{ field: 'applied_controls' },
+			{ field: 'task_templates' },
+			{ field: 'evidences' },
+			{ field: 'threats' },
+			{ field: 'vulnerabilities' },
+			{ field: 'reference_controls' },
+			{ field: 'requirement_node' },
+			{ field: 'perimeter' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'id' }
 		],
 		selectFields: [
 			{ field: 'severity', valueType: 'number' },

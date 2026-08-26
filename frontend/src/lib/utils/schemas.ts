@@ -763,7 +763,8 @@ export const FeatureFlagsSchema = z.object({
 	object_audit_trail: z.boolean().optional(),
 	custom_portals: z.boolean().optional(),
 	posture_assessments: z.boolean().optional(),
-	commitment_management: z.boolean().optional()
+	commitment_management: z.boolean().optional(),
+	findings_from_requirements: z.boolean().optional()
 });
 
 export const PortalSettingsSchema = z.object({
@@ -1412,6 +1413,8 @@ export const FindingSchema = z.object({
 	reference_controls: z.string().uuid().optional().array().optional(),
 	task_templates: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string().optional().nullable(),
+	requirement_node: z.string().uuid().optional().nullable(),
+	requirement_assessment: z.string().uuid().optional().nullable(),
 	folder: z.string().optional(),
 	asset: z.string().optional().nullable(),
 	severity: z.number().default(-1),

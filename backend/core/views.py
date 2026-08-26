@@ -14434,6 +14434,55 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     """
 
     model = RequirementAssessment
+    # Raising a finding is an edit of the requirement assessment, not an "add" of one:
+    # nobody has add_requirementassessment, they are created with the audit.
+    permission_overrides = {"findings_binder": "change_requirementassessment"}
+
+    @action(detail=True, methods=["post"], url_path="findings-binder")
+    def findings_binder(self, request, pk=None):
+        """Return the audit's findings binder, creating it on first use.
+
+        A finding raised from a requirement needs a binder to live in. Rather than
+        asking the user to create one, the audit gets exactly one, created lazily and
+        linked back to it — which is also what gives the audit its findings list
+        without a second UI.
+        """
+        if not ff_is_enabled("findings_from_requirements"):
+            return Response(
+                {"error": "This feature is not enabled."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        requirement_assessment = self.get_object()
+        audit = requirement_assessment.compliance_assessment
+
+        # `add_findingsassessment` on the audit's folder is what authorizes creating it.
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_findingsassessment"),
+            folder=audit.folder,
+        ):
+            raise PermissionDenied(
+                {"folder": "You do not have permission to add a findings binder here"}
+            )
+
+        binder, created = FindingsAssessment.objects.get_or_create(
+            compliance_assessment=audit,
+            defaults={
+                # Distinguishable at a glance from the audit it belongs to.
+                "name": str(_("%(audit)s (findings)")) % {"audit": audit.name},
+                "folder": audit.folder,
+                "perimeter": audit.perimeter,
+                "category": FindingsAssessment.Category.AUDIT,
+                "description": str(_("Findings raised from %(audit)s"))
+                % {"audit": audit.name},
+            },
+        )
+        return Response(
+            {"id": str(binder.id), "name": binder.name, "created": created},
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
     filterset_fields = {
         "folder": ["exact"],
         "folder__name": ["exact"],
@@ -15406,6 +15455,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "authors",
         "status",
         "evidences",
+        "compliance_assessment",
         "filtering_labels",
         "genericcollection",
     ]
@@ -15900,6 +15950,8 @@ class FindingFilterSet(GenericFilterSet):
             "severity": ["exact"],
             "priority": ["exact"],
             "asset": ["exact"],
+            "requirement_node": ["exact"],
+            "requirement_assessment": ["exact"],
             "filtering_labels": ["exact"],
             "applied_controls": ["exact"],
             "evidences": ["exact"],

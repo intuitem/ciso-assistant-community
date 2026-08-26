@@ -9,6 +9,7 @@
 	import { m } from '$paraglide/messages';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { getModelInfo } from '$lib/utils/crud';
+	import { formatSelectFieldData } from '$lib/utils/load';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { AppliedControlSchema, TaskTemplateSchema } from '$lib/utils/schemas';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -72,15 +73,22 @@
 	const appliedControlModel = getModelInfo('applied-controls');
 	const taskTemplateModel = getModelInfo('task-templates');
 
+	// Populated on mount rather than by a server load, so every `selectOptions` read
+	// below has to tolerate the first render.
+	//
+	// Driven by the model's own `selectFields` and passed through the same formatter the
+	// server load uses: severity and priority are `valueType: 'number'`, and fetching the
+	// endpoints raw would hand the form strings the schema rejects.
 	onMount(async () => {
-		if (!model.selectOptions) {
-			const selectOptions = {
-				status: await fetch('/findings/status').then((r) => r.json()),
-				priority: await fetch('/findings/priority').then((r) => r.json()),
-				severity: await fetch('/findings/severity').then((r) => r.json())
-			};
-			model.selectOptions = selectOptions;
-		}
+		if (model.selectOptions) return;
+		const entries = await Promise.all(
+			(model.selectFields ?? []).map(async (selectField) => {
+				const res = await fetch(`/${model.urlModel}/${selectField.field}`);
+				if (!res.ok) return [selectField.field, []];
+				return [selectField.field, formatSelectFieldData(await res.json(), selectField)];
+			})
+		);
+		model.selectOptions = Object.fromEntries(entries);
 	});
 
 	// Both remediation vehicles are creatable from the finding, pre-linked to it.
@@ -136,7 +144,7 @@
 {/key}
 <Select
 	{form}
-	options={model.selectOptions['severity']}
+	options={model.selectOptions?.['severity'] ?? []}
 	field="severity"
 	label={m.severity()}
 	cacheLock={cacheLocks['severity']}
@@ -158,7 +166,7 @@
 />
 <Select
 	{form}
-	options={model.selectOptions['status']}
+	options={model.selectOptions?.['status'] ?? []}
 	field="status"
 	label={m.status()}
 	cacheLock={cacheLocks['status']}
@@ -176,7 +184,7 @@
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<Select
 		{form}
-		options={model.selectOptions['priority']}
+		options={model.selectOptions?.['priority'] ?? []}
 		field="priority"
 		label={m.priority()}
 		cacheLock={cacheLocks['priority']}

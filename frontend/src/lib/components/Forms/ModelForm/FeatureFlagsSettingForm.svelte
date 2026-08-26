@@ -83,7 +83,7 @@
 				},
 				{
 					field: 'follow_up',
-					label: m.followUp(),
+					label: m.findingsManagement(),
 					description: m.findingsAssessmentsDescription()
 				},
 				{
@@ -152,6 +152,11 @@
 					field: 'campaigns',
 					label: m.campaigns(),
 					description: m.campaignsDescription()
+				},
+				{
+					field: 'findings_from_requirements',
+					label: m.findingsFromRequirements(),
+					description: m.findingsFromRequirementsDescription()
 				},
 				{
 					field: 'auditee_mode',

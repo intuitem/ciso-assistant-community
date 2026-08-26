@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { RequirementAssessmentSchema } from '$lib/utils/schemas';
+	import { FindingSchema, RequirementAssessmentSchema } from '$lib/utils/schemas';
+	import { getModelInfo } from '$lib/utils/crud';
 	import type { ActionData, PageData } from './$types';
 
 	import { page } from '$app/state';
@@ -28,7 +29,9 @@
 	import SuggestControlsModal from '$lib/components/Modals/SuggestControlsModal.svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import { superForm } from 'sveltekit-superforms';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { getFlash } from 'sveltekit-flash-message';
+	import { page as pageStore } from '$app/stores';
 	import {
 		getModalStore,
 		type ModalComponent,
@@ -103,6 +106,61 @@
 			title: safeTranslate('add-' + data.measureModel.localName)
 		};
 		modalStore.trigger(modal);
+	}
+
+	// Off by default: only teams who work this way see the button.
+	const canRaiseFinding = $derived(
+		!!page.data?.featureflags?.findings_from_requirements &&
+			canPerformActionOnObject({
+				user: page.data.user,
+				action: 'add',
+				model: 'finding',
+				object: data.requirementAssessment
+			})
+	);
+
+	const flash = getFlash(pageStore);
+
+	async function modalFindingCreateForm(): Promise<void> {
+		// The audit's binder is created on first use, so the finding has somewhere to live
+		// and the audit gets its findings list for free.
+		const res = await fetch(
+			`/requirement-assessments/${data.requirementAssessment.id}/findings-binder`,
+			{ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }
+		);
+		if (!res.ok) {
+			// Never fail silently: a missing route or a permission refusal both land here.
+			flash.set({ type: 'error', message: `${m.anErrorOccurred()} (${res.status})` });
+			return;
+		}
+		const binder = await res.json();
+
+		const findingModel = getModelInfo('findings');
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: defaults(
+					{
+						findings_assessment: binder.id,
+						// The assessment implies the requirement; setting the catalog node too
+						// just renders the same thing twice on the finding.
+						requirement_assessment: data.requirementAssessment.id
+					},
+					zod(FindingSchema)
+				),
+				formAction: '/findings?/create',
+				model: findingModel,
+				debug: false
+			}
+		};
+		modalStore.trigger({
+			type: 'component',
+			component: modalComponent,
+			title: m.raiseFinding(),
+			response: (r: boolean) => {
+				if (r) refreshKey = !refreshKey;
+			}
+		});
 	}
 
 	function modalEvidenceCreateForm(): void {
@@ -559,6 +617,11 @@
 								{#if isAuditor}
 									<Tabs.Trigger value="security_exceptions">{m.securityExceptions()}</Tabs.Trigger>
 								{/if}
+								{#if canRaiseFinding}
+									<Tabs.Trigger value="findings" data-testid="findings-tab"
+										>{m.findings()}</Tabs.Trigger
+									>
+								{/if}
 								<Tabs.Indicator />
 							</Tabs.List>
 							{#if canShowAppliedControls}
@@ -704,6 +767,30 @@
 											baseEndpoint="/security-exceptions?requirement_assessments={page.data
 												.requirementAssessment.id}"
 										/>
+									</div>
+								</Tabs.Content>
+							{/if}
+							{#if canRaiseFinding}
+								<Tabs.Content value="findings">
+									<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+										<span class="flex flex-row justify-end items-center">
+											<button
+												class="btn preset-filled-primary-500 self-end"
+												onclick={modalFindingCreateForm}
+												data-testid="raise-finding-button"
+												type="button"
+												><i class="fa-solid fa-plus mr-2"></i>{m.raiseFinding()}</button
+											>
+										</span>
+										{#key refreshKey}
+											<ModelTable
+												source={page.data.tables['findings']}
+												hideFilters={true}
+												URLModel="findings"
+												baseEndpoint="/findings?requirement_assessment={page.data
+													.requirementAssessment.id}"
+											/>
+										{/key}
 									</div>
 								</Tabs.Content>
 							{/if}
