@@ -1276,7 +1276,7 @@
 								bind:value={actionConfig.fields[fkName]}
 								onchange={onChange}
 							>
-								<option value="">—</option>
+								<option value={''}>—</option>
 								{#if fkOptions[endpoint as string]?.length}
 									<optgroup label={safeTranslate(endpoint as string)}>
 										{#each fkOptions[endpoint as string] as option (option.id)}
@@ -1604,7 +1604,7 @@
 							bind:value={actionConfig.parent}
 							onchange={onChange}
 						>
-							<option value="">—</option>
+							<option value={''}>—</option>
 							{#if fkOptions['folders']?.length}
 								<optgroup label={safeTranslate('folders')}>
 									{#each fkOptions['folders'] as option (option.id)}
@@ -1697,7 +1697,7 @@
 							bind:value={actionConfig.folder}
 							onchange={onChange}
 						>
-							<option value="">—</option>
+							<option value={''}>—</option>
 							{#if fkOptions['folders']?.length}
 								<optgroup label={safeTranslate('folders')}>
 									{#each fkOptions['folders'] as option (option.id)}

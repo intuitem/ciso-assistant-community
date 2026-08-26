@@ -12,9 +12,14 @@
 
 	let { outcomes, onupdate, activeLanguage = null }: Props = $props();
 
-	let rules: OutcomeRule[] = $derived(outcomes.map((r) => ({ ...r })));
+	let rules: OutcomeRule[] = $state(outcomes.map((r) => ({ ...r })));
 	let expandedIndex: number | null = $state(null);
 	let showCelRef: boolean = $state(false);
+
+	// Sync from parent when outcomes prop changes (e.g. after reload)
+	$effect(() => {
+		rules = outcomes.map((r) => ({ ...r }));
+	});
 
 	function persist() {
 		onupdate(rules.map((r) => ({ ...r })));

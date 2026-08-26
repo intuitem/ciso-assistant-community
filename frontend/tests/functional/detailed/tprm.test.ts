@@ -5,8 +5,8 @@ import { TestContent, test, expect } from '../../utils/test-utils.js';
 import { m } from '$paraglide/messages';
 import { SideBar } from '../../utils/sidebar.js';
 
-const vars = TestContent.generateTestVars();
-const testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
+let vars = TestContent.generateTestVars();
+let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
 const entityAssessment = {
 	name: 'Test entity assessment',
@@ -278,7 +278,7 @@ test('third-party representative can fill their assigned audit', async ({
 		await page.getByTestId('form-input-name').click();
 		await page.getByTestId('form-input-name').fill('tp-evidence');
 		await page.getByTestId('form-input-filtering-labels').getByRole('combobox').click();
-		const objectCreatedToast = thirdPartyAuthenticatedPage.isToastVisible(
+		let objectCreatedToast = thirdPartyAuthenticatedPage.isToastVisible(
 			'The evidence object has been successfully created' + /.+/.source
 		);
 		await page.getByTestId('save-button').click();

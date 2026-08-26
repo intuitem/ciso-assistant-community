@@ -1,8 +1,8 @@
 import { LoginPage } from '../../utils/login-page.js';
 import { TestContent, test, expect } from '../../utils/test-utils.js';
 
-const vars = TestContent.generateTestVars();
-const testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
+let vars = TestContent.generateTestVars();
+let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
 const workshopStepsNames = {
 	11: 'Define the study framework',
@@ -150,7 +150,7 @@ test('ebios rm study', async ({
 			await expect(async () => {
 				await page.getByTestId('workshop-1-step-2-link').click();
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[12]], false);
-				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f-]+\/workshop-1.*/);
+				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f\-]+\/workshop-1.*/);
 			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('select-button').click();
 			// Scoped: bare combobox is ambiguous — native <select>s (e.g. "Show entries") share the role
@@ -173,7 +173,7 @@ test('ebios rm study', async ({
 			await expect(async () => {
 				await page.getByTestId('workshop-1-step-3-link').click();
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[13]], false);
-				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f-]+\/workshop-1.*/);
+				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f\-]+\/workshop-1.*/);
 			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('add-button').click();
 			await page.getByTestId('form-input-name').click();
@@ -213,7 +213,7 @@ test('ebios rm study', async ({
 			await expect(async () => {
 				await page.getByTestId('workshop-1-step-4-link').click();
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[14]], false);
-				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f-]+\/workshop-1.*/);
+				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f\-]+\/workshop-1.*/);
 			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await complianceAssessmentsPage.createItem({
 				name: 'security foundation audit',

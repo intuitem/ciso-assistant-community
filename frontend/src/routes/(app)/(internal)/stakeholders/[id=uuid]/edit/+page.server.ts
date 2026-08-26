@@ -39,7 +39,6 @@ export const load: LayoutServerLoad = async (event) => {
 			);
 			throw redirect(
 				302,
-				// eslint-disable-next-line eslint-plugin-intuitem-sveltekit/secure-redirect -- fallback path is built from the URL_MODEL allowlist
 				getSecureRedirect(event.url.searchParams.get('next')) ||
 					`/${model.urlModel}/${riskAcceptance.id}`
 			);

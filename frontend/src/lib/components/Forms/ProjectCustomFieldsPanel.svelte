@@ -33,7 +33,11 @@
 
 	// Local copy so read mode reflects a successful save even if the parent
 	// doesn't refresh the `values` prop.
-	let displayedValues: Record<string, any> = $derived({ ...values });
+	let displayedValues: Record<string, any> = $state({ ...values });
+	$effect(() => {
+		displayedValues = { ...values };
+	});
+
 	let definitions: Definition[] = $state([]);
 	let editing = $state(false);
 	let saving = $state(false);

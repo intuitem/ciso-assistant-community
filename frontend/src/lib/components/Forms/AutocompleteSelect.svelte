@@ -226,8 +226,7 @@
 	const LAZY_HINT_VALUE = '__lazy_hint__';
 	let multiSelectOpen = $state(false);
 	const passthroughFilter = () => true;
-	const updateMissingConstraint =
-		getContext<(field: string, isMissing: boolean) => void>('updateMissingConstraint');
+	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
 
 	function buildEndpoint(extra?: Record<string, string>, baseOverride?: string) {
 		let endpoint = `/${baseOverride ?? optionsEndpoint}`;

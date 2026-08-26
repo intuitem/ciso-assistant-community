@@ -286,7 +286,6 @@
 	});
 
 	$effect(() => {
-		// eslint-disable-next-line @typescript-eslint/no-unused-expressions -- $effect dependency tracking
 		showStakeholderLabels;
 		chart?.setOption({
 			series: (data.maturity_groups || ['<4', '4-5', '6-7', '>7']).map((group) => ({

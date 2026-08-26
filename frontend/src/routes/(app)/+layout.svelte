@@ -48,12 +48,16 @@
 	interface Props {
 		data: PageData;
 		form: ActionData;
+		sideBarVisibleItems?: any;
 		children?: import('svelte').Snippet;
 	}
 
-	let { data, form, children }: Props = $props();
-
-	const sideBarVisibleItems = $derived(getSidebarVisibleItems(data?.featureflags));
+	let {
+		data,
+		form,
+		sideBarVisibleItems = getSidebarVisibleItems(data?.featureflags),
+		children
+	}: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
 

@@ -190,7 +190,7 @@
 					<Checkbox
 						{form}
 						field={objective}
-						label=""
+						label={''}
 						valuePath="{typeConfig.securityKey}.objectives.{objective}.is_enabled"
 						checkboxComponent="switch"
 						class="h-full flex flex-row items-center justify-center my-1"

@@ -85,6 +85,6 @@ export class SideBar {
 		}
 		await expect(this.page.getByTestId('accordion-item-' + tab.substring(1))).toBeVisible();
 		await this.page.getByTestId('accordion-item-' + tab.substring(1)).click();
-		if (waitForURL) await this.page.waitForURL(tab);
+		waitForURL ? await this.page.waitForURL(tab) : null;
 	}
 }

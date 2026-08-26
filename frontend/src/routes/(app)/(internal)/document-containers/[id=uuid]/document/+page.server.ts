@@ -36,7 +36,7 @@ export const load: PageServerLoad = async (event) => {
 	const availableLocales: string[] = allDocuments.map((d: any) => d.locale || 'en');
 
 	// Try to find the document matching user's locale
-	const document =
+	let document =
 		allDocuments.find((d: any) => d.locale === userLocale) ||
 		allDocuments.find((d: any) => d.default_locale) ||
 		allDocuments[0] ||

@@ -70,7 +70,7 @@
 			: m.attachmentHelpText()}
 		field="attachment"
 		label={m.attachment()}
-		allowedExtensions="*"
+		allowedExtensions={'*'}
 	/>
 {/if}
 {#if context !== 'edit'}

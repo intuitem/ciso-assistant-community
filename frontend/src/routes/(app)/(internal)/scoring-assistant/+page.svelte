@@ -7,9 +7,7 @@
 	import { isDark } from '$lib/utils/helpers';
 	import { m } from '$paraglide/messages';
 
-	let { data } = $props();
-
-	const risk_matrices = $derived(data.risk_matrices);
+	let { data, risk_matrices = data.risk_matrices } = $props();
 
 	let risk_matrix_select: Element = $state();
 	let risk_matrix: RiskMatrixJsonDefinition = $derived(risk_matrices[risk_matrix_index] ?? null);

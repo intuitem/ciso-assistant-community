@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { CacheLock } from '$lib/utils/types';
 	import { run } from 'svelte/legacy';
 
 	import { safeTranslate } from '$lib/utils/i18n';

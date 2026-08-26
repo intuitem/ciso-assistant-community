@@ -196,7 +196,7 @@
 			const impactData = scenario[`${risk}_impact`];
 			const probability = probabilityData?.value ?? -1;
 			const impact = impactData?.value ?? -1;
-			if (probability >= 0 && impact >= 0) grid[probability][impact].push(scenario);
+			probability >= 0 && impact >= 0 ? grid[probability][impact].push(scenario) : undefined;
 		});
 		return grid;
 	};
@@ -492,7 +492,7 @@
 
 					<RiskMatrix
 						riskMatrix={risk_assessment.risk_matrix}
-						matrixName="inherent"
+						matrixName={'inherent'}
 						data={buildRiskCluster(
 							risk_assessment.risk_scenarios,
 							risk_assessment.risk_matrix,
@@ -508,7 +508,7 @@
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}
-					matrixName="current"
+					matrixName={'current'}
 					data={currentCluster}
 					dataItemComponent={RiskScenarioItem}
 					showLegend={showRisks}
@@ -520,7 +520,7 @@
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}
-					matrixName="residual"
+					matrixName={'residual'}
 					data={residualCluster}
 					dataItemComponent={RiskScenarioItem}
 					{useBubbles}

@@ -34,8 +34,12 @@
 	// --- Splash-specific state (only used when display_mode === 'splash') ---
 	let splashMode: 'edit' | 'preview' = $state('edit');
 	let textareaEl: HTMLTextAreaElement | undefined = $state();
-	let splashDescription = $derived(node.node.description ?? '');
+	let splashDescription = $state(node.node.description ?? '');
 	let splashTransDescription = $state('');
+
+	$effect(() => {
+		splashDescription = node.node.description ?? '';
+	});
 
 	$effect(() => {
 		const lang = $activeLanguageStore;

@@ -22,8 +22,12 @@
 		not_checked: m.notChecked()
 	};
 
-	let values: Record<string, string> = $derived({ ...data.prefill });
+	let values: Record<string, string> = $state({ ...data.prefill });
 	let bulkValue = $state('pass');
+
+	$effect(() => {
+		values = { ...data.prefill };
+	});
 
 	const filled = $derived(Object.values(values).filter(Boolean).length);
 

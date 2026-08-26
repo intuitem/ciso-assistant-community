@@ -94,9 +94,7 @@ const createBreadcrumbs = (initialValue: Breadcrumb[]) => {
 		breadcrumbs.subscribe((value) => {
 			try {
 				sessionStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-			} catch {
-				// storage unavailable (private mode / quota)
-			}
+			} catch {}
 		});
 	}
 
@@ -146,9 +144,7 @@ const createBreadcrumbs = (initialValue: Breadcrumb[]) => {
 		if (browser) {
 			try {
 				sessionStorage.removeItem(STORAGE_KEY);
-			} catch {
-				// storage unavailable or malformed payload
-			}
+			} catch {}
 		}
 		breadcrumbs.set([homeCrumb]);
 	}
