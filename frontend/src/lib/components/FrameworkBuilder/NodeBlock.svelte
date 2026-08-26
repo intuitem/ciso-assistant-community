@@ -577,7 +577,8 @@
 				{/if}
 				<select
 					value={node.node.display_mode}
-					onchange={(e) => saveField('display_mode', e.currentTarget.value)}
+					onchange={(e) =>
+						builder.setDisplayMode(node.node.id, e.currentTarget.value as 'default' | 'splash')}
 					class="text-xs bg-transparent border-b border-surface-200-800 focus:border-blue-500 outline-none"
 					title={m.builderDisplayMode()}
 				>

@@ -12798,10 +12798,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
         )
+        # ... and assignments the user can actually open: the assessment page
+        # fetches the assignment through the scoped viewset, so a card for an
+        # assignment the user cannot view would lead straight to a 404.
+        viewable_assignment_ids = set(
+            RoleAssignment.get_viewable_object_ids(request.user, RequirementAssignment)
+        )
 
         dashboard_data = []
         for assignment in assignments:
             if assignment.compliance_assessment_id not in viewable_ca_ids:
+                continue
+            if assignment.id not in viewable_assignment_ids:
                 continue
 
             ca = assignment.compliance_assessment
