@@ -191,8 +191,10 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             sso_settings = SSOSettings.objects.get()
         except SSOSettings.DoesNotExist:
             sso_settings = None
-        jit_provisioning_active = bool(sso_settings) and ff_is_enabled(
-            "jit_provisioning"
+        jit_provisioning_active = (
+            bool(sso_settings)
+            and sso_settings.jit_provisioning_enabled
+            and ff_is_enabled("jit_provisioning")
         )
 
         try:
@@ -212,7 +214,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 user_id=str(user.id),
             )
         except User.DoesNotExist:
-            if not (jit_provisioning_active and sso_settings.jit_provisioning_enabled):
+            if not jit_provisioning_active:
                 logger.error(
                     "pre_social_login: user not found",
                     provider=sociallogin.account.provider,

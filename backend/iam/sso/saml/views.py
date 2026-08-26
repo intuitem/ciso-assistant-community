@@ -171,7 +171,10 @@ class FinishACSView(SAMLViewMixin, View):
             idp_last_names = auth.get_attribute(
                 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
             )
-            jit_provisioning_active = ff_is_enabled("jit_provisioning")
+            sso_settings = provider.app
+            jit_provisioning_active = sso_settings.jit_provisioning_enabled and (
+                ff_is_enabled("jit_provisioning")
+            )
             user = User.objects.filter(email__iexact=auth.get_nameid()).first()
             if not user and emails:
                 logger.info(
@@ -182,11 +185,7 @@ class FinishACSView(SAMLViewMixin, View):
                 try:
                     user = User.objects.get(email__iexact=emails[0])
                 except User.DoesNotExist:
-                    sso_settings = provider.app
-                    if not (
-                        jit_provisioning_active
-                        and sso_settings.jit_provisioning_enabled
-                    ):
+                    if not jit_provisioning_active:
                         raise User.DoesNotExist()
                     user = User.objects.create_user(
                         email=emails[0],
