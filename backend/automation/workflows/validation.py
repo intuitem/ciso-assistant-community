@@ -14,7 +14,11 @@ from .models import (
     WorkflowVersion,
 )
 from .actions import validate_create_config as _validate_create_config
+from .actions import validate_date_offset_config as _validate_date_offset_config
 from .actions import validate_read_config as _validate_read_config
+from .actions import validate_set_variables_config as _validate_set_variables_config
+from .actions import validate_update_config as _validate_update_config
+from .context import RESERVED_VARIABLE_KEYS
 from .triggers import validate_trigger_config
 
 SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
@@ -45,6 +49,16 @@ def validate_graph(version):
     wired_branch_ids = {
         e.source_branch_id for e in edges if e.source_branch_id is not None
     }
+
+    for variable in version.variables.all():
+        if variable.key in RESERVED_VARIABLE_KEYS:
+            errors.append(
+                _error(
+                    "variable_key_reserved",
+                    f"'{variable.key}' is set by the engine on every run — "
+                    "rename this variable",
+                )
+            )
 
     loop_ids = {n.id for n in nodes if n.type == WorkflowNode.Type.LOOP}
     for edge in edges:
@@ -140,6 +154,12 @@ def validate_graph(version):
             for code, message in _validate_read_config(node):
                 errors.append(_error(code, message, node=node))
             for code, message in _validate_create_config(node):
+                errors.append(_error(code, message, node=node))
+            for code, message in _validate_date_offset_config(node):
+                errors.append(_error(code, message, node=node))
+            for code, message in _validate_update_config(node):
+                errors.append(_error(code, message, node=node))
+            for code, message in _validate_set_variables_config(node):
                 errors.append(_error(code, message, node=node))
         for ref in sorted(_referenced_node_refs(node) - known_refs):
             errors.append(
