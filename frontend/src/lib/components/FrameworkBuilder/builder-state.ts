@@ -907,6 +907,7 @@ export interface BuilderStore {
 	indentNode: (nodeId: string) => boolean;
 	outdentNode: (nodeId: string) => boolean;
 	toggleAssessable: (nodeId: string) => void;
+	setDisplayMode: (nodeId: string, mode: 'default' | 'splash') => void;
 
 	updateNode: (nodeId: string, patch: Record<string, unknown>) => void;
 	addQuestion: (reqNodeId: string, type?: Question['type']) => void;
@@ -1361,6 +1362,18 @@ export function createBuilderState(
 		findAssessable(roots);
 		if (current === null) return;
 		updateNode(nodeId, { assessable: !current });
+	}
+
+	/**
+	 * Change a node's display mode. Splash screens are never assessable, so
+	 * switching to splash also clears the flag (the assessable checkbox is
+	 * hidden in splash mode and a stale true would be invisible).
+	 */
+	function setDisplayMode(nodeId: string, mode: 'default' | 'splash') {
+		updateNode(
+			nodeId,
+			mode === 'splash' ? { display_mode: mode, assessable: false } : { display_mode: mode }
+		);
 	}
 
 	// --- Node update ---
@@ -1932,6 +1945,7 @@ export function createBuilderState(
 		indentNode,
 		outdentNode,
 		toggleAssessable,
+		setDisplayMode,
 
 		updateNode,
 		addQuestion,

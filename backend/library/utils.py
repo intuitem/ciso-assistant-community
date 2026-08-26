@@ -116,6 +116,16 @@ class RequirementNodeImporter:
         if parent_urn:
             parent_urn = parent_urn.lower()
 
+        display_mode = self.requirement_data.get(
+            "display_mode", RequirementNode.DisplayMode.DEFAULT
+        )
+        # Splash screens are never assessable: a splash+assessable node would
+        # surface as a regular requirement in the respondent view.
+        assessable = (
+            self.requirement_data.get("assessable")
+            and display_mode != RequirementNode.DisplayMode.SPLASH
+        )
+
         # update_or_create scoped to the framework: identical to create()
         # for fresh imports, updates in place when the framework row was
         # adopted (see FrameworkImporter.import_framework).
@@ -125,7 +135,7 @@ class RequirementNodeImporter:
             defaults=dict(
                 folder=Folder.get_root_folder(),
                 parent_urn=parent_urn,
-                assessable=self.requirement_data.get("assessable"),
+                assessable=assessable,
                 ref_id=self.requirement_data.get("ref_id"),
                 annotation=self.requirement_data.get("annotation"),
                 typical_evidence=self.requirement_data.get("typical_evidence"),
@@ -136,9 +146,7 @@ class RequirementNodeImporter:
                 implementation_groups=self.requirement_data.get(
                     "implementation_groups"
                 ),
-                display_mode=self.requirement_data.get(
-                    "display_mode", RequirementNode.DisplayMode.DEFAULT
-                ),
+                display_mode=display_mode,
                 weight=self.requirement_data.get("weight", 1),
                 min_score=self.requirement_data.get("min_score"),
                 max_score=self.requirement_data.get("max_score"),

@@ -912,6 +912,16 @@ def validate_draft_document(draft, *, user=None) -> dict:
         if shape_errors := check_document_shape(normalized):
             return {"errors": errors + shape_errors, "warnings": warnings}
         errors.extend(_check_field_lengths(normalized))
+        # Splash screens are never assessable; the loader forces the flag off,
+        # so tell the author instead of silently diverging from the draft.
+        for framework in normalized.get("frameworks") or []:
+            for node in framework.get("requirement_nodes") or []:
+                if node.get("display_mode") == "splash" and node.get("assessable"):
+                    warnings.append(
+                        "Splash node {urn} is marked assessable; it will be imported as non-assessable".format(
+                            urn=node.get("urn") or node.get("ref_id") or "?"
+                        )
+                    )
         # Structural matrix validation (grid dims vs levels, cell indices).
         # RiskMatrixImporter.is_valid is a no-op and this validation runs
         # only for drafts, so a matrix reaching content via a raw PATCH
