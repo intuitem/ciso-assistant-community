@@ -317,6 +317,11 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	for (const [q_urn, question] of Object.entries<any>(questions)) {
 		if (!isQuestionVisible(question, answers, questions)) continue;
 
+		// Free-text questions are informational: they have no choices and can be anything,
+		// so it does not make very much sense to take them into account.
+		// Skip them out. (mirrors RequirementAssessment.recompute_assessment).
+		if (question.type === 'text') continue;
+
 		visibleCount++;
 
 		const selectedChoiceURNs = answers?.[q_urn];
