@@ -5675,5 +5675,6 @@
 	"saveAsPersonalFilter": "Enregistrer comme filtre personnel",
 	"personalFilters": "Personnels",
 	"sharedFilters": "Partagés",
-	"noSavedFilters": "Aucun filtre enregistré"
+	"noSavedFilters": "Aucun filtre enregistré",
+	"shareToDomain": "Partager vers un domaine"
 }

@@ -52,7 +52,8 @@
 	});
 
 	async function handleSubmit(name: string) {
-		const endpoint = scope === 'personal' ? '/fe-api/saved-filters/personal/' : '/fe-api/saved-filters/';
+		const endpoint =
+			scope === 'personal' ? '/fe-api/saved-filters/personal/' : '/fe-api/saved-filters/';
 		const body =
 			scope === 'personal'
 				? { name, model, properties }

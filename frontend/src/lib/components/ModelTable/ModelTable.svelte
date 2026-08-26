@@ -632,7 +632,11 @@
 		const modalComponent: ModalComponent = {
 			ref: RenameSavedFilterModal,
 			props: {
+				user,
 				initialName: current.name,
+				filterId: current.id,
+				model: savedFilterModel,
+				properties: { ...filterValues },
 				onRenamed: async (newName: string) => {
 					const res = await fetch(`/fe-api/saved-filters/personal/${appliedSavedFilter!.id}/`, {
 						method: 'PATCH',
@@ -643,6 +647,25 @@
 						const entry = (await res.json()) as SavedFilterEntry;
 						personalSavedFilters = personalSavedFilters.map((f) => (f.id === entry.id ? entry : f));
 						appliedSavedFilter = { id: entry.id, scope: 'personal', properties: entry.properties };
+					}
+				},
+				onShared: ({
+					shared,
+					personal
+				}: {
+					shared: SharedSavedFilter;
+					personal: SavedFilterEntry;
+				}) => {
+					sharedSavedFilters = [...sharedSavedFilters, shared];
+					personalSavedFilters = personalSavedFilters.map((f) =>
+						f.id === personal.id ? personal : f
+					);
+					if (appliedSavedFilter?.id === personal.id) {
+						appliedSavedFilter = {
+							id: personal.id,
+							scope: 'personal',
+							properties: personal.properties
+						};
 					}
 				}
 			}
@@ -1058,173 +1081,173 @@
 			/>
 		{:else}
 			{#if !hideFilters}
-			<div class="flex items-center gap-2">
-				<Popover
-					open={openState}
-					onOpenChange={(e) => (openState = e.open)}
-					positioning={{ placement: 'bottom-start' }}
-					autoFocus={false}
-					onPointerDownOutside={() => (openState = false)}
-					closeOnInteractOutside={false}
-				>
-					<Popover.Trigger class="btn preset-filled-primary-500 h-9 inline-flex items-center">
-						<i class="fa-solid fa-filter mr-2"></i>
-						{m.filters()}
-						{#if filterCount}
-							<span class="text-sm">{filterCount}</span>
-						{/if}
-					</Popover.Trigger>
-					<Popover.Positioner class="z-50!">
-						<Popover.Content
-							class="card p-2 bg-surface-50-950 max-w-lg shadow-lg space-y-2 border border-surface-200-800"
-						>
-							{#if savedFilterModel}
-								<div class="space-y-1 pb-2 mb-2 border-b border-surface-200-800">
-									<p class="text-xs font-semibold text-surface-500 px-1">{m.savedFilters()}</p>
-									{#if appliedSavedFilter}
-										<div
-											class="flex items-center justify-between px-2 py-1 rounded bg-surface-100-900 text-sm font-semibold"
-										>
-											<span>{appliedSavedFilterName}</span>
-											<button
-												type="button"
-												class="text-surface-500 hover:text-surface-700-300"
-												title={m.clearSelection()}
-												onclick={() => clearAppliedSavedFilter()}
-											>
-												<i class="fa-solid fa-xmark"></i>
-											</button>
-										</div>
-									{:else if personalSavedFilters.length === 0 && visibleSharedFilters.length === 0}
-										<p class="text-sm text-surface-500 px-2 py-1">{m.noSavedFilters()}</p>
-									{:else}
-										<AutocompleteSelect
-											form={savedFilterPickerForm}
-											field="savedFilter"
-											options={savedFilterOptions}
-											onChange={(value) => onSavedFilterPicked(value)}
-										/>
-									{/if}
-								</div>
+				<div class="flex items-center gap-2">
+					<Popover
+						open={openState}
+						onOpenChange={(e) => (openState = e.open)}
+						positioning={{ placement: 'bottom-start' }}
+						autoFocus={false}
+						onPointerDownOutside={() => (openState = false)}
+						closeOnInteractOutside={false}
+					>
+						<Popover.Trigger class="btn preset-filled-primary-500 h-9 inline-flex items-center">
+							<i class="fa-solid fa-filter mr-2"></i>
+							{m.filters()}
+							{#if filterCount}
+								<span class="text-sm">{filterCount}</span>
 							{/if}
-							<SuperForm {_form} validators={zod(z.object({}))}>
-								{#snippet children({ form })}
-									{#each filteredFields as field}
-										{#if filters[field]?.component}
-											{@const FilterComponent = filters[field].component}
-											<FilterComponent
-												{form}
-												{field}
-												{...filters[field].props}
-												fieldContext="filter"
-												label={safeTranslate(filters[field].props?.label)}
-												onChange={(value) => {
-													const arrayValue = Array.isArray(value) ? value : [value];
-													const sanitizedArrayValue = arrayValue.filter(
-														(v) => v !== null && v !== undefined && v !== ''
-													);
-
-													filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
-												}}
+						</Popover.Trigger>
+						<Popover.Positioner class="z-50!">
+							<Popover.Content
+								class="card p-2 bg-surface-50-950 max-w-lg shadow-lg space-y-2 border border-surface-200-800"
+							>
+								{#if savedFilterModel}
+									<div class="space-y-1 pb-2 mb-2 border-b border-surface-200-800">
+										<p class="text-xs font-semibold text-surface-500 px-1">{m.savedFilters()}</p>
+										{#if appliedSavedFilter}
+											<div
+												class="flex items-center justify-between px-2 py-1 rounded bg-surface-100-900 text-sm font-semibold"
+											>
+												<span>{appliedSavedFilterName}</span>
+												<button
+													type="button"
+													class="text-surface-500 hover:text-surface-700-300"
+													title={m.clearSelection()}
+													onclick={() => clearAppliedSavedFilter()}
+												>
+													<i class="fa-solid fa-xmark"></i>
+												</button>
+											</div>
+										{:else if personalSavedFilters.length === 0 && visibleSharedFilters.length === 0}
+											<p class="text-sm text-surface-500 px-2 py-1">{m.noSavedFilters()}</p>
+										{:else}
+											<AutocompleteSelect
+												form={savedFilterPickerForm}
+												field="savedFilter"
+												options={savedFilterOptions}
+												onChange={(value) => onSavedFilterPicked(value)}
 											/>
 										{/if}
-									{/each}
-									{#if filterCount > 0}
-										<div class="flex justify-end pt-1">
-											<button
-												type="button"
-												class="btn preset-tonal-surface text-sm"
-												onclick={() => {
-													resetFilters();
-													openState = false;
-												}}
-											>
-												<i class="fa-solid fa-rotate-left mr-2"></i>
-												{m.resetFilters()}
-											</button>
-										</div>
-									{/if}
-								{/snippet}
-							</SuperForm>
-						</Popover.Content>
-					</Popover.Positioner>
-				</Popover>
-				{#if savedFilterModel}
-					{#if appliedSavedFilter}
-						<div
-							class="flex items-center justify-between px-2 py-1 rounded bg-surface-100-900 text-sm font-semibold"
-						>
-							<span>{appliedSavedFilterName}</span>
+									</div>
+								{/if}
+								<SuperForm {_form} validators={zod(z.object({}))}>
+									{#snippet children({ form })}
+										{#each filteredFields as field}
+											{#if filters[field]?.component}
+												{@const FilterComponent = filters[field].component}
+												<FilterComponent
+													{form}
+													{field}
+													{...filters[field].props}
+													fieldContext="filter"
+													label={safeTranslate(filters[field].props?.label)}
+													onChange={(value) => {
+														const arrayValue = Array.isArray(value) ? value : [value];
+														const sanitizedArrayValue = arrayValue.filter(
+															(v) => v !== null && v !== undefined && v !== ''
+														);
+
+														filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
+													}}
+												/>
+											{/if}
+										{/each}
+										{#if filterCount > 0}
+											<div class="flex justify-end pt-1">
+												<button
+													type="button"
+													class="btn preset-tonal-surface text-sm"
+													onclick={() => {
+														resetFilters();
+														openState = false;
+													}}
+												>
+													<i class="fa-solid fa-rotate-left mr-2"></i>
+													{m.resetFilters()}
+												</button>
+											</div>
+										{/if}
+									{/snippet}
+								</SuperForm>
+							</Popover.Content>
+						</Popover.Positioner>
+					</Popover>
+					{#if savedFilterModel}
+						{#if appliedSavedFilter}
+							<div
+								class="flex items-center justify-between px-2 py-1 rounded bg-surface-100-900 text-sm font-semibold"
+							>
+								<span>{appliedSavedFilterName}</span>
+								<button
+									type="button"
+									class="text-surface-500 hover:text-surface-700-300"
+									title={m.clearSelection()}
+									onclick={() => clearAppliedSavedFilter()}
+								>
+									<i class="fa-solid fa-xmark"></i>
+								</button>
+							</div>
+						{/if}
+						{#if !appliedSavedFilter && filterCount > 0}
 							<button
 								type="button"
-								class="text-surface-500 hover:text-surface-700-300"
-								title={m.clearSelection()}
-								onclick={() => clearAppliedSavedFilter()}
+								class="btn preset-tonal-surface h-9"
+								title={m.saveFilter()}
+								onclick={() => openSaveFilterModal()}
 							>
-								<i class="fa-solid fa-xmark"></i>
+								<i class="fa-solid fa-floppy-disk text-surface-700-300"></i>
 							</button>
-						</div>
-					{/if}
-					{#if !appliedSavedFilter && filterCount > 0}
-						<button
-							type="button"
-							class="btn preset-tonal-surface h-9"
-							title={m.saveFilter()}
-							onclick={() => openSaveFilterModal()}
-						>
-							<i class="fa-solid fa-floppy-disk text-surface-700-300"></i>
-						</button>
-					{/if}
-					{#if appliedSavedFilter?.scope === 'shared'}
-						<button
-							type="button"
-							class="btn preset-tonal-surface h-9"
-							title={m.saveAsPersonalFilter()}
-							onclick={() => copyAsPersonal()}
-						>
-							<i class="fa-solid fa-star text-surface-700-300"></i>
-						</button>
-						{#if canEditSharedFilter}
+						{/if}
+						{#if appliedSavedFilter?.scope === 'shared'}
+							<button
+								type="button"
+								class="btn preset-tonal-surface h-9"
+								title={m.saveAsPersonalFilter()}
+								onclick={() => copyAsPersonal()}
+							>
+								<i class="fa-solid fa-star text-surface-700-300"></i>
+							</button>
+							{#if canEditSharedFilter}
+								<button
+									type="button"
+									class="btn preset-tonal-surface h-9"
+									title={m.edit()}
+									onclick={() => openEditSharedFilterModal()}
+								>
+									<i class="fa-solid fa-pen text-surface-700-300"></i>
+								</button>
+							{/if}
+							{#if canDeleteSharedFilter}
+								<button
+									type="button"
+									class="btn preset-tonal-surface h-9"
+									title={m.delete()}
+									onclick={() => deleteSharedFilter()}
+								>
+									<i class="fa-solid fa-trash text-surface-700-300"></i>
+								</button>
+							{/if}
+						{/if}
+						{#if appliedSavedFilter?.scope === 'personal'}
 							<button
 								type="button"
 								class="btn preset-tonal-surface h-9"
 								title={m.edit()}
-								onclick={() => openEditSharedFilterModal()}
+								onclick={() => openEditPersonalFilterModal()}
 							>
 								<i class="fa-solid fa-pen text-surface-700-300"></i>
 							</button>
-						{/if}
-						{#if canDeleteSharedFilter}
 							<button
 								type="button"
 								class="btn preset-tonal-surface h-9"
 								title={m.delete()}
-								onclick={() => deleteSharedFilter()}
+								onclick={() => deletePersonalFilter()}
 							>
 								<i class="fa-solid fa-trash text-surface-700-300"></i>
 							</button>
 						{/if}
 					{/if}
-					{#if appliedSavedFilter?.scope === 'personal'}
-						<button
-							type="button"
-							class="btn preset-tonal-surface h-9"
-							title={m.edit()}
-							onclick={() => openEditPersonalFilterModal()}
-						>
-							<i class="fa-solid fa-pen text-surface-700-300"></i>
-						</button>
-						<button
-							type="button"
-							class="btn preset-tonal-surface h-9"
-							title={m.delete()}
-							onclick={() => deletePersonalFilter()}
-						>
-							<i class="fa-solid fa-trash text-surface-700-300"></i>
-						</button>
-					{/if}
-				{/if}
-					</div>
+				</div>
 			{/if}
 
 			{#if search}

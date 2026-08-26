@@ -16,13 +16,7 @@
 		onSubmit: (name: string) => Promise<void> | void;
 	}
 
-	let {
-		parent,
-		initialName = '',
-		extraFields,
-		canSubmit = true,
-		onSubmit
-	}: Props = $props();
+	let { parent, initialName = '', extraFields, canSubmit = true, onSubmit }: Props = $props();
 
 	let name = $state(initialName);
 	let isSubmitting = $state(false);

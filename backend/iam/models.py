@@ -808,6 +808,29 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         self._save_saved_filters(prefs, filters)
         return entry
 
+    def link_saved_filter_to_shared(self, filter_id: str, shared_id: str) -> dict:
+        """
+        Attach an existing personal filter to a shared filter just published
+        from it.
+        """
+        from core.models import SavedFilter
+
+        shared = SavedFilter.objects.filter(id=shared_id).first()
+        if shared is None:
+            raise ValueError(f"Shared filter {shared_id} not found")
+
+        prefs = self.get_preferences()
+        filters = prefs.get("saved_filters", [])
+        for entry in filters:
+            if entry.get("id") == str(filter_id):
+                entry["shared_id"] = str(shared_id)
+                entry["updated_at"] = shared.updated_at.isoformat()
+                break
+        else:
+            raise ValueError(f"Saved filter {filter_id} not found")
+        self._save_saved_filters(prefs, filters)
+        return entry
+
     def delete_saved_filter(self, filter_id: str) -> None:
         prefs = self.get_preferences()
         filters = [

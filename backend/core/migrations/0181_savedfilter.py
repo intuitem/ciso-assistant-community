@@ -7,29 +7,67 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
-        ('core', '0180_securityexception_evidences'),
-        ('iam', '0023_alter_folder_content_type'),
+        ("contenttypes", "0002_remove_content_type_name"),
+        ("core", "0180_securityexception_evidences"),
+        ("iam", "0023_alter_folder_content_type"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SavedFilter',
+            name="SavedFilter",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Updated at')),
-                ('is_published', models.BooleanField(default=False, verbose_name='published')),
-                ('name', models.CharField(max_length=200, verbose_name='Name')),
-                ('description', models.TextField(blank=True, null=True, verbose_name='Description')),
-                ('properties', models.JSONField(default=dict, verbose_name='properties')),
-                ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='saved_filters', to='contenttypes.contenttype', verbose_name='model')),
-                ('folder', models.ForeignKey(default=iam.models.Folder.get_root_folder_id, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_folder', to='iam.folder')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Created at"),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Updated at"),
+                ),
+                (
+                    "is_published",
+                    models.BooleanField(default=False, verbose_name="published"),
+                ),
+                ("name", models.CharField(max_length=200, verbose_name="Name")),
+                (
+                    "description",
+                    models.TextField(blank=True, null=True, verbose_name="Description"),
+                ),
+                (
+                    "properties",
+                    models.JSONField(default=dict, verbose_name="properties"),
+                ),
+                (
+                    "content_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="saved_filters",
+                        to="contenttypes.contenttype",
+                        verbose_name="model",
+                    ),
+                ),
+                (
+                    "folder",
+                    models.ForeignKey(
+                        default=iam.models.Folder.get_root_folder_id,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_folder",
+                        to="iam.folder",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['name'],
+                "ordering": ["name"],
             },
         ),
     ]

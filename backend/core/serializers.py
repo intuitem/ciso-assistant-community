@@ -4425,7 +4425,9 @@ class SavedFilterReadSerializer(BaseModelSerializer):
             from core.saved_filters.registry import mask_inaccessible_properties
 
             cache = self.context.setdefault("_saved_filter_accessible_cache", {})
-            data["properties"] = mask_inaccessible_properties(instance, request.user, cache)
+            data["properties"] = mask_inaccessible_properties(
+                instance, request.user, cache
+            )
         return data
 
 
@@ -4438,7 +4440,9 @@ class SavedFilterWriteSerializer(BaseModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data["model"] = f"{instance.content_type.app_label}.{instance.content_type.model}"
+        data["model"] = (
+            f"{instance.content_type.app_label}.{instance.content_type.model}"
+        )
         return data
 
     def validate(self, data):

@@ -3572,7 +3572,9 @@ class SavedFilterViewSet(BaseModelViewSet):
             data = request.data
             model = data.get("model")
             if model:
-                from core.saved_filters.registry import resolve_saved_filter_content_type
+                from core.saved_filters.registry import (
+                    resolve_saved_filter_content_type,
+                )
 
                 resolve_saved_filter_content_type(model)
             entry = request.user.add_saved_filter(
@@ -3596,8 +3598,26 @@ class SavedFilterViewSet(BaseModelViewSet):
         try:
             entry = request.user.update_saved_filter(
                 filter_id,
-                **{k: v for k, v in request.data.items() if k in ("name", "properties")},
+                **{
+                    k: v for k, v in request.data.items() if k in ("name", "properties")
+                },
             )
+        except ValueError:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(entry)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path=r"personal/(?P<filter_id>[^/.]+)/link",
+    )
+    def personal_link(self, request, filter_id=None):
+        """relate an existing personal filter to a shared filter newly created"""
+        shared_id = request.data.get("shared_id")
+        if not shared_id or not self.get_queryset().filter(id=shared_id).exists():
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        try:
+            entry = request.user.link_saved_filter_to_shared(filter_id, shared_id)
         except ValueError:
             return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(entry)

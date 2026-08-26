@@ -5680,5 +5680,6 @@
 	"saveAsPersonalFilter": "Save as personal filter",
 	"personalFilters": "Personal",
 	"sharedFilters": "Shared",
-	"noSavedFilters": "No saved filters"
+	"noSavedFilters": "No saved filters",
+	"shareToDomain": "Share to a domain"
 }
