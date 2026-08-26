@@ -617,9 +617,17 @@ class WorkflowInstance(AbstractBaseModel, FolderMixin):
     # instances at depth 1; changes those runs make start instances at depth 2,
     # capped by events.MAX_TRIGGER_DEPTH to contain trigger loops.
     trigger_depth = models.PositiveSmallIntegerField(default=0)
+    # auditlog correlation id of the user action this run reacted to; the
+    # event dispatcher coalesces on it (events.COALESCE_WINDOW). Set there
+    # only — a webhook payload must never reach it.
+    trigger_cid = models.CharField(max_length=255, blank=True, default="")
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            # The coalescing lookup, on every event dispatch.
+            models.Index(fields=["trigger_registration", "trigger_cid"]),
+        ]
 
     def save(self, *args, **kwargs):
         if not self.folder_id:
@@ -806,6 +814,10 @@ class WorkflowTrigger(AbstractBaseModel, FolderMixin):
         SKIPPED_INACTIVE = "skipped_inactive", "Skipped (workflow inactive)"
         SKIPPED_NO_IDENTITY = "run_identity_missing", "Skipped (no run identity)"
         SKIPPED_INVALID_SCHEDULE = "invalid_schedule", "Skipped (invalid schedule)"
+        SKIPPED_COALESCED = (
+            "skipped_coalesced",
+            "Skipped (same user action already handled)",
+        )
         ERROR = "error", "Error"
 
     workflow = models.ForeignKey(

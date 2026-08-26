@@ -165,6 +165,7 @@ from core.models import (
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
     build_answers_dict,
+    bulk_update_with_log,
     compare_schema_versions,
     get_respondent_scoped_folder_ids,
     is_field_visible_to,
@@ -12141,6 +12142,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                             setattr(req, field, value)
                     requirement_assessments_to_update.append(req)
 
+                # Bare bulk_update on purpose: these rows were just
+                # bulk_created here, so an "updated" event per requirement
+                # would fire runs for rows that never announced their creation.
                 RequirementAssessment.objects.bulk_update(
                     requirement_assessments_to_update,
                     [
@@ -12263,8 +12267,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     else ca_min
                 )
             if ras_to_init:
-                RequirementAssessment.objects.bulk_update(
-                    ras_to_init, ["documentation_score"]
+                bulk_update_with_log(
+                    RequirementAssessment, ras_to_init, ["documentation_score"]
                 )
 
     @action(detail=False, name="Compliance assessments per status")
@@ -13636,7 +13640,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 ras_to_update.append(ra)
 
             if ras_to_update and update_fields:
-                RequirementAssessment.objects.bulk_update(
+                # Results rewritten on an audit that already existed: the
+                # audit trail and the event stream both need to see it.
+                bulk_update_with_log(
+                    RequirementAssessment,
                     ras_to_update,
                     list(update_fields),
                     batch_size=500,
