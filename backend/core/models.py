@@ -9401,6 +9401,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             if not _is_question_visible(question, answers_by_urn, questions_by_urn):
                 continue
 
+            # Free-text questions are informational: they have no choices and can be anything,
+            # so it does not make very much sense to take them into account. Skip them out.
+            # (They still count as unanswered in progress see get_visible_questions_counts.)
+            if question.type == Question.Type.TEXT:
+                continue
+
             visible_questions += 1
             if not has_answer_by_qid.get(question.id):
                 continue
