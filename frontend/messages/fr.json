@@ -5819,9 +5819,9 @@
 	"validationMustStartAsSubmitted": "Une nouvelle demande de validation doit débuter au statut « soumis »",
 	"showingMostRecentValidations": "Affichage des {count} validations les plus récentes sur {total}",
 	"withAppliedControls": "Avec mesures",
-	"withoutAppliedControls": "Sans mesure",
-	"withEvidence": "Avec preuve",
-	"withoutEvidence": "Sans preuve",
+	"withoutAppliedControls": "Sans mesures",
+	"withEvidence": "Avec preuves",
+	"withoutEvidence": "Sans preuves",
 	"evidenceCoverageHint": "directe ou via les mesures associées",
 	"bothEvidence": "Directes et indirectes"
 }

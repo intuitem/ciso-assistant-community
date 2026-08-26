@@ -1353,7 +1353,7 @@
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
 		{#key data}
-			{#key displayOnlyAssessableNodes || selectedStatus || selectedResults || selectedExtendedResults || selectedControlCoverage || selectedEvidenceCoverage}
+			{#key [displayOnlyAssessableNodes, selectedStatus, selectedResults, selectedExtendedResults, selectedControlCoverage, selectedEvidenceCoverage].join('|')}
 				<RecursiveTreeView
 					nodes={transformToTreeView(Object.entries(tree))}
 					bind:expandedNodes

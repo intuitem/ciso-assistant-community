@@ -6051,9 +6051,9 @@
 	"validationMustStartAsSubmitted": "A new validation request must start in the 'submitted' status",
 	"showingMostRecentValidations": "Showing the {count} most recent validations out of {total}",
 	"withAppliedControls": "With applied controls",
-	"withoutAppliedControls": "Without applied control",
-	"withEvidence": "With evidence",
-	"withoutEvidence": "Without evidence",
+	"withoutAppliedControls": "Without applied controls",
+	"withEvidence": "With evidences",
+	"withoutEvidence": "Without evidences",
 	"evidenceCoverageHint": "direct or through applied controls",
 	"bothEvidence": "Direct and indirect"
 }
