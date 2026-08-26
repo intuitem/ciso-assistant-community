@@ -164,6 +164,7 @@ from core.models import (
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
     build_answers_dict,
+    bulk_update_with_log,
     compare_schema_versions,
     get_respondent_scoped_folder_ids,
     is_field_visible_to,
@@ -450,6 +451,16 @@ def escape_csv_row(row):
     ]
 
 
+ILLEGAL_XLSX_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+
+
+def sanitize_xlsx_value(value):
+    """Strip ASCII control characters openpyxl refuses to write (tab/LF/CR are allowed)."""
+    if isinstance(value, str):
+        return ILLEGAL_XLSX_CHARS_RE.sub("", value)
+    return value
+
+
 def create_xlsx_response(entries, filename, wrap_columns=None):
     """
     DRY helper to create XLSX response with consistent formatting.
@@ -465,6 +476,9 @@ def create_xlsx_response(entries, filename, wrap_columns=None):
     if wrap_columns is None:
         wrap_columns = ["name", "description"]
 
+    entries = [
+        {k: sanitize_xlsx_value(v) for k, v in entry.items()} for entry in entries
+    ]
     df = pd.DataFrame(entries)
     buffer = io.BytesIO()
 
@@ -3970,7 +3984,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "\n".join([ra.get("str") for ra in item.get("owner")]),
                 "\n".join([ra.get("str") for ra in item.get("risk_scenarios")]),
             ]
-            ws.append(row)
+            ws.append([sanitize_xlsx_value(value) for value in row])
 
         for row_idx, row in enumerate(ws.iter_rows(min_row=2), 2):  # Skip header row
             max_lines = 1
@@ -11568,7 +11582,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     if evidence.get("filename")
                 ),
             }
-            entries.append(entry)
+            entries.append({k: sanitize_xlsx_value(v) for k, v in entry.items()})
 
         df = pd.DataFrame(entries)
         buffer = io.BytesIO()
@@ -11971,6 +11985,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                             setattr(req, field, value)
                     requirement_assessments_to_update.append(req)
 
+                # Bare bulk_update on purpose: these rows were just
+                # bulk_created here, so an "updated" event per requirement
+                # would fire runs for rows that never announced their creation.
                 RequirementAssessment.objects.bulk_update(
                     requirement_assessments_to_update,
                     [
@@ -12093,8 +12110,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     else ca_min
                 )
             if ras_to_init:
-                RequirementAssessment.objects.bulk_update(
-                    ras_to_init, ["documentation_score"]
+                bulk_update_with_log(
+                    RequirementAssessment, ras_to_init, ["documentation_score"]
                 )
 
     @action(detail=False, name="Compliance assessments per status")
@@ -12226,6 +12243,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             implementation_groups = None
         tree = filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, compliance_assessment)
+        annotate_tree_with_coverage(tree, compliance_assessment)
         return Response(tree)
 
     @action(detail=True, methods=["get"])
@@ -12289,6 +12307,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             implementation_groups = None
         tree = filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, compliance_assessment)
+        annotate_tree_with_coverage(tree, compliance_assessment)
 
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
@@ -13474,7 +13493,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 ras_to_update.append(ra)
 
             if ras_to_update and update_fields:
-                RequirementAssessment.objects.bulk_update(
+                # Results rewritten on an audit that already existed: the
+                # audit trail and the event stream both need to see it.
+                bulk_update_with_log(
+                    RequirementAssessment,
                     ras_to_update,
                     list(update_fields),
                     batch_size=500,
