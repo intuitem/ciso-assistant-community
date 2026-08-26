@@ -400,7 +400,7 @@ def app_config():
 
 
 def create_api_client_from_role(role: Role, folder: Folder) -> APIClient:
-    user = User.objects.create_user(email=f"{role.name}@wow.com", is_published=True)
+    user = User.objects.create_user(email=f"{role.name}@wow.com")
     group = UserGroup.objects.create(name=f"global_settings{role.name}", folder=folder)
     assignment = RoleAssignment.objects.create(
         user_group=group,
