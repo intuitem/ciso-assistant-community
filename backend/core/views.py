@@ -451,6 +451,16 @@ def escape_csv_row(row):
     ]
 
 
+ILLEGAL_XLSX_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+
+
+def sanitize_xlsx_value(value):
+    """Strip ASCII control characters openpyxl refuses to write (tab/LF/CR are allowed)."""
+    if isinstance(value, str):
+        return ILLEGAL_XLSX_CHARS_RE.sub("", value)
+    return value
+
+
 def create_xlsx_response(entries, filename, wrap_columns=None):
     """
     DRY helper to create XLSX response with consistent formatting.
@@ -466,6 +476,9 @@ def create_xlsx_response(entries, filename, wrap_columns=None):
     if wrap_columns is None:
         wrap_columns = ["name", "description"]
 
+    entries = [
+        {k: sanitize_xlsx_value(v) for k, v in entry.items()} for entry in entries
+    ]
     df = pd.DataFrame(entries)
     buffer = io.BytesIO()
 
@@ -3971,7 +3984,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "\n".join([ra.get("str") for ra in item.get("owner")]),
                 "\n".join([ra.get("str") for ra in item.get("risk_scenarios")]),
             ]
-            ws.append(row)
+            ws.append([sanitize_xlsx_value(value) for value in row])
 
         for row_idx, row in enumerate(ws.iter_rows(min_row=2), 2):  # Skip header row
             max_lines = 1
@@ -11569,7 +11582,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     if evidence.get("filename")
                 ),
             }
-            entries.append(entry)
+            entries.append({k: sanitize_xlsx_value(v) for k, v in entry.items()})
 
         df = pd.DataFrame(entries)
         buffer = io.BytesIO()
