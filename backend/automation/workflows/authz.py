@@ -38,3 +38,11 @@ def viewable_ids(user, model) -> QuerySet:
     if user is None or not user.is_active:
         return model.objects.none().values_list("id", flat=True)
     return RoleAssignment.get_viewable_object_ids(user, model)
+
+
+def changeable_ids(user, model) -> QuerySet:
+    """Ids of ``model`` rows ``user`` may change: the write counterpart of
+    ``viewable_ids``."""
+    if user is None or not user.is_active:
+        return model.objects.none().values_list("id", flat=True)
+    return RoleAssignment.get_changeable_object_ids(user, model)

@@ -1,0 +1,593 @@
+urn: urn:intuitem:risk:library:unesco-ai-maturity-framework
+locale: en
+ref_id: UNESCO-AI-MATURITY
+name: UNESCO AI Maturity Framework
+description: |-
+  Based on the UNESCO AI Maturity Framework - A self-positioning guide for public administrations (2025, SHS/REI/AI/FLMAT Rev. 3), developed within the "AI-Ready Flemish Public Administration" project funded by the European Commission DG REFORM. A reflective self-assessment of organisational AI readiness across 6 pillars and 29 categories: Strategy & Value; People & Culture; Technology & Infrastructure; AI Operations & Ecosystem; AI Governance, Ethics & Risk; and Data. Each category describes four progressive maturity levels (Basic, Ready, Dynamic, Advanced); assessors read the descriptors and record the level that best reflects current practice as the implementation score. The framework prescribes no target level - it helps an organisation understand where it is, where it aims to be, and what is required to get there.
+  https://unesdoc.unesco.org/ark:/48223/pf0000397145
+copyright: © UNESCO 2025. Licensed under the Attribution-ShareAlike 3.0 IGO (CC-BY-SA 3.0 IGO) licence.
+version: 1
+publication_date: 2026-08-25
+provider: UNESCO
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:unesco-ai-maturity-framework
+    ref_id: UNESCO-AI-MATURITY
+    name: UNESCO AI Maturity Framework
+    description: |-
+      Based on the UNESCO AI Maturity Framework - A self-positioning guide for public administrations (2025, SHS/REI/AI/FLMAT Rev. 3), developed within the "AI-Ready Flemish Public Administration" project funded by the European Commission DG REFORM. A reflective self-assessment of organisational AI readiness across 6 pillars and 29 categories: Strategy & Value; People & Culture; Technology & Infrastructure; AI Operations & Ecosystem; AI Governance, Ethics & Risk; and Data. Each category describes four progressive maturity levels (Basic, Ready, Dynamic, Advanced); assessors read the descriptors and record the level that best reflects current practice as the implementation score. The framework prescribes no target level - it helps an organisation understand where it is, where it aims to be, and what is required to get there.
+      https://unesdoc.unesco.org/ark:/48223/pf0000397145
+    min_score: 0
+    max_score: 4
+    scores_definition:
+    - score: 0
+      name: Not positioned
+      description: The category has not been assessed yet. Select a level from 1 to 4 to record the organisation's
+        current position. This is not a UNESCO maturity level.
+    - score: 1
+      name: Basic
+      description: This represents an initial state where processes are often undocumented, inconsistent,
+        reactive, or heavily reliant on individual efforts. At this level, there is typically limited
+        awareness or capability concerning AI.
+    - score: 2
+      name: Ready
+      description: Characterized as a managed state, this level means processes are documented and generally
+        followed, perhaps at a project or team level. Basic capabilities and standards are established
+        and repeatable, indicating a defined intent and growing awareness within the organisation.
+    - score: 3
+      name: Dynamic
+      description: At this defined and measured state, processes are standardized, integrated, and consistently
+        applied across relevant parts of the organisation. Performance is quantitatively measured and
+        actively managed, with practices becoming proactive rather than reactive.
+    - score: 4
+      name: Advanced
+      description: This optimized state signifies that processes are continuously improved based on quantitative
+        insights and feedback loops. The focus is on optimization, innovation, and proactive refinement,
+        with capabilities deeply embedded and strategically leveraged throughout the organization.
+    field_visibility:
+      score:
+        auditor: edit
+        respondent: hidden
+      is_scored:
+        auditor: edit
+        respondent: hidden
+      documentation_score:
+        auditor: hidden
+        respondent: hidden
+      status:
+        auditor: hidden
+        respondent: hidden
+      result:
+        auditor: hidden
+        respondent: hidden
+      extended_result:
+        auditor: hidden
+        respondent: hidden
+      respondent_alignment:
+        auditor: hidden
+        respondent: hidden
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Strategy & Value
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:1
+      ref_id: '1.1'
+      name: AI Vision & Ambition
+      description: |
+        This category assesses how clearly the organization defines the intended role and impact of AI in achieving its mission. A well-articulated AI vision provides direction, alignment, and motivation for AI initiatives.
+
+        **Importance:** An organization's AI vision sets the foundation for all AI activities. Without a clear vision, AI initiatives can become disjointed, tactical, and fail to deliver strategic value. The vision should articulate how AI will transform the organization's operations and services.
+
+        **Maturity levels**
+
+        - **Basic** — No defined AI vision exists, or only vague ideas. AI is mentioned without specific goals or is pursued opportunistically without clear direction.
+        - **Ready** — A high-level AI vision is documented and understood by key stakeholders. The organization has articulated some specific ways AI could benefit its mission, though connections to strategic objectives may be limited.
+        - **Dynamic** — The AI vision is clearly defined, communicated organization wide, and linked to measurable objectives. Specific AI-enabled capabilities are identified with expected outcomes. Leaders across departments understand and support the vision.
+        - **Advanced** — The AI vision is integrated into the core organizational strategy and regularly reviewed. It evolves based on results and changing technological landscape. The vision influences budgeting, resource allocation, and prioritization decisions. It has become part of how the organization defines its future state.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:1
+      ref_id: '1.2'
+      name: Strategic Alignment
+      description: |
+        This category examines the degree to which AI initiatives are planned and executed in support of core organizational strategies and goals, rather than as siloed technical projects.
+
+        **Importance:** Strategic alignment ensures AI investments create value in areas most important to the organization. Without alignment, AI projects may succeed technically but fail to advance strategic priorities or create meaningful impact.
+
+        **Maturity levels**
+
+        - **Basic** — AI initiatives are ad-hoc, with little connection to organizational goals. Projects are often technology-driven rather than needs-driven, and may be pursued based on individual interests rather than strategic fit.
+        - **Ready** — AI projects are assessed for alignment with strategic goals, but inconsistently. Some effort is made to connect AI initiatives to business needs, though the process may be informal or vary across the organization.
+        - **Dynamic** — A formal process ensures all significant AI initiatives directly support defined strategic priorities. Business cases include explicit links to strategic objectives. Alignment is tracked and reported. Non-aligned initiatives are deprioritized or redesigned.
+        - **Advanced** — AI capabilities proactively shape and enable new strategic goals. The organization regularly evaluates how emerging AI technologies might create new strategic opportunities. Alignment is continuously optimized, with resources dynamically allocated to maximize strategic impact.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:1
+      ref_id: '1.3'
+      name: Roadmap & Planning
+      description: |
+        This category evaluates the existence and quality of concrete plans outlining steps, resources, and timelines for AI adoption across the organization.
+
+        **Importance:** A well-structured AI roadmap translates vision into actionable plans, helping to sequence investments, prepare for dependencies, and manage expectations. It provides a framework for measuring progress and adjusting course as needed.
+
+        **Maturity levels**
+
+        - **Basic** — No AI roadmap exists; planning is short-term and project-specific. AI initiatives are approached in isolation, with minimal coordination. Timelines and resource needs are poorly defined.
+        - **Ready** — An initial AI roadmap with key milestones is documented but may lack detail or resources. The organization has identified a sequence of AI initiatives but may not have fully defined the enablers, dependencies, or specific resource requirements.
+        - **Dynamic** — A detailed, resourced AI roadmap exists, is actively managed, and integrated with organizational planning cycles. It includes capability building, data preparation, and foundational technology investments. Dependencies are identified and managed. Progress is tracked and the roadmap is updated regularly.
+        - **Advanced** — The AI roadmap is dynamic, continuously updated based on performance data, changing priorities, and foresight analysis. It includes contingency planning for different scenarios. The roadmap balances short-term wins with long-term capability building and is used to proactively identify and address potential obstacles.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:1.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:1
+      ref_id: '1.4'
+      name: Value Identification & Measurement
+      description: |
+        This category assesses the processes for identifying high impact AI use cases and systematically tracking the benefits and return on investment of AI initiatives.
+
+        **Importance:** Rigorous value identification and measurement enables organizations to select the most impactful AI investments and demonstrate returns, building confidence and support for continued investment. It also provides feedback to refine future initiatives.
+
+        **Maturity levels**
+
+        - **Basic** — AI use cases are chosen opportunistically; value is assumed or anecdotal. There's limited evaluation of potential benefits or prioritization based on value. Success metrics are vague or not defined.
+        - **Ready** — A process exists to identify potential AI use cases; basic value metrics (e.g., cost savings) are defined but inconsistently tracked. The organization attempts to estimate benefits but may not have systematic ways to measure or validate them after implementation.
+        - **Dynamic** — Standardized methodology for evaluating AI use case potential (feasibility, impact); value realization is systematically measured against predefined KPIs. Business cases include quantifiable metrics. Regular reviews assess value delivery against projections and identify optimization opportunities.
+        - **Advanced** — Value measurement is sophisticated (including strategic/intangible benefits), integrated into business cases, and used to optimize the AI portfolio continuously. Advanced techniques like A/B testing validate impacts. Value tracking influences resource allocation and future investment decisions. The organization can quantify AI's contribution to strategic objectives.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:1.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:1
+      ref_id: '1.5'
+      name: Innovation & Experimentation
+      description: |
+        This category examines the mechanisms and cultural support for exploring novel AI applications, including pilot projects and proof-of-concepts.
+
+        **Importance:** Innovation and experimentation enable organizations to learn about AI capabilities, test hypotheses at low cost, and identify promising opportunities before committing significant resources. They build organizational learning and reduce risk of larger investments.
+
+        **Maturity levels**
+
+        - **Basic** — Little or no experimentation with AI. The organization may be reluctant to invest in unproven concepts. Learning about AI is limited to reading or conferences rather than hands-on testing.
+        - **Ready** — Ad-hoc AI pilot projects are conducted; lessons learned are informal. Some teams may experiment with AI technologies but without systematic processes for sharing findings or scaling successful pilots.
+        - **Dynamic** — A structured process exists for AI experimentation (e.g., sandbox environments, pilot funding); results are documented and inform roadmap decisions. Successful experiments have clear paths to scaling. The organization allocates specific resources for innovation.
+        - **Advanced** — Proactive scouting for AI innovations; dedicated resources and processes for rapid experimentation and scaling; culture encourages calculated risk-taking. Innovation activities are linked to strategic priorities. The organization partners with external entities (academia, startups) to access emerging ideas. Failed experiments are valued for learning.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: People & Culture
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:2
+      ref_id: '2.1'
+      name: Talent & Skills
+      description: |
+        This category evaluates the organization's ability to define necessary AI roles, attract qualified personnel, and develop the workforce's AI competencies (both technical and non-technical).
+
+        **Importance:** AI success depends heavily on having the right skills and expertise available. Organizations need both specialized technical talent and widespread AI literacy to effectively implement and benefit from AI initiatives.
+
+        **Maturity levels**
+
+        - **Basic** — AI skills are scarce, roles undefined; reliance on external consultants or individual enthusiasts. The organization has not systematically identified required AI skills or established development paths. AI expertise is isolated.
+        - **Ready** — Key AI roles are defined; initial efforts to hire or train for specific AI skills are underway. The organization recognizes skill gaps and has begun to address them, though approaches may be reactive or inconsistent.
+        - **Dynamic** — Strategic workforce planning for AI roles; formal training programs and career paths exist; competency gaps are actively managed. Skills inventories are maintained and regularly updated. Development programs address both technical and non-technical AI-related skills.
+        - **Advanced** — Continuous AI skill development integrated into HR processes; internal mobility and cross-skilling are fostered; recognized internally/externally for AI talent. The organization has become an employer of choice for AI professionals. Learning is embedded in work processes. Skills development anticipates future needs.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:2
+      ref_id: '2.2'
+      name: Organizational Structure
+      description: |
+        This category examines how the entity organizes its AI efforts – defining roles (e.g., AI specialists, data scientists), responsibilities, and team configurations (like Centers of Excellence or embedded teams).
+
+        **Importance:** Effective organizational structures provide clear accountability for AI initiatives, ensure appropriate expertise is available where needed, and facilitate knowledge sharing and consistency across the organization.
+
+        **Maturity levels**
+
+        - **Basic** — No specific structure for AI; efforts are siloed within existing departments. AI responsibilities are not clearly assigned, creating gaps and overlaps. Knowledge sharing is limited or non-existent.
+        - **Ready** — Informal AI working groups or a designated point person exists. The organization has begun to create structures for coordination but may lack formal mandates or resources. Collaboration around AI is emerging but inconsistent.
+        - **Dynamic** — Formal AI team(s) or a Center of Excellence established with clear mandates and reporting lines. Roles and responsibilities are well-defined. Structures enable both specialized expertise and business integration. Governance bodies oversee cross-organizational AI initiatives.
+        - **Advanced** — Flexible, adaptive AI organizational models (e.g., federated, hub-and-spoke) are implemented and optimized based on needs; strong cross-functional collaboration. Structures evolve based on maturity and changing requirements. Interaction between centralized expertise and distributed implementation is seamless.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:2
+      ref_id: '2.3'
+      name: Leadership & Sponsorship
+      description: |
+        This category assesses the level of active support, commitment, and advocacy from senior leadership for AI initiatives.
+
+        **Importance:** Leadership commitment is crucial for securing resources, removing obstacles, driving change, and signaling organizational priorities. Without strong leadership support, AI initiatives often struggle to gain traction and sustain momentum.
+
+        **Maturity levels**
+
+        - **Basic** — Leadership awareness of AI is low; no clear sponsorship. Executives may see AI as primarily a technical matter rather than a strategic one. Support is passive or absent.
+        - **Ready** — Some leaders express interest or sponsor specific AI projects reactively. There may be isolated champions but not organization-wide support. Leaders approve resources but may not actively promote AI adoption.
+        - **Dynamic** — Visible executive sponsorship for the overall AI strategy; leaders actively communicate the importance of AI. Leadership regularly reviews progress of AI initiatives and holds teams accountable. Leaders model data-driven decision-making.
+        - **Advanced** — Leadership champions AI transformation, allocates strategic resources, removes barriers, and holds the organization accountable for AI goals. Leaders have a sophisticated understanding of AI's potential and limitations. They anticipate resistance and proactively address cultural challenges. AI leadership extends beyond the C-suite to all management levels.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:2
+      ref_id: '2.4'
+      name: Change Management & Adoption
+      description: |
+        This category examines strategies and processes to manage the human and organizational changes resulting from AI implementation and ensure user adoption.
+
+        **Importance:** AI often represents significant change to work processes, roles, and decision-making. Effective change management increases acceptance, accelerates adoption, and maximizes the benefits realized from AI investments.
+
+        **Maturity levels**
+
+        - **Basic** — AI is implemented with minimal consideration for organizational change or user impact. Technical aspects are prioritized over human factors. Users may resist or work around new AI capabilities.
+        - **Ready** — Basic communication and training accompany AI deployments. The organization recognizes the need for change management but approaches may be reactive or focus primarily on training rather than broader adoption factors.
+        - **Dynamic** — Formal change management methodology applied to AI initiatives, including stakeholder analysis, communication plans, and user support. Change implications are analyzed early in the project lifecycle. Adoption metrics are tracked. Feedback mechanisms exist.
+        - **Advanced** — Proactive and continuous change management; user feedback actively solicited and used to improve AI systems and adoption strategies; cultural integration is measured. Change management is tailored to different stakeholder groups. AI adoption is linked to performance management. The organization learns from previous change initiatives.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:2.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:2
+      ref_id: '2.5'
+      name: AI Literacy & Awareness
+      description: |
+        This category evaluates efforts to build a general understanding of AI concepts, capabilities, limitations, and ethical considerations across the workforce.
+
+        **Importance:** Widespread AI literacy enables better identification of opportunities, more realistic expectations, more effective collaboration with AI specialists, and more responsible use of AI capabilities throughout the organization.
+
+        **Maturity levels**
+
+        - **Basic** — General workforce has little understanding of AI. Misconceptions may be common. AI is seen as mysterious or threatening. Non-technical staff don't recognize potential applications in their work.
+        - **Ready** — Basic AI awareness training is offered or available sporadically. Some educational materials exist. Key stakeholders receive introduction to AI concepts, though depth of understanding varies widely.
+        - **Dynamic** — Structured AI literacy programs tailored to different roles are implemented across the organization. Training addresses both technical concepts and implications for work processes. Materials are regularly updated. Multiple learning formats are available.
+        - **Advanced** — Continuous learning opportunities exist; AI concepts are embedded in relevant business discussions; ethical awareness is widespread. Learning is contextual and applied. Staff at all levels can have informed conversations about AI's role in their work. The organization fosters a culture of curiosity and experimentation with AI.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Technology & Infrastructure
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:3
+      ref_id: '3.1'
+      name: AI Development Platforms & Tools
+      description: |
+        This category evaluates the availability, suitability, and effective use of software and tools for the entire AI lifecycle (data preparation, model building, training, testing, deployment).
+
+        **Importance:** Appropriate development platforms and tools enable AI practitioners to work efficiently, collaborate effectively, and create high-quality, maintainable AI solutions. They provide structure and consistency to AI development activities.
+
+        **Maturity levels**
+
+        - **Basic** — Reliance on individual developer tools or basic analytics software; no standardized AI platform. Tools may be chosen ad-hoc by individual practitioners. Limited collaboration capabilities. Workflow automation is minimal.
+        - **Ready** — Some common AI libraries/frameworks are used; exploration of cloud AI services or specific platforms begins. The organization is identifying preferred tools and beginning to standardize. Basic version control may exist, but full lifecycle management is limited.
+        - **Dynamic** — Standardized AI development platform(s) are adopted and supported, providing core functionalities (data prep, modeling, versioning). Tools support collaboration and knowledge sharing. Governance requirements are addressed. Training and support resources exist.
+        - **Advanced** — Integrated, enterprise-grade AI/ML platform supporting the full lifecycle; tools are optimized for productivity, collaboration, and governance; exploration of cutting-edge tools. Platforms integrate with broader IT landscape. Self-service capabilities exist where appropriate. Platform evolves based on user feedback and emerging needs.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:3
+      ref_id: '3.2'
+      name: Cloud & Compute Infrastructure
+      description: |
+        This category assesses access to adequate, scalable computing power (CPU, GPU), storage, and network resources, often leveraging cloud services, to support AI workloads.
+
+        **Importance:** AI models, particularly deep learning approaches, require significant computing resources. Appropriate infrastructure enables experimentation, efficient training of complex models, and scalable deployment of AI solutions.
+
+        **Maturity levels**
+
+        - **Basic** — Infrastructure limitations hinder AI experimentation; reliance on local machines. Computing resources are insufficient for serious AI development. Cloud services may be unavailable or restricted.
+        - **Ready** — Basic cloud services (storage, some compute) are used for AI projects; scalability is limited or managed manually. Some GPU resources may be available but access is constrained or inconsistent.
+        - **Dynamic** — Scalable cloud infrastructure specifically configured for AI workloads (including GPUs/TPUs where needed) is available and managed. Resource allocation processes are defined. Cost monitoring exists. Security requirements are addressed.
+        - **Advanced** — Optimized, hybrid/multi-cloud strategy for AI; infrastructure provisioning is automated and elastic; cost and performance are actively managed. Infrastructure decisions balance performance, cost, and sustainability. Specialized hardware accelerators are available where beneficial. Infrastructure adapts to changing workload patterns.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:3.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:3
+      ref_id: '3.3'
+      name: AI-Specific Architectures
+      description: |
+        This category examines the design of IT systems and infrastructure (e.g., using APIs, microservices) to readily accommodate and integrate AI components
+
+        **Importance:** AI-friendly architectures enable faster integration of AI capabilities into operational systems, greater flexibility to evolve AI components, and more efficient data flows to and from AI models.
+
+        **Maturity levels**
+
+        - **Basic** — Monolithic systems make AI integration difficult. Systems are rigid and closed. Data access requires custom extraction processes. Deploying AI models into production is cumbersome.
+        - **Ready** — Some systems expose data via APIs; initial consideration of AI in new system designs. The organization is beginning to adopt more modular approaches, though legacy constraints remain significant.
+        - **Dynamic** — Architectural patterns (e.g., microservices, event-driven) facilitating AI integration are adopted; standard interfaces for AI services exist. Reference architectures guide new developments. AI components can be deployed and updated independently.
+        - **Advanced** — Enterprise architecture explicitly designed for AI integration; reusable AI components and services are built and leveraged; real-time data streaming architectures support AI. Systems are design for flexibility and experimentation. Architecture enables continuous learning and adaptation of AI systems.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:3.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:3
+      ref_id: '3.4'
+      name: Data Science Environment
+      description: |
+        This category evaluates the provision of well-equipped, secure, and collaborative environments where data scientists and AI teams can work effectively.
+
+        **Importance:** Productive data science environments accelerate development, facilitate collaboration, enable reproducibility, and help attract and retain talent. They reduce time spent on setup and environment management.
+
+        **Maturity levels**
+
+        - **Basic** — Data scientists use isolated desktop tools; limited collaboration or access to resources. Development environments are individually maintained. Sharing code or results is difficult.
+        - **Ready** — Shared file systems or basic collaborative tools are used; access to some data sources is provided. Teams have mechanisms to share code and results, though workflows may still be largely manual.
+        - **Dynamic** — Standardized, secure, collaborative data science environment/workbench (cloud-based or on-prem) with access to necessary tools, data, and compute. Environments support version control, experiment tracking, and collaboration. Security requirements are addressed.
+        - **Advanced** — Highly optimized, integrated data science platform promoting collaboration, reproducibility, and efficiency; seamless integration with data sources and MLOps pipelines. Self-service capabilities enable rapid onboarding. Environments support specialized needs (e.g., deep learning, NLP). Usage analytics drive continuous improvement.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: AI Operations & Ecosystem
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:4
+      ref_id: '4.1'
+      name: Model Deployment & Management (MLOps)
+      description: |
+        This category assesses mature practices for reliably and repeatably deploying, monitoring, versioning, and retraining AI models in production environments.
+
+        **Importance:** MLOps practices bring software engineering discipline to AI development, ensuring models are deployed reliably, monitored effectively, and can evolve to maintain performance. They are essential for scaling AI beyond pilot projects.
+
+        **Maturity levels**
+
+        - **Basic** — Model deployment is manual, infrequent, and ad-hoc; no versioning or monitoring. The transition from development to production is high-friction. Processes are undefined and error-prone.
+        - **Ready** — Basic scripts or manual processes exist for deployment; some model versioning is practiced. The organization recognizes the need for more systematic approaches but implementation is incomplete.
+        - **Dynamic** — Automated CI/CD pipelines for ML models are implemented; standardized processes for deployment, monitoring, and rollback exist. Models are versioned and tracked. Testing frameworks validate model behavior before deployment.
+        - **Advanced** — Mature MLOps practices are fully integrated; automated retraining, A/B testing, comprehensive monitoring, and governance are standard; focus on efficiency and reliability. The full lifecycle from development to retirement is managed. Deployment strategies minimize disruption and enable safe experimentation.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:4
+      ref_id: '4.2'
+      name: Performance Monitoring & Optimization
+      description: |
+        This category evaluates continuously tracking the operational performance, accuracy, and fairness of deployed AI systems and making necessary adjustments.
+
+        **Importance:** AI models can degrade over time as data patterns change. Effective monitoring ensures models remain accurate, fair, and performant, enabling timely intervention when issues arise.
+
+        **Maturity levels**
+
+        - **Basic** — No monitoring of deployed AI models. Performance issues are detected only through user complaints or obvious failures. No mechanisms exist to measure ongoing accuracy or detect drift.
+        - **Ready** — Basic technical monitoring (uptime, errors) is in place; performance checked manually and infrequently. Some awareness of the need to verify model accuracy exists, but processes are ad-hoc.
+        - **Dynamic** — Automated monitoring of key AI performance metrics (accuracy, drift, fairness, latency) with alerting mechanisms. Thresholds are defined for intervention. Regular reporting on model performance is available to stakeholders.
+        - **Advanced** — Continuous, holistic monitoring of AI model performance and business impact; automated feedback loops for model retraining and optimization; proactive issue detection. Sophisticated approaches detect subtle changes in data distributions or model behavior. Performance insights drive continuous improvement.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:4
+      ref_id: '4.3'
+      name: Integration & Interoperability
+      description: |
+        This category examines ensuring AI systems can effectively exchange data and function within the existing IT landscape and business processes.
+
+        **Importance:** Effective integration ensures AI systems can access required data, deliver outputs to where they're needed, and operate as seamless components of broader business processes and technical systems.
+
+        **Maturity levels**
+
+        - **Basic** — AI models operate in isolation or require manual data transfer. Integration is minimal or highly customized. AI outputs may be manually interpreted and entered into operational systems.
+        - **Ready** — Point-to-point integrations are built for specific AI applications. Some automation exists but may be brittle. The organization recognizes the need for more standardized approaches.
+        - **Dynamic** — Standardized APIs and integration patterns are used for connecting AI systems with business processes and IT systems. Integration is part of the design process for AI solutions. Technical standards guide implementation.
+        - **Advanced** — Seamless integration via an enterprise service bus, event streams, or API gateway; AI services are easily discoverable and consumable across the organization. Integration is automated and monitored. Business processes are designed to leverage AI capabilities natively. Real-time data flows allow AI to be woven throughout operations.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:4
+      ref_id: '4.4'
+      name: External Collaboration & Partnerships
+      description: |
+        This category assesses leveraging knowledge, resources, and talent from outside the entity (e.g., academia, research institutions, other government bodies, industry).
+
+        **Importance:** External collaboration accelerates learning, provides access to specialized expertise, extends resource capabilities, and brings fresh perspectives. It can be especially valuable for public sector organizations with limited internal AI capabilities.
+
+        **Maturity levels**
+
+        - **Basic** — No external AI collaborations. The organization operates in isolation, missing opportunities to learn from or leverage external expertise or resources.
+        - **Ready** — Informal contacts or participation in general events; occasional ad hoc collaborations. The organization engages with external entities but without strategic focus or sustained relationships.
+        - **Dynamic** — Strategic partnerships with academia, research institutions, or other government bodies for specific AI projects or knowledge exchange. Partnerships have defined goals and governance. Benefits flow in both directions.
+        - **Advanced** — Active participation and leadership in AI ecosystems; systematic process for identifying, managing, and leveraging external partnerships; co-innovation initiatives. The organization has a reputation as a valuable partner. Partnerships advance strategic goals and create mutual value. Contributing to National Standardization Body AI technical committees and/or participating to AI related regulatory discussions.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:4.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:4
+      ref_id: '4.5'
+      name: Reusability & Shared Components
+      description: |
+        This category evaluates identifying and promoting the use of common AI platforms, tools, datasets, or model components across different projects or entities to improve efficiency.
+
+        **Importance:** Reusable components accelerate development, reduce duplication of effort, promote consistency, and enable smaller projects to benefit from capabilities that would be uneconomical to develop independently.
+
+        **Maturity levels**
+
+        - **Basic** — Every AI project starts from scratch. There's no awareness of or mechanism for reuse across projects. Knowledge and components remain siloed within teams.
+        - **Ready** — Awareness of potential for reuse; some code or components shared informally. The organization recognizes opportunities but lacks systematic approaches to enabling or promoting reuse.
+        - **Dynamic** — Processes and platforms exist to share and reuse AI models, data pipelines, features, or tools across teams/projects. Reusable components are documented and discoverable. Governance processes address ownership and maintenance.
+        - **Advanced** — Enterprise-wide strategy for building and leveraging reusable AI assets; active curation and promotion of shared components; measured impact of reuse. Architectural decisions consider reusability. Incentives encourage both contribution and use of shared components.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: AI Governance, Ethics & Risk
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:5
+      ref_id: '5.1'
+      name: AI Governance Framework
+      description: |
+        This category examines establishing clear rules, policies, decision-making processes, roles, and accountability structures specifically for AI initiatives.
+
+        **Importance:** Strong governance ensures AI initiatives are developed responsibly, align with organizational values and compliance requirements, and appropriately balance innovation with risk management.
+
+        **Maturity levels**
+
+        - **Basic** — No specific governance for AI; relies on general IT governance. AI initiatives proceed without specialized oversight, potentially creating unmanaged risks.
+        - **Ready** — Initial AI policies or guidelines are drafted; roles/responsibilities are informally assigned for specific projects. The organization recognizes the need for AI-specific governance but implementation is partial.
+        - **Dynamic** — Formal AI governance framework established with defined policies, processes, roles (e.g., AI review board), and accountability structures. Decision rights are clear. Governance processes are integrated into the AI lifecycle.
+        - **Advanced** — AI governance is integrated across the AI lifecycle, regularly reviewed and updated; proactive monitoring of policy adherence; contributes to external standards. Governance adapts to emerging risks and opportunities. The organization can demonstrate a mature, risk-based approach to AI governance.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:5
+      ref_id: '5.2'
+      name: Ethical Principles & Guidelines
+      description: |
+        This category assesses defining, adopting, and operationalizing ethical standards (e.g., fairness, non-discrimination, transparency, human oversight) for AI development and deployment.
+
+        **Importance:** Ethical guidelines are drawn from international frameworks and ensure that AI systems align with societal values and agreed ethical standards. They provide practical guidance for addressing ethical dilemmas and aim to protect citizens and users against harmful impacts. Applying ethical principles and guidelines builds trust with users and stakeholders.
+
+        **Maturity levels**
+
+        - **Basic** — Little awareness of AI ethics. The development and use AI do not start from a citizen-centric vision. Ethical considerations are not explicitly addressed in AI development. The focus is primarily on technical functionality rather than societal impact.
+        - **Ready** — General ethical principles are acknowledged; some discussion occurs for high-risk projects. The organization has started to recognize ethical dimensions but may lack structured processes to address them.
+        - **Dynamic** — The organisation established a clear framework of ethical principles. Ethical considerations are part of standard review processes, including practices such as bias testing, explainability checks, and ethical impact assessments. Responsibility for ethics is formally assigned, metrics are tracked, and design and deployment decisions are supported by structured stakeholder engagement.
+        - **Advanced** — Ethical principles are fully embedded in the organization’s culture, strategy, and throughout the AI lifecycle. The organisation refines its guidelines based on quantitative insights, evolving regulations, and societal expectations. There is internal monitoring via feedback loops and external stakeholders are engaged in ethical oversight. The organisation demonstrates leadership in responsible AI practices and sees trust as a strategic differentiator.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:5
+      ref_id: '5.3'
+      name: Risk Assessment & Mitigation
+      description: |
+        This category evaluates systematically identifying, analyzing, and managing potential risks associated with AI systems (e.g., bias amplification, security vulnerabilities, privacy infringements, societal impacts).
+
+        **Importance:** Proactive risk management prevents harmful outcomes, protects users and the organization, and enables innovation by creating frameworks for responsibly exploring new capabilities.
+
+        **Maturity levels**
+
+        - **Basic** — AI risks are not formally considered. Risk awareness is low. The organization may assume that general risk management is sufficient for AI-specific risks.
+        - **Ready** — Basic risk identification occurs for some AI projects, often reactively. Some awareness of AI-specific risks exists, but assessment may be superficial or inconsistent.
+        - **Dynamic** — Standardized process for AI risk assessment (including bias, fairness, security) aligned with frameworks (e.g., UNESCO RAM); mitigation plans are developed. Risk assessment is integrated into the AI development lifecycle. Different risk categories are recognized.
+        - **Advanced** — Proactive and continuous AI risk management integrated with enterprise risk management; quantitative risk analysis where possible; automated monitoring for risk indicators. Risk appetite is defined for different AI applications. Emerging risks are anticipated. Risk management evolves based on experience and external developments.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:5
+      ref_id: '5.4'
+      name: Compliance & Legal
+      description: |
+        This category assesses ensuring AI systems and their use comply with all relevant laws and regulations (e.g., EU AI Act, GDPR, sector-specific rules).
+
+        **Importance:** Compliance ensures AI systems meet legal requirements, avoiding penalties and reputational damage. It also provides a baseline for responsible AI development that protects individuals' rights and organizational interests.
+
+        **Maturity levels**
+
+        - **Basic** — Assumed compliance based on general regulations. Limited awareness of AI-specific legal requirements. Compliance verification is reactive or absent.
+        - **Ready** — Awareness of specific AI-related legal requirements (e.g., GDPR, AI Act); compliance checked manually for key projects. The organization has identified relevant regulations but may lack systematic processes to ensure compliance.
+        - **Dynamic** — Processes established to ensure and document AI compliance, and there are established processes to integrate different sets of expertise into compliance checks and existing legal review processes. Legal expertise is consulted during technical development and deployment. Compliance requirements are integrated into development methodologies. Documentation practices support compliance verification.
+        - **Advanced** — Proactive monitoring of the regulatory landscape; automated compliance checks integrated into MLOps; regular audits; active engagement with regulators and awareness of upcoming and emerging legislation around AI. Compliance is seen as an enabler rather than just a constraint but as a way to establish trust.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:5.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:5
+      ref_id: '5.5'
+      name: Transparency & Explainability
+      description: |
+        This category evaluates implementing techniques and processes to make AI decision-making processes understandable to relevant stakeholders (developers, users, auditors, citizens).
+
+        **Importance:** Explainability builds trust with users, enables effective oversight, facilitates debugging, and supports compliance with emerging transparency requirements. It allows humans to appropriately rely on AI systems.
+
+        **Maturity levels**
+
+        - **Basic** — AI models are treated as black boxes. There's little effort to explain how decisions are made. Documentation is minimal. Users are expected to trust outputs without explanation.
+        - **Ready** — Basic model documentation exists; some awareness of explainability needs. The organization recognizes the importance of transparency but may lack technical approaches to achieve it.
+        - **Dynamic** — Explainability techniques (e.g., SHAP, LIME) are applied where appropriate; documentation standards include explanations for relevant stakeholders. Appropriate levels of transparency are defined for different use cases and audiences.
+        - **Advanced** — Context-appropriate transparency is standard practice; explanations are tailored to different audiences (developers, users, citizens); research into improving explainability. The organization balances transparency with other considerations (e.g., performance, security). User feedback refines explanation approaches.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Data (AI-Specific Focus)
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:6
+      ref_id: '6.1'
+      name: AI Use Case Data Identification
+      description: |
+        This category assesses the ability to pinpoint and acquire the specific datasets needed for a particular AI project or application.
+
+        **Importance:** Successful AI development depends on having the right data. Effective identification processes ensure teams can find and access the specific data needed for their use cases, reducing delays and improving outcomes.
+
+        **Maturity levels**
+
+        - **Basic** — Difficulty identifying or accessing data needed for AI. Data discovery is manual and time-consuming. Sources may be unknown or inaccessible. Projects proceed with whatever data is convenient rather than optimal.
+        - **Ready** — Data needs for specific AI projects are identified, but sourcing can be ad-hoc and challenging. The organization has some processes to identify required data, though they may be inconsistent or incomplete.
+        - **Dynamic** — Systematic process for identifying, evaluating, and sourcing internal/external data relevant to planned AI use cases, leveraging data catalogs. Data requirements are defined early in project planning. Alternative data sources are considered when primary sources are unavailable.
+        - **Advanced** — Proactive identification of strategic data assets for future AI opportunities; established data acquisition/sharing partnerships. The organization anticipates data needs and positions itself to meet them. External data sources are continuously evaluated. Data acquisition is aligned with strategic AI priorities.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:6
+      ref_id: '6.2'
+      name: Data Readiness for AI
+      description: |
+        This category evaluates assessing and preparing data to meet the specific requirements of AI models, including quality checks, volume assessment, cleaning, transformation, feature engineering, and data labelling.
+
+        **Importance:** Data readiness directly impacts model performance. High-quality, well-prepared data enables more accurate, fair, and reliable AI models, while poor data leads to flawed outputs regardless of algorithmic sophistication.
+
+        **Maturity levels**
+
+        - **Basic** — Data used as-is; minimal cleaning or preparation specifically for AI. Data quality issues are addressed reactively when models fail. Preparation is manual and undocumented.
+        - **Ready** — Basic data cleaning and transformation performed for AI projects; quality issues often discovered late. Some standard preparation steps are followed, but approaches vary across projects.
+        - **Dynamic** — Standardized data preparation pipelines for AI, including quality checks, feature engineering, and labelling; data suitability is assessed early. Processes address common issues like missing values, outliers, and formatting. Data preparation is documented and reproducible.
+        - **Advanced** — Automated, reusable data preparation pipelines; sophisticated feature engineering; active learning for labelling; data quality/suitability continuously monitored for AI needs. The organization continuously improves preparation techniques based on model performance feedback. Advanced approaches like data augmentation are used where beneficial.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:6
+      ref_id: '6.3'
+      name: Data Access for AI Teams
+      description: |
+        This category assesses ensuring that AI development teams and operational systems have secure, efficient, and compliant access to the required data.
+
+        **Importance:** Efficient data access enables AI teams to develop and deploy models without unnecessary delays or workarounds. Proper access controls ensure compliance with security and privacy requirements while enabling legitimate use.
+
+        **Maturity levels**
+
+        - **Basic** — Accessing data is slow, manual, and bureaucratic. Access requests require multiple approvals or custom extractions. AI teams may resort to workarounds or use suboptimal data sources due to access barriers.
+        - **Ready** — Procedures exist for requesting data access, but may be inefficient; access granted to copies or extracts. Basic controls are in place, though processes may be cumbersome or inconsistent.
+        - **Dynamic** — Streamlined, policy-compliant processes for AI teams/systems to access necessary data; use of data platforms or virtualized access. Access is appropriate to sensitivity levels. Request processes are clear and well-documented.
+        - **Advanced** — Secure, self-service data access mechanisms (within policy boundaries) for AI teams; fine-grained access control; automated provisioning based on project needs. Access patterns are monitored and analyzed to improve processes. Access controls balance security with efficiency.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:6.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:6
+      ref_id: '6.4'
+      name: Synthetic Data Generation & Use
+      description: |
+        This category evaluates the capability to create artificial data for training or testing AI models, especially when real data is scarce or sensitive.
+
+        **Importance:** Synthetic data can overcome limitations of real data, including privacy constraints, imbalanced datasets, or scarce examples of edge cases. It enables testing in simulated scenarios and can accelerate development when acquiring real data would be time-consuming.
+
+        **Maturity levels**
+
+        - **Basic** — No use of synthetic data. The organization relies exclusively on real data, potentially limiting AI capabilities in areas where data is scarce, sensitive, or imbalanced.
+        - **Ready** — Awareness or initial experimentation with synthetic data generation tools for specific problems (e.g., balancing datasets). The organization recognizes potential benefits but lacks systematic approaches.
+        - **Dynamic** — Capability to generate and validate synthetic data for specific use cases (e.g., privacy preservation, augmenting limited data). Techniques are selected based on data characteristics. The quality and usefulness of synthetic data is evaluated.
+        - **Advanced** — Strategic use of synthetic data integrated into data strategy; robust validation processes; exploring advanced generation techniques (e.g., GANs for complex data). The organization leverages synthetic data to address multiple challenges and continuously improves generation techniques.
+    - urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:6.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:unesco-ai-maturity-framework:6
+      ref_id: '6.5'
+      name: Domain-Specific Data Understanding
+      description: |
+        This category assesses possessing the necessary subject matter expertise to interpret the data correctly and ensure its appropriate use within the context of the AI application.
+
+        **Importance:** Domain understanding ensures data is interpreted correctly, appropriate features are developed, and model outputs make sense in context. It helps avoid misuse or misinterpretation of data that could lead to flawed models despite technical excellence.
+
+        **Maturity levels**
+
+        - **Basic** — AI teams lack understanding of the data's business context. Technical staff work in isolation from domain experts. Assumptions about data meaning may be incorrect or oversimplified.
+        - **Ready** — Subject matter experts (SMEs) are consulted sporadically during AI projects. Some effort is made to understand data context, though collaboration is ad-hoc and knowledge transfer is limited.
+        - **Dynamic** — Close collaboration between AI teams and SMEs throughout the lifecycle; data documentation includes business context. Knowledge transfer is systematic. Domain experts actively participate in model design and evaluation.
+        - **Advanced** — AI teams possess strong domain knowledge or have embedded SMEs; data understanding is systematically captured and leveraged (e.g., feature stores with business definitions). Domain context shapes the entire AI development process. Techniques like knowledge graphs may formalize domain understanding.
