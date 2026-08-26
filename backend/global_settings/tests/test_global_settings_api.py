@@ -3,7 +3,6 @@ from typing import Final, Literal
 import json
 
 import pytest
-from django.urls import reverse
 from knox.models import AuthToken
 from rest_framework.test import APIClient
 from django.conf import settings
