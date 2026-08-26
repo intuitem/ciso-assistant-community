@@ -110,7 +110,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Automatic mapping
 - Mapping explorer
 - Custom frameworks supported
-- +167 frameworks included
+- +200 frameworks included
 - Policies management
 - Document management
 - Evidence management
@@ -302,7 +302,7 @@ Read more here: [AI engine](backend/chat/README.md)
 68. Federal Trade Commission (FTC) Standards for Safeguarding Customer Information 🇺🇸
 69. OWASP's checklist for LLM governance and security 🌐
 70. ANSSI : Recommandations pour les architectures des systèmes d’information sensibles ou à diffusion restreinte (v1.2) 🇫🇷
-71. CIS benchmark for Kubernetes v1.10 🌐
+71. CIS Benchmarks — Kubernetes (v1.10, v2.0.1), AWS, Azure, GCP, Microsoft 365, Google Workspace, GitHub, GitLab, Debian 12/13, Ubuntu 24.04 LTS, Windows 11 🌐
 72. De tekniske minimumskrav for statslige myndigheder 🇩🇰
 73. Google SAIF framework 🤖
 74. ANSSI : Recommandations relatives à l'administration sécurisée des SI (v3.0) 🇫🇷
@@ -352,6 +352,12 @@ Read more here: [AI engine](backend/chat/README.md)
 118. NCSC - Cyber Assessment Framework (CAF) v4.0 🇬🇧
 119. Algemene Beveiligingseisen voor Rijksoverheidsopdrachten (ABRO) 2026 🇳🇱
 120. Algemene Beveiligingseisen voor Defensieopdrachten (ABDO) 2019 🇳🇱
+121. ANSSI : Cybersécurité des systèmes industriels - Mesures détaillées 🇫🇷🏭
+122. Cbw (NIS2) Control Framework v1.2 🇳🇱
+123. ENISA SME Cyber Resilience Maturity Assessment (CRA) 🇪🇺
+124. ISO 27701:2025 outline - Privacy Information Management System, including Annex A 🌐
+125. Plumber CI/CD Security Checks 🖥️
+126. UNESCO AI Maturity Framework 🤖🌐
 
 ### Community contributions
 
