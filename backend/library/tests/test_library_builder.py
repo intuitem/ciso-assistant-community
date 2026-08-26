@@ -274,6 +274,41 @@ def test_validation_rejects_cross_framework_parent_urn():
 
 
 @pytest.mark.django_db
+def test_validation_warns_on_assessable_splash_node():
+    """Splash screens are never assessable; the loader forces the flag off on
+    import, so the draft author is warned about the divergence."""
+    draft = LibraryDraft(
+        name="splashy",
+        packager="me",
+        ref_id="splashy",
+        version=1,
+        urn="urn:me:risk:library:splashy",
+        content={
+            "frameworks": [
+                {
+                    "urn": "urn:me:risk:framework:splashy",
+                    "ref_id": "S",
+                    "name": "S",
+                    "requirement_nodes": [
+                        {
+                            "urn": "urn:me:risk:req_node:splashy:intro",
+                            "assessable": True,
+                            "display_mode": "splash",
+                        }
+                    ],
+                }
+            ]
+        },
+    )
+    validation = builder.validate_draft_document(draft)
+    assert validation["errors"] == []
+    assert any(
+        "splashy:intro" in warning and "non-assessable" in warning
+        for warning in validation["warnings"]
+    ), validation["warnings"]
+
+
+@pytest.mark.django_db
 def test_validate_backfills_missing_framework_ref_id():
     """Migrated drafts may lack the framework ref_id; the assembled document
     derives it from the URN leaf."""
