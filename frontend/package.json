@@ -5,7 +5,7 @@
 	"scripts": {
 		"prepare": "svelte-kit sync",
 		"dev": "vite dev",
-		"build": "paraglide-js compile --project ./project.inlang && vite build",
+		"build": "paraglide-js compile --project ./project.inlang --output-structure locale-modules && vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
@@ -22,7 +22,7 @@
 		"coverage": "vitest run --coverage",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
-		"postinstall": "paraglide-js compile --project ./project.inlang"
+		"postinstall": "paraglide-js compile --project ./project.inlang --output-structure locale-modules"
 	},
 	"devDependencies": {
 		"@axe-core/playwright": "^4.13.0",
@@ -34,8 +34,8 @@
 		"@svelte-put/qr": "^1.2.1",
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/adapter-node": "^5.5.7",
-		"@sveltejs/kit": "^2.70.2",
-		"@sveltejs/vite-plugin-svelte": "^6.2.4",
+		"@sveltejs/kit": "^2.70.3",
+		"@sveltejs/vite-plugin-svelte": "^7.3.0",
 		"@tailwindcss/forms": "^0.5.11",
 		"@tailwindcss/typography": "^0.5.20",
 		"@tailwindcss/vite": "^4.3.3",
@@ -67,7 +67,7 @@
 		"tailwindcss": "^4.3.3",
 		"tslib": "^2.8.1",
 		"typescript": "^5.9.3",
-		"vite": "^7.3.6",
+		"vite": "^8.2.2",
 		"vitest": "^4.1.10",
 		"zod": "^4.4.3"
 	},
