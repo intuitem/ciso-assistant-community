@@ -56,7 +56,7 @@ class Reason:
     NO_NEED_FOR_STANDARD_USER_READ = "There's no need for users (beside admin loading the settings edition form) from reading these settings."
     ITS_OPEN_SOURCE_ANYWAY = "The data returned by this endpoint can be known by anyone as the application is open-source anyway."
     SENSITIVE_SETTINGS = "This kind of settings is considered sensitive, so we don't want anyone to see it except the admin."
-    NON_SENSITIVE_SETTINGS = "Only admins MUST be able to view these settinhs, as these settings are considered sensitive."
+    NON_SENSITIVE_SETTINGS = "These settings aren't sensitive and can be usefull to users, so any user can read it."
     NON_SENSITIVE_DATA = "The data returned by this endpoint is considered as non-sensitive so we don't hide them from users."
     NON_ADMIN_SHALL_NOT_CHANGE_SETTINGS = "Only an admin SHALL be able to change any kind of global settings (A non-admin user SHALL NOT be able to do it)"
     SETTINGS_ARE_NOT_DELETABLE = (

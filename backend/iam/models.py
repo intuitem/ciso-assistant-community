@@ -1512,8 +1512,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         model: type[models.Model],
         id: uuid.UUID,
     ) -> bool:
-        from core.models import Actor, Team, FilteringLabel
-        from tprm.models import Entity
+        from core.models import Actor, FilteringLabel
 
         if not isinstance(user, User):
             return False
@@ -1529,17 +1528,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             if not isinstance(obj, Actor):
                 raise AssertionError("Unreachable.")
 
-            if obj.user is not None:
-                model = User
-                obj = obj.user
-            elif obj.team is not None:
-                model = Team
-                obj = obj.team
-            elif obj.entity is not None:
-                model = Entity
-                obj = obj.entity
-            else:
-                raise AssertionError("Invalid actor (unknown Actor kind).")
+            obj = obj.specific
+            model = type(obj)
 
         if perm_prefix == "add" and model is FilteringLabel:
             return RoleAssignment.get_allowed_folder_ids(
