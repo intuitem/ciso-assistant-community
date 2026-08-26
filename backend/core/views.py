@@ -12243,6 +12243,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             implementation_groups = None
         tree = filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, compliance_assessment)
+        annotate_tree_with_coverage(tree, compliance_assessment)
         return Response(tree)
 
     @action(detail=True, methods=["get"])
@@ -12306,6 +12307,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             implementation_groups = None
         tree = filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, compliance_assessment)
+        annotate_tree_with_coverage(tree, compliance_assessment)
 
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
