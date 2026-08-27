@@ -48,6 +48,35 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
     # Value of the setting.
     value = models.JSONField(default=dict)
 
+    GENERAL_DEFAULT_VALUE = {
+        "security_objective_scale": "1-4",
+        "ebios_radar_max": 6,
+        "ebios_radar_green_zone_radius": 0.2,
+        "ebios_radar_yellow_zone_radius": 0.9,
+        "ebios_radar_red_zone_radius": 2.5,
+        "notifications_enable_mailing": False,
+        "interface_agg_scenario_matrix": False,
+        "risk_matrix_swap_axes": False,
+        "risk_matrix_flip_vertical": False,
+        "risk_matrix_labels": "ISO",
+        "currency": "€",
+        "daily_rate": 500,
+        "mapping_max_depth": 3,
+        "allow_self_validation": False,
+        "show_warning_external_links": True,
+        "show_get_started": True,
+        "personal_folders": False,
+        "builtin_metrics_retention_days": 730,  # 2 years default, minimum is 1
+        "allow_assignments_to_entities": False,
+        "enforce_mfa": False,
+        "default_language": "en",
+        "default_custom_analytics_dashboard": None,
+        "default_packager": "custom",
+        "disable_partially_compliant_result": False,
+        "use_risk_category_label": False,
+    }
+    """Default `value` used when creating a new `GENERAL` GlobalSetting. """
+
     class Meta:
         permissions = [
             ("view_central_auditlog", "Can access the central audit log"),
