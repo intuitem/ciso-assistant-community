@@ -17676,7 +17676,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             ).distinct()
         return qs
 
-    EDITABLE_STATUSES = ("draft", "in_progress")  # Keep the tuple type
+    EDITABLE_STATUSES = ("draft",)  # Keep the tuple type
 
     def update(self, request, *args, **kwargs):
         assignment = self.get_object()
@@ -17732,9 +17732,6 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             "reviewer_only": True,
             "observation": "clear",
         },
-        # Reviewers can send an assignment back to draft from any non-editable
-        # status to unlock it for editing (e.g. reassigning to another actor),
-        # since update/partial_update/destroy are only allowed in EDITABLE_STATUSES.
         ("submitted", "draft"): {
             "reviewer_only": True,
             "observation": "clear",
