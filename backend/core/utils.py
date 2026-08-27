@@ -19,7 +19,19 @@ from uuid import UUID
 # Re-export so callers can import from a single utils module.
 from .friendly_names import generate_friendly_name  # noqa: F401
 
+import yaml
+
+try:
+    from yaml import CSafeLoader as _YamlSafeLoader
+except ImportError:  # libyaml unavailable
+    from yaml import SafeLoader as _YamlSafeLoader
+
 logger = structlog.get_logger(__name__)
+
+
+def yaml_safe_load(stream):
+    """yaml.safe_load backed by libyaml when available (~10x faster)."""
+    return yaml.load(stream, Loader=_YamlSafeLoader)
 
 
 def extract_node_id(urn: str | None) -> str | None:
