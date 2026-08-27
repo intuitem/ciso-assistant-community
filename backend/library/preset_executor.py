@@ -469,7 +469,7 @@ class PresetExecutor:
             return None
         try:
             return model_class.objects.filter(id=obj_id).first()
-        except (ValueError, ValidationError):
+        except ValueError, ValidationError:
             return None
 
     def _find_existing_risk_scenario(self, name: str, risk_assessment_id: str):
