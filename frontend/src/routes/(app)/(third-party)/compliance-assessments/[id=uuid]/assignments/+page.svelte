@@ -270,20 +270,26 @@
 		nodes: [string, Node][],
 		hasParentNode: boolean = false
 	): TreeViewNode[] {
-		return nodes
-			.filter(([_, node]) => node.display_mode !== 'splash')
-			.map(([id, node]) => {
-				const nodeId = node.ra_id || id;
-				const assignmentInfo = node.ra_id ? getAssignmentInfo(node.ra_id) : null;
-				const isAssigned = node.ra_id ? assignedRequirementIds.has(node.ra_id) : false;
+		return nodes.flatMap(([id, node]): TreeViewNode[] => {
+			// Splash screens are informational and not assignable, but their
+			// children are: hoist the subtree in place of the splash node.
+			if (node.display_mode === 'splash') {
+				return node.children
+					? transformToTreeView(Object.entries(node.children), hasParentNode)
+					: [];
+			}
+			const nodeId = node.ra_id || id;
+			const assignmentInfo = node.ra_id ? getAssignmentInfo(node.ra_id) : null;
+			const isAssigned = node.ra_id ? assignedRequirementIds.has(node.ra_id) : false;
 
-				// Get all assessable descendant IDs for batch selection
-				const childrenIds = node.assessable ? [] : getAssessableDescendantIds(node);
+			// Get all assessable descendant IDs for batch selection
+			const childrenIds = node.assessable ? [] : getAssessableDescendantIds(node);
 
-				// For section nodes, get aggregated assignment info
-				const sectionAssignments = node.assessable ? [] : getSectionAssignments(node);
+			// For section nodes, get aggregated assignment info
+			const sectionAssignments = node.assessable ? [] : getSectionAssignments(node);
 
-				return {
+			return [
+				{
 					id: nodeId,
 					content: TreeViewItemContentSimple,
 					contentProps: {
@@ -307,8 +313,9 @@
 						assignmentInfo
 					},
 					children: node.children ? transformToTreeView(Object.entries(node.children), true) : []
-				};
-			});
+				}
+			];
+		});
 	}
 
 	let treeViewNodes = $derived(transformToTreeView(Object.entries(data.tree)));

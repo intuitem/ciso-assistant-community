@@ -6101,5 +6101,11 @@
 	"validationInTerminalState": "This validation is closed and can no longer be modified",
 	"validationStatusTransitionNotAllowed": "Cannot move this validation from '{fromStatus}' to '{toStatus}'",
 	"validationMustStartAsSubmitted": "A new validation request must start in the 'submitted' status",
-	"showingMostRecentValidations": "Showing the {count} most recent validations out of {total}"
+	"showingMostRecentValidations": "Showing the {count} most recent validations out of {total}",
+	"withAppliedControls": "With applied controls",
+	"withoutAppliedControls": "Without applied controls",
+	"withEvidence": "With evidences",
+	"withoutEvidence": "Without evidences",
+	"evidenceCoverageHint": "direct or through applied controls",
+	"bothEvidence": "Direct and indirect"
 }

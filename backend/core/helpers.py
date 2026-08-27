@@ -629,6 +629,48 @@ def filter_graph_by_implementation_groups(
     return filtered_graph
 
 
+def annotate_tree_with_coverage(tree: dict[str, dict], compliance_assessment) -> dict:
+    """Flag each assessed node with whether it is covered by applied controls
+    and by evidence.
+
+    ``has_evidence`` follows RequirementAssessment.has_evidence(): evidence
+    attached directly to the requirement assessment OR reachable through one
+    of its applied controls.
+
+    Keys are only emitted when True, so an uncovered audit — the case the
+    coverage filter exists for — costs nothing in payload size.
+    """
+    ac_through = RequirementAssessment.applied_controls.through.objects.filter(
+        requirementassessment__compliance_assessment=compliance_assessment
+    )
+    with_controls = set(ac_through.values_list("requirementassessment_id", flat=True))
+    with_evidence = set(
+        RequirementAssessment.evidences.through.objects.filter(
+            requirementassessment__compliance_assessment=compliance_assessment
+        ).values_list("requirementassessment_id", flat=True)
+    ) | set(
+        ac_through.filter(appliedcontrol__evidences__isnull=False).values_list(
+            "requirementassessment_id", flat=True
+        )
+    )
+
+    def _annotate(node: dict):
+        ra_id = node.get("ra_id")
+        if ra_id:
+            ra_uuid = UUID(ra_id)
+            if ra_uuid in with_controls:
+                node["has_applied_controls"] = True
+            if ra_uuid in with_evidence:
+                node["has_evidence"] = True
+        for child in node.get("children", {}).values():
+            _annotate(child)
+
+    for node in tree.values():
+        _annotate(node)
+
+    return tree
+
+
 def enrich_tree_for_soa(
     tree: dict,
     ra_lookup: dict,

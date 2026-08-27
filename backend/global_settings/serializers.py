@@ -112,26 +112,6 @@ LLM_URL_DEFAULTS = {
 }
 
 
-class GlobalSettingsSerializer(serializers.ModelSerializer):
-    def create(self, validated_data):
-        raise serializers.ValidationError(
-            "Global settings can only be created through data migrations."
-        )
-
-    def delete(self, instance):
-        raise serializers.ValidationError(
-            "Global settings can only be deleted through data migrations."
-        )
-
-    def update(self, instance, validated_data):
-        validated_data.pop("name")
-        return super().update(instance, validated_data)
-
-    class Meta:
-        model = GlobalSettings
-        fields = ["id", "name", "created_at", "updated_at"]
-
-
 class GeneralSettingsSerializer(serializers.ModelSerializer):
     conversion_rate = serializers.FloatField(
         write_only=True, required=False, default=1.0
