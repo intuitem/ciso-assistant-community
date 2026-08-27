@@ -17,7 +17,6 @@ from knox.models import AuthToken
 import core.views as core_views
 from core.apps import startup
 from core.models import (
-    Actor,
     ComplianceAssessment,
     Framework,
     Perimeter,
