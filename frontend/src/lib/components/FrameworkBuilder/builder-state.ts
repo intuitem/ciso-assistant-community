@@ -545,6 +545,20 @@ export function withTranslation(
 	return { ...current, [lang]: langDict };
 }
 
+/**
+ * Whether a requirement passes an implementation-group filter.
+ * Mirrors audit semantics (ComplianceAssessment.get_requirement_assessments):
+ * with a selection active, a requirement is kept only if its own IGs
+ * intersect the selection — requirements with no IGs are excluded.
+ */
+export function nodePassesIgFilter(
+	implementationGroups: string[] | null | undefined,
+	selected: ReadonlySet<string>
+): boolean {
+	if (selected.size === 0) return true;
+	return (implementationGroups ?? []).some((g) => selected.has(g));
+}
+
 /** Serialize a single RequirementNode into its flat persistence shape. */
 export function serializeNode(n: RequirementNode): Record<string, unknown> {
 	return {
