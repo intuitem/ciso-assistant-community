@@ -636,3 +636,35 @@ class TestPresetExecutorExistingDomain:
 
         assert Perimeter.objects.filter(folder=folder).count() == 1
         assert Perimeter.objects.get(folder=folder).name == "Renamed perimeter"
+
+    def test_journey_list_queries_stored_library_once_per_urn(self):
+        """Serializing many journeys of one preset must not repeat the version lookup."""
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        from core.models import PresetJourney
+        from core.serializers import PresetJourneyReadSerializer
+
+        root = Folder.get_root_folder()
+        user = User.objects.create_user(email="preset11@example.com", password="secret")
+        _create_test_libraries(root)
+
+        folder = Folder.objects.create(
+            parent_folder=root,
+            name="Existing Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+
+        preset_library = _create_preset_library(root, scaffolded_objects=[], steps=[])
+        for _ in range(3):
+            PresetExecutor(preset_library, user).apply(folder_id=str(folder.id))
+
+        journeys = PresetJourney.objects.all()
+        with CaptureQueriesContext(connection) as ctx:
+            data = PresetJourneyReadSerializer(journeys, many=True).data
+
+        lookups = [
+            q for q in ctx.captured_queries if "storedlibrary" in q["sql"].lower()
+        ]
+        assert len(data) == 3
+        assert len(lookups) == 1

@@ -4967,12 +4967,17 @@ class PresetJourneyReadSerializer(BaseModelSerializer):
         if obj.preset.urn:
             # The Preset row can lag behind a newer stored library; `upgrade`
             # upserts from it, so the badge must look at the same source.
-            stored_version = (
-                StoredLibrary.objects.filter(urn=obj.preset.urn)
-                .order_by("-version")
-                .values_list("version", flat=True)
-                .first()
-            )
+            # Cached on the shared root context so a list costs one query per
+            # distinct URN rather than one per journey.
+            cache = self.context.setdefault("_stored_versions", {})
+            if obj.preset.urn not in cache:
+                cache[obj.preset.urn] = (
+                    StoredLibrary.objects.filter(urn=obj.preset.urn)
+                    .order_by("-version")
+                    .values_list("version", flat=True)
+                    .first()
+                )
+            stored_version = cache[obj.preset.urn]
             if stored_version:
                 return max(stored_version, obj.preset.version)
         return obj.preset.version
