@@ -205,6 +205,11 @@ class TestCustomMetricSampleWriteSerializerValidatesValueShape:
 
         assert "value" in errors
 
+    def test_rejects_float_choice_index_member(self, qualitative_instance):
+        errors = self._errors_for_value(qualitative_instance, {"choice_index": 2.0})
+
+        assert "value" in errors
+
     def test_rejects_choice_index_below_minimum(self, qualitative_instance):
         errors = self._errors_for_value(qualitative_instance, {"choice_index": 0})
 

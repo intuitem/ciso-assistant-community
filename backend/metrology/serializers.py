@@ -190,9 +190,8 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
         if metric_instance is None:
             return attrs
 
-        schema = VALUE_SCHEMA_BY_CATEGORY.get(
-            metric_instance.metric_definition.category
-        )
+        category = metric_instance.metric_definition.category
+        schema = VALUE_SCHEMA_BY_CATEGORY.get(category)
         if schema is None:
             return attrs
 
@@ -200,6 +199,13 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
             jsonschema.validate(value, schema)
         except jsonschema.exceptions.ValidationError as e:
             raise serializers.ValidationError({"value": e.message})
+
+        if category == MetricDefinition.Category.QUALITATIVE:
+            choice_index = value.get("choice_index")
+            if not isinstance(choice_index, int):
+                raise serializers.ValidationError(
+                    {"value": "choice_index must be an integer, not a float."}
+                )
 
         return attrs
 
