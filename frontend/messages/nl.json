@@ -5551,5 +5551,11 @@
 	"chatRemoveAttachment": "Bijlage verwijderen",
 	"dataWizardDownloadTemplate": "Download het Excel-sjabloon",
 	"previewTooLarge": "Het bestand is te groot om een voorbeeld te bekijken. Download het om de inhoud te bekijken.",
-	"previewTruncated": "Voorbeeld is afgekapt. Download het bestand om alles te zien."
+	"previewTruncated": "Voorbeeld is afgekapt. Download het bestand om alles te zien.",
+	"savedFilters": "Opgeslagen filters",
+	"saveFilter": "Filter opslaan",
+	"personalFilters": "Persoonlijk",
+	"sharedFilters": "Gedeeld",
+	"noSavedFilters": "Geen opgeslagen filters",
+	"shareToDomain": "Delen met een domein"
 }

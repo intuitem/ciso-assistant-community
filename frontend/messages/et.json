@@ -4897,5 +4897,11 @@
 	"scimTokenGenerationFailed": "SCIM-i tokeni loomine ebaõnnestus",
 	"idpGroup": "IdP rühm",
 	"idpGroups": "IdP rühmad",
-	"idpGroupsDescription": "Luba IdP rühmade föderatsioon (SCIM ettevalmistamine, IdP rühmade vastendused ja kasutajate IdP rühmade liikmesused)."
+	"idpGroupsDescription": "Luba IdP rühmade föderatsioon (SCIM ettevalmistamine, IdP rühmade vastendused ja kasutajate IdP rühmade liikmesused).",
+	"savedFilters": "Salvestatud filtrid",
+	"saveFilter": "Salvesta filter",
+	"personalFilters": "Isiklikud",
+	"sharedFilters": "Jagatud",
+	"noSavedFilters": "Salvestatud filtreid pole",
+	"shareToDomain": "Jaga valdkonnaga"
 }

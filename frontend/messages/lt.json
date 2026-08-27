@@ -4639,5 +4639,11 @@
 	"scimTokenGenerationFailed": "Nepavyko sugeneruoti SCIM žetono",
 	"idpGroup": "IdP grupė",
 	"idpGroups": "IdP grupės",
-	"idpGroupsDescription": "Įjungti IdP grupių federaciją (SCIM teikimas, IdP grupių susiejimai ir naudotojų narystės IdP grupėse)."
+	"idpGroupsDescription": "Įjungti IdP grupių federaciją (SCIM teikimas, IdP grupių susiejimai ir naudotojų narystės IdP grupėse).",
+	"savedFilters": "Išsaugoti filtrai",
+	"saveFilter": "Išsaugoti filtrą",
+	"personalFilters": "Asmeniniai",
+	"sharedFilters": "Bendrinami",
+	"noSavedFilters": "Nėra išsaugotų filtrų",
+	"shareToDomain": "Bendrinti su sritimi"
 }

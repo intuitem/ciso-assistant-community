@@ -3712,5 +3712,11 @@
 	"workshopThree": "Workshop 3",
 	"workshopTwo": "Workshop 2",
 	"workshops": "Workshop",
-	"yearlyTasksReview": "Riepilogo attività aggregate"
+	"yearlyTasksReview": "Riepilogo attività aggregate",
+	"savedFilters": "Filtri salvati",
+	"saveFilter": "Salva filtro",
+	"personalFilters": "Personali",
+	"sharedFilters": "Condivisi",
+	"noSavedFilters": "Nessun filtro salvato",
+	"shareToDomain": "Condividi con un dominio"
 }

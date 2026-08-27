@@ -150,7 +150,6 @@
 					const number = data.count ?? 0;
 					if (number <= 0) return;
 				});
-				fetch('/fe-api/sync-saved-filters', { method: 'POST' }).catch(() => {});
 			}
 		}
 	});

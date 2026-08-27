@@ -180,9 +180,7 @@ class TestSavedFilterReferenceVisibility:
         # ...but the reference to an inaccessible object is masked, while an
         # unrelated (non-referencing) field is left untouched.
         assert results[str(sf.id)]["properties"]["id"] == [{}]
-        assert results[str(sf.id)]["properties"]["status"] == [
-            {"value": "in_progress"}
-        ]
+        assert results[str(sf.id)]["properties"]["status"] == [{"value": "in_progress"}]
 
     def test_reader_with_access_to_referenced_audit_sees_unmasked_value(
         self, authenticated_client
@@ -255,7 +253,9 @@ class TestPersonalSavedFilters:
         assert any(e["id"] == entry_id for e in resp.json())
 
         resp = client.patch(
-            f"{SAVED_FILTERS_URL}personal/{entry_id}/", {"name": "renamed"}, format="json"
+            f"{SAVED_FILTERS_URL}personal/{entry_id}/",
+            {"name": "renamed"},
+            format="json",
         )
         assert resp.status_code == status.HTTP_200_OK, resp.content
         assert resp.json()["name"] == "renamed"
@@ -265,75 +265,3 @@ class TestPersonalSavedFilters:
 
         resp = client.get(f"{SAVED_FILTERS_URL}personal/")
         assert not any(e["id"] == entry_id for e in resp.json())
-
-
-@pytest.mark.django_db
-class TestSavedFilterSync:
-    def test_sync_updates_personal_filter_from_shared(self, authenticated_client):
-        domain = _make_domain("sync")
-        manager = _make_role_user(domain, RoleCodename.DOMAIN_MANAGER.value)
-        sf = SavedFilter.objects.create(
-            name="shared",
-            folder=domain,
-            content_type=_compliance_assessment_content_type(),
-            properties={"status": [{"value": "in_progress"}]},
-        )
-        entry = manager.add_saved_filter(
-            name="my copy",
-            model="core.complianceassessment",
-            properties=sf.properties,
-            shared_id=str(sf.id),
-        )
-
-        sf.properties = {"status": [{"value": "done"}]}
-        sf.save()
-
-        resp = _client_for(manager).post(f"{SAVED_FILTERS_URL}sync/")
-        assert resp.status_code == status.HTTP_200_OK, resp.content
-        assert entry["id"] in resp.json()["refreshed"]
-
-        manager.refresh_from_db()
-        updated_entry = next(
-            e for e in manager.get_saved_filters() if e["id"] == entry["id"]
-        )
-        assert updated_entry["properties"] == {"status": [{"value": "done"}]}
-
-    def test_sync_masks_values_the_user_lost_access_to(self, authenticated_client):
-        """Sync still refreshes a personal copy whose shared source changed,
-        but masks the values the user can no longer read instead of either
-        leaking them or skipping the sync entirely."""
-        domain_a = _make_domain("sync-a")
-        domain_b = _make_domain("sync-b")
-        framework = _make_framework()
-        audit_b = _make_audit(domain_b, framework)
-
-        sf = SavedFilter.objects.create(
-            name="shared",
-            folder=domain_a,
-            content_type=_compliance_assessment_content_type(),
-            properties={"id": [{"value": str(audit_b.id)}]},
-        )
-        reader = _make_role_user(domain_a, RoleCodename.READER.value)
-        entry = reader.add_saved_filter(
-            name="my copy",
-            model="core.complianceassessment",
-            properties={"status": [{"value": "in_progress"}]},
-            shared_id=str(sf.id),
-        )
-
-        sf.properties = {
-            "id": [{"value": str(audit_b.id)}],
-            "status": [{"value": "done"}],
-        }
-        sf.save()
-
-        resp = _client_for(reader).post(f"{SAVED_FILTERS_URL}sync/")
-        assert resp.status_code == status.HTTP_200_OK, resp.content
-        assert entry["id"] in resp.json()["refreshed"]
-
-        reader.refresh_from_db()
-        updated_entry = next(
-            e for e in reader.get_saved_filters() if e["id"] == entry["id"]
-        )
-        assert updated_entry["properties"]["id"] == [{}]
-        assert updated_entry["properties"]["status"] == [{"value": "done"}]

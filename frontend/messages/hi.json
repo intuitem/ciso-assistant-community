@@ -1637,5 +1637,11 @@
 	"idpGroup": "IdP समूह",
 	"idpGroups": "IdP समूह",
 	"idpGroupsDescription": "IdP समूह फ़ेडरेशन सक्षम करें (SCIM प्रावधान, IdP समूह मैपिंग, और उपयोगकर्ताओं पर IdP समूह सदस्यताएँ)।",
-	"ebiosRmStudyDomainHelpText": "डोमेन बदलने से अध्ययन और उसकी सभी कार्यशाला वस्तुएँ चयनित डोमेन में स्थानांतरित हो जाती हैं।"
+	"ebiosRmStudyDomainHelpText": "डोमेन बदलने से अध्ययन और उसकी सभी कार्यशाला वस्तुएँ चयनित डोमेन में स्थानांतरित हो जाती हैं।",
+	"savedFilters": "सहेजे गए फ़िल्टर",
+	"saveFilter": "फ़िल्टर सहेजें",
+	"personalFilters": "व्यक्तिगत",
+	"sharedFilters": "साझा",
+	"noSavedFilters": "कोई सहेजा गया फ़िल्टर नहीं",
+	"shareToDomain": "डोमेन के साथ साझा करें"
 }

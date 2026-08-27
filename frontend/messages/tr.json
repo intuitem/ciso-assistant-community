@@ -2416,5 +2416,11 @@
 	"scimTokenGenerationFailed": "SCIM belirteci oluşturulamadı",
 	"idpGroup": "IdP grubu",
 	"idpGroups": "IdP grupları",
-	"idpGroupsDescription": "IdP grup federasyonunu etkinleştirin (SCIM sağlama, IdP grup eşlemeleri ve kullanıcılarda IdP grup üyelikleri)."
+	"idpGroupsDescription": "IdP grup federasyonunu etkinleştirin (SCIM sağlama, IdP grup eşlemeleri ve kullanıcılarda IdP grup üyelikleri).",
+	"savedFilters": "Kayıtlı filtreler",
+	"saveFilter": "Filtreyi kaydet",
+	"personalFilters": "Kişisel",
+	"sharedFilters": "Paylaşılan",
+	"noSavedFilters": "Kayıtlı filtre yok",
+	"shareToDomain": "Bir etki alanıyla paylaş"
 }

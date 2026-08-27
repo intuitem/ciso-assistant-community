@@ -5671,5 +5671,11 @@
 	"importTemplatesSingleNote": "Importujete jen jednu jedinou šablonu? Často je mnohem rychlejší si ji založit manuálně přímo ze seznamu se šablonami.",
 	"unpublishedDocumentsNotice": "Připraveno celkem {count} dokumentů jakožto koncept (draft). Nejsou zatím publikované — uvidíte je tedy jen v pohledu správy (manage).",
 	"authored": "Napsáno v aplikaci",
-	"uploaded": "Nahráno ze souboru"
+	"uploaded": "Nahráno ze souboru",
+	"savedFilters": "Uložené filtry",
+	"saveFilter": "Uložit filtr",
+	"personalFilters": "Osobní",
+	"sharedFilters": "Sdílené",
+	"noSavedFilters": "Žádné uložené filtry",
+	"shareToDomain": "Sdílet do subjektu"
 }

@@ -5712,5 +5712,11 @@
 				"countPlural=other": "{count} визначень метрик"
 			}
 		}
-	]
+	],
+	"savedFilters": "Збережені фільтри",
+	"saveFilter": "Зберегти фільтр",
+	"personalFilters": "Особисті",
+	"sharedFilters": "Спільні",
+	"noSavedFilters": "Немає збережених фільтрів",
+	"shareToDomain": "Поділитися з доменом"
 }

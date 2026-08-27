@@ -5582,5 +5582,11 @@
 	"importTemplatesSingleNote": "Uvažate samo eno predlogo? Hitreje jo je ustvariti neposredno s seznama Predlog.",
 	"unpublishedDocumentsNotice": "{count} dokument(ov) je v osnutku, a še ni objavljenih — vidni so v pogledu upravljanja.",
 	"authored": "Ustvarjeno",
-	"uploaded": "Naloženo"
+	"uploaded": "Naloženo",
+	"savedFilters": "Shranjeni filtri",
+	"saveFilter": "Shrani filter",
+	"personalFilters": "Osebni",
+	"sharedFilters": "Deljeni",
+	"noSavedFilters": "Ni shranjenih filtrov",
+	"shareToDomain": "Deli z domeno"
 }

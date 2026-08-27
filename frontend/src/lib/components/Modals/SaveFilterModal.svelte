@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
-	import { onMount } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import FilterNameModal from './FilterNameModal.svelte';
-
-	interface DomainOption {
-		id: string;
-		name: string;
-		depth: number;
-	}
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 
 	interface Props {
 		parent: any;
@@ -19,37 +17,23 @@
 	let { parent, model, properties, onSaved }: Props = $props();
 
 	let scope = $state<'personal' | 'shared'>('personal');
-	let domains = $state<DomainOption[]>([]);
 	let selectedDomain = $state('');
-	let domainsLoading = $state(true);
 
-	const canSubmit = $derived(scope !== 'shared' || (!domainsLoading && !!selectedDomain));
-
-	function flatten(node: any, depth: number, out: DomainOption[]) {
-		if (node.writable !== false && node.uuid) {
-			out.push({ id: node.uuid, name: node.name, depth });
-		}
-		for (const child of node.children ?? []) {
-			flatten(child, depth + 1, out);
-		}
-	}
-
-	onMount(async () => {
-		try {
-			const res = await fetch(
-				'/folders/org_tree/?include_perimeters=false&write_perm=add_savedfilter'
-			);
-			if (res.ok) {
-				const tree = await res.json();
-				const out: DomainOption[] = [];
-				flatten(tree, 0, out);
-				domains = out;
-				if (domains.length) selectedDomain = domains[0].id;
-			}
-		} finally {
-			domainsLoading = false;
-		}
+	// Standalone SPA form backing the hierarchical domain picker (FolderTreeSelect
+	// requires a SuperForm); we mirror its value into selectedDomain.
+	const domainSchema = z.object({ domain: z.string() });
+	const domainForm = superForm(defaults({ domain: '' }, zod(domainSchema)), {
+		dataType: 'json',
+		taintedMessage: false,
+		validators: zod(domainSchema),
+		SPA: true
 	});
+	const unsubscribeDomain = domainForm.form.subscribe((v) => {
+		selectedDomain = v.domain ?? '';
+	});
+	onDestroy(unsubscribeDomain);
+
+	const canSubmit = $derived(scope !== 'shared' || !!selectedDomain);
 
 	async function handleSubmit(name: string) {
 		const endpoint =
@@ -88,20 +72,12 @@
 		</div>
 
 		{#if scope === 'shared'}
-			<div class="space-y-1">
-				<label class="block text-sm font-semibold" for="save-filter-domain">{m.domain()}</label>
-				{#if domainsLoading}
-					<p class="text-sm text-surface-500">{m.loading()}...</p>
-				{:else if domains.length === 0}
-					<p class="text-sm text-surface-500">{m.noDomainsAvailable()}</p>
-				{:else}
-					<select id="save-filter-domain" class="select w-full" bind:value={selectedDomain}>
-						{#each domains as domain (domain.id)}
-							<option value={domain.id}>{'—'.repeat(domain.depth)} {domain.name}</option>
-						{/each}
-					</select>
-				{/if}
-			</div>
+			<FolderTreeSelect
+				form={domainForm}
+				field="domain"
+				label={m.domain()}
+				writePermission="add_savedfilter"
+			/>
 		{/if}
 	{/snippet}
 </FilterNameModal>

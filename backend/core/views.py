@@ -3551,11 +3551,6 @@ class SavedFilterViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "content_type"]
     search_fields = ["name"]
 
-    @action(detail=False, methods=["post"])
-    def sync(self, request):
-        refreshed = request.user.sync_saved_filters_from_shared()
-        return Response({"refreshed": refreshed})
-
     @action(detail=False, methods=["get"], url_path="eligible-models")
     def eligible_models(self, request):
         from core.saved_filters.registry import eligible_models_by_urlmodel
@@ -3581,7 +3576,6 @@ class SavedFilterViewSet(BaseModelViewSet):
                 name=data.get("name", ""),
                 model=model,
                 properties=data.get("properties", {}),
-                shared_id=data.get("shared_id"),
             )
             return Response(entry, status=status.HTTP_201_CREATED)
         return Response(request.user.get_saved_filters())
@@ -3602,22 +3596,6 @@ class SavedFilterViewSet(BaseModelViewSet):
                     k: v for k, v in request.data.items() if k in ("name", "properties")
                 },
             )
-        except ValueError:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        return Response(entry)
-
-    @action(
-        detail=False,
-        methods=["post"],
-        url_path=r"personal/(?P<filter_id>[^/.]+)/link",
-    )
-    def personal_link(self, request, filter_id=None):
-        """relate an existing personal filter to a shared filter newly created"""
-        shared_id = request.data.get("shared_id")
-        if not shared_id or not self.get_queryset().filter(id=shared_id).exists():
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        try:
-            entry = request.user.link_saved_filter_to_shared(filter_id, shared_id)
         except ValueError:
             return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(entry)

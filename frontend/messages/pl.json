@@ -2423,5 +2423,11 @@
 	"scimTokenGenerationFailed": "Nie udało się wygenerować tokenu SCIM",
 	"idpGroup": "Grupa IdP",
 	"idpGroups": "Grupy IdP",
-	"idpGroupsDescription": "Włącz federację grup IdP (provisioning SCIM, mapowania grup IdP i członkostwa w grupach IdP użytkowników)."
+	"idpGroupsDescription": "Włącz federację grup IdP (provisioning SCIM, mapowania grup IdP i członkostwa w grupach IdP użytkowników).",
+	"savedFilters": "Zapisane filtry",
+	"saveFilter": "Zapisz filtr",
+	"personalFilters": "Osobiste",
+	"sharedFilters": "Udostępnione",
+	"noSavedFilters": "Brak zapisanych filtrów",
+	"shareToDomain": "Udostępnij domenie"
 }

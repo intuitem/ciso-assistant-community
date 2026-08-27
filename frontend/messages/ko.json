@@ -4353,5 +4353,11 @@
 	"scimTokenGenerationFailed": "SCIM 토큰 생성 실패",
 	"idpGroup": "IdP 그룹",
 	"idpGroups": "IdP 그룹",
-	"idpGroupsDescription": "IdP 그룹 페더레이션 활성화(SCIM 프로비저닝, IdP 그룹 매핑 및 사용자의 IdP 그룹 멤버십)."
+	"idpGroupsDescription": "IdP 그룹 페더레이션 활성화(SCIM 프로비저닝, IdP 그룹 매핑 및 사용자의 IdP 그룹 멤버십).",
+	"savedFilters": "저장된 필터",
+	"saveFilter": "필터 저장",
+	"personalFilters": "개인",
+	"sharedFilters": "공유됨",
+	"noSavedFilters": "저장된 필터 없음",
+	"shareToDomain": "도메인에 공유"
 }

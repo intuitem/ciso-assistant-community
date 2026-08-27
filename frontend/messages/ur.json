@@ -1658,5 +1658,11 @@
 	"idpGroup": "IdP گروپ",
 	"idpGroups": "IdP گروپس",
 	"idpGroupsDescription": "IdP گروپ فیڈریشن فعال کریں (SCIM پرووژننگ، IdP گروپ میپنگز، اور صارفین پر IdP گروپ ممبرشپس)۔",
-	"ebiosRmStudyDomainHelpText": "ڈومین تبدیل کرنے سے مطالعہ اور اس کی تمام ورکشاپ اشیاء منتخب ڈومین میں منتقل ہو جاتی ہیں۔"
+	"ebiosRmStudyDomainHelpText": "ڈومین تبدیل کرنے سے مطالعہ اور اس کی تمام ورکشاپ اشیاء منتخب ڈومین میں منتقل ہو جاتی ہیں۔",
+	"savedFilters": "محفوظ شدہ فلٹرز",
+	"saveFilter": "فلٹر محفوظ کریں",
+	"personalFilters": "ذاتی",
+	"sharedFilters": "مشترکہ",
+	"noSavedFilters": "کوئی محفوظ شدہ فلٹر نہیں",
+	"shareToDomain": "ڈومین کے ساتھ شیئر کریں"
 }

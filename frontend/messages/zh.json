@@ -3707,5 +3707,11 @@
 	"scimTokenGenerationFailed": "生成 SCIM 令牌失败",
 	"idpGroup": "IdP 组",
 	"idpGroups": "IdP 组",
-	"idpGroupsDescription": "启用 IdP 组联合（SCIM 预配、IdP 组映射以及用户的 IdP 组成员资格）。"
+	"idpGroupsDescription": "启用 IdP 组联合（SCIM 预配、IdP 组映射以及用户的 IdP 组成员资格）。",
+	"savedFilters": "已保存的筛选器",
+	"saveFilter": "保存筛选器",
+	"personalFilters": "个人",
+	"sharedFilters": "共享",
+	"noSavedFilters": "没有已保存的筛选器",
+	"shareToDomain": "共享到域"
 }

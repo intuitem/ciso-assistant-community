@@ -15,7 +15,6 @@ export function getSavedFilterEligibleModels(): Promise<Record<string, string>> 
 
 export interface SavedFilterEntry {
 	id: string;
-	shared_id: string | null;
 	name: string;
 	model: string;
 	properties: Record<string, { value: string }[]>;
@@ -25,8 +24,14 @@ export interface SavedFilterEntry {
 export interface SharedSavedFilter {
 	id: string;
 	name: string;
-	folder: string;
+	// The read serializer (list/GET) sends {id}; the write serializer
+	// (POST/PATCH response) sends a plain id string -- callers must handle both.
+	folder: string | { id: string };
 	model: string;
 	properties: Record<string, { value: string }[]>;
 	updated_at: string;
+}
+
+export function sharedSavedFilterFolderId(folder: SharedSavedFilter['folder']): string {
+	return typeof folder === 'string' ? folder : folder.id;
 }

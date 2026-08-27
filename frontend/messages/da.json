@@ -1966,5 +1966,11 @@
 	"idpGroup": "IdP-gruppe",
 	"idpGroups": "IdP-grupper",
 	"idpGroupsDescription": "Aktivér IdP-gruppeføderation (SCIM-provisionering, IdP-gruppemapninger og IdP-gruppemedlemskaber for brugere).",
-	"ebiosRmStudyDomainHelpText": "Ændring af domænet flytter analysen og alle dens workshopobjekter til det valgte domæne."
+	"ebiosRmStudyDomainHelpText": "Ændring af domænet flytter analysen og alle dens workshopobjekter til det valgte domæne.",
+	"savedFilters": "Gemte filtre",
+	"saveFilter": "Gem filter",
+	"personalFilters": "Personlige",
+	"sharedFilters": "Delte",
+	"noSavedFilters": "Ingen gemte filtre",
+	"shareToDomain": "Del til et domæne"
 }

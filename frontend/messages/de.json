@@ -3557,5 +3557,11 @@
 	"scimTokenGenerationFailed": "SCIM-Token konnte nicht erzeugt werden",
 	"idpGroup": "IdP-Gruppe",
 	"idpGroups": "IdP-Gruppen",
-	"idpGroupsDescription": "IdP-Gruppenföderation aktivieren (SCIM-Bereitstellung, IdP-Gruppenzuordnungen und IdP-Gruppenmitgliedschaften von Benutzern)."
+	"idpGroupsDescription": "IdP-Gruppenföderation aktivieren (SCIM-Bereitstellung, IdP-Gruppenzuordnungen und IdP-Gruppenmitgliedschaften von Benutzern).",
+	"savedFilters": "Gespeicherte Filter",
+	"saveFilter": "Filter speichern",
+	"personalFilters": "Persönlich",
+	"sharedFilters": "Geteilt",
+	"noSavedFilters": "Keine gespeicherten Filter",
+	"shareToDomain": "Mit einem Bereich teilen"
 }

@@ -1852,5 +1852,11 @@
 	"idpGroup": "Grup IdP",
 	"idpGroups": "Grup IdP",
 	"idpGroupsDescription": "Aktifkan federasi grup IdP (penyediaan SCIM, pemetaan grup IdP, dan keanggotaan grup IdP pada pengguna).",
-	"ebiosRmStudyDomainHelpText": "Mengubah domain akan memindahkan studi dan semua objek workshop-nya ke domain yang dipilih."
+	"ebiosRmStudyDomainHelpText": "Mengubah domain akan memindahkan studi dan semua objek workshop-nya ke domain yang dipilih.",
+	"savedFilters": "Filter tersimpan",
+	"saveFilter": "Simpan filter",
+	"personalFilters": "Pribadi",
+	"sharedFilters": "Dibagikan",
+	"noSavedFilters": "Tidak ada filter tersimpan",
+	"shareToDomain": "Bagikan ke domain"
 }

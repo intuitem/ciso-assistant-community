@@ -4177,5 +4177,11 @@
 	"scimTokenGenerationFailed": "Generiranje SCIM tokena nije uspjelo",
 	"idpGroup": "IdP grupa",
 	"idpGroups": "IdP grupe",
-	"idpGroupsDescription": "Omogući federaciju IdP grupa (SCIM provizioniranje, mapiranja IdP grupa i članstva korisnika u IdP grupama)."
+	"idpGroupsDescription": "Omogući federaciju IdP grupa (SCIM provizioniranje, mapiranja IdP grupa i članstva korisnika u IdP grupama).",
+	"savedFilters": "Spremljeni filteri",
+	"saveFilter": "Spremi filter",
+	"personalFilters": "Osobni",
+	"sharedFilters": "Dijeljeni",
+	"noSavedFilters": "Nema spremljenih filtera",
+	"shareToDomain": "Dijeli s domenom"
 }
