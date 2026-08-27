@@ -22,16 +22,16 @@ from .friendly_names import generate_friendly_name  # noqa: F401
 import yaml
 
 try:
-    from yaml import CSafeLoader as _YamlSafeLoader
+    from yaml import CSafeLoader as SafeLoader
 except ImportError:  # libyaml unavailable
-    from yaml import SafeLoader as _YamlSafeLoader
+    from yaml import SafeLoader
 
 logger = structlog.get_logger(__name__)
 
 
 def yaml_safe_load(stream):
     """yaml.safe_load backed by libyaml when available (~10x faster)."""
-    return yaml.load(stream, Loader=_YamlSafeLoader)
+    return yaml.load(stream, Loader=SafeLoader)
 
 
 def extract_node_id(urn: str | None) -> str | None:
