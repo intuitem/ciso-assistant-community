@@ -450,8 +450,6 @@ describe('buildTree', () => {
 	});
 });
 
-import { createBuilderState } from './builder-state';
-
 describe('addNode', () => {
 	function newStore() {
 		const fw = makeFramework();
@@ -499,6 +497,34 @@ describe('addNode', () => {
 		const roots = get(s.rootNodes);
 		expect(roots[0].node.assessable).toBe(false);
 		expect(roots[0].node.display_mode).toBe('default');
+	});
+});
+
+describe('setDisplayMode', () => {
+	function newStore() {
+		const fw = makeFramework();
+		return createBuilderState(fw, [], []);
+	}
+
+	it('clears assessable when a requirement is switched to splash', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const nodeId = get(s.rootNodes)[0].node.id;
+		s.setDisplayMode(nodeId, 'splash');
+		const roots = get(s.rootNodes);
+		expect(roots[0].node.display_mode).toBe('splash');
+		expect(roots[0].node.assessable).toBe(false);
+	});
+
+	it('switching back to default keeps the node non-assessable', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const nodeId = get(s.rootNodes)[0].node.id;
+		s.setDisplayMode(nodeId, 'splash');
+		s.setDisplayMode(nodeId, 'default');
+		const roots = get(s.rootNodes);
+		expect(roots[0].node.display_mode).toBe('default');
+		expect(roots[0].node.assessable).toBe(false);
 	});
 });
 

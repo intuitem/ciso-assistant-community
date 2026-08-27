@@ -3097,7 +3097,19 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_questions_translated(self) -> dict | None:
-        questions_qs = self.questions.prefetch_related("choices").all()
+        # Reuse the caller's prefetch when it covers choices too: calling
+        # prefetch_related() on the related manager discards
+        # _prefetched_objects_cache and re-queries once per node.
+        prefetched = (getattr(self, "_prefetched_objects_cache", None) or {}).get(
+            "questions"
+        )
+        if prefetched is not None and all(
+            "choices" in (getattr(q, "_prefetched_objects_cache", None) or {})
+            for q in prefetched
+        ):
+            questions_qs = prefetched
+        else:
+            questions_qs = self.questions.prefetch_related("choices").all()
         if not questions_qs:
             return None
 
@@ -9399,6 +9411,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         break
 
             if not _is_question_visible(question, answers_by_urn, questions_by_urn):
+                continue
+
+            # Free-text questions are informational: they have no choices and can be anything,
+            # so it does not make very much sense to take them into account. Skip them out.
+            # (They still count as unanswered in progress see get_visible_questions_counts.)
+            if question.type == Question.Type.TEXT:
                 continue
 
             visible_questions += 1
