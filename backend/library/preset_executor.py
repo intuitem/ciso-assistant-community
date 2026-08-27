@@ -3,9 +3,14 @@ import re
 import structlog
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Max
 from django.utils.translation import get_language
 
 _PARAM_REF_RE = re.compile(r"^\{\{ref:([A-Za-z0-9_]+)\}\}$")
+
+# Reserved object_refs key for the perimeter the executor creates itself; it is
+# not a scaffolded item, so it has no author-supplied ref to track it by.
+_DEFAULT_PERIMETER_REF = "__default_perimeter__"
 
 
 def _resolve_param_refs(params: dict | None, object_refs: dict) -> dict | None:
@@ -119,6 +124,10 @@ class PresetExecutor:
             )
         self._user = user
         self._request = request
+        self._sequence = 1
+
+    def _suffixed(self, name: str) -> str:
+        return name if self._sequence <= 1 else f"{name} ({self._sequence})"
 
     def _tr(self, item: dict, field: str) -> str:
         """Resolve a translated field from an item's inline translations block.
@@ -147,24 +156,19 @@ class PresetExecutor:
             self._apply_feature_flags()
         if folder_id:
             folder = Folder.objects.get(id=folder_id)
-            existing_journey = PresetJourney.objects.filter(
-                preset=self._preset, folder=folder
-            ).first()
-            if existing_journey:
-                raise ValidationError(
-                    {
-                        "folder_id": [
-                            "This preset has already been applied to this domain. "
-                            "You can upgrade the existing journey from the journey dashboard."
-                        ]
-                    }
-                )
+            self._sequence = (
+                PresetJourney.objects.filter(
+                    preset=self._preset, folder=folder
+                ).aggregate(max_sequence=Max("sequence"))["max_sequence"]
+                or 0
+            ) + 1
         else:
             folder = self._create_folder(folder_name)
 
         if create_objects:
             perimeter = self._create_default_perimeter(folder)
             object_refs = self._create_objects(folder, perimeter)
+            object_refs[_DEFAULT_PERIMETER_REF] = str(perimeter.id)
         else:
             object_refs = {}
 
@@ -176,6 +180,7 @@ class PresetExecutor:
             folder=folder,
             preset=self._preset,
             applied_version=self._preset.version,
+            sequence=self._sequence,
             object_refs=object_refs,
             applied_by=self._user,
         )
@@ -188,7 +193,7 @@ class PresetExecutor:
         translations = self._preset.translations or {}
         locale_tr = translations.get(locale, {}) or {}
         return (
-            locale_tr.get("name", self._preset.name),
+            self._suffixed(locale_tr.get("name", self._preset.name)),
             locale_tr.get("description", self._preset.description or ""),
         )
 
@@ -202,13 +207,19 @@ class PresetExecutor:
         - Creates any new scaffolded objects (idempotent)
         - Syncs steps: adds new, removes orphaned, updates metadata, preserves user state
         """
+        self._sequence = journey.sequence
         self._load_dependencies()
         if apply_feature_flags:
             self._apply_feature_flags()
 
         folder = journey.folder
-        perimeter = self._create_default_perimeter(folder)
-        new_object_refs = self._create_objects(folder, perimeter)
+        perimeter = self._create_default_perimeter(
+            folder, existing_refs=journey.object_refs
+        )
+        new_object_refs = self._create_objects(
+            folder, perimeter, existing_refs=journey.object_refs
+        )
+        new_object_refs[_DEFAULT_PERIMETER_REF] = str(perimeter.id)
 
         # Merge: keep old refs, add/overwrite with new
         merged_refs = dict(journey.object_refs or {})
@@ -216,7 +227,6 @@ class PresetExecutor:
 
         self._sync_steps(journey, merged_refs)
 
-        journey.name, journey.description = self._localized_name_description()
         journey.applied_version = self._preset.version
         journey.object_refs = merged_refs
         journey.save()
@@ -364,17 +374,22 @@ class PresetExecutor:
         Folder.create_default_ug_and_ra(folder)
         return folder
 
-    def _create_default_perimeter(self, folder: Folder) -> Perimeter:
-        existing = Perimeter.objects.filter(
-            folder=folder, name=self._preset.name
-        ).first()
+    def _create_default_perimeter(
+        self, folder: Folder, existing_refs: dict | None = None
+    ) -> Perimeter:
+        tracked = self._resolve_ref("perimeter", _DEFAULT_PERIMETER_REF, existing_refs)
+        if tracked:
+            return tracked
+
+        perimeter_name = self._suffixed(self._preset.name)
+        existing = Perimeter.objects.filter(folder=folder, name=perimeter_name).first()
         if existing:
             return existing
 
         context = {"request": self._request} if self._request else {}
         perimeter_data = {
             "folder": str(folder.id),
-            "name": self._preset.name,
+            "name": perimeter_name,
         }
         serializer = PerimeterWriteSerializer(data=perimeter_data, context=context)
         serializer.is_valid(raise_exception=True)
@@ -446,6 +461,17 @@ class PresetExecutor:
 
         return queryset.first()
 
+    def _resolve_ref(self, obj_type: str, ref: str | None, existing_refs: dict | None):
+        """Return the object a journey already tracks under `ref`, if it still exists."""
+        obj_id = (existing_refs or {}).get(ref) if ref else None
+        model_class = self._TYPE_MODEL_MAP.get(obj_type)
+        if not obj_id or not model_class:
+            return None
+        try:
+            return model_class.objects.filter(id=obj_id).first()
+        except (ValueError, ValidationError):
+            return None
+
     def _find_existing_risk_scenario(self, name: str, risk_assessment_id: str):
         """Find an existing risk scenario by name within a specific risk assessment."""
         return RiskScenario.objects.filter(
@@ -480,7 +506,12 @@ class PresetExecutor:
             if threat_urns:
                 obj.threats.add(*Threat.objects.filter(urn__in=threat_urns))
 
-    def _create_objects(self, folder: Folder, default_perimeter: Perimeter) -> dict:
+    def _create_objects(
+        self,
+        folder: Folder,
+        default_perimeter: Perimeter,
+        existing_refs: dict | None = None,
+    ) -> dict:
         scaffolded = self._preset.scaffolded_objects or []
         object_refs = {}
         deferred_scenarios = []
@@ -489,8 +520,14 @@ class PresetExecutor:
         for item in scaffolded:
             obj_type = item["type"]
             ref = item.get("ref")
-            name = self._tr(item, "name")
+            name = self._suffixed(self._tr(item, "name"))
             description = self._tr(item, "description")
+
+            tracked = self._resolve_ref(obj_type, ref, existing_refs)
+            if tracked:
+                object_refs[ref] = str(tracked.id)
+                self._backfill_side_effects(obj_type, tracked, item, object_refs)
+                continue
 
             # Reuse existing compatible object if found in this folder
             existing = self._find_existing(folder, obj_type, item, name)
@@ -794,7 +831,7 @@ class PresetExecutor:
         # Second pass: create risk scenarios (they reference assets and risk assessments by ref)
         for item in deferred_scenarios:
             ref = item.get("ref")
-            name = self._tr(item, "name")
+            name = self._suffixed(self._tr(item, "name"))
             description = self._tr(item, "description")
 
             ra_ref = item.get("risk_assessment_ref")
@@ -805,6 +842,12 @@ class PresetExecutor:
                     name=name,
                     ref=ra_ref,
                 )
+                continue
+
+            tracked = self._resolve_ref("risk_scenario", ref, existing_refs)
+            if tracked:
+                object_refs[ref] = str(tracked.id)
+                self._backfill_side_effects("risk_scenario", tracked, item, object_refs)
                 continue
 
             # Reuse by matching name + risk_assessment (not just folder + name)

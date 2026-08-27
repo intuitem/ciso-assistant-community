@@ -4964,6 +4964,17 @@ class PresetJourneyReadSerializer(BaseModelSerializer):
     def get_latest_version(self, obj):
         if not obj.preset:
             return obj.applied_version
+        if obj.preset.urn:
+            # The Preset row can lag behind a newer stored library; `upgrade`
+            # upserts from it, so the badge must look at the same source.
+            stored_version = (
+                StoredLibrary.objects.filter(urn=obj.preset.urn)
+                .order_by("-version")
+                .values_list("version", flat=True)
+                .first()
+            )
+            if stored_version:
+                return max(stored_version, obj.preset.version)
         return obj.preset.version
 
 

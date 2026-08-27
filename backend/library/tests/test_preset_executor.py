@@ -464,10 +464,49 @@ class TestPresetExecutorExistingDomain:
         ca = ComplianceAssessment.objects.get(folder=journey.folder, name="ISO Subset")
         assert ca.selected_implementation_groups == ["IG1", "IG2"]
 
-    def test_rejects_duplicate_preset_on_same_folder(self):
-        """Applying the same preset twice to the same folder should raise ValidationError."""
+    def test_repeated_apply_on_same_folder_creates_independent_journeys(self):
+        """Applying the same preset twice to a folder yields two journeys with their own objects."""
         root = Folder.get_root_folder()
         user = User.objects.create_user(email="preset6@example.com", password="secret")
+        framework = _create_test_libraries(root)
+
+        folder = Folder.objects.create(
+            parent_folder=root,
+            name="Existing Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+
+        preset_library = _create_preset_library(
+            root,
+            scaffolded_objects=[
+                {
+                    "type": "compliance_assessment",
+                    "name": "ISO 27001 Compliance",
+                    "framework": "urn:test:framework-lib",
+                    "ref": "iso_audit",
+                },
+            ],
+            steps=[],
+        )
+
+        first = PresetExecutor(preset_library, user).apply(folder_id=str(folder.id))
+        second = PresetExecutor(preset_library, user).apply(folder_id=str(folder.id))
+
+        assert (first.sequence, second.sequence) == (1, 2)
+        assert second.name == f"{first.name} (2)"
+        assert first.object_refs["iso_audit"] != second.object_refs["iso_audit"]
+        assert (
+            ComplianceAssessment.objects.filter(
+                folder=folder, framework=framework
+            ).count()
+            == 2
+        )
+        assert Perimeter.objects.filter(folder=folder).count() == 2
+
+    def test_upgrade_preserves_journey_sequence_objects(self):
+        """Upgrading the second journey must not fall back to the first journey's objects."""
+        root = Folder.get_root_folder()
+        user = User.objects.create_user(email="preset7@example.com", password="secret")
         _create_test_libraries(root)
 
         folder = Folder.objects.create(
@@ -478,14 +517,122 @@ class TestPresetExecutorExistingDomain:
 
         preset_library = _create_preset_library(
             root,
-            scaffolded_objects=[],
+            scaffolded_objects=[
+                {
+                    "type": "asset",
+                    "name": "Main Application",
+                    "asset_type": "SP",
+                    "ref": "app_asset",
+                },
+            ],
             steps=[],
         )
 
-        # First apply should succeed
         PresetExecutor(preset_library, user).apply(folder_id=str(folder.id))
+        second = PresetExecutor(preset_library, user).apply(folder_id=str(folder.id))
+        second_asset_id = second.object_refs["app_asset"]
 
-        # Second apply should raise
-        with pytest.raises(Exception) as exc_info:
-            PresetExecutor(preset_library, user).apply(folder_id=str(folder.id))
-        assert "already been applied" in str(exc_info.value)
+        PresetExecutor(second.preset, user).upgrade_journey(second)
+        second.refresh_from_db()
+
+        assert second.object_refs["app_asset"] == second_asset_id
+        assert (
+            Asset.objects.filter(folder=folder, name="Main Application (2)").count()
+            == 1
+        )
+
+    def test_upgrade_keeps_tracked_object_after_rename(self):
+        """A renamed scaffolded object stays tracked instead of being recreated."""
+        root = Folder.get_root_folder()
+        user = User.objects.create_user(email="preset8@example.com", password="secret")
+        _create_test_libraries(root)
+
+        folder = Folder.objects.create(
+            parent_folder=root,
+            name="Existing Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+
+        preset_library = _create_preset_library(
+            root,
+            scaffolded_objects=[
+                {
+                    "type": "asset",
+                    "name": "Main Application",
+                    "asset_type": "SP",
+                    "ref": "app_asset",
+                },
+            ],
+            steps=[],
+        )
+
+        journey = PresetExecutor(preset_library, user).apply(folder_id=str(folder.id))
+        asset_id = journey.object_refs["app_asset"]
+
+        asset = Asset.objects.get(id=asset_id)
+        asset.name = "Renamed by user"
+        asset.save()
+
+        PresetExecutor(journey.preset, user).upgrade_journey(journey)
+        journey.refresh_from_db()
+
+        assert journey.object_refs["app_asset"] == asset_id
+        assert Asset.objects.filter(folder=folder).count() == 1
+
+    def test_upgrade_preserves_renamed_journey(self):
+        """Upgrading must not overwrite a name the user set via the rename action."""
+        root = Folder.get_root_folder()
+        user = User.objects.create_user(email="preset9@example.com", password="secret")
+        _create_test_libraries(root)
+
+        folder = Folder.objects.create(
+            parent_folder=root,
+            name="Existing Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+
+        preset_library = _create_preset_library(root, scaffolded_objects=[], steps=[])
+
+        journey = PresetExecutor(preset_library, user).apply(folder_id=str(folder.id))
+        journey.name = "My ISMS rollout"
+        journey.save(update_fields=["name"])
+
+        PresetExecutor(journey.preset, user).upgrade_journey(journey)
+        journey.refresh_from_db()
+
+        assert journey.name == "My ISMS rollout"
+
+    def test_upgrade_keeps_tracked_perimeter_after_rename(self):
+        """The executor's own perimeter stays tracked once the user renames it."""
+        root = Folder.get_root_folder()
+        user = User.objects.create_user(email="preset10@example.com", password="secret")
+        _create_test_libraries(root)
+
+        folder = Folder.objects.create(
+            parent_folder=root,
+            name="Existing Domain",
+            content_type=Folder.ContentType.DOMAIN,
+        )
+
+        preset_library = _create_preset_library(
+            root,
+            scaffolded_objects=[
+                {
+                    "type": "asset",
+                    "name": "Main Application",
+                    "asset_type": "SP",
+                    "ref": "app_asset",
+                },
+            ],
+            steps=[],
+        )
+
+        journey = PresetExecutor(preset_library, user).apply(folder_id=str(folder.id))
+        perimeter = Perimeter.objects.get(folder=folder)
+        perimeter.name = "Renamed perimeter"
+        perimeter.save()
+
+        PresetExecutor(journey.preset, user).upgrade_journey(journey)
+
+        assert Perimeter.objects.filter(folder=folder).count() == 1
+        assert Perimeter.objects.get(folder=folder).name == "Renamed perimeter"
