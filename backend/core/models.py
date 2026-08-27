@@ -1423,6 +1423,19 @@ class LibraryUpdater:
 
                     # update answers or score for each ra for the current requirement_node, when relevant
                     for ra in existing_requirement_assessment_objects.get(urn, []):
+                        # Runs regardless of is_scored/score: a pin on a null
+                        # score would otherwise survive the reset and freeze
+                        # the RA against future recomputes.
+                        if (
+                            self.strategy == "reset"
+                            and ra.is_score_overridden
+                            and ra.compliance_assessment in ca_with_scale_change
+                        ):
+                            ra.is_score_overridden = False
+                            if ra.pk not in ra_pks_to_update:
+                                ra_pks_to_update.add(ra.pk)
+                                requirement_assessment_objects_to_update.append(ra)
+
                         if (
                             ra.is_scored
                             and ra.score is not None
@@ -1621,7 +1634,13 @@ class LibraryUpdater:
                 if requirement_assessment_objects_to_update:
                     RequirementAssessment.objects.bulk_update(
                         requirement_assessment_objects_to_update,
-                        ["score", "is_scored", "documentation_score", "result"],
+                        [
+                            "score",
+                            "is_scored",
+                            "is_score_overridden",
+                            "documentation_score",
+                            "result",
+                        ],
                         batch_size=100,
                     )
 
@@ -3078,7 +3097,19 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_questions_translated(self) -> dict | None:
-        questions_qs = self.questions.prefetch_related("choices").all()
+        # Reuse the caller's prefetch when it covers choices too: calling
+        # prefetch_related() on the related manager discards
+        # _prefetched_objects_cache and re-queries once per node.
+        prefetched = (getattr(self, "_prefetched_objects_cache", None) or {}).get(
+            "questions"
+        )
+        if prefetched is not None and all(
+            "choices" in (getattr(q, "_prefetched_objects_cache", None) or {})
+            for q in prefetched
+        ):
+            questions_qs = prefetched
+        else:
+            questions_qs = self.questions.prefetch_related("choices").all()
         if not questions_qs:
             return None
 
@@ -7623,6 +7654,9 @@ class ComplianceAssessment(Assessment):
                         baseline_assessment.documentation_score
                     )
                     assessment.is_scored = baseline_assessment.is_scored
+                    assessment.is_score_overridden = (
+                        baseline_assessment.is_score_overridden
+                    )
                     assessment.observation = baseline_assessment.observation
                     updates.append(assessment)
 
@@ -7645,6 +7679,7 @@ class ComplianceAssessment(Assessment):
                         "score",
                         "documentation_score",
                         "is_scored",
+                        "is_score_overridden",
                         "observation",
                     ],
                     batch_size=1000,
@@ -8805,6 +8840,14 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         default=False,
         verbose_name=_("Is scored"),
     )
+    is_score_overridden = models.BooleanField(
+        default=False,
+        verbose_name=_("Is score overridden"),
+        help_text=_(
+            "When set, the score is manually pinned and no longer recomputed "
+            "from the questionnaire answers."
+        ),
+    )
     score = models.IntegerField(
         blank=True,
         null=True,
@@ -9370,6 +9413,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             if not _is_question_visible(question, answers_by_urn, questions_by_urn):
                 continue
 
+            # Free-text questions are informational: they have no choices and can be anything,
+            # so it does not make very much sense to take them into account. Skip them out.
+            # (They still count as unanswered in progress see get_visible_questions_counts.)
+            if question.type == Question.Type.TEXT:
+                continue
+
             visible_questions += 1
             if not has_answer_by_qid.get(question.id):
                 continue
@@ -9428,10 +9477,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 }
                 new_result = result_map.get(aggregated, self.Result.NOT_ASSESSED)
 
-        # Update attributes
-        self.score = new_score
+        # Override pins score and is_scored; result still follows answers.
+        if not self.is_score_overridden:
+            self.score = new_score
+            self.is_scored = new_is_scored
         self.result = new_result
-        self.is_scored = new_is_scored
 
     def compute_score_and_result(self):
         self.recompute_assessment()
@@ -10459,7 +10509,9 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         return event.event_notes if event else None
 
     def __str__(self) -> str:
-        return self.ref_id
+        # ref_id is nullable and only auto-assigned in save(); bulk-created
+        # rows may not have one.
+        return self.ref_id or ""
 
 
 class FlowEvent(AbstractBaseModel, FolderMixin):

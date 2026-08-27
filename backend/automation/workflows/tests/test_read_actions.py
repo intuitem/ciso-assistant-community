@@ -15,6 +15,7 @@ from automation.workflows.models import (
     Workflow,
     WorkflowInstance,
     WorkflowNode,
+    WorkflowToken,
     WorkflowVersion,
 )
 from automation.workflows.validation import validate_graph
@@ -378,3 +379,497 @@ class TestReadValidation:
             {"type": "read_objects", "model": "applied_control"}
         ) == ["view_appliedcontrol"]
         assert required_permissions({"type": "read_objects", "model": "nope"}) == []
+
+
+@pytest.mark.django_db
+class TestRegistryIntegrity:
+    def test_every_field_is_a_concrete_scoped_column(self):
+        """The field list doubles as the filter/order whitelist, so a
+        non-column entry would explode at query time; the scope filter
+        assumes a concrete folder FK."""
+        from automation.workflows.actions import READABLE_MODELS
+
+        for key, entry in READABLE_MODELS.items():
+            columns = {f.name for f in entry.model._meta.concrete_fields}
+            assert "folder" in columns, key
+            for field in entry.readable_fields():
+                assert field in columns, f"{key}.{field}"
+
+
+@pytest.mark.django_db
+class TestNamelessModels:
+    def test_validation_flow_reads_without_name_column(self):
+        from core.models import ValidationFlow
+
+        domain = make_domain("Domain validations")
+        ValidationFlow.objects.create(folder=domain)
+        version = read_flow(domain, {"model": "validation_flow", "mode": "list"})
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        output = read_output(instance)
+        assert output["count"] == 1
+        row = output["results"][0]
+        assert "name" not in row
+        assert row["status"] == "submitted"
+        assert row["ref_id"]
+        # API parity: the display key for this nameless model is "str".
+        assert row["str"] == row["ref_id"]
+
+    def test_null_ref_id_rows_read_with_empty_str(self):
+        """ref_id is only auto-assigned in save(); bulk-created rows can hold
+        NULL, and str() must not blow up the whole read on them."""
+        from core.models import ValidationFlow
+
+        domain = make_domain("Domain null ref")
+        flow = ValidationFlow.objects.create(folder=domain)
+        ValidationFlow.objects.filter(id=flow.id).update(ref_id=None)
+        version = read_flow(domain, {"model": "validation_flow", "mode": "list"})
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        row = read_output(instance)["results"][0]
+        assert row["str"] == ""
+        assert row["ref_id"] is None
+
+    def test_name_is_not_filterable_on_nameless_models(self):
+        domain = make_domain("Domain nameless filter")
+        version = read_flow(
+            domain,
+            {
+                "model": "validation_flow",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [{"field": "name", "op": "eq", "value": "x"}],
+                },
+            },
+        )
+        read_node = version.nodes.get(type=WorkflowNode.Type.ACTION)
+        codes = [code for code, _message in validate_read_config(read_node)]
+        assert codes == ["action_read_invalid_filters"]
+
+
+@pytest.mark.django_db
+class TestDeadlineSweepModels:
+    def test_risk_acceptance_expiry_filter(self):
+        from core.models import RiskAcceptance
+
+        domain = make_domain("Domain acceptances")
+        RiskAcceptance.objects.create(
+            name="Expiring", folder=domain, expiry_date=date(2026, 1, 1)
+        )
+        RiskAcceptance.objects.create(
+            name="Far out", folder=domain, expiry_date=date(2030, 1, 1)
+        )
+        version = read_flow(
+            domain,
+            {
+                "model": "risk_acceptance",
+                "mode": "list",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [
+                        {"field": "expiry_date", "op": "lt", "value": "2027-01-01"}
+                    ],
+                },
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        output = read_output(instance)
+        assert output["count"] == 1
+        assert output["results"][0]["name"] == "Expiring"
+
+    def test_requirement_assessment_sweep_carries_identifiers(self):
+        from core.models import (
+            ComplianceAssessment,
+            Framework,
+            Perimeter,
+            RequirementAssessment,
+            RequirementNode,
+        )
+
+        domain = make_domain("Domain requirements")
+        framework = Framework.objects.create(
+            name="FW", urn="urn:test:fw:ra", folder=Folder.get_root_folder()
+        )
+        # R1 is ref_id-only (no name), like most shipped framework nodes.
+        requirements = [
+            RequirementNode.objects.create(
+                name="Req 0" if i == 0 else None,
+                ref_id=f"R{i}",
+                urn=f"urn:test:fw:ra:req{i}",
+                framework=framework,
+                assessable=True,
+                folder=Folder.get_root_folder(),
+            )
+            for i in range(2)
+        ]
+        perimeter = Perimeter.objects.create(name="P", folder=domain)
+        assessment = ComplianceAssessment.objects.create(
+            name="Audit", framework=framework, perimeter=perimeter, folder=domain
+        )
+        for requirement, result in zip(requirements, ["compliant", "non_compliant"]):
+            RequirementAssessment.objects.create(
+                compliance_assessment=assessment,
+                requirement=requirement,
+                folder=domain,
+                result=result,
+            )
+
+        version = read_flow(
+            domain,
+            {
+                "model": "requirement_assessment",
+                "mode": "list",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [
+                        {"field": "result", "op": "eq", "value": "non_compliant"}
+                    ],
+                },
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        output = read_output(instance)
+        assert output["count"] == 1
+        row = output["results"][0]
+        assert row["result"] == "non_compliant"
+        # API-shaped identifiers: name is __str__, falling back to the
+        # requirement's ref_id when the node has no name.
+        assert row["name"] == "R1"
+        assert row["requirement"]["ref_id"] == "R1"
+        assert row["requirement"]["name"] is None
+        assert row["compliance_assessment"]["name"] == "Audit"
+
+
+def make_scenarios(domain):
+    """One rated (current_level=1) and one unrated (-1 sentinel) scenario."""
+    from core.models import Perimeter, RiskAssessment, RiskMatrix, RiskScenario
+
+    perimeter = Perimeter.objects.create(name="P", folder=domain)
+    matrix = RiskMatrix.objects.create(
+        name="M",
+        folder=Folder.get_root_folder(),
+        json_definition={"risk": [{"name": "Low"}, {"name": "Medium"}]},
+    )
+    assessment = RiskAssessment.objects.create(
+        name="RA", perimeter=perimeter, risk_matrix=matrix, folder=domain
+    )
+    rated = RiskScenario.objects.create(
+        name="Rated", risk_assessment=assessment, folder=domain
+    )
+    RiskScenario.objects.create(
+        name="Unrated", risk_assessment=assessment, folder=domain
+    )
+    # save() resets levels to -1 while proba/impact are unset; rate one row
+    # at the column level.
+    RiskScenario.objects.filter(id=rated.id).update(current_level=1)
+    return assessment
+
+
+@pytest.mark.django_db
+class TestRiskScenarioLevels:
+    def test_threshold_filters_skip_unrated_scenarios(self):
+        domain = make_domain("Domain scenario levels")
+        make_scenarios(domain)
+        version = read_flow(
+            domain,
+            {
+                "model": "risk_scenario",
+                "mode": "list",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [{"field": "current_level", "op": "lte", "value": 2}],
+                },
+            },
+        )
+        output = read_output(start_instance(version))
+        assert [row["name"] for row in output["results"]] == ["Rated"]
+
+    def test_eq_minus_one_still_targets_unrated_rows(self):
+        domain = make_domain("Domain unrated eq")
+        make_scenarios(domain)
+        version = read_flow(
+            domain,
+            {
+                "model": "risk_scenario",
+                "mode": "list",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [{"field": "current_level", "op": "eq", "value": -1}],
+                },
+            },
+        )
+        output = read_output(start_instance(version))
+        assert [row["name"] for row in output["results"]] == ["Unrated"]
+
+    def test_levels_serialize_as_matrix_cells(self):
+        domain = make_domain("Domain level labels")
+        make_scenarios(domain)
+        version = read_flow(
+            domain, {"model": "risk_scenario", "mode": "list", "order_by": "name"}
+        )
+        rated, unrated = read_output(start_instance(version))["results"]
+        assert rated["current_level"] == {"name": "Medium", "value": 1}
+        assert unrated["current_level"]["value"] == -1
+        assert unrated["current_level"]["name"] == "--"
+        assert rated["inherent_level"]["value"] == -1
+
+    def test_negations_still_exclude_unrated_scenarios(self):
+        """The >= 0 guard must survive negation: 'not', neq and not_in would
+        otherwise flip it into 'OR level < 0' and sweep unrated rows in."""
+        domain = make_domain("Domain unrated negation")
+        make_scenarios(domain)
+        cases = [
+            {
+                "operator": "not",
+                "conditions": [{"field": "current_level", "op": "lte", "value": 0}],
+            },
+            {
+                "operator": "and",
+                "conditions": [{"field": "current_level", "op": "neq", "value": 0}],
+            },
+            {
+                "operator": "and",
+                "conditions": [
+                    {"field": "current_level", "op": "not_in", "value": [0]}
+                ],
+            },
+        ]
+        for filters in cases:
+            version = read_flow(
+                domain, {"model": "risk_scenario", "mode": "list", "filters": filters}
+            )
+            output = read_output(start_instance(version))
+            assert [row["name"] for row in output["results"]] == ["Rated"], filters
+
+    def test_stale_matrix_level_fails_with_clean_error(self):
+        """A library update can shrink the matrix while scenarios keep their
+        old level indices; the read must fail as ActionError, not IndexError."""
+        from core.models import RiskScenario
+
+        domain = make_domain("Domain stale matrix")
+        make_scenarios(domain)
+        RiskScenario.objects.filter(name="Rated").update(current_level=5)
+        version = read_flow(domain, {"model": "risk_scenario", "mode": "list"})
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        token = instance.tokens.get(status=WorkflowToken.Status.ERROR)
+        assert "no longer exists in the risk matrix" in token.error_message
+
+
+@pytest.mark.django_db
+class TestApiShapeParity:
+    def test_enum_fields_render_display_labels_but_filter_on_raw_values(self):
+        domain = make_domain("Domain enum labels")
+        Incident.objects.create(name="Breach", folder=domain, status="new", severity=1)
+        Incident.objects.create(name="Old", folder=domain, status="closed", severity=5)
+        version = read_flow(
+            domain,
+            {
+                "model": "incident",
+                "mode": "first",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [{"field": "status", "op": "eq", "value": "new"}],
+                },
+            },
+        )
+        obj = read_output(start_instance(version))["object"]
+        # Same shape as IncidentReadSerializer: display labels out, raw in.
+        assert obj["name"] == "Breach"
+        assert obj["status"] == "New"
+        assert obj["severity"] == "Critical"
+
+
+@pytest.mark.django_db
+class TestAssessableFilter:
+    def test_non_assessable_rows_are_excluded(self):
+        from core.models import (
+            ComplianceAssessment,
+            Framework,
+            Perimeter,
+            RequirementAssessment,
+            RequirementNode,
+        )
+
+        domain = make_domain("Domain assessable")
+        framework = Framework.objects.create(
+            name="FW", urn="urn:test:fw:hdr", folder=Folder.get_root_folder()
+        )
+        header = RequirementNode.objects.create(
+            name=None,
+            ref_id="1",
+            urn="urn:test:fw:hdr:1",
+            framework=framework,
+            assessable=False,
+            folder=Folder.get_root_folder(),
+        )
+        leaf = RequirementNode.objects.create(
+            name=None,
+            ref_id="1.1",
+            urn="urn:test:fw:hdr:1.1",
+            framework=framework,
+            assessable=True,
+            folder=Folder.get_root_folder(),
+        )
+        perimeter = Perimeter.objects.create(name="P", folder=domain)
+        audit = ComplianceAssessment.objects.create(
+            name="Audit", framework=framework, perimeter=perimeter, folder=domain
+        )
+        for requirement in (header, leaf):
+            RequirementAssessment.objects.create(
+                compliance_assessment=audit, requirement=requirement, folder=domain
+            )
+
+        version = read_flow(domain, {"model": "requirement_assessment", "mode": "list"})
+        output = read_output(start_instance(version))
+        assert output["count"] == 1
+        assert output["results"][0]["requirement"]["ref_id"] == "1.1"
+
+
+@pytest.mark.django_db
+class TestAssessmentScoping:
+    def test_requirement_assessment_filterable_by_audit(self):
+        from core.models import (
+            ComplianceAssessment,
+            Framework,
+            Perimeter,
+            RequirementAssessment,
+            RequirementNode,
+        )
+
+        domain = make_domain("Domain audit scoping")
+        framework = Framework.objects.create(
+            name="FW", urn="urn:test:fw:scope", folder=Folder.get_root_folder()
+        )
+        requirement = RequirementNode.objects.create(
+            ref_id="R1",
+            urn="urn:test:fw:scope:req1",
+            framework=framework,
+            assessable=True,
+            folder=Folder.get_root_folder(),
+        )
+        perimeter = Perimeter.objects.create(name="P", folder=domain)
+        audits = [
+            ComplianceAssessment.objects.create(
+                name=f"Audit {i}",
+                framework=framework,
+                perimeter=perimeter,
+                folder=domain,
+            )
+            for i in range(2)
+        ]
+        for audit in audits:
+            RequirementAssessment.objects.create(
+                compliance_assessment=audit,
+                requirement=requirement,
+                folder=domain,
+                result="non_compliant",
+            )
+
+        version = read_flow(
+            domain,
+            {
+                "model": "requirement_assessment",
+                "mode": "list",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [
+                        {
+                            "field": "compliance_assessment",
+                            "op": "eq",
+                            "value": str(audits[0].id),
+                        }
+                    ],
+                },
+            },
+        )
+        output = read_output(start_instance(version))
+        assert output["count"] == 1
+        row = output["results"][0]
+        # Same nested shape as the API's FieldsRelatedField.
+        assert row["compliance_assessment"] == {
+            "str": str(audits[0]),
+            "id": str(audits[0].id),
+            "name": "Audit 0",
+        }
+
+    def test_risk_scenario_filterable_by_risk_assessment(self):
+        from core.models import Perimeter, RiskAssessment, RiskMatrix, RiskScenario
+
+        domain = make_domain("Domain scenario scoping")
+        assessment = make_scenarios(domain)
+        perimeter = Perimeter.objects.create(name="P2", folder=domain)
+        matrix = RiskMatrix.objects.create(name="M2", folder=Folder.get_root_folder())
+        other = RiskAssessment.objects.create(
+            name="Other", perimeter=perimeter, risk_matrix=matrix, folder=domain
+        )
+        RiskScenario.objects.create(
+            name="Elsewhere", risk_assessment=other, folder=domain
+        )
+
+        version = read_flow(
+            domain,
+            {
+                "model": "risk_scenario",
+                "mode": "list",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [
+                        {
+                            "field": "risk_assessment",
+                            "op": "eq",
+                            "value": str(assessment.id),
+                        }
+                    ],
+                },
+            },
+        )
+        output = read_output(start_instance(version))
+        assert {row["name"] for row in output["results"]} == {"Rated", "Unrated"}
+
+
+@pytest.mark.django_db
+class TestOperatorTypeGating:
+    def _flow(self, op, value):
+        domain = make_domain(f"Domain op gate {op}")
+        return read_flow(
+            domain,
+            {
+                "model": "requirement_assessment",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [{"field": "is_scored", "op": op, "value": value}],
+                },
+            },
+        )
+
+    def test_boolean_contains_is_rejected_at_publish_time(self):
+        version = self._flow("contains", "tru")
+        read_node = version.nodes.get(type=WorkflowNode.Type.ACTION)
+        codes = [code for code, _message in validate_read_config(read_node)]
+        assert codes == ["action_read_invalid_filters"]
+
+    def test_boolean_eq_still_validates(self):
+        version = self._flow("eq", True)
+        read_node = version.nodes.get(type=WorkflowNode.Type.ACTION)
+        assert validate_read_config(read_node) == []
+
+    def test_boolean_contains_is_rejected_at_run_time(self):
+        # Published configs predate the publish gate: the same check must
+        # fail loud at execution instead of diverging across databases.
+        from automation.workflows.actions import (
+            READABLE_MODELS,
+            ActionError,
+            _read_condition_to_q,
+        )
+
+        entry = READABLE_MODELS["requirement_assessment"]
+        with pytest.raises(ActionError, match="not valid for field"):
+            _read_condition_to_q(
+                {"field": "is_scored", "op": "contains", "value": "tru"},
+                entry,
+                {"is_scored"},
+                {},
+            )

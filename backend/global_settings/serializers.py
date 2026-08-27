@@ -4,6 +4,7 @@ import uuid
 
 from django.conf import settings as django_settings
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db import transaction
 from rest_framework import serializers
 
 from urllib.parse import urlparse
@@ -102,32 +103,13 @@ GENERAL_SETTINGS_KEYS = [
     "personal_folders_parent",
     "disable_partially_compliant_result",
     "use_risk_category_label",
+    "disabled_email_templates",
 ]
 
 LLM_URL_DEFAULTS = {
     "ollama_base_url": "http://localhost:11434",
     "openai_api_base": "http://localhost:1234/v1",
 }
-
-
-class GlobalSettingsSerializer(serializers.ModelSerializer):
-    def create(self, validated_data):
-        raise serializers.ValidationError(
-            "Global settings can only be created through data migrations."
-        )
-
-    def delete(self, instance):
-        raise serializers.ValidationError(
-            "Global settings can only be deleted through data migrations."
-        )
-
-    def update(self, instance, validated_data):
-        validated_data.pop("name")
-        return super().update(instance, validated_data)
-
-    class Meta:
-        model = GlobalSettings
-        fields = ["id", "name", "created_at", "updated_at"]
 
 
 class GeneralSettingsSerializer(serializers.ModelSerializer):
@@ -143,12 +125,9 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         return ret
 
     def update(self, instance, validated_data):
-        # Preserve existing API key if not provided in the update
-        if "value" in validated_data and isinstance(validated_data["value"], dict):
-            if not validated_data["value"].get("openai_api_key") and instance.value:
-                existing_key = instance.value.get("openai_api_key")
-                if existing_key:
-                    validated_data["value"]["openai_api_key"] = existing_key
+        # Keys not provided by the client (openai_api_key, per-template email
+        # toggles) are preserved from the row under a lock right before save,
+        # see below.
 
         # Track old currency value for potential propagation
         old_currency = instance.value.get("currency") if instance.value else None
@@ -215,6 +194,13 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         {"default_packager": "Must match [a-z0-9_-]+."}
                     )
+            if key == "disabled_email_templates":
+                if not isinstance(value, list) or not all(
+                    isinstance(v, str) for v in value
+                ):
+                    raise serializers.ValidationError(
+                        {"disabled_email_templates": "Must be a list of template keys."}
+                    )
             if key == "chat_temperature_enabled":
                 if not isinstance(value, bool):
                     raise serializers.ValidationError(
@@ -234,12 +220,31 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                 validated_data["value"][key] = temp
             if key == "default_custom_analytics_dashboard":
                 validated_data["value"][key] = validate_default_dashboard_value(value)
-            setattr(instance, "value", validated_data["value"])
-
         # Get new currency value
         new_currency = validated_data["value"].get("currency")
 
-        instance.save()
+        with transaction.atomic():
+            # Lock and reload the row before merging preserved keys, so this
+            # read-merge-write can't overwrite a concurrent writer (e.g. the
+            # per-template email toggles endpoint).
+            instance = GlobalSettings.objects.select_for_update().get(pk=instance.pk)
+            current = instance.value if isinstance(instance.value, dict) else {}
+            # Preserve existing API key if not provided in the update
+            if not validated_data["value"].get("openai_api_key"):
+                existing_key = current.get("openai_api_key")
+                if existing_key:
+                    validated_data["value"]["openai_api_key"] = existing_key
+            # Preserve per-template email toggles if not provided in the update
+            # (they are managed from the email templates settings, not the
+            # general form)
+            if "disabled_email_templates" not in validated_data["value"]:
+                existing_disabled = current.get("disabled_email_templates")
+                if existing_disabled is not None:
+                    validated_data["value"]["disabled_email_templates"] = (
+                        existing_disabled
+                    )
+            instance.value = validated_data["value"]
+            instance.save()
 
         # If currency has changed, propagate to AppliedControl records
         if old_currency != new_currency and new_currency:
@@ -498,6 +503,12 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         if value_changed:
             instance.value = current_value_dict
             instance.save(update_fields=["value"])
+            # Every flags write must invalidate the read cache; the only other
+            # write path is PresetExecutor._apply_feature_flags, which does
+            # the same. Local import: utils imports this module at load time.
+            from global_settings.utils import clear_feature_flags_cache
+
+            clear_feature_flags_cache()
 
         return instance
 

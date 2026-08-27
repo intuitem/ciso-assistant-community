@@ -952,7 +952,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         if self.is_superuser and not self.is_active:
             # avoid deactivation of superuser
             self.is_active = True
-        if not self.is_local:
+        if not self.is_local and not self.is_scim_managed:
             self.set_unusable_password()
         super().save(*args, **kwargs)
         logger.info("user saved", user=self)
@@ -1025,6 +1025,21 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         Tries the YAML-based template system first (supports custom overrides),
         falls back to the legacy Django HTML templates.
         """
+        template_key = self._TEMPLATE_KEY_MAP.get(email_template_name)
+        if template_key:
+            from core.email_utils import is_email_template_enabled
+
+            # If call to render_email_template (below) fails because the template is disabled (from settings->templates->email templates),
+            # it will still send an email using fallback to legacy Django HTML templates.
+            # This prevents it
+            if not is_email_template_enabled(template_key):
+                logger.info(
+                    "Email template is disabled in settings, skipping send",
+                    template_key=template_key,
+                    recipient=self.email,
+                )
+                return
+
         user_lang = self.get_preferences().get("lang", "en")
         uid = urlsafe_base64_encode(force_bytes(self.pk))
         token = default_token_generator.make_token(self)
@@ -1045,7 +1060,6 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         }
 
         # Try YAML template system (supports custom overrides and Markdown)
-        template_key = self._TEMPLATE_KEY_MAP.get(email_template_name)
         if template_key:
             try:
                 from core.email_utils import render_email_template
@@ -1268,6 +1282,9 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         """
         from global_settings.models import GlobalSettings
 
+        if self.is_scim_managed and not self.keep_local_login:
+            return False
+
         try:
             sso_settings = GlobalSettings.objects.get(
                 name=GlobalSettings.Names.SSO
@@ -1489,20 +1506,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return is_directly_accessible or is_indirectly_accessible
 
     @staticmethod
-    def _is_actor_accessible(
-        user: AbstractBaseUser | AnonymousUser,
-        perm_prefix: PermissionPrefix,
-        actor: Actor,
-    ) -> bool:
-        specific = actor.specific
-        specific_model = type(specific)
-        iam_scope_folder = specific.folder
-
-        return iam_scope_folder.id in RoleAssignment.get_allowed_folder_ids(
-            user, (perm_prefix, specific_model)
-        )
-
-    @staticmethod
     def is_object_accessible(
         user: AbstractBaseUser | AnonymousUser,
         perm_prefix: PermissionPrefix,
@@ -1522,7 +1525,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return False
 
         if model is Actor:
-            return RoleAssignment._is_actor_accessible(user, perm_prefix, obj)
+            if not isinstance(obj, Actor):
+                raise AssertionError("Unreachable.")
+
+            obj = obj.specific
+            model = type(obj)
 
         if perm_prefix == "add" and model is FilteringLabel:
             return RoleAssignment.get_allowed_folder_ids(
@@ -1841,7 +1848,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         user_folder_ids = RoleAssignment.get_allowed_folder_ids(
             user, (perm_prefix, User)
         )
-        team__folder_ids = RoleAssignment.get_allowed_folder_ids(
+        team_folder_ids = RoleAssignment.get_allowed_folder_ids(
             user, (perm_prefix, Team)
         )
         entity_folder_ids = RoleAssignment.get_allowed_folder_ids(
@@ -1856,11 +1863,43 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             ),
         ).filter(
             Q(user__isnull=False, iam_folder_id__in=user_folder_ids)
-            | Q(team__isnull=False, iam_folder_id__in=team__folder_ids)
+            | Q(team__isnull=False, iam_folder_id__in=team_folder_ids)
             | Q(entity__isnull=False, iam_folder_id__in=entity_folder_ids)
         )
 
         allowed_actor_ids = allowed_actors.values_list("id", flat=True)
+
+        if perm_prefix == "view":
+            published_actors_query = Q()
+
+            for model, allowed_folder_ids in [
+                (User, user_folder_ids),
+                (Team, team_folder_ids),
+                (Entity, entity_folder_ids),
+            ]:
+                ancestor_folder_ids = Folder.objects.filter(
+                    descendants__in=Folder.objects.filter(
+                        id__in=allowed_folder_ids
+                    ).exclude(content_type=Folder.ContentType.ENCLAVE)
+                ).distinct()
+
+                iam_folder_field = RoleAssignment.get_iam_folder_field(model)
+
+                model_name = model.__name__.lower()
+                published_model_objects_query = Q(
+                    **{
+                        f"{model_name}__{iam_folder_field}__in": ancestor_folder_ids,
+                        f"{model_name}__is_published": True,
+                    }
+                )
+
+                published_actors_query |= published_model_objects_query
+
+            published_actors = Actor.objects.filter(published_actors_query)
+            published_actor_ids = published_actors.values_list("id", flat=True)
+
+            allowed_actor_ids = allowed_actor_ids.union(published_actor_ids)
+
         return allowed_actor_ids
 
     @staticmethod

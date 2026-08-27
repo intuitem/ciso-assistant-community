@@ -188,6 +188,8 @@
 	let selectedStatus = $state([]);
 	let selectedResults = $state([]);
 	let selectedExtendedResults = $state([]);
+	let selectedControlCoverage = $state([]);
+	let selectedEvidenceCoverage = $state([]);
 	let displayOnlyAssessableNodes = $state(false);
 	$effect(
 		() =>
@@ -195,6 +197,8 @@
 				selectedStatus = [],
 				selectedResults = [],
 				selectedExtendedResults = [],
+				selectedControlCoverage = [],
+				selectedEvidenceCoverage = [],
 				displayOnlyAssessableNodes = false
 			} = $currentFilters)
 	);
@@ -222,15 +226,31 @@
 		auditFiltersStore.setExtendedResults(page.params.id, selectedExtendedResults);
 	}
 
+	function toggleControlCoverage(coverage) {
+		selectedControlCoverage = toggleItem(coverage, selectedControlCoverage);
+		auditFiltersStore.setControlCoverage(page.params.id, selectedControlCoverage);
+	}
+
+	function toggleEvidenceCoverage(coverage) {
+		selectedEvidenceCoverage = toggleItem(coverage, selectedEvidenceCoverage);
+		auditFiltersStore.setEvidenceCoverage(page.params.id, selectedEvidenceCoverage);
+	}
+
 	function isNodeHidden(node: Node, displayOnlyAssessableNodes: boolean): boolean {
 		const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
+		const controlCoverage = node.has_applied_controls ? 'with' : 'without';
+		const evidenceCoverage = node.has_evidence ? 'with' : 'without';
 		return (
 			(displayOnlyAssessableNodes && !node.assessable && !hasAssessableChildren) ||
 			(node.assessable &&
 				((selectedStatus.length > 0 && !selectedStatus.includes(node.status)) ||
 					(selectedResults.length > 0 && !selectedResults.includes(node.result)) ||
 					(selectedExtendedResults.length > 0 &&
-						!selectedExtendedResults.includes(node.extended_result))))
+						!selectedExtendedResults.includes(node.extended_result)) ||
+					(selectedControlCoverage.length > 0 &&
+						!selectedControlCoverage.includes(controlCoverage)) ||
+					(selectedEvidenceCoverage.length > 0 &&
+						!selectedEvidenceCoverage.includes(evidenceCoverage))))
 		);
 	}
 	function transformToTreeView(nodes: Node[], hasParentNode: boolean = false) {
@@ -284,14 +304,14 @@
 	}
 	let treeViewNodes: TreeViewNode[] = $state();
 
-	function assessableNodesCount(nodes: TreeViewNode[]): number {
+	function assessableNodesCount(nodes: TreeViewNode[], onlyVisible = false): number {
 		let count = 0;
 		for (const node of nodes) {
-			if (node.contentProps.assessable) {
+			if (node.contentProps.assessable && !(onlyVisible && node.contentProps.hidden)) {
 				count++;
 			}
 			if (node.children) {
-				count += assessableNodesCount(node.children);
+				count += assessableNodesCount(node.children, onlyVisible);
 			}
 		}
 		return count;
@@ -663,6 +683,8 @@
 		(selectedStatus.length > 0 ? 1 : 0) +
 			(selectedResults.length > 0 ? 1 : 0) +
 			(selectedExtendedResults.length > 0 ? 1 : 0) +
+			(selectedControlCoverage.length > 0 ? 1 : 0) +
+			(selectedEvidenceCoverage.length > 0 ? 1 : 0) +
 			(displayOnlyAssessableNodes ? 1 : 0)
 	);
 
@@ -1151,7 +1173,11 @@
 				<span class="h4">{m.associatedRequirements()}</span>
 				<span class="badge bg-violet-400 text-white ml-1 rounded-xl">
 					{#if treeViewNodes}
-						{assessableNodesCount(treeViewNodes)}
+						{#if filterCount}
+							{assessableNodesCount(treeViewNodes, true)} / {assessableNodesCount(treeViewNodes)}
+						{:else}
+							{assessableNodesCount(treeViewNodes)}
+						{/if}
 					{/if}
 				</span>
 			</div>
@@ -1252,6 +1278,47 @@
 								</div>
 							{/if}
 							<div>
+								<span class="text-sm font-bold">{m.appliedControls()}</span>
+								<div
+									class="flex flex-wrap w-fit gap-2 text-xs bg-surface-200-800 border-2 p-1 rounded-md"
+								>
+									{#each ['with', 'without'] as coverage}
+										<button
+											type="button"
+											onclick={() => toggleControlCoverage(coverage)}
+											class="px-2 py-1 rounded-md font-bold {selectedControlCoverage.includes(
+												coverage
+											)
+												? 'bg-primary-500 text-white'
+												: 'bg-surface-400 text-black opacity-30'}"
+										>
+											{coverage === 'with' ? m.withAppliedControls() : m.withoutAppliedControls()}
+										</button>
+									{/each}
+								</div>
+							</div>
+							<div>
+								<span class="text-sm font-bold">{m.evidence()}</span>
+								<span class="text-xs text-surface-600-400 ml-1">({m.evidenceCoverageHint()})</span>
+								<div
+									class="flex flex-wrap w-fit gap-2 text-xs bg-surface-200-800 border-2 p-1 rounded-md"
+								>
+									{#each ['with', 'without'] as coverage}
+										<button
+											type="button"
+											onclick={() => toggleEvidenceCoverage(coverage)}
+											class="px-2 py-1 rounded-md font-bold {selectedEvidenceCoverage.includes(
+												coverage
+											)
+												? 'bg-primary-500 text-white'
+												: 'bg-surface-400 text-black opacity-30'}"
+										>
+											{coverage === 'with' ? m.withEvidence() : m.withoutEvidence()}
+										</button>
+									{/each}
+								</div>
+							</div>
+							<div>
 								<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
 								<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
 									<Switch
@@ -1286,7 +1353,7 @@
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
 		{#key data}
-			{#key displayOnlyAssessableNodes || selectedStatus || selectedResults || selectedExtendedResults}
+			{#key [displayOnlyAssessableNodes, selectedStatus, selectedResults, selectedExtendedResults, selectedControlCoverage, selectedEvidenceCoverage].join('|')}
 				<RecursiveTreeView
 					nodes={transformToTreeView(Object.entries(tree))}
 					bind:expandedNodes

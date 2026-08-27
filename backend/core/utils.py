@@ -1377,6 +1377,9 @@ def resolve_visibility_from_overrides(overrides, field_name):
     Use this when you have a raw dict (e.g. from a queryset `.values()` call).
     For a model instance, prefer `resolve_field_visibility(ca, field)`.
     """
+    # is_score_overridden inherits score's visibility.
+    if field_name == "is_score_overridden":
+        field_name = "score"
     pair = (overrides or {}).get(field_name)
     if isinstance(pair, dict):
         return pair
@@ -1425,3 +1428,43 @@ def build_initial_field_visibility(framework):
         merged.setdefault(key, dict(EVERYONE_EDIT))
         merged[key].update(pair)
     return merged
+
+
+def bulk_update_with_log(model, rows, fields, batch_size=500):
+    """``bulk_update`` that still leaves a trail: it skips ``post_save``, so
+    auditlog logs nothing and workflow events never fire. Writes the entries a
+    per-object ``save()`` would. Returns the number of rows that changed."""
+    from auditlog.diff import model_instance_diff
+    from auditlog.models import LogEntry
+    from django.db import transaction
+
+    rows = [row for row in rows if row.pk is not None]
+    fields = list(fields)
+    if not rows or not fields:
+        return 0
+
+    use_json = getattr(settings, "AUDITLOG_STORE_JSON_CHANGES", False)
+    logged = 0
+    # One transaction: a half-written trail is worse than a failed call.
+    with transaction.atomic():
+        # Stored values first: after bulk_update there is nothing left to diff.
+        # Locked, because at READ COMMITTED two concurrent writers would both
+        # read the pre-change value and log the same "from".
+        stored = model.objects.select_for_update().in_bulk([row.pk for row in rows])
+        model.objects.bulk_update(rows, fields, batch_size=batch_size)
+        for row in rows:
+            old = stored.get(row.pk)
+            if old is None:
+                continue
+            changes = model_instance_diff(
+                old, row, fields_to_check=fields, use_json_for_changes=use_json
+            )
+            if not changes:
+                continue
+            # log_create fills content_type, cid and additional_data (folder_id,
+            # which the dispatcher scopes on); the middleware fills the actor.
+            LogEntry.objects.log_create(
+                row, action=LogEntry.Action.UPDATE, changes=changes
+            )
+            logged += 1
+    return logged
