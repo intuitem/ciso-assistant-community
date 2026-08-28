@@ -262,22 +262,23 @@ class ServiceAccountWriteSerializer(serializers.Serializer):
         if not self.partial and not has_role and not has_permissions:
             raise serializers.ValidationError("Provide either a role or permissions.")
 
-        identity_source = attrs.get(
-            "identity_source", ServiceAccount.IdentitySource.LOCAL
-        )
-        social_app = attrs.get("social_app")
-        federated_subject = attrs.get("federated_subject")
-        if identity_source == ServiceAccount.IdentitySource.FEDERATED:
-            if not social_app or not federated_subject:
-                raise serializers.ValidationError(
-                    "Federated service accounts require both social_app and "
-                    "federated_subject."
-                )
-        elif social_app or federated_subject:
-            raise serializers.ValidationError(
-                "social_app and federated_subject are only valid for "
-                "federated service accounts."
+        if not self.partial:
+            identity_source = attrs.get(
+                "identity_source", ServiceAccount.IdentitySource.LOCAL
             )
+            social_app = attrs.get("social_app")
+            federated_subject = attrs.get("federated_subject")
+            if identity_source == ServiceAccount.IdentitySource.FEDERATED:
+                if not social_app or not federated_subject:
+                    raise serializers.ValidationError(
+                        "Federated service accounts require both social_app and "
+                        "federated_subject."
+                    )
+            elif social_app or federated_subject:
+                raise serializers.ValidationError(
+                    "social_app and federated_subject are only valid for "
+                    "federated service accounts."
+                )
         return attrs
 
 

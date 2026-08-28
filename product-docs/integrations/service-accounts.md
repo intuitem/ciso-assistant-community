@@ -4,20 +4,20 @@ description: Machine-to-machine API access for CISO Assistant, via OAuth2 client
 
 # Service accounts
 
-A **service account** is an identity for a script, CI pipeline, or external system to call the CISO Assistant API on its own, no human, no session, no interactive login. It authenticates using the OAuth2 **client credentials** grant, fully delegated to the OIDC identity provider built into CISO Assistant.
+A **service account** is an identity for a script, CI pipeline, or external system to call the CISO Assistant API on its own, no human, no session, no interactive login. It authenticates using the OAuth2 **client credentials** grant, either against the OIDC identity provider built into CISO Assistant (local) or against an external one (federated) — see below.
 
 {% hint style="info" %}
 This is a **PRO** feature. It is gated by the `Service accounts` feature flag (see [feature-flags.md](../configuration/settings/feature-flags.md "mention")). While the flag is off, the **Service accounts** menu stays hidden and its API is unreachable.
 {% endhint %}
 
-### Identity source: local or federated
+## Identity source: local or federated
 
-A service account authenticates one of two ways, chosen at creation and fixed afterwards:
+A service account authenticates one of two ways, chosen at creation and fixed afterwards — switching a service account from one to the other isn't supported:
 
 * **Local** (the default): CISO Assistant generates the Client ID and secret itself, as described below.
 * **Federated**: an external identity provider issues the token, verified against that provider's own signing keys. No secret is generated or stored here at all, there's nothing to leak on our side, and consequently nothing to rotate: **Rotate secret** isn't offered for a federated account.
 
-Federated mode requires the external provider to already be registered as an [identity provider](identity-providers.md) (distinct from the SSO identity providers used for human login, see that page for the difference). Once registered, creating a federated service account asks for which provider it authenticates as, and the **subject** (`sub` claim) the provider's tokens will carry for it.
+Federated mode requires the external provider to already be registered as an [identity provider](identity-providers.md) (distinct from the SSO identity providers used for human login, see that page for the difference). Creating a federated service account asks for which provider it authenticates as, and the **subject** (`sub` claim) the provider's tokens will carry for it — both can be changed later, e.g. if the account is re-pointed at a new provider or the upstream subject changes.
 
 Everything else, including the permission model below, works identically regardless of identity source.
 

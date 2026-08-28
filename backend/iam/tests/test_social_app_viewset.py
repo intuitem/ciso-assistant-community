@@ -2,11 +2,8 @@ import pytest
 
 from allauth.socialaccount.models import SocialApp
 
-from iam.models import ServiceAccount
-
 from .test_federated_service_accounts import (
     CLIENT_ID,
-    JWKS_URL,
     SERVER_URL,
     _create_federated_sa,
     admin_client,  # noqa: F401
@@ -59,6 +56,18 @@ class TestSocialAppViewSet:
                 "name": "Duplicate",
                 "provider_id": social_app.provider_id,
                 "client_id": "another-client",
+                "server_url": SERVER_URL,
+            },
+        )
+        assert response.status_code == 400, response.content
+
+    def test_duplicate_client_id_rejected(self, admin_client, mocked_idp, social_app):
+        response = admin_client.post(
+            SOCIAL_APPS_ENDPOINT,
+            {
+                "name": "Duplicate client",
+                "provider_id": "another-idp",
+                "client_id": social_app.client_id,
                 "server_url": SERVER_URL,
             },
         )

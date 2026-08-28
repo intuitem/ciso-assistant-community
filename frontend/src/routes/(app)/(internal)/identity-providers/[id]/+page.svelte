@@ -2,6 +2,7 @@
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { getToastStore } from '$lib/components/Toast/stores';
@@ -20,6 +21,18 @@
 
 	let busy = $state(false);
 
+	async function extractErrorMessage(res: Response): Promise<string> {
+		try {
+			const body = await res.json();
+			const raw = body?.error ?? body?.message?.error ?? body?.detail;
+			const key = Array.isArray(raw) ? raw[0] : raw;
+			if (typeof key === 'string' && key) return safeTranslate(key);
+		} catch {
+			/* fall through to the generic message */
+		}
+		return m.anErrorOccurred();
+	}
+
 	function modalConfirmDelete(): void {
 		modalStore.trigger({
 			type: 'confirm',
@@ -33,7 +46,7 @@
 					if (res.ok) {
 						await goto('/identity-providers', { invalidateAll: true });
 					} else {
-						toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
+						toastStore.trigger({ message: await extractErrorMessage(res), preset: 'error' });
 					}
 				} catch {
 					toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });

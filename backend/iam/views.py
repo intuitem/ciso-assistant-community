@@ -700,16 +700,29 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
             normalize = lambda v: None if v in (None, "") else str(v)
             return normalize(request.data[field]) != normalize(current)
 
+        # identity_source is structural (a local account has an OAuth2 client/secret a
+        # federated one doesn't, and update_service_account has no code path to create
+        # or tear one down), so switching it isn't supported. social_app and
+        # federated_subject are just the federated account's identity and may be
+        # re-pointed, subject to the same checks creation applies (see below).
+        if _changed("identity_source", service_account.identity_source):
+            return Response(
+                {"error": ["identity_source cannot be changed after creation."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        federation_fields_changed = _changed(
+            "social_app", service_account.social_app_id
+        ) or _changed("federated_subject", service_account.federated_subject)
         if (
-            _changed("identity_source", service_account.identity_source)
-            or _changed("social_app", service_account.social_app_id)
-            or _changed("federated_subject", service_account.federated_subject)
+            federation_fields_changed
+            and service_account.identity_source
+            != ServiceAccount.IdentitySource.FEDERATED
         ):
             return Response(
                 {
                     "error": [
-                        "identity_source, social_app, and federated_subject cannot "
-                        "be changed after creation."
+                        "social_app and federated_subject are only valid for "
+                        "federated service accounts."
                     ]
                 },
                 status=status.HTTP_400_BAD_REQUEST,
@@ -733,6 +746,12 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
                     is_recursive=data.get("is_recursive"),
                     expiry_date=data["expiry_date"]
                     if "expiry_date" in data
+                    else UNSET_FIELD,
+                    social_app=data["social_app"]
+                    if "social_app" in data
+                    else UNSET_FIELD,
+                    federated_subject=data["federated_subject"]
+                    if "federated_subject" in data
                     else UNSET_FIELD,
                 )
                 if "is_active" in data:
@@ -822,11 +841,6 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
                 }
                 for role in roles
             ]
-        )
-
-    def social_apps_catalog(self, request):
-        return Response(
-            SocialAppReadSerializer(SocialApp.objects.order_by("name"), many=True).data
         )
 
 

@@ -42,10 +42,7 @@
 		modalStore.trigger(modal);
 	}
 
-	// Identity providers are gated behind IsGlobalAdmin, not the folder-scoped
-	// RBAC permission catalog, so ModelTable's generic canPerformAction check
-	// never sees change_socialapp/delete_socialapp and hides the built-in row
-	// actions. Render our own, gated on isAdmin instead.
+	// isAdmin-gated: change_socialapp/delete_socialapp never reach ModelTable's RBAC check.
 	function modalConfirmDelete(row: Record<string, any>): void {
 		const modalComponent: ModalComponent = {
 			ref: DeleteConfirmModal,

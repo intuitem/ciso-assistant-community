@@ -12,7 +12,7 @@ This is not the same screen as [SSO's Identity providers](../configuration/sso/i
 This is a **PRO** feature, part of [service accounts](service-accounts.md). It shares that feature's `Service accounts` flag (see [feature-flags.md](../configuration/settings/feature-flags.md "mention")) and its admin-only access.
 {% endhint %}
 
-### Registering a provider
+## Registering a provider
 
 Identity providers live under **Organization > Identity providers** in the sidebar, next to Service accounts. Registering one asks for:
 

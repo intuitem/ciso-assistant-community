@@ -10,6 +10,7 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Error
 
 DISCOVERY_CACHE_TTL = 60 * 30
 JWKS_CACHE_TTL = 60 * 30
+JWKS_REFRESH_LOCK_TTL = 5
 # Same default allauth's own jwtkit.lookup_kid_jwk applies when a JWK omits 'alg' RFC 7517
 DEFAULT_JWK_ALG = "RS256"
 REQUEST_TIMEOUT = 10
@@ -20,7 +21,7 @@ WELL_KNOWN_SUFFIX = "/.well-known/openid-configuration"
 def social_app_discovery_url(social_app: SocialApp) -> str:
     url = social_app.settings["server_url"]
     if "/.well-known/" not in url:
-        url += WELL_KNOWN_SUFFIX
+        url = url.rstrip("/") + WELL_KNOWN_SUFFIX
     return url
 
 
@@ -54,11 +55,12 @@ def _cached_fetch_key(credential: str, keys_url: str, lookup):
     header = jwt.get_unverified_header(credential)
     kid = header["kid"]
     cache_key = f"iam:oidc-jwks:{keys_url}"
+    refresh_lock_key = f"iam:oidc-jwks-refresh-lock:{keys_url}"
     keys_data = cache.get(cache_key)
     if keys_data is None:
         keys_data = _fetch_and_cache_keys(cache_key, keys_url)
     key = lookup(keys_data, kid)
-    if not key:
+    if not key and cache.add(refresh_lock_key, True, JWKS_REFRESH_LOCK_TTL):
         keys_data = _fetch_and_cache_keys(cache_key, keys_url)
         key = lookup(keys_data, kid)
     if not key:
@@ -89,6 +91,7 @@ def verify_and_decode_cached(
                 "verify_iss": True,
                 "verify_aud": True,
                 "verify_exp": True,
+                "require": ["exp", "iss", "aud"],
             },
             issuer=issuer,
             audience=audience,
@@ -100,10 +103,8 @@ def verify_and_decode_cached(
 
 
 def check_social_app_live(social_app: SocialApp) -> None:
-    provider_config = resolve_social_app_provider_config(social_app)
-    with get_adapter().get_requests_session() as sess:
-        response = sess.get(provider_config["jwks_uri"], timeout=REQUEST_TIMEOUT)
-        response.raise_for_status()
+    jwks_uri = resolve_social_app_provider_config(social_app)["jwks_uri"]
+    _fetch_and_cache_keys(f"iam:oidc-jwks:{jwks_uri}", jwks_uri)
 
 
 def register_social_app(
@@ -112,6 +113,10 @@ def register_social_app(
     if SocialApp.objects.filter(provider_id=provider_id).exists():
         raise DjangoValidationError(
             f"An identity provider with provider ID '{provider_id}' already exists."
+        )
+    if SocialApp.objects.filter(client_id=client_id).exists():
+        raise DjangoValidationError(
+            f"An identity provider with client ID '{client_id}' already exists."
         )
     social_app = SocialApp(
         provider="openid_connect",
@@ -150,16 +155,28 @@ def update_social_app(
         social_app.provider_id = provider_id
     if name is not None:
         social_app.name = name
-    if client_id is not None:
+    connection_changed = False
+    if client_id is not None and client_id != social_app.client_id:
+        if (
+            SocialApp.objects.filter(client_id=client_id)
+            .exclude(pk=social_app.pk)
+            .exists()
+        ):
+            raise DjangoValidationError(
+                f"An identity provider with client ID '{client_id}' already exists."
+            )
         social_app.client_id = client_id
-    if server_url is not None:
+        connection_changed = True
+    if server_url is not None and server_url != social_app.settings.get("server_url"):
         social_app.settings["server_url"] = server_url
-    try:
-        check_social_app_live(social_app)
-    except (requests.RequestException, KeyError) as e:
-        raise DjangoValidationError(
-            f"Could not verify the identity provider: {e}"
-        ) from e
+        connection_changed = True
+    if connection_changed:
+        try:
+            check_social_app_live(social_app)
+        except (requests.RequestException, KeyError) as e:
+            raise DjangoValidationError(
+                f"Could not verify the identity provider: {e}"
+            ) from e
     social_app.save()
     return social_app
 

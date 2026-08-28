@@ -2,8 +2,8 @@ import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { BASE_API_URL } from '$lib/utils/constants';
 
-export const GET: RequestHandler = async ({ fetch }) => {
-	const endpoint = `${BASE_API_URL}/iam/service-accounts/social-apps/`;
+export const GET: RequestHandler = async ({ fetch, url }) => {
+	const endpoint = `${BASE_API_URL}/iam/social-apps/${url.search}`;
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {

@@ -1052,7 +1052,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'serviceAccounts',
 		verboseName: 'Service account',
 		verboseNamePlural: 'Service accounts',
-		foreignKeyFields: [{ field: 'folders', urlModel: 'folders' }],
+		foreignKeyFields: [
+			{ field: 'folders', urlModel: 'folders' },
+			{ field: 'social_app', urlModel: 'identity-providers' }
+		],
 		detailViewFields: [
 			{ field: 'id' },
 			{ field: 'name' },

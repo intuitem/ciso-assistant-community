@@ -60,11 +60,6 @@ urlpatterns = [
         name="service-account-roles",
     ),
     path(
-        "service-accounts/social-apps/",
-        ServiceAccountViewSet.as_view({"get": "social_apps_catalog"}),
-        name="service-account-social-apps",
-    ),
-    path(
         "service-accounts/<uuid:pk>/",
         ServiceAccountViewSet.as_view(
             {"get": "retrieve", "patch": "partial_update", "delete": "destroy"}

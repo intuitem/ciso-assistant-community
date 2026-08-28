@@ -14,8 +14,10 @@ from allauth.socialaccount.models import SocialApp
 
 from core.startup import startup
 from django.contrib.auth.models import Permission
+from django.core.exceptions import ValidationError
 from global_settings.models import GlobalSettings
 from iam.models import Folder, Role, ServiceAccount, User, UserGroup
+from iam.service_accounts import provision_federated_service_account
 
 SA_ENDPOINT = "/api/iam/service-accounts/"
 
@@ -151,8 +153,7 @@ def _mint_jwt(
         "iat": now,
         "exp": now + exp_delta,
     }
-    # Real IdP-issued tokens (e.g. Keycloak) always carry a jti — set one by
-    # default so tests exercise the same path real tokens do.
+    # jti is optional in OIDC; default one so tests can opt out with jti=False.
     if jti is not False:
         claims["jti"] = jti or "test-jti"
     return jwt.encode(claims, private_key, algorithm="RS256", headers={"kid": kid})
@@ -255,6 +256,81 @@ class TestFederatedProvisioning:
         )
         assert response.status_code == 400
 
+    def test_federated_subject_can_be_changed(
+        self, admin_client, domain_folder, social_app, mocked_idp
+    ):
+        payload = _create_federated_sa(admin_client, domain_folder, social_app).json()
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"federated_subject": "worker-2"},
+            format="json",
+        )
+        assert response.status_code == 200, response.content
+        assert response.json()["federated_subject"] == "worker-2"
+        sa = ServiceAccount.objects.get(id=payload["id"])
+        assert sa.federated_subject == "worker-2"
+
+    def test_social_app_can_be_repointed(
+        self, admin_client, domain_folder, social_app, mocked_idp
+    ):
+        other_app = SocialApp.objects.create(
+            provider="openid_connect",
+            provider_id="test-idp-2",
+            name="Test IdP 2",
+            client_id="other-client-id",
+            settings={"server_url": SERVER_URL},
+        )
+        payload = _create_federated_sa(admin_client, domain_folder, social_app).json()
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"social_app": str(other_app.id)},
+            format="json",
+        )
+        assert response.status_code == 200, response.content
+        assert response.json()["social_app"]["id"] == other_app.id
+        sa = ServiceAccount.objects.get(id=payload["id"])
+        assert sa.social_app_id == other_app.id
+        # subject is unchanged - only the provider was re-pointed.
+        assert sa.federated_subject == "worker-1"
+
+    def test_repoint_rejects_duplicate_pair(
+        self, admin_client, domain_folder, social_app, mocked_idp
+    ):
+        first = _create_federated_sa(admin_client, domain_folder, social_app).json()
+        second = _create_federated_sa(
+            admin_client, domain_folder, social_app, subject="worker-2", name="sa-2"
+        ).json()
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{second['id']}/",
+            {"federated_subject": "worker-1"},
+            format="json",
+        )
+        assert response.status_code == 400, response.content
+        sa = ServiceAccount.objects.get(id=second["id"])
+        assert sa.federated_subject == "worker-2"
+
+    def test_local_account_forbids_federation_field_updates(
+        self, admin_client, domain_folder
+    ):
+        response = admin_client.post(
+            SA_ENDPOINT,
+            {
+                "name": "local-sa",
+                "identity_source": "local",
+                "permissions": _view_folder_permission_ids(),
+                "folders": [str(domain_folder.id)],
+            },
+            format="json",
+        )
+        assert response.status_code == 201, response.content
+        sa_id = response.json()["id"]
+        patch_response = admin_client.patch(
+            f"{SA_ENDPOINT}{sa_id}/",
+            {"federated_subject": "worker-1"},
+            format="json",
+        )
+        assert patch_response.status_code == 400, patch_response.content
+
     def test_rotate_secret_rejected_for_federated(
         self, admin_client, domain_folder, social_app
     ):
@@ -263,6 +339,31 @@ class TestFederatedProvisioning:
             f"{SA_ENDPOINT}{payload['id']}/rotate-secret/", format="json"
         )
         assert response.status_code == 400
+
+    def test_concurrent_duplicate_maps_to_validation_error(
+        self, domain_folder, social_app, mocked_idp
+    ):
+        """Simulates two requests racing past the .exists() pre-check: the
+        first commits, the second must still get a clean ValidationError from
+        the real unique_together constraint, not a bare IntegrityError/500."""
+        kwargs = dict(
+            description=None,
+            permission_ids=_view_folder_permission_ids(),
+            role_id=None,
+            folder_ids=[domain_folder.id],
+            is_recursive=False,
+            created_by=None,
+            social_app=social_app,
+            federated_subject="worker-1",
+        )
+        provision_federated_service_account(name="first-sa", **kwargs)
+
+        with patch(
+            "iam.service_accounts.ServiceAccount.objects.filter"
+        ) as mocked_filter:
+            mocked_filter.return_value.exists.side_effect = [False, True]
+            with pytest.raises(ValidationError, match="already registered"):
+                provision_federated_service_account(name="second-sa", **kwargs)
 
 
 @pytest.mark.django_db
@@ -320,6 +421,38 @@ class TestFederatedAuthentication:
 
         assert mocked_idp["discovery"] == discovery_calls_after_create
         assert mocked_idp["jwks"] == jwks_calls_after_create
+
+    def test_token_missing_exp_rejected(
+        self, admin_client, domain_folder, social_app, rsa_keypair, mocked_idp
+    ):
+        """PyJWT only checks 'exp' if the claim is present, so a token that
+        omits it entirely must be rejected explicitly, not treated as non-expiring."""
+        private_key, _ = rsa_keypair
+        _create_federated_sa(admin_client, domain_folder, social_app)
+        claims = {
+            "iss": ISSUER,
+            "aud": CLIENT_ID,
+            "sub": "worker-1",
+            "iat": int(time.time()),
+        }
+        token = jwt.encode(claims, private_key, algorithm="RS256", headers={"kid": KID})
+        response = _bearer_client(token).get("/api/folders/")
+        assert response.status_code == 401
+
+    def test_unknown_kid_refresh_is_rate_limited_per_provider(
+        self, admin_client, domain_folder, social_app, rsa_keypair, mocked_idp
+    ):
+        """Rotating 'kid' values must not each force a live JWKS refetch."""
+        private_key, _ = rsa_keypair
+        _create_federated_sa(admin_client, domain_folder, social_app)
+        jwks_calls_after_create = mocked_idp["jwks"]
+
+        for i in range(5):
+            token = _mint_jwt(private_key, kid=f"bogus-kid-{i}")
+            response = _bearer_client(token).get("/api/folders/")
+            assert response.status_code == 401
+
+        assert mocked_idp["jwks"] - jwks_calls_after_create == 1
 
     def test_wrong_subject_rejected(
         self, admin_client, domain_folder, social_app, rsa_keypair, mocked_idp
