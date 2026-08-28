@@ -10926,18 +10926,28 @@ class Actor(AbstractBaseModel):
         Includes:
         - The user's own actor
         - Actors of teams where the user is leader, deputy, or member
+        - Actors of entities the user represents
+
+        Entities act through their representatives: naming an entity as owner or
+        assignee is naming the people who speak for it, so anything addressed to
+        the entity has to reach them. Without this an entity-assigned object has
+        an accountable actor that resolves to nobody, which is worse than leaving
+        it unassigned.
         """
         actors = []
         if hasattr(user, "actor") and user.actor:
             actors.append(user.actor)
 
-        team_actors = cls.objects.filter(
-            team__in=Team.objects.filter(
-                Q(leader=user) | Q(deputies=user) | Q(members=user)
+        group_actors = cls.objects.filter(
+            Q(
+                team__in=Team.objects.filter(
+                    Q(leader=user) | Q(deputies=user) | Q(members=user)
+                )
             )
+            | Q(entity__representatives__user=user)
         ).distinct()
 
-        return actors + list(team_actors)
+        return actors + list(group_actors)
 
     def __str__(self):
         return str(self.specific)

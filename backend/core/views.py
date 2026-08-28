@@ -16748,6 +16748,24 @@ class TaskTemplateFilter(GenericFilterSet):
             | Q(findings__findings_assessment__in=value)
         ).distinct()
 
+    # A task reaches an audit three ways: hung on the audit itself, on one of its
+    # requirement assessments, or on a finding raised from one. The action plan is
+    # only complete if it walks all three.
+    compliance_assessments = df.ModelMultipleChoiceFilter(
+        method="filter_compliance_assessments",
+        queryset=ComplianceAssessment.objects.all(),
+        label="Compliance assessments",
+    )
+
+    def filter_compliance_assessments(self, queryset, name, value):
+        if not value:
+            return queryset
+        return queryset.filter(
+            Q(compliance_assessments__in=value)
+            | Q(requirement_assessments__compliance_assessment__in=value)
+            | Q(findings__requirement_assessment__compliance_assessment__in=value)
+        ).distinct()
+
     next_occurrence_status = df.MultipleChoiceFilter(
         choices=TaskNode.TASK_STATUS_CHOICES, method="filter_next_occurrence_status"
     )

@@ -2400,6 +2400,7 @@
 	"commitmentsDescription": "Toutes les dates de remédiation promises, sur les mesures et les tâches",
 	"commitmentTakenAt": "Engagement pris le",
 	"findingsActionPlanTasksHelpText": "Tâches rattachées à ce classeur ou à l'un de ses constats",
+	"auditActionPlanTasksHelpText": "Tâches rattachées à cet audit, à l'une de ses exigences ou à un constat qui en découle",
 	"taskTemplatesAnalytics": "Analyses des tâches",
 	"findingsManagement": "Gestion des constats",
 	"findingsFromRequirements": "Constats depuis les exigences",

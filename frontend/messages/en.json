@@ -2454,6 +2454,7 @@
 	"commitmentsDescription": "Every promised remediation date, across controls and tasks",
 	"commitmentTakenAt": "Commitment taken at",
 	"findingsActionPlanTasksHelpText": "Tasks attached to this binder or to one of its findings",
+	"auditActionPlanTasksHelpText": "Tasks attached to this audit, to one of its requirements, or to a finding raised from one",
 	"taskTemplatesAnalytics": "Tasks analytics",
 	"findingsManagement": "Findings management",
 	"findingsFromRequirements": "Findings from requirements",
