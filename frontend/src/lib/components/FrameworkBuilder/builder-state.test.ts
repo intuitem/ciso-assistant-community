@@ -9,6 +9,7 @@ import {
 	buildTree,
 	serializeDraft,
 	createBuilderState,
+	nodePassesIgFilter,
 	type Framework,
 	type BuilderNode,
 	type RequirementNode,
@@ -1314,5 +1315,27 @@ describe('URN rewrite & repair — gap coverage', () => {
 
 		const choiceUrns = get(store.rootNodes)[0].questions[0].question.choices.map((c) => c.urn);
 		expect(new Set(choiceUrns).size).toBe(2);
+	});
+});
+
+describe('nodePassesIgFilter', () => {
+	it('keeps everything when no filter is active', () => {
+		expect(nodePassesIgFilter(['A'], new Set())).toBe(true);
+		expect(nodePassesIgFilter(null, new Set())).toBe(true);
+		expect(nodePassesIgFilter([], new Set())).toBe(true);
+	});
+
+	it('keeps nodes whose IGs intersect the selection', () => {
+		expect(nodePassesIgFilter(['A', 'B'], new Set(['B', 'C']))).toBe(true);
+	});
+
+	it('drops nodes whose IGs do not intersect the selection', () => {
+		expect(nodePassesIgFilter(['A'], new Set(['B']))).toBe(false);
+	});
+
+	it('drops IG-less nodes when a filter is active, matching audit semantics', () => {
+		expect(nodePassesIgFilter(null, new Set(['A']))).toBe(false);
+		expect(nodePassesIgFilter(undefined, new Set(['A']))).toBe(false);
+		expect(nodePassesIgFilter([], new Set(['A']))).toBe(false);
 	});
 });
