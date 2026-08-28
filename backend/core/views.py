@@ -164,6 +164,7 @@ from core.models import (
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
     build_answers_dict,
+    bulk_update_with_log,
     compare_schema_versions,
     get_respondent_scoped_folder_ids,
     is_field_visible_to,
@@ -450,6 +451,16 @@ def escape_csv_row(row):
     ]
 
 
+ILLEGAL_XLSX_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+
+
+def sanitize_xlsx_value(value):
+    """Strip ASCII control characters openpyxl refuses to write (tab/LF/CR are allowed)."""
+    if isinstance(value, str):
+        return ILLEGAL_XLSX_CHARS_RE.sub("", value)
+    return value
+
+
 def create_xlsx_response(entries, filename, wrap_columns=None):
     """
     DRY helper to create XLSX response with consistent formatting.
@@ -465,6 +476,9 @@ def create_xlsx_response(entries, filename, wrap_columns=None):
     if wrap_columns is None:
         wrap_columns = ["name", "description"]
 
+    entries = [
+        {k: sanitize_xlsx_value(v) for k, v in entry.items()} for entry in entries
+    ]
     df = pd.DataFrame(entries)
     buffer = io.BytesIO()
 
@@ -3970,7 +3984,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "\n".join([ra.get("str") for ra in item.get("owner")]),
                 "\n".join([ra.get("str") for ra in item.get("risk_scenarios")]),
             ]
-            ws.append(row)
+            ws.append([sanitize_xlsx_value(value) for value in row])
 
         for row_idx, row in enumerate(ws.iter_rows(min_row=2), 2):  # Skip header row
             max_lines = 1
@@ -11170,6 +11184,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 entry["score"] = req.score
 
             if has_questions:
+                # Round-tripped so re-import keeps the override state.
+                entry["is_score_overridden"] = req.is_score_overridden
                 q_dict = questions_by_node.get(req_node.id)
                 if q_dict:
                     answers = answers_by_req.get(req.id, {})
@@ -11566,7 +11582,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     if evidence.get("filename")
                 ),
             }
-            entries.append(entry)
+            entries.append({k: sanitize_xlsx_value(v) for k, v in entry.items()})
 
         df = pd.DataFrame(entries)
         buffer = io.BytesIO()
@@ -11773,16 +11789,35 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-            # Question-driven requirements: score and is_scored belong to
-            # recompute_assessment (a committed score means "questionnaire
-            # complete" for progress). Direct writes are ignored — same
-            # contract as the write serializer, so clients that round-trip
-            # the field keep working — and flagged in the response. This must
-            # run before score validation so a round-tripped empty value does
-            # not trip the integer parse.
+            # Effective override state for this write.
+            override_raw = request.data.get("is_score_overridden")
+            override_value = None
+            if override_raw is not None and str(override_raw).strip() != "":
+                token = str(override_raw).strip().lower()
+                if isinstance(override_raw, bool):
+                    override_value = override_raw
+                elif token in ("true", "1", "yes", "on"):
+                    override_value = True
+                elif token in ("false", "0", "no", "off"):
+                    override_value = False
+                else:
+                    return Response(
+                        {"error": "is_score_overridden must be a boolean"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            score_overridden = (
+                override_value
+                if override_value is not None
+                else requirement_assessment.is_score_overridden
+            )
+            was_overridden = requirement_assessment.is_score_overridden
+
+            # Question-driven score is recompute-owned: ignore direct writes unless overridden.
+            # Runs before validation so a round-tripped empty value doesn't trip int parse.
             score_ignored = (
                 "score" in request.data
                 and requirement_assessment.requirement.questions.exists()
+                and not score_overridden
             )
             if score_ignored:
                 score = None
@@ -11825,6 +11860,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if status_value is not None:
                 requirement_assessment.status = status_value
 
+            # Persist the override flag when the request carries it.
+            if override_value is not None:
+                requirement_assessment.is_score_overridden = score_overridden
+
             # Update score and toggle is_scored accordingly
             if score is not None:
                 requirement_assessment.score = score
@@ -11833,13 +11872,29 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 # Explicitly setting score to null/empty
                 requirement_assessment.score = None
                 requirement_assessment.is_scored = False
+            elif (
+                score_overridden
+                and requirement_assessment.requirement.questions.exists()
+            ):
+                # Override on, no score in request: keep is_scored in sync.
+                requirement_assessment.is_scored = (
+                    requirement_assessment.score is not None
+                )
 
-            requirement_assessment.save()
+            # Save and (on unpin) recompute must commit or roll back together.
+            with transaction.atomic():
+                requirement_assessment.save()
+                if (
+                    was_overridden
+                    and not score_overridden
+                    and requirement_assessment.requirement.questions.exists()
+                ):
+                    requirement_assessment.compute_score_and_result()
 
             response_data = {
                 "message": "Requirement updated successfully",
                 "urn": urn,
-                "result": result,
+                "result": requirement_assessment.result,
             }
             if score_ignored:
                 response_data["score_ignored"] = (
@@ -11858,6 +11913,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             elif score is None and "score" in request.data and not score_ignored:
                 response_data["score"] = None
                 response_data["is_scored"] = False
+
+            if override_value is not None:
+                response_data["is_score_overridden"] = score_overridden
 
             return Response(response_data, status=status.HTTP_200_OK)
 
@@ -11927,6 +11985,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                             setattr(req, field, value)
                     requirement_assessments_to_update.append(req)
 
+                # Bare bulk_update on purpose: these rows were just
+                # bulk_created here, so an "updated" event per requirement
+                # would fire runs for rows that never announced their creation.
                 RequirementAssessment.objects.bulk_update(
                     requirement_assessments_to_update,
                     [
@@ -12049,8 +12110,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     else ca_min
                 )
             if ras_to_init:
-                RequirementAssessment.objects.bulk_update(
-                    ras_to_init, ["documentation_score"]
+                bulk_update_with_log(
+                    RequirementAssessment, ras_to_init, ["documentation_score"]
                 )
 
     @action(detail=False, name="Compliance assessments per status")
@@ -12182,6 +12243,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             implementation_groups = None
         tree = filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, compliance_assessment)
+        annotate_tree_with_coverage(tree, compliance_assessment)
         return Response(tree)
 
     @action(detail=True, methods=["get"])
@@ -12245,6 +12307,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             implementation_groups = None
         tree = filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, compliance_assessment)
+        annotate_tree_with_coverage(tree, compliance_assessment)
 
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
@@ -12754,10 +12817,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
         )
+        # ... and assignments the user can actually open: the assessment page
+        # fetches the assignment through the scoped viewset, so a card for an
+        # assignment the user cannot view would lead straight to a 404.
+        viewable_assignment_ids = set(
+            RoleAssignment.get_viewable_object_ids(request.user, RequirementAssignment)
+        )
 
         dashboard_data = []
         for assignment in assignments:
             if assignment.compliance_assessment_id not in viewable_ca_ids:
+                continue
+            if assignment.id not in viewable_assignment_ids:
                 continue
 
             ca = assignment.compliance_assessment
@@ -13422,7 +13493,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 ras_to_update.append(ra)
 
             if ras_to_update and update_fields:
-                RequirementAssessment.objects.bulk_update(
+                # Results rewritten on an audit that already existed: the
+                # audit trail and the event stream both need to see it.
+                bulk_update_with_log(
+                    RequirementAssessment,
                     ras_to_update,
                     list(update_fields),
                     batch_size=500,

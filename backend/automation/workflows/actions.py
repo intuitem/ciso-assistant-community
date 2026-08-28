@@ -9,34 +9,114 @@ output_mapping into instance variables. String config values support
 import datetime
 import re
 import uuid
+from collections.abc import Callable
+from dataclasses import dataclass
+from dataclasses import field as dataclass_field
+from email.utils import parseaddr
 from urllib.parse import urlsplit
 
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.core.validators import validate_email
+from django.db import transaction
+from django.db.models import (
+    BooleanField,
+    DateField,
+    DecimalField,
+    Field,
+    FloatField,
+    ForeignKey,
+    IntegerField,
+    Model,
+    Q,
+    UUIDField,
+)
 
 from core.models import (
+    Actor,
     AppliedControl,
     RequirementAssessment,
     Asset,
     ComplianceAssessment,
     Evidence,
+    FilteringLabel,
     Finding,
     FindingsAssessment,
     Framework,
     Incident,
     Perimeter,
+    RiskAcceptance,
     RiskAssessment,
     RiskMatrix,
+    RiskScenario,
     SecurityException,
+    ValidationFlow,
     Vulnerability,
 )
+from core.tasks import get_missing_email_settings
 from tprm.models import Entity, EntityAssessment
+
+from .context import RESERVED_VARIABLE_KEYS, VARIABLE_KEY_RE, temporal_seeds
+from .models import WorkflowToken
+from .tasks import send_email_task
 
 TEMPLATE_RE = re.compile(r"\{\{\s*([\w.]+)\s*\}\}")
 
 
 class ActionError(Exception):
-    pass
+    """Deliberate action failure, routed through the node's retry policy."""
+
+
+class FatalActionError(ActionError):
+    """Permanent action failure (static config, validation) that no retry can
+    change: the engine fails the node immediately instead of burning the
+    retry schedule."""
+
+
+class DeferredTask:
+    """Returned by an action's execute() instead of an output dict when its
+    side effect must run outside the engine transaction (network I/O must not
+    hold the instance-tree locks). dispatch() parks the token and enqueues
+    `task`; the task hands the token back through
+    engine.complete_deferred_action / engine.fail_deferred_action."""
+
+    def __init__(self, task: Callable[..., None], **kwargs):
+        """`task` is a huey task called after commit with `kwargs` plus the
+        parked token's id as `token_id` and its claim as `dispatch_id`."""
+        self.task = task
+        self.kwargs = kwargs
+
+    def dispatch(self, token: WorkflowToken) -> None:
+        """Park `token` WAITING and enqueue the task after commit. If the
+        worker dies before the task reports back, the token stays WAITING
+        until the run's TTL reaper collects it — the same exposure as an
+        async subprocess wait. No dedicated log row (a new event type would
+        cost a migration): NODE_ENTERED is already written, and the
+        ACTION_EXECUTED/ERROR row lands when the task reports."""
+        dispatch_id = uuid.uuid4()
+        token.status = WorkflowToken.Status.WAITING
+        # dispatch_id is the claim the task CASes on: only the delivery that
+        # clears it runs the side effect, so a duplicate huey delivery is a
+        # no-op rather than a second send.
+        token.dispatch_id = dispatch_id
+        token.save(update_fields=["status", "dispatch_id", "updated_at"])
+        # on_commit: the WAITING row must be visible before the consumer
+        # runs, or a fast worker finds an ACTIVE token and drops the dispatch.
+        task = self.task
+        kwargs = {
+            "token_id": str(token.id),
+            "dispatch_id": str(dispatch_id),
+            **self.kwargs,
+        }
+        transaction.on_commit(lambda: task(**kwargs))
+
+
+class DeferredSendEmailTask(DeferredTask):
+    def __init__(self, subject: str, body: str, recipients: list[str]):
+        """Deliver `subject`/`body` to each address in `recipients` over one
+        SMTP session, then resume or fail the parked token."""
+        super().__init__(
+            send_email_task, subject=subject, body=body, recipients=recipients
+        )
 
 
 def dig(data, path):
@@ -118,8 +198,66 @@ class SetVariablesAction(BaseAction):
         # In-memory update only; the engine flushes variables + node_outputs in
         # one write via _persist_node_output right after every action runs.
         values = render(config.get("variables", {}), _render_context(instance))
+        reserved = RESERVED_VARIABLE_KEYS & values.keys()
+        if reserved:
+            raise FatalActionError(
+                f"set_variables: {', '.join(sorted(reserved))} is set by the engine"
+            )
         instance.variables.update(values)
         return values
+
+
+def _as_date(value, label):
+    """ISO date or ISO datetime; a datetime keeps only its date."""
+    if isinstance(value, datetime.datetime):
+        return value.date()
+    if isinstance(value, datetime.date):
+        return value
+    try:
+        parsed = datetime.datetime.fromisoformat(str(value).strip())
+    except ValueError, TypeError:
+        raise FatalActionError(
+            f"date_offset: {label} '{value}' is not an ISO date (YYYY-MM-DD)"
+        )
+    return parsed.date()
+
+
+def _as_offset(value, label):
+    if value in ("", None):
+        return 0
+    try:
+        return int(value)
+    except ValueError, TypeError:
+        raise FatalActionError(f"date_offset: '{label}' must be a whole number")
+
+
+@register
+class DateOffsetAction(BaseAction):
+    action_type = "date_offset"
+
+    def execute(self, config, instance):
+        context = _render_context(instance)
+        base = render(config.get("base", ""), context)
+        if base in ("", None):
+            # The run's own today, not the wall clock: retries must not drift.
+            base = (
+                instance.variables.get("today")
+                or temporal_seeds(instance.trigger_registration)["today"]
+            )
+        base_date = _as_date(base, "base")
+        result = base_date + datetime.timedelta(
+            days=_as_offset(render(config.get("days"), context), "days"),
+            weeks=_as_offset(render(config.get("weeks"), context), "weeks"),
+        )
+        output = str(config.get("output") or "").strip()
+        if output:
+            if not VARIABLE_KEY_RE.match(output) or output in RESERVED_VARIABLE_KEYS:
+                raise FatalActionError(
+                    f"date_offset: '{output}' is not a writable variable name"
+                )
+            # In-memory like set_variables; _persist_node_output flushes it.
+            instance.variables[output] = result.isoformat()
+        return {"result": result.isoformat(), "base": base_date.isoformat()}
 
 
 # Explicit registry of models workflows may create: each entry
@@ -287,11 +425,44 @@ class CreateObjectAction(BaseAction):
         }
 
 
-# Explicit registry of models workflows may read. Each entry lists
-# the readable simple fields on top of BASE_READ_FIELDS; the combined set is
-# both the serialized output AND the filter/order whitelist — no "__" paths,
-# no relations, so filters cannot tunnel into other objects.
+# Columns every readable model exposes, when it has them.
 BASE_READ_FIELDS = ["id", "name", "created_at", "updated_at"]
+
+
+@dataclass(frozen=True)
+class ReadEntry:
+    """One READABLE_MODELS entry: a model workflows may read, and how its
+    rows filter and serialize.
+
+    BASE_READ_FIELDS plus ``fields`` is both the serialized output and the
+    filter/order whitelist: concrete columns only, no "__" paths, so filters
+    cannot tunnel into other objects. FK fields are listed under their API
+    name and filter on the id value — still no join.
+
+    A ``computed`` key may shadow a listed column to reshape its output to
+    the API read serializer's shape (display labels, matrix cells, nested FK
+    dicts) so workflow rows read like API responses; the column name stays
+    the filter/order surface, comparing on the raw stored value.
+    """
+
+    model: type[Model]
+    #: Readable columns on top of BASE_READ_FIELDS.
+    fields: list[str]
+    #: Output-only values, key -> callable(row); never filterable/orderable.
+    computed: dict[str, Callable] = dataclass_field(default_factory=dict)
+    #: Restriction every read of this model must satisfy.
+    base_filter: Q | None = None
+    #: Integer columns where -1 means "not rated"; range filters skip it.
+    skip_unrated: frozenset[str] = frozenset()
+    #: Relations the computed callables dereference per row.
+    select_related: list[str] = dataclass_field(default_factory=list)
+
+    def readable_fields(self) -> list[str]:
+        """Return the field names a read node may output, filter and order
+        by: BASE_READ_FIELDS trimmed to columns the model actually has (e.g.
+        RequirementAssessment has no name column), plus ``fields``."""
+        columns = {field.name for field in self.model._meta.concrete_fields}
+        return [field for field in BASE_READ_FIELDS if field in columns] + self.fields
 
 
 def _requirements_breakdown(assessment):
@@ -305,42 +476,59 @@ def _requirements_breakdown(assessment):
     return {"total": total, **by_result}
 
 
-READABLE_MODELS = {
-    "applied_control": {
-        "model": AppliedControl,
-        "fields": ["description", "ref_id", "status", "eta", "priority", "link"],
-    },
-    "evidence": {
-        "model": Evidence,
-        "fields": ["description", "status"],
-    },
-    "incident": {
-        "model": Incident,
-        "fields": ["description", "ref_id", "status", "severity", "link"],
-    },
-    "asset": {
-        "model": Asset,
-        "fields": ["description", "ref_id", "type", "reference_link"],
-    },
-    "vulnerability": {
-        "model": Vulnerability,
-        "fields": ["description", "ref_id", "status", "severity", "eta", "due_date"],
-    },
-    "security_exception": {
-        "model": SecurityException,
-        "fields": ["description", "ref_id", "status", "severity", "expiration_date"],
-    },
-    "entity": {
-        "model": Entity,
-        "fields": ["description", "ref_id", "mission", "reference_link"],
-    },
-    "findings_assessment": {
-        "model": FindingsAssessment,
-        "fields": ["description", "ref_id", "status", "eta", "due_date"],
-    },
-    "finding": {
-        "model": Finding,
-        "fields": [
+READABLE_MODELS: dict[str, ReadEntry] = {
+    "applied_control": ReadEntry(
+        model=AppliedControl,
+        fields=[
+            "description",
+            "ref_id",
+            "status",
+            "eta",
+            "expiry_date",
+            "priority",
+            "link",
+        ],
+        computed={"priority": lambda o: o.get_priority_display()},
+    ),
+    "evidence": ReadEntry(
+        model=Evidence,
+        fields=["description", "status"],
+        computed={"status": lambda o: o.get_status_display()},
+    ),
+    "incident": ReadEntry(
+        model=Incident,
+        fields=["description", "ref_id", "status", "severity", "link"],
+        computed={
+            "status": lambda o: o.get_status_display(),
+            "severity": lambda o: o.get_severity_display(),
+        },
+    ),
+    "asset": ReadEntry(
+        model=Asset,
+        fields=["description", "ref_id", "type", "reference_link"],
+        computed={"type": lambda o: o.get_type_display()},
+    ),
+    "vulnerability": ReadEntry(
+        model=Vulnerability,
+        fields=["description", "ref_id", "status", "severity", "eta", "due_date"],
+        computed={"severity": lambda o: o.get_severity_display()},
+    ),
+    "security_exception": ReadEntry(
+        model=SecurityException,
+        fields=["description", "ref_id", "status", "severity", "expiration_date"],
+        computed={"severity": lambda o: o.get_severity_display()},
+    ),
+    "entity": ReadEntry(
+        model=Entity,
+        fields=["description", "ref_id", "mission", "reference_link"],
+    ),
+    "findings_assessment": ReadEntry(
+        model=FindingsAssessment,
+        fields=["description", "ref_id", "status", "eta", "due_date"],
+    ),
+    "finding": ReadEntry(
+        model=Finding,
+        fields=[
             "description",
             "ref_id",
             "status",
@@ -349,27 +537,105 @@ READABLE_MODELS = {
             "due_date",
             "priority",
         ],
-    },
-    "compliance_assessment": {
-        "model": ComplianceAssessment,
-        "fields": ["description", "ref_id", "status", "eta", "due_date"],
+        computed={
+            "severity": lambda o: o.get_severity_display(),
+            "priority": lambda o: o.get_priority_display(),
+        },
+    ),
+    "compliance_assessment": ReadEntry(
+        model=ComplianceAssessment,
+        fields=["description", "ref_id", "status", "eta", "due_date"],
         # Output-only values (never filterable/orderable — they don't exist as
         # queryable columns). Each callable may run its own queries per row,
         # which the list cap bounds.
-        "computed": {
+        computed={
             "computed_outcome": lambda ca: ca.computed_outcome,
             "scores": lambda ca: ca.get_global_score(),
             "requirements": _requirements_breakdown,
         },
-    },
-    "risk_assessment": {
-        "model": RiskAssessment,
-        "fields": ["description", "ref_id", "status", "eta", "due_date"],
-    },
-    "entity_assessment": {
-        "model": EntityAssessment,
-        "fields": ["description", "status", "eta", "due_date"],
-    },
+    ),
+    "risk_assessment": ReadEntry(
+        model=RiskAssessment,
+        fields=["description", "ref_id", "status", "eta", "due_date"],
+    ),
+    "entity_assessment": ReadEntry(
+        model=EntityAssessment,
+        fields=["description", "status", "eta", "due_date"],
+    ),
+    "requirement_assessment": ReadEntry(
+        model=RequirementAssessment,
+        # Assessments of non-assessable requirements (section headings)
+        # exist in the database; never read them.
+        base_filter=Q(requirement__assessable=True),
+        fields=[
+            "status",
+            "result",
+            "extended_result",
+            "score",
+            "is_scored",
+            "documentation_score",
+            "eta",
+            "due_date",
+            "compliance_assessment",
+        ],
+        # Identify the requirement and the audit on every row, under the
+        # same keys and shapes as RequirementAssessmentReadSerializer.
+        computed={
+            "name": str,
+            "requirement": lambda ra: {
+                "id": str(ra.requirement_id),
+                "ref_id": ra.requirement.ref_id,
+                "name": ra.requirement.name,
+            },
+            # Subset of the API's FieldsRelatedField dict.
+            "compliance_assessment": lambda ra: {
+                "str": str(ra.compliance_assessment),
+                "id": str(ra.compliance_assessment_id),
+                "name": ra.compliance_assessment.name,
+            },
+        },
+        select_related=["requirement", "compliance_assessment"],
+    ),
+    "risk_scenario": ReadEntry(
+        model=RiskScenario,
+        fields=[
+            "description",
+            "ref_id",
+            "treatment",
+            "inherent_level",
+            "current_level",
+            "residual_level",
+            "risk_assessment",
+        ],
+        # The level columns hold -1 until the scenario is rated; range and
+        # negated filters must not match those rows (eq -1 still selects them).
+        skip_unrated=frozenset({"inherent_level", "current_level", "residual_level"}),
+        # Levels serialize as their matrix cell dict, like the API
+        # serializer; filters keep comparing the raw integer column.
+        computed={
+            "inherent_level": lambda s: s.get_inherent_risk(),
+            "current_level": lambda s: s.get_current_risk(),
+            "residual_level": lambda s: s.get_residual_risk(),
+            # Subset of the API's FieldsRelatedField dict.
+            "risk_assessment": lambda s: {
+                "str": str(s.risk_assessment),
+                "id": str(s.risk_assessment_id),
+                "name": s.risk_assessment.name,
+            },
+        },
+        select_related=["risk_assessment__risk_matrix"],
+    ),
+    "risk_acceptance": ReadEntry(
+        model=RiskAcceptance,
+        fields=["description", "state", "expiry_date", "justification"],
+        computed={"state": lambda o: o.get_state_display()},
+    ),
+    "validation_flow": ReadEntry(
+        model=ValidationFlow,
+        fields=["ref_id", "status", "validation_deadline"],
+        # The API's display key for this nameless model.
+        computed={"str": str},
+    ),
 }
 
 READ_MAX_LIMIT = 100
@@ -380,7 +646,7 @@ def _read_scope_folder_ids(folder):
     """Instance folder + subtree ONLY — deliberately narrower than
     _accessible_folder_ids: reads of ancestor folders would leak parent-domain
     rows into a child-domain workflow's run log."""
-    return {folder.id, *(f.id for f in folder.get_sub_folders())}
+    return set(folder.get_sub_folders(include_self=True).values_list("id", flat=True))
 
 
 _READ_OP_LOOKUPS = {
@@ -397,14 +663,65 @@ _READ_OP_LOOKUPS = {
 }
 
 
-def _read_condition_to_q(condition, allowed_fields, context):
+def get_model_field(model: type[Model], name: str) -> Field | None:
+    """Return the concrete column named ``name`` on ``model``, or None."""
+    for field in model._meta.concrete_fields:
+        if field.name == name:
+            return field
+    return None
+
+
+def _allowed_ops(field: Field | None) -> set[str]:
+    """Return the operators valid for ``field``'s column type; none for an
+    unknown column (fail closed). An untyped op either crashes at query time
+    or — worse — compiles on both databases with different rows: 'contains'
+    on a boolean LIKEs against 'true'/'false' on PostgreSQL (casts to text)
+    but against 0/1 on SQLite."""
+    if isinstance(field, BooleanField):
+        return {"eq", "neq", "is_null"}
+    if isinstance(field, (ForeignKey, UUIDField)):
+        return {"eq", "neq", "in", "not_in", "is_null"}
+    if isinstance(field, (DateField, IntegerField, FloatField, DecimalField)):
+        return set(_READ_OP_LOOKUPS) - {"contains"}
+    if isinstance(field, Field):
+        return set(_READ_OP_LOOKUPS)
+    return set()
+
+
+_UNRATED_GUARDED_OPS = ("neq", "not_in", "gt", "lt", "gte", "lte")
+
+
+def _guard_unrated(query, op, field, entry):
+    """AND the >= 0 guard AFTER any negation so negating can't flip it into
+    'OR level < 0': ranges and negations must not sweep unrated (-1) rows in."""
+    if op in _UNRATED_GUARDED_OPS and field in entry.skip_unrated:
+        query &= Q(**{f"{field}__gte": 0})
+    return query
+
+
+def _sentinel_fields_in(group, sentinels):
+    fields = {
+        condition.get("field")
+        for condition in group.get("conditions", [])
+        if condition.get("field") in sentinels
+    }
+    for child in group.get("children", []):
+        fields |= _sentinel_fields_in(child, sentinels)
+    return fields
+
+
+def _read_condition_to_q(condition, entry, allowed_fields, context):
     field = condition.get("field")
     if field not in allowed_fields:
         raise ActionError(f"read_objects: '{field}' is not a filterable field")
     op = condition.get("op", "eq")
     lookup = _READ_OP_LOOKUPS.get(op)
     if lookup is None:
-        raise ActionError(f"read_objects: unknown operator '{op}'")
+        raise ActionError(f"read_objects: unknown operator {op!r}")
+    if op not in _allowed_ops(get_model_field(entry.model, field)):
+        raise ActionError(
+            f"read_objects: operator {op!r} is not valid for field {field!r}"
+        )
     value = render(condition.get("value"), context)
     if op == "is_null":
         return Q(
@@ -421,19 +738,23 @@ def _read_condition_to_q(condition, allowed_fields, context):
         if not isinstance(value, list):
             raise ActionError(f"read_objects: '{op}' needs a list value")
         query = Q(**{f"{field}__in": value})
-        return ~query if op == "not_in" else query
+        if op == "not_in":
+            query = ~query
+        return _guard_unrated(query, op, field, entry)
     query = Q(**{f"{field}__{lookup}": value})
-    return ~query if op == "neq" else query
+    if op == "neq":
+        query = ~query
+    return _guard_unrated(query, op, field, entry)
 
 
-def _read_group_to_q(group, allowed_fields, context):
+def _read_group_to_q(group, entry, allowed_fields, context):
     operator = group.get("operator", "and")
     parts = [
-        _read_condition_to_q(condition, allowed_fields, context)
+        _read_condition_to_q(condition, entry, allowed_fields, context)
         for condition in group.get("conditions", [])
     ]
     parts += [
-        _read_group_to_q(child, allowed_fields, context)
+        _read_group_to_q(child, entry, allowed_fields, context)
         for child in group.get("children", [])
     ]
     if not parts:
@@ -447,13 +768,19 @@ def _read_group_to_q(group, allowed_fields, context):
     for part in parts[1:]:
         combined &= part
     # Same semantics as event filters: NOT(all(results)).
-    return ~combined if operator == "not" else combined
+    if operator == "not":
+        combined = ~combined
+        # The negation above just flipped every per-condition guard inside;
+        # re-assert it for each sentinel field the subtree touches.
+        for field in _sentinel_fields_in(group, entry.skip_unrated):
+            combined &= Q(**{f"{field}__gte": 0})
+    return combined
 
 
-def _read_filters_to_q(tree, allowed_fields, context):
+def _read_filters_to_q(tree, entry, allowed_fields, context):
     if tree in (None, {}):
         return Q()
-    return _read_group_to_q(tree, allowed_fields, context)
+    return _read_group_to_q(tree, entry, allowed_fields, context)
 
 
 def _serialize_read_row(obj, fields, computed=None):
@@ -481,9 +808,9 @@ class ReadObjectsAction(BaseAction):
         entry = READABLE_MODELS.get(config.get("model"))
         if entry is None:
             raise ActionError(f"read_objects: unknown model '{config.get('model')}'")
-        fields = BASE_READ_FIELDS + entry["fields"]
+        fields = entry.readable_fields()
         context = _render_context(instance)
-        query = _read_filters_to_q(config.get("filters"), set(fields), context)
+        query = _read_filters_to_q(config.get("filters"), entry, set(fields), context)
 
         order_by = config.get("order_by") or "-created_at"
         if order_by.lstrip("-") not in fields:
@@ -497,19 +824,21 @@ class ReadObjectsAction(BaseAction):
         from .engine import run_identity
 
         queryset = (
-            entry["model"]
-            .objects.filter(folder_id__in=_read_scope_folder_ids(instance.folder))
-            .filter(id__in=authz.viewable_ids(run_identity(instance), entry["model"]))
+            entry.model.objects.filter(entry.base_filter or Q())
+            .filter(folder_id__in=_read_scope_folder_ids(instance.folder))
+            .filter(id__in=authz.viewable_ids(run_identity(instance), entry.model))
             .filter(query)
             .order_by(order_by, "id")  # id tie-break keeps pagination stable
         )
+        # Computed callables dereference these per row otherwise.
+        if entry.select_related:
+            queryset = queryset.select_related(*entry.select_related)
         try:
             if config.get("mode", "list") == "first":
                 obj = queryset.first()
-                computed = entry.get("computed")
                 return {
                     "found": obj is not None,
-                    "object": _serialize_read_row(obj, fields, computed)
+                    "object": _serialize_read_row(obj, fields, entry.computed)
                     if obj
                     else None,
                 }
@@ -520,7 +849,7 @@ class ReadObjectsAction(BaseAction):
                 # Unpaged count so threshold conditions work beyond the page.
                 "count": queryset.count(),
                 "results": [
-                    _serialize_read_row(obj, fields, entry.get("computed"))
+                    _serialize_read_row(obj, fields, entry.computed)
                     for obj in queryset[:limit]
                 ],
             }
@@ -528,6 +857,359 @@ class ReadObjectsAction(BaseAction):
             # Type mismatches only surface when the queryset evaluates
             # (e.g. "abc" compared against a date field).
             raise ActionError(f"read_objects: invalid filter value ({e})")
+        except IndexError:
+            # A library update can shrink a matrix while scenarios keep
+            # their old level indices; the computed cell lookups then
+            # index past the new lists.
+            raise ActionError(
+                "read_objects: a stored level no longer exists in the risk matrix"
+            )
+
+
+@dataclass(frozen=True)
+class UpdateEntry:
+    """One UPDATABLE_MODELS entry, drawn on one line: automation may record
+    that time passed and may attach work, but may not render the judgment.
+
+    ``fields`` is what a run may write; ``allowed_values`` narrows a field to
+    the values that are facts rather than decisions. Plain columns only —
+    anything whose transition lives outside save() stays off the registry.
+    """
+
+    model: type[Model]
+    #: Never `name`: identity stays stable so create_object's upsert matches.
+    fields: list[str]
+    allowed_values: dict[str, frozenset] = dataclass_field(default_factory=dict)
+    #: name -> (target model, frontend options endpoint)
+    m2m_fields: dict[str, tuple[type[Model], str]] = dataclass_field(
+        default_factory=dict
+    )
+
+
+_ACTOR = (Actor, "actors")
+_LABELS = (FilteringLabel, "filtering-labels")
+_CONTROLS = (AppliedControl, "applied-controls")
+_EVIDENCES = (Evidence, "evidences")
+_ASSETS = (Asset, "assets")
+_EXCEPTIONS = (SecurityException, "security-exceptions")
+
+# Lifecycle only; the verdict lives in the results, which are not writable.
+_ASSESSMENT_STATUSES = frozenset(
+    {"planned", "in_progress", "in_review", "done", "deprecated"}
+)
+
+UPDATABLE_MODELS: dict[str, UpdateEntry] = {
+    "applied_control": UpdateEntry(
+        model=AppliedControl,
+        fields=[
+            "status",
+            "priority",
+            "effort",
+            "start_date",
+            "eta",
+            "expiry_date",
+            "description",
+            "ref_id",
+            "link",
+            "observation",
+        ],
+        m2m_fields={
+            "owner": _ACTOR,
+            "evidences": _EVIDENCES,
+            "assets": _ASSETS,
+            "filtering_labels": _LABELS,
+        },
+    ),
+    "evidence": UpdateEntry(
+        model=Evidence,
+        fields=["status", "expiry_date", "description"],
+        # A lapsed date and a missing file are facts; approving is not.
+        allowed_values={"status": frozenset({"expired", "missing"})},
+        m2m_fields={"owner": _ACTOR, "filtering_labels": _LABELS},
+    ),
+    "incident": UpdateEntry(
+        model=Incident,
+        # No status/severity: their TimelineEntry is written by the viewset.
+        fields=["description", "ref_id", "link"],
+        m2m_fields={
+            "owners": _ACTOR,
+            "assets": _ASSETS,
+            "applied_controls": _CONTROLS,
+            "filtering_labels": _LABELS,
+        },
+    ),
+    "asset": UpdateEntry(
+        model=Asset,
+        fields=["description", "ref_id", "reference_link", "observation"],
+        m2m_fields={
+            "owner": _ACTOR,
+            "security_exceptions": _EXCEPTIONS,
+            "filtering_labels": _LABELS,
+        },
+    ),
+    "vulnerability": UpdateEntry(
+        model=Vulnerability,
+        fields=["status", "severity", "description", "ref_id", "eta", "due_date"],
+        m2m_fields={
+            "applied_controls": _CONTROLS,
+            "assets": _ASSETS,
+            "security_exceptions": _EXCEPTIONS,
+            "filtering_labels": _LABELS,
+        },
+    ),
+    "security_exception": UpdateEntry(
+        model=SecurityException,
+        fields=[
+            "status",
+            "severity",
+            "description",
+            "ref_id",
+            "expiration_date",
+            "observation",
+        ],
+        # Granting or refusing an exception stays human; expiring it is a date.
+        allowed_values={"status": frozenset({"expired", "deprecated"})},
+        m2m_fields={"owners": _ACTOR, "evidences": _EVIDENCES},
+    ),
+    "entity": UpdateEntry(
+        model=Entity,
+        fields=["description", "ref_id", "mission", "reference_link"],
+        m2m_fields={"filtering_labels": _LABELS},
+    ),
+    "findings_assessment": UpdateEntry(
+        model=FindingsAssessment,
+        fields=["status", "eta", "due_date", "description", "ref_id", "observation"],
+        allowed_values={"status": _ASSESSMENT_STATUSES},
+        m2m_fields={"evidences": _EVIDENCES, "filtering_labels": _LABELS},
+    ),
+    "finding": UpdateEntry(
+        model=Finding,
+        fields=[
+            "status",
+            "severity",
+            "priority",
+            "eta",
+            "due_date",
+            "description",
+            "ref_id",
+            "observation",
+        ],
+        # All but `dismissed`: that one is a person judging it harmless.
+        allowed_values={
+            "status": frozenset(
+                {
+                    "--",
+                    "identified",
+                    "confirmed",
+                    "assigned",
+                    "in_progress",
+                    "mitigated",
+                    "resolved",
+                    "closed",
+                    "deprecated",
+                }
+            )
+        },
+        m2m_fields={
+            "owner": _ACTOR,
+            "applied_controls": _CONTROLS,
+            "evidences": _EVIDENCES,
+            "filtering_labels": _LABELS,
+        },
+    ),
+    "compliance_assessment": UpdateEntry(
+        model=ComplianceAssessment,
+        fields=["status", "eta", "due_date", "description", "ref_id", "observation"],
+        allowed_values={"status": _ASSESSMENT_STATUSES},
+        m2m_fields={"evidences": _EVIDENCES, "assets": _ASSETS},
+    ),
+    "risk_assessment": UpdateEntry(
+        model=RiskAssessment,
+        fields=["status", "eta", "due_date", "description", "ref_id", "observation"],
+        allowed_values={"status": _ASSESSMENT_STATUSES},
+    ),
+    "entity_assessment": UpdateEntry(
+        model=EntityAssessment,
+        # No `conclusion`: that is the reviewer's verdict on the third party.
+        fields=["status", "eta", "due_date", "description", "observation"],
+        allowed_values={"status": _ASSESSMENT_STATUSES},
+    ),
+    "requirement_assessment": UpdateEntry(
+        model=RequirementAssessment,
+        # Progress and attached work only: a workflow that answers an audit
+        # destroys its evidentiary value.
+        fields=["status", "eta", "due_date", "observation"],
+        m2m_fields={
+            "applied_controls": _CONTROLS,
+            "evidences": _EVIDENCES,
+            "security_exceptions": _EXCEPTIONS,
+        },
+    ),
+    "risk_scenario": UpdateEntry(
+        model=RiskScenario,
+        # No treatment, no ratings: attach the control, leave the call.
+        fields=["description", "ref_id"],
+        m2m_fields={
+            "applied_controls": _CONTROLS,
+            "owner": _ACTOR,
+            "assets": _ASSETS,
+        },
+    ),
+}
+
+# RiskAcceptance and ValidationFlow are deliberately absent: their state moves
+# through set_state() and the write serializer's transition table + FlowEvent,
+# not through save(), so a column write here would skip revoked_at, the
+# scenario treatments it reverts, and the flow's own history.
+
+M2M_OPERATIONS = ("add", "remove", "set")
+
+
+def _writable_values(entry, key):
+    """The fence on a field: an explicit allowed_values, else the column's own
+    choices. save() enforces max_length and clean() but never choices."""
+    if key in entry.allowed_values:
+        return entry.allowed_values[key]
+    choices = getattr(get_model_field(entry.model, key), "choices", None)
+    return frozenset(str(choice[0]) for choice in choices) if choices else None
+
+
+def _as_id_list(value):
+    """A JSON array or a comma-separated string of ids."""
+    if isinstance(value, str):
+        parsed = json_loads_or_none(value)
+        value = (
+            parsed
+            if isinstance(parsed, list)
+            else [item.strip() for item in value.split(",") if item.strip()]
+        )
+    if not isinstance(value, list):
+        return None
+    return [str(item).strip() for item in value if str(item).strip()]
+
+
+@register
+class UpdateObjectAction(BaseAction):
+    action_type = "update_object"
+
+    def execute(self, config, instance):
+        entry = UPDATABLE_MODELS.get(config.get("model"))
+        if entry is None:
+            raise ActionError(f"update_object: unknown model '{config.get('model')}'")
+        context = _render_context(instance)
+        target_id = str(render(config.get("id", ""), context) or "").strip()
+        if not target_id:
+            raise ActionError("update_object: 'id' is required")
+
+        from . import authz
+        from .engine import run_identity
+
+        # Subtree AND changeable by the run identity: the same two-part scope
+        # as a read, with change instead of view.
+        try:
+            obj = (
+                entry.model.objects.filter(
+                    folder_id__in=_read_scope_folder_ids(instance.folder)
+                )
+                .filter(
+                    id__in=authz.changeable_ids(run_identity(instance), entry.model)
+                )
+                .filter(id=target_id)
+                .first()
+            )
+        except ValueError, ValidationError:
+            obj = None
+        if obj is None:
+            raise ActionError(
+                f"update_object: no {config.get('model')} '{target_id}' "
+                "in this workflow's scope"
+            )
+
+        fields = render(config.get("fields") or {}, context)
+        updated = {}
+        for key, value in fields.items():
+            if key not in entry.fields or value in ("", None):
+                continue
+            allowed = _writable_values(entry, key)
+            if allowed is not None and str(value) not in allowed:
+                raise FatalActionError(
+                    f"update_object: a workflow may not set {config.get('model')}"
+                    f".{key} to '{value}'"
+                )
+            setattr(obj, key, value)
+            updated[key] = value
+        if updated:
+            try:
+                obj.save()
+            except ValidationError as e:
+                raise ActionError(f"update_object: {'; '.join(e.messages)}")
+
+        relations = {}
+        for field_name, spec in (config.get("m2m") or {}).items():
+            relations[field_name] = self._apply_m2m(
+                entry, obj, field_name, spec or {}, context, instance
+            )
+        return {
+            "object_id": str(obj.id),
+            "str": str(obj),
+            "updated_fields": sorted(updated),
+            "relations": relations,
+        }
+
+    def _apply_m2m(self, entry, obj, field_name, spec, context, instance):
+        relation = entry.m2m_fields.get(field_name)
+        if relation is None:
+            raise FatalActionError(
+                f"update_object: '{field_name}' is not a writable relation"
+            )
+        target_model, _endpoint = relation
+        operation = spec.get("op", "add")
+        if operation not in M2M_OPERATIONS:
+            raise FatalActionError(
+                f"update_object: unknown relation operation '{operation}'"
+            )
+        ids = _as_id_list(render(spec.get("values"), context))
+        if not ids:
+            # `set` would clear the relation, add/remove would no-op.
+            raise FatalActionError(f"update_object: '{field_name}' has no values")
+        try:
+            rows = list(target_model.objects.filter(id__in=ids))
+        except ValueError, ValidationError:
+            raise FatalActionError(f"update_object: '{field_name}' has invalid ids")
+        if len(rows) != len(set(ids)):
+            found = {str(row.id) for row in rows}
+            missing = ", ".join(sorted(set(ids) - found))
+            raise ActionError(f"update_object: {field_name} '{missing}' does not exist")
+        # As with create_object's FKs: ancestors allowed, since actors and
+        # labels live in root.
+        allowed_folders = _accessible_folder_ids(instance.folder)
+        for row in rows:
+            folder_id = getattr(row, "folder_id", None)
+            if folder_id is not None and folder_id not in allowed_folders:
+                raise ActionError(
+                    f"update_object: {field_name} is outside this workflow's scope"
+                )
+        manager = getattr(obj, field_name)
+        if operation == "add":
+            manager.add(*rows)
+        elif operation == "remove":
+            manager.remove(*rows)
+        else:
+            # `set` detaches whatever it does not list, which `remove` would
+            # have refused when the target sits outside the scope.
+            displaced = [
+                row
+                for row in manager.exclude(id__in=[row.id for row in rows])
+                if getattr(row, "folder_id", None) is not None
+                and row.folder_id not in allowed_folders
+            ]
+            if displaced:
+                raise ActionError(
+                    f"update_object: '{field_name}' would detach objects "
+                    "outside this workflow's scope"
+                )
+            manager.set(rows)
+        return {"op": operation, "count": len(rows)}
 
 
 @register
@@ -535,8 +1217,18 @@ class SendEmailAction(BaseAction):
     action_type = "send_email"
 
     def execute(self, config, instance):
-        from core.tasks import send_notification_email
+        # Config errors fail the node here; delivery happens in a huey task
+        # (DeferredSendEmailTask) so SMTP I/O never runs while the engine
+        # transaction holds the instance-tree locks. The task resumes or
+        # fails the node, so delivery errors still feed the retry policy.
 
+        # No notifications_enable_mailing gate: that toggle governs the
+        # digest notifications, not explicit user-authored send_email nodes.
+        missing = get_missing_email_settings()
+        if missing:
+            raise FatalActionError(
+                f"send_email: email is not configured (missing {', '.join(missing)})"
+            )
         recipients = [
             email.strip()
             for email in render(
@@ -545,12 +1237,18 @@ class SendEmailAction(BaseAction):
             if email.strip()
         ]
         if not recipients:
-            raise ActionError("send_email: no recipients configured")
+            raise FatalActionError("send_email: no recipients configured")
+        for email in recipients:
+            # Validate the addr-spec only: display-name recipients
+            # ('Jane Doe <jane@x>') are supported. Commas inside quoted
+            # display names are not (the comma-split above).
+            try:
+                validate_email(parseaddr(email)[1])
+            except ValidationError:
+                raise FatalActionError(f"send_email: invalid recipient '{email}'")
         subject = render(config.get("subject", ""), _render_context(instance))
         body = render(config.get("body", ""), _render_context(instance))
-        for email in recipients:
-            send_notification_email(subject, body, email)
-        return {"recipients": recipients, "subject": subject}
+        return DeferredSendEmailTask(subject=subject, body=body, recipients=recipients)
 
 
 @register
@@ -874,11 +1572,16 @@ def required_permissions(action_config):
         if action_config.get("upsert"):
             codenames.append(f"change_{model_name}")
         return codenames
+    if action_type == "update_object":
+        entry = UPDATABLE_MODELS.get(action_config.get("model"))
+        if entry is None:
+            return []
+        return [f"change_{entry.model._meta.model_name}"]
     if action_type == "read_objects":
         entry = READABLE_MODELS.get(action_config.get("model"))
         if entry is None:
             return []
-        return [f"view_{entry['model']._meta.model_name}"]
+        return [f"view_{entry.model._meta.model_name}"]
     return {
         "provision_folder": ["add_folder", "change_folder"],
         "provision_user": ["add_user", "change_user"],
@@ -924,7 +1627,7 @@ def validate_read_config(node):
                 f"Unknown readable model '{config.get('model')}'",
             )
         ]
-    fields = set(BASE_READ_FIELDS) | set(entry["fields"])
+    fields = set(entry.readable_fields())
 
     from .events import validate_filter_tree, walk_conditions
 
@@ -935,12 +1638,25 @@ def validate_read_config(node):
         errors.append(("action_read_invalid_filters", f"Invalid filters: {e}"))
     else:
         for condition in walk_conditions(tree or {}):
-            if condition.get("field") not in fields:
+            field = condition.get("field")
+            op = condition.get("op", "eq")
+            if field not in fields:
                 errors.append(
                     (
                         "action_read_invalid_filters",
-                        f"'{condition.get('field')}' is not a filterable field of "
+                        f"'{field}' is not a filterable field of "
                         f"'{config.get('model')}'",
+                    )
+                )
+            elif op not in _READ_OP_LOOKUPS:
+                errors.append(
+                    ("action_read_invalid_filters", f"Unknown operator {op!r}")
+                )
+            elif op not in _allowed_ops(get_model_field(entry.model, field)):
+                errors.append(
+                    (
+                        "action_read_invalid_filters",
+                        f"Operator {op!r} is not valid for {field!r}",
                     )
                 )
             if condition.get("changed"):
@@ -1008,6 +1724,136 @@ def validate_create_config(node):
                 )
             )
     return errors
+
+
+def validate_set_variables_config(node):
+    config = node.action_config or {}
+    if config.get("type") != "set_variables":
+        return []
+    reserved = RESERVED_VARIABLE_KEYS & (config.get("variables") or {}).keys()
+    return [
+        ("action_set_variables_reserved", f"'{key}' is set by the engine on every run")
+        for key in sorted(reserved)
+    ]
+
+
+def validate_date_offset_config(node):
+    """Publish-time checks for date_offset nodes. Templated values are only
+    knowable at runtime and pass here."""
+    config = node.action_config or {}
+    if config.get("type") != "date_offset":
+        return []
+    errors = []
+    output = str(config.get("output") or "").strip()
+    if output and (
+        not VARIABLE_KEY_RE.match(output) or output in RESERVED_VARIABLE_KEYS
+    ):
+        errors.append(
+            (
+                "action_date_offset_bad_output",
+                f"'{output}' is not a writable variable name",
+            )
+        )
+    for key in ("days", "weeks"):
+        value = config.get(key)
+        if value in ("", None) or _is_templated(value):
+            continue
+        try:
+            int(value)
+        except ValueError, TypeError:
+            errors.append(
+                (
+                    "action_date_offset_bad_offset",
+                    f"'{key}' must be a whole number",
+                )
+            )
+    base = config.get("base")
+    if base not in ("", None) and not _is_templated(base):
+        try:
+            datetime.datetime.fromisoformat(str(base).strip())
+        except ValueError, TypeError:
+            errors.append(
+                (
+                    "action_date_offset_bad_base",
+                    f"'{base}' is not an ISO date (YYYY-MM-DD)",
+                )
+            )
+    return errors
+
+
+def validate_update_config(node):
+    """Publish-time checks for update_object nodes: what the whitelists would
+    refuse mid-run is refused here."""
+    config = node.action_config or {}
+    if config.get("type") != "update_object":
+        return []
+    entry = UPDATABLE_MODELS.get(config.get("model"))
+    if entry is None:
+        return [
+            (
+                "action_update_unknown_model",
+                f"Unknown updatable model '{config.get('model')}'",
+            )
+        ]
+    errors = []
+    if not str(config.get("id") or "").strip():
+        errors.append(("action_update_missing_id", "Which object to update is not set"))
+    fields = {
+        key: value
+        for key, value in (config.get("fields") or {}).items()
+        if value not in ("", None)
+    }
+    if not fields and not (config.get("m2m") or {}):
+        errors.append(("action_update_nothing_to_write", "This step writes nothing"))
+    for key, value in fields.items():
+        if key not in entry.fields:
+            errors.append(
+                (
+                    "action_update_field_not_writable",
+                    f"A workflow may not write '{key}' on '{config.get('model')}'",
+                )
+            )
+            continue
+        allowed = _writable_values(entry, key)
+        if allowed is not None and not _is_templated(value):
+            if str(value) not in allowed:
+                errors.append(
+                    (
+                        "action_update_value_not_allowed",
+                        f"'{key}' may only be set to {', '.join(sorted(allowed))}",
+                    )
+                )
+    for field_name, spec in (config.get("m2m") or {}).items():
+        if field_name not in entry.m2m_fields:
+            errors.append(
+                (
+                    "action_update_relation_not_writable",
+                    f"'{field_name}' is not a writable relation on "
+                    f"'{config.get('model')}'",
+                )
+            )
+            continue
+        operation = (spec or {}).get("op", "add")
+        if operation not in M2M_OPERATIONS:
+            errors.append(
+                (
+                    "action_update_bad_relation_op",
+                    f"Unknown relation operation '{operation}'",
+                )
+            )
+        values = (spec or {}).get("values")
+        if not _is_templated(values) and not _as_id_list(values):
+            errors.append(
+                (
+                    "action_update_relation_no_values",
+                    f"'{field_name}' has no ids to link",
+                )
+            )
+    return errors
+
+
+def _is_templated(value):
+    return isinstance(value, str) and TEMPLATE_RE.search(value) is not None
 
 
 def authorize_action(node, instance):

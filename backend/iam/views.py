@@ -577,7 +577,18 @@ class SCIMTokenViewSet(views.APIView):
         name = request.data.get("name") or "SCIM provisioning token"
         if len(name) > 255:
             return Response(
-                {"error": "Name must be at most 255 characters."},
+                {"error": "scimTokenNameTooLong"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            sso_settings = GlobalSettings.objects.get(
+                name=GlobalSettings.Names.SSO
+            ).value
+        except GlobalSettings.DoesNotExist:
+            sso_settings = {}
+        if not sso_settings.get("is_enabled", False):
+            return Response(
+                {"error": "scimTokenRequiresSso"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         token_prefix = knox_settings.TOKEN_PREFIX

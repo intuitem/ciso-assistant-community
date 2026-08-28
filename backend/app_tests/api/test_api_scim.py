@@ -15,12 +15,23 @@ import pytest
 from knox.models import AuthToken
 from rest_framework.test import APIClient
 
+from global_settings import utils as ff_utils
 from global_settings.models import GlobalSettings
+from global_settings.utils import clear_feature_flags_cache
 
 from iam.models import IdPGroup, SCIMToken, User, UserGroup
 
 USERS_URL = "/api/scim/v2/Users"
 GROUPS_URL = "/api/scim/v2/Groups"
+
+
+@pytest.fixture(autouse=True)
+def _enterprise_flags(monkeypatch):
+    """idp_groups is enterprise-only (declared on the EE FeatureFlagsSerializer,
+    hence unsupported on CE); these tests exercise the EE-gated behavior from
+    the CE test bed."""
+    supported = ff_utils.get_supported_feature_flags() | {"idp_groups"}
+    monkeypatch.setattr(ff_utils, "get_supported_feature_flags", lambda: supported)
 
 
 def _set_idp_groups_flag(enabled: bool):
@@ -29,6 +40,8 @@ def _set_idp_groups_flag(enabled: bool):
     )
     ff.value = {**(ff.value or {}), "idp_groups": enabled}
     ff.save()
+    # Direct ORM write: bypasses the serializer, the single invalidation point.
+    clear_feature_flags_cache()
 
 
 @pytest.fixture
@@ -156,7 +169,48 @@ class TestSCIMOwnershipInvariant:
         )
         assert resp.status_code == 200
         adopted = User.objects.get(email="joiner@tests.com")
+        assert adopted.is_scim_managed is True
         assert adopted.scim_external_id == "ext-99"
+
+    def test_adopted_account_can_have_its_email_changed_by_scim(
+        self, enable_idp_groups
+    ):
+        """SCIM may freely redirect an adopted account's email — on the same
+        request or a later one — because is_local closes the actual
+        exploitation surface (local login / password-reset) regardless."""
+        User.objects.create_user("joiner2@tests.com", is_published=True)
+        client = _scim_client()
+        first = client.post(
+            USERS_URL,
+            data={
+                "userName": "joiner2@tests.com",
+                "emails": [{"value": "new-address@tests.com", "primary": True}],
+            },
+            format="json",
+        )
+        assert first.status_code == 200
+        user = User.objects.get(id=json.loads(first.content)["id"])
+        assert user.email == "new-address@tests.com"
+
+    def test_adopted_account_loses_local_login_regardless_of_email_changes(
+        self, enable_idp_groups
+    ):
+        """The real security boundary: once is_scim_managed, is_local is
+        False (unless keep_local_login), so no email SCIM puts on the
+        account ever re-opens local password login or password-reset."""
+        User.objects.create_user("joiner3@tests.com", is_published=True)
+        resp = _scim_client().post(
+            USERS_URL,
+            data={
+                "userName": "joiner3@tests.com",
+                "emails": [{"value": "attacker@evil.test", "primary": True}],
+            },
+            format="json",
+        )
+        assert resp.status_code == 200
+        user = User.objects.get(id=json.loads(resp.content)["id"])
+        assert user.email == "attacker@evil.test"
+        assert user.is_local is False
 
     def test_cannot_patch_a_non_scim_user(self, enable_idp_groups):
         local = User.objects.create_user("local@tests.com", is_published=True)

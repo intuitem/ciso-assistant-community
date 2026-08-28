@@ -888,9 +888,17 @@ AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
 
 # Run workflow instances in a Huey worker instead of the triggering request.
-# Requires a running Huey consumer; keep False for dev setups without one.
+# False only moves the engine into the request: a Huey consumer is required
+# either way, since scheduled triggers, TTL reaping and deferred actions
+# (send_email) are all Huey tasks and silently never run without one.
 WORKFLOWS_ASYNC_EXECUTION = (
     os.environ.get("WORKFLOWS_ASYNC_EXECUTION", "").lower() == "true"
+)
+
+# How long a token may sit parked on a deferred action before the sweep
+# treats the dispatch as lost and fails the node.
+WORKFLOWS_DISPATCH_TIMEOUT_SECONDS = int(
+    os.environ.get("WORKFLOWS_DISPATCH_TIMEOUT_SECONDS", 900)
 )
 
 # Kill-switch for inbound workflow webhooks: when disabled, hook
