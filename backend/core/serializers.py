@@ -205,7 +205,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
         return folder
 
     def update(self, instance: models.Model, validated_data: Any) -> models.Model:
-        self._check_object_perm(instance, "change")
+        if self.context.get("commitment_transition"):
+            # Taking a commitment step is its own right; see CommitmentActionsMixin.
+            self._check_object_perm(instance, "transition", model=Commitment)
+        else:
+            self._check_object_perm(instance, "change")
         if hasattr(instance, "urn") and getattr(instance, "urn"):
             raise PermissionDenied({"urn": "Imported objects cannot be modified"})
         try:
@@ -2465,6 +2469,9 @@ class FrameworkReadSerializer(ReferentialSerializer):
     # CA-creation form's editor reads this so its pills always reflect what
     # the backend will actually save.
     effective_field_visibility = serializers.SerializerMethodField()
+    # Same map for an audit addressed to a third party: the entity-assessment form
+    # reads this so its pills match what that path will save.
+    third_party_field_visibility = serializers.SerializerMethodField()
 
     implementation_groups_definition = serializers.SerializerMethodField()
 
@@ -2484,6 +2491,11 @@ class FrameworkReadSerializer(ReferentialSerializer):
         from core.utils import build_initial_field_visibility
 
         return build_initial_field_visibility(obj)
+
+    def get_third_party_field_visibility(self, obj):
+        from core.utils import build_third_party_field_visibility
+
+        return build_third_party_field_visibility(obj)
 
     class Meta:
         model = Framework
@@ -3363,7 +3375,11 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
     description = serializers.CharField(source="get_requirement_description")
     evidences = FieldsRelatedField(many=True)
-    task_templates = FieldsRelatedField(many=True)
+    # The respondent view lists these as a table, so it needs the promised date and
+    # where the commitment stands, not just a name.
+    task_templates = FieldsRelatedField(
+        ["id", "task_date", "commitment_state", "committed_eta"], many=True
+    )
     compliance_assessment = FieldsRelatedField(
         [
             "id",

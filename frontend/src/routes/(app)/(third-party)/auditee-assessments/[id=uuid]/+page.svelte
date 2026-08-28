@@ -82,6 +82,7 @@
 	const showDocumentationScore = $derived(fieldVis.showDocumentationScore);
 	const showObservation = $derived(fieldVis.showObservation);
 	const showAppliedControls = $derived(fieldVis.showAppliedControls);
+	const showTaskTemplates = $derived(fieldVis.showTaskTemplates);
 	const showEvidences = $derived(fieldVis.showEvidences);
 	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
 	const showComments = $derived(fieldVis.showComments);
@@ -112,6 +113,10 @@
 	const canEditDocumentationScore = $derived(isFieldEditable('documentation_score'));
 	const canEditObservation = $derived(isFieldEditable('observation'));
 	const canEditAppliedControls = $derived(isFieldEditable('applied_controls'));
+	const canEditTaskTemplates = $derived(isFieldEditable('task_templates'));
+	// The promise is the point of showing a respondent their tasks, so the panel rides
+	// along with the flag rather than needing a page they cannot reach.
+	const showCommitment = $derived(!!page.data?.featureflags?.commitment_management);
 	const canEditEvidences = $derived(isFieldEditable('evidences'));
 	const canEditAnswers = $derived(isFieldEditable('answers'));
 	const canEditAlignment = $derived(isFieldEditable('respondent_alignment'));
@@ -447,6 +452,28 @@
 		modalStore.trigger(modal);
 	}
 
+	// Which task's commitment panel is open: the table stays scannable and the
+	// promise is one click away.
+	let expandedTask = $state<string | null>(null);
+
+	function modalTaskTemplateCreateForm(createform: SuperForm<any>): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: createform,
+				formAction: '?/createTaskTemplate',
+				invalidateAll: true,
+				model: data.taskTemplateModel,
+				debug: false
+			}
+		};
+		modalStore.trigger({
+			type: 'component',
+			component: modalComponent,
+			title: m.addTaskTemplate()
+		});
+	}
+
 	function modalEvidenceCreateForm(createform: SuperForm<any>): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -614,6 +641,7 @@
 
 	import { page } from '$app/state';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
+	import CommitmentPanel from '$lib/components/CommitmentPanel/CommitmentPanel.svelte';
 	import { onMount } from 'svelte';
 	onMount(() => {
 		document.addEventListener('keydown', handleKeydown);
@@ -1245,6 +1273,128 @@
 													</p>
 												{/each}
 											</div>
+										</Accordion.ItemContent>
+									</Accordion.Item>
+								{/if}
+
+								<!-- Tasks -->
+								{#if showTaskTemplates}
+									<Accordion.Item value="taskTemplates">
+										<Accordion.ItemTrigger
+											class="flex w-full items-center cursor-pointer"
+											data-testid="task-templates-accordion-trigger"
+										>
+											<p class="flex flex-1 items-center space-x-2 text-left">
+												<span>{m.taskTemplates()}</span>
+												{#if requirementAssessment.task_templates != null}
+													<span class="badge preset-tonal-primary"
+														>{requirementAssessment.task_templates.length}</span
+													>
+												{/if}
+											</p>
+
+											<Accordion.ItemIndicator
+												class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+												><svg
+													xmlns="http://www.w3.org/2000/svg"
+													width="14px"
+													height="14px"
+													viewBox="0 0 448 512"
+													><path
+														d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+													/></svg
+												></Accordion.ItemIndicator
+											>
+										</Accordion.ItemTrigger>
+										<Accordion.ItemContent>
+											{#if canEditTaskTemplates}
+												<div class="flex flex-row space-x-2 items-center mb-2">
+													<button
+														class="btn preset-filled-primary-500 self-start"
+														type="button"
+														data-testid="add-task-template-button"
+														onclick={() =>
+															modalTaskTemplateCreateForm(
+																requirementAssessment.taskTemplateCreateForm
+															)}
+													>
+														<i class="fa-solid fa-plus mr-2"></i>{m.addTaskTemplate()}
+													</button>
+													<button
+														class="btn preset-filled-secondary-500 self-start"
+														type="button"
+														onclick={() =>
+															modalUpdateForm(requirementAssessment, 'selectTaskTemplates')}
+													>
+														<i class="fa-solid fa-hand-pointer mr-2"></i>{m.taskTemplates()}
+													</button>
+												</div>
+											{/if}
+											{#if !requirementAssessment.task_templates?.length}
+												<p class="text-sm text-surface-600-400 p-2">{m.noTaskTemplates()}</p>
+											{:else}
+												<table class="w-full text-sm">
+													<thead class="text-surface-600-400 border-b border-surface-200-800">
+														<tr>
+															<th class="text-left font-medium py-1">{m.name()}</th>
+															<th class="text-left font-medium py-1">{m.eta()}</th>
+															{#if showCommitment}
+																<th class="text-left font-medium py-1">{m.commitment()}</th>
+																<th class="w-8"></th>
+															{/if}
+														</tr>
+													</thead>
+													<tbody>
+														{#each requirementAssessment.task_templates ?? [] as task}
+															<tr class="border-b border-surface-100-900">
+																<td class="py-2">
+																	<i class="fa-solid fa-list-check mr-2 text-surface-500"
+																	></i>{task.str}
+																</td>
+																<td class="py-2">{task.task_date ?? '--'}</td>
+																{#if showCommitment}
+																	<td class="py-2">
+																		{task.commitment_state && task.commitment_state !== '--'
+																			? safeTranslate(task.commitment_state)
+																			: '--'}
+																		{#if task.committed_eta}
+																			<span class="text-xs text-surface-600-400"
+																				>({task.committed_eta})</span
+																			>
+																		{/if}
+																	</td>
+																	<td class="py-2 text-right">
+																		<button
+																			type="button"
+																			class="btn-icon btn-icon-sm preset-tonal-surface"
+																			aria-label={m.commitment()}
+																			onclick={() =>
+																				(expandedTask = expandedTask === task.id ? null : task.id)}
+																		>
+																			<i
+																				class="fa-solid {expandedTask === task.id
+																					? 'fa-chevron-up'
+																					: 'fa-chevron-down'}"
+																			></i>
+																		</button>
+																	</td>
+																{/if}
+															</tr>
+															{#if showCommitment && expandedTask === task.id}
+																<tr>
+																	<td colspan="4" class="pb-3">
+																		<CommitmentPanel
+																			urlModel="task-templates"
+																			object={task}
+																			readOnly={!canEditTaskTemplates}
+																		/>
+																	</td>
+																</tr>
+															{/if}
+														{/each}
+													</tbody>
+												</table>
+											{/if}
 										</Accordion.ItemContent>
 									</Accordion.Item>
 								{/if}

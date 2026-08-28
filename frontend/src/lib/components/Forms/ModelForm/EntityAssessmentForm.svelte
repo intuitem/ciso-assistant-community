@@ -9,6 +9,7 @@
 	import { m } from '$paraglide/messages';
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
 
 	interface Props {
@@ -18,6 +19,7 @@
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
 		object?: Record<string, any>;
+		context?: string;
 	}
 
 	let {
@@ -26,12 +28,28 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		object = {}
+		object = {},
+		context = 'default'
 	}: Props = $props();
 
-	let createAudit = $state(form.data?.create_audit ?? false);
+	const { form: formData } = form;
+
+	// Assessing a third party almost always means sending them a questionnaire, so the
+	// audit is on by default when creating. On edit it stays off: an assessment
+	// deliberately left without one must not grow an audit just by being saved.
+	// Not `$formData.create_audit ?? ...`: the schema defaults the field to `false`,
+	// which `??` happily keeps.
+	let createAudit = $state(context === 'create' ? true : ($formData.create_audit ?? false));
 	let selectedEntity = $state<string | undefined>(form.data?.entity || initialData.entity);
 	let implementationGroupsChoices = $state<{ label: string; value: string }[]>([]);
+	let frameworkDefaults = $state<Record<string, any> | null>(null);
+
+	let auditDefaultApplied = false;
+	$effect(() => {
+		if (auditDefaultApplied || context !== 'create') return;
+		auditDefaultApplied = true;
+		form.form.update((d) => ({ ...d, create_audit: createAudit }));
+	});
 
 	let auditData = $derived(
 		object.compliance_assessment && typeof object.compliance_assessment === 'object'
@@ -76,6 +94,14 @@
 		bind:cachedValue={formDataCache['framework']}
 		label={m.framework()}
 		onChange={async (e) => {
+			if (!e) {
+				// Clearing the framework takes the baseline with it, so the editor hides
+				// again rather than keeping the previous framework's pills on screen.
+				frameworkDefaults = null;
+				implementationGroupsChoices = [];
+				form.form.update((d) => ({ ...d, field_visibility: {} }));
+				return;
+			}
 			if (e) {
 				await fetch(`/frameworks/${e}`)
 					.then((r) => r.json())
@@ -85,6 +111,11 @@
 							label: group.name,
 							value: group.ref_id
 						}));
+						// This form only ever creates audits addressed to a third party, so the
+						// pills must show that profile — not the internal-audit defaults.
+						frameworkDefaults =
+							r['third_party_field_visibility'] ?? r['effective_field_visibility'] ?? null;
+						form.form.update((d) => ({ ...d, field_visibility: {} }));
 					});
 			}
 		}}
@@ -102,6 +133,16 @@
 				label={m.selectedImplementationGroups()}
 			/>
 		{/key}
+	{/if}
+	<!-- Only once the framework is known: until then the editor has no baseline to
+	     show and falls back to "everyone" for every field, which is neither the
+	     profile nor what would be saved. -->
+	{#if createAudit && frameworkDefaults}
+		<VisibilityEditor
+			value={$formData.field_visibility}
+			onChange={(next) => form.form.update((d) => ({ ...d, field_visibility: next }))}
+			{frameworkDefaults}
+		/>
 	{/if}
 {/if}
 <AutocompleteSelect
@@ -127,15 +168,6 @@
 		label={m.solutions()}
 	/>
 {/key}
-<Score
-	{form}
-	label={m.criticality()}
-	field="criticality"
-	inversedColors
-	fullDonut
-	min_score={1}
-	max_score={4}
-/>
 <TextField
 	type="date"
 	{form}
@@ -164,15 +196,24 @@
 		/>
 	{/key}
 {/if}
-<Select
-	{form}
-	options={model.selectOptions['conclusion']}
-	field="conclusion"
-	label={m.conclusion()}
-	cacheLock={cacheLocks['conclusion']}
-	bind:cachedValue={formDataCache['conclusion']}
-/>
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<Score
+		{form}
+		label={m.criticality()}
+		field="criticality"
+		inversedColors
+		fullDonut
+		min_score={1}
+		max_score={4}
+	/>
+	<Select
+		{form}
+		options={model.selectOptions['conclusion']}
+		field="conclusion"
+		label={m.conclusion()}
+		cacheLock={cacheLocks['conclusion']}
+		bind:cachedValue={formDataCache['conclusion']}
+	/>
 	<Select
 		{form}
 		options={model.selectOptions['status']}

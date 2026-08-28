@@ -44,9 +44,12 @@
 	interface Props {
 		urlModel: string;
 		object: any;
+		/** Show the promise without offering to change it — used where the viewer has
+		 * read-only visibility on the host field. The backend still guards the steps. */
+		readOnly?: boolean;
 	}
 
-	let { urlModel, object }: Props = $props();
+	let { urlModel, object, readOnly = false }: Props = $props();
 
 	let payload: Payload = $state({ state: '--', transitions: [] });
 	let picked: Transition | null = $state(null);
@@ -249,6 +252,8 @@
 				</button>
 			</div>
 		</div>
+	{:else if readOnly}
+		<!-- nothing: the state above is the whole story for a read-only viewer -->
 	{:else if payload.transitions.length}
 		<div class="flex flex-wrap gap-2 border-t border-surface-200-800 pt-3">
 			{#each payload.transitions as transition}

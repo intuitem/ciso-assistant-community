@@ -5652,6 +5652,12 @@ class Commitment(AbstractBaseModel, FolderMixin):
     fields_to_check = []
 
     class Meta:
+        permissions = [
+            (
+                "transition_commitment",
+                "Can take a commitment step",
+            )
+        ]
         verbose_name = _("Commitment")
         verbose_name_plural = _("Commitments")
         ordering = ["created_at"]

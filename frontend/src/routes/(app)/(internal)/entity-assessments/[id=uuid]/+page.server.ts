@@ -33,7 +33,6 @@ export const actions: Actions = {
 		const res = await fetch(endpoint, requestInitOptions);
 		if (!res.ok) {
 			const response = await res.json();
-			console.log(response.warning);
 			if (response.warning) {
 				for (const warning of response.warning) {
 					setFlash({ type: 'warning', message: safeTranslate(warning) }, cookies);
@@ -42,6 +41,15 @@ export const actions: Actions = {
 			}
 			setFlash({ type: 'error', message: m.mailFailedToSend() }, cookies);
 			return fail(400, { form: ComplianceAssessmentForm });
+		}
+		// The assignments are started even when delivery fails, so this is a success
+		// carrying a warning — not a failure.
+		const response = await res.json();
+		if (response.warning) {
+			for (const warning of response.warning) {
+				setFlash({ type: 'warning', message: safeTranslate(warning) }, cookies);
+			}
+			return { ComplianceAssessmentForm };
 		}
 		setFlash({ type: 'success', message: m.mailSuccessfullySent() }, cookies);
 		return { ComplianceAssessmentForm };

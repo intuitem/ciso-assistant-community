@@ -330,7 +330,12 @@ class ContractImportExportSerializer(BaseModelSerializer):
 
 
 class EntityAssessmentReadSerializer(BaseModelSerializer):
-    compliance_assessment = FieldsRelatedField(fields=["id", "name"])
+    # Bare, so the value carries `str` and the table can render it as a link to the
+    # audit. Only `.id` is read elsewhere.
+    compliance_assessment = FieldsRelatedField()
+    completion = serializers.SerializerMethodField()
+    review_progress = serializers.SerializerMethodField()
+    assignment_status = serializers.SerializerMethodField()
     evidence = FieldsRelatedField()
     perimeter = FieldsRelatedField()
     entity = FieldsRelatedField()
@@ -349,6 +354,59 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
         ],
         source="validationflow_set",
     )
+
+    def get_completion(self, obj):
+        """How far the third party has got with filling the questionnaire in.
+
+        The respondent-facing number, so this column and the respondent's own
+        assessment page can never disagree. Distinct from `review_progress`, which
+        is the auditor's side and reads 0% however much the third party has answered.
+        """
+        audit_id = obj.compliance_assessment_id
+        if not audit_id:
+            return None
+        cached = (self.context.get("optimized_data") or {}).get("completion")
+        if cached is not None and audit_id in cached:
+            return cached[audit_id]
+        from core.utils import compute_respondent_progress
+
+        audit = obj.compliance_assessment
+        return compute_respondent_progress(
+            audit, audit.get_requirement_assessments(include_non_assessable=False)
+        )
+
+    def get_review_progress(self, obj):
+        """How much of the audit the auditor has assessed."""
+        audit_id = obj.compliance_assessment_id
+        if not audit_id:
+            return None
+        cached = (self.context.get("optimized_data") or {}).get("review_progress")
+        if cached is not None and audit_id in cached:
+            return cached[audit_id]
+        return obj.compliance_assessment.progress
+
+    def get_assignment_status(self, obj):
+        """Where the questionnaire stands with its respondent.
+
+        An audit can carry several assignments; the least advanced one is what the
+        assessment as a whole is still waiting on.
+        """
+        audit_id = obj.compliance_assessment_id
+        if not audit_id:
+            return None
+        cached = (self.context.get("optimized_data") or {}).get("assignment_statuses")
+        if cached is not None:
+            statuses = cached.get(audit_id, [])
+        else:
+            statuses = list(
+                obj.compliance_assessment.requirement_assignments.values_list(
+                    "status", flat=True
+                )
+            )
+        if not statuses:
+            return None
+        order = [s.value for s in RequirementAssignment.Status]
+        return min(statuses, key=lambda s: order.index(s) if s in order else len(order))
 
     class Meta:
         model = EntityAssessment
@@ -372,6 +430,9 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
     link_audit = serializers.PrimaryKeyRelatedField(
         queryset=ComplianceAssessment.objects.all(), required=False, allow_null=True
     )
+    # Set on the audit the assessment creates, so the analyst configures respondent
+    # visibility here instead of opening the audit afterwards.
+    field_visibility = serializers.JSONField(required=False)
 
     def _extract_audit_data(self, validated_data):
         audit_data = {
@@ -381,6 +442,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 "selected_implementation_groups", None
             ),
             "link_audit": validated_data.pop("link_audit", None),
+            "field_visibility": validated_data.pop("field_visibility", None),
         }
         return audit_data
 
@@ -402,6 +464,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
     def _finalize_linked_audit(self, instance, audit):
         """Shared tail for create/link."""
         audit.reviewers.set(instance.reviewers.all())
+        self._default_representatives_from_entity(instance)
         representatives = instance.representatives.all()
         audit.authors.set(
             [rep.actor for rep in representatives if hasattr(rep, "actor")]
@@ -416,7 +479,20 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
         with transaction.atomic():
             locked = self._lock_instance_without_audit(instance, "create_audit")
-            from core.utils import build_initial_field_visibility
+            from core.utils import EVERYONE_EDIT, build_third_party_field_visibility
+
+            # The editor only sends the pills that were touched, so an explicit map
+            # is merged onto the profile rather than replacing it — otherwise moving
+            # one pill would drop every other field back to the internal-audit
+            # defaults and re-expose the auditor's side to the respondent.
+            field_visibility = build_third_party_field_visibility(
+                audit_data["framework"]
+            )
+            for key, pair in (audit_data.get("field_visibility") or {}).items():
+                if not isinstance(pair, dict):
+                    continue
+                field_visibility.setdefault(key, dict(EVERYONE_EDIT))
+                field_visibility[key].update(pair)
 
             # Enclave audits carry no perimeter: the enclave folder, not the
             # entity assessment's perimeter, governs their placement.
@@ -426,9 +502,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 selected_implementation_groups=audit_data[
                     "selected_implementation_groups"
                 ],
-                field_visibility=build_initial_field_visibility(
-                    audit_data["framework"]
-                ),
+                field_visibility=field_visibility,
             )
 
             enclave = self._make_enclave_folder(instance)
@@ -543,6 +617,23 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                     logger.warning("User is not a third-party", user=user)
                 user.user_groups.remove(respondents)
 
+    def _default_representatives_from_entity(self, instance):
+        """Fall back to the entity's own representatives when none were picked.
+
+        The picker already offers exactly these users; leaving it empty produced an
+        assessment nobody could answer — no audit authors, no requirement assignment,
+        and nobody in the enclave's respondent group. Runs only where an audit is
+        created or linked, so clearing the field on an assessment that already has one
+        stays a deliberate clear.
+        """
+        if instance.representatives.exists():
+            return
+        users = User.objects.filter(
+            representative__entity=instance.entity, is_third_party=True
+        ).distinct()
+        if users:
+            instance.representatives.set(users)
+
     def create(self, validated_data):
         audit_data = self._extract_audit_data(validated_data)
         with transaction.atomic():
@@ -569,7 +660,16 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         with transaction.atomic():
             instance = super().update(instance, validated_data)
             self._create_or_update_audit(instance, audit_data)
-            if "representatives" in validated_data:
+            newly_audited = bool(
+                audit_data["create_audit"] or audit_data.get("link_audit")
+            )
+            if newly_audited:
+                # Read back from the instance: the submitted list may have been empty
+                # and filled from the entity when the audit was built.
+                self._assign_third_party_respondents(
+                    instance, set(instance.representatives.all()), old_representatives
+                )
+            elif "representatives" in validated_data:
                 self._assign_third_party_respondents(
                     instance, representatives, old_representatives
                 )

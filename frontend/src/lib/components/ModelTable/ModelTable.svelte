@@ -684,10 +684,15 @@
 		'user_groups'
 	];
 
+	// Computed in Python from related rows, so there is no column for the backend to
+	// ORDER BY: DRF drops the term and the click does nothing. Better not to offer it.
+	const UNSORTABLE_COMPUTED_COLUMNS = ['completion', 'review_progress'];
+
 	// Function to check if a column is multi-value and should not be sortable
 	const isMultiValueColumn = (key: string): boolean => {
 		return (
 			MULTI_VALUE_COLUMNS.includes(key) ||
+			UNSORTABLE_COMPUTED_COLUMNS.includes(key) ||
 			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]))
 		);
 	};
@@ -1115,7 +1120,7 @@
 													{:else if value === 'YES' || value === 'NO'}
 														{@const bd = booleanDisplay(value === 'YES', key, URLModel)}
 														<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
-													{:else if key === 'progress' || key === 'treatment_progress' || key === 'progress_field'}
+													{:else if key === 'progress' || key === 'treatment_progress' || key === 'progress_field' || key === 'completion' || key === 'review_progress'}
 														<span class="ml-9"
 															>{value != null
 																? safeTranslate('percentageDisplay', { number: value })

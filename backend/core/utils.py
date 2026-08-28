@@ -1378,6 +1378,27 @@ DEFAULT_VISIBILITY = {
 }
 
 
+# What a third party should see of an audit addressed to them. Their side of the
+# exchange is answers, alignment, the tasks they owe, and the evidence and remarks
+# around them; the auditor's verdict and the internal controls are not theirs to read.
+# `score`/`documentation_score` stay off for both, as everywhere else — a framework
+# that scores turns them on itself.
+THIRD_PARTY_VISIBILITY = {
+    "answers": EVERYONE_EDIT,
+    "respondent_alignment": EVERYONE_EDIT,
+    "status": AUDITOR_ONLY,
+    "result": AUDITOR_ONLY,
+    "extended_result": AUDITOR_ONLY,
+    "score": HIDDEN,
+    "documentation_score": HIDDEN,
+    "applied_controls": AUDITOR_ONLY,
+    "task_templates": EVERYONE_EDIT,
+    "evidences": EVERYONE_EDIT,
+    "observation": EVERYONE_EDIT,
+    "comments": EVERYONE_EDIT,
+}
+
+
 def resolve_visibility_from_overrides(overrides, field_name):
     """Resolve a field's visibility pair from a raw `field_visibility` dict.
 
@@ -1425,16 +1446,17 @@ def is_field_editable_by(compliance_assessment, field_name, role):
     return _role_access(compliance_assessment, field_name, role) == "edit"
 
 
-def build_initial_field_visibility(framework):
+def build_initial_field_visibility(framework, base=None):
     """Build the initial `field_visibility` map for a new CA.
 
-    Layered per-role: code defaults are seeded for every known field, then the
-    framework's overrides are merged on top — but per-role, so a framework that
-    only specifies a single role (e.g. {"score": {"auditor": "edit"}}) does not
-    erase the default value for the other roles.
+    Layered per-role: *base* (the code defaults unless a caller supplies another
+    starting profile) is seeded for every known field, then the framework's
+    overrides are merged on top — but per-role, so a framework that only specifies
+    a single role (e.g. {"score": {"auditor": "edit"}}) does not erase the default
+    value for the other roles.
     """
     fw_overrides = getattr(framework, "field_visibility", None) or {}
-    merged = {key: dict(pair) for key, pair in DEFAULT_VISIBILITY.items()}
+    merged = {key: dict(pair) for key, pair in (base or DEFAULT_VISIBILITY).items()}
     for key, pair in fw_overrides.items():
         if not isinstance(pair, dict):
             continue
@@ -1443,6 +1465,77 @@ def build_initial_field_visibility(framework):
         merged.setdefault(key, dict(EVERYONE_EDIT))
         merged[key].update(pair)
     return merged
+
+
+def respondent_progress_counts(
+    compliance_assessment, requirement_assessments
+) -> tuple[int, int, int]:
+    """How much of the questionnaire the respondent has filled in.
+
+    Returns (units, answered units, requirements completed).
+
+    Deliberately not `ComplianceAssessment.progress`, which measures the auditor's
+    review against the audit-level progress mode — fields a respondent may not even
+    be able to see. Per requirement: the share of answered VISIBLE questions
+    (`get_visible_questions_counts` resolves `depends_on`, so conditional
+    questionnaires are correct); a requirement with no questions counts as one
+    virtual unit, answered through the respondent's alignment answer when that field
+    is in use, else through the result.
+
+    Single implementation shared by the auditee dashboard, the assessment page and
+    the entity-assessment list, so the same questionnaire cannot report two numbers.
+    """
+    from core.models import RequirementAssessment
+
+    ca = compliance_assessment
+    alignment_pair = resolve_visibility_from_overrides(
+        ca.field_visibility
+        or (
+            getattr(ca.framework, "field_visibility", None) if ca.framework_id else None
+        ),
+        "respondent_alignment",
+    )
+    alignment_in_use = alignment_pair.get("respondent", "edit") != "hidden"
+
+    total_q = 0
+    answered_q = 0
+    done = 0
+    for ra in requirement_assessments:
+        visible, answered = ra.get_visible_questions_counts()
+        if visible > 0:
+            total_q += visible
+            answered_q += answered
+            if answered >= visible:
+                done += 1
+            continue
+        total_q += 1
+        unit_done = (
+            bool(ra.respondent_alignment)
+            if alignment_in_use
+            else ra.result != RequirementAssessment.Result.NOT_ASSESSED
+        )
+        if unit_done:
+            answered_q += 1
+            done += 1
+    return total_q, answered_q, done
+
+
+def compute_respondent_progress(compliance_assessment, requirement_assessments) -> int:
+    """`respondent_progress_counts` as a percentage."""
+    total_q, answered_q, _ = respondent_progress_counts(
+        compliance_assessment, requirement_assessments
+    )
+    return int(answered_q / total_q * 100) if total_q else 0
+
+
+def build_third_party_field_visibility(framework):
+    """The map a questionnaire sent to a third party starts from.
+
+    The framework still wins wherever it says something, so a framework that
+    configures scoring or hides a field keeps that; everything it leaves unsaid
+    follows the third-party profile rather than the internal-audit defaults.
+    """
+    return build_initial_field_visibility(framework, base=THIRD_PARTY_VISIBILITY)
 
 
 def bulk_update_with_log(model, rows, fields, batch_size=500):

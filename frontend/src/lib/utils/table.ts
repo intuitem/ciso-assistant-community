@@ -2268,8 +2268,13 @@ export const listViewFields = {
 		head: [
 			'name',
 			'entity',
-			'perimeter',
+			'audit',
 			'status',
+			'assignmentStatus',
+			'completion',
+			// Not the shared `reviewProgress` key ("Progress"), which would be
+			// ambiguous next to Completion; the audits table keeps that wording.
+			'auditReviewProgress',
 			'dueDate',
 			'criticality',
 			'conclusion',
@@ -2278,13 +2283,20 @@ export const listViewFields = {
 		body: [
 			'name',
 			'entity',
-			'perimeter',
+			'compliance_assessment',
 			'status',
+			'assignment_status',
+			'completion',
+			'review_progress',
 			'due_date',
 			'criticality',
 			'conclusion',
 			'folder'
 		],
+		optionalFields: {
+			head: ['perimeter'],
+			body: ['perimeter']
+		},
 		filters: {
 			perimeter: PERIMETER_FILTER,
 			entity: ENTITY_FILTER,

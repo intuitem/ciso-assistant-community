@@ -169,6 +169,7 @@ from core.utils import (
     compare_schema_versions,
     get_respondent_scoped_folder_ids,
     is_field_visible_to,
+    respondent_progress_counts,
     _generate_occurrences,
     _create_task_dict,
 )
@@ -867,18 +868,30 @@ class SmartOrderingFilter(filters.OrderingFilter):
     # inconsistent across backends; wrapping in Lower() makes it deterministic.
     case_insensitive_suffixes = ("name",)
 
+    def get_valid_fields(self, queryset, view, context={}):
+        # A viewset can expose a computed column for ordering by annotating it and
+        # declaring the mapping; without this DRF drops the term as an unknown field
+        # and the header silently does nothing.
+        valid = list(super().get_valid_fields(queryset, view, context))
+        remap = getattr(view, "ordering_remap", None) or {}
+        return valid + [(key, key) for key in remap]
+
     def get_ordering(self, request, queryset, view):
         ordering = super().get_ordering(request, queryset, view)
-        if ordering:
-            return [
-                "folder__name"
-                if f == "folder"
-                else "-folder__name"
-                if f == "-folder"
-                else f
-                for f in ordering
-            ]
-        return ordering
+        if not ordering:
+            return ordering
+        remap = {
+            "folder": "folder__name",
+            **(getattr(view, "ordering_remap", None) or {}),
+        }
+
+        def resolved(term):
+            descending = term.startswith("-")
+            field = term[1:] if descending else term
+            target = remap.get(field, field)
+            return f"-{target}" if descending else target
+
+        return [resolved(f) for f in ordering]
 
     def filter_queryset(self, request, queryset, view):
         ordering = self.get_ordering(request, queryset, view)
@@ -5170,6 +5183,12 @@ class CommitmentActionsMixin:
     The map itself is enforced in the write serializer; this only mirrors it.
     """
 
+    # Taking a commitment step is its own right, the way transitioning a requirement
+    # assignment is: a counterparty must be able to promise a date without holding
+    # change rights over every field of the object carrying the promise. The override
+    # keys on the action, so it governs the GET and the POST alike.
+    permission_overrides = {"commitment_transitions": "transition_commitment"}
+
     @action(detail=True, methods=["get", "post"], name="Commitment transitions")
     def commitment_transitions(self, request, pk=None):
         """GET the legal next steps; POST one to take it.
@@ -5240,8 +5259,12 @@ class CommitmentActionsMixin:
             data["commitment_date"] = promised_date
             data[obj.COMMITMENT_DATE_FIELD] = promised_date
 
+        # Flags the write as a commitment step, so the serializer checks the right to
+        # take one rather than the right to change the object wholesale — a
+        # counterparty promises a date without being able to rewrite the task.
+        context = {**self.get_serializer_context(), "commitment_transition": True}
         serializer = self.get_serializer_class(action="partial_update")(
-            obj, data=data, partial=True, context=self.get_serializer_context()
+            obj, data=data, partial=True, context=context
         )
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
@@ -11854,54 +11877,76 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         name="Send compliance assessment by mail to authors",
     )
     def mailing(self, request, pk):
+        """Start the assignments, then notify.
+
+        The assignment status is the state of the questionnaire; the email is only the
+        notification. Sending first meant an unreachable mail server left every
+        assignment in draft — and, since nothing wrapped the loop, a partial send could
+        tell one author a questionnaire was waiting for them while no assignment had
+        actually started. Delivery failures are reported, never a reason to withhold
+        the work.
+        """
         instance = self.get_object()
-        if settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE:
-            for author in instance.authors.all():
-                try:
-                    specific = author.specific
-                    if not hasattr(specific, "mailing"):
-                        logger.warning(
-                            f"Actor {author} (type: {type(specific).__name__}) has no mailing method, skipping email"
-                        )
-                        continue
-                    assignments = list(
-                        instance.requirement_assignments.filter(actor=author)
-                    )
-                    if not assignments:
-                        logger.warning(
-                            f"Actor {author} has no assignment on this audit, skipping email"
-                        )
-                        continue
-                    for assignment in assignments:
-                        specific.mailing(
-                            email_template_name="tprm/third_party_email.html",
-                            subject=_(
-                                "CISO Assistant: A questionnaire has been assigned to you"
-                            ),
-                            object="auditee-assessments",
-                            object_id=assignment.id,
-                        )
-                except Exception as primary_exception:
-                    logger.error(
-                        f"Failed to send email to {author}: {primary_exception}"
-                    )
-                    raise ValidationError(
-                        {"error": ["An error occurred while sending the email"]}
-                    )
-            draft_assignments = instance.requirement_assignments.filter(
-                status=RequirementAssignment.Status.DRAFT
+
+        started = 0
+        for assignment in instance.requirement_assignments.filter(
+            status=RequirementAssignment.Status.DRAFT
+        ):
+            assignment.status = RequirementAssignment.Status.IN_PROGRESS
+            assignment.save(update_fields=["status"])
+            RequirementAssignmentEvent.objects.create(
+                assignment=assignment,
+                event_type=RequirementAssignment.Status.IN_PROGRESS,
+                event_actor=request.user,
+                folder=assignment.folder,
             )
-            for assignment in draft_assignments:
-                assignment.status = RequirementAssignment.Status.IN_PROGRESS
-                assignment.save(update_fields=["status"])
-                RequirementAssignmentEvent.objects.create(
-                    assignment=assignment,
-                    event_type=RequirementAssignment.Status.IN_PROGRESS,
-                    event_actor=request.user,
-                    folder=assignment.folder,
+            started += 1
+
+        if not (settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE):
+            return Response({"started": started, "warning": ["noMailerConfigured"]})
+
+        failed = []
+        for author in instance.authors.all():
+            try:
+                specific = author.specific
+                if not hasattr(specific, "mailing"):
+                    logger.warning(
+                        "Actor has no mailing method, skipping email",
+                        actor=author,
+                        actor_type=type(specific).__name__,
+                    )
+                    continue
+                assignments = list(
+                    instance.requirement_assignments.filter(actor=author)
                 )
-            return Response({"results": "mail sent"})
-        raise ValidationError({"warning": ["noMailerConfigured"]})
+                if not assignments:
+                    logger.warning(
+                        "Actor has no assignment on this audit, skipping email",
+                        actor=author,
+                    )
+                    continue
+                for assignment in assignments:
+                    specific.mailing(
+                        email_template_name="tprm/third_party_email.html",
+                        subject=_(
+                            "CISO Assistant: A questionnaire has been assigned to you"
+                        ),
+                        object="auditee-assessments",
+                        object_id=assignment.id,
+                    )
+            except Exception as e:
+                logger.error("Failed to send email", actor=author, error=e)
+                failed.append(str(author))
+
+        if failed:
+            return Response(
+                {
+                    "started": started,
+                    "failed": failed,
+                    "warning": ["mailPartiallyFailed"],
+                }
+            )
+        return Response({"results": "mail sent", "started": started})
 
     @action(detail=True, methods=["post"])
     def update_requirement(self, request, pk):
@@ -12981,8 +13026,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             .distinct()
         )
 
-        from core.utils import resolve_visibility_from_overrides
-
         # Only include compliance assessments the user can view
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
@@ -13016,48 +13059,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 ]
             total = len(ras)
 
-            # Respondent-facing progress: track the respondent's own work, not
-            # the audit-level progress mode (the status field may not even be
-            # visible to them). Identical computation to the frontend
-            # assessment page: per requirement, share of answered VISIBLE
-            # questions (get_visible_questions_counts resolves depends_on, so
-            # conditional and informational questionnaires are correct); a
-            # requirement with no questions counts as one virtual unit,
-            # answered via the respondent's alignment answer when that field
-            # is in use, else the result. The Python walk is bounded by the
-            # respondent's own assignments, so its cost stays small.
-            alignment_pair = resolve_visibility_from_overrides(
-                ca.field_visibility
-                or (
-                    getattr(ca.framework, "field_visibility", None)
-                    if ca.framework_id
-                    else None
-                ),
-                "respondent_alignment",
-            )
-            alignment_in_use = alignment_pair.get("respondent", "edit") != "hidden"
-
-            total_q = 0
-            answered_q = 0
-            done = 0
-            for ra in ras:
-                visible, answered = ra.get_visible_questions_counts()
-                if visible > 0:
-                    total_q += visible
-                    answered_q += answered
-                    if answered >= visible:
-                        done += 1
-                    continue
-                # No visible questions: one virtual unit, respondent-driven.
-                total_q += 1
-                unit_done = (
-                    bool(ra.respondent_alignment)
-                    if alignment_in_use
-                    else ra.result != RequirementAssessment.Result.NOT_ASSESSED
-                )
-                if unit_done:
-                    answered_q += 1
-                    done += 1
+            # Respondent-facing progress: the respondent's own work, not the
+            # audit-level progress mode (the status field may not even be visible to
+            # them). Shared with the entity-assessment list and the TPRM metrics
+            # endpoint, so one questionnaire cannot report two different numbers.
+            total_q, answered_q, done = respondent_progress_counts(ca, ras)
             progress_percent = int(answered_q / total_q * 100) if total_q else 0
 
             actor_names = ", ".join(str(a) for a in assignment.actor.all())

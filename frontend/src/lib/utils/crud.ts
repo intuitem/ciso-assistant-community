@@ -521,7 +521,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		foreignKeyFields: [
 			{ field: 'reference_control', urlModel: 'reference-controls' },
-			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL&content_type=EN' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'objectives', urlModel: 'organisation-objectives' },
 			{ field: 'owner', urlModel: 'actors' },

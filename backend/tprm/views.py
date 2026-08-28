@@ -15,7 +15,9 @@ from core.views import (
     ExportMixin,
     escape_excel_formula,
 )
-from core.models import Asset
+from core.models import Asset, ComplianceAssessment, RequirementAssignment
+from core.utils import compute_respondent_progress
+from django.db.models import Case, IntegerField, OuterRef, Subquery, Value, When
 from tprm.models import Entity, Representative, Solution, EntityAssessment, Contract
 from rest_framework.decorators import action
 import structlog
@@ -1100,6 +1102,84 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         "genericcollection",
     ]
 
+    # `assignment_status` is a string on a related model, so ordering it raw would be
+    # alphabetical (changes_requested < closed < draft). The annotation ranks it by
+    # where it sits in the workflow instead.
+    ordering_remap = {"assignment_status": "assignment_status_rank"}
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        # How far along the questionnaire is, which is not the enum's declaration
+        # order: "changes requested" is back with the respondent, so it sits before
+        # "submitted" rather than after "closed".
+        order = [
+            RequirementAssignment.Status.DRAFT,
+            RequirementAssignment.Status.IN_PROGRESS,
+            RequirementAssignment.Status.CHANGES_REQUESTED,
+            RequirementAssignment.Status.SUBMITTED,
+            RequirementAssignment.Status.CLOSED,
+        ]
+        rank = Case(
+            *[
+                When(status=value, then=Value(index))
+                for index, value in enumerate(order)
+            ],
+            default=Value(len(order)),
+            output_field=IntegerField(),
+        )
+        least_advanced = (
+            RequirementAssignment.objects.filter(
+                compliance_assessment_id=OuterRef("compliance_assessment_id")
+            )
+            .annotate(rank=rank)
+            .order_by("rank")
+            .values("rank")[:1]
+        )
+        return qs.annotate(assignment_status_rank=Subquery(least_advanced))
+
+    def _get_optimized_object_data(self, queryset):
+        """Answering progress and assignment state for the whole page at once.
+
+        The progress walk touches every requirement assessment and its questions, so
+        computed per row it would be a query storm; prefetched across the page it is
+        a handful of queries regardless of page size.
+        """
+        data = super()._get_optimized_object_data(queryset)
+
+        audit_ids = {
+            ea.compliance_assessment_id
+            for ea in queryset
+            if ea.compliance_assessment_id
+        }
+        if not audit_ids:
+            return data
+
+        audits = (
+            ComplianceAssessment.objects.filter(id__in=audit_ids)
+            .select_related("framework")
+            .prefetch_related(
+                "requirement_assessments__requirement__questions",
+                "requirement_assessments__answers",
+            )
+        )
+        audits = list(audits)
+        data["completion"] = {
+            audit.id: compute_respondent_progress(
+                audit, audit.get_requirement_assessments(include_non_assessable=False)
+            )
+            for audit in audits
+        }
+        data["review_progress"] = {audit.id: audit.progress for audit in audits}
+
+        statuses: dict = {}
+        for audit_id, status_value in RequirementAssignment.objects.filter(
+            compliance_assessment_id__in=audit_ids
+        ).values_list("compliance_assessment_id", "status"):
+            statuses.setdefault(audit_id, []).append(status_value)
+        data["assignment_statuses"] = statuses
+
+        return data
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.compliance_assessment:
@@ -1168,8 +1248,16 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 else False,
             }
 
+            # Same respondent-facing walk as the assessment list and the auditee
+            # dashboard. `answers_progress` counted questions only, so a framework
+            # without any reported 0% however far along the third party was.
             completion = (
-                ea.compliance_assessment.answers_progress
+                compute_respondent_progress(
+                    ea.compliance_assessment,
+                    ea.compliance_assessment.get_requirement_assessments(
+                        include_non_assessable=False
+                    ),
+                )
                 if ea.compliance_assessment
                 else 0
             )

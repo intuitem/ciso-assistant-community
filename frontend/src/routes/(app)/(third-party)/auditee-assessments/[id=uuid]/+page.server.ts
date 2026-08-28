@@ -1,6 +1,7 @@
 import { handleErrorResponse, nestedWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
+import { formatSelectFieldData } from '$lib/utils/load';
 import { safeTranslate } from '$lib/utils/i18n';
 import { modelSchema } from '$lib/utils/schemas';
 import { m } from '$paraglide/messages';
@@ -60,6 +61,26 @@ export const load = (async ({ fetch, params }) => {
 
 	const evidenceModel = getModelInfo('evidences');
 	const evidenceCreateSchema = modelSchema('evidences');
+
+	const taskTemplateModel = getModelInfo('task-templates');
+	const taskTemplateCreateSchema = modelSchema('task-templates');
+	// TaskTemplateForm reads `model.selectOptions['status']` unguarded, so the options
+	// have to be resolved here or opening the modal throws.
+	const taskTemplateSelectOptions: Record<string, any> = {};
+	if (taskTemplateModel.selectFields) {
+		await Promise.all(
+			taskTemplateModel.selectFields.map(async (selectField) => {
+				const res = await fetch(`${BASE_API_URL}/task-templates/${selectField.field}/`);
+				if (res.ok) {
+					taskTemplateSelectOptions[selectField.field] = formatSelectFieldData(
+						await res.json(),
+						selectField
+					);
+				}
+			})
+		);
+	}
+	taskTemplateModel.selectOptions = taskTemplateSelectOptions;
 	const scoreSchema = z.object({
 		is_scored: z.boolean().optional(),
 		score: z.number().optional().nullable(),
@@ -79,6 +100,16 @@ export const load = (async ({ fetch, params }) => {
 				requirement_assessments: [requirementAssessment.id],
 				folder: requirementAssessment.folder.id
 			};
+			// The requirement assessment's folder is the enclave for a third-party
+			// audit, so a task the respondent raises stays inside it.
+			const taskTemplateCreateForm = await superValidate(
+				{
+					requirement_assessments: [requirementAssessment.id],
+					folder: requirementAssessment.folder.id
+				},
+				zod(taskTemplateCreateSchema),
+				{ errors: false }
+			);
 			const evidenceCreateForm = await superValidate(
 				evidenceInitialData,
 				zod(evidenceCreateSchema),
@@ -107,6 +138,9 @@ export const load = (async ({ fetch, params }) => {
 				}),
 				...(requirementAssessment.applied_controls !== undefined && {
 					applied_controls: requirementAssessment.applied_controls.map((ac) => ac.id)
+				}),
+				...(requirementAssessment.task_templates !== undefined && {
+					task_templates: requirementAssessment.task_templates.map((t) => t.id)
 				})
 			};
 			const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
@@ -114,6 +148,7 @@ export const load = (async ({ fetch, params }) => {
 				...requirementAssessment,
 				measureCreateForm,
 				evidenceCreateForm,
+				taskTemplateCreateForm,
 				observationBuffer,
 				scoreForm,
 				updateForm,
@@ -145,6 +180,7 @@ export const load = (async ({ fetch, params }) => {
 		requirements,
 		measureModel,
 		evidenceModel,
+		taskTemplateModel,
 		assignment,
 		viewerRole: tableMode.viewer_role ?? 'respondent',
 		title: compliance_assessment.name
@@ -172,6 +208,9 @@ export const actions: Actions = {
 		else return result;
 	},
 	createAppliedControl: async (event) => {
+		return nestedWriteFormAction({ event, action: 'create' });
+	},
+	createTaskTemplate: async (event) => {
 		return nestedWriteFormAction({ event, action: 'create' });
 	},
 	update: async (event) => {

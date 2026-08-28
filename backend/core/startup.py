@@ -354,6 +354,7 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_requirementassignment",
     "view_requirementassignment",
     "transition_requirementassignment",
+    "transition_commitment",
     "change_riskacceptance",
     "change_riskassessment",
     "change_riskscenario",
@@ -795,6 +796,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_requirementassignment",
     "view_requirementassignment",
     "transition_requirementassignment",
+    "transition_commitment",
     "change_riskacceptance",
     "change_riskassessment",
     "change_riskmatrix",
@@ -1371,6 +1373,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_requirementassignment",
     "view_requirementassignment",
     "transition_requirementassignment",
+    "transition_commitment",
     # evidence
     "add_evidence",
     "view_evidence",
@@ -1878,6 +1881,16 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "view_folder",
     "view_requirementassignment",
     "transition_requirementassignment",
+    # Tasks are the third party's own to-do list on the questionnaire, so they own
+    # them the way they own their evidences — bounded to the enclave by the role
+    # assignment, not by the permission. `transition_commitment` is separate on
+    # purpose: promising a date is governed by the commitment sides, not by write
+    # access to the task.
+    "view_tasktemplate",
+    "add_tasktemplate",
+    "change_tasktemplate",
+    "delete_tasktemplate",
+    "transition_commitment",
     "add_comment",
     "view_comment",
     "change_comment",
@@ -1904,6 +1917,7 @@ AUDITEE_PERMISSIONS_LIST = [
     "view_folder",
     "view_requirementassignment",
     "transition_requirementassignment",
+    "transition_commitment",
     "view_appliedcontrol",
     "view_commitment",
     "add_appliedcontrol",
