@@ -10403,6 +10403,13 @@ class TaskTemplate(
         help_text="Compliance assessments related to the task",
         related_name="task_templates",
     )
+    requirement_assessments = models.ManyToManyField(
+        RequirementAssessment,
+        verbose_name="Requirement assessments",
+        blank=True,
+        help_text="Requirement assessments related to the task",
+        related_name="task_templates",
+    )
     risk_assessments = models.ManyToManyField(
         RiskAssessment,
         verbose_name="Risk assessments",

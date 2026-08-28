@@ -27,7 +27,7 @@ export const load = (async ({ fetch, params }) => {
 
 	const tables: Record<string, any> = {};
 
-	for (const key of ['applied-controls', 'evidences', 'findings'] as urlModel[]) {
+	for (const key of ['applied-controls', 'task-templates', 'evidences', 'findings'] as urlModel[]) {
 		// findings hang off the assessment itself; the others off its `requirement_assessments` m2m
 		const filter = key === 'findings' ? 'requirement_assessment' : 'requirement_assessments';
 		const keyEndpoint = `${BASE_API_URL}/${key}/?${filter}=${params.id}`;

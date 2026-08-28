@@ -163,6 +163,27 @@
 		});
 	}
 
+	function modalTaskTemplateCreateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.taskTemplateCreateForm,
+				formAction: '?/createTaskTemplate',
+				model: data.taskTemplateModel,
+				invalidateAll: false,
+				debug: false
+			}
+		};
+		modalStore.trigger({
+			type: 'component',
+			component: modalComponent,
+			title: m.addTaskTemplate(),
+			response: (r: boolean) => {
+				if (r) refreshKey = !refreshKey;
+			}
+		});
+	}
+
 	function modalEvidenceCreateForm(): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -365,6 +386,7 @@
 	const showDocumentationScore = $derived(fieldVis.showDocumentationScore);
 	const showObservation = $derived(fieldVis.showObservation);
 	const showAppliedControls = $derived(fieldVis.showAppliedControls);
+	const showTaskTemplates = $derived(fieldVis.showTaskTemplates);
 	const showEvidences = $derived(fieldVis.showEvidences);
 	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
 	const showComments = $derived(fieldVis.showComments);
@@ -374,6 +396,7 @@
 
 	function pickDefaultTab(): string {
 		if (canShowAppliedControls) return 'applied_controls';
+		if (showTaskTemplates) return 'task_templates';
 		if (showEvidences) return 'evidences';
 		// Security exceptions are auditor-only — not part of the per-CA visibility model.
 		if (isAuditor) return 'security_exceptions';
@@ -609,6 +632,11 @@
 										>{m.appliedControls()}</Tabs.Trigger
 									>
 								{/if}
+								{#if showTaskTemplates}
+									<Tabs.Trigger value="task_templates" data-testid="task-templates-tab"
+										>{m.taskTemplates()}</Tabs.Trigger
+									>
+								{/if}
 								{#if showEvidences}
 									<Tabs.Trigger value="evidences" data-testid="evidences-tab"
 										>{m.evidences()}</Tabs.Trigger
@@ -696,6 +724,45 @@
 											hideFilters={true}
 											URLModel="applied-controls"
 											expectedCount={countMasked(page.data.requirementAssessment.applied_controls)}
+										/>
+									</div>
+								</Tabs.Content>
+							{/if}
+							{#if showTaskTemplates}
+								<Tabs.Content value="task_templates">
+									<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+										<i class="fa-solid fa-info-circle"></i>
+										<p>{m.requirementTaskTemplateHelpText()}</p>
+									</div>
+									<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+										<span class="flex flex-row justify-end items-center">
+											<button
+												class="btn preset-filled-primary-500 self-end"
+												onclick={modalTaskTemplateCreateForm}
+												data-testid="add-task-template-button"
+												type="button"
+												><i class="fa-solid fa-plus mr-2"></i>{m.addTaskTemplate()}</button
+											>
+										</span>
+										{#key refreshKey}
+											<AutocompleteSelect
+												multiple
+												{form}
+												optionsEndpoint="task-templates"
+												optionsExtraFields={[['folder', 'str']]}
+												optionsDetailedUrlParameters={[
+													['scope_folder_id', page.data.requirementAssessment.folder.id]
+												]}
+												field="task_templates"
+											/>
+										{/key}
+										<ModelTable
+											source={page.data.tables['task-templates']}
+											hideFilters={true}
+											URLModel="task-templates"
+											expectedCount={countMasked(page.data.requirementAssessment.task_templates)}
+											baseEndpoint="/task-templates?requirement_assessments={page.data
+												.requirementAssessment.id}"
 										/>
 									</div>
 								</Tabs.Content>

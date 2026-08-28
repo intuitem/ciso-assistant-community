@@ -16768,6 +16768,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "objectives",
             "incidents",
             "findings",
+            "requirement_assessments",
             "filtering_labels",
         ]
 

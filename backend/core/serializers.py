@@ -3363,6 +3363,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
     description = serializers.CharField(source="get_requirement_description")
     evidences = FieldsRelatedField(many=True)
+    task_templates = FieldsRelatedField(many=True)
     compliance_assessment = FieldsRelatedField(
         [
             "id",
@@ -3445,6 +3446,9 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     requirement = serializers.PrimaryKeyRelatedField(read_only=True)
     answers = serializers.JSONField(required=False, write_only=True)
+    task_templates = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=TaskTemplate.objects.all()
+    )
 
     def to_internal_value(self, data):
         # Strip fields the respondent isn't allowed to write before DRF validates
@@ -3470,6 +3474,26 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                     for k, v in data.items()
                     if is_field_editable_by(ca, k, "respondent")
                 }
+
+        # A relation the submitting role cannot see must not be writable by it.
+        # The RA form round-trips every schema field, so an auditor saving an audit
+        # whose tasks tab is off would otherwise post an empty list and unlink
+        # tasks attached from the task side.
+        if request and self.instance and "task_templates" in data:
+            from core.utils import (
+                get_respondent_scoped_folder_ids,
+                is_field_editable_by,
+            )
+
+            ca = self.instance.compliance_assessment
+            respondent_folders = get_respondent_scoped_folder_ids(request.user)
+            role = (
+                "respondent"
+                if respondent_folders and ca.folder_id in respondent_folders
+                else "auditor"
+            )
+            if not is_field_editable_by(ca, "task_templates", role):
+                data = {k: v for k, v in data.items() if k != "task_templates"}
 
         # On update, treat an empty required-choice value as "unchanged" instead
         # of failing validation. The respondent view (`requirements_list`) strips
@@ -5339,6 +5363,7 @@ class TaskTemplateReadSerializer(CommitmentSerializerMixin, BaseModelSerializer)
     assets = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
     compliance_assessments = FieldsRelatedField(many=True)
+    requirement_assessments = FieldsRelatedField(many=True)
     risk_assessments = FieldsRelatedField(many=True)
     assigned_to = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField(many=True)

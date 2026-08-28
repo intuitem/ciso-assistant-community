@@ -1075,6 +1075,7 @@
 	"evidenceNoFile": "Evidence has no file uploaded",
 	"requirementAppliedControlHelpText": "Evidences linked to the selected measures will be automatically associated with the requirement.",
 	"requirementEvidenceHelpText": "This tab allows you to add extra evidences to the requirement.",
+	"requirementTaskTemplateHelpText": "This tab allows you to track tasks the requirement depends on, such as a commitment made by a respondent.",
 	"providerID": "Provider ID",
 	"clientID": "Client ID",
 	"secret": "Secret",

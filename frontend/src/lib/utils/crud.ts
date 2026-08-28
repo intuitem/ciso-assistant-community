@@ -1307,6 +1307,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'status' }, { field: 'result' }, { field: 'extended_result' }],
 		foreignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'task_templates', urlModel: 'task-templates' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
@@ -2665,6 +2666,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
 			{ field: 'findings', urlModel: 'findings' },
+			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [

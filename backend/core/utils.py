@@ -1360,6 +1360,9 @@ DEFAULT_VISIBILITY = {
     # badge would never render — functionally equivalent to HIDDEN. Default
     # off; auditors who want it explicitly flip to "Auditor + Respondent".
     "respondent_alignment": HIDDEN,
+    # Off unless the audit opts in: existing audits track remediation through
+    # applied controls or findings, and should not sprout a tasks tab.
+    "task_templates": HIDDEN,
 }
 
 
