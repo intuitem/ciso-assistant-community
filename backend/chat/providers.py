@@ -661,6 +661,60 @@ class OpenAICompatibleLLM:
         return None
 
 
+class OrcaRouterLLM:
+    """LLM using the OrcaRouter gateway (OpenAI-compatible API).
+
+    OrcaRouter exposes the same ``/chat/completions`` surface as the other
+    OpenAI-compatible providers, so this mirrors ``OpenAICompatibleLLM`` and
+    only hard-codes the gateway base URL and the ``orcarouter/auto`` model
+    sentinel.
+    """
+
+    def __init__(
+        self,
+        model: str = "orcarouter/auto",
+        base_url: str = "https://api.orcarouter.ai/v1",
+        system_prompt: str = "",
+        api_key: str = "",
+        temperature_enabled: bool = True,
+        temperature: float = 0,
+    ):
+        self._client = OpenAICompatibleLLM(
+            model=model,
+            base_url=base_url,
+            system_prompt=system_prompt,
+            api_key=api_key,
+            temperature_enabled=temperature_enabled,
+            temperature=temperature,
+        )
+
+    def generate(
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
+    ) -> str:
+        return self._client.generate(prompt, context, history, directives)
+
+    def stream(
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
+    ) -> Iterator[tuple[str, str]]:
+        return self._client.stream(prompt, context, history, directives)
+
+    def tool_call(
+        self,
+        prompt: str,
+        tools: list[dict],
+        history: list[dict] | None = None,
+    ) -> dict | None:
+        return self._client.tool_call(prompt, tools, history)
+
+
 def _merge_thinking_stream(
     raw_tokens: Iterator[tuple[str, str]],
 ) -> Iterator[tuple[str, str]]:
@@ -770,6 +824,11 @@ def get_chat_settings() -> dict:
                 ),
                 "openai_model": gs.value.get("openai_model", ""),
                 "openai_api_key": gs.value.get("openai_api_key", ""),
+                "orcarouter_api_base": gs.value.get(
+                    "orcarouter_api_base", "https://api.orcarouter.ai/v1"
+                ),
+                "orcarouter_model": gs.value.get("orcarouter_model", "orcarouter/auto"),
+                "orcarouter_api_key": gs.value.get("orcarouter_api_key", ""),
                 "chat_temperature_enabled": gs.value.get(
                     "chat_temperature_enabled", True
                 ),
@@ -787,6 +846,9 @@ def get_chat_settings() -> dict:
         "openai_api_base": "http://localhost:1234/v1",
         "openai_model": "",
         "openai_api_key": "",
+        "orcarouter_api_base": "https://api.orcarouter.ai/v1",
+        "orcarouter_model": "orcarouter/auto",
+        "orcarouter_api_key": "",
         "chat_temperature_enabled": True,
         "chat_temperature": 0,
     }
@@ -885,6 +947,53 @@ def get_llm() -> LLM:
         logger.info(
             "no_llm_available", provider="openai_compatible", mode="retrieval-only"
         )
+        return StubLLM()
+
+    if provider == "orcarouter":
+        base_url = settings.get("orcarouter_api_base", "https://api.orcarouter.ai/v1")
+        try:
+            import httpx
+
+            api_key = settings.get("orcarouter_api_key", "")
+            health_headers = {}
+            if api_key:
+                health_headers["Authorization"] = f"Bearer {api_key}"
+            resp = httpx.get(
+                f"{base_url.rstrip('/')}/models",
+                timeout=5,
+                headers=health_headers,
+            )
+            if resp.status_code == 200:
+                _cached_llm = OrcaRouterLLM(
+                    model=settings.get("orcarouter_model", "orcarouter/auto"),
+                    base_url=base_url,
+                    system_prompt=settings["chat_system_prompt"],
+                    api_key=api_key,
+                    temperature_enabled=settings.get("chat_temperature_enabled", True),
+                    temperature=settings.get("chat_temperature", 0),
+                )
+                logger.info(
+                    "llm_initialized",
+                    provider="orcarouter",
+                    base_url=base_url,
+                    model=settings.get("orcarouter_model", "orcarouter/auto"),
+                    has_api_key=bool(api_key),
+                )
+                return _cached_llm
+            else:
+                logger.warning(
+                    "orcarouter_health_check_failed",
+                    base_url=base_url,
+                    status=resp.status_code,
+                )
+        except Exception as e:
+            logger.warning(
+                "orcarouter_connection_failed",
+                base_url=base_url,
+                error=e,
+            )
+        # Don't fall through to Ollama — user explicitly chose orcarouter
+        logger.info("no_llm_available", provider="orcarouter", mode="retrieval-only")
         return StubLLM()
 
     # Provider: Ollama

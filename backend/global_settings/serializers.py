@@ -93,6 +93,9 @@ GENERAL_SETTINGS_KEYS = [
     "openai_api_base",
     "openai_model",
     "openai_api_key",
+    "orcarouter_api_base",
+    "orcarouter_model",
+    "orcarouter_api_key",
     "chat_temperature_enabled",
     "chat_temperature",
     "default_custom_analytics_dashboard",
@@ -109,6 +112,7 @@ GENERAL_SETTINGS_KEYS = [
 LLM_URL_DEFAULTS = {
     "ollama_base_url": "http://localhost:11434",
     "openai_api_base": "http://localhost:1234/v1",
+    "orcarouter_api_base": "https://api.orcarouter.ai/v1",
 }
 
 
@@ -122,6 +126,7 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         ret = super().to_representation(instance)
         if "value" in ret and isinstance(ret["value"], dict):
             ret["value"].pop("openai_api_key", None)
+            ret["value"].pop("orcarouter_api_key", None)
         return ret
 
     def update(self, instance, validated_data):
@@ -142,7 +147,10 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         for key, value in validated_data["value"].items():
             if key not in GENERAL_SETTINGS_KEYS:
                 raise serializers.ValidationError(f"Invalid key: {key}")
-            if key in ("ollama_base_url", "openai_api_base") and value:
+            if (
+                key in ("ollama_base_url", "openai_api_base", "orcarouter_api_base")
+                and value
+            ):
                 if not isinstance(value, str):
                     raise serializers.ValidationError({key: "URL must be a string."})
                 parsed = urlparse(value)
@@ -229,11 +237,15 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
             # per-template email toggles endpoint).
             instance = GlobalSettings.objects.select_for_update().get(pk=instance.pk)
             current = instance.value if isinstance(instance.value, dict) else {}
-            # Preserve existing API key if not provided in the update
+            # Preserve existing API keys if not provided in the update
             if not validated_data["value"].get("openai_api_key"):
                 existing_key = current.get("openai_api_key")
                 if existing_key:
                     validated_data["value"]["openai_api_key"] = existing_key
+            if not validated_data["value"].get("orcarouter_api_key"):
+                existing_key = current.get("orcarouter_api_key")
+                if existing_key:
+                    validated_data["value"]["orcarouter_api_key"] = existing_key
             # Preserve per-template email toggles if not provided in the update
             # (they are managed from the email templates settings, not the
             # general form)

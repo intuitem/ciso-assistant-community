@@ -661,7 +661,8 @@
 							{
 								label: 'OpenAI-compatible (LM Studio, vLLM, llama.cpp...)',
 								value: 'openai_compatible'
-							}
+							},
+							{ label: 'OrcaRouter', value: 'orcarouter' }
 						]}
 						label={m.llmProvider()}
 						helpText={m.llmProviderHelpText()}
@@ -684,6 +685,26 @@
 							field="openai_api_key"
 							label={m.openaiApiKey()}
 							helpText={m.openaiApiKeyHelpText()}
+							type="password"
+						/>
+					{:else if $formStore.llm_provider === 'orcarouter'}
+						<TextField
+							{form}
+							field="orcarouter_api_base"
+							label={m.orcarouterApiBase()}
+							helpText={m.orcarouterApiBaseHelpText()}
+						/>
+						<TextField
+							{form}
+							field="orcarouter_model"
+							label={m.orcarouterModel()}
+							helpText={m.orcarouterModelHelpText()}
+						/>
+						<TextField
+							{form}
+							field="orcarouter_api_key"
+							label={m.orcarouterApiKey()}
+							helpText={m.orcarouterApiKeyHelpText()}
 							type="password"
 						/>
 					{:else}

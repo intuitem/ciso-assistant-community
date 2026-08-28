@@ -1068,6 +1068,8 @@ def run_questionnaire_prefill(agent_run_id: str):
     provider = settings_dict.get("llm_provider", "ollama")
     if provider == "openai_compatible":
         model_name = settings_dict.get("openai_model") or "openai_compatible"
+    elif provider == "orcarouter":
+        model_name = settings_dict.get("orcarouter_model") or "orcarouter/auto"
     else:
         model_name = settings_dict.get("ollama_model") or "ollama"
 
