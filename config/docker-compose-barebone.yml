@@ -93,4 +93,4 @@ services:
     restart: always
     ports:
       - 3000:3000
-    user: "1001:1001"
+    user: "1000:1000"

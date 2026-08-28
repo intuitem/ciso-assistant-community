@@ -92,7 +92,7 @@ services:
     depends_on:
       - backend
     restart: always
-    user: "1001:1001"
+    user: "1000:1000"
 
   qdrant:
     container_name: qdrant
