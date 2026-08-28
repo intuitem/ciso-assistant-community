@@ -49,6 +49,7 @@ from core.models import (
     match_urn,
 )
 from core.sandbox import SandboxTimeoutError, SandboxViolationError
+from core.utils import yaml_safe_load
 from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder, Permission
 from library import builder
@@ -1373,7 +1374,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
             return Response({"error": "fileTooLarge"}, status=HTTP_400_BAD_REQUEST)
         try:
             validate_file_extension(attachment)
-            document = yaml.safe_load(attachment.read())
+            document = yaml_safe_load(attachment.read())
         except (yaml.YAMLError, ValidationError, DRFValidationError) as e:
             return Response(
                 {"error": "invalidYamlFile", "detail": str(e)},
