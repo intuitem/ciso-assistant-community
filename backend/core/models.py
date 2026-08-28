@@ -63,6 +63,7 @@ from .utils import (
     resolve_compute_result,
     sha256,
     update_selected_implementation_groups,
+    yaml_safe_load,
     _is_question_visible,
     _build_answer_context,
 )
@@ -482,7 +483,7 @@ class StoredLibrary(LibraryMixin):
             # We do not store the library if its hash checksum is in the database.
             return None, "libraryAlreadyLoadedError"
         try:
-            library_data = yaml.safe_load(library_content)
+            library_data = yaml_safe_load(library_content)
             if not isinstance(library_data, dict):
                 raise yaml.YAMLError(
                     f"The YAML content must be a dictionary but it's been interpreted as a {type(library_data).__name__} !"
