@@ -96,10 +96,28 @@ def side_allows(side: str, accountable: bool | None) -> bool:
     return accountable if side == OWNER else not accountable
 
 
+def user_is_respondent_for(instance, user) -> bool:
+    """Is *user* answering this object rather than reviewing it?
+
+    A respondent is the promising side by construction: the questionnaire is
+    addressed to them. Without this an object with nobody assigned falls into the
+    "no sides" hatch below, and a respondent who raised their own task could run the
+    whole lifecycle alone — make the promise and then sign it off.
+    """
+    from core.utils import get_respondent_scoped_folder_ids
+
+    folder_id = getattr(instance, "folder_id", None)
+    if folder_id is None or user is None:
+        return False
+    return folder_id in get_respondent_scoped_folder_ids(user)
+
+
 def user_may_take(instance, user, side: str, incoming: dict | None = None) -> bool:
     """Whether *user* is on the right side of the table for a *side* step."""
     if side == ANY:
         return True
+    if side == COUNTERPARTY and user_is_respondent_for(instance, user):
+        return False
     return side_allows(side, user_is_accountable(instance, user, incoming))
 
 

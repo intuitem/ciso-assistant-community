@@ -5214,7 +5214,6 @@ class CommitmentActionsMixin:
             return {"state": obj.commitment_state, "transitions": []}
 
         transitions = []
-        accountable = commitment.user_is_accountable(obj, request.user)
         for target, config in commitment.allowed_targets(obj.commitment_state).items():
             transitions.append(
                 {
@@ -5223,7 +5222,11 @@ class CommitmentActionsMixin:
                     "side": config["side"],
                     "requires_note": bool(config.get("requires_note")),
                     "requires_date": bool(config.get("requires_date")),
-                    "allowed": commitment.side_allows(config["side"], accountable),
+                    # Through `user_may_take`, not `side_allows`: the UI must not offer
+                    # a step the write serializer will refuse.
+                    "allowed": commitment.user_may_take(
+                        obj, request.user, config["side"]
+                    ),
                 }
             )
         current = obj.commitment
