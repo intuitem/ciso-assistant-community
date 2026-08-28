@@ -1,0 +1,480 @@
+urn: urn:intuitem:risk:library:workflows-compliance
+locale: en
+ref_id: workflows-compliance
+name: Workflow starters — compliance and audit
+description: >-
+  Sample workflows for audit and compliance work: reviewer notices, a weekly
+  progress digest, and remediation follow-up. Install one, open it, adjust the
+  recipients, then publish and arm its triggers.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+    - urn: urn:intuitem:risk:library:workflows-compliance:workflow:audit-in-review
+      schema_version: 1
+      ref_id: audit-in-review
+      name: Audit moved to review — notify the reviewer
+      description: >-
+        When an audit's status becomes In review, email whoever is expected to
+        review it. Set notify_emails before publishing.
+      graph:
+        variables:
+          - key: notify_emails
+            type: string
+            default_value: grc@example.com
+        nodes:
+          - ref: on_review
+            type: trigger
+            label: Audit moved to review
+            trigger_config:
+              type: internal_event
+              event_key: complianceassessment.updated
+              filters:
+                operator: and
+                conditions:
+                  - field: status
+                    op: eq
+                    value: in_review
+                    changed: true
+          - ref: notify
+            type: action
+            label: Email the reviewer
+            action_config:
+              type: send_email
+              recipients: '{{notify_emails}}'
+              subject: 'Ready for review: {{payload.object_repr}}'
+              body: >-
+                {{payload.object_repr}} moved to In review on {{today}}.
+          - ref: done
+            type: end
+        edges:
+          - source: on_review
+            target: notify
+          - source: notify
+            target: done
+    - urn: urn:intuitem:risk:library:workflows-compliance:workflow:audit-progress-digest
+      schema_version: 1
+      ref_id: audit-progress-digest
+      name: Weekly audit progress digest
+      description: >-
+        Every Monday morning, list the audits still in progress with their
+        score and requirement breakdown, and email the summary.
+      graph:
+        variables:
+          - key: notify_emails
+            type: string
+            default_value: grc@example.com
+        nodes:
+          - ref: every_monday
+            type: trigger
+            label: Monday 08:00
+            trigger_config:
+              type: schedule
+              cron_expression: 0 8 * * 1
+              timezone: UTC
+          - ref: fetch_audits
+            type: action
+            label: Audits in progress
+            action_config:
+              type: read_objects
+              model: compliance_assessment
+              mode: list
+              order_by: due_date
+              limit: 25
+              filters:
+                operator: and
+                conditions:
+                  - field: status
+                    op: eq
+                    value: in_progress
+          - ref: per_audit
+            type: loop
+            label: One line per audit
+            loop_config:
+              collection: '{{nodes.fetch_audits.results}}'
+              collect: '{{item.name}}'
+              on_item_error: continue
+          - ref: note_audit
+            type: action
+            label: Log the audit
+            action_config:
+              type: log
+              message: '{{item.name}} · due {{item.due_date}}'
+          - ref: send_digest
+            type: action
+            label: Email the digest
+            action_config:
+              type: send_email
+              recipients: '{{notify_emails}}'
+              subject: 'Audits in progress: {{nodes.fetch_audits.count}}'
+              body: >-
+                As of {{today}}, {{nodes.fetch_audits.count}} audit(s) are in
+                progress: {{nodes.per_audit.results}}
+          - ref: done
+            type: end
+        edges:
+          - source: every_monday
+            target: fetch_audits
+          - source: fetch_audits
+            target: per_audit
+          - source: per_audit
+            target: note_audit
+            source_port: each
+          - source: note_audit
+            target: per_audit
+          - source: per_audit
+            target: send_digest
+            source_port: done
+          - source: send_digest
+            target: done
+    - urn: urn:intuitem:risk:library:workflows-compliance:workflow:audit-closed
+      schema_version: 1
+      ref_id: audit-closed
+      name: Audit completed — closure summary
+      description: >-
+        When an audit reaches Done, send its final score and requirement
+        breakdown to the people who need to file it.
+      graph:
+        variables:
+          - key: notify_emails
+            type: string
+            default_value: grc@example.com
+        nodes:
+          - ref: on_done
+            type: trigger
+            label: Audit completed
+            trigger_config:
+              type: internal_event
+              event_key: complianceassessment.updated
+              filters:
+                operator: and
+                conditions:
+                  - field: status
+                    op: eq
+                    value: done
+                    changed: true
+          - ref: read_audit
+            type: action
+            label: Read the audit
+            action_config:
+              type: read_objects
+              model: compliance_assessment
+              mode: first
+              filters:
+                operator: and
+                conditions:
+                  - field: id
+                    op: eq
+                    value: '{{payload.object_id}}'
+          - ref: summarise
+            type: action
+            label: Email the summary
+            action_config:
+              type: send_email
+              recipients: '{{notify_emails}}'
+              subject: 'Audit completed: {{payload.object_repr}}'
+              body: >-
+                {{payload.object_repr}} was completed on {{today}}.
+                Requirements: {{nodes.read_audit.object.requirements}}.
+                Scores: {{nodes.read_audit.object.scores}}.
+          - ref: done
+            type: end
+        edges:
+          - source: on_done
+            target: read_audit
+          - source: read_audit
+            target: summarise
+          - source: summarise
+            target: done
+    - urn: urn:intuitem:risk:library:workflows-compliance:workflow:requirement-remediation
+      schema_version: 1
+      ref_id: requirement-remediation
+      name: Non-compliant requirement — open and link a remediation control
+      description: >-
+        When a requirement is assessed non-compliant, create an applied control
+        for it, link the control to that requirement, and tell the owner. The
+        assessment result itself is never touched.
+      graph:
+        variables:
+          - key: notify_emails
+            type: string
+            default_value: grc@example.com
+        nodes:
+          - ref: on_non_compliant
+            type: trigger
+            label: Requirement assessed non-compliant
+            trigger_config:
+              type: internal_event
+              event_key: requirementassessment.updated
+              filters:
+                operator: and
+                conditions:
+                  - field: result
+                    op: eq
+                    value: non_compliant
+                    changed: true
+          - ref: create_control
+            type: action
+            label: Open a remediation control
+            action_config:
+              type: create_object
+              model: applied_control
+              fields:
+                name: 'Remediation: {{payload.object_repr}}'
+                description: >-
+                  Opened automatically on {{today}} after the requirement was
+                  assessed non-compliant.
+          - ref: link_control
+            type: action
+            label: Link it to the requirement
+            action_config:
+              type: update_object
+              model: requirement_assessment
+              id: '{{payload.object_id}}'
+              fields:
+                status: in_progress
+              m2m:
+                applied_controls:
+                  op: add
+                  values: '{{nodes.create_control.created_object_id}}'
+          - ref: notify
+            type: action
+            label: Tell the owner
+            action_config:
+              type: send_email
+              recipients: '{{notify_emails}}'
+              subject: 'Remediation opened: {{payload.object_repr}}'
+              body: >-
+                {{payload.object_repr}} was assessed non-compliant.
+                {{nodes.create_control.created_object_name}} was opened and
+                linked to it.
+          - ref: done
+            type: end
+        edges:
+          - source: on_non_compliant
+            target: create_control
+          - source: create_control
+            target: link_control
+          - source: link_control
+            target: notify
+          - source: notify
+            target: done
+    - urn: urn:intuitem:risk:library:workflows-compliance:workflow:remediation-backlog
+      schema_version: 1
+      ref_id: remediation-backlog
+      name: Remediation backlog digest
+      description: >-
+        Weekly list of requirements still assessed non-compliant and not yet
+        done, so the backlog is reviewed rather than remembered.
+      graph:
+        variables:
+          - key: notify_emails
+            type: string
+            default_value: grc@example.com
+        nodes:
+          - ref: every_friday
+            type: trigger
+            label: Friday 16:00
+            trigger_config:
+              type: schedule
+              cron_expression: 0 16 * * 5
+              timezone: UTC
+          - ref: fetch_gaps
+            type: action
+            label: Open non-compliances
+            action_config:
+              type: read_objects
+              model: requirement_assessment
+              mode: list
+              order_by: due_date
+              limit: 50
+              filters:
+                operator: and
+                conditions:
+                  - field: result
+                    op: eq
+                    value: non_compliant
+                  - field: status
+                    op: neq
+                    value: done
+          - ref: per_gap
+            type: loop
+            label: One line per requirement
+            loop_config:
+              collection: '{{nodes.fetch_gaps.results}}'
+              collect: '{{item.name}}'
+              on_item_error: continue
+          - ref: note_gap
+            type: action
+            label: Log the requirement
+            action_config:
+              type: log
+              message: '{{item.name}} · {{item.compliance_assessment.name}}'
+          - ref: send_digest
+            type: action
+            label: Email the backlog
+            action_config:
+              type: send_email
+              recipients: '{{notify_emails}}'
+              subject: 'Open non-compliances: {{nodes.fetch_gaps.count}}'
+              body: >-
+                {{nodes.fetch_gaps.count}} requirement(s) are still
+                non-compliant as of {{today}}: {{nodes.per_gap.results}}
+          - ref: done
+            type: end
+        edges:
+          - source: every_friday
+            target: fetch_gaps
+          - source: fetch_gaps
+            target: per_gap
+          - source: per_gap
+            target: note_gap
+            source_port: each
+          - source: note_gap
+            target: per_gap
+          - source: per_gap
+            target: send_digest
+            source_port: done
+          - source: send_digest
+            target: done
+    - urn: urn:intuitem:risk:library:workflows-compliance:workflow:validation-requested
+      schema_version: 1
+      ref_id: validation-requested
+      name: Validation requested — notify the approver
+      description: >-
+        A new validation request emails the approver with its deadline. The
+        workflow never decides anything: approvals stay human.
+      graph:
+        variables:
+          - key: notify_emails
+            type: string
+            default_value: approvals@example.com
+        nodes:
+          - ref: on_request
+            type: trigger
+            label: Validation submitted
+            trigger_config:
+              type: internal_event
+              event_key: validationflow.created
+          - ref: notify
+            type: action
+            label: Email the approver
+            action_config:
+              type: send_email
+              recipients: '{{notify_emails}}'
+              subject: 'Waiting for your decision: {{payload.object_repr}}'
+              body: >-
+                {{payload.object_repr}} was submitted for validation on
+                {{today}}.
+          - ref: done
+            type: end
+        edges:
+          - source: on_request
+            target: notify
+          - source: notify
+            target: done
+    - urn: urn:intuitem:risk:library:workflows-compliance:workflow:validation-decided
+      schema_version: 1
+      ref_id: validation-decided
+      name: Validation decided — route the outcome
+      description: >-
+        Routes an approver's decision to a different message per outcome, using
+        a branch. A good starting point for anything that reacts to a status.
+      graph:
+        variables:
+          - key: notify_emails
+            type: string
+            default_value: grc@example.com
+          - key: decision
+            type: string
+            default_value: ''
+        nodes:
+          - ref: on_decision
+            type: trigger
+            label: Validation status changed
+            trigger_config:
+              type: internal_event
+              event_key: validationflow.updated
+              filters:
+                operator: and
+                conditions:
+                  - field: status
+                    op: neq
+                    value: submitted
+                    changed: true
+          - ref: read_decision
+            type: action
+            label: Keep the decision
+            action_config:
+              type: set_variables
+              variables:
+                decision: '{{payload.new_values.status}}'
+          - ref: route
+            type: condition
+            label: Which outcome?
+            branches:
+              - name: accepted
+                condition_groups:
+                  - operator: and
+                    conditions:
+                      - variable: decision
+                        op: eq
+                        value: accepted
+              - name: rejected
+                condition_groups:
+                  - operator: and
+                    conditions:
+                      - variable: decision
+                        op: eq
+                        value: rejected
+              - name: otherwise
+                is_default: true
+          - ref: tell_accepted
+            type: action
+            label: Approved
+            action_config:
+              type: send_email
+              recipients: '{{notify_emails}}'
+              subject: 'Approved: {{payload.object_repr}}'
+              body: '{{payload.object_repr}} was approved on {{today}}.'
+          - ref: tell_rejected
+            type: action
+            label: Rejected
+            action_config:
+              type: send_email
+              recipients: '{{notify_emails}}'
+              subject: 'Rejected: {{payload.object_repr}}'
+              body: '{{payload.object_repr}} was rejected on {{today}}.'
+          - ref: tell_other
+            type: action
+            label: Anything else
+            action_config:
+              type: send_email
+              recipients: '{{notify_emails}}'
+              subject: 'Validation updated: {{payload.object_repr}}'
+              body: '{{payload.object_repr}} is now {{decision}}.'
+          - ref: done
+            type: end
+        edges:
+          - source: on_decision
+            target: read_decision
+          - source: read_decision
+            target: route
+          - source: route
+            target: tell_accepted
+            source_branch: accepted
+          - source: route
+            target: tell_rejected
+            source_branch: rejected
+          - source: route
+            target: tell_other
+            source_branch: otherwise
+          - source: tell_accepted
+            target: done
+          - source: tell_rejected
+            target: done
+          - source: tell_other
+            target: done

@@ -1,0 +1,401 @@
+urn: urn:intuitem:risk:library:workflows-operations
+locale: en
+ref_id: workflows-operations
+name: Workflow starters — operations and onboarding
+description: >-
+  Sample workflows for day-to-day operations: overdue control digests, pushing
+  a control to an external system, taking scanner results over a webhook,
+  onboarding a domain, and a read-only explorer to run safely on day one.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+    - urn: urn:intuitem:risk:library:workflows-operations:workflow:sandbox-explorer
+      schema_version: 1
+      ref_id: sandbox-explorer
+      name: Read-only explorer
+      description: >-
+        Reads a few applied controls and writes what it found to the run log.
+        Touches nothing — the safest way to press Execute for the first time
+        and see how runs, variables and expressions fit together.
+      graph:
+        variables: []
+        nodes:
+          - ref: manual
+            type: trigger
+            label: Run it yourself
+            trigger_config:
+              type: manual
+          - ref: fetch
+            type: action
+            label: Read applied controls
+            action_config:
+              type: read_objects
+              model: applied_control
+              mode: list
+              order_by: -created_at
+              limit: 5
+          - ref: report
+            type: action
+            label: Write to the run log
+            action_config:
+              type: log
+              message: >-
+                {{nodes.fetch.count}} applied control(s) in scope on {{today}};
+                first page: {{nodes.fetch.results}}
+          - ref: done
+            type: end
+        edges:
+          - source: manual
+            target: fetch
+          - source: fetch
+            target: report
+          - source: report
+            target: done
+    - urn: urn:intuitem:risk:library:workflows-operations:workflow:controls-overdue
+      schema_version: 1
+      ref_id: controls-overdue
+      name: Overdue applied controls — weekly digest
+      description: >-
+        Controls whose ETA has passed and that are not active yet, mailed once
+        a week to whoever chases them.
+      graph:
+        variables:
+          - key: notify_emails
+            type: string
+            default_value: grc@example.com
+        nodes:
+          - ref: every_monday
+            type: trigger
+            label: Monday 08:30
+            trigger_config:
+              type: schedule
+              cron_expression: 30 8 * * 1
+              timezone: UTC
+          - ref: fetch_late
+            type: action
+            label: Past their ETA
+            action_config:
+              type: read_objects
+              model: applied_control
+              mode: list
+              order_by: eta
+              limit: 50
+              filters:
+                operator: and
+                conditions:
+                  - field: eta
+                    op: lt
+                    value: '{{today}}'
+                  - field: status
+                    op: not_in
+                    value: active,deprecated
+          - ref: per_control
+            type: loop
+            label: One line per control
+            loop_config:
+              collection: '{{nodes.fetch_late.results}}'
+              collect: '{{item.name}}'
+              on_item_error: continue
+          - ref: note_control
+            type: action
+            label: Log the control
+            action_config:
+              type: log
+              message: '{{item.name}} · eta {{item.eta}} · {{item.status}}'
+          - ref: send_digest
+            type: action
+            label: Email the digest
+            action_config:
+              type: send_email
+              recipients: '{{notify_emails}}'
+              subject: 'Overdue controls: {{nodes.fetch_late.count}}'
+              body: >-
+                {{nodes.fetch_late.count}} control(s) are past their ETA on
+                {{today}}: {{nodes.per_control.results}}
+          - ref: done
+            type: end
+        edges:
+          - source: every_monday
+            target: fetch_late
+          - source: fetch_late
+            target: per_control
+          - source: per_control
+            target: note_control
+            source_port: each
+          - source: note_control
+            target: per_control
+          - source: per_control
+            target: send_digest
+            source_port: done
+          - source: send_digest
+            target: done
+    - urn: urn:intuitem:risk:library:workflows-operations:workflow:control-live-push
+      schema_version: 1
+      ref_id: control-live-push
+      name: Control went live — push it to an external system
+      description: >-
+        Posts a small JSON payload to your ITSM or chat webhook when a control
+        becomes active. Set the target URL, and provide the itsm_token secret
+        when you install it.
+      requires:
+        secrets:
+          - itsm_token
+      graph:
+        variables:
+          - key: target_url
+            type: string
+            default_value: https://example.com/hooks/ciso-assistant
+        nodes:
+          - ref: on_active
+            type: trigger
+            label: Control became active
+            trigger_config:
+              type: internal_event
+              event_key: appliedcontrol.updated
+              filters:
+                operator: and
+                conditions:
+                  - field: status
+                    op: eq
+                    value: active
+                    changed: true
+          - ref: push
+            type: action
+            label: POST to the external system
+            action_config:
+              type: http_request
+              method: POST
+              url: '{{target_url}}'
+              timeout: 15
+              headers:
+                Content-Type: application/json
+                Authorization: 'Bearer {{secrets.itsm_token}}'
+              body: >-
+                {"control": "{{payload.object_repr}}", "status": "active",
+                "date": "{{today}}"}
+          - ref: done
+            type: end
+        edges:
+          - source: on_active
+            target: push
+          - source: push
+            target: done
+    - urn: urn:intuitem:risk:library:workflows-operations:workflow:scanner-intake
+      schema_version: 1
+      ref_id: scanner-intake
+      name: Scanner intake — record vulnerabilities from a webhook
+      description: >-
+        Your scanner POSTs {"vulnerabilities": [{"id": "CVE-...", "summary":
+        "..."}]} to this workflow's URL. Each entry becomes a vulnerability,
+        matched on its name so re-posting updates instead of duplicating.
+      graph:
+        variables: []
+        nodes:
+          - ref: hook
+            type: trigger
+            label: Scanner posts results
+            trigger_config:
+              type: webhook
+          - ref: per_item
+            type: loop
+            label: One per entry
+            loop_config:
+              collection: '{{payload.vulnerabilities}}'
+              collect: '{{item.id}}'
+              on_item_error: continue
+          - ref: record
+            type: action
+            label: Record the vulnerability
+            action_config:
+              type: create_object
+              model: vulnerability
+              upsert: true
+              fields:
+                name: '{{item.id}}'
+                ref_id: '{{item.id}}'
+                description: '{{item.summary}}'
+          - ref: report
+            type: action
+            label: Log what came in
+            action_config:
+              type: log
+              message: >-
+                Recorded {{nodes.per_item.count}} entrie(s) on {{today}}:
+                {{nodes.per_item.results}}
+          - ref: done
+            type: end
+        edges:
+          - source: hook
+            target: per_item
+          - source: per_item
+            target: record
+            source_port: each
+          - source: record
+            target: per_item
+          - source: per_item
+            target: report
+            source_port: done
+          - source: report
+            target: done
+    - urn: urn:intuitem:risk:library:workflows-operations:workflow:entity-assessment-kickoff
+      schema_version: 1
+      ref_id: entity-assessment-kickoff
+      name: Third party added — start its assessment
+      description: >-
+        Creates an entity assessment for a newly registered third party, so due
+        diligence starts with the relationship rather than after it.
+      graph:
+        variables:
+          - key: notify_emails
+            type: string
+            default_value: tprm@example.com
+        nodes:
+          - ref: on_entity
+            type: trigger
+            label: Third party created
+            trigger_config:
+              type: internal_event
+              event_key: entity.created
+          - ref: create_assessment
+            type: action
+            label: Open the assessment
+            action_config:
+              type: create_object
+              model: entity_assessment
+              fields:
+                name: 'Due diligence: {{payload.object_repr}}'
+                description: 'Opened automatically on {{today}}.'
+                entity: '{{payload.object_id}}'
+          - ref: notify
+            type: action
+            label: Tell the team
+            action_config:
+              type: send_email
+              recipients: '{{notify_emails}}'
+              subject: 'Due diligence opened: {{payload.object_repr}}'
+              body: >-
+                {{nodes.create_assessment.created_object_name}} was opened on
+                {{today}}.
+          - ref: done
+            type: end
+        edges:
+          - source: on_entity
+            target: create_assessment
+          - source: create_assessment
+            target: notify
+          - source: notify
+            target: done
+    - urn: urn:intuitem:risk:library:workflows-operations:workflow:domain-onboarding
+      schema_version: 1
+      ref_id: domain-onboarding
+      name: Domain onboarding pack
+      description: >-
+        Creates a domain with its default groups, provisions a user, and puts
+        that user in the domain's analyst group. Fill the variables, then run it
+        manually for each new team.
+      graph:
+        variables:
+          - key: domain_name
+            type: string
+            default_value: New department
+          - key: user_email
+            type: string
+            default_value: newcomer@example.com
+          - key: user_first_name
+            type: string
+            default_value: ''
+          - key: user_last_name
+            type: string
+            default_value: ''
+        nodes:
+          - ref: manual
+            type: trigger
+            label: Run it for a new team
+            trigger_config:
+              type: manual
+          - ref: make_domain
+            type: action
+            label: Create the domain
+            action_config:
+              type: provision_folder
+              name: '{{domain_name}}'
+              create_default_groups: true
+          - ref: make_user
+            type: action
+            label: Create the user
+            action_config:
+              type: provision_user
+              email: '{{user_email}}'
+              first_name: '{{user_first_name}}'
+              last_name: '{{user_last_name}}'
+              send_onboarding_email: true
+          - ref: add_to_group
+            type: action
+            label: Add them as analyst
+            action_config:
+              type: manage_group_membership
+              user: '{{user_email}}'
+              folder: '{{nodes.make_domain.folder_id}}'
+              builtin_group: BI-UG-ANA
+              operation: add
+          - ref: report
+            type: action
+            label: Log the result
+            action_config:
+              type: log
+              message: >-
+                {{nodes.make_domain.folder_name}} ready on {{today}} for
+                {{nodes.make_user.user_email}}
+          - ref: done
+            type: end
+        edges:
+          - source: manual
+            target: make_domain
+          - source: make_domain
+            target: make_user
+          - source: make_user
+            target: add_to_group
+          - source: add_to_group
+            target: report
+          - source: report
+            target: done
+    - urn: urn:intuitem:risk:library:workflows-operations:workflow:privileged-credential-notice
+      schema_version: 1
+      ref_id: privileged-credential-notice
+      name: Personal access token created — notify security
+      description: >-
+        Tells the security team whenever a personal access token is minted, so
+        long-lived credentials are noticed rather than discovered.
+      graph:
+        variables:
+          - key: notify_emails
+            type: string
+            default_value: security@example.com
+        nodes:
+          - ref: on_token
+            type: trigger
+            label: Token created
+            trigger_config:
+              type: internal_event
+              event_key: personalaccesstoken.created
+          - ref: notify
+            type: action
+            label: Send the notice
+            action_config:
+              type: send_email
+              recipients: '{{notify_emails}}'
+              subject: 'Personal access token created'
+              body: >-
+                {{payload.object_repr}} was created on {{today}} by
+                {{payload.actor_email}}.
+          - ref: done
+            type: end
+        edges:
+          - source: on_token
+            target: notify
+          - source: notify
+            target: done
