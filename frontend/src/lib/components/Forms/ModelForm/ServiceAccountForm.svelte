@@ -196,6 +196,7 @@
 	/>
 	<TextField
 		{form}
+		required
 		field="federated_subject"
 		label={m.federatedSubject()}
 		helpText={m.federatedSubjectHelpText()}
