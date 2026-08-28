@@ -181,6 +181,32 @@ class WorkflowViewSet(BaseModelViewSet):
             ]
         )
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get updatable models", url_path="updatable-models")
+    def updatable_models(self, request):
+        """The update_object registry. `allowed_values` travels with it so the
+        builder offers the same fenced values the backend enforces."""
+        from .actions import M2M_OPERATIONS, UPDATABLE_MODELS
+
+        return Response(
+            [
+                {
+                    "key": key,
+                    "fields": entry.fields,
+                    "allowed_values": {
+                        field: sorted(values)
+                        for field, values in entry.allowed_values.items()
+                    },
+                    "m2m_fields": {
+                        name: endpoint
+                        for name, (_model, endpoint) in entry.m2m_fields.items()
+                    },
+                    "operations": list(M2M_OPERATIONS),
+                }
+                for key, entry in UPDATABLE_MODELS.items()
+            ]
+        )
+
     @action(detail=True, methods=["get"], url_path="export-yaml")
     def export_yaml(self, request, pk=None):
         workflow = self.get_object()

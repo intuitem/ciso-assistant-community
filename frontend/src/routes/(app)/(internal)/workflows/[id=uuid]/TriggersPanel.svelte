@@ -72,6 +72,10 @@
 			class: 'preset-tonal-warning',
 			label: () => m.triggerResultSkippedDepth()
 		},
+		skipped_coalesced: {
+			class: 'preset-tonal-warning',
+			label: () => m.triggerResultSkippedCoalesced()
+		},
 		error: { class: 'preset-tonal-error', label: () => m.triggerResultError() }
 	};
 
