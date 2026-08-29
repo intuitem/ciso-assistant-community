@@ -1,92 +1,85 @@
 import csv
+import enum
 import io
 import logging
+import math
 import structlog
+import re
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from datetime import date, datetime
+from functools import cached_property
 from pathlib import Path
 from types import MappingProxyType
-import re
-import pandas as pd
-from django.http import FileResponse
-from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.parsers import FileUploadParser
+from typing import Any, ClassVar, Final, Mapping, Optional
+from uuid import UUID
 
-from .serializers import LoadFileSerializer
+import pandas as pd
+import structlog
+from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import UploadedFile
+from django.db import IntegrityError, models
+from django.db.models import Q
+from django.http import FileResponse, HttpRequest
+from django.utils import timezone
+from rest_framework import status
+from rest_framework.parsers import FileUploadParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from core.base_models import AbstractBaseModel
-from core.utils import build_questions_dict
+from core.constants import COUNTRY_CHOICES
 from core.models import (
     Actor,
+    AppliedControl,
     Assessment,
     Asset,
+    AssetClass,
     ComplianceAssessment,
     Evidence,
+    FilteringLabel,
+    FindingsAssessment,
     Folder,
     Framework,
+    Incident,
     LoadedLibrary,
     Perimeter,
+    Policy,
     RequirementAssessment,
     RequirementNode,
     RiskAssessment,
     RiskMatrix,
-    StoredLibrary,
-    AppliedControl,
-    FindingsAssessment,
     RiskScenario,
-    Policy,
     SecurityException,
-    Incident,
-    TaskTemplate,
+    StoredLibrary,
     TaskNode,
+    TaskTemplate,
+    Terminology,
     Vulnerability,
 )
 from core.serializers import (
-    BaseModelSerializer,
-    AssetWriteSerializer,
-    PerimeterWriteSerializer,
     AppliedControlWriteSerializer,
+    AssetWriteSerializer,
+    BaseModelSerializer,
     ComplianceAssessmentWriteSerializer,
-    RequirementAssessmentWriteSerializer,
+    EvidenceWriteSerializer,
     FindingsAssessmentWriteSerializer,
     FindingWriteSerializer,
-    UserWriteSerializer,
+    FolderWriteSerializer,
+    IncidentWriteSerializer,
+    PerimeterWriteSerializer,
+    PolicyWriteSerializer,
+    ReferenceControlWriteSerializer,
+    RequirementAssessmentWriteSerializer,
     RiskAssessmentWriteSerializer,
     RiskScenarioWriteSerializer,
-    ReferenceControlWriteSerializer,
-    ThreatWriteSerializer,
-    EvidenceWriteSerializer,
-    FolderWriteSerializer,
-    PolicyWriteSerializer,
     SecurityExceptionWriteSerializer,
-    IncidentWriteSerializer,
     TaskTemplateWriteSerializer,
+    ThreatWriteSerializer,
+    UserWriteSerializer,
     VulnerabilityWriteSerializer,
 )
-from ebios_rm.models import (
-    EbiosRMStudy,
-    FearedEvent,
-    RoTo,
-    Stakeholder,
-    StrategicScenario,
-    AttackPath,
-    ElementaryAction,
-    KillChain,
-)
-from ebios_rm.serializers import (
-    ElementaryActionWriteSerializer,
-    EbiosRMStudyWriteSerializer,
-)
-from .ebios_rm_excel_helpers import (
-    extract_elementary_actions,
-    process_excel_file as process_ebios_rm_excel,
-)
-from .egerie_xml_helpers import (
-    process_xml_file as process_egerie_xml,
-    quartile_to_index,
-    map_egerie_status,
-)
-from core.models import Terminology
-from core.utils import AUDITOR_ONLY
+from core.utils import AUDITOR_ONLY, build_questions_dict, get_global_currency
 from data_wizard.arm_helpers import process_arm_file
 from data_wizard.cyfun_helpers import (
     CYFUN_FRAMEWORK_URN,
@@ -94,58 +87,73 @@ from data_wizard.cyfun_helpers import (
     LEVEL_TO_GROUP,
     process_cyfun_file,
 )
-from tprm.models import Entity, Solution, Contract, Representative
-from tprm.serializers import (
-    EntityWriteSerializer,
-    SolutionWriteSerializer,
-    ContractWriteSerializer,
-    RepresentativeWriteSerializer,
+from ebios_rm.models import (
+    AttackPath,
+    EbiosRMStudy,
+    ElementaryAction,
+    FearedEvent,
+    KillChain,
+    RoTo,
+    Stakeholder,
+    StrategicScenario,
 )
-from resilience.models import (
-    BusinessImpactAnalysis,
-    AssetAssessment,
-    EscalationThreshold,
+from ebios_rm.serializers import (
+    EbiosRMStudyWriteSerializer,
+    ElementaryActionWriteSerializer,
 )
-from resilience.serializers import (
-    BusinessImpactAnalysisWriteSerializer,
-    AssetAssessmentWriteSerializer,
-    EscalationThresholdWriteSerializer,
-)
+from iam.models import Permission, RoleAssignment, User
 from privacy.models import (
-    Processing,
-    PersonalData,
-    DataSubject,
-    DataRecipient,
-    DataContractor,
     ART6_LAWFUL_BASIS_CHOICES,
     ART9_SPECIAL_CATEGORY_CONDITION_CHOICES,
     TRANSFER_MECHANISM_CHOICES,
+    DataContractor,
+    DataRecipient,
+    DataSubject,
+    PersonalData,
+    Processing,
 )
 from privacy.serializers import (
+    DataContractorWriteSerializer,
+    DataRecipientWriteSerializer,
+    DataSubjectWriteSerializer,
+    DataTransferWriteSerializer,
+    PersonalDataWriteSerializer,
     ProcessingWriteSerializer,
     PurposeWriteSerializer,
-    PersonalDataWriteSerializer,
-    DataSubjectWriteSerializer,
-    DataRecipientWriteSerializer,
-    DataContractorWriteSerializer,
-    DataTransferWriteSerializer,
 )
-from core.constants import COUNTRY_CHOICES
-from iam.models import Permission, RoleAssignment, User
-from core.models import FilteringLabel
-from core.utils import get_global_currency
-from uuid import UUID
-from django.core.files.uploadedfile import UploadedFile
-from django.db.models import Q
-from django.http import HttpRequest
-from django.utils import timezone
-from django.db import models, IntegrityError
-from django.core.exceptions import ValidationError
-from datetime import datetime, date
-from typing import Optional, Final, ClassVar, Mapping, Any
-from dataclasses import dataclass, field
-from abc import ABC, abstractmethod
-import enum
+from resilience.models import (
+    AssetAssessment,
+    BusinessImpactAnalysis,
+    EscalationThreshold,
+)
+from resilience.serializers import (
+    AssetAssessmentWriteSerializer,
+    BusinessImpactAnalysisWriteSerializer,
+    EscalationThresholdWriteSerializer,
+)
+from tprm.models import Contract, Entity, EntityAssessment, Representative, Solution
+from tprm.serializers import (
+    ContractWriteSerializer,
+    EntityAssessmentWriteSerializer,
+    EntityWriteSerializer,
+    RepresentativeWriteSerializer,
+    SolutionWriteSerializer,
+)
+
+from .ebios_rm_excel_helpers import (
+    extract_elementary_actions,
+)
+from .ebios_rm_excel_helpers import (
+    process_excel_file as process_ebios_rm_excel,
+)
+from .egerie_xml_helpers import (
+    map_egerie_status,
+    quartile_to_index,
+)
+from .egerie_xml_helpers import (
+    process_xml_file as process_egerie_xml,
+)
+from .serializers import LoadFileSerializer
 
 logger = structlog.get_logger(__name__)
 
@@ -199,9 +207,7 @@ def resolve_accessible_target(model_class, target_id, user):
     user may change. Returns None when the id is unknown or out of reach."""
     if not target_id:
         return None
-    (_, change_ids, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, model_class
-    )
+    change_ids = RoleAssignment.get_changeable_object_ids(user, model_class)
     return model_class.objects.filter(id=target_id, id__in=change_ids).first()
 
 
@@ -215,9 +221,7 @@ def get_accessible_folders_map(user: User) -> dict[str, UUID]:
     silently redirect a row instead of failing it. The write serializers reject
     the unauthorized folder loudly, which is the behaviour we want.
     """
-    (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, Folder
-    )
+    viewable_folders_ids = RoleAssignment.get_viewable_object_ids(user, Folder)
     folders_map = {
         f.name.lower(): f.id for f in Folder.objects.filter(id__in=viewable_folders_ids)
     }
@@ -385,6 +389,32 @@ def _parse_recovery_objectives(raw: str) -> dict:
         if secs is not None and secs >= 0:
             result[key] = {"value": secs}
     return result
+
+
+def _resolve_asset_class(value: Any, path_index: dict) -> Optional[AssetClass]:
+    """Resolve a canonical asset class path, or an unambiguous leaf name."""
+    if not isinstance(value, str):
+        return None
+    token = value.strip()
+    if not token:
+        return None
+
+    normalized = "/".join(part.strip() for part in token.split("/") if part.strip())
+    match = path_index.get(normalized.lower())
+    if match is not None:
+        return match
+
+    # A path that names its parents is explicit: falling back to a leaf match
+    # elsewhere in the tree would silently reclassify the asset.
+    if "/" in normalized:
+        return None
+
+    candidates = [
+        node
+        for key, node in path_index.items()
+        if key.split("/")[-1] == normalized.lower()
+    ]
+    return candidates[0] if len(candidates) == 1 else None
 
 
 def _resolve_filtering_labels(value: Any) -> list[UUID]:
@@ -707,6 +737,34 @@ class FolderScopeError(ValueError):
     """Raised when an existing-record lookup cannot be scoped to a folder."""
 
 
+def _parse_bool_cell(value: object, *, binary_only: bool = False) -> Optional[bool]:
+    """Parse a boolean cell. Returns None when the value is unrecognized.
+
+    binary_only additionally rejects numbers other than 0/1, for columns where
+    a stray 2 is a data error rather than spreadsheet truthiness.
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        if math.isnan(value) or math.isinf(value):
+            return None
+        if binary_only and value not in (0, 1):
+            return None
+        return value != 0
+    if isinstance(value, str):
+        token = value.strip().lower()
+        if token in {"true", "yes", "y", "1", "1.0", "oui", "vrai", "x"}:
+            return True
+        if token in {"false", "no", "n", "0", "0.0", "non", "faux"}:
+            return False
+    return None
+
+
+def _bool_cell_or_false(value: object) -> bool:
+    """Lenient variant: blanks and unrecognized values read as False."""
+    return _parse_bool_cell(value) is True
+
+
 @dataclass
 class Result:
     created: int = 0
@@ -886,8 +944,8 @@ class RecordConsumer[Context = None](ABC):
             return results
 
         model_class = self.SERIALIZER_CLASS.Meta.model
-        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.request.user, model_class
+        viewable_ids = RoleAssignment.get_viewable_object_ids(
+            self.request.user, model_class
         )
         viewable_ids = set(viewable_ids)
 
@@ -997,6 +1055,7 @@ class AssetRecordConsumer(RecordConsumer[list]):
         {
             "reference_link": ["reference_link", "link"],
             "filtering_labels": ["filtering_labels", "labels", "étiquette", "label"],
+            "asset_class": ["asset_class", "class", "classe"],
         }
     )
     TYPE_MAP: Final[dict[str, str]] = {
@@ -1005,6 +1064,10 @@ class AssetRecordConsumer(RecordConsumer[list]):
         "support": "SP",
         "sp": "SP",
     }
+
+    @cached_property
+    def asset_class_index(self) -> dict:
+        return AssetClass.path_index()
 
     def create_context(self):
         return _get_security_objective_scale(), None
@@ -1081,6 +1144,16 @@ class AssetRecordConsumer(RecordConsumer[list]):
             parse_warning_msgs.append(
                 f"Could not parse disaster_recovery_objectives: '{raw_rec}'"
             )
+
+        raw_asset_class = (
+            record.get("asset_class") or record.get("class") or record.get("classe")
+        )
+        if raw_asset_class:
+            asset_class = _resolve_asset_class(raw_asset_class, self.asset_class_index)
+            if asset_class is not None:
+                data["asset_class"] = asset_class.id
+            else:
+                parse_warning_msgs.append(f"Unknown asset_class: '{raw_asset_class}'")
 
         if asset_type == "PR":
             if sec_objectives:
@@ -2915,15 +2988,7 @@ class ProcessingChildConsumerMixin:
     def create_context(self):
         return None, None
 
-    @staticmethod
-    def _parse_bool(value: object) -> bool:
-        if isinstance(value, bool):
-            return value
-        if isinstance(value, (int, float)):
-            return value != 0
-        if isinstance(value, str):
-            return value.strip().lower() in {"true", "yes", "y", "1"}
-        return False
+    _parse_bool = staticmethod(_bool_cell_or_false)
 
     @staticmethod
     def _choice_key(value: object, choices) -> Optional[str]:
@@ -2949,9 +3014,7 @@ class ProcessingChildConsumerMixin:
     def _accessible_processings(self):
         ids = getattr(self, "_accessible_processing_ids", None)
         if ids is None:
-            (ids, _, _) = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), self.request.user, Processing
-            )
+            ids = RoleAssignment.get_viewable_object_ids(self.request.user, Processing)
             self._accessible_processing_ids = ids
         return Processing.objects.filter(id__in=ids)
 
@@ -3422,17 +3485,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer):
             return [v.strip() for v in value.split(",") if v.strip()]
         return []
 
-    @staticmethod
-    def _parse_bool(value: object) -> bool:
-        if isinstance(value, bool):
-            return value
-        if value is None:
-            return False
-        if isinstance(value, (int, float)):
-            return value != 0
-        if isinstance(value, str):
-            return value.strip().lower() in {"true", "yes", "y", "1"}
-        return False
+    _parse_bool = staticmethod(_bool_cell_or_false)
 
     def _resolve_bia(
         self, record: dict
@@ -3836,7 +3889,6 @@ class LoadFileView(APIView):
             on_conflict = ConflictMode(on_conflict_str)
         except ValueError:
             on_conflict = ConflictMode.STOP
-
         logger.info(
             f"Processing file with model: {model_type}, folder: {folder_id}, perimeter: {perimeter_id}, framework: {framework_id}, matrix: {matrix_id}"
         )
@@ -3868,7 +3920,11 @@ class LoadFileView(APIView):
             match model_type:
                 case ModelType.TPRM:
                     res = self._process_tprm_file(
-                        request, record_file, folders_map, folder_id, on_conflict
+                        request,
+                        record_file,
+                        folders_map,
+                        folder_id,
+                        on_conflict,
                     )
                 # Special handling for EBIOS RM Study ARM format (multi-sheet)
                 case ModelType.EBIOS_RM_STUDY_ARM:
@@ -4800,6 +4856,28 @@ class LoadFileView(APIView):
                         if has_any_answer:
                             requirement_data["answers"] = answers
 
+                    override_cell = record.get("is_score_overridden")
+                    if override_cell not in (None, ""):
+                        override_value = _parse_bool_cell(
+                            override_cell, binary_only=True
+                        )
+                        if override_value is None:
+                            results["failed"] += 1
+                            results["errors"].append(
+                                {
+                                    "record": record,
+                                    "error": f"Invalid is_score_overridden value '{override_cell}': expected a boolean",
+                                }
+                            )
+                            continue
+                        requirement_data["is_score_overridden"] = override_value
+                    elif (
+                        requirement_data.get("score") not in (None, "")
+                        and requirement_assessment.requirement.questions.exists()
+                    ):
+                        # Imported score on question-driven requirement = override
+                        requirement_data["is_score_overridden"] = True
+
                     req_serializer = RequirementAssessmentWriteSerializer(
                         instance=requirement_assessment,
                         data=requirement_data,
@@ -5066,9 +5144,10 @@ class LoadFileView(APIView):
                 hint = parent_records[0]
                 domain_name = str(hint.get("domain") or "").lower()
                 scope_folder = folders_map.get(domain_name, folder_id)
-                (viewable_processings, _, _) = RoleAssignment.get_accessible_object_ids(
-                    Folder.get_root_folder(), request.user, Processing
+                viewable_processings = RoleAssignment.get_viewable_object_ids(
+                    request.user, Processing
                 )
+
                 queryset = Processing.objects.filter(id__in=viewable_processings)
                 if scope_folder:
                     queryset = queryset.filter(folder_id=scope_folder)
@@ -5136,12 +5215,14 @@ class LoadFileView(APIView):
             overall_results = {
                 "entities": {"successful": 0, "failed": 0, "errors": []},
                 "solutions": {"successful": 0, "failed": 0, "errors": []},
+                "entity_assessments": {"successful": 0, "failed": 0, "errors": []},
                 "contracts": {"successful": 0, "failed": 0, "errors": []},
                 "representatives": {"successful": 0, "failed": 0, "errors": []},
             }
 
             # Track ref_id to actual ID mappings
             entity_ref_map = {}  # ref_id -> actual UUID
+            entity_name_map = {}  # lowercased name -> actual UUID (fallback)
             solution_ref_map = {}  # ref_id -> actual UUID
 
             # Process Entities sheet first
@@ -5151,8 +5232,10 @@ class LoadFileView(APIView):
                     pd.read_excel(excel_file, sheet_name="Entities")
                 ).fillna("")
                 entities_records = entities_df.to_dict(orient="records")
-                entities_result, entity_ref_map = self._process_entities(
-                    request, entities_records, folders_map, folder_id, on_conflict
+                entities_result, entity_ref_map, entity_name_map = (
+                    self._process_entities(
+                        request, entities_records, folders_map, folder_id, on_conflict
+                    )
                 )
                 overall_results["entities"] = entities_result
                 if entities_result.get("stopped"):
@@ -5171,6 +5254,7 @@ class LoadFileView(APIView):
                     request,
                     solutions_records,
                     entity_ref_map,
+                    entity_name_map,
                     on_conflict,
                 )
                 overall_results["solutions"] = solutions_result
@@ -5178,6 +5262,31 @@ class LoadFileView(APIView):
                     return overall_results
             else:
                 logger.warning("No 'Solutions' sheet found in Excel file")
+
+            # Process EntityAssessments sheet (requires entities, may reference solutions)
+            if "EntityAssessments" in excel_data.sheet_names:
+                logger.info("Processing EntityAssessments sheet")
+                entity_assessments_df = normalize_datetime_columns(
+                    pd.read_excel(excel_file, sheet_name="EntityAssessments")
+                ).fillna("")
+                entity_assessments_records = entity_assessments_df.to_dict(
+                    orient="records"
+                )
+                entity_assessments_result = self._process_entity_assessments(
+                    request,
+                    entity_assessments_records,
+                    folders_map,
+                    folder_id,
+                    entity_ref_map,
+                    entity_name_map,
+                    solution_ref_map,
+                    on_conflict,
+                )
+                overall_results["entity_assessments"] = entity_assessments_result
+                if entity_assessments_result.get("stopped"):
+                    return overall_results
+            else:
+                logger.warning("No 'EntityAssessments' sheet found in Excel file")
 
             # Process Contracts sheet last (requires entities and solutions)
             if "Contracts" in excel_data.sheet_names:
@@ -5192,6 +5301,7 @@ class LoadFileView(APIView):
                     folders_map,
                     folder_id,
                     entity_ref_map,
+                    entity_name_map,
                     solution_ref_map,
                     on_conflict,
                 )
@@ -5212,6 +5322,7 @@ class LoadFileView(APIView):
                     request,
                     representatives_records,
                     entity_ref_map,
+                    entity_name_map,
                     on_conflict,
                 )
                 overall_results["representatives"] = representatives_result
@@ -5278,6 +5389,23 @@ class LoadFileView(APIView):
         else:
             error = "Missing mandatory fields: " + ", ".join(missing_fields)
         self._add_tprm_record_error(results, record, error)
+
+    def _resolve_tprm_entity(
+        self, record, ref_field, name_field, entity_ref_map, entity_name_map
+    ):
+        """Resolve an entity by ref_id, or by name when no ref_id is given.
+
+        A ref_id that is present but unknown fails the lookup instead of
+        falling back to the name: a typo'd ref must surface as a row error,
+        not silently bind to a same-named entity.
+        """
+        ref = str(record.get(ref_field, "")).strip()
+        name = str(record.get(name_field, "")).strip()
+        if ref:
+            return entity_ref_map.get(ref), ref, name
+        if name:
+            return entity_name_map.get(name.lower()), ref, name
+        return None, ref, name
 
     def _log_tprm_import_results(self, label, results) -> None:
         logger.info(
@@ -5346,17 +5474,19 @@ class LoadFileView(APIView):
         """Process entities from TPRM import"""
         results = self._empty_tprm_results()
         ref_id_map = {}  # Map ref_id to actual UUID
+        name_map = {}  # Map lowercased name to actual UUID — fallback when ref_id is absent
 
         for record in records:
             try:
                 missing_fields = self._check_missing_tprm_required_fields(
-                    record, ["ref_id", "name"]
+                    record, ["name"]
                 )
                 if missing_fields:
                     self._add_tprm_missing_fields_error(results, record, missing_fields)
                     continue
 
                 ref_id = record.get("ref_id", "").strip()
+                name = record.get("name", "").strip()
 
                 # Get domain from record or use fallback
                 domain = folder_id
@@ -5399,16 +5529,20 @@ class LoadFileView(APIView):
                 if legal_identifiers:
                     entity_data["legal_identifiers"] = legal_identifiers
 
-                # Check for existing entity by ref_id or name
-                existing_entity = Entity.objects.filter(ref_id=ref_id).first()
+                # Check for existing entity by ref_id (if provided), else by name
+                existing_entity = None
+                if ref_id:
+                    existing_entity = Entity.objects.filter(ref_id=ref_id).first()
                 if not existing_entity:
                     existing_entity = Entity.objects.filter(
-                        name__iexact=record.get("name"),
+                        name__iexact=name,
                         folder_id=domain,
                     ).first()
 
                 if existing_entity:
-                    ref_id_map[ref_id] = str(existing_entity.id)
+                    if ref_id:
+                        ref_id_map[ref_id] = str(existing_entity.id)
+                    name_map[name.lower()] = str(existing_entity.id)
                     action = self._handle_tprm_conflict(
                         request,
                         results,
@@ -5430,7 +5564,9 @@ class LoadFileView(APIView):
 
                 serializer.is_valid(raise_exception=True)
                 entity = serializer.save()
-                ref_id_map[ref_id] = str(entity.id)
+                if ref_id:
+                    ref_id_map[ref_id] = str(entity.id)
+                name_map[name.lower()] = str(entity.id)
                 results["successful"] += 1
                 logger.debug(f"Created entity: {entity.name} with ref_id: {ref_id}")
 
@@ -5460,13 +5596,14 @@ class LoadFileView(APIView):
                 logger.warning(f"Error linking parent entity: {str(e)}")
 
         self._log_tprm_import_results("Entity", results)
-        return results, ref_id_map
+        return results, ref_id_map, name_map
 
     def _process_solutions(
         self,
         request,
         records,
         entity_ref_map,
+        entity_name_map,
         on_conflict=ConflictMode.STOP,
     ):
         """Process solutions from TPRM import"""
@@ -5476,25 +5613,29 @@ class LoadFileView(APIView):
         for record in records:
             try:
                 missing_fields = self._check_missing_tprm_required_fields(
-                    record, ["ref_id", "name", "provider_entity_ref_id"]
+                    record, ["ref_id", "name"]
                 )
                 if missing_fields:
                     self._add_tprm_missing_fields_error(results, record, missing_fields)
                     continue
 
                 ref_id = record.get("ref_id", "").strip()
-                provider_ref_id = record.get("provider_entity_ref_id", "").strip()
-
-                # Lookup provider entity UUID
-                if provider_ref_id not in entity_ref_map:
+                provider_entity_id, provider_ref_id, provider_name = (
+                    self._resolve_tprm_entity(
+                        record,
+                        "provider_entity_ref_id",
+                        "provider_entity_name",
+                        entity_ref_map,
+                        entity_name_map,
+                    )
+                )
+                if provider_entity_id is None:
                     self._add_tprm_record_error(
                         results,
                         record,
-                        f"Provider entity with ref_id '{provider_ref_id}' not found",
+                        f"Provider entity with ref_id '{provider_ref_id}' or name '{provider_name}' not found",
                     )
                     continue
-
-                provider_entity_id = entity_ref_map[provider_ref_id]
 
                 # Prepare solution data (used by both update and create)
                 solution_data = {
@@ -5555,6 +5696,192 @@ class LoadFileView(APIView):
         self._log_tprm_import_results("Solution", results)
         return results, ref_id_map
 
+    def _resolve_tprm_perimeter(self, record) -> tuple[Optional[Perimeter], str | None]:
+        """Blank column is not an error — perimeter is optional here."""
+        value = str(
+            record.get("perimeter") or record.get("perimeter_ref_id") or ""
+        ).strip()
+        if not value:
+            return None, None
+
+        try:
+            perimeter = Perimeter.objects.filter(id=value).first()
+            if perimeter:
+                return perimeter, None
+        except (ValueError, ValidationError) as exc:
+            # Invalid UUID/ID format is expected for some imports; fall back to ref_id lookup.
+            logger.debug(
+                "Failed perimeter lookup by id, falling back to ref_id",
+                value=value,
+                error=str(exc),
+            )
+
+        perimeter = Perimeter.objects.filter(ref_id=value).first()
+        if perimeter is None:
+            return None, f"Perimeter '{value}' not found"
+        return perimeter, None
+
+    def _process_entity_assessments(
+        self,
+        request,
+        records,
+        folders_map,
+        folder_id,
+        entity_ref_map,
+        entity_name_map,
+        solution_ref_map,
+        on_conflict=ConflictMode.STOP,
+    ):
+        results = self._empty_tprm_results()
+        changeable_audit_ids = RoleAssignment.get_changeable_object_ids(
+            request.user, ComplianceAssessment
+        )
+
+        for record in records:
+            try:
+                missing_fields = self._check_missing_tprm_required_fields(
+                    record, ["name"]
+                )
+                if missing_fields:
+                    self._add_tprm_missing_fields_error(results, record, missing_fields)
+                    continue
+
+                entity_id, entity_ref_id, entity_name = self._resolve_tprm_entity(
+                    record,
+                    "entity_ref_id",
+                    "entity_name",
+                    entity_ref_map,
+                    entity_name_map,
+                )
+                if entity_id is None:
+                    self._add_tprm_record_error(
+                        results,
+                        record,
+                        f"Entity with ref_id '{entity_ref_id}' or name '{entity_name}' not found",
+                    )
+                    continue
+
+                # Get domain from record or use fallback
+                domain = folder_id
+                if record.get("domain") != "":
+                    domain = folders_map.get(
+                        str(record.get("domain")).lower(), folder_id
+                    )
+
+                assessment_data = {
+                    "name": record.get("name"),
+                    "description": record.get("description", ""),
+                    "entity": entity_id,
+                    "folder": domain,
+                }
+
+                perimeter, perimeter_error = self._resolve_tprm_perimeter(record)
+                if perimeter_error:
+                    self._add_tprm_record_error(results, record, perimeter_error)
+                    continue
+                if perimeter:
+                    assessment_data["perimeter"] = str(perimeter.id)
+
+                due_date = _parse_date(record.get("due_date"))
+                if due_date:
+                    assessment_data["due_date"] = due_date
+
+                if record.get("criticality") not in ("", None):
+                    try:
+                        assessment_data["criticality"] = int(record.get("criticality"))
+                    except ValueError, TypeError:
+                        logger.warning(
+                            "Invalid criticality value skipped during entity assessment import",
+                            criticality=record.get("criticality"),
+                        )
+
+                # Same parsing/error convention as the Contracts sheet.
+                solution_ids = []
+                missing_solution_refs = []
+                solution_ref_id_raw = str(record.get("solution_ref_id", "")).strip()
+                if solution_ref_id_raw:
+                    for sol_ref in re.split(r"[\n\r|,]+", solution_ref_id_raw):
+                        sol_ref = sol_ref.strip()
+                        if not sol_ref:
+                            continue
+                        if sol_ref in solution_ref_map:
+                            solution_ids.append(solution_ref_map[sol_ref])
+                        else:
+                            missing_solution_refs.append(sol_ref)
+                if missing_solution_refs:
+                    results["errors"].append(
+                        {
+                            "record": record,
+                            "error": (
+                                "Unknown solution_ref_id(s) skipped: "
+                                + ", ".join(missing_solution_refs)
+                            ),
+                        }
+                    )
+                if solution_ids:
+                    assessment_data["solutions"] = solution_ids
+
+                audit_ref = str(record.get("audit_ref_id", "")).strip()
+                audit_name = str(record.get("audit_name", "")).strip()
+                if audit_ref or audit_name:
+                    # Same strict convention as entity lookups: a provided but
+                    # unknown ref_id fails the row; the name is only consulted
+                    # when no ref_id is given.
+                    if audit_ref:
+                        audit = ComplianceAssessment.objects.filter(
+                            ref_id=audit_ref, id__in=changeable_audit_ids
+                        ).first()
+                    else:
+                        audit = ComplianceAssessment.objects.filter(
+                            name__iexact=audit_name, id__in=changeable_audit_ids
+                        ).first()
+                    if audit is None:
+                        self._add_tprm_record_error(
+                            results,
+                            record,
+                            f"Audit with ref_id '{audit_ref}' or name '{audit_name}' not found",
+                        )
+                        continue
+                    assessment_data["link_audit"] = str(audit.id)
+
+                # Entity assessments dedupe by (entity, name, folder)
+                existing_assessment = EntityAssessment.objects.filter(
+                    name__iexact=record.get("name"),
+                    entity_id=entity_id,
+                    folder_id=domain,
+                ).first()
+
+                if existing_assessment:
+                    action = self._handle_tprm_conflict(
+                        request,
+                        results,
+                        record,
+                        on_conflict,
+                        label="Entity assessment",
+                        serializer_class=EntityAssessmentWriteSerializer,
+                        instance=existing_assessment,
+                        data=assessment_data,
+                    )
+                    if action == "stopped":
+                        break
+                    continue
+
+                serializer = EntityAssessmentWriteSerializer(
+                    data=assessment_data, context={"request": request}
+                )
+
+                serializer.is_valid(raise_exception=True)
+                assessment = serializer.save()
+                results["successful"] += 1
+                logger.debug(f"Created entity assessment: {assessment.name}")
+
+            except Exception as e:
+                logger.warning(f"Error creating entity assessment: {str(e)}")
+                self._add_tprm_record_error(results, record, str(e))
+
+        self._log_tprm_import_results("Entity assessment", results)
+        return results
+
     def _process_contracts(
         self,
         request,
@@ -5562,6 +5889,7 @@ class LoadFileView(APIView):
         folders_map,
         folder_id,
         entity_ref_map,
+        entity_name_map,
         solution_ref_map,
         on_conflict=ConflictMode.STOP,
     ):
@@ -5571,25 +5899,29 @@ class LoadFileView(APIView):
         for record in records:
             try:
                 missing_fields = self._check_missing_tprm_required_fields(
-                    record, ["ref_id", "name", "provider_entity_ref_id"]
+                    record, ["ref_id", "name"]
                 )
                 if missing_fields:
                     self._add_tprm_missing_fields_error(results, record, missing_fields)
                     continue
 
                 ref_id = record.get("ref_id", "").strip()
-                provider_ref_id = record.get("provider_entity_ref_id", "").strip()
-
-                # Lookup provider entity UUID
-                if provider_ref_id not in entity_ref_map:
+                provider_entity_id, provider_ref_id, provider_name = (
+                    self._resolve_tprm_entity(
+                        record,
+                        "provider_entity_ref_id",
+                        "provider_entity_name",
+                        entity_ref_map,
+                        entity_name_map,
+                    )
+                )
+                if provider_entity_id is None:
                     self._add_tprm_record_error(
                         results,
                         record,
-                        f"Provider entity with ref_id '{provider_ref_id}' not found",
+                        f"Provider entity with ref_id '{provider_ref_id}' or name '{provider_name}' not found",
                     )
                     continue
-
-                provider_entity_id = entity_ref_map[provider_ref_id]
 
                 # Get domain from record or use fallback
                 domain = folder_id
@@ -5711,6 +6043,7 @@ class LoadFileView(APIView):
         request,
         records,
         entity_ref_map,
+        entity_name_map,
         on_conflict=ConflictMode.STOP,
     ):
         """Process representatives from TPRM import."""
@@ -5719,21 +6052,28 @@ class LoadFileView(APIView):
         for record in records:
             try:
                 missing_fields = self._check_missing_tprm_required_fields(
-                    record, ["email", "provider_entity_ref_id"]
+                    record, ["email"]
                 )
                 if missing_fields:
                     self._add_tprm_missing_fields_error(results, record, missing_fields)
                     continue
 
                 email = str(record.get("email", "")).strip()
-                provider_ref_id = str(record.get("provider_entity_ref_id", "")).strip()
-                provider_entity_id = entity_ref_map.get(provider_ref_id)
+                provider_entity_id, provider_ref_id, provider_name = (
+                    self._resolve_tprm_entity(
+                        record,
+                        "provider_entity_ref_id",
+                        "provider_entity_name",
+                        entity_ref_map,
+                        entity_name_map,
+                    )
+                )
 
                 if not provider_entity_id:
                     self._add_tprm_record_error(
                         results,
                         record,
-                        f"Provider entity with ref_id '{provider_ref_id}' not found",
+                        f"Provider entity with ref_id '{provider_ref_id}' or name '{provider_name}' not found",
                     )
                     continue
 

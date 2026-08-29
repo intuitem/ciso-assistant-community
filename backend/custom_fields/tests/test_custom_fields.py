@@ -17,9 +17,20 @@ from custom_fields.models import (
     FieldType,
     coerce_value,
 )
+from global_settings import utils as ff_utils
 from global_settings.models import GlobalSettings
+from global_settings.utils import clear_feature_flags_cache
 from iam.models import Folder
 from pmbok.models import Project
+
+
+@pytest.fixture(autouse=True)
+def _enterprise_flags(monkeypatch):
+    """custom_fields is enterprise-only (declared on the EE
+    FeatureFlagsSerializer, hence unsupported on CE); these tests exercise
+    the EE-gated behavior from the CE test bed."""
+    supported = ff_utils.get_supported_feature_flags() | {"custom_fields"}
+    monkeypatch.setattr(ff_utils, "get_supported_feature_flags", lambda: supported)
 
 
 def _enable_custom_fields():
@@ -28,6 +39,9 @@ def _enable_custom_fields():
     )
     gs.value = {**(gs.value or {}), "custom_fields": True}
     gs.save()
+    # Direct ORM write: bypasses the write-point invalidation of the
+    # feature-flags cache.
+    clear_feature_flags_cache()
 
 
 @pytest.fixture

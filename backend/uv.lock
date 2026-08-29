@@ -356,9 +356,10 @@ dependencies = [
     { name = "azure-identity" },
     { name = "boto3" },
     { name = "cel-python" },
+    { name = "cronsim" },
     { name = "cryptography" },
     { name = "django" },
-    { name = "django-allauth", extra = ["headless", "mfa", "saml", "socialaccount"] },
+    { name = "django-allauth", extra = ["headless", "idp-oidc", "mfa", "saml", "socialaccount"] },
     { name = "django-auditlog" },
     { name = "django-filter" },
     { name = "django-rest-knox" },
@@ -375,6 +376,7 @@ dependencies = [
     { name = "humanize" },
     { name = "icecream" },
     { name = "jira" },
+    { name = "jsonschema" },
     { name = "kafka-python" },
     { name = "markdown" },
     { name = "matplotlib" },
@@ -395,8 +397,8 @@ dependencies = [
     { name = "scipy" },
     { name = "sentence-transformers" },
     { name = "structlog" },
-    { name = "torch", version = "2.13.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform == 'darwin'" },
-    { name = "torch", version = "2.13.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform != 'darwin'" },
+    { name = "torch", version = "2.13.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "python_full_version < '3.15' and sys_platform == 'darwin'" },
+    { name = "torch", version = "2.13.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "python_full_version >= '3.15' or sys_platform != 'darwin'" },
     { name = "weasyprint" },
     { name = "whitenoise" },
     { name = "xmlsec" },
@@ -415,51 +417,53 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "argon2-cffi", specifier = ">=23.1.0,<24" },
+    { name = "argon2-cffi", specifier = ">=23.1.0,<26" },
     { name = "azure-identity", specifier = ">=1.19.0,<2" },
     { name = "boto3", specifier = ">=1.42.16,<2" },
     { name = "cel-python", specifier = ">=0.5.0,<0.6" },
+    { name = "cronsim", specifier = ">=2.6,<3" },
     { name = "cryptography", specifier = ">=48.0.1" },
     { name = "django", specifier = ">=6.0.4,<7" },
-    { name = "django-allauth", extras = ["socialaccount", "saml", "mfa", "headless"], specifier = ">=65.14.1,<66" },
+    { name = "django-allauth", extras = ["socialaccount", "saml", "mfa", "headless", "idp-oidc"], specifier = ">=65.14.1,<66" },
     { name = "django-auditlog", specifier = ">=3.4.1,<4" },
-    { name = "django-filter", specifier = ">=25.2,<26" },
+    { name = "django-filter", specifier = ">=25.2,<27" },
     { name = "django-rest-knox", specifier = ">=5.0.2,<6" },
     { name = "django-storages", extras = ["azure"], specifier = ">=1.14.6,<2" },
     { name = "django-structlog", specifier = ">=10.0.0,<11" },
     { name = "django-tailwind", specifier = ">=4.4.2,<5" },
     { name = "djangorestframework", specifier = ">=3.16.1,<4" },
     { name = "docxtpl", specifier = ">=0.20.2,<0.21" },
-    { name = "drf-spectacular", specifier = ">=0.29.0,<0.30" },
+    { name = "drf-spectacular", specifier = ">=0.29.0,<0.31" },
     { name = "fido2", specifier = ">=2.1.1,<3" },
-    { name = "gunicorn", specifier = ">=23.0.0,<24" },
+    { name = "gunicorn", specifier = ">=23.0.0,<27" },
     { name = "httpx", specifier = ">=0.28.1,<0.29" },
-    { name = "huey", specifier = ">=2.5.5,<3" },
+    { name = "huey", specifier = ">=2.5.5,<4" },
     { name = "humanize", specifier = ">=4.15.0,<5" },
     { name = "icecream", specifier = ">=2.1.8,<3" },
     { name = "jira", specifier = ">=3.10.5,<4" },
-    { name = "kafka-python", specifier = ">=2.0.6,<3" },
+    { name = "jsonschema", specifier = ">=4.0,<5" },
+    { name = "kafka-python", specifier = ">=2.0.6,<4" },
     { name = "markdown", specifier = ">=3.10.2,<4" },
     { name = "matplotlib", specifier = ">=3.10.8,<4" },
     { name = "numpy", specifier = ">=2.4.1,<3" },
     { name = "openpyxl", specifier = ">=3.1.5,<4" },
-    { name = "pandas", specifier = ">=2.3.3,<3" },
-    { name = "prometheus-client", specifier = ">=0.22.1,<0.23" },
+    { name = "pandas", specifier = ">=2.3.3,<4" },
+    { name = "prometheus-client", specifier = ">=0.22.1,<0.27" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3,<4" },
     { name = "pymupdf", specifier = ">=1.25.5,<2" },
     { name = "python-docx", specifier = ">=1.2.0,<2" },
     { name = "python-dotenv", specifier = ">=1.2.1,<2" },
     { name = "python-magic", specifier = ">=0.4.27,<0.5" },
-    { name = "pytz", specifier = ">=2025.2,<2026" },
+    { name = "pytz", specifier = ">=2025.2,<2027" },
     { name = "pyyaml", specifier = ">=6.0.3,<7" },
     { name = "qdrant-client", specifier = ">=1.14.2,<2" },
     { name = "rapidfuzz", specifier = ">=3.14.3,<4" },
-    { name = "regex", specifier = ">=2025.11.3,<2026" },
+    { name = "regex", specifier = ">=2025.11.3,<2027" },
     { name = "scipy", specifier = ">=1.16.3,<2" },
     { name = "sentence-transformers", specifier = ">=5.5.1,<6" },
-    { name = "structlog", specifier = ">=24.4.0,<25" },
+    { name = "structlog", specifier = ">=24.4.0,<27" },
     { name = "torch", specifier = ">=2.12.0,<3", index = "https://download.pytorch.org/whl/cpu" },
-    { name = "weasyprint", specifier = ">=68.0,<69" },
+    { name = "weasyprint", specifier = ">=68.0,<70" },
     { name = "whitenoise", specifier = ">=6.11.0,<7" },
     { name = "xmlsec", specifier = ">=1.3.17,<2" },
 ]
@@ -534,6 +538,14 @@ name = "coverage"
 version = "7.5.4"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ef/05/31553dc038667012853d0a248b57987d8d70b2d67ea885605f87bcb1baba/coverage-7.5.4.tar.gz", hash = "sha256:a44963520b069e12789d0faea4e9fdb1e410cdc4aab89d94f7f55cbb7fef0353", size = 793238, upload-time = "2024-06-22T21:51:05.233Z" }
+
+[[package]]
+name = "cronsim"
+version = "2.7"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fb/1a/02f105147f7f2e06ed4f734ff5a6439590bb275a53dd91fc73df6312298a/cronsim-2.7-py3-none-any.whl", hash = "sha256:1e1431fa08c51dc7f72e67e571c7c7a09af26420169b607badd4ca9677ffad1e", size = 14213, upload-time = "2025-10-21T16:38:20.431Z" },
+]
 
 [[package]]
 name = "cryptography"
@@ -654,6 +666,10 @@ wheels = [
 
 [package.optional-dependencies]
 headless = [
+    { name = "pyjwt", extra = ["crypto"] },
+]
+idp-oidc = [
+    { name = "oauthlib" },
     { name = "pyjwt", extra = ["crypto"] },
 ]
 mfa = [
@@ -2496,8 +2512,8 @@ dependencies = [
     { name = "numpy" },
     { name = "scikit-learn" },
     { name = "scipy" },
-    { name = "torch", version = "2.13.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform == 'darwin'" },
-    { name = "torch", version = "2.13.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform != 'darwin'" },
+    { name = "torch", version = "2.13.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "python_full_version < '3.15' and sys_platform == 'darwin'" },
+    { name = "torch", version = "2.13.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "python_full_version >= '3.15' or sys_platform != 'darwin'" },
     { name = "tqdm" },
     { name = "transformers" },
     { name = "typing-extensions" },
@@ -2536,11 +2552,11 @@ wheels = [
 
 [[package]]
 name = "sqlparse"
-version = "0.5.5"
+version = "0.6.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/90/76/437d71068094df0726366574cf3432a4ed754217b436eb7429415cf2d480/sqlparse-0.5.5.tar.gz", hash = "sha256:e20d4a9b0b8585fdf63b10d30066c7c94c5d7a7ec47c889a2d83a3caa93ff28e", size = 120815, upload-time = "2025-12-19T07:17:45.073Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5f/d3/3f06a1006f2261d1342aefb3c71eed02f5d4ca5bdbecd86ebc12ad38306e/sqlparse-0.6.0.tar.gz", hash = "sha256:113c35c75365ab9cc9c7231d68c6428fb11c085fc8e9eb1ad659b7ddbf6cd2b9", size = 178477, upload-time = "2026-08-13T19:16:06.396Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/49/4b/359f28a903c13438ef59ebeee215fb25da53066db67b305c125f1c6d2a25/sqlparse-0.5.5-py3-none-any.whl", hash = "sha256:12a08b3bf3eec877c519589833aed092e2444e68240a3577e8e26148acc7b1ba", size = 46138, upload-time = "2025-12-19T07:17:46.573Z" },
+    { url = "https://files.pythonhosted.org/packages/d9/50/f00935da0ec7cbf325f8dc4f772ae46fbc7b672dd62876e73f0a94adda57/sqlparse-0.6.0-py3-none-any.whl", hash = "sha256:b861c0288ce2fa56209a9a6412d2e066ac664b3873b89c26c9d8415e8e32996f", size = 50070, upload-time = "2026-08-13T19:16:04.062Z" },
 ]
 
 [[package]]
@@ -2628,17 +2644,16 @@ name = "torch"
 version = "2.13.0"
 source = { registry = "https://download.pytorch.org/whl/cpu" }
 resolution-markers = [
-    "python_full_version >= '3.15' and sys_platform == 'darwin'",
     "python_full_version < '3.15' and sys_platform == 'darwin'",
 ]
 dependencies = [
-    { name = "filelock", marker = "sys_platform == 'darwin'" },
-    { name = "fsspec", marker = "sys_platform == 'darwin'" },
-    { name = "jinja2", marker = "sys_platform == 'darwin'" },
-    { name = "networkx", marker = "sys_platform == 'darwin'" },
-    { name = "setuptools", marker = "sys_platform == 'darwin'" },
-    { name = "sympy", marker = "sys_platform == 'darwin'" },
-    { name = "typing-extensions", marker = "sys_platform == 'darwin'" },
+    { name = "filelock" },
+    { name = "fsspec" },
+    { name = "jinja2" },
+    { name = "networkx" },
+    { name = "setuptools" },
+    { name = "sympy" },
+    { name = "typing-extensions" },
 ]
 wheels = [
     { url = "https://download-r2.pytorch.org/whl/cpu/torch-2.13.0-cp314-cp314-macosx_14_0_arm64.whl", hash = "sha256:d849b390e07d8d333ce8ecaf91b273c656c598379a19c9acf1318a883f6b391c", upload-time = "2026-07-08T12:26:28Z" },
@@ -2652,15 +2667,16 @@ source = { registry = "https://download.pytorch.org/whl/cpu" }
 resolution-markers = [
     "python_full_version >= '3.15' and sys_platform != 'darwin'",
     "python_full_version < '3.15' and sys_platform != 'darwin'",
+    "python_full_version >= '3.15' and sys_platform == 'darwin'",
 ]
 dependencies = [
-    { name = "filelock", marker = "sys_platform != 'darwin'" },
-    { name = "fsspec", marker = "sys_platform != 'darwin'" },
-    { name = "jinja2", marker = "sys_platform != 'darwin'" },
-    { name = "networkx", marker = "sys_platform != 'darwin'" },
-    { name = "setuptools", marker = "sys_platform != 'darwin'" },
-    { name = "sympy", marker = "sys_platform != 'darwin'" },
-    { name = "typing-extensions", marker = "sys_platform != 'darwin'" },
+    { name = "filelock" },
+    { name = "fsspec" },
+    { name = "jinja2" },
+    { name = "networkx" },
+    { name = "setuptools" },
+    { name = "sympy" },
+    { name = "typing-extensions" },
 ]
 wheels = [
     { url = "https://download-r2.pytorch.org/whl/cpu/torch-2.13.0%2Bcpu-cp314-cp314-linux_s390x.whl", hash = "sha256:dec241fef3984c0d1edadd1f58708e218d4eae881ceef7bc10cf9964d41b68b9", upload-time = "2026-07-08T19:30:20Z" },

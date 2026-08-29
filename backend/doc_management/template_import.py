@@ -9,6 +9,8 @@ from pathlib import Path
 
 import yaml
 
+from core.utils import yaml_safe_load
+
 from doc_management.models import DocumentContainer, DocumentTemplate
 
 VALID_DOCUMENT_TYPES = {c[0] for c in DocumentContainer.DocumentType.choices}
@@ -37,7 +39,7 @@ def parse_template_markdown(raw: str, stem: str) -> dict:
         parts = raw.split("---", 2)
         if len(parts) >= 3:
             try:
-                fm = yaml.safe_load(parts[1])
+                fm = yaml_safe_load(parts[1])
                 if isinstance(fm, dict):
                     title = fm.get("title", title)
                     description = fm.get("description", "")

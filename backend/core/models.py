@@ -63,6 +63,7 @@ from .utils import (
     resolve_compute_result,
     sha256,
     update_selected_implementation_groups,
+    yaml_safe_load,
     _is_question_visible,
     _build_answer_context,
 )
@@ -482,7 +483,7 @@ class StoredLibrary(LibraryMixin):
             # We do not store the library if its hash checksum is in the database.
             return None, "libraryAlreadyLoadedError"
         try:
-            library_data = yaml.safe_load(library_content)
+            library_data = yaml_safe_load(library_content)
             if not isinstance(library_data, dict):
                 raise yaml.YAMLError(
                     f"The YAML content must be a dictionary but it's been interpreted as a {type(library_data).__name__} !"
@@ -891,6 +892,9 @@ class LibraryUpdater:
         if isinstance(self.new_requirement_mapping_sets, dict):
             self.new_requirement_mapping_sets = [self.new_requirement_mapping_sets]
 
+        self.ttp_catalogs = new_library_content.get("ttp_catalogs", [])
+        self.tactics = new_library_content.get("tactics", [])
+        self.techniques = new_library_content.get("techniques", [])
         self.threats = new_library_content.get("threats", [])
         self.reference_controls = new_library_content.get("reference_controls", [])
         self.metric_definitions = new_library_content.get("metric_definitions", [])
@@ -926,6 +930,102 @@ class LibraryUpdater:
                 "libraryHasNoUpdate",
             ]:
                 return error_msg
+
+    def _resolve_ref(self, model, urn, field, referrer):
+        # absent clears the link; unresolvable is a data bug
+        if not urn:
+            return None
+        obj = model.objects.filter(urn=urn.lower()).first()
+        if obj is None:
+            raise ValueError(f"Unknown {field} '{urn}' referenced in '{referrer}'.")
+        return obj
+
+    def update_ttp_catalogs(self):
+        from sec_intel.models import TTPCatalog
+
+        for catalog in self.ttp_catalogs:
+            TTPCatalog.objects.update_or_create(
+                urn=catalog["urn"].lower(),
+                defaults=catalog,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **catalog,
+                    "library": self.old_library,
+                },
+            )
+
+    def update_tactics(self):
+        from sec_intel.models import TTPCatalog, Tactic
+
+        for index, tactic in enumerate(self.tactics):
+            fields = {k: v for k, v in tactic.items() if k != "catalog_urn"}
+            fields.setdefault("order_id", index)
+            fields["catalog"] = self._resolve_ref(
+                TTPCatalog, tactic.get("catalog_urn"), "TTP catalog", tactic["urn"]
+            )
+            Tactic.objects.update_or_create(
+                urn=tactic["urn"].lower(),
+                defaults=fields,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **fields,
+                    "library": self.old_library,
+                },
+            )
+
+    def update_techniques(self):
+        from sec_intel.models import TTPCatalog, Tactic, Technique
+
+        # not concrete fields, so they cannot go through update_or_create()
+        deferred_keys = ("catalog_urn", "parent_urn", "tactics", "reference_controls")
+        pending = {}
+
+        for index, technique in enumerate(self.techniques):
+            deferred = {key: technique.get(key) for key in deferred_keys}
+            fields = {k: v for k, v in technique.items() if k not in deferred_keys}
+            fields.setdefault("order_id", index)
+            # omitted fields must reset, not stay stale
+            fields.setdefault("is_deprecated", False)
+            for clearable in ("description", "annotation", "groups"):
+                fields.setdefault(clearable, None)
+            fields["catalog"] = self._resolve_ref(
+                TTPCatalog, deferred["catalog_urn"], "TTP catalog", technique["urn"]
+            )
+            obj, _ = Technique.objects.update_or_create(
+                urn=technique["urn"].lower(),
+                defaults=fields,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **fields,
+                    "library": self.old_library,
+                },
+            )
+            pending[obj] = deferred
+
+        for obj, deferred in pending.items():
+            obj.parent = self._resolve_ref(
+                Technique, deferred["parent_urn"], "parent technique", obj.urn
+            )
+            obj.save(update_fields=["parent"])
+            for field, model in (
+                ("tactics", Tactic),
+                ("reference_controls", ReferenceControl),
+            ):
+                targets = model.objects.filter(
+                    urn__in=[u.lower() for u in deferred[field] or []]
+                )
+                if targets.exists() or getattr(obj, field).exists():
+                    getattr(obj, field).set(targets)
+
+        # flagged rather than deleted: user data may point at these
+        incoming = {t["urn"].lower() for t in self.techniques}
+        if incoming:
+            Technique.objects.filter(library=self.old_library).exclude(
+                urn__in=incoming
+            ).update(is_deprecated=True)
 
     def update_threats(self):
         for threat in self.threats:
@@ -1324,6 +1424,19 @@ class LibraryUpdater:
 
                     # update answers or score for each ra for the current requirement_node, when relevant
                     for ra in existing_requirement_assessment_objects.get(urn, []):
+                        # Runs regardless of is_scored/score: a pin on a null
+                        # score would otherwise survive the reset and freeze
+                        # the RA against future recomputes.
+                        if (
+                            self.strategy == "reset"
+                            and ra.is_score_overridden
+                            and ra.compliance_assessment in ca_with_scale_change
+                        ):
+                            ra.is_score_overridden = False
+                            if ra.pk not in ra_pks_to_update:
+                                ra_pks_to_update.add(ra.pk)
+                                requirement_assessment_objects_to_update.append(ra)
+
                         if (
                             ra.is_scored
                             and ra.score is not None
@@ -1522,7 +1635,13 @@ class LibraryUpdater:
                 if requirement_assessment_objects_to_update:
                     RequirementAssessment.objects.bulk_update(
                         requirement_assessment_objects_to_update,
-                        ["score", "is_scored", "documentation_score", "result"],
+                        [
+                            "score",
+                            "is_scored",
+                            "is_score_overridden",
+                            "documentation_score",
+                            "result",
+                        ],
                         batch_size=100,
                     )
 
@@ -1715,8 +1834,11 @@ class LibraryUpdater:
         for new_dependency in new_dependencies:
             self.old_library.dependencies.add(new_dependency)
 
+        self.update_ttp_catalogs()
+        self.update_tactics()
         self.update_threats()
         self.update_reference_controls()
+        self.update_techniques()
         self.update_metric_definitions()
 
         if self.new_frameworks is not None:
@@ -2976,7 +3098,19 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_questions_translated(self) -> dict | None:
-        questions_qs = self.questions.prefetch_related("choices").all()
+        # Reuse the caller's prefetch when it covers choices too: calling
+        # prefetch_related() on the related manager discards
+        # _prefetched_objects_cache and re-queries once per node.
+        prefetched = (getattr(self, "_prefetched_objects_cache", None) or {}).get(
+            "questions"
+        )
+        if prefetched is not None and all(
+            "choices" in (getattr(q, "_prefetched_objects_cache", None) or {})
+            for q in prefetched
+        ):
+            questions_qs = prefetched
+        else:
+            questions_qs = self.questions.prefetch_related("choices").all()
         if not questions_qs:
             return None
 
@@ -4486,8 +4620,27 @@ class Asset(
 
 class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     parent = models.ForeignKey(
-        "AssetClass", on_delete=models.PROTECT, blank=True, null=True
+        "AssetClass", on_delete=models.CASCADE, blank=True, null=True
     )
+    builtin = models.BooleanField(default=False, verbose_name=_("Built-in"))
+    is_visible = models.BooleanField(default=True, verbose_name=_("Is Visible"))
+    translations = models.JSONField(
+        default=dict, blank=True, null=True, verbose_name=_("Translations")
+    )
+
+    @property
+    def get_name_translated(self) -> str:
+        # Built-in names are i18n keys resolved by the frontend, so they carry
+        # no translations and fall through to `name`.
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations.get("name") or self.name
+
+    @property
+    def get_description_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations.get("description") or self.description
 
     @cached_property
     def full_path(self):
@@ -4496,11 +4649,58 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         else:
             return f"{self.parent.full_path}/{self.name}"
 
+    def ancestors_plus_self(self) -> set[Self]:
+        """Returns a set containing the class itself and all its ancestors."""
+        chain = {self}
+        node = self.parent
+        while node is not None and node not in chain:
+            chain.add(node)
+            node = node.parent
+        return chain
+
     @classmethod
-    def build_tree(cls):
+    def path_index(cls) -> dict[str, "AssetClass"]:
+        """Lowercased canonical full paths -> instance, in a single query."""
+        nodes = {node.id: node for node in cls.objects.all()}
+
+        def canonical_path(node):
+            parts = [node.name]
+            seen = {node.id}
+            current = node.parent_id
+            while current is not None and current not in seen:
+                seen.add(current)
+                parent = nodes.get(current)
+                if parent is None:
+                    break
+                parts.append(parent.name)
+                current = parent.parent_id
+            return "/".join(reversed(parts))
+
+        return {canonical_path(node).lower(): node for node in nodes.values()}
+
+    @staticmethod
+    def _prune_hidden(nodes):
+        """Drop hidden nodes, keeping those that still lead to a visible one."""
+        kept = []
+        for node in nodes:
+            children = AssetClass._prune_hidden(node["children"])
+            if node["is_visible"] or children:
+                kept.append({**node, "children": children})
+        return kept
+
+    @classmethod
+    def build_tree(cls, visible_only: bool = False):
         all_nodes = list(cls.objects.all())
         nodes_by_id = {
-            node.id: {"name": node.name, "children": []} for node in all_nodes
+            node.id: {
+                "id": str(node.id),
+                "name": node.name,
+                "translated_name": node.get_name_translated,
+                "builtin": node.builtin,
+                "is_visible": node.is_visible,
+                "children": [],
+            }
+            for node in all_nodes
         }
 
         tree = []
@@ -4515,6 +4715,9 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                 if parent_dict:  # Check if parent exists
                     parent_dict["children"].append(node_dict)
 
+        if visible_only:
+            tree = cls._prune_hidden(tree)
+
         return tree
 
     @classmethod
@@ -4522,12 +4725,12 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         created_nodes = []
 
         for item in hierarchy_data:
-            # Get or create the asset class
             asset_class, created = cls.objects.get_or_create(
                 name=item["name"],
                 parent=parent,
                 defaults={
                     "description": item.get("description", ""),
+                    "builtin": True,
                 },
             )
 
@@ -4861,7 +5064,7 @@ class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         AssetClass.create_hierarchy(extra)
 
     def __str__(self):
-        return self.full_path
+        return self.get_name_translated
 
     class Meta:
         unique_together = ["name", "parent"]
@@ -7452,6 +7655,9 @@ class ComplianceAssessment(Assessment):
                         baseline_assessment.documentation_score
                     )
                     assessment.is_scored = baseline_assessment.is_scored
+                    assessment.is_score_overridden = (
+                        baseline_assessment.is_score_overridden
+                    )
                     assessment.observation = baseline_assessment.observation
                     updates.append(assessment)
 
@@ -7474,6 +7680,7 @@ class ComplianceAssessment(Assessment):
                         "score",
                         "documentation_score",
                         "is_scored",
+                        "is_score_overridden",
                         "observation",
                     ],
                     batch_size=1000,
@@ -8634,6 +8841,14 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         default=False,
         verbose_name=_("Is scored"),
     )
+    is_score_overridden = models.BooleanField(
+        default=False,
+        verbose_name=_("Is score overridden"),
+        help_text=_(
+            "When set, the score is manually pinned and no longer recomputed "
+            "from the questionnaire answers."
+        ),
+    )
     score = models.IntegerField(
         blank=True,
         null=True,
@@ -9199,6 +9414,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             if not _is_question_visible(question, answers_by_urn, questions_by_urn):
                 continue
 
+            # Free-text questions are informational: they have no choices and can be anything,
+            # so it does not make very much sense to take them into account. Skip them out.
+            # (They still count as unanswered in progress see get_visible_questions_counts.)
+            if question.type == Question.Type.TEXT:
+                continue
+
             visible_questions += 1
             if not has_answer_by_qid.get(question.id):
                 continue
@@ -9257,10 +9478,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 }
                 new_result = result_map.get(aggregated, self.Result.NOT_ASSESSED)
 
-        # Update attributes
-        self.score = new_score
+        # Override pins score and is_scored; result still follows answers.
+        if not self.is_score_overridden:
+            self.score = new_score
+            self.is_scored = new_is_scored
         self.result = new_result
-        self.is_scored = new_is_scored
 
     def compute_score_and_result(self):
         self.recompute_assessment()
@@ -10288,7 +10510,9 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         return event.event_notes if event else None
 
     def __str__(self) -> str:
-        return self.ref_id
+        # ref_id is nullable and only auto-assigned in save(); bulk-created
+        # rows may not have one.
+        return self.ref_id or ""
 
 
 class FlowEvent(AbstractBaseModel, FolderMixin):
@@ -10411,7 +10635,7 @@ class Actor(AbstractBaseModel):
         return super().save(*args, **kwargs)
 
     @property
-    def type(self):
+    def type(self) -> Literal["user", "team", "entity"]:
         """Helper to return the type of underlying instance."""
         if self.user:
             return "user"
@@ -10419,7 +10643,8 @@ class Actor(AbstractBaseModel):
             return "team"
         if self.entity:
             return "entity"
-        return None
+
+        raise ValueError("Invalid Actor.")
 
     @property
     def specific(self):
@@ -10491,6 +10716,7 @@ class PresetJourney(NameDescriptionMixin, FolderMixin):
         related_name="journeys",
     )
     applied_version = models.IntegerField(default=1)
+    sequence = models.PositiveIntegerField(default=1)
     object_refs = models.JSONField(default=dict)
     applied_at = models.DateTimeField(auto_now_add=True)
     applied_by = models.ForeignKey(

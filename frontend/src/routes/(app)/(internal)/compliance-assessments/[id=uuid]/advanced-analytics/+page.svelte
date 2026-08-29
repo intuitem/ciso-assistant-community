@@ -694,24 +694,33 @@
 					{#if coverage.with_evidence > 0}
 						<div class="border-t border-surface-100-900 pt-4">
 							<div class="flex flex-wrap gap-2">
-								<span
-									class="inline-flex items-center gap-1.5 rounded-full border border-surface-200-800 bg-surface-50-950 px-3 py-1 text-xs text-surface-600-400"
-								>
-									<span class="w-2 h-2 rounded-full bg-blue-400"></span>
-									{m.directEvidence()}
-									<span class="font-semibold text-surface-800-200"
-										>{coverage.direct_only + coverage.both}</span
+								{#if coverage.direct_only > 0}
+									<span
+										class="inline-flex items-center gap-1.5 rounded-full border border-surface-200-800 bg-surface-50-950 px-3 py-1 text-xs text-surface-600-400"
 									>
-								</span>
-								<span
-									class="inline-flex items-center gap-1.5 rounded-full border border-surface-200-800 bg-surface-50-950 px-3 py-1 text-xs text-surface-600-400"
-								>
-									<span class="w-2 h-2 rounded-full bg-amber-400"></span>
-									{m.indirectEvidence()}
-									<span class="font-semibold text-surface-800-200"
-										>{coverage.indirect_only + coverage.both}</span
+										<span class="w-2 h-2 rounded-full bg-blue-400"></span>
+										{m.directEvidence()}
+										<span class="font-semibold text-surface-800-200">{coverage.direct_only}</span>
+									</span>
+								{/if}
+								{#if coverage.indirect_only > 0}
+									<span
+										class="inline-flex items-center gap-1.5 rounded-full border border-surface-200-800 bg-surface-50-950 px-3 py-1 text-xs text-surface-600-400"
 									>
-								</span>
+										<span class="w-2 h-2 rounded-full bg-amber-400"></span>
+										{m.indirectEvidence()}
+										<span class="font-semibold text-surface-800-200">{coverage.indirect_only}</span>
+									</span>
+								{/if}
+								{#if coverage.both > 0}
+									<span
+										class="inline-flex items-center gap-1.5 rounded-full border border-surface-200-800 bg-surface-50-950 px-3 py-1 text-xs text-surface-600-400"
+									>
+										<span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+										{m.bothEvidence()}
+										<span class="font-semibold text-surface-800-200">{coverage.both}</span>
+									</span>
+								{/if}
 							</div>
 						</div>
 					{/if}

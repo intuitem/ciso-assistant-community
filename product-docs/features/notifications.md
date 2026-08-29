@@ -18,6 +18,8 @@ Your CISO Assistant instance also needs an outgoing mail server configured (`EMA
 
 Notifications are sent to the email address associated with your account.
 
+On the PRO plan, administrators can also turn each email type on or off individually under **Extra > Settings > Email templates**. All emails are on by default.
+
 ***
 
 #### Notification types
@@ -165,7 +167,7 @@ If your organisation uses the Third-Party Risk Management module, external conta
 
 **I filled in the fields but still got no email. Why?** Check that the field contains an exact date — reminders are sent only on specific days (30, 7, and 1 day before). If the deadline is sooner than 30 days from when you set it, the 30-day reminder will not fire.
 
-**I am receiving too many reminders. Can I opt out?** Per-user opt-out is not yet available.
+**I am receiving too many reminders. Can I opt out?** Per-user opt-out is not yet available. On the PRO plan, an administrator can disable a specific email type for the whole instance under **Extra > Settings > Email templates**.
 
 **At what time are reminders sent?** Reminders are sent in the early morning (between 6:00 AM and 7:30 AM server time). Account, password-reset, validation-flow, and security-exception status-change event emails are sent immediately when the event occurs, not in this window.
 

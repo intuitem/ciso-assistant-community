@@ -545,6 +545,20 @@ export function withTranslation(
 	return { ...current, [lang]: langDict };
 }
 
+/**
+ * Whether a requirement passes an implementation-group filter.
+ * Mirrors audit semantics (ComplianceAssessment.get_requirement_assessments):
+ * with a selection active, a requirement is kept only if its own IGs
+ * intersect the selection — requirements with no IGs are excluded.
+ */
+export function nodePassesIgFilter(
+	implementationGroups: string[] | null | undefined,
+	selected: ReadonlySet<string>
+): boolean {
+	if (selected.size === 0) return true;
+	return (implementationGroups ?? []).some((g) => selected.has(g));
+}
+
 /** Serialize a single RequirementNode into its flat persistence shape. */
 export function serializeNode(n: RequirementNode): Record<string, unknown> {
 	return {
@@ -907,6 +921,7 @@ export interface BuilderStore {
 	indentNode: (nodeId: string) => boolean;
 	outdentNode: (nodeId: string) => boolean;
 	toggleAssessable: (nodeId: string) => void;
+	setDisplayMode: (nodeId: string, mode: 'default' | 'splash') => void;
 
 	updateNode: (nodeId: string, patch: Record<string, unknown>) => void;
 	addQuestion: (reqNodeId: string, type?: Question['type']) => void;
@@ -1361,6 +1376,18 @@ export function createBuilderState(
 		findAssessable(roots);
 		if (current === null) return;
 		updateNode(nodeId, { assessable: !current });
+	}
+
+	/**
+	 * Change a node's display mode. Splash screens are never assessable, so
+	 * switching to splash also clears the flag (the assessable checkbox is
+	 * hidden in splash mode and a stale true would be invisible).
+	 */
+	function setDisplayMode(nodeId: string, mode: 'default' | 'splash') {
+		updateNode(
+			nodeId,
+			mode === 'splash' ? { display_mode: mode, assessable: false } : { display_mode: mode }
+		);
 	}
 
 	// --- Node update ---
@@ -1932,6 +1959,7 @@ export function createBuilderState(
 		indentNode,
 		outdentNode,
 		toggleAssessable,
+		setDisplayMode,
 
 		updateNode,
 		addQuestion,

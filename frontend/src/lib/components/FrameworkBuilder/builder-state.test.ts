@@ -9,6 +9,7 @@ import {
 	buildTree,
 	serializeDraft,
 	createBuilderState,
+	nodePassesIgFilter,
 	type Framework,
 	type BuilderNode,
 	type RequirementNode,
@@ -450,8 +451,6 @@ describe('buildTree', () => {
 	});
 });
 
-import { createBuilderState } from './builder-state';
-
 describe('addNode', () => {
 	function newStore() {
 		const fw = makeFramework();
@@ -499,6 +498,34 @@ describe('addNode', () => {
 		const roots = get(s.rootNodes);
 		expect(roots[0].node.assessable).toBe(false);
 		expect(roots[0].node.display_mode).toBe('default');
+	});
+});
+
+describe('setDisplayMode', () => {
+	function newStore() {
+		const fw = makeFramework();
+		return createBuilderState(fw, [], []);
+	}
+
+	it('clears assessable when a requirement is switched to splash', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const nodeId = get(s.rootNodes)[0].node.id;
+		s.setDisplayMode(nodeId, 'splash');
+		const roots = get(s.rootNodes);
+		expect(roots[0].node.display_mode).toBe('splash');
+		expect(roots[0].node.assessable).toBe(false);
+	});
+
+	it('switching back to default keeps the node non-assessable', () => {
+		const s = newStore();
+		s.addNode({ parent: null, preset: 'requirement' });
+		const nodeId = get(s.rootNodes)[0].node.id;
+		s.setDisplayMode(nodeId, 'splash');
+		s.setDisplayMode(nodeId, 'default');
+		const roots = get(s.rootNodes);
+		expect(roots[0].node.display_mode).toBe('default');
+		expect(roots[0].node.assessable).toBe(false);
 	});
 });
 
@@ -1288,5 +1315,27 @@ describe('URN rewrite & repair — gap coverage', () => {
 
 		const choiceUrns = get(store.rootNodes)[0].questions[0].question.choices.map((c) => c.urn);
 		expect(new Set(choiceUrns).size).toBe(2);
+	});
+});
+
+describe('nodePassesIgFilter', () => {
+	it('keeps everything when no filter is active', () => {
+		expect(nodePassesIgFilter(['A'], new Set())).toBe(true);
+		expect(nodePassesIgFilter(null, new Set())).toBe(true);
+		expect(nodePassesIgFilter([], new Set())).toBe(true);
+	});
+
+	it('keeps nodes whose IGs intersect the selection', () => {
+		expect(nodePassesIgFilter(['A', 'B'], new Set(['B', 'C']))).toBe(true);
+	});
+
+	it('drops nodes whose IGs do not intersect the selection', () => {
+		expect(nodePassesIgFilter(['A'], new Set(['B']))).toBe(false);
+	});
+
+	it('drops IG-less nodes when a filter is active, matching audit semantics', () => {
+		expect(nodePassesIgFilter(null, new Set(['A']))).toBe(false);
+		expect(nodePassesIgFilter(undefined, new Set(['A']))).toBe(false);
+		expect(nodePassesIgFilter([], new Set(['A']))).toBe(false);
 	});
 });
