@@ -1,0 +1,88 @@
+urn: urn:intuitem:risk:library:workflow-operations-controls-overdue
+locale: en
+ref_id: workflow-operations-controls-overdue
+name: Overdue applied controls — weekly digest
+description: Controls whose ETA has passed and that are not active yet, mailed once a week to whoever
+  chases them.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-operations-controls-overdue:workflow:controls-overdue
+    schema_version: 1
+    ref_id: controls-overdue
+    name: Overdue applied controls — weekly digest
+    description: Controls whose ETA has passed and that are not active yet, mailed once a week to whoever
+      chases them.
+    graph:
+      variables:
+      - key: notify_emails
+        type: string
+        default_value: grc@example.com
+      nodes:
+      - ref: every_monday
+        type: trigger
+        label: Monday 08:30
+        trigger_config:
+          type: schedule
+          cron_expression: 30 8 * * 1
+          timezone: UTC
+      - ref: fetch_late
+        type: action
+        label: Past their ETA
+        action_config:
+          type: read_objects
+          model: applied_control
+          mode: list
+          order_by: eta
+          limit: 50
+          filters:
+            operator: and
+            conditions:
+            - field: eta
+              op: lt
+              value: '{{today}}'
+            - field: status
+              op: not_in
+              value: active,deprecated
+      - ref: per_control
+        type: loop
+        label: One line per control
+        loop_config:
+          collection: '{{nodes.fetch_late.results}}'
+          collect: '{{item.name}}'
+          on_item_error: continue
+      - ref: note_control
+        type: action
+        label: Log the control
+        action_config:
+          type: log
+          message: '{{item.name}} · eta {{item.eta}} · {{item.status}}'
+      - ref: send_digest
+        type: action
+        label: Email the digest
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Overdue controls: {{nodes.fetch_late.count}}'
+          body: '{{nodes.fetch_late.count}} control(s) are past their ETA on {{today}}: {{nodes.per_control.results}}'
+      - ref: done
+        type: end
+      edges:
+      - source: every_monday
+        target: fetch_late
+      - source: fetch_late
+        target: per_control
+      - source: per_control
+        target: note_control
+        source_port: each
+      - source: note_control
+        target: per_control
+      - source: per_control
+        target: send_digest
+        source_port: done
+      - source: send_digest
+        target: done

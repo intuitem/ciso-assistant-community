@@ -11,6 +11,7 @@ import re
 from collections.abc import Callable
 from datetime import date, timedelta
 
+from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
@@ -22,6 +23,7 @@ from .actions import (
     _render_context,
     dig,
     execute_action,
+    read_page,
     render,
 )
 from .context import temporal_seeds
@@ -707,7 +709,18 @@ def _handle_failure(token, message, retryable=True):
     )
 
 
-LOOP_MAX_ITEMS = 100
+def loop_max_items():
+    """Items one loop will iterate from a list. Same trade-off as the read cap:
+    every item is a token and an action execution. Read at call time so a
+    deployment (or a test) can change it."""
+    return int(getattr(settings, "WORKFLOW_LOOP_MAX_ITEMS", 500))
+
+
+def loop_max_pages():
+    """Pages a reading loop pulls before it stops on its own."""
+    return int(getattr(settings, "WORKFLOW_LOOP_MAX_PAGES", 20))
+
+
 LOOP_TEMPLATE_RE = re.compile(r"^\{\{\s*([\w.]+)\s*\}\}$")
 
 
@@ -737,21 +750,33 @@ def _process_loop(token):
 
     # Fresh arrival: this token becomes the controller.
     config = node.loop_config or {}
-    expression = config.get("collection") or ""
-    match = LOOP_TEMPLATE_RE.match(expression) if isinstance(expression, str) else None
-    if match is None:
-        raise ActionError("loop: collection must be a single {{path}} expression")
+    read_config = config.get("read")
+    paged = isinstance(read_config, dict) and bool(read_config)
     _set_iteration_overlay(token)
-    items = dig(_render_context(instance), match.group(1))
-    if items is None:
-        items = []
-    if not isinstance(items, list):
-        raise ActionError(
-            f"loop: '{expression}' did not resolve to a list "
-            f"(got {type(items).__name__})"
+    if paged:
+        # The loop pulls its own pages, so a sweep stays three nodes whatever
+        # the size of the set.
+        items, next_offset = read_page(node, instance, read_config, 0)
+    else:
+        expression = config.get("collection") or ""
+        match = (
+            LOOP_TEMPLATE_RE.match(expression) if isinstance(expression, str) else None
         )
-    if len(items) > LOOP_MAX_ITEMS:
-        raise ActionError(f"loop: {len(items)} items exceeds the {LOOP_MAX_ITEMS} cap")
+        if match is None:
+            raise ActionError("loop: collection must be a single {{path}} expression")
+        items = dig(_render_context(instance), match.group(1))
+        if items is None:
+            items = []
+        if not isinstance(items, list):
+            raise ActionError(
+                f"loop: '{expression}' did not resolve to a list "
+                f"(got {type(items).__name__})"
+            )
+        if len(items) > loop_max_items():
+            raise ActionError(
+                f"loop: {len(items)} items exceeds the {loop_max_items()} cap"
+            )
+        next_offset = 0
 
     token.status = WorkflowToken.Status.WAITING
     token.loop_state = {
@@ -760,6 +785,10 @@ def _process_loop(token):
         "outstanding": 0,
         "results": [],
         "errors": [],
+        "processed": 0,
+        "read": read_config if paged else None,
+        "next_offset": next_offset,
+        "pages": 1 if paged else 0,
     }
     token.save(update_fields=["status", "loop_state", "updated_at"])
     _loop_next_iteration(token)
@@ -771,6 +800,10 @@ def _loop_next_iteration(controller):
     state = controller.loop_state
     state["index"] += 1
 
+    if state["index"] >= len(state["items"]) and _loop_load_next_page(
+        controller, state
+    ):
+        pass
     if state["index"] >= len(state["items"]):
         _loop_finish(controller)
         return
@@ -779,6 +812,7 @@ def _loop_next_iteration(controller):
     if not each_edges:
         raise ActionError("loop: no edge leaves the 'each' port")
     item = state["items"][state["index"]]
+    state["processed"] = state.get("processed", 0) + 1
     state["outstanding"] = len(each_edges)
     controller.loop_state = state
     controller.save(update_fields=["loop_state", "updated_at"])
@@ -826,14 +860,43 @@ def _loop_body_returned(controller, failed):
     _loop_next_iteration(controller)
 
 
+def _loop_load_next_page(controller, state):
+    """Pull the next page into the controller, if the loop reads its own and
+    there is one. Returns True when fresh items are available."""
+    if not state.get("read") or not state.get("next_offset"):
+        return False
+    if state.get("pages", 0) >= loop_max_pages():
+        state["errors"].append(
+            {
+                "index": state["index"],
+                "message": f"stopped after {loop_max_pages()} pages",
+            }
+        )
+        return False
+    items, next_offset = read_page(
+        controller.current_node,
+        controller.instance,
+        state["read"],
+        state["next_offset"],
+    )
+    if not items:
+        return False
+    state["items"] = items
+    state["index"] = 0
+    state["next_offset"] = next_offset
+    state["pages"] = state.get("pages", 0) + 1
+    return True
+
+
 def _loop_finish(controller):
     node = controller.current_node
     instance = controller.instance
     state = controller.loop_state
     output = {
-        "count": len(state["items"]),
+        "count": state.get("processed", len(state["items"])),
         "results": state["results"],
         "errors": state["errors"],
+        "pages": state.get("pages", 0),
     }
     _persist_node_output(node, output, instance)
     failed = len(state["errors"])

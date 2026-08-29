@@ -154,8 +154,17 @@ class WorkflowViewSet(BaseModelViewSet):
                     "fields": entry["fields"],
                     "fk_fields": {
                         fk_name: endpoint
-                        for fk_name, (_model, endpoint) in entry["fk_fields"].items()
+                        for fk_name, (_model, endpoint) in (
+                            entry.get("fk_fields") or {}
+                        ).items()
                     },
+                    "params": {
+                        name: (target[1] if target else None)
+                        for name, target in (entry.get("params") or {}).items()
+                    },
+                    "required_params": entry.get("required_params") or [],
+                    # A built model is assembled, not matched.
+                    "upsert": not entry.get("constructor"),
                     "match_on": entry.get("match_on", "name"),
                 }
                 for key, entry in CREATABLE_MODELS.items()

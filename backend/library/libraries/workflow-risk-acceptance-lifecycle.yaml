@@ -1,0 +1,74 @@
+urn: urn:intuitem:risk:library:workflow-risk-acceptance-lifecycle
+locale: en
+ref_id: workflow-risk-acceptance-lifecycle
+name: Risk acceptance lifecycle — submitted and decided
+description: 'Two triggers in one workflow: a new acceptance notifies the approver, a decided one notifies
+  the requester. The decision itself is never written by the workflow.'
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-risk-acceptance-lifecycle:workflow:acceptance-lifecycle
+    schema_version: 1
+    ref_id: acceptance-lifecycle
+    name: Risk acceptance lifecycle — submitted and decided
+    description: 'Two triggers in one workflow: a new acceptance notifies the approver, a decided one
+      notifies the requester. The decision itself is never written by the workflow.'
+    graph:
+      variables:
+      - key: approver_emails
+        type: string
+        default_value: approvals@example.com
+      - key: requester_emails
+        type: string
+        default_value: risk@example.com
+      nodes:
+      - ref: on_submitted
+        type: trigger
+        label: Acceptance created
+        trigger_config:
+          type: internal_event
+          event_key: riskacceptance.created
+      - ref: tell_approver
+        type: action
+        label: Email the approver
+        action_config:
+          type: send_email
+          recipients: '{{approver_emails}}'
+          subject: 'Risk acceptance to review: {{payload.object_repr}}'
+          body: '{{payload.object_repr}} was submitted on {{today}}.'
+      - ref: on_decided
+        type: trigger
+        label: Acceptance state changed
+        trigger_config:
+          type: internal_event
+          event_key: riskacceptance.updated
+          filters:
+            operator: and
+            conditions:
+            - field: state
+              op: in
+              value: accepted,rejected,revoked
+              changed: true
+      - ref: tell_requester
+        type: action
+        label: Email the requester
+        action_config:
+          type: send_email
+          recipients: '{{requester_emails}}'
+          subject: 'Risk acceptance updated: {{payload.object_repr}}'
+          body: '{{payload.object_repr}} is now {{payload.new_values.state}} as of {{today}}.'
+      - ref: done
+        type: end
+      edges:
+      - source: on_submitted
+        target: tell_approver
+      - source: tell_approver
+        target: done
+      - source: on_decided
+        target: tell_requester
+      - source: tell_requester
+        target: done

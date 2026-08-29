@@ -76,6 +76,13 @@ class TestShippedWorkflowLibraries:
             errors = validate_graph(version)
             assert errors == [], f"{entry['ref_id']}: {errors}"
 
+    def test_a_library_ships_exactly_one_workflow(self, path):
+        """Installing a library instantiates every workflow it carries
+        (library/views.py instantiate_workflows), with no way to pick — so one
+        per library is what makes them installable one at a time."""
+        document = yaml.safe_load(path.read_text())
+        assert len(document["objects"]["workflows"]) == 1
+
     def test_documents_declare_their_identity(self, path):
         document = yaml.safe_load(path.read_text())
         for entry in document["objects"]["workflows"]:
@@ -150,10 +157,10 @@ def test_the_read_only_explorer_actually_runs():
     from automation.workflows.engine import start_instance
     from automation.workflows.models import WorkflowInstance
 
-    document = yaml.safe_load((LIBRARY_DIR / "workflows-operations.yaml").read_text())
-    entry = next(
-        w for w in document["objects"]["workflows"] if w["ref_id"] == "sandbox-explorer"
+    document = yaml.safe_load(
+        (LIBRARY_DIR / "workflow-operations-sandbox-explorer.yaml").read_text()
     )
+    entry = document["objects"]["workflows"][0]
     domain = Folder.objects.create(
         name="Explorer domain",
         parent_folder=Folder.get_root_folder(),

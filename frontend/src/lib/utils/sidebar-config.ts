@@ -26,6 +26,7 @@ type SidebarBackendKeys = {
 	contracts: boolean;
 	reports: boolean;
 	validation_flows: boolean;
+	workflows: boolean;
 	metrology: boolean;
 	personal_data: boolean;
 	purposes: boolean;
@@ -72,6 +73,7 @@ type SidebarFrontendKeys = {
 	contracts: boolean;
 	reports: boolean;
 	validationFlows: boolean;
+	workflows: boolean;
 	metrology: boolean;
 	personalData: boolean;
 	purposes: boolean;
@@ -118,6 +120,7 @@ export function getSidebarVisibleItems(
 		contracts: featureFlags?.contracts ?? false,
 		reports: featureFlags?.reports ?? false,
 		validationFlows: featureFlags?.validation_flows ?? false,
+		workflows: featureFlags?.workflows ?? false,
 		metrology: featureFlags?.metrology ?? true,
 		personalData: featureFlags?.personal_data ?? true,
 		purposes: featureFlags?.purposes ?? true,

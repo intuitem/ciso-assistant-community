@@ -15,7 +15,7 @@ Drag steps from **Add a step** onto the canvas and connect them.
 | **Trigger** | Where a run starts. A workflow can carry several |
 | **Action** | Does one thing — read, create, update, send, call, compute |
 | **Condition** | Splits the path into branches |
-| **Loop** | Repeats the steps on its **each item** port for every entry in a list, then continues from **done** |
+| **Loop** | Repeats the steps on its **each item** port for every entry, then continues from **done**. It iterates either a list an earlier step produced, or **objects page by page** — reading its own pages, so the size of the set does not change the graph |
 | **Stop run** | Ends the run |
 
 Branches are checked **from top to bottom — the first match runs**, and the **otherwise** branch runs if none match. Every branch must be wired to something, or publishing refuses.
@@ -51,9 +51,10 @@ Two behaviours are worth knowing:
 
 | Action | Notes |
 |---|---|
-| **Read objects** | 16 models. Filters, ordering, and a row cap (25 by default, 100 maximum). The unpaged count is available for threshold conditions |
-| **Create object** | 12 models. Can **update when it already exists**, matched on the entry's key — how a sync-style flow avoids duplicates |
+| **Read objects** | 16 models. Filters, ordering, a row cap (25 by default) and a **start at** offset for paging. The unpaged `count` and a `next_offset` come back with every page |
+| **Create object** | 22 models, including risk scenarios, business impact analyses and their asset assessments, and the privacy register — a processing with its purposes, personal data, subjects, recipients, contractors and transfers. Can **update when it already exists**, matched on the entry's key |
 | **Update object** | 14 models. Writes whitelisted fields and links; see the guardrails below |
+| **Attach a file to an evidence** | Writes rendered text, or downloads a file server-side, onto the evidence's latest revision. Same allowlist and size cap as an upload; the URL passes the SSRF guard and redirects are not followed |
 | **Send email** | Recipients, subject, body. Fails the step when delivery fails |
 | **HTTP request** | Outgoing call with headers, body and a timeout; secrets are referenced, never printed |
 | **Date offset** | A base date plus days or weeks, into a variable — how deadline and expiry windows are built |
@@ -64,6 +65,8 @@ Two behaviours are worth knowing:
 | **Manage group membership** | Adds or removes a user from a group |
 
 Every action runs with the run-as user's permissions, checked live, and can only reach objects in the workflow's domain and the domains beneath it.
+
+**Some objects are built, not just created.** Where a model needs more than a row to be usable, **Create object** assembles it through the same path the API uses, and offers the extra fields that requires: an **audit** takes a framework and implementation groups and arrives with its requirement assessments; a **third-party assessment** takes the same two and arrives with its questionnaire — the audit in its enclave folder, its requirements, and the representatives' assignments. Those models accept no *update when it already exists*: something assembled cannot be matched by name.
 
 ## Guardrails
 
@@ -94,6 +97,8 @@ Anywhere a field accepts text, `{{...}}` inserts a value:
 | `{{item}}`, `{{index}}` | The current entry inside a loop |
 | `{{today}}`, `{{now}}` | The date and time the run started |
 
+References resolve three ways, in this order: by **id** (what the builder's pickers supply), by **urn** for library-backed objects — frameworks, risk matrices, reference controls, threats — so a shipped library can name a standard without carrying ids from someone else's instance, and by **name** within reach of the workflow for everything else, which is the only identity a perimeter or a terminology has. A name that matches more than one object is refused rather than guessed, and a name is looked up among the values the field itself accepts, so a personal-data category matches categories only.
+
 The syntax has **no functions and no operators** — there is no `{{today + 30d}}`. Arithmetic on dates is the **Date offset** action's job. `today`, `now` and `payload` belong to the engine: a graph cannot declare or overwrite them.
 
 `{{today}}` and `{{now}}` are fixed when the run starts, so a retried step compares against the same date as its first attempt. A scheduled run reads them in the schedule's own timezone.
@@ -106,13 +111,21 @@ The syntax has **no functions and no operators** — there is no `{{today + 30d}
 
 ## Limits
 
-| | |
-|---|---|
-| Rows returned by a read | 25 by default, 100 maximum |
-| Cron frequency | One minute minimum |
-| Chained triggers | 5 generations |
-| Event coalescing window | 5 minutes per action and object |
-| Run time limit | Set per workflow; `0` means no limit, and runs that exceed it are stopped |
+| | | |
+|---|---|---|
+| Rows returned by a read | 25 by default, 500 maximum | `WORKFLOW_READ_MAX_LIMIT` |
+| Items one loop iterates from a list | 500 | `WORKFLOW_LOOP_MAX_ITEMS` |
+| Pages a reading loop pulls | 20 | `WORKFLOW_LOOP_MAX_PAGES` |
+| Cron frequency | One minute minimum | — |
+| Chained triggers | 5 generations | — |
+| Event coalescing window | 5 minutes per action and object | — |
+| Run time limit | Set per workflow; `0` means no limit | per workflow |
+
+The first two are environment variables. Raise them deliberately: every extra row sits in the run context, and every extra loop item is one more token and one more action execution in a single run.
+
+**Large sets.** Point a loop at *objects, page by page* and it walks them itself — 20 pages of up to 500 rows by default, and the graph is the same three nodes it would be for five rows. The loop's output carries `count` (items processed) and `pages`. If it stops at the page ceiling it says so in `errors` rather than finishing quietly.
+
+A plain read also returns `count` (unpaged) and `next_offset` if you would rather page by hand: read at `offset: 0`, then at `offset: {{nodes.fetch.next_offset}}`, stopping when it comes back `0`.
 
 ## Libraries and YAML
 

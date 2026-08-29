@@ -393,50 +393,29 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         return locked
 
     def _make_enclave_folder(self, instance):
-        return Folder.objects.create(
-            content_type=Folder.ContentType.ENCLAVE,
-            name=f"{instance.entity.name}/{instance.name}",
-            parent_folder=instance.folder,
-        )
+        from tprm.services import enclave_folder
+
+        return enclave_folder(instance)
 
     def _finalize_linked_audit(self, instance, audit):
         """Shared tail for create/link."""
-        audit.reviewers.set(instance.reviewers.all())
-        representatives = instance.representatives.all()
-        audit.authors.set(
-            [rep.actor for rep in representatives if hasattr(rep, "actor")]
-        )
-        self._create_requirement_assignment(audit, representatives)
-        instance.compliance_assessment = audit
-        instance.save()
+        from tprm.services import finalize_linked_audit
+
+        finalize_linked_audit(instance, audit)
 
     def _create_audit(self, instance, audit_data):
         if not audit_data.get("framework"):
             raise serializers.ValidationError({"framework": [_("Framework required")]})
 
+        from tprm.services import create_enclave_audit
+
         with transaction.atomic():
             locked = self._lock_instance_without_audit(instance, "create_audit")
-            from core.utils import build_initial_field_visibility
-
-            # Enclave audits carry no perimeter: the enclave folder, not the
-            # entity assessment's perimeter, governs their placement.
-            audit = ComplianceAssessment.objects.create(
-                name=locked.name,
-                framework=audit_data["framework"],
-                selected_implementation_groups=audit_data[
-                    "selected_implementation_groups"
-                ],
-                field_visibility=build_initial_field_visibility(
-                    audit_data["framework"]
-                ),
+            create_enclave_audit(
+                locked,
+                audit_data["framework"],
+                audit_data["selected_implementation_groups"],
             )
-
-            enclave = self._make_enclave_folder(instance)
-            audit.folder = enclave
-            audit.save()
-
-            audit.create_requirement_assessments()
-            self._finalize_linked_audit(instance, audit)
 
     def _link_existing_audit(self, instance, audit_data):
         with transaction.atomic():
@@ -492,23 +471,9 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             instance.save()
 
     def _sync_requirement_assignment(self, audit, representatives):
-        """Create or update the RequirementAssignment so its actors match the representatives."""
-        actors = [rep.actor for rep in representatives if hasattr(rep, "actor")]
-        assignment = audit.requirement_assignments.first()
-        if assignment is None:
-            if not actors:
-                return
-            requirement_assessments = audit.requirement_assessments.all()
-            if not requirement_assessments.exists():
-                return
-            assignment = RequirementAssignment.objects.create(
-                compliance_assessment=audit,
-                folder=audit.folder,
-            )
-            assignment.actor.set(actors)
-            assignment.requirement_assessments.set(requirement_assessments)
-        else:
-            assignment.actor.set(actors)
+        from tprm.services import sync_requirement_assignment
+
+        sync_requirement_assignment(audit, representatives)
 
     def _create_requirement_assignment(self, audit, representatives):
         self._sync_requirement_assignment(audit, representatives)

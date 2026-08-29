@@ -158,6 +158,7 @@
 	const ACTION_TYPES = [
 		'create_object',
 		'update_object',
+		'attach_evidence',
 		'read_objects',
 		'http_request',
 		'send_email',
@@ -189,12 +190,14 @@
 		date_offset: { base: '', days: 30, weeks: 0, output: '' },
 		create_object: { model: 'applied_control', fields: { name: '' }, upsert: false },
 		update_object: { model: 'applied_control', id: '', fields: {}, m2m: {} },
+		attach_evidence: { evidence: '', source: 'text', filename: '', text: '', url: '' },
 		read_objects: {
 			model: 'applied_control',
 			mode: 'list',
 			filters: {},
 			order_by: '-created_at',
-			limit: 25
+			limit: 25,
+			offset: ''
 		},
 		http_request: { method: 'GET', url: '', headers: {}, body: '', timeout: 15 },
 		send_email: { recipients: '', subject: '', body: '' },
@@ -289,6 +292,7 @@
 		}
 		if (nodeDomain?.type === 'loop') {
 			nodeDomain.loop_config ??= { collection: '', on_item_error: 'continue' };
+			nodeDomain.loop_config.read ??= null;
 			nodeDomain.loop_config.collect ??= '';
 		}
 		if (['action', 'subprocess', 'loop'].includes(nodeDomain?.type) && !nodeDomain.output_mapping) {
@@ -301,6 +305,9 @@
 		http_request: 'body.summary',
 		create_object: 'created_object_id',
 		update_object: 'object_id',
+		create_audit: 'created_object_id',
+		attach_evidence: 'filename',
+		create_entity_assessment: 'created_object_id',
 		read_objects: 'results.0.name',
 		provision_folder: 'folder_id',
 		provision_user: 'user_id',
@@ -1126,62 +1133,120 @@
 			{/if}
 
 			{#if nodeDomain.type === 'loop' && loopConfig}
-				<div>
-					{@render fieldLabel(m.forEachItemIn())}
-					{#if collectionChoices.length}
+				<label>
+					{@render fieldLabel(m.loopSource())}
+					<select
+						class="select w-full text-sm"
+						value={loopConfig.read ? 'read' : 'collection'}
+						onchange={(e) => {
+							if (e.currentTarget.value === 'read') {
+								loopConfig.collection = '';
+								loopConfig.read = { model: 'applied_control', order_by: '-created_at', limit: 25 };
+							} else {
+								loopConfig.read = null;
+							}
+							onChange();
+						}}
+						data-testid="loop-source"
+					>
+						<option value="collection">{m.loopOverResults()}</option>
+						<option value="read">{m.loopOverPages()}</option>
+					</select>
+				</label>
+				{#if loopConfig.read}
+					<label>
+						{@render fieldLabel(m.objectToRead())}
 						<select
 							class="select w-full text-sm"
-							value={collectionIsCustom ? '__custom__' : (loopConfig.collection ?? '')}
-							onchange={(e) => {
-								const chosen = e.currentTarget.value;
-								if (chosen === '__custom__') {
-									collectionIsCustom = true;
-								} else {
-									collectionIsCustom = false;
-									loopConfig.collection = chosen;
-									onChange();
-								}
-							}}
-							data-testid="loop-collection"
+							bind:value={loopConfig.read.model}
+							onchange={onChange}
 						>
-							{#if !loopConfig.collection && !collectionIsCustom}
-								<option value="">—</option>
-							{/if}
-							{#each collectionChoices as choice (choice.expr)}
-								<option value={choice.expr}>
-									{choice.label}{choice.count === null ? '' : ` (${choice.count})`}
-								</option>
+							{#each readableModels as entry (entry.key)}
+								<option value={entry.key}>{safeTranslate(entry.key)}</option>
 							{/each}
-							<option value="__custom__">{m.customExpression()}</option>
 						</select>
-					{:else}
-						<select class="select w-full text-sm" disabled>
-							<option>{m.forEachNoCollections()}</option>
-						</select>
-					{/if}
-					{#if collectionIsCustom || (!collectionChoices.length && loopConfig.collection)}
-						<input
-							type="text"
-							class="input w-full text-sm font-mono mt-1"
-							placeholder={'{{nodes.list_items.results}}'}
-							bind:value={loopConfig.collection}
-							oninput={onChange}
-						/>
-					{/if}
-					{#if collectionPreview?.invalid}
-						<p class="text-[10px] text-warning-600 mt-1">
-							<i class="fa-solid fa-triangle-exclamation mr-1"></i>{m.forEachNotAList()}
-						</p>
-					{:else if collectionPreview}
-						<p class="text-[10px] text-success-600 mt-1">
-							<i class="fa-solid fa-rotate mr-1"></i>{m.forEachPreview({
-								count: collectionPreview.count
-							})}
-						</p>
-					{/if}
-				</div>
-
-				{#if loopConfig.collection}
+					</label>
+					<div class="flex gap-2">
+						<label class="flex-1">
+							{@render fieldLabel(m.orderBy())}
+							<input
+								type="text"
+								class="input w-full text-sm"
+								bind:value={loopConfig.read.order_by}
+								oninput={onChange}
+							/>
+						</label>
+						<label class="w-24 shrink-0">
+							{@render fieldLabel(m.pageSize())}
+							<input
+								type="number"
+								min="1"
+								class="input w-full text-sm"
+								bind:value={loopConfig.read.limit}
+								oninput={onChange}
+							/>
+						</label>
+					</div>
+					<p class="text-[10px] text-surface-500 leading-relaxed">
+						<i class="fa-solid fa-layer-group mr-1"></i>{m.loopOverPagesHint()}
+					</p>
+				{:else}
+					<div>
+						{@render fieldLabel(m.forEachItemIn())}
+						{#if collectionChoices.length}
+							<select
+								class="select w-full text-sm"
+								value={collectionIsCustom ? '__custom__' : (loopConfig.collection ?? '')}
+								onchange={(e) => {
+									const chosen = e.currentTarget.value;
+									if (chosen === '__custom__') {
+										collectionIsCustom = true;
+									} else {
+										collectionIsCustom = false;
+										loopConfig.collection = chosen;
+										onChange();
+									}
+								}}
+								data-testid="loop-collection"
+							>
+								{#if !loopConfig.collection && !collectionIsCustom}
+									<option value="">—</option>
+								{/if}
+								{#each collectionChoices as choice (choice.expr)}
+									<option value={choice.expr}>
+										{choice.label}{choice.count === null ? '' : ` (${choice.count})`}
+									</option>
+								{/each}
+								<option value="__custom__">{m.customExpression()}</option>
+							</select>
+						{:else}
+							<select class="select w-full text-sm" disabled>
+								<option>{m.forEachNoCollections()}</option>
+							</select>
+						{/if}
+						{#if collectionIsCustom || (!collectionChoices.length && loopConfig.collection)}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono mt-1"
+								placeholder={'{{nodes.list_items.results}}'}
+								bind:value={loopConfig.collection}
+								oninput={onChange}
+							/>
+						{/if}
+						{#if collectionPreview?.invalid}
+							<p class="text-[10px] text-warning-600 mt-1">
+								<i class="fa-solid fa-triangle-exclamation mr-1"></i>{m.forEachNotAList()}
+							</p>
+						{:else if collectionPreview}
+							<p class="text-[10px] text-success-600 mt-1">
+								<i class="fa-solid fa-rotate mr-1"></i>{m.forEachPreview({
+									count: collectionPreview.count
+								})}
+							</p>
+						{/if}
+					</div>
+				{/if}
+				{#if loopConfig.collection || loopConfig.read}
 					{#if itemChips.length}
 						<div>
 							<span class="text-[10px] font-semibold uppercase tracking-wide text-surface-500">
@@ -1281,7 +1346,10 @@
 							{/each}
 						</select>
 					</label>
-					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+					<label
+						class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer"
+						class:hidden={creatableEntry?.upsert === false}
+					>
 						<input
 							type="checkbox"
 							class="checkbox scale-75"
@@ -1311,6 +1379,47 @@
 									bind:value={actionConfig.fields[field]}
 									oninput={onChange}
 								/>
+							{/if}
+						</label>
+					{/each}
+					{#each Object.entries(creatableEntry?.params ?? {}) as [paramName, endpoint] (paramName)}
+						<label>
+							{@render fieldLabel(safeTranslate(paramName))}
+							{#if endpoint}
+								<select
+									class="select w-full text-sm"
+									bind:value={actionConfig.fields[paramName]}
+									onchange={onChange}
+								>
+									<option value={''}>—</option>
+									{#if fkOptions[endpoint as string]?.length}
+										<optgroup label={safeTranslate(endpoint as string)}>
+											{#each fkOptions[endpoint as string] as option (option.id)}
+												<option value={(option as any).urn ?? option.id}>
+													{optionLabel(option)}
+												</option>
+											{/each}
+										</optgroup>
+									{/if}
+									{#if variables.length}
+										<optgroup label={m.workflowVariables()}>
+											{#each variables as variable (variable.id)}
+												<option value={'{{' + variable.key + '}}'}>
+													{'{{' + variable.key + '}}'}
+												</option>
+											{/each}
+										</optgroup>
+									{/if}
+								</select>
+								<span class="text-[10px] text-surface-500">{m.frameworkUrnOrId()}</span>
+							{:else}
+								<input
+									type="text"
+									class="input w-full text-sm"
+									bind:value={actionConfig.fields[paramName]}
+									oninput={onChange}
+								/>
+								<span class="text-[10px] text-surface-500">{m.implementationGroupsHint()}</span>
 							{/if}
 						</label>
 					{/each}
@@ -1469,6 +1578,60 @@
 								</div>
 							{/each}
 						</div>
+					{/if}
+				{:else if actionConfig.type === 'attach_evidence'}
+					<label>
+						{@render fieldLabel(m.evidence())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'{{nodes.make_evidence.created_object_id}}'}
+							bind:value={actionConfig.evidence}
+							oninput={onChange}
+						/>
+					</label>
+					<label>
+						{@render fieldLabel(m.fileName())}
+						<input
+							type="text"
+							class="input w-full text-sm"
+							placeholder={'digest-{{today}}.csv'}
+							bind:value={actionConfig.filename}
+							oninput={onChange}
+						/>
+					</label>
+					<label>
+						{@render fieldLabel(m.source())}
+						<select
+							class="select w-full text-sm"
+							bind:value={actionConfig.source}
+							onchange={onChange}
+						>
+							<option value="text">{m.text()}</option>
+							<option value="url">{m.url()}</option>
+						</select>
+						<span class="text-[10px] text-surface-500">{m.attachSourceHint()}</span>
+					</label>
+					{#if actionConfig.source === 'url'}
+						<label>
+							{@render fieldLabel(m.url())}
+							<input
+								type="text"
+								class="input w-full text-sm"
+								bind:value={actionConfig.url}
+								oninput={onChange}
+							/>
+						</label>
+					{:else}
+						<label>
+							{@render fieldLabel(m.content())}
+							<textarea
+								class="input w-full text-sm"
+								rows="3"
+								bind:value={actionConfig.text}
+								oninput={onChange}
+							></textarea>
+						</label>
 					{/if}
 				{:else if actionConfig.type === 'read_objects'}
 					<label>
@@ -1631,9 +1794,18 @@
 								<input
 									type="number"
 									min="1"
-									max="100"
 									class="input w-full text-sm"
 									bind:value={actionConfig.limit}
+									oninput={onChange}
+								/>
+							</label>
+							<label class="w-24 shrink-0">
+								{@render fieldLabel(m.startAt())}
+								<input
+									type="text"
+									class="input w-full text-sm"
+									placeholder="0"
+									bind:value={actionConfig.offset}
 									oninput={onChange}
 								/>
 							</label>

@@ -15,6 +15,7 @@ from dataclasses import field as dataclass_field
 from email.utils import parseaddr
 from urllib.parse import urlsplit
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import transaction
@@ -38,6 +39,7 @@ from core.models import (
     Asset,
     ComplianceAssessment,
     Evidence,
+    EvidenceRevision,
     FilteringLabel,
     Finding,
     FindingsAssessment,
@@ -48,11 +50,22 @@ from core.models import (
     RiskAssessment,
     RiskMatrix,
     RiskScenario,
+    Terminology,
     SecurityException,
     ValidationFlow,
     Vulnerability,
 )
 from core.tasks import get_missing_email_settings
+from privacy.models import (
+    DataContractor,
+    DataRecipient,
+    DataSubject,
+    DataTransfer,
+    PersonalData,
+    Processing,
+    Purpose,
+)
+from resilience.models import AssetAssessment, BusinessImpactAnalysis
 from tprm.models import Entity, EntityAssessment
 
 from .context import RESERVED_VARIABLE_KEYS, VARIABLE_KEY_RE, temporal_seeds
@@ -321,10 +334,21 @@ CREATABLE_MODELS = {
     "compliance_assessment": {
         "model": ComplianceAssessment,
         "fields": ["name", "description", "ref_id"],
-        "fk_fields": {
+        "fk_fields": {"perimeter": (Perimeter, "perimeters")},
+        # Construction parameters: not columns, handed to the constructor.
+        "params": {
             "framework": (Framework, "frameworks"),
-            "perimeter": (Perimeter, "perimeters"),
+            "implementation_groups": None,
         },
+        "required_params": ["framework"],
+        "constructor": "_construct_audit",
+        "constructor_permissions": {"framework": ["add_complianceassessment"]},
+    },
+    "risk_scenario": {
+        "model": RiskScenario,
+        # Never the ratings or the treatment: those are the analyst's.
+        "fields": ["name", "description", "ref_id"],
+        "fk_fields": {"risk_assessment": (RiskAssessment, "risk-assessments")},
     },
     "risk_assessment": {
         "model": RiskAssessment,
@@ -334,6 +358,96 @@ CREATABLE_MODELS = {
             "perimeter": (Perimeter, "perimeters"),
         },
     },
+    "business_impact_analysis": {
+        "model": BusinessImpactAnalysis,
+        # No status: a BIA a workflow opens starts where a new one starts.
+        "fields": ["name", "description", "eta", "due_date"],
+        "fk_fields": {
+            "perimeter": (Perimeter, "perimeters"),
+            "risk_matrix": (RiskMatrix, "risk-matrices"),
+        },
+    },
+    "asset_assessment": {
+        "model": AssetAssessment,
+        # The recovery verdicts stay human; attaching the asset is the job.
+        "fields": ["observation"],
+        "fk_fields": {
+            "asset": (Asset, "assets"),
+            "bia": (BusinessImpactAnalysis, "business-impact-analysis"),
+        },
+    },
+    "processing": {
+        "model": Processing,
+        # No status: privacy_approved is an approval, and a record a workflow
+        # writes starts as a draft.
+        "fields": [
+            "name",
+            "description",
+            "ref_id",
+            "information_channel",
+            "usage_channel",
+            "dpia_reference",
+        ],
+    },
+    "purpose": {
+        "model": Purpose,
+        "fields": ["name", "description", "legal_basis", "article_9_condition"],
+        "fk_fields": {"processing": (Processing, "processings")},
+    },
+    "personal_data": {
+        "model": PersonalData,
+        "fields": [
+            "name",
+            "description",
+            "retention",
+            "deletion_policy",
+            "is_sensitive",
+        ],
+        "fk_fields": {
+            "processing": (Processing, "processings"),
+            # Resolves among this field's own categories, by name or id.
+            "category": (Terminology, "terminologies"),
+        },
+    },
+    "data_subject": {
+        "model": DataSubject,
+        "fields": ["name", "description", "category"],
+        "fk_fields": {"processing": (Processing, "processings")},
+    },
+    "data_recipient": {
+        "model": DataRecipient,
+        "fields": ["name", "description", "category"],
+        "fk_fields": {"processing": (Processing, "processings")},
+    },
+    "data_contractor": {
+        "model": DataContractor,
+        "fields": [
+            "name",
+            "description",
+            "relationship_type",
+            "country",
+            "documentation_link",
+        ],
+        "fk_fields": {
+            "processing": (Processing, "processings"),
+            "entity": (Entity, "entities"),
+        },
+    },
+    "data_transfer": {
+        "model": DataTransfer,
+        "fields": [
+            "name",
+            "description",
+            "country",
+            "transfer_mechanism",
+            "guarantees",
+            "documentation_link",
+        ],
+        "fk_fields": {
+            "processing": (Processing, "processings"),
+            "entity": (Entity, "entities"),
+        },
+    },
     "entity_assessment": {
         "model": EntityAssessment,
         "fields": ["name", "description"],
@@ -341,6 +455,14 @@ CREATABLE_MODELS = {
             "entity": (Entity, "entities"),
             "perimeter": (Perimeter, "perimeters"),
         },
+        # With a framework the constructor also builds the questionnaire;
+        # without one it is a plain create.
+        "params": {
+            "framework": (Framework, "frameworks"),
+            "implementation_groups": None,
+        },
+        "constructor": "_construct_entity_assessment",
+        "constructor_permissions": {"framework": ["add_complianceassessment"]},
     },
 }
 
@@ -352,6 +474,76 @@ def _accessible_folder_ids(folder):
     ids |= {f.id for f in folder.get_parent_folders()}
     ids |= {f.id for f in folder.get_sub_folders()}
     return ids
+
+
+def _construct_audit(kwargs, params, instance):
+    """An audit is its requirements: objects.create() alone leaves a shell."""
+    from core.utils import build_initial_field_visibility
+
+    framework = params.get("framework")
+    audit = ComplianceAssessment.objects.create(
+        framework=framework,
+        selected_implementation_groups=_implementation_groups(
+            params.get("implementation_groups"), framework
+        ),
+        field_visibility=build_initial_field_visibility(framework),
+        **kwargs,
+    )
+    audit.create_requirement_assessments()
+    return audit
+
+
+def _construct_entity_assessment(kwargs, params, instance):
+    """With a framework, the questionnaire comes too: the audit in its enclave,
+    its requirements, and the representatives' assignments — through the same
+    service the API uses."""
+    assessment = EntityAssessment.objects.create(**kwargs)
+    framework = params.get("framework")
+    if framework is not None:
+        from tprm.services import create_enclave_audit
+
+        create_enclave_audit(
+            assessment,
+            framework,
+            _implementation_groups(params.get("implementation_groups"), framework),
+        )
+    return assessment
+
+
+def _implementation_groups(value, framework):
+    groups = _as_id_list(value)
+    if not groups:
+        return None
+    known = {
+        str(group.get("ref_id"))
+        for group in framework.implementation_groups_definition or []
+    }
+    unknown = sorted(set(groups) - known) if known else []
+    if unknown:
+        raise FatalActionError(
+            f"implementation group(s) {', '.join(unknown)} are not defined in "
+            f"'{framework.name}'"
+        )
+    return groups
+
+
+def _construction_params(entry, fields, instance):
+    """Resolve an entry's construction parameters: references by urn or id,
+    everything else rendered as-is."""
+    params = {}
+    for name, target in (entry.get("params") or {}).items():
+        raw = fields.get(name)
+        if raw in ("", None):
+            continue
+        params[name] = (
+            _resolve_reference(target[0], raw, instance, f"create_object: {name}")
+            if target
+            else raw
+        )
+    for name in entry.get("required_params") or []:
+        if name not in params:
+            raise FatalActionError(f"create_object: '{name}' is required")
+    return params
 
 
 @register
@@ -368,29 +560,51 @@ class CreateObjectAction(BaseAction):
             for key, value in fields.items()
             if key in entry["fields"] and value not in ("", None)
         }
-        if not kwargs.get("name") and not config.get("upsert"):
+        for key, value in kwargs.items():
+            allowed = _column_choices(entry["model"], key)
+            if allowed is not None and str(value) not in allowed:
+                raise FatalActionError(
+                    f"create_object: '{value}' is not an accepted "
+                    f"{config.get('model')}.{key}"
+                )
+        named = get_model_field(entry["model"], "name") is not None
+        if named and not kwargs.get("name") and not config.get("upsert"):
             raise ActionError("create_object: 'name' is required")
 
-        allowed_folders = None
-        for fk_name, (fk_model, _endpoint) in entry["fk_fields"].items():
+        for fk_name, (fk_model, _endpoint) in (entry.get("fk_fields") or {}).items():
             raw = fields.get(fk_name)
             if not raw:
                 continue
+            kwargs[fk_name] = _resolve_reference(
+                fk_model,
+                raw,
+                instance,
+                f"create_object: {fk_name}",
+                constraints=entry["model"]
+                ._meta.get_field(fk_name)
+                .get_limit_choices_to(),
+            )
+
+        constructor = entry.get("constructor")
+        if constructor:
+            if config.get("upsert"):
+                raise FatalActionError(
+                    f"create_object: '{config.get('model')}' is built, not "
+                    "matched — upsert does not apply"
+                )
+            params = _construction_params(entry, fields, instance)
             try:
-                target = fk_model.objects.filter(id=raw).first()
-            except ValueError, ValidationError:
-                target = None
-            if target is None:
-                raise ActionError(f"create_object: {fk_name} '{raw}' does not exist")
-            target_folder_id = getattr(target, "folder_id", None)
-            if target_folder_id is not None:
-                if allowed_folders is None:
-                    allowed_folders = _accessible_folder_ids(instance.folder)
-                if target_folder_id not in allowed_folders:
-                    raise ActionError(
-                        f"create_object: {fk_name} is outside this workflow's scope"
-                    )
-            kwargs[fk_name] = target
+                obj = globals()[constructor](
+                    {"folder": instance.folder, **kwargs}, params, instance
+                )
+            except ValidationError as e:
+                raise ActionError(f"create_object: {'; '.join(e.messages)}")
+            return {
+                "created_object_id": str(obj.id),
+                "created_object_name": obj.name,
+                "created_object_model": config.get("model"),
+                "created": True,
+            }
 
         obj = None
         created = True
@@ -412,14 +626,14 @@ class CreateObjectAction(BaseAction):
                     setattr(obj, key, value)
                 obj.save()
             else:
-                if not kwargs.get("name"):
+                if named and not kwargs.get("name"):
                     raise ActionError("create_object: 'name' is required")
                 obj = entry["model"].objects.create(folder=instance.folder, **kwargs)
         except ValidationError as e:
             raise ActionError(f"create_object: {'; '.join(e.messages)}")
         return {
             "created_object_id": str(obj.id),
-            "created_object_name": obj.name,
+            "created_object_name": getattr(obj, "name", None) or str(obj),
             "created_object_model": config.get("model"),
             "created": created,
         }
@@ -520,7 +734,17 @@ READABLE_MODELS: dict[str, ReadEntry] = {
     ),
     "entity": ReadEntry(
         model=Entity,
-        fields=["description", "ref_id", "mission", "reference_link"],
+        fields=[
+            "description",
+            "ref_id",
+            "mission",
+            "reference_link",
+            "is_active",
+            "default_dependency",
+            "default_penetration",
+            "default_maturity",
+            "default_trust",
+        ],
     ),
     "findings_assessment": ReadEntry(
         model=FindingsAssessment,
@@ -638,8 +862,13 @@ READABLE_MODELS: dict[str, ReadEntry] = {
     ),
 }
 
-READ_MAX_LIMIT = 100
 READ_DEFAULT_LIMIT = 25
+
+
+def read_max_limit():
+    """Ceiling on rows a single read returns. A deployment setting rather than
+    a graph option, read at call time."""
+    return int(getattr(settings, "WORKFLOW_READ_MAX_LIMIT", 500))
 
 
 def _read_scope_folder_ids(folder):
@@ -843,14 +1072,20 @@ class ReadObjectsAction(BaseAction):
                     else None,
                 }
             limit = min(
-                max(int(config.get("limit") or READ_DEFAULT_LIMIT), 1), READ_MAX_LIMIT
+                max(int(config.get("limit") or READ_DEFAULT_LIMIT), 1),
+                read_max_limit(),
             )
+            offset = max(int(render(config.get("offset"), context) or 0), 0)
+            count = queryset.count()
             return {
-                # Unpaged count so threshold conditions work beyond the page.
-                "count": queryset.count(),
+                # Unpaged count so threshold conditions work beyond the page,
+                # and so a graph can page until offset + limit reaches it.
+                "count": count,
+                "offset": offset,
+                "next_offset": offset + limit if offset + limit < count else 0,
                 "results": [
                     _serialize_read_row(obj, fields, entry.computed)
-                    for obj in queryset[:limit]
+                    for obj in queryset[offset : offset + limit]
                 ],
             }
         except (ValidationError, ValueError, TypeError) as e:
@@ -1065,13 +1300,19 @@ UPDATABLE_MODELS: dict[str, UpdateEntry] = {
 M2M_OPERATIONS = ("add", "remove", "set")
 
 
+def _column_choices(model, key):
+    """The values a column accepts, or None when it accepts anything. save()
+    enforces max_length and clean() but never choices."""
+    choices = getattr(get_model_field(model, key), "choices", None)
+    return frozenset(str(choice[0]) for choice in choices) if choices else None
+
+
 def _writable_values(entry, key):
     """The fence on a field: an explicit allowed_values, else the column's own
-    choices. save() enforces max_length and clean() but never choices."""
+    choices."""
     if key in entry.allowed_values:
         return entry.allowed_values[key]
-    choices = getattr(get_model_field(entry.model, key), "choices", None)
-    return frozenset(str(choice[0]) for choice in choices) if choices else None
+    return _column_choices(entry.model, key)
 
 
 def _as_id_list(value):
@@ -1212,6 +1453,162 @@ class UpdateObjectAction(BaseAction):
         return {"op": operation, "count": len(rows)}
 
 
+def _resolve_reference(model, value, instance, label, constraints=None):
+    """A referenced object by id (what the builder's picker supplies), by urn
+    (what a shipped library can name, since urns are stable across instances),
+    or by name within reach of this workflow — the only identity a folder-scoped
+    referential like a terminology or a perimeter has.
+
+    `constraints` narrows the search to what the field itself accepts, so a
+    category resolves among categories and not among every terminology.
+    """
+    value = str(value or "").strip()
+    if not value:
+        raise FatalActionError(f"{label} is required")
+    queryset = model.objects.filter(**(constraints or {}))
+    if UUID_RE.match(value):
+        matches = list(queryset.filter(id=value)[:2])
+    elif value.lower().startswith("urn:") and get_model_field(model, "urn"):
+        matches = list(queryset.filter(urn=value.lower())[:2])
+    elif get_model_field(model, "name"):
+        if get_model_field(model, "folder"):
+            queryset = queryset.filter(
+                folder_id__in=_accessible_folder_ids(instance.folder)
+            )
+        matches = list(queryset.filter(name__iexact=value)[:2])
+    else:
+        raise ActionError(f"{label} '{value}' is neither a urn nor an id")
+
+    if not matches:
+        raise ActionError(f"{label} '{value}' does not exist")
+    if len(matches) > 1:
+        # Names repeat across domains; guessing would attach the wrong object.
+        raise ActionError(f"{label} '{value}' matches more than one object")
+    target = matches[0]
+    folder_id = getattr(target, "folder_id", None)
+    if folder_id is not None and folder_id not in _accessible_folder_ids(
+        instance.folder
+    ):
+        raise ActionError(f"{label} '{value}' is outside this workflow's scope")
+    return target
+
+
+@register
+class AttachEvidenceAction(BaseAction):
+    action_type = "attach_evidence"
+
+    def execute(self, config, instance):
+        from django.core.files.base import ContentFile
+
+        context = _secrets_context(instance, config)
+        evidence = self._target(config, context, instance)
+        filename = str(render(config.get("filename", ""), context) or "").strip()
+        if not filename:
+            raise ActionError("attach_evidence: 'filename' is required")
+
+        source = config.get("source", "text")
+        if source == "text":
+            data = str(render(config.get("text", ""), context) or "").encode()
+        elif source == "url":
+            data = self._fetch(config, context)
+        else:
+            raise FatalActionError(f"attach_evidence: unknown source '{source}'")
+        if not data:
+            raise ActionError("attach_evidence: nothing to attach")
+
+        upload = ContentFile(data, name=filename)
+        # Same shape as the upload endpoint: the latest revision carries the
+        # file, and full_clean applies the extension allowlist and the size cap.
+        revision = evidence.revisions.order_by(
+            "-version"
+        ).first() or EvidenceRevision.objects.create(evidence=evidence)
+        revision.attachment = upload
+        try:
+            revision.full_clean()
+        except ValidationError as e:
+            raise FatalActionError(f"attach_evidence: {'; '.join(e.messages)}")
+        revision.save()
+        return {
+            "object_id": str(evidence.id),
+            "revision_id": str(revision.id),
+            "filename": revision.attachment.name,
+            "bytes": len(data),
+        }
+
+    def _target(self, config, context, instance):
+        from . import authz
+        from .engine import run_identity
+
+        target_id = str(render(config.get("evidence", ""), context) or "").strip()
+        if not target_id:
+            raise ActionError("attach_evidence: 'evidence' is required")
+        try:
+            evidence = (
+                Evidence.objects.filter(
+                    folder_id__in=_read_scope_folder_ids(instance.folder)
+                )
+                .filter(id__in=authz.changeable_ids(run_identity(instance), Evidence))
+                .filter(id=target_id)
+                .first()
+            )
+        except ValueError, ValidationError:
+            evidence = None
+        if evidence is None:
+            raise ActionError(
+                f"attach_evidence: no evidence '{target_id}' in this workflow's scope"
+            )
+        return evidence
+
+    def _fetch(self, config, context):
+        import requests
+        from django.conf import settings
+
+        from core.net_safety import (
+            BlockedRequestError,
+            DnsLookupError,
+            assert_public_url_unless_dev,
+        )
+
+        url = render(config.get("url", ""), context)
+        if not url:
+            raise ActionError("attach_evidence: 'url' is required")
+        try:
+            assert_public_url_unless_dev(url, allowed_schemes=("https", "http"))
+        except (BlockedRequestError, DnsLookupError) as e:
+            host = urlsplit(url).hostname or "target"
+            raise ActionError(f"attach_evidence: {type(e).__name__} for host '{host}'")
+        headers = {
+            str(key): render(str(value), context)
+            for key, value in (config.get("headers") or {}).items()
+        }
+        cap = int(settings.ATTACHMENT_MAX_SIZE_MB) * 1000000
+        try:
+            # Redirects off for the same reason as http_request: only the first
+            # URL passed the SSRF check. Streamed and capped, because the file
+            # never travels through the run context.
+            response = requests.get(
+                url,
+                headers=headers,
+                timeout=min(max(int(config.get("timeout") or 15), 1), 30),
+                allow_redirects=False,
+                stream=True,
+            )
+        except requests.RequestException as e:
+            raise ActionError(f"attach_evidence: {type(e).__name__}")
+        if response.status_code >= 400:
+            raise ActionError(
+                f"attach_evidence: the source answered {response.status_code}"
+            )
+        data = b""
+        for chunk in response.iter_content(64 * 1024):
+            data += chunk
+            if len(data) > cap:
+                raise FatalActionError(
+                    f"attach_evidence: the file exceeds {settings.ATTACHMENT_MAX_SIZE_MB} MB"
+                )
+        return data
+
+
 @register
 class SendEmailAction(BaseAction):
     action_type = "send_email"
@@ -1273,7 +1670,7 @@ SECRETS_REFERENCE_RE = re.compile(r"\{\{\s*secrets\.")
 
 def _secrets_context(instance, raw_config):
     """Merge decrypted secrets into a rendering context, only when the config
-    actually references {{secrets.*}} and only for http_request."""
+    actually references {{secrets.*}} — http_request and attach_evidence."""
     import json
 
     # Must tolerate the same whitespace TEMPLATE_RE accepts ({{ secrets.x }}).
@@ -1571,7 +1968,14 @@ def required_permissions(action_config):
         codenames = [f"add_{model_name}"]
         if action_config.get("upsert"):
             codenames.append(f"change_{model_name}")
+        # What the constructor also builds needs its own permission.
+        fields = action_config.get("fields") or {}
+        for param, extra in (entry.get("constructor_permissions") or {}).items():
+            if fields.get(param):
+                codenames += extra
         return codenames
+    if action_type == "attach_evidence":
+        return ["change_evidence"]
     if action_type == "update_object":
         entry = UPDATABLE_MODELS.get(action_config.get("model"))
         if entry is None:
@@ -1612,13 +2016,25 @@ def authorization_folder(codename, base_folder):
     return base_folder
 
 
+def _validate_offset(config):
+    value = config.get("offset")
+    if value in ("", None) or _is_templated(value):
+        return []
+    try:
+        if int(value) < 0:
+            raise ValueError
+    except ValueError, TypeError:
+        return [("action_read_bad_offset", "'offset' must be zero or a whole number")]
+    return []
+
+
 def validate_read_config(node):
     """Publish-time checks for read_objects nodes: (code, message)
     tuples, same contract as triggers.validate_trigger_config."""
     config = node.action_config or {}
     if config.get("type") != "read_objects":
         return []
-    errors = []
+    errors = _validate_offset(config)
     entry = READABLE_MODELS.get(config.get("model"))
     if entry is None:
         return [
@@ -1682,14 +2098,14 @@ def validate_read_config(node):
     limit = config.get("limit")
     if limit is not None:
         try:
-            valid_limit = 1 <= int(limit) <= READ_MAX_LIMIT
+            valid_limit = 1 <= int(limit) <= read_max_limit()
         except TypeError, ValueError:
             valid_limit = False
         if not valid_limit:
             errors.append(
                 (
                     "action_read_invalid_limit",
-                    f"Limit must be between 1 and {READ_MAX_LIMIT}",
+                    f"Limit must be between 1 and {read_max_limit()}",
                 )
             )
     return errors
@@ -1711,7 +2127,55 @@ def validate_create_config(node):
         ]
     fields = config.get("fields") or {}
     errors = []
-    for fk_name in entry["fk_fields"]:
+    if entry.get("constructor") and config.get("upsert"):
+        errors.append(
+            (
+                "action_create_upsert_unsupported",
+                f"'{config.get('model')}' is built, not matched — upsert does not apply",
+            )
+        )
+    for key, value in fields.items():
+        if key not in entry["fields"] or _is_templated(value) or value in ("", None):
+            continue
+        allowed = _column_choices(entry["model"], key)
+        if allowed is not None and str(value) not in allowed:
+            errors.append(
+                (
+                    "action_create_value_not_allowed",
+                    f"'{key}' may only be set to {', '.join(sorted(allowed))}",
+                )
+            )
+    for param in entry.get("required_params") or []:
+        if not str(fields.get(param) or "").strip():
+            errors.append(
+                (
+                    "action_create_missing_param",
+                    f"'{param}' is required to create a '{config.get('model')}'",
+                )
+            )
+    for param, target in (entry.get("params") or {}).items():
+        value = fields.get(param)
+        if not value or _is_templated(value) or not target:
+            continue
+        text = str(value).strip()
+        if not (UUID_RE.match(text) or text.lower().startswith("urn:")):
+            errors.append(
+                (
+                    "action_create_bad_reference",
+                    f"'{param}' must be a urn or an id, not '{text}'",
+                )
+            )
+    for fk_name in entry.get("fk_fields") or {}:
+        value = fields.get(fk_name)
+        if value and not _is_templated(value):
+            text = str(value).strip()
+            if not (UUID_RE.match(text) or text.lower().startswith("urn:")):
+                errors.append(
+                    (
+                        "action_create_bad_reference",
+                        f"'{fk_name}' must be a urn or an id, not '{text}'",
+                    )
+                )
         # execute_action skips empty FKs, so a missing non-nullable one only
         # surfaces as an IntegrityError mid-run.
         if entry["model"]._meta.get_field(fk_name).null:
@@ -1723,6 +2187,23 @@ def validate_create_config(node):
                     f"'{fk_name}' is required to create a '{config.get('model')}'",
                 )
             )
+    return errors
+
+
+def validate_attach_evidence_config(node):
+    config = node.action_config or {}
+    if config.get("type") != "attach_evidence":
+        return []
+    errors = []
+    if not str(config.get("evidence") or "").strip():
+        errors.append(("action_attach_missing_evidence", "Which evidence is not set"))
+    if not str(config.get("filename") or "").strip():
+        errors.append(("action_attach_missing_filename", "A file name is required"))
+    source = config.get("source", "text")
+    if source not in ("text", "url"):
+        errors.append(("action_attach_bad_source", f"Unknown source '{source}'"))
+    elif source == "url" and not str(config.get("url") or "").strip():
+        errors.append(("action_attach_missing_url", "A URL is required"))
     return errors
 
 
@@ -1856,16 +2337,19 @@ def _is_templated(value):
     return isinstance(value, str) and TEMPLATE_RE.search(value) is not None
 
 
-def authorize_action(node, instance):
+def authorize_action(node, instance, config=None):
     """Runtime half of the deputization promise: before any
     side effect, the run identity must hold every permission the action
     exercises, checked live against the workflow's folder. Refusal is a
-    structured, retryable node failure (grant the role, retry the token)."""
+    structured, retryable node failure (grant the role, retry the token).
+
+    `config` overrides the node's own when a node runs an action it carries
+    rather than is — a loop paging through read_objects."""
     from . import authz
     from .engine import _log, run_identity
     from .models import WorkflowInstanceLog
 
-    codenames = required_permissions(node.action_config)
+    codenames = required_permissions(config or node.action_config)
     if not codenames:
         return
     identity = run_identity(instance)
@@ -1897,6 +2381,14 @@ def authorize_action(node, instance):
         },
     )
     raise ActionError(f"Authorization denied: {reason}")
+
+
+def read_page(node, instance, read_config, offset):
+    """One page of a loop's read. Returns (rows, next_offset)."""
+    config = {**read_config, "type": "read_objects", "mode": "list", "offset": offset}
+    authorize_action(node, instance, config)
+    output = ACTION_REGISTRY["read_objects"].execute(config, instance)
+    return output["results"], output.get("next_offset") or 0
 
 
 def execute_action(node, instance):

@@ -214,6 +214,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-table-columns',
 					href: '/tasks-review',
 					permissions: ['view_appliedcontrol']
+				},
+				{
+					name: 'workflows',
+					fa_icon: 'fa-solid fa-diagram-project',
+					href: '/workflows',
+					permissions: ['view_workflow']
 				}
 			]
 		},
