@@ -56,12 +56,9 @@ Each object type has granular **CRUD permissions** (create, read, update, delete
 
 #### Predefined Roles <a href="#ember940" id="ember940"></a>
 
-Permissions are grouped into a small set of **standard roles**:
+Permissions are grouped into a small set of **standard roles** — Administrator, Domain manager, Analyst, Reader, Approver, Respondent, Third-party respondent and Technical tester.
 
-* **Administrator** – full access to all objects and settings
-* **Analyst** – full access to most objects, but cannot modify access control
-* **Viewer** – read-only access
-* **Approver** – strictly limited to **approving risk acceptance requests**
+See [User groups → Roles](user-groups.md#roles) for what each of them can and cannot do.
 
 #### Hierarchical Domains <a href="#ember943" id="ember943"></a>
 
