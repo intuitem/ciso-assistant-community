@@ -2,10 +2,9 @@ urn: urn:intuitem:risk:library:workflow-operations-external-report-intake
 locale: en
 ref_id: workflow-operations-external-report-intake
 name: External report — download it and file it as evidence
-description: 'POST {"name": "Pentest 2026", "url": "https://.../report.pdf", "filename": "pentest-2026.pdf"}
-  to this workflow''s URL and the file is downloaded server-side and attached to a new evidence. The download
-  is checked against the same rules as an upload: public host only, no redirects, size cap and extension
-  allowlist.'
+description: 'A team posts a report reference to this workflow''s URL and the file is fetched from the
+  location you trust and filed as evidence. The download is checked against the same rules as an upload:
+  public host only, no redirects, size cap and extension allowlist.'
 copyright: © intuitem
 version: 1
 publication_date: 2026-08-28
@@ -17,15 +16,18 @@ objects:
     schema_version: 1
     ref_id: external-report-intake
     name: External report — download it and file it as evidence
-    description: 'POST {"name": "Pentest 2026", "url": "https://.../report.pdf", "filename": "pentest-2026.pdf"}
-      to this workflow''s URL and the file is downloaded server-side and attached to a new evidence. The
-      download is checked against the same rules as an upload: public host only, no redirects, size cap
-      and extension allowlist.'
+    description: 'POST {"name": "Pentest 2026", "path": "pentest-2026.pdf", "filename": "pentest-2026.pdf"}
+      to this workflow''s URL. The file is downloaded server-side from report_base_url + path and attached
+      to a new evidence. The caller chooses the path, never the host: set report_base_url to the system
+      you accept reports from, ending with a slash.'
     graph:
       variables:
       - key: notify_emails
         type: string
         default_value: grc@example.com
+      - key: report_base_url
+        type: string
+        default_value: https://reports.example.com/
       nodes:
       - ref: hook
         type: trigger
@@ -40,7 +42,7 @@ objects:
           model: evidence
           fields:
             name: '{{payload.name}}'
-            description: Filed automatically on {{today}} from {{payload.url}}.
+            description: Filed automatically on {{today}} from {{report_base_url}}{{payload.path}}.
       - ref: download
         type: action
         label: Download and attach it
@@ -48,7 +50,7 @@ objects:
           type: attach_evidence
           evidence: '{{nodes.make_evidence.created_object_id}}'
           source: url
-          url: '{{payload.url}}'
+          url: '{{report_base_url}}{{payload.path}}'
           filename: '{{payload.filename}}'
       - ref: notify
         type: action
