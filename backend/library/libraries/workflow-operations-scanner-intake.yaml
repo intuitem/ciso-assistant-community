@@ -49,7 +49,7 @@ objects:
         label: Log what came in
         action_config:
           type: log
-          message: 'Recorded {{nodes.per_item.count}} entrie(s) on {{today}}: {{nodes.per_item.results}}'
+          message: 'Recorded {{nodes.per_item.count}} item(s) on {{today}}: {{nodes.per_item.results}}'
       - ref: done
         type: end
       edges:

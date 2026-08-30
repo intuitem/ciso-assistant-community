@@ -1158,8 +1158,13 @@
 						{@render fieldLabel(m.objectToRead())}
 						<select
 							class="select w-full text-sm"
-							bind:value={loopConfig.read.model}
-							onchange={onChange}
+							value={loopConfig.read.model}
+							onchange={(e) => {
+								loopConfig.read.model = e.currentTarget.value;
+								// order_by is validated against the model's own fields.
+								loopConfig.read.order_by = '-created_at';
+								onChange();
+							}}
 						>
 							{#each readableModels as entry (entry.key)}
 								<option value={entry.key}>{safeTranslate(entry.key)}</option>

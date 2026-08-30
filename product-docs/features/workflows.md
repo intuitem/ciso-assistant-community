@@ -12,7 +12,7 @@ Drag steps from **Add a step** onto the canvas and connect them.
 
 | Step | What it does |
 |---|---|
-| **Trigger** | Where a run starts. A workflow can carry several |
+| **Trigger** | Where a run starts. A workflow can carry several triggers |
 | **Action** | Does one thing — read, create, update, send, call, compute |
 | **Condition** | Splits the path into branches |
 | **Loop** | Repeats the steps on its **each item** port for every entry, then continues from **done**. It iterates either a list an earlier step produced, or **objects page by page** — reading its own pages, so the size of the set does not change the graph |
@@ -114,7 +114,7 @@ The syntax has **no functions and no operators** — there is no `{{today + 30d}
 | | | |
 |---|---|---|
 | Rows returned by a read | 25 by default, 500 maximum | `WORKFLOW_READ_MAX_LIMIT` |
-| Items one loop iterates from a list | 500 | `WORKFLOW_LOOP_MAX_ITEMS` |
+| Items one loop iterates, from a list or across pages | 500 | `WORKFLOW_LOOP_MAX_ITEMS` |
 | Pages a reading loop pulls | 20 | `WORKFLOW_LOOP_MAX_PAGES` |
 | Cron frequency | One minute minimum | — |
 | Chained triggers | 5 generations | — |
@@ -123,7 +123,9 @@ The syntax has **no functions and no operators** — there is no `{{today + 30d}
 
 The first two are environment variables. Raise them deliberately: every extra row sits in the run context, and every extra loop item is one more token and one more action execution in a single run.
 
-**Large sets.** Point a loop at *objects, page by page* and it walks them itself — 20 pages of up to 500 rows by default, and the graph is the same three nodes it would be for five rows. The loop's output carries `count` (items processed) and `pages`. If it stops at the page ceiling it says so in `errors` rather than finishing quietly.
+**Large sets.** Point a loop at *objects, page by page* and it walks them itself, fetching a page at a time (25 rows unless the loop sets its own page size) — the graph is the same three nodes it would be for five rows. The loop's output carries `count` (items processed) and `pages`.
+
+Two ceilings apply, and the loop stops **cleanly** at either, recording why in `errors` rather than finishing quietly: the item ceiling (`WORKFLOW_LOOP_MAX_ITEMS`, 500) and the page ceiling (`WORKFLOW_LOOP_MAX_PAGES`, 20). Raising the item ceiling much past ~1,500 is not useful: a run is capped at 5,000 steps and each item costs roughly three, so beyond that a sweep trades a clean stop for a hard failure.
 
 A plain read also returns `count` (unpaged) and `next_offset` if you would rather page by hand: read at `offset: 0`, then at `offset: {{nodes.fetch.next_offset}}`, stopping when it comes back `0`.
 

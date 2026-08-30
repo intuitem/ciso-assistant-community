@@ -1581,6 +1581,7 @@ class AttachEvidenceAction(BaseAction):
             str(key): render(str(value), context)
             for key, value in (config.get("headers") or {}).items()
         }
+        _assert_credentials_stay_encrypted(url, config, headers, "attach_evidence")
         cap = int(settings.ATTACHMENT_MAX_SIZE_MB) * 1000000
         try:
             # Redirects off for the same reason as http_request: only the first
@@ -1688,6 +1689,18 @@ def _secrets_context(instance, raw_config):
     return {**_render_context(instance), "secrets": secrets}
 
 
+def _assert_credentials_stay_encrypted(url, config, headers, label):
+    """A secret or an Authorization header must not travel over cleartext,
+    whatever the SSRF guard allows for plain http."""
+    import json as _json
+
+    carries_credentials = bool(SECRETS_REFERENCE_RE.search(_json.dumps(config))) or any(
+        key.lower() == "authorization" for key in headers
+    )
+    if carries_credentials and urlsplit(url).scheme != "https":
+        raise FatalActionError(f"{label}: credentials require an https URL")
+
+
 @register
 class HttpRequestAction(BaseAction):
     action_type = "http_request"
@@ -1720,6 +1733,7 @@ class HttpRequestAction(BaseAction):
             str(key): render(str(value), context)
             for key, value in (config.get("headers") or {}).items()
         }
+        _assert_credentials_stay_encrypted(url, config, headers, "http_request")
         body = render(config.get("body"), context)
         # Clamp both ends: requests raises ValueError on a negative timeout.
         timeout = min(max(int(config.get("timeout") or 15), 1), 30)

@@ -205,3 +205,47 @@ class TestAttachValidation:
             )
             == []
         )
+
+
+@pytest.mark.django_db
+class TestCredentialsNeedHttps:
+    """A secret or an Authorization header must not travel over cleartext,
+    whatever the SSRF guard allows for plain http."""
+
+    def test_a_secret_over_http_is_refused(self, monkeypatch):
+        monkeypatch.setattr(
+            "core.net_safety.assert_public_url_unless_dev", lambda *a, **k: None
+        )
+        domain = make_domain("Cleartext")
+        evidence = Evidence.objects.create(name="Report", folder=domain)
+        version = attach_flow(
+            domain,
+            {
+                "evidence": str(evidence.id),
+                "source": "url",
+                "url": "http://example.com/report.pdf",
+                "filename": "report.pdf",
+                "headers": {"Authorization": "Bearer {{secrets.token}}"},
+            },
+        )
+        assert start_instance(version).status == WorkflowInstance.Status.FAILED
+        assert not evidence.revisions.exclude(attachment="").exists()
+
+    def test_the_same_call_over_https_is_allowed(self, monkeypatch):
+        monkeypatch.setattr(
+            "core.net_safety.assert_public_url_unless_dev", lambda *a, **k: None
+        )
+        monkeypatch.setattr("requests.get", lambda url, **kw: FakeResponse(b"ok"))
+        domain = make_domain("Encrypted")
+        evidence = Evidence.objects.create(name="Report", folder=domain)
+        version = attach_flow(
+            domain,
+            {
+                "evidence": str(evidence.id),
+                "source": "url",
+                "url": "https://example.com/report.pdf",
+                "filename": "report.pdf",
+                "headers": {"Authorization": "Bearer token"},
+            },
+        )
+        assert start_instance(version).status == WorkflowInstance.Status.COMPLETED

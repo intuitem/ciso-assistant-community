@@ -4,7 +4,7 @@ description: Build, publish and arm a workflow that emails a reviewer whenever a
 
 # Building your first workflow
 
-This walkthrough builds the smallest workflow worth having: when an audit moves to **In review**, someone gets an email. Four steps on the canvas, and every concept you need for bigger ones — a trigger, an action, publishing, and arming.
+This walkthrough builds the smallest workflow worth having: when an audit moves to **In review**, someone gets an email. Three steps on the canvas, and every concept you need for bigger ones — a trigger, an action, publishing, and arming.
 
 Read [Workflows](../concepts/workflows.md) first if you haven't; the [builder reference](../features/workflows.md) has the details this guide skips.
 

@@ -2,9 +2,10 @@ urn: urn:intuitem:risk:library:workflow-operations-external-report-intake
 locale: en
 ref_id: workflow-operations-external-report-intake
 name: External report — download it and file it as evidence
-description: 'POST {"name": "Pentest 2026", "url": "https://.../report.pdf"} to this workflow''s URL and
-  the file is downloaded server-side and attached to a new evidence. The download is checked against the
-  same rules as an upload: public host only, no redirects, size cap and extension allowlist.'
+description: 'POST {"name": "Pentest 2026", "url": "https://.../report.pdf", "filename": "pentest-2026.pdf"}
+  to this workflow''s URL and the file is downloaded server-side and attached to a new evidence. The download
+  is checked against the same rules as an upload: public host only, no redirects, size cap and extension
+  allowlist.'
 copyright: © intuitem
 version: 1
 publication_date: 2026-08-28
@@ -16,9 +17,10 @@ objects:
     schema_version: 1
     ref_id: external-report-intake
     name: External report — download it and file it as evidence
-    description: 'POST {"name": "Pentest 2026", "url": "https://.../report.pdf"} to this workflow''s URL
-      and the file is downloaded server-side and attached to a new evidence. The download is checked against
-      the same rules as an upload: public host only, no redirects, size cap and extension allowlist.'
+    description: 'POST {"name": "Pentest 2026", "url": "https://.../report.pdf", "filename": "pentest-2026.pdf"}
+      to this workflow''s URL and the file is downloaded server-side and attached to a new evidence. The
+      download is checked against the same rules as an upload: public host only, no redirects, size cap
+      and extension allowlist.'
     graph:
       variables:
       - key: notify_emails

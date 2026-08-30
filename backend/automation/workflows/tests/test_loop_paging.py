@@ -10,12 +10,7 @@ from core.models import AppliedControl
 from iam.models import Folder
 from automation.workflows.engine import start_instance
 from automation.workflows.graph import save_graph
-from automation.workflows.models import (
-    Workflow,
-    WorkflowInstance,
-    WorkflowNode,
-    WorkflowVersion,
-)
+from automation.workflows.models import Workflow, WorkflowInstance, WorkflowVersion
 from automation.workflows.validation import validate_graph
 from automation.workflows.tests.helpers import publisher_user
 
@@ -187,3 +182,27 @@ class TestPagingLoopValidation:
             {"read": {"model": "entity", "order_by": "name", "limit": 50}},
         )
         assert validate_graph(version) == []
+
+
+@pytest.mark.django_db
+class TestItemCeiling:
+    @override_settings(WORKFLOW_LOOP_MAX_ITEMS=4)
+    def test_a_paged_loop_stops_at_the_item_ceiling(self):
+        """Pages must not become a way around the item ceiling: a run is
+        capped at MAX_STEPS, so an unbounded sweep would fail late rather
+        than stop cleanly."""
+        domain = make_domain("Sweep item cap")
+        for index in range(9):
+            AppliedControl.objects.create(name=f"AC {index:02d}", folder=domain)
+        version = paging_flow(
+            domain,
+            {
+                "read": {"model": "applied_control", "order_by": "name", "limit": 2},
+                "collect": "{{item.name}}",
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        output = instance.node_outputs["each_row"]
+        assert output["count"] == 4
+        assert any("stopped after 4 items" in e["message"] for e in output["errors"])

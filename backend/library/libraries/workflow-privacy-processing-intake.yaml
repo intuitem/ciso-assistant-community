@@ -79,7 +79,7 @@ objects:
               subject: 'New processing to review: {{payload.name}}'
               body: >-
                 {{payload.name}} was recorded on {{today}} with
-                {{nodes.per_category.count}} data categorie(s):
+                {{nodes.per_category.count}} personal-data item(s):
                 {{nodes.per_category.results}}. It is a draft until you approve
                 it.
           - ref: done

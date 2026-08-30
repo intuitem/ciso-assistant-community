@@ -800,6 +800,19 @@ def _loop_next_iteration(controller):
     state = controller.loop_state
     state["index"] += 1
 
+    if state.get("processed", 0) >= loop_max_items():
+        # Pages must not become a way around the item ceiling: a run is capped
+        # at MAX_STEPS, so an unbounded sweep would fail late instead of
+        # stopping cleanly.
+        state["errors"].append(
+            {
+                "index": state["index"],
+                "message": f"stopped after {loop_max_items()} items",
+            }
+        )
+        _loop_finish(controller)
+        return
+
     if state["index"] >= len(state["items"]) and _loop_load_next_page(
         controller, state
     ):
