@@ -643,6 +643,8 @@
 	"exportControlsWorkbookDesc": "Mesures appliquées en classeur mis en forme",
 	"exportStatusGroupedReport": "Rapport par statut",
 	"exportStatusGroupedReportDesc": "Mesures regroupées par statut et triées par échéance",
+	"exportAuditReportPdf": "Rapport d'audit",
+	"exportAuditReportPdfDesc": "Le rapport de l'archive en PDF imprimable : exigences, réponses, résultats et observations",
 	"exportIncidentReport": "Rapport d'incident",
 	"exportIncidentReportDesc": "Détails de l'incident et chronologie complète, modifiables",
 	"exportIncidentReportPrintable": "Rapport d'incident imprimable",

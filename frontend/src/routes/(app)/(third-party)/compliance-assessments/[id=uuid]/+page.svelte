@@ -441,6 +441,13 @@
 				href: `/compliance-assessments/${id}/export/word`,
 				testId: 'export-option-word'
 			},
+			{
+				titleKey: 'exportAuditReportPdf',
+				descriptionKey: 'exportAuditReportPdfDesc',
+				format: 'PDF' as const,
+				href: `/compliance-assessments/${id}/export/report-pdf`,
+				testId: 'export-option-report-pdf'
+			},
 			isInternal &&
 				isCyFun && {
 					titleKey: 'exportCyFunAssessment',

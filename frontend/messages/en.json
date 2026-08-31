@@ -501,6 +501,8 @@
 	"exportControlsWorkbookDesc": "Formatted workbook of applied controls",
 	"exportStatusGroupedReport": "Status-grouped report",
 	"exportStatusGroupedReportDesc": "Controls grouped by status, sorted by ETA",
+	"exportAuditReportPdf": "Audit report",
+	"exportAuditReportPdfDesc": "The bundle's report as a printable PDF: requirements, answers, results and observations",
 	"exportIncidentReport": "Incident report",
 	"exportIncidentReportDesc": "Incident details and full timeline, ready to edit",
 	"exportIncidentReportPrintable": "Printable incident report",

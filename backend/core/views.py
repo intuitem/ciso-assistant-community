@@ -147,7 +147,7 @@ from rest_framework.exceptions import (
 )
 
 
-from weasyprint import HTML
+from weasyprint import CSS, HTML
 
 from core.helpers import *
 from core.models import (
@@ -11677,6 +11677,50 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             return response
         else:
             return Response({"error": "Permission denied"})
+
+    @action(detail=True, methods=["get"], name="Get audit report PDF")
+    def report_pdf(self, request, pk):
+        """
+        The audit report — same content as the export bundle's index.html
+        (requirements, questions and answers, results, observations,
+        evidence names, applied controls) rendered as a single PDF.
+        """
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
+        )
+        if UUID(pk) not in object_ids_view:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        compliance_assessment: ComplianceAssessment = self.get_object()
+        user_lang = request.user.preferences.get("lang") or "en"
+        # Referential translations (question/choice texts) resolve through
+        # get_language(); follow the in-app preference the user reads the
+        # audit in rather than the HTTP Accept-Language header.
+        translation.activate(user_lang)
+
+        index_content, _ = generate_html(compliance_assessment)
+        page_layout = CSS(
+            string="""
+            @page {
+                size: A4 portrait;
+                margin: 1.2cm;
+                @bottom-right {
+                    content: counter(page) " / " counter(pages);
+                    font-size: 8pt;
+                    color: #71717a;
+                }
+            }
+            """
+        )
+        pdf_file = HTML(string=index_content).write_pdf(stylesheets=[page_layout])
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        safe_name = slugify(compliance_assessment.name) or "audit"
+        response["Content-Disposition"] = (
+            f'attachment; filename="{safe_name}_report.pdf"'
+        )
+        return response
 
     @action(
         detail=True,
