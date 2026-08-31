@@ -14,36 +14,36 @@ class Migration(migrations.Migration):
     """
 
     dependencies = [
-        ('iam', '0030_alter_folder_default_role'),
+        ("iam", "0030_alter_folder_default_role"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='folder',
-            name='is_published',
+            model_name="folder",
+            name="is_published",
         ),
         migrations.RemoveField(
-            model_name='idpgroup',
-            name='is_published',
+            model_name="idpgroup",
+            name="is_published",
         ),
         migrations.RemoveField(
-            model_name='role',
-            name='is_published',
+            model_name="role",
+            name="is_published",
         ),
         migrations.RemoveField(
-            model_name='roleassignment',
-            name='is_published',
+            model_name="roleassignment",
+            name="is_published",
         ),
         migrations.RemoveField(
-            model_name='serviceaccount',
-            name='is_published',
+            model_name="serviceaccount",
+            name="is_published",
         ),
         migrations.RemoveField(
-            model_name='user',
-            name='is_published',
+            model_name="user",
+            name="is_published",
         ),
         migrations.RemoveField(
-            model_name='usergroup',
-            name='is_published',
+            model_name="usergroup",
+            name="is_published",
         ),
     ]

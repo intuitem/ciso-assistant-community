@@ -5,15 +5,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('iam', '0029_remove_folder_is_published_and_more'),
+        ("iam", "0029_remove_folder_is_published_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='folder',
-            name='default_role',
-            field=models.ForeignKey(blank=True, help_text='Folder-attached `Role` which permissions are assigned(granted) to ANY user with ANY RoleAssignment on a descendant folder of `this` folder.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='default_role_folders', to='iam.role'),
+            model_name="folder",
+            name="default_role",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Folder-attached `Role` which permissions are assigned(granted) to ANY user with ANY RoleAssignment on a descendant folder of `this` folder.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="default_role_folders",
+                to="iam.role",
+            ),
         ),
     ]
