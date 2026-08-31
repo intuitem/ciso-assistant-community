@@ -168,7 +168,7 @@ class Migration(migrations.Migration):
         # We need to ensure this migraton runs BEFORE all migrations which remove an `is_published` field from a model.
         # (as `fill_default_roles` relies on the `is_published` fields to assign the appropriate `default_role` to the folders (`Folder` objects)).
         ("automation", "0006_remove_condition_is_published_and_more"),
-        ("core", "0185_remove_actor_is_published_remove_answer_is_published_and_more"),
+        ("core", "0186_remove_actor_is_published_remove_answer_is_published_and_more"),
         ("crq", "0004_remove_quantitativeriskhypothesis_is_published_and_more"),
         ("custom_fields", "0002_remove_customfieldchoice_is_published_and_more"),
         ("doc_management", "0006_remove_documentattachment_is_published_and_more"),
