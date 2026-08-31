@@ -74,10 +74,6 @@ services:
       - PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost:8443/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
-      - HOME=/tmp
-      - XDG_CACHE_HOME=/tmp/.cache
-      - XDG_CONFIG_HOME=/tmp/.config
-      - XDG_DATA_HOME=/tmp/.local/share
     image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
     pull_policy: always
     read_only: true
@@ -91,7 +87,6 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-    user: "1000:1000"
 
   qdrant:
     container_name: qdrant

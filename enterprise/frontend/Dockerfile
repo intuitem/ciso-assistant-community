@@ -19,8 +19,8 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm run build
 RUN pnpm prune
 
-# Distroless runtime: no shell, no package manager, no npm. Runs as uid 1000, so
-# the copies are chowned rather than a user being created (groupadd needs a shell).
+# Distroless runtime: no shell, no package manager, no npm. The copies are chowned
+# rather than a user being created, since groupadd/useradd need a shell.
 FROM ${NODE_RUNTIME_IMAGE}
 ENV NODE_OPTIONS="--max-old-space-size=10240"
 WORKDIR /app
@@ -31,5 +31,9 @@ COPY --chown=1000:1000 package.json .
 EXPOSE 3000
 ENV NODE_ENV=production
 ENV BODY_SIZE_LIMIT=50000000
+
+# uid 1000 is `node` in the runtime image; set explicitly so the image is non-root
+# on its own, whatever NODE_RUNTIME_IMAGE is overridden with.
+USER 1000:1000
 
 CMD [ "node", "server" ]
