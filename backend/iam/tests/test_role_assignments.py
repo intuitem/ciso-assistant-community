@@ -1,10 +1,14 @@
 from typing import Literal
 
 from django.db import models
+from django.apps import apps
 from django.contrib.auth.models import Permission
+from django.core.exceptions import FieldDoesNotExist
 import pytest
 
+from global_settings import utils as ff_utils
 from global_settings.models import GlobalSettings
+from global_settings.utils import clear_feature_flags_cache
 from iam.models import RoleAssignment, User, UserGroup, IdPGroup, Role, Folder
 from core.models import (
     AppliedControl,
@@ -41,6 +45,9 @@ class Utils:
             "idp_groups": True,
         }
         settings.save(update_fields=["value"])
+        # Direct ORM write: bypasses the serializer, the single invalidation
+        # point of the feature-flags cache.
+        clear_feature_flags_cache()
 
     @staticmethod
     def unset_idp_groups_feature_flag():
@@ -50,6 +57,185 @@ class Utils:
             "idp_groups": False,
         }
         settings.save(update_fields=["value"])
+        clear_feature_flags_cache()
+
+
+@pytest.fixture(autouse=True)
+def _enterprise_flags(monkeypatch):
+    """idp_groups is enterprise-only (declared on the EE FeatureFlagsSerializer,
+    hence unsupported on CE); the IdP-group inheritance tests exercise the
+    EE-gated behavior from the CE test bed."""
+    supported = ff_utils.get_supported_feature_flags() | {"idp_groups"}
+    monkeypatch.setattr(ff_utils, "get_supported_feature_flags", lambda: supported)
+
+
+@pytest.mark.django_db
+class TestIAMFolder:
+    @staticmethod
+    def get_models() -> list[type[models.Model]]:
+        all_models = apps.get_models()
+        models = []
+
+        # Modules unrelated to the IAM.
+        BLACKLISTED_MODULE_PREFIXES = ["allauth", "knox", "django", "auditlog"]
+
+        for model in all_models:
+            module_name = model.__module__.split(".", 2)[0]
+
+            # Managed models (e.g. `SSOSettings`) don't have a dedicated SQL table for them.
+            # It's fine to not perform tests on them as a managed model inherits behaviors from its base class (which will be tested).
+            if not model._meta.managed:
+                continue
+
+            if module_name not in BLACKLISTED_MODULE_PREFIXES:
+                models.append(model)
+
+        return models
+
+    def test_invalid_folder_field(self):
+        """
+        Ensure there's no invalid 'folder' field.
+
+        Every model which implements a field named 'folder' MUST set make it a `ForeignKey` ON the `Folder` model.
+        """
+        model_list = self.get_models()
+        errors = []
+
+        for model in model_list:
+            try:
+                folder_field = model._meta.get_field("folder")
+            except FieldDoesNotExist:
+                continue
+
+            if not getattr(folder_field, "concrete", False):
+                # We don't want to match reverse relations (like `Folder.folder`)
+                continue
+
+            if not isinstance(folder_field, models.ForeignKey):
+                errors.append(
+                    f"The {model.__qualname__}.folder field MUST be a ForeignKey."
+                )
+                continue
+
+            linked_model = folder_field.related_model
+
+            if linked_model is not Folder:
+                linked_model_name = (
+                    linked_model.__qualname__
+                    if isinstance(linked_model, models.Model)
+                    else "self"
+                )
+
+                errors.append(
+                    f"The {model.__qualname__}.folder field MUST be ON to the Folder model (not the {linked_model_name!r} model)."
+                )
+
+        assert len(errors) == 0, f"Errors found: {errors}"
+
+    def test_model_iam_scope_field_presence(self):
+        """
+        Ensure all models IAM scopes can be deduced.
+
+        This test will fail if someone create a model while forgetting to set the `IAM_SCOPE_FIELD` attribute for the new model.
+        """
+        model_list = self.get_models()
+
+        errors = []
+
+        for model in model_list:
+            field_names = {f.name for f in model._meta.get_fields()}
+
+            if "folder" in field_names:
+                # If the model has a `folder` field this field will serve as a default IAM folder field.
+                continue
+
+            # "iam_scope_field" => "IAM_SCOPE_FIELD"
+            iam_scope_field_name = getattr(model, "IAM_SCOPE_FIELD", None)
+            if iam_scope_field_name is None:
+                # Models without a "folder" field require a `IAM_SCOPE_FIELD` field.
+                errors.append(
+                    f"No IAM_SCOPE_FIELD attribute found for model: {model.__qualname__}"
+                )
+                continue
+
+            try:
+                if iam_scope_field_name in [
+                    Folder.IAM_NOT_IMPLEMENTED,
+                    Folder.IAM_SPECIAL_CASE,
+                ]:
+                    continue
+
+                iam_scope_field = model._meta.get_field(iam_scope_field_name)
+            except FieldDoesNotExist:
+                errors.append(
+                    f"The {model.__qualname__}.IAM_SCOPE_FIELD {repr(iam_scope_field_name)[:50]} isn't found/isn't a django field."
+                )
+                continue
+
+            is_valid_field_type = isinstance(iam_scope_field, models.ForeignKey)
+            if not is_valid_field_type:
+                errors.append(
+                    f"The model {model.__qualname__} has a non-ForeignKey IAM field: {iam_scope_field_name!r} "
+                )
+                continue
+
+            iam_scope_model = iam_scope_field.related_model
+            if iam_scope_model == "self":
+                errors.append(
+                    f"The {model.__qualname__}.IAM_SCOPE_FIELD field MUST NOT be linked to 'self'."
+                )
+                continue
+
+            try:
+                field = iam_scope_model._meta.get_field("folder")
+            except FieldDoesNotExist:
+                errors.append(
+                    f"The {model.__qualname__}.IAM_SCOPE_FIELD field is linked to a model ({iam_scope_model.__qualname__}) with no 'folder' field (an IAM scope model MUST have a 'folder' field)."
+                )
+                continue
+            else:
+                if (
+                    not isinstance(field, models.ForeignKey)
+                    or field.related_model is not Folder
+                ):
+                    errors.append(
+                        f"The {model.__qualname__}.IAM_SCOPE_FIELD field is linked to a model whose 'folder' field isn't a ForeignKey to a Folder object."
+                    )
+
+        assert len(errors) == 0, f"Errors found: {errors}"
+
+    def test_list_objects(self):
+        user = User.objects.create(email="basic-user@wow.com")
+        role = Role.objects.create(name="role")
+        role.permissions.set(
+            Permission.objects.filter(codename__in=BASIC_PERMISSION_LIST)
+        )
+        role_assignment = RoleAssignment.objects.create(
+            user=user, role=role, is_recursive=True
+        )
+        folder = Folder.objects.create(name="folder")
+        role_assignment.perimeter_folders.add(folder)
+
+        # Check if i can do a get_viewable_ids FOR EACH model (or if the absence of a valid folder just fucks everything up).
+
+        failing_models: list[tuple[type[models.Model], Exception]] = []
+
+        model_list = self.get_models()
+
+        for model in model_list:
+            try:
+                RoleAssignment.get_viewable_object_ids(
+                    user, model, Folder.get_root_folder()
+                ).count()
+            except Folder.IAMNotImplementedError:
+                # This Exception is fine as it means the model creator has explicitely set `IAM_SCOPE_FIELD` to `Folder.IAM_NOT_IMPLEMENTED`.
+                pass
+            except Exception as e:
+                failing_models.append((model, e))
+
+        assert len(failing_models) == 0, print(
+            f"RoleAssignment.get_viewable_object_ids doesn't work for these models: {failing_models}"
+        )
 
 
 @pytest.mark.django_db
@@ -280,7 +466,7 @@ class TestPermissionCheck:
         ), "Inactive users shouldn't have access to anything."
 
     def test_role_assignment_recursivity(self):
-        """Ensure `RoleAssignment.is_recursive` and `ALWAYS_VIEWABLE` (`AppliedControl.VIEWABLE_FROM_DESCENDANTS_MODE`) work as expected."""
+        """Ensure `RoleAssignment.is_recursive` works as expected."""
 
         folder1 = Folder.objects.create(name="folder1")
         folder2 = Folder.objects.create(name="folder2", parent_folder=folder1)
@@ -362,17 +548,17 @@ class TestPermissionCheck:
             RoleAssignment.is_object_accessible(
                 user, "view", AppliedControl, applied_control.id
             )
-            is True
+            is False
         ), (
-            "The previously created `applied_control` should be accessible (AppliedControl is ALWAYS_VIEWABLE, and it's in a ancestor folder)."
+            "The previously created `applied_control` shouldn't be accessible (as it's in a ancestor folder)."
         )
         assert (
             RoleAssignment.get_viewable_object_ids(
-                user, AppliedControl, folder2
+                user, AppliedControl, folder3
             ).count()
-            == 1
+            == 0
         ), (
-            "The previously created `applied_control` should be accessible (AppliedControl is ALWAYS_VIEWABLE, and it's in a ancestor folder)."
+            "The previously created `applied_control` shouldn't be accessible (as it's in a ancestor folder)."
         )
 
         assert (
@@ -392,96 +578,12 @@ class TestPermissionCheck:
             "The user shouldn't have the right to change the previous created applied control (as he doesn't have the 'change_appliedcontrol' permission)."
         )
 
-    def test_enclave_does_not_inherit_published_objects(self):
-        """
-        Ensure a user whose access is scoped to an ENCLAVE `Folder` does NOT inherit the published objects of the enclave ancestors.
-
-        Enclaves are sealed compartments for third parties (e.g. TPRM respondents) living inside a customer domain: the plain `is_published` inheritance rule MUST NOT apply to them, otherwise the third party sees every published object of the customer's domain and of the root folder.
-        """
-
-        root_folder = Folder.get_root_folder()
-        domain = Folder.objects.create(
-            name="customer_domain", viewable_from_descendants=True
-        )
-        enclave = Folder.objects.create(
-            name="enclave",
-            parent_folder=domain,
-            content_type=Folder.ContentType.ENCLAVE,
-        )
-
-        published_in_root = AppliedControl.objects.create(
-            name="published_in_root", folder=root_folder
-        )
-        published_in_domain = AppliedControl.objects.create(
-            name="published_in_domain", folder=domain
-        )
-        control_in_enclave = AppliedControl.objects.create(
-            name="control_in_enclave", folder=enclave
-        )
-
-        role = Role.objects.create(name="role")
-        role.permissions.set(
-            Permission.objects.filter(codename__in=BASIC_PERMISSION_LIST)
-        )
-
-        enclave_user = User.objects.create_user("enclave_user@gmail.com")
-        enclave_role_assignment = RoleAssignment.objects.create(
-            user=enclave_user, role=role, is_recursive=True
-        )
-        enclave_role_assignment.perimeter_folders.add(enclave)
-
-        assert (
-            RoleAssignment.is_object_accessible(
-                enclave_user, "view", AppliedControl, control_in_enclave.id
-            )
-            is True
-        ), "The enclave user should have access to the objects of its enclave."
-
-        for published_control in [published_in_root, published_in_domain]:
-            assert (
-                RoleAssignment.is_object_accessible(
-                    enclave_user, "view", AppliedControl, published_control.id
-                )
-                is False
-            ), (
-                "An enclave-scoped user MUST NOT inherit the published objects of the enclave ancestors."
-            )
-
-        enclave_user_viewable_ids = set(
-            RoleAssignment.get_viewable_object_ids(enclave_user, AppliedControl)
-        )
-        assert enclave_user_viewable_ids == {control_in_enclave.id}, (
-            "An enclave-scoped user MUST only list the objects of its enclave, not the published objects of the enclave ancestors."
-        )
-
-        # Control group: the same assignment on a non-enclave folder DOES inherit published ancestors.
-        domain_user = User.objects.create_user("domain_user@gmail.com")
-        domain_role_assignment = RoleAssignment.objects.create(
-            user=domain_user, role=role, is_recursive=False
-        )
-        domain_role_assignment.perimeter_folders.add(domain)
-
-        assert (
-            RoleAssignment.is_object_accessible(
-                domain_user, "view", AppliedControl, published_in_root.id
-            )
-            is True
-        ), (
-            "A domain-scoped user should still inherit the published objects of the domain ancestors."
-        )
-        assert published_in_root.id in set(
-            RoleAssignment.get_viewable_object_ids(domain_user, AppliedControl)
-        ), (
-            "A domain-scoped user should still list the published objects of the domain ancestors."
-        )
-
     def test_filtering_label_perms(self):
         """
         Ensure `FilteringLabel` follows the STANDARD folder-scoped IAM rules, with a SINGLE exception: "add".
 
-        `FilteringLabel` objects are force-published (`ALWAYS_PUBLISHED`), so:
+        `FilteringLabel` objects are (through the product surface) always stored in the root folder, so:
 
-        - "view" needs NO special case: root folder labels are visible to any user holding "view_filteringlabel" on any non-ENCLAVE folder, through the normal `is_published` inheritance (and an ENCLAVE-scoped grant sees nothing).
         - "change"/"delete" need NO special case: they require the permission on the label folder (the root folder), like any other object.
         - "add" is THE single exception: holding "add_filteringlabel" on ANY folder allows creating labels (they are force-stored in the root folder, so the standard rule would wrongly require root folder access).
         """
@@ -489,11 +591,6 @@ class TestPermissionCheck:
         root_folder = Folder.get_root_folder()
         domain1 = Folder.objects.create(name="domain1")
         domain2 = Folder.objects.create(name="domain2")
-        enclave = Folder.objects.create(
-            name="enclave",
-            parent_folder=domain1,
-            content_type=Folder.ContentType.ENCLAVE,
-        )
 
         label_in_root = FilteringLabel.objects.create(
             label="label_in_root", folder=root_folder
@@ -527,17 +624,6 @@ class TestPermissionCheck:
         )
         domain1_role_assignment.perimeter_folders.add(domain1)
 
-        assert set(
-            RoleAssignment.get_viewable_object_ids(domain1_user, FilteringLabel)
-        ) == {label_in_root.id, label_in_domain1.id}, (
-            "A domain user MUST view the root folder labels (published) and its own domain labels, but NOT the other domains labels."
-        )
-        assert (
-            RoleAssignment.is_object_accessible(
-                domain1_user, "view", FilteringLabel, label_in_root.id
-            )
-            is True
-        ), "Root folder labels MUST be visible through the `is_published` inheritance."
         assert (
             RoleAssignment.is_object_accessible(
                 domain1_user, "view", FilteringLabel, label_in_domain2.id
@@ -585,29 +671,6 @@ class TestPermissionCheck:
             RoleAssignment.get_changeable_object_ids(root_user, FilteringLabel)
         ) == {label_in_root.id}, (
             "A root folder user MUST be able to change the root folder labels."
-        )
-
-        # A user with the label permissions scoped to an ENCLAVE folder:
-
-        enclave_user = User.objects.create_user("enclave_labels@gmail.com")
-        enclave_role_assignment = RoleAssignment.objects.create(
-            user=enclave_user, role=label_role, is_recursive=True
-        )
-        enclave_role_assignment.perimeter_folders.add(enclave)
-
-        assert (
-            set(RoleAssignment.get_viewable_object_ids(enclave_user, FilteringLabel))
-            == set()
-        ), (
-            "An ENCLAVE-scoped grant MUST NOT see any label (the `is_published` inheritance doesn't apply to enclaves)."
-        )
-        assert (
-            RoleAssignment.is_object_accessible(
-                enclave_user, "view", FilteringLabel, label_in_root.id
-            )
-            is False
-        ), (
-            "An ENCLAVE-scoped grant MUST NOT see the root folder labels (the `is_published` inheritance doesn't apply to enclaves)."
         )
 
         # A user WITHOUT any label permission:
@@ -775,7 +838,6 @@ class TestFocusMode:
         Ensure focus mode intersects the accessible folders with the focus subtree PLUS the root folder, THROUGH THE PUBLIC API (`RoleAssignment.get_allowed_folder_ids`/`RoleAssignment.get_viewable_object_ids`):
 
         - Focus mode MUST NEVER extend the accessible folders: the root folder stays in scope ONLY for users with a role assignment covering it (#4470 parity: corpus-level objects stay available to admins in focus mode).
-        - Root folder objects (ALWAYS_VIEWABLE, like the `User` objects) remain visible to everyone (e.g. so the user pickers keep working in focus mode).
         """
         from core.context import focus_folder_id_var
 
@@ -801,8 +863,8 @@ class TestFocusMode:
         )
         domain_role_assignment.perimeter_folders.add(domain)
 
-        published_control_in_root = AppliedControl.objects.create(
-            name="published_control_in_root", folder=root_folder
+        unpublished_control_in_root = AppliedControl.objects.create(
+            name="unpublished_control_in_root", folder=root_folder
         )
         control_in_domain = AppliedControl.objects.create(
             name="control_in_domain", folder=domain
@@ -828,6 +890,9 @@ class TestFocusMode:
             assert control_in_domain.id in admin_viewable_ids, (
                 "The focused folder objects MUST be visible (admin)."
             )
+            assert unpublished_control_in_root.id in admin_viewable_ids, (
+                "Root folder objects MUST stay visible in focus mode for a user with a role assignment on the root folder (#4470 parity)."
+            )
 
             domain_user_allowed_folder_ids = set(
                 RoleAssignment.get_allowed_folder_ids(
@@ -847,21 +912,10 @@ class TestFocusMode:
             assert control_in_domain.id in domain_user_viewable_ids, (
                 "The focused folder objects MUST be visible (domain user)."
             )
+            assert unpublished_control_in_root.id not in domain_user_viewable_ids, (
+                "Unpublished root folder objects MUST NOT be visible to users without any role assignment on the root folder."
+            )
 
-            for user in [admin_user, domain_user]:
-                viewable_ids = set(
-                    RoleAssignment.get_viewable_object_ids(user, AppliedControl)
-                )
-                assert published_control_in_root.id in viewable_ids, (
-                    f"Root folder objects (ALWAYS_VIEWABLE) MUST remain visible in focus mode ({user.email!r})."
-                )
-
-                viewable_user_ids = set(
-                    RoleAssignment.get_viewable_object_ids(user, User)
-                )
-                assert {admin_user.id, domain_user.id} <= viewable_user_ids, (
-                    f"`User` objects (always published, in the root folder) MUST remain visible in focus mode ({user.email!r})."
-                )
         finally:
             focus_folder_id_var.reset(token)
 
@@ -871,7 +925,6 @@ class TestFocusMode:
 
         - A folder outside the focus subtree is NOT accessible while a focus folder is set (even for users with a role assignment covering it).
         - The ROOT folder stays in scope for users with a role assignment covering it (#4470 parity: corpus-level operations keep working for admins in focus mode).
-        - Root folder objects (ALWAYS_VIEWABLE) stay visible in focus mode.
         """
         from core.context import focus_folder_id_var
 
@@ -897,8 +950,8 @@ class TestFocusMode:
         )
         domain1_role_assignment.perimeter_folders.add(domain1)
 
-        published_control_in_root = AppliedControl.objects.create(
-            name="published_control_in_root", folder=root_folder
+        unpublished_control_in_root = AppliedControl.objects.create(
+            name="unpublished_control_in_root", folder=root_folder
         )
         control_in_domain1 = AppliedControl.objects.create(
             name="control_in_domain1", folder=domain1
@@ -954,15 +1007,22 @@ class TestFocusMode:
                 )
                 is True
             ), "The focus subtree objects MUST remain point-accessible."
-            for user in [admin_user, domain1_user]:
-                assert (
-                    RoleAssignment.is_object_accessible(
-                        user, "view", AppliedControl, published_control_in_root.id
-                    )
-                    is True
-                ), (
-                    f"Root folder objects (ALWAYS_VIEWABLE) MUST stay visible in focus mode ({user.email!r})."
+            assert (
+                RoleAssignment.is_object_accessible(
+                    admin_user, "view", AppliedControl, unpublished_control_in_root.id
                 )
+                is True
+            ), (
+                "Root folder objects MUST stay point-accessible in focus mode for a user with a role assignment on the root folder (#4470 parity)."
+            )
+            assert (
+                RoleAssignment.is_object_accessible(
+                    domain1_user, "view", AppliedControl, unpublished_control_in_root.id
+                )
+                is False
+            ), (
+                "The root folder focus inclusion MUST NOT grant unpublished root folder objects to users without any role assignment on the root folder."
+            )
         finally:
             focus_folder_id_var.reset(token)
 

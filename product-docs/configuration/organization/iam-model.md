@@ -127,16 +127,15 @@ The following schematic illustrates the fundamental concepts of IAM in CISO Assi
 
 <figure><img src="../../.gitbook/assets/rbac.png" alt=""><figcaption></figcaption></figure>
 
-### 6. Publication mechanism
+### 6. Default role mechanism
 
-Folders have a _**viewable\_from\_descendants.**_&#x20; field
+If a user has a role assignment on a domain, he is granted all the default_role of its ancestor domains on these domains.
 
-Objects which whose is `ALWAYS_VIEWABLE` or which whose is `MAY_BE_VIEWABLE` and which folder has _viewable\_from\_descendants_ set to `True` are visible(viewable) in subdomains as if they were attached to each subdomain of the object's domain.
-This mechanism only concerns visibility, not creation/udpate/deletion.
+For example, if a user has any role assignment on a **ChildDomain** domain, if an ancestor domain **Domain** has a defined default_role (e.g. **Reader catalog**), then the user will have the **Reader catalog** granted on the **Domain** domain.
 
-To avoid an object being viewable from descendants, the simplest solution is to put it in a leaf subdomain.
+This only work if the role assignment is on a domain which is NOT an enclave.
 
-The plan is to remove this mechanism by Q2 2026 and introduce dynamic groups instead (e.g. the group of all users).
+Also, third party users aren't affected by this mechanism (the default role of a domain doesn't give them any permission).
 
 #### Can I make an object visible to all users without attaching it to global?
 

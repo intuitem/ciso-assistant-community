@@ -427,6 +427,60 @@ BUILTIN_ROLE_TRANSLATIONS = {
         "ur": {"name": "تکنیکی ٹیسٹر"},
         "zh": {"name": "技术测试员"},
     },
+    "BI-RL-MIG": {
+        "en": {"name": "Legacy migration reader"},
+        "ar": {"name": "قارئ الترحيل القديم"},
+        "cs": {"name": "Čtečka starší migrace"},
+        "da": {"name": "Ældre migrationslæser"},
+        "de": {"name": "Legacy-Migrationsleser"},
+        "el": {"name": "Αναγνώστης παλαιάς μετάβασης"},
+        "es": {"name": "Lector de migración heredada"},
+        "et": {"name": "Pärand-migratsiooni lugeja"},
+        "fr": {"name": "Lecteur de migration héritée"},
+        "hi": {"name": "विरासती माइग्रेशन रीडर"},
+        "hr": {"name": "Čitatelj naslijeđene migracije"},
+        "hu": {"name": "Örökölt migrációolvasó"},
+        "id": {"name": "Pembaca migrasi warisan"},
+        "it": {"name": "Lettore della migrazione legacy"},
+        "ko": {"name": "레거시 마이그레이션 열람자"},
+        "lt": {"name": "Paveldėtos migracijos skaitytojas"},
+        "nl": {"name": "Legacy-migratielezer"},
+        "pl": {"name": "Czytelnik starszej migracji"},
+        "pt": {"name": "Leitor de migração legada"},
+        "ro": {"name": "Cititor de migrare moștenită"},
+        "sv": {"name": "Äldre migrationsläsare"},
+        "tr": {"name": "Eski geçiş okuyucusu"},
+        "uk": {"name": "Читач застарілої міграції"},
+        "ur": {"name": "پرانی مائیگریشن ریڈر"},
+        "zh": {"name": "遗留迁移阅读者"},
+    },
+    "BI-RL-CAT": {
+        "en": {"name": "Catalog reader"},
+        "ar": {"name": "قارئ الكتالوج"},
+        "cs": {"name": "Čtečka katalogu"},
+        "da": {"name": "Kataloglæser"},
+        "de": {"name": "Katalogleser"},
+        "el": {"name": "Αναγνώστης καταλόγου"},
+        "es": {"name": "Lector de catálogo"},
+        "et": {"name": "Kataloogilugeja"},
+        "fr": {"name": "Lecteur de catalogue"},
+        "hi": {"name": "सूची रीडर"},
+        "hr": {"name": "Čitatelj kataloga"},
+        "hu": {"name": "Katalógusolvasó"},
+        "id": {"name": "Pembaca katalog"},
+        "it": {"name": "Lettore del catalogo"},
+        "ko": {"name": "카탈로그 열람자"},
+        "lt": {"name": "Katalogo skaitytojas"},
+        "nl": {"name": "Cataloguslezer"},
+        "pl": {"name": "Czytelnik katalogu"},
+        "pt": {"name": "Leitor de catálogo"},
+        "ro": {"name": "Cititor de catalog"},
+        "sv": {"name": "Katalogläsare"},
+        "tr": {"name": "Katalog okuyucusu"},
+        "uk": {"name": "Читач каталогу"},
+        "ur": {"name": "کیٹلاگ ریڈر"},
+        "zh": {"name": "目录阅读者"},
+    },
 }
 
 
@@ -1318,8 +1372,6 @@ def get_respondent_scoped_folder_ids(user) -> set[UUID]:
     treated as a respondent. Auditor-side roles (reader, approver, analyst,
     domain-manager, administrator) hold ``view_compliance_assessment_full`` and are therefore
     excluded; auditee and third-party respondent do not and are included.
-
-    Uses the IAM snapshot caches exclusively (no extra DB queries).
     """
     from iam.models import RoleAssignment
 
@@ -1428,3 +1480,43 @@ def build_initial_field_visibility(framework):
         merged.setdefault(key, dict(EVERYONE_EDIT))
         merged[key].update(pair)
     return merged
+
+
+def bulk_update_with_log(model, rows, fields, batch_size=500):
+    """``bulk_update`` that still leaves a trail: it skips ``post_save``, so
+    auditlog logs nothing and workflow events never fire. Writes the entries a
+    per-object ``save()`` would. Returns the number of rows that changed."""
+    from auditlog.diff import model_instance_diff
+    from auditlog.models import LogEntry
+    from django.db import transaction
+
+    rows = [row for row in rows if row.pk is not None]
+    fields = list(fields)
+    if not rows or not fields:
+        return 0
+
+    use_json = getattr(settings, "AUDITLOG_STORE_JSON_CHANGES", False)
+    logged = 0
+    # One transaction: a half-written trail is worse than a failed call.
+    with transaction.atomic():
+        # Stored values first: after bulk_update there is nothing left to diff.
+        # Locked, because at READ COMMITTED two concurrent writers would both
+        # read the pre-change value and log the same "from".
+        stored = model.objects.select_for_update().in_bulk([row.pk for row in rows])
+        model.objects.bulk_update(rows, fields, batch_size=batch_size)
+        for row in rows:
+            old = stored.get(row.pk)
+            if old is None:
+                continue
+            changes = model_instance_diff(
+                old, row, fields_to_check=fields, use_json_for_changes=use_json
+            )
+            if not changes:
+                continue
+            # log_create fills content_type, cid and additional_data (folder_id,
+            # which the dispatcher scopes on); the middleware fills the actor.
+            LogEntry.objects.log_create(
+                row, action=LogEntry.Action.UPDATE, changes=changes
+            )
+            logged += 1
+    return logged

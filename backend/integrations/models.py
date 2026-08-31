@@ -4,7 +4,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
 
 from core.base_models import AbstractBaseModel
-from iam.models import FolderMixin
+from iam.models import FolderMixin, Folder
 
 
 class IntegrationProvider(AbstractBaseModel, FolderMixin):
@@ -65,6 +65,8 @@ class IntegrationSchemaCache(AbstractBaseModel):
     choices = models.JSONField(default=dict)  # {"table:field": [{value, label}], ...}
 
     fetched_at = models.DateTimeField(null=True, blank=True)
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
 
 class SyncMapping(AbstractBaseModel, FolderMixin):
@@ -137,6 +139,8 @@ class SyncEvent(models.Model):
     error_details = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
 
 # Sync state (SyncMapping/SyncEvent) is high-volume and intentionally untracked.

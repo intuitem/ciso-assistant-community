@@ -112,26 +112,6 @@ LLM_URL_DEFAULTS = {
 }
 
 
-class GlobalSettingsSerializer(serializers.ModelSerializer):
-    def create(self, validated_data):
-        raise serializers.ValidationError(
-            "Global settings can only be created through data migrations."
-        )
-
-    def delete(self, instance):
-        raise serializers.ValidationError(
-            "Global settings can only be deleted through data migrations."
-        )
-
-    def update(self, instance, validated_data):
-        validated_data.pop("name")
-        return super().update(instance, validated_data)
-
-    class Meta:
-        model = GlobalSettings
-        fields = ["id", "name", "created_at", "updated_at"]
-
-
 class GeneralSettingsSerializer(serializers.ModelSerializer):
     conversion_rate = serializers.FloatField(
         write_only=True, required=False, default=1.0
@@ -522,6 +502,12 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         if value_changed:
             instance.value = current_value_dict
             instance.save(update_fields=["value"])
+            # Every flags write must invalidate the read cache; the only other
+            # write path is PresetExecutor._apply_feature_flags, which does
+            # the same. Local import: utils imports this module at load time.
+            from global_settings.utils import clear_feature_flags_cache
+
+            clear_feature_flags_cache()
 
         return instance
 

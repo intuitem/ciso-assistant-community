@@ -366,7 +366,7 @@ For frameworks using dynamic questionnaires, the export/import supports flattene
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
-| `viewable_from_descendants` | BooleanField | Medium |
+| `default_role` | FK Role | Medium |
 | `content_type` | CharField | Low |
 | `builtin` | BooleanField | Low |
 | `hide_in_selects` | BooleanField | Low |

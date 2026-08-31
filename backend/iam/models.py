@@ -22,9 +22,6 @@ from django.urls.base import reverse_lazy
 from django.db.models import Q, F, QuerySet, Case, When
 from knox.models import AuthToken
 
-if TYPE_CHECKING:
-    from core.models import Actor
-
 from core.utils import (
     BUILTIN_USERGROUP_CODENAMES,
     get_translated_builtin_role_name,
@@ -34,7 +31,8 @@ from core.base_models import (
     ActorSyncManager,
     ActorSyncMixin,
     NameDescriptionMixin,
-    ViewableFromDescendantsMode,
+    _IAMNotImplemented,
+    _IAMSpecialCase,
 )
 from core.utils import UserGroupCodename, RoleCodename
 from django.utils.http import urlsafe_base64_encode
@@ -112,6 +110,22 @@ class Folder(NameDescriptionMixin):
     Folders are the base perimeter for role assignments
     """
 
+    IAM_NOT_IMPLEMENTED = _IAMNotImplemented()
+    """
+    Sentinel value set to a model `IAM_SCOPE_FIELD` attribute when this model isn't supported by the IAM.
+
+    If an IAM function (e.g. `is_object_readable` is invoked with this model/an object of this model it will raise an `IAMNotImplementedError`.
+    """
+    IAM_SPECIAL_CASE = _IAMSpecialCase()
+    """
+    Sentinel value set to a model `IAM_SCOPE_FIELD` attribute is supported by the IAM even though it doesn't have any clearly defined IAM scope field.
+    """
+
+    class IAMNotImplementedError(NotImplementedError):
+        """Exception raised when the IAM is invoked with a `IAM_NOT_IMPLEMENTED`/undefined `IAM_SCOPE_FIELD` model."""
+
+        pass
+
     _CACHED_ROOT_FOLDER: ClassVar[Optional[Folder]] = None
     """**WARNING:** Caching the root folder assumes it can't be deleted."""
 
@@ -126,12 +140,8 @@ class Folder(NameDescriptionMixin):
         root_folder, _ = Folder.objects.get_or_create(
             content_type=Folder.ContentType.ROOT,
             builtin=True,
-            defaults={"name": "Global", "viewable_from_descendants": True},
+            defaults={"name": "Global"},
         )
-        """if not root_folder.viewable_from_descendants:
-            # Self-healing (Use a migrations)
-            root_folder.viewable_from_descendants = True
-            root_folder.save()"""
 
         Folder._CACHED_ROOT_FOLDER = root_folder
 
@@ -197,10 +207,14 @@ class Folder(NameDescriptionMixin):
         default=False,
         help_text=_("Automatically provision IAM groups for domain folders."),
     )
-    viewable_from_descendants = models.BooleanField(
-        default=False,
+    default_role = models.ForeignKey(
+        "Role",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="default_role_folders",
         help_text=_(
-            "Make all `MAY_BE_VIEWABLE` objects in this folder be viewable from their descendants (descendant folders)."
+            "Folder-attached `Role` which permissions are assigned(granted) to ANY user with ANY RoleAssignment on a descendant folder of `this` folder."
         ),
     )
 
@@ -212,8 +226,6 @@ class Folder(NameDescriptionMixin):
     )
 
     fields_to_check = ["name"]
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         """for Model"""
@@ -330,11 +342,6 @@ class Folder(NameDescriptionMixin):
 
         with transaction.atomic():
             self._lock_folder_tree()
-
-            if is_root_folder and not self.viewable_from_descendants:
-                raise Folder.InconsistencyError(
-                    "The root folder objects MUST be viewable by descendants."
-                )
 
             if is_create:
                 if is_root_folder:
@@ -935,8 +942,6 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
-
     class Meta:
         """for Model"""
 
@@ -1425,6 +1430,24 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return user_role_assignments
 
     @staticmethod
+    def _resolve_permission(
+        permission: tuple[PermissionPrefix, type[models.Model]] | Permission,
+    ) -> Permission:
+        if isinstance(permission, Permission):
+            return permission
+
+        perm_prefix, model = permission
+
+        if model is User and perm_prefix in ("backup", "restore"):
+            codename = perm_prefix
+        else:
+            model_name = model.__name__.lower()
+            codename = f"{perm_prefix}_{model_name}"
+
+        permission = Permission.objects.get(codename=codename)
+        return permission
+
+    @staticmethod
     def _get_role_assignments_from_permission(
         user: AbstractBaseUser | AnonymousUser,
         permission: tuple[PermissionPrefix, type[models.Model]] | Permission,
@@ -1440,19 +1463,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             user
         ).order_by()
 
-        if isinstance(permission, Permission):
-            role_assignments = role_assignments.filter(role__permissions=permission)
-            return role_assignments
-
-        perm_prefix, model = permission
-
-        if model is User and perm_prefix in ("backup", "restore"):
-            codename = perm_prefix
-        else:
-            model_name = model.__name__.lower()
-            codename = f"{perm_prefix}_{model_name}"
-
-        permission = Permission.objects.get(codename=codename)
+        permission = RoleAssignment._resolve_permission(permission)
 
         role_assignments = role_assignments.filter(role__permissions=permission)
         return role_assignments
@@ -1507,20 +1518,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return is_directly_accessible or is_indirectly_accessible
 
     @staticmethod
-    def _is_actor_accessible(
-        user: AbstractBaseUser | AnonymousUser,
-        perm_prefix: PermissionPrefix,
-        actor: Actor,
-    ) -> bool:
-        specific = actor.specific
-        specific_model = type(specific)
-        iam_scope_folder = specific.folder
-
-        return iam_scope_folder.id in RoleAssignment.get_allowed_folder_ids(
-            user, (perm_prefix, specific_model)
-        )
-
-    @staticmethod
     def is_object_accessible(
         user: AbstractBaseUser | AnonymousUser,
         perm_prefix: PermissionPrefix,
@@ -1540,29 +1537,46 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return False
 
         if model is Actor:
-            return RoleAssignment._is_actor_accessible(user, perm_prefix, obj)
+            if not isinstance(obj, Actor):
+                raise AssertionError("Unreachable.")
+
+            obj = obj.specific
+            model = type(obj)
 
         if perm_prefix == "add" and model is FilteringLabel:
             return RoleAssignment.get_allowed_folder_ids(
                 user, (perm_prefix, FilteringLabel)
             ).exists()
 
-        user_role_assignments = RoleAssignment._get_role_assignments_from_permission(
-            user, (perm_prefix, model)
+        permission = RoleAssignment._resolve_permission((perm_prefix, model))
+
+        allowed_folder_set = RoleAssignment._get_directly_allowed_folder_ids(
+            user, permission
         )
-        recursive_role_assignments = user_role_assignments.filter(is_recursive=True)
+
+        """user_role_assignments = RoleAssignment._get_role_assignments_from_permission(
+            user, permission # (perm_prefix, model)
+        )
+        recursive_role_assignments = user_role_assignments.filter(is_recursive=True)"""
 
         directly_accessible_folder_id_set = set(
+            allowed_folder_set.directly_accessible_folder_ids
+        )
+        direct_recursive_folder_id_set = set(
+            allowed_folder_set.direct_recursive_folder_ids
+        )
+
+        """"directly_accessible_folder_id_set = set(
             user_role_assignments.values_list(
                 "perimeter_folders__id", flat=True
             ).distinct()
         )
 
-        direct_recursive_folder_ids = set(
+        direct_recursive_folder_id_set = set(
             recursive_role_assignments.values_list(
                 "perimeter_folders__id", flat=True
             ).distinct()
-        )
+        )"""
 
         iam_scope_folder_id = RoleAssignment.get_iam_folder_id(obj)
 
@@ -1589,48 +1603,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         is_directly_accessible = iam_folder.id in directly_accessible_folder_id_set
         is_indirectly_accessible = bool(
-            direct_recursive_folder_ids & folder_chain_id_set
+            direct_recursive_folder_id_set & folder_chain_id_set
         )
         is_accessible = is_directly_accessible or is_indirectly_accessible
 
-        if is_accessible:
-            return True
-
-        viewable_by_descendants_mode = getattr(
-            model,
-            "VIEWABLE_FROM_DESCENDANTS_MODE",
-            ViewableFromDescendantsMode.NEVER_VIEWABLE,
-        )
-
-        if (
-            perm_prefix == "view"
-            and viewable_by_descendants_mode
-            != ViewableFromDescendantsMode.NEVER_VIEWABLE
-        ):
-            if (
-                viewable_by_descendants_mode
-                == ViewableFromDescendantsMode.ALWAYS_VIEWABLE
-            ):
-                viewable_from_descendants_filter = {}
-            else:
-                viewable_from_descendants_filter = {"viewable_from_descendants": True}
-
-            # "view" access granted on an ENCLAVE folder MUST not leak the published objects of its ancestors.
-            ancestor_folder_ids = (
-                Folder.objects.filter(
-                    descendants__in=Folder.objects.filter(
-                        id__in=directly_accessible_folder_id_set
-                    ).exclude(content_type=Folder.ContentType.ENCLAVE),
-                    **viewable_from_descendants_filter,
-                )
-                .values_list("id", flat=True)
-                .distinct()
-            )
-
-            is_accessible = iam_folder.id in ancestor_folder_ids
-            return is_accessible
-
-        return False
+        return is_accessible
 
     @staticmethod
     def is_object_readable(
@@ -1733,12 +1710,33 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return accessible_folder_ids.union(root_queryset)
 
     @staticmethod
+    def _get_default_role_allowed_folder_ids(
+        directly_accessible_folder_ids: Iterable[uuid.UUID], permission: Permission
+    ) -> QuerySet[uuid.UUID]:
+        """Return all folder IDs which are accessible via the `Role.default_role` mechanism."""
+
+        non_enclave_accessible_folder_ids = Folder.objects.filter(
+            id__in=directly_accessible_folder_ids
+        ).exclude(content_type=Folder.ContentType.ENCLAVE)
+
+        default_role_folder_queryset = Folder.objects.filter(
+            descendants__in=non_enclave_accessible_folder_ids
+        ).distinct()
+        default_role_allowed_folder_ids = default_role_folder_queryset.filter(
+            default_role__permissions=permission
+        ).values_list("id", flat=True)
+
+        return default_role_allowed_folder_ids
+
+    @staticmethod
     def _get_directly_allowed_folder_ids(
         user: AbstractBaseUser | AnonymousUser,
         permission: tuple[PermissionPrefix, type[models.Model]] | Permission,
     ) -> AllowedFolderSet:
         if not isinstance(user, User):
             return AllowedFolderSet.none()
+
+        permission = RoleAssignment._resolve_permission(permission)
 
         user_role_assignments = RoleAssignment._get_role_assignments_from_permission(
             user, permission
@@ -1752,17 +1750,33 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             "perimeter_folders__id", flat=True
         ).distinct()
 
+        default_role_allowed_folder_ids = Folder.objects.none()
+
+        if not user.is_third_party:
+            default_role_allowed_folder_ids = (
+                RoleAssignment._get_default_role_allowed_folder_ids(
+                    directly_accessible_folder_ids, permission
+                )
+            )
+
+        all_directly_accessible_folder_ids = directly_accessible_folder_ids.union(
+            default_role_allowed_folder_ids
+        )
+
         direct_flat_folder_ids = flat_role_assignments.values_list(
             "perimeter_folders__id", flat=True
         ).distinct()
+        all_direct_flat_folder_ids = direct_flat_folder_ids.union(
+            default_role_allowed_folder_ids
+        )
 
         direct_recursive_folder_ids = recursive_role_assignments.values_list(
             "perimeter_folders__id", flat=True
         ).distinct()
 
         return AllowedFolderSet(
-            directly_accessible_folder_ids=directly_accessible_folder_ids,
-            direct_flat_folder_ids=direct_flat_folder_ids,
+            directly_accessible_folder_ids=all_directly_accessible_folder_ids,
+            direct_flat_folder_ids=all_direct_flat_folder_ids,
             direct_recursive_folder_ids=direct_recursive_folder_ids,
         )
 
@@ -1811,6 +1825,13 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         directly_accessible_folder_ids = (
             allowed_folder_set.directly_accessible_folder_ids
         )
+
+        # TODO: Copy the logic from 1448 (i guess we should put it in a dedicated function to avoid duplication)
+        # Something get_permission(permission: tuple[PermissionPrefix, type[models.Model]] | Permission) -> Permission:
+        # permission = Permission.objects.get(codename=codename)
+        # allowed_ancestor_folder_ids = Folder.objects.filter(descendants__in=directly_accessible_folder_ids).distinct().filter(default_role__permissions=permission)
+        # I guess this logic should be moved to `RoleAssignment._get_directly_allowed_folder_ids` instead.
+
         direct_flat_folder_ids = allowed_folder_set.direct_flat_folder_ids
         direct_recursive_folder_ids = allowed_folder_set.direct_recursive_folder_ids
 
@@ -1873,7 +1894,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         user_folder_ids = RoleAssignment.get_allowed_folder_ids(
             user, (perm_prefix, User)
         )
-        team__folder_ids = RoleAssignment.get_allowed_folder_ids(
+        team_folder_ids = RoleAssignment.get_allowed_folder_ids(
             user, (perm_prefix, Team)
         )
         entity_folder_ids = RoleAssignment.get_allowed_folder_ids(
@@ -1888,7 +1909,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             ),
         ).filter(
             Q(user__isnull=False, iam_folder_id__in=user_folder_ids)
-            | Q(team__isnull=False, iam_folder_id__in=team__folder_ids)
+            | Q(team__isnull=False, iam_folder_id__in=team_folder_ids)
             | Q(entity__isnull=False, iam_folder_id__in=entity_folder_ids)
         )
 
@@ -1940,20 +1961,21 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if "folder" in field_names:
             return "folder_id"
 
-        IAM_SCOPE_FIELDS = [
-            "risk_assessment",
-            "entity",
-            "provider_entity",
-            "journey",
-            "questionnaire_run",
-            "agent_run",
-        ]
+        # TRACE: model.IAM_SCOPE_FIELD
+        iam_scope_field_name = getattr(model, "IAM_SCOPE_FIELD")
 
-        for field in IAM_SCOPE_FIELDS:
-            if field in field_names:
-                return f"{field}__folder_id"
+        if iam_scope_field_name in [
+            Folder.IAM_NOT_IMPLEMENTED,
+            Folder.IAM_SPECIAL_CASE,
+        ]:
+            raise Folder.IAMNotImplementedError(
+                f"IAM not implemented for model {model.__qualname__}"
+            )
 
-        raise NotImplementedError("type not supported")
+        if iam_scope_field_name in field_names:
+            return f"{iam_scope_field_name}__folder_id"
+
+        raise NotImplementedError(f"Model {model.__qualname__} not supported.")
 
     @staticmethod
     def get_iam_folder_id(obj: models.Model) -> uuid.UUID:
@@ -2014,39 +2036,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         accessible_object_ids_query = Q(
             **{f"{iam_folder_field}__in": allowed_folder_ids}
         )
-
-        viewable_by_descendants_mode = getattr(
-            model,
-            "VIEWABLE_FROM_DESCENDANTS_MODE",
-            ViewableFromDescendantsMode.NEVER_VIEWABLE,
-        )
-
-        if (
-            perm_prefix == "view"
-            and viewable_by_descendants_mode
-            != ViewableFromDescendantsMode.NEVER_VIEWABLE
-        ):
-            if (
-                viewable_by_descendants_mode
-                == ViewableFromDescendantsMode.ALWAYS_VIEWABLE
-            ):
-                viewable_from_descendants_filter = {}
-            else:
-                viewable_from_descendants_filter = {"viewable_from_descendants": True}
-
-            # "view" access granted on an ENCLAVE folder MUST not leak the published objects of its ancestors.
-            ancestor_folder_ids = Folder.objects.filter(
-                descendants__in=Folder.objects.filter(
-                    id__in=allowed_folder_ids
-                ).exclude(content_type=Folder.ContentType.ENCLAVE),
-                **viewable_from_descendants_filter,
-            ).distinct()
-
-            published_objects_query = Q(
-                **{f"{iam_folder_field}__in": ancestor_folder_ids},
-            )
-
-            accessible_object_ids_query |= published_objects_query
 
         accessible_object_ids = model.objects.filter(
             accessible_object_ids_query
@@ -2110,8 +2099,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         Or return `False` otherwise.
         """
+        is_principal_third_party = False
+
         if isinstance(principal, User):
             user = principal
+            is_principal_third_party = user.is_third_party
             role_assignments = RoleAssignment.get_role_assignments_from_user(user)
         elif isinstance(principal, UserGroup):
             user_group = principal
@@ -2119,10 +2111,23 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         else:
             return False
 
+        permission = Permission.objects.get(codename=codename)
+
         permission_role_assignments = role_assignments.filter(
-            role__permissions__codename=codename
+            role__permissions=permission
         )
-        return permission_role_assignments.exists()
+        if permission_role_assignments.exists():
+            return True
+
+        if not is_principal_third_party:
+            directly_accessible_folder_ids = role_assignments.values_list(
+                "perimeter_folders__id", flat=True
+            ).distinct()
+            return RoleAssignment._get_default_role_allowed_folder_ids(
+                directly_accessible_folder_ids, permission
+            ).exists()
+
+        return False
 
     @staticmethod
     def get_permissions(
@@ -2133,8 +2138,12 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         Returns: {codename: {"str": Permission.name}}
         """
 
+        is_principal_third_party = False
+
         if isinstance(principal, User):
             user = principal
+            is_principal_third_party = user.is_third_party
+
             role_assigments = RoleAssignment.get_role_assignments_from_user(user)
             perm_name_pairs = role_assigments.values_list(
                 "role__permissions__codename", "role__permissions__name"
@@ -2148,6 +2157,36 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             ).distinct()
         else:
             return {}
+
+        directly_accessible_folder_ids = role_assigments.values_list(
+            "perimeter_folders__id", flat=True
+        ).distinct()
+        non_enclave_accessible_folder_ids = Folder.objects.filter(
+            id__in=directly_accessible_folder_ids
+        ).exclude(content_type=Folder.ContentType.ENCLAVE)
+        default_role_folder_queryset = Folder.objects.filter(
+            descendants__in=non_enclave_accessible_folder_ids,
+            default_role__isnull=False,
+        ).distinct()
+
+        default_role_perm_name_pairs = (
+            RoleAssignment.objects.none()
+            .values_list("role__permissions__codename", "role__permissions__name")
+            .order_by()
+        )
+
+        if not is_principal_third_party:
+            default_role_perm_name_pairs = (
+                default_role_folder_queryset.values_list(
+                    "default_role__permissions__codename",
+                    "default_role__permissions__name",
+                )
+                .distinct()
+                .order_by()
+            )
+
+        # We add `.order_by()` at the end of these `QuerySet` as SQLite doesn't support `ORDER BY` clauses in subqueries.
+        perm_name_pairs = perm_name_pairs.order_by().union(default_role_perm_name_pairs)
 
         return {
             perm_codename: {"str": perm_name}
@@ -2171,8 +2210,12 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         Returns: dict[str(folder_id)] -> set[codename]
         """
 
+        is_principal_third_party = False
+
         if isinstance(principal, User):
             user = principal
+            is_principal_third_party = user.is_third_party
+
             role_assignments = RoleAssignment.get_role_assignments_from_user(user)
         elif isinstance(principal, UserGroup):
             user_group = principal
@@ -2200,6 +2243,26 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 for folder in folders:
                     folder_id_to_codenames[str(folder.id)].update(codenames)
 
+        if not is_principal_third_party:
+            directly_accessible_folder_ids = role_assignments.values_list(
+                "perimeter_folders__id", flat=True
+            ).distinct()
+            non_enclave_accessible_folder_ids = Folder.objects.filter(
+                id__in=directly_accessible_folder_ids
+            ).exclude(content_type=Folder.ContentType.ENCLAVE)
+            default_role_folder_queryset = (
+                Folder.objects.filter(
+                    descendants__in=non_enclave_accessible_folder_ids,
+                    default_role__isnull=False,
+                )
+                .distinct()
+                .values_list("id", "default_role__permissions__codename")
+            )
+
+            for folder_id, codename in default_role_folder_queryset:
+                if codename is not None:
+                    folder_id_to_codenames[str(folder_id)].add(codename)
+
         return folder_id_to_codenames
 
 
@@ -2226,6 +2289,8 @@ class PersonalAccessToken(models.Model):
 
     name = models.CharField(max_length=255)
     auth_token = models.ForeignKey(AuthToken, on_delete=models.CASCADE)
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     @property
     def created(self):
@@ -2278,6 +2343,8 @@ class SCIMToken(models.Model):
         on_delete=models.CASCADE,
         related_name="scim_token",
     )
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         verbose_name = "SCIM token"
@@ -2336,6 +2403,9 @@ class ServiceAccount(AbstractBaseModel):
     previous_secret_hash = models.CharField(max_length=200, null=True, blank=True)
     previous_secret_expires_at = models.DateTimeField(null=True, blank=True)
     secret_preview = models.CharField(max_length=32, blank=True, default="")
+
+    # The IAM let you perform an action on the `ServiceAccount` if you have the appropriate permission in its `user.folder`.
+    IAM_SCOPE_FIELD = "user"
 
     class Meta:
         verbose_name = _("Service account")

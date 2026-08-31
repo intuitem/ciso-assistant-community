@@ -15,12 +15,23 @@ import pytest
 from knox.models import AuthToken
 from rest_framework.test import APIClient
 
+from global_settings import utils as ff_utils
 from global_settings.models import GlobalSettings
+from global_settings.utils import clear_feature_flags_cache
 
 from iam.models import IdPGroup, SCIMToken, User, UserGroup
 
 USERS_URL = "/api/scim/v2/Users"
 GROUPS_URL = "/api/scim/v2/Groups"
+
+
+@pytest.fixture(autouse=True)
+def _enterprise_flags(monkeypatch):
+    """idp_groups is enterprise-only (declared on the EE FeatureFlagsSerializer,
+    hence unsupported on CE); these tests exercise the EE-gated behavior from
+    the CE test bed."""
+    supported = ff_utils.get_supported_feature_flags() | {"idp_groups"}
+    monkeypatch.setattr(ff_utils, "get_supported_feature_flags", lambda: supported)
 
 
 def _set_idp_groups_flag(enabled: bool):
@@ -29,6 +40,8 @@ def _set_idp_groups_flag(enabled: bool):
     )
     ff.value = {**(ff.value or {}), "idp_groups": enabled}
     ff.save()
+    # Direct ORM write: bypasses the serializer, the single invalidation point.
+    clear_feature_flags_cache()
 
 
 @pytest.fixture

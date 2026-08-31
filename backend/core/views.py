@@ -164,6 +164,7 @@ from core.models import (
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
     build_answers_dict,
+    bulk_update_with_log,
     compare_schema_versions,
     get_respondent_scoped_folder_ids,
     is_field_visible_to,
@@ -450,6 +451,16 @@ def escape_csv_row(row):
     ]
 
 
+ILLEGAL_XLSX_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+
+
+def sanitize_xlsx_value(value):
+    """Strip ASCII control characters openpyxl refuses to write (tab/LF/CR are allowed)."""
+    if isinstance(value, str):
+        return ILLEGAL_XLSX_CHARS_RE.sub("", value)
+    return value
+
+
 def create_xlsx_response(entries, filename, wrap_columns=None):
     """
     DRY helper to create XLSX response with consistent formatting.
@@ -465,6 +476,9 @@ def create_xlsx_response(entries, filename, wrap_columns=None):
     if wrap_columns is None:
         wrap_columns = ["name", "description"]
 
+    entries = [
+        {k: sanitize_xlsx_value(v) for k, v in entry.items()} for entry in entries
+    ]
     df = pd.DataFrame(entries)
     buffer = io.BytesIO()
 
@@ -1899,34 +1913,13 @@ class ContentTypeListView(APIView):
 
     @method_decorator(cache_page(60 * MED_CACHE_TTL))
     def get(self, request, format=None):
-        may_be_viewable_from_descendants_filter = (
-            request.query_params.get(
-                "may_be_viewable_from_descendants", "false"
-            ).lower()
-            == "true"
-        )
-
-        model_filter = lambda model: True
-
-        if may_be_viewable_from_descendants_filter:
-            model_filter = lambda model: (
-                getattr(
-                    model,
-                    "VIEWABLE_FROM_DESCENDANTS_MODE",
-                    ViewableFromDescendantsMode.NEVER_VIEWABLE,
-                )
-                == ViewableFromDescendantsMode.MAY_BE_VIEWABLE
+        content_types = []
+        for model in apps.get_models():
+            content_types.append(
+                {"label": model.__name__, "value": model._meta.model_name}
             )
-
-        filtered_models = [model for model in apps.get_models() if model_filter(model)]
-
-        content_types = [
-            {"label": model.__name__, "value": model._meta.model_name}
-            for model in filtered_models
-        ]
-
-        sorted_content_types = sorted(content_types, key=lambda x: x["label"].lower())
-        return Response(sorted_content_types)
+        content_types.sort(key=lambda x: x["label"].lower())
+        return Response(content_types)
 
 
 # Risk Assessment
@@ -3991,7 +3984,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "\n".join([ra.get("str") for ra in item.get("owner")]),
                 "\n".join([ra.get("str") for ra in item.get("risk_scenarios")]),
             ]
-            ws.append(row)
+            ws.append([sanitize_xlsx_value(value) for value in row])
 
         for row_idx, row in enumerate(ws.iter_rows(min_row=2), 2):  # Skip header row
             max_lines = 1
@@ -8514,6 +8507,140 @@ class FolderViewSet(BaseModelViewSet):
         return Response(res)
 
 
+class RoleViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows roles to be viewed or edited
+    """
+
+    model = Role
+    ordering_fields = ["name"]
+    filter_backends = [
+        DjangoFilterBackend,
+        RoleFilter,
+    ]
+
+    def get_queryset(self):
+        # Hide only dedicated per-SA roles; a shared builtin role stays visible.
+        return (
+            super()
+            .get_queryset()
+            .exclude(service_accounts__isnull=False, builtin=False)
+        )
+
+    def _get_default_permissions(self):
+        return Permission.objects.filter(
+            codename__in=["view_folder", "view_globalsettings"],
+            content_type__app_label__in=["iam", "global_settings"],
+        )
+
+    def _ensure_default_permissions(self, role):
+        role.permissions.add(*self._get_default_permissions())
+
+    def perform_create(self, serializer):
+        """
+        Create per-folder UserGroups and RoleAssignments for the new role.
+        """
+        with transaction.atomic():
+            role = serializer.save()
+            self._ensure_default_permissions(role)
+
+            root_folder = Folder.get_root_folder()
+            folders = Folder.objects.exclude(content_type="EN")
+
+            user_groups = []
+            role_assignments = []
+            processed_folders = []
+
+            for folder in folders:
+                if (
+                    folder.content_type == Folder.ContentType.DOMAIN
+                    and not folder.create_iam_groups
+                ):
+                    continue
+
+                ug, _ = UserGroup.objects.get_or_create(
+                    folder=folder,
+                    name=role.name,
+                    defaults={"builtin": True},
+                )
+                user_groups.append(ug)
+                processed_folders.append(folder)
+
+                role_assignments.append(
+                    RoleAssignment(
+                        folder=root_folder,
+                        role=role,
+                        user_group=ug,
+                        is_recursive=True,
+                    )
+                )
+
+            RoleAssignment.objects.bulk_create(role_assignments)
+
+            # M2M must be handled after bulk_create
+            for ra, folder in zip(role_assignments, processed_folders):
+                ra.perimeter_folders.add(folder)
+
+    def perform_update(self, serializer):
+        """
+        Update the user groups associated with the role.
+        """
+        with transaction.atomic():
+            editors_before = len(User.get_editors())
+
+            role = serializer.save()
+            self._ensure_default_permissions(role)
+
+            editors_after = len(User.get_editors())
+            if (
+                editors_after > editors_before
+                and editors_after > settings.LICENSE_SEATS
+            ):
+                raise serializers.ValidationError(
+                    {"permissions": "errorLicenseSeatsExceeded"}
+                )
+
+            ug_ids = (
+                RoleAssignment.objects.filter(
+                    role=role,
+                    user_group__isnull=False,
+                    user_group__builtin=True,
+                )
+                .values_list("user_group_id", flat=True)
+                .distinct()
+            )
+
+            if ug_ids:
+                UserGroup.objects.filter(id__in=ug_ids).update(name=role.name)
+
+    def perform_destroy(self, instance):
+        """
+        Delete only user groups tied to this role’s assignments, atomically.
+        """
+        with transaction.atomic():
+            ras_qs = RoleAssignment.objects.select_related("user_group").filter(
+                role=instance
+            )
+            ug_ids = list(
+                ras_qs.exclude(user_group__isnull=True).values_list(
+                    "user_group_id", flat=True
+                )
+            )
+            # Remove this role's assignments first
+            ras_qs.delete()
+            if ug_ids:
+                # Delete only non-builtin groups that are now orphaned (no remaining RAs)
+                orphan_ug_ids = list(
+                    UserGroup.objects.filter(id__in=ug_ids, builtin=True)
+                    .annotate(ra_count=models.Count("roleassignment"))
+                    .filter(ra_count=0)
+                    .values_list("id", flat=True)
+                )
+                if orphan_ug_ids:
+                    UserGroup.objects.filter(id__in=orphan_ug_ids).delete()
+            super().perform_destroy(instance)
+
+
 class UserPreferencesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -11589,7 +11716,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     if evidence.get("filename")
                 ),
             }
-            entries.append(entry)
+            entries.append({k: sanitize_xlsx_value(v) for k, v in entry.items()})
 
         df = pd.DataFrame(entries)
         buffer = io.BytesIO()
@@ -11992,6 +12119,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                             setattr(req, field, value)
                     requirement_assessments_to_update.append(req)
 
+                # Bare bulk_update on purpose: these rows were just
+                # bulk_created here, so an "updated" event per requirement
+                # would fire runs for rows that never announced their creation.
                 RequirementAssessment.objects.bulk_update(
                     requirement_assessments_to_update,
                     [
@@ -12114,8 +12244,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     else ca_min
                 )
             if ras_to_init:
-                RequirementAssessment.objects.bulk_update(
-                    ras_to_init, ["documentation_score"]
+                bulk_update_with_log(
+                    RequirementAssessment, ras_to_init, ["documentation_score"]
                 )
 
     @action(detail=False, name="Compliance assessments per status")
@@ -12247,6 +12377,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             implementation_groups = None
         tree = filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, compliance_assessment)
+        annotate_tree_with_coverage(tree, compliance_assessment)
         return Response(tree)
 
     @action(detail=True, methods=["get"])
@@ -12310,6 +12441,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             implementation_groups = None
         tree = filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, compliance_assessment)
+        annotate_tree_with_coverage(tree, compliance_assessment)
 
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
@@ -12819,10 +12951,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
         )
+        # ... and assignments the user can actually open: the assessment page
+        # fetches the assignment through the scoped viewset, so a card for an
+        # assignment the user cannot view would lead straight to a 404.
+        viewable_assignment_ids = set(
+            RoleAssignment.get_viewable_object_ids(request.user, RequirementAssignment)
+        )
 
         dashboard_data = []
         for assignment in assignments:
             if assignment.compliance_assessment_id not in viewable_ca_ids:
+                continue
+            if assignment.id not in viewable_assignment_ids:
                 continue
 
             ca = assignment.compliance_assessment
@@ -13487,7 +13627,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 ras_to_update.append(ra)
 
             if ras_to_update and update_fields:
-                RequirementAssessment.objects.bulk_update(
+                # Results rewritten on an audit that already existed: the
+                # audit trail and the event stream both need to see it.
+                bulk_update_with_log(
+                    RequirementAssessment,
                     ras_to_update,
                     list(update_fields),
                     batch_size=500,

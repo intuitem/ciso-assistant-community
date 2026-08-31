@@ -56,7 +56,6 @@ from .base_models import (
     ActorSyncMixin,
     ETADueDateMixin,
     NameDescriptionMixin,
-    ViewableFromDescendantsMode,
 )
 from .utils import (
     aggregate_compute_results,
@@ -362,8 +361,6 @@ class FilteringLabel(FolderMixin, AbstractBaseModel):
 
     fields_to_check = ["label"]
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
-
 
 class FilteringLabelMixin(models.Model):
     filtering_labels = models.ManyToManyField(
@@ -404,12 +401,8 @@ class LibraryFilteringLabel(FolderMixin, AbstractBaseModel):
 
     fields_to_check = ["label"]
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
-
 
 class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
-
     class Meta:
         abstract = True
         unique_together = [["urn", "locale", "version"]]
@@ -2026,8 +2019,6 @@ class ObjectClassification(NameDescriptionMixin, FolderMixin):
 
     fields_to_check = ["name"]
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
-
     class Meta:
         verbose_name = _("Object classification")
         verbose_name_plural = _("Object classifications")
@@ -2574,8 +2565,6 @@ class Terminology(NameDescriptionMixin, FolderMixin):
 
     fields_to_check = ["name", "field_path"]
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
-
     @classmethod
     def _seed_defaults(cls, items):
         # is_visible is user-controlled — only set on insert, never on update.
@@ -2654,8 +2643,6 @@ class Threat(
 
     fields_to_check = ["ref_id", "name"]
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
-
     class Meta:
         verbose_name = _("Threat")
         verbose_name_plural = _("Threats")
@@ -2721,8 +2708,6 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
 
     fields_to_check = ["ref_id", "name"]
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
-
     class Meta:
         verbose_name = _("Reference control")
         verbose_name_plural = _("Reference controls")
@@ -2773,8 +2758,6 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
             "If the risk matrix is set as disabled, it will not be available for selection for new risk assessments."
         ),
     )
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta(ReferentialObjectMixin.Meta, I18nObjectMixin.Meta):
         # Explicit MRO for the parents' (abstract-only) Meta classes; no
@@ -2882,8 +2865,6 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         blank=True,
         related_name="frameworks",
     )
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         verbose_name = _("Framework")
@@ -3106,7 +3087,19 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_questions_translated(self) -> dict | None:
-        questions_qs = self.questions.prefetch_related("choices").all()
+        # Reuse the caller's prefetch when it covers choices too: calling
+        # prefetch_related() on the related manager discards
+        # _prefetched_objects_cache and re-queries once per node.
+        prefetched = (getattr(self, "_prefetched_objects_cache", None) or {}).get(
+            "questions"
+        )
+        if prefetched is not None and all(
+            "choices" in (getattr(q, "_prefetched_objects_cache", None) or {})
+            for q in prefetched
+        ):
+            questions_qs = prefetched
+        else:
+            questions_qs = self.questions.prefetch_related("choices").all()
         if not questions_qs:
             return None
 
@@ -3230,8 +3223,6 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
                         }
                     )
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
-
     class Meta:
         verbose_name = _("RequirementNode")
         verbose_name_plural = _("RequirementNodes")
@@ -3326,8 +3317,6 @@ class Question(AbstractBaseModel, FolderMixin):
         blank=True, null=True, verbose_name=_("Translations")
     )
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
-
     class Meta:
         ordering = ["order"]
         verbose_name = _("Question")
@@ -3372,8 +3361,6 @@ class QuestionChoice(AbstractBaseModel, FolderMixin):
         blank=True, null=True, verbose_name=_("Translations")
     )
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
-
     class Meta:
         ordering = ["order"]
         unique_together = [("question", "urn")]
@@ -3411,8 +3398,6 @@ class RequirementMappingSet(ReferentialObjectMixin):
         verbose_name=_("Target framework"),
         related_name="target_framework",
     )
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     def save(self, *args, **kwargs) -> None:
         if self.source_framework == self.target_framework:
@@ -3486,7 +3471,7 @@ class RequirementMapping(models.Model):
     )
     annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     @property
     def coverage(self) -> str:
@@ -3606,8 +3591,6 @@ class SecurityException(NameDescriptionMixin, FolderMixin, CustomFieldsMixin):
     )
 
     fields_to_check = ["ref_id", "name"]
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     def __str__(self):
         return self.name
@@ -3860,8 +3843,6 @@ class Asset(
     )
 
     fields_to_check = ["ref_id", "name"]
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         verbose_name_plural = _("Assets")
@@ -5071,8 +5052,6 @@ class AssetClass(NameDescriptionMixin, FolderMixin):
     def __str__(self):
         return self.get_name_translated
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
-
     class Meta:
         unique_together = ["name", "parent"]
         constraints = [
@@ -5111,8 +5090,6 @@ class Evidence(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     )
 
     fields_to_check = ["name"]
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         verbose_name = _("Evidence")
@@ -5190,8 +5167,6 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
 
     fields_to_check = ["evidence", "version"]
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = Evidence.VIEWABLE_FROM_DESCENDANTS_MODE
 
     class Meta:
         verbose_name = _("Evidence Revision")
@@ -5387,8 +5362,6 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
 
     fields_to_check = ["ref_id"]
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
-
     class Meta:
         verbose_name = "Incident"
         verbose_name_plural = "Incidents"
@@ -5451,8 +5424,6 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
         verbose_name="Evidence",
         blank=True,
     )
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     def __str__(self):
         return f"{self.entry}"
@@ -5522,8 +5493,6 @@ class Comment(AbstractBaseModel, FolderMixin):
         blank=True,
         related_name="comments",
     )
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         ordering = ["created_at"]
@@ -5814,8 +5783,6 @@ class AppliedControl(
 
     fields_to_check = ["ref_id", "name"]
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
-
     class Meta:
         verbose_name = _("Applied control")
         verbose_name_plural = _("Applied controls")
@@ -6079,8 +6046,6 @@ class OrganisationIssue(
 
     fields_to_check = ["name"]
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
-
     class Meta:
         verbose_name = _("Issue")
         verbose_name_plural = _("Issues")
@@ -6159,8 +6124,6 @@ class OrganisationObjective(
     )
 
     fields_to_check = ["name"]
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     class Meta:
         verbose_name = _("Objective")
@@ -6255,8 +6218,6 @@ class Vulnerability(
 
     fields_to_check = ["ref_id", "name"]
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
-
     def save(self, *args, **kwargs):
         from datetime import date
 
@@ -6316,6 +6277,8 @@ class HistoricalMetric(models.Model):
     model = models.TextField(verbose_name=_("Model"), db_index=True)
     object_id = models.UUIDField(verbose_name=_("Object ID"), db_index=True)
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         unique_together = ("model", "object_id", "date")
@@ -6428,8 +6391,6 @@ class RiskAssessment(Assessment):
         default=False,
         verbose_name=_("Automatic sync to actions"),
     )
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     class Meta:
         verbose_name = _("Risk assessment")
@@ -7424,8 +7385,6 @@ class ComplianceAssessment(Assessment):
     )
 
     fields_to_check = ["name", "version"]
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     class Meta:
         verbose_name = _("Compliance assessment")
@@ -9426,6 +9385,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             if not _is_question_visible(question, answers_by_urn, questions_by_urn):
                 continue
 
+            # Free-text questions are informational: they have no choices and can be anything,
+            # so it does not make very much sense to take them into account. Skip them out.
+            # (They still count as unanswered in progress see get_visible_questions_counts.)
+            if question.type == Question.Type.TEXT:
+                continue
+
             visible_questions += 1
             if not has_answer_by_qid.get(question.id):
                 continue
@@ -9984,8 +9949,6 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin):
 
     fields_to_check = ["name"]
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
-
     class Meta:
         permissions = [
             ("approve_riskacceptance", "Can validate/rejected risk acceptances")
@@ -10518,7 +10481,9 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         return event.event_notes if event else None
 
     def __str__(self) -> str:
-        return self.ref_id
+        # ref_id is nullable and only auto-assigned in save(); bulk-created
+        # rows may not have one.
+        return self.ref_id or ""
 
 
 class FlowEvent(AbstractBaseModel, FolderMixin):
@@ -10600,8 +10565,6 @@ class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
         emails.extend(member_emails)
         return list(dict.fromkeys(emails))
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
-
     class Meta:
         ordering = ["name"]
 
@@ -10621,7 +10584,8 @@ class Actor(AbstractBaseModel):
         related_name="actor",
     )
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
+    # The "normal" IAM isn't implemented for the `Actor` model, but this model can still be passed to the IAM (the IAM has specific internal routines to handle this model).
+    IAM_SCOPE_FIELD = Folder.IAM_SPECIAL_CASE
 
     class Meta:
         constraints = [
@@ -10760,6 +10724,8 @@ class PresetJourneyStep(AbstractBaseModel):
         User, null=True, blank=True, on_delete=models.SET_NULL
     )
     notes = models.TextField(blank=True)
+
+    IAM_SCOPE_FIELD = "journey"
 
     class Meta:
         ordering = ["order"]

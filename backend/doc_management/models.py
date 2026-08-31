@@ -5,10 +5,10 @@ from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from core.base_models import AbstractBaseModel, ViewableFromDescendantsMode
+from core.base_models import AbstractBaseModel
 from core.models import FilteringLabelMixin, I18nObjectMixin
 from core.validators import validate_file_name, validate_file_size
-from iam.models import FolderMixin, User
+from iam.models import FolderMixin, Folder, User
 
 
 class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
@@ -66,8 +66,6 @@ class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
 
     fields_to_check = ["name"]
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
-
     class Meta:
         verbose_name = _("Document container")
         verbose_name_plural = _("Document containers")
@@ -119,8 +117,6 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
     template_used = models.CharField(max_length=200, null=True, blank=True)
 
     fields_to_check = ["container", "locale"]
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     class Meta:
         verbose_name = _("Managed document")
@@ -211,8 +207,6 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
     editing_since = models.DateTimeField(null=True, blank=True)
 
     fields_to_check = ["document", "version_number"]
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     class Meta:
         ordering = ["-version_number"]
@@ -315,8 +309,6 @@ class DocumentAttachment(AbstractBaseModel, FolderMixin):
 
     fields_to_check = []
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
-
     class Meta:
         verbose_name = _("Document attachment")
         verbose_name_plural = _("Document attachments")
@@ -353,8 +345,6 @@ class DocumentEdit(AbstractBaseModel, FolderMixin):
     content_snapshot = models.TextField(blank=True)
 
     fields_to_check = []
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     class Meta:
         ordering = ["-created_at"]
@@ -436,6 +426,8 @@ class DocumentReference(AbstractBaseModel):
         related_name="incoming_references",
     )
     fields_to_check = []
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         constraints = [

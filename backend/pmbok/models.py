@@ -21,7 +21,6 @@ from tprm.models import Entity, EntityAssessment
 from core.base_models import (
     AbstractBaseModel,
     NameDescriptionMixin,
-    ViewableFromDescendantsMode,
 )
 from custom_fields.host import CustomFieldsMixin
 from global_settings.models import GlobalSettings
@@ -493,8 +492,6 @@ class ResponsibilityRole(NameDescriptionFolderMixin):
     builtin = models.BooleanField(default=False)
     is_visible = models.BooleanField(default=True)
     translations = models.JSONField(default=dict, blank=True, null=True)
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         ordering = ["taxonomy", "order", "code"]

@@ -31,10 +31,6 @@
 		model
 	}: Props = $props();
 
-	let viewableFromDescendantsHelpText = $state(
-		m.viewableFromDescendantsHelpText({ stringified_model_names: '...' })
-	);
-
 	onMount(() => {
 		const isEdit = Boolean(object?.id);
 		if (!isEdit && form.data?.create_iam_groups !== true) {
@@ -43,30 +39,7 @@
 				create_iam_groups: true
 			}));
 		}
-
-		initViewableFromDescendantsHelpText();
 	});
-
-	async function initViewableFromDescendantsHelpText() {
-		let stringifiedModelNames = m.anErrorOccurred();
-
-		try {
-			const req = await fetch('/content-types?may_be_viewable_from_descendants=true');
-
-			if (req.ok) {
-				const res = await req.json();
-				const modelNames = res.map((model) => safeTranslate(model.label));
-
-				stringifiedModelNames = modelNames.join(' | ');
-			}
-		} catch (error) {
-			stringifiedModelNames = m.networkErrorWithMessage({ message: error?.message });
-		}
-
-		viewableFromDescendantsHelpText = m.viewableFromDescendantsHelpText({
-			stringified_model_names: stringifiedModelNames
-		});
-	}
 </script>
 
 {#if importFolder}
@@ -92,6 +65,16 @@
 	/>
 {:else}
 	<AutocompleteSelect
+		{form}
+		translateOptions={false}
+		optionsEndpoint="roles"
+		field="default_role"
+		cacheLock={cacheLocks['default_role']}
+		bind:cachedValue={formDataCache['default_role']}
+		label={m.defaultRole()}
+		helpText={m.defaultRoleHelpText()}
+	/>
+	<AutocompleteSelect
 		multiple
 		{form}
 		createFromSelection={true}
@@ -108,11 +91,5 @@
 		field="create_iam_groups"
 		label={m.createIamGroups()}
 		helpText={m.whenEnabledIamGroupsAreCreatedAutomatically()}
-	/>
-	<Checkbox
-		{form}
-		field="viewable_from_descendants"
-		label={m.viewableFromDescendants()}
-		helpText={viewableFromDescendantsHelpText}
 	/>
 {/if}

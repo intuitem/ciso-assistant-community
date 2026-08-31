@@ -12,7 +12,6 @@ from django.utils.translation import gettext_lazy as _
 from core.base_models import (
     AbstractBaseModel,
     NameDescriptionMixin,
-    ViewableFromDescendantsMode,
 )
 from core.models import (
     Actor,
@@ -102,8 +101,6 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
 
     fields_to_check = ["ref_id", "name"]
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
-
     class Meta:
         verbose_name = _("Metric definition")
         verbose_name_plural = _("Metric definitions")
@@ -177,8 +174,6 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     )
 
     fields_to_check = ["ref_id", "name"]
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     class Meta:
         verbose_name = _("Metric instance")
@@ -399,6 +394,8 @@ class BuiltinMetricSample(AbstractBaseModel):
             "Format depends on object type (e.g., progress, result_breakdown, etc.)"
         ),
     )
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         verbose_name = _("Builtin metric sample")

@@ -577,7 +577,8 @@
 				{/if}
 				<select
 					value={node.node.display_mode}
-					onchange={(e) => saveField('display_mode', e.currentTarget.value)}
+					onchange={(e) =>
+						builder.setDisplayMode(node.node.id, e.currentTarget.value as 'default' | 'splash')}
 					class="text-xs bg-transparent border-b border-surface-200-800 focus:border-blue-500 outline-none"
 					title={m.builderDisplayMode()}
 				>
@@ -842,19 +843,21 @@
 					>
 					{#each $frameworkStore.implementation_groups_definition as ig}
 						{@const refId = (ig as Record<string, string>).ref_id}
+						{@const igLabel = (ig as Record<string, string>).name || refId}
 						{@const selected = (node.node.implementation_groups ?? []).includes(refId)}
 						<button
 							type="button"
 							class="text-xs px-2 py-0.5 rounded-full border mr-1 transition-colors {selected
 								? 'bg-blue-100 border-blue-300 text-blue-700'
 								: 'bg-surface-50-950 border-surface-200-800 text-surface-500 hover:border-surface-300-700'}"
+							title={(ig as Record<string, string>).description || igLabel}
 							onclick={() => {
 								const current = node.node.implementation_groups ?? [];
 								const next = selected ? current.filter((g) => g !== refId) : [...current, refId];
 								builder.updateNode(node.node.id, { implementation_groups: next });
 							}}
 						>
-							{refId}
+							{igLabel}
 						</button>
 					{/each}
 				</div>

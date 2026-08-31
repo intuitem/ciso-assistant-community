@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0182_requirementassessment_is_score_overridden"),
+        ("core", "0184_clear_assessable_on_splash_nodes"),
     ]
 
     operations = [

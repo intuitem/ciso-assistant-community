@@ -2355,9 +2355,9 @@ class FolderWriteSerializer(BaseModelSerializer):
 
             auto_groups = UserGroup.objects.filter(folder=instance, builtin=True)
             auto_groups_exist = auto_groups.exists()
-            if (
-                auto_groups_exist
-                and User.objects.filter(user_groups__in=auto_groups).exists()
+            if auto_groups_exist and (
+                User.objects.filter(user_groups__in=auto_groups).exists()
+                or auto_groups.filter(idp_groups__isnull=False).exists()
             ):
                 raise serializers.ValidationError(
                     {"create_iam_groups": "cannotDisableIamGroupsAssignedUsers"}
@@ -2401,6 +2401,7 @@ class FolderReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     parent_folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
+    default_role = FieldsRelatedField()
 
     content_type = serializers.CharField(source="get_content_type_display")
 
@@ -2420,10 +2421,28 @@ class FolderImportExportSerializer(BaseModelSerializer):
             "description",
             "content_type",
             "create_iam_groups",
-            "viewable_from_descendants",
             "created_at",
             "updated_at",
         ]
+
+
+class RoleReadSerializer(BaseModelSerializer):
+    name = serializers.CharField(source="__str__")
+    permissions = serializers.SerializerMethodField()
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = Role
+        fields = "__all__"
+
+    def get_permissions(self, obj):
+        return [{"str": perm.codename} for perm in obj.permissions.all()]
+
+
+class RoleWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Role
+        fields = "__all__"
 
 
 # Compliance Assessment

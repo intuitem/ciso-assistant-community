@@ -56,9 +56,7 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
             return True
 
         # for view, use is_object_readable to implement is_published correctly
-        if request.method in ["GET", "OPTIONS", "HEAD"] and getattr(
-            obj, "_viewable_from_descendants", False
-        ):
+        if request.method in ["GET", "OPTIONS", "HEAD"]:
             return RoleAssignment.is_object_readable(request.user, type(obj), obj.id)
 
         return RoleAssignment.is_access_allowed(

@@ -238,7 +238,7 @@ export function normalizeSearchString(str: string): string {
 		.toLowerCase()
 		.normalize('NFD') // Decompose accented characters
 		.replace(/\p{Diacritic}/gu, '') // Remove combining marks (diacritics)
-		.replace(/[^\w\s-]/g, ' ') // Replace special chars with spaces
+		.replace(/[^\p{L}\p{N}\s-]/gu, ' ') // Replace special chars with spaces (unicode-aware, keeps e.g. Cyrillic)
 		.replace(/\s+/g, ' ') // Collapse multiple spaces
 		.trim();
 }
@@ -316,6 +316,11 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 
 	for (const [q_urn, question] of Object.entries<any>(questions)) {
 		if (!isQuestionVisible(question, answers, questions)) continue;
+
+		// Free-text questions are informational: they have no choices and can be anything,
+		// so it does not make very much sense to take them into account.
+		// Skip them out. (mirrors RequirementAssessment.recompute_assessment).
+		if (question.type === 'text') continue;
 
 		visibleCount++;
 

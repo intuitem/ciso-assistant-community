@@ -48,25 +48,6 @@ class FolderWriteSerializer(CommunityFolderWriteSerializer):
         return parent_folder
 
 
-class RoleReadSerializer(BaseModelSerializer):
-    name = serializers.CharField(source="__str__")
-    permissions = serializers.SerializerMethodField()
-    folder = FieldsRelatedField()
-
-    class Meta:
-        model = Role
-        fields = "__all__"
-
-    def get_permissions(self, obj):
-        return [{"str": perm.codename} for perm in obj.permissions.all()]
-
-
-class RoleWriteSerializer(BaseModelSerializer):
-    class Meta:
-        model = Role
-        fields = "__all__"
-
-
 class EditorPermissionMixin:
     @staticmethod
     def check_editor_permissions(instance, group):

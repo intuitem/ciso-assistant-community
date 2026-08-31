@@ -14,7 +14,6 @@ from core.base_models import (
     AbstractBaseModel,
     ETADueDateMixin,
     NameDescriptionMixin,
-    ViewableFromDescendantsMode,
 )
 from core.models import (
     Actor,
@@ -664,6 +663,8 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
 
     fields_to_check = ["ebios_rm_study", "entity", "category"]
 
+    IAM_SCOPE_FIELD = "entity"
+
     class Meta:
         verbose_name = _("Stakeholder")
         verbose_name_plural = _("Stakeholders")
@@ -947,8 +948,6 @@ class ElementaryAction(NameDescriptionMixin, FolderMixin):
         return self.ICON_MAP.get(self.icon)["fa"] if self.icon else None
 
     fields_to_check = ["ref_id", "name"]
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     def __str__(self):
         return self.name if hasattr(self, "name") else f"ElementaryAction {self.id}"

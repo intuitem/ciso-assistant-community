@@ -31,6 +31,7 @@ from django.conf import settings
 
 router = routers.DefaultRouter()
 router.register(r"folders", FolderViewSet, basename="folders")
+router.register(r"roles", RoleViewSet, basename="roles")
 router.register(
     r"custom-fields",
     CustomFieldDefinitionViewSet,

@@ -7,7 +7,6 @@ from core.base_models import (
     ActorSyncMixin,
     NameDescriptionMixin,
     AbstractBaseModel,
-    ViewableFromDescendantsMode,
 )
 from core.models import (
     Actor,
@@ -168,8 +167,6 @@ class Entity(
 
     fields_to_check = ["name"]
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
-
     class Meta:
         verbose_name = _("Entity")
         verbose_name_plural = _("Entities")
@@ -236,6 +233,8 @@ class EntityAssessment(Assessment):
         verbose_name=_("Reference link"),
     )
 
+    IAM_SCOPE_FIELD = "entity"
+
     class Meta:
         verbose_name = _("Entity assessment")
         verbose_name_plural = _("Entity assessments")
@@ -263,6 +262,8 @@ class Representative(AbstractBaseModel, FilteringLabelMixin):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     fields_to_check = ["email"]
+
+    IAM_SCOPE_FIELD = "entity"
 
 
 class Solution(NameDescriptionMixin, FilteringLabelMixin):
@@ -396,6 +397,8 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
 
     fields_to_check = ["name", "provider_entity"]
 
+    IAM_SCOPE_FIELD = "provider_entity"
+
     class Meta:
         verbose_name = _("Solution")
         verbose_name_plural = _("Solutions")
@@ -444,6 +447,8 @@ class SolutionSubcontractor(AbstractBaseModel):
         null=True,
         blank=True,
     )
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         verbose_name = _("Solution subcontractor")

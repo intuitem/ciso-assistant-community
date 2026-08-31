@@ -167,17 +167,43 @@ class WorkflowViewSet(BaseModelViewSet):
     def readable_models(self, request):
         """The read_objects registry: field lists double as the
         filter/order whitelist the builder offers."""
-        from .actions import BASE_READ_FIELDS, READABLE_MODELS
+        from .actions import READABLE_MODELS
 
         return Response(
             [
                 {
                     "key": key,
-                    "fields": BASE_READ_FIELDS + entry["fields"],
+                    "fields": entry.readable_fields(),
                     # Output-only aggregates; not filterable/orderable.
-                    "computed": sorted((entry.get("computed") or {}).keys()),
+                    "computed": sorted(entry.computed.keys()),
                 }
                 for key, entry in READABLE_MODELS.items()
+            ]
+        )
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get updatable models", url_path="updatable-models")
+    def updatable_models(self, request):
+        """The update_object registry. `allowed_values` travels with it so the
+        builder offers the same fenced values the backend enforces."""
+        from .actions import M2M_OPERATIONS, UPDATABLE_MODELS
+
+        return Response(
+            [
+                {
+                    "key": key,
+                    "fields": entry.fields,
+                    "allowed_values": {
+                        field: sorted(values)
+                        for field, values in entry.allowed_values.items()
+                    },
+                    "m2m_fields": {
+                        name: endpoint
+                        for name, (_model, endpoint) in entry.m2m_fields.items()
+                    },
+                    "operations": list(M2M_OPERATIONS),
+                }
+                for key, entry in UPDATABLE_MODELS.items()
             ]
         )
 

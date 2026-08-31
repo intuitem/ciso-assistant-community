@@ -21,6 +21,8 @@ class WebhookEventType(models.Model):
         help_text="The event type string, e.g., 'appliedcontrol.created'",
     )
 
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
     def __str__(self):
         return self.name
 

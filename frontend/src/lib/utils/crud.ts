@@ -199,7 +199,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		listViewUrlParams: '?content_type=DO&content_type=GL',
 		foreignKeyFields: [
 			{ field: 'parent_folder', urlModel: 'folders' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'default_role', urlModel: 'roles' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'folder', urlModel: 'perimeters' },

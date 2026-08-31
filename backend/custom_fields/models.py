@@ -9,7 +9,7 @@ from django.utils.dateparse import parse_date
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 
-from core.base_models import AbstractBaseModel, ViewableFromDescendantsMode
+from core.base_models import AbstractBaseModel
 from iam.models import Folder, FolderMixin
 
 
@@ -107,8 +107,6 @@ class CustomFieldDefinition(FolderMixin, AbstractBaseModel):
     searchable = models.BooleanField(default=False, verbose_name=_("searchable"))
     filterable = models.BooleanField(default=True, verbose_name=_("filterable"))
     order = models.PositiveSmallIntegerField(default=0, verbose_name=_("order"))
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.MAY_BE_VIEWABLE
 
     class Meta:
         verbose_name = _("custom field definition")
@@ -222,6 +220,8 @@ class CustomFieldChoice(AbstractBaseModel):
             (self.translations or {}).get(get_language(), {}).get("label", self.label)
         )
 
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
     class Meta:
         verbose_name = _("custom field choice")
         verbose_name_plural = _("custom field choices")
@@ -262,6 +262,8 @@ class CustomFieldValue(AbstractBaseModel):
     )
     value_date = models.DateField(null=True, blank=True)
     value_boolean = models.BooleanField(null=True, blank=True)
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         verbose_name = _("custom field value")

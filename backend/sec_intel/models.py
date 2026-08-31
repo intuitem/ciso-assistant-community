@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from core.base_models import ViewableFromDescendantsMode
 
 from core.models import (
     FilteringLabelMixin,
@@ -76,8 +75,6 @@ class SecurityAdvisory(
 
     fields_to_check = ["ref_id"]
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
-
     class Meta:
         verbose_name = _("Security advisory")
         verbose_name_plural = _("Security advisories")
@@ -101,8 +98,6 @@ class CWE(
 
     fields_to_check = ["ref_id"]
 
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
-
     class Meta:
         verbose_name = _("CWE")
         verbose_name_plural = _("CWEs")
@@ -124,8 +119,6 @@ class TTPCatalog(ReferentialObjectMixin, I18nObjectMixin):
     )
 
     fields_to_check = ["ref_id", "name"]
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         verbose_name = _("TTP catalog")
@@ -150,8 +143,6 @@ class Tactic(ReferentialObjectMixin, I18nObjectMixin):
     order_id = models.IntegerField(null=True, verbose_name=_("Order ID"))
 
     fields_to_check = ["ref_id", "name"]
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         verbose_name = _("Tactic")
@@ -202,8 +193,6 @@ class Technique(
     is_deprecated = models.BooleanField(default=False, verbose_name=_("Deprecated"))
 
     fields_to_check = ["ref_id", "name"]
-
-    VIEWABLE_FROM_DESCENDANTS_MODE = ViewableFromDescendantsMode.ALWAYS_VIEWABLE
 
     class Meta:
         verbose_name = _("Technique")
