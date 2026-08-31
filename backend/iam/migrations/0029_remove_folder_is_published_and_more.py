@@ -209,32 +209,15 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.RunPython(fill_default_roles),
-        migrations.RemoveField(
-            model_name="folder",
-            name="is_published",
-        ),
-        migrations.RemoveField(
-            model_name="idpgroup",
-            name="is_published",
-        ),
-        migrations.RemoveField(
-            model_name="role",
-            name="is_published",
-        ),
-        migrations.RemoveField(
-            model_name="roleassignment",
-            name="is_published",
-        ),
-        migrations.RemoveField(
-            model_name="serviceaccount",
-            name="is_published",
-        ),
-        migrations.RemoveField(
-            model_name="user",
-            name="is_published",
-        ),
-        migrations.RemoveField(
-            model_name="usergroup",
-            name="is_published",
-        ),
+        # The `RemoveField(..., "is_published")` operations below were moved to
+        # `0031_remove_iam_is_published_fields.py`. On PostgreSQL, running them in
+        # this same migration (i.e. the same transaction as `fill_default_roles`)
+        # fails with `cannot ALTER TABLE "iam_role" because it has pending trigger
+        # events`: `fill_default_roles` writes to `iam_role` (via `get_or_create`
+        # and `role.permissions.set(...)`, which touches the M2M through table's FK
+        # to `iam_role`), and Postgres refuses an `ALTER TABLE ... DROP COLUMN` on a
+        # table that already has pending trigger events queued earlier in the same
+        # transaction. sqlite has no such restriction, which is why this only
+        # surfaced on Postgres CI. Splitting the DDL into its own migration/
+        # transaction, applied after this one commits, avoids the conflict.
     ]
