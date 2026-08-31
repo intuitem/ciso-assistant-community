@@ -118,6 +118,11 @@
 					description: m.contractsDescription()
 				},
 				{
+					field: 'external_ratings',
+					label: m.externalRatings(),
+					description: m.externalRatingsDescription()
+				},
+				{
 					field: 'validation_flows',
 					label: m.validationFlows(),
 					description: m.validationFlowsDescription()

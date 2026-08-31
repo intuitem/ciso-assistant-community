@@ -286,7 +286,7 @@
 		<i class="fa-solid fa-equals"></i>
 		<div class="flex flex-col mb-5">
 			<label for="default_criticality" class="text-sm font-semibold">
-				{m.criticality()}
+				{m.defaultCriticality()}
 			</label>
 			<span class="chip text-base text-center px-4 py-1 rounded-base preset-filled">
 				{defaultCriticality}

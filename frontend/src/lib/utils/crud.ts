@@ -114,6 +114,7 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 	disableDelete?: boolean;
 	disableEdit?: boolean;
 	folderPermsNeeded?: { action: 'add' | 'view' | 'change' | 'delete'; model: string }[]; // Permissions needed on the folder to display this reverse foreign key field
+	featureFlag?: FeatureFlag; // Tab only renders when this feature flag is on
 	defaultFilters?: { [key: string]: any[] }; // Default filters to initialize the table with (user can change/remove them)
 	expectedCountField?: string; // Field on parent payload that holds related items (for masked count)
 	// Offer the column picker on this nested table, and widen its head to the model's
@@ -163,6 +164,57 @@ export interface SelectFieldData {
 }
 
 type FeatureFlag = string;
+
+/**
+ * Models whose whole concept lives behind a feature flag. A reverse foreign key tab
+ * pointing at one of these disappears with its flag, so a detail page never offers a
+ * tab for a module the instance has turned off — the sidebar already hides the
+ * top-level entry, and the tabs used to survive it.
+ *
+ * A `featureFlag` declared on the reverse foreign key itself overrides this map, for
+ * the case where the same model should only be gated in one place.
+ */
+export const MODEL_FEATURE_FLAGS: Record<string, FeatureFlag> = {
+	'asset-assessments': 'bia',
+	'business-impact-analysis': 'bia',
+	'escalation-thresholds': 'bia',
+	campaigns: 'campaigns',
+	contracts: 'contracts',
+	'data-breaches': 'data_breaches',
+	'document-containers': 'document_management',
+	'document-revisions': 'document_management',
+	'managed-documents': 'document_management',
+	'dora-incident-reports': 'dora',
+	'attack-paths': 'ebiosrm',
+	'ebios-rm': 'ebiosrm',
+	'operating-modes': 'ebiosrm',
+	entities: 'tprm',
+	'entity-assessments': 'tprm',
+	'entity-scores': 'external_ratings',
+	representatives: 'tprm',
+	solutions: 'tprm',
+	findings: 'follow_up',
+	'findings-assessments': 'follow_up',
+	incidents: 'incidents',
+	'custom-metric-samples': 'metrology',
+	'dashboard-widgets': 'metrology',
+	dashboards: 'metrology',
+	'metric-instances': 'metrology',
+	'organisation-objectives': 'organisation_objectives',
+	'personal-data': 'personal_data',
+	policies: 'policy_documents',
+	processings: 'privacy',
+	purposes: 'purposes',
+	'quantitative-risk-hypotheses': 'quantitative_risk_studies',
+	'quantitative-risk-scenarios': 'quantitative_risk_studies',
+	'quantitative-risk-studies': 'quantitative_risk_studies',
+	'right-requests': 'right_requests',
+	'security-exceptions': 'exceptions',
+	'task-nodes': 'tasks',
+	'task-templates': 'tasks',
+	techniques: 'ttps',
+	vulnerabilities: 'vulnerabilities'
+};
 
 export interface ModelMapEntry {
 	name: string;
@@ -1403,6 +1455,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{ field: 'entity', urlModel: 'entity-assessments' },
+			{ field: 'entity', urlModel: 'entity-scores' },
 			{ field: 'entity', urlModel: 'representatives' },
 			{ field: 'provider_entity', urlModel: 'solutions' },
 			{ field: 'provider_entity', urlModel: 'contracts' }
@@ -1569,6 +1622,39 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'filtering_labels' }
 		]
+	},
+	'entity-scores': {
+		name: 'entityscore',
+		localName: 'entityScore',
+		localNamePlural: 'entityScores',
+		verboseName: 'Entity score',
+		verboseNamePlural: 'Entity scores',
+		foreignKeyFields: [
+			{ field: 'entity', urlModel: 'entities' },
+			{
+				field: 'provider',
+				urlModel: 'terminologies',
+				urlParams: 'field_path=entity_score.provider'
+			},
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		selectFields: [{ field: 'provider', detail: true }],
+		detailViewFields: [
+			{ field: 'entity' },
+			{ field: 'provider' },
+			{ field: 'score' },
+			{ field: 'scale_max' },
+			{ field: 'normalized_score' },
+			{ field: 'grade' },
+			{ field: 'as_of', type: 'date' },
+			{ field: 'url' },
+			{ field: 'observation' },
+			{ field: 'folder' },
+			{ field: 'filtering_labels' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
+		filters: [{ field: 'provider' }, { field: 'entity' }]
 	},
 	representatives: {
 		name: 'representative',

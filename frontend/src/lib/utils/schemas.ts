@@ -766,7 +766,8 @@ export const FeatureFlagsSchema = z.object({
 	posture_assessments: z.boolean().optional(),
 	commitment_management: z.boolean().optional(),
 	findings_from_requirements: z.boolean().optional(),
-	dora: z.boolean().optional()
+	dora: z.boolean().optional(),
+	external_ratings: z.boolean().optional()
 });
 
 export const PortalSettingsSchema = z.object({
@@ -971,6 +972,23 @@ export const representativeSchema = z.object({
 	phone: z.string().optional(),
 	role: z.string().optional(),
 	description: z.string().optional()
+});
+
+export const entityScoreSchema = z.object({
+	entity: z.string(),
+	provider: z.string(),
+	score: z.number(),
+	scale_max: z.number().default(100),
+	grade: z.string().optional(),
+	as_of: z.iso.date(),
+	url: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: "Link must be either empty or a valid URL starting with 'http'"
+		})
+		.optional(),
+	observation: z.string().optional().nullable(),
+	filtering_labels: z.array(z.string()).optional()
 });
 
 export const contractSchema = z.object({
@@ -2100,6 +2118,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	entities: EntitiesSchema,
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,
+	'entity-scores': entityScoreSchema,
 	solutions: solutionSchema,
 	contracts: contractSchema,
 	vulnerabilities: vulnerabilitySchema,

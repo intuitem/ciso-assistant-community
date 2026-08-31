@@ -15,10 +15,17 @@ from core.views import (
     ExportMixin,
     escape_excel_formula,
 )
-from core.models import Asset, ComplianceAssessment, RequirementAssignment
+from core.models import Asset, ComplianceAssessment, RequirementAssignment, Terminology
 from core.utils import compute_respondent_progress
 from django.db.models import Case, IntegerField, OuterRef, Subquery, Value, When
-from tprm.models import Entity, Representative, Solution, EntityAssessment, Contract
+from tprm.models import (
+    Entity,
+    EntityScore,
+    Representative,
+    Solution,
+    EntityAssessment,
+    Contract,
+)
 from rest_framework.decorators import action
 import structlog
 
@@ -1290,6 +1297,32 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             assessments_data.append(entry)
 
         return Response(assessments_data)
+
+
+class EntityScoreViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows entity scores to be viewed or edited.
+    """
+
+    model = EntityScore
+    filterset_fields = ["entity", "provider", "filtering_labels", "folder"]
+    search_fields = ["grade", "observation"]
+    ordering_fields = ["as_of", "score", "normalized_score"]
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("entity", "provider", "folder")
+
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        return Response(
+            {
+                str(t.id): t.get_name_translated
+                for t in Terminology.objects.filter(
+                    field_path=Terminology.FieldPath.ENTITY_SCORE_PROVIDER,
+                    is_visible=True,
+                )
+            }
+        )
 
 
 class RepresentativeViewSet(ExportMixin, BaseModelViewSet):

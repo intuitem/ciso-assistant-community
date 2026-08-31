@@ -451,6 +451,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         source="value.findings_from_requirements", required=False, default=False
     )
     dora = serializers.BooleanField(source="value.dora", required=False, default=False)
+    external_ratings = serializers.BooleanField(
+        source="value.external_ratings", required=False, default=False
+    )
 
     class Meta:
         model = GlobalSettings

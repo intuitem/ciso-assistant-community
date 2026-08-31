@@ -1,6 +1,7 @@
 import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
 import {
 	getModelInfo,
+	MODEL_FEATURE_FLAGS,
 	urlParamModelVerboseName,
 	type ModelMapEntry,
 	type SelectField,
@@ -150,6 +151,14 @@ export const loadDetail = async ({ event, model, id }) => {
 		const initialData = {};
 		await Promise.all(
 			model.reverseForeignKeyFields
+				// A tab whose model is behind a feature flag disappears with it. The flag
+				// comes from the reverse foreign key when it declares one, else from the
+				// model itself, so every flagged module is covered without annotating each
+				// of its tabs.
+				.filter((m) => {
+					const flag = m?.featureFlag ?? MODEL_FEATURE_FLAGS[m.urlModel];
+					return !flag || event.locals.featureflags?.[flag];
+				})
 				.filter(
 					(m) =>
 						!m?.folderPermsNeeded ||

@@ -2350,6 +2350,17 @@ export const listViewFields = {
 			solutions: SOLUTION_FILTER
 		}
 	},
+	'entity-scores': {
+		head: ['provider', 'score', 'normalizedScore', 'grade', 'asOf', 'entity'],
+		body: ['provider', 'score', 'normalized_score', 'grade', 'as_of', 'entity'],
+		optionalFields: {
+			head: ['scaleMaximum', 'link', 'labels'],
+			body: ['scale_max', 'url', 'filtering_labels']
+		},
+		filters: {
+			entity: ENTITY_FILTER
+		}
+	},
 	representatives: {
 		head: ['email', 'entity', 'role'],
 		body: ['email', 'entity', 'role'],

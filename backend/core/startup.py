@@ -16,6 +16,7 @@ READER_PERMISSIONS_LIST = [
     "view_commitment",
     "view_asset",
     "view_complianceassessment",
+    "view_entityscore",
     "view_entity",
     "view_entityassessment",
     "view_evidence",
@@ -391,6 +392,10 @@ ANALYST_PERMISSIONS_LIST = [
     "view_commitment",
     "view_asset",
     "view_complianceassessment",
+    "view_entityscore",
+    "add_entityscore",
+    "change_entityscore",
+    "delete_entityscore",
     "view_entity",
     "view_entityassessment",
     "view_evidence",
@@ -840,6 +845,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_commitment",
     "view_asset",
     "view_complianceassessment",
+    "view_entityscore",
+    "add_entityscore",
+    "change_entityscore",
+    "delete_entityscore",
     "view_entity",
     "view_entityassessment",
     "view_evidence",
@@ -1480,6 +1489,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_requirementmapping",
     "add_entity",
     "change_entity",
+    "view_entityscore",
+    "add_entityscore",
+    "change_entityscore",
+    "delete_entityscore",
     "view_entity",
     "delete_entity",
     "add_representative",
@@ -2198,6 +2211,11 @@ def startup(sender=None, **kwargs):
         Terminology.create_default_entity_relationships()
     except Exception as e:
         logger.error("Error creating default Entity Relationships", exc_info=True)
+
+    try:
+        Terminology.create_default_entity_score_providers()
+    except Exception as e:
+        logger.error("Error creating default Entity Score Providers", exc_info=True)
 
     try:
         Terminology.create_default_metric_units()

@@ -8,6 +8,7 @@ from sec_intel.views import (
 )
 from threat_modeling.views import ThreatModelViewSet
 from tprm.views import (
+    EntityScoreViewSet,
     EntityViewSet,
     RepresentativeViewSet,
     SolutionViewSet,
@@ -41,6 +42,7 @@ router.register(
     r"entity-assessments", EntityAssessmentViewSet, basename="entity-assessments"
 )
 router.register(r"solutions", SolutionViewSet, basename="solutions")
+router.register(r"entity-scores", EntityScoreViewSet, basename="entity-scores")
 router.register(r"representatives", RepresentativeViewSet, basename="representatives")
 router.register(r"contracts", ContractViewSet, basename="contracts")
 router.register(r"perimeters", PerimeterViewSet, basename="perimeters")

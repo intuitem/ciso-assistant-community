@@ -2127,6 +2127,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         PROJECT_HEALTH = "project.health", "projectHealth"
         PROCESSING_NATURE = "processing.nature", "processingNature"
         PERSONAL_DATA_CATEGORY = "personal_data.category", "personalDataCategory"
+        ENTITY_SCORE_PROVIDER = "entity_score.provider", "entityScoreProvider"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -2492,6 +2493,35 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         },
     ]
 
+    # Rating services customers commonly subscribe to. Only labels: a customer adds
+    # their own without a migration, and hides the ones they do not use.
+    DEFAULT_ENTITY_SCORE_PROVIDERS = [
+        {
+            "name": "SecurityScorecard",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_SCORE_PROVIDER,
+            "is_visible": True,
+        },
+        {
+            "name": "CyberVadis",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_SCORE_PROVIDER,
+            "is_visible": True,
+        },
+        {
+            "name": "Bitsight",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_SCORE_PROVIDER,
+            "is_visible": True,
+        },
+        {
+            "name": "EcoVadis",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_SCORE_PROVIDER,
+            "is_visible": True,
+        },
+    ]
+
     DEFAULT_METRIC_UNITS = [
         {
             "name": "count",
@@ -2616,8 +2646,19 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         cls._seed_defaults(cls.DEFAULT_ENTITY_RELATIONSHIPS)
 
     @classmethod
+    def create_default_entity_score_providers(cls):
+        cls._seed_defaults(cls.DEFAULT_ENTITY_SCORE_PROVIDERS)
+
+    @classmethod
     def create_default_metric_units(cls):
         cls._seed_defaults(cls.DEFAULT_METRIC_UNITS)
+
+    @staticmethod
+    def _display(value: str) -> str:
+        """Terms are stored lowercase by convention and capitalized for display, but
+        `str.capitalize()` lowercases the rest — which mangles a name that carries its
+        own casing (a product name like SecurityScorecard). Leave those as authored."""
+        return value if any(c.isupper() for c in value) else value.capitalize()
 
     @property
     def get_name_translated(self) -> str:
@@ -2625,18 +2666,10 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         locale_translation = translations.get(get_language(), {})
         if isinstance(locale_translation, dict):
             locale_translation = locale_translation.get("name", "")
-        return (
-            locale_translation.capitalize()
-            if locale_translation
-            else self.name.capitalize()
-        )
+        return self._display(locale_translation or self.name)
 
     def __str__(self) -> str:
-        return (
-            self.get_name_translated.capitalize()
-            if self.get_name_translated
-            else self.name.capitalize()
-        )
+        return self._display(self.get_name_translated or self.name)
 
 
 class Threat(

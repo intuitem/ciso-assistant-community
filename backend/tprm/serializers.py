@@ -1,3 +1,5 @@
+import uuid
+
 import structlog
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -11,6 +13,7 @@ from core.models import (
     Framework,
     RequirementAssessment,
     RequirementAssignment,
+    Terminology,
 )
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.serializers import BaseModelSerializer
@@ -21,6 +24,7 @@ from tprm.models import (
     Contract,
     Entity,
     EntityAssessment,
+    EntityScore,
     Representative,
     Solution,
     SolutionSubcontractor,
@@ -678,6 +682,71 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = EntityAssessment
         exclude = []
+
+
+class EntityScoreReadSerializer(BaseModelSerializer):
+    entity = FieldsRelatedField()
+    provider = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
+    # 0-100 whatever the provider's scale, so a row is readable next to another's.
+    normalized_score = serializers.ReadOnlyField()
+
+    class Meta:
+        model = EntityScore
+        exclude = []
+
+
+class EntityScoreWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = EntityScore
+        exclude = ["folder"]
+
+    def to_internal_value(self, data):
+        """Accept the provider by name as well as by id.
+
+        Scores arrive from a scheduled feed that knows "Bitsight", not a UUID;
+        forcing it to resolve the terminology first is a round-trip for nothing.
+        """
+        provider = data.get("provider") if hasattr(data, "get") else None
+        if isinstance(provider, str) and provider.strip():
+            try:
+                uuid.UUID(provider)
+            except ValueError:
+                providers = Terminology.objects.filter(
+                    field_path=Terminology.FieldPath.ENTITY_SCORE_PROVIDER,
+                    is_visible=True,
+                )
+                match = providers.filter(name__iexact=provider.strip()).first()
+                if match is None:
+                    known = ", ".join(sorted(providers.values_list("name", flat=True)))
+                    raise serializers.ValidationError(
+                        {
+                            "provider": [
+                                f"Unknown rating provider '{provider}'."
+                                + (f" Known providers: {known}." if known else "")
+                            ]
+                        }
+                    )
+                data = data.copy()
+                data["provider"] = str(match.id)
+        return super().to_internal_value(data)
+
+    def create(self, validated_data):
+        """A feed re-run for the same reading corrects it instead of colliding.
+
+        `fields_to_check` makes (entity, provider, as_of) unique, so without this a
+        nightly job that replays a day would get a validation error where it means
+        "already recorded".
+        """
+        existing = EntityScore.objects.filter(
+            entity=validated_data.get("entity"),
+            provider=validated_data.get("provider"),
+            as_of=validated_data.get("as_of"),
+        ).first()
+        if existing is not None:
+            return self.update(existing, validated_data)
+        return super().create(validated_data)
 
 
 class RepresentativeReadSerializer(BaseModelSerializer):
