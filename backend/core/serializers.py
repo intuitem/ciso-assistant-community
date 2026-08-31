@@ -3378,7 +3378,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     # The respondent view lists these as a table, so it needs the promised date and
     # where the commitment stands, not just a name.
     task_templates = FieldsRelatedField(
-        ["id", "task_date", "commitment_state", "committed_eta"], many=True
+        ["id", "task_date", "status", "commitment_state", "committed_eta"], many=True
     )
     compliance_assessment = FieldsRelatedField(
         [

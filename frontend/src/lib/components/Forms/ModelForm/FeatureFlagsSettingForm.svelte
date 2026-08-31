@@ -182,6 +182,11 @@
 					field: 'commitment_management',
 					label: m.commitmentManagement(),
 					description: m.commitmentManagementDescription()
+				},
+				{
+					field: 'dora',
+					label: m.dora(),
+					description: m.doraFlagDescription()
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		},

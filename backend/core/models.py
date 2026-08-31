@@ -10490,6 +10490,15 @@ class TaskTemplate(
             "status", date_filter={"due_date__gte": today}, order_by="due_date"
         )
 
+    @property
+    def status(self):
+        """Status of the single occurrence of a one-time task, so a related field can
+        read it without going through TaskTemplateReadSerializer. None when recurrent:
+        there is no one status to speak of."""
+        if self.is_recurrent:
+            return None
+        return self._get_task_node_value("status", order_by="due_date")
+
     class Meta:
         verbose_name = "Task template"
         verbose_name_plural = "Task templates"

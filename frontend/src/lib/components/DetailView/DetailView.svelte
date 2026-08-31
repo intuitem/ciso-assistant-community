@@ -144,12 +144,19 @@
 		return model.reverseForeignKeyFields.findIndex((o) => o.urlModel === relatedModel.urlModel);
 	};
 
+	// A field declared in flaggedFields disappears with its feature flag.
+	let visibleDetailViewFields = $derived(
+		data.model?.detailViewFields?.filter((fieldConfig) => {
+			const flag = data.model?.flaggedFields?.[fieldConfig.field];
+			return !flag || page.data?.featureflags?.[flag];
+		})
+	);
+
 	let filteredData = $derived(
-		data.model?.detailViewFields
+		visibleDetailViewFields
 			? Object.fromEntries(
 					Object.entries(data.data).filter(
-						([key, _]) =>
-							data.model.detailViewFields.filter((field) => field.field === key).length > 0
+						([key, _]) => visibleDetailViewFields.filter((field) => field.field === key).length > 0
 					)
 				)
 			: data.data
@@ -157,9 +164,9 @@
 
 	// Get ordered entries based on detailViewFields configuration
 	let orderedEntries = $derived(() => {
-		if (data.model?.detailViewFields) {
+		if (visibleDetailViewFields) {
 			// Return entries in the order specified by detailViewFields
-			return data.model.detailViewFields
+			return visibleDetailViewFields
 				.map((fieldConfig) => [fieldConfig.field, data.data[fieldConfig.field]])
 				.filter(([key, value]) => value !== undefined);
 		} else {

@@ -2416,6 +2416,8 @@
 	"onlyTheAccountableActorCanDoThis": "Seul le responsable désigné peut effectuer cette étape",
 	"commitmentManagement": "Gestion des engagements",
 	"commitmentManagementDescription": "Suivre la date de remédiation sur laquelle un responsable s'engage, et sa renégociation",
+	"dora": "DORA",
+	"doraFlagDescription": "Affiche les champs spécifiques à DORA sur les tiers, solutions, actifs et contrats, ainsi que les capacités de reporting DORA",
 	"commitmentState": "Engagement",
 	"commitmentNextStep": "Étape suivante",
 	"commitmentNotes": "Notes d'engagement",

@@ -2470,6 +2470,8 @@
 	"onlyTheAccountableActorCanDoThis": "Only the assigned owner can take this step",
 	"commitmentManagement": "Commitment management",
 	"commitmentManagementDescription": "Track the remediation date an owner commits to, and its renegotiation",
+	"dora": "DORA",
+	"doraFlagDescription": "Show the DORA-specific fields on entities, solutions, assets and contracts, and the DORA reporting capabilities",
 	"commitmentState": "Commitment",
 	"commitmentNextStep": "Next step",
 	"commitmentNotes": "Commitment notes",

@@ -1388,7 +1388,7 @@ THIRD_PARTY_VISIBILITY = {
     "respondent_alignment": EVERYONE_EDIT,
     "status": AUDITOR_ONLY,
     "result": AUDITOR_ONLY,
-    "extended_result": AUDITOR_ONLY,
+    "extended_result": HIDDEN,
     "score": HIDDEN,
     "documentation_score": HIDDEN,
     "applied_controls": AUDITOR_ONLY,

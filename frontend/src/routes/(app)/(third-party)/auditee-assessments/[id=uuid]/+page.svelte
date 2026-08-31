@@ -1338,6 +1338,7 @@
 														<tr>
 															<th class="text-left font-medium py-1">{m.name()}</th>
 															<th class="text-left font-medium py-1">{m.eta()}</th>
+															<th class="text-left font-medium py-1">{m.status()}</th>
 															{#if showCommitment}
 																<th class="text-left font-medium py-1">{m.commitment()}</th>
 																<th class="w-8"></th>
@@ -1352,6 +1353,9 @@
 																	></i>{task.str}
 																</td>
 																<td class="py-2">{task.task_date ?? '--'}</td>
+																<td class="py-2">
+																	{task.status ? safeTranslate(task.status) : '--'}
+																</td>
 																{#if showCommitment}
 																	<td class="py-2">
 																		{task.commitment_state && task.commitment_state !== '--'
@@ -1382,7 +1386,7 @@
 															</tr>
 															{#if showCommitment && expandedTask === task.id}
 																<tr>
-																	<td colspan="4" class="pb-3">
+																	<td colspan="5" class="pb-3">
 																		<CommitmentPanel
 																			urlModel="task-templates"
 																			object={task}

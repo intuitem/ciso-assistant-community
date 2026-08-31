@@ -4,7 +4,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import { defaultWriteFormAction } from '$lib/utils/actions';
-import type { Actions } from '@sveltejs/kit';
+import { redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 const URL_MODEL = 'dora-incident-reports';
@@ -20,7 +20,8 @@ async function fetchChoices(fetch: typeof globalThis.fetch, endpoint: string) {
 	}));
 }
 
-export const load: PageServerLoad = async ({ params, fetch }) => {
+export const load: PageServerLoad = async ({ params, fetch, locals }) => {
+	if (!locals.featureflags?.dora) redirect(302, '/');
 	const schema = modelSchema(URL_MODEL);
 	const model = getModelInfo(URL_MODEL);
 

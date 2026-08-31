@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
+	import { page } from '$app/state';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import type { PageData, ActionData } from './$types';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
@@ -188,6 +189,8 @@
 				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
 	});
 
+	const doraEnabled = $derived(!!page.data?.featureflags?.dora);
+
 	function buildExportGroups(): ExportGroup[] {
 		const id = data.data.id;
 		return [
@@ -210,19 +213,23 @@
 					}
 				]
 			},
-			{
-				titleKey: 'doraIncidentReports',
-				options: [
-					{
-						titleKey: 'generateDoraReport',
-						descriptionKey: 'generateDoraReportDesc',
-						format: 'JSON',
-						href: `/dora-incident-reports/new?incident=${id}`,
-						kind: 'navigate',
-						testId: 'export-option-dora'
-					}
-				]
-			}
+			...(doraEnabled
+				? [
+						{
+							titleKey: 'doraIncidentReports',
+							options: [
+								{
+									titleKey: 'generateDoraReport',
+									descriptionKey: 'generateDoraReportDesc',
+									format: 'JSON',
+									href: `/dora-incident-reports/new?incident=${id}`,
+									kind: 'navigate',
+									testId: 'export-option-dora'
+								}
+							]
+						}
+					]
+				: [])
 		];
 	}
 
@@ -327,7 +334,7 @@
 
 	// DORA reports fetched server-side, sorted by creation date (newest first)
 	const doraRows: any[] = $derived(
-		[...(data.doraReports ?? [])].sort(
+		[...(doraEnabled ? (data.doraReports ?? []) : [])].sort(
 			(a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
 		)
 	);

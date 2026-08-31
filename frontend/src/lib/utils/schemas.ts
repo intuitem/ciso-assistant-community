@@ -765,7 +765,8 @@ export const FeatureFlagsSchema = z.object({
 	custom_portals: z.boolean().optional(),
 	posture_assessments: z.boolean().optional(),
 	commitment_management: z.boolean().optional(),
-	findings_from_requirements: z.boolean().optional()
+	findings_from_requirements: z.boolean().optional(),
+	dora: z.boolean().optional()
 });
 
 export const PortalSettingsSchema = z.object({
@@ -861,7 +862,7 @@ export const EntitiesSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
-	is_active: z.boolean().optional(),
+	is_active: z.boolean().optional().default(true),
 	parent_entity: z.string().optional().nullable(),
 	mission: z.string().optional(),
 	reference_link: z

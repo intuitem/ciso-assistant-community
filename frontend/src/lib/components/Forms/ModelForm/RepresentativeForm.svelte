@@ -1,12 +1,12 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	interface Props {
-		form: SuperValidated<any>;
+		form: SuperForm<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
@@ -22,6 +22,16 @@
 		object = {},
 		context = 'default'
 	}: Props = $props();
+
+	// A representative is normally added so they can answer questionnaires, which needs
+	// an account. On edit it stays off: one deliberately left without an account must
+	// not grow one just by being saved.
+	let userDefaultApplied = false;
+	$effect(() => {
+		if (userDefaultApplied || context !== 'create') return;
+		userDefaultApplied = true;
+		form.form.update((d) => ({ ...d, create_user: true }));
+	});
 </script>
 
 <TextField

@@ -1451,6 +1451,18 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'solutions',
 		verboseName: 'Solution',
 		verboseNamePlural: 'Solutions',
+		flaggedFields: {
+			dora_ict_service_type: 'dora',
+			dora_data_sensitiveness: 'dora',
+			dora_reliance_level: 'dora',
+			dora_substitutability: 'dora',
+			dora_non_substitutability_reason: 'dora',
+			dora_has_exit_plan: 'dora',
+			dora_reintegration_possibility: 'dora',
+			dora_discontinuing_impact: 'dora',
+			dora_alternative_providers_identified: 'dora',
+			dora_alternative_providers: 'dora'
+		},
 		reverseForeignKeyFields: [{ field: 'solutions', urlModel: 'contracts', disableDelete: true }],
 		foreignKeyFields: [
 			{ field: 'provider_entity', urlModel: 'entities' },
@@ -1508,6 +1520,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'contracts',
 		verboseName: 'Contract',
 		verboseNamePlural: 'Contracts',
+		flaggedFields: {
+			dora_contractual_arrangement: 'dora'
+		},
 		reverseForeignKeyFields: [
 			{ field: 'contracts', urlModel: 'evidences', disableDelete: true },
 			{ field: 'contracts', urlModel: 'solutions', disableDelete: true, disableCreate: true }
