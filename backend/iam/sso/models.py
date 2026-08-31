@@ -7,7 +7,6 @@ from django.utils.translation import gettext_lazy as _
 from global_settings.models import GlobalSettings
 
 from iam.sso.saml.defaults import DEFAULT_SAML_SETTINGS
-from iam.models import Folder
 
 logger = structlog.get_logger(__name__)
 
