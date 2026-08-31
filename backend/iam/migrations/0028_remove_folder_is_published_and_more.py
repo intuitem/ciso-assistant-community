@@ -128,8 +128,6 @@ def fill_default_roles(apps, schema_editor):
     root_folder.default_role = reader_catalog_role
     root_folder.save()
 
-    # TODO: Maybe we need a "ALWAYS_PUBLISHED" logic on the `Folder` model
-
     affected_folder_ids = set()
     for model_config in READER_MIGRATION_MODEL_LIST:
         model = model_config.get_model(apps)
@@ -141,8 +139,7 @@ def fill_default_roles(apps, schema_editor):
 
         try:
             iam_folder_field = RoleAssignment.get_iam_folder_field(real_model)
-        except:
-            print(f"[PASS MODEL] {real_model.__qualname__}")
+        except Exception:
             continue
 
         folder_ids = (
@@ -153,8 +150,6 @@ def fill_default_roles(apps, schema_editor):
             .distinct()
         )
 
-        print(f"[{model.__qualname__}][{len(folder_ids)}] {folder_ids}")
-
         affected_folder_ids.update(folder_ids)
 
     # Batch by 1_000 to avoid crashes due to overly large SQL requests.
@@ -162,34 +157,6 @@ def fill_default_roles(apps, schema_editor):
         Folder.objects.filter(id__in=affected_folder_ids_batch).update(
             default_role=reader_migration_role
         )
-
-    # Folder = apps.get_model("iam", "Folder")
-    # TODO: Implement this
-
-    # Create a queryset which return the list of non-leaf folder IDs (by listing all the `from_folder_id` of the `iam_folder_descendants` table i guess).
-    # Create a `migration_folder_ids` set containing the folde IDs of the folder which will receive the "reader legacy" `default_role`.
-
-    """
-    Duplicate the permissions listed in core/startup.py (to "freeze" them for the migration).
-    Do a `Role.objects;get_or_create` for "reader migration" and "reader catalog" with them (don't forget to do role.permissions.set(...) exactly like in core/startup.py).
-
-    # WE MUST SUPPORT THE "iam scope field" LOGIC:
-    # field_name = RoleAssignment.get_iam_folder_field(model)
-    
-    For each "reader migration" models: new_migration_folder_ids = model.objects.filter({
-    f""{field_name}__in": non_leaf_folder_ids,
-    is"_published=True,
-    ).values_list(field_name, flat=True).distinct()
-    # Check if the field_name work for values_list (like would "entity__folder_id" work even though there's a `ForeignKey` traversal involved in it ?)
-
-    migration_folder_ids.update(new_migration_folder_ids)
-
-    Folder.objects.filter(id__in=migration_folder_ids).update(default_role=reader_migration_role)
-
-    #TODO: (Don't forget to set "reader datalog" for the root folder)
-    #TODO: Move the `RoleViewSet` from the (enterprise version) to the (community version) (as this feature MUST be available in the community version of the app) (we need this viewset to list the roles in the frontend to be able to choose a specific `Role` for a `Folder.default_role`).
-    #TODO: Adapt the IAM to these new changes (make it use the `Folder.default_role` instead of the old `is_published` mechanism).
-    """
 
 
 class Migration(migrations.Migration):
