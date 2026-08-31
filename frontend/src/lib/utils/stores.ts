@@ -139,6 +139,20 @@ function createPersistedAuditFilters() {
 				return filters;
 			});
 		},
+		setControlCoverage(id, coverageArray) {
+			update((filters) => {
+				if (!filters[id]) filters[id] = {};
+				filters[id].selectedControlCoverage = coverageArray;
+				return filters;
+			});
+		},
+		setEvidenceCoverage(id, coverageArray) {
+			update((filters) => {
+				if (!filters[id]) filters[id] = {};
+				filters[id].selectedEvidenceCoverage = coverageArray;
+				return filters;
+			});
+		},
 		setDisplayOnlyAssessableNodes(id, displayOnlyAssessableNodes) {
 			update((filters) => {
 				if (!filters[id]) filters[id] = {};

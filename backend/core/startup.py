@@ -72,7 +72,6 @@ READER_PERMISSIONS_LIST = [
     "view_terminology",
     "view_objectclassification",
     "view_classificationlevel",
-    "view_globalsettings",
     "view_securityexception",
     "view_finding",
     "view_findingsassessment",
@@ -101,6 +100,8 @@ READER_PERMISSIONS_LIST = [
     "view_databreach",
     # campaigns,
     "view_campaign",
+    "view_organisationobjective",
+    "view_organisationissue",
     # operating modes
     "view_elementaryaction",
     "view_operatingmode",
@@ -140,6 +141,7 @@ READER_PERMISSIONS_LIST = [
     # integrations
     "view_syncmapping",
     "view_filteringlabel",
+    "view_libraryfilteringlabel",
     # presets
     "view_preset",
     "view_presetjourney",
@@ -223,7 +225,6 @@ APPROVER_PERMISSIONS_LIST = [
     "view_terminology",
     "view_objectclassification",
     "view_classificationlevel",
-    "view_globalsettings",
     "view_securityexception",
     "view_finding",
     "view_findingsassessment",
@@ -241,6 +242,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_assetcapability",
     # campaigns,
     "view_campaign",
+    "view_organisationobjective",
+    "view_organisationissue",
     # privacy,
     "view_processing",
     "view_purpose",
@@ -463,7 +466,6 @@ ANALYST_PERMISSIONS_LIST = [
     "view_terminology",
     "view_objectclassification",
     "view_classificationlevel",
-    "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
     "change_securityexception",
@@ -525,6 +527,8 @@ ANALYST_PERMISSIONS_LIST = [
     "view_assetcapability",
     # campaigns,
     "view_campaign",
+    "view_organisationobjective",
+    "view_organisationissue",
     # privacy,
     "add_processing",
     "change_processing",
@@ -934,7 +938,6 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_terminology",
     "view_objectclassification",
     "view_classificationlevel",
-    "view_globalsettings",
     "view_securityexception",
     "add_securityexception",
     "change_securityexception",
@@ -2015,10 +2018,7 @@ def startup(sender=None, **kwargs):
     print("startup handler: initialize database")
 
     # if root folder does not exist, then create it
-    if not Folder.objects.filter(content_type=Folder.ContentType.ROOT).exists():
-        Folder.objects.create(
-            name="Global", content_type=Folder.ContentType.ROOT, builtin=True
-        )
+    Folder._init_root_folder()
     # if main entity does not exist, then create it
     if not Entity.get_main_entity():
         main = Entity.objects.create(
@@ -2242,23 +2242,8 @@ def startup(sender=None, **kwargs):
     ensure_admin_user()
 
     # reset global setings in case of an issue
-    default_settings = {
-        "security_objective_scale": "1-4",
-        "ebios_radar_max": 6,
-        "ebios_radar_green_zone_radius": 0.2,
-        "ebios_radar_yellow_zone_radius": 0.9,
-        "ebios_radar_red_zone_radius": 2.5,
-        "notifications_enable_mailing": False,
-        "interface_agg_scenario_matrix": False,
-        "currency": "€",
-        "daily_rate": 500,
-        "mapping_max_depth": 3,
-        "show_warning_external_links": True,
-        "show_get_started": True,
-        "personal_folders": False,
-        "allow_assignments_to_entities": False,
-        "enforce_mfa": False,
-    }
+    default_settings = GlobalSettings.GENERAL_DEFAULT_VALUE
+
     try:
         global_settings, _ = GlobalSettings.objects.get_or_create(
             name="general", defaults={"value": default_settings}

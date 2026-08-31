@@ -49,6 +49,7 @@ from core.models import (
     match_urn,
 )
 from core.sandbox import SandboxTimeoutError, SandboxViolationError
+from core.utils import yaml_safe_load
 from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder, Permission
 from library import builder
@@ -974,10 +975,8 @@ class MappingLibrariesList(generics.ListAPIView):
             | Q(content__requirement_mapping_sets__isnull=False)
         ).distinct()
 
-        viewable_libraries, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(),
-            self.request.user,
-            StoredLibrary,
+        viewable_libraries = RoleAssignment.get_viewable_object_ids(
+            self.request.user, StoredLibrary
         )
         return qs.filter(id__in=viewable_libraries)
 
@@ -1375,7 +1374,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
             return Response({"error": "fileTooLarge"}, status=HTTP_400_BAD_REQUEST)
         try:
             validate_file_extension(attachment)
-            document = yaml.safe_load(attachment.read())
+            document = yaml_safe_load(attachment.read())
         except (yaml.YAMLError, ValidationError, DRFValidationError) as e:
             return Response(
                 {"error": "invalidYamlFile", "detail": str(e)},
@@ -1561,9 +1560,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
         """Audits on a live framework the user is allowed to see. We only ever
         surface what the caller may read (RBAC), never the raw cross-scope set.
         """
-        viewable, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, ComplianceAssessment
-        )
+        viewable = RoleAssignment.get_viewable_object_ids(user, ComplianceAssessment)
         return ComplianceAssessment.objects.filter(framework=framework, id__in=viewable)
 
     @action(detail=True, methods=["get", "put"], url_path="framework-editor")
@@ -1875,9 +1872,9 @@ class LibraryDraftViewSet(BaseModelViewSet):
 
         known = {str(s.get("library_urn", "")).lower() for s in sources}
         latest: dict = {}
-        accessible_ids = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, StoredLibrary
-        )[0]
+        accessible_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, StoredLibrary
+        )
         rows = (
             StoredLibrary.objects.filter(id__in=accessible_ids)
             .filter(

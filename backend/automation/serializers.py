@@ -65,11 +65,7 @@ class PostureAssessmentWriteSerializer(BaseModelSerializer):
         request = self.context.get("request")
         if request is None:
             return None
-        return set(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), request.user, Asset
-            )[0]
-        )
+        return set(RoleAssignment.get_viewable_object_ids(request.user, Asset))
 
     def validate_assets(self, assets):
         viewable = self._viewable_asset_ids()
@@ -130,9 +126,7 @@ class PostureAssessmentReadSerializer(AssessmentReadSerializer):
             viewable = self.context.get("viewable_asset_ids")
             if viewable is None:
                 viewable = set(
-                    RoleAssignment.get_accessible_object_ids(
-                        Folder.get_root_folder(), request.user, Asset
-                    )[0]
+                    RoleAssignment.get_viewable_object_ids(request.user, Asset)
                 )
                 self.context["viewable_asset_ids"] = viewable
             assets = [a for a in assets if a.id in viewable]

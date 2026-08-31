@@ -160,9 +160,7 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
         if template_name := validated_data.get("template_used"):
             locale = validated_data.get("locale", "en")
             accessible_ids = (
-                RoleAssignment.get_accessible_object_ids(
-                    Folder.get_root_folder(), request.user, DocumentTemplate
-                )[0]
+                RoleAssignment.get_viewable_object_ids(request.user, DocumentTemplate)
                 if request
                 else []
             )

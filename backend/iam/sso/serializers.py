@@ -1,10 +1,13 @@
 from allauth.socialaccount.providers.saml.provider import SAMLProvider
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from global_settings.models import GlobalSettings
 from .models import SSOSettings
 
 from core.serializers import BaseModelSerializer
+
+User = get_user_model()
 
 
 class SSOSettingsReadSerializer(BaseModelSerializer):
@@ -265,6 +268,15 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
 
     def update(self, instance, validated_data):
         settings_object = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
+
+        if validated_data.get("is_enabled") is False:
+            has_scim_users_without_local_fallback = User.objects.filter(
+                is_scim_managed=True, keep_local_login=False
+            ).exists()
+            if has_scim_users_without_local_fallback:
+                raise serializers.ValidationError(
+                    {"is_enabled": "errorSsoRequiredForScimUsers"}
+                )
 
         # Use stored secret and sp_private_key if no transmitted
         validated_data["secret"] = validated_data.get(

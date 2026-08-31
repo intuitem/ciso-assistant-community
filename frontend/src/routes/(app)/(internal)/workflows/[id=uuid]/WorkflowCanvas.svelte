@@ -53,6 +53,7 @@
 		taskTemplates: any[];
 		subprocessCandidates: any[];
 		creatableModels?: any[];
+		updatableModels?: any[];
 		readableModels?: any[];
 		workflowIsActive?: boolean;
 		workflowTimeoutSeconds?: number;
@@ -75,6 +76,7 @@
 		taskTemplates,
 		subprocessCandidates,
 		creatableModels = [],
+		updatableModels = [],
 		readableModels = [],
 		workflowIsActive = true,
 		workflowTimeoutSeconds = 0,
@@ -2384,6 +2386,7 @@
 				{taskTemplates}
 				{subprocessCandidates}
 				{creatableModels}
+				{updatableModels}
 				{readableModels}
 				{fkOptions}
 				{workflowId}

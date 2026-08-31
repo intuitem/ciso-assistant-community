@@ -8,6 +8,7 @@ as `waiting`; everything else executes and advances in the same call.
 
 import contextvars
 import re
+from collections.abc import Callable
 from datetime import date, timedelta
 
 from django.db import transaction
@@ -15,12 +16,15 @@ from django.utils import timezone
 
 from .actions import (
     ActionError,
+    DeferredTask,
+    FatalActionError,
     _read_scope_folder_ids,
     _render_context,
     dig,
     execute_action,
     render,
 )
+from .context import temporal_seeds
 from .models import (
     WorkflowInstance,
     WorkflowInstanceLog,
@@ -245,6 +249,7 @@ def create_instance(
     trigger_depth=0,
     entry_node=None,
     initial_variables=None,
+    trigger_cid="",
 ):
     if entry_node is None:
         entry_node = default_entry_node(version)
@@ -259,6 +264,8 @@ def create_instance(
     # caller (manual-run endpoint) validates keys and types beforehand.
     if initial_variables:
         variables.update(initial_variables)
+    # Engine-owned last; these keys are reserved, so nothing authored is lost.
+    variables.update(temporal_seeds(trigger_registration))
     if payload:
         variables["payload"] = payload
 
@@ -277,6 +284,7 @@ def create_instance(
             parent_token=parent_token,
             trigger_registration=trigger_registration,
             trigger_depth=trigger_depth,
+            trigger_cid=trigger_cid,
         )
         _log(
             instance,
@@ -309,6 +317,75 @@ def resume_token(token):
         token.save(update_fields=["status", "updated_at"])
         _advance(token)
         _run(instance)
+
+
+def claim_deferred_action(token_id: str, dispatch_id: str) -> WorkflowToken | None:
+    """Exclusive claim on a parked token's dispatch, returning None when
+    another delivery already took it. Same CAS pattern as retry_token_task:
+    huey may deliver a task twice, and a read-then-act window would let both
+    deliveries run the side effect. The token stays WAITING while in flight,
+    so _run never picks it up mid-delivery."""
+    claimed = WorkflowToken.objects.filter(
+        id=token_id,
+        status=WorkflowToken.Status.WAITING,
+        dispatch_id=dispatch_id,
+    ).update(dispatch_id=None)
+    if not claimed:
+        return None
+    return WorkflowToken.objects.select_related("instance").get(id=token_id)
+
+
+def _resume_deferred(
+    token: WorkflowToken, on_resume: Callable[[WorkflowInstance], None]
+) -> None:
+    """Shared scaffolding for a deferred action's task handing its token
+    back: run `on_resume` then the instance under the tree lock and the
+    instance's trigger depth. The WAITING re-check makes duplicate task
+    deliveries and operator interference no-ops."""
+    depth_token = current_trigger_depth.set(token.instance.trigger_depth)
+    try:
+        with transaction.atomic():
+            instance = _lock_instance_tree(token.instance_id)
+            token.refresh_from_db()
+            if token.status != WorkflowToken.Status.WAITING:
+                return
+            token.instance = instance
+            on_resume(instance)
+            _run(instance)
+    finally:
+        current_trigger_depth.reset(depth_token)
+
+
+def complete_deferred_action(token: WorkflowToken, output: dict) -> None:
+    """A deferred action's task reports success: persist the output, log the
+    execution and advance."""
+
+    def on_resume(instance):
+        node = token.current_node
+        _persist_node_output(node, output, instance)
+        _log(
+            instance,
+            WorkflowInstanceLog.EventType.ACTION_EXECUTED,
+            node=node,
+            message=(node.action_config or {}).get("type", ""),
+            data=_truncate_log_data(output),
+        )
+        _advance(token)
+
+    _resume_deferred(token, on_resume)
+
+
+def fail_deferred_action(token: WorkflowToken, message: str) -> None:
+    """A deferred action's task reports failure: route through the node's
+    retry policy exactly like a synchronous ActionError (mirrors the failed
+    async-subprocess path in _refresh_status)."""
+
+    def on_resume(instance):
+        token.status = WorkflowToken.Status.ACTIVE
+        token.save(update_fields=["status", "updated_at"])
+        _handle_failure(token, message)
+
+    _resume_deferred(token, on_resume)
 
 
 def _reopen(instance):
@@ -492,6 +569,7 @@ def _process(token):
     _set_iteration_overlay(token)
 
     failure = None
+    failure_retryable = True
     try:
         # Savepoint: a DB error here would otherwise poison run_instance's
         # atomic block and take _handle_failure's error token down with it.
@@ -530,6 +608,9 @@ def _process(token):
                 if node.type == WorkflowNode.Type.ACTION:
                     config = node.action_config or {}
                     output = execute_action(node, instance) or {}
+                    if isinstance(output, DeferredTask):
+                        output.dispatch(token)
+                        return
                     _persist_node_output(node, output, instance)
                     _log(
                         instance,
@@ -549,19 +630,24 @@ def _process(token):
                     return
 
                 _advance(token)
+            except FatalActionError as e:
+                failure = str(e)
+                failure_retryable = False
             except (ActionError, EngineError) as e:
                 failure = str(e)
     except Exception as e:  # noqa: BLE001 — a buggy action must not 500 the request
         failure = f"{type(e).__name__}: {e}"
     if failure is not None:
-        _handle_failure(token, failure)
+        _handle_failure(token, failure, retryable=failure_retryable)
 
 
-def _handle_failure(token, message):
-    """Retry policy: schedule a delayed Huey re-execution while
-    attempts remain on action/subprocess nodes, else park the token in error."""
+def _handle_failure(token, message, retryable=True):
+    """Retry policy: schedule a delayed Huey re-execution while attempts
+    remain on action/subprocess nodes, else park the token in error.
+    retryable=False (permanent config/validation failures) skips the retry
+    schedule and fails immediately — no retry can change the outcome."""
     node = token.current_node
-    retryable = node.type in (
+    retryable = retryable and node.type in (
         WorkflowNode.Type.ACTION,
         WorkflowNode.Type.SUBPROCESS,
     )
