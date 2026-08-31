@@ -156,6 +156,48 @@ class TestPagingLoop:
 
 
 @pytest.mark.django_db
+class TestPageReadFailure:
+    def test_a_failed_page_read_ends_the_loop_instead_of_the_run(self):
+        """A permission revoked mid-run makes read_page raise between pages.
+        The failure must land on the loop (error entry, loop finishes with the
+        items already processed) — not unwind through the already-completed
+        body token, where _handle_failure would collect it a second time and
+        corrupt the loop state."""
+        from unittest import mock
+
+        from automation.workflows import engine
+        from automation.workflows.actions import ActionError
+
+        domain = make_domain("Sweep revoked")
+        for index in range(4):
+            AppliedControl.objects.create(name=f"AC {index:02d}", folder=domain)
+        version = paging_flow(
+            domain,
+            {
+                "read": {"model": "applied_control", "order_by": "name", "limit": 2},
+                "collect": "{{item.name}}",
+            },
+        )
+        real = engine.read_page
+        calls = {"count": 0}
+
+        def revoked_after_first_page(*args, **kwargs):
+            calls["count"] += 1
+            if calls["count"] > 1:
+                raise ActionError("Authorization denied: permission revoked")
+            return real(*args, **kwargs)
+
+        with mock.patch.object(engine, "read_page", revoked_after_first_page):
+            instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        output = instance.node_outputs["each_row"]
+        assert output["count"] == 2
+        assert output["results"] == ["AC 00", "AC 01"]
+        assert any("page read failed" in e["message"] for e in output["errors"])
+        assert not instance.tokens.filter(status="waiting").exists()
+
+
+@pytest.mark.django_db
 class TestPagingLoopValidation:
     def test_an_invalid_read_is_refused_at_publish(self):
         domain = make_domain("Bad loop read")

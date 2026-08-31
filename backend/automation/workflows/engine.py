@@ -886,12 +886,23 @@ def _loop_load_next_page(controller, state):
             }
         )
         return False
-    items, next_offset = read_page(
-        controller.current_node,
-        controller.instance,
-        state["read"],
-        state["next_offset"],
-    )
+    try:
+        items, next_offset = read_page(
+            controller.current_node,
+            controller.instance,
+            state["read"],
+            state["next_offset"],
+        )
+    except (ActionError, FatalActionError) as e:
+        # A failed page read must not unwind through the body token that
+        # triggered it: that token is already COMPLETED, so _handle_failure
+        # would collect it a second time (outstanding below zero, the second
+        # raise escaping run_instance's transaction). Record the failure on
+        # the loop and finish with the items already processed.
+        state["errors"].append(
+            {"index": state["index"], "message": f"page read failed: {e}"}
+        )
+        return False
     if not items:
         return False
     state["items"] = items
