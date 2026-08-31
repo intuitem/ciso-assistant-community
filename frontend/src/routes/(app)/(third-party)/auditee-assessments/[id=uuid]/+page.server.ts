@@ -202,6 +202,14 @@ export const actions: Actions = {
 		const res = await event.fetch(endpoint, requestInitOptions);
 		return { status: res.status, body: await res.json() };
 	},
+	updateTaskTemplateStatus: async (event) => {
+		const { id, status } = await event.request.json();
+		const res = await event.fetch(`${BASE_API_URL}/task-templates/${id}/`, {
+			method: 'PATCH',
+			body: JSON.stringify({ status })
+		});
+		return { status: res.status, body: await res.json() };
+	},
 	createEvidence: async (event) => {
 		const result = await nestedWriteFormAction({ event, action: 'create' });
 		if (result.form) return { form: result.form, newEvidence: result.form.message.object };

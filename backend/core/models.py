@@ -9009,6 +9009,18 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         IN_PROGRESS = "in_progress", _("In progress")
         NOT_APPLICABLE = "not_applicable", _("Not applicable")
 
+    class ReviewState(models.TextChoices):
+        """Per-requirement outcome of a reviewer's pass, so a rework request can name
+        the handful of items that need work instead of bouncing the whole
+        questionnaire back with one note. RESUBMITTED is what the respondent's answer
+        turns a flag into: the reviewer keeps a list of what to re-check rather than
+        starting over."""
+
+        NONE = "", _("None")
+        CHANGES_REQUESTED = "changes_requested", _("Changes requested")
+        RESUBMITTED = "resubmitted", _("Resubmitted")
+        ACCEPTED = "accepted", _("Accepted")
+
     status = models.CharField(
         max_length=100,
         choices=Status.choices,
@@ -9064,6 +9076,13 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         blank=True,
         null=True,
         verbose_name=_("Respondent alignment"),
+    )
+    review_state = models.CharField(
+        max_length=32,
+        choices=ReviewState.choices,
+        default=ReviewState.NONE,
+        blank=True,
+        verbose_name=_("Review state"),
     )
     compliance_assessment = models.ForeignKey(
         ComplianceAssessment,

@@ -456,6 +456,57 @@
 	// promise is one click away.
 	let expandedTask = $state<string | null>(null);
 
+	// The reviewer's per-requirement verdict. `resubmitted` is what a flag becomes once
+	// the respondent has answered it, so a second pass is the handful that came back.
+	const REVIEW_STATES = [
+		{ id: 'changes_requested', label: m.reviewChangesRequested(), color: '#ef4444' },
+		{ id: 'resubmitted', label: m.reviewResubmitted(), color: '#f59e0b' },
+		{ id: 'accepted', label: m.reviewAccepted(), color: '#10b981' }
+	];
+	const reviewStateMeta = (state: string | null | undefined) =>
+		REVIEW_STATES.find((s) => s.id === state);
+
+	// While the assignment is still `submitted` the reviewer is mid-pass, so their
+	// half-finished flags stay on their side. The respondent sees them once the round
+	// has actually been sent back.
+	const showReviewFlags = $derived(isAuditor || assignmentStatus !== 'submitted');
+	const changesRequestedCount = $derived(
+		showReviewFlags
+			? requirementAssessments.filter(
+					(ra: Record<string, any>) => ra.review_state === 'changes_requested'
+				).length
+			: 0
+	);
+
+	function goToFirstFlagged() {
+		tocFilterReview = 'changes_requested';
+		const first = tocSections.find((s) => s.reviewState === 'changes_requested');
+		if (first) goTo(first.index);
+	}
+
+	async function setReviewState(requirementAssessment: Record<string, any>, state: string) {
+		const next = requirementAssessment.review_state === state ? '' : state;
+		await fetch('?/updateRequirementAssessment', {
+			method: 'POST',
+			body: JSON.stringify({ id: requirementAssessment.id, review_state: next })
+		});
+		await invalidateAll();
+	}
+
+	function scrollToComments() {
+		document.getElementById('requirement-comments')?.scrollIntoView({ behavior: 'smooth' });
+	}
+
+	const taskStatusOptions = $derived(data.taskTemplateModel?.selectOptions?.status ?? []);
+
+	async function updateTaskStatus(taskId: string, status: string) {
+		await fetch('?/updateTaskTemplateStatus', {
+			method: 'POST',
+			body: JSON.stringify({ id: taskId, status })
+		});
+		await invalidateAll();
+	}
+
 	function modalTaskTemplateCreateForm(createform: SuperForm<any>): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -600,6 +651,7 @@
 				id: item.data.id,
 				title,
 				result: item.data.result,
+				reviewState: item.data.review_state,
 				alignment: item.data.respondent_alignment,
 				hasVisibleQuestions: (item.data.visible_questions ?? 0) > 0,
 				questionColor: getQuestionStatus(item)
@@ -610,14 +662,25 @@
 	// ToC visibility and filtering
 	let tocCollapsed = $state(false);
 	let tocFilterResult = $state<string | null>(null);
+	let tocFilterReview = $state<string | null>(null);
 	const resultCounts = $derived(
 		result_options.map((opt) => ({
 			...opt,
 			count: tocSections.filter((s) => s.result === opt.id).length
 		}))
 	);
+	const reviewStateCounts = $derived(
+		REVIEW_STATES.map((state) => ({
+			...state,
+			count: tocSections.filter((s) => s.reviewState === state.id).length
+		}))
+	);
 	const filteredTocSections = $derived(
-		tocFilterResult ? tocSections.filter((s) => s.result === tocFilterResult) : tocSections
+		tocSections.filter(
+			(s) =>
+				(!tocFilterResult || s.result === tocFilterResult) &&
+				(!tocFilterReview || s.reviewState === tocFilterReview)
+		)
 	);
 
 	// Keyboard navigation
@@ -687,6 +750,21 @@
 						</button>
 					{/if}
 				{/each}
+				{#each reviewStateCounts as state}
+					{#if state.count > 0 && showReviewFlags}
+						<button
+							class="px-2 py-1 text-[10px] rounded transition-colors flex items-center gap-1.5
+								{tocFilterReview === state.id
+								? 'bg-surface-700-300 text-white font-semibold'
+								: 'bg-surface-50-950 text-surface-700-300 hover:bg-surface-200-800 border border-surface-200-800'}"
+							onclick={() => (tocFilterReview = tocFilterReview === state.id ? null : state.id)}
+							title={state.label}
+						>
+							<i class="fa-solid fa-flag text-[9px]" style="color: {state.color};"></i>
+							{state.count}
+						</button>
+					{/if}
+				{/each}
 			</div>
 			<nav class="p-2 space-y-0.5">
 				{#each filteredTocSections as section}
@@ -721,6 +799,14 @@
 											: (complianceResultColorMap[section.result] ?? '#d1d5db')};"
 							></span>
 							<span class="truncate">{section.title}</span>
+							{#if showReviewFlags && reviewStateMeta(section.reviewState)}
+								{@const meta = reviewStateMeta(section.reviewState)}
+								<i
+									class="fa-solid fa-flag text-[9px] ml-auto flex-shrink-0"
+									style="color: {meta?.color};"
+									title={meta?.label}
+								></i>
+							{/if}
 						</button>
 					{/if}
 				{/each}
@@ -828,6 +914,17 @@
 						{reviewerObservation}
 					</div>
 				{/if}
+				{#if changesRequestedCount > 0}
+					<button
+						type="button"
+						class="ml-11 btn btn-sm preset-tonal-error w-fit"
+						onclick={goToFirstFlagged}
+					>
+						<i class="fa-solid fa-flag mr-2"></i>{m.itemsNeedingChanges({
+							count: changesRequestedCount
+						})}
+					</button>
+				{/if}
 				{#if assignment?.events?.length > 0}
 					<button
 						class="ml-11 badge bg-surface-200-800 text-surface-600-400 text-xs hover:bg-surface-200-800 cursor-pointer transition-colors"
@@ -922,7 +1019,7 @@
 				class="card bg-surface-50-950 shadow-md border-t-[3px] border-t-orange-400 px-6 py-5 flex flex-col space-y-4"
 			>
 				<!-- Requirement title -->
-				<div class="flex items-start justify-between">
+				<div class="flex items-start justify-between gap-4">
 					<div>
 						<h3 class="text-xl font-semibold text-orange-600">
 							{getTitle(requirementAssessment)}
@@ -931,7 +1028,55 @@
 							<p class="text-sm text-surface-600-400 mt-0.5">{requirement.ref_id}</p>
 						{/if}
 					</div>
+					{#if isAuditor}
+						<div class="flex items-center gap-1 flex-shrink-0">
+							<button
+								type="button"
+								class="btn btn-sm {requirementAssessment.review_state === 'changes_requested'
+									? 'preset-filled-error-500'
+									: 'preset-tonal-surface'}"
+								onclick={() => setReviewState(requirementAssessment, 'changes_requested')}
+								title={m.requestChanges()}
+							>
+								<i class="fa-solid fa-flag mr-1"></i>{m.requestChanges()}
+							</button>
+							<button
+								type="button"
+								class="btn btn-sm {requirementAssessment.review_state === 'accepted'
+									? 'preset-filled-success-500'
+									: 'preset-tonal-surface'}"
+								onclick={() => setReviewState(requirementAssessment, 'accepted')}
+								title={m.markAsAccepted()}
+							>
+								<i class="fa-solid fa-check"></i>
+							</button>
+						</div>
+					{:else if showReviewFlags && reviewStateMeta(requirementAssessment.review_state)}
+						{@const meta = reviewStateMeta(requirementAssessment.review_state)}
+						<span
+							class="badge text-xs flex-shrink-0"
+							style="background-color: {meta?.color}1a; color: {meta?.color};"
+						>
+							<i class="fa-solid fa-flag mr-1"></i>{meta?.label}
+						</span>
+					{/if}
 				</div>
+				{#if showReviewFlags && !isAuditor && requirementAssessment.review_state === 'changes_requested'}
+					<div
+						class="bg-red-50 border-l-[3px] border-l-red-500 rounded-md px-4 py-2 flex items-center justify-between gap-3 text-sm text-red-800"
+					>
+						<span><i class="fa-solid fa-comment-dots mr-2"></i>{m.changesRequestedItemHint()}</span>
+						{#if page.data?.featureflags?.comments && showComments}
+							<button
+								type="button"
+								class="btn btn-sm preset-tonal-error"
+								onclick={scrollToComments}
+							>
+								{m.seeComments()}
+							</button>
+						{/if}
+					</div>
+				{/if}
 
 				<!-- Description -->
 				{#if requirement.description}
@@ -1354,7 +1499,23 @@
 																</td>
 																<td class="py-2">{task.task_date ?? '--'}</td>
 																<td class="py-2">
-																	{task.status ? safeTranslate(task.status) : '--'}
+																	{#if task.status && canEditTaskTemplates}
+																		<select
+																			class="select select-sm text-xs w-36"
+																			aria-label={m.status()}
+																			value={task.status}
+																			onchange={(e) =>
+																				updateTaskStatus(task.id, e.currentTarget.value)}
+																		>
+																			{#each taskStatusOptions as option}
+																				<option value={option.value}
+																					>{safeTranslate(option.label)}</option
+																				>
+																			{/each}
+																		</select>
+																	{:else}
+																		{task.status ? safeTranslate(task.status) : '--'}
+																	{/if}
 																</td>
 																{#if showCommitment}
 																	<td class="py-2">
@@ -1492,7 +1653,12 @@
 					{/key}
 				{/if}
 				{#if page.data?.featureflags?.comments && showComments}
-					<CommentsPanel parentType="requirement_assessment" parentId={requirementAssessment.id} />
+					<div id="requirement-comments">
+						<CommentsPanel
+							parentType="requirement_assessment"
+							parentId={requirementAssessment.id}
+						/>
+					</div>
 				{/if}
 			</div>
 		{/if}

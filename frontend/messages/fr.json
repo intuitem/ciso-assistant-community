@@ -223,6 +223,23 @@
 	"dropNotes": "Notes d'abandon",
 	"resubmissionNotes": "Notes de resoumission",
 	"requestChanges": "Demander des modifications",
+	"reviewChangesRequested": "Modifications demandées",
+	"noFlaggedItemsHint": "Aucune exigence n'est signalée. Le répondant ne recevra que la note ci-dessous — signalez les exigences à corriger depuis le questionnaire pour lui indiquer quoi reprendre.",
+	"itemsNeedingChanges": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} exigence à corriger",
+				"countPlural=other": "{count} exigences à corriger"
+			}
+		}
+	],
+	"reviewResubmitted": "Renvoyé",
+	"reviewAccepted": "Accepté",
+	"markAsAccepted": "Marquer comme accepté",
+	"changesRequestedItemHint": "Le relecteur a demandé des modifications ici. Le détail est dans les commentaires.",
+	"seeComments": "Voir les commentaires",
 	"drop": "Abandonner",
 	"resubmit": "Renvoyer",
 	"onlyRequesterCanModify": "Seul le demandeur peut effectuer des actions sur cette validation",

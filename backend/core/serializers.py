@@ -3511,6 +3511,17 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
             if not is_field_editable_by(ca, "task_templates", role):
                 data = {k: v for k, v in data.items() if k != "task_templates"}
 
+        # The review flag is the reviewer's, unconditionally: a respondent clearing
+        # their own "changes requested" would silently empty the rework list. Not
+        # routed through field_visibility so it cannot be configured open.
+        if request and self.instance and "review_state" in data:
+            from core.utils import get_respondent_scoped_folder_ids
+
+            ca = self.instance.compliance_assessment
+            respondent_folders = get_respondent_scoped_folder_ids(request.user)
+            if respondent_folders and ca.folder_id in respondent_folders:
+                data = {k: v for k, v in data.items() if k != "review_state"}
+
         # On update, treat an empty required-choice value as "unchanged" instead
         # of failing validation. The respondent view (`requirements_list`) strips
         # auditor-only fields like `status` from the read, so the Select-evidence /
@@ -4503,7 +4514,9 @@ class RequirementAssignmentReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     compliance_assessment = FieldsRelatedField()
     actor = FieldsRelatedField(many=True)
-    requirement_assessments = FieldsRelatedField(many=True)
+    # The assignments board counts the review flags per assignment, so a reviewer
+    # sending a round back can see what they flagged without opening the audit.
+    requirement_assessments = FieldsRelatedField(["id", "review_state"], many=True)
     events = RequirementAssignmentEventSerializer(many=True, read_only=True)
 
     class Meta:

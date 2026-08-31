@@ -18195,6 +18195,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         # Apply transition
         assignment.status = target
         assignment.save(update_fields=["status"])
+        self._advance_review_states(assignment, key)
 
         # Create event for traceability
         RequirementAssignmentEvent.objects.create(
@@ -18327,6 +18328,33 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 "viewer_role": viewer_role,
             },
             status=status.HTTP_200_OK,
+        )
+
+    @staticmethod
+    def _advance_review_states(assignment, transition_key):
+        """Carry the per-requirement review flags across an assignment transition.
+
+        Answering a rework request moves the flagged items to RESUBMITTED rather than
+        clearing them: the reviewer's second pass is the handful that came back, not
+        the whole questionnaire again. Closing the assignment accepts whatever is
+        still awaiting that second look.
+        """
+        from core.models import RequirementAssessment
+
+        ReviewState = RequirementAssessment.ReviewState
+        moves = {
+            ("changes_requested", "submitted"): (
+                ReviewState.CHANGES_REQUESTED,
+                ReviewState.RESUBMITTED,
+            ),
+            ("submitted", "closed"): (ReviewState.RESUBMITTED, ReviewState.ACCEPTED),
+        }
+        move = moves.get(transition_key)
+        if move is None:
+            return
+        source, target_state = move
+        assignment.requirement_assessments.filter(review_state=source).update(
+            review_state=target_state
         )
 
     @staticmethod

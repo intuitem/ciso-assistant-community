@@ -177,6 +177,8 @@ export interface ModelMapEntry {
 	foreignKeyFields?: ForeignKeyField[];
 	reverseForeignKeyFields?: ReverseForeignKeyField[];
 	selectFields?: SelectField[];
+	// Resolved at load time from the `{model}/{field}/` choice endpoints.
+	selectOptions?: Record<string, SelectFieldData[]>;
 	fileFields?: string[];
 	filters?: SelectField[];
 	path?: string;

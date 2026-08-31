@@ -239,6 +239,23 @@
 	"dropNotes": "Drop notes",
 	"resubmissionNotes": "Resubmission notes",
 	"requestChanges": "Request changes",
+	"reviewChangesRequested": "Changes requested",
+	"noFlaggedItemsHint": "No requirement is flagged. The respondent will only get the note below — flag the items to fix from the questionnaire to point them at what needs work.",
+	"itemsNeedingChanges": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} item needs changes",
+				"countPlural=other": "{count} items need changes"
+			}
+		}
+	],
+	"reviewResubmitted": "Resubmitted",
+	"reviewAccepted": "Accepted",
+	"markAsAccepted": "Mark as accepted",
+	"changesRequestedItemHint": "The reviewer asked for changes here. The details are in the comments.",
+	"seeComments": "See comments",
 	"drop": "Drop",
 	"resubmit": "Resubmit",
 	"onlyRequesterCanModify": "Only the requester can perform actions on this validation",
