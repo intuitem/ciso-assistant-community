@@ -5826,5 +5826,11 @@
 	"validationInTerminalState": "Cette validation est clôturée et ne peut plus être modifiée",
 	"validationStatusTransitionNotAllowed": "Impossible de faire passer cette validation de « {fromStatus} » à « {toStatus} »",
 	"validationMustStartAsSubmitted": "Une nouvelle demande de validation doit débuter au statut « soumis »",
-	"showingMostRecentValidations": "Affichage des {count} validations les plus récentes sur {total}"
+	"showingMostRecentValidations": "Affichage des {count} validations les plus récentes sur {total}",
+	"withAppliedControls": "Avec mesures",
+	"withoutAppliedControls": "Sans mesures",
+	"withEvidence": "Avec preuves",
+	"withoutEvidence": "Sans preuves",
+	"evidenceCoverageHint": "directe ou via les mesures associées",
+	"bothEvidence": "Directes et indirectes"
 }

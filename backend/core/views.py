@@ -451,6 +451,16 @@ def escape_csv_row(row):
     ]
 
 
+ILLEGAL_XLSX_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+
+
+def sanitize_xlsx_value(value):
+    """Strip ASCII control characters openpyxl refuses to write (tab/LF/CR are allowed)."""
+    if isinstance(value, str):
+        return ILLEGAL_XLSX_CHARS_RE.sub("", value)
+    return value
+
+
 def create_xlsx_response(entries, filename, wrap_columns=None):
     """
     DRY helper to create XLSX response with consistent formatting.
@@ -466,6 +476,9 @@ def create_xlsx_response(entries, filename, wrap_columns=None):
     if wrap_columns is None:
         wrap_columns = ["name", "description"]
 
+    entries = [
+        {k: sanitize_xlsx_value(v) for k, v in entry.items()} for entry in entries
+    ]
     df = pd.DataFrame(entries)
     buffer = io.BytesIO()
 
@@ -3971,7 +3984,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "\n".join([ra.get("str") for ra in item.get("owner")]),
                 "\n".join([ra.get("str") for ra in item.get("risk_scenarios")]),
             ]
-            ws.append(row)
+            ws.append([sanitize_xlsx_value(value) for value in row])
 
         for row_idx, row in enumerate(ws.iter_rows(min_row=2), 2):  # Skip header row
             max_lines = 1
@@ -10240,8 +10253,8 @@ class PresetViewSet(BaseModelViewSet):
 
         folder_name = request.data.get("folder_name")
         folder_id = request.data.get("folder_id")
-        create_objects = request.data.get("create_objects", True)
-        apply_feature_flags = request.data.get("apply_feature_flags", True)
+        create_objects = request.data.get("create_objects", False)
+        apply_feature_flags = request.data.get("apply_feature_flags", False)
 
         if apply_feature_flags:
             can_change_settings = RoleAssignment.is_access_allowed(
@@ -11569,7 +11582,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     if evidence.get("filename")
                 ),
             }
-            entries.append(entry)
+            entries.append({k: sanitize_xlsx_value(v) for k, v in entry.items()})
 
         df = pd.DataFrame(entries)
         buffer = io.BytesIO()
@@ -12230,6 +12243,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             implementation_groups = None
         tree = filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, compliance_assessment)
+        annotate_tree_with_coverage(tree, compliance_assessment)
         return Response(tree)
 
     @action(detail=True, methods=["get"])
@@ -12293,6 +12307,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             implementation_groups = None
         tree = filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, compliance_assessment)
+        annotate_tree_with_coverage(tree, compliance_assessment)
 
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
@@ -12802,10 +12817,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
         )
+        # ... and assignments the user can actually open: the assessment page
+        # fetches the assignment through the scoped viewset, so a card for an
+        # assignment the user cannot view would lead straight to a 404.
+        viewable_assignment_ids = set(
+            RoleAssignment.get_viewable_object_ids(request.user, RequirementAssignment)
+        )
 
         dashboard_data = []
         for assignment in assignments:
             if assignment.compliance_assessment_id not in viewable_ca_ids:
+                continue
+            if assignment.id not in viewable_assignment_ids:
                 continue
 
             ca = assignment.compliance_assessment

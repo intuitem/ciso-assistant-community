@@ -1501,20 +1501,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return is_directly_accessible or is_indirectly_accessible
 
     @staticmethod
-    def _is_actor_accessible(
-        user: AbstractBaseUser | AnonymousUser,
-        perm_prefix: PermissionPrefix,
-        actor: Actor,
-    ) -> bool:
-        specific = actor.specific
-        specific_model = type(specific)
-        iam_scope_folder = specific.folder
-
-        return iam_scope_folder.id in RoleAssignment.get_allowed_folder_ids(
-            user, (perm_prefix, specific_model)
-        )
-
-    @staticmethod
     def is_object_accessible(
         user: AbstractBaseUser | AnonymousUser,
         perm_prefix: PermissionPrefix,
@@ -1534,7 +1520,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return False
 
         if model is Actor:
-            return RoleAssignment._is_actor_accessible(user, perm_prefix, obj)
+            if not isinstance(obj, Actor):
+                raise AssertionError("Unreachable.")
+
+            obj = obj.specific
+            model = type(obj)
 
         if perm_prefix == "add" and model is FilteringLabel:
             return RoleAssignment.get_allowed_folder_ids(
@@ -1853,7 +1843,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         user_folder_ids = RoleAssignment.get_allowed_folder_ids(
             user, (perm_prefix, User)
         )
-        team__folder_ids = RoleAssignment.get_allowed_folder_ids(
+        team_folder_ids = RoleAssignment.get_allowed_folder_ids(
             user, (perm_prefix, Team)
         )
         entity_folder_ids = RoleAssignment.get_allowed_folder_ids(
@@ -1868,11 +1858,43 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             ),
         ).filter(
             Q(user__isnull=False, iam_folder_id__in=user_folder_ids)
-            | Q(team__isnull=False, iam_folder_id__in=team__folder_ids)
+            | Q(team__isnull=False, iam_folder_id__in=team_folder_ids)
             | Q(entity__isnull=False, iam_folder_id__in=entity_folder_ids)
         )
 
         allowed_actor_ids = allowed_actors.values_list("id", flat=True)
+
+        if perm_prefix == "view":
+            published_actors_query = Q()
+
+            for model, allowed_folder_ids in [
+                (User, user_folder_ids),
+                (Team, team_folder_ids),
+                (Entity, entity_folder_ids),
+            ]:
+                ancestor_folder_ids = Folder.objects.filter(
+                    descendants__in=Folder.objects.filter(
+                        id__in=allowed_folder_ids
+                    ).exclude(content_type=Folder.ContentType.ENCLAVE)
+                ).distinct()
+
+                iam_folder_field = RoleAssignment.get_iam_folder_field(model)
+
+                model_name = model.__name__.lower()
+                published_model_objects_query = Q(
+                    **{
+                        f"{model_name}__{iam_folder_field}__in": ancestor_folder_ids,
+                        f"{model_name}__is_published": True,
+                    }
+                )
+
+                published_actors_query |= published_model_objects_query
+
+            published_actors = Actor.objects.filter(published_actors_query)
+            published_actor_ids = published_actors.values_list("id", flat=True)
+
+            allowed_actor_ids = allowed_actor_ids.union(published_actor_ids)
+
         return allowed_actor_ids
 
     @staticmethod
