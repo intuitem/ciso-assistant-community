@@ -3553,7 +3553,7 @@
 	"externallyDetected": "Externí",
 	"errorCreatingPersonalAccessToken": "Při vytváření osobního přístupového tokenu (PAT) došlo k chybě.",
 	"errorMaxPatAmountExceeded": "Byl překročen maximální počet povolených tokenů pro tohoto uživatele.",
-	"errorSsoRequiredForScimUsers": "SSO nelze deaktivovat, dokud existují uživatelé zřízení přes SCIM bez místního přístupu.",
+	"errorSsoRequiredForManagedUsers": "SSO nelze deaktivovat, dokud existují uživatelé zřízení přes SCIM nebo automatickým zřizováním bez místního přístupu.",
 	"campaigns": "Kampaně",
 	"addCampaign": "Zahájit kampaň",
 	"campaignDomainHelpText": "Doména, ke které bude kampaň připojena.",
@@ -5698,5 +5698,14 @@
 	"importTemplatesSingleNote": "Importujete jen jednu jedinou šablonu? Často je mnohem rychlejší si ji založit manuálně přímo ze seznamu se šablonami.",
 	"unpublishedDocumentsNotice": "Připraveno celkem {count} dokumentů jakožto koncept (draft). Nejsou zatím publikované — uvidíte je tedy jen v pohledu správy (manage).",
 	"authored": "Napsáno v aplikaci",
-	"uploaded": "Nahráno ze souboru"
+	"uploaded": "Nahráno ze souboru",
+	"enableJitProvisioning": "Povolit automatické zřizování",
+	"enableJitProvisioningHelpText": "Automaticky vytvořit účet s výchozími uživatelskými skupinami uvedenými níže pro uživatele, kteří se poprvé přihlašují přes SSO.",
+	"defaultUserGroups": "Výchozí uživatelské skupiny",
+	"defaultUserGroupsHelpText": "Uživatelské skupiny automaticky přidělené uživatelům vytvořeným automatickým zřizováním.",
+	"defaultUserGroupsWarning": "Použije se pouze jednou, při vytvoření účtu. Pozdější změna nebo odstranění tohoto nastavení neovlivní již zřízené uživatele. Pro členství ve skupinách, které zůstává synchronizované v čase, použijte místo toho mapování skupin IdP.",
+	"attributeMappingGroups": "Mapování atributu skupin",
+	"attributeMappingGroupsHelpText": "Název(y) nároku (claim) obsahujícího členství uživatele ve skupinách IdP. Skupiny nalezené zde jsou při každém přihlášení synchronizovány se skupinami IdP a udělují uživatelské skupiny CISO Assistant, na které je administrátor namapoval.",
+	"jitProvisioning": "Automatické zřizování přes SSO (JIT)",
+	"jitProvisioningDescription": "Povolit automatické vytváření účtů při prvním přihlášení přes SSO a synchronizaci jejich členství ve skupinách IdP, bez nutnosti SCIM."
 }
