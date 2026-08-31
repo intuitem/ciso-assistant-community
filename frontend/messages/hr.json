@@ -874,6 +874,8 @@
 	"addRepresentative": "Dodaj predstavnika",
 	"phone": "Telefon",
 	"role": "Uloga",
+	"defaultRole": "Zadana uloga",
+	"defaultRoleHelpText": "Uloga koja se automatski dodjeljuje na ovoj domeni svakom korisniku s dodjelom uloge na jednoj od njezinih poddomena.",
 	"questions": "Pitanja",
 	"recipientEntity": "Primajući entitet",
 	"financial": "Financijska",
@@ -4204,7 +4206,5 @@
 	"scimTokenNameTooLong": "Naziv ne smije imati više od 255 znakova.",
 	"idpGroup": "IdP grupa",
 	"idpGroups": "IdP grupe",
-	"idpGroupsDescription": "Omogući federaciju IdP grupa (SCIM provizioniranje, mapiranja IdP grupa i članstva korisnika u IdP grupama).",
-	"viewableFromDescendants": "Vidljivo iz poddomena",
-	"viewableFromDescendantsHelpText": "Ako je odabrano, objekti više vrsta u ovoj domeni postaju vidljivi iz svih poddomena. Vrste objekata na koje ovo utječe su: {stringified_model_names}."
+	"idpGroupsDescription": "Omogući federaciju IdP grupa (SCIM provizioniranje, mapiranja IdP grupa i članstva korisnika u IdP grupama)."
 }

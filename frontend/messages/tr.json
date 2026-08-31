@@ -868,6 +868,8 @@
 	"addRepresentative": "Temsilci ekle",
 	"phone": "Telefon",
 	"role": "Rol",
+	"defaultRole": "Varsayılan rol",
+	"defaultRoleHelpText": "Bu etki alanında, alt etki alanlarından birinde rol ataması bulunan her kullanıcıya otomatik olarak verilen rol.",
 	"questions": "Sorular",
 	"recipientEntity": "Alıcı kuruluş",
 	"financial": "Finansal",
@@ -2444,7 +2446,5 @@
 	"scimTokenNameTooLong": "Ad en fazla 255 karakter olabilir.",
 	"idpGroup": "IdP grubu",
 	"idpGroups": "IdP grupları",
-	"idpGroupsDescription": "IdP grup federasyonunu etkinleştirin (SCIM sağlama, IdP grup eşlemeleri ve kullanıcılarda IdP grup üyelikleri).",
-	"viewableFromDescendants": "Alt alan adlarından görüntülenebilir",
-	"viewableFromDescendantsHelpText": "İşaretlenirse, bu etki alanındaki birden fazla türdeki nesne tüm alt alan adlarından görüntülenebilir hale gelir. Bundan etkilenen nesne türleri: {stringified_model_names}."
+	"idpGroupsDescription": "IdP grup federasyonunu etkinleştirin (SCIM sağlama, IdP grup eşlemeleri ve kullanıcılarda IdP grup üyelikleri)."
 }

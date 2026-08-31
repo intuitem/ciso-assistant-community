@@ -787,6 +787,8 @@
 	"addRepresentative": "Vertreter hinzufügen",
 	"phone": "Telefon",
 	"role": "Rolle",
+	"defaultRole": "Standardrolle",
+	"defaultRoleHelpText": "Rolle, die automatisch auf dieser Domäne an jeden Benutzer mit einer Rollenzuweisung in einer ihrer Unterdomänen gewährt wird.",
 	"questions": "Fragen",
 	"recipientEntity": "Empfänger",
 	"financial": "Finanziell",
@@ -3585,7 +3587,5 @@
 	"scimTokenNameTooLong": "Der Name darf höchstens 255 Zeichen lang sein.",
 	"idpGroup": "IdP-Gruppe",
 	"idpGroups": "IdP-Gruppen",
-	"idpGroupsDescription": "IdP-Gruppenföderation aktivieren (SCIM-Bereitstellung, IdP-Gruppenzuordnungen und IdP-Gruppenmitgliedschaften von Benutzern).",
-	"viewableFromDescendants": "Sichtbar aus Unterdomänen",
-	"viewableFromDescendantsHelpText": "Wenn aktiviert, werden Objekte mehrerer Typen in diesem Bereich aus allen Unterdomänen sichtbar. Die davon betroffenen Objekttypen sind: {stringified_model_names}."
+	"idpGroupsDescription": "IdP-Gruppenföderation aktivieren (SCIM-Bereitstellung, IdP-Gruppenzuordnungen und IdP-Gruppenmitgliedschaften von Benutzern)."
 }

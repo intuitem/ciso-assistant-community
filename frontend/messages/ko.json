@@ -1184,6 +1184,8 @@
 	"removeIdentifier": "식별자 제거",
 	"phone": "전화",
 	"role": "역할",
+	"defaultRole": "기본 역할",
+	"defaultRoleHelpText": "이 도메인에서 하위 도메인 중 하나에 역할 할당이 있는 모든 사용자에게 자동으로 부여되는 역할입니다.",
 	"questions": "질문",
 	"recipientEntity": "수신 엔터티",
 	"financial": "재무",
@@ -4380,7 +4382,5 @@
 	"scimTokenNameTooLong": "이름은 255자를 초과할 수 없습니다.",
 	"idpGroup": "IdP 그룹",
 	"idpGroups": "IdP 그룹",
-	"idpGroupsDescription": "IdP 그룹 페더레이션 활성화(SCIM 프로비저닝, IdP 그룹 매핑 및 사용자의 IdP 그룹 멤버십).",
-	"viewableFromDescendants": "하위 도메인에서 볼 수 있음",
-	"viewableFromDescendantsHelpText": "선택하면 이 도메인에 있는 여러 유형의 객체를 모든 하위 도메인에서 볼 수 있게 됩니다. 영향을 받는 객체 유형은 다음과 같습니다: {stringified_model_names}."
+	"idpGroupsDescription": "IdP 그룹 페더레이션 활성화(SCIM 프로비저닝, IdP 그룹 매핑 및 사용자의 IdP 그룹 멤버십)."
 }

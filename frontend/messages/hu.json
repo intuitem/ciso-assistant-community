@@ -827,6 +827,8 @@
 	"addRepresentative": "Képviselő hozzáadása",
 	"phone": "Telefon",
 	"role": "Szerep",
+	"defaultRole": "Alapértelmezett szerepkör",
+	"defaultRoleHelpText": "Az a szerepkör, amelyet a rendszer automatikusan megad ezen a tartományon minden olyan felhasználónak, akinek szerepkör-hozzárendelése van valamelyik aldoménjén.",
 	"questions": "Kérdések",
 	"recipientEntity": "Címzett vállalat",
 	"financial": "Pénzügyi",
@@ -1696,7 +1698,5 @@
 	"gracePeriod": "Türelmi idő",
 	"gracePeriodHelpText": "A jelenlegi titkos kulcs a csere után még ennyi ideig működik, hogy az integrációkat leállás nélkül lehessen frissíteni. Legfeljebb 1 hónapra korlátozva.",
 	"gracePeriodTooLong": "A türelmi idő nem lehet hosszabb 1 hónapnál.",
-	"previousSecretValidUntil": "Az előző ügyfél titkos kulcsa {date} időpontig érvényes marad.",
-	"viewableFromDescendants": "Látható az aldomainekről",
-	"viewableFromDescendantsHelpText": "Ha be van jelölve, az ebben a mappában lévő, több típusú objektum láthatóvá válik az összes aldomainről. Az ez által érintett objektumtípusok: {stringified_model_names}."
+	"previousSecretValidUntil": "Az előző ügyfél titkos kulcsa {date} időpontig érvényes marad."
 }

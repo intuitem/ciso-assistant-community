@@ -1368,6 +1368,8 @@
 	"removeIdentifier": "Odstrani identifikator",
 	"phone": "Telefon",
 	"role": "Vloga",
+	"defaultRole": "Privzeta vloga",
+	"defaultRoleHelpText": "Vloga, ki se samodejno dodeli na tej domeni vsakemu uporabniku z dodelitvijo vloge na eni od njenih poddomen.",
 	"questions": "Vprašanja",
 	"recipientEntity": "Subjekt prejemnik",
 	"financial": "Finančni",
@@ -5609,7 +5611,5 @@
 	"importTemplatesSingleNote": "Uvažate samo eno predlogo? Hitreje jo je ustvariti neposredno s seznama Predlog.",
 	"unpublishedDocumentsNotice": "{count} dokument(ov) je v osnutku, a še ni objavljenih — vidni so v pogledu upravljanja.",
 	"authored": "Ustvarjeno",
-	"uploaded": "Naloženo",
-	"viewableFromDescendants": "Vidno iz poddomen",
-	"viewableFromDescendantsHelpText": "Če je označeno, postanejo predmeti več vrst v tej domeni vidni iz vseh poddomen. Vrste predmetov, na katere to vpliva, so: {stringified_model_names}."
+	"uploaded": "Naloženo"
 }

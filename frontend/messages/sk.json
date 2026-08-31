@@ -1233,6 +1233,8 @@
 	"removeIdentifier": "Odstrániť identifikátor",
 	"phone": "Telefón",
 	"role": "Rola používateľa",
+	"defaultRole": "Predvolená rola",
+	"defaultRoleHelpText": "Rola, ktorá sa automaticky udeľuje v tejto doméne každému používateľovi s priradením role v niektorej z jej subdomén.",
 	"questions": "Otázky",
 	"recipientEntity": "Cieľový subjekt",
 	"financial": "Finančné",
@@ -5834,7 +5836,5 @@
 	"actionPlanNoFollowUpHint": "K tomuto stavu technického zabezpečenia nie je priradené hodnotenie zistení. Upravte stav technického zabezpečenia a nastavte následné hodnotenie na plánovanie nápravy zistení.",
 	"actionPlanEmptyHelp": "Všetky kontroly vyhovujú. Položky sa tu zobrazia, keď kontrola nevyhovie, skončí chybou alebo zostane neskontrolovaná.",
 	"createFollowUpAssessment": "Vytvoriť súvisiace hodnotenie zistení",
-	"createFollowUpAssessmentHelpText": "Vytvorí hodnotenie zistení v rovnakej organizačnej oblasti na sledovanie nápravy nevyhovujúcich kontrol.",
-	"viewableFromDescendants": "Viditeľné zo subdomén",
-	"viewableFromDescendantsHelpText": "Ak je začiarknuté, objekty viacerých typov v tejto oblasti budú viditeľné zo všetkých subdomén. Typy objektov, ktorých sa to týka, sú: {stringified_model_names}."
+	"createFollowUpAssessmentHelpText": "Vytvorí hodnotenie zistení v rovnakej organizačnej oblasti na sledovanie nápravy nevyhovujúcich kontrol."
 }

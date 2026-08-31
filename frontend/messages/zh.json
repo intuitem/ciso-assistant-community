@@ -1032,6 +1032,8 @@
 	"removeIdentifier": "移除标识符",
 	"phone": "电话",
 	"role": "角色",
+	"defaultRole": "默认角色",
+	"defaultRoleHelpText": "在此域中自动授予角色，适用于在其任一子域拥有角色分配的任何用户。",
 	"questions": "问题",
 	"recipientEntity": "接收实体",
 	"financial": "财务",
@@ -3734,7 +3736,5 @@
 	"scimTokenNameTooLong": "名称不得超过 255 个字符。",
 	"idpGroup": "IdP 组",
 	"idpGroups": "IdP 组",
-	"idpGroupsDescription": "启用 IdP 组联合（SCIM 预配、IdP 组映射以及用户的 IdP 组成员资格）。",
-	"viewableFromDescendants": "可从子域查看",
-	"viewableFromDescendantsHelpText": "如果勾选，此域中多种类型的对象将可从所有子域查看。受影响的对象类型为：{stringified_model_names}。"
+	"idpGroupsDescription": "启用 IdP 组联合（SCIM 预配、IdP 组映射以及用户的 IdP 组成员资格）。"
 }

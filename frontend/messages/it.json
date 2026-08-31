@@ -800,6 +800,8 @@
 	"addRepresentative": "Aggiungi rappresentante",
 	"phone": "Telefono",
 	"role": "Ruolo",
+	"defaultRole": "Ruolo predefinito",
+	"defaultRoleHelpText": "Ruolo concesso automaticamente su questo dominio a qualsiasi utente con un'assegnazione di ruolo su uno dei suoi sottodomini.",
 	"questions": "Domande",
 	"recipientEntity": "Entità destinataria",
 	"financial": "Finanziario",
@@ -4179,7 +4181,5 @@
 	"publicDocumentsHelp": "File pubblicati nel Trust Center. Ogni file viene reso disponibile tramite un URL pubblico isolato, separato dalle evidenze interne.",
 	"assetCoverage": "Copertura degli asset",
 	"riskCoverage": "Copertura dei rischi",
-	"coverage": "Copertura",
-	"viewableFromDescendants": "Visibile dai sottodomini",
-	"viewableFromDescendantsHelpText": "Se spuntato, rende visibili dai sottodomini gli oggetti di più tipi presenti in questo dominio. I tipi di oggetto interessati sono: {stringified_model_names}."
+	"coverage": "Copertura"
 }

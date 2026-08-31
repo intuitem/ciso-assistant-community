@@ -785,6 +785,8 @@
 	"addRepresentative": "Vertegenwoordiger toevoegen",
 	"phone": "Telefoon",
 	"role": "Rol",
+	"defaultRole": "Standaardrol",
+	"defaultRoleHelpText": "Rol die automatisch wordt verleend op dit domein aan elke gebruiker met een roltoewijzing op een van de subdomeinen ervan.",
 	"questions": "Vraagen",
 	"recipientEntity": "Ontvangende entiteit",
 	"financial": "Financieel",
@@ -5578,7 +5580,5 @@
 	"chatRemoveAttachment": "Bijlage verwijderen",
 	"dataWizardDownloadTemplate": "Download het Excel-sjabloon",
 	"previewTooLarge": "Het bestand is te groot om een voorbeeld te bekijken. Download het om de inhoud te bekijken.",
-	"previewTruncated": "Voorbeeld is afgekapt. Download het bestand om alles te zien.",
-	"viewableFromDescendants": "Zichtbaar vanuit subdomeinen",
-	"viewableFromDescendantsHelpText": "Indien aangevinkt, worden objecten van meerdere typen in deze map zichtbaar vanuit alle subdomeinen. De objecttypen die hierdoor worden beïnvloed zijn: {stringified_model_names}."
+	"previewTruncated": "Voorbeeld is afgekapt. Download het bestand om alles te zien."
 }

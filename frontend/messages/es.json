@@ -790,6 +790,8 @@
 	"addRepresentative": "Agregar representante",
 	"phone": "Teléfono",
 	"role": "Role",
+	"defaultRole": "Rol predeterminado",
+	"defaultRoleHelpText": "Rol concedido automáticamente en este dominio a cualquier usuario con una asignación de rol en uno de sus subdominios.",
 	"questions": "Preguntas",
 	"recipientEntity": "Entidad destinataria",
 	"financial": "Finanzas",
@@ -3729,7 +3731,5 @@
 	"scimTokenNameTooLong": "El nombre no debe superar los 255 caracteres.",
 	"idpGroup": "Grupo IdP",
 	"idpGroups": "Grupos IdP",
-	"idpGroupsDescription": "Habilitar la federación de grupos IdP (aprovisionamiento SCIM, asignaciones de grupos IdP y pertenencias a grupos IdP en los usuarios).",
-	"viewableFromDescendants": "Visible desde subdominios",
-	"viewableFromDescendantsHelpText": "Si está marcado, los objetos de varios tipos en esta carpeta serán visibles desde todos los subdominios. Los tipos de objetos afectados son: {stringified_model_names}."
+	"idpGroupsDescription": "Habilitar la federación de grupos IdP (aprovisionamiento SCIM, asignaciones de grupos IdP y pertenencias a grupos IdP en los usuarios)."
 }

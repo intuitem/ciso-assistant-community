@@ -1239,6 +1239,8 @@
 	"removeIdentifier": "Pašalinti identifikatorių",
 	"phone": "Telefonas",
 	"role": "Vaidmuo",
+	"defaultRole": "Numatytasis vaidmuo",
+	"defaultRoleHelpText": "Vaidmuo, automatiškai suteikiamas šiame domene kiekvienam naudotojui, turinčiam vaidmens priskyrimą viename iš jo subdomenų.",
 	"questions": "Klausimai",
 	"recipientEntity": "Gavėjo subjektas",
 	"financial": "Finansinis",
@@ -4666,7 +4668,5 @@
 	"scimTokenNameTooLong": "Pavadinimas negali būti ilgesnis nei 255 simboliai.",
 	"idpGroup": "IdP grupė",
 	"idpGroups": "IdP grupės",
-	"idpGroupsDescription": "Įjungti IdP grupių federaciją (SCIM teikimas, IdP grupių susiejimai ir naudotojų narystės IdP grupėse).",
-	"viewableFromDescendants": "Matoma iš subdomenų",
-	"viewableFromDescendantsHelpText": "Jei pažymėta, kelių tipų objektai šioje srityje taps matomi iš visų subdomenų. Objektų tipai, kuriems tai turi įtakos: {stringified_model_names}."
+	"idpGroupsDescription": "Įjungti IdP grupių federaciją (SCIM teikimas, IdP grupių susiejimai ir naudotojų narystės IdP grupėse)."
 }
