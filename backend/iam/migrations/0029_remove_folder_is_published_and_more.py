@@ -161,7 +161,7 @@ def fill_default_roles(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("iam", "0027_cleanup_stray_domain_iam_groups"),
+        ("iam", "0028_idpgroup_source_user_is_jit_provisioned"),
     ]
 
     run_before = [
