@@ -447,6 +447,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     posture_assessments = serializers.BooleanField(
         source="value.posture_assessments", required=False, default=False
     )
+    jit_provisioning = serializers.BooleanField(
+        source="value.jit_provisioning", required=False, default=False
+    )
 
     class Meta:
         model = GlobalSettings

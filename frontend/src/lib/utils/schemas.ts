@@ -761,7 +761,8 @@ export const FeatureFlagsSchema = z.object({
 	cwes: z.boolean().optional(),
 	object_audit_trail: z.boolean().optional(),
 	custom_portals: z.boolean().optional(),
-	posture_assessments: z.boolean().optional()
+	posture_assessments: z.boolean().optional(),
+	jit_provisioning: z.boolean().optional()
 });
 
 export const PortalSettingsSchema = z.object({
@@ -798,6 +799,8 @@ export const SSOSettingsSchema = z.object({
 	is_enabled: z.boolean().default(false).optional(),
 	force_sso: z.boolean().default(false).optional(),
 	slo_enabled: z.boolean().default(false).optional(),
+	jit_provisioning_enabled: z.boolean().default(false).optional(),
+	default_user_groups: z.array(z.string().uuid()).optional(),
 	provider: z.string().default('saml'),
 	provider_id: z.string().optional(),
 	provider_name: z.string().optional(),
@@ -812,6 +815,9 @@ export const SSOSettingsSchema = z.object({
 		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
 		.optional(),
 	attribute_mapping_email: z
+		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
+		.optional(),
+	attribute_mapping_groups: z
 		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
 		.optional(),
 	idp_entity_id: z.string().optional(),

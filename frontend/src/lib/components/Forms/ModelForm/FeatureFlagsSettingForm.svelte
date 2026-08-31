@@ -277,6 +277,11 @@
 					description: m.idpGroupsDescription()
 				},
 				{
+					field: 'jit_provisioning',
+					label: m.jitProvisioning(),
+					description: m.jitProvisioningDescription()
+				},
+				{
 					field: 'service_accounts',
 					label: m.serviceAccounts(),
 					description: m.serviceAccountsDescription()
