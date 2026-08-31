@@ -1903,38 +1903,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         )
 
         allowed_actor_ids = allowed_actors.values_list("id", flat=True)
-
-        if perm_prefix == "view":
-            published_actors_query = Q()
-
-            for model, allowed_folder_ids in [
-                (User, user_folder_ids),
-                (Team, team_folder_ids),
-                (Entity, entity_folder_ids),
-            ]:
-                ancestor_folder_ids = Folder.objects.filter(
-                    descendants__in=Folder.objects.filter(
-                        id__in=allowed_folder_ids
-                    ).exclude(content_type=Folder.ContentType.ENCLAVE)
-                ).distinct()
-
-                iam_folder_field = RoleAssignment.get_iam_folder_field(model)
-
-                model_name = model.__name__.lower()
-                published_model_objects_query = Q(
-                    **{
-                        f"{model_name}__{iam_folder_field}__in": ancestor_folder_ids,
-                        f"{model_name}__is_published": True,
-                    }
-                )
-
-                published_actors_query |= published_model_objects_query
-
-            published_actors = Actor.objects.filter(published_actors_query)
-            published_actor_ids = published_actors.values_list("id", flat=True)
-
-            allowed_actor_ids = allowed_actor_ids.union(published_actor_ids)
-
         return allowed_actor_ids
 
     @staticmethod
