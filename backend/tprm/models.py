@@ -51,9 +51,29 @@ class Entity(
     An entity represents a legal entity, a corporate body, an administrative body, an association
     """
 
+    class Scope(models.TextChoices):
+        INTERNAL = "internal", _("Internal")
+        EXTERNAL = "external", _("External")
+
     objects = ActorSyncManager()
 
     ref_id = models.CharField(max_length=255, blank=True)
+    # The API requires an explicit value (see EntityWriteSerializer); the model
+    # default only covers programmatic creation paths (data wizard, DORA
+    # imports), which are all third-party contexts.
+    scope = models.CharField(
+        max_length=10,
+        choices=Scope.choices,
+        default=Scope.EXTERNAL,
+        verbose_name=_("Scope"),
+    )
+    default_assignee = models.ManyToManyField(
+        "core.Actor",
+        related_name="entity_default_assignee",
+        verbose_name=_("Default assignee"),
+        blank=True,
+    )
+    is_main = models.BooleanField(default=False, verbose_name=_("Is main"))
     is_active = models.BooleanField(default=True, verbose_name=_("Is active"))
     default_dependency = models.PositiveSmallIntegerField(
         verbose_name=_("Default dependency"),
@@ -85,12 +105,6 @@ class Entity(
     )
     mission = models.TextField(blank=True)
     reference_link = models.URLField(blank=True, null=True, max_length=2048)
-    owned_folders = models.ManyToManyField(
-        "iam.Folder",
-        related_name="owner",
-        blank=True,
-        verbose_name=_("Owned folders"),
-    )
     builtin = models.BooleanField(default=False)
     parent_entity = models.ForeignKey(
         "self",
@@ -171,15 +185,17 @@ class Entity(
     class Meta:
         verbose_name = _("Entity")
         verbose_name_plural = _("Entities")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["is_main"],
+                condition=models.Q(is_main=True),
+                name="unique_main_entity",
+            )
+        ]
 
     @classmethod
     def get_main_entity(cls):
-        return (
-            cls.objects.filter(builtin=True)
-            .filter(owned_folders=Folder.get_root_folder())
-            .order_by("created_at")
-            .first()
-        )
+        return cls.objects.filter(is_main=True).first()
 
     def get_emails(self) -> list[str]:
         emails = self.representatives.exclude(email="").values_list("email", flat=True)

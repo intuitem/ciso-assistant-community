@@ -767,7 +767,10 @@
 					{@render optionSnippet?.(option)}
 				{:else}
 					{#if option.infoString?.position === 'prefix'}
-						<span class="text-xs {option.infoString.classes}">
+						<span
+							class="text-xs {option.infoString.classes ??
+								'text-primary-600-400 uppercase tracking-wide'}"
+						>
 							{option.infoString.string}
 						</span>
 					{/if}
@@ -791,7 +794,7 @@
 						{option.label || option}
 					{/if}
 					{#if option.infoString?.position === 'suffix'}
-						<span class="text-xs {option.infoString.classes}">
+						<span class="text-xs {option.infoString.classes ?? 'text-primary-600-400'}">
 							{option.infoString.string}
 						</span>
 					{/if}

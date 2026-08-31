@@ -80,6 +80,12 @@ export const navData = {
 					href: '/perimeters'
 				},
 				{
+					name: 'entities',
+					fa_icon: 'fa-solid fa-building',
+					href: '/entities?scope=internal',
+					permissions: ['view_entity']
+				},
+				{
 					name: 'users',
 					fa_icon: 'fa-solid fa-user',
 					href: '/users'
@@ -375,7 +381,7 @@ export const navData = {
 				{
 					name: 'entities',
 					fa_icon: 'fa-solid fa-building',
-					href: '/entities'
+					href: '/entities?scope=external'
 				},
 				{
 					name: 'representatives',

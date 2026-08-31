@@ -492,6 +492,7 @@ export const CAMPAIGN_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+
 export const INCIDENT_DETECTION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2208,6 +2209,8 @@ export const listViewFields = {
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
+			// Implicit: preset by the section (?scope=), never shown as a chip
+			scope: { hide: true } as ListViewFilterConfig,
 			parent_entity: PARENT_ENTITY_FILTER,
 			relationship: ENTITY_RELATIONSHIP_FILTER,
 			filtering_labels: LABELS_FILTER
@@ -2885,7 +2888,9 @@ export const listViewFields = {
 		body: ['name', 'description', 'frameworks', 'status'],
 		filters: {
 			status: CAMPAIGN_STATUS_FILTER,
-			frameworks: FRAMEWORK_FILTER
+			frameworks: FRAMEWORK_FILTER,
+			// Implicit: preset by the menu entry (?target_scope=), never shown
+			target_scope: { hide: true } as ListViewFilterConfig
 		}
 	},
 	'organisation-objectives': {

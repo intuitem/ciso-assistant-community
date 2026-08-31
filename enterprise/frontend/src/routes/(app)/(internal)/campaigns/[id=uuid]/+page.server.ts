@@ -13,6 +13,15 @@ export const load: PageServerLoad = async (event) => {
 		id: event.params.id
 	});
 
+	// Scope-aware subtitle: "Internal campaign" / "Third-party campaign"
+	// instead of the generic model name (mirrors the CE generic detail route).
+	const targetScope = detailData.data?.target_scope;
+	if (targetScope === 'Internal' || targetScope === 'internal') {
+		detailData.modelVerboseName = 'internalCampaign';
+	} else if (targetScope === 'External' || targetScope === 'external') {
+		detailData.modelVerboseName = 'externalCampaign';
+	}
+
 	// Fetch the metrics data
 	const metricsData = await event
 		.fetch(`${BASE_API_URL}/campaigns/${event.params.id}/metrics/`)

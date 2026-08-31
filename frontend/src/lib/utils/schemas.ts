@@ -599,7 +599,8 @@ export const CampaignSchema = z.object({
 	selected_implementation_groups: z
 		.array(z.object({ value: z.string(), framework: z.string() }))
 		.optional(),
-	perimeters: z.array(z.string()),
+	target_scope: z.string().default('internal'),
+	entities: z.array(z.string()),
 	status: z.string().optional().nullable(),
 	start_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
@@ -857,6 +858,8 @@ export const EntitiesSchema = z.object({
 	folder: z.string(),
 	ref_id: z.string().optional(),
 	is_active: z.boolean().optional(),
+	scope: z.string().default('external'),
+	default_assignee: z.array(z.string().optional()).optional(),
 	parent_entity: z.string().optional().nullable(),
 	mission: z.string().optional(),
 	reference_link: z

@@ -17,10 +17,26 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
 import { safeTranslate } from '$lib/utils/i18n';
 
-export const load: PageServerLoad = async ({ params, fetch }) => {
+// Scoped list views get a scope-specific page subtitle: the (app) layout
+// prefers `modelDescriptionKey` from page data over its URL-derived default.
+const SCOPED_DESCRIPTION_KEYS: Record<string, Record<string, string>> = {
+	entities: {
+		internal: 'internalEntitiesDescription',
+		external: 'externalEntitiesDescription'
+	},
+	campaigns: {
+		internal: 'internalCampaignsDescription',
+		external: 'externalCampaignsDescription'
+	}
+};
+
+export const load: PageServerLoad = async ({ params, fetch, url }) => {
 	const schema = z.object({ id: z.string().uuid() });
 	const deleteForm = await superValidate(zod(schema));
 	const URLModel = params.model!;
+	const scopeParam =
+		url.searchParams.get('scope') ?? url.searchParams.get('target_scope') ?? '';
+	const modelDescriptionKey = SCOPED_DESCRIPTION_KEYS[URLModel]?.[scopeParam];
 	const createSchema = modelSchema(params.model!);
 	const createForm = await superValidate(zod(createSchema));
 	const model: ModelInfo = getModelInfo(params.model!);
@@ -59,7 +75,13 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		});
 	}
 
-	return { createForm, deleteForm, model, URLModel };
+	return {
+		createForm,
+		deleteForm,
+		model,
+		URLModel,
+		...(modelDescriptionKey ? { modelDescriptionKey } : {})
+	};
 };
 
 export const actions: Actions = {

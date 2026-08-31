@@ -40,35 +40,18 @@ class TestEntity(TestCase):
         self.assertEqual(entity.folder, self.entity_folder)
         self.assertFalse(entity.builtin)
 
-    @patch("tprm.models.Folder")
-    @patch("tprm.models.Entity.owned_folders")
-    def test_get_main_entity(self, mock_owned_folders, mock_folder_class):
-        """Testing the get_main_entity method."""
-        mock_root_folder = MagicMock()
-        mock_folder_class.get_root_folder.return_value = mock_root_folder
-
-        entity = Entity.objects.create(
-            name="Main Entity", builtin=True, folder=self.entity_folder
-        )
-
-        with patch("tprm.models.Entity.objects") as mock_objects:
-            mock_filter = MagicMock()
-            mock_filter2 = MagicMock()
-            mock_order_by = MagicMock()
-
-            mock_objects.filter.return_value = mock_filter
-            mock_filter.filter.return_value = mock_filter2
-            mock_filter2.order_by.return_value = mock_order_by
-            mock_order_by.first.return_value = entity
-
-            result = Entity.get_main_entity()
-
-            mock_objects.filter.assert_called_once_with(builtin=True)
-            mock_filter.filter.assert_called_once()
-            mock_filter2.order_by.assert_called_once_with("created_at")
-            mock_order_by.first.assert_called_once()
-
-            self.assertEqual(result, entity)
+    def test_get_main_entity(self):
+        """get_main_entity returns the entity flagged is_main."""
+        main = Entity.get_main_entity()
+        if main is None:
+            main = Entity.objects.create(
+                name="Main Entity",
+                builtin=True,
+                is_main=True,
+                folder=self.entity_folder,
+            )
+        self.assertTrue(main.is_main)
+        self.assertEqual(Entity.get_main_entity(), main)
 
 
 class TestEntityAssessment(TestCase):

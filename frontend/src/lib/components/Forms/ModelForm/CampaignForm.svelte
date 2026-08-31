@@ -2,6 +2,7 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
+	import { page } from '$app/state';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
@@ -25,6 +26,28 @@
 		object = {},
 		context
 	}: Props = $props();
+
+	const formData = form.form;
+
+	// The campaign's audience is preset by the entry point: the general
+	// campaigns menu targets internal entities, the third-party one external
+	// entities. Immutable once the campaign exists.
+	const isEdit = Boolean(object?.id);
+	const urlTargetScope = page.url.searchParams.get('target_scope');
+	if (!isEdit && (urlTargetScope === 'internal' || urlTargetScope === 'external')) {
+		$formData.target_scope = urlTargetScope;
+	}
+	let targetScope = $derived($formData.target_scope ?? 'internal');
+
+	// Flipping the audience invalidates the current entity selection.
+	let previousScope = targetScope;
+	$effect(() => {
+		if (targetScope !== previousScope) {
+			previousScope = targetScope;
+			$formData.entities = [];
+			formDataCache['entities'] = [];
+		}
+	});
 
 	let implementationGroupsChoices = $state<
 		{ label: string; value: { id: string; framework: string } }[]
@@ -50,6 +73,32 @@
 	}
 </script>
 
+<Select
+	{form}
+	options={model.selectOptions['target_scope']}
+	field="target_scope"
+	label={m.targetScope()}
+	disabled={isEdit}
+	helpText={m.campaignTargetScopeHelpText()}
+	cacheLock={cacheLocks['target_scope']}
+	bind:cachedValue={formDataCache['target_scope']}
+/>
+{#key targetScope}
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="entities"
+		optionsDetailedUrlParameters={[['scope', targetScope]]}
+		optionsExtraFields={[['folder', 'str']]}
+		field="entities"
+		cacheLock={cacheLocks['entities']}
+		bind:cachedValue={formDataCache['entities']}
+		label={m.entities()}
+		helpText={targetScope === 'internal'
+			? m.campaignInternalEntitiesHelpText()
+			: m.campaignExternalEntitiesHelpText()}
+	/>
+{/key}
 <AutocompleteSelect
 	multiple
 	{form}
@@ -74,17 +123,6 @@
 		label={m.selectedImplementationGroups()}
 	/>
 {/if}
-<AutocompleteSelect
-	multiple
-	{form}
-	optionsEndpoint="perimeters"
-	optionsExtraFields={[['folder', 'str']]}
-	field="perimeters"
-	cacheLock={cacheLocks['perimeters']}
-	bind:cachedValue={formDataCache['perimeters']}
-	label={m.perimeters()}
-	disabled={!!initialData.perimeters?.length}
-/>
 <TextField
 	type="date"
 	{form}

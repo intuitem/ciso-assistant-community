@@ -22,8 +22,12 @@
 					return user?.roles?.some((role: string) => !subItem.exclude.includes(role)) ?? false;
 				} else if (subItem.permissions) {
 					return subItem.permissions?.some((permission) => hasPermissionAnywhere(user, permission));
-				} else if (Object.hasOwn(URL_MODEL_MAP, subItem.href.split('/')[1])) {
-					const model = URL_MODEL_MAP[subItem.href.split('/')[1]];
+				} else if (
+					Object.hasOwn(URL_MODEL_MAP, subItem.href.split('/')[1].split('?')[0])
+				) {
+					// Strip query params: scoped views like /entities?scope=external
+					// map to the same model as their bare route.
+					const model = URL_MODEL_MAP[subItem.href.split('/')[1].split('?')[0]];
 					return hasPermissionAnywhere(user, `view_${model.name}`);
 				}
 				return false;

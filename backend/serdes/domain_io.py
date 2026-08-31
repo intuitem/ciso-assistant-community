@@ -931,6 +931,8 @@ def process_model_relationships(
                     )
 
         case "entity":
+            # owned_folders no longer exists on Entity; keep popping it so
+            # domain exports produced before its removal still import.
             _fields.pop("owned_folders", None)
             # parent_entity is a self-reference; the parent may be created in
             # the same batch, so link_dump_database_ids isn't populated yet.

@@ -89,6 +89,14 @@
 			.split('-')
 			.map((word, index) => (index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)))
 			.join('');
+		// Scoped list views (e.g. /entities?scope=internal, /campaigns?target_scope=external)
+		// get a scope-specific subtitle when one exists: internalEntitiesDescription, etc.
+		const scope =
+			$page.url.searchParams.get('scope') ?? $page.url.searchParams.get('target_scope');
+		if (scope === 'internal' || scope === 'external') {
+			const scopedKey = `${scope}${camelCase.charAt(0).toUpperCase() + camelCase.slice(1)}Description`;
+			if (m[scopedKey]) return scopedKey;
+		}
 		return `${camelCase}Description`;
 	});
 

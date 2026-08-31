@@ -622,8 +622,14 @@
 		modalStore.trigger(modal);
 	}
 
+	// Hidden filters (implicit, URL-driven — e.g. entity scope) are not
+	// user-actionable and never rendered, so they don't count.
 	let filterCount = $derived(
-		filteredFields?.reduce((acc, field) => acc + filterValues?.[field]?.length, 0)
+		filteredFields?.reduce(
+			(acc, field) =>
+				acc + (filters[field]?.hide ? 0 : (filterValues?.[field]?.length ?? 0)),
+			0
+		)
 	);
 
 	async function resetFilters() {

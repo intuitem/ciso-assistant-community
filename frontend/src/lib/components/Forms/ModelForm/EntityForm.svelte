@@ -7,6 +7,8 @@
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
 	import Checkbox from '../Checkbox.svelte';
+	import Select from '../Select.svelte';
+	import { page } from '$app/state';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -31,6 +33,14 @@
 
 	const formData = form.form;
 
+	// Scope is fixed at creation and preset by the entry point (Organization →
+	// internal, third-party section → external); the backend refuses changes.
+	const isEdit = Boolean(object?.id);
+	const urlScope = page.url.searchParams.get('scope');
+	if (!isEdit && (urlScope === 'internal' || urlScope === 'external')) {
+		$formData.scope = urlScope;
+	}
+
 	const getCriticality = (
 		dependency: number,
 		penetration: number,
@@ -51,6 +61,16 @@
 	);
 </script>
 
+<Select
+	{form}
+	options={model.selectOptions?.scope}
+	field="scope"
+	label={m.entityScope()}
+	disabled={isEdit}
+	helpText={m.entityScopeHelpText()}
+	cacheLock={cacheLocks['scope']}
+	bind:cachedValue={formDataCache['scope']}
+/>
 <Checkbox
 	{form}
 	field="is_active"
@@ -58,6 +78,24 @@
 	cacheLock={cacheLocks['is_active']}
 	bind:cachedValue={formDataCache['is_active']}
 />
+{#if $formData.scope === 'internal'}
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="actors"
+		optionsDetailedUrlParameters={[['entity__isnull', 'true']]}
+		optionsLabelField="str"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
+		field="default_assignee"
+		cacheLock={cacheLocks['default_assignee']}
+		bind:cachedValue={formDataCache['default_assignee']}
+		label={m.defaultAssignee()}
+		helpText={m.entityDefaultAssigneeHelpText()}
+	/>
+{/if}
 {#if !object.builtin}
 	<AutocompleteSelect
 		{form}

@@ -120,6 +120,12 @@ export const navData = {
 					href: '/perimeters'
 				},
 				{
+					name: 'entities',
+					fa_icon: 'fa-solid fa-building',
+					href: '/entities?scope=internal',
+					permissions: ['view_entity']
+				},
+				{
 					name: 'users',
 					fa_icon: 'fa-solid fa-user',
 					href: '/users'
@@ -386,7 +392,7 @@ export const navData = {
 				{
 					name: 'campaigns',
 					fa_icon: 'fa-solid fa-scale-balanced',
-					href: '/campaigns'
+					href: '/campaigns?target_scope=internal'
 				},
 				{
 					name: 'recap',
@@ -437,7 +443,7 @@ export const navData = {
 				{
 					name: 'entities',
 					fa_icon: 'fa-solid fa-building',
-					href: '/entities'
+					href: '/entities?scope=external'
 				},
 				{
 					name: 'representatives',
@@ -458,6 +464,11 @@ export const navData = {
 					name: 'entityAssessments',
 					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/entity-assessments'
+				},
+				{
+					name: 'campaigns',
+					fa_icon: 'fa-solid fa-scale-balanced',
+					href: '/campaigns?target_scope=external'
 				}
 			]
 		},

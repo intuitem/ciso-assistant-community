@@ -2063,6 +2063,15 @@ class PolicyReadSerializer(AppliedControlReadSerializer):
 class ActorReadSerializer(BaseModelSerializer):
     specific = FieldsRelatedField()
     str = serializers.CharField(source="__str__")
+    type = serializers.SerializerMethodField()
+
+    def get_type(self, obj):
+        # Scope-qualified for entity actors so actor pickers distinguish
+        # internal entities from third parties (i18n keys internalEntity /
+        # externalEntity). Nothing compares the value — it is display-only.
+        if obj.entity_id is not None:
+            return f"{obj.entity.scope}Entity"
+        return obj.type
 
     class Meta:
         model = Actor
@@ -2862,6 +2871,8 @@ class CampaignReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     compliance_assessments = FieldsRelatedField(many=True)
     perimeters = FieldsRelatedField(many=True)
+    entities = FieldsRelatedField(many=True)
+    target_scope = serializers.CharField(source="get_target_scope_display")
     frameworks = FieldsRelatedField(many=True)
     status = serializers.CharField(source="get_status_display")
     framework = FieldsRelatedField(
@@ -2883,7 +2894,50 @@ class CampaignReadSerializer(BaseModelSerializer):
 class CampaignWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Campaign
-        fields = "__all__"
+        # perimeters is the legacy targeting mechanism, kept read-only for
+        # migrated campaigns (see documentation/entities-and-campaigns.md).
+        exclude = ["perimeters"]
+
+    def validate_target_scope(self, value):
+        # A campaign targets internal entities or external ones, never both —
+        # the fan-out and respondent flows differ. Locked after creation.
+        if self.instance is not None and value != self.instance.target_scope:
+            raise serializers.ValidationError("targetScopeIsImmutable")
+        return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        entities = attrs.get("entities")
+        if self.instance is None and not entities:
+            raise serializers.ValidationError(
+                {"entities": "campaignRequiresAtLeastOneEntity"}
+            )
+        if self.instance is None and not attrs.get("frameworks"):
+            raise serializers.ValidationError(
+                {"frameworks": "campaignRequiresAtLeastOneFramework"}
+            )
+        target_scope = attrs.get(
+            "target_scope",
+            self.instance.target_scope if self.instance else None,
+        )
+        checked_entities = (
+            entities
+            if entities is not None
+            else (list(self.instance.entities.all()) if self.instance else [])
+        )
+        if any(entity.scope != target_scope for entity in checked_entities):
+            raise serializers.ValidationError(
+                {"entities": "campaignEntitiesScopeMismatch"}
+            )
+        if target_scope == Campaign.TargetScope.INTERNAL:
+            # Audits land in the entity's own folder — it must be a domain
+            # (the main entity lives in the root folder, for instance).
+            for entity in checked_entities:
+                if entity.folder.content_type != Folder.ContentType.DOMAIN:
+                    raise serializers.ValidationError(
+                        {"entities": "campaignEntityFolderMustBeDomain"}
+                    )
+        return attrs
 
     def create(self, validated_data: Any):
         return super().create(validated_data)

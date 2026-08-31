@@ -7631,6 +7631,13 @@ class ActorViewSet(BaseModelViewSet):
 
     model = Actor
     search_fields = []
+    # Lets pickers restrict by actor kind, e.g. ?entity__isnull=true for
+    # assignee fields (only people and teams can be assignees).
+    filterset_fields = {
+        "user": ["isnull"],
+        "team": ["isnull"],
+        "entity": ["isnull"],
+    }
     ordering = [
         "type_rank",
         "display_name",
@@ -8063,27 +8070,15 @@ class RoleAssignmentViewSet(BaseModelViewSet):
 class FolderFilter(GenericFilterSet):
     parent_folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
 
-    owned = df.BooleanFilter(method="get_owned_folders", label="owned")
     content_type = df.MultipleChoiceFilter(
         choices=Folder.ContentType, lookup_expr="icontains"
     )
-
-    def get_owned_folders(self, queryset, name, value):
-        owned_folders_id = []
-        for folder in Folder.objects.all():
-            if folder.owner.all().first():
-                owned_folders_id.append(folder.id)
-        if value:
-            return queryset.filter(id__in=owned_folders_id)
-        return queryset.exclude(id__in=owned_folders_id)
 
     class Meta:
         model = Folder
         fields = [
             "name",
             "content_type",
-            "owner",
-            "owned",
             "filtering_labels",
         ]
 
@@ -10531,13 +10526,25 @@ class OrganisationIssueViewSet(BaseModelViewSet):
 class CampaignViewSet(BaseModelViewSet):
     model = Campaign
 
-    filterset_fields = ["folder", "frameworks", "perimeters", "status"]
+    filterset_fields = [
+        "folder",
+        "frameworks",
+        "perimeters",
+        "entities",
+        "target_scope",
+        "status",
+    ]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Campaign.Status.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get target scope choices")
+    def target_scope(self, request):
+        return Response(dict(Campaign.TargetScope.choices))
 
     @action(detail=True, name="Get campaign metrics")
     def metrics(self, request, pk):
@@ -10552,31 +10559,9 @@ class CampaignViewSet(BaseModelViewSet):
 
     def perform_create(self, serializer):
         super().perform_create(serializer)
-        campaign = serializer.instance
-        frameworks = serializer.instance.frameworks.all()
-        for perimeter in campaign.perimeters.all():
-            for framework in frameworks:
-                framework_implementation_groups = None
-                if campaign.selected_implementation_groups:
-                    framework_implementation_groups = [
-                        group["value"]
-                        for group in campaign.selected_implementation_groups
-                        if group["framework"] == str(framework.id)
-                    ]
-                from core.utils import build_initial_field_visibility
+        from tprm.services import fan_out_campaign
 
-                compliance_assessment = ComplianceAssessment.objects.create(
-                    name=f"{campaign.name} - {perimeter.name} - {framework.name}",
-                    campaign=campaign,
-                    perimeter=perimeter,
-                    framework=framework,
-                    folder=perimeter.folder,
-                    selected_implementation_groups=framework_implementation_groups
-                    if framework_implementation_groups
-                    else None,
-                    field_visibility=build_initial_field_visibility(framework),
-                )
-                compliance_assessment.create_requirement_assessments()
+        fan_out_campaign(serializer.instance)
 
 
 def _serialize_suggestion_preview(entries: list[dict]) -> list[dict]:

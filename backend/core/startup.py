@@ -2021,10 +2021,13 @@ def startup(sender=None, **kwargs):
     Folder._init_root_folder()
     # if main entity does not exist, then create it
     if not Entity.get_main_entity():
-        main = Entity.objects.create(
-            name="Main", folder=Folder.get_root_folder(), builtin=True
+        Entity.objects.create(
+            name="Main",
+            folder=Folder.get_root_folder(),
+            builtin=True,
+            is_main=True,
+            scope=Entity.Scope.INTERNAL,
         )
-        main.owned_folders.add(Folder.get_root_folder())
 
     # Sync builtin role permissions — all permission rows exist at this point
     for name, perm_list in (

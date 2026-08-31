@@ -38,6 +38,16 @@
 		...listViewFields[URLModel]?.filters,
 		...buildCustomFieldFilters(data.customFields ?? [])
 	});
+	// Locked filters (e.g. entity scope, campaign target scope) are enforced
+	// from the URL as table overrides: no chip, immune to "reset filters".
+	const overrideFilters = $derived.by(() => {
+		const overrides: Record<string, { value: string }[]> = {};
+		for (const field of data.model?.lockedFilters ?? []) {
+			const values = page.url.searchParams.getAll(field);
+			if (values.length > 0) overrides[field] = values.map((value) => ({ value }));
+		}
+		return overrides;
+	});
 	let pullCatalogOpen = $state(false);
 	let currentFilterSearch = $state(page.url.search);
 
@@ -223,6 +233,7 @@
 			<ModelTable
 				source={data.table}
 				{tableFilters}
+				{overrideFilters}
 				deleteForm={data.deleteForm}
 				{URLModel}
 				disableEdit={['user-groups', 'validation-flows'].includes(URLModel)}

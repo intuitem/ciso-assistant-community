@@ -139,6 +139,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         "name",
         "ref_id",
         "is_active",
+        "scope",
         "folder",
         "parent_entity",
         "relationship",
@@ -227,7 +228,6 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             # M2Ms / reverse FKs rendered as FieldsRelatedField on
             # EntityReadSerializer — without these every row issues a fresh query.
             qs = qs.prefetch_related(
-                "owned_folders",
                 "branches",
                 "relationship",
                 "contracts",
@@ -929,6 +929,10 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         )
         return response
 
+    @action(detail=False, name="Get scope choices")
+    def scope(self, request):
+        return Response(dict(Entity.Scope.choices))
+
     @action(detail=False, name="Get country choices")
     def country(self, request):
         return Response(dict(COUNTRY_CHOICES))
@@ -1098,6 +1102,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         "criticality",
         "conclusion",
         "genericcollection",
+        "compliance_assessment__campaign",
     ]
 
     def destroy(self, request, *args, **kwargs):

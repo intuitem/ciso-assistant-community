@@ -35,8 +35,6 @@ class EntitySerializersTestCase(TestCase):
             "folder": self.folder,
         }
         self.entity = Entity.objects.create(**self.entity_data)
-        self.owned_folder = Folder.objects.create(name="Owned Folder")
-        self.entity.owned_folders.add(self.owned_folder)
 
     def test_entity_read_serializer(self):
         """Test that EntityReadSerializer correctly serializes an Entity"""
@@ -48,7 +46,7 @@ class EntitySerializersTestCase(TestCase):
         self.assertEqual(data["mission"], self.entity_data["mission"])
         self.assertEqual(data["reference_link"], self.entity_data["reference_link"])
         self.assertIn("folder", data)
-        self.assertIn("owned_folders", data)
+        self.assertIn("scope", data)
 
     def test_entity_write_serializer(self):
         """Test that EntityWriteSerializer correctly creates an Entity"""
@@ -87,7 +85,7 @@ class EntitySerializersTestCase(TestCase):
         self.assertEqual(data["mission"], self.entity_data["mission"])
         self.assertEqual(data["reference_link"], self.entity_data["reference_link"])
         self.assertIn("folder", data)
-        self.assertIn("owned_folders", data)
+        self.assertIn("scope", data)
         self.assertIn("created_at", data)
         self.assertIn("updated_at", data)
 

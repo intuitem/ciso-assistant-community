@@ -10,11 +10,21 @@
 
 	let { item = [], sideBarVisibleItems }: Props = $props();
 
-	let classesActive = $derived((href: string) =>
-		href === page.url.pathname
+	let classesActive = $derived((href: string) => {
+		// Scoped entries carry query params (/entities?scope=internal): the
+		// path must match and every param of the href must be in the URL.
+		const [path, query] = href.split('?');
+		const isActive =
+			path === page.url.pathname &&
+			(!query ||
+				query.split('&').every((pair) => {
+					const [key, value] = pair.split('=');
+					return page.url.searchParams.getAll(key).includes(value);
+				}));
+		return isActive
 			? 'bg-primary-100-900 text-primary-800-200'
-			: 'hover:bg-primary-50-950 text-surface-950-50 '
-	);
+			: 'hover:bg-primary-50-950 text-surface-950-50 ';
+	});
 </script>
 
 {#each item as item}

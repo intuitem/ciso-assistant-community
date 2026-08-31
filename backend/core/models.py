@@ -7295,6 +7295,10 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         DONE = "done", _("Done")
         DEPRECATED = "deprecated", _("Deprecated")
 
+    class TargetScope(models.TextChoices):
+        INTERNAL = "internal", _("Internal")
+        EXTERNAL = "external", _("External")
+
     frameworks = models.ManyToManyField(Framework, related_name="campaigns")
     status = models.CharField(
         max_length=100,
@@ -7304,6 +7308,20 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         blank=True,
         null=True,
     )
+    # Immutable after creation: a campaign targets internal entities or
+    # external ones, never both (fan-out and respondent flows differ).
+    target_scope = models.CharField(
+        max_length=10,
+        choices=TargetScope.choices,
+        default=TargetScope.INTERNAL,
+        verbose_name=_("Target scope"),
+    )
+    entities = models.ManyToManyField(
+        "tprm.Entity",
+        related_name="campaigns",
+        blank=True,
+        verbose_name=_("Entities"),
+    )
     selected_implementation_groups = models.JSONField(
         blank=True, null=True, verbose_name=_("Selected implementation groups")
     )
@@ -7312,6 +7330,9 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         null=True,
         verbose_name=_("Start date"),
     )
+    # Legacy targeting — read-only since the move to entity-based campaigns
+    # (see documentation/entities-and-campaigns.md); kept for provenance on
+    # migrated campaigns.
     perimeters = models.ManyToManyField(Perimeter, related_name="campaigns")
 
     class Meta:

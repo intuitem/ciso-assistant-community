@@ -3,6 +3,7 @@
 import EvidenceFileName from '$lib/components/ModelTable/field/EvidenceFileName.svelte';
 import LanguageDisplay from '$lib/components/ModelTable/field/LanguageDisplay.svelte';
 import FrameworkName from '$lib/components/ModelTable/field/FrameworkName.svelte';
+import EntityName from '$lib/components/ModelTable/field/EntityName.svelte';
 import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/field/UserGroupNameDisplay.svelte';
 import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
@@ -183,6 +184,12 @@ export interface ModelMapEntry {
 	 * rendered as Markdown for this model.
 	 */
 	markdownFields?: string[];
+	/**
+	 * Filter fields whose value comes from the list URL's query params and is
+	 * enforced as a ModelTable override: not rendered as a chip, immune to
+	 * "reset filters" (e.g. entity scope, campaign target scope).
+	 */
+	lockedFilters?: string[];
 }
 
 type ModelMap = {
@@ -1366,6 +1373,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'entities',
 		verboseName: 'Entity',
 		verboseNamePlural: 'Entities',
+		lockedFilters: ['scope'],
 		detailViewFields: [
 			{ field: 'id' },
 			{ field: 'ref_id' },
@@ -1376,6 +1384,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'relationship' },
 			{ field: 'legal_identifiers' },
 			{ field: 'branches' },
+			{ field: 'default_assignee' },
 			{ field: 'reference_link' }
 		],
 		reverseForeignKeyFields: [
@@ -1386,7 +1395,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'owned_folders', urlModel: 'folders', urlParams: 'owned=false' },
+			{ field: 'default_assignee', urlModel: 'actors' },
 			{ field: 'parent_entity', urlModel: 'entities' },
 			{ field: 'branches', urlModel: 'entities' },
 			{
@@ -1396,6 +1405,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			}
 		],
 		selectFields: [
+			{ field: 'scope' },
 			{ field: 'country' },
 			{ field: 'currency' },
 			{ field: 'dora_entity_type' },
@@ -2650,10 +2660,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'campaigns',
 		verboseName: 'Campaign',
 		verboseNamePlural: 'Campaigns',
-		selectFields: [{ field: 'status' }],
+		lockedFilters: ['target_scope'],
+		selectFields: [{ field: 'status' }, { field: 'target_scope' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'framework', urlModel: 'frameworks' },
+			{ field: 'entities', urlModel: 'entities' },
+			// Legacy targeting, read-only on migrated campaigns
 			{ field: 'perimeters', urlModel: 'perimeters' }
 		],
 		reverseForeignKeyFields: [
@@ -2663,12 +2676,19 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			},
+			{
+				field: 'compliance_assessment__campaign',
+				urlModel: 'entity-assessments',
+				disableCreate: true,
+				disableDelete: true
+			},
 			{ field: 'campaigns', urlModel: 'perimeters', disableCreate: true, disableDelete: true }
 		],
 		detailViewFields: [
 			{ field: 'id' },
 			{ field: 'name' },
 			{ field: 'description' },
+			{ field: 'entities' },
 			{ field: 'framework' },
 			{ field: 'status' },
 			{ field: 'start_date' },
@@ -2681,7 +2701,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'status' },
 			{ field: 'framework' },
 			{ field: 'folder' },
-			{ field: 'perimeters' }
+			{ field: 'target_scope' },
+			{ field: 'entities' }
 		]
 	},
 	'organisation-objectives': {
@@ -3520,6 +3541,9 @@ const FIELD_COMPONENT_MAP = {
 	},
 	frameworks: {
 		name: FrameworkName
+	},
+	entities: {
+		name: EntityName
 	},
 	workflows: {
 		trigger_types: TriggerTypesDisplay

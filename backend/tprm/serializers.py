@@ -39,7 +39,7 @@ User = get_user_model()
 
 class EntityReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
-    owned_folders = FieldsRelatedField(many=True)
+    default_assignee = FieldsRelatedField(many=True)
     parent_entity = FieldsRelatedField()
     branches = FieldsRelatedField(many=True)
     relationship = FieldsRelatedField(many=True)
@@ -100,9 +100,33 @@ class EntityWriteSerializer(BaseModelSerializer):
     # is user-owned and fully editable — e.g. renamed to the org's name.
     BUILTIN_EDITABLE_FIELDS = "__all__"
 
+    # Programmatic creation paths (data wizard, TPRM import, preset executor)
+    # all create third parties; the UI sends the scope explicitly.
+    scope = serializers.ChoiceField(
+        choices=Entity.Scope.choices, default=Entity.Scope.EXTERNAL
+    )
+
     class Meta:
         model = Entity
-        exclude = ["owned_folders"]
+        exclude = []
+        read_only_fields = ["is_main"]
+
+    def validate_scope(self, value):
+        # Scope is fixed at creation: internal entities are managed in the
+        # Organization section, external ones in the third-party section. In
+        # the rare case an entity truly changes nature, copy its information
+        # into a new entity of the other scope instead.
+        if self.instance is not None and value != self.instance.scope:
+            raise serializers.ValidationError("entityScopeIsImmutable")
+        return value
+
+    def validate_default_assignee(self, value):
+        # Assignees receive the entity's campaign audits in "my assignments":
+        # only people and teams qualify. Entity actors would be meaningless
+        # there and would allow ownership cycles between entities.
+        if any(actor.entity_id is not None for actor in value):
+            raise serializers.ValidationError("defaultAssigneeMustBeUserOrTeam")
+        return value
 
     def to_internal_value(self, data):
         """Convert None to empty string for CharField DORA fields before validation"""
@@ -144,7 +168,6 @@ class EntityWriteSerializer(BaseModelSerializer):
 
 class EntityImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
-    owned_folders = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
     parent_entity = HashSlugRelatedField(slug_field="pk", read_only=True)
     relationship = serializers.SlugRelatedField(
         slug_field="name", read_only=True, many=True
@@ -158,9 +181,9 @@ class EntityImportExportSerializer(BaseModelSerializer):
             "description",
             "folder",
             "is_active",
+            "scope",
             "mission",
             "reference_link",
-            "owned_folders",
             "parent_entity",
             "default_dependency",
             "default_penetration",
@@ -598,6 +621,14 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
 
     def validate_entity(self, value):
         self._ensure_immutable("entity", value)
+        # Internal entities carry responsibility through default_assignee
+        # actors; representatives are the external-contact mechanism. Existing
+        # representatives on an entity that later became internal are kept as
+        # history — only new ones are refused.
+        if self.instance is None and value.scope == Entity.Scope.INTERNAL:
+            raise serializers.ValidationError(
+                "representativesRequireExternalEntity"
+            )
         return value
 
     def _create_or_update_user(self, instance, user):

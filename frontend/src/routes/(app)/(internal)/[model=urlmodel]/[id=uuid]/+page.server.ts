@@ -82,6 +82,24 @@ export const load: PageServerLoad = async (event) => {
 		id: event.params.id
 	});
 
+	if (event.params.model === 'entities') {
+		// Scope-aware subtitle: "Internal entity" / "Third-party entity"
+		// instead of the generic model name.
+		const scope = data.data?.scope;
+		if (scope === 'internal' || scope === 'external') {
+			data.modelVerboseName = scope === 'internal' ? 'internalEntity' : 'externalEntity';
+		}
+	}
+
+	if (event.params.model === 'campaigns') {
+		const targetScope = data.data?.target_scope;
+		if (targetScope === 'Internal' || targetScope === 'internal') {
+			data.modelVerboseName = 'internalCampaign';
+		} else if (targetScope === 'External' || targetScope === 'external') {
+			data.modelVerboseName = 'externalCampaign';
+		}
+	}
+
 	if (event.params.model === 'applied-controls') {
 		const appliedControlSchema = modelSchema(event.params.model + '_duplicate');
 		const appliedControl = data.data;
