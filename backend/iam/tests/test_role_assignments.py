@@ -233,7 +233,7 @@ class TestIAMFolder:
             except Exception as e:
                 failing_models.append((model, e))
 
-        assert len(failing_models) == 0, print(
+        assert len(failing_models) == 0, (
             f"RoleAssignment.get_viewable_object_ids doesn't work for these models: {failing_models}"
         )
 
