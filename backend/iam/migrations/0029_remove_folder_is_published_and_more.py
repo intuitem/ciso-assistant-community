@@ -162,6 +162,14 @@ def fill_default_roles(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("iam", "0028_idpgroup_source_user_is_jit_provisioned"),
+        ("core", "0185_presetjourney_sequence"),
+        ("custom_fields", "0001_initial"),
+        ("doc_management", "0005_alter_documentrevision_url"),
+        ("ebios_rm", "0025_alter_elementaryaction_is_published"),
+        ("metrology", "0004_custommetricsample_evidence_revision_and_more"),
+        ("pmbok", "0007_alter_project_ref_link"),
+        ("sec_intel", "0002_tactic_ttpcatalog_technique_tactic_catalog"),
+        ("tprm", "0019_null_perimeter_on_enclave_audits"),
     ]
 
     run_before = [
