@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ACTOR_TYPE_ICON_MAP } from '$lib/utils/actors';
 	import { run } from 'svelte/legacy';
 
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
@@ -209,7 +210,7 @@
 							optionsEndpoint="actors"
 							optionsLabelField="str"
 							optionsInfoFields={{
-								fields: [{ field: 'type', translate: true }],
+								fields: [{ field: 'type', translate: true, iconMap: ACTOR_TYPE_ICON_MAP }],
 								position: 'prefix'
 							}}
 							field="owner"

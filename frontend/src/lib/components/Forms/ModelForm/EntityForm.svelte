@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ACTOR_TYPE_ICON_MAP } from '$lib/utils/actors';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
@@ -86,7 +87,7 @@
 		optionsDetailedUrlParameters={[['entity__isnull', 'true']]}
 		optionsLabelField="str"
 		optionsInfoFields={{
-			fields: [{ field: 'type', translate: true }],
+			fields: [{ field: 'type', translate: true, iconMap: ACTOR_TYPE_ICON_MAP }],
 			position: 'prefix'
 		}}
 		field="default_assignee"

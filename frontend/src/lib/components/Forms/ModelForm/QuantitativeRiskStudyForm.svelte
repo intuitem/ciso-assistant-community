@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ACTOR_TYPE_ICON_MAP } from '$lib/utils/actors';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
@@ -112,7 +113,7 @@
 	optionsEndpoint="actors"
 	optionsLabelField="str"
 	optionsInfoFields={{
-		fields: [{ field: 'type', translate: true }],
+		fields: [{ field: 'type', translate: true, iconMap: ACTOR_TYPE_ICON_MAP }],
 		position: 'prefix'
 	}}
 	field="authors"
@@ -236,7 +237,7 @@
 			optionsEndpoint="actors"
 			optionsLabelField="str"
 			optionsInfoFields={{
-				fields: [{ field: 'type', translate: true }],
+				fields: [{ field: 'type', translate: true, iconMap: ACTOR_TYPE_ICON_MAP }],
 				position: 'prefix'
 			}}
 			field="reviewers"

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ACTOR_TYPE_ICON_MAP } from '$lib/utils/actors';
 	import { page } from '$app/state';
 	import { invalidateAll } from '$app/navigation';
 	import { applyAction, deserialize } from '$app/forms';
@@ -836,7 +837,7 @@
 								optionsDetailedUrlParameters={[['include_third_parties', 'true']]}
 								optionsLabelField="str"
 								optionsInfoFields={{
-									fields: [{ field: 'type', translate: true }],
+									fields: [{ field: 'type', translate: true, iconMap: ACTOR_TYPE_ICON_MAP }],
 									position: 'prefix'
 								}}
 								field="actor"

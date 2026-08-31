@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ACTOR_TYPE_ICON_MAP } from '$lib/utils/actors';
 	import { page } from '$app/state';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
@@ -116,7 +117,7 @@
 	optionsEndpoint="actors"
 	optionsLabelField="str"
 	optionsInfoFields={{
-		fields: [{ field: 'type', translate: true }],
+		fields: [{ field: 'type', translate: true, iconMap: ACTOR_TYPE_ICON_MAP }],
 		position: 'prefix'
 	}}
 	field="owner"

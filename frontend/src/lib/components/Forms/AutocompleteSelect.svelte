@@ -55,6 +55,10 @@
 				path?: string; // Optional, used for nested fields};
 				translate?: boolean; // Optional, used for translating the field
 				display?: (value: any) => string;
+				// Render the field as a fixed-width icon instead of text: maps the
+				// raw value to icon classes; the (translated) value becomes the
+				// tooltip. Unmapped values fall back to the text rendering.
+				iconMap?: Record<string, string>;
 			}[];
 			position?: 'suffix' | 'prefix'; // Default: 'suffix'
 			separator?: string; // Default: ' '
@@ -413,9 +417,17 @@
 							})
 						: [];
 
+				let infoIcon: { classes: string; label: string } | undefined = undefined;
 				const infoFields = optionsInfoFields.fields
 					.map((f) => {
 						const value = getNestedValue(object, f.field, f.path);
+						if (f.iconMap && value != null && f.iconMap[value]) {
+							infoIcon = {
+								classes: f.iconMap[value],
+								label: f.translate ? safeTranslate(value) : value
+							};
+							return '';
+						}
 						return f.display ? f.display(value) : f.translate ? safeTranslate(value) : value;
 					})
 					.filter(Boolean);
@@ -448,6 +460,7 @@
 								: fullLabel,
 					path,
 					infoString,
+					infoIcon,
 					contentType: object?.content_type || ''
 				};
 
@@ -766,6 +779,13 @@
 				{:else if optionSnippet}
 					{@render optionSnippet?.(option)}
 				{:else}
+					{#if option.infoIcon}
+						<i
+							class="{option.infoIcon.classes} text-xs w-4 text-center"
+							title={option.infoIcon.label}
+							aria-label={option.infoIcon.label}
+						></i>
+					{/if}
 					{#if option.infoString?.position === 'prefix'}
 						<span
 							class="text-xs {option.infoString.classes ??
@@ -817,6 +837,13 @@
 						: translateOptions
 							? (option.translatedLabel ?? option.label ?? option)
 							: (option.label ?? option)}
+					{#if option.infoIcon}
+						<i
+							class="{option.infoIcon.classes} text-xs"
+							title={option.infoIcon.label}
+							aria-label={option.infoIcon.label}
+						></i>
+					{/if}
 					{#if option.infoString?.position === 'prefix'}
 						<span class="text-xs text-surface-600-400">&nbsp;{option.infoString.string}</span>
 					{/if}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ACTOR_TYPE_ICON_MAP } from '$lib/utils/actors';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '../TextField.svelte';
 	import TextArea from '../TextArea.svelte';
@@ -225,7 +226,7 @@
 	optionsEndpoint="actors?user__is_third_party=False"
 	optionsLabelField="str"
 	optionsInfoFields={{
-		fields: [{ field: 'type', translate: true }],
+		fields: [{ field: 'type', translate: true, iconMap: ACTOR_TYPE_ICON_MAP }],
 		position: 'prefix'
 	}}
 	field="assigned_to"

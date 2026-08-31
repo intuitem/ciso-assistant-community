@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ACTOR_TYPE_ICON_MAP } from '$lib/utils/actors';
 	import Select from '../Select.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -163,7 +164,7 @@
 		optionsEndpoint="actors"
 		optionsLabelField="str"
 		optionsInfoFields={{
-			fields: [{ field: 'type', translate: true }],
+			fields: [{ field: 'type', translate: true, iconMap: ACTOR_TYPE_ICON_MAP }],
 			position: 'prefix'
 		}}
 		field="owners"
