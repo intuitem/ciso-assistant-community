@@ -63,6 +63,7 @@ from .utils import (
     resolve_compute_result,
     sha256,
     update_selected_implementation_groups,
+    yaml_safe_load,
     _is_question_visible,
     _build_answer_context,
 )
@@ -482,7 +483,7 @@ class StoredLibrary(LibraryMixin):
             # We do not store the library if its hash checksum is in the database.
             return None, "libraryAlreadyLoadedError"
         try:
-            library_data = yaml.safe_load(library_content)
+            library_data = yaml_safe_load(library_content)
             if not isinstance(library_data, dict):
                 raise yaml.YAMLError(
                     f"The YAML content must be a dictionary but it's been interpreted as a {type(library_data).__name__} !"
@@ -10715,6 +10716,7 @@ class PresetJourney(NameDescriptionMixin, FolderMixin):
         related_name="journeys",
     )
     applied_version = models.IntegerField(default=1)
+    sequence = models.PositiveIntegerField(default=1)
     object_refs = models.JSONField(default=dict)
     applied_at = models.DateTimeField(auto_now_add=True)
     applied_by = models.ForeignKey(
