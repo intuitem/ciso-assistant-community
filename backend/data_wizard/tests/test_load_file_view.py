@@ -1750,3 +1750,141 @@ class TestTprmEntityResolutionByName:
         results = resp.json()["results"]
         assert results["entities"]["successful"] == 1, results["entities"]
         assert results["solutions"]["failed"] == 1, results["solutions"]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ComplianceAssessment import — questionnaire answers across locales
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+MC_URN = "urn:test:qfw:question:1"
+TEXT_URN = "urn:test:qfw:question:2"
+CHOICE_1 = "urn:test:qfw:question:1:choice:1"
+CHOICE_2 = "urn:test:qfw:question:1:choice:2"
+
+
+def _make_questionnaire_framework(folder):
+    """French-authored framework with English translations on its questions."""
+    from core.models import Framework, Question, QuestionChoice, RequirementNode
+
+    fw = Framework.objects.create(
+        name="Questionnaire FW", folder=folder, is_published=True, urn="urn:test:qfw"
+    )
+    rn = RequirementNode.objects.create(
+        framework=fw,
+        urn="urn:test:qfw:req:1",
+        ref_id="Q.1",
+        assessable=True,
+        folder=folder,
+        is_published=True,
+    )
+    mc = Question.objects.create(
+        requirement_node=rn,
+        urn=MC_URN,
+        text="Lister les activités couvertes.",
+        type="multiple_choice",
+        folder=folder,
+        translations={"en": {"text": "List the activities covered."}},
+    )
+    QuestionChoice.objects.create(
+        question=mc,
+        urn=CHOICE_1,
+        value="Hébergement de solutions IT",
+        folder=folder,
+        translations={"en": {"value": "Hosting of IT solutions"}},
+    )
+    QuestionChoice.objects.create(
+        question=mc,
+        urn=CHOICE_2,
+        value="Développement logiciel",
+        folder=folder,
+        translations={"en": {"value": "Software development"}},
+    )
+    Question.objects.create(
+        requirement_node=rn,
+        urn=TEXT_URN,
+        text="Autre, précisez.",
+        type="text",
+        order=1,
+        folder=folder,
+        translations={"en": {"text": "Other, please specify."}},
+    )
+    return fw, rn
+
+
+@pytest.mark.django_db
+class TestComplianceAssessmentAnswersImport:
+    def _import(self, api_client, folder, fw, answers_cell):
+        excel = make_excel_file(
+            {"Sheet1": [{"ref_id": "Q.1", "assessable": True, "answers": answers_cell}]}
+        )
+        return _post(
+            api_client,
+            excel.read(),
+            "audit.xlsx",
+            "ComplianceAssessment",
+            folder.id,
+            HTTP_X_FRAMEWORK_ID=str(fw.id),
+        )
+
+    def _answers(self, fw, rn):
+        from core.models import Answer, ComplianceAssessment
+
+        ca = ComplianceAssessment.objects.get(framework=fw)
+        ra = ca.requirement_assessments.get(requirement=rn)
+        return {
+            a.question.urn: (sorted(c.urn for c in a.selected_choices.all()), a.value)
+            for a in Answer.objects.filter(requirement_assessment=ra)
+        }
+
+    def test_answers_in_current_language_are_imported(
+        self, api_client, domain_folder, all_accessible
+    ):
+        """A template exported under an English UI carries translated labels;
+        the import must match them, not only the base-language ones."""
+        fw, rn = _make_questionnaire_framework(domain_folder)
+        cell = (
+            "List the activities covered. (multiple) >> "
+            "Hosting of IT solutions | Software development\n\n"
+            "Other, please specify. >> Mainly SaaS"
+        )
+        resp = self._import(api_client, domain_folder, fw, cell)
+        assert resp.status_code == 200, resp.json()
+        assert resp.json()["results"]["successful"] == 1, resp.json()
+
+        answers = self._answers(fw, rn)
+        assert answers[MC_URN][0] == [CHOICE_1, CHOICE_2]
+        assert answers[TEXT_URN][1] == "Mainly SaaS"
+
+    def test_answers_in_base_language_still_match_with_case_and_spacing_noise(
+        self, api_client, domain_folder, all_accessible
+    ):
+        fw, rn = _make_questionnaire_framework(domain_folder)
+        cell = (
+            "lister les  activités couvertes. (multiple) >> "
+            "HÉBERGEMENT DE SOLUTIONS IT\n\n"
+            "Autre, précisez. >> Surtout du SaaS"
+        )
+        resp = self._import(api_client, domain_folder, fw, cell)
+        assert resp.status_code == 200, resp.json()
+
+        answers = self._answers(fw, rn)
+        assert answers[MC_URN][0] == [CHOICE_1]
+        assert answers[TEXT_URN][1] == "Surtout du SaaS"
+
+    def test_template_hints_and_unknown_labels_are_skipped(
+        self, api_client, domain_folder, all_accessible
+    ):
+        fw, rn = _make_questionnaire_framework(domain_folder)
+        cell = (
+            "List the activities covered. (multiple) >> "
+            "[Hosting of IT solutions / Software development]\n\n"
+            "Not a real question >> Hosting of IT solutions\n\n"
+            "List the activities covered. (multiple) >> Not a real choice"
+        )
+        resp = self._import(api_client, domain_folder, fw, cell)
+        assert resp.status_code == 200, resp.json()
+
+        answers = self._answers(fw, rn)
+        assert answers[MC_URN][0] == []
+        assert answers[TEXT_URN][1] is None
