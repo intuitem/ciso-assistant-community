@@ -126,6 +126,71 @@ class TestPagingLoop:
         # Never silent: the run says where it stopped.
         assert any("stopped after" in e["message"] for e in output["errors"])
 
+    def test_a_mutating_sweep_covers_the_whole_set(self):
+        """The flagship sweep filters on the very field the body updates.
+        Offset paging over the live queryset would skip ~limit rows per page
+        as processed rows drop out of the match; the frozen id snapshot keeps
+        coverage complete."""
+        domain = make_domain("Sweep mutating")
+        for index in range(6):
+            AppliedControl.objects.create(
+                name=f"AC {index:02d}", folder=domain, status="to_do"
+            )
+        workflow = Workflow.objects.create(name="Mutating sweep", folder=domain)
+        version = WorkflowVersion.objects.create(
+            workflow=workflow, run_as=publisher_user()
+        )
+        start = node("trigger", trigger_config={"type": "manual"})
+        loop = node(
+            "loop",
+            label="Each row",
+            loop_config={
+                "read": {
+                    "model": "applied_control",
+                    "order_by": "name",
+                    "limit": 2,
+                    "filters": {
+                        "operator": "and",
+                        "conditions": [
+                            {"field": "status", "op": "eq", "value": "to_do"}
+                        ],
+                    },
+                },
+                "collect": "{{item.name}}",
+            },
+        )
+        body = node(
+            "action",
+            label="Activate",
+            action_config={
+                "type": "update_object",
+                "model": "applied_control",
+                "id": "{{item.id}}",
+                "fields": {"status": "active"},
+            },
+        )
+        end = node("end")
+        save_graph(
+            version,
+            {
+                "nodes": [start, loop, body, end],
+                "edges": [
+                    edge(start, loop),
+                    edge(loop, body, source_port="each"),
+                    edge(body, loop),
+                    edge(loop, end, source_port="done"),
+                ],
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        output = instance.node_outputs["each_row"]
+        assert output["count"] == 6
+        assert output["results"] == [f"AC {i:02d}" for i in range(6)]
+        assert not AppliedControl.objects.filter(
+            folder=domain, status="to_do"
+        ).exists()
+
     def test_the_filters_apply_to_every_page(self):
         domain = make_domain("Sweep filtered")
         for index in range(6):

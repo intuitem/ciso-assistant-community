@@ -871,6 +871,14 @@ def read_max_limit():
     return int(getattr(settings, "WORKFLOW_READ_MAX_LIMIT", 500))
 
 
+def read_page_limit(config):
+    """The page size a read config asks for, clamped to the deployment cap."""
+    return min(
+        max(int(config.get("limit") or READ_DEFAULT_LIMIT), 1),
+        read_max_limit(),
+    )
+
+
 def _read_scope_folder_ids(folder):
     """Instance folder + subtree ONLY — deliberately narrower than
     _accessible_folder_ids: reads of ancestor folders would leak parent-domain
@@ -1033,7 +1041,9 @@ def _serialize_read_row(obj, fields, computed=None):
 class ReadObjectsAction(BaseAction):
     action_type = "read_objects"
 
-    def execute(self, config, instance):
+    def _queryset(self, config, instance):
+        """(entry, fields, queryset) shared by list/first reads and the
+        loop's frozen-snapshot paging."""
         entry = READABLE_MODELS.get(config.get("model"))
         if entry is None:
             raise ActionError(f"read_objects: unknown model '{config.get('model')}'")
@@ -1062,6 +1072,11 @@ class ReadObjectsAction(BaseAction):
         # Computed callables dereference these per row otherwise.
         if entry.select_related:
             queryset = queryset.select_related(*entry.select_related)
+        return entry, fields, queryset
+
+    def execute(self, config, instance):
+        entry, fields, queryset = self._queryset(config, instance)
+        context = _render_context(instance)
         try:
             if config.get("mode", "list") == "first":
                 obj = queryset.first()
@@ -1071,10 +1086,7 @@ class ReadObjectsAction(BaseAction):
                     if obj
                     else None,
                 }
-            limit = min(
-                max(int(config.get("limit") or READ_DEFAULT_LIMIT), 1),
-                read_max_limit(),
-            )
+            limit = read_page_limit(config)
             offset = max(int(render(config.get("offset"), context) or 0), 0)
             count = queryset.count()
             return {
@@ -2397,12 +2409,42 @@ def authorize_action(node, instance, config=None):
     raise ActionError(f"Authorization denied: {reason}")
 
 
-def read_page(node, instance, read_config, offset):
-    """One page of a loop's read. Returns (rows, next_offset)."""
-    config = {**read_config, "type": "read_objects", "mode": "list", "offset": offset}
+def read_snapshot_ids(node, instance, read_config, cap):
+    """The ids a paged loop will walk, frozen at loop start. Offset paging
+    over the live queryset would skip rows whenever an iteration mutates one
+    out of the filter match (the canonical sweep: filter on the very field the
+    body updates) — a silent partial sweep. Snapshotting the ids fixes the
+    set; each page then re-reads the rows by id."""
+    config = {**read_config, "type": "read_objects", "mode": "list"}
     authorize_action(node, instance, config)
-    output = ACTION_REGISTRY["read_objects"].execute(config, instance)
-    return output["results"], output.get("next_offset") or 0
+    action = ACTION_REGISTRY["read_objects"]
+    _entry, _fields, queryset = action._queryset(config, instance)
+    try:
+        return [str(pk) for pk in queryset.values_list("id", flat=True)[:cap]]
+    except (ValidationError, ValueError, TypeError) as e:
+        raise ActionError(f"read_objects: invalid filter value ({e})")
+
+
+def read_page(node, instance, read_config, ids):
+    """The rows for one slice of a loop's frozen id snapshot, in snapshot
+    order. Scope, visibility and filters are re-applied live: a row that lost
+    any of them since the snapshot drops out rather than leaking."""
+    config = {**read_config, "type": "read_objects", "mode": "list"}
+    authorize_action(node, instance, config)
+    action = ACTION_REGISTRY["read_objects"]
+    entry, fields, queryset = action._queryset(config, instance)
+    try:
+        rows = {
+            str(obj.id): _serialize_read_row(obj, fields, entry.computed)
+            for obj in queryset.filter(id__in=ids)
+        }
+    except (ValidationError, ValueError, TypeError) as e:
+        raise ActionError(f"read_objects: invalid filter value ({e})")
+    except IndexError:
+        raise ActionError(
+            "read_objects: a stored level no longer exists in the risk matrix"
+        )
+    return [rows[i] for i in ids if i in rows]
 
 
 def execute_action(node, instance):

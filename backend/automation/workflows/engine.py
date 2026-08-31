@@ -24,6 +24,8 @@ from .actions import (
     dig,
     execute_action,
     read_page,
+    read_page_limit,
+    read_snapshot_ids,
     render,
 )
 from .context import temporal_seeds
@@ -755,9 +757,18 @@ def _process_loop(token):
     _set_iteration_overlay(token)
     if paged:
         # The loop pulls its own pages, so a sweep stays three nodes whatever
-        # the size of the set.
-        items, next_offset = read_page(node, instance, read_config, 0)
+        # the size of the set. The ids are frozen up front: paging the live
+        # queryset by offset would skip rows as the body mutates them out of
+        # the filter match (the canonical sweep filters on the very field it
+        # updates). The snapshot is bounded by the item ceiling.
+        snapshot = read_snapshot_ids(
+            node, instance, read_config, loop_max_items() + 1
+        )
+        items, next_offset = _read_snapshot_page(
+            node, instance, read_config, snapshot, 0
+        )
     else:
+        snapshot = None
         expression = config.get("collection") or ""
         match = (
             LOOP_TEMPLATE_RE.match(expression) if isinstance(expression, str) else None
@@ -787,6 +798,7 @@ def _process_loop(token):
         "errors": [],
         "processed": 0,
         "read": read_config if paged else None,
+        "snapshot": snapshot,
         "next_offset": next_offset,
         "pages": 1 if paged else 0,
     }
@@ -873,6 +885,20 @@ def _loop_body_returned(controller, failed):
     _loop_next_iteration(controller)
 
 
+def _read_snapshot_page(node, instance, read_config, snapshot, start):
+    """Rows for the next non-empty slice of the loop's frozen id snapshot.
+    A slice can come back short or empty (rows deleted, or no longer visible,
+    since the snapshot); keep sliding until rows turn up or the snapshot is
+    exhausted. Returns (items, next_start), next_start 0 when exhausted."""
+    limit = read_page_limit(read_config)
+    items = []
+    while not items and start < len(snapshot):
+        ids = snapshot[start : start + limit]
+        start += limit
+        items = read_page(node, instance, read_config, ids)
+    return items, (start if start < len(snapshot) else 0)
+
+
 def _loop_load_next_page(controller, state):
     """Pull the next page into the controller, if the loop reads its own and
     there is one. Returns True when fresh items are available."""
@@ -887,10 +913,11 @@ def _loop_load_next_page(controller, state):
         )
         return False
     try:
-        items, next_offset = read_page(
+        items, next_offset = _read_snapshot_page(
             controller.current_node,
             controller.instance,
             state["read"],
+            state.get("snapshot") or [],
             state["next_offset"],
         )
     except (ActionError, FatalActionError) as e:
