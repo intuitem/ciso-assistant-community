@@ -172,7 +172,6 @@ class Project(NameDescriptionFolderMixin, FilteringLabelMixin, CustomFieldsMixin
         PORTFOLIO = "portfolio", _("Portfolio")
         PROGRAM = "program", _("Program")
         PROJECT = "project", _("Project")
-        ENGAGEMENT = "engagement", _("Engagement")
 
     PRIORITY = [
         (1, _("P1")),
