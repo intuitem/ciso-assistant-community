@@ -168,7 +168,7 @@ export interface ModelMapEntry {
 	verboseNamePlural?: string;
 	urlModel?: urlModel;
 	listViewUrlParams?: string;
-	flaggedFields?: Record<string, FeatureFlag>;
+	flaggedFields?: Record<string, FeatureFlag | FeatureFlag[]>;
 	detailViewFields?: Field[];
 	foreignKeyFields?: ForeignKeyField[];
 	reverseForeignKeyFields?: ReverseForeignKeyField[];
@@ -966,9 +966,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'User',
 		verboseNamePlural: 'Users',
 		flaggedFields: {
-			idp_groups: 'idp_groups'
+			idp_groups: ['idp_groups', 'jit_provisioning']
 		},
-		foreignKeyFields: [{ field: 'user_groups', urlModel: 'user-groups' }],
+		foreignKeyFields: [
+			{ field: 'user_groups', urlModel: 'user-groups' },
+			{ field: 'idp_groups', urlModel: 'idp-groups' }
+		],
 		filters: []
 	},
 	teams: {

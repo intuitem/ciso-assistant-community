@@ -8039,7 +8039,7 @@ class IdPGroupViewSet(BaseModelViewSet):
     """
 
     model = IdPGroup
-    feature_flag = "idp_groups"
+    feature_flag = ("idp_groups", "jit_provisioning")
     ordering_fields = ["name"]
     search_fields = ["name"]
 
@@ -10387,8 +10387,8 @@ class PresetViewSet(BaseModelViewSet):
 
         folder_name = request.data.get("folder_name")
         folder_id = request.data.get("folder_id")
-        create_objects = request.data.get("create_objects", True)
-        apply_feature_flags = request.data.get("apply_feature_flags", True)
+        create_objects = request.data.get("create_objects", False)
+        apply_feature_flags = request.data.get("apply_feature_flags", False)
 
         if apply_feature_flags:
             can_change_settings = RoleAssignment.is_access_allowed(

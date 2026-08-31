@@ -2637,7 +2637,7 @@
 	"mappingSuggestionTeasing": "Teraz sú navrhnuté mapovania! Filtre môžete použiť na preskúmanie návrhov na základe načítaných rámcov.",
 	"errorCreatingPersonalAccessToken": "Pri vytváraní osobného prístupového tokenu sa vyskytla chyba.",
 	"errorMaxPatAmountExceeded": "Pre tohto používateľa bol prekročený maximálny povolený počet tokenov.",
-	"errorSsoRequiredForScimUsers": "SSO nemožno deaktivovať, kým existujú používatelia zriadení cez SCIM bez lokálneho prístupu.",
+	"errorSsoRequiredForManagedUsers": "SSO nemožno deaktivovať, kým existujú používatelia zriadení cez SCIM alebo automatickým zriaďovaním bez lokálneho prístupu.",
 	"campaign": "kampaň",
 	"campaigns": "Kampane",
 	"addCampaign": "Spustite kampaň",
@@ -5836,5 +5836,14 @@
 	"actionPlanNoFollowUpHint": "K tomuto stavu technického zabezpečenia nie je priradené hodnotenie zistení. Upravte stav technického zabezpečenia a nastavte následné hodnotenie na plánovanie nápravy zistení.",
 	"actionPlanEmptyHelp": "Všetky kontroly vyhovujú. Položky sa tu zobrazia, keď kontrola nevyhovie, skončí chybou alebo zostane neskontrolovaná.",
 	"createFollowUpAssessment": "Vytvoriť súvisiace hodnotenie zistení",
-	"createFollowUpAssessmentHelpText": "Vytvorí hodnotenie zistení v rovnakej organizačnej oblasti na sledovanie nápravy nevyhovujúcich kontrol."
+	"createFollowUpAssessmentHelpText": "Vytvorí hodnotenie zistení v rovnakej organizačnej oblasti na sledovanie nápravy nevyhovujúcich kontrol.",
+	"enableJitProvisioning": "Povoliť automatické zriaďovanie",
+	"enableJitProvisioningHelpText": "Automaticky vytvorí účet s predvolenými používateľskými skupinami uvedenými nižšie pre používateľov, ktorí sa prvýkrát prihlasujú cez SSO.",
+	"defaultUserGroups": "Predvolené používateľské skupiny",
+	"defaultUserGroupsHelpText": "Používateľské skupiny automaticky pridelené používateľom vytvoreným automatickým zriaďovaním.",
+	"defaultUserGroupsWarning": "Uplatní sa iba raz, pri vytvorení účtu. Neskoršia zmena alebo odstránenie tohto nastavenia neovplyvní už zriadených používateľov. Pre členstvo v skupinách, ktoré zostáva synchronizované v čase, použite namiesto toho mapovanie skupín IdP.",
+	"attributeMappingGroups": "Mapovanie atribútu skupín",
+	"attributeMappingGroupsHelpText": "Názov(y) nároku (claim) obsahujúceho členstvá používateľa v skupinách IdP. Skupiny nájdené tu sa synchronizujú so skupinami IdP pri každom prihlásení a udeľujú tie skupiny používateľov CISO Assistant, na ktoré ich administrátor namapoval.",
+	"jitProvisioning": "Automatické zriaďovanie SSO (JIT)",
+	"jitProvisioningDescription": "Umožňuje automatické vytváranie účtov pri prvom prihlásení cez SSO a synchronizáciu ich členstiev v skupinách IdP, bez potreby SCIM."
 }

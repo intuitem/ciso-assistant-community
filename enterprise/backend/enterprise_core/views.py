@@ -264,6 +264,140 @@ class LicenseStatusView(APIView):
             return Response({"status": "expired", "days_expired": days_expired})
 
 
+class RoleViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows roles to be viewed or edited
+    """
+
+    model = Role
+    ordering_fields = ["name"]
+    filter_backends = [
+        DjangoFilterBackend,
+        RoleFilter,
+    ]
+
+    def get_queryset(self):
+        # Hide only dedicated per-SA roles; a shared builtin role stays visible.
+        return (
+            super()
+            .get_queryset()
+            .exclude(service_accounts__isnull=False, builtin=False)
+        )
+
+    def _get_default_permissions(self):
+        return Permission.objects.filter(
+            codename__in=["view_folder", "view_globalsettings"],
+            content_type__app_label__in=["iam", "global_settings"],
+        )
+
+    def _ensure_default_permissions(self, role):
+        role.permissions.add(*self._get_default_permissions())
+
+    def perform_create(self, serializer):
+        """
+        Create per-folder UserGroups and RoleAssignments for the new role.
+        """
+        with transaction.atomic():
+            role = serializer.save()
+            self._ensure_default_permissions(role)
+
+            root_folder = Folder.get_root_folder()
+            folders = Folder.objects.exclude(content_type="EN")
+
+            user_groups = []
+            role_assignments = []
+            processed_folders = []
+
+            for folder in folders:
+                if (
+                    folder.content_type == Folder.ContentType.DOMAIN
+                    and not folder.create_iam_groups
+                ):
+                    continue
+
+                ug, _ = UserGroup.objects.get_or_create(
+                    folder=folder,
+                    name=role.name,
+                    defaults={"builtin": True},
+                )
+                user_groups.append(ug)
+                processed_folders.append(folder)
+
+                role_assignments.append(
+                    RoleAssignment(
+                        folder=root_folder,
+                        role=role,
+                        user_group=ug,
+                        is_recursive=True,
+                    )
+                )
+
+            RoleAssignment.objects.bulk_create(role_assignments)
+
+            # M2M must be handled after bulk_create
+            for ra, folder in zip(role_assignments, processed_folders):
+                ra.perimeter_folders.add(folder)
+
+    def perform_update(self, serializer):
+        """
+        Update the user groups associated with the role.
+        """
+        with transaction.atomic():
+            editors_before = len(User.get_editors())
+
+            role = serializer.save()
+            self._ensure_default_permissions(role)
+
+            editors_after = len(User.get_editors())
+            if (
+                editors_after > editors_before
+                and editors_after > settings.LICENSE_SEATS
+            ):
+                raise serializers.ValidationError(
+                    {"permissions": "errorLicenseSeatsExceeded"}
+                )
+
+            ug_ids = (
+                RoleAssignment.objects.filter(
+                    role=role,
+                    user_group__isnull=False,
+                    user_group__builtin=True,
+                )
+                .values_list("user_group_id", flat=True)
+                .distinct()
+            )
+
+            if ug_ids:
+                UserGroup.objects.filter(id__in=ug_ids).update(name=role.name)
+
+    def perform_destroy(self, instance):
+        """
+        Delete only user groups tied to this role’s assignments, atomically.
+        """
+        with transaction.atomic():
+            ras_qs = RoleAssignment.objects.select_related("user_group").filter(
+                role=instance
+            )
+            ug_ids = list(
+                ras_qs.exclude(user_group__isnull=True).values_list(
+                    "user_group_id", flat=True
+                )
+            )
+            # Remove this role's assignments first
+            ras_qs.delete()
+            if ug_ids:
+                # Delete only non-builtin groups that are now orphaned (no remaining RAs)
+                orphan_ug_ids = list(
+                    UserGroup.objects.filter(id__in=ug_ids, builtin=True)
+                    .annotate(ra_count=models.Count("roleassignment"))
+                    .filter(ra_count=0)
+                    .values_list("id", flat=True)
+                )
+                if orphan_ug_ids:
+                    UserGroup.objects.filter(id__in=orphan_ug_ids).delete()
+            super().perform_destroy(instance)
+
+
 class PermissionViewSet(BaseModelViewSet):
     """
     API endpoint that allows permissions to be viewed or edited.

@@ -2825,7 +2825,7 @@
 	"mappingSuggestionTeasing": "Predlogi za kartiranje so zdaj na voljo! Za raziskovanje predlogov na podlagi naloženih okvirov lahko uporabite filtre.",
 	"errorCreatingPersonalAccessToken": "Med ustvarjanjem osebnega žetona za dostop je prišlo do napake.",
 	"errorMaxPatAmountExceeded": "Preseženo največje dovoljeno število žetonov za tega uporabnika.",
-	"errorSsoRequiredForScimUsers": "SSO ni mogoče onemogočiti, dokler obstajajo uporabniki, ustvarjeni prek SCIM, brez lokalnega dostopa.",
+	"errorSsoRequiredForManagedUsers": "SSO ni mogoče onemogočiti, dokler obstajajo uporabniki, ustvarjeni prek SCIM ali samodejnega zagotavljanja, brez lokalnega dostopa.",
 	"campaign": "Kampanja",
 	"campaigns": "Kampanje",
 	"addCampaign": "Začni kampanjo",
@@ -5611,5 +5611,14 @@
 	"importTemplatesSingleNote": "Uvažate samo eno predlogo? Hitreje jo je ustvariti neposredno s seznama Predlog.",
 	"unpublishedDocumentsNotice": "{count} dokument(ov) je v osnutku, a še ni objavljenih — vidni so v pogledu upravljanja.",
 	"authored": "Ustvarjeno",
-	"uploaded": "Naloženo"
+	"uploaded": "Naloženo",
+	"enableJitProvisioning": "Omogoči samodejno zagotavljanje",
+	"enableJitProvisioningHelpText": "Samodejno ustvari račun s spodnjimi privzetimi uporabniškimi skupinami za uporabnike, ki se prvič avtenticirajo prek SSO.",
+	"defaultUserGroups": "Privzete uporabniške skupine",
+	"defaultUserGroupsHelpText": "Uporabniške skupine, samodejno dodeljene uporabnikom, ustvarjenim s samodejnim zagotavljanjem.",
+	"defaultUserGroupsWarning": "Uporabi se samo enkrat, ob ustvarjanju računa. Poznejša sprememba ali odstranitev te nastavitve ne vpliva na že zagotovljene uporabnike. Za članstvo v skupinah, ki ostane sinhronizirano skozi čas, namesto tega uporabite preslikavo skupin IdP.",
+	"attributeMappingGroups": "Preslikava atributa skupin",
+	"attributeMappingGroupsHelpText": "Ime(na) zahtevka (claim), ki vsebuje uporabnikova članstva v skupinah IdP. Tukaj najdene skupine se ob vsaki prijavi sinhronizirajo s skupinami IdP in dodelijo tiste uporabniške skupine CISO Assistant, na katere jih je preslikal skrbnik.",
+	"jitProvisioning": "Samodejno zagotavljanje SSO (JIT)",
+	"jitProvisioningDescription": "Omogoči samodejno ustvarjanje računov ob prvi prijavi prek SSO in sinhronizacijo njihovih članstev v skupinah IdP, brez potrebe po SCIM."
 }
