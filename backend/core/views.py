@@ -10449,8 +10449,8 @@ class PresetViewSet(BaseModelViewSet):
 
         folder_name = request.data.get("folder_name")
         folder_id = request.data.get("folder_id")
-        create_objects = request.data.get("create_objects", True)
-        apply_feature_flags = request.data.get("apply_feature_flags", True)
+        create_objects = request.data.get("create_objects", False)
+        apply_feature_flags = request.data.get("apply_feature_flags", False)
 
         if apply_feature_flags:
             can_change_settings = RoleAssignment.is_access_allowed(
