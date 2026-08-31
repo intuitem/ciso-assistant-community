@@ -411,11 +411,15 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
         with transaction.atomic():
             locked = self._lock_instance_without_audit(instance, "create_audit")
-            create_enclave_audit(
+            audit = create_enclave_audit(
                 locked,
                 audit_data["framework"],
                 audit_data["selected_implementation_groups"],
             )
+            # The service writes to the locked row; the serializer keeps working
+            # with its own instance, and what follows (respondent assignment)
+            # reads instance.compliance_assessment.
+            instance.compliance_assessment = audit
 
     def _link_existing_audit(self, instance, audit_data):
         with transaction.atomic():
