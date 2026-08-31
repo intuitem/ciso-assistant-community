@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0184_clear_assessable_on_splash_nodes"),
+        ("core", "0185_presetjourney_sequence"),
     ]
 
     operations = [
