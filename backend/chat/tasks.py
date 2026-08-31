@@ -221,11 +221,11 @@ def _parse_library_yaml(filepath) -> list[dict]:
     Parse a YAML library file and extract indexable entries.
     Returns a list of dicts with: urn, ref_id, name, description, etc.
     """
-    import yaml
+    from core.utils import yaml_safe_load
 
     try:
         with open(filepath, "r", encoding="utf-8") as f:
-            data = yaml.safe_load(f)
+            data = yaml_safe_load(f)
     except Exception as e:
         logger.warning("failed_to_parse_yaml", file=str(filepath), error=e)
         return []
