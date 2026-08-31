@@ -2198,8 +2198,15 @@ def duplicate_related_objects(
             # If the object exists in the target folder, link it to the duplicate object
             link_existing_object(duplicate_object, existing_obj, field_name)
 
-        # TODO: Retablish the old `elif obj.folder in target_parent_folders and obj._viewable_from_descendants:`
-        # I guess we want all accessible objects (including the ones in the ancestor folders (`target_parent_folders`) to be "linked"(`link_existing_object`) to the `duplicated_object`).
+        elif (
+            obj.folder in target_parent_folders
+            and obj.folder.default_role is not None
+            and obj.folder.default_role.permissions.filter(
+                codename=f"view_{model_class._meta.model_name}"
+            ).exists()
+        ):
+            # Link the object if the user can see it thanks to the `obj.folder.default_role`.
+            link_existing_object(duplicate_object, obj, field_name)
 
         elif obj.folder in sub_folders:
             # If the object's folder is a subfolder of the target folder, link it

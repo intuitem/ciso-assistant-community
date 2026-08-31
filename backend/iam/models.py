@@ -1821,12 +1821,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             allowed_folder_set.directly_accessible_folder_ids
         )
 
-        # TODO: Copy the logic from 1448 (i guess we should put it in a dedicated function to avoid duplication)
-        # Something get_permission(permission: tuple[PermissionPrefix, type[models.Model]] | Permission) -> Permission:
-        # permission = Permission.objects.get(codename=codename)
-        # allowed_ancestor_folder_ids = Folder.objects.filter(descendants__in=directly_accessible_folder_ids).distinct().filter(default_role__permissions=permission)
-        # I guess this logic should be moved to `RoleAssignment._get_directly_allowed_folder_ids` instead.
-
         direct_flat_folder_ids = allowed_folder_set.direct_flat_folder_ids
         direct_recursive_folder_ids = allowed_folder_set.direct_recursive_folder_ids
 
