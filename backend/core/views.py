@@ -8039,7 +8039,7 @@ class IdPGroupViewSet(BaseModelViewSet):
     """
 
     model = IdPGroup
-    feature_flag = "idp_groups"
+    feature_flag = ("idp_groups", "jit_provisioning")
     ordering_fields = ["name"]
     search_fields = ["name"]
 
