@@ -40,6 +40,15 @@
 	// Check if this node belongs to the assignment being edited
 	let isBeingEdited = $derived($editingRequirementIdsStore?.has(nodeId) ?? false);
 
+	// The node's own assignment plus, for a section, those of its assessable
+	// descendants — deduplicated so an actor holding both shows once.
+	let visibleAssignments = $derived([
+		...new Set([
+			...(assignmentInfo ?? []).map((info) => info.actorName),
+			...(assessable ? [] : sectionAssignments.map((sa) => sa.actorName))
+		])
+	]);
+
 	// For leaf nodes: check if this node is checked
 	let isChecked = $derived($checkedNodesStore?.has(nodeId) ?? false);
 
@@ -178,31 +187,19 @@
 				{/if}
 			</span>
 
-			<!-- Assignment badges (hidden when node is being edited). Section nodes carry a
-				requirement assessment of their own and can be part of the assignment, so
-				without the `assessable` guard they would show this pill *and* the
-				aggregated one below — the same actor twice on every section row. -->
-			{#if assessable && assignmentInfo && !isBeingEdited}
-				{#each assignmentInfo as info}
+			<!-- One badge per actor. A section node carries a requirement assessment of its
+				own *and* aggregates its descendants', so rendering the two sets separately
+				showed the same actor twice on every section row. -->
+			{#if !isBeingEdited && visibleAssignments.length > 0}
+				{#each visibleAssignments as actorName}
 					<span
-						class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 border border-blue-200"
-						title="{m.assignedTo()} {info.actorName}"
+						class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs {assessable
+							? 'bg-blue-100 text-blue-700 border border-blue-200'
+							: 'bg-blue-50 text-blue-600 border border-blue-100'}"
+						title="{m.assignedTo()} {actorName}"
 					>
 						<i class="fa-solid fa-user text-xs"></i>
-						<span class="max-w-[100px] truncate">{info.actorName}</span>
-					</span>
-				{/each}
-			{/if}
-
-			<!-- Section-level assignment badges -->
-			{#if !assessable && sectionAssignments.length > 0}
-				{#each sectionAssignments as sa}
-					<span
-						class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-50 text-blue-600 border border-blue-100"
-						title="{m.assignedTo()} {sa.actorName}"
-					>
-						<i class="fa-solid fa-user text-xs"></i>
-						<span class="max-w-[80px] truncate">{sa.actorName}</span>
+						<span class="max-w-[100px] truncate">{actorName}</span>
 					</span>
 				{/each}
 			{/if}

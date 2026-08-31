@@ -409,7 +409,7 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
             )
         if not statuses:
             return None
-        order = [s.value for s in RequirementAssignment.Status]
+        order = [s.value for s in RequirementAssignment.WORKFLOW_ORDER]
         return min(statuses, key=lambda s: order.index(s) if s in order else len(order))
 
     class Meta:
@@ -616,7 +616,10 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 if not user.is_third_party:
                     logger.warning("User is not a third-party", user=user)
                 user.user_groups.add(respondents)
-            for user in old_third_party_users:
+            # Never revoke someone who is in the final set: an empty submitted list
+            # marks every current representative for removal, and the entity defaults
+            # can put the same people straight back.
+            for user in old_third_party_users - third_party_users:
                 if not user.is_third_party:
                     logger.warning("User is not a third-party", user=user)
                 user.user_groups.remove(respondents)
@@ -701,6 +704,11 @@ class EntityScoreWriteSerializer(BaseModelSerializer):
     class Meta:
         model = EntityScore
         exclude = ["folder"]
+        # The (entity, provider, as_of) constraint would otherwise become a
+        # UniqueTogetherValidator that rejects a replay before `create` can turn it
+        # into an update. The constraint still guards writes that skip this
+        # serializer, and `create` keeps the API idempotent.
+        validators = []
 
     def to_internal_value(self, data):
         """Accept the provider by name as well as by id.
@@ -732,21 +740,32 @@ class EntityScoreWriteSerializer(BaseModelSerializer):
                 data["provider"] = str(match.id)
         return super().to_internal_value(data)
 
-    def create(self, validated_data):
-        """A feed re-run for the same reading corrects it instead of colliding.
-
-        `fields_to_check` makes (entity, provider, as_of) unique, so without this a
-        nightly job that replays a day would get a validation error where it means
-        "already recorded".
-        """
-        existing = EntityScore.objects.filter(
+    @staticmethod
+    def _existing_reading(validated_data):
+        return EntityScore.objects.filter(
             entity=validated_data.get("entity"),
             provider=validated_data.get("provider"),
             as_of=validated_data.get("as_of"),
         ).first()
+
+    def create(self, validated_data):
+        """A feed re-run for the same reading corrects it instead of colliding.
+
+        One reading per provider per day, so replaying a day means "already recorded",
+        not an error. The retry covers two feeds posting the same reading at once,
+        where the row appears between the lookup and the insert.
+        """
+        existing = self._existing_reading(validated_data)
         if existing is not None:
             return self.update(existing, validated_data)
-        return super().create(validated_data)
+        try:
+            with transaction.atomic():
+                return super().create(validated_data)
+        except IntegrityError:
+            existing = self._existing_reading(validated_data)
+            if existing is None:
+                raise
+            return self.update(existing, validated_data)
 
 
 class RepresentativeReadSerializer(BaseModelSerializer):

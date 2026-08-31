@@ -239,6 +239,7 @@
 
 			<div class="flex gap-2">
 				<button
+					type="button"
 					class="btn preset-filled-primary-500"
 					disabled={submitting ||
 						(picked.requires_note && !note.trim()) ||
@@ -247,7 +248,7 @@
 				>
 					{m.confirm()}
 				</button>
-				<button class="btn preset-tonal-surface" onclick={() => (picked = null)}>
+				<button type="button" class="btn preset-tonal-surface" onclick={() => (picked = null)}>
 					{m.cancel()}
 				</button>
 			</div>
@@ -258,6 +259,7 @@
 		<div class="flex flex-wrap gap-2 border-t border-surface-200-800 pt-3">
 			{#each payload.transitions as transition}
 				<button
+					type="button"
 					class="btn {transition.allowed ? 'preset-tonal-primary' : 'preset-tonal-surface'}"
 					disabled={!transition.allowed}
 					title={transition.allowed

@@ -9790,6 +9790,17 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
         CLOSED = "closed", _("Closed")
         CHANGES_REQUESTED = "changes_requested", _("Changes Requested")
 
+    # How far along the questionnaire is, which is not the enum's declaration order:
+    # "changes requested" is back with the respondent, so it sits before "submitted".
+    # Shared so the status a row reports and the order it sorts in cannot drift.
+    WORKFLOW_ORDER = [
+        Status.DRAFT,
+        Status.IN_PROGRESS,
+        Status.CHANGES_REQUESTED,
+        Status.SUBMITTED,
+        Status.CLOSED,
+    ]
+
     compliance_assessment = models.ForeignKey(
         ComplianceAssessment,
         on_delete=models.CASCADE,

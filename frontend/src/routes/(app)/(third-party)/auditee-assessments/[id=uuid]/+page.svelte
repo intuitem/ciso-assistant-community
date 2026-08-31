@@ -470,14 +470,6 @@
 	// half-finished flags stay on their side. The respondent sees them once the round
 	// has actually been sent back.
 	const showReviewFlags = $derived(isAuditor || assignmentStatus !== 'submitted');
-	const changesRequestedCount = $derived(
-		showReviewFlags
-			? requirementAssessments.filter(
-					(ra: Record<string, any>) => ra.review_state === 'changes_requested'
-				).length
-			: 0
-	);
-
 	function goToFirstFlagged() {
 		tocFilterReview = 'changes_requested';
 		const first = tocSections.find((s) => s.reviewState === 'changes_requested');
@@ -669,6 +661,12 @@
 			count: tocSections.filter((s) => s.result === opt.id).length
 		}))
 	);
+	// Counted over the same entries the jump walks, so the banner cannot promise an
+	// item the table of contents has no row for.
+	const changesRequestedCount = $derived(
+		showReviewFlags ? tocSections.filter((s) => s.reviewState === 'changes_requested').length : 0
+	);
+
 	const reviewStateCounts = $derived(
 		REVIEW_STATES.map((state) => ({
 			...state,

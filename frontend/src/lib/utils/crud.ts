@@ -1508,6 +1508,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Solutions',
 		flaggedFields: {
 			dora_ict_service_type: 'dora',
+			storage_of_data: 'dora',
+			data_location_storage: 'dora',
+			data_location_processing: 'dora',
 			dora_data_sensitiveness: 'dora',
 			dora_reliance_level: 'dora',
 			dora_substitutability: 'dora',

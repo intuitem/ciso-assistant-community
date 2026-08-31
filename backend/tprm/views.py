@@ -1116,16 +1116,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        # How far along the questionnaire is, which is not the enum's declaration
-        # order: "changes requested" is back with the respondent, so it sits before
-        # "submitted" rather than after "closed".
-        order = [
-            RequirementAssignment.Status.DRAFT,
-            RequirementAssignment.Status.IN_PROGRESS,
-            RequirementAssignment.Status.CHANGES_REQUESTED,
-            RequirementAssignment.Status.SUBMITTED,
-            RequirementAssignment.Status.CLOSED,
-        ]
+        order = RequirementAssignment.WORKFLOW_ORDER
         rank = Case(
             *[
                 When(status=value, then=Value(index))
@@ -1223,11 +1214,15 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         )
 
         # The completion dial links into the respondent view, which is addressed by
-        # assignment. One query for every card rather than one per card; a draft
-        # assignment has nothing to review yet.
+        # assignment. One query for every card rather than one per card, and scoped to
+        # the audits actually rendered rather than every assignment in the instance; a
+        # draft assignment has nothing to review yet.
+        audit_ids = EntityAssessment.objects.filter(
+            id__in=viewable_items, compliance_assessment__isnull=False
+        ).values_list("compliance_assessment_id", flat=True)
         assignments_by_audit: dict = {}
         for audit_id, assignment_id in (
-            RequirementAssignment.objects.filter(compliance_assessment__isnull=False)
+            RequirementAssignment.objects.filter(compliance_assessment_id__in=audit_ids)
             .exclude(status=RequirementAssignment.Status.DRAFT)
             .values_list("compliance_assessment_id", "id")
         ):
@@ -1308,9 +1303,23 @@ class EntityScoreViewSet(BaseModelViewSet):
     filterset_fields = ["entity", "provider", "filtering_labels", "folder"]
     search_fields = ["grade", "observation"]
     ordering_fields = ["as_of", "score", "normalized_score"]
+    # `normalized_score` is a property, so the ORM cannot order by it: the column has
+    # to be computed in SQL and the public term pointed at it.
+    ordering_remap = {"normalized_score": "normalized_score_value"}
 
     def get_queryset(self):
-        return super().get_queryset().select_related("entity", "provider", "folder")
+        return (
+            super()
+            .get_queryset()
+            .select_related("entity", "provider", "folder")
+            .annotate(
+                normalized_score_value=Case(
+                    When(scale_max=0, then=Value(None)),
+                    default=(F("score") * 100.0) / F("scale_max"),
+                    output_field=FloatField(),
+                )
+            )
+        )
 
     @action(detail=False, name="Get provider choices")
     def provider(self, request):

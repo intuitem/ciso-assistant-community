@@ -398,6 +398,7 @@
 		if (canShowAppliedControls) return 'applied_controls';
 		if (showTaskTemplates) return 'task_templates';
 		if (showEvidences) return 'evidences';
+		if (canRaiseFinding) return 'findings';
 		// Security exceptions are auditor-only — not part of the per-CA visibility model.
 		if (isAuditor) return 'security_exceptions';
 		return 'applied_controls';
@@ -434,6 +435,20 @@
 				{ taint: false }
 			);
 			form.newEvidence = undefined;
+		}
+	});
+
+	$effect(() => {
+		if (form?.newTaskTemplate) {
+			refreshKey = !refreshKey;
+			requirementAssessmentForm.form.update(
+				(current: Record<string, any>) => ({
+					...current,
+					task_templates: [...(current.task_templates ?? []), form?.newTaskTemplate]
+				}),
+				{ taint: false }
+			);
+			form.newTaskTemplate = undefined;
 		}
 	});
 
@@ -618,7 +633,7 @@
 			{...rest}
 		>
 			{#snippet children({ form, data })}
-				{#if canShowAppliedControls || showEvidences || isAuditor}
+				{#if canShowAppliedControls || showTaskTemplates || showEvidences || canRaiseFinding || isAuditor}
 					<div class="card shadow-lg bg-surface-50-950">
 						<Tabs
 							value={group}

@@ -257,6 +257,7 @@ export const actions: Actions = {
 			'answers',
 			'evidences',
 			'applied_controls',
+			'task_templates',
 			'security_exceptions'
 		];
 		for (const key of visibilityControlled) {

@@ -695,6 +695,15 @@ class EntityScore(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         verbose_name = _("Entity score")
         verbose_name_plural = _("Entity scores")
         ordering = ["-as_of"]
+        constraints = [
+            # One reading per provider per day. `fields_to_check` says the same thing
+            # at the API layer; this holds for writes that never see a serializer
+            # (imports, shell, a racing double POST).
+            models.UniqueConstraint(
+                fields=["entity", "provider", "as_of"],
+                name="unique_entity_score_per_provider_and_date",
+            )
+        ]
 
     def __str__(self) -> str:
         return f"{self.entity} - {self.provider}: {self.score}"

@@ -16847,17 +16847,6 @@ def _bucket_by_date(due, today):
 class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet):
     model = TaskTemplate
 
-    def get_queryset(self):
-        # The commitment state is an opt-in column: one query, not one per row.
-        return (
-            super()
-            .get_queryset()
-            .prefetch_related(
-                "commitments__committed_by",
-                scoped_findings_prefetch(self.request),
-            )
-        )
-
     filterset_fields = [
         "assigned_to",
         "is_recurrent",
@@ -16886,12 +16875,21 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
 
         # One query for every occurrence, grouped in python: the per-template lookup
         # the serializer uses would be a query per row.
+        # A recurrent template's "next" occurrence is the first one still ahead, the
+        # same rule `get_next_occurrence_status` applies, so the chart and the table
+        # column do not report different states for the same task. A one-time task has
+        # a single occurrence whenever it falls.
+        recurrent_ids = {t.id for t in tasks if t.is_recurrent}
         next_node_by_template: dict = {}
         for node in (
             TaskNode.objects.filter(task_template__in=[t.id for t in tasks])
             .order_by("due_date")
             .only("task_template_id", "status", "due_date")
         ):
+            if node.task_template_id in recurrent_ids and (
+                node.due_date is None or node.due_date < today
+            ):
+                continue
             next_node_by_template.setdefault(node.task_template_id, node)
 
         by_status: dict = {}
@@ -17211,7 +17209,17 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
     }
 
     def get_queryset(self):
-        qs = super().get_queryset().prefetch_related("filtering_labels__folder")
+        # The commitment state and the findings are opt-in columns: one query each,
+        # not one per row.
+        qs = (
+            super()
+            .get_queryset()
+            .prefetch_related(
+                "filtering_labels__folder",
+                "commitments__committed_by",
+                scoped_findings_prefetch(self.request),
+            )
+        )
         ordering = self.request.query_params.get("ordering", "")
 
         if any(

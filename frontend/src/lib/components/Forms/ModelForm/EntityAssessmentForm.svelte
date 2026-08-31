@@ -99,13 +99,21 @@
 				// again rather than keeping the previous framework's pills on screen.
 				frameworkDefaults = null;
 				implementationGroupsChoices = [];
-				form.form.update((d) => ({ ...d, field_visibility: {} }));
+				form.form.update((d) => ({
+					...d,
+					field_visibility: {},
+					selected_implementation_groups: []
+				}));
 				return;
 			}
 			if (e) {
 				await fetch(`/frameworks/${e}`)
 					.then((r) => r.json())
 					.then((r) => {
+						// The selection can move on while this request is in flight; a slower
+						// earlier response must not apply another framework's defaults or wipe
+						// the pills the user has since set.
+						if (e !== $formData.framework) return;
 						const implementation_groups = r['implementation_groups_definition'] || [];
 						implementationGroupsChoices = implementation_groups.map((group) => ({
 							label: group.name,
@@ -115,7 +123,13 @@
 						// pills must show that profile — not the internal-audit defaults.
 						frameworkDefaults =
 							r['third_party_field_visibility'] ?? r['effective_field_visibility'] ?? null;
-						form.form.update((d) => ({ ...d, field_visibility: {} }));
+						// Groups belong to the framework that defined them: carrying the previous
+						// selection over would submit ref_ids the new framework does not know.
+						form.form.update((d) => ({
+							...d,
+							field_visibility: {},
+							selected_implementation_groups: []
+						}));
 					});
 			}
 		}}

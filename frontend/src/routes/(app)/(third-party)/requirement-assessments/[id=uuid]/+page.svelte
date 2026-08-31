@@ -105,6 +105,7 @@
 		if (canShowAppliedControls) return 'applied_controls';
 		if (showTaskTemplates) return 'task_templates';
 		if (showEvidences) return 'evidence';
+		if (showFindings) return 'findings';
 		return 'applied_controls';
 	}
 	let group = $state(pickDefaultTab());
@@ -300,7 +301,7 @@
 			{/if}
 		</div>
 	{/if}
-	{#if canShowAppliedControls || showEvidences}
+	{#if canShowAppliedControls || showTaskTemplates || showEvidences || showFindings}
 		<div>
 			<Tabs
 				value={group}
