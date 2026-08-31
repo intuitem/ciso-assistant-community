@@ -349,8 +349,8 @@ frontend:
   # @default -- `{}`
   containerSecurityContext: {} # @schema additionalProperties: true
   #  seLinuxOptions: {} # @schema additionalProperties: true
-  #  runAsUser: 1001
-  #  runAsGroup: 1001
+  #  runAsUser: 1000
+  #  runAsGroup: 1000
   #  runAsNonRoot: true
   #  privileged: false
   #  readOnlyRootFilesystem: true
