@@ -11156,7 +11156,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
 
         if self.action == "list":
-            qs = qs.prefetch_related(actor_prefetch("authors"))  # Optional table column
+            qs = qs.prefetch_related(
+                actor_prefetch("authors"),  # Optional table column
+                # One query for the page, not one per row: the table badges audits
+                # that answer an entity assessment.
+                "entityassessment_set",
+            )
 
         # No requirement_assessments prefetch on the list action: progress is
         # served by `_get_optimized_object_data` (no-IG audits) or the model's
@@ -11186,6 +11191,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "approver"
                     ).prefetch_related("events"),
                 ),
+                "entityassessment_set",
+                "requirement_assignments",
             )
         # Custom detail actions (tree, global_score, donut_data, etc.)
         # use lightweight querysets — they don't need full prefetches.

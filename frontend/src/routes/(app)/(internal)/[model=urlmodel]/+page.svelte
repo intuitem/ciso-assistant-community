@@ -533,6 +533,14 @@
 								>ebios-rm</span
 							>
 						{/if}
+					{:else if URLModel === 'compliance-assessments'}
+						{#if key === 'perimeter' && row.meta.entity_assessments?.length}
+							<a
+								href="/entity-assessments/{row.meta.entity_assessments[0].id}"
+								class="badge inline-block bg-teal-100 text-teal-800 text-xs px-2 py-0.5 rounded-md border border-teal-200 rotate-[-6deg] font-semibold uppercase tracking-wide hover:bg-teal-200"
+								title={row.meta.entity_assessments[0].str}>tprm</a
+							>
+						{/if}
 					{/if}
 				{/snippet}
 				{#if URLModel === 'risk-assessments'}{/if}

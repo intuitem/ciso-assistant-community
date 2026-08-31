@@ -17,10 +17,25 @@
 
 	const mailing =
 		Boolean(data.data.compliance_assessment) && Boolean(data.data.representatives.length);
+
+	const reviewAssignments = $derived(data.reviewAssignments ?? []);
+	const reviewHref = $derived(
+		reviewAssignments.length === 1
+			? `/auditee-assessments/${reviewAssignments[0].id}`
+			: `/compliance-assessments/${data.data.compliance_assessment?.id}/assignments`
+	);
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
-	<DetailView {data} {mailing} />
+	<DetailView {data} {mailing}>
+		{#snippet actions()}
+			{#if reviewAssignments.length > 0}
+				<a href={reviewHref} class="btn preset-filled-secondary-500 h-fit">
+					<i class="fa-solid fa-clipboard-check mr-2"></i>{m.reviewResponses()}
+				</a>
+			{/if}
+		{/snippet}
+	</DetailView>
 	{#if data.data.compliance_assessment}
 		<div class="card px-6 py-4 bg-surface-50-950 flex flex-row justify-between shadow-lg w-full">
 			<TreeView>

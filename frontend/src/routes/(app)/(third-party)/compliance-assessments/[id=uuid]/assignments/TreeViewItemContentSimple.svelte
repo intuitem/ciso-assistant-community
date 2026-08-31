@@ -178,8 +178,11 @@
 				{/if}
 			</span>
 
-			<!-- Assignment badges (hidden when node is being edited) -->
-			{#if assignmentInfo && !isBeingEdited}
+			<!-- Assignment badges (hidden when node is being edited). Section nodes carry a
+				requirement assessment of their own and can be part of the assignment, so
+				without the `assessable` guard they would show this pill *and* the
+				aggregated one below — the same actor twice on every section row. -->
+			{#if assessable && assignmentInfo && !isBeingEdited}
 				{#each assignmentInfo as info}
 					<span
 						class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 border border-blue-200"

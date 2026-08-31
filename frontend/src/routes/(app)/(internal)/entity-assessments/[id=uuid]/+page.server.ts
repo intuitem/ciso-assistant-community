@@ -10,7 +10,29 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { safeTranslate } from '$lib/utils/i18n';
 
 export const load: PageServerLoad = async (event) => {
-	return loadDetail({ event, model: getModelInfo('entity-assessments'), id: event.params.id });
+	const detail = await loadDetail({
+		event,
+		model: getModelInfo('entity-assessments'),
+		id: event.params.id
+	});
+
+	// The respondent view lives behind the linked audit's assignments, so surface a
+	// direct way in from here rather than making the analyst walk the audit page.
+	const auditId = detail.data?.compliance_assessment?.id;
+	let reviewAssignments: Array<{ id: string; status: string }> = [];
+	if (auditId) {
+		const res = await event.fetch(
+			`${BASE_API_URL}/requirement-assignments/?compliance_assessment=${auditId}`
+		);
+		if (res.ok) {
+			const body = await res.json();
+			reviewAssignments = (body.results ?? []).filter(
+				(a: { status?: string }) => a.status && a.status !== 'draft'
+			);
+		}
+	}
+
+	return { ...detail, reviewAssignments };
 };
 
 export const actions: Actions = {

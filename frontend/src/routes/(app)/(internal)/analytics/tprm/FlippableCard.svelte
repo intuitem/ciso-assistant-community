@@ -12,6 +12,8 @@
 		entity_assessment: {
 			provider: string;
 			entity_assessment_id: string;
+			compliance_assessment_id: string;
+			review_assignment_id: string | null;
 			baseline: string;
 			solutions: string;
 			completion: number;
@@ -27,6 +29,17 @@
 
 	let { entity_assessment }: Props = $props();
 
+	// Each dial links where its number comes from: what the third party filled in is
+	// read in the respondent view, the auditor's own progress on the audit itself.
+	const auditHref = $derived(
+		`/compliance-assessments/${entity_assessment.compliance_assessment_id}`
+	);
+	const completionHref = $derived(
+		entity_assessment.review_assignment_id
+			? `/auditee-assessments/${entity_assessment.review_assignment_id}`
+			: auditHref
+	);
+
 	// Function to determine conclusion badge color
 	function getConclusionColor(conclusion: string): string {
 		const lookup: Record<string, string> = {
@@ -40,7 +53,7 @@
 	}
 </script>
 
-{#snippet progressDial(value: number, label: string, testid: string, hint: string)}
+{#snippet progressDial(value: number, label: string, testid: string, hint: string, href: string)}
 	<div class="flex flex-col items-center" title={hint}>
 		<span class="block text-xs text-surface-600-400 mb-1 text-center">{label}</span>
 		<div class="text-surface-950-50">
@@ -65,11 +78,7 @@
 					font-weight="bold"
 					fill="currentColor"
 				>
-					<a
-						data-testid={testid}
-						href="/compliance-assessments/{entity_assessment.compliance_assessment_id}"
-						>{value ?? 0}%</a
-					>
+					<a data-testid={testid} {href}>{value ?? 0}%</a>
 				</text>
 			</svg>
 		</div>
@@ -167,13 +176,15 @@
 						entity_assessment.completion,
 						'Completion',
 						'completion',
-						'How much of the questionnaire the third party has filled in'
+						'How much of the questionnaire the third party has filled in',
+						completionHref
 					)}
 					{@render progressDial(
 						entity_assessment.review_progress,
 						'Review progress',
 						'review_progress',
-						"Any Compliance status except 'not assessed' counts"
+						"Any Compliance status except 'not assessed' counts",
+						auditHref
 					)}
 				</div>
 

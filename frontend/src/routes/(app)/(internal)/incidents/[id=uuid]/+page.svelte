@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import { page } from '$app/state';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import type { PageData, ActionData } from './$types';
 	import SuperForm from '$lib/components/Forms/Form.svelte';

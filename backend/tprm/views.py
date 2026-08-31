@@ -1215,6 +1215,17 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             request.user, EntityAssessment
         )
 
+        # The completion dial links into the respondent view, which is addressed by
+        # assignment. One query for every card rather than one per card; a draft
+        # assignment has nothing to review yet.
+        assignments_by_audit: dict = {}
+        for audit_id, assignment_id in (
+            RequirementAssignment.objects.filter(compliance_assessment__isnull=False)
+            .exclude(status=RequirementAssignment.Status.DRAFT)
+            .values_list("compliance_assessment_id", "id")
+        ):
+            assignments_by_audit.setdefault(audit_id, []).append(str(assignment_id))
+
         for ea in EntityAssessment.objects.filter(id__in=viewable_items).select_related(
             "folder", "entity"
         ):
@@ -1247,6 +1258,15 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 if ea.compliance_assessment
                 else False,
             }
+
+            # Only when there is exactly one: with several, no single target is right
+            # and the card falls back to the audit.
+            review_assignments = assignments_by_audit.get(
+                ea.compliance_assessment_id, []
+            )
+            entry["review_assignment_id"] = (
+                review_assignments[0] if len(review_assignments) == 1 else None
+            )
 
             # Same respondent-facing walk as the assessment list and the auditee
             # dashboard. `answers_progress` counted questions only, so a framework

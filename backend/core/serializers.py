@@ -2964,6 +2964,10 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
         ],
         source="validationflow_set",
     )
+    entity_assessments = FieldsRelatedField(many=True, source="entityassessment_set")
+    # Drives the shortcut into the respondent view, which is otherwise reachable
+    # only through the assignments page.
+    requirement_assignments = FieldsRelatedField(["id", "status"], many=True)
 
     def get_progress(self, obj):
         # Detail-oriented serializer: delegate to the model's cascade-based
@@ -3023,6 +3027,9 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
     framework = FieldsRelatedField()
     perimeter = FieldsRelatedField()
     progress = serializers.SerializerMethodField()
+    # The entity assessment this audit answers, when there is one: the table badges
+    # third-party questionnaires and links back to their assessment.
+    entity_assessments = FieldsRelatedField(many=True, source="entityassessment_set")
 
     def get_progress(self, obj):
         # Fast path: page-scoped counts from optimized_data, computed for
@@ -3060,6 +3067,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "updated_at",
             "path",
             "authors",
+            "entity_assessments",
         ]
 
 
