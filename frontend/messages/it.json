@@ -2377,7 +2377,7 @@
 	"errorLoadingData": "Errore caricamento dati",
 	"errorLoadingVulnerabilityData": "Errore nel caricamento dei dati vulnerabilità",
 	"errorMaxPatAmountExceeded": "È stato superato il massimo numero di token per questo utente.",
-	"errorSsoRequiredForScimUsers": "Non è possibile disabilitare lo SSO finché esistono utenti provisionati tramite SCIM senza accesso locale.",
+	"errorSsoRequiredForManagedUsers": "Non è possibile disabilitare lo SSO finché esistono utenti provisionati tramite SCIM o tramite provisioning automatico senza accesso locale.",
 	"errorRiskScenarioGraphMustNotContainCycles": "Il grafo degli scenari di rischio non deve contenere cicli.",
 	"evidenceRevision": "Revisione evidenza",
 	"existingControlNotActive": "È marcato come controllo esistente ma il suo stato non è attivo",
@@ -4179,5 +4179,14 @@
 	"publicDocumentsHelp": "File pubblicati nel Trust Center. Ogni file viene reso disponibile tramite un URL pubblico isolato, separato dalle evidenze interne.",
 	"assetCoverage": "Copertura degli asset",
 	"riskCoverage": "Copertura dei rischi",
-	"coverage": "Copertura"
+	"coverage": "Copertura",
+	"enableJitProvisioning": "Abilita il provisioning automatico",
+	"enableJitProvisioningHelpText": "Crea automaticamente un account, con i gruppi utente predefiniti indicati di seguito, per gli utenti che si autenticano tramite SSO per la prima volta.",
+	"defaultUserGroups": "Gruppi utente predefiniti",
+	"defaultUserGroupsHelpText": "Gruppi utente concessi automaticamente agli utenti creati tramite provisioning automatico.",
+	"defaultUserGroupsWarning": "Applicato una sola volta, alla creazione dell'account. Modificare o rimuovere questa impostazione in seguito non influisce sugli utenti già provisionati. Per un'appartenenza ai gruppi che rimanga sincronizzata nel tempo, utilizzare invece la mappatura dei gruppi IdP.",
+	"attributeMappingGroups": "Mappatura dell'attributo gruppi",
+	"attributeMappingGroupsHelpText": "Nome/i della claim che trasporta le appartenenze ai gruppi IdP dell'utente. I gruppi trovati qui vengono sincronizzati con i gruppi IdP a ogni accesso e concedono i gruppi utente di CISO Assistant a cui un amministratore li ha mappati.",
+	"jitProvisioning": "Provisioning automatico SSO (JIT)",
+	"jitProvisioningDescription": "Abilita la creazione automatica degli account al primo accesso SSO e la sincronizzazione delle loro appartenenze ai gruppi IdP, senza richiedere SCIM."
 }

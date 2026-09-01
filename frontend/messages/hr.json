@@ -1813,7 +1813,7 @@
 	"mappingSuggestionTeasing": "Mapiranja su sada predložena! Možete koristiti filtere za istraživanje prijedloga na temelju učitanih okvira.",
 	"errorCreatingPersonalAccessToken": "Došlo je do pogreške pri kreiranju osobnog pristupnog tokena.",
 	"errorMaxPatAmountExceeded": "Prekoračen maksimalan dozvoljen broj tokena za ovog korisnika.",
-	"errorSsoRequiredForScimUsers": "SSO se ne može onemogućiti dok postoje korisnici pripremljeni putem SCIM-a bez lokalnog pristupa.",
+	"errorSsoRequiredForManagedUsers": "SSO se ne može onemogućiti dok postoje korisnici pripremljeni putem SCIM-a ili automatskim pripremanjem bez lokalnog pristupa.",
 	"campaign": "Kampanja",
 	"campaigns": "Kampanje",
 	"addCampaign": "Započni kampanju",
@@ -4204,5 +4204,14 @@
 	"scimTokenNameTooLong": "Naziv ne smije imati više od 255 znakova.",
 	"idpGroup": "IdP grupa",
 	"idpGroups": "IdP grupe",
-	"idpGroupsDescription": "Omogući federaciju IdP grupa (SCIM provizioniranje, mapiranja IdP grupa i članstva korisnika u IdP grupama)."
+	"idpGroupsDescription": "Omogući federaciju IdP grupa (SCIM provizioniranje, mapiranja IdP grupa i članstva korisnika u IdP grupama).",
+	"enableJitProvisioning": "Omogući automatsko pripremanje",
+	"enableJitProvisioningHelpText": "Automatski stvara račun, s zadanim korisničkim grupama navedenim ispod, za korisnike koji se prvi put autentificiraju putem SSO-a.",
+	"defaultUserGroups": "Zadane korisničke grupe",
+	"defaultUserGroupsHelpText": "Korisničke grupe automatski dodijeljene korisnicima stvorenim automatskim pripremanjem.",
+	"defaultUserGroupsWarning": "Primjenjuje se samo jednom, prilikom stvaranja računa. Naknadna promjena ili uklanjanje ove postavke ne utječe na korisnike koji su već pripremljeni. Za članstvo u grupama koje ostaje sinkronizirano tijekom vremena, umjesto toga upotrijebite mapiranje IdP grupa.",
+	"attributeMappingGroups": "Mapiranje atributa grupa",
+	"attributeMappingGroupsHelpText": "Naziv(i) tvrdnje (claim) koji nosi članstva korisnika u IdP grupama. Grupe pronađene ovdje sinkroniziraju se s IdP grupama pri svakoj prijavi i dodjeljuju korisničke grupe CISO Assistanta koje im je administrator mapirao.",
+	"jitProvisioning": "SSO automatsko pripremanje (JIT)",
+	"jitProvisioningDescription": "Omogućuje automatsko stvaranje računa pri prvoj SSO prijavi i sinkronizaciju njihovih članstava u IdP grupama, bez potrebe za SCIM-om."
 }
