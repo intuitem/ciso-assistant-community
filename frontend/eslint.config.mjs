@@ -3,18 +3,9 @@ import intuitemSveltekit from './plugins/eslint/eslint-plugin-intuitem-sveltekit
 import globals from 'globals';
 import tsParser from '@typescript-eslint/parser';
 import parser from 'svelte-eslint-parser';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import svelte from 'eslint-plugin-svelte';
+import prettier from 'eslint-config-prettier';
 import js from '@eslint/js';
-import { FlatCompat } from '@eslint/eslintrc';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-	baseDirectory: __dirname,
-	recommendedConfig: js.configs.recommended,
-	allConfig: js.configs.all
-});
 
 export default [
 	{
@@ -34,16 +25,12 @@ export default [
 			'**/yarn.lock'
 		]
 	},
-	...compat.extends(
-		'eslint:recommended',
-		'plugin:@typescript-eslint/recommended',
-		'plugin:svelte/recommended',
-		'prettier',
-		'plugin:storybook/recommended'
-	),
+	js.configs.recommended,
+	...typescriptEslint.configs['flat/recommended'],
+	...svelte.configs['flat/recommended'],
+	prettier,
 	{
 		plugins: {
-			'@typescript-eslint': typescriptEslint,
 			'eslint-plugin-intuitem-sveltekit': intuitemSveltekit
 		},
 
