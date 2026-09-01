@@ -14,7 +14,13 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
-	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
+	import {
+		complianceResultColorMap,
+		complianceStatusColorMap,
+		extendedResultColorMap
+	} from '$lib/utils/constants';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
+	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import {
 		getFieldVisibility,
 		hasComputedResult,
@@ -68,6 +74,10 @@
 		{ value: 'in_review', label: m.inReview() },
 		{ value: 'done', label: m.done() }
 	];
+	const extended_result_options = Object.keys(extendedResultColorMap).map((value) => ({
+		value,
+		label: safeTranslate(value)
+	}));
 
 	const requirementHashmap = Object.fromEntries(
 		data.requirements.map((requirement: Record<string, any>) => [requirement.id, requirement])
@@ -82,8 +92,18 @@
 	});
 	let complianceAssessment = $derived(data.compliance_assessment);
 
+	// User permission (reader vs editor) on requirement assessments
+	const user = page.data.user;
+	const canEdit = $derived(
+		canPerformActionOnObject({
+			user,
+			action: 'change',
+			model: URL_MODEL_MAP['requirement-assessments'].name,
+			object: complianceAssessment
+		})
+	);
 	let isReadOnly = $derived(
-		complianceAssessment.is_locked || complianceAssessment.status === 'in_review'
+		complianceAssessment.is_locked || complianceAssessment.status === 'in_review' || !canEdit
 	);
 
 	// Field visibility based on viewer role (server-computed from actor membership)
@@ -93,6 +113,7 @@
 	const fieldVis = $derived(getFieldVisibility(complianceAssessment, viewerRole));
 	const showAnswers = $derived(fieldVis.showAnswers);
 	const showResult = $derived(fieldVis.showResult);
+	const showExtendedResult = $derived(fieldVis.showExtendedResult);
 	const showScore = $derived(fieldVis.showScore);
 	const showObservation = $derived(fieldVis.showObservation);
 	const showAppliedControls = $derived(fieldVis.showAppliedControls);
@@ -1095,7 +1116,7 @@
 											{/if}
 
 											<!-- Row B: result / status / score -->
-											{#if !questionnaireMode && (showResult || (!shallow && complianceAssessment.scoring_enabled))}
+											{#if !questionnaireMode && (showResult || (showExtendedResult && complianceAssessment.extended_result_enabled) || (!shallow && complianceAssessment.scoring_enabled))}
 												<div class="flex flex-wrap items-start gap-x-6 gap-y-3">
 													{#if !questionnaireMode && showResult}
 														<div class="flex flex-col gap-1">
@@ -1151,6 +1172,28 @@
 																/>
 															</div>
 														{/if}
+													{/if}
+													{#if showExtendedResult && complianceAssessment.extended_result_enabled}
+														<div class="flex flex-col gap-1">
+															<span class="text-xs font-semibold text-surface-500 italic"
+																>{m.extendedResult()}</span
+															>
+															<SegmentedControl
+																options={extended_result_options}
+																value={requirementAssessment.extended_result ?? 'not_set'}
+																colorMap={extendedResultColorMap}
+																disabled={isReadOnly}
+																size="sm"
+																ariaLabel={m.extendedResult()}
+																onChange={(newValue) => {
+																	requirementAssessment.extended_result =
+																		requirementAssessment.extended_result === newValue
+																			? 'not_set'
+																			: newValue;
+																	update(requirementAssessment, 'extended_result');
+																}}
+															/>
+														</div>
 													{/if}
 													{@render scoreSlot(requirementAssessment)}
 												</div>
