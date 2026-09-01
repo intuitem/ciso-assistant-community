@@ -1689,7 +1689,7 @@
 	"scimTokenGenerationFailed": "Falha ao gerar o token SCIM",
 	"scimTokenRequiresSso": "O SSO deve estar ativado antes de gerar um token SCIM.",
 	"scimTokenNameTooLong": "O nome não deve exceder 255 caracteres.",
-	"errorSsoRequiredForScimUsers": "O SSO não pode ser desativado enquanto existirem usuários provisionados via SCIM sem acesso local.",
+	"errorSsoRequiredForManagedUsers": "O SSO não pode ser desativado enquanto existirem usuários provisionados via SCIM ou por aprovisionamento automático sem acesso local.",
 	"idpGroup": "Grupo IdP",
 	"idpGroups": "Grupos IdP",
 	"idpGroupsDescription": "Ativar a federação de grupos IdP (provisionamento SCIM, mapeamentos de grupos IdP e associações a grupos IdP nos usuários).",
@@ -1716,5 +1716,14 @@
 	"gracePeriod": "Período de carência",
 	"gracePeriodHelpText": "O segredo atual continua a funcionar durante este período após a rotação, para que as integrações possam ser atualizadas sem interrupção. Limitado a 1 mês.",
 	"gracePeriodTooLong": "O período de carência não pode ser superior a 1 mês.",
-	"previousSecretValidUntil": "O segredo do cliente anterior permanece válido até {date}."
+	"previousSecretValidUntil": "O segredo do cliente anterior permanece válido até {date}.",
+	"enableJitProvisioning": "Ativar aprovisionamento automático",
+	"enableJitProvisioningHelpText": "Cria automaticamente uma conta, com os grupos de usuários padrão abaixo, para usuários que se autenticam via SSO pela primeira vez.",
+	"defaultUserGroups": "Grupos de usuários padrão",
+	"defaultUserGroupsHelpText": "Grupos de usuários concedidos automaticamente a usuários criados por aprovisionamento automático.",
+	"defaultUserGroupsWarning": "Aplicado apenas uma vez, na criação da conta. Alterar ou remover essa configuração posteriormente não afeta os usuários já aprovisionados. Para uma associação de grupo que permaneça sincronizada ao longo do tempo, use o mapeamento de grupos de IdP.",
+	"attributeMappingGroups": "Mapeamento de atributo de grupos",
+	"attributeMappingGroupsHelpText": "Nome(s) da claim que carrega as associações de grupos de IdP do usuário. Os grupos encontrados aqui são sincronizados com os grupos de IdP a cada login e concedem os grupos de usuários do CISO Assistant que um administrador mapeou para eles.",
+	"jitProvisioning": "Aprovisionamento automático de SSO (JIT)",
+	"jitProvisioningDescription": "Ativa a criação automática de contas no primeiro login via SSO e a sincronização de suas associações de grupos de IdP, sem exigir SCIM."
 }

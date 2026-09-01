@@ -48,15 +48,15 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		await expect(page.getByTestId('toast')).not.toBeVisible();
 
 		await page
-			.getByRole('gridcell', { name: 'New' })
+			.getByRole('cell', { name: 'New' })
 			.getByTestId('model-table-td-array-elem')
 			.waitFor({ state: 'visible' });
 		await page
-			.getByRole('gridcell', { name: 'Minor' })
+			.getByRole('cell', { name: 'Minor' })
 			.getByTestId('model-table-td-array-elem')
 			.waitFor({ state: 'visible' });
 		await page
-			.getByRole('gridcell', { name: 'Internal' })
+			.getByRole('cell', { name: 'Internal' })
 			.getByTestId('model-table-td-array-elem')
 			.waitFor({ state: 'visible' });
 	});

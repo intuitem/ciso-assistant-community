@@ -9,7 +9,7 @@
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
 
-	const cBase = 'card bg-surface-50-950 p-6 w-modal-wide space-y-6';
+	const cBase = 'card bg-surface-100-900 border border-surface-500 p-6 w-modal-wide space-y-6';
 	const cHeader = 'text-xl font-medium text-surface-900-100';
 
 	interface Props {

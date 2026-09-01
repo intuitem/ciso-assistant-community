@@ -146,6 +146,12 @@
 		}
 	}
 
+	const presetClasses: Record<string, string> = {
+		error: 'preset-filled-error-500',
+		success: 'preset-filled-success-500',
+		warning: 'preset-filled-warning-500'
+	};
+
 	let wrapperVisible = $state(false);
 
 	// Reactive
@@ -194,7 +200,9 @@
 				>
 					<!-- Toast -->
 					<div
-						class="toast {classesToast} {t.background ?? background} {t.classes ?? ''}"
+						class="toast {classesToast} {t.background ??
+							(t.preset ? presetClasses[t.preset] : undefined) ??
+							background} {t.classes ?? ''}"
 						data-testid="toast"
 					>
 						<div class="text-base">{t.message}</div>

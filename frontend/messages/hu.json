@@ -1672,7 +1672,7 @@
 	"scimTokenGenerationFailed": "Nem sikerült a SCIM token generálása",
 	"scimTokenRequiresSso": "Az SSO-t engedélyezni kell a SCIM-token létrehozása előtt.",
 	"scimTokenNameTooLong": "A név legfeljebb 255 karakter hosszú lehet.",
-	"errorSsoRequiredForScimUsers": "Az SSO nem kapcsolható ki, amíg léteznek SCIM-mel kiépített, helyi hozzáféréssel nem rendelkező felhasználók.",
+	"errorSsoRequiredForManagedUsers": "Az SSO nem kapcsolható ki, amíg léteznek SCIM-mel kiépített vagy automatikusan kiépített, helyi hozzáféréssel nem rendelkező felhasználók.",
 	"idpGroup": "IdP csoport",
 	"idpGroups": "IdP csoportok",
 	"idpGroupsDescription": "IdP csoportföderáció engedélyezése (SCIM kiépítés, IdP csoport-hozzárendelések és felhasználók IdP csoporttagságai).",
@@ -1699,5 +1699,14 @@
 	"gracePeriod": "Türelmi idő",
 	"gracePeriodHelpText": "A jelenlegi titkos kulcs a csere után még ennyi ideig működik, hogy az integrációkat leállás nélkül lehessen frissíteni. Legfeljebb 1 hónapra korlátozva.",
 	"gracePeriodTooLong": "A türelmi idő nem lehet hosszabb 1 hónapnál.",
-	"previousSecretValidUntil": "Az előző ügyfél titkos kulcsa {date} időpontig érvényes marad."
+	"previousSecretValidUntil": "Az előző ügyfél titkos kulcsa {date} időpontig érvényes marad.",
+	"enableJitProvisioning": "Automatikus kiépítés engedélyezése",
+	"enableJitProvisioningHelpText": "Automatikusan létrehoz egy fiókot az alábbi alapértelmezett felhasználói csoportokkal azoknak a felhasználóknak, akik először hitelesítenek SSO-n keresztül.",
+	"defaultUserGroups": "Alapértelmezett felhasználói csoportok",
+	"defaultUserGroupsHelpText": "Az automatikus kiépítéssel létrehozott felhasználóknak automatikusan biztosított felhasználói csoportok.",
+	"defaultUserGroupsWarning": "Csak egyszer, a fiók létrehozásakor kerül alkalmazásra. E beállítás későbbi módosítása vagy eltávolítása nem érinti a már kiépített felhasználókat. Ha olyan csoporttagságra van szükség, amely idővel is szinkronban marad, használja inkább az IdP-csoport-hozzárendelést.",
+	"attributeMappingGroups": "Csoportattribútum-hozzárendelés",
+	"attributeMappingGroupsHelpText": "A felhasználó IdP-csoporttagságait hordozó igény (claim) neve/nevei. Az itt talált csoportok minden bejelentkezéskor szinkronizálódnak az IdP-csoportokkal, és megadják azokat a CISO Assistant felhasználói csoportokat, amelyekhez egy adminisztrátor hozzárendelte őket.",
+	"jitProvisioning": "SSO automatikus kiépítés (JIT)",
+	"jitProvisioningDescription": "Engedélyezi a fiókok automatikus létrehozását az első SSO-bejelentkezéskor, valamint IdP-csoporttagságuk szinkronizálását, SCIM nélkül."
 }

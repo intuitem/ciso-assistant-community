@@ -1685,7 +1685,7 @@
 	"scimTokenGenerationFailed": "Det gick inte att generera SCIM-token",
 	"scimTokenRequiresSso": "SSO måste vara aktiverat innan du kan generera en SCIM-token.",
 	"scimTokenNameTooLong": "Namnet får inte vara längre än 255 tecken.",
-	"errorSsoRequiredForScimUsers": "SSO kan inte inaktiveras så länge det finns SCIM-hanterade användare utan lokal åtkomst.",
+	"errorSsoRequiredForManagedUsers": "SSO kan inte inaktiveras så länge det finns SCIM-hanterade eller automatiskt provisionerade användare utan lokal åtkomst.",
 	"idpGroup": "IdP-grupp",
 	"idpGroups": "IdP-grupper",
 	"idpGroupsDescription": "Aktivera IdP-gruppfederation (SCIM-provisionering, IdP-gruppmappningar och IdP-gruppmedlemskap för användare).",
@@ -1712,5 +1712,14 @@
 	"gracePeriod": "Övergångsperiod",
 	"gracePeriodHelpText": "Den nuvarande hemligheten fortsätter att fungera under denna tid efter rotation, så att integrationer kan uppdateras utan driftstopp. Begränsat till 1 månad.",
 	"gracePeriodTooLong": "Övergångsperioden får inte vara längre än 1 månad.",
-	"previousSecretValidUntil": "Den tidigare klienthemligheten förblir giltig till {date}."
+	"previousSecretValidUntil": "Den tidigare klienthemligheten förblir giltig till {date}.",
+	"enableJitProvisioning": "Aktivera automatisk provisionering",
+	"enableJitProvisioningHelpText": "Skapar automatiskt ett konto, med standardanvändargrupperna nedan, för användare som autentiserar via SSO för första gången.",
+	"defaultUserGroups": "Standardanvändargrupper",
+	"defaultUserGroupsHelpText": "Användargrupper som automatiskt tilldelas användare som skapats via automatisk provisionering.",
+	"defaultUserGroupsWarning": "Tillämpas endast en gång, vid kontoskapande. Att ändra eller ta bort denna inställning senare påverkar inte användare som redan har provisionerats. För gruppmedlemskap som förblir synkroniserat över tid, använd istället IdP-gruppmappning.",
+	"attributeMappingGroups": "Attributmappning för grupper",
+	"attributeMappingGroupsHelpText": "Namn på anspråket (claim) som bär användarens IdP-gruppmedlemskap. Grupper som hittas här synkroniseras med IdP-grupper vid varje inloggning och beviljar de CISO Assistant-användargrupper som en administratör har mappat dem till.",
+	"jitProvisioning": "SSO-automatisk provisionering (JIT)",
+	"jitProvisioningDescription": "Aktiverar automatiskt skapande av konton vid första SSO-inloggningen och synkronisering av deras IdP-gruppmedlemskap, utan krav på SCIM."
 }

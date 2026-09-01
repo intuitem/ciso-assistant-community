@@ -185,7 +185,8 @@ def _save_cache(graph: DiGraph) -> None:
 def _build_graph() -> DiGraph:
     """Parse all YAML library files and build the knowledge graph."""
     import time
-    import yaml
+
+    from core.utils import yaml_safe_load
 
     t0 = time.time()
     G = DiGraph()
@@ -201,7 +202,7 @@ def _build_graph() -> DiGraph:
     for filepath in yaml_files:
         try:
             with open(filepath, "r", encoding="utf-8") as f:
-                data = yaml.safe_load(f)
+                data = yaml_safe_load(f)
         except Exception as e:
             logger.warning("yaml_parse_failed", file=filepath.name, error=e)
             continue

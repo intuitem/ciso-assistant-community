@@ -395,6 +395,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     outgoing_webhooks = serializers.BooleanField(
         source="value.outgoing_webhooks", required=False, default=False
     )
+    workflows = serializers.BooleanField(
+        source="value.workflows", required=False, default=False
+    )
     metrology = serializers.BooleanField(
         source="value.metrology", required=False, default=True
     )
@@ -443,6 +446,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     )
     posture_assessments = serializers.BooleanField(
         source="value.posture_assessments", required=False, default=False
+    )
+    jit_provisioning = serializers.BooleanField(
+        source="value.jit_provisioning", required=False, default=False
     )
 
     class Meta:

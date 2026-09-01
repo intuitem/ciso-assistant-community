@@ -1834,7 +1834,7 @@
 	"errorLoadingData": "Fehler beim Laden der Daten",
 	"errorLoadingVulnerabilityData": "Fehler beim Laden der Schwachstellendaten",
 	"errorMaxPatAmountExceeded": "Maximale Anzahl persönlicher Tokens überschritten.",
-	"errorSsoRequiredForScimUsers": "SSO kann nicht deaktiviert werden, solange SCIM-verwaltete Benutzer ohne lokalen Zugriff existieren.",
+	"errorSsoRequiredForManagedUsers": "SSO kann nicht deaktiviert werden, solange SCIM-verwaltete oder automatisch bereitgestellte Benutzer ohne lokalen Zugriff existieren.",
 	"errorOccuredDuringImport": "Während des Imports ist ein Fehler aufgetreten.",
 	"errorRiskScenarioGraphMustNotContainCycles": "Das Risikoszenario-Diagramm darf keine Zyklen enthalten.",
 	"errorUpdatingObject": "Beim Aktualisieren des {object}-Objekts ist ein Fehler aufgetreten.",
@@ -3588,5 +3588,14 @@
 	"idpGroupsDescription": "IdP-Gruppenföderation aktivieren (SCIM-Bereitstellung, IdP-Gruppenzuordnungen und IdP-Gruppenmitgliedschaften von Benutzern).",
 	"reopenAssignmentForEditing": "Zur Bearbeitung wieder öffnen",
 	"forReview": "Zur Überprüfung",
-	"forEditing": "Zur Bearbeitung"
+	"forEditing": "Zur Bearbeitung",
+	"enableJitProvisioning": "Automatische Bereitstellung aktivieren",
+	"enableJitProvisioningHelpText": "Erstellt automatisch ein Konto mit den unten angegebenen Standard-Benutzergruppen für Benutzer, die sich zum ersten Mal über SSO anmelden.",
+	"defaultUserGroups": "Standard-Benutzergruppen",
+	"defaultUserGroupsHelpText": "Benutzergruppen, die Benutzern, die durch automatische Bereitstellung erstellt wurden, automatisch zugewiesen werden.",
+	"defaultUserGroupsWarning": "Wird nur einmal bei der Kontoerstellung angewendet. Eine spätere Änderung oder Entfernung dieser Einstellung wirkt sich nicht auf bereits bereitgestellte Benutzer aus. Für eine Gruppenmitgliedschaft, die dauerhaft synchron bleibt, verwenden Sie stattdessen die IdP-Gruppenzuordnung.",
+	"attributeMappingGroups": "Attributzuordnung für Gruppen",
+	"attributeMappingGroupsHelpText": "Claim-Name(n), die die IdP-Gruppenmitgliedschaften des Benutzers enthalten. Hier gefundene Gruppen werden bei jeder Anmeldung mit IdP-Gruppen synchronisiert und gewähren die CISO-Assistant-Benutzergruppen, die ein Administrator ihnen zugeordnet hat.",
+	"jitProvisioning": "SSO-Auto-Provisionierung (JIT)",
+	"jitProvisioningDescription": "Aktiviert das automatische Erstellen von Konten bei der ersten SSO-Anmeldung und die Synchronisierung ihrer IdP-Gruppenmitgliedschaften, ohne dass SCIM erforderlich ist."
 }

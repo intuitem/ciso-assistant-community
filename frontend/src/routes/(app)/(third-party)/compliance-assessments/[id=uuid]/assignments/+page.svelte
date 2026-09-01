@@ -370,14 +370,14 @@
 				await invalidateAll();
 				toastStore.trigger({
 					message: m.assignmentCreated(),
-					background: 'variant-filled-success',
+					background: 'preset-filled-success-500',
 					timeout: 3000
 				});
 			} else {
 				console.error('Failed to create assignment:', result);
 				toastStore.trigger({
 					message: m.assignmentCreationFailed(),
-					background: 'variant-filled-error',
+					background: 'preset-filled-error-500',
 					timeout: 3000
 				});
 			}
@@ -385,7 +385,7 @@
 			console.error('Error creating assignment:', error);
 			toastStore.trigger({
 				message: m.assignmentCreationFailed(),
-				background: 'variant-filled-error',
+				background: 'preset-filled-error-500',
 				timeout: 3000
 			});
 		} finally {
@@ -423,14 +423,14 @@
 				await invalidateAll();
 				toastStore.trigger({
 					message: m.assignmentDeleted(),
-					background: 'variant-filled-success',
+					background: 'preset-filled-success-500',
 					timeout: 3000
 				});
 			} else {
 				console.error('Failed to delete assignment:', result);
 				toastStore.trigger({
 					message: m.assignmentDeletionFailed(),
-					background: 'variant-filled-error',
+					background: 'preset-filled-error-500',
 					timeout: 3000
 				});
 			}
@@ -438,7 +438,7 @@
 			console.error('Error deleting assignment:', error);
 			toastStore.trigger({
 				message: m.assignmentDeletionFailed(),
-				background: 'variant-filled-error',
+				background: 'preset-filled-error-500',
 				timeout: 3000
 			});
 		} finally {
@@ -488,14 +488,14 @@
 				await invalidateAll();
 				toastStore.trigger({
 					message: m.assignmentUpdated(),
-					background: 'variant-filled-success',
+					background: 'preset-filled-success-500',
 					timeout: 3000
 				});
 			} else {
 				console.error('Failed to update assignment:', result);
 				toastStore.trigger({
 					message: m.assignmentUpdateFailed(),
-					background: 'variant-filled-error',
+					background: 'preset-filled-error-500',
 					timeout: 3000
 				});
 			}
@@ -503,7 +503,7 @@
 			console.error('Error updating assignment:', error);
 			toastStore.trigger({
 				message: m.assignmentUpdateFailed(),
-				background: 'variant-filled-error',
+				background: 'preset-filled-error-500',
 				timeout: 3000
 			});
 		} finally {
@@ -624,13 +624,13 @@
 				await invalidateAll();
 				toastStore.trigger({
 					message: m.statusUpdatedSuccessfully(),
-					background: 'variant-filled-success',
+					background: 'preset-filled-success-500',
 					timeout: 3000
 				});
 			} else {
 				toastStore.trigger({
 					message: result.data?.body?.error || 'Action failed',
-					background: 'variant-filled-error',
+					background: 'preset-filled-error-500',
 					timeout: 3000
 				});
 			}
@@ -1242,7 +1242,7 @@
 
 			<!-- Footer -->
 			<div class="p-4 border-t bg-surface-50-950 rounded-b-lg">
-				<button class="btn preset-filled-surface-500 w-full" onclick={closeRequirementsModal}>
+				<button class="btn preset-filled-surface-900-100 w-full" onclick={closeRequirementsModal}>
 					{m.close()}
 				</button>
 			</div>
@@ -1390,7 +1390,7 @@
 
 			<!-- Footer -->
 			<div class="p-4 border-t bg-surface-50-950 rounded-b-lg">
-				<button class="btn preset-filled-surface-500 w-full" onclick={closeHistoryModal}>
+				<button class="btn preset-filled-surface-900-100 w-full" onclick={closeHistoryModal}>
 					{m.close()}
 				</button>
 			</div>

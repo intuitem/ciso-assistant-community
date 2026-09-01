@@ -35,10 +35,12 @@
           {{ node.assessments.requirement.get_description_translated }}
         </div>
       {% endif %}
-      {% if node.answers_dict %}
+      {# Driven by questions_dict, which is ordered by Question.order, unlike
+         answers_dict, whose order comes from an unordered Answer queryset. #}
+      {% if node.questions_dict %}
         <div class="text-left w-full">
-          {% for key, value in node.answers_dict.items %}
-                {% with question=node.questions_dict|get_item:key %}
+          {% for key, question in node.questions_dict.items %}
+                {% with value=node.answers_dict|get_item:key %}
                   <p class="font-semibold">{{ question.text }}</p>
                   {% with answer=question|get_answers:value %}
                     {% if answer|is_string %}

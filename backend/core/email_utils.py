@@ -3,7 +3,6 @@ Email template utilities for CISO Assistant
 """
 
 import re
-import yaml
 import markdown
 from pathlib import Path
 from string import Template
@@ -11,6 +10,7 @@ from typing import Dict, Optional
 from django.conf import settings
 from django.utils.html import escape as html_escape
 from django.utils.translation import get_language
+from core.utils import yaml_safe_load
 from global_settings.models import GlobalSettings
 from iam.models import User
 import structlog
@@ -147,7 +147,7 @@ def load_email_template(
 
     try:
         with open(template_file, "r", encoding="utf-8") as f:
-            template_data = yaml.safe_load(f)
+            template_data = yaml_safe_load(f)
 
         # Validate template structure
         if (

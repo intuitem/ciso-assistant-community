@@ -498,7 +498,7 @@
 										{/each}
 									{/if}
 									{#if !template.is_enabled}
-										<span class="badge preset-filled-surface-500 text-xs">
+										<span class="badge preset-filled-surface-900-100 text-xs">
 											{m.emailSendingDisabled()}
 										</span>
 									{/if}

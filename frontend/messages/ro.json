@@ -1687,7 +1687,7 @@
 	"scimTokenGenerationFailed": "Generarea tokenului SCIM a eșuat",
 	"scimTokenRequiresSso": "SSO trebuie activat înainte de a genera un token SCIM.",
 	"scimTokenNameTooLong": "Numele nu trebuie să depășească 255 de caractere.",
-	"errorSsoRequiredForScimUsers": "SSO nu poate fi dezactivat atât timp cât există utilizatori provizionați prin SCIM fără acces local.",
+	"errorSsoRequiredForManagedUsers": "SSO nu poate fi dezactivat atât timp cât există utilizatori provizionați prin SCIM sau prin provizionare automată fără acces local.",
 	"idpGroup": "Grup IdP",
 	"idpGroups": "Grupuri IdP",
 	"idpGroupsDescription": "Activați federarea grupurilor IdP (provizionare SCIM, mapări de grupuri IdP și apartenențe la grupuri IdP ale utilizatorilor).",
@@ -1714,5 +1714,14 @@
 	"gracePeriod": "Perioadă de grație",
 	"gracePeriodHelpText": "Secretul curent continuă să funcționeze pe durata aceasta după rotire, astfel încât integrările să poată fi actualizate fără întrerupere. Limitat la 1 lună.",
 	"gracePeriodTooLong": "Perioada de grație nu poate depăși 1 lună.",
-	"previousSecretValidUntil": "Secretul anterior al clientului rămâne valid până la {date}."
+	"previousSecretValidUntil": "Secretul anterior al clientului rămâne valid până la {date}.",
+	"enableJitProvisioning": "Activează provizionarea automată",
+	"enableJitProvisioningHelpText": "Creează automat un cont, cu grupurile de utilizatori implicite de mai jos, pentru utilizatorii care se autentifică prin SSO pentru prima dată.",
+	"defaultUserGroups": "Grupuri de utilizatori implicite",
+	"defaultUserGroupsHelpText": "Grupuri de utilizatori acordate automat utilizatorilor creați prin provizionare automată.",
+	"defaultUserGroupsWarning": "Se aplică o singură dată, la crearea contului. Modificarea sau eliminarea ulterioară a acestei setări nu afectează utilizatorii deja provizionați. Pentru o apartenență la grup care rămâne sincronizată în timp, utilizați în schimb maparea grupurilor IdP.",
+	"attributeMappingGroups": "Maparea atributului de grupuri",
+	"attributeMappingGroupsHelpText": "Numele (numele) revendicării (claim) care conține apartenențele la grupuri IdP ale utilizatorului. Grupurile găsite aici sunt sincronizate cu grupurile IdP la fiecare autentificare și acordă grupurile de utilizatori CISO Assistant la care un administrator le-a mapat.",
+	"jitProvisioning": "Provizionare automată SSO (JIT)",
+	"jitProvisioningDescription": "Activează crearea automată a conturilor la prima autentificare SSO și sincronizarea apartenențelor lor la grupuri IdP, fără a necesita SCIM."
 }

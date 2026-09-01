@@ -1776,7 +1776,7 @@
 	"mappingSuggestionTeasing": "Artık eşlemeler öneriliyor! Yüklenen çerçevelere göre önerileri keşfetmek için filtreleri kullanabilirsiniz.",
 	"errorCreatingPersonalAccessToken": "Kişisel erişim jetonu oluşturulurken bir hata oluştu.",
 	"errorMaxPatAmountExceeded": "Bu kullanıcı için izin verilen maksimum jeton miktarı aşıldı.",
-	"errorSsoRequiredForScimUsers": "Yerel erişimi olmayan SCIM tarafından sağlanan kullanıcılar mevcut olduğu sürece SSO devre dışı bırakılamaz.",
+	"errorSsoRequiredForManagedUsers": "Yerel erişimi olmayan SCIM veya otomatik olarak sağlanmış kullanıcılar mevcut olduğu sürece SSO devre dışı bırakılamaz.",
 	"campaign": "Kampanya",
 	"campaigns": "Kampanyalar",
 	"addCampaign": "Bir kampanya başlat",
@@ -2447,5 +2447,14 @@
 	"idpGroupsDescription": "IdP grup federasyonunu etkinleştirin (SCIM sağlama, IdP grup eşlemeleri ve kullanıcılarda IdP grup üyelikleri).",
 	"reopenAssignmentForEditing": "Düzenleme için yeniden aç",
 	"forReview": "İnceleme için",
-	"forEditing": "Düzenleme için"
+	"forEditing": "Düzenleme için",
+	"enableJitProvisioning": "Otomatik sağlamayı etkinleştir",
+	"enableJitProvisioningHelpText": "SSO ile ilk kez kimlik doğrulaması yapan kullanıcılar için aşağıdaki varsayılan kullanıcı gruplarıyla otomatik olarak bir hesap oluşturur.",
+	"defaultUserGroups": "Varsayılan kullanıcı grupları",
+	"defaultUserGroupsHelpText": "Otomatik sağlama yoluyla oluşturulan kullanıcılara otomatik olarak verilen kullanıcı grupları.",
+	"defaultUserGroupsWarning": "Yalnızca hesap oluşturulurken bir kez uygulanır. Bu ayarı daha sonra değiştirmek veya kaldırmak, zaten sağlanmış kullanıcıları etkilemez. Zaman içinde senkronize kalan grup üyeliği için bunun yerine IdP grup eşlemesini kullanın.",
+	"attributeMappingGroups": "Grup özniteliği eşlemesi",
+	"attributeMappingGroupsHelpText": "Kullanıcının IdP grup üyeliklerini taşıyan hak talebi (claim) adı/adları. Burada bulunan gruplar her girişte IdP gruplarıyla senkronize edilir ve bir yöneticinin eşlediği CISO Assistant kullanıcı gruplarını verir.",
+	"jitProvisioning": "SSO otomatik sağlama (JIT)",
+	"jitProvisioningDescription": "İlk SSO girişinde hesapların otomatik olarak oluşturulmasını ve IdP grup üyeliklerinin senkronize edilmesini, SCIM gerektirmeden etkinleştirir."
 }

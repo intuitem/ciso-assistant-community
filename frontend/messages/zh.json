@@ -1952,7 +1952,7 @@
 	"mappingSuggestionTeasing": "现在提供映射建议！您可以使用筛选器浏览基于已加载框架的建议。",
 	"errorCreatingPersonalAccessToken": "创建个人访问令牌时发生错误。",
 	"errorMaxPatAmountExceeded": "该用户已超过允许的最大令牌数量。",
-	"errorSsoRequiredForScimUsers": "只要存在没有本地访问权限的 SCIM 预配用户，就无法禁用 SSO。",
+	"errorSsoRequiredForManagedUsers": "只要存在没有本地访问权限的 SCIM 预配或自动预配用户，就无法禁用 SSO。",
 	"campaignDomainHelpText": "活动将附加到的域。",
 	"ebiosRmStudyDomainHelpText": "更改域会将研究及其所有工作坊对象移至所选域。",
 	"associatedFindingsAssessments": "关联的跟踪",
@@ -3737,5 +3737,14 @@
 	"idpGroupsDescription": "启用 IdP 组联合（SCIM 预配、IdP 组映射以及用户的 IdP 组成员资格）。",
 	"reopenAssignmentForEditing": "重新打开以编辑",
 	"forReview": "待审核",
-	"forEditing": "待编辑"
+	"forEditing": "待编辑",
+	"enableJitProvisioning": "启用自动预配置",
+	"enableJitProvisioningHelpText": "为首次通过 SSO 进行身份验证的用户自动创建帐户，并分配下方的默认用户组。",
+	"defaultUserGroups": "默认用户组",
+	"defaultUserGroupsHelpText": "通过自动预配置创建的用户自动获得的用户组。",
+	"defaultUserGroupsWarning": "仅在创建帐户时应用一次。之后更改或删除此设置不会影响已预配置的用户。如果需要随时间保持同步的组成员身份，请改用 IdP 组映射。",
+	"attributeMappingGroups": "组属性映射",
+	"attributeMappingGroupsHelpText": "携带用户 IdP 组成员身份的声明（claim）名称。此处找到的组会在每次登录时与 IdP 组同步，并授予管理员已映射的任何 CISO Assistant 用户组。",
+	"jitProvisioning": "SSO 自动预配置（JIT）",
+	"jitProvisioningDescription": "在首次 SSO 登录时启用自动创建帐户，并同步其 IdP 组成员身份，无需 SCIM。"
 }

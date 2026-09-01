@@ -2396,7 +2396,7 @@
 	"mappingSuggestionTeasing": "이제 매핑이 제안됩니다! 필터를 사용하여 불러온 프레임워크를 기반으로 제안을 탐색할 수 있습니다.",
 	"errorCreatingPersonalAccessToken": "개인용 액세스 토큰을 생성하는 중 오류가 발생했습니다.",
 	"errorMaxPatAmountExceeded": "이 사용자에게 허용된 최대 토큰 수를 초과했습니다.",
-	"errorSsoRequiredForScimUsers": "로컬 액세스 권한이 없는 SCIM 프로비저닝 사용자가 존재하는 동안에는 SSO를 비활성화할 수 없습니다.",
+	"errorSsoRequiredForManagedUsers": "로컬 액세스 권한이 없는 SCIM 프로비저닝 또는 자동 프로비저닝된 사용자가 존재하는 동안에는 SSO를 비활성화할 수 없습니다.",
 	"campaign": "캠페인",
 	"campaigns": "캠페인",
 	"addCampaign": "캠페인 시작",
@@ -4383,5 +4383,14 @@
 	"scimTokenNameTooLong": "이름은 255자를 초과할 수 없습니다.",
 	"idpGroup": "IdP 그룹",
 	"idpGroups": "IdP 그룹",
-	"idpGroupsDescription": "IdP 그룹 페더레이션 활성화(SCIM 프로비저닝, IdP 그룹 매핑 및 사용자의 IdP 그룹 멤버십)."
+	"idpGroupsDescription": "IdP 그룹 페더레이션 활성화(SCIM 프로비저닝, IdP 그룹 매핑 및 사용자의 IdP 그룹 멤버십).",
+	"enableJitProvisioning": "자동 프로비저닝 사용",
+	"enableJitProvisioningHelpText": "SSO를 통해 처음 인증하는 사용자에 대해 아래 기본 사용자 그룹으로 계정을 자동으로 생성합니다.",
+	"defaultUserGroups": "기본 사용자 그룹",
+	"defaultUserGroupsHelpText": "자동 프로비저닝으로 생성된 사용자에게 자동으로 부여되는 사용자 그룹입니다.",
+	"defaultUserGroupsWarning": "계정 생성 시 한 번만 적용됩니다. 이후에 이 설정을 변경하거나 삭제해도 이미 프로비저닝된 사용자에게는 영향을 주지 않습니다. 시간이 지나도 계속 동기화되는 그룹 멤버십이 필요하다면 대신 IdP 그룹 매핑을 사용하세요.",
+	"attributeMappingGroups": "그룹 속성 매핑",
+	"attributeMappingGroupsHelpText": "사용자의 IdP 그룹 멤버십을 전달하는 클레임 이름입니다. 여기에서 찾은 그룹은 로그인할 때마다 IdP 그룹과 동기화되며, 관리자가 매핑한 CISO Assistant 사용자 그룹 권한을 부여합니다.",
+	"jitProvisioning": "SSO 자동 프로비저닝(JIT)",
+	"jitProvisioningDescription": "최초 SSO 로그인 시 계정을 자동으로 생성하고 IdP 그룹 멤버십을 동기화하도록 활성화합니다. SCIM이 필요하지 않습니다."
 }

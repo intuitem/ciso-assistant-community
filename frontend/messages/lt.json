@@ -2588,7 +2588,7 @@
 	"mappingSuggestionTeasing": "Susiejimai dabar siūlomi! Galite naudoti filtrus, kad tyrinėtumėte pasiūlymus pagal įkeltas sistemas.",
 	"errorCreatingPersonalAccessToken": "Kuriant asmeninį prieigos raktą įvyko klaida.",
 	"errorMaxPatAmountExceeded": "Viršytas šiam naudotojui leidžiamas maksimalus raktų kiekis.",
-	"errorSsoRequiredForScimUsers": "SSO negalima išjungti, kol yra SCIM sukurtų naudotojų be vietinės prieigos.",
+	"errorSsoRequiredForManagedUsers": "SSO negalima išjungti, kol yra SCIM arba automatiškai sukurtų naudotojų be vietinės prieigos.",
 	"campaign": "Kampanija",
 	"campaigns": "Kampanijos",
 	"addCampaign": "Pradėti kampaniją",
@@ -4669,5 +4669,14 @@
 	"scimTokenNameTooLong": "Pavadinimas negali būti ilgesnis nei 255 simboliai.",
 	"idpGroup": "IdP grupė",
 	"idpGroups": "IdP grupės",
-	"idpGroupsDescription": "Įjungti IdP grupių federaciją (SCIM teikimas, IdP grupių susiejimai ir naudotojų narystės IdP grupėse)."
+	"idpGroupsDescription": "Įjungti IdP grupių federaciją (SCIM teikimas, IdP grupių susiejimai ir naudotojų narystės IdP grupėse).",
+	"enableJitProvisioning": "Įjungti automatinį parengimą",
+	"enableJitProvisioningHelpText": "Automatiškai sukuria paskyrą su toliau nurodytomis numatytosiomis naudotojų grupėmis naudotojams, kurie pirmą kartą autentifikuojasi per SSO.",
+	"defaultUserGroups": "Numatytosios naudotojų grupės",
+	"defaultUserGroupsHelpText": "Naudotojų grupės, automatiškai suteikiamos naudotojams, sukurtiems per automatinį parengimą.",
+	"defaultUserGroupsWarning": "Taikoma tik vieną kartą, kuriant paskyrą. Vėlesnis šio nustatymo keitimas ar pašalinimas neturi įtakos jau parengtiems naudotojams. Jei norite narystės grupėse, kuri išlieka sinchronizuota laikui bėgant, naudokite IdP grupių susiejimą.",
+	"attributeMappingGroups": "Grupių atributo susiejimas",
+	"attributeMappingGroupsHelpText": "Atributo (claim) pavadinimas (-ai), perteikiantis naudotojo IdP grupių narystes. Čia rastos grupės sinchronizuojamos su IdP grupėmis kiekvieno prisijungimo metu ir suteikia tas CISO Assistant naudotojų grupes, su kuriomis jas susiejo administratorius.",
+	"jitProvisioning": "SSO automatinis parengimas (JIT)",
+	"jitProvisioningDescription": "Įjungia automatinį paskyrų kūrimą pirmo prisijungimo per SSO metu ir jų IdP grupių narysčių sinchronizavimą, nereikalaujant SCIM."
 }

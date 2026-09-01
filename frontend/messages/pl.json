@@ -1776,7 +1776,7 @@
 	"mappingSuggestionTeasing": "Mapowania są teraz sugerowane! Możesz użyć filtrów, aby eksplorować sugestie oparte na załadowanych ramach.",
 	"errorCreatingPersonalAccessToken": "Wystąpił błąd podczas tworzenia tokena dostępu osobistego.",
 	"errorMaxPatAmountExceeded": "Maksymalna ilość tokenów dozwolona dla tego użytkownika.",
-	"errorSsoRequiredForScimUsers": "Nie można wyłączyć SSO, dopóki istnieją użytkownicy provisionowani przez SCIM bez dostępu lokalnego.",
+	"errorSsoRequiredForManagedUsers": "Nie można wyłączyć SSO, dopóki istnieją użytkownicy provisionowani przez SCIM lub automatycznie, bez dostępu lokalnego.",
 	"campaign": "Kampania",
 	"campaigns": "Kampanie",
 	"addCampaign": "Rozpocznij kampanię",
@@ -2454,5 +2454,14 @@
 	"idpGroupsDescription": "Włącz federację grup IdP (provisioning SCIM, mapowania grup IdP i członkostwa w grupach IdP użytkowników).",
 	"reopenAssignmentForEditing": "Otwórz ponownie do edycji",
 	"forReview": "Do przeglądu",
-	"forEditing": "Do edycji"
+	"forEditing": "Do edycji",
+	"enableJitProvisioning": "Włącz automatyczne udostępnianie",
+	"enableJitProvisioningHelpText": "Automatycznie tworzy konto z domyślnymi grupami użytkowników wskazanymi poniżej dla użytkowników uwierzytelniających się przez SSO po raz pierwszy.",
+	"defaultUserGroups": "Domyślne grupy użytkowników",
+	"defaultUserGroupsHelpText": "Grupy użytkowników automatycznie przyznawane użytkownikom utworzonym w ramach automatycznego udostępniania.",
+	"defaultUserGroupsWarning": "Stosowane tylko raz, przy tworzeniu konta. Późniejsza zmiana lub usunięcie tego ustawienia nie wpływa na użytkowników już udostępnionych. Aby członkostwo w grupach pozostawało zsynchronizowane w czasie, użyj zamiast tego mapowania grup IdP.",
+	"attributeMappingGroups": "Mapowanie atrybutu grup",
+	"attributeMappingGroupsHelpText": "Nazwa(y) roszczenia (claim) przenosząca członkostwo użytkownika w grupach IdP. Grupy znalezione tutaj są synchronizowane z grupami IdP przy każdym logowaniu i przyznają te grupy użytkowników CISO Assistant, do których administrator je zmapował.",
+	"jitProvisioning": "Automatyczne udostępnianie SSO (JIT)",
+	"jitProvisioningDescription": "Włącza automatyczne tworzenie kont przy pierwszym logowaniu SSO oraz synchronizację ich członkostwa w grupach IdP, bez konieczności użycia SCIM."
 }
