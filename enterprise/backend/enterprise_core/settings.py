@@ -55,7 +55,7 @@ MODULES["enterprise_core"] = {  # noqa: F405
 INSTALLED_APPS.append("enterprise_core")  # noqa: F405
 
 # --- License ---
-LICENSE_SEATS = int(os.environ.get("LICENSE_SEATS", 10))
+LICENSE_SEATS = int(os.environ.get("LICENSE_SEATS", 1))
 LICENSE_EXPIRATION = os.environ.get("LICENSE_EXPIRATION", "unset")
 
 # --- Startup banner ---
