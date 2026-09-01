@@ -25,6 +25,7 @@
 		label?: string;
 		optionsInfoFields?: {
 			fields: { field: string; translate?: boolean }[];
+			position?: 'suffix' | 'prefix';
 			classes?: string;
 		};
 		lazy?: boolean;
