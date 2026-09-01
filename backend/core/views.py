@@ -14341,6 +14341,8 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "answers__selected_choices",  # Needed by build_answers_dict() to get choice ref_ids
                 "requirement__questions",  # Needed by FilteredNodeSerializer.questions
                 "requirement__questions__choices",  # Needed by get_questions_translated
+                "requirement__reference_controls",  # Needed by associated_reference_controls property
+                "requirement__threats",  # Needed by associated_threats property
             )
         )
         respondent_folders = get_respondent_scoped_folder_ids(self.request.user)
@@ -14351,6 +14353,34 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 | Q(assignments__actor__in=user_actors)
             ).distinct()
         return qs
+
+    def paginate_queryset(self, queryset):
+        page = super().paginate_queryset(queryset)
+        self._preset_parent_requirements(page if page is not None else queryset)
+        return page
+
+    @staticmethod
+    def _preset_parent_requirements(requirement_assessments):
+        """Batch-resolve RequirementNode.parent_requirement for the page: the
+        property falls back to one query per row when _parent_requirement_obj
+        is not preset (urn is globally unique, so one urn__in fetch is
+        equivalent)."""
+        requirements = [
+            ra.requirement
+            for ra in requirement_assessments
+            if getattr(ra, "requirement", None)
+        ]
+        parent_urns = {req.parent_urn for req in requirements if req.parent_urn}
+        if not parent_urns:
+            return
+        parents_by_urn = {
+            node.urn: node
+            for node in RequirementNode.objects.filter(urn__in=parent_urns)
+        }
+        for req in requirements:
+            parent = parents_by_urn.get(req.parent_urn)
+            if parent:
+                req._parent_requirement_obj = parent
 
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
