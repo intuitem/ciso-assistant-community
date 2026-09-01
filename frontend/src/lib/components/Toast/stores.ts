@@ -128,6 +128,7 @@ function toastService() {
 				const duplicate = tStore.find((t) => t.message === toast.message);
 				if (duplicate) {
 					id = duplicate.id;
+					toast.callback?.({ id, status: 'queued' });
 					return tStore;
 				}
 				// Trigger Callback
