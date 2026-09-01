@@ -122,7 +122,7 @@
 
 <div class="space-y-5">
 	{#if error}
-		<aside class="variant-soft-error rounded p-3 text-sm">{error}</aside>
+		<aside class="preset-tonal-error rounded p-3 text-sm">{error}</aside>
 	{/if}
 
 	<TextField form={_form} field="ref_id" label={m.refId()} />
@@ -239,7 +239,7 @@
 	<div class="border-t border-surface-200-800 pt-5">
 		<button
 			type="button"
-			class="btn variant-filled-primary w-full font-semibold shadow-sm transition-shadow hover:shadow-md"
+			class="btn preset-filled-primary-500 w-full font-semibold shadow-sm transition-shadow hover:shadow-md"
 			disabled={busy}
 			onclick={submit}
 		>

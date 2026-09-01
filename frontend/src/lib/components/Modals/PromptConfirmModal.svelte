@@ -10,7 +10,8 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-surface-50-950 p-4 w-fit max-w-4xl shadow-xl space-y-4';
+	const cBase =
+		'card bg-surface-100-900 border border-surface-500 p-4 w-fit max-w-4xl shadow-xl space-y-4';
 	const cHeaderRow = 'flex items-center justify-between';
 	const cHeader = 'text-2xl font-bold whitespace-pre-line';
 

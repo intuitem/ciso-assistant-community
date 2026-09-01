@@ -5918,7 +5918,7 @@
 	"readObjects": "Objecten lezen",
 	"realTimeContinuous": "Realtime (continu)",
 	"redo": "Opnieuw",
-	"relationValues": "ID's, gescheiden door komma's of {{templated}}",
+	"relationValues": "ID's, gescheiden door komma's of \\{\\{templated\\}\\}",
 	"relations": "Koppelingen",
 	"removeNode": "Knooppunt verwijderen",
 	"renameTriggerWarning": "Als je deze trigger hernoemt, wordt deze bij de volgende publicatie gereset: eventuele wijzigingen in de webhook-URL en de aan/uit-status keren terug naar de standaardinstellingen.",
