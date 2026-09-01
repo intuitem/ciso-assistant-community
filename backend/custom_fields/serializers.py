@@ -206,6 +206,11 @@ class CustomFieldsSerializerMixin(serializers.ModelSerializer):
         for key, value in raw.items():
             definition = definitions.get(key)
             if definition is None:
+                # Tolerate empty leftovers: form clients may keep a null/blank
+                # placeholder for a field that stopped applying when the target
+                # folder changed. Only a real value on an unknown key is an error.
+                if value in (None, "", []):
+                    continue
                 errors[key] = "Unknown custom field for this object."
                 continue
             try:

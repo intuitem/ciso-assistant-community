@@ -197,6 +197,46 @@ class TestCustomFieldsAPI:
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
         assert "custom_fields" in resp.json()
 
+    def test_stale_empty_keys_from_other_scope_ignored(self, authenticated_client):
+        # A form can leave null placeholders behind for fields scoped to another
+        # domain (the section rendered before the target folder was picked);
+        # those must not block the write.
+        root = Folder.get_root_folder()
+        domain_a = Folder.objects.create(name="Domain A", parent_folder=root)
+        domain_b = Folder.objects.create(name="Domain B", parent_folder=root)
+        self._make_choice_def(authenticated_client, str(domain_a.id))
+
+        create = authenticated_client.post(
+            PROJECTS_URL,
+            {
+                "name": "In B",
+                "folder": str(domain_b.id),
+                "custom_fields": {"tier": None},
+            },
+            format="json",
+        )
+        assert create.status_code == status.HTTP_201_CREATED, create.content
+        detail = authenticated_client.get(f"{PROJECTS_URL}{create.json()['id']}/")
+        assert detail.json()["custom_fields"] == {}
+
+    def test_unknown_key_with_value_still_rejected(self, authenticated_client):
+        root = Folder.get_root_folder()
+        domain_a = Folder.objects.create(name="Domain A", parent_folder=root)
+        domain_b = Folder.objects.create(name="Domain B", parent_folder=root)
+        self._make_choice_def(authenticated_client, str(domain_a.id))
+
+        resp = authenticated_client.post(
+            PROJECTS_URL,
+            {
+                "name": "In B",
+                "folder": str(domain_b.id),
+                "custom_fields": {"tier": "gold"},
+            },
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert "tier" in resp.json()["custom_fields"]
+
     def test_disabled_flag_gates_access(self, authenticated_client):
         root = Folder.get_root_folder()
         self._make_choice_def(authenticated_client, str(root.id))

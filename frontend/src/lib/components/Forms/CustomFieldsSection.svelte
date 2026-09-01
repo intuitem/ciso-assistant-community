@@ -36,17 +36,41 @@
 
 	let definitions: Definition[] = $state([]);
 
-	// Ensure the nested container exists before any field proxy writes into it.
-	if (form.data && !form.data.custom_fields) form.data.custom_fields = {};
+	const formData = form.form;
+
+	// Drop values whose definition no longer applies (e.g. after a domain change),
+	// otherwise they linger in the payload and the API rejects them as unknown keys.
+	function pruneStaleValues() {
+		const valid = new Set(definitions.map((d) => d.key));
+		formData.update((data: any) => {
+			if (data?.custom_fields) {
+				for (const key of Object.keys(data.custom_fields)) {
+					if (!valid.has(key)) delete data.custom_fields[key];
+				}
+			}
+			return data;
+		});
+	}
+
+	let loadSeq = 0;
 
 	async function load(folder: string | undefined) {
-		const params = new URLSearchParams({ model, visible: 'true' });
-		if (folder) params.set('for_folder', folder);
+		const seq = ++loadSeq;
+		// Definitions are folder-scoped: without a folder there is nothing to
+		// resolve against yet (fields show up once a domain is selected).
+		if (!folder) {
+			definitions = [];
+			pruneStaleValues();
+			return;
+		}
+		const params = new URLSearchParams({ model, visible: 'true', for_folder: folder });
 		try {
 			const res = await fetch(`/custom-fields/?${params.toString()}`);
 			if (!res.ok) return;
 			const data = await res.json();
+			if (seq !== loadSeq) return;
 			definitions = data.results ?? data;
+			pruneStaleValues();
 		} catch (e) {
 			console.error('Failed to load custom field definitions', e);
 		}
@@ -62,7 +86,10 @@
 	// Expanded by default only when there's something the user must see:
 	// a required field, or values already set (edit mode). Otherwise collapsed.
 	const startOpen = $derived(
-		definitions.some((d) => d.required) || Object.keys(form?.data?.custom_fields ?? {}).length > 0
+		definitions.some((d) => d.required) ||
+			Object.values($formData?.custom_fields ?? {}).some(
+				(v) => v != null && v !== '' && !(Array.isArray(v) && v.length === 0)
+			)
 	);
 </script>
 
