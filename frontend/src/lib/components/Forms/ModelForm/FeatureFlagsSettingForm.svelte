@@ -123,6 +123,11 @@
 					description: m.validationFlowsDescription()
 				},
 				{
+					field: 'workflows',
+					label: m.workflows(),
+					description: m.workflowsFlagDescription()
+				},
+				{
 					field: 'policy_documents',
 					label: m.policyDocumentsFlag(),
 					description: m.policyDocumentsFlagDescription()
