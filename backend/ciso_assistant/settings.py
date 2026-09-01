@@ -257,6 +257,13 @@ logger.info("EXPOSE_METRICS: %s", EXPOSE_METRICS)
 
 ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 50)
 
+# Workflow engine ceilings: rows one read returns, and items one loop iterates.
+# Every extra row is memory in the run context; every extra item is a token and
+# an action execution, so raise them deliberately.
+WORKFLOW_READ_MAX_LIMIT = int(os.environ.get("WORKFLOW_READ_MAX_LIMIT", 500))
+WORKFLOW_LOOP_MAX_ITEMS = int(os.environ.get("WORKFLOW_LOOP_MAX_ITEMS", 500))
+WORKFLOW_LOOP_MAX_PAGES = int(os.environ.get("WORKFLOW_LOOP_MAX_PAGES", 20))
+
 USE_S3 = os.getenv("USE_S3", "False").lower() in ("true", "1", "yes")
 USE_AZURE = os.getenv("USE_AZURE", "False").lower() in ("true", "1", "yes")
 
