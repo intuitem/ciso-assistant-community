@@ -37,7 +37,15 @@ def get_openid_config(discovery_url: str) -> dict:
     if config is None:
         assert_public_url_unless_dev(discovery_url)
         with get_adapter().get_requests_session() as sess:
-            response = sess.get(discovery_url, timeout=REQUEST_TIMEOUT)
+            # No redirects: following one would fetch a URL the guard above
+            # never checked (scheme downgrade or an internal host).
+            response = sess.get(
+                discovery_url, timeout=REQUEST_TIMEOUT, allow_redirects=False
+            )
+            if response.is_redirect:
+                raise requests.RequestException(
+                    "Redirects are not allowed for OIDC discovery"
+                )
             response.raise_for_status()
             config = response.json()
         cache.set(cache_key, config, DISCOVERY_CACHE_TTL)
@@ -54,7 +62,11 @@ def _fetch_and_cache_keys(cache_key: str, keys_url: str) -> dict:
     # the discovery document the remote server returns, not from the admin.
     assert_public_url_unless_dev(keys_url)
     with get_adapter().get_requests_session() as sess:
-        response = sess.get(keys_url, timeout=REQUEST_TIMEOUT)
+        response = sess.get(keys_url, timeout=REQUEST_TIMEOUT, allow_redirects=False)
+        if response.is_redirect:
+            raise requests.RequestException(
+                "Redirects are not allowed for JWKS fetches"
+            )
         response.raise_for_status()
         keys_data = response.json()
     cache.set(cache_key, keys_data, JWKS_CACHE_TTL)

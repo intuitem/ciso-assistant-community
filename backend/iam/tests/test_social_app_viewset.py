@@ -179,6 +179,8 @@ class TestSocialAppSSRFGuard:
         )
 
         class FakeResponse:
+            is_redirect = False
+
             def raise_for_status(self):
                 pass
 
@@ -201,3 +203,34 @@ class TestSocialAppSSRFGuard:
         )
         assert response.status_code == 400, response.content
         assert not SocialApp.objects.filter(provider_id="pivot-idp").exists()
+
+    def test_redirecting_discovery_endpoint_rejected(
+        self, admin_client, monkeypatch, db
+    ):
+        """A redirect would fetch a URL the SSRF guard never checked (scheme
+        downgrade or internal pivot), so it must fail closed."""
+
+        class RedirectResponse:
+            is_redirect = True
+            status_code = 302
+
+            def raise_for_status(self):
+                pass
+
+            def json(self):  # pragma: no cover - must not be reached
+                raise AssertionError("redirect response body was consumed")
+
+        monkeypatch.setattr(
+            "requests.Session.get", lambda self, url, *a, **k: RedirectResponse()
+        )
+        response = admin_client.post(
+            SOCIAL_APPS_ENDPOINT,
+            {
+                "name": "Redirecting IdP",
+                "provider_id": "redirect-idp",
+                "client_id": "redirect-client",
+                "server_url": "https://redirecting-idp.example.com",
+            },
+        )
+        assert response.status_code == 400, response.content
+        assert not SocialApp.objects.filter(provider_id="redirect-idp").exists()

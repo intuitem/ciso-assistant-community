@@ -17,7 +17,10 @@ from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from global_settings.models import GlobalSettings
 from iam.models import Folder, Role, ServiceAccount, User, UserGroup
-from iam.service_accounts import provision_federated_service_account
+from iam.service_accounts import (
+    provision_federated_service_account,
+    update_service_account,
+)
 
 SA_ENDPOINT = "/api/iam/service-accounts/"
 
@@ -51,6 +54,8 @@ def mocked_idp(rsa_keypair):
     calls = {"discovery": 0, "jwks": 0}
 
     class FakeResponse:
+        is_redirect = False
+
         def __init__(self, payload):
             self._payload = payload
 
@@ -405,6 +410,23 @@ class TestFederatedProvisioning:
             with pytest.raises(ValidationError, match="already registered"):
                 provision_federated_service_account(name="second-sa", **kwargs)
 
+    def test_concurrent_repoint_duplicate_maps_to_validation_error(
+        self, admin_client, domain_folder, social_app, mocked_idp
+    ):
+        """Same race on the update path: a re-point that slips past the
+        exists() pre-check must surface the unique_together violation as a
+        clean ValidationError, not an IntegrityError/500."""
+        _create_federated_sa(admin_client, domain_folder, social_app)
+        second = _create_federated_sa(
+            admin_client, domain_folder, social_app, subject="worker-2", name="sa-2"
+        ).json()
+        sa2 = ServiceAccount.objects.get(id=second["id"])
+        with patch("iam.service_accounts._ensure_federated_identity_available"):
+            with pytest.raises(ValidationError, match="already registered"):
+                update_service_account(sa2, federated_subject="worker-1")
+        sa2.refresh_from_db()
+        assert sa2.federated_subject == "worker-2"
+
 
 @pytest.mark.django_db
 class TestFederatedAuthentication:
@@ -757,6 +779,8 @@ class TestFederatedAuthenticationHardening:
         }
 
         class FakeResponse:
+            is_redirect = False
+
             def __init__(self, payload):
                 self._payload = payload
 
