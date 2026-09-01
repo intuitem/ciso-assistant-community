@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { fetchAllPages } from '$lib/utils/pagination';
 	import type { CacheLock } from '$lib/utils/types';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import * as m from '$paraglide/messages';
@@ -156,16 +157,10 @@
 	async function fetchOptions() {
 		isLoading = true;
 		try {
-			let endpoint = `/${optionsEndpoint}`;
-			const collected: any[] = [];
-			while (endpoint) {
-				const response = await fetch(endpoint);
-				if (!response.ok) break;
-				const json = await response.json();
-				const page = json?.results ?? json;
-				collected.push(...page);
-				endpoint = json?.next ?? null;
-			}
+			// fetchAllPages pages by explicit offset: the backend's `next`
+			// links are backend-relative ("/api/...") and do not resolve
+			// against the frontend origin this component fetches from.
+			const collected = await fetchAllPages(fetch, `/${optionsEndpoint}`);
 			if (collected.length) {
 				options = collected.map((option: any) => {
 					const label = option[optionsLabelField] ?? '--';

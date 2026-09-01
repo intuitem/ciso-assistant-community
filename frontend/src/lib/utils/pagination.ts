@@ -68,6 +68,38 @@ export async function fetchAllPages<T = Record<string, any>>(
 			return results;
 		}
 	}
-	console.error(`fetchAllPages: aborted after ${maxPages} pages for ${url}`);
-	return results;
+	// A silent partial result would look complete to the caller; fail loudly.
+	throw new Error(`fetchAllPages: aborted after ${maxPages} pages for ${url}`);
+}
+
+interface FetchAllByIdsOptions extends FetchAllPagesOptions {
+	/** Ids per request, keeping URLs well under proxy limits (default 40). */
+	chunkSize?: number;
+	/** Query parameter carrying the id list (default `id`). */
+	param?: string;
+}
+
+/**
+ * Hydrate specific rows by id: fetch `url?id=a,b,c` in chunks and page each
+ * chunk, so neither the URL length nor the server page size caps the result.
+ * Row order follows the server, not the input ids.
+ */
+export async function fetchAllByIds<T = Record<string, any>>(
+	fetchFn: typeof fetch,
+	url: string,
+	ids: (string | number)[],
+	{ chunkSize = 40, param = 'id', ...pageOptions }: FetchAllByIdsOptions = {}
+): Promise<T[]> {
+	const chunks: (string | number)[][] = [];
+	for (let i = 0; i < ids.length; i += chunkSize) {
+		chunks.push(ids.slice(i, i + chunkSize));
+	}
+	const pages = await Promise.all(
+		chunks.map((chunk) => {
+			const sep = url.includes('?') ? '&' : '?';
+			const chunkUrl = `${url}${sep}${param}=${encodeURIComponent(chunk.join(','))}`;
+			return fetchAllPages<T>(fetchFn, chunkUrl, pageOptions);
+		})
+	);
+	return pages.flat();
 }

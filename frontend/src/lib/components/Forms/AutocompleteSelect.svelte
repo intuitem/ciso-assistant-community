@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { fetchAllByIds, fetchAllPages } from '$lib/utils/pagination';
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount, untrack } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
@@ -306,19 +307,17 @@
 						seedSuggestions();
 					}
 				} else {
-					const endpoint = buildEndpoint();
-					const response = await fetch(endpoint, { cache: browserCache });
-					if (response.ok) {
-						const data = await response.json().then((res) => res?.results ?? res);
-						if (data.length > 0) {
-							options = processOptions(data);
-						}
-						const isRequired = mandatory || $constraints?.required;
-						const hasNoOptions = options.length === 0;
-						const isMissing = isRequired && hasNoOptions;
-						if (updateMissingConstraint) {
-							updateMissingConstraint(field, isMissing);
-						}
+					// Explicit eager mode: fetch the complete collection, not
+					// just the first server page.
+					const data = await fetchAllPages(cachedFetch, buildEndpoint());
+					if (data.length > 0) {
+						options = processOptions(data);
+					}
+					const isRequired = mandatory || $constraints?.required;
+					const hasNoOptions = options.length === 0;
+					const isMissing = isRequired && hasNoOptions;
+					if (updateMissingConstraint) {
+						updateMissingConstraint(field, isMissing);
 					}
 				}
 				optionsLoaded = true;
@@ -346,19 +345,25 @@
 		}
 	}
 
+	// fetch with the component's cache mode, for the paging helpers.
+	const cachedFetch: typeof fetch = (input, init) => fetch(input, { cache: browserCache, ...init });
+
 	async function fetchSelectedItems() {
 		if (!initialValue) return;
 		const ids = Array.isArray(initialValue) ? initialValue : [initialValue];
 		if (ids.length === 0) return;
 
 		const lazyBase = effectiveLazy ? autocompleteBase() : undefined;
-		const endpoint = buildEndpoint({ id: ids.join(',') }, lazyBase);
-		const response = await fetch(endpoint, { cache: browserCache });
-		if (response.ok) {
-			const data = await response.json().then((res) => res?.results ?? res);
-			if (data.length > 0) {
-				options = processOptions(data);
-			}
+		// Chunked and paged: the id list can exceed both the URL length budget
+		// and the server page size, and a truncated hydration would sync a
+		// truncated selection back into the form value (silent data loss).
+		const data = await fetchAllByIds(
+			cachedFetch,
+			buildEndpoint(undefined, lazyBase),
+			ids.map(String)
+		);
+		if (data.length > 0) {
+			options = processOptions(data);
 		}
 	}
 

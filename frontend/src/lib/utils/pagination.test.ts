@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 
-import { fetchAllPages } from './pagination';
+import { fetchAllByIds, fetchAllPages } from './pagination';
 
 function jsonResponse(body: unknown, ok = true, status = 200) {
 	return {
@@ -80,5 +80,66 @@ describe('fetchAllPages', () => {
 		const all = await fetchAllPages(fetchFn, '/assets');
 		expect(all).toEqual([]);
 		expect(fetchFn).toHaveBeenCalledTimes(1);
+	});
+
+	it('throws instead of returning a silent partial when maxPages is exhausted', async () => {
+		// Server keeps claiming there is a next page.
+		const fetchFn = vi.fn(async () =>
+			jsonResponse({ count: 100, next: 'more', previous: null, results: [1] })
+		) as unknown as typeof fetch;
+		await expect(fetchAllPages(fetchFn, '/assets', { maxPages: 3 })).rejects.toThrow(
+			'aborted after 3 pages'
+		);
+	});
+});
+
+describe('fetchAllByIds', () => {
+	it('chunks the id list and merges the hydrated rows', async () => {
+		const requested: string[] = [];
+		const fetchFn = vi.fn(async (url: string | URL | Request) => {
+			requested.push(String(url));
+			const params = new URL(String(url), 'http://x').searchParams;
+			const ids = (params.get('id') ?? '').split(',');
+			return jsonResponse({ count: ids.length, next: null, previous: null, results: ids });
+		}) as unknown as typeof fetch;
+
+		const ids = Array.from({ length: 5 }, (_, i) => `id-${i}`);
+		const rows = await fetchAllByIds<string>(fetchFn, '/assets/autocomplete', ids, {
+			chunkSize: 2
+		});
+		expect(rows).toEqual(ids);
+		expect(fetchFn).toHaveBeenCalledTimes(3);
+		expect(requested[0]).toBe('/assets/autocomplete?id=id-0%2Cid-1&limit=200');
+	});
+
+	it('pages inside a chunk when the server paginates the hydration', async () => {
+		// One chunk of 3 ids served one row per page.
+		const fetchFn = vi.fn(async (url: string | URL | Request) => {
+			const params = new URL(String(url), 'http://x').searchParams;
+			const ids = (params.get('id') ?? '').split(',');
+			const offset = Number(params.get('offset') ?? 0);
+			const results = ids.slice(offset, offset + 1);
+			return jsonResponse({
+				count: ids.length,
+				next: offset + 1 < ids.length ? 'more' : null,
+				previous: null,
+				results
+			});
+		}) as unknown as typeof fetch;
+
+		const rows = await fetchAllByIds<string>(fetchFn, '/assets/autocomplete', ['a', 'b', 'c']);
+		expect(rows).toEqual(['a', 'b', 'c']);
+		expect(fetchFn).toHaveBeenCalledTimes(3);
+	});
+
+	it('appends the id param to a url that already has a query string', async () => {
+		const requested: string[] = [];
+		const fetchFn = vi.fn(async (url: string | URL | Request) => {
+			requested.push(String(url));
+			return jsonResponse({ count: 0, next: null, previous: null, results: [] });
+		}) as unknown as typeof fetch;
+
+		await fetchAllByIds(fetchFn, '/folders/autocomplete?content_type=DO', ['x']);
+		expect(requested[0]).toBe('/folders/autocomplete?content_type=DO&id=x&limit=200');
 	});
 });
