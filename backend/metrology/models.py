@@ -1,4 +1,5 @@
 import json
+import structlog
 from datetime import timedelta
 
 from django.core.exceptions import ValidationError
@@ -39,6 +40,8 @@ from core.models import (
 )
 from global_settings.models import GlobalSettings
 from iam.models import Folder, FolderMixin
+
+logger = structlog.getLogger(__name__)
 
 
 class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMixin):
@@ -292,13 +295,33 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
         else:
             value_dict = self.value
 
+        if not isinstance(value_dict, dict):
+            logger.warning(
+                "CustomMetricSample.value is not a dict, expected "
+                '{"result": ...} or {"choice_index": ...}',
+                sample_id=str(self.pk),
+                metric_instance_id=str(self.metric_instance_id),
+                value_type=type(value_dict).__name__,
+            )
+            return None
+
         metric_definition = self.metric_instance.metric_definition
 
         if metric_definition.category == MetricDefinition.Category.QUALITATIVE:
-            return value_dict.get("choice_index")
+            choice_index = value_dict.get("choice_index")
+            if (
+                isinstance(choice_index, bool)
+                or not isinstance(choice_index, int)
+                or choice_index < 1
+            ):
+                return None
+            return choice_index
 
         elif metric_definition.category == MetricDefinition.Category.QUANTITATIVE:
-            return value_dict.get("result")
+            result = value_dict.get("result")
+            if isinstance(result, bool) or not isinstance(result, (int, float)):
+                return None
+            return result
 
         return None
 
@@ -314,14 +337,27 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
         else:
             value_dict = self.value
 
+        if not isinstance(value_dict, dict):
+            return "N/A"
+
         metric_definition = self.metric_instance.metric_definition
 
         if metric_definition.category == MetricDefinition.Category.QUALITATIVE:
             choice_index = value_dict.get("choice_index")
             if (
-                choice_index is not None
-                and metric_definition.choices_definition
-                and isinstance(metric_definition.choices_definition, list)
+                isinstance(choice_index, bool)
+                or not isinstance(choice_index, int)
+                or choice_index < 1
+            ):
+                logger.warning(
+                    "CustomMetricSample.value.choice_index is not a valid index",
+                    sample_id=str(self.pk),
+                    metric_instance_id=str(self.metric_instance_id),
+                    value_type=type(choice_index).__name__,
+                )
+                return "N/A"
+            if metric_definition.choices_definition and isinstance(
+                metric_definition.choices_definition, list
             ):
                 # choices_definition is 1-indexed.
                 array_index = choice_index - 1
@@ -329,10 +365,20 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
                     choice = metric_definition.choices_definition[array_index]
                     choice_name = choice.get("name", "")
                     return f"[{choice_index}] {choice_name}"
-            return str(choice_index) if choice_index is not None else "N/A"
+            return str(choice_index)
 
         elif metric_definition.category == MetricDefinition.Category.QUANTITATIVE:
             result = value_dict.get("result")
+            if isinstance(result, bool):
+                result = None
+            elif result is not None and not isinstance(result, (int, float)):
+                logger.warning(
+                    "CustomMetricSample.value.result is not numeric",
+                    sample_id=str(self.pk),
+                    metric_instance_id=str(self.metric_instance_id),
+                    value_type=type(result).__name__,
+                )
+                result = None
             if result is not None:
                 if metric_definition.unit:
                     unit = (

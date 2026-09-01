@@ -744,6 +744,7 @@ export const FeatureFlagsSchema = z.object({
 	idp_groups: z.boolean().optional(),
 	service_accounts: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
+	workflows: z.boolean().optional(),
 	audit_log_forwarding: z.boolean().optional(),
 	metrology: z.boolean().optional(),
 	personal_data: z.boolean().optional(),
