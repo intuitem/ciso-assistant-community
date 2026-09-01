@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
+	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
+
 	interface Series {
 		name: string;
 		data: number[];
@@ -28,71 +30,73 @@
 
 	const chart_id = `${name}_div`;
 
-	onMount(async () => {
-		const echarts = await import('echarts');
-		let chart = echarts.init(
-			document.getElementById(chart_id),
-			document.documentElement.classList.contains('dark') ? 'dark' : null,
-			{ renderer: 'svg' }
-		);
+	onMount(() => {
+		let dispose: (() => void) | undefined;
+		let active = true;
+		(async () => {
+			const echarts = await import('echarts');
+			if (!active) return;
+			const el = document.getElementById(chart_id);
+			if (!el) return;
+			dispose = mountThemeAwareChart(echarts, el, () => {
+				const option = {
+					title: {
+						text: title,
+						textStyle: {
+							fontWeight: 'bold',
+							fontSize: 14
+						}
+					},
+					tooltip: {
+						trigger: 'axis',
+						axisPointer: {
+							type: 'shadow'
+						}
+					},
+					legend: {
+						bottom: 0,
+						left: 'center'
+					},
+					grid: {
+						left: 0,
+						top: 40,
+						right: 0,
+						bottom: 40,
+						containLabel: true
+					},
+					xAxis: {
+						type: 'category',
+						data: categories,
+						axisTick: {
+							alignWithLabel: true
+						},
+						axisLabel: {
+							interval: 0,
+							rotate: 0
+						}
+					},
+					yAxis: {
+						type: 'value',
+						allowDecimals: false,
+						minInterval: 1
+					},
+					series: series.map((s) => ({
+						name: s.name,
+						type: 'bar',
+						data: s.data,
+						emphasis: {
+							focus: 'series'
+						}
+					}))
+				};
 
-		const option = {
-			title: {
-				text: title,
-				textStyle: {
-					fontWeight: 'bold',
-					fontSize: 14
-				}
-			},
-			tooltip: {
-				trigger: 'axis',
-				axisPointer: {
-					type: 'shadow'
-				}
-			},
-			legend: {
-				bottom: 0,
-				left: 'center'
-			},
-			grid: {
-				left: 0,
-				top: 40,
-				right: 0,
-				bottom: 40,
-				containLabel: true
-			},
-			xAxis: {
-				type: 'category',
-				data: categories,
-				axisTick: {
-					alignWithLabel: true
-				},
-				axisLabel: {
-					interval: 0,
-					rotate: 0
-				}
-			},
-			yAxis: {
-				type: 'value',
-				allowDecimals: false,
-				minInterval: 1
-			},
-			series: series.map((s) => ({
-				name: s.name,
-				type: 'bar',
-				data: s.data,
-				emphasis: {
-					focus: 'series'
-				}
-			}))
+				return option;
+			});
+		})();
+		return () => {
+			active = false;
+			dispose?.();
 		};
-
-		option.backgroundColor = 'transparent';
-		chart.setOption(option);
-
-		window.addEventListener('resize', function () {
-			chart.resize();
-		});
 	});
 </script>
 

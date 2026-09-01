@@ -168,6 +168,8 @@ from core.utils import (
     compare_schema_versions,
     get_respondent_scoped_folder_ids,
     is_field_visible_to,
+    render_answers_cell,
+    visible_questions,
     _generate_occurrences,
     _create_task_dict,
 )
@@ -8039,7 +8041,7 @@ class IdPGroupViewSet(BaseModelViewSet):
     """
 
     model = IdPGroup
-    feature_flag = "idp_groups"
+    feature_flag = ("idp_groups", "jit_provisioning")
     ordering_fields = ["name"]
     search_fields = ["name"]
 
@@ -11083,6 +11085,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "requirement_progress",
                 "score",
                 "observations",
+                "answers",
             ]
             writer.writerow(columns)
 
@@ -11092,11 +11095,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     include_non_assessable=True
                 )
             )
-            req_nodes = RequirementNode.objects.in_bulk(
-                [ra.requirement_id for ra in reqs]
-            )
             for req in reqs:
-                req_node = req_nodes.get(req.requirement_id)
+                # get_requirement_assessments() select_relates the node and
+                # prefetches its questions and this assessment's answers.
+                req_node = req.requirement
                 row = [
                     req_node.urn,
                     req_node.ref_id,
@@ -11115,6 +11117,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     ]
                 else:
                     row += ["", "", "", "", ""]
+                row.append(
+                    render_answers_cell(
+                        req_node.get_questions_translated,
+                        build_answers_dict(req.answers.all()),
+                    )
+                )
                 writer.writerow(escape_csv_row(row))
 
             return response
@@ -11186,60 +11194,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if has_questions:
                 # Round-tripped so re-import keeps the override state.
                 entry["is_score_overridden"] = req.is_score_overridden
-                q_dict = questions_by_node.get(req_node.id)
-                if q_dict:
-                    answers = answers_by_req.get(req.id, {})
-                    lines = []
-                    for q_urn, question in q_dict.items():
-                        q_text = question.get("text", "")
-                        if not q_text:
-                            continue
-                        q_type = question.get("type")
-                        choices_map = {
-                            c["urn"]: c.get("value", "")
-                            for c in question.get("choices", [])
-                        }
-                        answer_value = answers.get(q_urn)
-                        readable = ""
-                        if answer_value:
-                            if q_type in ("text", "date"):
-                                readable = str(answer_value)
-                            elif q_type == "multiple_choice" and isinstance(
-                                answer_value, list
-                            ):
-                                readable = " | ".join(
-                                    choices_map.get(a, a) for a in answer_value
-                                )
-                            else:
-                                readable = choices_map.get(
-                                    answer_value, str(answer_value)
-                                )
-                        # Show choices hint when no answer
-                        if not readable:
-                            choice_values = list(choices_map.values())
-                            if q_type == "multiple_choice":
-                                lines.append(
-                                    escape_excel_formula(
-                                        f"{q_text} (multiple) >> [{' / '.join(choice_values)}]"
-                                    )
-                                )
-                            elif q_type in ("text", "date"):
-                                lines.append(
-                                    escape_excel_formula(f"{q_text} >> [free text]")
-                                )
-                            else:
-                                lines.append(
-                                    escape_excel_formula(
-                                        f"{q_text} >> [{' / '.join(choice_values)}]"
-                                    )
-                                )
-                        else:
-                            lines.append(
-                                escape_excel_formula(f"{q_text} >> {readable}")
-                            )
-                    entry["answers"] = "\n\n".join(lines)
-                else:
-                    entry["answers"] = ""
+                # No escape_excel_formula here: every line starts with the
+                # question's "[urn:...]", so there is nothing for Excel to read
+                # as a formula, and escaping would corrupt the re-import key.
+                entry["answers"] = render_answers_cell(
+                    questions_by_node.get(req_node.id),
+                    answers_by_req.get(req.id, {}),
+                )
 
             entries.append(entry)
 
@@ -13163,6 +13124,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "updated_at": base_audit.updated_at,
                 "observation": base_audit.observation,
                 "global_score": base_audit.get_global_score()["maturity_score"],
+                "min_score": base_audit.min_score,
                 "max_score": base_audit.max_score,
                 "total_max_score": base_audit.get_total_max_score(),
                 "score_calculation_method": base_audit.score_calculation_method,
@@ -13185,6 +13147,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "updated_at": compare_audit.updated_at,
                 "observation": compare_audit.observation,
                 "global_score": compare_audit.get_global_score()["maturity_score"],
+                "min_score": compare_audit.min_score,
                 "max_score": compare_audit.max_score,
                 "total_max_score": compare_audit.get_total_max_score(),
                 "score_calculation_method": compare_audit.score_calculation_method,
@@ -14954,7 +14917,11 @@ def generate_html(
 
     questions_dict_by_urn = {}
     for node in requirement_nodes.prefetch_related("questions__choices"):
-        qd = node.get_questions_translated
+        # A question hidden by an unsatisfied depends_on does not apply here, so
+        # the report must not list it as unanswered.
+        qd = visible_questions(
+            node.get_questions_translated, answers_dict_by_urn.get(node.urn, {})
+        )
         if qd:
             questions_dict_by_urn[node.urn] = qd
 

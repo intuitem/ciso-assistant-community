@@ -204,11 +204,11 @@
 						<input bind:value={editAbbr} class="input w-28" placeholder={m.abbreviation()} />
 						<input bind:value={editName} class="input flex-1" placeholder={m.name()} />
 						<button
-							class="btn btn-sm variant-filled-primary"
+							class="btn btn-sm preset-filled-primary-500"
 							disabled={busy}
 							onclick={() => saveEdit(l)}>{m.save()}</button
 						>
-						<button class="btn btn-sm variant-soft" onclick={() => (editingId = null)}
+						<button class="btn btn-sm preset-tonal" onclick={() => (editingId = null)}
 							>{m.cancel()}</button
 						>
 					{:else}
@@ -256,7 +256,7 @@
 			<input bind:value={newAbbr} class="input w-32" placeholder={m.abbreviation()} />
 			<input bind:value={newName} class="input min-w-40 flex-1" placeholder={m.name()} />
 			<button
-				class="btn variant-filled-primary"
+				class="btn preset-filled-primary-500"
 				disabled={busy || !newAbbr.trim()}
 				onclick={addLevel}
 			>
