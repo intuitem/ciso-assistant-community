@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
@@ -116,93 +117,88 @@
 	}
 
 	function initTimelineChart(el: HTMLElement, timeline: any[]) {
-		let chart: any;
-		let resizeHandler: (() => void) | null = null;
+		let dispose: (() => void) | undefined;
+		let active = true;
 
 		import('echarts').then((echarts) => {
-			if (!el.isConnected) return;
-			chart = echarts.init(
-				el,
-				document.documentElement.classList.contains('dark') ? 'dark' : null,
-				{ renderer: 'svg' }
-			);
-			const dates = timeline.map((t: any) => t.date);
-			const hasScores = timeline.some((t: any) => t.score != null && t.score >= 0);
-			const areaSeries = RESULT_KEYS.map((key) => ({
-				name: safeTranslate(key),
-				type: 'line',
-				stack: 'total',
-				smooth: true,
-				showSymbol: false,
-				areaStyle: { opacity: 0.5 },
-				lineStyle: { width: 1.5 },
-				emphasis: { focus: 'series' },
-				yAxisIndex: 0,
-				data: timeline.map((t: any) => t.per_result[key] || 0),
-				itemStyle: { color: complianceResultColorMap[key] }
-			}));
-			const series: any[] = [...areaSeries];
-			if (hasScores) {
-				series.push({
-					name: safeTranslate('score'),
+			if (!active || !el.isConnected) return;
+			dispose = mountThemeAwareChart(echarts, el, () => {
+				const dates = timeline.map((t: any) => t.date);
+				const hasScores = timeline.some((t: any) => t.score != null && t.score >= 0);
+				const areaSeries = RESULT_KEYS.map((key) => ({
+					name: safeTranslate(key),
 					type: 'line',
+					stack: 'total',
 					smooth: true,
-					showSymbol: true,
-					lineStyle: { width: 2.5 },
+					showSymbol: false,
+					areaStyle: { opacity: 0.5 },
+					lineStyle: { width: 1.5 },
 					emphasis: { focus: 'series' },
-					yAxisIndex: 1,
-					data: timeline.map((t: any) => (t.score >= 0 ? t.score : null)),
-					itemStyle: { color: '#6366f1' },
-					symbol: 'circle',
-					symbolSize: 5
-				});
-			}
-			chart.setOption({
-				backgroundColor: 'transparent',
-				tooltip: {
-					trigger: 'axis',
-					backgroundColor: '#1e293b',
-					borderColor: '#334155',
-					textStyle: { color: '#f1f5f9', fontSize: 12 }
-				},
-				legend: { top: 0, textStyle: { fontSize: 11, color: '#64748b' } },
-				grid: { left: 45, right: hasScores ? 50 : 16, top: 36, bottom: 28 },
-				xAxis: {
-					type: 'category',
-					data: dates,
-					axisLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.3)' } },
-					axisLabel: { color: '#94a3b8', fontSize: 10 }
-				},
-				yAxis: [
-					{
-						type: 'value',
-						splitLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.2)' } },
+					yAxisIndex: 0,
+					data: timeline.map((t: any) => t.per_result[key] || 0),
+					itemStyle: { color: complianceResultColorMap[key] }
+				}));
+				const series: any[] = [...areaSeries];
+				if (hasScores) {
+					series.push({
+						name: safeTranslate('score'),
+						type: 'line',
+						smooth: true,
+						showSymbol: true,
+						lineStyle: { width: 2.5 },
+						emphasis: { focus: 'series' },
+						yAxisIndex: 1,
+						data: timeline.map((t: any) => (t.score >= 0 ? t.score : null)),
+						itemStyle: { color: '#6366f1' },
+						symbol: 'circle',
+						symbolSize: 5
+					});
+				}
+				return {
+					backgroundColor: 'transparent',
+					tooltip: {
+						trigger: 'axis',
+						backgroundColor: '#1e293b',
+						borderColor: '#334155',
+						textStyle: { color: '#f1f5f9', fontSize: 12 }
+					},
+					legend: { top: 0, textStyle: { fontSize: 11, color: '#64748b' } },
+					grid: { left: 45, right: hasScores ? 50 : 16, top: 36, bottom: 28 },
+					xAxis: {
+						type: 'category',
+						data: dates,
+						axisLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.3)' } },
 						axisLabel: { color: '#94a3b8', fontSize: 10 }
 					},
-					...(hasScores
-						? [
-								{
-									type: 'value',
-									position: 'right',
-									splitLine: { show: false },
-									axisLabel: { color: '#6366f1', fontSize: 10 },
-									axisLine: { show: true, lineStyle: { color: '#6366f1' } },
-									name: safeTranslate('score'),
-									nameTextStyle: { color: '#6366f1', fontSize: 10 }
-								}
-							]
-						: [])
-				],
-				series
+					yAxis: [
+						{
+							type: 'value',
+							splitLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.2)' } },
+							axisLabel: { color: '#94a3b8', fontSize: 10 }
+						},
+						...(hasScores
+							? [
+									{
+										type: 'value',
+										position: 'right',
+										splitLine: { show: false },
+										axisLabel: { color: '#6366f1', fontSize: 10 },
+										axisLine: { show: true, lineStyle: { color: '#6366f1' } },
+										name: safeTranslate('score'),
+										nameTextStyle: { color: '#6366f1', fontSize: 10 }
+									}
+								]
+							: [])
+					],
+					series
+				};
 			});
-			resizeHandler = () => chart.resize();
-			window.addEventListener('resize', resizeHandler);
 		});
 
 		return {
 			destroy() {
-				if (resizeHandler) window.removeEventListener('resize', resizeHandler);
-				if (chart) chart.dispose();
+				active = false;
+				dispose?.();
 			}
 		};
 	}

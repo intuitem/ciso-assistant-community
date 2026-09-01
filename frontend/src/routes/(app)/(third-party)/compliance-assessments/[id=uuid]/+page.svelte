@@ -65,6 +65,10 @@
 
 	let { data, form }: Props = $props();
 
+	const scoreFloor = $derived(
+		data.global_score?.score_calculation_method === 'sum' ? 0 : (data.global_score?.min_score ?? 0)
+	);
+
 	const compliance_assessment = $derived(data.compliance_assessment);
 
 	const user = page.data.user;
@@ -858,9 +862,12 @@
 							name="global_maturity"
 							value={data.global_score.maturity_score}
 							max={data.global_score.total_max_score}
+							min={scoreFloor}
 							color={getScoreHexColor(
 								data.global_score.maturity_score,
-								data.global_score.total_max_score
+								data.global_score.total_max_score,
+								false,
+								scoreFloor
 							)}
 							strokeWidth={35}
 							fontSize={36}
