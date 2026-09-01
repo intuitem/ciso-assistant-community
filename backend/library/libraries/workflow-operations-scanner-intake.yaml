@@ -1,0 +1,67 @@
+urn: urn:intuitem:risk:library:workflow-operations-scanner-intake
+locale: en
+ref_id: workflow-operations-scanner-intake
+name: Scanner intake — record vulnerabilities from a webhook
+description: 'Your scanner POSTs {"vulnerabilities": [{"id": "CVE-...", "summary": "..."}]} to this workflow''s
+  URL. Each entry becomes a vulnerability, matched on its name so re-posting updates instead of duplicating.'
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-operations-scanner-intake:workflow:scanner-intake
+    schema_version: 1
+    ref_id: scanner-intake
+    name: Scanner intake — record vulnerabilities from a webhook
+    description: 'Your scanner POSTs {"vulnerabilities": [{"id": "CVE-...", "summary": "..."}]} to this
+      workflow''s URL. Each entry becomes a vulnerability, matched on its name so re-posting updates instead
+      of duplicating.'
+    graph:
+      variables: []
+      nodes:
+      - ref: hook
+        type: trigger
+        label: Scanner posts results
+        trigger_config:
+          type: webhook
+      - ref: per_item
+        type: loop
+        label: One per entry
+        loop_config:
+          collection: '{{payload.vulnerabilities}}'
+          collect: '{{item.id}}'
+          on_item_error: continue
+      - ref: record
+        type: action
+        label: Record the vulnerability
+        action_config:
+          type: create_object
+          model: vulnerability
+          upsert: true
+          fields:
+            name: '{{item.id}}'
+            ref_id: '{{item.id}}'
+            description: '{{item.summary}}'
+      - ref: report
+        type: action
+        label: Log what came in
+        action_config:
+          type: log
+          message: 'Recorded {{nodes.per_item.count}} item(s) on {{today}}: {{nodes.per_item.results}}'
+      - ref: done
+        type: end
+      edges:
+      - source: hook
+        target: per_item
+      - source: per_item
+        target: record
+        source_port: each
+      - source: record
+        target: per_item
+      - source: per_item
+        target: report
+        source_port: done
+      - source: report
+        target: done
