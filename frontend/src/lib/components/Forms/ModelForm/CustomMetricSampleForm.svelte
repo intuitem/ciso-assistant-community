@@ -89,7 +89,7 @@
 	});
 
 	function handleQualitativeChange(selectedIndex: string) {
-		$valueFieldProxy = JSON.stringify({ choice_index: parseInt(selectedIndex) });
+		$valueFieldProxy = { choice_index: parseInt(selectedIndex) };
 	}
 
 	// For quantitative metrics, parse the numeric value
@@ -108,7 +108,7 @@
 		const value = (event.target as HTMLInputElement).value;
 		const numValue = parseFloat(value);
 		if (!isNaN(numValue)) {
-			$valueFieldProxy = JSON.stringify({ result: numValue });
+			$valueFieldProxy = { result: numValue };
 		}
 	}
 
