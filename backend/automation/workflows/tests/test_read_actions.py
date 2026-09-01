@@ -873,3 +873,137 @@ class TestOperatorTypeGating:
                 {"is_scored"},
                 {},
             )
+
+
+@pytest.mark.django_db
+class TestPaging:
+    def test_offset_walks_past_the_first_page(self):
+        domain = make_domain("Paging")
+        for index in range(7):
+            AppliedControl.objects.create(name=f"AC {index}", folder=domain)
+        version = read_flow(
+            domain,
+            {
+                "model": "applied_control",
+                "mode": "list",
+                "order_by": "name",
+                "limit": 3,
+            },
+        )
+        first = read_output(start_instance(version))
+        assert [row["name"] for row in first["results"]] == ["AC 0", "AC 1", "AC 2"]
+        # count stays unpaged, and next_offset says where to continue
+        assert first["count"] == 7
+        assert first["offset"] == 0
+        assert first["next_offset"] == 3
+
+        version = read_flow(
+            domain,
+            {
+                "model": "applied_control",
+                "mode": "list",
+                "order_by": "name",
+                "limit": 3,
+                "offset": 3,
+            },
+        )
+        second = read_output(start_instance(version))
+        assert [row["name"] for row in second["results"]] == ["AC 3", "AC 4", "AC 5"]
+        assert second["next_offset"] == 6
+
+    def test_the_last_page_reports_no_next_offset(self):
+        domain = make_domain("Last page")
+        for index in range(4):
+            AppliedControl.objects.create(name=f"AC {index}", folder=domain)
+        version = read_flow(
+            domain,
+            {
+                "model": "applied_control",
+                "mode": "list",
+                "order_by": "name",
+                "limit": 3,
+                "offset": 3,
+            },
+        )
+        output = read_output(start_instance(version))
+        assert len(output["results"]) == 1
+        assert output["next_offset"] == 0
+
+    def test_the_offset_can_come_from_a_variable(self):
+        domain = make_domain("Offset variable")
+        for index in range(5):
+            AppliedControl.objects.create(name=f"AC {index}", folder=domain)
+        version = read_flow(
+            domain,
+            {
+                "model": "applied_control",
+                "mode": "list",
+                "order_by": "name",
+                "limit": 2,
+                "offset": "{{page_start}}",
+            },
+            variables=[
+                {
+                    "id": str(uuid.uuid4()),
+                    "key": "page_start",
+                    "type": "number",
+                    "default_value": 2,
+                }
+            ],
+        )
+        output = read_output(start_instance(version))
+        assert [row["name"] for row in output["results"]] == ["AC 2", "AC 3"]
+
+    def test_a_negative_literal_offset_is_refused_at_publish(self):
+        from automation.workflows.actions import validate_read_config
+        from automation.workflows.models import WorkflowNode
+
+        codes = {
+            code
+            for code, _ in validate_read_config(
+                WorkflowNode(
+                    action_config={
+                        "type": "read_objects",
+                        "model": "applied_control",
+                        "offset": -5,
+                    }
+                )
+            )
+        }
+        assert "action_read_bad_offset" in codes
+
+
+@pytest.mark.django_db
+class TestEntityReadSurface:
+    """A sweep must be able to select the third parties it means."""
+
+    def test_active_and_tier_columns_filter_and_order(self):
+        from tprm.models import Entity
+
+        domain = make_domain("Vendors")
+        Entity.objects.create(
+            name="Critical", folder=domain, is_active=True, default_dependency=4
+        )
+        Entity.objects.create(
+            name="Minor", folder=domain, is_active=True, default_dependency=1
+        )
+        Entity.objects.create(
+            name="Retired", folder=domain, is_active=False, default_dependency=4
+        )
+        version = read_flow(
+            domain,
+            {
+                "model": "entity",
+                "mode": "list",
+                "order_by": "-default_dependency",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [
+                        {"field": "is_active", "op": "eq", "value": True},
+                        {"field": "default_dependency", "op": "gte", "value": 3},
+                    ],
+                },
+            },
+        )
+        output = read_output(start_instance(version))
+        assert [row["name"] for row in output["results"]] == ["Critical"]
