@@ -1428,6 +1428,17 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     def _resolve_permission(
         permission: tuple[PermissionPrefix, type[models.Model]] | Permission,
     ) -> Permission:
+        """
+        Resolve and return a django `Permission` based on a `(permission_type, model)` tuple, example:
+
+        ```py
+        permission = RoleAssignment._resolve_permission(("view", AppliedControl))
+        assert isisntance(permission, Permission)
+        assert permission.codename == "view_appliedcontrol"
+        ```
+
+        If a `Permission` `permission` is passed to this function, the function will return the `permission` itself.
+        """
         if isinstance(permission, Permission):
             return permission
 
@@ -1549,29 +1560,12 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             user, permission
         )
 
-        """user_role_assignments = RoleAssignment._get_role_assignments_from_permission(
-            user, permission # (perm_prefix, model)
-        )
-        recursive_role_assignments = user_role_assignments.filter(is_recursive=True)"""
-
         directly_accessible_folder_id_set = set(
             allowed_folder_set.directly_accessible_folder_ids
         )
         direct_recursive_folder_id_set = set(
             allowed_folder_set.direct_recursive_folder_ids
         )
-
-        """"directly_accessible_folder_id_set = set(
-            user_role_assignments.values_list(
-                "perimeter_folders__id", flat=True
-            ).distinct()
-        )
-
-        direct_recursive_folder_id_set = set(
-            recursive_role_assignments.values_list(
-                "perimeter_folders__id", flat=True
-            ).distinct()
-        )"""
 
         iam_scope_folder_id = RoleAssignment.get_iam_folder_id(obj)
 
