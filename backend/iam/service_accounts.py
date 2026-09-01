@@ -20,6 +20,7 @@ from iam.models import (
     ServiceAccount,
     User,
 )
+from core.net_safety import BlockedRequestError, DnsLookupError
 from iam.oidc_federation import check_social_app_live
 
 SERVICE_ACCOUNT_EMAIL_DOMAIN = "service-accounts.local"
@@ -70,7 +71,12 @@ def _ensure_federated_identity_available(
         )
     try:
         check_social_app_live(social_app)
-    except (requests.RequestException, KeyError) as e:
+    except (
+        requests.RequestException,
+        KeyError,
+        BlockedRequestError,
+        DnsLookupError,
+    ) as e:
         raise ValidationError(
             f"Could not verify the registered identity provider: {e}"
         ) from e

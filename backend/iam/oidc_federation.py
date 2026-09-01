@@ -8,6 +8,12 @@ from allauth.socialaccount.internal import jwtkit
 from allauth.socialaccount.models import SocialApp
 from allauth.socialaccount.providers.oauth2.client import OAuth2Error
 
+from core.net_safety import (
+    BlockedRequestError,
+    DnsLookupError,
+    assert_public_url_unless_dev,
+)
+
 DISCOVERY_CACHE_TTL = 60 * 30
 JWKS_CACHE_TTL = 60 * 30
 JWKS_REFRESH_LOCK_TTL = 5
@@ -29,6 +35,7 @@ def get_openid_config(discovery_url: str) -> dict:
     cache_key = f"iam:oidc-discovery:{discovery_url}"
     config = cache.get(cache_key)
     if config is None:
+        assert_public_url_unless_dev(discovery_url)
         with get_adapter().get_requests_session() as sess:
             response = sess.get(discovery_url, timeout=REQUEST_TIMEOUT)
             response.raise_for_status()
@@ -43,6 +50,9 @@ def resolve_social_app_provider_config(social_app: SocialApp) -> dict:
 
 
 def _fetch_and_cache_keys(cache_key: str, keys_url: str) -> dict:
+    # Guarded at every fetch, not just registration: the jwks_uri comes from
+    # the discovery document the remote server returns, not from the admin.
+    assert_public_url_unless_dev(keys_url)
     with get_adapter().get_requests_session() as sess:
         response = sess.get(keys_url, timeout=REQUEST_TIMEOUT)
         response.raise_for_status()
@@ -127,7 +137,12 @@ def register_social_app(
     )
     try:
         check_social_app_live(social_app)
-    except (requests.RequestException, KeyError) as e:
+    except (
+        requests.RequestException,
+        KeyError,
+        BlockedRequestError,
+        DnsLookupError,
+    ) as e:
         raise DjangoValidationError(
             f"Could not verify the identity provider: {e}"
         ) from e
@@ -173,7 +188,12 @@ def update_social_app(
     if connection_changed:
         try:
             check_social_app_live(social_app)
-        except (requests.RequestException, KeyError) as e:
+        except (
+            requests.RequestException,
+            KeyError,
+            BlockedRequestError,
+            DnsLookupError,
+        ) as e:
             raise DjangoValidationError(
                 f"Could not verify the identity provider: {e}"
             ) from e

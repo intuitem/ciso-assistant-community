@@ -279,6 +279,22 @@ class ServiceAccountWriteSerializer(serializers.Serializer):
                     "social_app and federated_subject are only valid for "
                     "federated service accounts."
                 )
+        else:
+            # Partial update: a federated account may re-point its identity
+            # but never unset it (a null social_app would crash the live
+            # check; a null subject would create an account any sub-less
+            # token could match).
+            instance = self.context.get("instance")
+            if (
+                instance is not None
+                and instance.identity_source == ServiceAccount.IdentitySource.FEDERATED
+            ):
+                for field in ("social_app", "federated_subject"):
+                    if field in attrs and not attrs[field]:
+                        raise serializers.ValidationError(
+                            "Federated service accounts require both social_app "
+                            "and federated_subject."
+                        )
         return attrs
 
 

@@ -1,5 +1,7 @@
 """Service account authentication."""
 
+from datetime import date
+
 import jwt
 import requests
 from allauth.idp.oidc.contrib.rest_framework.authentication import (
@@ -9,6 +11,7 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Error
 from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
 
+from core.net_safety import BlockedRequestError, DnsLookupError
 from iam.models import ServiceAccount
 from iam.oidc_federation import (
     resolve_social_app_provider_config,
@@ -59,31 +62,53 @@ class FederatedServiceAccountAuthentication(BaseAuthentication):
         if not aud_candidates:
             return None
         unverified_subject = unverified.get("sub")
+        if not unverified_subject:
+            return None
 
-        service_account = (
+        # client_id uniqueness across SocialApps is application-enforced, not
+        # a DB constraint, so don't assume a single match: verify against each
+        # candidate's own provider and keep the first that checks out.
+        candidates = list(
             ServiceAccount.objects.filter(
                 identity_source=ServiceAccount.IdentitySource.FEDERATED,
                 social_app__client_id__in=aud_candidates,
                 federated_subject=unverified_subject,
             )
             .select_related("social_app", "user")
-            .first()
+            .order_by("created_at")
         )
-        if service_account is None:
-            return None
+        # Unknown (client_id, subject) pairs get the same failure as a bad
+        # token on a registered one, so an unauthenticated caller can't probe
+        # which pairs exist.
+        if not candidates:
+            raise exceptions.AuthenticationFailed("Invalid token.")
 
-        try:
-            provider_config = resolve_social_app_provider_config(
-                service_account.social_app
-            )
-            claims = verify_and_decode_cached(
-                credential=token,
-                keys_url=provider_config["jwks_uri"],
-                issuer=provider_config["issuer"],
-                audience=[service_account.social_app.client_id],
-            )
-        except (OAuth2Error, KeyError, requests.RequestException) as error:
-            raise exceptions.AuthenticationFailed("Invalid token.") from error
+        service_account = None
+        claims = None
+        last_error = None
+        for candidate in candidates:
+            try:
+                provider_config = resolve_social_app_provider_config(
+                    candidate.social_app
+                )
+                claims = verify_and_decode_cached(
+                    credential=token,
+                    keys_url=provider_config["jwks_uri"],
+                    issuer=provider_config["issuer"],
+                    audience=[candidate.social_app.client_id],
+                )
+                service_account = candidate
+                break
+            except (
+                OAuth2Error,
+                KeyError,
+                requests.RequestException,
+                BlockedRequestError,
+                DnsLookupError,
+            ) as error:
+                last_error = error
+        if service_account is None:
+            raise exceptions.AuthenticationFailed("Invalid token.") from last_error
 
         if claims.get("sub") != service_account.federated_subject:
             raise exceptions.AuthenticationFailed(
@@ -91,6 +116,14 @@ class FederatedServiceAccountAuthentication(BaseAuthentication):
             )
         if not service_account.is_active or not service_account.user.is_active:
             raise exceptions.AuthenticationFailed("Service account is inactive.")
+        # The daily deactivation cron leaves a window between expiry_date
+        # passing and is_active flipping; unlike the local path there is no
+        # token-revocation backstop here, so enforce expiry directly.
+        if (
+            service_account.expiry_date is not None
+            and service_account.expiry_date < date.today()
+        ):
+            raise exceptions.AuthenticationFailed("Service account has expired.")
 
         return (service_account.user, token)
 
