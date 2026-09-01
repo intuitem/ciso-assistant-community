@@ -95,7 +95,14 @@
 	}
 
 	onMount(() => {
-		if (!lowerBound || !upperBound || lowerBound >= upperBound) {
+		if (
+			!lowerBound ||
+			!upperBound ||
+			!Number.isFinite(lowerBound) ||
+			!Number.isFinite(upperBound) ||
+			lowerBound <= 0 ||
+			lowerBound >= upperBound
+		) {
 			return;
 		}
 		let dispose: (() => void) | undefined;
