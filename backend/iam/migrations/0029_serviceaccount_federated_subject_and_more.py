@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("allauth_idp_oidc", "0003_client_allow_uri_wildcards"),
-        ("iam", "0027_cleanup_stray_domain_iam_groups"),
+        ("iam", "0028_idpgroup_source_user_is_jit_provisioned"),
         ("socialaccount", "0006_alter_socialaccount_extra_data"),
     ]
 
