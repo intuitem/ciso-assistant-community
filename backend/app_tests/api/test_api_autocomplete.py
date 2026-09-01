@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from core.models import Threat
-from iam.models import Folder
+from iam.models import Folder, UserGroup
 
 
 def _rows(response):
@@ -87,3 +87,34 @@ class TestGenericAutocomplete:
             return row["folder"]
 
         assert folder_of(auto_resp) == folder_of(list_resp)
+
+    def test_user_group_autocomplete_honors_search(self, authenticated_client):
+        # UserGroupViewSet has no SearchFilter: search is implemented by the
+        # in-memory UserGroupFilter, which must apply to autocomplete exactly
+        # like list — otherwise lazy pickers ignore the typed term.
+        root = Folder.get_root_folder()
+        UserGroup.objects.create(name="Blue Team", folder=root)
+        UserGroup.objects.create(name="Red Team", folder=root)
+
+        response = authenticated_client.get(
+            reverse("user-groups-autocomplete"), {"search": "blue"}
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        labels = [r["str"] for r in _rows(response)]
+        assert any("Blue Team" in label for label in labels)
+        assert not any("Red Team" in label for label in labels)
+
+    def test_user_group_autocomplete_id_hydration(self, authenticated_client):
+        # ?id= hydration must keep working now that the in-memory filter runs
+        # on the autocomplete action (it turns the queryset into a list).
+        root = Folder.get_root_folder()
+        target = UserGroup.objects.create(name="Hydrate Me", folder=root)
+        UserGroup.objects.create(name="Not Me", folder=root)
+
+        response = authenticated_client.get(
+            reverse("user-groups-autocomplete"), {"id": str(target.id)}
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert [r["id"] for r in _rows(response)] == [str(target.id)]

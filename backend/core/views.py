@@ -870,12 +870,14 @@ class AutocompleteMixin:
 
     @action(detail=False, name="Lightweight autocomplete search")
     def autocomplete(self, request):
-        qs = self.filter_queryset(self.get_queryset())
+        qs = self.get_queryset()
         # The autocomplete serializer nests the folder when the model has one.
         if any(f.name == "folder" and f.is_relation for f in self.model._meta.fields):
             qs = qs.select_related("folder")
         # Selected-item hydration passes ?id=a,b,c — honor it even when the
-        # model's filterset does not declare an id filter.
+        # model's filterset does not declare an id filter. Applied before
+        # filter_queryset: the in-memory filters (translated-name viewsets)
+        # return plain lists, which no longer support .filter().
         ids = request.query_params.get("id")
         if ids:
             tokens = [t for t in ids.split(",") if t]
@@ -890,6 +892,7 @@ class AutocompleteMixin:
                         {"id": "expected a comma-separated id list"}
                     )
             qs = qs.filter(id__in=parsed)
+        qs = self.filter_queryset(qs)
         page = self.paginate_queryset(qs)
         objects = page if page is not None else qs
         serializer = self.get_autocomplete_serializer_class()(objects, many=True)
@@ -7616,7 +7619,9 @@ class TranslatedNameOrderingFilter(SmartOrderingFilter):
         return [f for f in ordering if f.lstrip("-") not in ("pk", "id")]
 
     def filter_queryset(self, request, queryset, view):
-        if getattr(view, "action", None) != "list":
+        # autocomplete serves the same rows to lazy pickers and must get the
+        # same in-memory search and stable ordering as list.
+        if getattr(view, "action", None) not in ("list", "autocomplete"):
             return queryset
 
         ordering = self._requested_ordering(request, queryset, view)
@@ -7639,7 +7644,9 @@ class RoleFilter(TranslatedNameOrderingFilter):
     translated_ordering_field = "name"
 
     def filter_queryset(self, request, queryset, view):
-        if getattr(view, "action", None) != "list":
+        # autocomplete serves the same rows to lazy pickers and must get the
+        # same in-memory search and stable ordering as list.
+        if getattr(view, "action", None) not in ("list", "autocomplete"):
             return queryset
 
         data = list(queryset)
@@ -7691,7 +7698,9 @@ class UserGroupFilter(TranslatedNameOrderingFilter):
         return path + (str(obj).casefold(),)
 
     def filter_queryset(self, request, queryset, view):
-        if getattr(view, "action", None) != "list":
+        # autocomplete serves the same rows to lazy pickers and must get the
+        # same in-memory search and stable ordering as list.
+        if getattr(view, "action", None) not in ("list", "autocomplete"):
             return queryset
 
         data = list(queryset)
