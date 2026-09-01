@@ -39,14 +39,14 @@
 		if (form?.success) {
 			toastStore.trigger({
 				message: m.conversionSuccessful(),
-				background: 'variant-filled-success'
+				background: 'preset-filled-success-500'
 			});
 			// Redirect to the newly created quantitative risk study
 			goto(`/quantitative-risk-studies/${form.quantitative_risk_study_id}`);
 		} else if (form?.error) {
 			toastStore.trigger({
 				message: form.error,
-				background: 'variant-filled-error'
+				background: 'preset-filled-error-500'
 			});
 			isSubmitting = false;
 		}
@@ -61,7 +61,7 @@
 		if (missingProbabilities.length > 0) {
 			toastStore.trigger({
 				message: m.allProbabilityValuesMustBeProvided(),
-				background: 'variant-filled-error'
+				background: 'preset-filled-error-500'
 			});
 			return null;
 		}
@@ -74,7 +74,7 @@
 		if (missingImpacts.length > 0) {
 			toastStore.trigger({
 				message: m.allImpactValuesMustBeProvided(),
-				background: 'variant-filled-error'
+				background: 'preset-filled-error-500'
 			});
 			return null;
 		}
@@ -87,7 +87,7 @@
 					message: m.probabilityMustBeBetweenZeroAndHundred({
 						level: probabilityOptions[index].name
 					}),
-					background: 'variant-filled-error'
+					background: 'preset-filled-error-500'
 				});
 				return null;
 			}
@@ -104,7 +104,7 @@
 						current: probabilityOptions[i].name,
 						previous: probabilityOptions[i - 1].name
 					}),
-					background: 'variant-filled-error'
+					background: 'preset-filled-error-500'
 				});
 				return null;
 			}
@@ -118,7 +118,7 @@
 					message: m.impactMustBeGreaterThanZero({
 						level: impactOptions[index].name
 					}),
-					background: 'variant-filled-error'
+					background: 'preset-filled-error-500'
 				});
 				return null;
 			}
@@ -135,7 +135,7 @@
 						current: impactOptions[i].name,
 						previous: impactOptions[i - 1].name
 					}),
-					background: 'variant-filled-error'
+					background: 'preset-filled-error-500'
 				});
 				return null;
 			}
@@ -145,7 +145,7 @@
 		if (!lossThreshold || parseFloat(lossThreshold) <= 0) {
 			toastStore.trigger({
 				message: m.pleaseProvideValidLossThreshold(),
-				background: 'variant-filled-error'
+				background: 'preset-filled-error-500'
 			});
 			return null;
 		}

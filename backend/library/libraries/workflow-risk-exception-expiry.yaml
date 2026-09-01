@@ -1,0 +1,93 @@
+urn: urn:intuitem:risk:library:workflow-risk-exception-expiry
+locale: en
+ref_id: workflow-risk-exception-expiry
+name: Security exceptions past their date — mark expired
+description: Marks exceptions whose expiration date has passed as expired, and mails the list. Expiry
+  is a fact about a date; granting or refusing an exception stays human, and the engine refuses those
+  values anyway.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-risk-exception-expiry:workflow:exception-expiry
+    schema_version: 1
+    ref_id: exception-expiry
+    name: Security exceptions past their date — mark expired
+    description: Marks exceptions whose expiration date has passed as expired, and mails the list. Expiry
+      is a fact about a date; granting or refusing an exception stays human, and the engine refuses those
+      values anyway.
+    graph:
+      variables:
+      - key: notify_emails
+        type: string
+        default_value: security@example.com
+      nodes:
+      - ref: every_morning
+        type: trigger
+        label: Every day 06:00
+        trigger_config:
+          type: schedule
+          cron_expression: 0 6 * * *
+          timezone: UTC
+      - ref: fetch_lapsed
+        type: action
+        label: Lapsed exceptions
+        action_config:
+          type: read_objects
+          model: security_exception
+          mode: list
+          order_by: expiration_date
+          limit: 50
+          filters:
+            operator: and
+            conditions:
+            - field: expiration_date
+              op: lte
+              value: '{{today}}'
+            - field: status
+              op: not_in
+              value: expired,deprecated
+      - ref: per_exception
+        type: loop
+        label: One per exception
+        loop_config:
+          collection: '{{nodes.fetch_lapsed.results}}'
+          collect: '{{item.name}}'
+          on_item_error: continue
+      - ref: expire_it
+        type: action
+        label: Mark it expired
+        action_config:
+          type: update_object
+          model: security_exception
+          id: '{{item.id}}'
+          fields:
+            status: expired
+      - ref: send_digest
+        type: action
+        label: Email what expired
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Security exceptions expired: {{nodes.fetch_lapsed.count}}'
+          body: 'Expired on {{today}}: {{nodes.per_exception.results}}'
+      - ref: done
+        type: end
+      edges:
+      - source: every_morning
+        target: fetch_lapsed
+      - source: fetch_lapsed
+        target: per_exception
+      - source: per_exception
+        target: expire_it
+        source_port: each
+      - source: expire_it
+        target: per_exception
+      - source: per_exception
+        target: send_digest
+        source_port: done
+      - source: send_digest
+        target: done

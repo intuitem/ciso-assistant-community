@@ -1,6 +1,7 @@
 import type { z } from 'zod';
 import type { ModelMapEntry } from './crud';
 import type { RiskScenarioSchema } from './schemas';
+import type { ThemeMode } from './theme';
 
 export interface User {
 	id: string;
@@ -26,6 +27,7 @@ export interface User {
 	root_folder_id: string;
 	preferences: {
 		lang?: string;
+		ui?: { theme?: ThemeMode };
 	};
 }
 

@@ -249,7 +249,8 @@
 						{(isTranslatingMeta && metaTranslations[activeLang]?.name) || name || matrix.ref_id}
 					</h2>
 					{#if unsaved}
-						<span class="badge variant-filled-warning text-xs">{m.lbMatrixUnsavedChanges()}</span>
+						<span class="badge preset-filled-warning-500 text-xs">{m.lbMatrixUnsavedChanges()}</span
+						>
 					{/if}
 				</div>
 				<p class="text-xs font-mono text-surface-500 mt-1">{matrix.urn}</p>
@@ -257,7 +258,7 @@
 			<div class="flex items-center gap-2">
 				<button
 					type="button"
-					class="btn btn-sm variant-filled-primary"
+					class="btn btn-sm preset-filled-primary-500"
 					onclick={save}
 					disabled={saving}
 				>
