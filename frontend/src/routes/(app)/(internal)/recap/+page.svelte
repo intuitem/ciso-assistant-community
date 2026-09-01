@@ -120,7 +120,9 @@
 												<Progress
 													value={formatScoreValue(
 														assessment.global_score.maturity_score,
-														assessment.global_score.max_score
+														assessment.global_score.max_score,
+														false,
+														assessment.global_score.min_score
 													)}
 													min={0}
 													max={100}
@@ -130,7 +132,9 @@
 														<Progress.CircleRange
 															class={displayScoreColor(
 																assessment.global_score.maturity_score,
-																assessment.global_score.max_score
+																assessment.global_score.max_score,
+																false,
+																assessment.global_score.min_score
 															)}
 														/>
 													</Progress.Circle>

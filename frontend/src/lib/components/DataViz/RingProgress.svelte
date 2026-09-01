@@ -48,7 +48,7 @@
 
 			// Capture values at mount time to avoid reactive context issues in ECharts callbacks
 			const range = max - min;
-			const percentage = range > 0 ? ((value - min) / range) * 100 : 0;
+			const percentage = range > 0 ? Math.min(100, Math.max(0, ((value - min) / range) * 100)) : 0;
 			const displayValue = Math.round(value * 10) / 10;
 
 			dispose = mountThemeAwareChart(echarts, el, () => {

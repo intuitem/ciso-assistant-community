@@ -124,6 +124,8 @@ function toastService() {
 		trigger: (toast: ToastSettings) => {
 			const id: string = randomUUID();
 			update((tStore) => {
+				// a page with many tables can fail N times at once; show it once
+				if (tStore.some((t) => t.message === toast.message)) return tStore;
 				// Trigger Callback
 				if (toast && toast.callback) toast.callback({ id, status: 'queued' });
 				// activate autohide when dismiss button is hidden.

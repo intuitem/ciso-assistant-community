@@ -388,11 +388,11 @@
 										? Object.values(tableSource.body)
 										: Object.keys(tableSource.body)
 							},
-			featureFlags: page.data?.featureflags
-		}).catch((error) => {
-			console.error(error);
-			toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
-			return [];
+			featureFlags: page.data?.featureflags,
+			onError: (error) => {
+				console.error(error);
+				toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
+			}
 		})
 	);
 
@@ -901,11 +901,7 @@
 		</div>
 	{/if}
 	<!-- Table -->
-	<table
-		class="table caption-bottom {classesTable}"
-		class:table-interactive={interactive}
-		role="grid"
-	>
+	<table class="table caption-bottom {classesTable}" class:table-interactive={interactive}>
 		<thead class="table-head {regionHead}">
 			<tr>
 				{#if hasBatchActions}
@@ -964,13 +960,11 @@
 								onclick={(e) => onRowClick(e, rowIndex)}
 								onkeydown={(e) => onRowKeydown(e, rowIndex)}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
-								aria-rowindex={rowIndex + 1}
 								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer"
 							>
 								{#if hasBatchActions}
 									<td
 										class="group/check w-10 text-center cursor-pointer"
-										role="gridcell"
 										onclick={(e) => {
 											e.stopPropagation();
 											if (meta?.id) toggleRowSelection(meta.id);
@@ -992,7 +986,7 @@
 								{#each renderColumnKeys as key (key)}
 									{@const value = row[key]}
 									{@const component = fieldComponentMap[key]}
-									<td role="gridcell">
+									<td>
 										<div class={regionCell}>
 											{#if component && browser}
 												{@const CellComponent = component}
@@ -1186,7 +1180,7 @@
 									</td>
 								{/each}
 								{#if displayActions}
-									<td class="text-end {regionCell}" role="gridcell">
+									<td class="text-end {regionCell}">
 										{#if actions}{@render actions({
 												meta: row.meta
 											})}{:else if row.meta[identifierField]}

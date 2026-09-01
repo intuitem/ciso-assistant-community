@@ -9,6 +9,7 @@ export interface LoadTableDataParams {
 	endpoint: string;
 	fields?: { head: string[]; body: string[] };
 	featureFlags?: Record<string, boolean>;
+	onError?: (error: unknown) => void;
 }
 
 export const loadTableData = async ({
@@ -16,7 +17,8 @@ export const loadTableData = async ({
 	URLModel,
 	endpoint,
 	fields,
-	featureFlags = {}
+	featureFlags = {},
+	onError
 }: LoadTableDataParams) => {
 	const url = new URL(endpoint, window.location.origin);
 	const params = new URLSearchParams(url.search);
@@ -25,11 +27,16 @@ export const loadTableData = async ({
 	newParams.forEach((value, key) => params.append(key, value));
 	url.search = params.toString();
 
-	const res = await fetch(url.toString());
-	if (!res.ok) {
-		throw new Error(`Failed to load ${URLModel}: ${res.status}`);
+	let response;
+	try {
+		const res = await fetch(url.toString());
+		if (!res.ok) throw new Error(`Failed to load ${URLModel}: ${res.status}`);
+		response = await res.json();
+	} catch (error) {
+		state.setTotalRows(0);
+		onError?.(error);
+		return [];
 	}
-	const response = await res.json();
 	state.setTotalRows(response.count);
 
 	const baseFields = getListViewFields({ key: URLModel, featureFlags, includeOptional: true });
