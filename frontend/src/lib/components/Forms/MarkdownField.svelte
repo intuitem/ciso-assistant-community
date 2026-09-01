@@ -166,7 +166,7 @@
 				<button
 					type="button"
 					data-testid="markdown-edit-btn-{field}"
-					class="btn btn-sm {!showPreview ? 'variant-filled-primary' : 'variant-soft'}"
+					class="btn btn-sm {!showPreview ? 'preset-filled-primary-500' : 'preset-tonal'}"
 					onclick={() => (showPreview = false)}
 				>
 					<i class="fas fa-edit mr-1"></i>
@@ -174,7 +174,7 @@
 				</button>
 				<button
 					type="button"
-					class="btn btn-sm {showPreview ? 'variant-filled-primary' : 'variant-soft'}"
+					class="btn btn-sm {showPreview ? 'preset-filled-primary-500' : 'preset-tonal'}"
 					onclick={() => (showPreview = true)}
 				>
 					<i class="fas fa-eye mr-1"></i>
@@ -195,7 +195,7 @@
 			{#each TOOLBAR as btn (btn.icon)}
 				<button
 					type="button"
-					class="btn btn-sm variant-soft px-2"
+					class="btn btn-sm preset-tonal px-2"
 					title={btn.label()}
 					aria-label={btn.label()}
 					onclick={btn.action}

@@ -309,7 +309,7 @@
 			<p class="text-surface-600-400 mt-2">{m.advancedAnalysisMetrics()}</p>
 		</div>
 		<button
-			class="btn variant-ghost-surface"
+			class="btn preset-outlined-surface-500"
 			on:click={() => goto(`/quantitative-risk-studies/${$page.params.id}`)}
 		>
 			<i class="fa-solid fa-arrow-left mr-2"></i>
@@ -434,7 +434,7 @@
 							</span>
 							<div class="relative">
 								<button
-									class="btn btn-sm variant-ghost-surface column-controls-button"
+									class="btn btn-sm preset-outlined-surface-500 column-controls-button"
 									on:click={() => (showColumnControls = !showColumnControls)}
 									title="Show/Hide Columns"
 								>
@@ -458,14 +458,14 @@
 
 										<div class="flex gap-2 mb-3">
 											<button
-												class="btn btn-sm variant-ghost-primary"
+												class="btn btn-sm preset-outlined-primary-500"
 												on:click={() => toggleAllColumns(true)}
 												disabled={getVisibleColumnsCount() === allColumns.length}
 											>
 												{m.showAll()}
 											</button>
 											<button
-												class="btn btn-sm variant-ghost-error"
+												class="btn btn-sm preset-outlined-error-500"
 												on:click={() => toggleAllColumns(false)}
 												disabled={getVisibleColumnsCount() <= 1}
 											>

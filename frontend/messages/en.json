@@ -482,7 +482,7 @@
 	"exportButton": "Export",
 	"exportOptionsTitle": "Export options",
 	"exportRequirementsData": "Requirements data",
-	"exportRequirementsDataDesc": "Flat list of requirements with scores and observations",
+	"exportRequirementsDataDesc": "Flat list of requirements with scores, observations and answers",
 	"exportRequirementsWorkbook": "Requirements workbook",
 	"exportRequirementsWorkbookDesc": "Full data including answers, scoring and progress",
 	"exportExecutiveSummary": "Executive summary",
