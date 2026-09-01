@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+
+	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type * as echarts from 'echarts';
 	const symbolSizeOffset = 10;
@@ -195,44 +197,52 @@
 		}
 	};
 
-	onMount(async () => {
-		const echarts = await import('echarts');
-		const element = document.getElementById(chart_id);
+	onMount(() => {
+		let dispose: (() => void) | undefined;
+		let active = true;
+		(async () => {
+			const echarts = await import('echarts');
+			if (!active) return;
+			const element = document.getElementById(chart_id);
 
-		if (!element) {
-			console.error(`Element with id ${chart_id} not found`);
-			return;
-		}
-
-		chart = echarts.init(
-			element,
-			document.documentElement.classList.contains('dark') ? 'dark' : null
-		);
-		const options = getChartOptions();
-		options.backgroundColor = 'transparent';
-		chart.setOption(options);
-
-		chart.on('click', (params) => {
-			if (params.dataType === 'node') {
-				handleNodeEmphasis(params.data.id);
-			} else {
-				handleNodeEmphasis(null);
+			if (!element) {
+				console.error(`Element with id ${chart_id} not found`);
+				return;
 			}
-		});
 
-		const handleResize = () => {
-			clearTimeout(resizeTimeout);
-			resizeTimeout = setTimeout(() => {
-				chart?.resize();
-			}, 250);
-		};
+			const disposeChart = mountThemeAwareChart(echarts, element, () => getChartOptions(), {
+				rendererOpts: {}, // canvas: this layout is too heavy for svg
+				manageResize: false, // the debounced handler below owns resizing
+				onChart: (c: any) => {
+					chart = c;
+					c.on('click', (params: any) => {
+						if (params.dataType === 'node') {
+							handleNodeEmphasis(params.data.id);
+						} else {
+							handleNodeEmphasis(null);
+						}
+					});
+				}
+			});
 
-		window.addEventListener('resize', handleResize);
+			const handleResize = () => {
+				clearTimeout(resizeTimeout);
+				resizeTimeout = setTimeout(() => {
+					chart?.resize();
+				}, 250);
+			};
 
+			window.addEventListener('resize', handleResize);
+
+			dispose = () => {
+				window.removeEventListener('resize', handleResize);
+				clearTimeout(resizeTimeout);
+				disposeChart();
+			};
+		})();
 		return () => {
-			window.removeEventListener('resize', handleResize);
-			clearTimeout(resizeTimeout);
-			chart?.dispose();
+			active = false;
+			dispose?.();
 		};
 	});
 

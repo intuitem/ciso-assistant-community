@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
 	import RadarChart from '$lib/components/Chart/RadarChart.svelte';
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
@@ -28,74 +29,66 @@
 		el: HTMLElement,
 		params: { timeline: any[]; colors: Record<string, string> }
 	) {
-		let chart: any;
-		let resizeHandler: (() => void) | null = null;
+		let dispose: (() => void) | undefined;
+		let active = true;
 
 		import('echarts').then((echarts) => {
-			if (!el.isConnected) return;
-			chart = echarts.init(
-				el,
-				document.documentElement.classList.contains('dark') ? 'dark' : null,
-				{ renderer: 'svg' }
-			);
+			if (!active || !el.isConnected) return;
+			dispose = mountThemeAwareChart(echarts, el, () => {
+				const { timeline, colors } = params;
+				const dates = timeline.map((t: any) => t.date);
 
-			const { timeline, colors } = params;
-			const dates = timeline.map((t: any) => t.date);
-
-			// Collect all risk level names across all snapshots
-			const levelSet = new Set<string>();
-			for (const t of timeline) {
-				for (const key of Object.keys(t.current_level_breakdown || {})) {
-					levelSet.add(key);
+				// Collect all risk level names across all snapshots
+				const levelSet = new Set<string>();
+				for (const t of timeline) {
+					for (const key of Object.keys(t.current_level_breakdown || {})) {
+						levelSet.add(key);
+					}
 				}
-			}
-			const levelNames = [...levelSet];
+				const levelNames = [...levelSet];
 
-			const series = levelNames.map((level) => ({
-				name: safeTranslate(level),
-				type: 'line' as const,
-				stack: 'risk',
-				smooth: true,
-				showSymbol: false,
-				areaStyle: { opacity: 0.6 },
-				lineStyle: { width: 1.5 },
-				emphasis: { focus: 'series' as const },
-				data: timeline.map((t: any) => t.current_level_breakdown?.[level] || 0),
-				itemStyle: { color: colors[level] ?? '#6b7280' }
-			}));
-
-			chart.setOption({
-				backgroundColor: 'transparent',
-				tooltip: {
-					trigger: 'axis',
-					backgroundColor: '#1e293b',
-					borderColor: '#334155',
-					textStyle: { color: '#f1f5f9', fontSize: 12 }
-				},
-				legend: { top: 0, textStyle: { fontSize: 11, color: '#64748b' } },
-				grid: { left: 45, right: 16, top: 36, bottom: 28 },
-				xAxis: {
-					type: 'category',
-					data: dates,
-					axisLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.3)' } },
-					axisLabel: { color: '#94a3b8', fontSize: 10 }
-				},
-				yAxis: {
-					type: 'value',
-					splitLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.2)' } },
-					axisLabel: { color: '#94a3b8', fontSize: 10 }
-				},
-				series
+				const series = levelNames.map((level) => ({
+					name: safeTranslate(level),
+					type: 'line' as const,
+					stack: 'risk',
+					smooth: true,
+					showSymbol: false,
+					areaStyle: { opacity: 0.6 },
+					lineStyle: { width: 1.5 },
+					emphasis: { focus: 'series' as const },
+					data: timeline.map((t: any) => t.current_level_breakdown?.[level] || 0),
+					itemStyle: { color: colors[level] ?? '#6b7280' }
+				}));
+				return {
+					backgroundColor: 'transparent',
+					tooltip: {
+						trigger: 'axis',
+						backgroundColor: '#1e293b',
+						borderColor: '#334155',
+						textStyle: { color: '#f1f5f9', fontSize: 12 }
+					},
+					legend: { top: 0, textStyle: { fontSize: 11, color: '#64748b' } },
+					grid: { left: 45, right: 16, top: 36, bottom: 28 },
+					xAxis: {
+						type: 'category',
+						data: dates,
+						axisLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.3)' } },
+						axisLabel: { color: '#94a3b8', fontSize: 10 }
+					},
+					yAxis: {
+						type: 'value',
+						splitLine: { lineStyle: { color: 'rgba(148, 163, 184, 0.2)' } },
+						axisLabel: { color: '#94a3b8', fontSize: 10 }
+					},
+					series
+				};
 			});
-
-			resizeHandler = () => chart.resize();
-			window.addEventListener('resize', resizeHandler);
 		});
 
 		return {
 			destroy() {
-				if (resizeHandler) window.removeEventListener('resize', resizeHandler);
-				if (chart) chart.dispose();
+				active = false;
+				dispose?.();
 			}
 		};
 	}

@@ -128,6 +128,7 @@ for PORT in $MAILER_WEB_SERVER_PORT $MAILER_SMTP_SERVER_PORT; do
 done
 
 cleanup() {
+  local status="${1:-1}"
   echo -e "\nCleaning up..."
   if [[ -n "$BACKEND_PID" ]]; then
     kill $BACKEND_PID >/dev/null 2>&1
@@ -164,7 +165,7 @@ cleanup() {
   # This must be at the end of the cleanup as the sudo command can block the script
   trap - SIGINT SIGTERM EXIT
   echo "Cleanup done"
-  exit 0
+  exit "$status"
 }
 
 django_args() {
@@ -211,11 +212,16 @@ run_tests() {
 }
 
 finish() {
-  echo "Test successfully completed!"
-  cleanup
+  local status=$?
+  if [[ $status -eq 0 ]]; then
+    echo "Test successfully completed!"
+  else
+    echo "Tests failed (exit code $status)"
+  fi
+  cleanup "$status"
 }
 
-trap cleanup SIGINT SIGTERM
+trap 'cleanup 130' SIGINT SIGTERM
 trap finish EXIT
 
 if [[ ! " ${SCRIPT_SHORT_ARGS[@]} " =~ " -m " ]]; then

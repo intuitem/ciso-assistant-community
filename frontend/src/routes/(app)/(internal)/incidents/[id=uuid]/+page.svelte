@@ -43,6 +43,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
@@ -101,6 +102,7 @@
 		}
 	);
 	const rows = handler.getRows();
+	const toastStore = getToastStore();
 	const field = data.model.reverseForeignKeyFields.find(
 		(item) => item.urlModel === 'timeline-entries'
 	);
@@ -109,7 +111,11 @@
 			state,
 			URLModel: 'timeline-entries',
 			endpoint: `/timeline-entries?incident=${data.data.id}`,
-			fields: listViewFields['timeline-entries'].body.filter((v) => v !== field.field)
+			fields: listViewFields['timeline-entries'].body.filter((v) => v !== field.field),
+			onError: (error) => {
+				console.error(error);
+				toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
+			}
 		})
 	);
 

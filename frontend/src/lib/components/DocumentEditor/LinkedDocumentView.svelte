@@ -252,13 +252,13 @@
 					<input type="url" bind:value={newLangUrl} class="input mt-1" placeholder="https://…" />
 				</label>
 				<button
-					class="btn btn-sm variant-filled-primary"
+					class="btn btn-sm preset-filled-primary-500"
 					disabled={busy || !newLocale || !newLangUrl.trim()}
 					onclick={addLanguage}
 				>
 					{m.add()}
 				</button>
-				<button class="btn btn-sm variant-soft" onclick={() => (addingLang = false)}>
+				<button class="btn btn-sm preset-tonal" onclick={() => (addingLang = false)}>
 					{m.cancel()}
 				</button>
 			</div>
@@ -274,13 +274,13 @@
 			</label>
 			<div class="flex gap-2">
 				<button
-					class="btn btn-sm variant-filled-primary"
+					class="btn btn-sm preset-filled-primary-500"
 					disabled={busy || !editUrl.trim()}
 					onclick={saveLink}
 				>
 					{m.save()}
 				</button>
-				<button class="btn btn-sm variant-soft" onclick={() => (editing = false)}>
+				<button class="btn btn-sm preset-tonal" onclick={() => (editing = false)}>
 					{m.cancel()}
 				</button>
 			</div>
@@ -290,12 +290,12 @@
 					href={currentUrl}
 					target="_blank"
 					rel="noopener noreferrer"
-					class="btn variant-filled-primary"
+					class="btn preset-filled-primary-500"
 				>
 					<i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>{m.open()}
 				</a>
 				{#if canEditLink}
-					<button class="btn btn-sm variant-soft" disabled={busy} onclick={startEdit}>
+					<button class="btn btn-sm preset-tonal" disabled={busy} onclick={startEdit}>
 						<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
 					</button>
 				{/if}
@@ -306,7 +306,7 @@
 		{:else}
 			<p class="text-sm text-surface-500">{m.noLinkSet()}</p>
 			{#if canEditLink}
-				<button class="btn btn-sm variant-filled-primary" onclick={startEdit}>
+				<button class="btn btn-sm preset-filled-primary-500" onclick={startEdit}>
 					<i class="fa-solid fa-plus mr-2"></i>{m.add()}
 				</button>
 			{/if}
@@ -335,23 +335,27 @@
 		<!-- Lifecycle actions -->
 		<div class="flex flex-wrap items-center gap-2 border-t border-surface-200-800 pt-4">
 			{#if isDraft}
-				<button class="btn btn-sm variant-filled-primary" disabled={busy} onclick={submitForReview}>
+				<button
+					class="btn btn-sm preset-filled-primary-500"
+					disabled={busy}
+					onclick={submitForReview}
+				>
 					{m.submitForReview()}
 				</button>
 			{:else if isInReview}
-				<button class="btn btn-sm variant-filled-success" disabled={busy} onclick={approve}>
+				<button class="btn btn-sm preset-filled-success-500" disabled={busy} onclick={approve}>
 					{m.approve()}
 				</button>
-				<button class="btn btn-sm variant-soft-error" disabled={busy} onclick={requestChanges}>
+				<button class="btn btn-sm preset-tonal-error" disabled={busy} onclick={requestChanges}>
 					{m.requestChanges()}
 				</button>
 			{:else if isValidated}
-				<button class="btn btn-sm variant-filled-success" disabled={busy} onclick={publish}>
+				<button class="btn btn-sm preset-filled-success-500" disabled={busy} onclick={publish}>
 					{m.publish()}
 				</button>
 			{/if}
 			<button
-				class="btn btn-sm variant-soft-error ml-auto"
+				class="btn btn-sm preset-tonal-error ml-auto"
 				disabled={busy}
 				onclick={deleteDocument}
 			>
