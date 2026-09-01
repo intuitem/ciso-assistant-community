@@ -17,14 +17,6 @@ export const load = (async ({ fetch }) => {
 	const storedLibrariesResponse = await fetch(storedLibrariesEndpoint);
 	const storedLibraries = await storedLibrariesResponse.json();
 
-	// `overview` now comes from the serializer on every page; only the
-	// delete gate remains client-derived.
-	const prepareRow = (row: Record<string, any>) => {
-		row.allowDeleteLibrary = row.reference_count && row.reference_count > 0 ? false : true;
-	};
-
-	storedLibraries.results.forEach(prepareRow);
-
 	const makeHeadData = (URLModel) => {
 		return listViewFields[URLModel].body.reduce((obj, key, index) => {
 			obj[key] = listViewFields[URLModel].head[index];

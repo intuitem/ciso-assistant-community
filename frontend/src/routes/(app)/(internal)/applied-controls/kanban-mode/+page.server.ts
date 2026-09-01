@@ -14,8 +14,9 @@ export const load = (async ({ fetch, url }) => {
 	// Get search parameters from the URL to preserve any filters
 	const searchParams = url.searchParams;
 	for (const [key, value] of searchParams.entries()) {
-		// Don't pass through UI-specific parameters to the API
-		if (!['backUrl', 'backLabel'].includes(key)) {
+		// Don't pass through UI-specific parameters to the API, nor paging
+		// params (fetchAllPages appends its own; a stray offset skips rows).
+		if (!['backUrl', 'backLabel', 'limit', 'offset'].includes(key)) {
 			queryParams.append(key, value);
 		}
 	}

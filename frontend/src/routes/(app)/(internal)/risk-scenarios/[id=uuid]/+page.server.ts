@@ -1,6 +1,7 @@
 import type { Actions, PageServerLoad } from './$types';
 
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { headData } from '$lib/utils/table';
 import { fail, superValidate } from 'sveltekit-superforms';
@@ -16,12 +17,10 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 	const objectEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object/`;
 
 	// Depends only on params.id, so start it now and let it overlap the fetches below.
-	const riskAcceptancesPromise = fetch(
+	const riskAcceptancesPromise = fetchAllPages(
+		fetch,
 		`${BASE_API_URL}/risk-acceptances/?risk_scenarios=${params.id}`
-	)
-		.then((res) => (res.ok ? res.json() : { results: [] }))
-		.then((res) => res.results ?? [])
-		.catch(() => []);
+	).catch(() => []);
 
 	const res = await fetch(baseEndpoint);
 	if (!res.ok) {
