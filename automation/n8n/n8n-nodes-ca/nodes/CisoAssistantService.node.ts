@@ -1018,6 +1018,36 @@ export class CisoAssistantService implements INodeType {
         ],
         default: "list",
       },
+      // Shared list options
+      {
+        displayName: "Return All",
+        name: "returnAll",
+        type: "boolean",
+        displayOptions: {
+          show: {
+            operation: ["list", "listUsers"],
+          },
+        },
+        default: false,
+        description:
+          "Whether to return all results or only up to a given limit",
+      },
+      {
+        displayName: "Limit",
+        name: "limit",
+        type: "number",
+        typeOptions: {
+          minValue: 1,
+        },
+        displayOptions: {
+          show: {
+            operation: ["list", "listUsers"],
+            returnAll: [false],
+          },
+        },
+        default: 50,
+        description: "Max number of results to return",
+      },
       // System fields
       {
         displayName: "User Email",
