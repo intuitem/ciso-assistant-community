@@ -164,7 +164,7 @@
 					</button>
 				{/each}
 			</div>
-			<button type="button" class="btn variant-filled-primary btn-sm" onclick={addLevel}>
+			<button type="button" class="btn preset-filled-primary-500 btn-sm" onclick={addLevel}>
 				<i class="fa-solid fa-plus mr-1"></i>
 				{m.addLevel()}
 			</button>
@@ -260,7 +260,7 @@
 						<td class="flex gap-1 items-center">
 							<button
 								type="button"
-								class="btn btn-sm variant-ghost"
+								class="btn btn-sm preset-outlined"
 								disabled={i === 0}
 								onclick={() => moveLevel(i, -1)}
 								title={m.moveUp()}
@@ -270,7 +270,7 @@
 							</button>
 							<button
 								type="button"
-								class="btn btn-sm variant-ghost"
+								class="btn btn-sm preset-outlined"
 								disabled={i === levels.length - 1}
 								onclick={() => moveLevel(i, 1)}
 								title={m.moveDown()}
@@ -280,7 +280,7 @@
 							</button>
 							<button
 								type="button"
-								class="btn btn-sm variant-ghost-error"
+								class="btn btn-sm preset-outlined-error-500"
 								disabled={levels.length <= 2}
 								onclick={() => removeLevel(i)}
 								title={m.removeLevel()}

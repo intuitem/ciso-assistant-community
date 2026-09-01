@@ -203,7 +203,7 @@
 		number: 'preset-filled-success-500',
 		object: 'preset-filled-warning-500',
 		list: 'preset-filled-tertiary-500',
-		image: 'preset-filled-surface-500'
+		image: 'preset-filled-surface-900-100'
 	};
 
 	$effect(() => {
@@ -327,7 +327,7 @@
 									>
 									<span
 										class="badge shrink-0 text-xs {TYPE_BADGE_CLASSES[variable.type] ??
-											'preset-filled-surface-500'}">{variable.type}</span
+											'preset-filled-surface-900-100'}">{variable.type}</span
 									>
 									<span class="text-xs text-surface-600-400">{variable.description}</span>
 								</div>
