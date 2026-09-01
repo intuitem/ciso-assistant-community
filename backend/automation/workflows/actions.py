@@ -476,6 +476,20 @@ def _accessible_folder_ids(folder):
     return ids
 
 
+def _name_scope_folder_ids(folder):
+    """Where a NAME may resolve: the instance folder, its subtree, and the
+    root folder (global referentials such as terminologies live there).
+    Deliberately narrower than _accessible_folder_ids: a name is a fuzzy,
+    often payload-supplied identity, and letting it reach intermediate
+    ancestor domains would silently bind a same-named parent-domain object.
+    Ancestor targets stay reachable — by explicit id or urn."""
+    from iam.models import Folder
+
+    ids = {folder.id, Folder.get_root_folder().id}
+    ids |= {f.id for f in folder.get_sub_folders()}
+    return ids
+
+
 def _construct_audit(kwargs, params, instance):
     """An audit is its requirements: objects.create() alone leaves a shell."""
     from core.utils import build_initial_field_visibility
@@ -1468,8 +1482,10 @@ class UpdateObjectAction(BaseAction):
 def _resolve_reference(model, value, instance, label, constraints=None):
     """A referenced object by id (what the builder's picker supplies), by urn
     (what a shipped library can name, since urns are stable across instances),
-    or by name within reach of this workflow — the only identity a folder-scoped
-    referential like a terminology or a perimeter has.
+    or by name — the only identity a folder-scoped referential like a
+    terminology or a perimeter has. A name only resolves within the workflow's
+    own subtree and the root folder (_name_scope_folder_ids); ids and urns
+    reach ancestors too.
 
     `constraints` narrows the search to what the field itself accepts, so a
     category resolves among categories and not among every terminology.
@@ -1485,7 +1501,7 @@ def _resolve_reference(model, value, instance, label, constraints=None):
     elif get_model_field(model, "name"):
         if get_model_field(model, "folder"):
             queryset = queryset.filter(
-                folder_id__in=_accessible_folder_ids(instance.folder)
+                folder_id__in=_name_scope_folder_ids(instance.folder)
             )
         matches = list(queryset.filter(name__iexact=value)[:2])
     else:

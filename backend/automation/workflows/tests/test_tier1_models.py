@@ -278,6 +278,50 @@ class TestPrivacyRegister:
         )
         assert start_instance(version).status == WorkflowInstance.Status.FAILED
 
+    def test_a_name_does_not_reach_an_ancestor_domain(self):
+        """A name is a fuzzy, often payload-supplied identity: it resolves in
+        the workflow's own subtree (plus root, where global referentials
+        live), never in an intermediate ancestor domain — a same-named
+        parent-domain object must not be silently bound. Ancestor targets
+        stay reachable by explicit id."""
+        parent = make_domain("Parent")
+        child = Folder.objects.create(
+            name="Child", parent_folder=parent, content_type=Folder.ContentType.DOMAIN
+        )
+        perimeter = Perimeter.objects.create(name="P", folder=parent)
+        assessment = RiskAssessment.objects.create(
+            name="Q3 review",
+            perimeter=perimeter,
+            risk_matrix=make_matrix(),
+            folder=parent,
+        )
+        by_name = create_flow(
+            child,
+            {
+                "label": "Add scenario",
+                "type": "create_object",
+                "model": "risk_scenario",
+                "fields": {"name": "Phishing", "risk_assessment": "Q3 review"},
+            },
+        )
+        assert start_instance(by_name).status == WorkflowInstance.Status.FAILED
+        assert not RiskScenario.objects.filter(name="Phishing").exists()
+
+        by_id = create_flow(
+            child,
+            {
+                "label": "Add scenario",
+                "type": "create_object",
+                "model": "risk_scenario",
+                "fields": {
+                    "name": "Phishing",
+                    "risk_assessment": str(assessment.id),
+                },
+            },
+        )
+        assert start_instance(by_id).status == WorkflowInstance.Status.COMPLETED
+        assert RiskScenario.objects.filter(name="Phishing").exists()
+
 
 @pytest.mark.django_db
 class TestCreatedValuesAreFenced:
