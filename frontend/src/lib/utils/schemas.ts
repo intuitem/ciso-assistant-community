@@ -746,6 +746,7 @@ export const FeatureFlagsSchema = z.object({
 	idp_groups: z.boolean().optional(),
 	service_accounts: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
+	workflows: z.boolean().optional(),
 	audit_log_forwarding: z.boolean().optional(),
 	metrology: z.boolean().optional(),
 	personal_data: z.boolean().optional(),
@@ -767,7 +768,8 @@ export const FeatureFlagsSchema = z.object({
 	commitment_management: z.boolean().optional(),
 	findings_from_requirements: z.boolean().optional(),
 	dora: z.boolean().optional(),
-	external_ratings: z.boolean().optional()
+	external_ratings: z.boolean().optional(),
+	jit_provisioning: z.boolean().optional()
 });
 
 export const PortalSettingsSchema = z.object({
@@ -804,6 +806,8 @@ export const SSOSettingsSchema = z.object({
 	is_enabled: z.boolean().default(false).optional(),
 	force_sso: z.boolean().default(false).optional(),
 	slo_enabled: z.boolean().default(false).optional(),
+	jit_provisioning_enabled: z.boolean().default(false).optional(),
+	default_user_groups: z.array(z.string().uuid()).optional(),
 	provider: z.string().default('saml'),
 	provider_id: z.string().optional(),
 	provider_name: z.string().optional(),
@@ -818,6 +822,9 @@ export const SSOSettingsSchema = z.object({
 		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
 		.optional(),
 	attribute_mapping_email: z
+		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
+		.optional(),
+	attribute_mapping_groups: z
 		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
 		.optional(),
 	idp_entity_id: z.string().optional(),

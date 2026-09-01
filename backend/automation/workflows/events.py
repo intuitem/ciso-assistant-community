@@ -85,8 +85,15 @@ def event_key_catalog():
 
 def dispatch_internal_event(event_key, payload, folder_id, origin_depth=0):
     """Match triggers and start workflows. Returns started instances."""
+    from global_settings.utils import ff_is_enabled
+
     from .engine import EngineError, create_instance
     from .tasks import run_instance_task
+
+    if not ff_is_enabled("workflows"):
+        # Flag off means off: application events fall through silently, same
+        # as when no trigger matches.
+        return []
 
     started = []
     triggers = WorkflowTrigger.objects.filter(

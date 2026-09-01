@@ -203,17 +203,24 @@
 	let model = $derived(URL_MODEL_MAP[URLModel]);
 	// Models keeping some fields writable on built-in rows (BUILTIN_EDITABLE_FIELDS).
 	const BUILTIN_EDITABLE_URL_MODELS = ['terminologies', 'entities', 'asset-class'];
+	// A field's flag(s) can be a single flag name or a list (shown if ANY is on).
+	// Hidden only once every listed flag is a known, explicitly-false feature flag.
+	function isFieldHiddenByFeatureFlags(
+		flaggedFields: Record<string, string | string[]> | undefined,
+		key: string
+	) {
+		if (!flaggedFields || !Object.hasOwn(flaggedFields, key)) return false;
+		const flags = ([] as string[]).concat(flaggedFields[key]);
+		return flags.every(
+			(flag) =>
+				Object.hasOwn(page.data?.featureflags ?? {}, flag) &&
+				page.data?.featureflags[flag] === false
+		);
+	}
+
 	const tableSource: TableSource = $derived(
 		Object.keys(source.head)
-			.filter(
-				(key) =>
-					!(
-						model?.flaggedFields &&
-						Object.hasOwn(model.flaggedFields, key) &&
-						Object.hasOwn(page.data?.featureflags, model.flaggedFields[key]) &&
-						page.data?.featureflags[model.flaggedFields[key]] === false
-					)
-			)
+			.filter((key) => !isFieldHiddenByFeatureFlags(model?.flaggedFields, key))
 			.reduce(
 				(acc, key) => {
 					acc.head[key] = source.head[key];

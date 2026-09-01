@@ -4182,9 +4182,11 @@ export function getListViewFields({
 	if (model?.flaggedFields) {
 		const indicesToPop = body
 			.map((field: string, index: number) => {
-				const flag = model.flaggedFields?.[field];
-				// instead of includes, check if featureFlags[flag] is truthy
-				return flag && !featureFlags[flag] ? index : -1;
+				const flags = model.flaggedFields?.[field];
+				if (!flags) return -1;
+				// A field's flag(s) can be a single flag name or a list (shown if ANY is on).
+				const flagList = ([] as string[]).concat(flags);
+				return flagList.every((flag) => !featureFlags[flag]) ? index : -1;
 			})
 			.filter((i) => i !== -1);
 

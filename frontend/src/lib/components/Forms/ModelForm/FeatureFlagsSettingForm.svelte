@@ -128,6 +128,11 @@
 					description: m.validationFlowsDescription()
 				},
 				{
+					field: 'workflows',
+					label: m.workflows(),
+					description: m.workflowsFlagDescription()
+				},
+				{
 					field: 'policy_documents',
 					label: m.policyDocumentsFlag(),
 					description: m.policyDocumentsFlagDescription()
@@ -290,6 +295,11 @@
 					field: 'idp_groups',
 					label: m.idpGroups(),
 					description: m.idpGroupsDescription()
+				},
+				{
+					field: 'jit_provisioning',
+					label: m.jitProvisioning(),
+					description: m.jitProvisioningDescription()
 				},
 				{
 					field: 'service_accounts',

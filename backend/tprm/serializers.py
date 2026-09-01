@@ -459,62 +459,34 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         return locked
 
     def _make_enclave_folder(self, instance):
-        return Folder.objects.create(
-            content_type=Folder.ContentType.ENCLAVE,
-            name=f"{instance.entity.name}/{instance.name}",
-            parent_folder=instance.folder,
-        )
+        from tprm.services import enclave_folder
+
+        return enclave_folder(instance)
 
     def _finalize_linked_audit(self, instance, audit):
         """Shared tail for create/link."""
-        audit.reviewers.set(instance.reviewers.all())
-        self._default_representatives_from_entity(instance)
-        representatives = instance.representatives.all()
-        audit.authors.set(
-            [rep.actor for rep in representatives if hasattr(rep, "actor")]
-        )
-        self._create_requirement_assignment(audit, representatives)
-        instance.compliance_assessment = audit
-        instance.save()
+        from tprm.services import finalize_linked_audit
+
+        finalize_linked_audit(instance, audit)
 
     def _create_audit(self, instance, audit_data):
         if not audit_data.get("framework"):
             raise serializers.ValidationError({"framework": [_("Framework required")]})
 
+        from tprm.services import create_enclave_audit
+
         with transaction.atomic():
             locked = self._lock_instance_without_audit(instance, "create_audit")
-            from core.utils import EVERYONE_EDIT, build_third_party_field_visibility
-
-            # The editor only sends the pills that were touched, so an explicit map
-            # is merged onto the profile rather than replacing it — otherwise moving
-            # one pill would drop every other field back to the internal-audit
-            # defaults and re-expose the auditor's side to the respondent.
-            field_visibility = build_third_party_field_visibility(
-                audit_data["framework"]
+            audit = create_enclave_audit(
+                locked,
+                audit_data["framework"],
+                audit_data["selected_implementation_groups"],
+                field_visibility=audit_data.get("field_visibility"),
             )
-            for key, pair in (audit_data.get("field_visibility") or {}).items():
-                if not isinstance(pair, dict):
-                    continue
-                field_visibility.setdefault(key, dict(EVERYONE_EDIT))
-                field_visibility[key].update(pair)
-
-            # Enclave audits carry no perimeter: the enclave folder, not the
-            # entity assessment's perimeter, governs their placement.
-            audit = ComplianceAssessment.objects.create(
-                name=locked.name,
-                framework=audit_data["framework"],
-                selected_implementation_groups=audit_data[
-                    "selected_implementation_groups"
-                ],
-                field_visibility=field_visibility,
-            )
-
-            enclave = self._make_enclave_folder(instance)
-            audit.folder = enclave
-            audit.save()
-
-            audit.create_requirement_assessments()
-            self._finalize_linked_audit(instance, audit)
+            # The service writes to the locked row; the serializer keeps working
+            # with its own instance, and what follows (respondent assignment)
+            # reads instance.compliance_assessment.
+            instance.compliance_assessment = audit
 
     def _link_existing_audit(self, instance, audit_data):
         with transaction.atomic():
@@ -570,23 +542,9 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             instance.save()
 
     def _sync_requirement_assignment(self, audit, representatives):
-        """Create or update the RequirementAssignment so its actors match the representatives."""
-        actors = [rep.actor for rep in representatives if hasattr(rep, "actor")]
-        assignment = audit.requirement_assignments.first()
-        if assignment is None:
-            if not actors:
-                return
-            requirement_assessments = audit.requirement_assessments.all()
-            if not requirement_assessments.exists():
-                return
-            assignment = RequirementAssignment.objects.create(
-                compliance_assessment=audit,
-                folder=audit.folder,
-            )
-            assignment.actor.set(actors)
-            assignment.requirement_assessments.set(requirement_assessments)
-        else:
-            assignment.actor.set(actors)
+        from tprm.services import sync_requirement_assignment
+
+        sync_requirement_assignment(audit, representatives)
 
     def _create_requirement_assignment(self, audit, representatives):
         self._sync_requirement_assignment(audit, representatives)
@@ -623,23 +581,6 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 if not user.is_third_party:
                     logger.warning("User is not a third-party", user=user)
                 user.user_groups.remove(respondents)
-
-    def _default_representatives_from_entity(self, instance):
-        """Fall back to the entity's own representatives when none were picked.
-
-        The picker already offers exactly these users; leaving it empty produced an
-        assessment nobody could answer — no audit authors, no requirement assignment,
-        and nobody in the enclave's respondent group. Runs only where an audit is
-        created or linked, so clearing the field on an assessment that already has one
-        stays a deliberate clear.
-        """
-        if instance.representatives.exists():
-            return
-        users = User.objects.filter(
-            representative__entity=instance.entity, is_third_party=True
-        ).distinct()
-        if users:
-            instance.representatives.set(users)
 
     def create(self, validated_data):
         audit_data = self._extract_audit_data(validated_data)

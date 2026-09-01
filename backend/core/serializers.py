@@ -2301,6 +2301,7 @@ class IdPGroupWriteSerializer(BaseModelSerializer):
     class Meta:
         model = IdPGroup
         fields = "__all__"
+        read_only_fields = ["source"]
 
 
 class PermissionReadSerializer(BaseModelSerializer):

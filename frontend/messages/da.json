@@ -1970,7 +1970,7 @@
 	"scimTokenGenerationFailed": "Kunne ikke generere SCIM-token",
 	"scimTokenRequiresSso": "SSO skal være aktiveret, før du kan generere et SCIM-token.",
 	"scimTokenNameTooLong": "Navnet må højst være 255 tegn langt.",
-	"errorSsoRequiredForScimUsers": "SSO kan ikke deaktiveres, så længe der findes SCIM-provisionerede brugere uden lokal adgang.",
+	"errorSsoRequiredForManagedUsers": "SSO kan ikke deaktiveres, så længe der findes SCIM-provisionerede eller automatisk provisionerede brugere uden lokal adgang.",
 	"idpGroup": "IdP-gruppe",
 	"idpGroups": "IdP-grupper",
 	"idpGroupsDescription": "Aktivér IdP-gruppeføderation (SCIM-provisionering, IdP-gruppemapninger og IdP-gruppemedlemskaber for brugere).",
@@ -1994,5 +1994,14 @@
 	"gracePeriod": "Overgangsperiode",
 	"gracePeriodHelpText": "Den nuværende hemmelighed fortsætter med at fungere i denne periode efter rotation, så integrationer kan opdateres uden nedetid. Begrænset til 1 måned.",
 	"gracePeriodTooLong": "Overgangsperioden må ikke være længere end 1 måned.",
-	"previousSecretValidUntil": "Den tidligere klienthemmelighed er fortsat gyldig indtil {date}."
+	"previousSecretValidUntil": "Den tidligere klienthemmelighed er fortsat gyldig indtil {date}.",
+	"enableJitProvisioning": "Aktivér automatisk provisionering",
+	"enableJitProvisioningHelpText": "Opret automatisk en konto med standardbrugergrupperne nedenfor for brugere, der logger ind via SSO for første gang.",
+	"defaultUserGroups": "Standardbrugergrupper",
+	"defaultUserGroupsHelpText": "Brugergrupper, der automatisk tildeles brugere oprettet via automatisk provisionering.",
+	"defaultUserGroupsWarning": "Anvendes kun én gang, ved kontooprettelse. Ændring eller fjernelse af denne indstilling senere påvirker ikke brugere, der allerede er provisioneret. Til gruppemedlemskab, der forbliver synkroniseret over tid, skal du i stedet bruge IdP-gruppetilknytning.",
+	"attributeMappingGroups": "Attributtilknytning for grupper",
+	"attributeMappingGroupsHelpText": "Claim-navn(e), der indeholder brugerens IdP-gruppemedlemskaber. Grupper fundet her synkroniseres til IdP-grupper ved hvert login og giver adgang til de CISO Assistant-brugergrupper, som en administrator har tilknyttet dem.",
+	"jitProvisioning": "SSO-automatisk provisionering (JIT)",
+	"jitProvisioningDescription": "Aktivér automatisk oprettelse af konti ved første SSO-login og synkronisering af deres IdP-gruppemedlemskaber, uden krav om SCIM."
 }
