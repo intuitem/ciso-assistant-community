@@ -357,6 +357,7 @@ class TestFolderDefaultRole:
         user: User
         folder: Folder
         parent_folder: Folder
+        default_role: Role
         applied_control: AppliedControl
         default_role_permission: Permission
         user_role_permission: Permission
@@ -413,6 +414,7 @@ class TestFolderDefaultRole:
                 user,
                 folder,
                 parent_folder,
+                default_role,
                 applied_control,
                 default_role_permission,
                 user_role_permission,
@@ -573,4 +575,13 @@ class TestFolderDefaultRole:
             [ctx.folder.id], ctx.default_role_permission
         ).exists(), (
             "The default role permission SHALL NOT be granted if there's no folder.default_role"
+        )
+
+        ctx.folder.default_role = ctx.default_role
+        ctx.folder.save()
+
+        assert not RoleAssignment._get_default_role_allowed_folder_ids(
+            [ctx.parent_folder.id], ctx.default_role_permission
+        ).exists(), (
+            "The default role permission SHALL NOT be granted to ancestor folders."
         )
