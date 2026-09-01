@@ -23,9 +23,7 @@
 		context = 'default'
 	}: Props = $props();
 
-	// A representative is normally added so they can answer questionnaires, which needs
-	// an account. On edit it stays off: one deliberately left without an account must
-	// not grow one just by being saved.
+	// On edit it stays off: one deliberately left without an account must not grow one.
 	let userDefaultApplied = false;
 	$effect(() => {
 		if (userDefaultApplied || context !== 'create') return;

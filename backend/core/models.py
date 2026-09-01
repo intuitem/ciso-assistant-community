@@ -2493,8 +2493,6 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         },
     ]
 
-    # Rating services customers commonly subscribe to. Only labels: a customer adds
-    # their own without a migration, and hides the ones they do not use.
     DEFAULT_ENTITY_SCORE_PROVIDERS = [
         {
             "name": "SecurityScorecard",
@@ -2655,9 +2653,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
 
     @staticmethod
     def _display(value: str) -> str:
-        """Terms are stored lowercase by convention and capitalized for display, but
-        `str.capitalize()` lowercases the rest — which mangles a name that carries its
-        own casing (a product name like SecurityScorecard). Leave those as authored."""
+        """Capitalize lowercase terms; leave names carrying their own casing alone."""
         return value if any(c.isupper() for c in value) else value.capitalize()
 
     @property
@@ -9043,11 +9039,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         NOT_APPLICABLE = "not_applicable", _("Not applicable")
 
     class ReviewState(models.TextChoices):
-        """Per-requirement outcome of a reviewer's pass, so a rework request can name
-        the handful of items that need work instead of bouncing the whole
-        questionnaire back with one note. RESUBMITTED is what the respondent's answer
-        turns a flag into: the reviewer keeps a list of what to re-check rather than
-        starting over."""
+        """Per-requirement outcome of a reviewer's pass. RESUBMITTED is what a flag
+        becomes once the respondent has answered it."""
 
         NONE = "", _("None")
         CHANGES_REQUESTED = "changes_requested", _("Changes requested")
@@ -9790,9 +9783,8 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
         CLOSED = "closed", _("Closed")
         CHANGES_REQUESTED = "changes_requested", _("Changes Requested")
 
-    # How far along the questionnaire is, which is not the enum's declaration order:
-    # "changes requested" is back with the respondent, so it sits before "submitted".
-    # Shared so the status a row reports and the order it sorts in cannot drift.
+    # Not the declaration order: "changes requested" is back with the respondent.
+    # Shared so the reported status and the sort order cannot drift.
     WORKFLOW_ORDER = [
         Status.DRAFT,
         Status.IN_PROGRESS,

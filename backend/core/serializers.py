@@ -2966,8 +2966,6 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
         source="validationflow_set",
     )
     entity_assessments = FieldsRelatedField(many=True, source="entityassessment_set")
-    # Drives the shortcut into the respondent view, which is otherwise reachable
-    # only through the assignments page.
     requirement_assignments = FieldsRelatedField(["id", "status"], many=True)
 
     def get_progress(self, obj):
@@ -3028,8 +3026,6 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
     framework = FieldsRelatedField()
     perimeter = FieldsRelatedField()
     progress = serializers.SerializerMethodField()
-    # The entity assessment this audit answers, when there is one: the table badges
-    # third-party questionnaires and links back to their assessment.
     entity_assessments = FieldsRelatedField(many=True, source="entityassessment_set")
 
     def get_progress(self, obj):
@@ -3520,9 +3516,8 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
             if not is_field_editable_by(ca, "task_templates", role):
                 data = {k: v for k, v in data.items() if k != "task_templates"}
 
-        # The review flag is the reviewer's, unconditionally: a respondent clearing
-        # their own "changes requested" would silently empty the rework list. Not
-        # routed through field_visibility so it cannot be configured open.
+        # The reviewer's, unconditionally: not routed through field_visibility so it
+        # cannot be configured open.
         if request and self.instance and "review_state" in data:
             from core.utils import get_respondent_scoped_folder_ids
 
@@ -4523,8 +4518,6 @@ class RequirementAssignmentReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     compliance_assessment = FieldsRelatedField()
     actor = FieldsRelatedField(many=True)
-    # The assignments board counts the review flags per assignment, so a reviewer
-    # sending a round back can see what they flagged without opening the audit.
     requirement_assessments = FieldsRelatedField(["id", "review_state"], many=True)
     events = RequirementAssignmentEventSerializer(many=True, read_only=True)
 

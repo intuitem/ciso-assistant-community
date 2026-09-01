@@ -37,14 +37,8 @@ def sync_requirement_assignment(audit, representatives):
 
 
 def default_representatives_from_entity(entity_assessment):
-    """Fall back to the entity's own representatives when none were picked.
-
-    The picker already offers exactly these users; leaving it empty produced an
-    assessment nobody could answer — no audit authors, no requirement assignment,
-    and nobody in the enclave's respondent group. Runs only where an audit is
-    created or linked, so clearing the field on an assessment that already has one
-    stays a deliberate clear.
-    """
+    """Fall back to the entity's own representatives when none were picked, so the
+    assessment reaches somebody. Only on audit create/link."""
     if entity_assessment.representatives.exists():
         return
     users = User.objects.filter(
@@ -71,14 +65,12 @@ def create_enclave_audit(
     enclave folder, with its requirements, reviewers and assignments. Callers
     lock the entity assessment and check it has no audit yet.
 
-    `field_visibility` carries the pills the caller set explicitly; they are merged
-    onto the third-party profile rather than replacing it, since an editor only sends
-    what was touched.
+    `field_visibility` is merged onto the third-party profile, not a replacement:
+    an editor only sends the pills that were touched.
     """
     from core.utils import EVERYONE_EDIT, build_third_party_field_visibility
 
-    # This questionnaire is addressed to a third party, so it starts from that
-    # profile: the internal-audit defaults would expose the auditor's side.
+    # Addressed to a third party: the internal-audit defaults would expose the auditor.
     visibility = build_third_party_field_visibility(framework)
     for key, pair in (field_visibility or {}).items():
         if not isinstance(pair, dict):

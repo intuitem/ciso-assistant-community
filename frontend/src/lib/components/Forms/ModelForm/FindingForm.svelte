@@ -61,8 +61,7 @@
 		const res = await fetch(`/findings-assessments/${binderId}`);
 		if (!res.ok) return;
 		const binder = await res.json();
-		// The selection can move on while this request is in flight; a slower earlier
-		// response must not drag the folder back to the binder that is no longer chosen.
+		// A slower earlier response must not drag the folder back to a stale binder.
 		if (binderId !== $formData.findings_assessment) return;
 		if (!binder.folder?.id || binder.folder.id === $formData.folder) return;
 		form.form.update((current) => ({ ...current, folder: binder.folder.id }), {

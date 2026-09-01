@@ -151,10 +151,7 @@ export const loadDetail = async ({ event, model, id }) => {
 		const initialData = {};
 		await Promise.all(
 			model.reverseForeignKeyFields
-				// A tab whose model is behind a feature flag disappears with it. The flag
-				// comes from the reverse foreign key when it declares one, else from the
-				// model itself, so every flagged module is covered without annotating each
-				// of its tabs.
+				// Flag from the reverse FK when it declares one, else from the model.
 				.filter((m) => {
 					const flag = m?.featureFlag ?? MODEL_FEATURE_FLAGS[m.urlModel];
 					return !flag || event.locals.featureflags?.[flag];

@@ -209,6 +209,75 @@
 		modalStore.trigger(modal);
 	}
 
+	const canReview = $derived(isAuditor && assignmentStatus === 'submitted');
+
+	async function transitionAssignment(status: string, reviewerObservation = '') {
+		isSubmitting = true;
+		try {
+			const body = new FormData();
+			body.set('status', status);
+			body.set('reviewer_observation', reviewerObservation);
+			const response = await fetch(`?/reviewAssignment`, { method: 'POST', body });
+			const result = deserialize(await response.text());
+			if (result.type === 'success' && result.data?.submitStatus === 200) {
+				await applyAction(result);
+				await invalidateAll();
+				toastStore.trigger({
+					message: m.statusUpdatedSuccessfully(),
+					background: 'preset-filled-success-500',
+					timeout: 3000
+				});
+			} else {
+				toastStore.trigger({
+					message: result.data?.submitBody?.error || m.submissionFailed(),
+					background: 'preset-filled-error-500',
+					timeout: 5000
+				});
+			}
+		} catch (error) {
+			console.error('Error transitioning assignment:', error);
+			toastStore.trigger({
+				message: m.anErrorOccurred(),
+				background: 'preset-filled-error-500',
+				timeout: 3000
+			});
+		} finally {
+			isSubmitting = false;
+		}
+	}
+
+	function handleRequestChanges() {
+		// The transition refuses without a note.
+		modalStore.trigger({
+			type: 'prompt',
+			title: m.requestChanges(),
+			body: m.reviewerObservation(),
+			value: '',
+			modalClasses: 'w-full max-w-2xl',
+			valueAttr: {
+				multiline: true,
+				rows: 6,
+				required: true,
+				placeholder: m.reviewerObservationPlaceholder()
+			},
+			response: (note: string | false) => {
+				if (note === false || !`${note ?? ''}`.trim()) return;
+				transitionAssignment('changes_requested', `${note}`.trim());
+			}
+		});
+	}
+
+	function handleCloseAssignment() {
+		modalStore.trigger({
+			type: 'confirm',
+			title: m.closeAssignment(),
+			body: m.closeAssignmentConfirm(),
+			response: (confirmed: boolean) => {
+				if (confirmed) transitionAssignment('closed');
+			}
+		});
+	}
+
 	const requirementHashmap = $derived(
 		Object.fromEntries(
 			data.requirements.map((requirement: Record<string, any>) => [requirement.id, requirement])
@@ -456,8 +525,6 @@
 	// promise is one click away.
 	let expandedTask = $state<string | null>(null);
 
-	// The reviewer's per-requirement verdict. `resubmitted` is what a flag becomes once
-	// the respondent has answered it, so a second pass is the handful that came back.
 	const REVIEW_STATES = [
 		{ id: 'changes_requested', label: m.reviewChangesRequested(), color: '#ef4444' },
 		{ id: 'resubmitted', label: m.reviewResubmitted(), color: '#f59e0b' },
@@ -466,9 +533,7 @@
 	const reviewStateMeta = (state: string | null | undefined) =>
 		REVIEW_STATES.find((s) => s.id === state);
 
-	// While the assignment is still `submitted` the reviewer is mid-pass, so their
-	// half-finished flags stay on their side. The respondent sees them once the round
-	// has actually been sent back.
+	// Half-finished flags stay on the reviewer's side until the round is sent back.
 	const showReviewFlags = $derived(isAuditor || assignmentStatus !== 'submitted');
 	function goToFirstFlagged() {
 		tocFilterReview = 'changes_requested';
@@ -661,8 +726,7 @@
 			count: tocSections.filter((s) => s.result === opt.id).length
 		}))
 	);
-	// Counted over the same entries the jump walks, so the banner cannot promise an
-	// item the table of contents has no row for.
+	// Same entries the jump walks, so the count cannot promise a missing row.
 	const changesRequestedCount = $derived(
 		showReviewFlags ? tocSections.filter((s) => s.reviewState === 'changes_requested').length : 0
 	);
@@ -947,6 +1011,40 @@
 					<i class="fa-solid fa-hourglass text-surface-400-600 text-sm"></i>
 				</div>
 				<p class="text-sm text-surface-600-400 font-medium">{m.assignmentAwaitingStart()}</p>
+			</div>
+		{/if}
+
+		{#if canReview}
+			<div class="flex flex-col items-end gap-2">
+				<div class="flex items-center gap-2">
+					{#if changesRequestedCount > 0}
+						<span class="text-xs text-surface-600-400">
+							<i class="fa-solid fa-flag text-red-500 mr-1"></i>{changesRequestedCount}
+							{m.itemsFlaggedForChanges()}
+						</span>
+					{/if}
+					<button
+						class="btn preset-tonal-error"
+						onclick={handleRequestChanges}
+						disabled={isSubmitting}
+						data-testid="request-changes-button"
+					>
+						<i class="fa-solid fa-rotate-left mr-2"></i>{m.requestChanges()}
+					</button>
+					<button
+						class="btn preset-filled-success-500"
+						onclick={handleCloseAssignment}
+						disabled={isSubmitting}
+						data-testid="close-assignment-button"
+					>
+						{#if isSubmitting}
+							<i class="fa-solid fa-spinner fa-spin mr-2"></i>
+						{:else}
+							<i class="fa-solid fa-check mr-2"></i>
+						{/if}
+						{m.closeAssignment()}
+					</button>
+				</div>
 			</div>
 		{/if}
 

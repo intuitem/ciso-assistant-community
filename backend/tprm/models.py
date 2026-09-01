@@ -635,14 +635,8 @@ class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
 
 
 class EntityScore(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
-    """A rating an external service (SecurityScorecard, CyberVadis, Bitsight...)
-    publishes about an entity.
-
-    Dated rather than a single current value: a score read once and never revisited
-    is worse than none, and the movement between two readings is the interesting
-    part. `scale_max` is what makes the providers comparable — 720 means nothing
-    until you know whether the scale stops at 900 or at 1000.
-    """
+    """A rating an external service publishes about an entity, dated so readings
+    accumulate as history. `scale_max` makes providers comparable."""
 
     entity = models.ForeignKey(
         Entity,
@@ -696,9 +690,7 @@ class EntityScore(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         verbose_name_plural = _("Entity scores")
         ordering = ["-as_of"]
         constraints = [
-            # One reading per provider per day. `fields_to_check` says the same thing
-            # at the API layer; this holds for writes that never see a serializer
-            # (imports, shell, a racing double POST).
+            # One reading per provider per day, for writes that skip the serializer.
             models.UniqueConstraint(
                 fields=["entity", "provider", "as_of"],
                 name="unique_entity_score_per_provider_and_date",
@@ -710,14 +702,13 @@ class EntityScore(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
 
     @property
     def normalized_score(self) -> float | None:
-        """The score on a 0-100 scale, so providers can be compared and a custom
-        criticality can consume any of them."""
+        """The score on a 0-100 scale."""
         if not self.scale_max:
             return None
         return round((self.score / self.scale_max) * 100, 1)
 
     def save(self, *args, **kwargs):
-        # A score is only ever as visible as the entity it is about.
+        # As visible as the entity it is about.
         if self.entity_id:
             self.folder = self.entity.folder
         super().save(*args, **kwargs)

@@ -40,8 +40,7 @@
 	// Check if this node belongs to the assignment being edited
 	let isBeingEdited = $derived($editingRequirementIdsStore?.has(nodeId) ?? false);
 
-	// The node's own assignment plus, for a section, those of its assessable
-	// descendants — deduplicated so an actor holding both shows once.
+	// Own assignment plus, for a section, its descendants' — deduped.
 	let visibleAssignments = $derived([
 		...new Set([
 			...(assignmentInfo ?? []).map((info) => info.actorName),
@@ -187,9 +186,6 @@
 				{/if}
 			</span>
 
-			<!-- One badge per actor. A section node carries a requirement assessment of its
-				own *and* aggregates its descendants', so rendering the two sets separately
-				showed the same actor twice on every section row. -->
 			{#if !isBeingEdited && visibleAssignments.length > 0}
 				{#each visibleAssignments as actorName}
 					<span

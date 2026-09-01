@@ -165,15 +165,8 @@ export interface SelectFieldData {
 
 type FeatureFlag = string;
 
-/**
- * Models whose whole concept lives behind a feature flag. A reverse foreign key tab
- * pointing at one of these disappears with its flag, so a detail page never offers a
- * tab for a module the instance has turned off — the sidebar already hides the
- * top-level entry, and the tabs used to survive it.
- *
- * A `featureFlag` declared on the reverse foreign key itself overrides this map, for
- * the case where the same model should only be gated in one place.
- */
+/** Models behind a feature flag: their reverse-FK tabs disappear with it.
+ *  A `featureFlag` on the reverse FK itself overrides this map. */
 export const MODEL_FEATURE_FLAGS: Record<string, FeatureFlag> = {
 	'asset-assessments': 'bia',
 	'business-impact-analysis': 'bia',
@@ -229,7 +222,6 @@ export interface ModelMapEntry {
 	foreignKeyFields?: ForeignKeyField[];
 	reverseForeignKeyFields?: ReverseForeignKeyField[];
 	selectFields?: SelectField[];
-	// Resolved at load time from the `{model}/{field}/` choice endpoints.
 	selectOptions?: Record<string, SelectFieldData[]>;
 	fileFields?: string[];
 	filters?: SelectField[];

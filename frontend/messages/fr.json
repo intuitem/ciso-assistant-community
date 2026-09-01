@@ -4788,6 +4788,8 @@
 	"submitForReview": "Soumettre pour revue",
 	"submitForReviewConfirm": "Êtes-vous sûr de vouloir soumettre vos réponses pour revue ? Vous ne pourrez plus les modifier tant que le relecteur ne les aura pas renvoyées.",
 	"closeAssignment": "Clôturer",
+	"closeAssignmentConfirm": "Clôturer ce cycle de revue ? Le répondant ne pourra plus modifier ses réponses.",
+	"itemsFlaggedForChanges": "signalées à corriger",
 	"reopenAssignment": "Rouvrir",
 	"reviewerObservation": "Observation du relecteur",
 	"reviewerObservationPlaceholder": "Décrivez les modifications nécessaires...",

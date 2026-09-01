@@ -28,8 +28,6 @@
 
 	const formData = form.form;
 
-	// Providers publish on different scales, so the comparable figure is the one to
-	// show back while typing.
 	let normalized = $derived(
 		$formData.scale_max ? Math.round(($formData.score / $formData.scale_max) * 1000) / 10 : null
 	);
@@ -57,8 +55,6 @@
 	label={m.entity()}
 	hidden={initialData.entity !== undefined}
 />
-<!-- Top-aligned: the scale's help text makes that cell taller than the other two,
-	and bottom-aligning the row pushed the score field down a line on its own. -->
 <div class="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_1fr_auto] items-start">
 	<NumberField
 		{form}

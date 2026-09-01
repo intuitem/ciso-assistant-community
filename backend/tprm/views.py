@@ -1213,10 +1213,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             request.user, EntityAssessment
         )
 
-        # The completion dial links into the respondent view, which is addressed by
-        # assignment. One query for every card rather than one per card, and scoped to
-        # the audits actually rendered rather than every assignment in the instance; a
-        # draft assignment has nothing to review yet.
+        # One query for the whole page, scoped to the audits rendered.
         audit_ids = EntityAssessment.objects.filter(
             id__in=viewable_items, compliance_assessment__isnull=False
         ).values_list("compliance_assessment_id", flat=True)
@@ -1261,8 +1258,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 else False,
             }
 
-            # Only when there is exactly one: with several, no single target is right
-            # and the card falls back to the audit.
+            # With several, no single target is right: the card falls back to the audit.
             review_assignments = assignments_by_audit.get(
                 ea.compliance_assessment_id, []
             )
@@ -1303,8 +1299,7 @@ class EntityScoreViewSet(BaseModelViewSet):
     filterset_fields = ["entity", "provider", "filtering_labels", "folder"]
     search_fields = ["grade", "observation"]
     ordering_fields = ["as_of", "score", "normalized_score"]
-    # `normalized_score` is a property, so the ORM cannot order by it: the column has
-    # to be computed in SQL and the public term pointed at it.
+    # A property: the ORM needs it computed in SQL to order by it.
     ordering_remap = {"normalized_score": "normalized_score_value"}
 
     def get_queryset(self):

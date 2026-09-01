@@ -110,9 +110,7 @@
 				await fetch(`/frameworks/${e}`)
 					.then((r) => r.json())
 					.then((r) => {
-						// The selection can move on while this request is in flight; a slower
-						// earlier response must not apply another framework's defaults or wipe
-						// the pills the user has since set.
+						// A slower earlier response must not apply another framework's defaults.
 						if (e !== $formData.framework) return;
 						const implementation_groups = r['implementation_groups_definition'] || [];
 						implementationGroupsChoices = implementation_groups.map((group) => ({
@@ -123,8 +121,7 @@
 						// pills must show that profile — not the internal-audit defaults.
 						frameworkDefaults =
 							r['third_party_field_visibility'] ?? r['effective_field_visibility'] ?? null;
-						// Groups belong to the framework that defined them: carrying the previous
-						// selection over would submit ref_ids the new framework does not know.
+						// Groups belong to the framework that defined them.
 						form.form.update((d) => ({
 							...d,
 							field_visibility: {},

@@ -4892,6 +4892,8 @@
 	"submitForReview": "Submit for Review",
 	"submitForReviewConfirm": "Are you sure you want to submit your responses for review? You will not be able to edit them until the reviewer sends them back.",
 	"closeAssignment": "Close",
+	"closeAssignmentConfirm": "Close this review round? The respondent will no longer be able to edit their answers.",
+	"itemsFlaggedForChanges": "flagged for changes",
 	"reopenAssignment": "Reopen",
 	"reviewerObservation": "Reviewer observation",
 	"reviewerObservationPlaceholder": "Describe what changes are needed...",

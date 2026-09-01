@@ -574,9 +574,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 if not user.is_third_party:
                     logger.warning("User is not a third-party", user=user)
                 user.user_groups.add(respondents)
-            # Never revoke someone who is in the final set: an empty submitted list
-            # marks every current representative for removal, and the entity defaults
-            # can put the same people straight back.
+            # Never revoke someone the defaults just put back.
             for user in old_third_party_users - third_party_users:
                 if not user.is_third_party:
                     logger.warning("User is not a third-party", user=user)
@@ -633,7 +631,6 @@ class EntityScoreReadSerializer(BaseModelSerializer):
     provider = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
     folder = FieldsRelatedField()
-    # 0-100 whatever the provider's scale, so a row is readable next to another's.
     normalized_score = serializers.ReadOnlyField()
 
     class Meta:
@@ -645,18 +642,13 @@ class EntityScoreWriteSerializer(BaseModelSerializer):
     class Meta:
         model = EntityScore
         exclude = ["folder"]
-        # The (entity, provider, as_of) constraint would otherwise become a
-        # UniqueTogetherValidator that rejects a replay before `create` can turn it
-        # into an update. The constraint still guards writes that skip this
-        # serializer, and `create` keeps the API idempotent.
+        # Else the unique constraint becomes a validator that rejects a replay
+        # before `create` can turn it into an update.
         validators = []
 
     def to_internal_value(self, data):
-        """Accept the provider by name as well as by id.
-
-        Scores arrive from a scheduled feed that knows "Bitsight", not a UUID;
-        forcing it to resolve the terminology first is a round-trip for nothing.
-        """
+        """Accept the provider by name as well as by id: a feed knows "Bitsight",
+        not a UUID."""
         provider = data.get("provider") if hasattr(data, "get") else None
         if isinstance(provider, str) and provider.strip():
             try:
@@ -690,12 +682,8 @@ class EntityScoreWriteSerializer(BaseModelSerializer):
         ).first()
 
     def create(self, validated_data):
-        """A feed re-run for the same reading corrects it instead of colliding.
-
-        One reading per provider per day, so replaying a day means "already recorded",
-        not an error. The retry covers two feeds posting the same reading at once,
-        where the row appears between the lookup and the insert.
-        """
+        """A feed re-run for the same reading corrects it instead of colliding. The
+        retry covers a concurrent insert between the lookup and the write."""
         existing = self._existing_reading(validated_data)
         if existing is not None:
             return self.update(existing, validated_data)

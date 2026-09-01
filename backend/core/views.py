@@ -11160,8 +11160,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         if self.action == "list":
             qs = qs.prefetch_related(
                 actor_prefetch("authors"),  # Optional table column
-                # One query for the page, not one per row: the table badges audits
-                # that answer an entity assessment.
                 "entityassessment_set",
             )
 
@@ -16842,10 +16840,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
 
         # One query for every occurrence, grouped in python: the per-template lookup
         # the serializer uses would be a query per row.
-        # A recurrent template's "next" occurrence is the first one still ahead, the
-        # same rule `get_next_occurrence_status` applies, so the chart and the table
-        # column do not report different states for the same task. A one-time task has
-        # a single occurrence whenever it falls.
+        # Same rule as `get_next_occurrence_status`, so the chart and the column agree.
         recurrent_ids = {t.id for t in tasks if t.is_recurrent}
         next_node_by_template: dict = {}
         for node in (
@@ -17176,8 +17171,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
     }
 
     def get_queryset(self):
-        # The commitment state and the findings are opt-in columns: one query each,
-        # not one per row.
+        # Opt-in columns: one query each, not one per row.
         qs = (
             super()
             .get_queryset()
@@ -18314,13 +18308,8 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 
     @staticmethod
     def _advance_review_states(assignment, transition_key):
-        """Carry the per-requirement review flags across an assignment transition.
-
-        Answering a rework request moves the flagged items to RESUBMITTED rather than
-        clearing them: the reviewer's second pass is the handful that came back, not
-        the whole questionnaire again. Closing the assignment accepts whatever is
-        still awaiting that second look.
-        """
+        """Carry the review flags across a transition: answering a rework request
+        makes them RESUBMITTED, closing accepts what is still awaiting a look."""
         from core.models import RequirementAssessment
 
         ReviewState = RequirementAssessment.ReviewState

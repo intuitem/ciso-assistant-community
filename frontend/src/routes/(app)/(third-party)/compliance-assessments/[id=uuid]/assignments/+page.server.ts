@@ -65,8 +65,6 @@ export const load = (async ({ fetch, params }) => {
 				type: a.type || 'user'
 			})),
 			requirement_assessments: assignment.requirement_assessments.map((ra) => ra.id),
-			// Per-requirement review flags, so a reviewer sending a round back sees what
-			// they flagged without reopening the questionnaire.
 			review_counts: {
 				changes_requested: assignment.requirement_assessments.filter(
 					(ra) => ra.review_state === 'changes_requested'
