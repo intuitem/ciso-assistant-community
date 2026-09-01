@@ -95,6 +95,9 @@
 	}
 
 	onMount(() => {
+		if (!lowerBound || !upperBound || lowerBound >= upperBound) {
+			return;
+		}
 		let dispose: (() => void) | undefined;
 		let active = true;
 		(async () => {
@@ -102,22 +105,19 @@
 			if (!active) return;
 			const el = document.getElementById(chart_id);
 			if (!el) return;
+
+			const { mu, sigma } = calculateLognormalParams(lowerBound, upperBound);
+
+			// Verify our calculation by checking if the percentiles match
+			const calculated5th = Math.exp(mu + sigma * -1.64485362695147);
+			const calculated95th = Math.exp(mu + sigma * 1.64485362695147);
+
+			// Call the callback with calculated parameters
+			if (onParametersCalculated) {
+				onParametersCalculated(mu, sigma);
+			}
+
 			dispose = mountThemeAwareChart(echarts, el, () => {
-				if (!lowerBound || !upperBound || lowerBound >= upperBound) {
-					return;
-				}
-
-				const { mu, sigma } = calculateLognormalParams(lowerBound, upperBound);
-
-				// Verify our calculation by checking if the percentiles match
-				const calculated5th = Math.exp(mu + sigma * -1.64485362695147);
-				const calculated95th = Math.exp(mu + sigma * 1.64485362695147);
-
-				// Call the callback with calculated parameters
-				if (onParametersCalculated) {
-					onParametersCalculated(mu, sigma);
-				}
-
 				// Use a more reasonable range: from 10% of lower bound to 10x upper bound
 				const chartMin = Math.max(lowerBound * 0.1, 1);
 				const chartMax = upperBound * 5;

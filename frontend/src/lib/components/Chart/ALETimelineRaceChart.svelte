@@ -197,6 +197,7 @@
 		const maxValue = Math.max(...frame.data.map((d: any) => d.value));
 
 		const option = {
+			backgroundColor: 'transparent',
 			title: {
 				text: frame.dateDisplay,
 				left: 'center',
