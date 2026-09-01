@@ -143,16 +143,28 @@ def _create_federated_sa(
 
 
 def _mint_jwt(
-    private_key, *, aud=CLIENT_ID, sub="worker-1", exp_delta=3600, kid=KID, jti=None
+    private_key,
+    *,
+    aud=CLIENT_ID,
+    sub="worker-1",
+    exp_delta=3600,
+    kid=KID,
+    jti=None,
+    iss=ISSUER,
+    nbf=None,
 ):
     now = int(time.time())
     claims = {
-        "iss": ISSUER,
+        "iss": iss,
         "aud": aud,
-        "sub": sub,
         "iat": now,
         "exp": now + exp_delta,
     }
+    # sub=None omits the claim entirely (a sub-less client_credentials token).
+    if sub is not None:
+        claims["sub"] = sub
+    if nbf is not None:
+        claims["nbf"] = nbf
     # jti is optional in OIDC; default one so tests can opt out with jti=False.
     if jti is not False:
         claims["jti"] = jti or "test-jti"
@@ -330,6 +342,34 @@ class TestFederatedProvisioning:
             format="json",
         )
         assert patch_response.status_code == 400, patch_response.content
+
+    def test_patch_cannot_unset_social_app(
+        self, admin_client, domain_folder, social_app
+    ):
+        payload = _create_federated_sa(admin_client, domain_folder, social_app).json()
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"social_app": None},
+            format="json",
+        )
+        assert response.status_code == 400, response.content
+        sa = ServiceAccount.objects.get(id=payload["id"])
+        assert sa.social_app_id == social_app.id
+
+    def test_patch_cannot_unset_federated_subject(
+        self, admin_client, domain_folder, social_app
+    ):
+        """A NULL subject would make the account matchable by any sub-less
+        token that verifies against the provider."""
+        payload = _create_federated_sa(admin_client, domain_folder, social_app).json()
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"federated_subject": None},
+            format="json",
+        )
+        assert response.status_code == 400, response.content
+        sa = ServiceAccount.objects.get(id=payload["id"])
+        assert sa.federated_subject == "worker-1"
 
     def test_rotate_secret_rejected_for_federated(
         self, admin_client, domain_folder, social_app
@@ -572,3 +612,188 @@ class TestFederatedRoleLinked:
 
         sa = ServiceAccount.objects.get(id=payload["id"])
         assert sa.role_id == role.id
+
+
+@pytest.mark.django_db
+class TestFederatedAuthenticationHardening:
+    """Attacker-shaped cases: token confusion, enumeration, expiry, and
+    routing when the client_id uniqueness invariant is broken out-of-band."""
+
+    def test_aud_array_containing_client_id_authenticates(
+        self, admin_client, domain_folder, social_app, rsa_keypair, mocked_idp
+    ):
+        private_key, _ = rsa_keypair
+        _create_federated_sa(admin_client, domain_folder, social_app)
+        token = _mint_jwt(private_key, aud=[CLIENT_ID, "some-other-service"])
+        response = _bearer_client(token).get("/api/folders/")
+        assert response.status_code == 200, response.content
+
+    def test_aud_array_without_client_id_rejected(
+        self, admin_client, domain_folder, social_app, rsa_keypair, mocked_idp
+    ):
+        private_key, _ = rsa_keypair
+        _create_federated_sa(admin_client, domain_folder, social_app)
+        token = _mint_jwt(private_key, aud=["other-1", "other-2"])
+        response = _bearer_client(token).get("/api/folders/")
+        assert response.status_code == 401
+
+    def test_issuer_mismatch_rejected(
+        self, admin_client, domain_folder, social_app, rsa_keypair, mocked_idp
+    ):
+        """A token signed with the right key but claiming another issuer must
+        not verify: iss is pinned to the provider's own discovery document."""
+        private_key, _ = rsa_keypair
+        _create_federated_sa(admin_client, domain_folder, social_app)
+        token = _mint_jwt(private_key, iss="https://evil-idp.example.com/")
+        response = _bearer_client(token).get("/api/folders/")
+        assert response.status_code == 401
+
+    def test_future_nbf_rejected(
+        self, admin_client, domain_folder, social_app, rsa_keypair, mocked_idp
+    ):
+        private_key, _ = rsa_keypair
+        _create_federated_sa(admin_client, domain_folder, social_app)
+        token = _mint_jwt(private_key, nbf=int(time.time()) + 3600)
+        response = _bearer_client(token).get("/api/folders/")
+        assert response.status_code == 401
+
+    def test_alg_none_rejected(
+        self, admin_client, domain_folder, social_app, mocked_idp
+    ):
+        _create_federated_sa(admin_client, domain_folder, social_app)
+        now = int(time.time())
+        claims = {
+            "iss": ISSUER,
+            "aud": CLIENT_ID,
+            "sub": "worker-1",
+            "iat": now,
+            "exp": now + 3600,
+        }
+        token = jwt.encode(claims, None, algorithm="none", headers={"kid": KID})
+        response = _bearer_client(token).get("/api/folders/")
+        assert response.status_code == 401
+
+    def test_hs256_alg_confusion_rejected(
+        self, admin_client, domain_folder, social_app, mocked_idp
+    ):
+        """Symmetric signature over a known kid must fail the JWK alg pin."""
+        _create_federated_sa(admin_client, domain_folder, social_app)
+        now = int(time.time())
+        claims = {
+            "iss": ISSUER,
+            "aud": CLIENT_ID,
+            "sub": "worker-1",
+            "iat": now,
+            "exp": now + 3600,
+        }
+        token = jwt.encode(
+            claims, "attacker-known-secret", algorithm="HS256", headers={"kid": KID}
+        )
+        response = _bearer_client(token).get("/api/folders/")
+        assert response.status_code == 401
+
+    def test_token_without_sub_rejected(
+        self, admin_client, domain_folder, social_app, rsa_keypair, mocked_idp
+    ):
+        private_key, _ = rsa_keypair
+        _create_federated_sa(admin_client, domain_folder, social_app)
+        token = _mint_jwt(private_key, sub=None)
+        response = _bearer_client(token).get("/api/folders/")
+        assert response.status_code == 401
+
+    def test_expired_account_rejected_before_deactivation_cron(
+        self, admin_client, domain_folder, social_app, rsa_keypair, mocked_idp
+    ):
+        """expiry_date is enforced at authentication time, not only by the
+        daily cron that flips is_active."""
+        from datetime import date, timedelta
+
+        private_key, _ = rsa_keypair
+        payload = _create_federated_sa(admin_client, domain_folder, social_app).json()
+        token = _mint_jwt(private_key)
+        assert _bearer_client(token).get("/api/folders/").status_code == 200
+
+        ServiceAccount.objects.filter(id=payload["id"]).update(
+            expiry_date=date.today() - timedelta(days=1)
+        )
+        assert _bearer_client(token).get("/api/folders/").status_code == 401
+
+    def test_unknown_pair_indistinguishable_from_bad_token(
+        self, admin_client, domain_folder, social_app, rsa_keypair, mocked_idp
+    ):
+        """An unauthenticated caller must not be able to probe which
+        (client_id, subject) pairs are registered from the response."""
+        private_key, _ = rsa_keypair
+        _create_federated_sa(admin_client, domain_folder, social_app)
+
+        wrong_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        registered_bad_sig = _bearer_client(_mint_jwt(wrong_key)).get("/api/folders/")
+        unregistered = _bearer_client(
+            _mint_jwt(private_key, aud="ghost-client", sub="ghost-subject")
+        ).get("/api/folders/")
+
+        assert registered_bad_sig.status_code == unregistered.status_code == 401
+        assert registered_bad_sig.json() == unregistered.json()
+
+    def test_duplicate_client_id_routes_to_the_verifying_provider(
+        self, admin_client, domain_folder, social_app, rsa_keypair, db
+    ):
+        """client_id uniqueness is app-enforced, not a DB constraint. If a
+        duplicate ever appears out-of-band (e.g. Django admin), routing must
+        try every candidate rather than trusting .first()."""
+        second_issuer = "https://second-idp.example.com/"
+        second_server_url = second_issuer + ".well-known/openid-configuration"
+        second_jwks_url = second_issuer + "jwks"
+        second_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        second_jwk = json.loads(RSAAlgorithm.to_jwk(second_key.public_key()))
+        second_jwk.update({"kid": KID, "alg": "RS256", "use": "sig"})
+
+        _, first_jwks = rsa_keypair
+        docs = {
+            SERVER_URL: {"issuer": ISSUER, "jwks_uri": JWKS_URL},
+            JWKS_URL: first_jwks,
+            second_server_url: {"issuer": second_issuer, "jwks_uri": second_jwks_url},
+            second_jwks_url: {"keys": [second_jwk]},
+        }
+
+        class FakeResponse:
+            def __init__(self, payload):
+                self._payload = payload
+
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return self._payload
+
+        def fake_get(self, url, *args, **kwargs):
+            if url in docs:
+                return FakeResponse(docs[url])
+            raise requests.RequestException(f"unexpected URL in test: {url}")
+
+        with patch("requests.Session.get", new=fake_get):
+            _create_federated_sa(
+                admin_client, domain_folder, social_app, name="sa-first-idp"
+            )
+            duplicate_app = SocialApp.objects.create(
+                provider="openid_connect",
+                provider_id="second-idp",
+                name="Second IdP",
+                client_id=CLIENT_ID,
+                settings={"server_url": second_server_url},
+            )
+            other_domain = Folder.objects.create(
+                parent_folder=Folder.get_root_folder(),
+                name="second idp domain",
+                content_type=Folder.ContentType.DOMAIN,
+            )
+            _create_federated_sa(
+                admin_client, other_domain, duplicate_app, name="sa-second-idp"
+            )
+
+            token = _mint_jwt(second_key, iss=second_issuer)
+            response = _bearer_client(token).get("/api/folders/")
+            assert response.status_code == 200, response.content
+            folder_ids = {row["id"] for row in response.json()["results"]}
+            assert str(other_domain.id) in folder_ids
+            assert str(domain_folder.id) not in folder_ids

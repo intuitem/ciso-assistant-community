@@ -18,6 +18,17 @@ def _enterprise_flags(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def _skip_oidc_ssrf_guard(monkeypatch):
+    """The SSRF guard resolves hostnames via real DNS, and the fake IdP hosts
+    used in these tests don't exist. No-op it by default; the SSRF regression
+    tests re-patch it with the real check plus a stubbed resolver."""
+    monkeypatch.setattr(
+        "iam.oidc_federation.assert_public_url_unless_dev",
+        lambda url, **kwargs: None,
+    )
+
+
+@pytest.fixture(autouse=True)
 def clear_oidc_cache():
     """LocMemCache is process-global and pytest-django doesn't clear it between
     tests, so cached OIDC discovery/JWKS documents would otherwise leak across

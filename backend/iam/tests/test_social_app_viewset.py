@@ -1,6 +1,10 @@
+import socket
+
 import pytest
 
 from allauth.socialaccount.models import SocialApp
+
+from core.net_safety import assert_public_url
 
 from .test_federated_service_accounts import (
     CLIENT_ID,
@@ -120,3 +124,80 @@ class TestSocialAppViewSet:
         response = admin_client.delete(f"{SOCIAL_APPS_ENDPOINT}{social_app.id}/")
         assert response.status_code == 204, response.content
         assert not SocialApp.objects.filter(pk=social_app.pk).exists()
+
+
+@pytest.mark.django_db
+class TestSocialAppSSRFGuard:
+    """Registration fetches (discovery + JWKS) must go through the net_safety
+    guard. The shared conftest no-ops the guard (fake IdP hosts have no DNS);
+    these tests restore the real check with a stubbed resolver."""
+
+    @staticmethod
+    def _resolver(ip_by_host):
+        def getaddrinfo(host, *args, **kwargs):
+            ip = ip_by_host.get(host, "203.0.113.10")
+            return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", (ip, 443))]
+
+        return getaddrinfo
+
+    @pytest.fixture
+    def real_guard(self, monkeypatch):
+        monkeypatch.setattr(
+            "iam.oidc_federation.assert_public_url_unless_dev", assert_public_url
+        )
+
+    def test_private_server_url_rejected(
+        self, admin_client, mocked_idp, real_guard, monkeypatch
+    ):
+        monkeypatch.setattr(
+            "core.net_safety.socket.getaddrinfo",
+            self._resolver({"test-idp.example.com": "10.13.37.1"}),
+        )
+        response = admin_client.post(
+            SOCIAL_APPS_ENDPOINT,
+            {
+                "name": "Internal IdP",
+                "provider_id": "internal-idp",
+                "client_id": "internal-client",
+                "server_url": SERVER_URL,
+            },
+        )
+        assert response.status_code == 400, response.content
+        assert not SocialApp.objects.filter(provider_id="internal-idp").exists()
+
+    def test_private_jwks_uri_from_discovery_rejected(
+        self, admin_client, real_guard, monkeypatch
+    ):
+        """jwks_uri comes from the remote discovery document, not the admin: a
+        public server_url must not be able to pivot the JWKS fetch inward."""
+        issuer = "https://pivot-idp.example.com/"
+        server_url = issuer + ".well-known/openid-configuration"
+        internal_jwks = "https://metadata.internal.example.com/jwks"
+        monkeypatch.setattr(
+            "core.net_safety.socket.getaddrinfo",
+            self._resolver({"metadata.internal.example.com": "169.254.169.254"}),
+        )
+
+        class FakeResponse:
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return {"issuer": issuer, "jwks_uri": internal_jwks}
+
+        def fake_get(session_self, url, *args, **kwargs):
+            assert url == server_url, f"blocked URL was fetched: {url}"
+            return FakeResponse()
+
+        monkeypatch.setattr("requests.Session.get", fake_get)
+        response = admin_client.post(
+            SOCIAL_APPS_ENDPOINT,
+            {
+                "name": "Pivot IdP",
+                "provider_id": "pivot-idp",
+                "client_id": "pivot-client",
+                "server_url": server_url,
+            },
+        )
+        assert response.status_code == 400, response.content
+        assert not SocialApp.objects.filter(provider_id="pivot-idp").exists()
