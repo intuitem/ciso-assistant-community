@@ -60,7 +60,6 @@ class BaseModelViewSet(AbstractBaseModelViewSet):
 
 class SSOSettingsViewSet(BaseModelViewSet):
     model = SSOSettings
-    permission_classes = (permissions.IsAuthenticated, IsGlobalAdmin)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
