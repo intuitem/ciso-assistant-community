@@ -3,11 +3,11 @@ name = "ciso-assistant-cli"
 version = "0.1.0"
 description = "CISO Assistant CLI tools"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
     "click>=8.1.0",
     "icecream>=2.1.0",
-    "mcp[cli]>=1.6.0",
+    "mcp[cli]>=1.6.0,<2",
     "python-dotenv>=1.0.0",
     "requests>=2.32.3",
     "rich>=13.0.0",

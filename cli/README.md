@@ -20,7 +20,7 @@ CLICA is a command-line interface tool for interacting with the CISO Assistant R
 
 ### Prerequisites
 
-- Python 3.12 or higher
+- Python 3.14 or higher
 - [uv](https://docs.astral.sh/uv/) (the project is managed with `uv`; install via `curl -LsSf https://astral.sh/uv/install.sh | sh` or your package manager)
 
 ### Setup
