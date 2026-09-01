@@ -1856,7 +1856,7 @@
 	"scimTokenGenerationFailed": "Gagal membuat token SCIM",
 	"scimTokenRequiresSso": "SSO harus diaktifkan sebelum membuat token SCIM.",
 	"scimTokenNameTooLong": "Nama tidak boleh lebih dari 255 karakter.",
-	"errorSsoRequiredForScimUsers": "SSO tidak dapat dinonaktifkan selama masih ada pengguna yang disediakan melalui SCIM tanpa akses lokal.",
+	"errorSsoRequiredForManagedUsers": "SSO tidak dapat dinonaktifkan selama masih ada pengguna yang disediakan melalui SCIM atau penyediaan otomatis tanpa akses lokal.",
 	"idpGroup": "Grup IdP",
 	"idpGroups": "Grup IdP",
 	"idpGroupsDescription": "Aktifkan federasi grup IdP (penyediaan SCIM, pemetaan grup IdP, dan keanggotaan grup IdP pada pengguna).",
@@ -1880,5 +1880,14 @@
 	"gracePeriod": "Masa tenggang",
 	"gracePeriodHelpText": "Rahasia saat ini terus berfungsi selama durasi ini setelah rotasi, sehingga integrasi dapat diperbarui tanpa waktu henti. Dibatasi hingga 1 bulan.",
 	"gracePeriodTooLong": "Masa tenggang tidak boleh lebih dari 1 bulan.",
-	"previousSecretValidUntil": "Rahasia klien sebelumnya tetap berlaku hingga {date}."
+	"previousSecretValidUntil": "Rahasia klien sebelumnya tetap berlaku hingga {date}.",
+	"enableJitProvisioning": "Aktifkan penyediaan otomatis",
+	"enableJitProvisioningHelpText": "Secara otomatis membuat akun, dengan grup pengguna default di bawah ini, untuk pengguna yang melakukan autentikasi melalui SSO untuk pertama kalinya.",
+	"defaultUserGroups": "Grup pengguna default",
+	"defaultUserGroupsHelpText": "Grup pengguna yang secara otomatis diberikan kepada pengguna yang dibuat melalui penyediaan otomatis.",
+	"defaultUserGroupsWarning": "Diterapkan hanya sekali, saat pembuatan akun. Mengubah atau menghapus pengaturan ini nanti tidak memengaruhi pengguna yang sudah disediakan. Untuk keanggotaan grup yang tetap sinkron dari waktu ke waktu, gunakan pemetaan grup IdP sebagai gantinya.",
+	"attributeMappingGroups": "Pemetaan atribut grup",
+	"attributeMappingGroupsHelpText": "Nama klaim (claim) yang membawa keanggotaan grup IdP pengguna. Grup yang ditemukan di sini disinkronkan ke grup IdP setiap kali masuk, dan memberikan grup pengguna CISO Assistant apa pun yang telah dipetakan oleh administrator.",
+	"jitProvisioning": "Penyediaan otomatis SSO (JIT)",
+	"jitProvisioningDescription": "Aktifkan pembuatan akun otomatis saat login SSO pertama kali, dan sinkronisasi keanggotaan grup IdP mereka, tanpa memerlukan SCIM."
 }

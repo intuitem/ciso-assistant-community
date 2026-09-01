@@ -10716,6 +10716,7 @@ class PresetJourney(NameDescriptionMixin, FolderMixin):
         related_name="journeys",
     )
     applied_version = models.IntegerField(default=1)
+    sequence = models.PositiveIntegerField(default=1)
     object_refs = models.JSONField(default=dict)
     applied_at = models.DateTimeField(auto_now_add=True)
     applied_by = models.ForeignKey(
