@@ -1010,7 +1010,7 @@ def backup_full(dest_dir, batch_size, resume):
                             header = json.loads(block_data[:j].decode("utf-8"))
                             header_end = j
                             break
-                        except json.JSONDecodeError, UnicodeDecodeError:
+                        except (json.JSONDecodeError, UnicodeDecodeError):
                             continue
 
                     if not header:

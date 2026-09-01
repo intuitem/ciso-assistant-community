@@ -2,8 +2,10 @@
 
 import requests
 import sys
+from urllib.parse import parse_qs, urlsplit
 from rich import print as rprint
 from .config import API_URL, TOKEN, VERIFY_CERTIFICATE, HTTP_TIMEOUT
+from .utils.response_formatter import http_error_response
 
 
 def get_headers():
@@ -137,6 +139,25 @@ def get_paginated_results(data):
     return []
 
 
+def _next_link_to_request(next_link):
+    """Convert a pagination ``next`` link into (endpoint, params) for
+    make_get_request.
+
+    The API returns path-relative links ("/api/folders/?limit=50&offset=50"),
+    and some proxies rewrite them to absolute URLs. Either way the endpoint
+    passed to make_get_request must be relative to API_URL, which already
+    carries the "/api" path prefix — so strip that prefix from the link's
+    path instead of prefixing it a second time.
+    """
+    split = urlsplit(next_link)
+    path = split.path
+    api_path = urlsplit(API_URL).path.rstrip("/")
+    if api_path and (path == api_path or path.startswith(api_path + "/")):
+        path = path[len(api_path) :] or "/"
+    params = {k: v[0] if len(v) == 1 else v for k, v in parse_qs(split.query).items()}
+    return path, params
+
+
 def fetch_all_results(endpoint, params=None):
     """
     Fetch all paginated results from an API endpoint by following 'next' links.
@@ -164,23 +185,10 @@ def fetch_all_results(endpoint, params=None):
     current_params = params
 
     while next_url:
-        # Make request - if next_url is a full URL from pagination, extract just the path
-        if next_url.startswith("http://") or next_url.startswith("https://"):
-            # Parse the full URL to extract path and query params
-            from urllib.parse import urlparse, parse_qs
-
-            parsed = urlparse(next_url)
-            next_url = parsed.path
-            # Convert query string to params dict for subsequent requests
-            current_params = {
-                k: v[0] if len(v) == 1 else v for k, v in parse_qs(parsed.query).items()
-            }
-
         res = make_get_request(next_url, params=current_params)
 
         if res.status_code != 200:
-            error_msg = f"Error: HTTP {res.status_code} - {res.text}"
-            return results_list, error_msg
+            return results_list, http_error_response(res.status_code, res.text)
 
         data = res.json()
 
@@ -188,10 +196,11 @@ def fetch_all_results(endpoint, params=None):
         if isinstance(data, dict) and "results" in data:
             results = data.get("results", [])
             results_list.extend(results)
-            next_url = data.get("next")  # Get next page URL
-            current_params = (
-                None  # Clear params for subsequent requests (included in next_url)
-            )
+            next_link = data.get("next")  # Next page URL (path-relative or absolute)
+            if next_link:
+                next_url, current_params = _next_link_to_request(next_link)
+            else:
+                next_url = None
         # Handle non-paginated response (list)
         elif isinstance(data, list):
             results_list.extend(data)
