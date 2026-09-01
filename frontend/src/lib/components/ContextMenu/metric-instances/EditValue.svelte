@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { ContextMenu } from 'bits-ui';
 	import { m } from '$paraglide/messages';
 	import { superValidate } from 'sveltekit-superforms';
@@ -16,7 +15,6 @@
 
 	interface Props {
 		row: any;
-		handler: DataHandler;
 	}
 
 	let { row }: Props = $props();
