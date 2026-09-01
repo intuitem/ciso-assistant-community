@@ -843,7 +843,7 @@ class TestFocusMode:
 
         root_folder = Folder.get_root_folder()
         root_folder.default_role = None
-        root_folder.save() 
+        root_folder.save()
 
         domain = Folder.objects.create(name="domain")
 
