@@ -842,6 +842,9 @@ class TestFocusMode:
         from core.context import focus_folder_id_var
 
         root_folder = Folder.get_root_folder()
+        root_folder.default_role = None
+        root_folder.save() 
+
         domain = Folder.objects.create(name="domain")
 
         role = Role.objects.create(name="role")
