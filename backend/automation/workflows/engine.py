@@ -761,9 +761,7 @@ def _process_loop(token):
         # queryset by offset would skip rows as the body mutates them out of
         # the filter match (the canonical sweep filters on the very field it
         # updates). The snapshot is bounded by the item ceiling.
-        snapshot = read_snapshot_ids(
-            node, instance, read_config, loop_max_items() + 1
-        )
+        snapshot = read_snapshot_ids(node, instance, read_config, loop_max_items() + 1)
         items, next_offset = _read_snapshot_page(
             node, instance, read_config, snapshot, 0
         )

@@ -187,9 +187,7 @@ class TestPagingLoop:
         output = instance.node_outputs["each_row"]
         assert output["count"] == 6
         assert output["results"] == [f"AC {i:02d}" for i in range(6)]
-        assert not AppliedControl.objects.filter(
-            folder=domain, status="to_do"
-        ).exists()
+        assert not AppliedControl.objects.filter(folder=domain, status="to_do").exists()
 
     def test_the_filters_apply_to_every_page(self):
         domain = make_domain("Sweep filtered")
