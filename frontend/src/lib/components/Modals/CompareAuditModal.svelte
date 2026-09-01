@@ -86,7 +86,11 @@
 				onChange={() => {}}
 			/>
 			<div class="flex justify-end space-x-2">
-				<button type="button" class="btn preset-filled-surface-500" onclick={parent.onClose}>
+				<button
+					type="button"
+					class="btn preset-tonal-surface border border-surface-500"
+					onclick={parent.onClose}
+				>
 					{m.cancel()}
 				</button>
 				<button

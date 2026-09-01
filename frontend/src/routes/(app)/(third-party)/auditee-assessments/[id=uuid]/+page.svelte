@@ -1467,7 +1467,7 @@
 
 			<!-- Footer -->
 			<div class="p-4 border-t bg-surface-100-900 rounded-b-lg">
-				<button class="btn preset-filled-surface-500 w-full" onclick={closeHistoryModal}>
+				<button class="btn preset-filled-surface-900-100 w-full" onclick={closeHistoryModal}>
 					{m.close()}
 				</button>
 			</div>

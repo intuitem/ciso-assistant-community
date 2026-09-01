@@ -1181,7 +1181,7 @@
 
 			<!-- Footer -->
 			<div class="p-4 border-t bg-surface-50-950 rounded-b-lg">
-				<button class="btn preset-filled-surface-500 w-full" onclick={closeRequirementsModal}>
+				<button class="btn preset-filled-surface-900-100 w-full" onclick={closeRequirementsModal}>
 					{m.close()}
 				</button>
 			</div>
@@ -1329,7 +1329,7 @@
 
 			<!-- Footer -->
 			<div class="p-4 border-t bg-surface-50-950 rounded-b-lg">
-				<button class="btn preset-filled-surface-500 w-full" onclick={closeHistoryModal}>
+				<button class="btn preset-filled-surface-900-100 w-full" onclick={closeHistoryModal}>
 					{m.close()}
 				</button>
 			</div>
