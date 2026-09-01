@@ -89,7 +89,8 @@
 	});
 
 	function handleQualitativeChange(selectedIndex: string) {
-		$valueFieldProxy = { choice_index: parseInt(selectedIndex) };
+		const choiceIndex = parseInt(selectedIndex);
+		$valueFieldProxy = Number.isNaN(choiceIndex) ? null : { choice_index: choiceIndex };
 	}
 
 	// For quantitative metrics, parse the numeric value
