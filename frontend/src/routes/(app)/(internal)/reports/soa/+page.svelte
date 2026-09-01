@@ -3,6 +3,10 @@
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 	import type { PageData } from './$types';
 
 	const STORAGE_KEY = 'soa_selection';
@@ -30,6 +34,32 @@
 	let selectedRiskAssessments: string[] = $state(saved.risk);
 	let selectedImplementationGroups: string[] = $state(saved.groups ?? []);
 
+	// Lazy pickers: assessments are searched server-side instead of fetching the
+	// whole collections up front (same pattern as ModelTable filters).
+	const pickerSchema = z.object({
+		compliance_assessment: z.array(z.string()).optional().nullable(),
+		risk_assessments: z.array(z.string()).optional().nullable()
+	});
+	const pickerForm = superForm(
+		defaults(
+			{
+				compliance_assessment: selectedComplianceAssessment ? [selectedComplianceAssessment] : [],
+				risk_assessments: saved.risk ?? []
+			},
+			zod(pickerSchema)
+		),
+		{
+			SPA: true,
+			validators: zod(pickerSchema),
+			dataType: 'json',
+			invalidateAll: false,
+			applyAction: false,
+			resetForm: false,
+			taintedMessage: false,
+			validationMethod: 'auto'
+		}
+	);
+
 	const statusLabels: Record<string, () => string> = {
 		planned: m.planned,
 		in_progress: m.inProgress,
@@ -50,40 +80,47 @@
 		}
 	}
 
-	function toggleRiskAssessment(id: string) {
-		if (selectedRiskAssessments.includes(id)) {
-			selectedRiskAssessments = selectedRiskAssessments.filter((r) => r !== id);
-		} else {
-			selectedRiskAssessments = [...selectedRiskAssessments, id];
-		}
-	}
-
-	// Derive implementation groups from the selected CA's framework
-	const implementationGroups = $derived.by(() => {
-		const ca = data.complianceAssessments.find(
-			(c: Record<string, any>) => c.id === selectedComplianceAssessment
-		);
-		if (!ca?.framework?.id) return [];
-		return data.frameworkGroupsMap?.[ca.framework.id] || [];
-	});
+	// Selected CA details and its framework's implementation groups are fetched
+	// on selection — only the needed rows, never the whole collections.
+	let selectedComplianceData: Record<string, any> | null = $state(null);
+	let implementationGroups: any[] = $state([]);
 
 	// Select all groups by default when CA changes (skip on initial load if restoring saved state without URL override)
 	let lastAutoSelectedCA: string = $state(caFromUrl ? '' : saved.compliance);
 
 	$effect(() => {
-		if (selectedComplianceAssessment !== lastAutoSelectedCA) {
-			lastAutoSelectedCA = selectedComplianceAssessment;
-			const soaGroup = implementationGroups.find(
-				(g: { ref_id: string }) => g.ref_id.toLowerCase() === 'soa'
-			);
-			if (soaGroup) {
-				selectedImplementationGroups = [soaGroup.ref_id];
-			} else {
-				selectedImplementationGroups = implementationGroups.map(
-					(g: { ref_id: string }) => g.ref_id
-				);
-			}
+		const caId = selectedComplianceAssessment;
+		if (!browser) return;
+		if (!caId) {
+			selectedComplianceData = null;
+			implementationGroups = [];
+			return;
 		}
+		let cancelled = false;
+		(async () => {
+			try {
+				const caRes = await fetch(`/compliance-assessments/${caId}`);
+				const ca = caRes.ok ? await caRes.json() : null;
+				if (cancelled) return;
+				selectedComplianceData = ca;
+				const groups: any[] = ca?.framework?.implementation_groups_definition || [];
+				implementationGroups = groups;
+				if (caId !== lastAutoSelectedCA) {
+					lastAutoSelectedCA = caId;
+					const soaGroup = groups.find((g: { ref_id: string }) => g.ref_id.toLowerCase() === 'soa');
+					if (soaGroup) {
+						selectedImplementationGroups = [soaGroup.ref_id];
+					} else {
+						selectedImplementationGroups = groups.map((g: { ref_id: string }) => g.ref_id);
+					}
+				}
+			} catch (e) {
+				console.error('Failed to fetch compliance assessment details', e);
+			}
+		})();
+		return () => {
+			cancelled = true;
+		};
 	});
 
 	function handleGenerate() {
@@ -111,12 +148,6 @@
 		}
 		goto(`/reports/soa/results?${params.toString()}`);
 	}
-
-	const selectedComplianceData = $derived(
-		data.complianceAssessments.find(
-			(ca: Record<string, any>) => ca.id === selectedComplianceAssessment
-		)
-	);
 </script>
 
 <div class="space-y-6 max-w-4xl mx-auto">
@@ -142,26 +173,24 @@
 			<h2 class="text-lg font-semibold text-surface-900-100">{m.soaSelectCompliance()}</h2>
 		</div>
 
-		{#if data.complianceAssessments.length === 0}
+		{#if data.complianceAssessmentsCount === 0}
 			<p class="text-surface-600-400 italic">{m.soaNoComplianceAssessments()}</p>
 		{:else}
-			<select
-				bind:value={selectedComplianceAssessment}
-				class="w-full px-3 py-2 border border-surface-300-700 rounded-lg bg-surface-50-950 text-surface-900-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-			>
-				<option value="" disabled>{m.soaSelectCompliance()}</option>
-				{#each data.complianceAssessments as ca}
-					<option value={ca.id}>
-						{ca.name}
-						{ca.framework?.str ? `(${ca.framework.str})` : ''}
-						{ca.perimeter?.str
-							? `— ${ca.perimeter.str}`
-							: ca.folder?.str
-								? `— ${ca.folder.str}`
-								: ''}
-					</option>
-				{/each}
-			</select>
+			<AutocompleteSelect
+				form={pickerForm}
+				field="compliance_assessment"
+				optionsEndpoint="compliance-assessments"
+				optionsInfoFields={{
+					fields: [
+						{ field: 'framework', path: 'str' },
+						{ field: 'perimeter', path: 'str' }
+					]
+				}}
+				placeholder={m.soaSelectCompliance()}
+				onChange={(value) => {
+					selectedComplianceAssessment = value || '';
+				}}
+			/>
 
 			{#if selectedComplianceData}
 				<div class="mt-3 flex flex-wrap gap-2">
@@ -241,39 +270,23 @@
 			</div>
 		</div>
 
-		{#if data.riskAssessments.length === 0}
+		{#if data.riskAssessmentsCount === 0}
 			<p class="text-surface-600-400 italic">{m.soaNoRiskAssessments()}</p>
 		{:else}
-			<div class="space-y-2 max-h-64 overflow-y-auto">
-				{#each data.riskAssessments as ra}
-					<label
-						class="flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer
-							{selectedRiskAssessments.includes(ra.id)
-							? 'border-red-300 bg-red-50 dark:border-red-500/40 dark:bg-red-500/15'
-							: 'border-surface-200-800 hover:border-surface-300-700 bg-surface-50-950'}"
-					>
-						<input
-							type="checkbox"
-							checked={selectedRiskAssessments.includes(ra.id)}
-							onchange={() => toggleRiskAssessment(ra.id)}
-							class="rounded border-surface-300-700 text-red-600 focus:ring-red-500"
-						/>
-						<div class="flex-1 min-w-0">
-							<span class="text-sm font-medium text-surface-900-100">{ra.name}</span>
-							{#if ra.risk_matrix?.str}
-								<span class="text-xs text-surface-600-400 ml-2">({ra.risk_matrix.str})</span>
-							{/if}
-						</div>
-						{#if ra.perimeter?.str}
-							<span
-								class="text-xs text-surface-600-400 bg-surface-100-900 px-2 py-0.5 rounded flex-shrink-0"
-							>
-								{ra.perimeter.str}
-							</span>
-						{/if}
-					</label>
-				{/each}
-			</div>
+			<AutocompleteSelect
+				form={pickerForm}
+				field="risk_assessments"
+				multiple
+				optionsEndpoint="risk-assessments"
+				optionsInfoFields={{
+					fields: [{ field: 'perimeter', path: 'str' }]
+				}}
+				placeholder={m.soaSelectRisk()}
+				onChange={(value) => {
+					const arrayValue = Array.isArray(value) ? value : value ? [value] : [];
+					selectedRiskAssessments = arrayValue.filter(Boolean);
+				}}
+			/>
 		{/if}
 	</div>
 

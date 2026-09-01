@@ -1,39 +1,23 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	const [complianceAssessments, riskAssessments] = await Promise.all([
-		fetchAllPages(fetch, `${BASE_API_URL}/compliance-assessments/?ordering=-created_at`),
-		fetchAllPages(fetch, `${BASE_API_URL}/risk-assessments/?ordering=-created_at`)
+	// Assessments are picked lazily client-side (server-side search) — only probe
+	// the counts here so the empty states can be shown without fetching every row.
+	const [complianceAssessmentsCount, riskAssessmentsCount] = await Promise.all([
+		fetch(`${BASE_API_URL}/compliance-assessments/?limit=1`)
+			.then((res) => res.json())
+			.then((data) => data.count ?? 0),
+		fetch(`${BASE_API_URL}/risk-assessments/?limit=1`)
+			.then((res) => res.json())
+			.then((data) => data.count ?? 0)
 	]).catch(() => {
 		error(400, 'Error loading compliance assessments');
 	});
 
-	// Fetch implementation_groups_definition for each unique framework
-	const frameworkIds = [
-		...new Set(
-			complianceAssessments.map((ca: Record<string, any>) => ca.framework?.id).filter(Boolean)
-		)
-	];
-
-	const frameworkGroupsMap: Record<string, any[]> = {};
-	if (frameworkIds.length > 0) {
-		const frameworkResponses = await Promise.all(
-			frameworkIds.map((id: string) => fetch(`${BASE_API_URL}/frameworks/${id}/`))
-		);
-		for (const res of frameworkResponses) {
-			if (res.ok) {
-				const fw = await res.json();
-				frameworkGroupsMap[fw.id] = fw.implementation_groups_definition || [];
-			}
-		}
-	}
-
 	return {
-		complianceAssessments,
-		riskAssessments,
-		frameworkGroupsMap
+		complianceAssessmentsCount,
+		riskAssessmentsCount
 	};
 };

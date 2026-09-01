@@ -1,7 +1,6 @@
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
 import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import { defaultWriteFormAction } from '$lib/utils/actions';
@@ -82,26 +81,12 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		fetchChoices(fetch, `${base}/info_duration_service_downtime_actual_or_estimate/`)
 	]);
 
-	// Fetch users for contact fill helper
-	let userOptions: { id: string; label: string; email: string }[] = [];
-	try {
-		const results = await fetchAllPages(fetch, `${BASE_API_URL}/users/`);
-		userOptions = results.map((u: any) => ({
-			id: u.id,
-			label: `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email,
-			email: u.email || ''
-		}));
-	} catch {
-		// Optional
-	}
-
 	return {
 		form,
 		model,
 		object,
 		incidentRef,
 		validation,
-		userOptions,
 		reportId: params.id,
 		mode: 'edit' as const,
 		formAction: '?/update',

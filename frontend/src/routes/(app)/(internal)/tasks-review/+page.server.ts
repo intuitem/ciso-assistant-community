@@ -61,20 +61,17 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	// Streamed with error handling
 	const reviewPromise = safeFetch(fetch, endpoint, { folders: [], buckets: [], granularity });
 
-	// Each filter dropdown fetched independently — one failure won't block others
+	// Each filter dropdown fetched independently — one failure won't block others.
+	// Applied controls are picked lazily client-side (server-side search) — no fetch-all.
 	const foldersPromise = fetchAllPages(fetch, `${BASE_API_URL}/folders/`).catch(() => []);
 	const actorsPromise = fetchAllPages(fetch, `${BASE_API_URL}/actors/`).catch(() => []);
-	const controlsPromise = fetchAllPages(fetch, `${BASE_API_URL}/applied-controls/`).catch(() => []);
 
 	return {
 		reviewData: reviewPromise,
-		filterData: Promise.all([foldersPromise, actorsPromise, controlsPromise]).then(
-			([allFolders, allActors, allAppliedControls]) => ({
-				allFolders,
-				allActors,
-				allAppliedControls
-			})
-		),
+		filterData: Promise.all([foldersPromise, actorsPromise]).then(([allFolders, allActors]) => ({
+			allFolders,
+			allActors
+		})),
 		startMonth,
 		startYear,
 		endMonth,

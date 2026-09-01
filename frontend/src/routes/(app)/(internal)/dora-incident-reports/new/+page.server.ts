@@ -179,26 +179,12 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 		fetchChoices(fetch, `${base}/info_duration_service_downtime_actual_or_estimate/`)
 	]);
 
-	// Fetch users for contact fill helper
-	let userOptions: { id: string; label: string; email: string }[] = [];
-	try {
-		const results = await fetchAllPages(fetch, `${BASE_API_URL}/users/`);
-		userOptions = results.map((u: any) => ({
-			id: u.id,
-			label: `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email,
-			email: u.email || ''
-		}));
-	} catch {
-		// Optional
-	}
-
 	return {
 		form,
 		model,
 		mode: 'create' as const,
 		formAction: '?/create',
 		incidentRef,
-		userOptions,
 		selectOptions: {
 			incident_submission: submissionChoices,
 			report_currency: currencyChoices,

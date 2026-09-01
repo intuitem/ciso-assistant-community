@@ -4,11 +4,14 @@
 	import { invalidateAll } from '$app/navigation';
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { getSecureRedirect } from '$lib/utils/helpers';
-	import { fetchAllPages } from '$lib/utils/pagination';
 	import { page } from '$app/stores';
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 
 	let { data }: { data: PageData } = $props();
 
@@ -105,43 +108,44 @@
 
 	// --- Edit mode for step links ---
 	let editMode = $state(false);
-	let choicesCache: Record<string, { id: string; str: string; folder: string }[]> = $state({});
-	// Track in-flight requests without $state to avoid mutation-in-template errors
-	const _loadingChoices: Set<string> = new Set();
 
-	async function fetchChoices(targetModel: string) {
-		if (choicesCache[targetModel] || _loadingChoices.has(targetModel)) return;
-		_loadingChoices.add(targetModel);
-		try {
-			const results = await fetchAllPages(
-				(url) => fetch(url, { headers: { Accept: 'application/json' } }),
-				`/${targetModel}`
-			);
-			choicesCache[targetModel] = results.map((r: any) => ({
-				id: r.id,
-				str: r.str ?? r.name ?? r.id,
-				folder: r.folder?.str ?? r.folder?.name ?? ''
-			}));
-		} catch (e) {
-			console.error('Failed to fetch choices for', targetModel, e);
-		} finally {
-			_loadingChoices.delete(targetModel);
+	// One lazy picker per direct-link step: options are searched server-side via
+	// /<target_model>/autocomplete (or fetched eagerly when the collection is small)
+	// instead of fetching entire collections up front.
+	const editableSteps: any[] = (data.steps ?? []).filter(
+		(s: any) => s.target_model && s.target_ref != null
+	);
+	const stepLinkSchema = z.object(
+		Object.fromEntries(
+			editableSteps.map((s: any) => [s.id, z.array(z.string()).optional().nullable()])
+		)
+	);
+	const stepLinkForm = superForm(
+		defaults(
+			Object.fromEntries(editableSteps.map((s: any) => [s.id, s.target_ref ? [s.target_ref] : []])),
+			zod(stepLinkSchema)
+		),
+		{
+			SPA: true,
+			validators: zod(stepLinkSchema),
+			dataType: 'json',
+			invalidateAll: false,
+			applyAction: false,
+			resetForm: false,
+			taintedMessage: false,
+			validationMethod: 'auto'
 		}
+	);
+	// Only persist changes after the user actually interacted with a picker —
+	// hydration edge cases (e.g. an unreadable target) must not PATCH on load.
+	let touchedStepPickers: Record<string, boolean> = $state({});
+
+	function onStepTargetRefChange(step: any, value: unknown) {
+		if (!touchedStepPickers[step.id]) return;
+		const targetRef = (Array.isArray(value) ? (value[0] ?? null) : value) || null;
+		if (targetRef === (step.target_ref ?? null)) return;
+		updateStepTargetRef(step.id, targetRef);
 	}
-
-	// Prefetch choices when edit mode is toggled on — only for direct-link steps
-	$effect(() => {
-		if (editMode && data.steps) {
-			const models = new Set(
-				data.steps
-					.filter((s: any) => s.target_model && s.target_ref != null)
-					.map((s: any) => s.target_model)
-			);
-			for (const model of models) {
-				fetchChoices(model);
-			}
-		}
-	});
 
 	async function updateStepTargetRef(stepId: string, targetRef: string | null) {
 		await fetch(`/journeys/${$page.params.id}/step/${stepId}`, {
@@ -479,23 +483,22 @@
 									{#if step.description && !compactMode}
 										<p class="text-sm text-surface-600-400 mt-1">{step.description}</p>
 									{/if}
-									{#if editMode && step.target_ref != null && step.target_model && choicesCache[step.target_model]}
-										<div class="mt-2">
-											<select
-												class="select select-sm text-sm max-w-xs bg-surface-50-950 text-surface-800-200 border-surface-300-700"
-												value={step.target_ref ?? ''}
-												onchange={(e) => {
-													const val = (e.target as HTMLSelectElement).value;
-													updateStepTargetRef(step.id, val || null);
+									{#if editMode && step.target_ref != null && step.target_model}
+										<div
+											class="mt-2 max-w-xs"
+											onfocusin={() => (touchedStepPickers[step.id] = true)}
+										>
+											<AutocompleteSelect
+												form={stepLinkForm}
+												field={step.id}
+												optionsEndpoint={step.target_model}
+												optionsInfoFields={{
+													fields: [{ field: 'folder', path: 'str' }]
 												}}
-											>
-												<option value="">{m.noLinkedObject()}</option>
-												{#each choicesCache[step.target_model] ?? [] as choice}
-													<option value={choice.id}>
-														{choice.str}{choice.folder ? ` — ${choice.folder}` : ''}
-													</option>
-												{/each}
-											</select>
+												nullable
+												placeholder={m.noLinkedObject()}
+												onChange={(value) => onStepTargetRefChange(step, value)}
+											/>
 										</div>
 									{/if}
 								</div>
