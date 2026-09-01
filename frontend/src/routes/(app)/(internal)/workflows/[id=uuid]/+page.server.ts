@@ -55,7 +55,8 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 			...creatableModels.flatMap((entry: any) => Object.values(entry.fk_fields ?? {})),
 			'folders',
 			'actors',
-			'filtering-labels'
+			'filtering-labels',
+			'frameworks'
 		])
 	] as string[];
 	const fkOptions: Record<string, any[]> = {};

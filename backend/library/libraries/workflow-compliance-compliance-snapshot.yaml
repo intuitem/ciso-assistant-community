@@ -1,0 +1,83 @@
+urn: urn:intuitem:risk:library:workflow-compliance-compliance-snapshot
+locale: en
+ref_id: workflow-compliance-compliance-snapshot
+name: Monthly compliance snapshot, filed as evidence
+description: 'On the first of the month, read every audit with its score and requirement breakdown, file
+  the result as an evidence attachment, and say where it landed. The point is the artefact: an auditor
+  can be shown what the posture was on a date, not asked to trust a dashboard.'
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-compliance-compliance-snapshot:workflow:compliance-snapshot
+    schema_version: 1
+    ref_id: compliance-snapshot
+    name: Monthly compliance snapshot, filed as evidence
+    description: 'On the first of the month, read every audit with its score and requirement breakdown,
+      file the result as an evidence attachment, and say where it landed. The point is the artefact: an
+      auditor can be shown what the posture was on a date, not asked to trust a dashboard.'
+    graph:
+      variables:
+      - key: notify_emails
+        type: string
+        default_value: grc@example.com
+      nodes:
+      - ref: first_of_month
+        type: trigger
+        label: 1st at 06:00
+        trigger_config:
+          type: schedule
+          cron_expression: 0 6 1 * *
+          timezone: UTC
+      - ref: fetch_audits
+        type: action
+        label: Read every audit
+        action_config:
+          type: read_objects
+          model: compliance_assessment
+          mode: list
+          order_by: name
+          limit: 100
+      - ref: make_evidence
+        type: action
+        label: Open the evidence
+        action_config:
+          type: create_object
+          model: evidence
+          fields:
+            name: Compliance snapshot {{today}}
+            description: Automated snapshot of {{nodes.fetch_audits.count}} audit(s) taken on {{today}}.
+      - ref: file_it
+        type: action
+        label: Attach the snapshot
+        action_config:
+          type: attach_evidence
+          evidence: '{{nodes.make_evidence.created_object_id}}'
+          source: text
+          filename: compliance-snapshot-{{today}}.json
+          text: '{{nodes.fetch_audits.results}}'
+      - ref: notify
+        type: action
+        label: Say where it landed
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Compliance snapshot filed: {{today}}'
+          body: '{{nodes.fetch_audits.count}} audit(s) captured in {{nodes.file_it.filename}} ({{nodes.file_it.bytes}}
+            bytes).'
+      - ref: done
+        type: end
+      edges:
+      - source: first_of_month
+        target: fetch_audits
+      - source: fetch_audits
+        target: make_evidence
+      - source: make_evidence
+        target: file_it
+      - source: file_it
+        target: notify
+      - source: notify
+        target: done

@@ -4,8 +4,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.translation import gettext_lazy as _
-
 from global_settings.models import GlobalSettings
+
 from iam.sso.saml.defaults import DEFAULT_SAML_SETTINGS
 
 logger = structlog.get_logger(__name__)
@@ -48,6 +48,11 @@ class SSOSettingsQuerySet(QuerySet):
                     secret=_settings.value.get("secret"),
                     key=_settings.value.get("key"),
                     settings=_settings.value.get("settings"),
+                    jit_provisioning_enabled=_settings.value.get(
+                        "jit_provisioning_enabled", False
+                    ),
+                    default_user_groups=_settings.value.get("default_user_groups", [])
+                    or [],
                 )
             ]
 
@@ -107,6 +112,22 @@ class SSOSettings(GlobalSettings):
         verbose_name=_("key"), max_length=191, blank=True, help_text=_("Key")
     )
     settings = models.JSONField(default=dict, blank=True)
+    jit_provisioning_enabled = models.BooleanField(
+        verbose_name=_("Enable auto-provisioning"),
+        default=False,
+        help_text=_(
+            "Automatically create an account for users authenticating via SSO "
+            "for the first time"
+        ),
+    )
+    default_user_groups = models.JSONField(
+        verbose_name=_("Default user groups"),
+        default=list,
+        blank=True,
+        help_text=_(
+            "User groups automatically granted to users created by auto-provisioning"
+        ),
+    )
 
     class Meta:
         managed = False
