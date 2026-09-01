@@ -47,7 +47,7 @@ export function syncBreadcrumbsToCurrentUrl(
 	if (idx > 0) {
 		const trimmed = breadcrumbs.slice(0, idx + 1);
 		const matched = trimmed[idx];
-		trimmed[idx] = { ...matched, href: currentUrl };
+		trimmed[idx] = { ...matched, href: currentUrl, label: matched.label || fallbackLabel };
 		return trimmed;
 	}
 	// Fresh load with no match: reset trail.
