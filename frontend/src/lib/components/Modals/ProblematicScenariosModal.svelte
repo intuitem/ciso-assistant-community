@@ -37,7 +37,7 @@
 			{#if scenarios && scenarios.length > 0}
 				<div class="space-y-4">
 					{#each scenarios as scenario}
-						<div class="card variant-ghost-warning p-4">
+						<div class="card preset-outlined-warning-500 p-4">
 							<div class="flex items-center justify-between mb-3">
 								<div>
 									<h4 class="h4 font-semibold">
@@ -62,9 +62,9 @@
 												<p class="font-medium text-sm">{hypothesis.name}</p>
 											</div>
 											{#if hypothesis.is_selected}
-												<span class="badge variant-filled-success text-xs">Selected</span>
+												<span class="badge preset-filled-success-500 text-xs">Selected</span>
 											{:else}
-												<span class="badge variant-soft-surface text-xs">Not Selected</span>
+												<span class="badge preset-tonal-surface text-xs">Not Selected</span>
 											{/if}
 										</div>
 									{/each}
@@ -88,7 +88,7 @@
 		</section>
 
 		<footer class="flex justify-end pt-4">
-			<button type="button" class="btn variant-filled" onclick={closeModal}> Close </button>
+			<button type="button" class="btn preset-filled" onclick={closeModal}> Close </button>
 		</footer>
 	</div>
 {/if}

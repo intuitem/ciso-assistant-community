@@ -11,8 +11,8 @@
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { onMount, tick, untrack } from 'svelte';
+	import { getToastStore } from '$lib/components/Toast/stores';
 
-	import { tableA11y } from '$lib/components/ModelTable/actions';
 	// Types
 	import { browser } from '$app/environment';
 	import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
@@ -366,6 +366,8 @@
 
 	$tableHandlers[baseEndpoint] = handler;
 
+	const toastStore = getToastStore();
+
 	handler.onChange((state: State) =>
 		loadTableData({
 			state,
@@ -387,6 +389,10 @@
 										: Object.keys(tableSource.body)
 							},
 			featureFlags: page.data?.featureflags
+		}).catch((error) => {
+			console.error(error);
+			toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
+			return [];
 		})
 	);
 
@@ -899,7 +905,6 @@
 		class="table caption-bottom {classesTable}"
 		class:table-interactive={interactive}
 		role="grid"
-		use:tableA11y
 	>
 		<thead class="table-head {regionHead}">
 			<tr>

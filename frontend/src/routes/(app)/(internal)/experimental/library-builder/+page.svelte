@@ -297,7 +297,7 @@
 				</button>
 				<button
 					type="button"
-					class="btn btn-sm variant-ghost-primary"
+					class="btn btn-sm preset-outlined-primary-500"
 					onclick={() => {
 						showCreate = !showCreate;
 						quickKind = null;
@@ -308,7 +308,7 @@
 					{m.lbListNewLibraryDraft()}
 				</button>
 				<label
-					class="btn btn-sm variant-ghost-primary cursor-pointer"
+					class="btn btn-sm preset-outlined-primary-500 cursor-pointer"
 					title={m.lbListImportYamlTooltip()}
 				>
 					{#if importingYaml}
@@ -347,7 +347,7 @@
 					</select>
 					<button
 						type="button"
-						class="btn btn-sm variant-ghost-primary"
+						class="btn btn-sm preset-outlined-primary-500"
 						onclick={adoptLibrary}
 						disabled={!adoptSource || adopting}
 					>
@@ -391,7 +391,7 @@
 				<div class="flex items-end">
 					<button
 						type="button"
-						class="btn btn-sm variant-filled-primary"
+						class="btn btn-sm preset-filled-primary-500"
 						onclick={createQuick}
 						disabled={quickCreating ||
 							!identitySlug(quickName) ||
@@ -455,7 +455,7 @@
 				<div class="flex items-end">
 					<button
 						type="button"
-						class="btn btn-sm variant-filled-primary"
+						class="btn btn-sm preset-filled-primary-500"
 						onclick={createDraft}
 						disabled={creating || !IDENTITY_RE.test(newPackager) || !IDENTITY_RE.test(newRefId)}
 					>
@@ -531,14 +531,14 @@
 									     in-use content). Three states: Draft; Published; Published
 									     with edits not yet re-published. -->
 									{#if !draft.identity_locked}
-										<span class="badge variant-ghost-surface text-xs">{m.lbListDraft()}</span>
+										<span class="badge preset-outlined-surface-500 text-xs">{m.lbListDraft()}</span>
 									{:else if draft.has_unpublished_changes}
-										<span class="badge variant-filled-warning text-xs">
+										<span class="badge preset-filled-warning-500 text-xs">
 											<i class="fa-solid fa-cloud-arrow-up mr-0.5" aria-hidden="true"
 											></i>{m.lbListPublishedModified()}
 										</span>
 									{:else}
-										<span class="badge variant-filled-success text-xs">
+										<span class="badge preset-filled-success-500 text-xs">
 											<i class="fa-solid fa-cloud-arrow-up mr-0.5" aria-hidden="true"
 											></i>{m.lbListPublished()}
 										</span>
@@ -547,14 +547,14 @@
 								<td class="space-x-1">
 									<a
 										href="/experimental/library-builder/{draft.id}"
-										class="btn btn-sm variant-filled-primary"
+										class="btn btn-sm preset-filled-primary-500"
 									>
 										<i class="fa-solid fa-pen-to-square mr-1"></i>
 										{m.edit()}
 									</a>
 									<button
 										type="button"
-										class="btn btn-sm variant-ghost-error"
+										class="btn btn-sm preset-outlined-error-500"
 										onclick={() => deleteDraft(draft)}
 										aria-label={m.lbListDeleteDraft()}
 									>

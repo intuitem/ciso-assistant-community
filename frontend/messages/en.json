@@ -5521,7 +5521,7 @@
 	"targetObjectId": "Which one (id)",
 	"relations": "Links",
 	"addRelation": "Add link",
-	"relationValues": "Ids, comma-separated or {{templated}}",
+	"relationValues": "Ids, comma-separated or \\{\\{templated\\}\\}",
 	"set": "Replace",
 	"guardedFieldHint": "Only the values listed here can be written by a workflow.",
 	"setVariables": "Set variables",

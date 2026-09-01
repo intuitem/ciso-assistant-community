@@ -25,7 +25,11 @@ export const loadTableData = async ({
 	newParams.forEach((value, key) => params.append(key, value));
 	url.search = params.toString();
 
-	const response = await fetch(url.toString()).then((res) => res.json());
+	const res = await fetch(url.toString());
+	if (!res.ok) {
+		throw new Error(`Failed to load ${URLModel}: ${res.status}`);
+	}
+	const response = await res.json();
 	state.setTotalRows(response.count);
 
 	const baseFields = getListViewFields({ key: URLModel, featureFlags, includeOptional: true });

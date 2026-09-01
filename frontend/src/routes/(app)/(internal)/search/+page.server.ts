@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
 
 	const res = await fetch(`${BASE_API_URL}/search/?${params.toString()}`);
 	if (!res.ok) {
-		return { query, results: [], count: 0, totalCandidates: 0 };
+		return { query, results: [], count: 0, totalCandidates: 0, error: true };
 	}
 
 	const data = await res.json();

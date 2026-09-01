@@ -368,7 +368,7 @@
 						<div class="flex items-center space-x-2">
 							{#if !isPlaying}
 								<button
-									class="btn btn-sm variant-filled-primary"
+									class="btn btn-sm preset-filled-primary-500"
 									on:click={playAnimation}
 									title="Play Animation"
 								>
@@ -376,7 +376,7 @@
 								</button>
 							{:else}
 								<button
-									class="btn btn-sm variant-filled-error"
+									class="btn btn-sm preset-filled-error-500"
 									on:click={stopAnimation}
 									title="Stop Animation"
 								>
@@ -388,7 +388,7 @@
 						<!-- Frame navigation -->
 						<div class="flex items-center space-x-2">
 							<button
-								class="btn btn-sm variant-ghost-surface"
+								class="btn btn-sm preset-outlined-surface-500"
 								on:click={() => goToFrame(currentFrameIndex - 1)}
 								disabled={currentFrameIndex === 0}
 								title="Previous Frame"
@@ -401,7 +401,7 @@
 							</span>
 
 							<button
-								class="btn btn-sm variant-ghost-surface"
+								class="btn btn-sm preset-outlined-surface-500"
 								on:click={() => goToFrame(currentFrameIndex + 1)}
 								disabled={currentFrameIndex === timelineData.length - 1}
 								title="Next Frame"

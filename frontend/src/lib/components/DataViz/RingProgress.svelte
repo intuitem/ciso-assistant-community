@@ -8,6 +8,7 @@
 		name?: string;
 		value: number;
 		max: number;
+		min?: number;
 		isPercentage?: boolean;
 		color?: string;
 		backgroundColor?: string;
@@ -23,6 +24,7 @@
 		name = 'single_gauge',
 		value,
 		max,
+		min = 0,
 		isPercentage = false,
 		color = '#B075CC',
 		backgroundColor = '#E6E6E6',
@@ -42,7 +44,8 @@
 		const valueColor = isDark ? '#e5e5e5' : '#333';
 
 		// Capture values at mount time to avoid reactive context issues in ECharts callbacks
-		const percentage = max > 0 ? (value / max) * 100 : 0;
+		const range = max - min;
+		const percentage = range > 0 ? ((value - min) / range) * 100 : 0;
 		const displayValue = Math.round(value * 10) / 10;
 
 		const option = {
@@ -138,6 +141,7 @@
 	style="min-width: 180px; min-height: 180px;"
 	data-testid="progress-ring-svg"
 	aria-valuenow={value}
+	aria-valuemin={min}
 	aria-valuemax={max}
 	role="progressbar"
 ></div>

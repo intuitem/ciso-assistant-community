@@ -37,13 +37,17 @@
 <div class="flex items-center justify-between p-2 mb-2">
 	<h2 class="text-xl font-semibold">{m.myAssignments()}</h2>
 	<div class="flex gap-2">
-		<button type="button" class="btn btn-sm variant-ghost-surface" onclick={toggleTeamAssignments}>
+		<button
+			type="button"
+			class="btn btn-sm preset-outlined-surface-500"
+			onclick={toggleTeamAssignments}
+		>
 			<i class="fa-solid {data.includeTeams ? 'fa-user' : 'fa-users'} mr-2"></i>
 			{data.includeTeams ? m.directAssignmentsOnly() : m.includeTeamAssignments()}
 		</button>
 		<button
 			type="button"
-			class="btn btn-sm variant-ghost-surface"
+			class="btn btn-sm preset-outlined-surface-500"
 			onclick={() => (showEmptySections = !showEmptySections)}
 		>
 			<i class="fa-solid {showEmptySections ? 'fa-eye-slash' : 'fa-eye'} mr-2"></i>
@@ -64,7 +68,7 @@
 			<div class="font-bold mb-2">
 				<i class="fa-solid fa-fire-extinguisher mr-2"></i>{m.appliedControls()}
 				{#if counts.appliedControls > 0}
-					<span class="badge variant-filled-surface ml-2">{counts.appliedControls}</span>
+					<span class="badge preset-filled-surface-500 ml-2">{counts.appliedControls}</span>
 				{/if}
 			</div>
 			<ModelTable
@@ -94,7 +98,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-note-sticky mr-2"></i>{m.tasks()}
 					{#if counts.tasks > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.tasks}</span>
+						<span class="badge preset-filled-surface-500 ml-2">{counts.tasks}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -120,7 +124,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-certificate mr-2"></i>{m.complianceAssessments()}
 					{#if counts.complianceAssessments > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.complianceAssessments}</span>
+						<span class="badge preset-filled-surface-500 ml-2">{counts.complianceAssessments}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -147,7 +151,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-magnifying-glass-chart mr-2"></i>{m.riskAssessments()}
 					{#if counts.riskAssessments > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.riskAssessments}</span>
+						<span class="badge preset-filled-surface-500 ml-2">{counts.riskAssessments}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -173,7 +177,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-clone mr-2"></i>{m.riskScenarios()}
 					{#if counts.riskScenarios > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.riskScenarios}</span>
+						<span class="badge preset-filled-surface-500 ml-2">{counts.riskScenarios}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -200,7 +204,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-bug mr-2"></i>{m.incidents()}
 					{#if counts.incidents > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.incidents}</span>
+						<span class="badge preset-filled-surface-500 ml-2">{counts.incidents}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -227,7 +231,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-circle-exclamation mr-2"></i>{m.securityExceptions()}
 					{#if counts.securityExceptions > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.securityExceptions}</span>
+						<span class="badge preset-filled-surface-500 ml-2">{counts.securityExceptions}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -254,7 +258,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-clipboard-list mr-2"></i>{m.findingsAssessments()}
 					{#if counts.findingsAssessments > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.findingsAssessments}</span>
+						<span class="badge preset-filled-surface-500 ml-2">{counts.findingsAssessments}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -280,7 +284,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-check-circle mr-2"></i>{m.validationFlows()}
 					{#if counts.validationFlows > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.validationFlows}</span>
+						<span class="badge preset-filled-surface-500 ml-2">{counts.validationFlows}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -307,7 +311,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-signature mr-2"></i>{m.riskAcceptances()}
 					{#if counts.riskAcceptances > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.riskAcceptances}</span>
+						<span class="badge preset-filled-surface-500 ml-2">{counts.riskAcceptances}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -332,7 +336,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-triangle-exclamation mr-2"></i>{m.findings()}
 					{#if counts.findings > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.findings}</span>
+						<span class="badge preset-filled-surface-500 ml-2">{counts.findings}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -358,7 +362,8 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-bullseye mr-2"></i>{m.organisationObjectives()}
 					{#if counts.organisationObjectives > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.organisationObjectives}</span>
+						<span class="badge preset-filled-surface-500 ml-2">{counts.organisationObjectives}</span
+						>
 					{/if}
 				</div>
 				<ModelTable
@@ -385,7 +390,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-user-shield mr-2"></i>{m.rightRequests()}
 					{#if counts.rightRequests > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.rightRequests}</span>
+						<span class="badge preset-filled-surface-500 ml-2">{counts.rightRequests}</span>
 					{/if}
 				</div>
 				<ModelTable
@@ -412,7 +417,7 @@
 				<div class="font-bold mb-2">
 					<i class="fa-solid fa-chart-line mr-2"></i>{m.metricInstances()}
 					{#if counts.metricInstances > 0}
-						<span class="badge variant-filled-surface ml-2">{counts.metricInstances}</span>
+						<span class="badge preset-filled-surface-500 ml-2">{counts.metricInstances}</span>
 					{/if}
 				</div>
 				<ModelTable

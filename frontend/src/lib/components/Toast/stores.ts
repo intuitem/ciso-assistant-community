@@ -6,6 +6,8 @@ export interface ToastSettings {
 	message: string;
 	/** Provide CSS classes to set the background color. */
 	background?: string;
+	/** Semantic color preset. Ignored when `background` is set. */
+	preset?: 'error' | 'success' | 'warning';
 	/** Enables auto-hide after the timeout duration. */
 	autohide?: boolean;
 	/** Set the auto-hide timeout duration. */
