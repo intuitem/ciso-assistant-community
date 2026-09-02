@@ -140,7 +140,7 @@ test('lazy picker search finds a user group beyond the first page', async ({ log
 
 	const groupsField = page.getByTestId('form-input-user-groups');
 	await groupsField.click();
-	await groupsField.getByRole('textbox').fill(needleName);
+	await groupsField.getByRole('combobox').fill(needleName);
 
 	// A first-page-only consumer would filter 50 locally-known options and
 	// never surface the needle.
@@ -175,18 +175,31 @@ test('m2m links beyond one page survive an edit-form save that does not touch th
 	await page.locator('body[data-hydrated="true"]').waitFor();
 
 	// Hydration integrity: every linked evidence must be selected in the
-	// picker, including those beyond the first page. Chips visually collapse
-	// behind a "+N" summary chip (which takes over one option's accessible
-	// name), so check the selected options in the accessibility tree: the
-	// last-created evidence explicitly, and all-but-one option by name.
+	// picker, including those beyond the first page. Selected chips are plain
+	// list items (no option role). Overflow chips stay in the DOM: the
+	// component collapses them with CSS (chip-max-N) and turns one chip into a
+	// "+N" badge, so count the <li>s. If svelte-multiselect's own
+	// maxVisibleChips ever gets enabled, its "+N more" button would hide chips
+	// from the DOM, so expand it first.
 	const evidencesField = page.getByTestId('form-input-evidences');
 	await expect(evidencesField).toBeVisible();
-	await expect(
-		evidencesField.getByRole('option', { name: `pagination-evidence-${pad(SEED_COUNT - 1)}` })
-	).toHaveCount(1);
+	const moreChips = evidencesField.locator('button.more-chips');
 	await expect
-		.poll(() => evidencesField.getByRole('option', { name: /pagination-evidence-/ }).count())
-		.toBeGreaterThanOrEqual(SEED_COUNT - 1);
+		.poll(async () => {
+			if (
+				(await moreChips.count()) > 0 &&
+				(await moreChips.getAttribute('aria-expanded')) !== 'true'
+			) {
+				await moreChips.click();
+			}
+			return evidencesField.locator('ul.selected li:not(.more-chip)').count();
+		})
+		.toBe(SEED_COUNT);
+	await expect(
+		evidencesField.locator('ul.selected li', {
+			hasText: `pagination-evidence-${pad(SEED_COUNT - 1)}`
+		})
+	).toHaveCount(1);
 
 	// Rename the control (a field unrelated to the m2m) so a successful save
 	// round-trip is observable, then save WITHOUT touching evidences.

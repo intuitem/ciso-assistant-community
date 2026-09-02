@@ -368,8 +368,12 @@
 	});
 
 	async function fetchSelectedItems() {
-		if (!initialValue) return;
-		const ids = Array.isArray(initialValue) ? initialValue : [initialValue];
+		// Hydrate the current form value, not the mount-time one: a re-fetch
+		// (e.g. after a dependent form update) must not resurrect the initial
+		// selection and drop what the user just picked.
+		const current = $value ?? initialValue;
+		if (current === undefined || current === null || current === '') return;
+		const ids = Array.isArray(current) ? current : [current];
 		if (ids.length === 0) return;
 
 		const lazyBase = effectiveLazy ? autocompleteBase() : undefined;
@@ -382,7 +386,10 @@
 			ids.map(String)
 		);
 		if (data.length > 0) {
-			options = processOptions(data);
+			const hydrated = processOptions(data);
+			const hydratedValues = new Set(hydrated.map((o) => String(o.value)));
+			// Keep already-selected options the hydration did not return.
+			options = [...selected.filter((o) => !hydratedValues.has(String(o.value))), ...hydrated];
 		}
 	}
 
@@ -553,7 +560,14 @@
 			if (valueArray.length === 0) {
 				selected = [];
 			} else {
-				selected = options.filter((item) => valueArray.includes(String(item.value)));
+				// Resolve from the known options, but never drop an already
+				// selected option just because the (lazy, page-sized) option
+				// list was replaced meanwhile.
+				const known = new Map<string, Option>();
+				for (const item of [...untrack(() => selected), ...options]) {
+					known.set(String(item.value), item);
+				}
+				selected = valueArray.map((v) => known.get(v)).filter((o): o is Option => Boolean(o));
 			}
 		}
 	});
