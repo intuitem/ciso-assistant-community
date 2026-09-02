@@ -7,12 +7,13 @@ and context formatting.
 import structlog
 import os
 import time
-from typing import Any
+from typing import Optional, Any
 
 from django.contrib.auth.models import Permission
 
 from iam.models import Folder, RoleAssignment
 from chat.embedding_models import RERANKER_MODEL as _RERANKER_MODEL
+from qdrant_client.models import Filter, FieldCondition, MatchAny, MatchValue
 
 logger = structlog.get_logger(__name__)
 
@@ -83,13 +84,12 @@ def indexed_payload_types() -> dict[str, Any]:
     return types
 
 
-def _user_partition_filter(scope, source_type, object_type):
+def _user_partition_filter(scope, source_type, object_type) -> Optional[Filter]:
     """
     One clause per indexed type: that type AND the folders where the user holds
     view_<model>. A single folder_id filter would leak types the user's role
     cannot read (a respondent sees a domain but not its risk scenarios).
     """
-    from qdrant_client.models import Filter, FieldCondition, MatchAny, MatchValue
 
     clauses = []
     for payload_type, model_class in indexed_payload_types().items():
@@ -137,8 +137,6 @@ def search(
 
     Results are merged and sorted by score.
     """
-    from qdrant_client.models import Filter, FieldCondition, MatchValue
-
     from .providers import get_embedder
     from .scoping import ReadScope
 
