@@ -372,33 +372,40 @@
 
 	const toastStore = getToastStore();
 
-	handler.onChange((state: State) =>
-		loadTableData({
-			state,
-			URLModel,
-			endpoint: baseEndpoint,
-			fields:
-				showColumnSelector && allColumnKeys.length > 0
-					? { head: allColumnKeys, body: allColumnKeys }
-					: fields.length > 0
-						? { head: fields, body: fields }
-						: {
-								head:
-									typeof tableSource.head[0] === 'string'
-										? Object.values(tableSource.head)
-										: Object.keys(tableSource.head),
-								body:
-									typeof tableSource.body[0] === 'string'
-										? Object.values(tableSource.body)
-										: Object.keys(tableSource.body)
-							},
-			featureFlags: page.data?.featureflags,
-			onError: (error) => {
-				console.error(error);
-				toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
-			}
-		})
-	);
+	// A table handed its rows up front (the library preview, for one) has neither a
+	// model nor an endpoint, so `baseEndpoint` is the literal "/undefined": the remote
+	// handler would poll it, fail, and clear the rows it was seeded with. Tables given
+	// only a `baseEndpoint` (no URLModel) are still remote.
+	const hasRemoteSource = Boolean(URLModel) || baseEndpoint !== '/undefined';
+
+	if (hasRemoteSource)
+		handler.onChange((state: State) =>
+			loadTableData({
+				state,
+				URLModel,
+				endpoint: baseEndpoint,
+				fields:
+					showColumnSelector && allColumnKeys.length > 0
+						? { head: allColumnKeys, body: allColumnKeys }
+						: fields.length > 0
+							? { head: fields, body: fields }
+							: {
+									head:
+										typeof tableSource.head[0] === 'string'
+											? Object.values(tableSource.head)
+											: Object.keys(tableSource.head),
+									body:
+										typeof tableSource.body[0] === 'string'
+											? Object.values(tableSource.body)
+											: Object.keys(tableSource.body)
+								},
+				featureFlags: page.data?.featureflags,
+				onError: (error) => {
+					console.error(error);
+					toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
+				}
+			})
+		);
 
 	onMount(() => {
 		if (orderBy) {
@@ -488,9 +495,10 @@
 				$tableFilterStates[filterStoreKey] = { ...filterValues };
 			});
 		}
-		setTimeout(() => {
-			handler.invalidate();
-		}, 10);
+		if (hasRemoteSource)
+			setTimeout(() => {
+				handler.invalidate();
+			}, 10);
 	});
 
 	const filterInitialData: Record<string, string[]> = {};
@@ -521,7 +529,7 @@
 	});
 
 	$effect(() => {
-		if (page.form?.form?.posted && page.form?.form?.valid) {
+		if (hasRemoteSource && page.form?.form?.posted && page.form?.form?.valid) {
 			console.debug('Form posted, invalidating table');
 			handler.invalidate();
 		}

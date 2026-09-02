@@ -6192,5 +6192,6 @@
 	"noActivityForDays": "no activity for {days}d",
 	"userLanguageHelpText": "Language used for this user's interface and the emails they receive.",
 	"representativeLanguageHelpText": "Language of the account's interface and of the questionnaire invitation.",
-	"campaignCompletionHelpText": "Average completion across the campaign's targets. Every target counts equally, whatever its size."
+	"campaignCompletionHelpText": "Average completion across the campaign's targets. Every target counts equally, whatever its size.",
+	"changeConclusion": "Change conclusion"
 }
