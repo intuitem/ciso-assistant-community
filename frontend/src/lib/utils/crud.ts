@@ -1028,6 +1028,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		flaggedFields: {
 			idp_groups: ['idp_groups', 'jit_provisioning']
 		},
+		selectFields: [{ field: 'language' }],
 		foreignKeyFields: [
 			{ field: 'user_groups', urlModel: 'user-groups' },
 			{ field: 'idp_groups', urlModel: 'idp-groups' }
@@ -1686,6 +1687,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'representatives',
 		verboseName: 'Representative',
 		verboseNamePlural: 'Representatives',
+		selectFields: [{ field: 'language' }],
 		foreignKeyFields: [
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'user', urlModel: 'users' }

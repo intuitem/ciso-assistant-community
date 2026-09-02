@@ -1498,6 +1498,7 @@ class AppliedControlWriteSerializer(
         return self.validate_commitment(super().validate(attrs))
 
     def create(self, validated_data: Any):
+        commitment_data = dict(validated_data)
         self.pop_commitment(validated_data)
         validated_data.pop("create_remote_object", None)
         validated_data.pop("remote_object_id", None)
@@ -1520,6 +1521,10 @@ class AppliedControlWriteSerializer(
             self._send_assignment_notifications(
                 applied_control, [user.id for user in owner_data]
             )
+
+        # `validate_commitment` accepts an opening move on create, so honour it here
+        # rather than returning 201 with the state silently dropped.
+        self.apply_commitment(applied_control, commitment_data)
 
         return applied_control
 
@@ -2137,6 +2142,13 @@ class UserReadSerializer(BaseModelSerializer):
     idp_groups = FieldsRelatedField(many=True)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
     folder = FieldsRelatedField()
+    language = serializers.SerializerMethodField()
+
+    def get_language(self, obj):
+        # The label, not the code: this feeds the detail view. The edit form reads the
+        # code from the write serializer instead.
+        code = obj.get_preferences().get("lang")
+        return dict(settings.LANGUAGES).get(code, code)
 
     class Meta:
         model = User
@@ -2156,6 +2168,7 @@ class UserReadSerializer(BaseModelSerializer):
             "expiry_date",
             "is_superuser",
             "folder",
+            "language",
         ]
 
 
@@ -2176,11 +2189,14 @@ class UserRolesOnFolderSerializer(BaseModelSerializer):
 class UserWriteSerializer(BaseModelSerializer):
     is_local = serializers.BooleanField(required=False)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
+    # Lives in `preferences`, not a column, so it is declared rather than derived.
+    language = serializers.CharField(required=False, allow_blank=True, write_only=True)
 
     class Meta:
         model = User
         fields = [
             "id",
+            "language",
             "email",
             "first_name",
             "last_name",
@@ -2199,6 +2215,21 @@ class UserWriteSerializer(BaseModelSerializer):
     def validate_email(self, email):
         validate_email(email)
         return email
+
+    def validate_language(self, language):
+        from iam.models import is_supported_language
+
+        if language and not is_supported_language(language):
+            raise serializers.ValidationError("unsupportedLanguage")
+        return language
+
+    def to_representation(self, instance):
+        # Stays write_only so DRF never looks for a `language` attribute, but the edit
+        # form reads its initial values from here — without this the picker opens empty
+        # and the user's language looks lost.
+        data = super().to_representation(instance)
+        data["language"] = instance.get_preferences().get("lang")
+        return data
 
     def create(self, validated_data):
         send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
@@ -2237,6 +2268,13 @@ class UserWriteSerializer(BaseModelSerializer):
         return user
 
     def update(self, instance: User, validated_data: Any) -> User:
+        language = validated_data.pop("language", None)
+        if language:
+            preferences = instance.get_preferences()
+            preferences["lang"] = language
+            instance.preferences = preferences
+            instance.save(update_fields=["preferences"])
+
         user_groups_data = validated_data.get("user_groups")
         if user_groups_data is not None:
             initial_groups = set(instance.user_groups.all())
@@ -5499,6 +5537,7 @@ class TaskTemplateWriteSerializer(CommitmentSerializerMixin, BaseModelSerializer
         return self.validate_commitment(super().validate(attrs))
 
     def create(self, validated_data):
+        commitment_data = dict(validated_data)
         self.pop_commitment(validated_data)
         assigned_to_data = validated_data.get("assigned_to", [])
         incidents = validated_data.pop("incidents", [])
@@ -5514,6 +5553,11 @@ class TaskTemplateWriteSerializer(CommitmentSerializerMixin, BaseModelSerializer
             self._send_assignment_notifications(
                 instance, [actor.id for actor in assigned_to_data]
             )
+
+        # A recurrent template is a definition, not one promise; the mixin drops the
+        # fields for it on update, but on create there is no instance to check yet.
+        if not instance.is_recurrent:
+            self.apply_commitment(instance, commitment_data)
 
         return instance
 

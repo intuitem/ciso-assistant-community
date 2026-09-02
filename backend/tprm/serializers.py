@@ -578,6 +578,17 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             for user in old_third_party_users - third_party_users:
                 if not user.is_third_party:
                     logger.warning("User is not a third-party", user=user)
+                # The workspace is shared by every assessment of the entity, so the
+                # group grants access to all of them: dropping a representative from
+                # this round must not cut them off from the rounds they still answer.
+                if (
+                    EntityAssessment.objects.filter(
+                        compliance_assessment__folder=enclave, representatives=user
+                    )
+                    .exclude(pk=instance.pk)
+                    .exists()
+                ):
+                    continue
                 user.user_groups.remove(respondents)
 
     def create(self, validated_data):
@@ -704,6 +715,14 @@ class RepresentativeReadSerializer(BaseModelSerializer):
     # Governing folder, derived the same way as backend enforcement
     # (Folder.get_folder path: entity.folder) so the frontend can scope checks.
     folder = FieldsRelatedField(source="entity.folder")
+    # The language belongs to the account, so it reads the same here as on the user.
+    language = serializers.SerializerMethodField()
+
+    def get_language(self, obj):
+        if not obj.user:
+            return None
+        code = obj.user.get_preferences().get("lang")
+        return dict(settings.LANGUAGES).get(code, code)
 
     class Meta:
         model = Representative
@@ -712,17 +731,51 @@ class RepresentativeReadSerializer(BaseModelSerializer):
 
 class RepresentativeWriteSerializer(BaseModelSerializer):
     create_user = serializers.BooleanField(default=False)
+    # Seeds the linked user's language: the questionnaire invitation is the first
+    # thing a vendor contact ever sees of the product.
+    language = serializers.CharField(required=False, allow_blank=True, write_only=True)
+
+    def validate_language(self, language):
+        from iam.models import is_supported_language
+
+        if language and not is_supported_language(language):
+            raise serializers.ValidationError("unsupportedLanguage")
+        return language
 
     def validate_entity(self, value):
         self._ensure_immutable("entity", value)
         return value
 
-    def _create_or_update_user(self, instance, user):
-        if not user:
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["language"] = (
+            instance.user.get_preferences().get("lang") if instance.user else None
+        )
+        return data
+
+    @staticmethod
+    def _apply_language(user, language):
+        if not user or not language:
+            return
+        preferences = user.get_preferences()
+        preferences["lang"] = language
+        user.preferences = preferences
+        user.save(update_fields=["preferences"])
+
+    def _create_or_update_user(self, instance, create_user, language=None):
+        if not create_user:
+            # The flag only says whether to mint an account. The language is about the
+            # account itself, so it still applies to the one already linked — or to the
+            # one that already exists under this address.
+            self._apply_language(
+                instance.user or User.objects.filter(email=instance.email).first(),
+                language,
+            )
             return
         user = User.objects.filter(
             email=instance.email,
         ).first()
+        self._apply_language(user, language)
         if not user:
             send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
             try:
@@ -732,6 +785,7 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
                     last_name=instance.last_name,
                     is_third_party=True,
                     keep_local_login=True,
+                    language=language,
                 )
             except Exception as e:
                 logger.error(e)
@@ -768,14 +822,16 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         user = validated_data.pop("create_user", False)
+        language = validated_data.pop("language", None)
         instance = super().create(validated_data)
-        self._create_or_update_user(instance, user)
+        self._create_or_update_user(instance, user, language)
         return instance
 
     def update(self, instance, validated_data):
         user = validated_data.pop("create_user", False)
+        language = validated_data.pop("language", None)
         instance = super().update(instance, validated_data)
-        self._create_or_update_user(instance, user)
+        self._create_or_update_user(instance, user, language)
         return instance
 
     class Meta:

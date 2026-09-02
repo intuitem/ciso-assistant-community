@@ -95,6 +95,7 @@
 	<AutocompleteSelect
 		{form}
 		optionsEndpoint="entities"
+		optionsExtraFields={[['folder', 'str']]}
 		field="parent_entity"
 		optionsSelf={object}
 		nullable

@@ -49,6 +49,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="entities"
+	optionsExtraFields={[['folder', 'str']]}
 	field="entity"
 	cacheLock={cacheLocks['entity']}
 	bind:cachedValue={formDataCache['entity']}

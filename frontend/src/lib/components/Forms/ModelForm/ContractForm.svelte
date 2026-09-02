@@ -68,6 +68,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="entities"
+	optionsExtraFields={[['folder', 'str']]}
 	field="provider_entity"
 	cacheLock={cacheLocks['provider_entity']}
 	bind:cachedValue={formDataCache['provider_entity']}
@@ -76,6 +77,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="entities"
+	optionsExtraFields={[['folder', 'str']]}
 	field="beneficiary_entity"
 	cacheLock={cacheLocks['beneficiary_entity']}
 	bind:cachedValue={formDataCache['beneficiary_entity']}

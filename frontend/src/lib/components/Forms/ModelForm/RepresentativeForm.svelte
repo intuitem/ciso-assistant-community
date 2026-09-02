@@ -5,6 +5,8 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import Select from '$lib/components/Forms/Select.svelte';
+	import { languageOptions } from '$lib/utils/locales';
 	interface Props {
 		form: SuperForm<any>;
 		model: ModelInfo;
@@ -22,6 +24,8 @@
 		object = {},
 		context = 'default'
 	}: Props = $props();
+
+	const languageChoices = $derived(languageOptions(model.selectOptions?.['language']));
 
 	// On edit it stays off: one deliberately left without an account must not grow one.
 	let userDefaultApplied = false;
@@ -70,9 +74,20 @@
 		bind:cachedValue={formDataCache['create_user']}
 	/>
 {/if}
+<Select
+	{form}
+	field="language"
+	blank
+	options={languageChoices}
+	label={m.language()}
+	helpText={m.representativeLanguageHelpText()}
+	cacheLock={cacheLocks['language']}
+	bind:cachedValue={formDataCache['language']}
+/>
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="entities"
+	optionsExtraFields={[['folder', 'str']]}
 	field="entity"
 	cacheLock={cacheLocks['entity']}
 	bind:cachedValue={formDataCache['entity']}

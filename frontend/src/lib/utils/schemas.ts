@@ -512,6 +512,7 @@ export const RequirementAssessmentSchema = z.object({
 
 export const UserEditSchema = z.object({
 	email: z.string().email(),
+	language: z.string().optional().default(''),
 	first_name: z.string().optional(),
 	last_name: z.string().optional(),
 	is_active: z.boolean().optional(),
@@ -524,6 +525,7 @@ export const UserEditSchema = z.object({
 
 export const UserCreateSchema = z.object({
 	email: z.string().email(),
+	language: z.string().optional().default(''),
 	observation: z.string().optional().nullable(),
 	expiry_date: z
 		.union([z.literal('').transform(() => null), z.iso.date()])
@@ -975,6 +977,7 @@ export const solutionSchema = z.object({
 
 export const representativeSchema = z.object({
 	create_user: z.boolean().optional().default(false),
+	language: z.string().optional().default(''),
 	email: z.string().email(),
 	entity: z.string(),
 	first_name: z.string().optional(),

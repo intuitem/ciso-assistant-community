@@ -6189,5 +6189,7 @@
 	"responses": "Responses",
 	"flaggedItems": "flagged",
 	"staleItems": "Stale",
-	"noActivityForDays": "no activity for {days}d"
+	"noActivityForDays": "no activity for {days}d",
+	"userLanguageHelpText": "Language used for this user's interface and the emails they receive.",
+	"representativeLanguageHelpText": "Language of the account's interface and of the questionnaire invitation."
 }

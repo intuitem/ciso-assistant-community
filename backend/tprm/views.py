@@ -2,6 +2,7 @@ import io
 import re
 
 from django.db import transaction
+from django.conf import settings
 from django.db.models import ProtectedError
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
@@ -17,7 +18,13 @@ from core.views import (
     ExportMixin,
     escape_excel_formula,
 )
-from core.models import Asset, ComplianceAssessment, RequirementAssignment, Terminology
+from core.models import (
+    Asset,
+    ComplianceAssessment,
+    RequirementAssessment,
+    RequirementAssignment,
+    Terminology,
+)
 from core.utils import compute_respondent_progress
 from django.db.models import Case, IntegerField, OuterRef, Subquery, Value, When
 from tprm.models import (
@@ -1139,6 +1146,25 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         )
         return qs.annotate(assignment_status_rank=Subquery(least_advanced))
 
+    @staticmethod
+    def _prefetched_requirement_assessments(audit):
+        """`get_requirement_assessments` builds its own queryset, so calling it here
+        would bypass the page-level prefetch and re-query per row. Same selection
+        rules, read off what is already in memory."""
+        rows = [
+            ra
+            for ra in audit.requirement_assessments.all()
+            if ra.requirement.assessable
+        ]
+        selected = set(audit.selected_implementation_groups or [])
+        if not selected:
+            return rows
+        return [
+            ra
+            for ra in rows
+            if selected & set(ra.requirement.implementation_groups or [])
+        ]
+
     def _get_optimized_object_data(self, queryset):
         """Answering progress and assignment state for the whole page at once.
 
@@ -1156,18 +1182,27 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         if not audit_ids:
             return data
 
-        audits = (
+        audits = list(
             ComplianceAssessment.objects.filter(id__in=audit_ids)
             .select_related("framework")
             .prefetch_related(
-                "requirement_assessments__requirement__questions",
-                "requirement_assessments__answers",
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.select_related(
+                        "requirement"
+                    ).prefetch_related(
+                        "requirement__questions",
+                        "requirement__questions__choices",
+                        "answers",
+                        "answers__question",
+                        "answers__selected_choices",
+                    ),
+                ),
             )
         )
-        audits = list(audits)
         data["completion"] = {
             audit.id: compute_respondent_progress(
-                audit, audit.get_requirement_assessments(include_non_assessable=False)
+                audit, self._prefetched_requirement_assessments(audit)
             )
             for audit in audits
         }
@@ -1411,6 +1446,11 @@ class RepresentativeViewSet(ExportMixin, BaseModelViewSet):
     """
 
     model = Representative
+
+    @action(detail=False, name="Get language choices")
+    def language(self, request):
+        return Response(dict(settings.LANGUAGES))
+
     export_config = {
         "filename": "representatives_export",
         "fields": {

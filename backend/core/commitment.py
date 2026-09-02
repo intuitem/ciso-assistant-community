@@ -74,10 +74,15 @@ def user_is_accountable(instance, user, incoming: dict | None = None):
 
     Returns None when the object has no accountable actor at all — there are no sides
     to be on, which is different from being on the wrong one.
+
+    An incoming list that is *empty* falls back to the stored actors rather than
+    counting as "nobody is accountable": clearing the field in the same request that
+    closes the promise would otherwise hand the owner the no-sides hatch and let them
+    sign off their own commitment.
     """
     actor_field = instance.COMMITMENT_ACTOR_FIELD
     actors = (incoming or {}).get(actor_field)
-    if actors is None:
+    if not actors:
         actors = list(getattr(instance, actor_field).all())
     if not actors:
         return None

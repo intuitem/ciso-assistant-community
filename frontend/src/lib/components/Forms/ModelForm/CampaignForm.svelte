@@ -85,6 +85,7 @@
 		multiple
 		{form}
 		optionsEndpoint="entities"
+		optionsExtraFields={[['folder', 'str']]}
 		field="entities"
 		cacheLock={cacheLocks['entities']}
 		bind:cachedValue={formDataCache['entities']}

@@ -7899,6 +7899,11 @@ class UserViewSet(AutocompleteMixin, BaseModelViewSet):
     search_fields = ["email", "first_name", "last_name"]
     autocomplete_fields = ["first_name", "last_name", "email", "is_active"]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get language choices")
+    def language(self, request):
+        return Response(dict(settings.LANGUAGES))
+
     def get_queryset(self):
         # Use base IAM filtering
         # but ensure current user is always included
@@ -10921,10 +10926,27 @@ class CampaignViewSet(BaseModelViewSet):
         else:
             self._launch_internal(campaign, frameworks)
 
+    @staticmethod
+    def _target_folders(campaign):
+        """Internal campaigns target domains, but `perimeters` is still writable and
+        is what older clients send. Same rule the 0187 backfill applied, so such a
+        campaign launches its audits instead of silently creating none."""
+        folders = list(campaign.folders.all())
+        if folders:
+            return folders
+        derived = {
+            perimeter.folder
+            for perimeter in campaign.perimeters.all()
+            if perimeter.folder_id
+        }
+        if derived:
+            campaign.folders.set(derived)
+        return list(derived)
+
     def _launch_internal(self, campaign, frameworks):
         from core.utils import build_initial_field_visibility
 
-        for folder in campaign.folders.all():
+        for folder in self._target_folders(campaign):
             for framework in frameworks:
                 compliance_assessment = ComplianceAssessment.objects.create(
                     name=f"{campaign.name} - {folder.name} - {framework.name}",
@@ -14656,18 +14678,26 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 {"folder": "You do not have permission to add a findings binder here"}
             )
 
-        binder, created = FindingsAssessment.objects.get_or_create(
-            compliance_assessment=audit,
-            defaults={
-                # Distinguishable at a glance from the audit it belongs to.
-                "name": str(_("%(audit)s (findings)")) % {"audit": audit.name},
-                "folder": audit.folder,
-                "perimeter": audit.perimeter,
-                "category": FindingsAssessment.Category.AUDIT,
-                "description": str(_("Findings raised from %(audit)s"))
-                % {"audit": audit.name},
-            },
+        # `compliance_assessment` is a plain FK and is writable, so an audit can end up
+        # with more than one binder; get_or_create would raise MultipleObjectsReturned.
+        # Oldest wins, so the choice is stable across calls.
+        binder = (
+            FindingsAssessment.objects.filter(compliance_assessment=audit)
+            .order_by("created_at")
+            .first()
         )
+        created = binder is None
+        if created:
+            binder = FindingsAssessment.objects.create(
+                compliance_assessment=audit,
+                # Distinguishable at a glance from the audit it belongs to.
+                name=str(_("%(audit)s (findings)")) % {"audit": audit.name},
+                folder=audit.folder,
+                perimeter=audit.perimeter,
+                category=FindingsAssessment.Category.AUDIT,
+                description=str(_("Findings raised from %(audit)s"))
+                % {"audit": audit.name},
+            )
         return Response(
             {"id": str(binder.id), "name": binder.name, "created": created},
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,

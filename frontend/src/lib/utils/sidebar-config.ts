@@ -53,6 +53,7 @@ type SidebarFrontendKeys = {
 	tasksReview: boolean;
 	riskAcceptances: boolean;
 	securityExceptions: boolean;
+	findings: boolean;
 	followUp: boolean;
 	ebiosRM: boolean;
 	scoringAssistant: boolean;
@@ -101,6 +102,7 @@ export function getSidebarVisibleItems(
 		tasksReview: featureFlags?.control_plan ?? true,
 		riskAcceptances: featureFlags?.risk_acceptances ?? false,
 		securityExceptions: featureFlags?.exceptions ?? false,
+		findings: featureFlags?.follow_up ?? false,
 		followUp: featureFlags?.follow_up ?? false,
 		ebiosRM: featureFlags?.ebiosrm ?? false,
 		scoringAssistant: featureFlags?.scoring_assistant ?? false,
