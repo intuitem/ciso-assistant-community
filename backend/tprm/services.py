@@ -3,14 +3,48 @@ workflow engine so a questionnaire is built one way only."""
 
 from django.db import transaction
 
-from core.models import ComplianceAssessment, RequirementAssignment
+from core.models import (
+    ComplianceAssessment,
+    Evidence,
+    EvidenceRevision,
+    RequirementAssignment,
+)
 from iam.models import Folder, User
 
 
 def enclave_folder(entity_assessment):
+    """The vendor's workspace: one enclave per entity within a domain, reused by every
+    assessment of that entity so evidence, tasks and access carry across rounds.
+
+    Matched on where the entity's existing audits live rather than on the folder name,
+    so workspaces created under the old per-assessment naming are adopted as-is.
+    """
+    from tprm.models import EntityAssessment
+
+    existing = set(
+        EntityAssessment.objects.filter(
+            entity=entity_assessment.entity,
+            folder=entity_assessment.folder,
+            compliance_assessment__folder__content_type=Folder.ContentType.ENCLAVE,
+        )
+        .exclude(pk=entity_assessment.pk)
+        .values_list("compliance_assessment__folder_id", flat=True)
+    )
+    # Only when it is unambiguous. Several workspaces means the entity predates this
+    # model: picking one would silently widen access, so leave them to
+    # `consolidate_entity_workspaces`.
+    if len(existing) == 1:
+        return Folder.objects.get(pk=existing.pop())
+
+    # Sibling folder names have to be unique; fall back to the old form on a clash.
+    name = entity_assessment.entity.name
+    if Folder.objects.filter(
+        parent_folder=entity_assessment.folder, name__iexact=name
+    ).exists():
+        name = f"{name}/{entity_assessment.name}"
     return Folder.objects.create(
         content_type=Folder.ContentType.ENCLAVE,
-        name=f"{entity_assessment.entity.name}/{entity_assessment.name}",
+        name=name,
         parent_folder=entity_assessment.folder,
     )
 
@@ -58,15 +92,91 @@ def finalize_linked_audit(entity_assessment, audit):
     entity_assessment.save()
 
 
+def clone_evidence_into(evidence, folder):
+    """Copy an evidence and its latest revision into `folder`.
+
+    The file is duplicated rather than shared: deleting a revision deletes its
+    attachment from storage, so two rows on one path would break each other.
+    """
+    import os
+
+    from django.core.files.base import ContentFile
+
+    copy = Evidence.objects.create(
+        name=evidence.name,
+        description=evidence.description,
+        folder=folder,
+        status=evidence.status,
+        expiry_date=evidence.expiry_date,
+    )
+    copy.owner.set(evidence.owner.all())
+    copy.filtering_labels.set(evidence.filtering_labels.all())
+
+    source = evidence.last_revision
+    if source is None:
+        return copy
+    revision = EvidenceRevision(
+        evidence=copy,
+        version=1,
+        link=source.link,
+        observation=source.observation,
+        attachment_hash=source.attachment_hash,
+    )
+    revision.save()
+    if source.attachment and source.attachment.name:
+        source.attachment.open("rb")
+        try:
+            revision.attachment.save(
+                os.path.basename(source.attachment.name),
+                ContentFile(source.attachment.read()),
+                save=True,
+            )
+        finally:
+            source.attachment.close()
+    return copy
+
+
+def carry_evidences_into_enclave(audit):
+    """Re-home the evidences a baseline copy brought in, so the enclave's respondents
+    can open them: the originals live in the previous revision's enclave, which is a
+    sibling folder they have no access to."""
+    from core.models import RequirementAssessment
+
+    copies: dict = {}
+    for ra in RequirementAssessment.objects.filter(
+        compliance_assessment=audit
+    ).prefetch_related("evidences"):
+        originals = list(ra.evidences.all())
+        if not originals:
+            continue
+        remapped = []
+        for evidence in originals:
+            if evidence.folder_id == audit.folder_id:
+                remapped.append(evidence)
+                continue
+            if evidence.id not in copies:
+                copies[evidence.id] = clone_evidence_into(evidence, audit.folder)
+            remapped.append(copies[evidence.id])
+        ra.evidences.set(remapped)
+    return copies
+
+
 def create_enclave_audit(
-    entity_assessment, framework, implementation_groups=None, field_visibility=None
+    entity_assessment,
+    framework,
+    implementation_groups=None,
+    field_visibility=None,
+    baseline=None,
+    enclave=None,
 ):
     """The questionnaire behind an entity assessment: an audit in its own
     enclave folder, with its requirements, reviewers and assignments. Callers
     lock the entity assessment and check it has no audit yet.
 
     `field_visibility` is merged onto the third-party profile, not a replacement:
-    an editor only sends the pills that were touched.
+    an editor only sends the pills that were touched. `baseline` carries a previous
+    audit's answers, results and evidences into this one; `enclave` reuses an existing
+    workspace instead of minting one, so a revision keeps the vendor's folder.
     """
     from core.utils import EVERYONE_EDIT, build_third_party_field_visibility
 
@@ -87,8 +197,203 @@ def create_enclave_audit(
             selected_implementation_groups=implementation_groups,
             field_visibility=visibility,
         )
-        audit.folder = enclave_folder(entity_assessment)
+        audit.folder = enclave or enclave_folder(entity_assessment)
         audit.save()
-        audit.create_requirement_assessments()
+        audit.create_requirement_assessments(baseline)
+        if baseline and baseline.folder_id != audit.folder_id:
+            carry_evidences_into_enclave(audit)
         finalize_linked_audit(entity_assessment, audit)
     return audit
+
+
+def workspaces_by_entity():
+    """(entity, domain) -> {workspace folder: [audit names]}."""
+    from collections import defaultdict
+
+    from tprm.models import EntityAssessment
+
+    grouped = defaultdict(lambda: defaultdict(list))
+    for ea in EntityAssessment.objects.filter(
+        compliance_assessment__isnull=False,
+        compliance_assessment__folder__content_type=Folder.ContentType.ENCLAVE,
+    ).select_related("entity", "folder", "compliance_assessment__folder"):
+        grouped[(ea.entity, ea.folder)][ea.compliance_assessment.folder].append(ea.name)
+    return grouped
+
+
+def _folder_models():
+    """Models that can hold rows in a workspace, discovered so a model added later is
+    not left behind in an old folder."""
+    from django.apps import apps
+
+    from iam.models import RoleAssignment, UserGroup
+
+    for model in apps.get_models():
+        if model in (Folder, UserGroup, RoleAssignment):
+            continue
+        if any(
+            getattr(field, "attname", None) == "folder_id"
+            for field in model._meta.get_fields()
+        ):
+            yield model
+
+
+def workspace_contents(folders):
+    counts = {}
+    for model in _folder_models():
+        try:
+            n = model.objects.filter(folder__in=folders).count()
+        except Exception:
+            continue
+        if n:
+            counts[model] = n
+    return counts
+
+
+def workspace_members(folders):
+    from iam.models import UserGroup
+
+    return {
+        user
+        for group in UserGroup.objects.filter(folder__in=folders)
+        for user in group.user_set.all()
+    }
+
+
+def generated_workspace_name(entity, audit_names):
+    """The names this code used to mint. A workspace an admin renamed by hand is not
+    ours to relabel."""
+    return {f"{entity.name}/{audit}" for audit in audit_names}
+
+
+def rename_workspace(entity, domain, folder, audit_names):
+    """Give a single workspace the entity's name. Returns the new name, or None when
+    it should be left alone."""
+    if folder.name == entity.name:
+        return None
+    if folder.name not in generated_workspace_name(entity, audit_names):
+        return None
+    if (
+        Folder.objects.filter(parent_folder=domain, name__iexact=entity.name)
+        .exclude(pk=folder.pk)
+        .exists()
+    ):
+        return None
+    folder.name = entity.name
+    folder.save()
+    return entity.name
+
+
+def consolidate_workspaces(entity, domain, sources):
+    """Move every workspace of an entity into one, merging their respondent groups."""
+    from auditlog.registry import auditlog
+
+    from core.utils import RoleCodename, UserGroupCodename, bulk_update_with_log
+    from iam.models import Role, RoleAssignment, UserGroup
+
+    name = entity.name
+    if Folder.objects.filter(parent_folder=domain, name__iexact=name).exists():
+        name = f"{name} (workspace)"
+    target = Folder.objects.create(
+        content_type=Folder.ContentType.ENCLAVE, name=name, parent_folder=domain
+    )
+
+    for model in _folder_models():
+        try:
+            rows = list(model.objects.filter(folder__in=sources))
+        except Exception:
+            continue
+        if not rows:
+            continue
+        if auditlog.contains(model):
+            for row in rows:
+                row.folder = target
+            bulk_update_with_log(model, rows, ["folder"])
+        else:
+            model.objects.filter(pk__in=[row.pk for row in rows]).update(folder=target)
+
+    Folder.objects.filter(parent_folder__in=sources).update(parent_folder=target)
+
+    respondents, _ = UserGroup.objects.get_or_create(
+        name=UserGroupCodename.THIRD_PARTY_RESPONDENT, folder=target, builtin=True
+    )
+    assignment, _ = RoleAssignment.objects.get_or_create(
+        user_group=respondents,
+        role=Role.objects.get(name=RoleCodename.THIRD_PARTY_RESPONDENT),
+        builtin=True,
+        folder=target,
+        is_recursive=True,
+    )
+    assignment.perimeter_folders.add(target)
+    for group in UserGroup.objects.filter(folder__in=sources):
+        for user in group.user_set.all():
+            user.user_groups.add(respondents)
+    RoleAssignment.objects.filter(folder__in=sources).delete()
+    UserGroup.objects.filter(folder__in=sources).delete()
+
+    leftover = workspace_contents(sources)
+    if leftover:
+        raise RuntimeError(f"refusing to delete non-empty workspaces: {leftover}")
+    for folder in sources:
+        folder.delete()
+
+    if (
+        target.name != entity.name
+        and not Folder.objects.filter(parent_folder=domain, name__iexact=entity.name)
+        .exclude(pk=target.pk)
+        .exists()
+    ):
+        target.name = entity.name
+        target.save()
+    return target
+
+
+def normalize_entity_workspaces(apply=False, entity_name=None):
+    """One workspace per entity per domain, named after the entity.
+
+    Returns a list of planned or applied changes. Each entity is independent: one that
+    fails is reported and skipped rather than taking the rest down with it.
+    """
+    from django.db import transaction
+
+    plan = []
+    groups = workspaces_by_entity()
+    for (entity, domain), workspaces in groups.items():
+        if entity_name and entity.name != entity_name:
+            continue
+        sources = list(workspaces)
+        row = {
+            "entity": entity,
+            "domain": domain,
+            "workspaces": workspaces,
+            "action": "consolidate" if len(sources) > 1 else "rename",
+            "members": sorted(u.email for u in workspace_members(sources)),
+            "contents": workspace_contents(sources),
+            "error": None,
+            "result": None,
+        }
+        if len(sources) == 1:
+            folder = sources[0]
+            audits = workspaces[folder]
+            if (
+                folder.name == entity.name
+                or folder.name not in generated_workspace_name(entity, audits)
+            ):
+                continue
+            row["from"] = folder.name
+            row["to"] = entity.name
+        if not apply:
+            plan.append(row)
+            continue
+        try:
+            with transaction.atomic():
+                if len(sources) > 1:
+                    row["result"] = consolidate_workspaces(entity, domain, sources)
+                else:
+                    row["result"] = rename_workspace(
+                        entity, domain, sources[0], workspaces[sources[0]]
+                    )
+        except Exception as exc:
+            row["error"] = str(exc)
+        plan.append(row)
+    return plan

@@ -1,10 +1,12 @@
 import io
 import re
 
+from django.db import transaction
 from django.db.models import ProtectedError
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.status import (
+    HTTP_201_CREATED,
     HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
     HTTP_409_CONFLICT,
@@ -1181,14 +1183,30 @@ class EntityAssessmentViewSet(BaseModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.compliance_assessment:
-            folder = instance.compliance_assessment.folder
+            audit = instance.compliance_assessment
+            folder = audit.folder
             if folder.content_type == Folder.ContentType.ENCLAVE:
-                logger.info(
-                    "deleting_compliance_assessment_folder",
-                    folder_id=str(folder.id),
-                    content_type=str(folder.content_type),
+                # Revisions share the enclave: it is the vendor's workspace, not this
+                # round's. Only the last audit takes the folder down with it.
+                shared = (
+                    ComplianceAssessment.objects.filter(folder=folder)
+                    .exclude(pk=audit.pk)
+                    .exists()
                 )
-                folder.delete()
+                if shared:
+                    logger.info(
+                        "deleting_audit_keeping_shared_enclave",
+                        audit_id=str(audit.pk),
+                        folder_id=str(folder.id),
+                    )
+                    audit.delete()
+                else:
+                    logger.info(
+                        "deleting_compliance_assessment_folder",
+                        folder_id=str(folder.id),
+                        content_type=str(folder.content_type),
+                    )
+                    folder.delete()
             else:
                 logger.warning(
                     "Compliance assessment folder is not an Enclave, skipping deletion",
@@ -1196,6 +1214,62 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 )
 
         return super().destroy(request, *args, **kwargs)
+
+    @action(detail=True, methods=["post"], name="Clone as a new revision")
+    def clone(self, request, pk=None):
+        """Start the next round from this one: a new assessment for the same entity,
+        sharing the vendor's enclave, with a questionnaire carrying the previous
+        answers, results and evidences. The source is left untouched."""
+        source = self.get_object()
+        if not RoleAssignment.is_access_allowed(
+            request.user,
+            Permission.objects.get(codename="add_entityassessment"),
+            source.folder,
+        ):
+            raise PermissionDenied(
+                {"error": "You do not have permission to create an entity assessment"}
+            )
+        if source.compliance_assessment is None:
+            return Response(
+                {"error": "sourceAssessmentHasNoAudit"},
+                status=HTTP_400_BAD_REQUEST,
+            )
+
+        from tprm.services import create_enclave_audit
+
+        name = request.data.get("name") or f"{source.name} (copy)"
+        with transaction.atomic():
+            clone = EntityAssessment.objects.create(
+                name=name,
+                description=source.description,
+                folder=source.folder,
+                perimeter=source.perimeter,
+                entity=source.entity,
+                version=request.data.get("version") or source.version,
+                criticality=source.criticality,
+                penetration=source.penetration,
+                dependency=source.dependency,
+                maturity=source.maturity,
+                trust=source.trust,
+                reference_link=source.reference_link,
+                due_date=request.data.get("due_date") or None,
+            )
+            clone.solutions.set(source.solutions.all())
+            clone.reviewers.set(source.reviewers.all())
+            clone.authors.set(source.authors.all())
+            clone.representatives.set(source.representatives.all())
+            audit = create_enclave_audit(
+                clone,
+                source.compliance_assessment.framework,
+                source.compliance_assessment.selected_implementation_groups,
+                field_visibility=source.compliance_assessment.field_visibility,
+                baseline=source.compliance_assessment,
+                enclave=source.compliance_assessment.folder,
+            )
+        return Response(
+            {"id": str(clone.id), "compliance_assessment": str(audit.id)},
+            status=HTTP_201_CREATED,
+        )
 
     @action(detail=False, name="Get status choices")
     def status(self, request):

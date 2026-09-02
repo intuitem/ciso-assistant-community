@@ -36,6 +36,21 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
+	clone: async (event) => {
+		const formData = await event.request.formData();
+		const res = await event.fetch(`${BASE_API_URL}/entity-assessments/${event.params.id}/clone/`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ name: formData.get('name') })
+		});
+		let body;
+		try {
+			body = await res.json();
+		} catch {
+			body = { error: res.statusText };
+		}
+		return { cloneStatus: res.status, cloneBody: body };
+	},
 	mailing: async ({ request, fetch, cookies }) => {
 		const formData = await request.formData();
 		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
