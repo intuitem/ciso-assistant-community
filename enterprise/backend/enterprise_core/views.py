@@ -1401,7 +1401,7 @@ class TimelineEntriesView(APIView):
         actor_qs = Actor.objects.filter(id__in=actor_ids)
         try:
             actor_qs = actor_qs.filter(id__in=accessible_ids(Actor))
-        except (NotImplementedError, Permission.DoesNotExist):
+        except NotImplementedError, Permission.DoesNotExist:
             # Model not IAM-scoped: list endpoints skip masking too.
             pass
         actor_labels = {
