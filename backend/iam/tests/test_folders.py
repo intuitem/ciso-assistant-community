@@ -544,7 +544,7 @@ class TestFolderDefaultRole:
     ):
         """Test that _get_default_role_allowed_folder_ids correctly identifies folders accessible via default_role."""
         assert not RoleAssignment._get_default_role_allowed_folder_ids(
-            [ctx.parent_folder.id], ctx.default_role_permission
+            [ctx.parent_folder.id], ctx.user_role_permission
         ).exists(), (
             "The user role not permission SHALL NOT be granted by the folder.default_role"
         )
