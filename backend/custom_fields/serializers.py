@@ -201,17 +201,34 @@ class CustomFieldsSerializerMixin(serializers.ModelSerializer):
             ).prefetch_related("choices")
         }
 
+        unknown_keys = set(raw) - set(definitions)
+        # Keys that name a real definition of this model, just not one applying
+        # to the target folder — as opposed to outright unknown (typo'd) keys.
+        out_of_scope = (
+            set(
+                CustomFieldDefinition.objects.filter(
+                    content_type=content_type, key__in=unknown_keys
+                ).values_list("key", flat=True)
+            )
+            if unknown_keys
+            else set()
+        )
+
         errors: dict = {}
         cleaned = []
         for key, value in raw.items():
             definition = definitions.get(key)
             if definition is None:
-                # Tolerate empty leftovers: form clients may keep a null/blank
-                # placeholder for a field that stopped applying when the target
-                # folder changed. Only a real value on an unknown key is an error.
-                if value in (None, "", []):
-                    continue
-                errors[key] = "Unknown custom field for this object."
+                if key in out_of_scope:
+                    # Tolerate empty leftovers: form clients may keep a
+                    # null/blank placeholder (or a checkbox's fabricated False)
+                    # for a field that stopped applying when the target folder
+                    # changed. A real value must not be dropped silently.
+                    if self._is_empty(value):
+                        continue
+                    errors[key] = "Custom field does not apply to this folder."
+                else:
+                    errors[key] = "Unknown custom field for this object."
                 continue
             try:
                 cleaned_value = self._clean_one(definition, value)
@@ -236,6 +253,15 @@ class CustomFieldsSerializerMixin(serializers.ModelSerializer):
         if errors:
             raise serializers.ValidationError({"custom_fields": errors})
         return cleaned
+
+    @staticmethod
+    def _is_empty(value) -> bool:
+        # Identity check for False so numeric 0 stays a real value.
+        return (
+            value is None
+            or value is False
+            or (isinstance(value, (str, list, dict)) and not value)
+        )
 
     @staticmethod
     def _clean_one(definition: CustomFieldDefinition, value):
@@ -271,6 +297,17 @@ class CustomFieldsSerializerMixin(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
+        old_folder_id = getattr(instance, "folder_id", None)
         instance = super().update(instance, validated_data)
+        # Values follow definition scope: moving the object to another folder
+        # discards values whose definition no longer applies, so they don't
+        # linger unreadable in forms while still matching cf__ filters.
+        if old_folder_id is not None and instance.folder_id != old_folder_id:
+            allowed = {
+                Folder.get_root_folder_id()
+            } | CustomFieldDefinition._ancestor_or_self_ids(instance.folder)
+            instance.custom_field_values.exclude(
+                definition__folder_id__in=allowed
+            ).delete()
         self._apply(instance)
         return instance

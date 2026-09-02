@@ -7,6 +7,7 @@
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
+	import { get } from 'svelte/store';
 
 	interface Choice {
 		value: string;
@@ -35,45 +36,63 @@
 	const enabled = $derived(page.data?.featureflags?.custom_fields === true);
 
 	let definitions: Definition[] = $state([]);
+	let loadFailed = $state(false);
+	// Expanded by default only when there's something the user must see: a
+	// required field, or values already set (edit mode). Computed once per
+	// definitions load so a manual toggle isn't overridden by form edits.
+	let startOpen = $state(false);
 
 	const formData = form.form;
 
 	// Drop values whose definition no longer applies (e.g. after a domain change),
-	// otherwise they linger in the payload and the API rejects them as unknown keys.
-	function pruneStaleValues() {
-		const valid = new Set(definitions.map((d) => d.key));
-		formData.update((data: any) => {
-			if (data?.custom_fields) {
-				for (const key of Object.keys(data.custom_fields)) {
-					if (!valid.has(key)) delete data.custom_fields[key];
+	// otherwise they linger in the payload and the API rejects them as unknown
+	// keys. Payload-only: absent keys never touch values stored server-side.
+	function pruneStaleValues(validKeys: Set<string>) {
+		const current = get(formData)?.custom_fields;
+		if (!current || !Object.keys(current).some((key) => !validKeys.has(key))) return;
+		formData.update(
+			(data: any) => {
+				if (data?.custom_fields) {
+					for (const key of Object.keys(data.custom_fields)) {
+						if (!validKeys.has(key)) delete data.custom_fields[key];
+					}
 				}
-			}
-			return data;
-		});
+				return data;
+			},
+			{ taint: false }
+		);
 	}
+
+	// `false` excluded: the checkbox binding fabricates it on mount.
+	const hasValue = (v: unknown) =>
+		v != null && v !== false && v !== '' && !(Array.isArray(v) && v.length === 0);
 
 	let loadSeq = 0;
 
 	async function load(folder: string | undefined) {
 		const seq = ++loadSeq;
-		// Definitions are folder-scoped: without a folder there is nothing to
-		// resolve against yet (fields show up once a domain is selected).
-		if (!folder) {
-			definitions = [];
-			pruneStaleValues();
-			return;
-		}
-		const params = new URLSearchParams({ model, visible: 'true', for_folder: folder });
+		// for_folder is always sent: empty means "no folder chosen yet" and the
+		// API resolves it to the global definitions only.
+		const params = new URLSearchParams({ model, visible: 'true', for_folder: folder ?? '' });
+		let loaded: Definition[] | null = null;
 		try {
 			const res = await fetch(`/custom-fields/?${params.toString()}`);
-			if (!res.ok) return;
-			const data = await res.json();
-			if (seq !== loadSeq) return;
-			definitions = data.results ?? data;
-			pruneStaleValues();
+			if (res.ok) {
+				const data = await res.json();
+				loaded = data.results ?? data;
+			}
 		} catch (e) {
 			console.error('Failed to load custom field definitions', e);
 		}
+		if (seq !== loadSeq) return;
+		// On failure render nothing rather than another folder's fields: the
+		// payload must only ever carry keys of currently rendered definitions.
+		definitions = loaded ?? [];
+		loadFailed = loaded === null;
+		pruneStaleValues(new Set(definitions.map((d) => d.key)));
+		startOpen =
+			definitions.some((d) => d.required) ||
+			Object.values(get(formData)?.custom_fields ?? {}).some(hasValue);
 	}
 
 	$effect(() => {
@@ -82,18 +101,11 @@
 
 	const choiceOptions = (def: Definition) =>
 		def.choices.map((c) => ({ label: c.label_localized, value: c.value }));
-
-	// Expanded by default only when there's something the user must see:
-	// a required field, or values already set (edit mode). Otherwise collapsed.
-	const startOpen = $derived(
-		definitions.some((d) => d.required) ||
-			Object.values($formData?.custom_fields ?? {}).some(
-				(v) => v != null && v !== '' && !(Array.isArray(v) && v.length === 0)
-			)
-	);
 </script>
 
-{#if definitions.length}
+{#if loadFailed}
+	<p class="text-error-500 text-xs font-medium">{m.customFieldsLoadError()}</p>
+{:else if definitions.length}
 	<Dropdown open={startOpen} icon="fa-solid fa-sliders" header={m.customFields()} style="">
 		<div class="space-y-3 pt-2">
 			{#each definitions as def (def.id)}
