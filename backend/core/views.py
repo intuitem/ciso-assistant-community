@@ -10065,6 +10065,13 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
     filterset_fields = ["evidence"]
     ordering = ["-version"]
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("evidence", "evidence__folder", "folder", "task_node")
+        )
+
     @action(methods=["get"], detail=True)
     def attachment(self, request, pk):
         object_ids_view = RoleAssignment.get_viewable_object_ids(
