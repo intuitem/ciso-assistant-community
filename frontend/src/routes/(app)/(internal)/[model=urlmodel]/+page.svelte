@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import ChoiceCardsModal from '$lib/components/Modals/ChoiceCardsModal.svelte';
 	import ImportWorkflowModal from '$lib/components/Modals/ImportWorkflowModal.svelte';
 	import ExportModal, {
 		type ExportGroup,
@@ -120,12 +121,13 @@
 		modalStore.trigger(modal);
 	}
 
-	function modalCreateForm(): void {
+	function modalCreateForm(additionalInitialData: Record<string, any> = {}): void {
 		let modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
 				form: data.createForm,
-				model: data.model
+				model: data.model,
+				additionalInitialData
 			}
 		};
 		let modal: ModalSettings = {
@@ -135,6 +137,39 @@
 			title: safeTranslate('add-' + data.model.localName)
 		};
 		modalStore.trigger(modal);
+	}
+
+	function modalCampaignKind(): void {
+		let modalComponent: ModalComponent = {
+			ref: ChoiceCardsModal,
+			props: {
+				title: m.startCampaign(),
+				choices: [
+					{
+						icon: 'fa-building-shield',
+						iconClass: 'text-emerald-500',
+						label: m.internalCampaign(),
+						description: m.internalCampaignDescription(),
+						testId: 'internal-campaign-card',
+						action: () => modalCreateForm({ kind: 'internal' })
+					},
+					{
+						icon: 'fa-handshake',
+						iconClass: 'text-indigo-500',
+						label: m.thirdPartyCampaign(),
+						description: m.thirdPartyCampaignDescription(),
+						testId: 'third-party-campaign-card',
+						action: () => modalCreateForm({ kind: 'third_party' })
+					}
+				]
+			}
+		};
+		modalStore.trigger({ type: 'component', component: modalComponent });
+	}
+
+	function modalAddForm(): void {
+		if (URLModel === 'campaigns') return modalCampaignKind();
+		modalCreateForm();
 	}
 
 	function modalWorkflowImportForm(): void {
@@ -196,7 +231,7 @@
 					'role-assignments'
 				].includes(URLModel)
 			) {
-				modalCreateForm();
+				modalAddForm();
 			}
 		}
 	}
@@ -248,7 +283,7 @@
 									id="add-button"
 									title={safeTranslate('add-' + data.model.localName)}
 									aria-label={safeTranslate('add-' + data.model.localName)}
-									onclick={handlers(modalCreateForm, handleClickForGT)}
+									onclick={handlers(modalAddForm, handleClickForGT)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</button>
 								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings', 'task-templates', 'entities', 'solutions', 'contracts', 'representatives'].includes(URLModel)}

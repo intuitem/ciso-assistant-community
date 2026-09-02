@@ -598,11 +598,14 @@ export const ComplianceAssessmentSchema = z.object({
 
 export const CampaignSchema = z.object({
 	...NameDescriptionMixin,
+	kind: z.string().default('internal'),
 	frameworks: z.array(z.string()),
 	selected_implementation_groups: z
 		.array(z.object({ value: z.string(), framework: z.string() }))
 		.optional(),
-	perimeters: z.array(z.string()),
+	perimeters: z.array(z.string()).optional(),
+	folders: z.array(z.string()).optional(),
+	entities: z.array(z.string()).optional(),
 	status: z.string().optional().nullable(),
 	start_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),

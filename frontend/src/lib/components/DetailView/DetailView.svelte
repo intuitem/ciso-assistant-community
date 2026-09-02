@@ -127,6 +127,7 @@
 	// message key. Countries (data_location_*) are excluded on purpose: their
 	// ~250 labels have no message keys.
 	const translatedValueFieldSet = new Set([
+		'kind',
 		'roc_display',
 		'dora_ict_service_type',
 		'dora_data_sensitiveness',

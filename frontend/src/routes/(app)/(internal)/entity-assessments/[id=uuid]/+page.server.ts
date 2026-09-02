@@ -41,7 +41,10 @@ export const actions: Actions = {
 		const res = await event.fetch(`${BASE_API_URL}/entity-assessments/${event.params.id}/clone/`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ name: formData.get('name') })
+			body: JSON.stringify({
+				name: formData.get('name'),
+				version: formData.get('version')
+			})
 		});
 		let body;
 		try {

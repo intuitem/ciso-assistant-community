@@ -3,12 +3,7 @@ workflow engine so a questionnaire is built one way only."""
 
 from django.db import transaction
 
-from core.models import (
-    ComplianceAssessment,
-    Evidence,
-    EvidenceRevision,
-    RequirementAssignment,
-)
+from core.models import ComplianceAssessment, RequirementAssignment
 from iam.models import Folder, User
 
 
@@ -92,75 +87,6 @@ def finalize_linked_audit(entity_assessment, audit):
     entity_assessment.save()
 
 
-def clone_evidence_into(evidence, folder):
-    """Copy an evidence and its latest revision into `folder`.
-
-    The file is duplicated rather than shared: deleting a revision deletes its
-    attachment from storage, so two rows on one path would break each other.
-    """
-    import os
-
-    from django.core.files.base import ContentFile
-
-    copy = Evidence.objects.create(
-        name=evidence.name,
-        description=evidence.description,
-        folder=folder,
-        status=evidence.status,
-        expiry_date=evidence.expiry_date,
-    )
-    copy.owner.set(evidence.owner.all())
-    copy.filtering_labels.set(evidence.filtering_labels.all())
-
-    source = evidence.last_revision
-    if source is None:
-        return copy
-    revision = EvidenceRevision(
-        evidence=copy,
-        version=1,
-        link=source.link,
-        observation=source.observation,
-        attachment_hash=source.attachment_hash,
-    )
-    revision.save()
-    if source.attachment and source.attachment.name:
-        source.attachment.open("rb")
-        try:
-            revision.attachment.save(
-                os.path.basename(source.attachment.name),
-                ContentFile(source.attachment.read()),
-                save=True,
-            )
-        finally:
-            source.attachment.close()
-    return copy
-
-
-def carry_evidences_into_enclave(audit):
-    """Re-home the evidences a baseline copy brought in, so the enclave's respondents
-    can open them: the originals live in the previous revision's enclave, which is a
-    sibling folder they have no access to."""
-    from core.models import RequirementAssessment
-
-    copies: dict = {}
-    for ra in RequirementAssessment.objects.filter(
-        compliance_assessment=audit
-    ).prefetch_related("evidences"):
-        originals = list(ra.evidences.all())
-        if not originals:
-            continue
-        remapped = []
-        for evidence in originals:
-            if evidence.folder_id == audit.folder_id:
-                remapped.append(evidence)
-                continue
-            if evidence.id not in copies:
-                copies[evidence.id] = clone_evidence_into(evidence, audit.folder)
-            remapped.append(copies[evidence.id])
-        ra.evidences.set(remapped)
-    return copies
-
-
 def create_enclave_audit(
     entity_assessment,
     framework,
@@ -193,6 +119,9 @@ def create_enclave_audit(
         # assessment's perimeter, governs their placement.
         audit = ComplianceAssessment.objects.create(
             name=entity_assessment.name,
+            # Revisions share the workspace, and name+version identify an audit within
+            # a folder: without this every revision would be v1.0 and collide.
+            version=entity_assessment.version,
             framework=framework,
             selected_implementation_groups=implementation_groups,
             field_visibility=visibility,
@@ -200,8 +129,6 @@ def create_enclave_audit(
         audit.folder = enclave or enclave_folder(entity_assessment)
         audit.save()
         audit.create_requirement_assessments(baseline)
-        if baseline and baseline.folder_id != audit.folder_id:
-            carry_evidences_into_enclave(audit)
         finalize_linked_audit(entity_assessment, audit)
     return audit
 

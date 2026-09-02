@@ -625,7 +625,7 @@
 				{model}
 				{cacheLocks}
 				{formDataCache}
-				{initialData}
+				initialData={{ ...initialData, ...additionalInitialData }}
 				{object}
 				{context}
 				{...rest}

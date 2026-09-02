@@ -3,6 +3,10 @@
 	import { page } from '$app/stores';
 	import { deserialize } from '$app/forms';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import NewRevisionModal from '$lib/components/Modals/NewRevisionModal.svelte';
+	import RingProgress from '$lib/components/DataViz/RingProgress.svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import type { ModalComponent, ModalSettings } from '$lib/components/Modals/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import { m } from '$paraglide/messages';
@@ -32,45 +36,91 @@
 	const toastStore = getToastStore();
 	let isCloning = $state(false);
 
-	function handleClone() {
-		modalStore.trigger({
-			type: 'prompt',
-			title: m.newRevision(),
-			body: m.newRevisionHelpText(),
-			value: `${data.data.name} (copy)`,
-			valueAttr: { required: true },
-			response: async (name: string | false) => {
-				if (name === false || !`${name ?? ''}`.trim()) return;
-				isCloning = true;
-				try {
-					const body = new FormData();
-					body.set('name', `${name}`.trim());
-					const res = await fetch('?/clone', { method: 'POST', body });
-					const result = deserialize(await res.text());
-					const cloned = (result.type === 'success' ? result.data : null) as {
-						cloneStatus?: number;
-						cloneBody?: { id?: string; error?: string };
-					} | null;
-					if (cloned?.cloneStatus === 201) {
-						await invalidateAll();
-						goto(`/entity-assessments/${cloned.cloneBody?.id}`);
-					} else {
-						toastStore.trigger({
-							message: cloned?.cloneBody?.error || m.anErrorOccurred(),
-							background: 'preset-filled-error-500',
-							timeout: 5000
-						});
-					}
-				} finally {
-					isCloning = false;
-				}
+	async function createRevision(values: { name: string; version: string }) {
+		isCloning = true;
+		try {
+			const body = new FormData();
+			body.set('name', values.name);
+			body.set('version', values.version);
+			const res = await fetch('?/clone', { method: 'POST', body });
+			const result = deserialize(await res.text());
+			const cloned = (result.type === 'success' ? result.data : null) as {
+				cloneStatus?: number;
+				cloneBody?: { id?: string; error?: string; name?: string[]; version?: string[] };
+			} | null;
+			if (cloned?.cloneStatus === 201) {
+				await invalidateAll();
+				goto(`/entity-assessments/${cloned.cloneBody?.id}`);
+			} else {
+				const body = cloned?.cloneBody;
+				toastStore.trigger({
+					message: body?.error || body?.name?.[0] || body?.version?.[0] || m.anErrorOccurred(),
+					background: 'preset-filled-error-500',
+					timeout: 5000
+				});
 			}
-		});
+		} finally {
+			isCloning = false;
+		}
+	}
+
+	function handleClone() {
+		const modalComponent: ModalComponent = {
+			ref: NewRevisionModal,
+			props: {
+				initialName: data.data.name,
+				initialVersion: data.data.version ?? '1.0',
+				onSubmit: createRevision
+			}
+		};
+		const modal: ModalSettings = { type: 'component', component: modalComponent };
+		modalStore.trigger(modal);
 	}
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
 	<DetailView {data} {mailing}>
+		{#snippet widgets()}
+			{#if data.data.compliance_assessment}
+				<div class="flex flex-col h-full justify-center items-center gap-4 p-2">
+					<div class="flex flex-row justify-center gap-6">
+						<div class="flex flex-col items-center w-32">
+							<span class="text-xs text-surface-600-400">{m.completion()}</span>
+							<RingProgress
+								name="ea_completion"
+								value={data.data.completion ?? 0}
+								max={100}
+								isPercentage
+								strokeWidth={26}
+								fontSize={26}
+								color="#6366f1"
+							/>
+						</div>
+						<div class="flex flex-col items-center w-32">
+							<!-- The table's wording: `reviewProgress` renders as just "Progress". -->
+							<span class="text-xs text-surface-600-400">{m.auditReviewProgress()}</span>
+							<RingProgress
+								name="ea_review"
+								value={data.data.review_progress ?? 0}
+								max={100}
+								isPercentage
+								strokeWidth={26}
+								fontSize={26}
+								color="#10b981"
+							/>
+						</div>
+					</div>
+					<div class="flex flex-col items-center gap-1 text-xs">
+						{#if data.data.assignment_status}
+							<span class="text-surface-600-400">{m.assignmentStatus()}</span>
+							<span class="badge preset-tonal-secondary">
+								{safeTranslate(data.data.assignment_status)}
+							</span>
+						{/if}
+					</div>
+				</div>
+			{/if}
+		{/snippet}
 		{#snippet actions()}
 			{#if data.data.compliance_assessment}
 				<button

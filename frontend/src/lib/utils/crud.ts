@@ -1493,6 +1493,32 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' }
 		],
 		selectFields: [{ field: 'status' }, { field: 'conclusion' }],
+		// The first ten show without expanding, so they carry what an analyst reads
+		// first. Progress lives in the widget beside them, not in a row.
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'entity' },
+			{ field: 'status' },
+			{ field: 'conclusion' },
+			{ field: 'criticality' },
+			{ field: 'due_date', type: 'date' },
+			{ field: 'representatives' },
+			{ field: 'reviewers' },
+			{ field: 'compliance_assessment' },
+			{ field: 'solutions' },
+			{ field: 'folder' },
+			{ field: 'perimeter' },
+			{ field: 'version' },
+			{ field: 'eta', type: 'date' },
+			{ field: 'authors' },
+			{ field: 'description' },
+			{ field: 'observation' },
+			{ field: 'reference_link' },
+			{ field: 'evidence' },
+			{ field: 'is_locked' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
 		filters: [{ field: 'status' }]
 	},
 	solutions: {
@@ -2843,11 +2869,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'campaigns',
 		verboseName: 'Campaign',
 		verboseNamePlural: 'Campaigns',
-		selectFields: [{ field: 'status' }],
+		selectFields: [{ field: 'status' }, { field: 'kind' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'framework', urlModel: 'frameworks' },
-			{ field: 'perimeters', urlModel: 'perimeters' }
+			{ field: 'perimeters', urlModel: 'perimeters' },
+			{ field: 'folders', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'entities', urlModel: 'entities' }
 		],
 		reverseForeignKeyFields: [
 			{
@@ -2856,13 +2884,22 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			},
-			{ field: 'campaigns', urlModel: 'perimeters', disableCreate: true, disableDelete: true }
+			{
+				field: 'compliance_assessment__campaign',
+				urlModel: 'entity-assessments',
+				disableCreate: true,
+				disableDelete: true
+			}
 		],
 		detailViewFields: [
 			{ field: 'id' },
 			{ field: 'name' },
 			{ field: 'description' },
-			{ field: 'framework' },
+			{ field: 'kind' },
+			{ field: 'frameworks' },
+			{ field: 'folders' },
+			{ field: 'entities' },
+			{ field: 'perimeters' },
 			{ field: 'status' },
 			{ field: 'start_date' },
 			{ field: 'due_date' },

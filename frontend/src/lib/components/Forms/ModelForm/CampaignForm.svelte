@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import { formFieldProxy } from 'sveltekit-superforms';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -25,6 +26,11 @@
 		object = {},
 		context
 	}: Props = $props();
+
+	const { value: kindValue } = formFieldProxy(form as any, 'kind');
+	const presetKind = initialData.kind;
+	if (presetKind) kindValue.set(presetKind);
+	const kind = $derived(presetKind || $kindValue || 'internal');
 
 	let implementationGroupsChoices = $state<
 		{ label: string; value: { id: string; framework: string } }[]
@@ -74,17 +80,40 @@
 		label={m.selectedImplementationGroups()}
 	/>
 {/if}
-<AutocompleteSelect
-	multiple
-	{form}
-	optionsEndpoint="perimeters"
-	optionsExtraFields={[['folder', 'str']]}
-	field="perimeters"
-	cacheLock={cacheLocks['perimeters']}
-	bind:cachedValue={formDataCache['perimeters']}
-	label={m.perimeters()}
-	disabled={!!initialData.perimeters?.length}
-/>
+{#if kind === 'third_party'}
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="entities"
+		field="entities"
+		cacheLock={cacheLocks['entities']}
+		bind:cachedValue={formDataCache['entities']}
+		label={m.thirdParties()}
+	/>
+{:else}
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="folders?content_type=DO&content_type=GL"
+		field="folders"
+		cacheLock={cacheLocks['folders']}
+		bind:cachedValue={formDataCache['folders']}
+		label={m.targetDomains()}
+	/>
+{/if}
+{#if object?.perimeters?.length}
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="perimeters"
+		optionsExtraFields={[['folder', 'str']]}
+		field="perimeters"
+		cacheLock={cacheLocks['perimeters']}
+		bind:cachedValue={formDataCache['perimeters']}
+		label={m.perimeters()}
+		disabled
+	/>
+{/if}
 <TextField
 	type="date"
 	{form}

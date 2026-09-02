@@ -9156,8 +9156,26 @@ class FrameworkViewSet(BaseModelViewSet):
     filterset_class = FrameworkFilter
     search_fields = ["name", "description"]
 
+    def _options_only(self) -> bool:
+        request = getattr(self, "request", None)
+        return (
+            self.action == "list"
+            and request is not None
+            and request.query_params.get("options") == "true"
+        )
+
+    def get_serializer_class(self, **kwargs):
+        if self._options_only():
+            from core.serializers import FrameworkOptionsSerializer
+
+            return FrameworkOptionsSerializer
+        return super().get_serializer_class(**kwargs)
+
     def get_queryset(self):
-        qs = super().get_queryset().prefetch_related("requirement_nodes")
+        qs = super().get_queryset().select_related("folder", "library")
+
+        if self._options_only():
+            return qs
 
         # Annotate if the framework is dynamic (any question choice uses implementation groups)
         qs = qs.annotate(
@@ -9166,7 +9184,10 @@ class FrameworkViewSet(BaseModelViewSet):
                     question__requirement_node__framework=OuterRef("pk"),
                     select_implementation_groups__isnull=False,
                 ).exclude(select_implementation_groups=[])
-            )
+            ),
+            has_compliance_assessments_flag=Exists(
+                ComplianceAssessment.objects.filter(framework=OuterRef("pk"))
+            ),
         )
 
         return qs
@@ -9218,10 +9239,14 @@ class FrameworkViewSet(BaseModelViewSet):
         Query params:
           - implementation_group (str): narrow to a single IG.
             Default honors each CA's selected_implementation_groups.
+          - campaign (uuid): narrow to one campaign's audits. A campaign is
+            already an explicit scope, so planned audits are kept — they are the
+            normal state right after a launch and cannot double-count here.
         """
         framework = self.get_object()  # checks read permission
 
         ig_filter = request.query_params.get("implementation_group") or None
+        campaign_id = request.query_params.get("campaign") or None
 
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
@@ -9231,11 +9256,22 @@ class FrameworkViewSet(BaseModelViewSet):
         # deprecated CAs are intentionally excluded; surface them via the
         # standard CA list page if needed.
         LIVE_STATUSES = ("in_progress", "in_review", "done")
+        if campaign_id:
+            LIVE_STATUSES = LIVE_STATUSES + ("planned",)
 
         visible_cas_qs = ComplianceAssessment.objects.filter(
             framework=framework,
             id__in=viewable_ca_ids,
         ).select_related("folder")
+        campaign_scope = None
+        if campaign_id:
+            visible_cas_qs = visible_cas_qs.filter(campaign_id=campaign_id)
+            campaign = Campaign.objects.filter(
+                id=campaign_id,
+                id__in=RoleAssignment.get_viewable_object_ids(request.user, Campaign),
+            ).first()
+            if campaign:
+                campaign_scope = {"id": str(campaign.id), "name": campaign.name}
 
         all_visible_cas = list(visible_cas_qs)
 
@@ -9416,6 +9452,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 "ca_status_counts": ca_status_counts,
                 "live_statuses": list(LIVE_STATUSES),
                 "aggregation_strategy": aggregation_strategy,
+                "campaign": campaign_scope,
                 "generated_at": timezone.now().isoformat(),
             }
         )
@@ -10729,13 +10766,129 @@ class OrganisationIssueViewSet(BaseModelViewSet):
 class CampaignViewSet(BaseModelViewSet):
     model = Campaign
 
-    filterset_fields = ["folder", "frameworks", "perimeters", "status"]
+    filterset_fields = [
+        "folder",
+        "frameworks",
+        "perimeters",
+        "folders",
+        "entities",
+        "status",
+        "kind",
+    ]
     search_fields = ["name", "description"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder")
+            .prefetch_related(
+                "frameworks",
+                "folders",
+                "entities",
+                "compliance_assessments",
+                # Perimeter.__str__ reads folder.name.
+                Prefetch(
+                    "perimeters", queryset=Perimeter.objects.select_related("folder")
+                ),
+            )
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Campaign.Status.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get kind choices")
+    def kind(self, request):
+        return Response(dict(Campaign.Kind.choices))
+
+    @action(detail=True, name="Get campaign dashboard")
+    def dashboard(self, request, pk):
+        """Series and counts the campaign widgets need, in one round trip.
+
+        The per-target rows come from the compliance-assessment list endpoint,
+        which already computes progress page-wide.
+        """
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", Campaign, UUID(pk)
+        ):
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        campaign = self.get_object()
+        audit_ids = list(
+            ComplianceAssessment.objects.filter(campaign=campaign).values_list(
+                "id", flat=True
+            )
+        )
+        return Response(
+            {
+                "trend": self._campaign_trend(audit_ids),
+                "assignments": self._campaign_assignments(audit_ids),
+            }
+        )
+
+    @staticmethod
+    def _campaign_trend(audit_ids):
+        """Daily campaign completion, weighted by requirement count.
+
+        HistoricalMetric only holds a row for the days an audit changed, so the
+        last known sample is carried forward to fill the gaps.
+        """
+        if not audit_ids:
+            return []
+        rows = (
+            HistoricalMetric.objects.filter(
+                model="ComplianceAssessment", object_id__in=audit_ids
+            )
+            .order_by("date")
+            .values_list("date", "object_id", "data")
+        )
+        by_date = {}
+        for day, object_id, data in rows:
+            reqs = (data or {}).get("reqs") or {}
+            total = reqs.get("total") or 0
+            progress = reqs.get("progress_perc") or 0
+            by_date.setdefault(day, {})[object_id] = (total, progress)
+        if not by_date:
+            return []
+
+        series = []
+        last_seen = {}
+        day = min(by_date)
+        today = date.today()
+        while day <= today:
+            last_seen.update(by_date.get(day, {}))
+            total = sum(t for t, _ in last_seen.values())
+            assessed = sum(t * p / 100 for t, p in last_seen.values())
+            series.append(
+                {
+                    "date": day.isoformat(),
+                    "progress": int(assessed / total * 100) if total else 0,
+                }
+            )
+            day += timedelta(days=1)
+        return series
+
+    @staticmethod
+    def _campaign_assignments(audit_ids):
+        if not audit_ids:
+            return {"per_status": {}, "flagged": 0}
+        per_status = {
+            row["status"]: row["count"]
+            for row in RequirementAssignment.objects.filter(
+                compliance_assessment_id__in=audit_ids
+            )
+            .values("status")
+            .annotate(count=Count("id"))
+        }
+        flagged = RequirementAssessment.objects.filter(
+            compliance_assessment_id__in=audit_ids,
+            review_state=RequirementAssessment.ReviewState.CHANGES_REQUESTED,
+        ).count()
+        return {"per_status": per_status, "flagged": flagged}
 
     @action(detail=True, name="Get campaign metrics")
     def metrics(self, request, pk):
@@ -10748,33 +10901,63 @@ class CampaignViewSet(BaseModelViewSet):
         campaign = self.get_object()
         return Response(campaign.metrics())
 
+    @staticmethod
+    def _campaign_implementation_groups(campaign, framework):
+        if not campaign.selected_implementation_groups:
+            return None
+        groups = [
+            group["value"]
+            for group in campaign.selected_implementation_groups
+            if group["framework"] == str(framework.id)
+        ]
+        return groups or None
+
     def perform_create(self, serializer):
         super().perform_create(serializer)
         campaign = serializer.instance
-        frameworks = serializer.instance.frameworks.all()
-        for perimeter in campaign.perimeters.all():
-            for framework in frameworks:
-                framework_implementation_groups = None
-                if campaign.selected_implementation_groups:
-                    framework_implementation_groups = [
-                        group["value"]
-                        for group in campaign.selected_implementation_groups
-                        if group["framework"] == str(framework.id)
-                    ]
-                from core.utils import build_initial_field_visibility
+        frameworks = campaign.frameworks.all()
+        if campaign.kind == Campaign.Kind.THIRD_PARTY:
+            self._launch_third_party(campaign, frameworks)
+        else:
+            self._launch_internal(campaign, frameworks)
 
+    def _launch_internal(self, campaign, frameworks):
+        from core.utils import build_initial_field_visibility
+
+        for folder in campaign.folders.all():
+            for framework in frameworks:
                 compliance_assessment = ComplianceAssessment.objects.create(
-                    name=f"{campaign.name} - {perimeter.name} - {framework.name}",
+                    name=f"{campaign.name} - {folder.name} - {framework.name}",
                     campaign=campaign,
-                    perimeter=perimeter,
                     framework=framework,
-                    folder=perimeter.folder,
-                    selected_implementation_groups=framework_implementation_groups
-                    if framework_implementation_groups
-                    else None,
+                    folder=folder,
+                    selected_implementation_groups=self._campaign_implementation_groups(
+                        campaign, framework
+                    ),
                     field_visibility=build_initial_field_visibility(framework),
                 )
                 compliance_assessment.create_requirement_assessments()
+
+    def _launch_third_party(self, campaign, frameworks):
+        from tprm.models import EntityAssessment
+        from tprm.services import create_enclave_audit
+
+        for entity in campaign.entities.all():
+            for framework in frameworks:
+                assessment = EntityAssessment.objects.create(
+                    name=f"{campaign.name} - {entity.name} - {framework.name}",
+                    folder=campaign.folder,
+                    entity=entity,
+                    due_date=campaign.due_date,
+                )
+                audit = create_enclave_audit(
+                    assessment,
+                    framework,
+                    self._campaign_implementation_groups(campaign, framework),
+                )
+                # The campaign FK lives on the audit, not the assessment.
+                audit.campaign = campaign
+                audit.save(update_fields=["campaign"])
 
 
 def _serialize_suggestion_preview(entries: list[dict]) -> list[dict]:

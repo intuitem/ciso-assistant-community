@@ -526,14 +526,15 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     # incidents/campaigns/findings still make it into the dump (and into
     # loaded_libraries). Rebuild with fresh Q filters rather than queryset
     # union so the result plays nicely with .distinct().
+    campaigns = Campaign.objects.filter(folder__in=folders).distinct()
     entities = Entity.objects.filter(
         Q(folder__in=folders)
         | Q(stakeholders__in=stakeholders)
         | Q(ebios_rm_studies__in=ebios_rm_studies)
         | Q(incidents__in=incidents)
+        | Q(campaigns__in=campaigns)
     ).distinct()
 
-    campaigns = Campaign.objects.filter(folder__in=folders).distinct()
     frameworks = Framework.objects.filter(
         Q(folder__in=folders)
         | Q(complianceassessment__in=compliance_assessments)

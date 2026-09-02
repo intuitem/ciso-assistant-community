@@ -1109,6 +1109,8 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         "criticality",
         "conclusion",
         "genericcollection",
+        # A third-party campaign owns the questionnaire; the assessment hangs off it.
+        "compliance_assessment__campaign",
     ]
 
     # `assignment_status` is a string on a related model, so ordering it raw would be

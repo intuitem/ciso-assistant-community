@@ -81,6 +81,8 @@ const ENTITY_CRITICALITY_OPTIONS = [
 	{ label: '4', value: '4' }
 ];
 
+// Labels are the tokens the API serialises for `content_type`, so the column and this
+// filter resolve through the same messages.
 const CONTENT_TYPE_OPTIONS = [
 	{ label: 'DOMAIN', value: 'DO' },
 	{ label: 'GLOBAL', value: 'GL' },
@@ -512,6 +514,22 @@ export const INCIDENT_STATUS_FILTER: ListViewFilterConfig = {
 		browserCache: 'force-cache',
 		multiple: true
 	}
+};
+
+export const CAMPAIGN_KIND_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'campaigns/kind',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'kind',
+		browserCache: 'force-cache',
+		multiple: true
+	},
+	extraProps: {
+		defaultOptionName: 'kind'
+	},
+	alwaysDisplay: false
 };
 
 export const CAMPAIGN_STATUS_FILTER: ListViewFilterConfig = {
@@ -1132,7 +1150,8 @@ export const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'framework',
-		optionsEndpoint: 'frameworks',
+		// id/ref_id/name only: the full framework payload is ~10 kB a row.
+		optionsEndpoint: 'frameworks?options=true',
 		multiple: true
 	}
 };
@@ -2970,9 +2989,10 @@ export const listViewFields = {
 		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
 	},
 	campaigns: {
-		head: ['name', 'description', 'frameworks', 'status'],
-		body: ['name', 'description', 'frameworks', 'status'],
+		head: ['name', 'kind', 'frameworks', 'status'],
+		body: ['name', 'kind', 'frameworks', 'status'],
 		filters: {
+			kind: CAMPAIGN_KIND_FILTER,
 			status: CAMPAIGN_STATUS_FILTER,
 			frameworks: FRAMEWORK_FILTER
 		}

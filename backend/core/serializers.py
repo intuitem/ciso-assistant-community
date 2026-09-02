@@ -2457,6 +2457,17 @@ class FolderImportExportSerializer(BaseModelSerializer):
 # Compliance Assessment
 
 
+class FrameworkOptionsSerializer(serializers.ModelSerializer):
+    """Just enough to render a framework in a picker: the full read serializer
+    carries the visibility maps, implementation groups and reference controls."""
+
+    name = serializers.CharField(source="get_name_translated")
+
+    class Meta:
+        model = Framework
+        fields = ["id", "ref_id", "name"]
+
+
 class FrameworkReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id", "urn"])
@@ -2480,6 +2491,9 @@ class FrameworkReadSerializer(ReferentialSerializer):
         return obj.get_implementation_groups_definition_translated()
 
     def get_has_compliance_assessments(self, obj):
+        flag = getattr(obj, "has_compliance_assessments_flag", None)
+        if flag is not None:
+            return flag
         return obj.complianceassessment_set.exists()
 
     def get_scores_definition(self, obj):
@@ -2899,18 +2913,10 @@ class CampaignReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     compliance_assessments = FieldsRelatedField(many=True)
     perimeters = FieldsRelatedField(many=True)
+    folders = FieldsRelatedField(many=True)
+    entities = FieldsRelatedField(many=True)
     frameworks = FieldsRelatedField(many=True)
     status = serializers.CharField(source="get_status_display")
-    framework = FieldsRelatedField(
-        [
-            "id",
-            "min_score",
-            "max_score",
-            "implementation_groups_definition",
-            "ref_id",
-            "reference_controls",
-        ]
-    )
 
     class Meta:
         model = Campaign
@@ -4438,12 +4444,15 @@ class CampaignImportExportSerializer(BaseModelSerializer):
         slug_field="urn", read_only=True, many=True
     )
     perimeters = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    folders = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    entities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = Campaign
         fields = [
             "name",
             "description",
+            "kind",
             "status",
             "start_date",
             "eta",
@@ -4452,6 +4461,8 @@ class CampaignImportExportSerializer(BaseModelSerializer):
             "folder",
             "frameworks",
             "perimeters",
+            "folders",
+            "entities",
             "created_at",
             "updated_at",
         ]

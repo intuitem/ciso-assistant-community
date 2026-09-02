@@ -7515,6 +7515,16 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         DONE = "done", _("Done")
         DEPRECATED = "deprecated", _("Deprecated")
 
+    class Kind(models.TextChoices):
+        INTERNAL = "internal", _("Internal")
+        THIRD_PARTY = "third_party", _("Third-party")
+
+    kind = models.CharField(
+        max_length=20,
+        choices=Kind.choices,
+        default=Kind.INTERNAL,
+        verbose_name=_("Kind"),
+    )
     frameworks = models.ManyToManyField(Framework, related_name="campaigns")
     status = models.CharField(
         max_length=100,
@@ -7532,7 +7542,21 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         null=True,
         verbose_name=_("Start date"),
     )
-    perimeters = models.ManyToManyField(Perimeter, related_name="campaigns")
+    # Perimeters became optional everywhere, so an internal campaign targets domains.
+    # `perimeters` stays for the campaigns that were built on it.
+    perimeters = models.ManyToManyField(Perimeter, related_name="campaigns", blank=True)
+    folders = models.ManyToManyField(
+        Folder,
+        related_name="campaigns",
+        blank=True,
+        verbose_name=_("Target domains"),
+    )
+    entities = models.ManyToManyField(
+        "tprm.Entity",
+        related_name="campaigns",
+        blank=True,
+        verbose_name=_("Third parties"),
+    )
 
     class Meta:
         verbose_name = "Campaign"
