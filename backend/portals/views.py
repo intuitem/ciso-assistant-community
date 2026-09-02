@@ -9,6 +9,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
+from rest_framework.renderers import JSONRenderer
 from rest_framework.views import APIView
 
 from core.models import RequirementAssignment
@@ -661,6 +662,9 @@ def _snapshot_export_csv(rows, slug):
 
 
 class PublicFrameworkSnapshotExportView(PublicPortalAPIView):
+    def perform_content_negotiation(self, request, force=False):
+        return (JSONRenderer(), "application/json")
+
     def get(self, request, token):
         snap = FrameworkSnapshot.objects.filter(public_token=token).first()
         if snap is None or not _is_publicly_reachable(snapshot_id=snap.id):
