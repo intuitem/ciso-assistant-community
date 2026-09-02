@@ -3677,6 +3677,9 @@ class FilteringLabelViewSet(BaseModelViewSet):
     search_fields = ["label"]
     ordering = ["label"]
 
+    def get_queryset(self):
+        return super().get_queryset().select_related("folder")
+
 
 class LibraryFilteringLabelViewSet(BaseModelViewSet):
     """
@@ -3687,6 +3690,9 @@ class LibraryFilteringLabelViewSet(BaseModelViewSet):
     filterset_fields = ["folder"]
     search_fields = ["label"]
     ordering = ["label"]
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("folder")
 
 
 class RiskAssessmentFilterSet(GenericFilterSet):
@@ -10303,6 +10309,13 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
     filterset_fields = ["evidence"]
     ordering = ["-version"]
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("evidence", "evidence__folder", "folder", "task_node")
+        )
+
     @action(methods=["get"], detail=True)
     def attachment(self, request, pk):
         object_ids_view = RoleAssignment.get_viewable_object_ids(
@@ -16179,9 +16192,23 @@ class FindingViewSet(BaseModelViewSet):
         return (
             super()
             .get_queryset()
-            .select_related("folder", "findings_assessment")
+            .select_related(
+                "folder",
+                "findings_assessment",
+                "findings_assessment__perimeter",
+                "findings_assessment__perimeter__folder",
+                "requirement_node",
+                "asset",
+            )
             .prefetch_related(
-                "filtering_labels", "applied_controls", "task_templates", "evidences"
+                "filtering_labels",
+                "applied_controls",
+                "task_templates",
+                "evidences",
+                actor_prefetch("owner"),
+                "threats",
+                "vulnerabilities",
+                "reference_controls",
             )
         )
 
@@ -16328,6 +16355,23 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         "created_at": ["gte", "lt"],
         "updated_at": ["gte", "lt"],
     }
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder")
+            .prefetch_related(
+                "threats",
+                actor_prefetch("owners"),
+                "assets",
+                "qualifications",
+                "entities",
+                "applied_controls",
+                "task_templates",
+                "risk_scenarios",
+            )
+        )
 
     export_config = {
         "fields": {
@@ -17368,16 +17412,23 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
     }
 
     def get_queryset(self):
-        # Opt-in columns: one query each, not one per row.
-        qs = (
-            super()
-            .get_queryset()
-            .prefetch_related(
+        qs = super().get_queryset().select_related("folder")
+        if self.action in ("list", "retrieve"):
+            # Opt-in columns: one query each, not one per row.
+            qs = qs.prefetch_related(
                 "filtering_labels__folder",
+                "incidents",
+                "evidences",
+                "assets",
+                "applied_controls",
+                "compliance_assessments",
+                "risk_assessments",
+                actor_prefetch("assigned_to"),
+                "findings_assessment",
                 "commitments__committed_by",
+                # Stands in for a plain "findings": same lookup, binder-scoped.
                 scoped_findings_prefetch(self.request),
             )
-        )
         ordering = self.request.query_params.get("ordering", "")
 
         if any(
