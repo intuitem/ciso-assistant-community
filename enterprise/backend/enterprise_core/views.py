@@ -1275,9 +1275,9 @@ class TimelineEntriesView(APIView):
         entries: list[dict] = []
 
         def accessible_ids(model):
-            return RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, model
-            )[0]
+            # Same kernel call as BaseModelViewSet.get_queryset: a queryset of
+            # the ids the user may view, usable directly in id__in filters.
+            return RoleAssignment.get_viewable_object_ids(user, model)
 
         def owner_ids_map(model, field_name, object_ids):
             """Map object id to its owning actor ids via the M2M through
@@ -1398,12 +1398,15 @@ class TimelineEntriesView(APIView):
         # FieldsRelatedField's "str", i.e. str(actor)). Restricted to actors
         # the requester can view, matching the related-field masking the list
         # endpoints apply to owners/authors.
-        viewable_actor_ids = set(accessible_ids(Actor))
+        actor_qs = Actor.objects.filter(id__in=actor_ids)
+        try:
+            actor_qs = actor_qs.filter(id__in=accessible_ids(Actor))
+        except (NotImplementedError, Permission.DoesNotExist):
+            # Model not IAM-scoped: list endpoints skip masking too.
+            pass
         actor_labels = {
             actor.id: str(actor)
-            for actor in Actor.objects.filter(
-                id__in=actor_ids & viewable_actor_ids
-            ).select_related("user", "team", "entity")
+            for actor in actor_qs.select_related("user", "team", "entity")
         }
         for entry in entries:
             if "owners" in entry:

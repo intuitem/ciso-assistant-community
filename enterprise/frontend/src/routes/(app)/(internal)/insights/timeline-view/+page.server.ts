@@ -35,30 +35,39 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
 	// Stream the timeline entries (one aggregate request) so the page can show
 	// a spinner. Reshape to the per-model arrays the component expects.
-	const ganttData = fetch(`${BASE_API_URL}/timeline-entries/`).then(async (res) => {
-		if (!res.ok) {
-			throw new Error(`Failed to load timeline entries (${res.status})`);
-		}
-		const entries: TimelineEntry[] = await res.json();
-		const grouped: Record<GanttKey, Record<string, unknown>[]> = {
-			appliedControls: [],
-			complianceAssessments: [],
-			riskAssessments: [],
-			businessImpactAnalyses: [],
-			findingsAssessments: [],
-			securityExceptions: []
-		};
-		for (const entry of entries) {
-			const key = MODEL_KEYS[entry.model as keyof typeof MODEL_KEYS];
-			if (!key) continue;
-			grouped[key].push({
-				...entry,
-				// The component reads owner names as {str} objects (old serializer shape)
-				owners: (entry.owners ?? []).map((str) => ({ str }))
-			});
-		}
-		return grouped;
+	// Never let this promise reject: a rejected streamed promise is an
+	// unhandled rejection on the node server. Resolve with an error flag and
+	// let the page render its error state instead.
+	const emptyGroups = (): Record<GanttKey, Record<string, unknown>[]> => ({
+		appliedControls: [],
+		complianceAssessments: [],
+		riskAssessments: [],
+		businessImpactAnalyses: [],
+		findingsAssessments: [],
+		securityExceptions: []
 	});
+	const ganttData = fetch(`${BASE_API_URL}/insights-timeline/`)
+		.then(async (res) => {
+			if (!res.ok) {
+				throw new Error(`Failed to load timeline entries (${res.status})`);
+			}
+			const entries: TimelineEntry[] = await res.json();
+			const grouped = emptyGroups();
+			for (const entry of entries) {
+				const key = MODEL_KEYS[entry.model as keyof typeof MODEL_KEYS];
+				if (!key) continue;
+				grouped[key].push({
+					...entry,
+					// The component reads owner names as {str} objects (old serializer shape)
+					owners: (entry.owners ?? []).map((str) => ({ str }))
+				});
+			}
+			return { ...grouped, error: false };
+		})
+		.catch((err) => {
+			console.error('Failed to load timeline entries:', err);
+			return { ...emptyGroups(), error: true };
+		});
 
 	return {
 		folders,

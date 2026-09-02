@@ -28,8 +28,8 @@ urlpatterns = [
     ),
     path("audited-models/", AuditedModelsView.as_view(), name="audited-models"),
     path(
-        "timeline-entries/",
+        "insights-timeline/",
         TimelineEntriesView.as_view(),
-        name="timeline-entries",
+        name="insights-timeline",
     ),
 ]
