@@ -65,6 +65,11 @@ class TestUserPartitionFilter:
         assert "risk_scenario" in _allowed_types(scope_for(reader))
 
     def test_auditee_may_not_search_risk_scenarios(self, auditee, domain):
+        root_folder = Folder.get_root_folder()
+        assert root_folder is not None, "No root folder found."
+        root_folder.default_role = None
+        root_folder.save()
+
         allowed = _allowed_types(scope_for(auditee))
         assert "applied_control" in allowed
         assert "risk_scenario" not in allowed
