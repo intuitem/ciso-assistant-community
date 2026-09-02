@@ -1379,4 +1379,4 @@ if __name__ == "__main__":
             "in the cli/ directory and set API_URL, e.g. API_URL=http://localhost:8000/api",
             file=sys.stderr,
         )
-    sys.exit(1)
+        sys.exit(1)
