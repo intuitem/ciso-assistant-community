@@ -293,9 +293,13 @@ class TestCustomFieldsAPI:
     ):
         root = Folder.get_root_folder()
         domain = Folder.objects.create(name="Domain A", parent_folder=root)
-        resp = self._make_choice_def(authenticated_client, str(root.id), key="global_tier")
+        resp = self._make_choice_def(
+            authenticated_client, str(root.id), key="global_tier"
+        )
         assert resp.status_code == status.HTTP_201_CREATED, resp.content
-        resp = self._make_choice_def(authenticated_client, str(domain.id), key="domain_tier")
+        resp = self._make_choice_def(
+            authenticated_client, str(domain.id), key="domain_tier"
+        )
         assert resp.status_code == status.HTTP_201_CREATED, resp.content
 
         listed = authenticated_client.get(
