@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
     """
 
     dependencies = [
-        ("tprm", "0020_entityscore"),
+        ("tprm", "0019_null_perimeter_on_enclave_audits"),
     ]
 
     operations = [
