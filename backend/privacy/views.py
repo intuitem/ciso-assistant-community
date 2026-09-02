@@ -10,6 +10,7 @@ from core.serializers import ActorReadSerializer
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
+    actor_prefetch,
     escape_excel_formula,
 )
 from django_filters.rest_framework import DjangoFilterBackend
@@ -349,7 +350,7 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 "data_subjects",
                 "nature",
                 "associated_controls",
-                "assigned_to",
+                actor_prefetch("assigned_to"),
                 "evidences",
                 "purposes",
                 "perimeters",

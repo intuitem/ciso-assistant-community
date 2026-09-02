@@ -15761,7 +15761,7 @@ class FindingViewSet(BaseModelViewSet):
                 "filtering_labels",
                 "applied_controls",
                 "evidences",
-                "owner",
+                actor_prefetch("owner"),
                 "threats",
                 "vulnerabilities",
                 "reference_controls",
@@ -15919,7 +15919,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
             .select_related("folder")
             .prefetch_related(
                 "threats",
-                "owners",
+                actor_prefetch("owners"),
                 "assets",
                 "qualifications",
                 "entities",
@@ -16843,11 +16843,9 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
     }
 
     def get_queryset(self):
-        qs = (
-            super()
-            .get_queryset()
-            .select_related("folder")
-            .prefetch_related(
+        qs = super().get_queryset().select_related("folder")
+        if self.action in ("list", "retrieve"):
+            qs = qs.prefetch_related(
                 "filtering_labels__folder",
                 "incidents",
                 "evidences",
@@ -16855,11 +16853,10 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 "applied_controls",
                 "compliance_assessments",
                 "risk_assessments",
-                "assigned_to",
+                actor_prefetch("assigned_to"),
                 "findings_assessment",
                 "findings",
             )
-        )
         ordering = self.request.query_params.get("ordering", "")
 
         if any(
