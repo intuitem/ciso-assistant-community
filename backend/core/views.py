@@ -18492,7 +18492,13 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
     @staticmethod
     def _advance_review_states(assignment, transition_key):
         """Carry the review flags across a transition: answering a rework request
-        makes them RESUBMITTED, closing accepts what is still awaiting a look."""
+        makes them RESUBMITTED, closing accepts what is still awaiting a look.
+
+        Reopening to draft starts a new round, so anything still awaiting a look goes
+        back to flagged: without this, the reviewer's next close would accept items
+        nobody re-examined in the new round. Already ACCEPTED flags are left alone —
+        they record a verdict that was actually given.
+        """
         from core.models import RequirementAssessment
 
         ReviewState = RequirementAssessment.ReviewState
@@ -18505,7 +18511,9 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         }
         move = moves.get(transition_key)
         if move is None:
-            return
+            if transition_key[1] != RequirementAssignment.Status.DRAFT:
+                return
+            move = (ReviewState.RESUBMITTED, ReviewState.CHANGES_REQUESTED)
         source, target_state = move
         assignment.requirement_assessments.filter(review_state=source).update(
             review_state=target_state
