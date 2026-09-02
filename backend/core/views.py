@@ -966,6 +966,23 @@ class AutocompleteMixin:
         return Response(serializer.data)
 
 
+def _model_resolves_lookup(model: type[models.Model], lookup: str) -> bool:
+    """Return whether ``lookup`` (a DRF ``search_fields`` entry, optional ``^=@$``
+    prefix, ``__``-separated path) resolves to a concrete field on ``model``."""
+    parts = lookup.lstrip("^=@$").split("__")
+    current = model
+    for index, part in enumerate(parts):
+        try:
+            field = current._meta.get_field(part)
+        except FieldDoesNotExist:
+            return False
+        if index < len(parts) - 1:
+            if field.related_model is None:
+                return False
+            current = field.related_model
+    return True
+
+
 class BaseModelViewSet(viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
@@ -974,11 +991,25 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     ]
     ordering = ["created_at"]
     ordering_fields = "__all__"
-    search_fields = ["name", "description"]
+    default_search_fields = ["name", "description"]
     filterset_fields = []
     model: type[models.Model] | None = None
 
     serializers_module = "core.serializers"
+
+    @property
+    def search_fields(self) -> list[str]:
+        """``default_search_fields`` restricted to the lookups ``self.model`` can
+        resolve, so ``?search=`` never raises ``FieldError`` on a model without
+        ``name``/``description``. A subclass declaring ``search_fields`` shadows
+        this property and is used verbatim (it may target queryset annotations)."""
+        if self.model is None:
+            return []
+        return [
+            f
+            for f in self.default_search_fields
+            if _model_resolves_lookup(self.model, f)
+        ]
 
     @property
     def filterset_class(self):
@@ -10064,6 +10095,7 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
     model = EvidenceRevision
     filterset_fields = ["evidence"]
     ordering = ["-version"]
+    search_fields = ["observation", "link", "evidence__name"]
 
     @action(methods=["get"], detail=True)
     def attachment(self, request, pk):
