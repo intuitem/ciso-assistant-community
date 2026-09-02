@@ -55,6 +55,12 @@
 		currentFilterSearch = search ? `?${search}` : '';
 	}
 
+	// The list is already scoped to one kind (the menu links carry it, and the filter
+	// chip keeps it current), so creating from here inherits it instead of asking again.
+	const campaignKinds = $derived(
+		new URLSearchParams(currentFilterSearch.replace(/^\?/, '')).getAll('kind')
+	);
+
 	const modalStore: ModalStore = getModalStore();
 
 	function buildTableExportOptions(filterSearch: string): ExportOption[] {
@@ -168,7 +174,11 @@
 	}
 
 	function modalAddForm(): void {
-		if (URLModel === 'campaigns') return modalCampaignKind();
+		if (URLModel === 'campaigns') {
+			// Only ask when the list spans both kinds and the choice is genuinely open.
+			if (campaignKinds.length === 1) return modalCreateForm({ kind: campaignKinds[0] });
+			return modalCampaignKind();
+		}
 		modalCreateForm();
 	}
 
@@ -254,7 +264,9 @@
 
 {#if data?.table}
 	<div class="shadow-lg">
-		{#key URLModel}
+		<!-- `urlSearch` comes from the load, so it only changes on a real navigation:
+		     the table's own in-place rewrites of the query string never remount it. -->
+		{#key `${URLModel}${data.urlSearch ?? ''}`}
 			<ModelTable
 				source={data.table}
 				{tableFilters}

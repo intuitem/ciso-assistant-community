@@ -10,8 +10,10 @@
 
 	let { item = [], sideBarVisibleItems }: Props = $props();
 
+	// Entries that preselect a filter carry a query string, so match on it too —
+	// otherwise `/campaigns?kind=internal` would never highlight.
 	let classesActive = $derived((href: string) =>
-		href === page.url.pathname
+		href === page.url.pathname || href === `${page.url.pathname}${page.url.search}`
 			? 'bg-primary-100-900 text-primary-800-200'
 			: 'hover:bg-primary-50-950 text-surface-950-50 '
 	);

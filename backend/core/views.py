@@ -10788,7 +10788,6 @@ class CampaignViewSet(BaseModelViewSet):
             .select_related("folder")
             .prefetch_related(
                 "frameworks",
-                "folders",
                 "entities",
                 "compliance_assessments",
                 # Perimeter.__str__ reads folder.name.
