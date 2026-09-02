@@ -589,6 +589,11 @@ class TestPermissionCheck:
         """
 
         root_folder = Folder.get_root_folder()
+        assert root_folder is not None, "No root folder found."
+
+        root_folder.default_role = None
+        root_folder.save()
+
         domain1 = Folder.objects.create(name="domain1")
         domain2 = Folder.objects.create(name="domain2")
 
@@ -800,6 +805,14 @@ class TestPermissionCheck:
             )
 
     def test_actor_perms(self):
+        # Remove the root folder's builtin `default_role` (BI-RL-CAT)
+        # which otherwise grants `view_user`/`view_team`/`view_entity` to any `User` with a `RoleAssignment``.
+        root_folder = Folder.get_root_folder()
+        assert root_folder is not None, "No root folder found."
+
+        root_folder.default_role = None
+        root_folder.save()
+
         folder = Folder.objects.create(name="folder")
 
         user = User.objects.create_user("user@gmail.com")
