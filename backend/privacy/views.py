@@ -836,6 +836,21 @@ class DataBreachViewSet(BaseModelViewSet):
         "evidences",
     ]
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "incident")
+            .prefetch_related(
+                "assigned_to",
+                "authorities",
+                "affected_processings",
+                "affected_personal_data",
+                "remediation_measures",
+                "evidences",
+            )
+        )
+
     @action(detail=False, name="Get breach type choices")
     def breach_type(self, request):
         return Response(dict(DataBreach.BREACH_TYPE_CHOICES))
