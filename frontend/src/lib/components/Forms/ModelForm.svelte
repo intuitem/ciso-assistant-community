@@ -369,6 +369,10 @@
 				optionsEndpoint="reference-controls"
 				optionsExtraFields={[['folder', 'str']]}
 				optionsLabelField="auto"
+				optionsInfoFields={{
+					fields: [{ field: 'category', translate: true }],
+					position: 'prefix'
+				}}
 				optionsSuggestions={suggestions['reference_control']}
 				field="reference_control"
 				cacheLock={cacheLocks['reference_control']}

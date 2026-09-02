@@ -1854,6 +1854,11 @@ class LibraryUpdater:
         if self.new_requirement_mapping_sets is not None:
             self.update_requirement_mapping_sets()
 
+        if self.new_library.is_preset:
+            from library.utils import upsert_preset_from_stored_library
+
+            upsert_preset_from_stored_library(self.new_library)
+
 
 class LoadedLibrary(LibraryMixin):
     dependencies = models.ManyToManyField(

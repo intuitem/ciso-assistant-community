@@ -127,6 +127,7 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 		optionsInfoFields?: {
 			// Optional info fields for autocomplete display
 			fields: { field: string; translate?: boolean }[];
+			position?: 'suffix' | 'prefix';
 			classes?: string;
 		};
 		lazy?: boolean; // Enable lazy loading for large option sets (e.g., assets)
@@ -956,6 +957,10 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true,
 				addExisting: {
 					parentField: 'applied_controls',
+					optionsInfoFields: {
+						fields: [{ field: 'category', translate: true }],
+						position: 'prefix'
+					},
 					lazy: true
 				}
 			}
@@ -1906,6 +1911,10 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true,
 				addExisting: {
 					parentField: 'associated_controls',
+					optionsInfoFields: {
+						fields: [{ field: 'category', translate: true }],
+						position: 'prefix'
+					},
 					lazy: true
 				}
 			},
@@ -2600,6 +2609,10 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'applied-controls',
 				addExisting: {
 					parentField: 'applied_controls',
+					optionsInfoFields: {
+						fields: [{ field: 'category', translate: true }],
+						position: 'prefix'
+					},
 					lazy: true
 				}
 			},
@@ -2621,7 +2634,11 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'findings',
 				urlModel: 'reference-controls',
 				addExisting: {
-					parentField: 'reference_controls'
+					parentField: 'reference_controls',
+					optionsInfoFields: {
+						fields: [{ field: 'category', translate: true }],
+						position: 'prefix'
+					}
 				}
 			},
 			{
@@ -2711,6 +2728,10 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true,
 				addExisting: {
 					parentField: 'applied_controls',
+					optionsInfoFields: {
+						fields: [{ field: 'category', translate: true }],
+						position: 'prefix'
+					},
 					lazy: true
 				}
 			},
@@ -2956,6 +2977,10 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true,
 				addExisting: {
 					parentField: 'applied_controls',
+					optionsInfoFields: {
+						fields: [{ field: 'category', translate: true }],
+						position: 'prefix'
+					},
 					lazy: true
 				}
 			},

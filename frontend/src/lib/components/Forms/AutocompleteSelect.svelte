@@ -815,7 +815,7 @@
 							? (option.translatedLabel ?? option.label ?? option)
 							: (option.label ?? option)}
 					{#if option.infoString?.position === 'prefix'}
-						<span class="text-xs text-surface-600-400">&nbsp;{option.infoString.string}</span>
+						<span class="text-xs text-surface-600-400">{option.infoString.string}&nbsp;</span>
 					{/if}
 					{#if option.path}
 						<span>

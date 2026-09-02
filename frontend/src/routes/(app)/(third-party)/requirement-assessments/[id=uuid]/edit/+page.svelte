@@ -728,6 +728,10 @@
 													['scope_folder_id', page.data.requirementAssessment.folder.id]
 												]}
 												optionsExtraFields={[['folder', 'str']]}
+												optionsInfoFields={{
+													fields: [{ field: 'category', translate: true }],
+													position: 'prefix'
+												}}
 												field="applied_controls"
 												placeholder={m.appliedControlsPlaceholder()}
 											/>

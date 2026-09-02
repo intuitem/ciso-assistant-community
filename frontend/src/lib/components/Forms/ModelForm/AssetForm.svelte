@@ -294,6 +294,10 @@
 		multiple
 		optionsEndpoint="applied-controls"
 		optionsLabelField="auto"
+		optionsInfoFields={{
+			fields: [{ field: 'category', translate: true }],
+			position: 'prefix'
+		}}
 		field="applied_controls"
 		cacheLock={cacheLocks['applied_controls']}
 		bind:cachedValue={formDataCache['applied_controls']}
