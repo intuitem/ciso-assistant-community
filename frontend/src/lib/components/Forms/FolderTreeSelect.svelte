@@ -85,6 +85,9 @@
 	let sortAsc = $state(true);
 	let selectedName = $state('');
 	let selectedPath = $state<string[]>([]);
+	// Which value the displayed name was resolved for, so a value set from outside
+	// (e.g. a domain derived from the picked entity) refreshes the label.
+	let resolvedFor = $state<string | null>(null);
 	let isLoading = $state(false);
 
 	let debouncedQuery = $state('');
@@ -153,8 +156,9 @@
 	$effect(() => {
 		const v = $value;
 		if (v && orgTree) {
-			// Only traverse when the name isn't already known (edit mode / cache restore)
-			if (selectedName) return;
+			// Only traverse when the name isn't already known for this value
+			// (edit mode / cache restore)
+			if (selectedName && resolvedFor === String(v)) return;
 			function findNode(n: TreeNode, anc: string[]): { name: string; path: string[] } | null {
 				if (n.uuid === String(v)) return { name: n.name, path: anc };
 				for (const c of n.children ?? []) {
@@ -167,10 +171,12 @@
 			if (result) {
 				selectedName = result.name;
 				selectedPath = result.path;
+				resolvedFor = String(v);
 			}
 		} else if (!v) {
 			selectedName = '';
 			selectedPath = [];
+			resolvedFor = null;
 		}
 	});
 
@@ -185,6 +191,7 @@
 		$value = id;
 		selectedName = name;
 		selectedPath = path;
+		resolvedFor = String(id);
 		isOpen = false;
 		searchQuery = '';
 		onChange($value);
@@ -195,6 +202,7 @@
 		$value = null;
 		selectedName = '';
 		selectedPath = [];
+		resolvedFor = null;
 		isOpen = false;
 		onChange(null);
 	}

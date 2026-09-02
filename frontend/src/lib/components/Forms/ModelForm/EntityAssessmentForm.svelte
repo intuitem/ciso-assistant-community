@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
@@ -41,6 +42,20 @@
 	// which `??` happily keeps.
 	let createAudit = $state(context === 'create' ? true : ($formData.create_audit ?? false));
 	let selectedEntity = $state<string | undefined>(form.data?.entity || initialData.entity);
+
+	// The assessment belongs where the third party does. Preselected so the two cannot
+	// silently diverge, but still editable for the odd cross-domain review.
+	async function handleEntityChange(entityId: string | undefined) {
+		selectedEntity = entityId;
+		if (!entityId || initialData.folder) return;
+		try {
+			const entity = await fetch(`/entities/${entityId}`).then((res) => res.json());
+			const folderId = entity?.folder?.id ?? entity?.folder;
+			if (folderId) form.form.update((data) => ({ ...data, folder: folderId }), { taint: false });
+		} catch (e) {
+			console.error('Could not resolve the entity folder', e);
+		}
+	}
 	let implementationGroupsChoices = $state<{ label: string; value: string }[]>([]);
 	let frameworkDefaults = $state<Record<string, any> | null>(null);
 
@@ -59,6 +74,26 @@
 				: null
 	);
 </script>
+
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="entities"
+	optionsExtraFields={[['folder', 'str']]}
+	field="entity"
+	cacheLock={cacheLocks['entity']}
+	bind:cachedValue={formDataCache['entity']}
+	label={m.entity()}
+	hidden={initialData.entity}
+	onChange={handleEntityChange}
+/>
+<FolderTreeSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.domain()}
+	hidden={initialData.folder}
+/>
 
 {#if auditData}
 	<AutocompleteSelect
@@ -156,17 +191,6 @@
 		/>
 	{/if}
 {/if}
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="entities"
-	optionsExtraFields={[['folder', 'str']]}
-	field="entity"
-	cacheLock={cacheLocks['entity']}
-	bind:cachedValue={formDataCache['entity']}
-	label={m.entity()}
-	hidden={initialData.entity}
-	onChange={(entityId) => (selectedEntity = entityId)}
-/>
 {#key selectedEntity}
 	<AutocompleteSelect
 		{form}
@@ -180,15 +204,6 @@
 		label={m.solutions()}
 	/>
 {/key}
-<TextField
-	type="date"
-	{form}
-	field="due_date"
-	label={m.dueDate()}
-	helpText={m.dueDateHelpText()}
-	cacheLock={cacheLocks['due_date']}
-	bind:cachedValue={formDataCache['due_date']}
-/>
 {#if selectedEntity}
 	{#key selectedEntity}
 		<AutocompleteSelect
@@ -208,6 +223,15 @@
 		/>
 	{/key}
 {/if}
+<TextField
+	type="date"
+	{form}
+	field="due_date"
+	label={m.dueDate()}
+	helpText={m.dueDateHelpText()}
+	cacheLock={cacheLocks['due_date']}
+	bind:cachedValue={formDataCache['due_date']}
+/>
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<Score
 		{form}
