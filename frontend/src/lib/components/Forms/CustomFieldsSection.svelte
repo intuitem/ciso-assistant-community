@@ -71,6 +71,13 @@
 
 	async function load(folder: string | undefined) {
 		const seq = ++loadSeq;
+		// Hide the previous folder's fields while the new set loads, so nothing
+		// out of scope can be edited in the in-flight window. Write-only: reading
+		// `definitions` here would make it a dependency of the calling $effect
+		// and the post-response write would loop it. Values are kept until the
+		// response tells which keys are still valid (folders can share keys).
+		definitions = [];
+		loadFailed = false;
 		// for_folder is always sent: empty means "no folder chosen yet" and the
 		// API resolves it to the global definitions only.
 		const params = new URLSearchParams({ model, visible: 'true', for_folder: folder ?? '' });
