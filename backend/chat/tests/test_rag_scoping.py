@@ -43,7 +43,7 @@ def reader(domain):
 
 @pytest.fixture
 def auditee(domain):
-    """Holds view_appliedcontrol but not view_riskscenario / view_asset."""
+    """Holds view_appliedcontrol/view_asset(via default_role) but not view_riskscenario."""
     return _user_with_role("rag-auditee@test.local", "BI-RL-ADE", domain)
 
 
@@ -66,10 +66,25 @@ class TestUserPartitionFilter:
         assert "risk_scenario" in _allowed_types(ReadScope(reader))
 
     def test_auditee_may_not_search_risk_scenarios(self, auditee, domain):
+        import chat.rag as rag
+
+        from iam.models import Folder
+
         allowed = _allowed_types(ReadScope(auditee))
         assert "applied_control" in allowed
         assert "risk_scenario" not in allowed
-        assert "asset" not in allowed
+
+        # The `"BI-RL-CAT"` `root_folder.default_role` grants any non-third-party user the `"view_asset"` `Role`` on the root folder.
+        assert "asset" in allowed
+        partition = rag._user_partition_filter(ReadScope(auditee), None, None)
+        asset_folders = {
+            fid
+            for clause in partition.must[0].should
+            if clause.must[0].match.value == "asset"
+            for fid in clause.must[1].match.any
+        }
+        assert asset_folders == {str(Folder.get_root_folder().id)}
+        assert str(domain.id) not in asset_folders
 
     def test_each_clause_carries_only_that_types_folders(self, auditee, domain):
         import chat.rag as rag
