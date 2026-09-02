@@ -1,0 +1,12 @@
+subject: "CISO Assistant : Votre affectation sur '${assessment_name}' a été remise en brouillon"
+body: |
+  Bonjour,
+
+  Votre affectation sur l'audit suivant a été remise à l'état brouillon afin d'être modifiée :
+
+  - Audit : ${assessment_name}
+  ${reviewer_observation}
+
+  Veuillez vous connecter à votre portail CISO Assistant pour plus de détails : [Accéder à CISO Assistant](${ciso_assistant_url}/auditee-dashboard)
+
+  Merci.
