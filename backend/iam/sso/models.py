@@ -19,17 +19,14 @@ class SSOSettingsQuerySet(QuerySet):
 
     def _fetch_all(self):
         if self._result_cache is None:
-            if not GlobalSettings.objects.filter(
-                name=GlobalSettings.Names.SSO
-            ).exists():
-                logger.info("SSO settings not found, creating default settings")
-                _settings = GlobalSettings.objects.create(
-                    name=GlobalSettings.Names.SSO,
-                    value={"client_id": "0", "settings": DEFAULT_SAML_SETTINGS},
-                )
+            _settings, created = GlobalSettings.objects.get_or_create(
+                name=GlobalSettings.Names.SSO,
+                defaults={
+                    "value": {"client_id": "0", "settings": DEFAULT_SAML_SETTINGS}
+                },
+            )
+            if created:
                 logger.info("SSO settings created", settings=_settings.value)
-            else:
-                _settings = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
 
             self._result_cache = [
                 SSOSettings(
