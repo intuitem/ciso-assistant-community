@@ -17,6 +17,10 @@ What we chose, stated actively: "We will ...". One paragraph.
 
 What becomes easier, what becomes harder, what is now forbidden or required. This is the section future readers act on, so make constraints explicit and imperative.
 
+## Security considerations
+
+What this decision changes for security: what new things can be attacked, what data is exposed, who gains access to what. List the risks we accept and what must be done to reduce them.
+
 ## Alternatives considered
 
 Each option we didn't pick, with a one-line reason. Written down so nobody has to redo this discussion next year.
