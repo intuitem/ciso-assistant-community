@@ -2897,7 +2897,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'perimeters', urlModel: 'perimeters' },
-			{ field: 'folders', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'entities', urlModel: 'entities' }
 		],
 		reverseForeignKeyFields: [
@@ -2920,9 +2919,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'description' },
 			{ field: 'kind' },
 			{ field: 'frameworks' },
-			{ field: 'folders' },
-			{ field: 'entities' },
 			{ field: 'perimeters' },
+			{ field: 'entities' },
 			{ field: 'status' },
 			{ field: 'start_date' },
 			{ field: 'due_date' },

@@ -1977,6 +1977,38 @@ TECHNICAL_TESTER_PERMISSIONS_LIST = [
 ]
 
 
+def normalize_third_party_workspaces():
+    """One workspace per third party per domain, merging the per-assessment ones.
+
+    Here rather than in a migration: it reuses the service the API and the support
+    command call, so it needs real models — which are only safe to read once every
+    migration has run. Idempotent, so running it on each migrate is a no-op after the
+    first pass.
+    """
+    from tprm.services import normalize_entity_workspaces
+
+    try:
+        rows = normalize_entity_workspaces(apply=True)
+    except Exception:
+        logger.error("Could not normalise third-party workspaces", exc_info=True)
+        return
+    for row in rows:
+        if row["error"]:
+            # One awkward entity must not block a startup.
+            logger.warning(
+                "Could not normalise third-party workspace",
+                entity=row["entity"].name,
+                domain=row["domain"].name,
+                error=row["error"],
+            )
+        else:
+            logger.info(
+                "Normalised third-party workspace",
+                entity=row["entity"].name,
+                action=row["action"],
+            )
+
+
 def ensure_admin_user():
     """Ensure the designated superuser exists and is in the admin group.
 
@@ -2276,6 +2308,8 @@ def startup(sender=None, **kwargs):
         call_command("backfill_builtin_metrics")
     except Exception as e:
         logger.error("Error backfilling builtin metrics", exc_info=True)
+
+    normalize_third_party_workspaces()
 
     ensure_admin_user()
 

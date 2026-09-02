@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
@@ -52,17 +53,12 @@
 		return { notStarted, inProgress, complete };
 	});
 
-	const meanProgress = $derived(
+	// Plain mean, both kinds: it measures the same thing as the bar below, where every
+	// target counts once. The trend is weighted by requirement count and can differ.
+	const completion = $derived(
 		targets.length
 			? Math.round(targets.reduce((sum, t) => sum + (t.progress ?? 0), 0) / targets.length)
 			: 0
-	);
-	// The headline has to measure the same thing as the bar. Internally that is the
-	// audit progress the trend already weights by requirement count; for a third
-	// party it is how much of the questionnaire the vendor filled in, which the
-	// stored history does not track.
-	const completion = $derived(
-		data.thirdParty ? meanProgress : (trend.at(-1)?.progress ?? meanProgress)
 	);
 
 	const daysSince = (iso: string | null) =>
@@ -119,9 +115,24 @@
 				<div class="flex flex-col gap-2">
 					<div class="flex flex-row items-baseline justify-between">
 						<span class="text-xs uppercase tracking-wide text-surface-600-400">{m.targets()}</span>
-						<span class="text-sm">
+						<span class="text-sm flex items-baseline gap-1">
 							<span class="text-2xl font-semibold">{completion}%</span>
 							<span class="text-xs text-surface-600-400">{m.completed()}</span>
+							<Tooltip positioning={{ placement: 'left' }} openDelay={200} closeDelay={100}>
+								<Tooltip.Trigger>
+									<i
+										class="fas fa-info-circle text-xs text-surface-600-400 hover:text-primary-500 cursor-help"
+										aria-label={m.campaignCompletionHelpText()}
+									></i>
+								</Tooltip.Trigger>
+								<Tooltip.Positioner class="z-50!">
+									<Tooltip.Content
+										class="card bg-surface-950-50 text-white p-3 max-w-xs shadow-xl border border-surface-700-300"
+									>
+										<p class="text-sm">{m.campaignCompletionHelpText()}</p>
+									</Tooltip.Content>
+								</Tooltip.Positioner>
+							</Tooltip>
 						</span>
 					</div>
 					<div class="flex flex-row h-3 w-full rounded-full overflow-hidden bg-surface-200-800">

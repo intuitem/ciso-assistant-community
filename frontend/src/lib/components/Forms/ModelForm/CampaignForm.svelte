@@ -95,24 +95,12 @@
 	<AutocompleteSelect
 		multiple
 		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL"
-		field="folders"
-		cacheLock={cacheLocks['folders']}
-		bind:cachedValue={formDataCache['folders']}
-		label={m.targetDomains()}
-	/>
-{/if}
-{#if object?.perimeters?.length}
-	<AutocompleteSelect
-		multiple
-		{form}
 		optionsEndpoint="perimeters"
 		optionsExtraFields={[['folder', 'str']]}
 		field="perimeters"
 		cacheLock={cacheLocks['perimeters']}
 		bind:cachedValue={formDataCache['perimeters']}
 		label={m.perimeters()}
-		disabled
 	/>
 {/if}
 <TextField

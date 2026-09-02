@@ -606,7 +606,6 @@ export const CampaignSchema = z.object({
 		.array(z.object({ value: z.string(), framework: z.string() }))
 		.optional(),
 	perimeters: z.array(z.string()).optional(),
-	folders: z.array(z.string()).optional(),
 	entities: z.array(z.string()).optional(),
 	status: z.string().optional().nullable(),
 	start_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),

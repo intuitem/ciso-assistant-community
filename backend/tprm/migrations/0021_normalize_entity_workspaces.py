@@ -10,37 +10,25 @@ to see that vendor's rounds. That is the point of a shared workspace, and it is 
 out in the release notes.
 """
 
-import structlog
 from django.db import migrations
-
-logger = structlog.get_logger(__name__)
-
-
-def normalize(apps, schema_editor):
-    # Real models, not historical ones: this reuses the service the API and the
-    # support command call, and it needs model behaviour (auditlog, folder rules).
-    from tprm.services import normalize_entity_workspaces
-
-    for row in normalize_entity_workspaces(apply=True):
-        if row["error"]:
-            # One awkward entity must not block an upgrade.
-            logger.warning(
-                "Could not normalise third-party workspace",
-                entity=row["entity"].name,
-                domain=row["domain"].name,
-                error=row["error"],
-            )
-        else:
-            logger.info(
-                "Normalised third-party workspace",
-                entity=row["entity"].name,
-                action=row["action"],
-            )
 
 
 class Migration(migrations.Migration):
+    """The consolidation itself runs from `post_migrate` (core/startup.py), not here.
+
+    It reuses the service the API and the support command call, which means real
+    models — and a real model inside `RunPython` is read with today's fields while
+    the schema is only as far along as this migration. A later migration adding a
+    column to User, Folder or Entity then breaks the upgrade partway through, which
+    is exactly what `iam.0028` did. `post_migrate` runs once the schema is complete.
+
+    Kept as a no-op so the applied history stays linear for anyone who already ran it.
+    """
+
     dependencies = [
         ("tprm", "0020_entityscore"),
     ]
 
-    operations = [migrations.RunPython(normalize, migrations.RunPython.noop)]
+    operations = [
+        migrations.RunPython(migrations.RunPython.noop, migrations.RunPython.noop)
+    ]

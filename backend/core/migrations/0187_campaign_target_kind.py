@@ -3,16 +3,6 @@
 from django.db import migrations, models
 
 
-def backfill_target_domains(apps, schema_editor):
-    """Existing campaigns targeted perimeters; keep them working by pointing them at
-    those perimeters' domains. `perimeters` is left intact."""
-    Campaign = apps.get_model("core", "Campaign")
-    for campaign in Campaign.objects.prefetch_related("perimeters"):
-        folders = {p.folder_id for p in campaign.perimeters.all() if p.folder_id}
-        if folders:
-            campaign.folders.set(folders)
-
-
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0186_commitment_remove_comment_comment_exactly_one_parent_and_more"),
@@ -33,16 +23,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="campaign",
-            name="folders",
-            field=models.ManyToManyField(
-                blank=True,
-                related_name="campaigns",
-                to="iam.folder",
-                verbose_name="Target domains",
-            ),
-        ),
-        migrations.AddField(
-            model_name="campaign",
             name="kind",
             field=models.CharField(
                 choices=[("internal", "Internal"), ("third_party", "Third-party")],
@@ -51,6 +31,8 @@ class Migration(migrations.Migration):
                 verbose_name="Kind",
             ),
         ),
+        # Third-party campaigns target entities, not perimeters, so this can no
+        # longer be mandatory.
         migrations.AlterField(
             model_name="campaign",
             name="perimeters",
@@ -58,5 +40,4 @@ class Migration(migrations.Migration):
                 blank=True, related_name="campaigns", to="core.perimeter"
             ),
         ),
-        migrations.RunPython(backfill_target_domains, migrations.RunPython.noop),
     ]

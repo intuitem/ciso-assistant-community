@@ -43,9 +43,9 @@ export const load: PageServerLoad = async (event) => {
 
 	const targets: Target[] = rows.map((row: Record<string, any>) => ({
 		id: row.id,
-		// The vendor workspace is named after the entity, so the folder would work
-		// too — but the entity is the thing the campaign is actually about.
-		label: (thirdParty ? row.entity?.str : row.folder?.str) ?? row.name,
+		// What the campaign actually targets: an entity for a third party, the
+		// perimeter the audit was launched on otherwise.
+		label: (thirdParty ? row.entity?.str : (row.perimeter?.str ?? row.folder?.str)) ?? row.name,
 		name: row.name,
 		progress: (thirdParty ? row.completion : row.progress) ?? 0,
 		updated_at: row.updated_at ?? null,

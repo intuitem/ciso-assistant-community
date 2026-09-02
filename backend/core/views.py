@@ -10775,7 +10775,6 @@ class CampaignViewSet(BaseModelViewSet):
         "folder",
         "frameworks",
         "perimeters",
-        "folders",
         "entities",
         "status",
         "kind",
@@ -10871,7 +10870,9 @@ class CampaignViewSet(BaseModelViewSet):
             series.append(
                 {
                     "date": day.isoformat(),
-                    "progress": int(assessed / total * 100) if total else 0,
+                    # round, not int: the reconstruction lands on values like
+                    # 57.99999999999999, which truncation would report as 57.
+                    "progress": round(assessed / total * 100) if total else 0,
                 }
             )
             day += timedelta(days=1)
@@ -10926,33 +10927,17 @@ class CampaignViewSet(BaseModelViewSet):
         else:
             self._launch_internal(campaign, frameworks)
 
-    @staticmethod
-    def _target_folders(campaign):
-        """Internal campaigns target domains, but `perimeters` is still writable and
-        is what older clients send. Same rule the 0187 backfill applied, so such a
-        campaign launches its audits instead of silently creating none."""
-        folders = list(campaign.folders.all())
-        if folders:
-            return folders
-        derived = {
-            perimeter.folder
-            for perimeter in campaign.perimeters.all()
-            if perimeter.folder_id
-        }
-        if derived:
-            campaign.folders.set(derived)
-        return list(derived)
-
     def _launch_internal(self, campaign, frameworks):
         from core.utils import build_initial_field_visibility
 
-        for folder in self._target_folders(campaign):
+        for perimeter in campaign.perimeters.all():
             for framework in frameworks:
                 compliance_assessment = ComplianceAssessment.objects.create(
-                    name=f"{campaign.name} - {folder.name} - {framework.name}",
+                    name=f"{campaign.name} - {perimeter.name} - {framework.name}",
                     campaign=campaign,
+                    perimeter=perimeter,
                     framework=framework,
-                    folder=folder,
+                    folder=perimeter.folder,
                     selected_implementation_groups=self._campaign_implementation_groups(
                         campaign, framework
                     ),

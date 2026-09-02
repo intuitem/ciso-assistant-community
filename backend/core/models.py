@@ -7547,15 +7547,7 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         null=True,
         verbose_name=_("Start date"),
     )
-    # Perimeters became optional everywhere, so an internal campaign targets domains.
-    # `perimeters` stays for the campaigns that were built on it.
     perimeters = models.ManyToManyField(Perimeter, related_name="campaigns", blank=True)
-    folders = models.ManyToManyField(
-        Folder,
-        related_name="campaigns",
-        blank=True,
-        verbose_name=_("Target domains"),
-    )
     entities = models.ManyToManyField(
         "tprm.Entity",
         related_name="campaigns",

@@ -2951,7 +2951,6 @@ class CampaignReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     compliance_assessments = FieldsRelatedField(many=True)
     perimeters = FieldsRelatedField(many=True)
-    folders = FieldsRelatedField(many=True)
     entities = FieldsRelatedField(many=True)
     frameworks = FieldsRelatedField(many=True)
     status = serializers.CharField(source="get_status_display")
@@ -4482,7 +4481,6 @@ class CampaignImportExportSerializer(BaseModelSerializer):
         slug_field="urn", read_only=True, many=True
     )
     perimeters = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
-    folders = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     entities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
@@ -4499,7 +4497,6 @@ class CampaignImportExportSerializer(BaseModelSerializer):
             "folder",
             "frameworks",
             "perimeters",
-            "folders",
             "entities",
             "created_at",
             "updated_at",

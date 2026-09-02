@@ -5948,5 +5948,6 @@
 	"staleItems": "Sans activité",
 	"noActivityForDays": "aucune activité depuis {days} j",
 	"userLanguageHelpText": "Langue de l'interface de cet utilisateur et des courriels qu'il reçoit.",
-	"representativeLanguageHelpText": "Langue de l'interface du compte et de l'invitation au questionnaire."
+	"representativeLanguageHelpText": "Langue de l'interface du compte et de l'invitation au questionnaire.",
+	"campaignCompletionHelpText": "Avancement moyen des cibles de la campagne. Chaque cible compte autant, quelle que soit sa taille."
 }
