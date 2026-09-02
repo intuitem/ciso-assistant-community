@@ -355,11 +355,6 @@ export const navData = {
 					href: '/evidences'
 				},
 				{
-					name: 'campaigns',
-					fa_icon: 'fa-solid fa-scale-balanced',
-					href: '/campaigns?kind=internal'
-				},
-				{
 					name: 'recap',
 					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/recap',
@@ -423,11 +418,6 @@ export const navData = {
 					name: 'entityAssessments',
 					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/entity-assessments'
-				},
-				{
-					name: 'campaigns',
-					fa_icon: 'fa-solid fa-scale-balanced',
-					href: '/campaigns?kind=third_party'
 				}
 			]
 		},

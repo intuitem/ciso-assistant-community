@@ -108,8 +108,7 @@ export function getSidebarVisibleItems(
 		scoringAssistant: featureFlags?.scoring_assistant ?? false,
 		vulnerabilities: featureFlags?.vulnerabilities ?? false,
 		compliance: featureFlags?.compliance ?? false,
-		// Temporarily ungated for dev: restore `?? false` to put campaigns back behind PRO.
-		campaigns: featureFlags?.campaigns ?? true,
+		campaigns: featureFlags?.campaigns ?? false,
 		thirdPartyCategory: featureFlags?.tprm ?? false,
 		privacy: featureFlags?.privacy ?? false,
 		experimental: featureFlags?.experimental ?? false,
