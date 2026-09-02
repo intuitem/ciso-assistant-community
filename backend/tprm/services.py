@@ -150,13 +150,22 @@ def workspaces_by_entity():
 
 def _folder_models():
     """Models that can hold rows in a workspace, discovered so a model added later is
-    not left behind in an old folder."""
+    not left behind in an old folder.
+
+    Models whose table is absent (an edition that never migrated them) are skipped
+    here rather than by swallowing query errors later: the callers below decide
+    whether a workspace is safe to delete, so they must not silence a failure.
+    """
     from django.apps import apps
+    from django.db import connection
 
     from iam.models import RoleAssignment, UserGroup
 
+    tables = set(connection.introspection.table_names())
     for model in apps.get_models():
         if model in (Folder, UserGroup, RoleAssignment):
+            continue
+        if model._meta.db_table not in tables:
             continue
         if any(
             getattr(field, "attname", None) == "folder_id"
@@ -170,8 +179,12 @@ def workspace_contents(folders):
     for model in _folder_models():
         try:
             n = model.objects.filter(folder__in=folders).count()
-        except Exception:
-            continue
+        except Exception as exc:
+            # This is the gate that decides a workspace is safe to delete, so a
+            # silenced failure here would report it as empty.
+            raise RuntimeError(
+                f"could not count {model._meta.label} in the workspace: {exc}"
+            ) from exc
         if n:
             counts[model] = n
     return counts
@@ -228,8 +241,14 @@ def consolidate_workspaces(entity, domain, sources):
     for model in _folder_models():
         try:
             rows = list(model.objects.filter(folder__in=sources))
-        except Exception:
-            continue
+        except Exception as exc:
+            # Skipping a model here would leave its rows pointing at a folder this
+            # function goes on to delete, and the leftover guard below would not see
+            # them. Abort this entity instead; the caller records the failure.
+            raise RuntimeError(
+                f"could not read {model._meta.label} while consolidating "
+                f"{entity.name}: {exc}"
+            ) from exc
         if not rows:
             continue
         if auditlog.contains(model):
@@ -239,7 +258,13 @@ def consolidate_workspaces(entity, domain, sources):
         else:
             model.objects.filter(pk__in=[row.pk for row in rows]).update(folder=target)
 
-    Folder.objects.filter(parent_folder__in=sources).update(parent_folder=target)
+    # One save() per child, not a queryset update: the ancestor/descendant closure
+    # in `Folder.descendants` is maintained by save() alone, and a direct column
+    # write would leave the moved subfolders parented to folders deleted below —
+    # breaking recursive role resolution and tripping get_parent_folders().
+    for child in Folder.objects.filter(parent_folder__in=sources):
+        child.parent_folder = target
+        child.save()
 
     respondents, _ = UserGroup.objects.get_or_create(
         name=UserGroupCodename.THIRD_PARTY_RESPONDENT, folder=target, builtin=True

@@ -608,6 +608,8 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         | Q(stakeholders__in=stakeholders)
         | Q(ebios_rm_studies__in=ebios_rm_studies)
         | Q(incidents__in=incidents)
+        # A third-party campaign's targets are only reachable through the campaign.
+        | Q(campaigns__in=campaigns)
         | Q(pk__in=required_entity_targets)
         | Q(pk__in=optional_entity_targets)
     ).distinct()

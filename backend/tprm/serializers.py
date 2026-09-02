@@ -767,8 +767,13 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
             # The flag only says whether to mint an account. The language is about the
             # account itself, so it still applies to the one already linked — or to the
             # one that already exists under this address.
+            # Only ever the linked account, or a third-party one under the same
+            # address: an email match must not reach an internal user's preferences.
             self._apply_language(
-                instance.user or User.objects.filter(email=instance.email).first(),
+                instance.user
+                or User.objects.filter(
+                    email=instance.email, is_third_party=True
+                ).first(),
                 language,
             )
             return

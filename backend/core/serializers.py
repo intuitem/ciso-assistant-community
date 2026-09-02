@@ -2269,11 +2269,6 @@ class UserWriteSerializer(BaseModelSerializer):
 
     def update(self, instance: User, validated_data: Any) -> User:
         language = validated_data.pop("language", None)
-        if language:
-            preferences = instance.get_preferences()
-            preferences["lang"] = language
-            instance.preferences = preferences
-            instance.save(update_fields=["preferences"])
 
         user_groups_data = validated_data.get("user_groups")
         if user_groups_data is not None:
@@ -2288,7 +2283,17 @@ class UserWriteSerializer(BaseModelSerializer):
                     new_user_groups=new_groups,
                 )
                 # instance.user_groups.set(user_groups_data)
-        return super().update(instance, validated_data)
+        updated_instance = super().update(instance, validated_data)
+
+        # After, not before: the change permission is enforced inside super().update(),
+        # so writing preferences first would let an unauthorized request through.
+        if language:
+            preferences = updated_instance.get_preferences()
+            preferences["lang"] = language
+            updated_instance.preferences = preferences
+            updated_instance.save(update_fields=["preferences"])
+
+        return updated_instance
 
 
 def build_autocomplete_serializer(model_cls, extra_fields=()):

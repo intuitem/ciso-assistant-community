@@ -10931,13 +10931,16 @@ class CampaignViewSet(BaseModelViewSet):
         return groups or None
 
     def perform_create(self, serializer):
-        super().perform_create(serializer)
-        campaign = serializer.instance
-        frameworks = campaign.frameworks.all()
-        if campaign.kind == Campaign.Kind.THIRD_PARTY:
-            self._launch_third_party(campaign, frameworks)
-        else:
-            self._launch_internal(campaign, frameworks)
+        # One transaction: a campaign that fails halfway through launching would
+        # otherwise be left committed with only some of its audits.
+        with transaction.atomic():
+            super().perform_create(serializer)
+            campaign = serializer.instance
+            frameworks = campaign.frameworks.all()
+            if campaign.kind == Campaign.Kind.THIRD_PARTY:
+                self._launch_third_party(campaign, frameworks)
+            else:
+                self._launch_internal(campaign, frameworks)
 
     def _launch_internal(self, campaign, frameworks):
         from core.utils import build_initial_field_visibility
