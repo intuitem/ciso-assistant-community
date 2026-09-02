@@ -995,20 +995,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         if not self.model:
             return None
 
-        object_ids_view = None
-        if self.request.method == "GET":
-            if q := re.match(
-                r"/api/[\w-]+/([\w-]+/)?([0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}(,[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12})+)",
-                self.request.path,
-            ):
-                """"get_queryset is called by Django even for an individual object via get_object
-                https://stackoverflow.com/questions/74048193/why-does-a-retrieve-request-end-up-calling-get-queryset"""
-                id = UUID(q.group(1))
-                if RoleAssignment.is_object_readable(self.request.user, self.model, id):
-                    return self.model.objects.filter(id=id)
-                else:
-                    return self.model.objects.none()
-
         object_ids_view = RoleAssignment.get_viewable_object_ids(
             self.request.user, self.model
         )
