@@ -10,16 +10,16 @@
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
 
-	const cBase = 'card bg-surface-50-950 p-6 w-modal-wide space-y-6';
+	const cBase = 'card bg-surface-100-900 border border-surface-500 p-6 w-modal-wide space-y-6';
 	const cHeader = 'text-xl font-medium text-surface-900-100';
 
 	interface Props {
 		parent: any;
-		processingId: string;
+		parentId: string;
 		urlModel: string;
 	}
 
-	let { parent, processingId, urlModel }: Props = $props();
+	let { parent, parentId, urlModel }: Props = $props();
 
 	// Groups defined by category key prefixes/ranges, labels fetched from backend
 	const groupDefinitions: { label: string; keys: string[] }[] = [
@@ -221,7 +221,7 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					processing: processingId,
+					processing: parentId,
 					categories: selectedCategories.map((c) => codeToId[c]).filter(Boolean),
 					retention,
 					deletion_policy: deletionPolicy,

@@ -270,20 +270,26 @@
 		nodes: [string, Node][],
 		hasParentNode: boolean = false
 	): TreeViewNode[] {
-		return nodes
-			.filter(([_, node]) => node.display_mode !== 'splash')
-			.map(([id, node]) => {
-				const nodeId = node.ra_id || id;
-				const assignmentInfo = node.ra_id ? getAssignmentInfo(node.ra_id) : null;
-				const isAssigned = node.ra_id ? assignedRequirementIds.has(node.ra_id) : false;
+		return nodes.flatMap(([id, node]): TreeViewNode[] => {
+			// Splash screens are informational and not assignable, but their
+			// children are: hoist the subtree in place of the splash node.
+			if (node.display_mode === 'splash') {
+				return node.children
+					? transformToTreeView(Object.entries(node.children), hasParentNode)
+					: [];
+			}
+			const nodeId = node.ra_id || id;
+			const assignmentInfo = node.ra_id ? getAssignmentInfo(node.ra_id) : null;
+			const isAssigned = node.ra_id ? assignedRequirementIds.has(node.ra_id) : false;
 
-				// Get all assessable descendant IDs for batch selection
-				const childrenIds = node.assessable ? [] : getAssessableDescendantIds(node);
+			// Get all assessable descendant IDs for batch selection
+			const childrenIds = node.assessable ? [] : getAssessableDescendantIds(node);
 
-				// For section nodes, get aggregated assignment info
-				const sectionAssignments = node.assessable ? [] : getSectionAssignments(node);
+			// For section nodes, get aggregated assignment info
+			const sectionAssignments = node.assessable ? [] : getSectionAssignments(node);
 
-				return {
+			return [
+				{
 					id: nodeId,
 					content: TreeViewItemContentSimple,
 					contentProps: {
@@ -307,8 +313,9 @@
 						assignmentInfo
 					},
 					children: node.children ? transformToTreeView(Object.entries(node.children), true) : []
-				};
-			});
+				}
+			];
+		});
 	}
 
 	let treeViewNodes = $derived(transformToTreeView(Object.entries(data.tree)));
@@ -360,14 +367,14 @@
 				await invalidateAll();
 				toastStore.trigger({
 					message: m.assignmentCreated(),
-					background: 'variant-filled-success',
+					background: 'preset-filled-success-500',
 					timeout: 3000
 				});
 			} else {
 				console.error('Failed to create assignment:', result);
 				toastStore.trigger({
 					message: m.assignmentCreationFailed(),
-					background: 'variant-filled-error',
+					background: 'preset-filled-error-500',
 					timeout: 3000
 				});
 			}
@@ -375,7 +382,7 @@
 			console.error('Error creating assignment:', error);
 			toastStore.trigger({
 				message: m.assignmentCreationFailed(),
-				background: 'variant-filled-error',
+				background: 'preset-filled-error-500',
 				timeout: 3000
 			});
 		} finally {
@@ -413,14 +420,14 @@
 				await invalidateAll();
 				toastStore.trigger({
 					message: m.assignmentDeleted(),
-					background: 'variant-filled-success',
+					background: 'preset-filled-success-500',
 					timeout: 3000
 				});
 			} else {
 				console.error('Failed to delete assignment:', result);
 				toastStore.trigger({
 					message: m.assignmentDeletionFailed(),
-					background: 'variant-filled-error',
+					background: 'preset-filled-error-500',
 					timeout: 3000
 				});
 			}
@@ -428,7 +435,7 @@
 			console.error('Error deleting assignment:', error);
 			toastStore.trigger({
 				message: m.assignmentDeletionFailed(),
-				background: 'variant-filled-error',
+				background: 'preset-filled-error-500',
 				timeout: 3000
 			});
 		} finally {
@@ -478,14 +485,14 @@
 				await invalidateAll();
 				toastStore.trigger({
 					message: m.assignmentUpdated(),
-					background: 'variant-filled-success',
+					background: 'preset-filled-success-500',
 					timeout: 3000
 				});
 			} else {
 				console.error('Failed to update assignment:', result);
 				toastStore.trigger({
 					message: m.assignmentUpdateFailed(),
-					background: 'variant-filled-error',
+					background: 'preset-filled-error-500',
 					timeout: 3000
 				});
 			}
@@ -493,7 +500,7 @@
 			console.error('Error updating assignment:', error);
 			toastStore.trigger({
 				message: m.assignmentUpdateFailed(),
-				background: 'variant-filled-error',
+				background: 'preset-filled-error-500',
 				timeout: 3000
 			});
 		} finally {
@@ -614,13 +621,13 @@
 				await invalidateAll();
 				toastStore.trigger({
 					message: m.statusUpdatedSuccessfully(),
-					background: 'variant-filled-success',
+					background: 'preset-filled-success-500',
 					timeout: 3000
 				});
 			} else {
 				toastStore.trigger({
 					message: result.data?.body?.error || 'Action failed',
-					background: 'variant-filled-error',
+					background: 'preset-filled-error-500',
 					timeout: 3000
 				});
 			}
@@ -1174,7 +1181,7 @@
 
 			<!-- Footer -->
 			<div class="p-4 border-t bg-surface-50-950 rounded-b-lg">
-				<button class="btn preset-filled-surface-500 w-full" onclick={closeRequirementsModal}>
+				<button class="btn preset-filled-surface-900-100 w-full" onclick={closeRequirementsModal}>
 					{m.close()}
 				</button>
 			</div>
@@ -1322,7 +1329,7 @@
 
 			<!-- Footer -->
 			<div class="p-4 border-t bg-surface-50-950 rounded-b-lg">
-				<button class="btn preset-filled-surface-500 w-full" onclick={closeHistoryModal}>
+				<button class="btn preset-filled-surface-900-100 w-full" onclick={closeHistoryModal}>
 					{m.close()}
 				</button>
 			</div>

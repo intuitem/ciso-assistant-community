@@ -8,7 +8,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-surface-50-950 p-6 w-modal space-y-6';
+	const cBase = 'card bg-surface-100-900 border border-surface-500 p-6 w-modal space-y-6';
 	const cHeader = 'text-xl font-medium text-surface-950-50';
 	const cForm = 'space-y-4';
 
@@ -44,16 +44,21 @@
 		level?: string;
 	};
 
-	let cascadeInfo: { deleted: Bucket; affected: Bucket } | null = $state(null);
+	type BucketName = 'deleted' | 'affected' | 'blocked';
+
+	let cascadeInfo: { deleted: Bucket; affected: Bucket; blocked?: Bucket } | null = $state(null);
 	let loading = $state(true);
 	let errorMsg = $state<string | null>(null);
 
-	// expand/collapse state per-group (deleted/affected buckets share keys, so prefix)
+	// PROTECT/RESTRICT references make the delete fail server-side.
+	const isBlocked = $derived((cascadeInfo?.blocked?.count ?? 0) > 0);
+
+	// expand/collapse state per-group (buckets share keys, so prefix)
 	let expanded = $state<Set<string>>(new Set());
-	function keyFor(bucket: 'deleted' | 'affected', groupKey: string) {
+	function keyFor(bucket: BucketName, groupKey: string) {
 		return `${bucket}:${groupKey}`;
 	}
-	function toggle(bucket: 'deleted' | 'affected', groupKey: string) {
+	function toggle(bucket: BucketName, groupKey: string) {
 		const k = keyFor(bucket, groupKey);
 		if (expanded.has(k)) expanded.delete(k);
 		else expanded.add(k);
@@ -94,7 +99,49 @@
 				{errorMsg}
 			</div>
 		{:else if cascadeInfo}
-			{#if cascadeInfo.deleted?.count > 0}
+			{#if isBlocked && cascadeInfo.blocked}
+				<div class="p-4 bg-error-50 dark:bg-error-500/15 border-l-2 border-error-500">
+					<div class="text-sm font-medium text-surface-950-50 mb-3">
+						{m.cascadeBlockedWarning({ count: cascadeInfo.blocked.count })}
+					</div>
+
+					<div class="max-h-64 overflow-y-auto space-y-1">
+						{#each cascadeInfo.blocked.grouped_objects as group (group.model)}
+							<section class="border-t border-surface-200-800">
+								<button
+									type="button"
+									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-50-950 text-sm"
+									aria-controls={`blk-${group.model}`}
+									aria-expanded={expanded.has(keyFor('blocked', group.model))}
+									onclick={() => toggle('blocked', group.model)}
+								>
+									<span class="font-medium text-surface-950-50"
+										>{group.verbose_name ?? group.model}</span
+									>
+									<span class="text-xs text-surface-600-400">
+										{group.objects.length}
+									</span>
+								</button>
+
+								{#if expanded.has(keyFor('blocked', group.model))}
+									<ul
+										id={`blk-${group.model}`}
+										class="px-3 pb-2 text-sm space-y-0.5 bg-surface-50-950"
+									>
+										{#each group.objects as o (o.id)}
+											<li class="flex items-center justify-between py-1">
+												<span class="truncate text-surface-700-300" title={o.name}>{o.name}</span>
+											</li>
+										{/each}
+									</ul>
+								{/if}
+							</section>
+						{/each}
+					</div>
+				</div>
+			{/if}
+
+			{#if !isBlocked && cascadeInfo.deleted?.count > 0}
 				<div class="p-4 bg-orange-50 dark:bg-orange-500/15 border-l-2 border-orange-400">
 					<div class="text-sm font-medium text-surface-950-50 mb-3">
 						{m.cascadeDeleteWarning({ count: cascadeInfo.deleted.count })}
@@ -136,7 +183,7 @@
 				</div>
 			{/if}
 
-			{#if cascadeInfo.affected?.count > 0}
+			{#if !isBlocked && cascadeInfo.affected?.count > 0}
 				<div class="p-4 bg-blue-50 dark:bg-blue-500/15 border-l-2 border-blue-400">
 					<div class="text-sm font-medium text-surface-950-50 mb-1">
 						{m.cascadeAffectedNotice({ count: cascadeInfo.affected.count })}
@@ -190,18 +237,20 @@
 					data-testid="delete-cancel-button"
 					onclick={parent.onClose}
 				>
-					{m.cancel()}
+					{isBlocked ? m.close() : m.cancel()}
 				</button>
 				<input type="hidden" name="urlmodel" value={URLModel} />
 				<input type="hidden" name="id" value={id} />
-				<button
-					class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
-					data-testid="delete-confirm-button"
-					type="submit"
-					onclick={parent.onClose}
-				>
-					{m.submit()}
-				</button>
+				{#if !isBlocked}
+					<button
+						class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+						data-testid="delete-confirm-button"
+						type="submit"
+						onclick={parent.onClose}
+					>
+						{m.submit()}
+					</button>
+				{/if}
 			</footer>
 		</form>
 

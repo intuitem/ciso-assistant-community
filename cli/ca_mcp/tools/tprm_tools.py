@@ -1,9 +1,11 @@
 """TPRM (Third-Party Risk Management) MCP tools for CISO Assistant"""
 
 from ..client import (
+    found_line,
+    make_get_request,
     make_post_request,
     make_patch_request,
-    fetch_all_results,
+    get_paginated_results,
 )
 from ..resolvers import (
     resolve_folder_id,
@@ -55,14 +57,18 @@ async def get_entities(
             params["country"] = country
             filters["country"] = country
 
-        entities, error = fetch_all_results("/entities/", params=params)
-        if error:
-            return error
+        res = make_get_request("/entities/", params=params)
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        entities = get_paginated_results(data)
 
         if not entities:
             return empty_response("entities", filters)
 
-        result = f"Found {len(entities)} entities"
+        result = found_line(entities, "entities")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -130,14 +136,18 @@ async def get_entity_assessments(
             params["conclusion"] = conclusion
             filters["conclusion"] = conclusion
 
-        assessments, error = fetch_all_results("/entity-assessments/", params=params)
-        if error:
-            return error
+        res = make_get_request("/entity-assessments/", params=params)
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        assessments = get_paginated_results(data)
 
         if not assessments:
             return empty_response("entity assessments", filters)
 
-        result = f"Found {len(assessments)} entity assessments"
+        result = found_line(assessments, "entity assessments")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -184,14 +194,18 @@ async def get_representatives(entity: str = None):
             params["entity"] = resolve_entity_id(entity)
             filters["entity"] = entity
 
-        representatives, error = fetch_all_results("/representatives/", params=params)
-        if error:
-            return error
+        res = make_get_request("/representatives/", params=params)
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        representatives = get_paginated_results(data)
 
         if not representatives:
             return empty_response("representatives", filters)
 
-        result = f"Found {len(representatives)} representatives"
+        result = found_line(representatives, "representatives")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -251,14 +265,18 @@ async def get_solutions(
             params["criticality"] = criticality
             filters["criticality"] = criticality
 
-        solutions, error = fetch_all_results("/solutions/", params=params)
-        if error:
-            return error
+        res = make_get_request("/solutions/", params=params)
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        solutions = get_paginated_results(data)
 
         if not solutions:
             return empty_response("solutions", filters)
 
-        result = f"Found {len(solutions)} solutions"
+        result = found_line(solutions, "solutions")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -324,14 +342,18 @@ async def get_contracts(
             params["status"] = status
             filters["status"] = status
 
-        contracts, error = fetch_all_results("/contracts/", params=params)
-        if error:
-            return error
+        res = make_get_request("/contracts/", params=params)
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        contracts = get_paginated_results(data)
 
         if not contracts:
             return empty_response("contracts", filters)
 
-        result = f"Found {len(contracts)} contracts"
+        result = found_line(contracts, "contracts")
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"

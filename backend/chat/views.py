@@ -5,10 +5,12 @@ import time
 
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
 from django.http import StreamingHttpResponse
 from django.utils import timezone
-from rest_framework import viewsets, status
+from rest_framework import status
 from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.exceptions import PermissionDenied as DRFPermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
@@ -33,6 +35,7 @@ from .memory import (
     inject_summary,
     inject_tool_replays,
     pack_verbatim_window,
+    strip_framing_markers,
     update_summary_for_session,
 )
 from .metrics import build_turn_metrics, record_metric
@@ -55,16 +58,6 @@ from .serializers import (
 
 logger = structlog.get_logger(__name__)
 
-# Patterns that attempt to impersonate system/assistant roles or override instructions
-_INJECTION_PATTERNS = re.compile(
-    r"(?:"
-    r"\[/?(?:SYSTEM|CONTEXT|INST)\]"  # Fake delimiter tags
-    r"|<\|(?:im_start|im_end|system)\|>"  # ChatML role markers
-    r"|```\s*(?:system|tool_call)"  # Fenced role blocks
-    r")",
-    re.IGNORECASE,
-)
-
 
 def _sanitize_user_input(text: str) -> str:
     """
@@ -72,8 +65,8 @@ def _sanitize_user_input(text: str) -> str:
     Strips characters that could be interpreted as role markers or
     delimiter tags by the LLM, while preserving the user's intent.
     """
-    # Remove injection patterns
-    text = _INJECTION_PATTERNS.sub("", text)
+    # shared with database text; a single sub() can leave a rebuilt marker
+    text = strip_framing_markers(text)
     # Strip null bytes and other control characters (keep newlines/tabs)
     text = "".join(
         c for c in text if c == "\n" or c == "\t" or (c >= " " and c <= "\U0010ffff")
@@ -120,6 +113,23 @@ class ChatSessionViewSet(BaseModelViewSet):
         user_content = _sanitize_user_input(serializer.validated_data["content"])
         page_context = serializer.validated_data.get("page_context", {})
 
+        document_ids = serializer.validated_data.get("document_ids") or []
+        documents = []
+        if document_ids:
+            documents = list(
+                IndexedDocument.objects.filter(
+                    id__in=document_ids,
+                    source_type=IndexedDocument.SourceType.CHAT,
+                    source_content_type=ContentType.objects.get_for_model(ChatSession),
+                    source_object_id=session.id,
+                )
+            )
+            if len(documents) != len(set(document_ids)):
+                return Response(
+                    {"detail": "Unknown document reference."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         # Save user message
         ChatMessage.objects.create(
             session=session,
@@ -138,7 +148,6 @@ class ChatSessionViewSet(BaseModelViewSet):
             graph_expand,
             format_context,
             build_context_refs,
-            get_accessible_folder_ids,
         )
         from .orm_query import format_query_result
         from .tools import (
@@ -149,9 +158,13 @@ class ChatSessionViewSet(BaseModelViewSet):
             MODEL_MAP,
         )
 
-        accessible_folders = get_accessible_folder_ids(request.user)
+        from .scoping import ReadScope
+
+        scope = ReadScope(request.user)
         context_refs = []
         context = ""
+        enrichment = ""
+        page_context_prefix = ""
         query_result = None
 
         # Parse page context into structured reference
@@ -172,7 +185,18 @@ class ChatSessionViewSet(BaseModelViewSet):
         # Step 1a: Deterministic pre-routing for workflows.
         # Small LLMs are unreliable at tool selection with 5+ tools,
         # so we match workflows by context + keywords first.
-        pre_routed_workflow = _match_workflow(user_content, parsed_context)
+        # A tabular attachment — or an import already in progress — always
+        # routes to the import workflow: attachment presence is a stronger
+        # signal than any keyword.
+        from .tabular import TABULAR_CONTENT_TYPES
+        from .workflows.import_document import should_resume
+
+        if any(
+            d.content_type in TABULAR_CONTENT_TYPES for d in documents
+        ) or should_resume(session.workflow_state, user_content):
+            pre_routed_workflow = get_workflow_by_tool_name("workflow_import_document")
+        else:
+            pre_routed_workflow = _match_workflow(user_content, parsed_context)
         if pre_routed_workflow:
             logger.info("workflow_pre_routed", workflow=pre_routed_workflow.name)
             tool_response = {"name": f"workflow_{pre_routed_workflow.name}"}
@@ -253,11 +277,13 @@ class ChatSessionViewSet(BaseModelViewSet):
                 wf_ctx = WorkflowContext(
                     user_message=user_content,
                     parsed_context=parsed_context,
-                    accessible_folder_ids=accessible_folders,
+                    scope=scope,
                     llm=llm,
                     history=wf_history,
                     user_lang=request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2],
                     session=session,
+                    documents=documents,
+                    request=request,
                 )
 
                 def stream_workflow():
@@ -337,7 +363,7 @@ class ChatSessionViewSet(BaseModelViewSet):
             query_result = dispatch_tool_call(
                 tool_response["name"],
                 tool_response.get("arguments", {}),
-                accessible_folders,
+                scope,
                 parsed_context,
                 user_message=user_content,
             )
@@ -360,6 +386,8 @@ class ChatSessionViewSet(BaseModelViewSet):
 
         # Track if this is a creation/attach proposal (different SSE flow)
         creation_proposal = None
+        # platform-authored response constraints, kept out of the context
+        response_directives = ""
 
         if query_result and query_result.get("type") == "propose_create":
             # Creation proposal — don't execute, let the user confirm via UI
@@ -367,7 +395,9 @@ class ChatSessionViewSet(BaseModelViewSet):
             context = (
                 f"The system is proposing to create {len(query_result.get('items', []))} "
                 f"{query_result['display_name']}. "
-                "Interactive confirmation cards are already displayed in the UI.\n\n"
+                "Interactive confirmation cards are already displayed in the UI."
+            )
+            response_directives = (
                 "YOUR RESPONSE MUST:\n"
                 "- Tell the user you're proposing to create these items (1 sentence).\n"
                 "- Tell them to review and use the Confirm/Cancel buttons below.\n\n"
@@ -394,7 +424,9 @@ class ChatSessionViewSet(BaseModelViewSet):
                 f"The system found {len(query_result.get('items', []))} existing "
                 f"{query_result['related_display']} that can be attached to the current "
                 f"{query_result['parent_display']}. "
-                "Interactive confirmation cards are already displayed in the UI.\n\n"
+                "Interactive confirmation cards are already displayed in the UI."
+            )
+            response_directives = (
                 "YOUR RESPONSE MUST:\n"
                 "- Briefly explain why these items were suggested (1 sentence).\n"
                 "- Tell the user to review and use the Confirm/Cancel buttons below.\n\n"
@@ -419,35 +451,36 @@ class ChatSessionViewSet(BaseModelViewSet):
                 }
             )
         elif query_result and query_result.get("type") == "multi_query":
-            parts = [
-                "INSTRUCTIONS: Multiple queries were executed to answer your question. "
+            response_directives = (
+                "Multiple queries were executed to answer the question. "
                 "Present ALL results to the user in a clear, structured way. "
-                "Do NOT hallucinate additional information.\n"
-            ]
+                "Do NOT hallucinate additional information."
+            )
+            parts = []
             for i, sub in enumerate(query_result.get("results", []), 1):
                 parts.append(f"--- Query {i}: {sub.get('display_name', '')} ---")
                 parts.append(format_query_result(sub))
             context = "\n\n".join(parts)
         elif query_result and query_result.get("type") == "search_library":
-            context = (
-                "INSTRUCTIONS: The following data comes from the frameworks knowledge base. "
+            response_directives = (
+                "The context data comes from the frameworks knowledge base. "
                 "Present this information to the user in a clear, structured way. "
                 "When citing requirements, always include the framework name and reference ID. "
-                "Do NOT hallucinate additional information beyond what is provided.\n\n"
-                + query_result.get("text", "No results found.")
+                "Do NOT hallucinate additional information beyond what is provided."
             )
+            context = query_result.get("text", "No results found.")
         elif query_result:
-            context = (
-                "INSTRUCTIONS: The following data comes from a database query. "
+            response_directives = (
+                "The context data comes from a database query. "
                 "Present ONLY this data to the user. Use the total_count as the authoritative count. "
                 "The listed items are one page of results. Do NOT add explanations, "
                 "framework references, or commentary beyond what is in the data. "
                 "Do NOT hallucinate additional information. "
                 "IMPORTANT: Items include markdown links like [Name](/path/id) — "
                 "you MUST preserve these links exactly as-is in your response so the user "
-                "can click them. Do NOT rewrite, shorten, or remove the links.\n\n"
-                + format_query_result(query_result)
+                "can click them. Do NOT rewrite, shorten, or remove the links."
             )
+            context = format_query_result(query_result)
             url_slug = query_result.get("url_slug", "")
             for obj in query_result.get("objects", []):
                 context_refs.append(
@@ -471,6 +504,14 @@ class ChatSessionViewSet(BaseModelViewSet):
                 }
             )
         else:
+            # Page enrichment doubles as the signal for whether we already have
+            # something to say about this page (see the auto-attach fallback).
+            enrichment = (
+                _enrich_context(parsed_context, scope)
+                if parsed_context and parsed_context.object_id
+                else ""
+            )
+
             # Step 2: Knowledge graph + Semantic RAG search
             # Check the knowledge graph for framework context, but only for
             # general questions — skip when on action pages (detail/edit)
@@ -479,12 +520,10 @@ class ChatSessionViewSet(BaseModelViewSet):
             if not (parsed_context and parsed_context.object_id):
                 graph_context = _get_graph_context(user_content)
 
-            results = search(user_content, request.user, top_k=10)
+            results = search(user_content, request.user, top_k=10, scope=scope)
 
             structured = [r for r in results if r.get("source_type") == "model"]
-            expanded = (
-                graph_expand(structured, accessible_folders) if structured else []
-            )
+            expanded = graph_expand(structured, scope) if structured else []
 
             context = ""
             if graph_context:
@@ -492,10 +531,16 @@ class ChatSessionViewSet(BaseModelViewSet):
             context += format_context(results, expanded)
             context_refs = build_context_refs(results, expanded)
 
-            # Step 3: Auto-suggest attachable objects when on a contextual page
-            # If the LLM didn't call a tool but we're on a detail/edit page
-            # with attachable relations, try attaching relevant objects automatically.
-            if parsed_context and parsed_context.object_id:
+            # Step 3: Auto-suggest attachable objects when on a contextual page.
+            # Only when retrieval came back empty — this branch replaces the
+            # context wholesale, so firing it on a question that retrieval could
+            # answer buries the answer under attachment cards.
+            if (
+                parsed_context
+                and parsed_context.object_id
+                and not context.strip()
+                and not enrichment.strip()
+            ):
                 from .tools import ATTACHABLE_RELATIONS, _build_attach_proposal
 
                 relations = ATTACHABLE_RELATIONS.get(parsed_context.model_key, [])
@@ -504,7 +549,7 @@ class ChatSessionViewSet(BaseModelViewSet):
                     first_rel_key = relations[0][0]
                     attach_result = _build_attach_proposal(
                         {"related_model": first_rel_key},
-                        accessible_folders,
+                        scope,
                         parsed_context,
                     )
                     if attach_result and attach_result.get("items"):
@@ -515,7 +560,9 @@ class ChatSessionViewSet(BaseModelViewSet):
                             f"The system found {len(item_names)} existing "
                             f"{attach_result['related_display']} that may be relevant. "
                             "Interactive confirmation cards are already displayed in the UI "
-                            "showing each item with a Confirm/Cancel button.\n\n"
+                            "showing each item with a Confirm/Cancel button."
+                        )
+                        response_directives = (
                             "YOUR RESPONSE MUST:\n"
                             "- Briefly explain why these items were suggested (1-2 sentences).\n"
                             "- Tell the user to review and use the buttons below to attach them.\n\n"
@@ -565,31 +612,41 @@ class ChatSessionViewSet(BaseModelViewSet):
         user_lang = request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2]
         lang_name = LANG_MAP.get(user_lang, "English")
 
-        ctx_builder = ContextBuilder(max_tokens=RAG_CONTEXT_TOKENS)
-        ctx_builder.add(
-            "language",
-            f"LANGUAGE: You MUST respond in {lang_name}.",
-            priority=10,
+        response_directives = "\n\n".join(
+            part
+            for part in (
+                f"LANGUAGE: You MUST respond in {lang_name}.",
+                response_directives,
+            )
+            if part
         )
+
+        ctx_builder = ContextBuilder(max_tokens=RAG_CONTEXT_TOKENS)
         if page_context_prefix and not query_result:
             ctx_builder.add("page_context", page_context_prefix, priority=8)
         ctx_builder.add("main_context", context, priority=9)
 
         # Enrich context with domain objects when on a detail page
         if parsed_context and parsed_context.object_id:
-            enrichment = _enrich_context(parsed_context, accessible_folders)
+            if not enrichment:
+                enrichment = _enrich_context(parsed_context, scope)
             if enrichment:
                 ctx_builder.add("enrichment", enrichment, priority=5)
 
         context = ctx_builder.build()
 
         system_prompt_text = llm.system_prompt if hasattr(llm, "system_prompt") else ""
+        # _build_messages sends the directives twice — count both copies
+        user_turn_text = user_content
+        if response_directives:
+            system_prompt_text = f"{system_prompt_text}\n\n{response_directives}"
+            user_turn_text = f"{user_content}\n\n{response_directives}"
         system_prompt_chars = len(system_prompt_text)
         system_prompt_tokens = count_tokens(system_prompt_text)
         context_chars = len(context)
         context_tokens = count_tokens(context)
-        user_chars = len(user_content)
-        user_tokens = count_tokens(user_content)
+        user_chars = len(user_turn_text)
+        user_tokens = count_tokens(user_turn_text)
         history_chars = sum(len(m.get("content", "")) for m in history_messages)
         history_tokens = sum(
             count_tokens(m.get("content", "")) for m in history_messages
@@ -697,7 +754,10 @@ class ChatSessionViewSet(BaseModelViewSet):
                 thinking_count = 0
                 token_count = 0
                 for token_type, token in llm.stream(
-                    user_content, context, history=history_messages
+                    user_content,
+                    context,
+                    history=history_messages,
+                    directives=response_directives,
                 ):
                     if t_first_token is None:
                         t_first_token = time.time()
@@ -796,7 +856,15 @@ class ChatSessionViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="upload")
     def upload_document(self, request, pk=None):
-        """Upload a document to be indexed for RAG in this session's folder context."""
+        """Upload a document to this session, validated and stored in an
+        accessible domain folder so RAG retrieval can actually find it."""
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        from core.validators import validate_file_name, validate_file_size
+
+        from .rag import get_accessible_folder_ids
+        from .upload_validation import validate_chat_upload
+
         session = self.get_object()
         file = request.FILES.get("file")
 
@@ -805,11 +873,35 @@ class ChatSessionViewSet(BaseModelViewSet):
                 {"detail": "No file provided."}, status=status.HTTP_400_BAD_REQUEST
             )
 
+        try:
+            validate_file_size(file)
+            validate_file_name(file)
+            content_type = validate_chat_upload(file)
+        except DjangoValidationError as e:
+            return Response(
+                {"detail": " ".join(e.messages)}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        accessible_folders = get_accessible_folder_ids(
+            request.user, codename="add_indexeddocument"
+        )
+        if not accessible_folders:
+            return Response(
+                {"detail": "No accessible domain folder to store the document in."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        folder_id = request.data.get("folder_id") or accessible_folders[0]
+        if str(folder_id) not in accessible_folders:
+            return Response(
+                {"detail": "Folder not found or not accessible."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         doc = IndexedDocument.objects.create(
-            folder=session.folder,
+            folder_id=folder_id,
             file=file,
             filename=file.name,
-            content_type=file.content_type or "application/octet-stream",
+            content_type=content_type,
             source_type=IndexedDocument.SourceType.CHAT,
             source_content_type=ContentType.objects.get_for_model(ChatSession),
             source_object_id=session.id,
@@ -821,9 +913,150 @@ class ChatSessionViewSet(BaseModelViewSet):
         ingest_document(str(doc.id))
 
         return Response(
-            {"id": str(doc.id), "filename": doc.filename, "status": doc.status},
+            {
+                "id": str(doc.id),
+                "filename": doc.filename,
+                "content_type": doc.content_type,
+                "status": doc.status,
+            },
             status=status.HTTP_201_CREATED,
         )
+
+    @action(detail=True, methods=["post"], url_path="import")
+    def apply_import(self, request, pk=None):
+        """Apply (or cancel) the import the workflow staged in workflow_state.
+
+        The actual writes go through the data_wizard RecordConsumer for the
+        target inside a single transaction; nothing here can do more than a
+        manual data-wizard import by the same user.
+        """
+        from .importer import format_side_effects, run_import
+        from .rag import get_accessible_folder_ids
+        from .tabular import IMPORT_TARGETS
+
+        session = self.get_object()
+        state = session.workflow_state or {}
+        if (
+            state.get("workflow") != "import_document"
+            or state.get("step") != "import_review"
+        ):
+            return Response(
+                {"detail": "No import is awaiting confirmation."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if request.data.get("cancel"):
+            session.workflow_state = {}
+            session.save(update_fields=["workflow_state"])
+            return Response({"detail": "cancelled"})
+
+        data = state.get("data") or {}
+        target = IMPORT_TARGETS.get(data.get("target")) or {}
+        # A container the import has to create may need more than a folder.
+        needs_matrix = (target.get("container") or {}).get(
+            "needs_matrix"
+        ) and not data.get("container_id")
+        if (
+            not data.get("mapping")
+            or data.get("target") not in IMPORT_TARGETS
+            or (needs_matrix and not data.get("matrix_id"))
+        ):
+            session.workflow_state = {}
+            session.save(update_fields=["workflow_state"])
+            return Response(
+                {
+                    "detail": "The staged import is no longer valid — attach the file again."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        doc = IndexedDocument.objects.filter(
+            id=data.get("document_id"),
+            source_content_type=ContentType.objects.get_for_model(ChatSession),
+            source_object_id=session.id,
+        ).first()
+        if doc is None:
+            return Response(
+                {"detail": "The uploaded file is no longer available."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # The folder is pinned by the dry-run — a different one here would make
+        # the previewed counts wrong, since find_existing() is folder-scoped.
+        folder_id = str(data.get("folder_id") or doc.folder_id)
+        if folder_id not in get_accessible_folder_ids(request.user):
+            return Response(
+                {"detail": "Folder not found or not accessible."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Claim the staged import so a concurrent confirm can't replay it.
+        with transaction.atomic():
+            locked = ChatSession.objects.select_for_update().get(pk=session.pk)
+            if (locked.workflow_state or {}).get("step") != "import_review":
+                return Response(
+                    {"detail": "This import was already applied."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            locked.workflow_state = {}
+            locked.save(update_fields=["workflow_state"])
+
+        try:
+            report = run_import(
+                request,
+                doc,
+                data["mapping"],
+                data["target"],
+                folder_id=folder_id,
+                dry_run=False,
+                target_id=data.get("container_id"),
+                matrix_id=data.get("matrix_id"),
+            )
+        except DRFPermissionDenied:
+            return Response(
+                {
+                    "detail": "You are not allowed to import this object type into this domain."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        except Exception as e:
+            logger.error(
+                "chat_import_apply_failed", session_id=str(session.id), error=e
+            )
+            session.workflow_state = state
+            session.save(update_fields=["workflow_state"])
+            return Response(
+                {"detail": "The import failed and nothing was written."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        label = IMPORT_TARGETS[data["target"]]["label"]
+        into = (
+            f" into **{data['container_name']}**"
+            if data.get("container_id") and data.get("container_name")
+            else ""
+        )
+        summary = (
+            f"Imported **{doc.filename}** as {label.lower()}{into}: "
+            f"{report['created']} created, {report['updated']} updated"
+        )
+        if report["skipped"]:
+            summary += f", {report['skipped']} skipped"
+        if report["failed"]:
+            summary += f", {report['failed']} failed"
+        summary += "."
+        side_effects = format_side_effects(report.get("details"))
+        if side_effects:
+            summary += f" Also created from names on the rows: {side_effects}."
+        if report["errors"]:
+            summary += "\n\nIssues:\n" + "\n".join(f"- {e}" for e in report["errors"])
+        ChatMessage.objects.create(
+            session=session,
+            role=ChatMessage.Role.ASSISTANT,
+            content=summary,
+        )
+
+        return Response({**report, "message": summary})
 
 
 class IndexedDocumentViewSet(BaseModelViewSet):
@@ -1295,8 +1528,8 @@ class QuestionnaireQuestionViewSet(BaseModelViewSet):
         # The question's questionnaire run carries the folder; only allow
         # controls in that same folder, and only those the user can read.
         run_folder = question.questionnaire_run.folder
-        readable_ac_ids, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, AppliedControl
+        readable_ac_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, AppliedControl
         )
         ids_set = set(str(i) for i in ids) & set(str(i) for i in readable_ac_ids)
         valid_acs = AppliedControl.objects.filter(id__in=ids_set, folder=run_folder)
@@ -1836,7 +2069,12 @@ def _build_context_prompt(page_context: dict, parsed_context) -> str:
     if not page_context:
         return ""
 
-    from .tools import PARENT_CHILD_MAP, ATTACHABLE_RELATIONS, MODEL_MAP
+    from .tools import (
+        ATTACHABLE_RELATIONS,
+        CREATABLE_MODELS,
+        MODEL_MAP,
+        PARENT_CHILD_MAP,
+    )
 
     parts = []
     page_path = page_context.get("path", "")
@@ -1867,9 +2105,9 @@ def _build_context_prompt(page_context: dict, parsed_context) -> str:
     if parsed_context and parsed_context.object_id:
         actions = []
 
-        # Child creation hints
+        # Child creation hints — the map also carries query-only children
         for child_key, fk_field in PARENT_CHILD_MAP.get(parsed_context.model_key, []):
-            if child_key in MODEL_MAP:
+            if child_key in MODEL_MAP and child_key in CREATABLE_MODELS:
                 child_display = MODEL_MAP[child_key][2]
                 actions.append(
                     f"- Create {child_display} linked to this {page_model or parsed_context.model_key}"
@@ -1905,39 +2143,54 @@ def _build_context_prompt(page_context: dict, parsed_context) -> str:
     return "\n".join(parts) + "\n"
 
 
-def _enrich_context(parsed_context, accessible_folder_ids: list[str]) -> str:
+def _enrich_context(parsed_context, scope) -> str:
     """
     Enrich the LLM context with domain objects relevant to the current page.
     For example, when on a risk assessment page, include the domain's assets
     so the LLM can reason about additional risks.
     """
-    from .tools import MODEL_MAP
+    from .tools import resolve_context_object
 
-    # Determine the parent object's folder
-    parent_info = MODEL_MAP.get(parsed_context.model_key)
-    if not parent_info:
+    parent_obj = resolve_context_object(parsed_context, scope)
+    if not parent_obj or not hasattr(parent_obj, "folder_id"):
         return ""
-
-    try:
-        parent_model = apps.get_model(parent_info[0], parent_info[1])
-        parent_obj = parent_model.objects.filter(id=parsed_context.object_id).first()
-        if not parent_obj or not hasattr(parent_obj, "folder_id"):
-            return ""
-        folder_id = str(parent_obj.folder_id)
-    except Exception:
-        return ""
+    folder_id = str(parent_obj.folder_id)
 
     parts = []
 
-    # For risk assessments: include assets from the same domain
+    # Scenarios and their rating come before the asset list: under a tight token
+    # budget these are what questions are actually asked about.
     if parsed_context.model_key == "risk_assessment":
+        from .risk_levels import LEVEL_FIELDS, describe_levels, level_label
+
+        matrix = getattr(parent_obj, "risk_matrix", None)
+        scale = describe_levels(matrix)
+        if scale:
+            parts.append(f"RISK MATRIX LEVELS (lowest to highest): {scale}")
+
+        RiskScenario = apps.get_model("core", "RiskScenario")
+        scenarios = scope.queryset(RiskScenario).filter(
+            risk_assessment_id=parent_obj.id
+        )[:20]
+        if scenarios:
+            parts.append("\nEXISTING RISK SCENARIOS (already identified):")
+            for s in scenarios:
+                line = f"  - {s.name}"
+                extras = []
+                for level_scope, level_field in LEVEL_FIELDS.items():
+                    level = getattr(s, level_field, None)
+                    if level is not None and level >= 0:
+                        extras.append(f"{level_scope}={level_label(matrix, level)}")
+                if s.treatment:
+                    extras.append(f"treatment={s.get_treatment_display()}")
+                if extras:
+                    line += f" ({', '.join(extras)})"
+                parts.append(line)
+
         Asset = apps.get_model("core", "Asset")
-        assets = Asset.objects.filter(
-            folder_id=folder_id,
-            folder_id__in=accessible_folder_ids,
-        )[:30]
+        assets = scope.queryset(Asset).filter(folder_id=folder_id)[:30]
         if assets:
-            parts.append("ASSETS IN THIS DOMAIN:")
+            parts.append("\nASSETS IN THIS DOMAIN:")
             for asset in assets:
                 line = f"  - {asset.name}"
                 extras = []
@@ -1955,18 +2208,92 @@ def _enrich_context(parsed_context, accessible_folder_ids: list[str]) -> str:
                     line += f" — {asset.description[:150]}"
                 parts.append(line)
 
-        # Also include existing risk scenarios for awareness
-        RiskScenario = apps.get_model("core", "RiskScenario")
-        scenarios = RiskScenario.objects.filter(
-            risk_assessment_id=parsed_context.object_id,
-        )[:20]
-        if scenarios:
-            parts.append("\nEXISTING RISK SCENARIOS (already identified):")
-            for s in scenarios:
-                line = f"  - {s.name}"
-                if hasattr(s, "treatment") and s.treatment:
-                    line += f" (treatment={s.get_treatment_display()})"
-                parts.append(line)
+    elif parsed_context.model_key == "compliance_assessment":
+        RequirementAssessment = apps.get_model("core", "RequirementAssessment")
+        Result = RequirementAssessment.Result
+
+        header = f"AUDIT: {parent_obj.name}"
+        framework = getattr(parent_obj, "framework", None)
+        if framework:
+            header += f" — framework: {framework.name}"
+        parts.append(header)
+        parts.append(f"Progress: {parent_obj.progress}%")
+
+        # The model's own accessor, so these agree with the figures on the page
+        # (assessable requirements only, narrowed to the selected groups).
+        breakdown = ", ".join(
+            f"{Result(result).label}={count}"
+            for count, result in parent_obj.get_requirements_result_count()
+        )
+        if breakdown:
+            parts.append(f"Requirement results: {breakdown}")
+
+        gaps = (
+            scope.queryset(RequirementAssessment)
+            .filter(
+                compliance_assessment=parent_obj,
+                requirement__assessable=True,
+                result__in=[Result.NON_COMPLIANT, Result.PARTIALLY_COMPLIANT],
+            )
+            .select_related("requirement")[:25]
+        )
+        if gaps:
+            parts.append("\nREQUIREMENTS NOT FULLY MET:")
+            for ra in gaps:
+                ref_id = getattr(ra.requirement, "ref_id", "") or ""
+                name = ra.requirement.name or ra.requirement.description or ""
+                label = f"[{ref_id}] {name}".strip() if ref_id else name
+                parts.append(f"  - {label[:160]} ({Result(ra.result).label})")
+
+    elif parsed_context.model_key == "findings_assessment":
+        from django.db.models import Count
+
+        from core.models import Severity
+
+        Finding = apps.get_model("core", "Finding")
+        # Counted from the same scoped rows that get listed — a total the model
+        # is told to report verbatim must not include findings it cannot see.
+        readable = scope.queryset(Finding).filter(findings_assessment=parent_obj)
+        findings = readable[:30]
+        if findings:
+            total = readable.count()
+            unresolved_important = (
+                readable.filter(severity__gte=Severity.HIGH)
+                .exclude(
+                    status__in=[
+                        Finding.Status.MITIGATED,
+                        Finding.Status.RESOLVED,
+                        Finding.Status.DISMISSED,
+                        Finding.Status.CLOSED,
+                    ]
+                )
+                .count()
+            )
+            parts.append(
+                f"FINDINGS IN THIS ASSESSMENT: {total} total, "
+                f"{unresolved_important} unresolved with high or critical severity."
+            )
+            severity_labels = dict(Finding._meta.get_field("severity").choices or [])
+            distribution = (
+                readable.values("severity")
+                .annotate(count=Count("id"))
+                .order_by("-severity")
+            )
+            parts.append(
+                "Severity distribution: "
+                + ", ".join(
+                    f"{severity_labels.get(row['severity'], row['severity'])}={row['count']}"
+                    for row in distribution
+                    if row["count"]
+                )
+            )
+            for f in findings:
+                line = f"  - {f.name} (severity={f.get_severity_display()}, status={f.get_status_display()}"
+                if f.priority:
+                    line += f", priority=P{f.priority}"
+                if f.eta:
+                    line += f", eta={f.eta}"
+                parts.append(line + ")")
 
     return "\n".join(parts)
 

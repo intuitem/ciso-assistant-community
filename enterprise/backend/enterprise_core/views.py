@@ -55,6 +55,7 @@ from core.models import (
     RiskAssessment,
     SecurityException,
 )
+from global_settings.models import GlobalSettings
 from resilience.models import BusinessImpactAnalysis
 from .models import ClientSettings
 from .serializers import (
@@ -81,6 +82,15 @@ logger = structlog.get_logger(__name__)
 
 class ClientSettingsViewSet(BaseModelViewSet):
     model = ClientSettings
+
+    # No role holds add_clientsettings (the row is created by AppConfig), so the
+    # image actions authorize as edits of the existing singleton.
+    permission_overrides = {
+        "upload_logo": "change_clientsettings",
+        "upload_favicon": "change_clientsettings",
+        "delete_logo": "change_clientsettings",
+        "delete_favicon": "change_clientsettings",
+    }
 
     def create(self, request, *args, **kwargs):
         return Response(
@@ -162,13 +172,16 @@ class ClientSettingsViewSet(BaseModelViewSet):
         )
 
     def handle_file_upload(self, request, pk, field_name):
+        # Raises 403/404 before anything is read; the blanket except below must
+        # not turn an authorization failure into a 400.
+        settings = self.get_object()
+
         if "file" not in request.FILES:
             return Response(
                 {"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
-            settings = ClientSettings.objects.get(id=pk)
             file = request.FILES["file"]
             content_type = magic.Magic(mime=True).from_buffer(file.read())
 
@@ -186,11 +199,13 @@ class ClientSettingsViewSet(BaseModelViewSet):
                 )
 
             setattr(settings, field_name, request.FILES["file"])
+            settings.full_clean()
             settings.save()
             return Response(status=status.HTTP_200_OK)
-        except ClientSettings.DoesNotExist:
+        except ValidationError:
             return Response(
-                {"error": "Client settings not found"}, status=status.HTTP_404_NOT_FOUND
+                {field_name: "invalidFileType"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
             logger.error("Error uploading file", exc_info=e)
@@ -217,41 +232,22 @@ class ClientSettingsViewSet(BaseModelViewSet):
     def upload_favicon(self, request, pk):
         return self.handle_file_upload(request, pk, "favicon")
 
+    def handle_file_delete(self, field_name):
+        settings = self.get_object()
+        image = getattr(settings, field_name)
+        if not image:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        image.delete()
+        settings.save()
+        return Response(status=status.HTTP_200_OK)
+
     @action(methods=["put"], detail=True, url_path="logo/delete")
     def delete_logo(self, request, pk):
-        (
-            object_ids_view,
-            _,
-            _,
-        ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ClientSettings
-        )
-        response = Response(status=status.HTTP_403_FORBIDDEN)
-        if UUID(pk) in object_ids_view:
-            settings = self.get_object()
-            if settings.logo:
-                settings.logo.delete()
-                settings.save()
-                response = Response(status=status.HTTP_200_OK)
-        return response
+        return self.handle_file_delete("logo")
 
     @action(methods=["put"], detail=True, url_path="favicon/delete")
     def delete_favicon(self, request, pk):
-        (
-            object_ids_view,
-            _,
-            _,
-        ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ClientSettings
-        )
-        response = Response(status=status.HTTP_403_FORBIDDEN)
-        if UUID(pk) in object_ids_view:
-            settings = self.get_object()
-            if settings.favicon:
-                settings.favicon.delete()
-                settings.save()
-                response = Response(status=status.HTTP_200_OK)
-        return response
+        return self.handle_file_delete("favicon")
 
 
 class LicenseStatusView(APIView):
@@ -297,6 +293,14 @@ class RoleViewSet(BaseModelViewSet):
         RoleFilter,
     ]
 
+    def get_queryset(self):
+        # Hide only dedicated per-SA roles; a shared builtin role stays visible.
+        return (
+            super()
+            .get_queryset()
+            .exclude(service_accounts__isnull=False, builtin=False)
+        )
+
     def _get_default_permissions(self):
         return Permission.objects.filter(
             codename__in=["view_folder", "view_globalsettings"],
@@ -319,14 +323,22 @@ class RoleViewSet(BaseModelViewSet):
 
             user_groups = []
             role_assignments = []
+            processed_folders = []
 
             for folder in folders:
+                if (
+                    folder.content_type == Folder.ContentType.DOMAIN
+                    and not folder.create_iam_groups
+                ):
+                    continue
+
                 ug, _ = UserGroup.objects.get_or_create(
                     folder=folder,
                     name=role.name,
                     defaults={"builtin": True},
                 )
                 user_groups.append(ug)
+                processed_folders.append(folder)
 
                 role_assignments.append(
                     RoleAssignment(
@@ -340,7 +352,7 @@ class RoleViewSet(BaseModelViewSet):
             RoleAssignment.objects.bulk_create(role_assignments)
 
             # M2M must be handled after bulk_create
-            for ra, folder in zip(role_assignments, folders):
+            for ra, folder in zip(role_assignments, processed_folders):
                 ra.perimeter_folders.add(folder)
 
     def perform_update(self, serializer):
@@ -592,7 +604,7 @@ class CustomEmailTemplateViewSet(BaseModelViewSet):
             return CustomEmailTemplate.objects.none()
         return CustomEmailTemplate.objects.all()
 
-    def get_serializer_class(self):
+    def get_serializer_class(self, **kwargs):
         if self.request.method in ("POST", "PUT", "PATCH"):
             return CustomEmailTemplateWriteSerializer
         return CustomEmailTemplateReadSerializer
@@ -608,6 +620,10 @@ class CustomEmailTemplateViewSet(BaseModelViewSet):
         )
         override_set = {(k, l) for k, l in overrides}
 
+        from core.email_utils import get_disabled_email_templates
+
+        disabled_templates = get_disabled_email_templates()
+
         result = []
         for key, meta in EMAIL_TEMPLATE_REGISTRY.items():
             result.append(
@@ -619,9 +635,56 @@ class CustomEmailTemplateViewSet(BaseModelViewSet):
                     "overrides": [
                         lang for lang in ["en", "fr"] if (key, lang) in override_set
                     ],
+                    "is_enabled": key not in disabled_templates,
                 }
             )
         return Response(result)
+
+    @action(methods=["post"], detail=False, url_path="set-enabled")
+    def set_enabled(self, request):
+        """Enable or disable sending of a given email template."""
+        if not self._has_permission(request):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        template_key = request.data.get("template_key")
+        is_enabled = request.data.get("is_enabled")
+        if template_key not in EMAIL_TEMPLATE_REGISTRY:
+            return Response(
+                {"error": "Unknown template key"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        if not isinstance(is_enabled, bool):
+            return Response(
+                {"error": "is_enabled must be a boolean"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        with transaction.atomic():
+            general = (
+                GlobalSettings.objects.select_for_update()
+                .filter(name="general")
+                .first()
+            )
+            if general is None:
+                return Response(
+                    {"error": "General settings not initialized"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            value = general.value if isinstance(general.value, dict) else {}
+            disabled = {
+                key
+                for key in value.get("disabled_email_templates", [])
+                if isinstance(key, str)
+            }
+            if is_enabled:
+                disabled.discard(template_key)
+            else:
+                disabled.add(template_key)
+            value["disabled_email_templates"] = sorted(disabled)
+            general.value = value
+            general.save(update_fields=["value"])
+
+        return Response({"template_key": template_key, "is_enabled": is_enabled})
 
     @action(
         methods=["get"],
@@ -683,7 +746,7 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
             return CustomWordTemplate.objects.none()
         return CustomWordTemplate.objects.all()
 
-    def get_serializer_class(self):
+    def get_serializer_class(self, **kwargs):
         if self.request.method in ("POST", "PUT", "PATCH"):
             return CustomWordTemplateWriteSerializer
         return CustomWordTemplateReadSerializer

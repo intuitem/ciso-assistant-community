@@ -88,6 +88,14 @@
 			hoverClass: 'hover:border-red-400 hover:bg-red-50',
 			label: m.threats()
 		},
+		ttp_catalogs: {
+			type: 'string',
+			field: 'object_type',
+			icon: findIconInSidebar('catalog', 'ttpCatalogs', 'fa-crosshairs'),
+			selectedClass: 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-orange-200',
+			hoverClass: 'hover:border-orange-400 hover:bg-orange-50',
+			label: m.ttpCatalogs()
+		},
 		metric_definitions: {
 			type: 'string',
 			field: 'object_type',
@@ -103,6 +111,14 @@
 			selectedClass: 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-pink-200',
 			hoverClass: 'hover:border-pink-400 hover:bg-pink-50',
 			label: m.requirementMappingSets()
+		},
+		workflows: {
+			type: 'string',
+			field: 'object_type',
+			icon: findIconInSidebar('projectManagement', 'workflows', 'fa-diagram-project'),
+			selectedClass: 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-indigo-200',
+			hoverClass: 'hover:border-indigo-400 hover:bg-indigo-50',
+			label: m.workflows()
 		},
 		preset: {
 			type: 'string',

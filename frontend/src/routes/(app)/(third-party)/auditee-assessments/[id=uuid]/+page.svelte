@@ -179,13 +179,13 @@
 						await invalidateAll();
 						toastStore.trigger({
 							message: m.statusUpdatedSuccessfully(),
-							background: 'variant-filled-success',
+							background: 'preset-filled-success-500',
 							timeout: 3000
 						});
 					} else {
 						toastStore.trigger({
 							message: result.data?.submitBody?.error || m.submissionFailed(),
-							background: 'variant-filled-error',
+							background: 'preset-filled-error-500',
 							timeout: 5000
 						});
 					}
@@ -193,7 +193,7 @@
 					console.error('Error submitting assignment:', error);
 					toastStore.trigger({
 						message: m.anErrorOccurred(),
-						background: 'variant-filled-error',
+						background: 'preset-filled-error-500',
 						timeout: 3000
 					});
 				} finally {
@@ -1467,7 +1467,7 @@
 
 			<!-- Footer -->
 			<div class="p-4 border-t bg-surface-100-900 rounded-b-lg">
-				<button class="btn preset-filled-surface-500 w-full" onclick={closeHistoryModal}>
+				<button class="btn preset-filled-surface-900-100 w-full" onclick={closeHistoryModal}>
 					{m.close()}
 				</button>
 			</div>

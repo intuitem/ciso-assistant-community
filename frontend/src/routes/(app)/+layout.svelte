@@ -5,7 +5,7 @@
 	import '../../app.css';
 
 	import { AppBar } from '@skeletonlabs/skeleton-svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate, setUseRiskCategoryLabel } from '$lib/utils/i18n';
 
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
@@ -21,7 +21,7 @@
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
 
-	import type { PageData, ActionData } from './$types';
+	import type { LayoutData, ActionData } from './$types';
 	import { getSidebarVisibleItems } from '$lib/utils/sidebar-config';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 
@@ -46,7 +46,7 @@
 	let classesSidebarOpen = $derived((open: boolean) => (open ? 'ml-64' : 'ml-7'));
 
 	interface Props {
-		data: PageData;
+		data: LayoutData;
 		form: ActionData;
 		sideBarVisibleItems?: any;
 		children?: import('svelte').Snippet;
@@ -60,6 +60,14 @@
 	}: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
+
+	// Sync the qualification/risk-category wording flag before children render
+	// (hydration would otherwise flip labels back), then keep it in sync when
+	// settings are invalidated.
+	setUseRiskCategoryLabel(data?.settings?.use_risk_category_label);
+	$effect.pre(() => {
+		setUseRiskCategoryLabel(data?.settings?.use_risk_category_label);
+	});
 
 	// Display title, model name, and description from either page data or manual store setting
 	const displayTitle = $derived($page.data?.title || $pageTitle);
@@ -154,7 +162,9 @@
 </svelte:head>
 
 <!-- App Shell -->
-<div class="overflow-x-clip">
+<!-- min-height and background live here (not on <main>) so appbar + main can
+     add up to exactly one viewport; min-h-screen on <main> alone always overflowed. -->
+<div class="overflow-x-clip min-h-dvh bg-linear-to-br from-surface-200-800 to-surface-150-850">
 	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
 	<AppBar
 		class="sticky top-0 z-50 border-b border-surface-200-800 transition-all duration-300 bg-surface-50-950 w-auto pb-2 px-4 {classesSidebarOpen(
@@ -235,11 +245,7 @@
 	{#if $page.data.featureflags?.chat_mode}
 		<ChatWidget />
 	{/if}
-	<main
-		class="min-h-screen p-8 bg-linear-to-br from-surface-200-800 to-surface-150-850 transition-all duration-300 {classesSidebarOpen(
-			sidebarOpen
-		)}"
-	>
+	<main class="p-8 transition-all duration-300 {classesSidebarOpen(sidebarOpen)}">
 		{@render children?.()}
 	</main>
 	<!-- ---- / ---- -->

@@ -104,6 +104,10 @@ export const LOCALE_MAP = {
 	sk: {
 		name: 'slovak',
 		flag: '🇸🇰'
+	},
+	sl: {
+		name: 'slovenian',
+		flag: '🇸🇮'
 	}
 };
 
@@ -133,7 +137,8 @@ export const language: any = {
 	lithuanian: m.lithuanian(),
 	korean: m.korean(),
 	estonian: m.estonian(),
-	slovak: m.slovak()
+	slovak: m.slovak(),
+	slovenian: m.slovenian()
 };
 
 export const defaultLangLabels = {
@@ -162,11 +167,13 @@ export const defaultLangLabels = {
 	lt: 'Lietuvių',
 	ko: '한국어',
 	et: 'Eesti',
-	sk: 'Slovenčina'
+	sk: 'Slovenčina',
+	sl: 'Slovenščina'
 };
 
 export function toCamelCase(str: string) {
 	if (typeof str !== 'string') return str;
+	str = str.replace(/[()]/g, ' ').replace(/\s+/g, ' ').trim();
 	str = str.charAt(0).toLowerCase() + str.slice(1);
 	return str.replace(/[_-\s]\w/g, (match) => match.charAt(1).toUpperCase());
 }

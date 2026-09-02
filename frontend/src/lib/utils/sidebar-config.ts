@@ -17,6 +17,8 @@ type SidebarBackendKeys = {
 	organisation_objectives: boolean;
 	organisation_issues: boolean;
 	quantitative_risk_studies: boolean;
+	threat_modeling: boolean;
+	ttps: boolean;
 	terminologies: boolean;
 	custom_fields: boolean;
 	bia: boolean;
@@ -24,6 +26,7 @@ type SidebarBackendKeys = {
 	contracts: boolean;
 	reports: boolean;
 	validation_flows: boolean;
+	workflows: boolean;
 	metrology: boolean;
 	personal_data: boolean;
 	purposes: boolean;
@@ -38,6 +41,8 @@ type SidebarBackendKeys = {
 	cwes: boolean;
 	custom_portals: boolean;
 	idp_groups: boolean;
+	jit_provisioning: boolean;
+	service_accounts: boolean;
 	posture_assessments: boolean;
 };
 
@@ -60,6 +65,8 @@ type SidebarFrontendKeys = {
 	organisationObjectives: boolean;
 	organisationIssues: boolean;
 	quantitativeRiskStudies: boolean;
+	threatModeling: boolean;
+	ttpCatalogs: boolean;
 	terminologies: boolean;
 	customFields: boolean;
 	businessImpactAnalysis: boolean;
@@ -67,6 +74,7 @@ type SidebarFrontendKeys = {
 	contracts: boolean;
 	reports: boolean;
 	validationFlows: boolean;
+	workflows: boolean;
 	metrology: boolean;
 	personalData: boolean;
 	purposes: boolean;
@@ -78,6 +86,7 @@ type SidebarFrontendKeys = {
 	cwes: boolean;
 	managePortals: boolean;
 	idpGroups: boolean;
+	serviceAccounts: boolean;
 	postureAssessments: boolean;
 };
 
@@ -103,6 +112,8 @@ export function getSidebarVisibleItems(
 		organisationObjectives: featureFlags?.organisation_objectives ?? false,
 		organisationIssues: featureFlags?.organisation_issues ?? false,
 		quantitativeRiskStudies: featureFlags?.quantitative_risk_studies ?? false,
+		threatModeling: featureFlags?.threat_modeling ?? false,
+		ttpCatalogs: featureFlags?.ttps ?? false,
 		terminologies: featureFlags?.terminologies ?? true,
 		customFields: featureFlags?.custom_fields ?? false,
 		businessImpactAnalysis: featureFlags?.bia ?? true,
@@ -110,6 +121,7 @@ export function getSidebarVisibleItems(
 		contracts: featureFlags?.contracts ?? false,
 		reports: featureFlags?.reports ?? false,
 		validationFlows: featureFlags?.validation_flows ?? false,
+		workflows: featureFlags?.workflows ?? false,
 		metrology: featureFlags?.metrology ?? true,
 		personalData: featureFlags?.personal_data ?? true,
 		purposes: featureFlags?.purposes ?? true,
@@ -120,7 +132,8 @@ export function getSidebarVisibleItems(
 		securityAdvisories: featureFlags?.security_advisories ?? true,
 		cwes: featureFlags?.cwes ?? true,
 		managePortals: featureFlags?.custom_portals ?? false,
-		idpGroups: featureFlags?.idp_groups ?? false,
+		idpGroups: (featureFlags?.idp_groups || featureFlags?.jit_provisioning) ?? false,
+		serviceAccounts: featureFlags?.service_accounts ?? false,
 		postureAssessments: featureFlags?.posture_assessments ?? false,
 		documents: featureFlags?.document_management ?? true,
 		documentTemplates: featureFlags?.document_management ?? true,

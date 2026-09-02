@@ -21,6 +21,7 @@ from core.models import (
     Threat,
     _sync_questions_from_data,
 )
+from sec_intel.models import Tactic, Technique, TTPCatalog
 from metrology.models import MetricDefinition
 from django.db import transaction
 from iam.models import Folder
@@ -115,6 +116,16 @@ class RequirementNodeImporter:
         if parent_urn:
             parent_urn = parent_urn.lower()
 
+        display_mode = self.requirement_data.get(
+            "display_mode", RequirementNode.DisplayMode.DEFAULT
+        )
+        # Splash screens are never assessable: a splash+assessable node would
+        # surface as a regular requirement in the respondent view.
+        assessable = (
+            self.requirement_data.get("assessable")
+            and display_mode != RequirementNode.DisplayMode.SPLASH
+        )
+
         # update_or_create scoped to the framework: identical to create()
         # for fresh imports, updates in place when the framework row was
         # adopted (see FrameworkImporter.import_framework).
@@ -124,7 +135,7 @@ class RequirementNodeImporter:
             defaults=dict(
                 folder=Folder.get_root_folder(),
                 parent_urn=parent_urn,
-                assessable=self.requirement_data.get("assessable"),
+                assessable=assessable,
                 ref_id=self.requirement_data.get("ref_id"),
                 annotation=self.requirement_data.get("annotation"),
                 typical_evidence=self.requirement_data.get("typical_evidence"),
@@ -135,9 +146,7 @@ class RequirementNodeImporter:
                 implementation_groups=self.requirement_data.get(
                     "implementation_groups"
                 ),
-                display_mode=self.requirement_data.get(
-                    "display_mode", RequirementNode.DisplayMode.DEFAULT
-                ),
+                display_mode=display_mode,
                 weight=self.requirement_data.get("weight", 1),
                 min_score=self.requirement_data.get("min_score"),
                 max_score=self.requirement_data.get("max_score"),
@@ -427,6 +436,7 @@ class FrameworkImporter:
                     "implementation_groups_definition"
                 ),
                 outcomes_definition=self.framework_data.get("outcomes_definition", []),
+                field_visibility=self.framework_data.get("field_visibility") or {},
                 provider=library_object.provider,
                 locale=library_object.locale,
                 default_locale=library_object.default_locale,
@@ -444,6 +454,102 @@ class FrameworkImporter:
                     rn.requirement_data["urn"].lower() for rn in self._requirement_nodes
                 ]
             ).delete()
+
+
+class ReferentialImporterMixin:
+    REQUIRED_FIELDS = {"ref_id", "urn"}
+
+    def __init__(self, data: dict, index: int = 0):
+        self.data = data
+        self.index = index
+        self._object = None
+
+    def is_valid(self) -> Union[str, None]:
+        if missing_fields := self.REQUIRED_FIELDS - set(self.data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+
+    def _common(self, library_object: LoadedLibrary) -> dict:
+        return dict(
+            library=library_object,
+            urn=self.data["urn"].lower(),
+            ref_id=self.data["ref_id"],
+            name=self.data.get("name"),
+            description=self.data.get("description"),
+            annotation=self.data.get("annotation"),
+            provider=library_object.provider,
+            is_published=True,
+            locale=library_object.locale,
+            translations=self.data.get("translations", {}),
+            default_locale=library_object.default_locale,
+        )
+
+    def _resolve(self, model, urn: str, field: str):
+        identifier = self.data.get("ref_id", self.data.get("urn"))
+        if not urn:
+            message = f"Missing {field} reference in '{identifier}'."
+            logger.error(message)
+            raise ValueError(message)
+        try:
+            return model.objects.get(urn=urn.lower())
+        except model.DoesNotExist as exc:
+            message = f"Unknown {field} '{urn}' referenced in '{identifier}'."
+            logger.error(message)
+            raise ValueError(message) from exc
+
+
+class TTPCatalogImporter(ReferentialImporterMixin):
+    def import_object(self, library_object: LoadedLibrary):
+        self._object = TTPCatalog.objects.create(
+            **self._common(library_object),
+            grouping_definition=self.data.get("grouping_definition"),
+        )
+
+
+class TacticImporter(ReferentialImporterMixin):
+    REQUIRED_FIELDS = {"ref_id", "urn", "catalog_urn"}
+
+    def import_object(self, library_object: LoadedLibrary):
+        self._object = Tactic.objects.create(
+            **self._common(library_object),
+            catalog=self._resolve(TTPCatalog, self.data["catalog_urn"], "TTP catalog"),
+            order_id=self.data.get("order_id", self.index),
+        )
+
+
+class TechniqueImporter(ReferentialImporterMixin):
+    def import_object(self, library_object: LoadedLibrary):
+        catalog = None
+        if catalog_urn := self.data.get("catalog_urn"):
+            catalog = self._resolve(TTPCatalog, catalog_urn, "TTP catalog")
+        self._object = Technique.objects.create(
+            **self._common(library_object),
+            catalog=catalog,
+            order_id=self.data.get("order_id", self.index),
+            groups=self.data.get("groups"),
+            is_deprecated=self.data.get("is_deprecated", False),
+        )
+
+    def link_object(self):
+        """Resolve links whose targets may not exist at create time."""
+        if self._object is None:
+            return
+
+        if parent_urn := self.data.get("parent_urn"):
+            self._object.parent = self._resolve(
+                Technique, parent_urn, "parent technique"
+            )
+            self._object.save(update_fields=["parent"])
+
+        for field, model, key in (
+            ("tactics", Tactic, "tactic"),
+            ("reference_controls", ReferenceControl, "reference control"),
+        ):
+            targets = [
+                self._resolve(model, urn, key) for urn in self.data.get(field, [])
+            ]
+            # .set() not .add(): links removed from the document must be dropped
+            if targets or getattr(self._object, field).exists():
+                getattr(self._object, field).set(targets)
 
 
 class ThreatImporter:
@@ -649,6 +755,9 @@ class LibraryImporter:
 
     REQUIRED_FIELDS = {"ref_id", "urn", "locale", "objects", "version"}
     OBJECT_FIELDS = [
+        "ttp_catalogs",
+        "tactics",
+        "techniques",
         "threats",
         "reference_controls",
         "metric_definitions",
@@ -659,6 +768,7 @@ class LibraryImporter:
         "requirement_mapping_set",  # This field name is deprecated
         "requirement_mapping_sets",
         "preset",
+        "workflows",
     ]
     NON_DEPRECATED_OBJECT_FIELDS = [
         field
@@ -669,11 +779,61 @@ class LibraryImporter:
     def __init__(self, library: StoredLibrary):
         self._library = library
         self._frameworks = []
+        self._ttp_catalogs = []
+        self._tactics = []
+        self._techniques = []
         self._threats = []
         self._reference_controls = []
         self._metric_definitions = []
         self._risk_matrices = []
         self._requirement_mapping_sets = []
+        self._workflows = []
+
+    def init_workflows(self, workflows: List[dict]) -> Union[str, None]:
+        """Structural validation of workflow objects; actual
+        creation happens in import_objects via the workflows app."""
+        from automation.workflows.import_export import (
+            WorkflowImportError,
+            validate_workflow_document,
+        )
+
+        if not isinstance(workflows, list) or not workflows:
+            return "objects.workflows must be a non-empty list"
+        for index, entry in enumerate(workflows):
+            try:
+                validate_workflow_document(entry)
+            except WorkflowImportError as e:
+                return f"objects.workflows[{index}]: {e.message}"
+        self._workflows = workflows
+
+    def _init_referential(self, data, importer_cls, attr, label):
+        importers, errors = [], []
+        for index, item in enumerate(data):
+            importer = importer_cls(item, index)
+            importers.append(importer)
+            if (error := importer.is_valid()) is not None:
+                errors.append((index, error))
+        setattr(self, attr, importers)
+        if errors:
+            index, error = errors[0]
+            return (
+                f"[{label.upper()}_ERROR] {len(errors)} invalid {label}"
+                f"{'s' if len(errors) > 1 else ''} detected, entry {index + 1} "
+                f"has the following error : {error}"
+            )
+
+    def init_ttp_catalogs(self, data) -> Union[str, None]:
+        return self._init_referential(
+            data, TTPCatalogImporter, "_ttp_catalogs", "ttp_catalog"
+        )
+
+    def init_tactics(self, data) -> Union[str, None]:
+        return self._init_referential(data, TacticImporter, "_tactics", "tactic")
+
+    def init_techniques(self, data) -> Union[str, None]:
+        return self._init_referential(
+            data, TechniqueImporter, "_techniques", "technique"
+        )
 
     def init_threats(self, threats: List[dict]) -> Union[str, None]:
         threat_importers = []
@@ -905,6 +1065,16 @@ class LibraryImporter:
                 )
                 return requirement_mapping_set_import_error
 
+        for key, initialiser in (
+            ("ttp_catalogs", self.init_ttp_catalogs),
+            ("tactics", self.init_tactics),
+            ("techniques", self.init_techniques),
+        ):
+            if key in library_objects:
+                if (error := initialiser(library_objects[key])) is not None:
+                    logger.error("TTP import error", key=key, error=error)
+                    return error
+
         if "threats" in library_objects:
             threat_data = library_objects["threats"]
             if (threat_import_error := self.init_threats(threat_data)) is not None:
@@ -945,6 +1115,14 @@ class LibraryImporter:
                 )
             ) is not None:
                 return metric_definition_import_error
+
+        if "workflows" in library_objects:
+            if (
+                workflow_import_error := self.init_workflows(
+                    library_objects["workflows"]
+                )
+            ) is not None:
+                return workflow_import_error
 
     def check_and_import_dependencies(self) -> Union[str, None]:
         """Check and import library dependencies."""
@@ -1017,11 +1195,24 @@ class LibraryImporter:
     def import_objects(self, library_object: LoadedLibrary):
         """Import library objects."""
 
+        for ttp_catalog in self._ttp_catalogs:
+            ttp_catalog.import_object(library_object)
+
+        for tactic in self._tactics:
+            tactic.import_object(library_object)
+
+        for technique in self._techniques:
+            technique.import_object(library_object)
+
         for threat in self._threats:
             threat.import_threat(library_object)
 
         for reference_control in self._reference_controls:
             reference_control.import_reference_control(library_object)
+
+        # after reference controls: techniques link to them and to parents
+        for technique in self._techniques:
+            technique.link_object()
 
         for metric_definition in self._metric_definitions:
             metric_definition.import_metric_definition(library_object)
@@ -1034,6 +1225,27 @@ class LibraryImporter:
 
         for requirement_mapping_set in self._requirement_mapping_sets:
             requirement_mapping_set.load(library_object)
+
+        # Workflows divorce at load: created as plain user documents
+        # with provenance stamped, no FK to the library — unload leaves them,
+        # update never mutates them.
+        if self._workflows:
+            from iam.models import Folder as IamFolder
+
+            from automation.workflows.import_export import import_workflow
+
+            for entry in self._workflows:
+                _workflow, warnings = import_workflow(
+                    entry,
+                    IamFolder.get_root_folder(),
+                    source_version=self._library.version,
+                )
+                for warning in warnings:
+                    logger.warning(
+                        "Workflow library load warning",
+                        library=self._library.urn,
+                        warning=warning,
+                    )
 
     @transaction.atomic
     def _import_library(self):
@@ -1056,6 +1268,9 @@ class LibraryImporter:
         if error_msg is not None:
             return error_msg
 
+        from automation.workflows.graph import GraphValidationError
+        from automation.workflows.import_export import WorkflowImportError
+
         for _ in range(10):
             try:
                 self._import_library()
@@ -1065,6 +1280,14 @@ class LibraryImporter:
                     time.sleep(3)
                 else:
                     raise e
+            except (WorkflowImportError, GraphValidationError) as e:
+                # A malformed workflow object must surface as the error-string
+                # contract, not a 500 (structural checks run at init_workflows,
+                # but save_graph can still reject at load).
+                logger.error(
+                    "Workflow library load error", error=e, library=self._library
+                )
+                return getattr(e, "message", str(e))
             except Exception as e:
                 logger.error("Library import error", error=e, library=self._library)
                 raise e

@@ -205,7 +205,7 @@
 		number: 'preset-filled-success-500',
 		object: 'preset-filled-warning-500',
 		list: 'preset-filled-tertiary-500',
-		image: 'preset-filled-surface-500'
+		image: 'preset-filled-surface-900-100'
 	};
 
 	$effect(() => {
@@ -215,6 +215,10 @@
 
 <div class="flex flex-col gap-6">
 	<span class="text-surface-600-400">{m.wordTemplatesDescription()}</span>
+	<div class="card p-4 preset-tonal-warning w-fit">
+		<i class="fa-solid fa-warning mr-2 text-warning-900-5"></i>
+		{m.wordTemplatesWarning()}
+	</div>
 
 	{#if successMessage}
 		<div class="alert preset-filled-success-500 p-3">
@@ -336,7 +340,7 @@
 									>
 									<span
 										class="badge text-xs shrink-0 {TYPE_BADGE_CLASSES[variable.type] ??
-											'preset-filled-surface-500'}">{variable.type}</span
+											'preset-filled-surface-900-100'}">{variable.type}</span
 									>
 									<span class="text-surface-600-400 text-xs">{variable.description}</span>
 								</div>

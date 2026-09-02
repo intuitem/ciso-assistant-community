@@ -9,6 +9,11 @@ import json
 import structlog
 
 from chat.embedding_models import DEFAULT_EMBEDDING_MODEL
+from chat.memory import (
+    SESSION_SUMMARY_NOTE,
+    strip_framing_markers,
+    wrap_session_summary,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -22,10 +27,17 @@ DEFAULT_SYSTEM_PROMPT = (
     "(ISO 27001, NIST CSF, NIS2, GDPR, SOC2, etc.) and can answer questions about their requirements.\n\n"
     "RULES:\n"
     "- Answer ONLY based on the provided context. Never invent data, counts, or object names.\n"
+    "- Report counts exactly as given. Never add, subtract or estimate numbers yourself — "
+    "if a total you need is not present, say which query would produce it instead of "
+    "computing one.\n"
     "- If the context doesn't contain enough information, say so clearly.\n"
     "- When citing framework requirements, always include the framework name and reference ID "
     "(e.g. 'ISO 27001 A.8.1', 'NIST CSF PR.AC-1'). These are your sources.\n"
     "- Be concise and precise. Prefer structured output (lists, tables) for data.\n"
+    "- Query results carry ratings you must read before saying data is missing: risk "
+    "scenarios come with 'Current/Residual/Inherent risk level breakdown' counts and "
+    "per-scenario current_risk=/residual_risk= labels; findings and vulnerabilities "
+    "come with a 'Severity breakdown'. '--' means not rated.\n"
     "- You can read data and propose creating new objects. You cannot modify or delete anything.\n"
     "- Only propose creating objects when the user EXPLICITLY asks to create something. "
     "Never proactively suggest creating objects unless asked.\n"
@@ -59,6 +71,22 @@ TOOL_SYSTEM_PROMPT = (
     "- 'risk scenarios with no controls' → model='risk_scenario', has_no_related=['applied_controls']\n"
     "- 'my domains' → model='folder', action='list'\n"
     "- 'summarize risks' → model='risk_scenario', action='summary'\n"
+    "- 'how many high risks' / 'combien de risques élevés' → model='risk_scenario', "
+    "action='count', risk_level=['high'] (use the level wording the user used; add "
+    "risk_level_scope='residual' when they ask about residual risk)\n"
+    "- 'high or very high risks' / 'risques élevés ou très élevés' → ONE call with "
+    "risk_level=['high','very high']. Never run two queries and add the numbers.\n"
+    "- 'how many are non-compliant' / 'combien ne sont pas conformes' / 'gaps' → "
+    "model='requirement_assessment', action='count', result=['non_compliant'] "
+    "(on an audit page this is scoped to that audit automatically)\n"
+    "- 'non-compliant OR partially compliant' / 'non conformes ou partiellement "
+    "conformes' → ONE call with result=['non_compliant','partially_compliant']. "
+    "Filters accept several values — never run two queries and add the numbers.\n"
+    "- 'where are the gaps' / 'compliance breakdown' → "
+    "model='requirement_assessment', action='summary'\n"
+    "- 'open findings' / 'constats ouverts' → model='finding', action='summary'\n"
+    "- 'critical findings' / 'constats critiques' → model='finding', action='list', "
+    "severity=['critical']\n"
     "- 'where are we on X' / 'status of X' → model='compliance_assessment', search='X'\n"
     "- 'did we audit X' / 'audit on X' → model='compliance_assessment', search='X' (do NOT add domain filter)\n"
     "- 'list audits' / 'list assessments' → model='compliance_assessment', action='list'\n\n"
@@ -175,11 +203,19 @@ class LLM(Protocol):
     """Interface for LLM providers."""
 
     def generate(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> str: ...
 
     def stream(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> Iterator[tuple[str, str]]:
         """Stream response as (type, content) tuples. Type is 'token' or 'thinking'."""
         ...
@@ -249,29 +285,82 @@ class OllamaEmbedder:
         return resp.json()["embedding"]
 
 
+def _normalize_system_messages(
+    system_prompt: str,
+    history: list[dict] | None = None,
+    directives: str = "",
+) -> list[dict]:
+    """Build history with a single system message at position 0.
+
+    Qwen and others require the system message only at the beginning.
+    ``directives`` go last so they outrank the summary.
+    """
+    system_parts = [system_prompt]
+    messages = []
+
+    if history:
+        for msg in history:
+            if msg["role"] == "system":
+                # session summary — LLM output over user data, not trusted
+                summary = strip_framing_markers(msg["content"] or "").strip()
+                if summary:
+                    system_parts.append(
+                        f"{SESSION_SUMMARY_NOTE}\n{wrap_session_summary(summary)}"
+                    )
+            else:
+                messages.append({"role": msg["role"], "content": msg["content"]})
+
+    # strict templates require the first non-system message to be a user turn
+    while messages and messages[0]["role"] != "user":
+        messages.pop(0)
+
+    system_parts.append(directives)
+
+    return [
+        {
+            "role": "system",
+            "content": "\n\n".join(part for part in system_parts if part),
+        },
+        *messages,
+    ]
+
+
+def _merge_adjacent_roles(messages: list[dict]) -> list[dict]:
+    """Collapse consecutive same-role messages into one.
+
+    Mistral-family templates reject non-alternating roles, and a replayed
+    tool observation lands right before the current user turn.
+    """
+    merged: list[dict] = []
+    for msg in messages:
+        if merged and merged[-1]["role"] == msg["role"]:
+            merged[-1]["content"] = f"{merged[-1]['content']}\n\n{msg['content']}"
+        else:
+            merged.append(dict(msg))
+    return merged
+
+
 def _build_messages(
     system_prompt: str,
     prompt: str,
     context: str,
     history: list[dict] | None = None,
+    directives: str = "",
 ) -> list[dict]:
     """Build the message array for LLM calls.
 
-    Uses explicit delimiters to separate system context from user input,
-    making it harder for prompt injection in user messages to be interpreted
-    as system instructions.
+    Context stays on the user turn: per-turn data that must outrank replayed
+    observations, and it carries database text. ``directives`` are sent
+    twice — the system copy is authoritative, the restatement is the one
+    small models actually obey.
     """
-    messages = [{"role": "system", "content": system_prompt}]
-    if history:
-        for msg in history:
-            messages.append({"role": msg["role"], "content": msg["content"]})
+    messages = _normalize_system_messages(system_prompt, history, directives)
     if context:
-        # Context goes in a separate system message so it's clearly not user input
-        messages.append(
-            {"role": "system", "content": f"[CONTEXT]\n{context}\n[/CONTEXT]"}
-        )
+        prompt = f"[CONTEXT]\n{strip_framing_markers(context)}\n[/CONTEXT]\n\n{prompt}"
+    if directives:
+        prompt = f"{prompt}\n\n{directives}"
     messages.append({"role": "user", "content": prompt})
-    return messages
+    return _merge_adjacent_roles(messages)
 
 
 class OllamaLLM:
@@ -298,9 +387,15 @@ class OllamaLLM:
         return {"temperature": self.temperature} if self.temperature_enabled else {}
 
     def generate(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> str:
-        messages = _build_messages(self.system_prompt, prompt, context, history)
+        messages = _build_messages(
+            self.system_prompt, prompt, context, history, directives
+        )
         body: dict = {"model": self.model, "messages": messages, "stream": False}
         if options := self._options():
             body["options"] = options
@@ -309,11 +404,17 @@ class OllamaLLM:
         return strip_thinking(resp.json()["message"]["content"])
 
     def _raw_stream(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> Iterator[str]:
         import httpx
 
-        messages = _build_messages(self.system_prompt, prompt, context, history)
+        messages = _build_messages(
+            self.system_prompt, prompt, context, history, directives
+        )
         body: dict = {"model": self.model, "messages": messages, "stream": True}
         if options := self._options():
             body["options"] = options
@@ -330,9 +431,15 @@ class OllamaLLM:
                         yield content
 
     def stream(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> Iterator[tuple[str, str]]:
-        return filter_thinking_tokens(self._raw_stream(prompt, context, history))
+        return filter_thinking_tokens(
+            self._raw_stream(prompt, context, history, directives)
+        )
 
     def tool_call(
         self,
@@ -340,12 +447,9 @@ class OllamaLLM:
         tools: list[dict],
         history: list[dict] | None = None,
     ) -> dict | None:
-        messages = [{"role": "system", "content": TOOL_SYSTEM_PROMPT}]
-        if history:
-            for msg in history:
-                messages.append({"role": msg["role"], "content": msg["content"]})
+        messages = _normalize_system_messages(TOOL_SYSTEM_PROMPT, history)
         messages.append({"role": "user", "content": prompt})
-
+        messages = _merge_adjacent_roles(messages)
         import httpx
 
         body: dict = {
@@ -418,9 +522,15 @@ class OpenAICompatibleLLM:
         return f"{self.base_url}/chat/completions"
 
     def generate(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> str:
-        messages = _build_messages(self.system_prompt, prompt, context, history)
+        messages = _build_messages(
+            self.system_prompt, prompt, context, history, directives
+        )
         body: dict = {"messages": messages, "stream": False}
         if self.model:
             body["model"] = self.model
@@ -431,11 +541,17 @@ class OpenAICompatibleLLM:
         return strip_thinking(resp.json()["choices"][0]["message"]["content"])
 
     def _raw_stream(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> Iterator[tuple[str, str]]:
         import httpx
 
-        messages = _build_messages(self.system_prompt, prompt, context, history)
+        messages = _build_messages(
+            self.system_prompt, prompt, context, history, directives
+        )
         body: dict = {"messages": messages, "stream": True}
         if self.model:
             body["model"] = self.model
@@ -474,9 +590,15 @@ class OpenAICompatibleLLM:
                     continue
 
     def stream(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> Iterator[tuple[str, str]]:
-        return _merge_thinking_stream(self._raw_stream(prompt, context, history))
+        return _merge_thinking_stream(
+            self._raw_stream(prompt, context, history, directives)
+        )
 
     def tool_call(
         self,
@@ -484,11 +606,9 @@ class OpenAICompatibleLLM:
         tools: list[dict],
         history: list[dict] | None = None,
     ) -> dict | None:
-        messages = [{"role": "system", "content": TOOL_SYSTEM_PROMPT}]
-        if history:
-            for msg in history:
-                messages.append({"role": msg["role"], "content": msg["content"]})
+        messages = _normalize_system_messages(TOOL_SYSTEM_PROMPT, history)
         messages.append({"role": "user", "content": prompt})
+        messages = _merge_adjacent_roles(messages)
 
         import httpx
 
@@ -599,12 +719,20 @@ class StubLLM:
     """Fallback when no LLM is available — returns retrieval results only."""
 
     def generate(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> str:
         return f"[No LLM configured — showing retrieved context]\n\n{context}"
 
     def stream(
-        self, prompt: str, context: str, history: list[dict] | None = None
+        self,
+        prompt: str,
+        context: str,
+        history: list[dict] | None = None,
+        directives: str = "",
     ) -> Iterator[tuple[str, str]]:
         yield ("token", self.generate(prompt, context))
 

@@ -117,6 +117,13 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		errors: false
 	});
 
+	const threatModelCreateForm = await superValidate(
+		initialData,
+		zod(modelSchema('threat-models')),
+		{ errors: false }
+	);
+	const threatModelModel = getModelInfo('threat-models');
+
 	const measureModel = getModelInfo('applied-controls');
 	const measureSelectOptions: Record<string, any> = {};
 
@@ -150,6 +157,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		tables,
 		measureModel,
 		measureCreateForm,
+		threatModelModel,
+		threatModelCreateForm,
 		title: m.edit()
 	};
 };
@@ -157,6 +166,51 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 export const actions: Actions = {
 	updateRiskScenario: async (event) => {
 		return defaultWriteFormAction({ event, urlModel: 'risk-scenarios', action: 'edit' });
+	},
+	createThreatModel: async (event) => {
+		const URLModel = 'threat-models';
+		const model = getModelInfo(URLModel);
+		const form = await superValidate(event.request, zod(modelSchema(URLModel)));
+
+		if (!form.valid) {
+			return fail(400, { form });
+		}
+
+		const res = await event.fetch(`${BASE_API_URL}/${URLModel}/`, {
+			method: 'POST',
+			body: JSON.stringify(form.data)
+		});
+
+		if (!res.ok) {
+			const response: Record<string, any> = await res.json();
+			console.error('server response:', response);
+			Object.entries(response).forEach(([key, value]) => {
+				setError(form, key, safeTranslate(value));
+			});
+			return fail(400, { form });
+		}
+
+		const threatModel = await res.json();
+		const scenarioEndpoint = `${BASE_API_URL}/risk-scenarios/${event.params.id}/`;
+		const scenario = await event.fetch(`${scenarioEndpoint}object/`).then((res) => res.json());
+
+		const patchRes = await event.fetch(scenarioEndpoint, {
+			method: 'PATCH',
+			body: JSON.stringify({ threat_models: [...(scenario.threat_models ?? []), threatModel.id] })
+		});
+		if (!patchRes.ok) {
+			console.error('server response:', await patchRes.json());
+			return fail(400, { form });
+		}
+
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullyCreatedObject({ object: model.verboseName.toLowerCase() })
+			},
+			event
+		);
+		return { form, newThreatModel: threatModel.id };
 	},
 	createAppliedControl: async (event) => {
 		const URLModel = 'applied-controls';

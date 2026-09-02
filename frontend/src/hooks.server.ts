@@ -1,5 +1,5 @@
 import { BASE_API_URL, DEFAULT_LANGUAGE } from '$lib/utils/constants';
-import { safeTranslate } from '$lib/utils/i18n';
+import { safeTranslate, setUseRiskCategoryLabel } from '$lib/utils/i18n';
 import type { User } from '$lib/utils/types';
 import { redirect, type Handle, type HandleFetch, type RequestEvent } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -149,6 +149,13 @@ async function validateUserSession(event: RequestEvent): Promise<User | null> {
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
+	// Inbound webhook passthrough: unauthenticated by design (the
+	// URL secret is the credential) — skip locale middleware, CSRF-token fetch
+	// and session validation, none of which apply to machine deliveries.
+	if (event.url.pathname.startsWith('/api/workflows/hooks/')) {
+		return resolve(event);
+	}
+
 	const localeForRequest = await ensureDefaultLocale(event);
 	fallbackLocaleStore.set(event.request, localeForRequest);
 
@@ -193,6 +200,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 				}
 			});
 			event.locals.settings = await generalSettings.json();
+			setUseRiskCategoryLabel(event.locals.settings?.use_risk_category_label);
 
 			const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/`, {
 				credentials: 'include',

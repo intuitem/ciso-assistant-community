@@ -74,10 +74,6 @@ services:
       - PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost:8443/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
-      - HOME=/tmp
-      - XDG_CACHE_HOME=/tmp/.cache
-      - XDG_CONFIG_HOME=/tmp/.config
-      - XDG_DATA_HOME=/tmp/.local/share
     image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
     pull_policy: always
     read_only: true
@@ -91,7 +87,6 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-    user: "1001:1001"
 
   qdrant:
     container_name: qdrant
@@ -101,6 +96,41 @@ services:
       - qdrant_data:/qdrant/storage
     ports:
       - 127.0.0.1:6333:6333
+
+  # MCP server for external AI orchestrators. Opt-in: `docker compose --profile mcp up -d`.
+  # No `ports:` — reachable only through caddy at /mcp.
+  mcp:
+    container_name: mcp
+    image: ghcr.io/intuitem/ciso-assistant-community/mcp:latest
+    pull_policy: always
+    profiles:
+      - mcp
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - API_URL=http://backend:8000/api
+      - CA_MCP_TRANSPORT=streamable-http
+      - CA_MCP_HOST=0.0.0.0
+      - CA_MCP_PORT=8001
+      - CA_MCP_READ_ONLY=true
+      # matched against the Host header, port included; does not set the bind address
+      - CA_MCP_ALLOWED_HOSTS=localhost:8443
+      # each caller presents its own PAT
+      - CA_MCP_ALLOW_ENV_TOKEN=false
+      - HOME=/tmp
+      - XDG_CACHE_HOME=/tmp/.cache
+      - XDG_CONFIG_HOME=/tmp/.config
+      - XDG_DATA_HOME=/tmp/.local/share
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
+    user: "1001:1001"
 
   caddy:
     container_name: caddy
@@ -118,6 +148,7 @@ services:
     command: |
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000
+      reverse_proxy /mcp* mcp:8001
       reverse_proxy /* frontend:3000
       tls internal
       }" > Caddyfile && caddy run'

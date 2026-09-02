@@ -53,7 +53,7 @@
 						class="btn preset-filled-primary-500">{m.processButton()}</Anchor
 					>
 				{:else}
-					<p class="btn-base rounded-base select-none preset-filled-surface-500 opacity-30">
+					<p class="btn-base rounded-base select-none preset-tonal-surface opacity-30">
 						{m.processButton()}
 					</p>
 				{/if}

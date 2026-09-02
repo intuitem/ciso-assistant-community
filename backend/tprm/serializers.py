@@ -1,25 +1,30 @@
-from django.db import IntegrityError, transaction
-from rest_framework import serializers
+import structlog
 from django.conf import settings
-from core.models import ComplianceAssessment, Framework, RequirementAssignment
+from django.contrib.auth import get_user_model
+from django.db import IntegrityError, transaction
+from django.utils.translation import gettext_lazy as _
+from rest_framework import serializers
 
+from core.models import (
+    Answer,
+    ComplianceAssessment,
+    Framework,
+    RequirementAssessment,
+    RequirementAssignment,
+)
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.serializers import BaseModelSerializer
 from core.utils import RoleCodename, UserGroupCodename
-from pmbok.models import GenericCollection
 from iam.models import Folder, Role, RoleAssignment, UserGroup
-from django.contrib.auth import get_user_model
+from pmbok.models import GenericCollection
 from tprm.models import (
+    Contract,
     Entity,
     EntityAssessment,
     Representative,
     Solution,
     SolutionSubcontractor,
-    Contract,
 )
-from django.utils.translation import gettext_lazy as _
-
-import structlog
 
 logger = structlog.get_logger(__name__)
 
@@ -91,6 +96,10 @@ class EntityReadSerializer(BaseModelSerializer):
 
 
 class EntityWriteSerializer(BaseModelSerializer):
+    # The default "Main" entity is created built-in (so it can't be deleted) but
+    # is user-owned and fully editable — e.g. renamed to the org's name.
+    BUILTIN_EDITABLE_FIELDS = "__all__"
+
     class Meta:
         model = Entity
         exclude = ["owned_folders"]
@@ -136,6 +145,7 @@ class EntityWriteSerializer(BaseModelSerializer):
 class EntityImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     owned_folders = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+    parent_entity = HashSlugRelatedField(slug_field="pk", read_only=True)
     relationship = serializers.SlugRelatedField(
         slug_field="name", read_only=True, many=True
     )
@@ -143,21 +153,179 @@ class EntityImportExportSerializer(BaseModelSerializer):
     class Meta:
         model = Entity
         fields = [
+            "ref_id",
             "name",
             "description",
             "folder",
+            "is_active",
             "mission",
             "reference_link",
             "owned_folders",
+            "parent_entity",
+            "default_dependency",
+            "default_penetration",
+            "default_maturity",
+            "default_trust",
+            "legal_identifiers",
             "country",
             "currency",
             "dora_entity_type",
             "dora_entity_hierarchy",
             "dora_assets_value",
             "dora_competent_authority",
+            "dora_provider_person_type",
             "created_at",
             "updated_at",
             "relationship",
+        ]
+
+
+class EntityAssessmentImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
+    entity = HashSlugRelatedField(slug_field="pk", read_only=True)
+    compliance_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
+    evidence = HashSlugRelatedField(slug_field="pk", read_only=True)
+    solutions = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+
+    class Meta:
+        model = EntityAssessment
+        # authors / reviewers / representatives are User/Actor relations that
+        # are not part of a domain export, so they are intentionally omitted.
+        fields = [
+            "name",
+            "description",
+            "folder",
+            "perimeter",
+            "version",
+            "status",
+            "observation",
+            "eta",
+            "due_date",
+            "criticality",
+            "penetration",
+            "dependency",
+            "maturity",
+            "trust",
+            "conclusion",
+            "reference_link",
+            "entity",
+            "compliance_assessment",
+            "evidence",
+            "solutions",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class RepresentativeImportExportSerializer(BaseModelSerializer):
+    entity = HashSlugRelatedField(slug_field="pk", read_only=True)
+    email = serializers.EmailField(validators=[], required=False, allow_blank=True)
+
+    class Meta:
+        model = Representative
+        # user (FK to iam.User) is intentionally omitted: users are not exported.
+        fields = [
+            "ref_id",
+            "entity",
+            "email",
+            "first_name",
+            "last_name",
+            "phone",
+            "role",
+            "description",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class SolutionImportExportSerializer(BaseModelSerializer):
+    provider_entity = HashSlugRelatedField(slug_field="pk", read_only=True)
+    recipient_entity = HashSlugRelatedField(slug_field="pk", read_only=True)
+    assets = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+
+    class Meta:
+        model = Solution
+        # owner (M2M to core.Actor) is intentionally omitted.
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "provider_entity",
+            "recipient_entity",
+            "is_active",
+            "reference_link",
+            "criticality",
+            "assets",
+            "dora_ict_service_type",
+            "storage_of_data",
+            "data_location_storage",
+            "data_location_processing",
+            "dora_data_sensitiveness",
+            "dora_reliance_level",
+            "dora_substitutability",
+            "dora_non_substitutability_reason",
+            "dora_has_exit_plan",
+            "dora_reintegration_possibility",
+            "dora_discontinuing_impact",
+            "dora_alternative_providers_identified",
+            "dora_alternative_providers",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class SolutionSubcontractorImportExportSerializer(BaseModelSerializer):
+    solution = HashSlugRelatedField(slug_field="pk", read_only=True)
+    subcontractor = HashSlugRelatedField(slug_field="pk", read_only=True)
+    recipient = HashSlugRelatedField(slug_field="pk", read_only=True)
+
+    class Meta:
+        model = SolutionSubcontractor
+        fields = [
+            "solution",
+            "subcontractor",
+            "recipient",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class ContractImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    provider_entity = HashSlugRelatedField(slug_field="pk", read_only=True)
+    beneficiary_entity = HashSlugRelatedField(slug_field="pk", read_only=True)
+    overarching_contract = HashSlugRelatedField(slug_field="pk", read_only=True)
+    evidences = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+    solutions = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+
+    class Meta:
+        model = Contract
+        # owner (M2M to core.Actor) is intentionally omitted.
+        fields = [
+            "ref_id",
+            "name",
+            "description",
+            "folder",
+            "provider_entity",
+            "beneficiary_entity",
+            "overarching_contract",
+            "evidences",
+            "solutions",
+            "status",
+            "start_date",
+            "end_date",
+            "dora_contractual_arrangement",
+            "currency",
+            "annual_expense",
+            "termination_reason",
+            "is_intragroup",
+            "dora_exclude",
+            "governing_law_country",
+            "notice_period_entity",
+            "notice_period_provider",
+            "created_at",
+            "updated_at",
         ]
 
 
@@ -201,6 +369,9 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
     selected_implementation_groups = serializers.ListField(
         child=serializers.CharField(), required=False
     )
+    link_audit = serializers.PrimaryKeyRelatedField(
+        queryset=ComplianceAssessment.objects.all(), required=False, allow_null=True
+    )
 
     def _extract_audit_data(self, validated_data):
         audit_data = {
@@ -209,59 +380,89 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             "selected_implementation_groups": validated_data.pop(
                 "selected_implementation_groups", None
             ),
+            "link_audit": validated_data.pop("link_audit", None),
         }
         return audit_data
 
+    def _lock_instance_without_audit(self, instance, field_name):
+        locked = EntityAssessment.objects.select_for_update().get(pk=instance.pk)
+        if getattr(locked, "compliance_assessment_id", None):
+            raise serializers.ValidationError(
+                {field_name: [_("An audit already exists for this assessment")]}
+            )
+        return locked
+
+    def _make_enclave_folder(self, instance):
+        from tprm.services import enclave_folder
+
+        return enclave_folder(instance)
+
+    def _finalize_linked_audit(self, instance, audit):
+        """Shared tail for create/link."""
+        from tprm.services import finalize_linked_audit
+
+        finalize_linked_audit(instance, audit)
+
+    def _create_audit(self, instance, audit_data):
+        if not audit_data.get("framework"):
+            raise serializers.ValidationError({"framework": [_("Framework required")]})
+
+        from tprm.services import create_enclave_audit
+
+        with transaction.atomic():
+            locked = self._lock_instance_without_audit(instance, "create_audit")
+            audit = create_enclave_audit(
+                locked,
+                audit_data["framework"],
+                audit_data["selected_implementation_groups"],
+            )
+            # The service writes to the locked row; the serializer keeps working
+            # with its own instance, and what follows (respondent assignment)
+            # reads instance.compliance_assessment.
+            instance.compliance_assessment = audit
+
+    def _link_existing_audit(self, instance, audit_data):
+        with transaction.atomic():
+            self._lock_instance_without_audit(instance, "link_audit")
+            source_audit = ComplianceAssessment.objects.select_for_update().get(
+                pk=audit_data["link_audit"].pk
+            )
+            # Linking relocates the audit itself, so the user needs
+            # change_complianceassessment in the audit's current folder —
+            # not this serializer's own change_entityassessment.
+            self._check_object_perm(source_audit, "change", model=ComplianceAssessment)
+            if (
+                EntityAssessment.objects.filter(compliance_assessment=source_audit)
+                .exclude(pk=instance.pk)
+                .exists()
+            ):
+                # i18n key resolved by the frontend (safeTranslate / messages/*.json)
+                raise serializers.ValidationError(
+                    {"link_audit": ["auditAlreadyLinkedToEntityAssessment"]}
+                )
+
+            enclave = self._make_enclave_folder(instance)
+
+            audit = source_audit
+            audit.folder = enclave
+            # Enclave audits carry no perimeter — drop the one it had in its
+            # previous domain.
+            audit.perimeter = None
+            audit.save()
+            RequirementAssessment.objects.filter(compliance_assessment=audit).update(
+                folder=enclave
+            )
+            Answer.objects.filter(
+                requirement_assessment__compliance_assessment=audit
+            ).update(folder=enclave)
+
+            self._finalize_linked_audit(instance, audit)
+
     def _create_or_update_audit(self, instance, audit_data):
         if audit_data["create_audit"]:
-            if not audit_data.get("framework"):
-                raise serializers.ValidationError(
-                    {"framework": [_("Framework required")]}
-                )
-
-            with transaction.atomic():
-                locked = EntityAssessment.objects.select_for_update().get(
-                    pk=instance.pk
-                )  # lock entity assessment until the end of the transaction
-                if getattr(locked, "compliance_assessment_id", None):
-                    raise serializers.ValidationError(
-                        {
-                            "create_audit": [
-                                _("An audit already exists for this assessment")
-                            ]
-                        }
-                    )
-                from core.utils import build_initial_field_visibility
-
-                audit = ComplianceAssessment.objects.create(
-                    name=locked.name,
-                    framework=audit_data["framework"],
-                    perimeter=locked.perimeter,
-                    selected_implementation_groups=audit_data[
-                        "selected_implementation_groups"
-                    ],
-                    field_visibility=build_initial_field_visibility(
-                        audit_data["framework"]
-                    ),
-                )
-
-                enclave = Folder.objects.create(
-                    content_type=Folder.ContentType.ENCLAVE,
-                    name=f"{instance.entity.name}/{instance.name}",
-                    parent_folder=instance.folder,
-                )
-                audit.folder = enclave
-                audit.save()
-
-                audit.create_requirement_assessments()
-                audit.reviewers.set(instance.reviewers.all())
-                representatives = instance.representatives.all()
-                audit.authors.set(
-                    [rep.actor for rep in representatives if hasattr(rep, "actor")]
-                )
-                self._create_requirement_assignment(audit, representatives)
-                instance.compliance_assessment = audit
-                instance.save()
+            self._create_audit(instance, audit_data)
+        elif audit_data.get("link_audit"):
+            self._link_existing_audit(instance, audit_data)
         else:
             if instance.compliance_assessment:
                 audit = instance.compliance_assessment
@@ -274,23 +475,9 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             instance.save()
 
     def _sync_requirement_assignment(self, audit, representatives):
-        """Create or update the RequirementAssignment so its actors match the representatives."""
-        actors = [rep.actor for rep in representatives if hasattr(rep, "actor")]
-        assignment = audit.requirement_assignments.first()
-        if assignment is None:
-            if not actors:
-                return
-            requirement_assessments = audit.requirement_assessments.all()
-            if not requirement_assessments.exists():
-                return
-            assignment = RequirementAssignment.objects.create(
-                compliance_assessment=audit,
-                folder=audit.folder,
-            )
-            assignment.actor.set(actors)
-            assignment.requirement_assessments.set(requirement_assessments)
-        else:
-            assignment.actor.set(actors)
+        from tprm.services import sync_requirement_assignment
+
+        sync_requirement_assignment(audit, representatives)
 
     def _create_requirement_assignment(self, audit, representatives):
         self._sync_requirement_assignment(audit, representatives)
@@ -489,9 +676,9 @@ class SolutionReadSerializer(BaseModelSerializer):
     subcontracting_chain = SolutionSubcontractorReadSerializer(
         many=True, read_only=True
     )
-    dora_ict_service_type = serializers.CharField(
-        source="get_dora_ict_service_type_display", default=""
-    )
+    # Raw EBA code (e.g. "eba_TA:S02"), not the display label.
+    # So the frontend can map to translation via safeTranslate.
+    dora_ict_service_type = serializers.CharField(default="")
     data_location_storage = serializers.CharField(
         source="get_data_location_storage_display", default=""
     )

@@ -1316,7 +1316,13 @@ def export_domain(folder, output):
     default=False,
     help="Load libraries referenced by the dump that are missing on the target.",
 )
-def import_domain(file, name, load_missing_libraries):
+@click.option(
+    "--create-missing-asset-classes",
+    is_flag=True,
+    default=False,
+    help="Create the custom asset classes referenced by the dump. They become visible to every user.",
+)
+def import_domain(file, name, load_missing_libraries, create_missing_asset_classes):
     """Import a domain (folder) from an export zip."""
     if not TOKEN:
         print(
@@ -1337,7 +1343,10 @@ def import_domain(file, name, load_missing_libraries):
         "X-CISOAssistantDomainName": domain_name,
     }
     url = f"{API_URL}/folders/import/"
-    params = {"load_missing_libraries": str(load_missing_libraries).lower()}
+    params = {
+        "load_missing_libraries": str(load_missing_libraries).lower(),
+        "create_missing_asset_classes": str(create_missing_asset_classes).lower(),
+    }
     with open(file_path, "rb") as f:
         res = requests.post(
             url,

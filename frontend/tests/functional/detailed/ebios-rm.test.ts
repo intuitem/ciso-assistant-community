@@ -110,7 +110,7 @@ test('ebios rm study', async ({
 			name: ebiosRmStudy.build.name,
 			folder: vars.folderName
 		});
-		await page.getByRole('gridcell', { name: ebiosRmStudy.build.name }).first().click();
+		await page.getByRole('cell', { name: ebiosRmStudy.build.name }).first().click();
 	});
 
 	await test.step('workshop 1', async () => {
@@ -153,7 +153,8 @@ test('ebios rm study', async ({
 				await expect(page).toHaveURL(/.*\/ebios-rm\/[0-9a-f\-]+\/workshop-1.*/);
 			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('select-button').click();
-			await page.getByRole('textbox').click();
+			// Scoped: bare combobox is ambiguous — native <select>s (e.g. "Show entries") share the role
+			await page.getByTestId('form-input-assets').getByRole('combobox').click();
 			await page.getByRole('option', { name: `${vars.folderName}/${vars.assetName}` }).click();
 			await page.getByText(`Assets ${vars.folderName}/${vars.assetName}`).click();
 			await page.getByTestId('save-button').click();
@@ -178,9 +179,9 @@ test('ebios rm study', async ({
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test feared event 1');
 			await page.getByTestId('form-input-gravity').selectOption('3');
-			await page.getByTestId('form-input-assets').getByRole('textbox').click();
+			await page.getByTestId('form-input-assets').getByRole('combobox').click();
 			await page.getByRole('option', { name: `${vars.folderName}/added asset Primary` }).click();
-			await page.getByTestId('form-input-qualifications').getByRole('textbox').click();
+			await page.getByTestId('form-input-qualifications').getByRole('combobox').click();
 			await page.getByRole('option', { name: 'Authenticity' }).click();
 			await page.getByRole('option', { name: 'Availability' }).click();
 			await page.getByTestId('form-input-name').click(); // just to close the qualifications
@@ -190,13 +191,13 @@ test('ebios rm study', async ({
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test feared event 2');
 			await page.getByTestId('form-input-gravity').selectOption('1');
-			await page.getByTestId('form-input-assets').getByRole('textbox').click();
+			await page.getByTestId('form-input-assets').getByRole('combobox').click();
 			await page
 				.getByRole('option', { name: `${vars.folderName}/${vars.assetName} Primary` })
 				.click();
-			await page.getByTestId('form-input-qualifications').getByRole('textbox').click();
+			await page.getByTestId('form-input-qualifications').getByRole('combobox').click();
 			await page.getByRole('option', { name: 'Environmental' }).click();
-			await page.getByTestId('form-input-qualifications').getByRole('textbox').press('Escape');
+			await page.getByTestId('form-input-qualifications').getByRole('combobox').press('Escape');
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByRole('link', { name: ' Go back to EBIOS RM study' }).click();
@@ -238,7 +239,7 @@ test('ebios rm study', async ({
 			await expect(page).toHaveURL(/.*workshop-2.*/);
 		}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 		await page.getByTestId('add-button').click();
-		await page.getByTestId('form-input-risk-origin').getByRole('textbox').click();
+		await page.getByTestId('form-input-risk-origin').getByRole('combobox').click();
 		await page.getByRole('option', { name: 'Amateur' }).click();
 		await page.getByTestId('form-input-target-objective').click();
 		await page
@@ -283,7 +284,7 @@ test('ebios rm study', async ({
 		await expect(page).toHaveURL(/.*edit.*/);
 		await page.getByTestId('form-input-is-selected').uncheck();
 		await page.getByTestId('form-input-is-selected').check();
-		await page.getByTestId('form-input-feared-events').getByRole('textbox').click();
+		await page.getByTestId('form-input-feared-events').getByRole('combobox').click();
 		await page.getByRole('option', { name: `${vars.folderName}/test feared event 1` }).click();
 		await page.getByRole('option', { name: `${vars.folderName}/test feared event 2` }).click();
 		await page.getByTestId('save-button').click();
@@ -311,7 +312,7 @@ test('ebios rm study', async ({
 					timeout: 10_000
 				});
 			}
-			await page.getByTestId('form-input-category').getByRole('textbox').click();
+			await page.getByTestId('form-input-category').getByRole('combobox').click();
 			await page.getByRole('option', { name: 'partner' }).click();
 			await page.getByText('4').first().click();
 			await page.getByText('4').nth(1).click();
@@ -353,7 +354,7 @@ test('ebios rm study', async ({
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[32]], false);
 				await expect(page).toHaveURL(/.*workshop-3.*/);
 			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
-			await page.getByRole('gridcell', { name: 'test strategic scenario' }).click();
+			await page.getByRole('cell', { name: 'test strategic scenario' }).click();
 			await expect(page).not.toHaveURL(/.*workshop-3.*/);
 			await page.getByTestId('add-button').click();
 			await expect(page.getByTestId('modal-title')).toBeVisible();
@@ -392,7 +393,7 @@ test('ebios rm study', async ({
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[33]], false);
 				await expect(page).toHaveURL(/.*workshop-3.*/);
 			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
-			await page.getByRole('gridcell', { name: 'Partner' }).first().click();
+			await page.getByRole('cell', { name: 'Partner' }).first().click();
 			await expect(page).not.toHaveURL(/.*workshop-3.*/);
 			await appliedControlsPage.createItem({ name: 'test applied control 1' });
 			await appliedControlsPage.createItem({ name: 'test applied control 2' });
@@ -441,7 +442,7 @@ test('ebios rm study', async ({
 			await page.getByTestId('form-input-name').fill('test elementary action 1');
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('reconnaissance');
-			await page.getByTestId('form-input-threat').getByRole('textbox').click();
+			await page.getByTestId('form-input-threat').getByRole('combobox').click();
 			await page.getByText('Icon --').click();
 			await page.getByTestId('form-input-icon').selectOption('cube');
 			await page.getByTestId('save-button').click();
@@ -485,7 +486,7 @@ test('ebios rm study', async ({
 			await page.getByTestId('form-input-icon').selectOption('skull');
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
-			await page.getByRole('gridcell', { name: 'reconnaissance', exact: true }).click();
+			await page.getByRole('cell', { name: 'reconnaissance', exact: true }).click();
 			await expect(page).not.toHaveURL(/.*workshop-4.*/);
 			await page.getByRole('link', { name: 'Prepare elementary actions' }).click();
 			await expect(page).toHaveURL(/.*workshop-4.*/);
@@ -517,8 +518,8 @@ test('ebios rm study', async ({
 				.fill(
 					'Minim ad dolore do pariatur non. Nostrud enim dolore est fugiat occaecat deserunt minim labore. Commodo minim adipisicing proident esse irure. Veniam nostrud et adipisicing.'
 				);
-			await page.getByTestId('form-input-threats').getByRole('textbox').click();
-			await page.getByTestId('form-input-attack-path').getByRole('textbox').click();
+			await page.getByTestId('form-input-threats').getByRole('combobox').click();
+			await page.getByTestId('form-input-attack-path').getByRole('combobox').click();
 			await page.getByRole('option', { name: 'test attack path 1' }).click();
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
@@ -552,7 +553,7 @@ test('ebios rm study', async ({
 				await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[42]], false);
 				await expect(page).toHaveURL(/.*workshop-4.*/);
 			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
-			await page.getByRole('gridcell', { name: 'test attack path 1' }).click();
+			await page.getByRole('cell', { name: 'test attack path 1' }).click();
 			await expect(page).not.toHaveURL(/.*workshop-4.*/);
 			await page.getByRole('button', { name: ' Severity High ' }).click();
 			await page.getByTestId('add-button').click();
@@ -603,7 +604,7 @@ test('ebios rm study', async ({
 		await page.getByTestId('save-button').click();
 		await expect(page.getByTestId('modal-title')).not.toBeVisible();
 		await page
-			.getByRole('gridcell', { name: 'test strategic scenario 1 - test attack path 1' })
+			.getByRole('cell', { name: 'test strategic scenario 1 - test attack path 1' })
 			.click();
 		await expect(page).not.toHaveURL(/.*workshop-5.*/);
 		await expect(page.locator('span:text("High")').first()).toBeVisible();

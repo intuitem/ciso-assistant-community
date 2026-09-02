@@ -1,12 +1,14 @@
 // define the content of forms
 
-import EvidenceFilePreview from '$lib/components/ModelTable/field/EvidenceFilePreview.svelte';
+import EvidenceFileName from '$lib/components/ModelTable/field/EvidenceFileName.svelte';
 import LanguageDisplay from '$lib/components/ModelTable/field/LanguageDisplay.svelte';
 import FrameworkName from '$lib/components/ModelTable/field/FrameworkName.svelte';
 import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svelte';
 import UserGroupNameDisplay from '$lib/components/ModelTable/field/UserGroupNameDisplay.svelte';
 import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
+import TriggerTypesDisplay from '$lib/components/ModelTable/field/TriggerTypesDisplay.svelte';
 import { listViewFields } from './table';
+import type { TableBatchAction } from './table';
 import type { urlModel } from './types';
 import LibraryOverview from '$lib/components/ModelTable/field/LibraryOverview.svelte';
 import MarkdownDescription from '$lib/components/ModelTable/field/MarkdownDescription.svelte';
@@ -127,15 +129,13 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 	batchCreate?: {
 		label?: string; // i18n key for button title (defaults to 'batchCreate')
 	};
-	// Enables multi-row selection on the reverse-FK table with an action that POSTs
-	// the selected ids to a parent endpoint (e.g. remove members from a group).
-	// Gated by change permission on the parent's folder.
-	removeFromParent?: {
-		action: string; // parent action url segment, e.g. 'remove-members'
-		payloadField: string; // request body key holding the selected ids, e.g. 'users'
-		label?: string; // i18n key for the button (defaults to 'remove')
-		successMessage?: string; // i18n key for the success toast
-	};
+	// Extra batch actions for this reverse-FK table only, merged into the batch
+	// bar next to the child model's global batchActions. Pre-gated by the
+	// embedding view: DetailView only passes them when the user can change the
+	// parent object (so `parent_action` entries never leak to list pages nor to
+	// users without change on the parent). See TableBatchAction in table.ts for
+	// the row-operation vs parent-mutation decision rule.
+	tableBatchActions?: TableBatchAction[];
 }
 
 interface Field {
@@ -168,7 +168,7 @@ export interface ModelMapEntry {
 	verboseNamePlural?: string;
 	urlModel?: urlModel;
 	listViewUrlParams?: string;
-	flaggedFields?: Record<string, FeatureFlag>;
+	flaggedFields?: Record<string, FeatureFlag | FeatureFlag[]>;
 	detailViewFields?: Field[];
 	foreignKeyFields?: ForeignKeyField[];
 	reverseForeignKeyFields?: ReverseForeignKeyField[];
@@ -297,6 +297,99 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		]
 	},
+	'ttp-catalogs': {
+		name: 'ttpcatalog',
+		localName: 'ttpCatalog',
+		localNamePlural: 'ttpCatalogs',
+		verboseName: 'TTP catalog',
+		verboseNamePlural: 'TTP catalogs',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'annotation' },
+			{ field: 'description' },
+			{ field: 'provider' },
+			{ field: 'folder' },
+			{ field: 'library' }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'loaded-libraries' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'catalog', urlModel: 'techniques', disableCreate: true, disableDelete: true }
+		]
+	},
+	tactics: {
+		name: 'tactic',
+		localName: 'tactic',
+		localNamePlural: 'tactics',
+		verboseName: 'Tactic',
+		verboseNamePlural: 'Tactics',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'catalog' },
+			{ field: 'folder' },
+			{ field: 'library' }
+		],
+		foreignKeyFields: [
+			{ field: 'catalog', urlModel: 'ttp-catalogs' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'loaded-libraries' }
+		]
+	},
+	'threat-models': {
+		name: 'threatmodel',
+		localName: 'threatModel',
+		localNamePlural: 'threatModels',
+		verboseName: 'Threat model',
+		verboseNamePlural: 'Threat models',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'catalog' },
+			{ field: 'folder' }
+		],
+		foreignKeyFields: [
+			{ field: 'catalog', urlModel: 'ttp-catalogs' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		]
+	},
+	techniques: {
+		name: 'technique',
+		localName: 'technique',
+		localNamePlural: 'techniques',
+		verboseName: 'Technique',
+		verboseNamePlural: 'Techniques',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'annotation' },
+			{ field: 'description' },
+			{ field: 'catalog' },
+			{ field: 'tactics' },
+			{ field: 'parent' },
+			{ field: 'reference_controls' },
+			{ field: 'groups' },
+			{ field: 'is_deprecated' },
+			{ field: 'provider' },
+			{ field: 'folder' },
+			{ field: 'filtering_labels' },
+			{ field: 'library' }
+		],
+		foreignKeyFields: [
+			{ field: 'catalog', urlModel: 'ttp-catalogs' },
+			{ field: 'tactics', urlModel: 'tactics' },
+			{ field: 'parent', urlModel: 'techniques' },
+			{ field: 'reference_controls', urlModel: 'reference-controls' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'loaded-libraries' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		]
+	},
 	'security-advisories': {
 		name: 'securityadvisory',
 		localName: 'securityAdvisory',
@@ -368,6 +461,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		},
 		foreignKeyFields: [
 			{ field: 'threats', urlModel: 'threats' },
+			{ field: 'threat_models', urlModel: 'threat-models' },
 			{ field: 'risk_assessment', urlModel: 'risk-assessments' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' },
@@ -762,6 +856,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			},
+			{ field: 'asset', urlModel: 'findings', disableDelete: true },
+			{ field: 'asset', urlModel: 'asset-assessments' },
 			{
 				field: 'assets',
 				urlModel: 'vulnerabilities',
@@ -770,11 +866,11 @@ export const URL_MODEL_MAP: ModelMap = {
 					parentField: 'vulnerabilities'
 				}
 			},
-			{ field: 'assets', urlModel: 'risk-scenarios', disableCreate: true, disableDelete: true },
+			{ field: 'assets', urlModel: 'ebios-rm', disableCreate: true, disableDelete: true },
+			{ field: 'assets', urlModel: 'risk-scenarios', disableDelete: true },
 			{
 				field: 'assets',
 				urlModel: 'quantitative-risk-scenarios',
-				disableCreate: true,
 				disableDelete: true
 			},
 			{
@@ -837,11 +933,22 @@ export const URL_MODEL_MAP: ModelMap = {
 	},
 	'asset-class': {
 		endpointUrl: 'asset-class',
-		name: 'asset-class',
+		// Django model name: codenames are built as `${action}_${name}`.
+		name: 'assetclass',
 		localName: 'assetClass',
 		localNamePlural: 'assetClasses',
 		verboseName: 'assetclass',
-		verboseNamePlural: 'assetclasses'
+		verboseNamePlural: 'assetclasses',
+		customNameDescription: true,
+		foreignKeyFields: [{ field: 'parent', urlModel: 'asset-class' }],
+		reverseForeignKeyFields: [{ field: 'parent', urlModel: 'asset-class' }],
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'parent' },
+			{ field: 'builtin' },
+			{ field: 'is_visible' }
+		]
 	},
 	'asset-capabilities': {
 		endpointUrl: 'asset-capabilities',
@@ -858,9 +965,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'User',
 		verboseNamePlural: 'Users',
 		flaggedFields: {
-			idp_groups: 'idp_groups'
+			idp_groups: ['idp_groups', 'jit_provisioning']
 		},
-		foreignKeyFields: [{ field: 'user_groups', urlModel: 'user-groups' }],
+		foreignKeyFields: [
+			{ field: 'user_groups', urlModel: 'user-groups' },
+			{ field: 'idp_groups', urlModel: 'idp-groups' }
+		],
 		filters: []
 	},
 	teams: {
@@ -896,12 +1006,16 @@ export const URL_MODEL_MAP: ModelMap = {
 				// Select members in the table and remove them from the group. Routes to
 				// the group's change_usergroup-gated endpoint, so a domain manager can
 				// remove members without write access on the (Global) User object.
-				removeFromParent: {
-					action: 'remove-members',
-					payloadField: 'users',
-					label: 'removeFromGroup',
-					successMessage: 'membersRemoved'
-				}
+				tableBatchActions: [
+					{
+						type: 'parent_action',
+						action: 'remove-members',
+						payloadField: 'users',
+						label: 'removeFromGroup',
+						icon: 'fa-solid fa-user-minus',
+						successMessage: 'membersRemoved'
+					}
+				]
 			}
 		],
 		filters: []
@@ -915,6 +1029,30 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [{ field: 'user_groups', urlModel: 'user-groups' }],
 		reverseForeignKeyFields: [
 			{ field: 'idp_groups', urlModel: 'users', disableCreate: true, disableDelete: true }
+		],
+		filters: []
+	},
+	'service-accounts': {
+		endpointUrl: 'iam/service-accounts',
+		name: 'serviceaccount',
+		localName: 'serviceAccount',
+		localNamePlural: 'serviceAccounts',
+		verboseName: 'Service account',
+		verboseNamePlural: 'Service accounts',
+		foreignKeyFields: [{ field: 'folders', urlModel: 'folders' }],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'client_id' },
+			{ field: 'secret_preview' },
+			{ field: 'is_active' },
+			{ field: 'expiry_date', type: 'date' },
+			{ field: 'is_recursive' },
+			{ field: 'folders' },
+			{ field: 'created_by' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
 		],
 		filters: []
 	},
@@ -985,7 +1123,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			},
 			{ field: 'evidences', urlModel: 'findings', disableCreate: true, disableDelete: true },
 			{ field: 'evidences', urlModel: 'task-templates', disableCreate: true, disableDelete: true },
-			{ field: 'evidences', urlModel: 'data-breaches', disableCreate: true, disableDelete: true }
+			{ field: 'evidences', urlModel: 'data-breaches', disableCreate: true, disableDelete: true },
+			{
+				field: 'evidences',
+				urlModel: 'security-exceptions',
+				disableCreate: true,
+				disableDelete: true
+			}
 		],
 		selectFields: [{ field: 'status' }],
 		detailViewFields: [
@@ -1416,7 +1560,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' }
 		],
-		reverseForeignKeyFields: [{ field: 'bia', urlModel: 'asset-assessments' }],
+		reverseForeignKeyFields: [
+			{
+				field: 'bia',
+				urlModel: 'asset-assessments',
+				batchCreate: {
+					label: 'batchAddAssets'
+				}
+			}
+		],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'perimeter' }, { field: 'auditor' }, { field: 'status' }],
 		detailViewFields: [
@@ -2099,14 +2251,38 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'securityExceptions',
 		verboseName: 'Security exception',
 		verboseNamePlural: 'Security exceptions',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'folder' },
+			{ field: 'severity' },
+			{ field: 'status' },
+			{ field: 'expiration_date', type: 'date' },
+			{ field: 'owners' },
+			{ field: 'approver' },
+			{ field: 'observation' },
+			{ field: 'link' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
 		foreignKeyFields: [
 			{ field: 'owners', urlModel: 'actors' },
 			{ field: 'approver', urlModel: 'users', urlParams: 'is_approver=true' },
 			{ field: 'folder', urlModel: 'folders' },
-			{ field: 'assets', urlModel: 'assets' }
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
 		reverseForeignKeyFields: [
+			{
+				field: 'security_exceptions',
+				urlModel: 'evidences',
+				disableDelete: false,
+				addExisting: {
+					parentField: 'evidences'
+				}
+			},
 			{
 				field: 'security_exceptions',
 				urlModel: 'applied-controls',
@@ -2150,7 +2326,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'authors', urlModel: 'actors' },
 			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
-			{ field: 'owner', urlModel: 'actors', urlParams: 'is_third_party=false' }
+			{ field: 'owner', urlModel: 'actors', urlParams: 'is_third_party=false' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'findings_assessment', urlModel: 'findings' },
@@ -2170,13 +2347,16 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ref_id' },
 			{ field: 'name' },
 			{ field: 'description' },
+			{ field: 'category' },
 			{ field: 'authors' },
 			{ field: 'reviewers' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'reported_at', type: 'date' },
 			{ field: 'version' },
 			{ field: 'status' },
 			{ field: 'observation' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'is_locked' }
 		]
 	},
@@ -2221,6 +2401,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Findings',
 		foreignKeyFields: [
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
+			{ field: 'asset', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
@@ -2663,6 +2844,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' },
 			{ field: 'threats', urlModel: 'threats' },
+			{ field: 'threat_models', urlModel: 'threat-models' },
 			{ field: 'qualifications', urlModel: 'qualifications' }
 		],
 		detailViewFields: [
@@ -3113,6 +3295,30 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		filters: [{ field: 'activity' }, { field: 'actor' }, { field: 'role' }]
 	},
+	workflows: {
+		name: 'workflow',
+		localName: 'workflow',
+		localNamePlural: 'workflows',
+		verboseName: 'Workflow',
+		verboseNamePlural: 'Workflows',
+		endpointUrl: 'workflows/workflows',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		filters: [{ field: 'folder' }, { field: 'filtering_labels' }]
+	},
+	'workflow-versions': {
+		name: 'workflowversion',
+		localName: 'workflowVersion',
+		localNamePlural: 'workflowVersions',
+		verboseName: 'Workflow version',
+		verboseNamePlural: 'Workflow versions',
+		endpointUrl: 'workflows/workflow-versions',
+		foreignKeyFields: [{ field: 'workflow', urlModel: 'workflows' }],
+		selectFields: [{ field: 'status' }],
+		filters: [{ field: 'workflow' }, { field: 'status' }]
+	},
 	'metric-definitions': {
 		name: 'metricdefinition',
 		localName: 'metricDefinition',
@@ -3294,10 +3500,10 @@ export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
 
 const FIELD_COMPONENT_MAP = {
 	evidences: {
-		attachment: EvidenceFilePreview
+		attachment: EvidenceFileName
 	},
 	'evidence-revisions': {
-		attachment: EvidenceFilePreview
+		attachment: EvidenceFileName
 	},
 	'stored-libraries': {
 		locales: LanguageDisplay,
@@ -3317,6 +3523,9 @@ const FIELD_COMPONENT_MAP = {
 	},
 	frameworks: {
 		name: FrameworkName
+	},
+	workflows: {
+		trigger_types: TriggerTypesDisplay
 	}
 };
 

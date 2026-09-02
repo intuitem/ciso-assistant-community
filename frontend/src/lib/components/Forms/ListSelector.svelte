@@ -18,6 +18,7 @@
 		[key: string]: {
 			options: Option[];
 			subGroups: NestedGroup;
+			flatOptions: Option[];
 		};
 	}
 
@@ -66,17 +67,23 @@
 	let nestedGroups: NestedGroup = $state({});
 	let collapsedGroups: Set<string> = $state(new Set());
 	let selected: (string | number)[] = $state([]);
+	let selectedSet = $derived(new Set(selected));
 	let isLoading = $state(false);
 
-	// Helper function to create nested structure from groupsList
+	function attachFlatOptions(nested: NestedGroup): void {
+		Object.values(nested).forEach((group) => {
+			attachFlatOptions(group.subGroups);
+			group.flatOptions = group.options.concat(
+				...Object.values(group.subGroups).map((sub) => sub.flatOptions)
+			);
+		});
+	}
+
 	function createNestedGroups(opts: Option[]): NestedGroup {
 		if (!groupBy) {
-			return {
-				All: {
-					options: opts,
-					subGroups: {}
-				}
-			};
+			const nested: NestedGroup = { All: { options: opts, subGroups: {}, flatOptions: [] } };
+			attachFlatOptions(nested);
+			return nested;
 		}
 
 		const nested: NestedGroup = {};
@@ -84,17 +91,11 @@
 		opts.forEach((option) => {
 			const groupsList = option.groupsList || [];
 			let currentLevel = nested;
-			let pathSoFar = '';
 
 			// Navigate/create the nested structure
 			groupsList.forEach((group, index) => {
-				pathSoFar = pathSoFar ? `${pathSoFar}>${group}` : group;
-
 				if (!currentLevel[group]) {
-					currentLevel[group] = {
-						options: [],
-						subGroups: {}
-					};
+					currentLevel[group] = { options: [], subGroups: {}, flatOptions: [] };
 				}
 
 				// If this is the last level, add the option
@@ -109,16 +110,16 @@
 			// If no groups, add to root
 			if (groupsList.length === 0) {
 				if (!nested['Other']) {
-					nested['Other'] = { options: [], subGroups: {} };
+					nested['Other'] = { options: [], subGroups: {}, flatOptions: [] };
 				}
 				nested['Other'].options.push(option);
 			}
 		});
 
+		attachFlatOptions(nested);
 		return nested;
 	}
 
-	// Initialize collapsed groups recursively
 	function initializeCollapsedGroups(nested: NestedGroup, prefix = ''): Set<string> {
 		if (!collapsibleGroups || !defaultCollapsed) {
 			return new Set();
@@ -129,9 +130,11 @@
 		function traverse(groups: NestedGroup, currentPrefix: string) {
 			Object.keys(groups).forEach((key) => {
 				const fullPath = currentPrefix ? `${currentPrefix}>${key}` : key;
-				collapsed.add(fullPath);
+				const hasSelection = groups[key].flatOptions.some((opt) => selectedSet.has(opt.value));
+				if (!hasSelection) {
+					collapsed.add(fullPath);
+				}
 
-				// Recursively traverse subgroups
 				if (groups[key].subGroups && Object.keys(groups[key].subGroups).length > 0) {
 					traverse(groups[key].subGroups, fullPath);
 				}
@@ -142,21 +145,14 @@
 		return collapsed;
 	}
 
-	// Get all options from a nested group recursively
-	function getAllOptionsFromGroup(group: { options: Option[]; subGroups: NestedGroup }): Option[] {
-		let allOptions = [...group.options];
-
-		Object.values(group.subGroups).forEach((subGroup) => {
-			allOptions = [...allOptions, ...getAllOptionsFromGroup(subGroup)];
-		});
-
-		return allOptions;
-	}
-
 	// fetch options
 	async function fetchOptions() {
 		isLoading = true;
 		try {
+			if ($value) {
+				selected = Array.isArray($value) ? $value : [$value];
+			}
+
 			// fetchAllPages pages by explicit offset: the backend's `next`
 			// links are backend-relative ("/api/...") and do not resolve
 			// against the frontend origin this component fetches from.
@@ -188,18 +184,19 @@
 					};
 				});
 
-				// Create nested structure
 				nestedGroups = createNestedGroups(options);
 
-				// Initialize collapsed state
 				if (collapsibleGroups && defaultCollapsed) {
 					collapsedGroups = initializeCollapsedGroups(nestedGroups);
 				}
-			}
 
-			// init selection
-			if ($value) {
-				selected = Array.isArray($value) ? $value : [$value];
+				const validValues = new Set(options.map((o) => o.value));
+				const reconciled = selected.filter((v) => validValues.has(v));
+				if (reconciled.length !== selected.length) {
+					selected = reconciled;
+					$value = selected;
+					cachedValue = selected;
+				}
 			}
 		} catch (err) {
 			console.error('Error fetching options', err);
@@ -209,7 +206,7 @@
 	}
 
 	function toggle(val: string | number) {
-		if (selected.includes(val)) {
+		if (selectedSet.has(val)) {
 			selected = selected.filter((v) => v !== val);
 		} else {
 			selected = [...selected, val];
@@ -230,25 +227,15 @@
 		collapsedGroups = new Set(collapsedGroups);
 	}
 
-	function selectAllInGroup(group: { options: Option[]; subGroups: NestedGroup }) {
-		const allOptions = getAllOptionsFromGroup(group);
-		const groupValues = allOptions.map((opt) => opt.value);
-
-		// Check if all options in group are already selected
-		const allSelected = groupValues.every((val) => selected.includes(val));
+	function selectAllInGroup(group: { flatOptions: Option[] }) {
+		const groupValues = group.flatOptions.map((opt) => opt.value);
+		const allSelected = groupValues.every((val) => selectedSet.has(val));
 
 		if (allSelected) {
-			// Deselect all in group
-			selected = selected.filter((val) => !groupValues.includes(val));
+			const groupValuesSet = new Set(groupValues);
+			selected = selected.filter((val) => !groupValuesSet.has(val));
 		} else {
-			// Select all in group
-			const newSelected = [...selected];
-			groupValues.forEach((val) => {
-				if (!newSelected.includes(val)) {
-					newSelected.push(val);
-				}
-			});
-			selected = newSelected;
+			selected = [...new Set([...selected, ...groupValues])];
 		}
 
 		$value = selected;
@@ -256,14 +243,20 @@
 		cachedValue = selected;
 	}
 
-	function getGroupSelectionState(group: { options: Option[]; subGroups: NestedGroup }) {
-		const allOptions = getAllOptionsFromGroup(group);
-		const groupValues = allOptions.map((opt) => opt.value);
-		const selectedInGroup = groupValues.filter((val) => selected.includes(val));
+	function getGroupSelectionState(group: { flatOptions: Option[] }) {
+		const groupValues = group.flatOptions.map((opt) => opt.value);
+		const selectedCount = groupValues.filter((val) => selectedSet.has(val)).length;
 
-		if (selectedInGroup.length === 0) return 'none';
-		if (selectedInGroup.length === groupValues.length) return 'all';
+		if (selectedCount === 0) return 'none';
+		if (selectedCount === groupValues.length) return 'all';
 		return 'partial';
+	}
+	export function applyPreset(values: (string | number)[]): void {
+		const validValues = new Set(options.map((o) => o.value));
+		selected = values.filter((v) => validValues.has(v));
+		$value = selected;
+		cacheLock.resolve(selected);
+		cachedValue = selected;
 	}
 
 	onMount(async () => {
@@ -276,6 +269,11 @@
 		} else if (cachedValue?.length) {
 			selected = cachedValue;
 			$value = selected;
+		} else {
+			return;
+		}
+		if (collapsibleGroups && defaultCollapsed) {
+			collapsedGroups = initializeCollapsedGroups(nestedGroups);
 		}
 	});
 
@@ -290,7 +288,8 @@
 		{@const hasSubGroups = Object.keys(group.subGroups).length > 0}
 		{@const hasDirectOptions = group.options.length > 0}
 		{@const isCollapsed = collapsedGroups.has(currentPath)}
-		{@const totalOptions = getAllOptionsFromGroup(group).length}
+		{@const totalOptions = group.flatOptions.length}
+		{@const selectionState = showGroupHeaders && groupBy ? getGroupSelectionState(group) : 'none'}
 
 		<div class="border border-surface-200-800 rounded-lg" style="margin-left: {depth * 20}px;">
 			{#if showGroupHeaders && groupBy}
@@ -327,14 +326,12 @@
 					<button
 						type="button"
 						class="text-xs px-2 py-1 rounded border border-surface-300-700 hover:bg-surface-100-900 transition-colors"
-						class:bg-blue-50={getGroupSelectionState(group) === 'all'}
-						class:border-blue-300={getGroupSelectionState(group) === 'all'}
-						class:bg-blue-25={getGroupSelectionState(group) === 'partial'}
-						class:border-blue-200={getGroupSelectionState(group) === 'partial'}
+						class:preset-tonal-primary={selectionState === 'all'}
+						class:preset-tonal-secondary={selectionState === 'partial'}
 						onclick={() => selectAllInGroup(group)}
 						{disabled}
 					>
-						{#if getGroupSelectionState(group) === 'all'}
+						{#if selectionState === 'all'}
 							{m.deselectAll()}
 						{:else}
 							{m.selectAll()}
@@ -354,7 +351,7 @@
 								<input
 									type="checkbox"
 									value={opt.value}
-									checked={selected.includes(opt.value)}
+									checked={selectedSet.has(opt.value)}
 									onchange={() => toggle(opt.value)}
 									{disabled}
 									class="rounded border-surface-300-700 text-blue-600 focus:ring-blue-500"

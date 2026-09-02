@@ -14,7 +14,7 @@
 
 	let { parent, mapTo, mapFrom }: Props = $props();
 
-	const cBase = 'card bg-surface-50 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-100-900 border border-surface-500 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	function choose(action: () => void) {
@@ -38,22 +38,22 @@
 		</div>
 		<div class="grid grid-cols-2 gap-4">
 			<button
-				class="flex flex-col items-start gap-2 p-4 rounded-xl border border-gray-200 bg-white text-left hover:bg-gray-50 hover:border-primary-400 transition-colors shadow-sm cursor-pointer"
+				class="flex flex-col items-start gap-2 p-4 rounded-xl border border-surface-200-800 bg-surface-50-950 text-left hover:bg-surface-100-900 hover:border-primary-400 transition-colors shadow-sm cursor-pointer"
 				onclick={() => choose(mapTo)}
 				data-testid="map-to-framework-card"
 			>
 				<i class="fa-solid fa-diagram-project text-emerald-500 text-2xl"></i>
 				<span class="text-sm font-semibold">{m.mapToFramework()}</span>
-				<span class="text-xs text-gray-500">{m.mapToFrameworkDescription()}</span>
+				<span class="text-xs text-surface-600-400">{m.mapToFrameworkDescription()}</span>
 			</button>
 			<button
-				class="flex flex-col items-start gap-2 p-4 rounded-xl border border-gray-200 bg-white text-left hover:bg-gray-50 hover:border-primary-400 transition-colors shadow-sm cursor-pointer"
+				class="flex flex-col items-start gap-2 p-4 rounded-xl border border-surface-200-800 bg-surface-50-950 text-left hover:bg-surface-100-900 hover:border-primary-400 transition-colors shadow-sm cursor-pointer"
 				onclick={() => choose(mapFrom)}
 				data-testid="map-from-audit-card"
 			>
 				<i class="fa-solid fa-arrow-right-to-bracket text-indigo-500 text-2xl"></i>
 				<span class="text-sm font-semibold">{m.mapFromAudit()}</span>
-				<span class="text-xs text-gray-500">{m.mapFromAuditDescription()}</span>
+				<span class="text-xs text-surface-600-400">{m.mapFromAuditDescription()}</span>
 			</button>
 		</div>
 	</div>

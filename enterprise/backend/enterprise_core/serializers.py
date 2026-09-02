@@ -7,9 +7,11 @@ from core.serializers import (
     UserWriteSerializer as CommunityUserWriteSerializer,
 )
 from core.serializer_fields import FieldsRelatedField
-from iam.models import RoleAssignment, User, Role
-from iam.cache_builders import get_folder_path, CacheNotReadyError
-import uuid
+from iam.models import RoleAssignment, ServiceAccount, User, Role, Folder
+from iam.serializers import (
+    ServiceAccountWriteSerializer as CommunityServiceAccountWriteSerializer,
+)
+from django.core.exceptions import ValidationError
 
 from global_settings.models import GlobalSettings
 from global_settings.serializers import (
@@ -165,14 +167,19 @@ class LogEntrySerializer(serializers.ModelSerializer):
     def get_folder(self, obj):
         # additional_data now carries folder_id (the old enrichment stored a "folder"
         # path string). Resolve it to the full path via the in-memory folders cache.
+
         folder_id = (obj.additional_data or {}).get("folder_id")
         if not folder_id:
             return None
+
         try:
-            path = get_folder_path(uuid.UUID(str(folder_id)))
-        except ValueError, KeyError, CacheNotReadyError:
-            return None
-        return "/".join(f.name for f in path) or None
+            folder = Folder.objects.filter(id=folder_id).first()
+            if folder is None:
+                return
+        except ValidationError:
+            return
+
+        return folder.get_folder_full_path_string()
 
     def get_content_type(self, obj):
         return obj.content_type.name
@@ -316,3 +323,37 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
     idp_groups = serializers.BooleanField(
         source="value.idp_groups", required=False, default=False
     )
+    service_accounts = serializers.BooleanField(
+        source="value.service_accounts", required=False, default=False
+    )
+
+
+class ServiceAccountWriteSerializer(CommunityServiceAccountWriteSerializer):
+    """License cap: at most one *active* service account per licensed seat.
+
+    Resolved by name through MODULE_PATHS["serializers"] from the community
+    ServiceAccountViewSet, the same seam UserWriteSerializer uses for the
+    editor seat check. Creation is always active; on update only the
+    inactive -> active transition is gated, so deactivation always works.
+    """
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        instance = self.context.get("instance")
+        if instance is None:
+            becoming_active = True
+        else:
+            becoming_active = attrs.get("is_active") is True and not instance.is_active
+        if becoming_active:
+            active_accounts = ServiceAccount.objects.filter(is_active=True)
+            if instance is not None:
+                active_accounts = active_accounts.exclude(pk=instance.pk)
+            if active_accounts.count() >= settings.LICENSE_SEATS:
+                logger.error(
+                    "License seats exceeded, cannot activate service account",
+                    seats=settings.LICENSE_SEATS,
+                )
+                raise serializers.ValidationError(
+                    {"error": "errorServiceAccountSeatsExceeded"}
+                )
+        return attrs

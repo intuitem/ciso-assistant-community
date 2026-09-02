@@ -360,7 +360,7 @@
 	</div>
 
 	<div class="flex flex-col sm:flex-row gap-2">
-		<div class="card px-4 py-2 bg-surface-50-950 shadow-lg w-full sm:w-1/2">
+		<div class="card px-4 py-2 bg-surface-50-950 shadow-lg w-full flex-1">
 			<h4 class="h4 font-semibold">{m.riskOrigin()}</h4>
 			{#if data.scenario.risk_origin}
 				<p class="font-semibold text-surface-600-400">
@@ -373,9 +373,7 @@
 				<p class="text-surface-400-600 italic text-sm">{m.undefined()}</p>
 			{/if}
 		</div>
-		<div
-			class="card px-4 py-2 bg-surface-50-950 shadow-lg w-full sm:w-1/2 max-h-96 overflow-y-auto"
-		>
+		<div class="card px-4 py-2 bg-surface-50-950 shadow-lg w-full flex-1 max-h-96 overflow-y-auto">
 			<h4 class="h4 font-semibold">{m.antecedentScenarios()}</h4>
 			{#if data.scenario.antecedent_scenarios && data.scenario.antecedent_scenarios.length > 0}
 				<ul class="space-y-1">
@@ -391,6 +389,32 @@
 				<p class="text-surface-400-600 italic text-sm">{m.noAntecedentScenarios()}</p>
 			{/if}
 		</div>
+		{#if page.data?.featureflags?.threat_modeling}
+			<div
+				class="card px-4 py-2 bg-surface-50-950 shadow-lg w-full flex-1 max-h-96 overflow-y-auto"
+			>
+				<h4 class="h4 font-semibold">{m.threatModel()}</h4>
+				{#if data.scenario.threat_models && data.scenario.threat_models.length > 0}
+					<ul class="space-y-1">
+						{#each data.scenario.threat_models as threatModel}
+							<li class="flex items-center gap-2">
+								<Anchor class="anchor text-sm font-semibold" href="/threat-models/{threatModel.id}">
+									{threatModel.str}
+								</Anchor>
+								<Anchor
+									class="anchor text-xs text-surface-600-400"
+									href="/threat-models/{threatModel.id}/graph"
+								>
+									<i class="fa-solid fa-diagram-project mr-1"></i>{m.graph()}
+								</Anchor>
+							</li>
+						{/each}
+					</ul>
+				{:else}
+					<p class="text-surface-400-600 italic text-sm">{m.undefined()}</p>
+				{/if}
+			</div>
+		{/if}
 	</div>
 
 	{#if page.data?.featureflags?.inherent_risk}
@@ -569,7 +593,7 @@
 	</div>
 	<div class="card px-4 py-2 bg-surface-50-950 shadow-lg space-y-2">
 		<div>
-			<p class="text-sm font-semibold text-surface-400-600">{m.qualifications()}</p>
+			<p class="text-sm font-semibold text-surface-400-600">{safeTranslate('qualifications')}</p>
 			<p>
 				<span class="font-semibold">
 					{#each data.scenario.qualifications.sort( (a, b) => safeTranslate(a.str).localeCompare(safeTranslate(b.str)) ) as qualification, i}

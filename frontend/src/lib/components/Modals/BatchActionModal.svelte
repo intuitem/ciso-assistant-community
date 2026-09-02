@@ -11,22 +11,20 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-surface-50-950 p-6 w-modal space-y-6';
+	const cBase = 'card bg-surface-100-900 border border-surface-500 p-6 w-modal space-y-6';
 	const cHeader = 'text-xl font-medium text-surface-950-50';
 
 	interface Props {
 		parent: any;
 		actionType:
-			| 'delete'
-			| 'change_field'
-			| 'change_m2m'
-			| 'add_m2m'
-			| 'remove_m2m'
-			| 'change_folder';
+			'delete' | 'change_field' | 'change_m2m' | 'add_m2m' | 'remove_m2m' | 'change_folder';
 		count: number;
 		optionsEndpoint?: string;
 		enableDoubleDash?: boolean;
 		multiSelect?: boolean;
+		// Optional i18n key for an action-specific warning (receives {count}),
+		// e.g. a cascade disclosure on delete.
+		confirmMessage?: string;
 		onConfirm: (value?: string | string[]) => void;
 	}
 
@@ -37,6 +35,7 @@
 		optionsEndpoint,
 		enableDoubleDash = false,
 		multiSelect = false,
+		confirmMessage = undefined,
 		onConfirm
 	}: Props = $props();
 
@@ -147,6 +146,11 @@
 
 		{#if actionType === 'delete'}
 			<article>{m.batchActionConfirmDelete({ count })}</article>
+			{#if confirmMessage}
+				<article class="text-sm font-medium text-amber-600">
+					{safeTranslate(confirmMessage, { count })}
+				</article>
+			{/if}
 			<div class="space-y-2">
 				<p class="text-sm font-medium text-red-600">{m.confirmYes({ word: m.yes() })}</p>
 				<input
@@ -160,6 +164,11 @@
 			</div>
 		{:else}
 			<article>{m.batchActionConfirmChange({ count })}</article>
+			{#if confirmMessage}
+				<article class="text-sm font-medium text-amber-600">
+					{safeTranslate(confirmMessage, { count })}
+				</article>
+			{/if}
 
 			{#if loading}
 				<div class="text-sm text-surface-600-400">Loading...</div>

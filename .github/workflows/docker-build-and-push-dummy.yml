@@ -30,9 +30,10 @@ jobs:
 
       - name: Get version and Create .meta file
         run: |
-          echo "VERSION=$(git describe --tags --always)" >> $GITHUB_ENV
+          VERSION="$(git describe --tags --always --match 'v[0-9]*')"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "BUILD=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-          echo "CISO_ASSISTANT_VERSION=$(git describe --tags --always)" > .meta
+          echo "CISO_ASSISTANT_VERSION=$VERSION" > .meta
           echo "CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD)" >> .meta
           cp .meta ./backend/
           cp .meta ./backend/ciso_assistant/

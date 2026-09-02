@@ -3,18 +3,18 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 
 from core.permissions import IsGlobalAdmin
 from core.serializers import SerializerFactory
 from iam.models import Folder, Permission, RoleAssignment, User
 from iam.sso.models import SSOSettings
-from integrations.models import IntegrationProvider
+from integrations.models import IntegrationConfiguration, IntegrationProvider
 from core.serializers import SerializerFactory
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from .serializers import (
-    GlobalSettingsSerializer,
     GeneralSettingsSerializer,
     FeatureFlagsSerializer,
     VulnerabilitySlaSerializer,
@@ -42,39 +42,11 @@ class GlobalSettingsSerializerFactory(SerializerFactory):
         return self._get_serializer_class(f"{base_name}Serializer")
 
 
-class GlobalSettingsViewSet(viewsets.ModelViewSet):
-    queryset = GlobalSettings.objects.all()
-    serializer_class = GlobalSettingsSerializer
-
-    def create(self, request, *args, **kwargs):
-        return Response(
-            {"detail": "Global settings can only be created through data migrations."},
-            status=405,
-        )
-
-    def delete(self, request, *args, **kwargs):
-        return Response(
-            {"detail": "Global settings can only be deleted through data migrations."},
-            status=405,
-        )
-
-    def update(self, request, *args, **kwargs):
-        return Response(
-            {"detail": "Global settings can only be updated through data migrations."},
-            status=405,
-        )
-
-
 class FeatureFlagsViewSet(viewsets.ModelViewSet):
     model = GlobalSettings
     serializer_class = FeatureFlagsSerializer
-    queryset = GlobalSettings.objects.filter(name="feature-flags")
+    queryset = GlobalSettings.objects.filter(name=GlobalSettings.Names.FEATURE_FLAGS)
     serializers_module = "global_settings.serializers"
-
-    def get_permissions(self):
-        if self.request.method in ("GET", "HEAD", "OPTIONS"):
-            return [IsAuthenticated()]
-        return super().get_permissions()
 
     def get_serializer_class(self, **kwargs):
         serializer_factory = GlobalSettingsSerializerFactory(
@@ -94,7 +66,12 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
         return serializer_class
 
     def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
+        try:
+            instance = self.get_object()
+        except PermissionDenied:
+            # We want users to be able to see `FEATURE_FLAGS` global settings, even when they don't have the "view_globalsettings" permission.
+            instance = FeatureFlagsViewSet.queryset.first()
+
         serializer = self.get_serializer_class()(instance)
         return Response(serializer.data)
 
@@ -130,10 +107,15 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
 class GeneralSettingsViewSet(viewsets.ModelViewSet):
     model = GlobalSettings
     serializer_class = GeneralSettingsSerializer
-    queryset = GlobalSettings.objects.filter(name="general")
+    queryset = GlobalSettings.objects.filter(name=GlobalSettings.Names.GENERAL)
 
     def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
+        try:
+            instance = self.get_object()
+        except PermissionDenied:
+            # We want users to be able to see `GENERAL` global settings, even when they don't have the "view_globalsettings" permission.
+            instance = GeneralSettingsViewSet.queryset.first()
+
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
@@ -152,7 +134,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def get_object(self):
-        obj = self.model.objects.get(name="general")
+        obj = self.model.objects.get(name=GlobalSettings.Names.GENERAL)
         obj.is_published = True  # we could do that at creation, but it's ok here
         obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)
@@ -160,30 +142,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, name="Get write data")
     def object(self, request, pk=None):
-        default_settings = {
-            "security_objective_scale": "1-4",
-            "ebios_radar_max": 6,
-            "ebios_radar_green_zone_radius": 0.2,
-            "ebios_radar_yellow_zone_radius": 0.9,
-            "ebios_radar_red_zone_radius": 2.5,
-            "notifications_enable_mailing": False,
-            "interface_agg_scenario_matrix": False,
-            "risk_matrix_swap_axes": False,
-            "risk_matrix_flip_vertical": False,
-            "risk_matrix_labels": "ISO",
-            "mapping_max_depth": 3,
-            "allow_self_validation": False,
-            "show_warning_external_links": True,
-            "show_get_started": True,
-            "personal_folders": False,
-            "builtin_metrics_retention_days": 730,  # 2 years default, minimum is 1
-            "allow_assignments_to_entities": False,
-            "enforce_mfa": False,
-            "default_language": "en",
-            "default_custom_analytics_dashboard": None,
-            "default_packager": "custom",
-            "disable_partially_compliant_result": False,
-        }
+        default_settings = GlobalSettings.GENERAL_DEFAULT_VALUE
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")
 
@@ -193,12 +152,28 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             settings.value = updated_value
             settings.save()
 
-        enabled_integrations = (
-            IntegrationProvider.objects.filter(is_active=True)
-            .distinct()
-            .values("id", "provider_type", "name", "configurations")
+        # Only configurations the caller can reach: the ids are consumed as a
+        # "is an integration usable here" signal, and an unscoped list handed
+        # every domain's configuration UUIDs to any authenticated user.
+
+        accessible_config_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, IntegrationConfiguration
         )
-        settings.value["enabled_integrations"] = list(enabled_integrations)
+
+        settings.value["enabled_integrations"] = [
+            {
+                "id": provider.id,
+                "provider_type": provider.provider_type,
+                "name": provider.name,
+                "configurations": [
+                    str(config_id)
+                    for config_id in provider.configurations.filter(
+                        id__in=accessible_config_ids
+                    ).values_list("id", flat=True)
+                ],
+            }
+            for provider in IntegrationProvider.objects.filter(is_active=True)
+        ]
 
         return Response(GeneralSettingsSerializer(settings).data.get("value"))
 
@@ -263,9 +238,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         """
         from metrology.models import Dashboard
 
-        accessible_ids, _, _ = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Dashboard
-        )
+        accessible_ids = RoleAssignment.get_viewable_object_ids(request.user, Dashboard)
         dashboards = Dashboard.objects.filter(id__in=accessible_ids).order_by("name")
         choices = {"": "—"}
         for d in dashboards:
@@ -284,7 +257,9 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
                 {"error": "You do not have permission to change user preferences."},
                 status=403,
             )
-        general = GlobalSettings.objects.filter(name="general").first()
+        general = GlobalSettings.objects.filter(
+            name=GlobalSettings.Names.GENERAL
+        ).first()
         lang = (
             general.value.get("default_language")
             if general and isinstance(general.value, dict)
@@ -320,15 +295,21 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, name="Get ebios rm radar parameters")
     def ebios_radar_parameters(self, request):
+        try:
+            instance = self.get_object()
+        except PermissionDenied:
+            # We want users to be able to see `GENERAL` global settings, even when they don't have the "view_globalsettings" permission.
+            instance = GeneralSettingsViewSet.queryset.first()
+
         ebios_rm_parameters = {
-            "ebios_radar_max": self.get_object().value.get("ebios_radar_max"),
-            "ebios_radar_green_zone_radius": self.get_object().value.get(
+            "ebios_radar_max": instance.value.get("ebios_radar_max"),
+            "ebios_radar_green_zone_radius": instance.value.get(
                 "ebios_radar_green_zone_radius"
             ),
-            "ebios_radar_yellow_zone_radius": self.get_object().value.get(
+            "ebios_radar_yellow_zone_radius": instance.value.get(
                 "ebios_radar_yellow_zone_radius"
             ),
-            "ebios_radar_red_zone_radius": self.get_object().value.get(
+            "ebios_radar_red_zone_radius": instance.value.get(
                 "ebios_radar_red_zone_radius"
             ),
         }
@@ -336,8 +317,14 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, name="Get notifications settings")
     def notifications_settings(self, request):
+        try:
+            instance = self.get_object()
+        except PermissionDenied:
+            # We want users to be able to see `GENERAL` global settings, even when they don't have the "view_globalsettings" permission.
+            instance = GeneralSettingsViewSet.queryset.first()
+
         notifications_settings = {
-            "notifications_enable_mailing": self.get_object().value.get(
+            "notifications_enable_mailing": instance.value.get(
                 "notifications_enable_mailing"
             ),
         }
@@ -345,8 +332,14 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, name="Get interface settings")
     def interface_settings(self, request):
+        try:
+            instance = self.get_object()
+        except PermissionDenied:
+            # We want users to be able to see `GENERAL` global settings, even when they don't have the "view_globalsettings" permission.
+            instance = GeneralSettingsViewSet.queryset.first()
+
         interface_settings = {
-            "interface_agg_scenario_matrix": self.get_object().value.get(
+            "interface_agg_scenario_matrix": instance.value.get(
                 "interface_agg_scenario_matrix"
             ),
         }
@@ -356,7 +349,9 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 class VulnerabilitySlaViewSet(viewsets.ModelViewSet):
     model = GlobalSettings
     serializer_class = VulnerabilitySlaSerializer
-    queryset = GlobalSettings.objects.filter(name="vulnerability-sla")
+    queryset = GlobalSettings.objects.filter(
+        name=GlobalSettings.Names.VULNERABILITY_SLA
+    )
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -371,7 +366,9 @@ class VulnerabilitySlaViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def get_object(self):
-        obj, _ = self.model.objects.get_or_create(name="vulnerability-sla")
+        obj, _ = self.model.objects.get_or_create(
+            name=GlobalSettings.Names.VULNERABILITY_SLA
+        )
         obj.is_published = True
         obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)
@@ -381,7 +378,7 @@ class VulnerabilitySlaViewSet(viewsets.ModelViewSet):
 class SecIntelFeedsViewSet(viewsets.ModelViewSet):
     model = GlobalSettings
     serializer_class = SecIntelFeedsSerializer
-    queryset = GlobalSettings.objects.filter(name="sec-intel-feeds")
+    queryset = GlobalSettings.objects.filter(name=GlobalSettings.Names.SEC_INTEL_FEEDS)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -396,7 +393,9 @@ class SecIntelFeedsViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def get_object(self):
-        obj, _ = self.model.objects.get_or_create(name="sec-intel-feeds")
+        obj, _ = self.model.objects.get_or_create(
+            name=GlobalSettings.Names.SEC_INTEL_FEEDS
+        )
         obj.is_published = True
         obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)
@@ -409,7 +408,7 @@ class InfraConfigViewSet(viewsets.ModelViewSet):
 
     model = GlobalSettings
     serializer_class = InfraConfigSerializer
-    queryset = GlobalSettings.objects.filter(name="infra-config")
+    queryset = GlobalSettings.objects.filter(name=GlobalSettings.Names.INFRA_CONFIG)
     permission_classes = [IsAuthenticated, IsGlobalAdmin]
 
     def retrieve(self, request, *args, **kwargs):
@@ -425,7 +424,9 @@ class InfraConfigViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def get_object(self):
-        obj, _ = self.model.objects.get_or_create(name="infra-config")
+        obj, _ = self.model.objects.get_or_create(
+            name=GlobalSettings.Names.INFRA_CONFIG
+        )
         obj.is_published = True
         obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)

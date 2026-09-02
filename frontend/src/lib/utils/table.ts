@@ -8,6 +8,7 @@ import ChangeImpact from '$lib/components/ContextMenu/applied-controls/ChangeImp
 import ChangeEffort from '$lib/components/ContextMenu/applied-controls/ChangeEffort.svelte';
 import ChangeCsfFunction from '$lib/components/ContextMenu/applied-controls/ChangeCsfFunction.svelte';
 import EvidenceChangeStatus from '$lib/components/ContextMenu/evidences/ChangeStatus.svelte';
+import WorkflowToggleActive from '$lib/components/ContextMenu/workflows/ToggleActive.svelte';
 import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeStatus.svelte';
 import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
@@ -16,6 +17,7 @@ import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWit
 import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
 import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
 import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
+import ToggleRecoveryFlags from '$lib/components/ContextMenu/asset-assessments/ToggleRecoveryFlags.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -57,6 +59,13 @@ const YES_NO_OPTIONS = [
 	{ label: 'no', value: 'false' }
 ];
 
+const TRIGGER_TYPE_OPTIONS = [
+	{ label: 'triggerManual', value: 'manual' },
+	{ label: 'triggerWebhook', value: 'webhook' },
+	{ label: 'triggerSchedule', value: 'schedule' },
+	{ label: 'triggerInternalEvent', value: 'internal_event' }
+];
+
 const SOLUTION_CRITICALITY_OPTIONS = [
 	{ label: '1', value: '1' },
 	{ label: '2', value: '2' },
@@ -75,12 +84,6 @@ const CONTENT_TYPE_OPTIONS = [
 	{ label: 'DOMAIN', value: 'DO' },
 	{ label: 'GLOBAL', value: 'GL' },
 	{ label: 'ENCLAVE', value: 'EN' }
-];
-
-const YES_NO_UNSET_OPTIONS = [
-	{ label: 'YES', value: 'YES' },
-	{ label: 'NO', value: 'NO' },
-	{ label: '--', value: '--' }
 ];
 
 const RISK_STAGE_OPTIONS = [
@@ -316,7 +319,6 @@ export const RISK_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		options: [
-			{ label: '--', value: '--' },
 			{ label: 'planned', value: 'planned' },
 			{ label: 'in_progress', value: 'in_progress' },
 			{ label: 'in_review', value: 'in_review' },
@@ -327,7 +329,8 @@ export const RISK_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		label: 'status',
 		browserCache: 'force-cache',
-		multiple: true
+		multiple: true,
+		enableDoubleDash: true
 	}
 };
 
@@ -335,7 +338,6 @@ export const QUANT_RISK_SCENARIO_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		options: [
-			{ label: '--', value: '--' },
 			{ label: 'draft', value: 'draft' },
 			{ label: 'open', value: 'open' },
 			{ label: 'mitigate', value: 'mitigate' },
@@ -346,7 +348,8 @@ export const QUANT_RISK_SCENARIO_STATUS_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		label: 'status',
 		browserCache: 'force-cache',
-		multiple: true
+		multiple: true,
+		enableDoubleDash: true
 	}
 };
 export const RISK_STAGE_FILTER: ListViewFilterConfig = {
@@ -444,8 +447,12 @@ export const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'withinTolerance',
-		options: YES_NO_UNSET_OPTIONS,
-		multiple: false
+		options: [
+			{ label: 'YES', value: 'YES' },
+			{ label: 'NO', value: 'NO' }
+		],
+		multiple: false,
+		enableDoubleDash: true
 	}
 };
 
@@ -1141,6 +1148,24 @@ export const ASSET_CLASS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const ASSET_CLASS_IS_VISIBLE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'is_visible',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
+const ASSET_CLASS_BUILTIN_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'builtin',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
 const ASSET_IS_BUSINESS_FUNCTION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1171,6 +1196,18 @@ export const FINDINGS_ASSESSMENTS_CATEGORY_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		browserCache: 'force-cache',
 		optionsValueField: 'value'
+	}
+};
+
+export const FINDINGS_ASSESSMENTS_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'findings-assessments/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
 	}
 };
 
@@ -1386,7 +1423,8 @@ export const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
 		optionsEndpoint: 'actors',
-		multiple: true
+		multiple: true,
+		enableDoubleDash: true
 	}
 };
 
@@ -1541,8 +1579,8 @@ export const listViewFields = {
 			'updated_at'
 		],
 		optionalFields: {
-			head: ['createdAt'],
-			body: ['created_at']
+			head: ['authors', 'createdAt'],
+			body: ['authors', 'created_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1871,8 +1909,8 @@ export const listViewFields = {
 			'filtering_labels'
 		],
 		optionalFields: {
-			head: ['referenceLink', 'createdAt', 'updatedAt'],
-			body: ['reference_link', 'created_at', 'updated_at']
+			head: ['assetClass', 'referenceLink', 'createdAt', 'updatedAt'],
+			body: ['asset_class', 'reference_link', 'created_at', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1883,8 +1921,19 @@ export const listViewFields = {
 		}
 	},
 	'asset-class': {
-		head: ['name', 'description'],
-		body: ['name', 'description']
+		head: ['name', 'parentAssetClass', 'description', 'translations', 'isVisible', 'builtin'],
+		body: [
+			'translated_name',
+			'parent',
+			'translated_description',
+			'translations',
+			'is_visible',
+			'builtin'
+		],
+		filters: {
+			is_visible: ASSET_CLASS_IS_VISIBLE_FILTER,
+			builtin: ASSET_CLASS_BUILTIN_FILTER
+		}
 	},
 	users: {
 		head: [
@@ -1928,6 +1977,10 @@ export const listViewFields = {
 	'idp-groups': {
 		head: ['name', 'userGroups'],
 		body: ['name', 'user_groups']
+	},
+	'service-accounts': {
+		head: ['name', 'clientId', 'secretPreview', 'isActive', 'expiryDate', 'createdAt'],
+		body: ['name', 'client_id', 'secret_preview', 'is_active', 'expiry_date', 'created_at']
 	},
 	roles: {
 		head: ['name', 'description'],
@@ -1973,8 +2026,8 @@ export const listViewFields = {
 			'updated_at'
 		],
 		optionalFields: {
-			head: ['status'],
-			body: ['status']
+			head: ['status', 'authors'],
+			body: ['status', 'authors']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2028,12 +2081,22 @@ export const listViewFields = {
 		body: ['version_number', 'status_display', 'author', 'change_summary', 'created_at']
 	},
 	'document-containers': {
-		head: ['refId', 'name', 'documentType', 'status', 'classification', 'domain', 'labels'],
+		head: [
+			'refId',
+			'name',
+			'documentType',
+			'status',
+			'reviewProgress',
+			'classification',
+			'domain',
+			'labels'
+		],
 		body: [
 			'ref_id',
 			'name',
 			'document_type',
 			'status',
+			'progress',
 			'classification',
 			'folder',
 			'filtering_labels'
@@ -2632,6 +2695,13 @@ export const listViewFields = {
 			is_selected: IS_SELECTED_FILTER
 		}
 	},
+	'threat-models': {
+		head: ['ref_id', 'name', 'description', 'catalog', 'nodeCount', 'domain'],
+		body: ['ref_id', 'name', 'description', 'catalog', 'node_count', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER
+		}
+	},
 	'elementary-actions': {
 		head: ['ref_id', 'folder', '', 'name', 'attack_stage', 'threat'],
 		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat'],
@@ -2692,6 +2762,7 @@ export const listViewFields = {
 			'category',
 			'evidences',
 			'findings',
+			'status',
 			'treatmentProgress',
 			'folder',
 			'perimeter'
@@ -2702,14 +2773,21 @@ export const listViewFields = {
 			'category',
 			'evidences',
 			'findings_count',
+			'status',
 			'treatment_progress',
 			'folder',
 			'perimeter'
 		],
+		optionalFields: {
+			head: ['authors', 'filteringLabels', 'reportedAt'],
+			body: ['authors', 'filtering_labels', 'reported_at']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
-			category: FINDINGS_ASSESSMENTS_CATEGORY_FILTER
+			category: FINDINGS_ASSESSMENTS_CATEGORY_FILTER,
+			status: FINDINGS_ASSESSMENTS_STATUS_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'posture-assessments': {
@@ -2785,8 +2863,8 @@ export const listViewFields = {
 			'updated_at'
 		],
 		optionalFields: {
-			head: ['createdAt'],
-			body: ['created_at']
+			head: ['createdAt', 'labels'],
+			body: ['created_at', 'filtering_labels']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -3084,6 +3162,30 @@ export const listViewFields = {
 		body: ['activity', 'actor', 'role'],
 		filters: {}
 	},
+	workflows: {
+		head: ['name', 'description', 'triggerTypes', 'isActive', 'folder'],
+		body: ['name', 'description', 'trigger_types', 'is_active', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER,
+			trigger_type: {
+				component: AutocompleteSelect,
+				props: {
+					label: 'triggerType',
+					options: TRIGGER_TYPE_OPTIONS,
+					multiple: true
+				}
+			},
+			is_active: {
+				component: AutocompleteSelect,
+				props: {
+					label: 'isActive',
+					options: YES_NO_OPTIONS,
+					multiple: false
+				}
+			}
+		}
+	},
 	'metric-definitions': {
 		head: ['ref_id', 'name', 'description', 'category', 'unit', 'provider', 'labels', 'folder'],
 		body: [
@@ -3310,6 +3412,7 @@ export const contextMenuActions = {
 		{ component: ReplaceWith, props: {} }
 	],
 	evidences: [{ component: EvidenceChangeStatus, props: {} }],
+	workflows: [{ component: WorkflowToggleActive, props: {} }],
 	'task-nodes': [{ component: TaskNodeChangeStatus, props: {} }],
 	'feared-events': [{ component: SelectObject, props: {} }],
 	'ro-to': [{ component: SelectObject, props: {} }],
@@ -3320,10 +3423,22 @@ export const contextMenuActions = {
 	vulnerabilities: [
 		{ component: VulnerabilityChangeStatus, props: {} },
 		{ component: VulnerabilityChangeSeverity, props: {} }
-	]
+	],
+	'asset-assessments': [{ component: ToggleRecoveryFlags, props: {} }]
 };
 
-// Batch action configuration
+// Batch action configuration.
+//
+// Two shapes, discriminated by `type`, matching two kinds of relationships:
+// - Row operations (BatchActionConfig): act on the selected objects themselves.
+//   Use these when the relationship is REIFIED — it has its own model,
+//   permissions and data (e.g. AssetAssessment), so re-adding does NOT restore
+//   what removing destroyed. Per-row child-model permissions, per-row results.
+// - Parent mutations (ParentActionConfig): the selection only parameterizes an
+//   edit of the PARENT object. Use these for ANONYMOUS links (e.g. group
+//   membership, a bare M2M), where removal loses nothing but the link itself.
+//   Authorized by `change` on the parent via the endpoint's
+//   permission_overrides; single {count} response, no per-row results.
 export interface BatchActionConfig {
 	type:
 		| 'delete'
@@ -3343,10 +3458,36 @@ export interface BatchActionConfig {
 	children?: BatchActionConfig[];
 	minSelection?: number;
 	maxSelection?: number;
+	confirmMessage?: string; // i18n key for an extra confirm warning, receives {count}
 }
+
+export interface ParentActionConfig {
+	type: 'parent_action';
+	action: string; // parent action url segment, e.g. 'remove-members'
+	payloadField: string; // request body key holding the selected ids, e.g. 'users'
+	label: string; // i18n key for the button
+	icon?: string;
+	confirmMessage?: string; // i18n key for the confirm body, receives {count} (defaults to 'confirmRemoveSelected')
+	successMessage?: string; // i18n key for the success toast (defaults to 'saved')
+	// Resolved at runtime by the embedding view (parent url + id + action);
+	// never set in static config.
+	endpoint?: string;
+}
+
+export type TableBatchAction = BatchActionConfig | ParentActionConfig;
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	'document-templates': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'asset-assessments': [
+		{
+			type: 'delete',
+			label: 'delete',
+			icon: 'fa-solid fa-trash',
+			// Removing an asset from a BIA deletes its assessment — a reified
+			// association — so the confirm must disclose the cascade.
+			confirmMessage: 'confirmRemoveAssetAssessments'
+		}
+	],
 	'applied-controls': [
 		{
 			type: 'group',
@@ -3908,9 +4049,11 @@ export function getListViewFields({
 	if (model?.flaggedFields) {
 		const indicesToPop = body
 			.map((field: string, index: number) => {
-				const flag = model.flaggedFields?.[field];
-				// instead of includes, check if featureFlags[flag] is truthy
-				return flag && !featureFlags[flag] ? index : -1;
+				const flags = model.flaggedFields?.[field];
+				if (!flags) return -1;
+				// A field's flag(s) can be a single flag name or a list (shown if ANY is on).
+				const flagList = ([] as string[]).concat(flags);
+				return flagList.every((flag) => !featureFlags[flag]) ? index : -1;
 			})
 			.filter((i) => i !== -1);
 

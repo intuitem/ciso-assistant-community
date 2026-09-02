@@ -1,22 +1,27 @@
 import io
 import re
+import uuid
 
+from django.db import IntegrityError
 from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
 
 from core.views import (
+    BATCH_SIZE_LIMIT,
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
     escape_excel_formula,
 )
+from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from core.serializers import RiskMatrixReadSerializer
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
-from iam.models import RoleAssignment, Folder
+from iam.models import RoleAssignment, Folder, Permission
 from core.models import Asset
 from .models import (
     BusinessImpactAnalysis,
@@ -24,6 +29,7 @@ from .models import (
     EscalationThreshold,
     DoraIncidentReport,
 )
+from .serializers import AssetAssessmentWriteSerializer
 
 SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
@@ -432,6 +438,95 @@ class AssetAssessmentViewSet(BaseModelViewSet):
 
         return None  # Some are indeterminate
 
+    @action(detail=False, methods=["post"], url_path="batch-create")
+    def batch_create(self, request):
+        bia_id = request.data.get("bia")
+        asset_ids = request.data.get("assets", [])
+        if not bia_id:
+            return Response(
+                {"error": "bia is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if not isinstance(asset_ids, list) or not asset_ids:
+            return Response(
+                {"error": "assets is required and must be a non-empty list"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if len(asset_ids) > BATCH_SIZE_LIMIT:
+            return Response(
+                {"error": "too many assets", "max": BATCH_SIZE_LIMIT},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        viewable_bias = RoleAssignment.get_viewable_object_ids(
+            request.user, BusinessImpactAnalysis
+        )
+        try:
+            bia = BusinessImpactAnalysis.objects.filter(id__in=viewable_bias).get(
+                id=uuid.UUID(str(bia_id))
+            )
+        except ValueError, AttributeError, BusinessImpactAnalysis.DoesNotExist:
+            return Response(
+                {"error": "BIA not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+        if bia.is_locked:
+            return Response(
+                {"error": "lockedAssessment"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_assetassessment"),
+            folder=bia.folder,
+        ):
+            return Response(
+                {"error": "permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        viewable_assets = RoleAssignment.get_viewable_object_ids(request.user, Asset)
+        viewable_asset_ids = {str(a) for a in viewable_assets}
+
+        existing_assets = {
+            str(a)
+            for a in AssetAssessment.objects.filter(bia=bia).values_list(
+                "asset_id", flat=True
+            )
+        }
+        created = 0
+        skipped = 0
+        errors = []
+        for asset_id in dict.fromkeys(str(a) for a in asset_ids):
+            if asset_id in existing_assets:
+                skipped += 1
+                continue
+            if asset_id not in viewable_asset_ids:
+                errors.append({"asset": asset_id, "error": "asset not found"})
+                continue
+            serializer = AssetAssessmentWriteSerializer(
+                data={"asset": asset_id, "bia": str(bia.id)},
+                context={"request": request},
+            )
+            if not serializer.is_valid():
+                errors.append({"asset": asset_id, "errors": serializer.errors})
+                continue
+            try:
+                serializer.save()
+            except IntegrityError:
+                skipped += 1
+                continue
+            except PermissionDenied:
+                errors.append({"asset": asset_id, "error": "permission denied"})
+                continue
+            created += 1
+
+        return Response(
+            {
+                "success": created > 0 or skipped > 0,
+                "created": created,
+                "skipped": skipped,
+                "errors": errors,
+            },
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):
         aa = self.get_object()
@@ -473,9 +568,7 @@ class AssetAssessmentViewSet(BaseModelViewSet):
         all_asset_ids = {a.id for a in all_assets}
 
         # Get viewable asset IDs using the standard pattern
-        viewable_asset_ids = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(), user=request.user, object_type=Asset
-        )[0]
+        viewable_asset_ids = RoleAssignment.get_viewable_object_ids(request.user, Asset)
 
         # Filter to only assets that are both in our tree and viewable
         accessible_asset_ids = all_asset_ids & set(viewable_asset_ids)

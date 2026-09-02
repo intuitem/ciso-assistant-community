@@ -28,6 +28,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
+	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
@@ -42,8 +43,9 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
 	import type { TableSource } from '$lib/components/ModelTable/types';
-	import { Popover, Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
 		data: PageData;
@@ -100,6 +102,7 @@
 		}
 	);
 	const rows = handler.getRows();
+	const toastStore = getToastStore();
 	const field = data.model.reverseForeignKeyFields.find(
 		(item) => item.urlModel === 'timeline-entries'
 	);
@@ -108,7 +111,11 @@
 			state,
 			URLModel: 'timeline-entries',
 			endpoint: `/timeline-entries?incident=${data.data.id}`,
-			fields: listViewFields['timeline-entries'].body.filter((v) => v !== field.field)
+			fields: listViewFields['timeline-entries'].body.filter((v) => v !== field.field),
+			onError: (error) => {
+				console.error(error);
+				toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
+			}
 		})
 	);
 
@@ -187,7 +194,58 @@
 				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
 	});
 
-	let exportPopupOpen = $state(false);
+	function buildExportGroups(): ExportGroup[] {
+		const id = data.data.id;
+		return [
+			{
+				titleKey: 'incident',
+				options: [
+					{
+						titleKey: 'exportIncidentReport',
+						descriptionKey: 'exportIncidentReportDesc',
+						format: 'MD',
+						href: `/incidents/${id}/export/md`,
+						testId: 'export-option-md'
+					},
+					{
+						titleKey: 'exportIncidentReportPrintable',
+						descriptionKey: 'exportIncidentReportPrintableDesc',
+						format: 'PDF',
+						href: `/incidents/${id}/export/pdf`,
+						testId: 'export-option-pdf'
+					}
+				]
+			},
+			{
+				titleKey: 'doraIncidentReports',
+				options: [
+					{
+						titleKey: 'generateDoraReport',
+						descriptionKey: 'generateDoraReportDesc',
+						format: 'JSON',
+						href: `/dora-incident-reports/new?incident=${id}`,
+						kind: 'navigate',
+						testId: 'export-option-dora'
+					}
+				]
+			}
+		];
+	}
+
+	function modalExport(): void {
+		const modalComponent: ModalComponent = {
+			ref: ExportModal,
+			props: {
+				title: m.exportOptionsTitle(),
+				groups: buildExportGroups()
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
+		};
+		modalStore.trigger(modal);
+	}
 
 	function modalDeleteDoraReport(reportId: string, reportName: string): void {
 		const modalComponent: ModalComponent = {
@@ -285,42 +343,14 @@
 	<DetailView {data} displayModelTable={false}>
 		{#snippet actions()}
 			<div class="flex flex-col space-y-2">
-				<Popover
-					open={exportPopupOpen}
-					onOpenChange={(e) => (exportPopupOpen = e.open)}
-					positioning={{ placement: 'bottom' }}
+				<button
+					type="button"
+					class="btn preset-filled-primary-500 w-full"
+					data-testid="export-button"
+					onclick={modalExport}
 				>
-					<Popover.Trigger class="btn preset-filled-primary-500 w-full">
-						<span data-testid="export-button">
-							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
-						</span>
-					</Popover.Trigger>
-					<Popover.Positioner class="z-50!">
-						<Popover.Content
-							class="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1"
-						>
-							<div>
-								<p class="block px-4 py-2 text-sm text-surface-800-200">{m.incident()}</p>
-								<a
-									href="/incidents/{data.data.id}/export/md"
-									class="block px-4 py-2 text-sm text-surface-800-200 hover:bg-surface-200-800"
-									>... {m.asMarkdown()}</a
-								>
-								<a
-									href="/incidents/{data.data.id}/export/pdf"
-									class="block px-4 py-2 text-sm text-surface-800-200 hover:bg-surface-200-800"
-									>... {m.asPDF()}</a
-								>
-							</div>
-						</Popover.Content>
-					</Popover.Positioner>
-				</Popover>
-				<a
-					href="/dora-incident-reports/new?incident={data.data.id}"
-					class="btn preset-filled-secondary-500 w-full"
-				>
-					<i class="fa-solid fa-file-shield mr-2"></i>{m.generateDoraReport()}
-				</a>
+					<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+				</button>
 			</div>
 		{/snippet}
 		{#snippet widgets()}
@@ -502,7 +532,7 @@
 									>
 									<a
 										href={`/${actionsURLModel}/${meta.id}`}
-										class="font-semibold capitalize"
+										class="font-semibold"
 										data-testid="name-entry-{rowIndex}">{safeTranslate(meta.entry)}</a
 									>
 								</div>

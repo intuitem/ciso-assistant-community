@@ -6,6 +6,8 @@ export interface ToastSettings {
 	message: string;
 	/** Provide CSS classes to set the background color. */
 	background?: string;
+	/** Semantic color preset. Ignored when `background` is set. */
+	preset?: 'error' | 'success' | 'warning';
 	/** Enables auto-hide after the timeout duration. */
 	autohide?: boolean;
 	/** Set the auto-hide timeout duration. */
@@ -120,8 +122,15 @@ function toastService() {
 		close,
 		/** Add a new toast to the queue. */
 		trigger: (toast: ToastSettings) => {
-			const id: string = randomUUID();
+			let id: string = randomUUID();
 			update((tStore) => {
+				// a page with many tables can fail N times at once; show it once
+				const duplicate = tStore.find((t) => t.message === toast.message);
+				if (duplicate) {
+					id = duplicate.id;
+					toast.callback?.({ id, status: 'queued' });
+					return tStore;
+				}
 				// Trigger Callback
 				if (toast && toast.callback) toast.callback({ id, status: 'queued' });
 				// activate autohide when dismiss button is hidden.

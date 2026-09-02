@@ -123,6 +123,11 @@
 					description: m.validationFlowsDescription()
 				},
 				{
+					field: 'workflows',
+					label: m.workflows(),
+					description: m.workflowsFlagDescription()
+				},
+				{
 					field: 'policy_documents',
 					label: m.policyDocumentsFlag(),
 					description: m.policyDocumentsFlagDescription()
@@ -205,6 +210,16 @@
 					description: m.quantitativeRiskStudiesDescription()
 				},
 				{
+					field: 'threat_modeling',
+					label: m.threatModeling(),
+					description: m.threatModelingDescription()
+				},
+				{
+					field: 'ttps',
+					label: m.ttpCatalogs(),
+					description: m.ttpsDescription()
+				},
+				{
 					field: 'scoring_assistant',
 					label: m.scoringAssistant(),
 					description: m.scoringAssistantDescription()
@@ -260,6 +275,16 @@
 					field: 'idp_groups',
 					label: m.idpGroups(),
 					description: m.idpGroupsDescription()
+				},
+				{
+					field: 'jit_provisioning',
+					label: m.jitProvisioning(),
+					description: m.jitProvisioningDescription()
+				},
+				{
+					field: 'service_accounts',
+					label: m.serviceAccounts(),
+					description: m.serviceAccountsDescription()
 				},
 				{
 					field: 'terminologies',
@@ -447,19 +472,19 @@
 		<div class="flex flex-wrap items-center gap-2 ml-auto">
 			<button
 				type="button"
-				class="btn btn-sm variant-soft-primary"
+				class="btn btn-sm preset-tonal-primary"
 				onclick={() => setFields(allFields, true)}
 			>
 				<i class="fa-solid fa-check-double mr-1"></i>{m.enableAll()}
 			</button>
 			<button
 				type="button"
-				class="btn btn-sm variant-soft"
+				class="btn btn-sm preset-tonal"
 				onclick={() => setFields(allFields, false)}
 			>
 				<i class="fa-solid fa-xmark mr-1"></i>{m.disableAll()}
 			</button>
-			<button type="button" class="btn btn-sm variant-soft" onclick={resetToDefaults}>
+			<button type="button" class="btn btn-sm preset-tonal" onclick={resetToDefaults}>
 				<i class="fa-solid fa-rotate-left mr-1"></i>{m.resetToDefaults()}
 			</button>
 
@@ -469,7 +494,7 @@
 			{#each PRESETS as preset}
 				<button
 					type="button"
-					class="btn btn-sm variant-ghost-primary"
+					class="btn btn-sm preset-outlined-primary-500"
 					title={preset.description}
 					onclick={() => applyPreset(preset.on)}
 				>
@@ -498,7 +523,7 @@
 					>
 					<button
 						type="button"
-						class="btn btn-sm variant-soft-primary"
+						class="btn btn-sm preset-tonal-primary"
 						title={m.enableAll()}
 						onclick={() => setFields(groupFields, true)}
 					>
@@ -506,7 +531,7 @@
 					</button>
 					<button
 						type="button"
-						class="btn btn-sm variant-soft"
+						class="btn btn-sm preset-tonal"
 						title={m.disableAll()}
 						onclick={() => setFields(groupFields, false)}
 					>

@@ -277,7 +277,7 @@ test('third-party representative can fill their assigned audit', async ({
 		await page.getByTestId('create-evidence-button').click();
 		await page.getByTestId('form-input-name').click();
 		await page.getByTestId('form-input-name').fill('tp-evidence');
-		await page.getByTestId('form-input-filtering-labels').getByRole('textbox').click();
+		await page.getByTestId('form-input-filtering-labels').getByRole('combobox').click();
 		let objectCreatedToast = thirdPartyAuthenticatedPage.isToastVisible(
 			'The evidence object has been successfully created' + /.+/.source
 		);
@@ -292,7 +292,9 @@ test('third-party representative can fill their assigned audit', async ({
 	await test.step('check that selected evidences were updated', async () => {
 		await page.getByTestId('select-evidence-button').click();
 		await expect(page.getByTestId('modal-title')).toBeVisible();
-		await expect(page.getByRole('option').first()).toContainText(/.*tp-evidence.*/);
+		await expect(page.getByTestId('form-input-evidences').locator('div.multiselect')).toContainText(
+			/.*tp-evidence.*/
+		);
 		await page.getByTestId('cancel-button').click();
 	});
 });

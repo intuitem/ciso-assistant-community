@@ -752,6 +752,12 @@ class TestImportResults:
             format="multipart",
         )
 
+    def test_import_size_limit_follows_attachment_setting(self, setup, settings):
+        settings.ATTACHMENT_MAX_SIZE_MB = 1
+        res = self.import_file(setup, "big.csv", b"ref_id,result\n" + b"x" * 1_100_000)
+        assert res.status_code == 400
+        assert "max 1 MB" in res.json()["error"]
+
     def test_csv_import(self, setup):
         s = setup
         csv_content = (
@@ -1798,3 +1804,229 @@ class TestIngestionValidation:
             format="json",
         )
         assert res.status_code == 400
+
+
+@pytest.mark.django_db
+class TestRunLifecycle:
+    def _run_id(self, s):
+        return upload(
+            s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "fail"}]
+        ).json()["run_id"]
+
+    def test_update_run_observation(self, setup):
+        s = setup
+        run_id = self._run_id(s)
+        url = f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/"
+        res = s["client"].patch(url, {"observation": "manual review"}, format="json")
+        assert res.status_code == 200
+        assert res.json()["observation"] == "manual review"
+        detail = s["client"].get(url).json()
+        assert detail["run"]["observation"] == "manual review"
+        runs = (
+            s["client"]
+            .get(f"/api/automation/posture-assessments/{s['pa'].id}/runs/")
+            .json()["runs"]
+        )
+        assert runs[0]["observation"] == "manual review"
+
+    def test_update_run_attachment_upload_and_remove(self, setup):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        s = setup
+        run_id = self._run_id(s)
+        url = f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/"
+        res = s["client"].patch(
+            url,
+            {
+                "attachment": SimpleUploadedFile(
+                    "scan-report.txt", b"raw scanner output"
+                )
+            },
+            format="multipart",
+        )
+        assert res.status_code == 200
+        assert res.json()["attachment"].endswith(".txt")
+
+        res = s["client"].get(url + "attachment/")
+        assert res.status_code == 200
+        content = (
+            b"".join(res.streaming_content)
+            if hasattr(res, "streaming_content")
+            else res.content
+        )
+        assert b"raw scanner output" in content
+
+        res = s["client"].patch(url, {"remove_attachment": "true"}, format="multipart")
+        assert res.status_code == 200
+        assert res.json()["attachment"] is None
+        assert s["client"].get(url + "attachment/").status_code == 404
+
+    def test_update_run_locked_blocked(self, setup):
+        s = setup
+        run_id = self._run_id(s)
+        s["pa"].is_locked = True
+        s["pa"].save(update_fields=["is_locked"])
+        res = s["client"].patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/",
+            {"observation": "nope"},
+            format="json",
+        )
+        assert res.status_code == 400
+
+    def test_delete_run_cascades_results(self, setup):
+        s = setup
+        run_id = self._run_id(s)
+        assert PostureResult.objects.filter(run_id=run_id).count() == 1
+        res = s["client"].delete(
+            f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/"
+        )
+        assert res.status_code == 204
+        assert not PostureRun.objects.filter(id=run_id).exists()
+        assert not PostureResult.objects.filter(run_id=run_id).exists()
+
+    def test_delete_run_locked_blocked(self, setup):
+        s = setup
+        run_id = self._run_id(s)
+        s["pa"].is_locked = True
+        s["pa"].save(update_fields=["is_locked"])
+        res = s["client"].delete(
+            f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/"
+        )
+        assert res.status_code == 400
+        assert PostureRun.objects.filter(id=run_id).exists()
+
+    def test_history_requires_asset(self, setup):
+        s = setup
+        res = s["client"].get(
+            f"/api/automation/posture-assessments/{s['pa'].id}/history/"
+        )
+        assert res.status_code == 400
+
+    def test_history_returns_runs_and_results(self, setup):
+        s = setup
+        upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "fail"}])
+        upload(s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}])
+        upload(s["client"], s["pa"], s["asset2"], [{"ref_id": "1.2", "result": "pass"}])
+        body = (
+            s["client"]
+            .get(
+                f"/api/automation/posture-assessments/{s['pa'].id}/history/",
+                {"asset": str(s["asset1"].id)},
+            )
+            .json()
+        )
+        assert len(body["runs"]) == 2
+        assert len(body["results"]) == 2
+        assert {r["result"] for r in body["results"]} == {"pass", "fail"}
+        assert all(r["requirement"]["ref_id"] == "1.1" for r in body["results"])
+
+    def test_update_run_rejects_disallowed_extension_with_string_error(self, setup):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        s = setup
+        run_id = self._run_id(s)
+        res = s["client"].patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/",
+            {"attachment": SimpleUploadedFile("payload.exe", b"MZ")},
+            format="multipart",
+        )
+        assert res.status_code == 400
+        assert isinstance(res.json()["error"], str)
+
+    def test_observation_only_update_keeps_attachment_and_bumps_updated_at(self, setup):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        s = setup
+        run_id = self._run_id(s)
+        url = f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/"
+        s["client"].patch(
+            url,
+            {"attachment": SimpleUploadedFile("report.txt", b"x")},
+            format="multipart",
+        )
+        run = PostureRun.objects.get(id=run_id)
+        stored_name, before = run.attachment.name, run.updated_at
+
+        res = s["client"].patch(url, {"observation": "note"}, format="json")
+        assert res.status_code == 200
+        run.refresh_from_db()
+        assert run.attachment.name == stored_name
+        assert run.updated_at > before
+
+    def test_remove_attachment_ignores_falsy_strings(self, setup):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        s = setup
+        run_id = self._run_id(s)
+        url = f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/"
+        s["client"].patch(
+            url, {"attachment": SimpleUploadedFile("r.txt", b"x")}, format="multipart"
+        )
+        res = s["client"].patch(url, {"remove_attachment": "false"}, format="json")
+        assert res.status_code == 200
+        assert res.json()["attachment"] is not None
+
+    def test_delete_run_removes_attachment_file(self, setup):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        s = setup
+        run_id = self._run_id(s)
+        url = f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/"
+        s["client"].patch(
+            url,
+            {"attachment": SimpleUploadedFile("gone.txt", b"x")},
+            format="multipart",
+        )
+        run = PostureRun.objects.get(id=run_id)
+        storage, name = run.attachment.storage, run.attachment.name
+        assert storage.exists(name)
+
+        deleted = s["client"].delete(url)
+        assert deleted.status_code == 204
+        assert not storage.exists(name)
+
+    def test_pruning_spares_annotated_runs(self, setup):
+        s = setup
+        first = upload(
+            s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "fail"}]
+        ).json()["run_id"]
+        s["client"].patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/runs/{first}/",
+            {"observation": "investigated manually"},
+            format="json",
+        )
+        # history_depth is 2, so three more runs age the first one's results out
+        for _ in range(3):
+            upload(
+                s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}]
+            )
+        assert not PostureResult.objects.filter(run_id=first).exists()
+        assert PostureRun.objects.filter(id=first).exists()
+
+    def test_pruning_drops_plain_empty_runs(self, setup):
+        s = setup
+        first = upload(
+            s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "fail"}]
+        ).json()["run_id"]
+        for _ in range(3):
+            upload(
+                s["client"], s["pa"], s["asset1"], [{"ref_id": "1.1", "result": "pass"}]
+            )
+        assert not PostureRun.objects.filter(id=first).exists()
+
+    def test_assessment_deletion_cascades_attachment_files(self, setup):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        s = setup
+        run_id = self._run_id(s)
+        s["client"].patch(
+            f"/api/automation/posture-assessments/{s['pa'].id}/runs/{run_id}/",
+            {"attachment": SimpleUploadedFile("cascade.txt", b"x")},
+            format="multipart",
+        )
+        run = PostureRun.objects.get(id=run_id)
+        storage, name = run.attachment.storage, run.attachment.name
+        assert storage.exists(name)
+
+        s["pa"].delete()
+        assert not storage.exists(name)

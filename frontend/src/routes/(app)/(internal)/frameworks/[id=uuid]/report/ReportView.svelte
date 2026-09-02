@@ -12,11 +12,7 @@
 	// -----------------------------------------------------------------------------
 
 	type Result =
-		| 'not_assessed'
-		| 'partially_compliant'
-		| 'non_compliant'
-		| 'compliant'
-		| 'not_applicable';
+		'not_assessed' | 'partially_compliant' | 'non_compliant' | 'compliant' | 'not_applicable';
 
 	type InheritancePathEntry = {
 		ca_id: string;
@@ -557,7 +553,7 @@
 				</div>
 			</div>
 			<div class="flex gap-2 items-center">
-				<a class="btn variant-ghost-surface text-sm" href="/frameworks/{framework.id}"
+				<a class="btn preset-outlined-surface-500 text-sm" href="/frameworks/{framework.id}"
 					>{m.backToFramework()}</a
 				>
 			</div>

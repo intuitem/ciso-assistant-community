@@ -11,6 +11,13 @@
 	import { invalidateAll } from '$app/navigation';
 	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import ValidationFlowActionModal from '$lib/components/Modals/ValidationFlowActionModal.svelte';
+	import { deserialize } from '$app/forms';
+	import {
+		validationFlowErrorMessage,
+		validationFlowItemHref,
+		validationFlowModelLabels,
+		validationStatusColor
+	} from '$lib/utils/validationFlows';
 	import {
 		getModalStore,
 		type ModalSettings,
@@ -52,11 +59,16 @@
 						formData.append('notes', notes);
 						const response = await fetch(`?/${action}`, {
 							method: 'POST',
-							body: formData
+							body: formData,
+							headers: { 'x-sveltekit-action': 'true' }
 						});
-						if (!response.ok) {
-							const errorData = await response.text();
-							throw new Error(`${response.status} - ${errorData}`);
+						const result = deserialize(await response.text());
+						if (result.type === 'failure' || result.type === 'error') {
+							const message =
+								result.type === 'failure'
+									? validationFlowErrorMessage(result.data?.error)
+									: undefined;
+							throw new Error(message ?? m.anErrorOccurred());
 						}
 					},
 					onSuccess: () => invalidateAll()
@@ -66,60 +78,7 @@
 		modalStore.trigger(modal);
 	}
 
-	// Helper to convert model field names to display names
-	const modelDisplayNames: Record<string, string> = {
-		compliance_assessments: m.complianceAssessments(),
-		risk_assessments: m.riskAssessments(),
-		business_impact_analysis: m.businessImpactAnalysis(),
-		crq_studies: m.quantitativeRiskStudies(),
-		ebios_studies: m.ebiosRMStudies(),
-		entity_assessments: m.entityAssessments(),
-		findings_assessments: m.findingsAssessments(),
-		evidences: m.evidences(),
-		security_exceptions: m.securityExceptions(),
-		policies: m.policies(),
-		processings: m.processings(),
-		accreditations: m.accreditations(),
-		contracts: m.contracts(),
-		managed_documents: m.managedDocuments()
-	};
-
-	// Get URL model names for links
-	const modelUrlNames: Record<string, string> = {
-		compliance_assessments: 'compliance-assessments',
-		risk_assessments: 'risk-assessments',
-		business_impact_analysis: 'business-impact-analysis',
-		crq_studies: 'quantitative-risk-studies',
-		ebios_studies: 'ebios-rm',
-		entity_assessments: 'entity-assessments',
-		findings_assessments: 'findings-assessments',
-		evidences: 'evidences',
-		security_exceptions: 'security-exceptions',
-		policies: 'policies',
-		processings: 'processings',
-		accreditations: 'accreditations',
-		contracts: 'contracts',
-		managed_documents: 'managed-documents'
-	};
-
-	// Resolve the URL for an associated object
-	function getItemHref(key: string, item: any): string {
-		if (key === 'managed_documents' && item.policy?.id) {
-			return `/policies/${item.policy.id}/document`;
-		}
-		return `/${modelUrlNames[key]}/${item.id}`;
-	}
-
-	// Get status color
-	const statusColors: Record<string, string> = {
-		submitted: 'bg-blue-100 text-blue-800',
-		accepted: 'bg-green-100 text-green-800',
-		rejected: 'bg-red-100 text-red-800',
-		revoked: 'bg-surface-100-900 text-surface-950-50',
-		expired: 'bg-orange-100 text-orange-800',
-		dropped: 'bg-surface-100-900 text-surface-950-50',
-		change_requested: 'bg-yellow-100 text-yellow-800'
-	};
+	const modelDisplayNames = validationFlowModelLabels();
 </script>
 
 <div class="flex flex-col space-y-4">
@@ -128,8 +87,9 @@
 			<div class="flex flex-col space-y-2">
 				<h1 class="text-2xl font-bold">{validation_flow.str}</h1>
 				<span
-					class="badge {statusColors[validation_flow.status] ||
-						'bg-surface-100-900 text-surface-950-50'} px-3 py-1 rounded-full text-sm font-medium w-fit"
+					class="badge {validationStatusColor(
+						validation_flow.status
+					)} px-3 py-1 rounded-full text-sm font-medium w-fit"
 				>
 					{safeTranslate(validation_flow.status)}
 				</span>
@@ -168,7 +128,7 @@
 						<button
 							type="button"
 							onclick={() => openObservationModal('drop')}
-							class="btn preset-filled-surface-500"
+							class="btn preset-filled-surface-900-100"
 							data-testid="drop-button"
 						>
 							<i class="fa-solid fa-trash mr-2"></i>
@@ -201,7 +161,7 @@
 						<button
 							type="button"
 							onclick={() => openObservationModal('drop')}
-							class="btn preset-filled-surface-500"
+							class="btn preset-filled-surface-900-100"
 							data-testid="drop-button"
 						>
 							<i class="fa-solid fa-trash mr-2"></i>
@@ -219,7 +179,7 @@
 						<button
 							type="button"
 							onclick={() => openObservationModal('drop')}
-							class="btn preset-filled-surface-500"
+							class="btn preset-filled-surface-900-100"
 							data-testid="drop-button"
 						>
 							<i class="fa-solid fa-trash mr-2"></i>
@@ -359,13 +319,17 @@
 									class="border rounded-lg p-3 bg-surface-50-950 hover:bg-surface-100-900 transition"
 								>
 									<div class="flex items-start justify-between gap-2 mb-2">
-										<Anchor href={getItemHref(key, item)} class="anchor text-sm font-medium">
+										<Anchor
+											href={validationFlowItemHref(key, item)}
+											class="anchor text-sm font-medium"
+										>
 											{item.str}
 										</Anchor>
 										{#if item.status}
 											<span
-												class="badge {statusColors[item.status] ||
-													'bg-surface-100-900 text-surface-950-50'} px-2 py-1 rounded text-xs font-medium whitespace-nowrap flex-shrink-0"
+												class="badge {validationStatusColor(
+													item.status
+												)} px-2 py-1 rounded text-xs font-medium whitespace-nowrap flex-shrink-0"
 											>
 												{safeTranslate(item.status)}
 											</span>
@@ -409,8 +373,9 @@
 					<div class="flex justify-between items-start mb-2">
 						<div>
 							<span
-								class="badge {statusColors[event.event_type] ||
-									'bg-surface-100-900 text-surface-950-50'} px-2 py-1 rounded text-xs font-medium mr-2"
+								class="badge {validationStatusColor(
+									event.event_type
+								)} px-2 py-1 rounded text-xs font-medium mr-2"
 							>
 								{safeTranslate(event.event_type)}
 							</span>

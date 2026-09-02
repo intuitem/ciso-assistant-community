@@ -1223,7 +1223,7 @@
 									</a>
 								{:else}
 									<span
-										class="btn preset-filled-surface-500 font-semibold px-6 opacity-50 cursor-not-allowed"
+										class="btn preset-tonal-surface font-semibold px-6 opacity-50 cursor-not-allowed"
 										title={m.schemaInvalid()}
 									>
 										<i class="fa-solid fa-file-code mr-2"></i>{m.asDoraJson()}

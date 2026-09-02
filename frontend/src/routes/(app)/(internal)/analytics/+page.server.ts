@@ -157,46 +157,61 @@ export const load: PageServerLoad = async ({ locals, fetch, url }) => {
 			return [];
 		});
 
-	// Start all operations analytics fetches in parallel
-	const detectionPromise = fetch(`${BASE_API_URL}/incidents/detection_breakdown/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch((error) => {
-			console.error('Failed to fetch incident detection breakdown:', error);
-			return { results: [] };
-		});
+	// Start all operations analytics fetches in parallel; skip the incident
+	// endpoints entirely when the incidents feature flag is off.
+	const incidentsEnabled = Boolean(locals.featureflags?.incidents);
 
-	const monthlyPromise = fetch(`${BASE_API_URL}/incidents/monthly_metrics/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch((error) => {
-			console.error('Failed to fetch monthly incident metrics:', error);
-			return { results: { months: [], monthly_counts: [], cumulative_counts: [] } };
-		});
+	const detectionPromise = incidentsEnabled
+		? fetch(`${BASE_API_URL}/incidents/detection_breakdown/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident detection breakdown:', error);
+					return { results: [] };
+				})
+		: Promise.resolve({ results: [] });
 
-	const summaryPromise = fetch(`${BASE_API_URL}/incidents/summary_stats/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch((error) => {
-			console.error('Failed to fetch incident summary stats:', error);
-			return { results: { total_incidents: 0, incidents_this_month: 0, open_incidents: 0 } };
-		});
+	const monthlyPromise = incidentsEnabled
+		? fetch(`${BASE_API_URL}/incidents/monthly_metrics/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch monthly incident metrics:', error);
+					return { results: { months: [], monthly_counts: [], cumulative_counts: [] } };
+				})
+		: Promise.resolve({ results: { months: [], monthly_counts: [], cumulative_counts: [] } });
 
-	const severityPromise = fetch(`${BASE_API_URL}/incidents/severity_breakdown/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch((error) => {
-			console.error('Failed to fetch incident severity breakdown:', error);
-			return { results: [] };
-		});
+	const summaryPromise = incidentsEnabled
+		? fetch(`${BASE_API_URL}/incidents/summary_stats/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident summary stats:', error);
+					return { results: { total_incidents: 0, incidents_this_month: 0, open_incidents: 0 } };
+				})
+		: Promise.resolve({
+				results: { total_incidents: 0, incidents_this_month: 0, open_incidents: 0 }
+			});
 
-	const qualificationsPromise = fetch(`${BASE_API_URL}/incidents/qualifications_breakdown/`)
-		.then(assertOk)
-		.then((res) => res.json())
-		.catch((error) => {
-			console.error('Failed to fetch incident qualifications breakdown:', error);
-			return { results: { labels: [], values: [] } };
-		});
+	const severityPromise = incidentsEnabled
+		? fetch(`${BASE_API_URL}/incidents/severity_breakdown/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident severity breakdown:', error);
+					return { results: [] };
+				})
+		: Promise.resolve({ results: [] });
+
+	const qualificationsPromise = incidentsEnabled
+		? fetch(`${BASE_API_URL}/incidents/qualifications_breakdown/`)
+				.then(assertOk)
+				.then((res) => res.json())
+				.catch((error) => {
+					console.error('Failed to fetch incident qualifications breakdown:', error);
+					return { results: { labels: [], values: [] } };
+				})
+		: Promise.resolve({ results: { labels: [], values: [] } });
 
 	const exceptionSankeyPromise = fetch(`${BASE_API_URL}/security-exceptions/sankey_data/`)
 		.then(assertOk)

@@ -71,6 +71,57 @@ services:
       - PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost:8443/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      # DHI via the GHCR mirror; see frontend/Dockerfile for why not dhi.io
+      args:
+        NODE_BUILD_IMAGE: ${NODE_BUILD_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-node:24-dev}
+        NODE_RUNTIME_IMAGE: ${NODE_RUNTIME_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-node:24}
+    depends_on:
+      - backend
+    restart: always
+
+  qdrant:
+    container_name: qdrant
+    image: ${QDRANT_IMAGE:-qdrant/qdrant:v1.14.0}
+    restart: unless-stopped
+    volumes:
+      - qdrant_data:/qdrant/storage
+    ports:
+      - 127.0.0.1:6333:6333
+
+  # see docker-compose.yml for the profile / no-ports / read-only rationale
+  mcp:
+    container_name: mcp
+    build:
+      context: ./cli
+      dockerfile: Dockerfile
+      # DHI via the GHCR mirror; see cli/Dockerfile for why not dhi.io
+      args:
+        PYTHON_BUILD_IMAGE: ${PYTHON_BUILD_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14-dev}
+        PYTHON_RUNTIME_IMAGE: ${PYTHON_RUNTIME_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14}
+    profiles:
+      - mcp
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - API_URL=http://backend:8000/api
+      - CA_MCP_TRANSPORT=streamable-http
+      - CA_MCP_HOST=0.0.0.0
+      - CA_MCP_PORT=8001
+      - CA_MCP_READ_ONLY=true
+      - CA_MCP_ALLOWED_HOSTS=localhost:8443
+      - CA_MCP_ALLOW_ENV_TOKEN=false
       - HOME=/tmp
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
@@ -82,24 +133,7 @@ services:
       - no-new-privileges:true
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        NODE_IMAGE: ${NODE_IMAGE:-node:24-slim}
-    depends_on:
-      - backend
-    restart: always
     user: "1001:1001"
-
-  qdrant:
-    container_name: qdrant
-    image: ${QDRANT_IMAGE:-qdrant/qdrant:v1.14.0}
-    restart: unless-stopped
-    volumes:
-      - qdrant_data:/qdrant/storage
-    ports:
-      - 127.0.0.1:6333:6333
 
   caddy:
     container_name: caddy
@@ -114,6 +148,7 @@ services:
     command: |
       sh -c 'echo $$CISO_ASSISTANT_URL "{
       reverse_proxy /api/* backend:8000
+      reverse_proxy /mcp* mcp:8001
       reverse_proxy /* frontend:3000
       }" > Caddyfile && caddy run'
 

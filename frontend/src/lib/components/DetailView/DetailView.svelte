@@ -3,6 +3,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import BatchCreatePersonalDataModal from '$lib/components/Modals/BatchCreatePersonalDataModal.svelte';
+	import BatchAddAssetAssessmentsModal from '$lib/components/Modals/BatchAddAssetAssessmentsModal.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import RiskAcceptanceModal from '$lib/components/Modals/RiskAcceptanceModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
@@ -117,6 +118,23 @@
 
 	const markdownFieldSet = $derived(getMarkdownFields(data.urlModel));
 
+	// Fields whose serialized value is a stable code (e.g. "eba_TA:S02") or an
+	// English choice label (e.g. "Low reliance") that safeTranslate can map to a
+	// message key. Countries (data_location_*) are excluded on purpose: their
+	// ~250 labels have no message keys.
+	const translatedValueFieldSet = new Set([
+		'roc_display',
+		'dora_ict_service_type',
+		'dora_data_sensitiveness',
+		'dora_reliance_level',
+		'dora_substitutability',
+		'dora_non_substitutability_reason',
+		'dora_has_exit_plan',
+		'dora_reintegration_possibility',
+		'dora_discontinuing_impact',
+		'dora_alternative_providers_identified'
+	]);
+
 	const getRelatedModelIndex = (model: ModelMapEntry, relatedModel: Record<string, string>) => {
 		if (!model.reverseForeignKeyFields) return -1;
 		return model.reverseForeignKeyFields.findIndex((o) => o.urlModel === relatedModel.urlModel);
@@ -217,36 +235,17 @@
 		modalStore.trigger(modal);
 	}
 
-	async function removeFromParent(
-		field: any,
-		ids: string[],
-		clear: () => void,
-		reload: () => void
-	): Promise<void> {
-		if (!field?.removeFromParent || !ids.length) return;
-		const res = await fetch(
-			`/${data.model.urlModel}/${data.data.id}/${field.removeFromParent.action}`,
-			{
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ [field.removeFromParent.payloadField]: ids })
-			}
+	// Table-scoped batch actions for a reverse-FK table, gated by change on the
+	// parent object (so parent_action entries are only offered to users the
+	// parent endpoint would authorize). parent_action endpoints are resolved
+	// here — the only place that knows the parent url and id.
+	function tableBatchActions(field: ReverseForeignKeyField) {
+		if (!field.tableBatchActions || !canEditObject) return [];
+		return field.tableBatchActions.map((a) =>
+			a.type === 'parent_action'
+				? { ...a, endpoint: `/${data.model.urlModel}/${data.data.id}/${a.action}` }
+				: a
 		);
-		if (res.ok) {
-			clear();
-			reload();
-			await invalidateAll();
-			toastStore.trigger({
-				message: safeTranslate(field.removeFromParent.successMessage ?? 'saved'),
-				background: 'preset-filled-success-500'
-			});
-		} else {
-			const body = await res.json().catch(() => ({}));
-			toastStore.trigger({
-				message: typeof body?.error === 'string' ? safeTranslate(body.error) : m.anErrorOccurred(),
-				background: 'preset-filled-error-500'
-			});
-		}
 	}
 
 	function modalSelectExisting(field: ReverseForeignKeyField): void {
@@ -272,12 +271,18 @@
 		modalStore.trigger(modal);
 	}
 
+	const batchCreateModals: Record<string, ModalComponent['ref']> = {
+		'personal-data': BatchCreatePersonalDataModal,
+		'asset-assessments': BatchAddAssetAssessmentsModal
+	};
+
 	function modalBatchCreate(field: ReverseForeignKeyField, parentId: string): void {
-		if (!field.batchCreate) return;
+		const ref = batchCreateModals[field.urlModel];
+		if (!field.batchCreate || !ref) return;
 		const modalComponent: ModalComponent = {
-			ref: BatchCreatePersonalDataModal,
+			ref,
 			props: {
-				processingId: parentId,
+				parentId,
 				urlModel: field.urlModel
 			}
 		};
@@ -792,7 +797,7 @@
 											{:else if typeof value === 'boolean'}
 												{@const bd = booleanDisplay(value, key, data.urlModel)}
 												<i class="{bd.icon} {bd.colorClass}"></i>
-											{:else if key === 'roc_display'}
+											{:else if translatedValueFieldSet.has(key)}
 												{safeTranslate(value)}
 											{:else if key === 'roc_calculation_explanation'}
 												{safeTranslate(value.key, formatRosiExplanationParams(value.params))}
@@ -997,30 +1002,19 @@
 								})}
 								source={model.table}
 								disableCreate={disableCreate || model.disableCreate}
-								disableEdit={disableEdit || model.disableEdit}
-								disableDelete={disableDelete || model.disableDelete}
+								disableEdit={disableEdit || model.disableEdit || Boolean(data.data.is_locked)}
+								disableDelete={disableDelete || model.disableDelete || Boolean(data.data.is_locked)}
 								deleteForm={model.deleteForm}
 								URLModel={urlmodel}
 								expectedCount={getExpectedCount(urlmodel, field)}
 								fields={fieldsToUse}
 								defaultFilters={field.defaultFilters || {}}
-								selectable={Boolean(canEditObject && field?.removeFromParent)}
+								extraBatchActions={tableBatchActions(field)}
 							>
-								{#snippet selectActions({ ids, clear, reload })}
-									{#if field?.removeFromParent}
-										<button
-											type="button"
-											class="btn btn-sm preset-filled-error-500"
-											onclick={() => removeFromParent(field, ids, clear, reload)}
-										>
-											<i class="fa-solid fa-user-minus mr-2"></i>{safeTranslate(
-												field.removeFromParent.label ?? 'remove'
-											)}
-										</button>
-									{/if}
-								{/snippet}
 								{#snippet addButton()}
-									{#if canEditObject && field?.addExisting}
+									{#if data.data.is_locked}
+										<!-- Locked parent: no add affordances, matching the hidden remove selection. -->
+									{:else if canEditObject && field?.addExisting}
 										<span
 											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
 										>

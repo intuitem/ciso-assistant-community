@@ -11,8 +11,8 @@
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { onMount, tick, untrack } from 'svelte';
+	import { getToastStore } from '$lib/components/Toast/stores';
 
-	import { tableA11y } from '$lib/components/ModelTable/actions';
 	// Types
 	import { browser } from '$app/environment';
 	import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
@@ -115,15 +115,13 @@
 		actionsBody?: import('svelte').Snippet;
 		actionsHead?: import('svelte').Snippet;
 		tail?: import('svelte').Snippet;
-		// Opt-in multi-row selection independent of batch actions. Renders the
-		// checkbox column and exposes the current selection to `selectActions`.
-		selectable?: boolean;
-		// Toolbar rendered when rows are selected (selectable mode). Receives the
-		// selected ids, a clear callback, and a reload callback (to refresh rows
-		// after acting) — e.g. a "remove from group" button.
-		selectActions?: import('svelte').Snippet<
-			[{ ids: string[]; clear: () => void; reload: () => void }]
-		>;
+		// Table-scoped batch actions merged into the batch bar next to the child
+		// model's global batchActions. The caller pre-gates them (DetailView only
+		// passes them when the user can change the parent object); this component
+		// only applies the disableDelete/disableEdit filters — never the
+		// child-model permission filter, which would ask the wrong question for
+		// parent_action entries.
+		extraBatchActions?: import('$lib/utils/table').TableBatchAction[];
 	}
 
 	let {
@@ -183,24 +181,32 @@
 		actionsBody,
 		actionsHead,
 		tail,
-		selectable = false,
-		selectActions
+		extraBatchActions = []
 	}: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
 
 	let model = $derived(URL_MODEL_MAP[URLModel]);
+	// Models keeping some fields writable on built-in rows (BUILTIN_EDITABLE_FIELDS).
+	const BUILTIN_EDITABLE_URL_MODELS = ['terminologies', 'entities', 'asset-class'];
+	// A field's flag(s) can be a single flag name or a list (shown if ANY is on).
+	// Hidden only once every listed flag is a known, explicitly-false feature flag.
+	function isFieldHiddenByFeatureFlags(
+		flaggedFields: Record<string, string | string[]> | undefined,
+		key: string
+	) {
+		if (!flaggedFields || !Object.hasOwn(flaggedFields, key)) return false;
+		const flags = ([] as string[]).concat(flaggedFields[key]);
+		return flags.every(
+			(flag) =>
+				Object.hasOwn(page.data?.featureflags ?? {}, flag) &&
+				page.data?.featureflags[flag] === false
+		);
+	}
+
 	const tableSource: TableSource = $derived(
 		Object.keys(source.head)
-			.filter(
-				(key) =>
-					!(
-						model?.flaggedFields &&
-						Object.hasOwn(model.flaggedFields, key) &&
-						Object.hasOwn(page.data?.featureflags, model.flaggedFields[key]) &&
-						page.data?.featureflags[model.flaggedFields[key]] === false
-					)
-			)
+			.filter((key) => !isFieldHiddenByFeatureFlags(model?.flaggedFields, key))
 			.reduce(
 				(acc, key) => {
 					acc.head[key] = source.head[key];
@@ -272,10 +278,7 @@
 		$tableColumnStates = next;
 	}
 
-	function onRowClick(
-		event: SvelteEvent<MouseEvent | KeyboardEvent, HTMLTableRowElement>,
-		rowIndex: number
-	): void {
+	function onRowClick(event: SvelteEvent<MouseEvent, HTMLTableRowElement>, rowIndex: number): void {
 		if (!interactive) return;
 		event.preventDefault();
 		event.stopPropagation();
@@ -296,13 +299,6 @@
 			label,
 			breadcrumbAction: 'push'
 		});
-	}
-
-	function onRowKeydown(
-		event: SvelteEvent<KeyboardEvent, HTMLTableRowElement>,
-		rowIndex: number
-	): void {
-		if (['Enter', 'Space'].includes(event.code)) onRowClick(event, rowIndex);
 	}
 
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
@@ -360,6 +356,8 @@
 
 	$tableHandlers[baseEndpoint] = handler;
 
+	const toastStore = getToastStore();
+
 	handler.onChange((state: State) =>
 		loadTableData({
 			state,
@@ -380,7 +378,11 @@
 										? Object.values(tableSource.body)
 										: Object.keys(tableSource.body)
 							},
-			featureFlags: page.data?.featureflags
+			featureFlags: page.data?.featureflags,
+			onError: (error) => {
+				console.error(error);
+				toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
+			}
 		})
 	);
 
@@ -401,7 +403,8 @@
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type) ||
 		forcePreventDelete;
-	const preventEdit = (row: TableSource) => row?.meta?.builtin || forcePreventEdit;
+	const preventEdit = (row: TableSource) =>
+		(row?.meta?.builtin && !BUILTIN_EDITABLE_URL_MODELS.includes(URLModel)) || forcePreventEdit;
 
 	const tableURLModel = URLModel;
 
@@ -538,8 +541,7 @@
 				})
 			: false) &&
 			(!(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) ||
-				URLModel === 'terminologies' ||
-				URLModel === 'entities')
+				BUILTIN_EDITABLE_URL_MODELS.includes(URLModel))
 	);
 
 	let contextMenuDisplayEdit = $derived(
@@ -724,12 +726,21 @@
 		URLModel && model
 			? getBatchActions(URLModel).filter((a) =>
 					a.type === 'delete'
-						? hasPermissionAnywhere(user, `delete_${model.name}`)
-						: hasPermissionAnywhere(user, `change_${model.name}`)
+						? !disableDelete && hasPermissionAnywhere(user, `delete_${model.name}`)
+						: !disableEdit && hasPermissionAnywhere(user, `change_${model.name}`)
 				)
 			: []
 	);
-	const hasBatchActions = $derived(currentBatchActions.length > 0 && deleteForm !== undefined);
+	// Table-scoped extras are pre-gated by the caller (change on the parent);
+	// only the lock/disable filters apply here — the child-model permission
+	// filter above would ask the wrong question for parent_action entries.
+	const extraActions = $derived(
+		extraBatchActions.filter((a) => (a.type === 'delete' ? !disableDelete : !disableEdit))
+	);
+	const allBatchActions = $derived([...currentBatchActions, ...extraActions]);
+	const hasBatchActions = $derived(
+		(currentBatchActions.length > 0 && deleteForm !== undefined) || extraActions.length > 0
+	);
 
 	let selectAllChecked = $derived.by(() => {
 		const pageIds = $rows.filter((r: any) => r.meta?.id).map((r: any) => r.meta.id);
@@ -777,25 +788,11 @@
 		{#if hasBatchActions && selectedIds.size > 0}
 			<BatchActionBar
 				{selectedIds}
-				actions={currentBatchActions}
+				actions={allBatchActions}
 				{URLModel}
 				{handler}
 				onClearSelection={clearSelection}
 			/>
-		{:else if selectable && selectedIds.size > 0}
-			<div class="flex items-center gap-3 px-2">
-				<span class="text-sm text-surface-700-300"
-					>{selectedIds.size} {safeTranslate('selected')}</span
-				>
-				{@render selectActions?.({
-					ids: [...selectedIds],
-					clear: clearSelection,
-					reload: () => handler.invalidate()
-				})}
-				<button type="button" class="btn btn-sm preset-tonal" onclick={clearSelection}
-					>{safeTranslate('cancel')}</button
-				>
-			</div>
 		{:else}
 			{#if !hideFilters}
 				<Popover
@@ -894,15 +891,10 @@
 		</div>
 	{/if}
 	<!-- Table -->
-	<table
-		class="table caption-bottom {classesTable}"
-		class:table-interactive={interactive}
-		role="grid"
-		use:tableA11y
-	>
+	<table class="table caption-bottom {classesTable}" class:table-interactive={interactive}>
 		<thead class="table-head {regionHead}">
 			<tr>
-				{#if hasBatchActions || selectable}
+				{#if hasBatchActions}
 					<th
 						class="{regionHeadCell} group/check w-10 text-center cursor-pointer"
 						title={m.selectAll()}
@@ -935,7 +927,7 @@
 			</tr>
 			{#if thFilter}
 				<tr>
-					{#if hasBatchActions || selectable}
+					{#if hasBatchActions}
 						<th></th>
 					{/if}
 					{#each renderColumnKeys as key (key)}
@@ -956,15 +948,12 @@
 							{@const meta = row?.meta ?? row}
 							<tr
 								onclick={(e) => onRowClick(e, rowIndex)}
-								onkeydown={(e) => onRowKeydown(e, rowIndex)}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
-								aria-rowindex={rowIndex + 1}
 								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer"
 							>
-								{#if hasBatchActions || selectable}
+								{#if hasBatchActions}
 									<td
 										class="group/check w-10 text-center cursor-pointer"
-										role="gridcell"
 										onclick={(e) => {
 											e.stopPropagation();
 											if (meta?.id) toggleRowSelection(meta.id);
@@ -986,7 +975,7 @@
 								{#each renderColumnKeys as key (key)}
 									{@const value = row[key]}
 									{@const component = fieldComponentMap[key]}
-									<td role="gridcell">
+									<td>
 										<div class={regionCell}>
 											{#if component && browser}
 												{@const CellComponent = component}
@@ -1119,7 +1108,13 @@
 																{#each Object.entries(value) as [lang, translation]}
 																	<div class="flex flex-row gap-2">
 																		<strong>{lang}:</strong>
-																		<span>{safeTranslate(translation)}</span>
+																		<span
+																			>{safeTranslate(
+																				typeof translation === 'object' && translation !== null
+																					? ((translation as Record<string, string>).name ?? '')
+																					: translation
+																			)}</span
+																		>
 																	</div>
 																{/each}
 															</div>
@@ -1174,7 +1169,7 @@
 									</td>
 								{/each}
 								{#if displayActions}
-									<td class="text-end {regionCell}" role="gridcell">
+									<td class="text-end {regionCell}">
 										{#if actions}{@render actions({
 												meta: row.meta
 											})}{:else if row.meta[identifierField]}
@@ -1185,8 +1180,7 @@
 												URLModel={actionsURLModel}
 												detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
 												editURL={!(row.meta.builtin || row.meta.urn) ||
-												URLModel === 'terminologies' ||
-												URLModel === 'entities'
+												BUILTIN_EDITABLE_URL_MODELS.includes(URLModel)
 													? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`
 													: undefined}
 												{row}

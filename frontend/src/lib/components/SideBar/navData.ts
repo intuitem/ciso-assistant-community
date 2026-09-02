@@ -95,6 +95,11 @@ export const navData = {
 					href: '/user-groups'
 				},
 				{
+					name: 'idpGroups',
+					fa_icon: 'fa-solid fa-id-badge',
+					href: '/idp-groups'
+				},
+				{
 					name: 'roleAssignments',
 					fa_icon: 'fa-solid fa-user-tag',
 					href: '/role-assignments'
@@ -113,6 +118,11 @@ export const navData = {
 					name: 'threats',
 					fa_icon: 'fa-solid fa-biohazard',
 					href: '/threats'
+				},
+				{
+					name: 'ttpCatalogs',
+					fa_icon: 'fa-solid fa-table-cells',
+					href: '/ttp-catalogs'
 				},
 				{
 					name: 'securityAdvisories',
@@ -209,6 +219,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-table-columns',
 					href: '/tasks-review',
 					permissions: ['view_appliedcontrol']
+				},
+				{
+					name: 'workflows',
+					fa_icon: 'fa-solid fa-diagram-project',
+					href: '/workflows',
+					permissions: ['view_workflow']
 				}
 			]
 		},
@@ -274,6 +290,12 @@ export const navData = {
 					name: 'ebiosRM',
 					fa_icon: 'fa-solid fa-gopuram',
 					href: '/ebios-rm'
+				},
+				{
+					name: 'threatModeling',
+					fa_icon: 'fa-solid fa-diagram-project',
+					href: '/threat-models',
+					permissions: ['view_threatmodel']
 				},
 				{
 					name: 'quantitativeRiskStudies',
@@ -478,6 +500,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-shield-halved',
 					href: '/object-classifications',
 					permissions: ['view_objectclassification']
+				},
+				{
+					name: 'assetClasses',
+					fa_icon: 'fa-solid fa-sitemap',
+					href: '/asset-class',
+					permissions: ['view_assetclass']
 				},
 				{
 					name: 'settings',
