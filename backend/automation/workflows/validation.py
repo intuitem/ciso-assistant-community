@@ -14,7 +14,12 @@ from .models import (
     WorkflowVersion,
 )
 from .actions import validate_create_config as _validate_create_config
+from .actions import validate_date_offset_config as _validate_date_offset_config
 from .actions import validate_read_config as _validate_read_config
+from .actions import validate_attach_evidence_config as _validate_attach_evidence_config
+from .actions import validate_set_variables_config as _validate_set_variables_config
+from .actions import validate_update_config as _validate_update_config
+from .context import RESERVED_VARIABLE_KEYS
 from .triggers import validate_trigger_config
 
 SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
@@ -45,6 +50,16 @@ def validate_graph(version):
     wired_branch_ids = {
         e.source_branch_id for e in edges if e.source_branch_id is not None
     }
+
+    for variable in version.variables.all():
+        if variable.key in RESERVED_VARIABLE_KEYS:
+            errors.append(
+                _error(
+                    "variable_key_reserved",
+                    f"'{variable.key}' is set by the engine on every run — "
+                    "rename this variable",
+                )
+            )
 
     loop_ids = {n.id for n in nodes if n.type == WorkflowNode.Type.LOOP}
     for edge in edges:
@@ -141,6 +156,14 @@ def validate_graph(version):
                 errors.append(_error(code, message, node=node))
             for code, message in _validate_create_config(node):
                 errors.append(_error(code, message, node=node))
+            for code, message in _validate_date_offset_config(node):
+                errors.append(_error(code, message, node=node))
+            for code, message in _validate_update_config(node):
+                errors.append(_error(code, message, node=node))
+            for code, message in _validate_set_variables_config(node):
+                errors.append(_error(code, message, node=node))
+            for code, message in _validate_attach_evidence_config(node):
+                errors.append(_error(code, message, node=node))
         for ref in sorted(_referenced_node_refs(node) - known_refs):
             errors.append(
                 _error(
@@ -174,6 +197,8 @@ def validate_graph(version):
                     )
                 )
         if node.type == WorkflowNode.Type.LOOP:
+            for code, message in _validate_loop_read(node):
+                errors.append(_error(code, message, node=node))
             for code, message in _validate_loop(node, edges, outgoing, nodes_by_id):
                 errors.append(_error(code, message, node=node))
         if node.type == WorkflowNode.Type.TASK and not node.task_template_id:
@@ -294,6 +319,25 @@ def _referenced_secret_names(node):
 LOOP_COLLECTION_RE = re.compile(r"^\{\{\s*[\w.]+\s*\}\}$")
 
 
+def _validate_loop_read(node):
+    """A loop that pulls its own pages carries a read config; hold it to the
+    same rules a read_objects node answers to."""
+    read_config = (node.loop_config or {}).get("read")
+    if not read_config:
+        return []
+    if not isinstance(read_config, dict):
+        return [("loop_read_invalid", "The loop's read configuration is invalid")]
+    if (node.loop_config or {}).get("collection"):
+        return [
+            (
+                "loop_source_ambiguous",
+                "A loop reads its own pages or iterates a collection, not both",
+            )
+        ]
+    probe = WorkflowNode(action_config={**read_config, "type": "read_objects"})
+    return _validate_read_config(probe)
+
+
 def _validate_loop(node, edges, outgoing, nodes_by_id):
     """Loop rules: a valid collection expression, both ports wired,
     every `each` path returns to the loop, and no `each` path escapes into the
@@ -301,7 +345,10 @@ def _validate_loop(node, edges, outgoing, nodes_by_id):
     results = []
     config = node.loop_config or {}
     collection = config.get("collection") or ""
-    if not isinstance(collection, str) or not LOOP_COLLECTION_RE.match(collection):
+    # A reading loop has no collection: it pulls its own pages.
+    if config.get("read"):
+        pass
+    elif not isinstance(collection, str) or not LOOP_COLLECTION_RE.match(collection):
         results.append(
             (
                 "loop_collection_invalid",

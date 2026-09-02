@@ -1,0 +1,85 @@
+urn: urn:intuitem:risk:library:workflow-compliance-audit-progress-digest
+locale: en
+ref_id: workflow-compliance-audit-progress-digest
+name: Weekly audit progress digest
+description: Every Monday morning, list the audits still in progress with their score and requirement
+  breakdown, and email the summary.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-compliance-audit-progress-digest:workflow:audit-progress-digest
+    schema_version: 1
+    ref_id: audit-progress-digest
+    name: Weekly audit progress digest
+    description: Every Monday morning, list the audits still in progress with their score and requirement
+      breakdown, and email the summary.
+    graph:
+      variables:
+      - key: notify_emails
+        type: string
+        default_value: grc@example.com
+      nodes:
+      - ref: every_monday
+        type: trigger
+        label: Monday 08:00
+        trigger_config:
+          type: schedule
+          cron_expression: 0 8 * * 1
+          timezone: UTC
+      - ref: fetch_audits
+        type: action
+        label: Audits in progress
+        action_config:
+          type: read_objects
+          model: compliance_assessment
+          mode: list
+          order_by: due_date
+          limit: 25
+          filters:
+            operator: and
+            conditions:
+            - field: status
+              op: eq
+              value: in_progress
+      - ref: per_audit
+        type: loop
+        label: One line per audit
+        loop_config:
+          collection: '{{nodes.fetch_audits.results}}'
+          collect: '{{item.name}}'
+          on_item_error: continue
+      - ref: note_audit
+        type: action
+        label: Log the audit
+        action_config:
+          type: log
+          message: '{{item.name}} · due {{item.due_date}}'
+      - ref: send_digest
+        type: action
+        label: Email the digest
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Audits in progress: {{nodes.fetch_audits.count}}'
+          body: 'As of {{today}}, {{nodes.fetch_audits.count}} audit(s) are in progress: {{nodes.per_audit.results}}'
+      - ref: done
+        type: end
+      edges:
+      - source: every_monday
+        target: fetch_audits
+      - source: fetch_audits
+        target: per_audit
+      - source: per_audit
+        target: note_audit
+        source_port: each
+      - source: note_audit
+        target: per_audit
+      - source: per_audit
+        target: send_digest
+        source_port: done
+      - source: send_digest
+        target: done

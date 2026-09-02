@@ -112,26 +112,6 @@ LLM_URL_DEFAULTS = {
 }
 
 
-class GlobalSettingsSerializer(serializers.ModelSerializer):
-    def create(self, validated_data):
-        raise serializers.ValidationError(
-            "Global settings can only be created through data migrations."
-        )
-
-    def delete(self, instance):
-        raise serializers.ValidationError(
-            "Global settings can only be deleted through data migrations."
-        )
-
-    def update(self, instance, validated_data):
-        validated_data.pop("name")
-        return super().update(instance, validated_data)
-
-    class Meta:
-        model = GlobalSettings
-        fields = ["id", "name", "created_at", "updated_at"]
-
-
 class GeneralSettingsSerializer(serializers.ModelSerializer):
     conversion_rate = serializers.FloatField(
         write_only=True, required=False, default=1.0
@@ -415,6 +395,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     outgoing_webhooks = serializers.BooleanField(
         source="value.outgoing_webhooks", required=False, default=False
     )
+    workflows = serializers.BooleanField(
+        source="value.workflows", required=False, default=False
+    )
     metrology = serializers.BooleanField(
         source="value.metrology", required=False, default=True
     )
@@ -463,6 +446,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     )
     posture_assessments = serializers.BooleanField(
         source="value.posture_assessments", required=False, default=False
+    )
+    jit_provisioning = serializers.BooleanField(
+        source="value.jit_provisioning", required=False, default=False
     )
 
     class Meta:

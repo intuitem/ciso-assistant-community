@@ -11,8 +11,8 @@
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { onMount, tick, untrack } from 'svelte';
+	import { getToastStore } from '$lib/components/Toast/stores';
 
-	import { tableA11y } from '$lib/components/ModelTable/actions';
 	// Types
 	import { browser } from '$app/environment';
 	import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
@@ -189,17 +189,24 @@
 	let model = $derived(URL_MODEL_MAP[URLModel]);
 	// Models keeping some fields writable on built-in rows (BUILTIN_EDITABLE_FIELDS).
 	const BUILTIN_EDITABLE_URL_MODELS = ['terminologies', 'entities', 'asset-class'];
+	// A field's flag(s) can be a single flag name or a list (shown if ANY is on).
+	// Hidden only once every listed flag is a known, explicitly-false feature flag.
+	function isFieldHiddenByFeatureFlags(
+		flaggedFields: Record<string, string | string[]> | undefined,
+		key: string
+	) {
+		if (!flaggedFields || !Object.hasOwn(flaggedFields, key)) return false;
+		const flags = ([] as string[]).concat(flaggedFields[key]);
+		return flags.every(
+			(flag) =>
+				Object.hasOwn(page.data?.featureflags ?? {}, flag) &&
+				page.data?.featureflags[flag] === false
+		);
+	}
+
 	const tableSource: TableSource = $derived(
 		Object.keys(source.head)
-			.filter(
-				(key) =>
-					!(
-						model?.flaggedFields &&
-						Object.hasOwn(model.flaggedFields, key) &&
-						Object.hasOwn(page.data?.featureflags, model.flaggedFields[key]) &&
-						page.data?.featureflags[model.flaggedFields[key]] === false
-					)
-			)
+			.filter((key) => !isFieldHiddenByFeatureFlags(model?.flaggedFields, key))
 			.reduce(
 				(acc, key) => {
 					acc.head[key] = source.head[key];
@@ -271,10 +278,7 @@
 		$tableColumnStates = next;
 	}
 
-	function onRowClick(
-		event: SvelteEvent<MouseEvent | KeyboardEvent, HTMLTableRowElement>,
-		rowIndex: number
-	): void {
+	function onRowClick(event: SvelteEvent<MouseEvent, HTMLTableRowElement>, rowIndex: number): void {
 		if (!interactive) return;
 		event.preventDefault();
 		event.stopPropagation();
@@ -295,13 +299,6 @@
 			label,
 			breadcrumbAction: 'push'
 		});
-	}
-
-	function onRowKeydown(
-		event: SvelteEvent<KeyboardEvent, HTMLTableRowElement>,
-		rowIndex: number
-	): void {
-		if (['Enter', 'Space'].includes(event.code)) onRowClick(event, rowIndex);
 	}
 
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
@@ -359,6 +356,8 @@
 
 	$tableHandlers[baseEndpoint] = handler;
 
+	const toastStore = getToastStore();
+
 	handler.onChange((state: State) =>
 		loadTableData({
 			state,
@@ -379,7 +378,11 @@
 										? Object.values(tableSource.body)
 										: Object.keys(tableSource.body)
 							},
-			featureFlags: page.data?.featureflags
+			featureFlags: page.data?.featureflags,
+			onError: (error) => {
+				console.error(error);
+				toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
+			}
 		})
 	);
 
@@ -888,12 +891,7 @@
 		</div>
 	{/if}
 	<!-- Table -->
-	<table
-		class="table caption-bottom {classesTable}"
-		class:table-interactive={interactive}
-		role="grid"
-		use:tableA11y
-	>
+	<table class="table caption-bottom {classesTable}" class:table-interactive={interactive}>
 		<thead class="table-head {regionHead}">
 			<tr>
 				{#if hasBatchActions}
@@ -950,15 +948,12 @@
 							{@const meta = row?.meta ?? row}
 							<tr
 								onclick={(e) => onRowClick(e, rowIndex)}
-								onkeydown={(e) => onRowKeydown(e, rowIndex)}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
-								aria-rowindex={rowIndex + 1}
 								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer"
 							>
 								{#if hasBatchActions}
 									<td
 										class="group/check w-10 text-center cursor-pointer"
-										role="gridcell"
 										onclick={(e) => {
 											e.stopPropagation();
 											if (meta?.id) toggleRowSelection(meta.id);
@@ -980,7 +975,7 @@
 								{#each renderColumnKeys as key (key)}
 									{@const value = row[key]}
 									{@const component = fieldComponentMap[key]}
-									<td role="gridcell">
+									<td>
 										<div class={regionCell}>
 											{#if component && browser}
 												{@const CellComponent = component}
@@ -1174,7 +1169,7 @@
 									</td>
 								{/each}
 								{#if displayActions}
-									<td class="text-end {regionCell}" role="gridcell">
+									<td class="text-end {regionCell}">
 										{#if actions}{@render actions({
 												meta: row.meta
 											})}{:else if row.meta[identifierField]}

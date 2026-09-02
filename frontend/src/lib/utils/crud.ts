@@ -122,6 +122,7 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 		optionsInfoFields?: {
 			// Optional info fields for autocomplete display
 			fields: { field: string; translate?: boolean }[];
+			position?: 'suffix' | 'prefix';
 			classes?: string;
 		};
 		lazy?: boolean; // Enable lazy loading for large option sets (e.g., assets)
@@ -168,7 +169,7 @@ export interface ModelMapEntry {
 	verboseNamePlural?: string;
 	urlModel?: urlModel;
 	listViewUrlParams?: string;
-	flaggedFields?: Record<string, FeatureFlag>;
+	flaggedFields?: Record<string, FeatureFlag | FeatureFlag[]>;
 	detailViewFields?: Field[];
 	foreignKeyFields?: ForeignKeyField[];
 	reverseForeignKeyFields?: ReverseForeignKeyField[];
@@ -895,6 +896,10 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true,
 				addExisting: {
 					parentField: 'applied_controls',
+					optionsInfoFields: {
+						fields: [{ field: 'category', translate: true }],
+						position: 'prefix'
+					},
 					lazy: true
 				}
 			}
@@ -965,9 +970,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'User',
 		verboseNamePlural: 'Users',
 		flaggedFields: {
-			idp_groups: 'idp_groups'
+			idp_groups: ['idp_groups', 'jit_provisioning']
 		},
-		foreignKeyFields: [{ field: 'user_groups', urlModel: 'user-groups' }],
+		foreignKeyFields: [
+			{ field: 'user_groups', urlModel: 'user-groups' },
+			{ field: 'idp_groups', urlModel: 'idp-groups' }
+		],
 		filters: []
 	},
 	teams: {
@@ -1756,6 +1764,10 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true,
 				addExisting: {
 					parentField: 'associated_controls',
+					optionsInfoFields: {
+						fields: [{ field: 'category', translate: true }],
+						position: 'prefix'
+					},
 					lazy: true
 				}
 			},
@@ -2422,6 +2434,10 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'applied-controls',
 				addExisting: {
 					parentField: 'applied_controls',
+					optionsInfoFields: {
+						fields: [{ field: 'category', translate: true }],
+						position: 'prefix'
+					},
 					lazy: true
 				}
 			},
@@ -2443,7 +2459,11 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'findings',
 				urlModel: 'reference-controls',
 				addExisting: {
-					parentField: 'reference_controls'
+					parentField: 'reference_controls',
+					optionsInfoFields: {
+						fields: [{ field: 'category', translate: true }],
+						position: 'prefix'
+					}
 				}
 			},
 			{
@@ -2497,6 +2517,10 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true,
 				addExisting: {
 					parentField: 'applied_controls',
+					optionsInfoFields: {
+						fields: [{ field: 'category', translate: true }],
+						position: 'prefix'
+					},
 					lazy: true
 				}
 			},
@@ -2724,6 +2748,10 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true,
 				addExisting: {
 					parentField: 'applied_controls',
+					optionsInfoFields: {
+						fields: [{ field: 'category', translate: true }],
+						position: 'prefix'
+					},
 					lazy: true
 				}
 			},

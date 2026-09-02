@@ -44,7 +44,7 @@
 		switch (node.type) {
 			case 'action': {
 				const c = node.action_config ?? {};
-				if (c.type === 'create_object' || c.type === 'read_objects')
+				if (['create_object', 'update_object', 'read_objects'].includes(c.type))
 					return c.model ? `${c.type} · ${c.model}` : c.type;
 				return c.type ?? null;
 			}

@@ -9,20 +9,22 @@ interface ThemeAwareChartOptions {
 	/** Called after every (re)init so the component can attach instance-level
 	 *  listeners (e.g. chart.on('click', …)) that don't survive a dispose. */
 	onChart?: (chart: any) => void;
+	/** Set false when the caller installs its own resize handling (e.g. a debounced
+	 *  one for an expensive layout) and does not want the built-in listener too. */
+	manageResize?: boolean;
 }
 
 /**
  * Inits an ECharts instance that rebuilds itself whenever the `dark` class on
  * <html> flips. `buildOption` is re-invoked on each theme change, so inline
  * theme-conditional colors are recomputed instead of frozen at first paint.
- * Returns a dispose function; the container is tagged `data-theme-managed` so
- * the global refreshECharts() in theme.ts skips it (no double dispose).
+ * Returns a dispose function.
  */
 export function mountThemeAwareChart(
 	echarts: any,
 	container: HTMLElement,
 	buildOption: () => any,
-	{ rendererOpts = { renderer: 'svg' }, onChart }: ThemeAwareChartOptions = {}
+	{ rendererOpts = { renderer: 'svg' }, onChart, manageResize = true }: ThemeAwareChartOptions = {}
 ): () => void {
 	let dark = isDarkTheme();
 	let chart: any;
@@ -43,7 +45,7 @@ export function mountThemeAwareChart(
 	container.setAttribute('data-theme-managed', 'true');
 
 	const resize = () => chart.resize();
-	window.addEventListener('resize', resize);
+	if (manageResize) window.addEventListener('resize', resize);
 
 	const observer = new MutationObserver(() => {
 		const now = isDarkTheme();
@@ -56,7 +58,7 @@ export function mountThemeAwareChart(
 
 	return () => {
 		observer.disconnect();
-		window.removeEventListener('resize', resize);
+		if (manageResize) window.removeEventListener('resize', resize);
 		container.removeAttribute('data-theme-managed');
 		chart.dispose();
 	};
