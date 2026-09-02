@@ -1727,6 +1727,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         permission = RoleAssignment._resolve_permission(permission)
 
+        all_user_role_assignments = RoleAssignment.get_role_assignments_from_user(user)
         user_role_assignments = RoleAssignment._get_role_assignments_from_permission(
             user, permission
         )
@@ -1742,9 +1743,13 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         default_role_allowed_folder_ids = Folder.objects.none()
 
         if not user.is_third_party:
+            all_directly_accessible_folder_ids = all_user_role_assignments.values_list(
+                "perimeter_folders__id", flat=True
+            ).distinct()
+
             default_role_allowed_folder_ids = (
                 RoleAssignment._get_default_role_allowed_folder_ids(
-                    directly_accessible_folder_ids, permission
+                    all_directly_accessible_folder_ids, permission
                 )
             )
 
