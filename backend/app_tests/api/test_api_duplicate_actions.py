@@ -200,6 +200,62 @@ def test_risk_assessment_duplicate_folder_follows_perimeter(domains):
     assert duplicate.folder == domain_b
 
 
+@pytest.mark.django_db
+def test_risk_assessment_duplicate_with_scenarios_requires_scenario_rights(domains):
+    from iam.models import Permission, Role, RoleAssignment
+    from core.models import RiskScenario
+
+    domain_a, _ = domains
+    user = User.objects.create_user("dup-ra-only@tests.com", is_published=True)
+    user.folder = domain_a
+    user.save()
+    role = Role.objects.create(name="ra-only", folder=Folder.get_root_folder())
+    role.permissions.set(
+        Permission.objects.filter(
+            codename__in=["view_riskassessment", "add_riskassessment"]
+        )
+    )
+    assignment = RoleAssignment.objects.create(
+        name="ra-only",
+        user=user,
+        role=role,
+        folder=Folder.get_root_folder(),
+        is_recursive=True,
+    )
+    assignment.perimeter_folders.add(domain_a)
+    client = APIClient()
+    _, token = AuthToken.objects.create(user=user)
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+
+    risk_assessment = _make_risk_assessment(domain_a)
+    payload = {
+        "name": "ra copy",
+        "description": "",
+        "version": "1.0",
+        "perimeter": str(risk_assessment.perimeter.id),
+        "folder": str(domain_a.id),
+    }
+
+    # without scenarios, add_riskassessment alone is enough
+    response = client.post(
+        f"/api/risk-assessments/{risk_assessment.id}/duplicate/",
+        payload,
+        format="json",
+    )
+    assert response.status_code == 200, response.content
+
+    RiskScenario.objects.create(
+        name="scn", folder=domain_a, risk_assessment=risk_assessment
+    )
+    response = client.post(
+        f"/api/risk-assessments/{risk_assessment.id}/duplicate/",
+        {**payload, "name": "ra copy 2"},
+        format="json",
+    )
+    assert response.status_code == 403, response.content
+    assert not RiskAssessment.objects.filter(name="ra copy 2").exists()
+
+
 # --- organisation objectives ---------------------------------------------------
 
 

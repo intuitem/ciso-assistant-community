@@ -4381,7 +4381,10 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             perimeter = data.get("perimeter")
             # folder always follows the perimeter, as on update
             folder = perimeter.folder if perimeter else data.get("folder")
-            check_folder_add_permission(request.user, folder, RiskAssessment)
+            target_models = [RiskAssessment]
+            if risk_assessment.risk_scenarios.exists():
+                target_models.append(RiskScenario)
+            check_folder_add_permission(request.user, folder, *target_models)
 
             duplicate_risk_assessment = RiskAssessment.objects.create(
                 name=data.get("name"),
