@@ -51,7 +51,12 @@ def _friendly_excepthook(exc_type, exc_value, exc_tb):
     """Turn common misconfiguration errors (missing/invalid API_URL, unreachable
     server) into a readable message instead of a raw traceback."""
     if issubclass(
-        exc_type, (requests.exceptions.MissingSchema, requests.exceptions.InvalidURL)
+        exc_type,
+        (
+            requests.exceptions.MissingSchema,
+            requests.exceptions.InvalidURL,
+            requests.exceptions.InvalidSchema,
+        ),
     ):
         print(
             "API_URL is missing or invalid. Copy .clica.env.template to .clica.env "
