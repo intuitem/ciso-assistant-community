@@ -285,16 +285,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'riskAssessments',
 		verboseName: 'Risk assessment',
 		verboseNamePlural: 'Risk assessments',
-		foreignKeyFields: [
-			{ field: 'perimeter', urlModel: 'perimeters' },
-			{ field: 'folder', urlModel: 'folders' },
-			{ field: 'authors', urlModel: 'actors' },
-			{ field: 'reviewers', urlModel: 'actors' },
-			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
-			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' },
-			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' },
-			{ field: 'validation_flows', urlModel: 'validation-flows' }
-		]
+		foreignKeyFields: [{ field: 'perimeter', urlModel: 'perimeters' }]
 	},
 	threats: {
 		name: 'threat',
@@ -615,15 +606,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Applied control',
 		verboseNamePlural: 'Applied controls',
 		foreignKeyFields: [
-			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'reference_control', urlModel: 'reference-controls' },
-			{ field: 'incidents', urlModel: 'incidents' },
-			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'objectives', urlModel: 'organisation-objectives' },
-			{ field: 'owner', urlModel: 'actors' },
-			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
-			{ field: 'assets', urlModel: 'assets' }
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
 		]
 	},
 	policies: {
