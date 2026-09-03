@@ -157,8 +157,11 @@
 						</dt>
 						<dd class="text-sm text-gray-900">
 							{#if def.field_type === 'url' && isURL(displayedValues?.[def.key])}
-								<Anchor breadcrumbAction="push" href={displayedValues[def.key]} target="_blank" class="anchor"
-									>{displayedValues[def.key]}</Anchor
+								<Anchor
+									breadcrumbAction="push"
+									href={displayedValues[def.key]}
+									target="_blank"
+									class="anchor">{displayedValues[def.key]}</Anchor
 								>
 							{:else}
 								{displayValue(def, displayedValues?.[def.key])}
