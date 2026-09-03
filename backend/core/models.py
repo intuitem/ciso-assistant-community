@@ -7786,7 +7786,7 @@ class ComplianceAssessment(Assessment):
         # Fetch all requirements in a single query
         requirements = RequirementNode.objects.filter(
             framework=self.framework
-        ).select_related()
+        ).select_related("folder")
 
         # If there's a baseline, prefetch all related baseline assessments and answers in one query
         baseline_assessments = {}
@@ -9738,8 +9738,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     _CEL_RELEVANT_FIELDS = frozenset({"score", "result", "status"})
 
     @classmethod
-    def from_db(cls, db, field_names, values):
-        instance = super().from_db(db, field_names, values)
+    def from_db(cls, db, field_names, values, *, fetch_mode=None):
+        instance = super().from_db(db, field_names, values, fetch_mode=fetch_mode)
         instance._loaded_cel_values = {
             f: getattr(instance, f)
             for f in cls._CEL_RELEVANT_FIELDS
