@@ -5,6 +5,8 @@ One row per negotiation cycle, so promised dates are not overwritten; the host k
 no columns and the machine runs off serializer fields, so every write path enforces it.
 """
 
+from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -115,8 +117,23 @@ def serialize_commitment(entry) -> dict:
 
 
 def apply_transition(instance, target: str, user=None, notes=None, promised_date=None):
-    """Move *instance* to *target*, writing the commitment rows. Assumes it is legal."""
-    current = instance.commitment
+    """Move *instance* to *target*, writing the commitment rows. Assumes it is legal.
+
+    The live row is re-read under a lock: validation ran against a cached read, and two
+    counterparties transitioning at once would otherwise each persist from the state
+    they saw.
+    """
+    # Discard the cached cycles: the state validated against may already be stale.
+    instance.__dict__.pop("commitment_entries", None)
+    current = (
+        Commitment.objects.select_for_update()
+        .filter(
+            content_type=ContentType.objects.get_for_model(instance),
+            object_id=instance.pk,
+            is_current=True,
+        )
+        .first()
+    )
 
     if current is None:
         current = Commitment(target=instance, state=State.IN_NEGOTIATION)
@@ -282,13 +299,16 @@ class CommitmentSerializerMixin:
             return
         target, promised_date = move
         request = self.context.get("request")
-        apply_transition(
-            instance,
-            target,
-            user=request.user if request else None,
-            notes=(validated_data.get("commitment_notes") or "").strip() or None,
-            promised_date=promised_date,
-        )
+        # One transaction: the row lock taken inside is only worth anything while it
+        # is held, and closing a cycle then opening the next must not half-apply.
+        with transaction.atomic():
+            apply_transition(
+                instance,
+                target,
+                user=request.user if request else None,
+                notes=(validated_data.get("commitment_notes") or "").strip() or None,
+                promised_date=promised_date,
+            )
 
 
 def _commitment_fields() -> dict:

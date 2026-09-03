@@ -1,10 +1,13 @@
 """Shared entity-assessment operations, called by the API serializer and the
 workflow engine so a questionnaire is built one way only."""
 
+import structlog
 from django.db import transaction
 
 from core.models import ComplianceAssessment, RequirementAssignment
 from iam.models import Folder, User
+
+logger = structlog.get_logger(__name__)
 
 
 def enclave_folder(entity_assessment):
@@ -62,6 +65,40 @@ def default_representatives_from_entity(entity_assessment):
     ).distinct()
     if users:
         entity_assessment.representatives.set(users)
+
+
+def grant_respondent_access(entity_assessment, users=None):
+    """Let the third party into the workspace their questionnaire lives in.
+
+    The role assignment on the enclave is what makes the emailed link open; without it
+    the questionnaire is invisible to the very people it was addressed to. Idempotent,
+    so every path that can reach a representative may call it.
+    """
+    from core.utils import RoleCodename, UserGroupCodename
+    from iam.models import Role, RoleAssignment, UserGroup
+
+    audit = entity_assessment.compliance_assessment
+    if audit is None:
+        return None
+    enclave = audit.folder
+    respondents, _ = UserGroup.objects.get_or_create(
+        name=UserGroupCodename.THIRD_PARTY_RESPONDENT,
+        folder=enclave,
+        builtin=True,
+    )
+    role_assignment, _ = RoleAssignment.objects.get_or_create(
+        user_group=respondents,
+        role=Role.objects.get(name=RoleCodename.THIRD_PARTY_RESPONDENT),
+        builtin=True,
+        folder=enclave,
+        is_recursive=True,
+    )
+    role_assignment.perimeter_folders.add(enclave)
+    for user in entity_assessment.representatives.all() if users is None else users:
+        if not user.is_third_party:
+            logger.warning("User is not a third-party", user=user)
+        user.user_groups.add(respondents)
+    return respondents
 
 
 def sync_audit_schedule(entity_assessment, audit):

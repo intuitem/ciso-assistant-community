@@ -552,25 +552,11 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         third_party_users: set[User],
         old_third_party_users: set[User] = set(),
     ):
+        from tprm.services import grant_respondent_access
+
         if instance.compliance_assessment:
             enclave = instance.compliance_assessment.folder
-            respondents, _ = UserGroup.objects.get_or_create(
-                name=UserGroupCodename.THIRD_PARTY_RESPONDENT,
-                folder=enclave,
-                builtin=True,
-            )
-            role_assignment, _ = RoleAssignment.objects.get_or_create(
-                user_group=respondents,
-                role=Role.objects.get(name=RoleCodename.THIRD_PARTY_RESPONDENT),
-                builtin=True,
-                folder=enclave,
-                is_recursive=True,
-            )
-            role_assignment.perimeter_folders.add(enclave)
-            for user in third_party_users:
-                if not user.is_third_party:
-                    logger.warning("User is not a third-party", user=user)
-                user.user_groups.add(respondents)
+            respondents = grant_respondent_access(instance, third_party_users)
             # Never revoke someone the defaults just put back.
             for user in old_third_party_users - third_party_users:
                 if not user.is_third_party:

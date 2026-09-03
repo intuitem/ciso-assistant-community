@@ -11050,7 +11050,7 @@ class CampaignViewSet(BaseModelViewSet):
 
     def _launch_third_party(self, campaign, frameworks):
         from tprm.models import EntityAssessment
-        from tprm.services import create_enclave_audit
+        from tprm.services import create_enclave_audit, grant_respondent_access
 
         for entity in campaign.entities.all():
             for framework in frameworks:
@@ -11068,6 +11068,11 @@ class CampaignViewSet(BaseModelViewSet):
                 # The campaign FK lives on the audit, not the assessment.
                 audit.campaign = campaign
                 audit.save(update_fields=["campaign"])
+                # Built by hand rather than through the serializer, so the access the
+                # serializer grants has to be granted here too: without it the
+                # questionnaire is invisible to the representatives it is addressed to.
+                assessment.refresh_from_db()
+                grant_respondent_access(assessment)
 
 
 def _serialize_suggestion_preview(entries: list[dict]) -> list[dict]:
@@ -18611,9 +18616,9 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
     def _advance_review_states(assignment, transition_key):
         """Carry the review flags across a transition.
 
-        Answering a rework request makes them RESUBMITTED; closing accepts what is still
-        awaiting a look; reopening flags it again so the next close cannot accept items nobody
-        re-examined. ACCEPTED flags are left alone.
+        Answering a rework request makes them RESUBMITTED, closing accepts what was
+        awaiting a look, and every other transition — reopening included — leaves the
+        flags as they are: an accepted item records a verdict that was given.
         """
         from core.models import RequirementAssessment
 
@@ -18627,9 +18632,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         }
         move = moves.get(transition_key)
         if move is None:
-            if transition_key[1] != RequirementAssignment.Status.DRAFT:
-                return
-            move = (ReviewState.RESUBMITTED, ReviewState.CHANGES_REQUESTED)
+            return
         source, target_state = move
         assignment.requirement_assessments.filter(review_state=source).update(
             review_state=target_state

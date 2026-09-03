@@ -1817,7 +1817,10 @@ def ensure_audit_assignment(audit):
     Only ever fills a gap: an existing assignment is left alone, its actors included.
     """
     from tprm.models import EntityAssessment
-    from tprm.services import default_representatives_from_entity
+    from tprm.services import (
+        default_representatives_from_entity,
+        grant_respondent_access,
+    )
 
     if audit.requirement_assignments.exists():
         return None
@@ -1829,6 +1832,9 @@ def ensure_audit_assignment(audit):
         # Pulls the entity's representatives onto the assessment when it has none,
         # which is exactly the "I added the missing representative" case.
         default_representatives_from_entity(entity_assessment)
+        # And lets them into the workspace: whoever is about to be emailed a link
+        # must be able to open it.
+        grant_respondent_access(entity_assessment)
         actors = [
             rep.actor
             for rep in entity_assessment.representatives.all()

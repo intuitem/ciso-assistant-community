@@ -1539,14 +1539,24 @@ class AppliedControlWriteSerializer(
         task_templates = validated_data.pop("task_templates", None)
         incidents = validated_data.pop("incidents", None)
 
-        updated_instance = super().update(instance, validated_data)
+        # The host and its promise move together: a failed commitment write must not
+        # leave the date changed with nothing promised against it. Notifications stay
+        # outside — they are not part of the record.
+        with transaction.atomic():
+            updated_instance = super().update(instance, validated_data)
 
-        if findings is not None:
-            updated_instance.findings.set(findings)
-        if task_templates is not None:
-            updated_instance.task_templates.set(task_templates)
-        if incidents is not None:
-            updated_instance.incidents.set(incidents)
+            if findings is not None:
+                updated_instance.findings.set(findings)
+            if task_templates is not None:
+                updated_instance.task_templates.set(task_templates)
+            if incidents is not None:
+                updated_instance.incidents.set(incidents)
+
+            if old_folder_id != updated_instance.folder_id:
+                # A commitment is only ever as visible as the object it is about.
+                updated_instance.commitments.update(folder=updated_instance.folder)
+
+            self.apply_commitment(updated_instance, commitment_data)
 
         # Get new owners after update
         new_owner_ids = set(updated_instance.owner.values_list("id", flat=True))
@@ -1557,12 +1567,6 @@ class AppliedControlWriteSerializer(
             self._send_assignment_notifications(
                 updated_instance, list(newly_assigned_ids)
             )
-
-        if old_folder_id != updated_instance.folder_id:
-            # A commitment is only ever as visible as the object it is about.
-            updated_instance.commitments.update(folder=updated_instance.folder)
-
-        self.apply_commitment(updated_instance, commitment_data)
 
         return updated_instance
 
@@ -5610,6 +5614,9 @@ class TaskTemplateWriteSerializer(CommitmentSerializerMixin, BaseModelSerializer
                 # A commitment is only ever as visible as the object it is about.
                 instance.commitments.update(folder=instance.folder)
 
+            # Inside the block: the template and its promise move together.
+            self.apply_commitment(instance, commitment_data)
+
         # Get new assigned users after update
         new_assigned_ids = set(instance.assigned_to.values_list("id", flat=True))
 
@@ -5617,8 +5624,6 @@ class TaskTemplateWriteSerializer(CommitmentSerializerMixin, BaseModelSerializer
         newly_assigned_ids = new_assigned_ids - old_assigned_ids
         if newly_assigned_ids:
             self._send_assignment_notifications(instance, list(newly_assigned_ids))
-
-        self.apply_commitment(instance, commitment_data)
 
         return instance
 
