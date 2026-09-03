@@ -219,7 +219,8 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
     @classmethod
     def from_db(cls, db, field_names, values, *, fetch_mode=None):
         instance = super().from_db(db, field_names, values, fetch_mode=fetch_mode)
-        instance._loaded_content = instance.content
+        if "content" in field_names:
+            instance._loaded_content = instance.content
         return instance
 
     def save(self, *args, **kwargs):

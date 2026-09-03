@@ -497,7 +497,7 @@ requires-dist = [
     { name = "cel-python", specifier = ">=0.5.0,<0.6" },
     { name = "cronsim", specifier = ">=2.6,<3" },
     { name = "cryptography", specifier = ">=48.0.1" },
-    { name = "django", specifier = ">=6.0.4,<7" },
+    { name = "django", specifier = ">=6.1,<7" },
     { name = "django-allauth", extras = ["socialaccount", "saml", "mfa", "headless", "idp-oidc"], specifier = ">=65.14.1,<66" },
     { name = "django-auditlog", specifier = ">=3.4.1,<4" },
     { name = "django-filter", specifier = ">=25.2,<27" },
