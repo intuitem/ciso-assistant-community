@@ -26,6 +26,8 @@ from core.models import (
     Framework,
     LibraryDraft,
     LoadedLibrary,
+    Preset,
+    PresetJourney,
     ReferenceControl,
     RequirementNode,
     RiskMatrix,
@@ -2871,3 +2873,76 @@ def test_delete_object_removes_the_journey_preset(admin_client):
         format="json",
     )
     assert again.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.django_db
+def test_republishing_preset_refreshes_steps_used_by_new_journeys(admin_client):
+    def step(number):
+        return {
+            "key": f"step-{number}",
+            "title": f"Step {number}",
+            "target_url": f"/step-{number}",
+        }
+
+    draft = _create_draft(
+        admin_client,
+        content={
+            "preset": {
+                "name": "My path",
+                "scaffolded_objects": [],
+                "journey": {"steps": [step(1), step(2)]},
+            }
+        },
+    )
+
+    publish_url = reverse("library-drafts-publish", args=[draft["id"]])
+    detail_url = reverse("library-drafts-detail", args=[draft["id"]])
+
+    published_v1 = admin_client.post(publish_url, {}, format="json")
+    assert published_v1.status_code == status.HTTP_200_OK
+
+    preset = Preset.objects.get(urn="urn:me:risk:preset:mylib")
+    assert preset.version == 1
+    assert len(preset.steps) == 2
+
+    current = admin_client.get(detail_url).data
+    current["content"]["preset"]["journey"]["steps"].append(step(3))
+
+    saved = admin_client.patch(
+        detail_url,
+        {"content": current["content"]},
+        format="json",
+    )
+    assert saved.status_code == status.HTTP_200_OK
+
+    published_v2 = admin_client.post(
+        publish_url,
+        {"bump_version": True},
+        format="json",
+    )
+    assert published_v2.status_code == status.HTTP_200_OK
+
+    preset.refresh_from_db()
+    assert preset.version == 2
+    assert [item["key"] for item in preset.steps] == [
+        "step-1",
+        "step-2",
+        "step-3",
+    ]
+
+    applied = admin_client.post(
+        f"/api/presets/{preset.id}/apply/",
+        {
+            "folder_name": "My path v2",
+            "apply_feature_flags": False,
+        },
+        format="json",
+    )
+    assert applied.status_code == status.HTTP_201_CREATED
+
+    journey = PresetJourney.objects.get(id=applied.data["journey_id"])
+    assert list(journey.steps.values_list("key", flat=True)) == [
+        "step-1",
+        "step-2",
+        "step-3",
+    ]

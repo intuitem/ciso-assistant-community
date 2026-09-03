@@ -5287,10 +5287,17 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
     def get_task_node(self, obj):
         """
         Helper to fetch the related TaskNode for non-recurrent templates.
+        Cached on the instance since both get_status and get_observation call this.
         """
-        if obj.is_recurrent:
-            return None
-        return TaskNode.objects.filter(task_template=obj).order_by("due_date").first()
+        if not hasattr(obj, "_cached_task_node"):
+            obj._cached_task_node = (
+                None
+                if obj.is_recurrent
+                else TaskNode.objects.filter(task_template=obj)
+                .order_by("due_date")
+                .first()
+            )
+        return obj._cached_task_node
 
     def get_status(self, obj):
         task_node = self.get_task_node(obj)
