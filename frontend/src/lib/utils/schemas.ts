@@ -331,6 +331,7 @@ export const AppliedControlSchema = z.object({
 	reference_control: z.string().optional().nullable(),
 	owner: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
+	inherited_controls: z.string().uuid().optional().array().optional(),
 	stakeholders: z.string().uuid().optional().array().optional(),
 	progress_field: z.number().optional().default(0),
 	filtering_labels: z.string().optional().array().optional(),

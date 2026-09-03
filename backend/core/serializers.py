@@ -1472,6 +1472,9 @@ class AppliedControlWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerial
     incidents = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Incident.objects.all()
     )
+    inherited_controls = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=AppliedControl.objects.all()
+    )
     cost = serializers.JSONField(required=False, allow_null=True)
     integration_config = serializers.PrimaryKeyRelatedField(
         required=False,
@@ -1485,6 +1488,11 @@ class AppliedControlWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerial
     create_remote_object = serializers.BooleanField(
         required=False, default=False, write_only=True
     )
+
+    def validate_inherited_controls(self, value):
+        if self.instance and self.instance in value:
+            raise serializers.ValidationError("A control cannot inherit from itself.")
+        return value
 
     def create(self, validated_data: Any):
         validated_data.pop("create_remote_object", None)
@@ -1623,6 +1631,8 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     ranking_score = serializers.IntegerField(source="get_ranking_score")
     owner = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
+    inherited_controls = FieldsRelatedField(many=True)
+    inheriting_controls = FieldsRelatedField(many=True)
     state = serializers.SerializerMethodField()
     findings_count = serializers.IntegerField(source="findings.count")
     is_assigned = serializers.BooleanField(read_only=True)

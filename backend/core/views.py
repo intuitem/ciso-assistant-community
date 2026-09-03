@@ -4928,6 +4928,12 @@ class AppliedControlFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
     reference_control = df.ModelMultipleChoiceFilter(
         queryset=ReferenceControl.objects.all()
     )
+    inherited_controls = df.ModelMultipleChoiceFilter(
+        queryset=AppliedControl.objects.all()
+    )
+    inheriting_controls = df.ModelMultipleChoiceFilter(
+        queryset=AppliedControl.objects.all()
+    )
 
     todo = df.BooleanFilter(method="filter_todo")
     to_review = df.BooleanFilter(method="filter_to_review")
