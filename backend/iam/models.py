@@ -581,7 +581,8 @@ class Folder(NameDescriptionMixin):
         )
 
         # Combine both querysets into a single one.
-        all_roles_qs = direct_perms_qs.union(group_perms_qs)
+        # order_by() drops the default ordering Django 6.1 applies to unions.
+        all_roles_qs = direct_perms_qs.union(group_perms_qs).order_by()
 
         user_roles = defaultdict(list)
         for item in all_roles_qs:
@@ -1828,9 +1829,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             "id", flat=True
         )
 
+        # order_by() drops the default ordering Django 6.1 applies to unions:
+        # it would reference a column absent from the selected values.
         accessible_folder_ids = directly_accessible_folder_ids.union(
             indirectly_accessible_folder_ids
-        )
+        ).order_by()
         return accessible_folder_ids
 
     @staticmethod
