@@ -175,9 +175,9 @@ def _folder_models():
             yield model
 
 
-def workspace_contents(folders):
+def workspace_contents(folders, models=None):
     counts = {}
-    for model in _folder_models():
+    for model in models if models is not None else _folder_models():
         try:
             n = model.objects.filter(folder__in=folders).count()
         except Exception as exc:
@@ -303,21 +303,13 @@ def normalize_entity_workspaces(apply=False, entity_name=None):
     from django.db import transaction
 
     plan = []
+    models = list(_folder_models())
     groups = workspaces_by_entity()
     for (entity, domain), workspaces in groups.items():
         if entity_name and entity.name != entity_name:
             continue
         sources = list(workspaces)
-        row = {
-            "entity": entity,
-            "domain": domain,
-            "workspaces": workspaces,
-            "action": "consolidate" if len(sources) > 1 else "rename",
-            "members": sorted(u.email for u in workspace_members(sources)),
-            "contents": workspace_contents(sources),
-            "error": None,
-            "result": None,
-        }
+        rename = None
         if len(sources) == 1:
             folder = sources[0]
             audits = workspaces[folder]
@@ -326,8 +318,21 @@ def normalize_entity_workspaces(apply=False, entity_name=None):
                 or folder.name not in generated_workspace_name(entity, audits)
             ):
                 continue
-            row["from"] = folder.name
-            row["to"] = entity.name
+            rename = (folder.name, entity.name)
+        # After the skip: the survey is a count per folder-bearing model, and this
+        # runs on every boot over every entity already in shape.
+        row = {
+            "entity": entity,
+            "domain": domain,
+            "workspaces": workspaces,
+            "action": "consolidate" if len(sources) > 1 else "rename",
+            "members": sorted(u.email for u in workspace_members(sources)),
+            "contents": workspace_contents(sources, models),
+            "error": None,
+            "result": None,
+        }
+        if rename:
+            row["from"], row["to"] = rename
         if not apply:
             plan.append(row)
             continue

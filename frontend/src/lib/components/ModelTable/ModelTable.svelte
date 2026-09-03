@@ -7,7 +7,12 @@
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { CUSTOM_ACTIONS_COMPONENT, getFieldComponentMap, URL_MODEL_MAP } from '$lib/utils/crud';
+	import {
+		CUSTOM_ACTIONS_COMPONENT,
+		getFieldComponentMap,
+		isFieldFlagEnabled,
+		URL_MODEL_MAP
+	} from '$lib/utils/crud';
 
 	// A filter on a flag-gated field must go away with its flag, like its column does.
 	function filtersForActiveFlags(urlModel: string) {
@@ -17,8 +22,7 @@
 		const featureFlags = page.data?.featureflags ?? {};
 		return Object.fromEntries(
 			Object.entries(filters).filter(([field]) => {
-				const flag = flaggedFields[field];
-				return !flag || featureFlags[flag];
+				return isFieldFlagEnabled(flaggedFields[field], featureFlags);
 			})
 		);
 	}

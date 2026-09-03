@@ -13,7 +13,7 @@
 	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
-	import { getModelInfo, getMarkdownFields } from '$lib/utils/crud';
+	import { getModelInfo, getMarkdownFields, isFieldFlagEnabled } from '$lib/utils/crud';
 	import { formatDate, formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -150,7 +150,7 @@
 	let visibleDetailViewFields = $derived(
 		data.model?.detailViewFields?.filter((fieldConfig) => {
 			const flag = data.model?.flaggedFields?.[fieldConfig.field];
-			return !flag || page.data?.featureflags?.[flag];
+			return isFieldFlagEnabled(flag, page.data?.featureflags ?? {});
 		})
 	);
 

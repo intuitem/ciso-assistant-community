@@ -541,13 +541,37 @@
 		if (first) goTo(first.index);
 	}
 
-	async function setReviewState(requirementAssessment: Record<string, any>, state: string) {
-		const next = requirementAssessment.review_state === state ? '' : state;
-		await fetch('?/updateRequirementAssessment', {
-			method: 'POST',
-			body: JSON.stringify({ id: requirementAssessment.id, review_state: next })
+	// A refused write (a locked round, a field the respondent may not set) would
+	// otherwise re-render unflagged and read as a dead button.
+	async function applied(res: Response): Promise<boolean> {
+		const result = deserialize(await res.text());
+		if (result.type === 'success') return true;
+		toastStore.trigger({
+			message: m.anErrorOccurred(),
+			background: 'preset-filled-error-500',
+			timeout: 3000
 		});
-		await invalidateAll();
+		return false;
+	}
+
+	// One at a time: the buttons sit side by side, and two verdicts in flight land in
+	// whatever order the server finishes them.
+	let reviewPending = $state(false);
+
+	async function setReviewState(requirementAssessment: Record<string, any>, state: string) {
+		if (reviewPending) return;
+		reviewPending = true;
+		try {
+			const next = requirementAssessment.review_state === state ? '' : state;
+			const res = await fetch('?/updateRequirementAssessment', {
+				method: 'POST',
+				body: JSON.stringify({ id: requirementAssessment.id, review_state: next })
+			});
+			if (!(await applied(res))) return;
+			await invalidateAll();
+		} finally {
+			reviewPending = false;
+		}
 	}
 
 	function scrollToComments() {
@@ -557,10 +581,11 @@
 	const taskStatusOptions = $derived(data.taskTemplateModel?.selectOptions?.status ?? []);
 
 	async function updateTaskStatus(taskId: string, status: string) {
-		await fetch('?/updateTaskTemplateStatus', {
+		const res = await fetch('?/updateTaskTemplateStatus', {
 			method: 'POST',
 			body: JSON.stringify({ id: taskId, status })
 		});
+		if (!(await applied(res))) return;
 		await invalidateAll();
 	}
 
@@ -1132,6 +1157,7 @@
 									? 'preset-filled-error-500'
 									: 'preset-tonal-surface'}"
 								onclick={() => setReviewState(requirementAssessment, 'changes_requested')}
+								disabled={reviewPending}
 								title={m.requestChanges()}
 							>
 								<i class="fa-solid fa-flag mr-1"></i>{m.requestChanges()}
@@ -1142,6 +1168,7 @@
 									? 'preset-filled-success-500'
 									: 'preset-tonal-surface'}"
 								onclick={() => setReviewState(requirementAssessment, 'accepted')}
+								disabled={reviewPending}
 								title={m.markAsAccepted()}
 							>
 								<i class="fa-solid fa-check"></i>

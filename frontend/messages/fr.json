@@ -5960,5 +5960,6 @@
 	"lastAssessment": "Dernière évaluation",
 	"lastAssessmentStatus": "Statut de la dernière évaluation",
 	"lastAssessmentDate": "Date de la dernière évaluation",
+	"resolveCommitmentBeforeRecurrence": "Clôturez l’engagement avant de rendre cette tâche récurrente.",
 	"neverAssessed": "Jamais évaluée"
 }

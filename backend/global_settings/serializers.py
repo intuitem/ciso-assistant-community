@@ -453,7 +453,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     findings_from_requirements = serializers.BooleanField(
         source="value.findings_from_requirements", required=False, default=False
     )
-    dora = serializers.BooleanField(source="value.dora", required=False, default=False)
+    dora = serializers.BooleanField(source="value.dora", required=False, default=True)
     external_ratings = serializers.BooleanField(
         source="value.external_ratings", required=False, default=False
     )

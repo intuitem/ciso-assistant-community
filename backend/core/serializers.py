@@ -2964,6 +2964,22 @@ class CampaignReadSerializer(BaseModelSerializer):
 
 
 class CampaignWriteSerializer(BaseModelSerializer):
+    def validate_selected_implementation_groups(self, value):
+        """Launch reads `framework` and `value` off each entry with bare subscripts,
+        and the field is free-form JSON: a malformed entry would 500 there."""
+        if not value:
+            return value
+        if not isinstance(value, list) or any(
+            not isinstance(entry, dict)
+            or "framework" not in entry
+            or "value" not in entry
+            for entry in value
+        ):
+            raise serializers.ValidationError(
+                "Each entry must be an object carrying `framework` and `value`."
+            )
+        return value
+
     class Meta:
         model = Campaign
         fields = "__all__"

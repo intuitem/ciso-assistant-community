@@ -11,6 +11,7 @@ type SidebarBackendKeys = {
 	vulnerabilities: boolean;
 	compliance: boolean;
 	campaigns: boolean;
+	commitment_management: boolean;
 	tprm: boolean;
 	privacy: boolean;
 	experimental: boolean;

@@ -236,6 +236,16 @@ export interface ModelMapEntry {
 	markdownFields?: string[];
 }
 
+// A field can name one flag or several, and shows when any of them is on. Indexing
+// `featureFlags` with the raw value stringifies a list into a key nothing matches.
+export function isFieldFlagEnabled(
+	flags: FeatureFlag | FeatureFlag[] | undefined,
+	featureFlags: Record<string, boolean> = {}
+): boolean {
+	if (!flags) return true;
+	return ([] as string[]).concat(flags as string | string[]).some((flag) => featureFlags[flag]);
+}
+
 type ModelMap = {
 	[key: string]: ModelMapEntry;
 };

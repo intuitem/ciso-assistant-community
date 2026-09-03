@@ -10,7 +10,7 @@ import ChangeCsfFunction from '$lib/components/ContextMenu/applied-controls/Chan
 import EvidenceChangeStatus from '$lib/components/ContextMenu/evidences/ChangeStatus.svelte';
 import WorkflowToggleActive from '$lib/components/ContextMenu/workflows/ToggleActive.svelte';
 import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeStatus.svelte';
-import { getModelInfo } from './crud';
+import { getModelInfo, isFieldFlagEnabled } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
 import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWith.svelte';
@@ -4222,7 +4222,7 @@ export function getBatchActions(
 	const flaggedFields = getModelInfo(model)?.flaggedFields;
 	const enabled = (action: BatchActionConfig): boolean => {
 		const flag = action.field ? flaggedFields?.[action.field] : undefined;
-		if (flag && !featureFlags[flag]) return false;
+		if (!isFieldFlagEnabled(flag, featureFlags)) return false;
 		return action.type !== 'group' || (action.children ?? []).some(enabled);
 	};
 	return (batchActions[model] ?? []).filter(enabled);
@@ -4260,9 +4260,7 @@ export function getListViewFields({
 			.map((field: string, index: number) => {
 				const flags = model.flaggedFields?.[field];
 				if (!flags) return -1;
-				// A field's flag(s) can be a single flag name or a list (shown if ANY is on).
-				const flagList = ([] as string[]).concat(flags);
-				return flagList.every((flag) => !featureFlags[flag]) ? index : -1;
+				return isFieldFlagEnabled(flags, featureFlags) ? -1 : index;
 			})
 			.filter((i) => i !== -1);
 

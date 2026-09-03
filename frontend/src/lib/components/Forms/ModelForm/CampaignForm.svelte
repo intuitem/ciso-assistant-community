@@ -28,7 +28,9 @@
 	}: Props = $props();
 
 	const { value: kindValue } = formFieldProxy(form as any, 'kind');
-	const presetKind = initialData.kind;
+	// Derived, not captured: ModelForm reuses this component with fresh `initialData`,
+	// and a stale kind renders the wrong target selector.
+	const presetKind = $derived(initialData.kind);
 	if (presetKind) kindValue.set(presetKind);
 	const kind = $derived(presetKind || $kindValue || 'internal');
 

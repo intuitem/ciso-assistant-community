@@ -6203,5 +6203,6 @@
 	"lastAssessment": "Last assessment",
 	"lastAssessmentStatus": "Last assessment status",
 	"lastAssessmentDate": "Last assessment date",
+	"resolveCommitmentBeforeRecurrence": "Resolve the commitment before making this task recurrent.",
 	"neverAssessed": "Never assessed"
 }

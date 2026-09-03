@@ -12,7 +12,7 @@ from core.models import (
 )
 from global_settings.models import GlobalSettings
 from global_settings.utils import clear_feature_flags_cache
-from iam.models import Folder, User
+from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
 
 def set_flag(enabled: bool):
@@ -660,9 +660,38 @@ class TestRegister:
             f"/api/commitments/{entry.id}/", {"state": "fulfilled"}, format="json"
         )
         assert patched.status_code == 405
-        assert (
-            setup["manager"].delete(f"/api/commitments/{entry.id}/").status_code == 405
+        deleted = setup["manager"].delete(f"/api/commitments/{entry.id}/")
+        assert deleted.status_code == 405
+
+    @pytest.mark.parametrize("role", ["BI-RL-AUD", "BI-RL-APP"])
+    def test_a_reader_can_read_the_transitions_of_a_task(self, setup, role):
+        """Reading the legal steps is part of reading the object. A role without
+        `transition_commitment` that was refused here got a panel claiming
+        "not started" next to a commitment row saying otherwise.
+
+        On a task template rather than a control: `is_published` is False there, so
+        the permission layer does not short-circuit GET to a readability check.
+        """
+        domain = setup["domain"]
+        task = TaskTemplate.objects.create(name="Read me", folder=domain)
+        user = User.objects.create_user(f"commitment-{role.lower()}@tests.com")
+        group = UserGroup.objects.create(name=f"grp-{role}", folder=domain)
+        group.user_set.add(user)
+        assignment = RoleAssignment.objects.create(
+            user_group=group,
+            role=Role.objects.get(name=role),
+            folder=domain,
+            is_recursive=True,
         )
+        assignment.perimeter_folders.add(domain)
+        client = APIClient()
+        client.force_authenticate(user)
+
+        url = f"/api/task-templates/{task.id}/commitment_transitions/"
+        assert client.get(url).status_code == 200
+        # Taking a step stays its own right.
+        taken = client.post(url, {"commitment_state": "in_negotiation"}, format="json")
+        assert taken.status_code == 403
 
     def test_the_register_is_gated_by_the_flag(self, setup):
         set_flag(False)

@@ -189,7 +189,31 @@ class CommitmentSerializerMixin:
 
     def validate_commitment(self, attrs: dict) -> dict:
         self._commitment_move = None
+        # Becoming recurrent hides the lifecycle fields, so a promise still in play
+        # would be left with no way to resolve it.
+        if (
+            attrs.get("is_recurrent")
+            and self.instance is not None
+            and not getattr(self.instance, "is_recurrent", False)
+        ):
+            live = self.instance.commitment
+            if live is not None and live.state in (
+                State.IN_NEGOTIATION,
+                State.COMMITTED,
+            ):
+                raise serializers.ValidationError(
+                    {"is_recurrent": "resolveCommitmentBeforeRecurrence"}
+                )
         if "commitment_state" not in attrs:
+            # A recurrent template carries no commitment fields, so DRF drops the key
+            # before validation: refuse the write rather than answering 200 to one
+            # that did nothing.
+            if getattr(self.instance, "is_recurrent", False) and "commitment_state" in (
+                getattr(self, "initial_data", None) or {}
+            ):
+                raise serializers.ValidationError(
+                    {"commitment_state": "commitmentNotAvailableOnRecurrentTask"}
+                )
             return attrs
 
         target = attrs["commitment_state"]

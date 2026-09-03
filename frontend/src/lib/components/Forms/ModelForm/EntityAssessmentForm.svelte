@@ -45,10 +45,12 @@
 	async function handleEntityChange(entityId: string | undefined) {
 		selectedEntity = entityId;
 		if (!entityId || initialData.folder) return;
+		const folderWhenAsked = $formData.folder;
 		try {
 			const entity = await fetch(`/entities/${entityId}`).then((res) => res.json());
-			// A slower earlier response must not apply another entity's folder.
-			if (entityId !== selectedEntity) return;
+			// Neither a slower earlier response nor a folder the user picked meanwhile
+			// may be overwritten by this one.
+			if (entityId !== selectedEntity || $formData.folder !== folderWhenAsked) return;
 			const folderId = entity?.folder?.id ?? entity?.folder;
 			if (folderId) form.form.update((data) => ({ ...data, folder: folderId }), { taint: false });
 		} catch (e) {

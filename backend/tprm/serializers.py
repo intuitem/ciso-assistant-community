@@ -774,7 +774,6 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
         user = User.objects.filter(
             email=instance.email,
         ).first()
-        self._apply_language(user, language)
         if not user:
             send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
             try:
@@ -814,6 +813,9 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError(
                 {"email": "errorUserAlreadyExistsAsInternal"}
             )
+        # Only past the guard: the write commits, so applying it earlier would leave an
+        # internal user's preference changed by a request that was refused.
+        self._apply_language(user, language)
         user.keep_local_login = True
         user.save()
         instance.user = user

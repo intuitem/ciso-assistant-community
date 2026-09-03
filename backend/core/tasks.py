@@ -1686,24 +1686,19 @@ def notify_audit_assignees(audit) -> list:
     from django.utils.translation import gettext_lazy as _
 
     failed = []
-    for author in audit.authors.all():
-        try:
-            specific = author.specific
-            if not hasattr(specific, "mailing"):
-                logger.warning(
-                    "Actor has no mailing method, skipping email",
-                    actor=author,
-                    actor_type=type(specific).__name__,
-                )
-                continue
-            assignments = list(audit.requirement_assignments.filter(actor=author))
-            if not assignments:
-                logger.warning(
-                    "Actor has no assignment on this audit, skipping email",
-                    actor=author,
-                )
-                continue
-            for assignment in assignments:
+    # Driven by the assignments, not by `authors`: an actor can be pointed at an
+    # assignment without being an author, and iterating authors skips them silently.
+    for assignment in audit.requirement_assignments.prefetch_related("actor"):
+        for actor in assignment.actor.all():
+            try:
+                specific = actor.specific
+                if not hasattr(specific, "mailing"):
+                    logger.warning(
+                        "Actor has no mailing method, skipping email",
+                        actor=actor,
+                        actor_type=type(specific).__name__,
+                    )
+                    continue
                 specific.mailing(
                     email_template_name="tprm/third_party_email.html",
                     subject=_(
@@ -1712,9 +1707,9 @@ def notify_audit_assignees(audit) -> list:
                     object="auditee-assessments",
                     object_id=assignment.id,
                 )
-        except Exception as e:
-            logger.error("Failed to send email", actor=author, error=e)
-            failed.append(str(author))
+            except Exception as e:
+                logger.error("Failed to send email", actor=actor, error=e)
+                failed.append(str(actor))
     return failed
 
 

@@ -1975,6 +1975,40 @@ TECHNICAL_TESTER_PERMISSIONS_LIST = [
 ]
 
 
+def seed_feature_flag_defaults():
+    """Fill in flags the stored row has never heard of.
+
+    A flag added by a release is absent from an existing row, and `ff_is_enabled`
+    reads that row: a missing key is False whatever the field declares, so an
+    on-by-default flag would land off while the UI, which reads the serializer,
+    shows it on. Only fills gaps — a choice already made is left alone.
+    """
+    from global_settings.models import GlobalSettings
+    from global_settings.utils import (
+        clear_feature_flags_cache,
+        get_feature_flag_defaults,
+    )
+
+    try:
+        row, _ = GlobalSettings.objects.get_or_create(
+            name=GlobalSettings.Names.FEATURE_FLAGS, defaults={"value": {}}
+        )
+        stored = row.value if isinstance(row.value, dict) else {}
+        missing = {
+            name: value
+            for name, value in get_feature_flag_defaults().items()
+            if name not in stored
+        }
+        if not missing:
+            return
+        row.value = {**stored, **missing}
+        row.save(update_fields=["value"])
+        clear_feature_flags_cache()
+        logger.info("Seeded feature flag defaults", flags=sorted(missing))
+    except Exception:
+        logger.error("Could not seed feature flag defaults", exc_info=True)
+
+
 def normalize_third_party_workspaces():
     """One workspace per third party per domain, merging the per-assessment ones.
 
@@ -2304,6 +2338,8 @@ def startup(sender=None, **kwargs):
         call_command("backfill_builtin_metrics")
     except Exception as e:
         logger.error("Error backfilling builtin metrics", exc_info=True)
+
+    seed_feature_flag_defaults()
 
     normalize_third_party_workspaces()
 

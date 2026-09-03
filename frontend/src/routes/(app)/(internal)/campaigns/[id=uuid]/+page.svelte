@@ -131,20 +131,21 @@
 				Math.min(...targets.map((t) => t.progress ?? 0))
 	);
 
-	// Sparkline over [first sample .. max(today, due date)] so the due date is on
-	// the same scale as the curve.
+	// Sparkline over a window holding both the samples and the due date, so an
+	// overdue campaign — due before its first sample — still shows the marker.
 	const spark = $derived.by(() => {
 		if (trend.length < 2) return null;
-		const start = new Date(trend[0].date).getTime();
+		const due = dueDate?.getTime() ?? null;
+		const start = Math.min(new Date(trend[0].date).getTime(), due ?? Infinity);
 		const last = new Date(trend[trend.length - 1].date).getTime();
-		const end = Math.max(last, dueDate?.getTime() ?? 0);
+		const end = Math.max(last, due ?? 0);
 		const span = end - start || 1;
 		const x = (t: number) => ((t - start) / span) * 100;
 		return {
 			points: trend
 				.map((p) => `${x(new Date(p.date).getTime()).toFixed(2)},${(100 - p.progress) * 0.3}`)
 				.join(' '),
-			dueX: dueDate ? x(dueDate.getTime()) : null
+			dueX: due !== null ? x(due) : null
 		};
 	});
 </script>

@@ -51,6 +51,7 @@
 	let { urlModel, object, readOnly = false }: Props = $props();
 
 	let payload: Payload = $state({ state: '--', transitions: [] });
+	let unreadable = $state(false);
 	let picked: Transition | null = $state(null);
 	let note = $state('');
 	let promisedDate = $state('');
@@ -97,7 +98,14 @@
 	async function load() {
 		const token = ++loadToken;
 		const res = await fetch(`/${urlModel}/${object.id}/commitment-transitions`);
-		if (!res.ok || token !== loadToken) return;
+		if (token !== loadToken) return;
+		if (!res.ok) {
+			// Not "not started": the state was never read, and claiming one contradicts
+			// the commitment row rendered next to this panel.
+			unreadable = true;
+			return;
+		}
+		unreadable = false;
 		const fresh = await res.json();
 		if (token !== loadToken) return;
 		payload = fresh;
@@ -167,7 +175,7 @@
 	<div class="flex items-center justify-between flex-wrap gap-2">
 		<span class="font-semibold">{m.commitment()}</span>
 		<span class="badge preset-tonal-surface">
-			{notStarted ? m.commitmentNotStarted() : safeTranslate(state)}
+			{unreadable ? '--' : notStarted ? m.commitmentNotStarted() : safeTranslate(state)}
 		</span>
 	</div>
 

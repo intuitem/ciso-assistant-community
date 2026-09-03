@@ -41,6 +41,12 @@
 	});
 	let pullCatalogOpen = $state(false);
 	let currentFilterSearch = $state(page.url.search);
+	// The page survives a query-string navigation (only the table is keyed), so the
+	// value captured at creation would keep the previous filters. In-place filter
+	// changes still assign to it below.
+	$effect(() => {
+		currentFilterSearch = data.urlSearch;
+	});
 
 	function handleFilterChange(filters: Record<string, any>) {
 		const params = new URLSearchParams();

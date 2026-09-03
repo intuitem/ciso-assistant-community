@@ -5187,10 +5187,16 @@ class CommitmentRegisterViewSet(BaseModelViewSet):
 class CommitmentActionsMixin:
     """Serves the legal next commitment states; the write serializer is what enforces them."""
 
-    # Its own right, like transitioning an assignment: a counterparty promises a date
-    # without holding change rights over the whole object. Keyed on the action, so it
-    # governs GET and POST alike.
-    permission_overrides = {"commitment_transitions": "transition_commitment"}
+    # Taking a step is its own right, like transitioning an assignment: a counterparty
+    # promises a date without holding change rights over the whole object. Reading the
+    # legal steps is not — that is part of reading the object, and a reader who was
+    # asked for the transition right would be shown a blank panel instead of the state.
+    @property
+    def permission_overrides(self):
+        method = getattr(getattr(self, "request", None), "method", None)
+        if method in permissions.SAFE_METHODS:
+            return {}
+        return {"commitment_transitions": "transition_commitment"}
 
     @action(detail=True, methods=["get", "post"], name="Commitment transitions")
     def commitment_transitions(self, request, pk=None):
@@ -17468,6 +17474,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 "assets",
                 "applied_controls",
                 "compliance_assessments",
+                "requirement_assessments",
                 "risk_assessments",
                 actor_prefetch("assigned_to"),
                 "findings_assessment",
