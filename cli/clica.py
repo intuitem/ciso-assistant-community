@@ -1369,4 +1369,23 @@ def import_domain(file, name, load_missing_libraries, create_missing_asset_class
 
 
 if __name__ == "__main__":
-    cli()
+    try:
+        cli()
+    except requests.exceptions.ConnectionError:
+        print(
+            f"Could not reach the CISO Assistant API at {API_URL!r}. "
+            "Check that API_URL is correct and the server is running.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    except (
+        requests.exceptions.MissingSchema,
+        requests.exceptions.InvalidURL,
+        requests.exceptions.InvalidSchema,
+    ):
+        print(
+            "API_URL is missing or invalid. Copy .clica.env.template to .clica.env "
+            "in the cli/ directory and set API_URL, e.g. API_URL=http://localhost:8000/api",
+            file=sys.stderr,
+        )
+        sys.exit(1)
