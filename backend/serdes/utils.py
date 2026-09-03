@@ -431,6 +431,14 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     )
     perimeters = Perimeter.objects.filter(folder__in=folders).distinct()
 
+    # Computed early so the audits they reference (ComplianceAssessments living
+    # in enclave sub-folders, excluded from `folders`) are pulled into the
+    # compliance_assessments scope below and cascade to their requirements /
+    # answers / evidence.
+    entity_assessments = EntityAssessment.objects.filter(
+        Q(folder__in=folders) | Q(perimeter__in=perimeters)
+    ).distinct()
+
     risk_assessments = RiskAssessment.objects.filter(
         Q(perimeter__in=perimeters) | Q(folder__in=folders)
     ).distinct()
@@ -466,6 +474,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
         Q(perimeter__in=perimeters)
         | Q(folder__in=folders)
         | Q(ebios_rm_studies__in=ebios_rm_studies)
+        | Q(pk__in=entity_assessments.values("compliance_assessment"))
     ).distinct()
     requirement_assessments = RequirementAssessment.objects.filter(
         compliance_assessment__in=compliance_assessments
@@ -557,15 +566,10 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     ).distinct()
 
     # --- TPRM ecosystem ---
-    # Only Entity was exported historically. Pull in the rest of the third
-    # party graph so a SaaS -> on-prem migration keeps assessments, solutions,
-    # subcontracting chains, representatives and contracts (all flattened into
-    # the target domain like everything else). Computed before evidences so
-    # audit / contract attachments are folded into the evidence scope below.
-    entity_assessments = EntityAssessment.objects.filter(
-        Q(folder__in=folders) | Q(perimeter__in=perimeters)
-    ).distinct()
-
+    # Pull in the rest of the third party graph so a SaaS -> on-prem migration
+    # keeps solutions, subcontracting chains, representatives and contracts (all
+    # flattened into the target domain like everything else). entity_assessments
+    # is defined earlier (its audits feed the compliance_assessments scope).
     solutions = Solution.objects.filter(
         Q(provider_entity__in=entities)
         | Q(recipient_entity__in=entities)
