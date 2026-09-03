@@ -41,6 +41,45 @@
 	let pullCatalogOpen = $state(false);
 	let currentFilterSearch = $state(page.url.search);
 
+	// A pull runs synchronously in the request, so both buttons stay locked until
+	// it settles: a second click would start a second import.
+	type SyncFeed = 'kev' | 'euvd';
+	let syncingFeed = $state<SyncFeed | null>(null);
+	const isSyncing = $derived(syncingFeed !== null);
+
+	async function runSync(feed: SyncFeed) {
+		if (syncingFeed) return;
+		syncingFeed = feed;
+		try {
+			const res = await fetch(`/security-advisories/sync-${feed}`, { method: 'POST' });
+			const result = await res.json();
+			toastStore.trigger({
+				message: result.detail || result.error,
+				preset: res.ok ? 'success' : 'error'
+			});
+			// Awaited so the buttons only unlock once the new rows have landed.
+			if (res.ok) await invalidateAll();
+		} catch {
+			toastStore.trigger({
+				message: feed === 'kev' ? m.syncKevFailed() : m.syncEuvdFailed(),
+				preset: 'error'
+			});
+		} finally {
+			syncingFeed = null;
+		}
+	}
+
+	function confirmSync(feed: SyncFeed) {
+		modalStore.trigger({
+			type: 'confirm',
+			title: m.pullCatalog(),
+			body: feed === 'kev' ? m.syncKev() : m.syncEuvd(),
+			response: (confirmed: boolean) => {
+				if (confirmed) runSync(feed);
+			}
+		});
+	}
+
 	function handleFilterChange(filters: Record<string, any>) {
 		const params = new URLSearchParams();
 		for (const [field, values] of Object.entries(filters)) {
@@ -218,6 +257,16 @@
 </script>
 
 {#if data?.table}
+	{#if isSyncing}
+		<div
+			class="h-1 w-full overflow-hidden bg-surface-200-800"
+			role="status"
+			aria-label={m.loading()}
+			data-testid="sync-loading-bar"
+		>
+			<div class="h-full w-full animate-pulse bg-primary-500"></div>
+		</div>
+	{/if}
 	<div class="shadow-lg">
 		{#key URLModel}
 			<ModelTable
@@ -227,6 +276,7 @@
 				{URLModel}
 				disableEdit={['user-groups', 'validation-flows'].includes(URLModel)}
 				disableDelete={['user-groups'].includes(URLModel)}
+				loading={isSyncing}
 				onFilterChange={handleFilterChange}
 			>
 				{#snippet addButton()}
@@ -331,69 +381,33 @@
 								{/if}
 								{#if URLModel === 'security-advisories'}
 									<button
-										class="inline-block p-3 w-12 focus:relative bg-blue-100 hover:bg-blue-200 dark:bg-blue-500/20 dark:hover:bg-blue-500/30"
+										class="inline-block p-3 w-12 focus:relative bg-blue-100 hover:bg-blue-200 dark:bg-blue-500/20 dark:hover:bg-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
 										title={m.syncKev()}
 										aria-label={m.syncKev()}
 										data-testid="sync-kev-button"
-										onclick={() => {
-											modalStore.trigger({
-												type: 'confirm',
-												title: m.pullCatalog(),
-												body: m.syncKev(),
-												response: async (confirmed) => {
-													if (!confirmed) return;
-													try {
-														const res = await fetch('/security-advisories/sync-kev', {
-															method: 'POST'
-														});
-														const result = await res.json();
-														toastStore.trigger({
-															message: result.detail || result.error,
-															preset: res.ok ? 'success' : 'error'
-														});
-														if (res.ok) invalidateAll();
-													} catch {
-														toastStore.trigger({
-															message: m.syncKevFailed(),
-															preset: 'error'
-														});
-													}
-												}
-											});
-										}}>🇺🇸</button
+										disabled={isSyncing}
+										onclick={() => confirmSync('kev')}
 									>
+										{#if syncingFeed === 'kev'}
+											<i class="fa-solid fa-spinner animate-spin"></i>
+										{:else}
+											🇺🇸
+										{/if}
+									</button>
 									<button
-										class="inline-block p-3 w-12 focus:relative bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-500/20 dark:hover:bg-yellow-500/30"
+										class="inline-block p-3 w-12 focus:relative bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-500/20 dark:hover:bg-yellow-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
 										title={m.syncEuvd()}
 										aria-label={m.syncEuvd()}
 										data-testid="sync-euvd-button"
-										onclick={() => {
-											modalStore.trigger({
-												type: 'confirm',
-												title: m.pullCatalog(),
-												body: m.syncEuvd(),
-												response: async (confirmed) => {
-													if (!confirmed) return;
-													try {
-														const res = await fetch('/security-advisories/sync-euvd', {
-															method: 'POST'
-														});
-														const result = await res.json();
-														toastStore.trigger({
-															message: result.detail || result.error,
-															preset: res.ok ? 'success' : 'error'
-														});
-														if (res.ok) invalidateAll();
-													} catch {
-														toastStore.trigger({
-															message: m.syncEuvdFailed(),
-															preset: 'error'
-														});
-													}
-												}
-											});
-										}}>🇪🇺</button
+										disabled={isSyncing}
+										onclick={() => confirmSync('euvd')}
 									>
+										{#if syncingFeed === 'euvd'}
+											<i class="fa-solid fa-spinner animate-spin"></i>
+										{:else}
+											🇪🇺
+										{/if}
+									</button>
 								{/if}
 								{#if URLModel === 'document-templates'}
 									<a

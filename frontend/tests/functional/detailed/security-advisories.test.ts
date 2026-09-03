@@ -320,4 +320,107 @@ test.describe('Security Advisories', () => {
 			await saveFeedsForm();
 		});
 	});
+
+	// Regression test for CA-1845. The endpoint is stubbed, so unlike the tests
+	// above this one never reaches CISA and can hold the response open.
+	test('CVE sync locks both buttons and shows loading feedback while pulling', async ({
+		logedPage,
+		page
+	}) => {
+		let requestCount = 0;
+		let releaseResponse: () => void = () => {};
+		const responseHeld = new Promise<void>((resolve) => {
+			releaseResponse = resolve;
+		});
+
+		await page.route('**/security-advisories/sync-kev', async (route) => {
+			requestCount += 1;
+			await responseHeld;
+			await route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ detail: 'KEV sync complete: 0 created, 0 updated' })
+			});
+		});
+
+		const kevButton = page.getByTestId('sync-kev-button');
+		const euvdButton = page.getByTestId('sync-euvd-button');
+		const modal = page.getByTestId('modal');
+
+		await test.step('navigate to security advisories with an empty table', async () => {
+			await page.goto('/security-advisories');
+			await expect(page).toHaveURL(/.*security-advisories.*/);
+			// Searching while the first load is still in flight lets that response
+			// land afterwards and drop the filter.
+			await page.waitForLoadState('networkidle');
+			// The tests above pull real catalogs, so an empty table is only
+			// reachable behind a search that matches nothing. RowCount renders
+			// nothing without a total, so its absence means the filter applied.
+			await page.getByRole('searchbox').first().fill('zzzz-no-such-advisory');
+			await expect(page.getByTestId('row-count')).toBeHidden();
+			await expect(page.locator('table tbody tr')).toHaveCount(0);
+		});
+
+		await test.step('confirm the pull', async () => {
+			// The first-login welcome modal can land after the login fixture
+			// checked for it, and dismissing it clears the modal store — which
+			// would swallow the confirm modal opened by this click.
+			await expect(async () => {
+				await kevButton.click();
+				await expect(modal).toBeVisible({ timeout: 2_000 });
+			}).toPass({ timeout: 20_000 });
+			await modal.getByRole('button', { name: /confirm/i }).click();
+		});
+
+		await test.step('both feeds are locked and the pull is visible', async () => {
+			await expect(kevButton).toBeDisabled();
+			await expect(euvdButton).toBeDisabled();
+			await expect(page.getByTestId('sync-loading-bar')).toBeVisible();
+			await expect(page.getByTestId('row-skeleton').first()).toBeVisible();
+		});
+
+		await test.step('spamming the buttons starts no second pull', async () => {
+			await kevButton.click({ force: true });
+			await euvdButton.click({ force: true });
+			await expect(modal).toBeHidden();
+			expect(requestCount).toBe(1);
+		});
+
+		await test.step('one toast once it settles, and both feeds are free again', async () => {
+			releaseResponse();
+			await expect(page.getByTestId('toast')).toHaveCount(1);
+			await expect(kevButton).toBeEnabled();
+			await expect(euvdButton).toBeEnabled();
+			await expect(page.getByTestId('sync-loading-bar')).toBeHidden();
+			expect(requestCount).toBe(1);
+		});
+	});
+
+	// A slow first load used to look exactly like a table with no data.
+	test('table shows placeholder rows while its first page is loading', async ({
+		logedPage,
+		page
+	}) => {
+		let releaseRows: () => void = () => {};
+		const rowsHeld = new Promise<void>((resolve) => {
+			releaseRows = resolve;
+		});
+
+		// Only the paginated data request carries a query string; the page
+		// navigation itself must go through untouched.
+		await page.route('**/security-advisories?*', async (route) => {
+			await rowsHeld;
+			await route.continue();
+		});
+
+		await page.goto('/security-advisories');
+		await expect(page).toHaveURL(/.*security-advisories.*/);
+
+		await expect(page.getByTestId('row-skeleton').first()).toBeVisible();
+		await expect(page.getByTestId('sync-loading-bar')).toBeHidden();
+
+		releaseRows();
+
+		await expect(page.getByTestId('row-skeleton')).toHaveCount(0);
+	});
 });
