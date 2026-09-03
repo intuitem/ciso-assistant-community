@@ -2,7 +2,9 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { CUSTOM_FIELD_HOST_MODELS } from '$lib/utils/customFields';
+	import { isURL } from '$lib/utils/helpers';
 
 	interface Choice {
 		value: string;
@@ -81,7 +83,15 @@
 						<dt class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide">
 							{def.label_localized}
 						</dt>
-						<dd class="text-sm text-surface-900-100">{displayValue(def, values?.[def.key])}</dd>
+						<dd class="text-sm text-surface-900-100">
+							{#if def.field_type === 'url' && isURL(values?.[def.key])}
+								<Anchor breadcrumbAction="push" href={values[def.key]} target="_blank" class="anchor"
+									>{values[def.key]}</Anchor
+								>
+							{:else}
+								{displayValue(def, values?.[def.key])}
+							{/if}
+						</dd>
 					</div>
 				{/each}
 			</dl>

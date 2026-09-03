@@ -4,6 +4,7 @@ from decimal import Decimal, InvalidOperation
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from django.db import models
 from django.utils.dateparse import parse_date
 from django.utils.translation import get_language
@@ -20,6 +21,7 @@ class FieldType(models.TextChoices):
     BOOLEAN = "boolean", _("Boolean")
     CHOICE = "choice", _("Choice")
     MULTI_CHOICE = "multi_choice", _("Multiple choice")
+    URL = "url", _("URL")
 
 
 # Each field type is stored in exactly one typed column of CustomFieldValue.
@@ -30,6 +32,7 @@ TYPE_TO_COLUMN = {
     FieldType.BOOLEAN: "value_boolean",
     FieldType.CHOICE: "value_text",
     FieldType.MULTI_CHOICE: "value_text",
+    FieldType.URL: "value_text",
 }
 
 # Only value_text-backed types can be searched (search scans value_text).
@@ -74,6 +77,14 @@ def coerce_value(field_type: str, raw):
         if token in ("false", "0"):
             return False
         raise ValueError(f"'{raw}' is not a valid boolean")
+
+    if field_type == FieldType.URL:
+        value = str(raw)
+        try:
+            URLValidator()(value)
+        except ValidationError:
+            raise ValueError(f"'{raw}' is not a valid URL")
+        return value
 
     # text, choice, multi_choice → stored as text
     return str(raw)

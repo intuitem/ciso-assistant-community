@@ -1708,7 +1708,7 @@ export const CustomFieldDefinitionSchema = z
 			}),
 		label: z.string().min(1),
 		help_text: z.string().optional().default(''),
-		field_type: z.enum(['text', 'number', 'date', 'boolean', 'choice', 'multi_choice']),
+		field_type: z.enum(['text', 'number', 'date', 'boolean', 'choice', 'multi_choice', 'url']),
 		required: z.boolean().default(false),
 		visible: z.boolean().default(true),
 		searchable: z.boolean().default(false),
