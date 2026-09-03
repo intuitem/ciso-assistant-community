@@ -433,8 +433,11 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
 
     # Computed early: the audits these reference live in enclave sub-folders
     # (excluded from `folders`) and must feed compliance_assessments below.
-    # folder is mandatory (FolderMixin) so it captures every EA on its own.
-    entity_assessments = EntityAssessment.objects.filter(folder__in=folders).distinct()
+    # Scoped by folder OR perimeter like the sibling assessments (Assessment.save
+    # can move folder to perimeter.folder, so folder alone isn't sufficient).
+    entity_assessments = EntityAssessment.objects.filter(
+        Q(folder__in=folders) | Q(perimeter__in=perimeters)
+    ).distinct()
 
     risk_assessments = RiskAssessment.objects.filter(
         Q(perimeter__in=perimeters) | Q(folder__in=folders)
