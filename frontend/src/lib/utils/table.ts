@@ -525,11 +525,7 @@ export const CAMPAIGN_KIND_FILTER: ListViewFilterConfig = {
 		label: 'kind',
 		browserCache: 'force-cache',
 		multiple: true
-	},
-	extraProps: {
-		defaultOptionName: 'kind'
-	},
-	alwaysDisplay: false
+	}
 };
 
 export const CAMPAIGN_STATUS_FILTER: ListViewFilterConfig = {

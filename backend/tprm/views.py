@@ -1336,9 +1336,33 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         ):
             assignments_by_audit.setdefault(audit_id, []).append(str(assignment_id))
 
+        # Same page-level prefetch the list endpoint uses: the respondent walk reads
+        # every requirement assessment with its questions and answers, so resolving it
+        # per row would issue a query storm.
+        audits_by_id = {
+            audit.id: audit
+            for audit in ComplianceAssessment.objects.filter(id__in=list(audit_ids))
+            .select_related("framework")
+            .prefetch_related(
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.select_related(
+                        "requirement"
+                    ).prefetch_related(
+                        "requirement__questions",
+                        "requirement__questions__choices",
+                        "answers",
+                        "answers__question",
+                        "answers__selected_choices",
+                    ),
+                ),
+            )
+        }
+
         for ea in EntityAssessment.objects.filter(id__in=viewable_items).select_related(
             "folder", "entity"
         ):
+            audit = audits_by_id.get(ea.compliance_assessment_id)
             # Use entity assessment's folder for grouping
             folder = ea.folder
             entry = {
@@ -1349,24 +1373,18 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 "solutions": ",".join([sol.name for sol in ea.solutions.all()])
                 if len(ea.solutions.all()) > 0
                 else "-",
-                "baseline": ea.compliance_assessment.framework.name
-                if ea.compliance_assessment
-                else "-",
+                "baseline": audit.framework.name if audit else "-",
                 "due_date": ea.due_date.strftime("%Y-%m-%d") if ea.due_date else "-",
                 "last_update": ea.updated_at.strftime("%Y-%m-%d")
                 if ea.updated_at
                 else "-",
                 "conclusion": ea.conclusion if ea.conclusion else "ongoing",
-                "compliance_assessment_id": ea.compliance_assessment.id
-                if ea.compliance_assessment
-                else "#",
+                "compliance_assessment_id": audit.id if audit else "#",
                 "reviewers": ",".join([str(re.specific) for re in ea.reviewers.all()])
                 if len(ea.reviewers.all())
                 else "-",
                 "observation": ea.observation if ea.observation else "-",
-                "has_questions": ea.compliance_assessment.has_questions
-                if ea.compliance_assessment
-                else False,
+                "has_questions": audit.has_questions if audit else False,
             }
 
             # With several, no single target is right: the card falls back to the audit.
@@ -1382,19 +1400,14 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             # without any reported 0% however far along the third party was.
             completion = (
                 compute_respondent_progress(
-                    ea.compliance_assessment,
-                    ea.compliance_assessment.get_requirement_assessments(
-                        include_non_assessable=False
-                    ),
+                    audit, self._prefetched_requirement_assessments(audit)
                 )
-                if ea.compliance_assessment
+                if audit
                 else 0
             )
             entry.update({"completion": completion})
 
-            review_progress = (
-                ea.compliance_assessment.progress if ea.compliance_assessment else 0
-            )
+            review_progress = audit.progress if audit else 0
             entry.update({"review_progress": review_progress})
             assessments_data.append(entry)
 

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -92,12 +91,25 @@
 		return ACTION_LABELS[transition.value]?.() ?? safeTranslate(transition.value);
 	}
 
+	// Keyed on the object so navigating between two detail pages of the same route
+	// reloads: the component is reused, and stale transitions would be confirmed
+	// against the new object's id. A later request always wins.
+	let loadToken = 0;
 	async function load() {
+		const token = ++loadToken;
 		const res = await fetch(`/${urlModel}/${object.id}/commitment-transitions`);
-		if (res.ok) payload = await res.json();
+		if (!res.ok || token !== loadToken) return;
+		const fresh = await res.json();
+		if (token !== loadToken) return;
+		payload = fresh;
+		picked = null;
 	}
 
-	onMount(load);
+	$effect(() => {
+		void urlModel;
+		void object?.id;
+		load();
+	});
 
 	// The backend answers with either {field: "<i18n key>"} or SvelteKit's {message}.
 	async function readError(res: Response): Promise<string> {
