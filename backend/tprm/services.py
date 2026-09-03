@@ -47,22 +47,11 @@ def enclave_folder(entity_assessment):
 def sync_requirement_assignment(audit, representatives):
     """Create or update the RequirementAssignment so its actors match the
     representatives."""
-    actors = [rep.actor for rep in representatives if hasattr(rep, "actor")]
-    assignment = audit.requirement_assignments.first()
-    if assignment is None:
-        if not actors:
-            return
-        requirement_assessments = audit.requirement_assessments.all()
-        if not requirement_assessments.exists():
-            return
-        assignment = RequirementAssignment.objects.create(
-            compliance_assessment=audit,
-            folder=audit.folder,
-        )
-        assignment.actor.set(actors)
-        assignment.requirement_assessments.set(requirement_assessments)
-    else:
-        assignment.actor.set(actors)
+    from core.utils import assign_audit_to
+
+    assign_audit_to(
+        audit, [rep.actor for rep in representatives if hasattr(rep, "actor")]
+    )
 
 
 def default_representatives_from_entity(entity_assessment):
@@ -77,7 +66,20 @@ def default_representatives_from_entity(entity_assessment):
         entity_assessment.representatives.set(users)
 
 
+def sync_audit_schedule(entity_assessment, audit):
+    """Keep the questionnaire's clock on the assessment's, in both directions of edit."""
+    if (audit.due_date, audit.eta) == (
+        entity_assessment.due_date,
+        entity_assessment.eta,
+    ):
+        return
+    audit.due_date = entity_assessment.due_date
+    audit.eta = entity_assessment.eta
+    audit.save(update_fields=["due_date", "eta"])
+
+
 def finalize_linked_audit(entity_assessment, audit):
+    sync_audit_schedule(entity_assessment, audit)
     audit.reviewers.set(entity_assessment.reviewers.all())
     default_representatives_from_entity(entity_assessment)
     representatives = entity_assessment.representatives.all()
@@ -125,6 +127,11 @@ def create_enclave_audit(
             framework=framework,
             selected_implementation_groups=implementation_groups,
             field_visibility=visibility,
+            # The questionnaire is what the third party opens, and what the reminders,
+            # the overdue lock and the activation email all read: without the dates the
+            # deadline shows on the assessment and nowhere the vendor can see it.
+            due_date=entity_assessment.due_date,
+            eta=entity_assessment.eta,
         )
         audit.folder = enclave or enclave_folder(entity_assessment)
         audit.save()

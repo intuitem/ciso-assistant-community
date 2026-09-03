@@ -532,7 +532,11 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             self._link_existing_audit(instance, audit_data)
         else:
             if instance.compliance_assessment:
+                from tprm.services import sync_audit_schedule
+
                 audit = instance.compliance_assessment
+                # Editing the assessment's deadline has to reach the questionnaire.
+                sync_audit_schedule(instance, audit)
                 audit.reviewers.set(instance.reviewers.all())
                 representatives = instance.representatives.all()
                 audit.authors.set(

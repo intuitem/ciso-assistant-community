@@ -22,8 +22,11 @@
 
 	let { data, form }: Props = $props();
 
-	const mailing =
-		Boolean(data.data.compliance_assessment) && Boolean(data.data.representatives.length);
+	// Offered whenever there is a questionnaire: representatives may have been added
+	// after the fact, on the assessment or on the entity, and sending is what wires
+	// them in. With nobody to notify the backend says so rather than the button
+	// vanishing with no explanation.
+	const mailing = Boolean(data.data.compliance_assessment);
 
 	const reviewAssignments = $derived(data.reviewAssignments ?? []);
 	const reviewHref = $derived(

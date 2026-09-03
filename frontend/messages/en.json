@@ -6177,7 +6177,7 @@
 	"evidenceCoverageHint": "direct or through applied controls",
 	"bothEvidence": "Direct and indirect",
 	"thirdParties": "Third parties",
-	"startCampaign": "Start a campaign",
+	"startCampaign": "Start campaign",
 	"internalCampaign": "Internal campaign",
 	"internalCampaignDescription": "Assess your own domains against one or more frameworks.",
 	"thirdPartyCampaign": "Third-party campaign",
@@ -6193,5 +6193,11 @@
 	"userLanguageHelpText": "Language used for this user's interface and the emails they receive.",
 	"representativeLanguageHelpText": "Language of the account's interface and of the questionnaire invitation.",
 	"campaignCompletionHelpText": "Average completion across the campaign's targets. Every target counts equally, whatever its size.",
-	"changeConclusion": "Change conclusion"
+	"changeConclusion": "Change conclusion",
+	"newCampaign": "New campaign",
+	"sureToStartCampaign": "Start “{campaign}”? Everyone assigned will be notified that their questionnaire is waiting.",
+	"campaignStarted": "Campaign started: {count} assignment(s) notified.",
+	"campaignStartedWithUnassigned": "Campaign started: {count} assignment(s) notified, but {missing} target(s) have nobody assigned.",
+	"campaignHasNoAudits": "This campaign has no assessments to start.",
+	"noAssigneeToNotify": "Nobody is assigned to this questionnaire yet — add a representative to the third party or to this assessment, then send again."
 }

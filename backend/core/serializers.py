@@ -2958,7 +2958,6 @@ class CampaignReadSerializer(BaseModelSerializer):
     perimeters = FieldsRelatedField(many=True)
     entities = FieldsRelatedField(many=True)
     frameworks = FieldsRelatedField(many=True)
-    status = serializers.CharField(source="get_status_display")
 
     class Meta:
         model = Campaign

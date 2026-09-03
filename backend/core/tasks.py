@@ -1679,3 +1679,68 @@ def send_assignment_reviewed_notification(
                         email,
                         rendered.get("html_body"),
                     )
+
+
+def notify_audit_assignees(audit) -> list:
+    """Email everyone holding an assignment on *audit*. Returns the actors that failed.
+
+    Split out of the mailing action so a campaign start and a single Send take the
+    same path. Notification only: the assignments are already started by the time
+    this runs, so a dead mail server delays word of the work, never the work.
+    """
+    from django.utils.translation import gettext_lazy as _
+
+    failed = []
+    for author in audit.authors.all():
+        try:
+            specific = author.specific
+            if not hasattr(specific, "mailing"):
+                logger.warning(
+                    "Actor has no mailing method, skipping email",
+                    actor=author,
+                    actor_type=type(specific).__name__,
+                )
+                continue
+            assignments = list(audit.requirement_assignments.filter(actor=author))
+            if not assignments:
+                logger.warning(
+                    "Actor has no assignment on this audit, skipping email",
+                    actor=author,
+                )
+                continue
+            for assignment in assignments:
+                specific.mailing(
+                    email_template_name="tprm/third_party_email.html",
+                    subject=_(
+                        "CISO Assistant: A questionnaire has been assigned to you"
+                    ),
+                    object="auditee-assessments",
+                    object_id=assignment.id,
+                )
+        except Exception as e:
+            logger.error("Failed to send email", actor=author, error=e)
+            failed.append(str(author))
+    return failed
+
+
+@task()
+def notify_campaign_assignees(campaign_id):
+    """Send a campaign's notifications off the request thread.
+
+    A fan-out is tens of audits, each its own SMTP round trip: doing that inline
+    would hold the request open long enough to time out, and leave no record of how
+    far it got. The state transitions happen synchronously in the action; only the
+    mail is deferred.
+    """
+    audits = ComplianceAssessment.objects.filter(campaign_id=campaign_id)
+    notified = failed = 0
+    for audit in audits:
+        errors = notify_audit_assignees(audit)
+        failed += len(errors)
+        notified += 1
+    logger.info(
+        "campaign notifications sent",
+        campaign_id=str(campaign_id),
+        audits=notified,
+        failed_actors=failed,
+    )

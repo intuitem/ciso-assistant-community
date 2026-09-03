@@ -149,7 +149,7 @@
 		let modalComponent: ModalComponent = {
 			ref: ChoiceCardsModal,
 			props: {
-				title: m.startCampaign(),
+				title: m.newCampaign(),
 				choices: [
 					{
 						icon: 'fa-building-shield',

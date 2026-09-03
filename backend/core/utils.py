@@ -1802,3 +1802,69 @@ def bulk_update_with_log(model, rows, fields, batch_size=500):
             )
             logged += 1
     return logged
+
+
+def assign_audit_to(audit, actors):
+    """Point one assignment covering the whole audit at *actors*.
+
+    The single place an audit's assignment is created, so a questionnaire sent to a
+    third party and an audit handed to an internal assignee are the same object in
+    the same state. Created in DRAFT: it is the wiring, not the send — starting the
+    campaign is what makes it live.
+    """
+    from core.models import RequirementAssignment
+
+    actors = [actor for actor in actors if actor is not None]
+    assignment = audit.requirement_assignments.first()
+    if assignment is None:
+        if not actors:
+            return None
+        requirement_assessments = audit.requirement_assessments.all()
+        if not requirement_assessments.exists():
+            return None
+        assignment = RequirementAssignment.objects.create(
+            compliance_assessment=audit,
+            folder=audit.folder,
+        )
+        assignment.requirement_assessments.set(requirement_assessments)
+    assignment.actor.set(actors)
+    return assignment
+
+
+def ensure_audit_assignment(audit):
+    """Wire an audit to whoever answers for it, when nothing is wired yet.
+
+    Launch can only use what exists at the time: a third party with no representative,
+    or a perimeter with no default assignee, produces a questionnaire nobody holds.
+    Fixing that afterwards has to be able to reach the assessment, so starting a
+    campaign re-checks the source rather than assuming launch got it right.
+
+    Only ever fills a gap. An assignment that already exists is left alone, including
+    its actors — pressing start must not quietly drop someone mid-flight.
+    """
+    from tprm.models import EntityAssessment
+    from tprm.services import default_representatives_from_entity
+
+    if audit.requirement_assignments.exists():
+        return None
+
+    entity_assessment = EntityAssessment.objects.filter(
+        compliance_assessment=audit
+    ).first()
+    if entity_assessment is not None:
+        # Pulls the entity's representatives onto the assessment when it has none,
+        # which is exactly the "I added the missing representative" case.
+        default_representatives_from_entity(entity_assessment)
+        actors = [
+            rep.actor
+            for rep in entity_assessment.representatives.all()
+            if hasattr(rep, "actor")
+        ]
+    else:
+        actors = list(audit.perimeter.default_assignee.all()) if audit.perimeter else []
+
+    if not actors:
+        return None
+    # add, not set: never remove an author the audit already had.
+    audit.authors.add(*actors)
+    return assign_audit_to(audit, actors)

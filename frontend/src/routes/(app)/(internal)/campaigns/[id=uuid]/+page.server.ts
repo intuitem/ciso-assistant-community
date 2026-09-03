@@ -6,6 +6,13 @@ import {
 	nestedDeleteFormAction,
 	nestedWriteFormAction
 } from '$lib/utils/actions';
+import { safeTranslate } from '$lib/utils/i18n';
+import { m } from '$paraglide/messages';
+import { fail } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { superValidate } from 'sveltekit-superforms';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
+import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
 
 type Target = {
@@ -60,6 +67,36 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
+	start: async (event) => {
+		// Returned as a superform, like ?/mailing: the confirm modal submits through
+		// SuperForm, and only a form result triggers its invalidateAll — otherwise the
+		// page keeps showing the pre-start status until a manual refresh.
+		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
+		const form = await superValidate(await event.request.formData(), zod(schema));
+
+		const res = await event.fetch(`${BASE_API_URL}/campaigns/${event.params.id}/start/`, {
+			method: 'POST'
+		});
+		const body = await res.json().catch(() => ({}));
+		if (!res.ok) {
+			setFlash({ type: 'error', message: safeTranslate(body.error ?? 'anErrorOccurred') }, event);
+			return fail(res.status, { form });
+		}
+		const missing = body.unassigned?.length ?? 0;
+		// One flash, not two: the second would replace the first and the count would
+		// be the thing lost.
+		setFlash(
+			missing
+				? {
+						type: 'warning',
+						message: m.campaignStartedWithUnassigned({ count: body.started, missing })
+					}
+				: { type: 'success', message: m.campaignStarted({ count: body.started }) },
+			event
+		);
+		return { form };
+	},
+
 	create: async (event) => {
 		return nestedWriteFormAction({ event, action: 'create', redirectToWrittenObject: false });
 	},

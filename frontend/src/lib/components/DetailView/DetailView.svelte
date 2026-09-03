@@ -128,6 +128,7 @@
 	// ~250 labels have no message keys.
 	const translatedValueFieldSet = new Set([
 		'kind',
+		'status',
 		'roc_display',
 		'dora_ict_service_type',
 		'dora_data_sensitiveness',

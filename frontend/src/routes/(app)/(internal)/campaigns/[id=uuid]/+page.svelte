@@ -1,5 +1,12 @@
 <script lang="ts">
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
@@ -84,6 +91,40 @@
 	// The cross-audit matrix already exists per framework; scope it to this campaign
 	// rather than duplicating it here.
 	const frameworks = $derived((data.data?.frameworks ?? []) as { id: string; str: string }[]);
+
+	// Offered while there is anything left to start: a draft campaign, or a target
+	// added to one already under way.
+	const draftAssignments = $derived(perStatus['draft'] ?? 0);
+	// A target nobody holds keeps "start" on offer: it is the only way to wire one
+	// once the missing representative or default assignee has been added.
+	const unassignedTargets = $derived((data.dashboard?.assignments?.unassigned ?? 0) as number);
+	// Null counts as draft, same as the backend: the column is nullable and campaigns
+	// created before it had a default carry no status at all.
+	const isDraft = $derived(!data.data?.status || data.data.status === 'draft');
+	const canStart = $derived(
+		targets.length > 0 && (isDraft || draftAssignments > 0 || unassignedTargets > 0)
+	);
+
+	const modalStore: ModalStore = getModalStore();
+
+	function modalStartConfirm(): void {
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: { id: data.data.id, urlmodel: 'campaigns' },
+				id: data.data.id,
+				debug: false,
+				URLModel: 'campaigns',
+				formAction: '?/start'
+			}
+		};
+		modalStore.trigger({
+			type: 'component',
+			component: modalComponent,
+			title: m.confirmModalTitle(),
+			body: m.sureToStartCampaign({ campaign: data.data.name })
+		});
+	}
 	const hasSpread = $derived(
 		targets.length > 1 &&
 			Math.max(...targets.map((t) => t.progress ?? 0)) >
@@ -286,6 +327,16 @@
 		{/if}
 	{/snippet}
 	{#snippet actions()}
+		{#if canStart}
+			<button
+				class="btn preset-filled-primary-500 h-fit"
+				onclick={modalStartConfirm}
+				data-testid="start-campaign-button"
+			>
+				<i class="fas fa-paper-plane mr-2"></i>
+				{m.startCampaign()}
+			</button>
+		{/if}
 		{#each frameworks as framework (framework.id)}
 			<a
 				href="/frameworks/{framework.id}/report?campaign={data.data.id}"

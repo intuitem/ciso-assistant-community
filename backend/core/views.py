@@ -10820,6 +10820,97 @@ class CampaignViewSet(BaseModelViewSet):
     def kind(self, request):
         return Response(dict(Campaign.Kind.choices))
 
+    @action(detail=True, methods=["post"], name="Start the campaign")
+    def start(self, request, pk):
+        """Move a campaign from wiring to under way.
+
+        Launch builds the questionnaires and points an assignment at whoever answers;
+        this is the moment they are told. The transitions run here — they are the
+        campaign's state and must be true the instant the call returns — while the
+        mail goes to a background task, because a fan-out is one SMTP round trip per
+        audit and would hold the request open.
+
+        Re-running only picks up what is still in draft, so adding a target later and
+        pressing start again notifies just that target.
+        """
+        if not RoleAssignment.is_object_accessible(
+            request.user, "change", Campaign, UUID(pk)
+        ):
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        campaign = self.get_object()
+        audits = list(ComplianceAssessment.objects.filter(campaign=campaign))
+        if not audits:
+            return Response(
+                {"error": "campaignHasNoAudits"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        from core.utils import ensure_audit_assignment
+
+        started = 0
+        unassigned = []
+        with transaction.atomic():
+            for audit in audits:
+                # Re-check the source first: a representative or default assignee added
+                # after launch is otherwise unreachable, since nothing else ever wires
+                # an existing audit.
+                ensure_audit_assignment(audit)
+                drafts = audit.requirement_assignments.filter(
+                    status=RequirementAssignment.Status.DRAFT
+                )
+                if not audit.requirement_assignments.exists():
+                    # Still nobody to answer: no perimeter default assignee, or a third
+                    # party with no representative. Reported, never silently skipped.
+                    unassigned.append(audit.name)
+                for assignment in drafts:
+                    assignment.status = RequirementAssignment.Status.IN_PROGRESS
+                    assignment.save(update_fields=["status"])
+                    RequirementAssignmentEvent.objects.create(
+                        assignment=assignment,
+                        event_type=RequirementAssignment.Status.IN_PROGRESS,
+                        event_actor=request.user,
+                        folder=assignment.folder,
+                    )
+                    started += 1
+                # Otherwise the audit stays "planned", which the cross-audit report
+                # filters out — a started campaign would read as empty.
+                if audit.status == ComplianceAssessment.Status.PLANNED:
+                    audit.status = ComplianceAssessment.Status.IN_PROGRESS
+                    audit.save(update_fields=["status"])
+
+            # For a third party the assessment is the object on screen — the campaign
+            # lists those, not the questionnaires behind them — so it has to move too.
+            from tprm.models import EntityAssessment
+
+            EntityAssessment.objects.filter(
+                compliance_assessment__in=audits,
+                status=ComplianceAssessment.Status.PLANNED,
+            ).update(status=ComplianceAssessment.Status.IN_PROGRESS)
+
+            # `None`, not just DRAFT: the column is nullable and campaigns created
+            # before it had a default carry no status at all.
+            if campaign.status in (None, "", Campaign.Status.DRAFT):
+                campaign.status = Campaign.Status.IN_PROGRESS
+                campaign.save(update_fields=["status"])
+
+        if settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE:
+            from core.tasks import notify_campaign_assignees
+
+            transaction.on_commit(lambda: notify_campaign_assignees(str(campaign.id)))
+            warning = []
+        else:
+            warning = ["noMailerConfigured"]
+
+        return Response(
+            {
+                "audits": len(audits),
+                "started": started,
+                "unassigned": unassigned,
+                "warning": warning,
+            }
+        )
+
     @action(detail=True, name="Get campaign dashboard")
     def dashboard(self, request, pk):
         """Series and counts the campaign widgets need, in one round trip.
@@ -10893,7 +10984,7 @@ class CampaignViewSet(BaseModelViewSet):
     @staticmethod
     def _campaign_assignments(audit_ids):
         if not audit_ids:
-            return {"per_status": {}, "flagged": 0}
+            return {"per_status": {}, "flagged": 0, "unassigned": 0}
         per_status = {
             row["status"]: row["count"]
             for row in RequirementAssignment.objects.filter(
@@ -10906,7 +10997,14 @@ class CampaignViewSet(BaseModelViewSet):
             compliance_assessment_id__in=audit_ids,
             review_state=RequirementAssessment.ReviewState.CHANGES_REQUESTED,
         ).count()
-        return {"per_status": per_status, "flagged": flagged}
+        # Audits nobody holds. Surfaced so the page can keep offering "start" as the
+        # way to wire them once the missing representative or assignee is added.
+        unassigned = (
+            ComplianceAssessment.objects.filter(id__in=audit_ids)
+            .filter(requirement_assignments__isnull=True)
+            .count()
+        )
+        return {"per_status": per_status, "flagged": flagged, "unassigned": unassigned}
 
     @action(detail=True, name="Get campaign metrics")
     def metrics(self, request, pk):
@@ -10943,9 +11041,12 @@ class CampaignViewSet(BaseModelViewSet):
                 self._launch_internal(campaign, frameworks)
 
     def _launch_internal(self, campaign, frameworks):
-        from core.utils import build_initial_field_visibility
+        from core.utils import assign_audit_to, build_initial_field_visibility
 
         for perimeter in campaign.perimeters.all():
+            # The perimeter says who answers for it; the campaign just hands them the
+            # work. Assignments are created in DRAFT — starting the campaign sends.
+            assignees = list(perimeter.default_assignee.all())
             for framework in frameworks:
                 compliance_assessment = ComplianceAssessment.objects.create(
                     name=f"{campaign.name} - {perimeter.name} - {framework.name}",
@@ -10953,12 +11054,16 @@ class CampaignViewSet(BaseModelViewSet):
                     perimeter=perimeter,
                     framework=framework,
                     folder=perimeter.folder,
+                    due_date=campaign.due_date,
                     selected_implementation_groups=self._campaign_implementation_groups(
                         campaign, framework
                     ),
                     field_visibility=build_initial_field_visibility(framework),
                 )
                 compliance_assessment.create_requirement_assessments()
+                if assignees:
+                    compliance_assessment.authors.set(assignees)
+                    assign_audit_to(compliance_assessment, assignees)
 
     def _launch_third_party(self, campaign, frameworks):
         from tprm.models import EntityAssessment
@@ -12060,7 +12165,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         actually started. Delivery failures are reported, never a reason to withhold
         the work.
         """
+        from core.utils import ensure_audit_assignment
+
         instance = self.get_object()
+        # Representatives added after the assessment was created are otherwise
+        # unreachable: nothing else wires an existing audit. Same helper the campaign
+        # start uses, and it only ever fills a gap.
+        ensure_audit_assignment(instance)
+
+        if not instance.requirement_assignments.exists():
+            return Response(
+                {"started": 0, "warning": ["noAssigneeToNotify"]},
+                status=status.HTTP_200_OK,
+            )
 
         started = 0
         for assignment in instance.requirement_assignments.filter(
@@ -12079,38 +12196,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         if not (settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE):
             return Response({"started": started, "warning": ["noMailerConfigured"]})
 
-        failed = []
-        for author in instance.authors.all():
-            try:
-                specific = author.specific
-                if not hasattr(specific, "mailing"):
-                    logger.warning(
-                        "Actor has no mailing method, skipping email",
-                        actor=author,
-                        actor_type=type(specific).__name__,
-                    )
-                    continue
-                assignments = list(
-                    instance.requirement_assignments.filter(actor=author)
-                )
-                if not assignments:
-                    logger.warning(
-                        "Actor has no assignment on this audit, skipping email",
-                        actor=author,
-                    )
-                    continue
-                for assignment in assignments:
-                    specific.mailing(
-                        email_template_name="tprm/third_party_email.html",
-                        subject=_(
-                            "CISO Assistant: A questionnaire has been assigned to you"
-                        ),
-                        object="auditee-assessments",
-                        object_id=assignment.id,
-                    )
-            except Exception as e:
-                logger.error("Failed to send email", actor=author, error=e)
-                failed.append(str(author))
+        from core.tasks import notify_audit_assignees
+
+        failed = notify_audit_assignees(instance)
 
         if failed:
             return Response(

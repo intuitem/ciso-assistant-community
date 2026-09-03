@@ -5934,7 +5934,7 @@
 	"evidenceCoverageHint": "directe ou via les mesures associées",
 	"bothEvidence": "Directes et indirectes",
 	"thirdParties": "Tiers",
-	"startCampaign": "Lancer une campagne",
+	"startCampaign": "Lancer la campagne",
 	"internalCampaign": "Campagne interne",
 	"internalCampaignDescription": "Évaluer vos propres domaines au regard d'un ou plusieurs référentiels.",
 	"thirdPartyCampaign": "Campagne tiers",
@@ -5950,5 +5950,11 @@
 	"userLanguageHelpText": "Langue de l'interface de cet utilisateur et des courriels qu'il reçoit.",
 	"representativeLanguageHelpText": "Langue de l'interface du compte et de l'invitation au questionnaire.",
 	"campaignCompletionHelpText": "Avancement moyen des cibles de la campagne. Chaque cible compte autant, quelle que soit sa taille.",
-	"changeConclusion": "Modifier la conclusion"
+	"changeConclusion": "Modifier la conclusion",
+	"newCampaign": "Nouvelle campagne",
+	"sureToStartCampaign": "Lancer « {campaign} » ? Toutes les personnes affectées seront prévenues que leur questionnaire les attend.",
+	"campaignStarted": "Campagne lancée : {count} affectation(s) notifiée(s).",
+	"campaignStartedWithUnassigned": "Campagne lancée : {count} affectation(s) notifiée(s), mais {missing} cible(s) n'ont personne d'affecté.",
+	"campaignHasNoAudits": "Cette campagne n'a aucune évaluation à lancer.",
+	"noAssigneeToNotify": "Personne n'est affecté à ce questionnaire — ajoutez un représentant au tiers ou à cette évaluation, puis renvoyez."
 }
