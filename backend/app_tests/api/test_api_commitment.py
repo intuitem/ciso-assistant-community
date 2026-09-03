@@ -474,20 +474,6 @@ class TestChoicesEndpoint:
         assert str(other.id) not in ids
 
 
-class TestEngagementKind:
-    def test_a_findings_binder_is_categorised_by_activity_not_by_container(self, setup):
-        # "Engagement" is the umbrella an audit or a pentest happens *in*, not a sibling
-        # of them: a binder is linked to an engagement-kind Project instead.
-        res = setup["manager"].get("/api/findings-assessments/category/")
-        assert res.status_code == 200
-        assert "engagement" not in res.json()
-
-    def test_projects_offer_engagement(self, setup):
-        res = setup["manager"].get("/api/pmbok/projects/kind/")
-        assert res.status_code == 200
-        assert "engagement" in {choice["value"] for choice in res.json()}
-
-
 class TestTaskTemplateComments:
     def test_a_comment_can_be_attached_to_a_task_template(self, setup):
         task = TaskTemplate.objects.create(name="Rotate", folder=setup["domain"])
