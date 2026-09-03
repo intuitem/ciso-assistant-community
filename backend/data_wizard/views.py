@@ -6170,6 +6170,16 @@ class LoadFileView(APIView):
             excel_file.seek(0)
             arm_data = process_arm_file(excel_file.read())
 
+            missing_sheets = arm_data.get("missing_sheets", [])
+            if missing_sheets:
+                results["warnings"] = [
+                    {
+                        "sheet": key,
+                        "warning": "Sheet not found in the ARM file, related data was not imported",
+                    }
+                    for key in missing_sheets
+                ]
+
             # Generate study name
             study_name = resolve_container_name(request, "EBIOS_RM_Study")
 
