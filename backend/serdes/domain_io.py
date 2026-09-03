@@ -744,7 +744,17 @@ def create_batch(
             if has_save_override and not is_requirement_assessment:
                 created_objects = []
                 for object_creation_data in objects_creation_data:
-                    obj_created = model.objects.create(**object_creation_data["fields"])
+                    fields = object_creation_data["fields"]
+                    try:
+                        obj_created = model.objects.create(**fields)
+                    except ValidationError as e:
+                        # Dedup name clashes with a sibling created earlier in
+                        # this batch (flattened sub-folders), unseen pre-create.
+                        for field in getattr(e, "error_dict", {}):
+                            current = fields.get(field)
+                            if isinstance(current, str):
+                                fields[field] = f"{current} {uuid.uuid4()}"
+                        obj_created = model.objects.create(**fields)
                     created_objects.append(obj_created)
             else:
                 objects_to_create = [
