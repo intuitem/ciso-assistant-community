@@ -333,7 +333,7 @@ export const navData = {
 				},
 				{
 					name: 'followUp',
-					fa_icon: 'fa-solid fa-clipboard-list',
+					fa_icon: 'fas fa-th-list',
 					href: '/findings-assessments'
 				}
 			]

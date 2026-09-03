@@ -92,6 +92,7 @@
 		cacheLock={cacheLocks['entities']}
 		bind:cachedValue={formDataCache['entities']}
 		label={m.thirdParties()}
+		disabled={!!initialData.entities?.length}
 	/>
 {:else}
 	<AutocompleteSelect
@@ -103,6 +104,7 @@
 		cacheLock={cacheLocks['perimeters']}
 		bind:cachedValue={formDataCache['perimeters']}
 		label={m.perimeters()}
+		disabled={!!initialData.perimeters?.length}
 	/>
 {/if}
 <TextField
