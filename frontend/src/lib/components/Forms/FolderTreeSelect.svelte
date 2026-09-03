@@ -172,6 +172,12 @@
 				selectedName = result.name;
 				selectedPath = result.path;
 				resolvedFor = String(v);
+			} else if (selectedName || resolvedFor) {
+				// The value moved to a folder outside the tree (an enclave, say): showing
+				// the previous name would misreport what the hidden input holds.
+				selectedName = '';
+				selectedPath = [];
+				resolvedFor = null;
 			}
 		} else if (!v) {
 			selectedName = '';

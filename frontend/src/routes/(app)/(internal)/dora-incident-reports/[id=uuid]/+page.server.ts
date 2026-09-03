@@ -129,13 +129,15 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 
 export const actions: Actions = {
 	update: async (event) => {
+		if (!event.locals.featureflags?.dora) redirect(302, '/');
 		return defaultWriteFormAction({
 			event,
 			urlModel: URL_MODEL,
 			action: 'edit'
 		});
 	},
-	markSubmitted: async ({ fetch, params }) => {
+	markSubmitted: async ({ fetch, params, locals }) => {
+		if (!locals.featureflags?.dora) redirect(302, '/');
 		const endpoint = `${BASE_API_URL}/${ENDPOINT}/${params.id}/`;
 		const res = await fetch(endpoint, {
 			method: 'PATCH',

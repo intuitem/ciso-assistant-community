@@ -405,6 +405,7 @@ export const navData = {
 				},
 				{
 					name: 'campaigns',
+					key: 'campaignsInternal',
 					fa_icon: 'fa-solid fa-scale-balanced',
 					href: '/campaigns?kind=internal'
 				},
@@ -481,6 +482,7 @@ export const navData = {
 				},
 				{
 					name: 'campaigns',
+					key: 'campaignsThirdParty',
 					fa_icon: 'fa-solid fa-scale-balanced',
 					href: '/campaigns?kind=third_party'
 				}

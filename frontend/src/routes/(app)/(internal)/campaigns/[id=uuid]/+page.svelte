@@ -168,7 +168,7 @@
 								</Tooltip.Trigger>
 								<Tooltip.Positioner class="z-50!">
 									<Tooltip.Content
-										class="card bg-surface-950-50 text-white p-3 max-w-xs shadow-xl border border-surface-700-300"
+										class="card bg-surface-950-50 text-surface-50-950 p-3 max-w-xs shadow-xl border border-surface-700-300"
 									>
 										<p class="text-sm">{m.campaignCompletionHelpText()}</p>
 									</Tooltip.Content>

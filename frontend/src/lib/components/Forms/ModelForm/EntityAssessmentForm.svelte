@@ -47,6 +47,8 @@
 		if (!entityId || initialData.folder) return;
 		try {
 			const entity = await fetch(`/entities/${entityId}`).then((res) => res.json());
+			// A slower earlier response must not apply another entity's folder.
+			if (entityId !== selectedEntity) return;
 			const folderId = entity?.folder?.id ?? entity?.folder;
 			if (folderId) form.form.update((data) => ({ ...data, folder: folderId }), { taint: false });
 		} catch (e) {

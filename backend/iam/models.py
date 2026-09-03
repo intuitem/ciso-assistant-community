@@ -741,7 +741,8 @@ def default_language() -> str:
         if general and isinstance(general.value, dict):
             candidate = general.value.get("default_language", "en")
             return candidate if is_supported_language(candidate) else "en"
-    except Exception:
+    except ImportError, OperationalError, ProgrammingError:
+        # Called during startup and from migrations, before the table exists.
         pass
     return "en"
 

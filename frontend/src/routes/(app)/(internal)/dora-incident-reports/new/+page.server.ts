@@ -224,6 +224,7 @@ export const load: PageServerLoad = async ({ url, fetch, locals }) => {
 
 export const actions: Actions = {
 	create: async (event) => {
+		if (!event.locals.featureflags?.dora) redirect(302, '/');
 		return defaultWriteFormAction({
 			event,
 			urlModel: URL_MODEL,

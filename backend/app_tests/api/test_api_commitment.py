@@ -654,18 +654,12 @@ class TestRegister:
     def test_the_register_is_read_only(self, setup):
         drive_to(setup, "committed")
         entry = Commitment.objects.first()
-        assert (
-            setup["manager"].post("/api/commitments/", {}, format="json").status_code
-            == 405
+        created = setup["manager"].post("/api/commitments/", {}, format="json")
+        assert created.status_code == 405
+        patched = setup["manager"].patch(
+            f"/api/commitments/{entry.id}/", {"state": "fulfilled"}, format="json"
         )
-        assert (
-            setup["manager"]
-            .patch(
-                f"/api/commitments/{entry.id}/", {"state": "fulfilled"}, format="json"
-            )
-            .status_code
-            == 405
-        )
+        assert patched.status_code == 405
         assert (
             setup["manager"].delete(f"/api/commitments/{entry.id}/").status_code == 405
         )

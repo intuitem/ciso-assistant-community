@@ -15,7 +15,8 @@ const forward = async (res: Response) => {
 		error(res.status as NumericRange<400, 599>, await res.json());
 	}
 	return new Response(JSON.stringify(await res.json()), {
-		headers: { 'Content-Type': 'application/json' }
+		// Fetched straight from the browser: logout clears cookies, not the cache.
+		headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
 	});
 };
 
