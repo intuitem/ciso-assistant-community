@@ -105,6 +105,7 @@
 		forcePreventDelete?: boolean;
 		forcePreventEdit?: boolean;
 		expectedCount?: number;
+		loading?: boolean;
 		onFilterChange?: (filters: Record<string, any>) => void;
 		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, typeof _form, () => void]>;
 		optButton?: import('svelte').Snippet;
@@ -171,6 +172,7 @@
 		forcePreventDelete = false,
 		forcePreventEdit = false,
 		expectedCount = undefined,
+		loading = false,
 		onFilterChange = () => {},
 		quickFilters,
 		optButton,
@@ -358,8 +360,13 @@
 
 	const toastStore = getToastStore();
 
-	handler.onChange((state: State) =>
-		loadTableData({
+	// Rows arrive from the API, so on a slow connection an empty table would
+	// otherwise be indistinguishable from a table with no data loaded.
+	let isFetching = $state(false);
+
+	handler.onChange((state: State) => {
+		isFetching = true;
+		return loadTableData({
 			state,
 			URLModel,
 			endpoint: baseEndpoint,
@@ -383,8 +390,8 @@
 				console.error(error);
 				toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
 			}
-		})
-	);
+		}).finally(() => (isFetching = false));
+	});
 
 	onMount(() => {
 		if (orderBy) {
@@ -1213,6 +1220,28 @@
 								{/if}
 							</tr>
 						{/each}
+						{#if (loading || isFetching) && $rows.length === 0}
+							{#each Array(5) as _}
+								<tr class="even:bg-surface-100-900" data-testid="row-skeleton">
+									{#if hasBatchActions}
+										<td class="w-10"></td>
+									{/if}
+									{#each renderColumnKeys as key (key)}
+										<td>
+											<div class={regionCell}>
+												<div class="space-y-2 py-2 animate-pulse">
+													<div class="h-4 rounded bg-surface-200-800"></div>
+													<div class="h-4 w-3/5 rounded bg-surface-200-800"></div>
+												</div>
+											</div>
+										</td>
+									{/each}
+									{#if displayActions}
+										<td class="text-end {regionCell}"></td>
+									{/if}
+								</tr>
+							{/each}
+						{/if}
 					</tbody>
 				{/snippet}
 			</ContextMenu.Trigger>
