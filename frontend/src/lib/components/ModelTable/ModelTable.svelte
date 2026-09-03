@@ -1115,7 +1115,7 @@
 														>
 															{safeTranslate(value.name ?? value.str) ?? '-'}
 														</p>
-													{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'end_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
+													{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'end_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on' || key === 'last_assessment_date')}
 														{formatDateOrDateTime(value, getLocale())}
 													{:else if [true, false].includes(value)}
 														{@const bd = booleanDisplay(value, key, URLModel)}
@@ -1129,6 +1129,14 @@
 																? safeTranslate('percentageDisplay', { number: value })
 																: '--'}</span
 														>
+													{:else if key === 'last_assessment_status'}
+														<!-- A null status on an existing round means "status not set": only the
+														absence of a round is "never assessed". -->
+														{#if !meta?.last_assessment_date}
+															<span class="text-surface-500">{m.neverAssessed()}</span>
+														{:else}
+															{safeTranslate(value ?? '-')}
+														{/if}
 													{:else if key === 'translations'}
 														{#if Object.keys(value).length > 0}
 															<div class="flex flex-col gap-2">

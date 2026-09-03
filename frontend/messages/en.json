@@ -6199,5 +6199,9 @@
 	"campaignStarted": "Campaign started: {count} assignment(s) notified.",
 	"campaignStartedWithUnassigned": "Campaign started: {count} assignment(s) notified, but {missing} target(s) have nobody assigned.",
 	"campaignHasNoAudits": "This campaign has no assessments to start.",
-	"noAssigneeToNotify": "Nobody is assigned to this questionnaire yet — add a representative to the third party or to this assessment, then send again."
+	"noAssigneeToNotify": "Nobody is assigned to this questionnaire yet — add a representative to the third party or to this assessment, then send again.",
+	"lastAssessment": "Last assessment",
+	"lastAssessmentStatus": "Last assessment status",
+	"lastAssessmentDate": "Last assessment date",
+	"neverAssessed": "Never assessed"
 }

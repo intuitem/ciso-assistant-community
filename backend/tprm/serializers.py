@@ -50,6 +50,9 @@ class EntityReadSerializer(BaseModelSerializer):
     contracts = FieldsRelatedField(many=True)
     legal_identifiers = serializers.SerializerMethodField()
     default_criticality = serializers.ReadOnlyField()
+    # Annotated on the queryset, not stored: see EntityViewSet.get_queryset.
+    last_assessment_status = serializers.ReadOnlyField()
+    last_assessment_date = serializers.ReadOnlyField()
     filtering_labels = FieldsRelatedField(many=True)
     subcontracts_count = serializers.SerializerMethodField()
     subcontracts_usage = serializers.SerializerMethodField()

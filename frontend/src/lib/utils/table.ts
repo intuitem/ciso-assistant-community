@@ -1069,6 +1069,18 @@ export const ENTITY_RELATIONSHIP_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const LAST_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'entities/last_assessment_status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'lastAssessment',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const ACCREDITATION_AUTHORITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2257,6 +2269,7 @@ export const listViewFields = {
 			'domain',
 			'parentEntity',
 			'relationship',
+			'lastAssessment',
 			'defaultCriticality'
 		],
 		body: [
@@ -2266,16 +2279,24 @@ export const listViewFields = {
 			'folder',
 			'parent_entity',
 			'relationship',
+			'last_assessment_status',
 			'default_criticality'
 		],
 		optionalFields: {
-			head: ['filteringLabels', 'referenceLink', 'createdAt', 'updatedAt'],
-			body: ['filtering_labels', 'reference_link', 'created_at', 'updated_at']
+			head: ['lastAssessmentDate', 'filteringLabels', 'referenceLink', 'createdAt', 'updatedAt'],
+			body: [
+				'last_assessment_date',
+				'filtering_labels',
+				'reference_link',
+				'created_at',
+				'updated_at'
+			]
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			parent_entity: PARENT_ENTITY_FILTER,
 			relationship: ENTITY_RELATIONSHIP_FILTER,
+			last_assessment_status: LAST_ASSESSMENT_STATUS_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},

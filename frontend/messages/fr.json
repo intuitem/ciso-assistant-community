@@ -5956,5 +5956,9 @@
 	"campaignStarted": "Campagne lancée : {count} affectation(s) notifiée(s).",
 	"campaignStartedWithUnassigned": "Campagne lancée : {count} affectation(s) notifiée(s), mais {missing} cible(s) n'ont personne d'affecté.",
 	"campaignHasNoAudits": "Cette campagne n'a aucune évaluation à lancer.",
-	"noAssigneeToNotify": "Personne n'est affecté à ce questionnaire — ajoutez un représentant au tiers ou à cette évaluation, puis renvoyez."
+	"noAssigneeToNotify": "Personne n'est affecté à ce questionnaire — ajoutez un représentant au tiers ou à cette évaluation, puis renvoyez.",
+	"lastAssessment": "Dernière évaluation",
+	"lastAssessmentStatus": "Statut de la dernière évaluation",
+	"lastAssessmentDate": "Date de la dernière évaluation",
+	"neverAssessed": "Jamais évaluée"
 }

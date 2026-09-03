@@ -1,8 +1,10 @@
 import io
 import re
 
+import django_filters as df
 from django.db import transaction
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 from django.db.models import ProtectedError
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
@@ -16,6 +18,7 @@ from iam.models import Folder, Permission, RoleAssignment
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
+    GenericFilterSet,
     escape_excel_formula,
 )
 from core.models import (
@@ -26,7 +29,7 @@ from core.models import (
     Terminology,
 )
 from core.utils import compute_respondent_progress
-from django.db.models import Case, IntegerField, OuterRef, Subquery, Value, When
+from django.db.models import Case, IntegerField, OuterRef, Q, Subquery, Value, When
 from tprm.models import (
     Entity,
     EntityScore,
@@ -99,6 +102,58 @@ class BaseModelViewSet(AbstractBaseModelViewSet):
     serializers_module = "tprm.serializers"
 
 
+NEVER_ASSESSED = "never"
+
+ENTITY_FILTERSET_FIELDS = [
+    "name",
+    "ref_id",
+    "is_active",
+    "folder",
+    "parent_entity",
+    "relationship",
+    "relationship__name",
+    "contracts",
+    "country",
+    "currency",
+    "dora_entity_type",
+    "dora_entity_hierarchy",
+    "dora_competent_authority",
+    "filtering_labels",
+    "default_dependency",
+    "default_penetration",
+    "default_maturity",
+    "default_trust",
+]
+
+
+class EntityFilterSet(GenericFilterSet):
+    """`last_assessment_status` is annotated rather than stored, so the FilterSet
+    the base viewset builds from `filterset_fields` cannot see it."""
+
+    last_assessment_status = df.MultipleChoiceFilter(
+        choices=lambda: (
+            list(EntityAssessment.Status.choices)
+            + [(NEVER_ASSESSED, _("Never assessed"))]
+        ),
+        method="filter_last_assessment_status",
+    )
+
+    class Meta:
+        model = Entity
+        fields = ENTITY_FILTERSET_FIELDS
+
+    def filter_last_assessment_status(self, queryset, name, value):
+        if not value:
+            return queryset
+        statuses = [v for v in value if v != NEVER_ASSESSED]
+        condition = Q(last_assessment_status__in=statuses) if statuses else Q()
+        if NEVER_ASSESSED in value:
+            # On the date, not the status: `Assessment.status` is nullable, so a
+            # null status means "assessed, status not set", not "never assessed".
+            condition |= Q(last_assessment_date__isnull=True)
+        return queryset.filter(condition)
+
+
 # Create your views here.
 class EntityViewSet(ExportMixin, BaseModelViewSet):
     """
@@ -153,27 +208,18 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         "select_related": ["folder", "parent_entity"],
         "wrap_columns": ["name", "description", "mission"],
     }
-    filterset_fields = [
-        "name",
-        "ref_id",
-        "is_active",
-        "folder",
-        "parent_entity",
-        "relationship",
-        "relationship__name",
-        "contracts",
-        "country",
-        "currency",
-        "dora_entity_type",
-        "dora_entity_hierarchy",
-        "dora_competent_authority",
-        "filtering_labels",
-        "default_dependency",
-        "default_penetration",
-        "default_maturity",
-        "default_trust",
-    ]
+    filterset_class = EntityFilterSet
     search_fields = ["name", "description", "legal_identifiers_text"]
+    # The column shows the status; chronology is what makes it sortable.
+    ordering_remap = {"last_assessment_status": "last_assessment_date"}
+    ordering_nulls_last = ("last_assessment_date",)
+
+    @action(detail=False, name="Get last assessment status choices")
+    def last_assessment_status(self, request):
+        return Response(
+            dict(EntityAssessment.Status.choices)
+            | {NEVER_ASSESSED: _("Never assessed")}
+        )
 
     def destroy(self, request, *args, **kwargs):
         """
@@ -256,6 +302,19 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         # Works on both SQLite (JSON stored as text) and PostgreSQL (jsonb → text cast).
         qs = qs.annotate(
             legal_identifiers_text=Cast("legal_identifiers", output_field=TextField()),
+        )
+
+        # The register's live signal: where the third party's most recent round stands.
+        # Correlated subqueries, so the cost does not grow with the number of vendors —
+        # a per-row lookup here would be a query storm on a long register.
+        # Newest by creation: a revision opened later supersedes its predecessor, and
+        # editing an old assessment must not float it back to the top.
+        latest_assessment = EntityAssessment.objects.filter(
+            entity=OuterRef("pk")
+        ).order_by("-created_at")
+        qs = qs.annotate(
+            last_assessment_status=Subquery(latest_assessment.values("status")[:1]),
+            last_assessment_date=Subquery(latest_assessment.values("created_at")[:1]),
         )
 
         # Annotate with default_criticality calculation
@@ -1283,11 +1342,10 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 perimeter=source.perimeter,
                 entity=source.entity,
                 version=request.data.get("version") or source.version,
-                criticality=source.criticality,
-                penetration=source.penetration,
-                dependency=source.dependency,
-                maturity=source.maturity,
-                trust=source.trust,
+                # Criticality and its inputs are deliberately not carried over: they
+                # are typed by hand and nothing recomputes them, so a revision would
+                # inherit a judgement made for the previous round and show it as
+                # current. A new round rates the third party again.
                 reference_link=source.reference_link,
                 due_date=request.data.get("due_date") or None,
             )

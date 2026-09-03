@@ -548,10 +548,12 @@ class ExportMixin:
 
     def _get_export_queryset(self):
         """Get filtered queryset with permissions applied."""
-        viewable_ids = RoleAssignment.get_viewable_object_ids(
-            self.request.user, self.model
-        )
-        queryset = self.model.objects.filter(id__in=viewable_ids)
+        # The list view's own queryset, annotations included: the export is handed the
+        # table's whole query string, and filtering or searching on a computed column
+        # errors out on a queryset that was rebuilt from the bare manager. The list
+        # view's prefetches are dropped — export_config declares the ones the rows
+        # need, and iterator() rejects a prefetched queryset.
+        queryset = self.get_queryset().prefetch_related(None)
 
         if self.export_config:
             if self.export_config.get("select_related"):
@@ -898,15 +900,24 @@ class SmartOrderingFilter(filters.OrderingFilter):
     def filter_queryset(self, request, queryset, view):
         ordering = self.get_ordering(request, queryset, view)
         if ordering:
-            return queryset.order_by(*[self._as_term(f) for f in ordering])
+            nulls_last = set(getattr(view, "ordering_nulls_last", None) or ())
+            return queryset.order_by(*[self._as_term(f, nulls_last) for f in ordering])
         return queryset
 
-    def _as_term(self, term):
+    def _as_term(self, term, nulls_last=frozenset()):
         descending = term.startswith("-")
         field = term[1:] if descending else term
         if field.split("__")[-1] in self.case_insensitive_suffixes:
             expr = Lower(field)
             return expr.desc() if descending else expr.asc()
+        # Postgres sorts NULLs first on DESC and last on ASC while SQLite does the
+        # opposite: a column that is mostly empty needs the placement pinned, or the
+        # same click gives a different page per backend.
+        if field in nulls_last:
+            expr = F(field)
+            return (
+                expr.desc(nulls_last=True) if descending else expr.asc(nulls_last=True)
+            )
         return term
 
 
