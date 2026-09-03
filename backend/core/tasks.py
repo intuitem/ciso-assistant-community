@@ -1682,12 +1682,7 @@ def send_assignment_reviewed_notification(
 
 
 def notify_audit_assignees(audit) -> list:
-    """Email everyone holding an assignment on *audit*. Returns the actors that failed.
-
-    Split out of the mailing action so a campaign start and a single Send take the
-    same path. Notification only: the assignments are already started by the time
-    this runs, so a dead mail server delays word of the work, never the work.
-    """
+    """Email everyone holding an assignment on *audit*. Returns the actors that failed."""
     from django.utils.translation import gettext_lazy as _
 
     failed = []
@@ -1725,13 +1720,7 @@ def notify_audit_assignees(audit) -> list:
 
 @task()
 def notify_campaign_assignees(campaign_id):
-    """Send a campaign's notifications off the request thread.
-
-    A fan-out is tens of audits, each its own SMTP round trip: doing that inline
-    would hold the request open long enough to time out, and leave no record of how
-    far it got. The state transitions happen synchronously in the action; only the
-    mail is deferred.
-    """
+    """Send a campaign's notifications off the request thread: a fan-out is one SMTP round trip per audit."""
     audits = ComplianceAssessment.objects.filter(campaign_id=campaign_id)
     notified = failed = 0
     for audit in audits:

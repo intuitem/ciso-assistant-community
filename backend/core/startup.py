@@ -1894,11 +1894,9 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "view_folder",
     "view_requirementassignment",
     "transition_requirementassignment",
-    # Tasks are the third party's own to-do list on the questionnaire, so they own
-    # them the way they own their evidences — bounded to the enclave by the role
-    # assignment, not by the permission. `transition_commitment` is separate on
-    # purpose: promising a date is governed by the commitment sides, not by write
-    # access to the task.
+    # The third party owns their tasks like their evidences, bounded to the enclave by
+    # the role assignment. `transition_commitment` is deliberately separate: promising
+    # a date is governed by the commitment sides, not by write access.
     "view_tasktemplate",
     "add_tasktemplate",
     "change_tasktemplate",
@@ -1980,10 +1978,8 @@ TECHNICAL_TESTER_PERMISSIONS_LIST = [
 def normalize_third_party_workspaces():
     """One workspace per third party per domain, merging the per-assessment ones.
 
-    Here rather than in a migration: it reuses the service the API and the support
-    command call, so it needs real models — which are only safe to read once every
-    migration has run. Idempotent, so running it on each migrate is a no-op after the
-    first pass.
+    Here rather than in a migration: it reuses the service the API calls, so it needs
+    real models, safe to read only once every migration has run. Idempotent.
     """
     from tprm.services import normalize_entity_workspaces
 

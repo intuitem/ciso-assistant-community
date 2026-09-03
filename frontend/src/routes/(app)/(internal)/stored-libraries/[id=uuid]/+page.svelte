@@ -37,9 +37,8 @@
 		[key: string]: any;
 	}
 
-	// Derived, not plain consts: previewing another library is a same-route
-	// navigation, so the component is reused and a captured value would keep
-	// showing the previous library's content.
+	// Derived, not plain consts: previewing another library reuses the component, so
+	// a captured value would show the previous one.
 	const libraryObjects: LibraryObjects = $derived(data?.library?.objects ?? {});
 	const riskMatrices = $derived(libraryObjects['risk_matrix'] ?? []);
 	const referenceControls = $derived(libraryObjects['reference_controls'] ?? []);

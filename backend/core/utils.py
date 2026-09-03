@@ -1604,11 +1604,9 @@ DEFAULT_VISIBILITY = {
 }
 
 
-# What a third party should see of an audit addressed to them. Their side of the
-# exchange is answers, alignment, the tasks they owe, and the evidence and remarks
-# around them; the auditor's verdict and the internal controls are not theirs to read.
-# `score`/`documentation_score` stay off for both, as everywhere else — a framework
-# that scores turns them on itself.
+# A third party sees their side of the exchange: answers, alignment, the tasks they
+# owe and the evidence around them — not the auditor's verdict or internal controls.
+# Scores stay off for both; a framework that scores turns them on itself.
 THIRD_PARTY_VISIBILITY = {
     "answers": EVERYONE_EDIT,
     "respondent_alignment": EVERYONE_EDIT,
@@ -1698,18 +1696,8 @@ def respondent_progress_counts(
 ) -> tuple[int, int, int]:
     """How much of the questionnaire the respondent has filled in.
 
-    Returns (units, answered units, requirements completed).
-
-    Deliberately not `ComplianceAssessment.progress`, which measures the auditor's
-    review against the audit-level progress mode — fields a respondent may not even
-    be able to see. Per requirement: the share of answered VISIBLE questions
-    (`get_visible_questions_counts` resolves `depends_on`, so conditional
-    questionnaires are correct); a requirement with no questions counts as one
-    virtual unit, answered through the respondent's alignment answer when that field
-    is in use, else through the result.
-
-    Single implementation shared by the auditee dashboard, the assessment page and
-    the entity-assessment list, so the same questionnaire cannot report two numbers.
+    Returns (units, answered units, requirements completed). Not the auditor's
+    `ComplianceAssessment.progress`.
     """
     from core.models import RequirementAssessment
 
@@ -1755,12 +1743,7 @@ def compute_respondent_progress(compliance_assessment, requirement_assessments) 
 
 
 def build_third_party_field_visibility(framework):
-    """The map a questionnaire sent to a third party starts from.
-
-    The framework still wins wherever it says something, so a framework that
-    configures scoring or hides a field keeps that; everything it leaves unsaid
-    follows the third-party profile rather than the internal-audit defaults.
-    """
+    """The map a questionnaire sent to a third party starts from; the framework still wins."""
     return build_initial_field_visibility(framework, base=THIRD_PARTY_VISIBILITY)
 
 
@@ -1807,10 +1790,7 @@ def bulk_update_with_log(model, rows, fields, batch_size=500):
 def assign_audit_to(audit, actors):
     """Point one assignment covering the whole audit at *actors*.
 
-    The single place an audit's assignment is created, so a questionnaire sent to a
-    third party and an audit handed to an internal assignee are the same object in
-    the same state. Created in DRAFT: it is the wiring, not the send — starting the
-    campaign is what makes it live.
+    Created in DRAFT: it is the wiring, not the send.
     """
     from core.models import RequirementAssignment
 
@@ -1834,13 +1814,7 @@ def assign_audit_to(audit, actors):
 def ensure_audit_assignment(audit):
     """Wire an audit to whoever answers for it, when nothing is wired yet.
 
-    Launch can only use what exists at the time: a third party with no representative,
-    or a perimeter with no default assignee, produces a questionnaire nobody holds.
-    Fixing that afterwards has to be able to reach the assessment, so starting a
-    campaign re-checks the source rather than assuming launch got it right.
-
-    Only ever fills a gap. An assignment that already exists is left alone, including
-    its actors — pressing start must not quietly drop someone mid-flight.
+    Only ever fills a gap: an existing assignment is left alone, its actors included.
     """
     from tprm.models import EntityAssessment
     from tprm.services import default_representatives_from_entity

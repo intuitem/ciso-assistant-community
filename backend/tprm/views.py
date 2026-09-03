@@ -127,8 +127,7 @@ ENTITY_FILTERSET_FIELDS = [
 
 
 class EntityFilterSet(GenericFilterSet):
-    """`last_assessment_status` is annotated rather than stored, so the FilterSet
-    the base viewset builds from `filterset_fields` cannot see it."""
+    """`last_assessment_status` is annotated, so the auto-built FilterSet misses it."""
 
     last_assessment_status = df.MultipleChoiceFilter(
         choices=lambda: (
@@ -148,8 +147,7 @@ class EntityFilterSet(GenericFilterSet):
         statuses = [v for v in value if v != NEVER_ASSESSED]
         condition = Q(last_assessment_status__in=statuses) if statuses else Q()
         if NEVER_ASSESSED in value:
-            # On the date, not the status: `Assessment.status` is nullable, so a
-            # null status means "assessed, status not set", not "never assessed".
+            # `status` is nullable, so only a missing date means "never assessed".
             condition |= Q(last_assessment_date__isnull=True)
         return queryset.filter(condition)
 
@@ -304,11 +302,8 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             legal_identifiers_text=Cast("legal_identifiers", output_field=TextField()),
         )
 
-        # The register's live signal: where the third party's most recent round stands.
-        # Correlated subqueries, so the cost does not grow with the number of vendors —
-        # a per-row lookup here would be a query storm on a long register.
-        # Newest by creation: a revision opened later supersedes its predecessor, and
-        # editing an old assessment must not float it back to the top.
+        # Newest by creation: a revision supersedes its predecessor, and editing an
+        # old assessment must not float it back to the top.
         latest_assessment = EntityAssessment.objects.filter(
             entity=OuterRef("pk")
         ).order_by("-created_at")
@@ -1179,9 +1174,8 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         "compliance_assessment__campaign",
     ]
 
-    # `assignment_status` is a string on a related model, so ordering it raw would be
-    # alphabetical (changes_requested < closed < draft). The annotation ranks it by
-    # where it sits in the workflow instead.
+    # Ordering the raw string would be alphabetical; the annotation ranks it by
+    # workflow position.
     ordering_remap = {"assignment_status": "assignment_status_rank"}
 
     def get_queryset(self):
@@ -1207,9 +1201,10 @@ class EntityAssessmentViewSet(BaseModelViewSet):
 
     @staticmethod
     def _prefetched_requirement_assessments(audit):
-        """`get_requirement_assessments` builds its own queryset, so calling it here
-        would bypass the page-level prefetch and re-query per row. Same selection
-        rules, read off what is already in memory."""
+        """Same selection rules as `get_requirement_assessments`, read off what is in memory:
+
+        calling it would bypass the page-level prefetch and re-query per row.
+        """
         rows = [
             ra
             for ra in audit.requirement_assessments.all()
@@ -1225,12 +1220,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         ]
 
     def _get_optimized_object_data(self, queryset):
-        """Answering progress and assignment state for the whole page at once.
-
-        The progress walk touches every requirement assessment and its questions, so
-        computed per row it would be a query storm; prefetched across the page it is
-        a handful of queries regardless of page size.
-        """
+        """Answering progress and assignment state for the whole page at once: per row the walk is a query storm."""
         data = super()._get_optimized_object_data(queryset)
 
         audit_ids = {
@@ -1313,9 +1303,10 @@ class EntityAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["post"], name="Clone as a new revision")
     def clone(self, request, pk=None):
-        """Start the next round from this one: a new assessment for the same entity,
-        sharing the vendor's enclave, with a questionnaire carrying the previous
-        answers, results and evidences. The source is left untouched."""
+        """Start the next round: a new assessment for the same entity, sharing the vendor's
+
+        enclave, with a questionnaire carrying the previous answers. The source is untouched.
+        """
         source = self.get_object()
         if not RoleAssignment.is_access_allowed(
             request.user,
@@ -1342,10 +1333,8 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 perimeter=source.perimeter,
                 entity=source.entity,
                 version=request.data.get("version") or source.version,
-                # Criticality and its inputs are deliberately not carried over: they
-                # are typed by hand and nothing recomputes them, so a revision would
-                # inherit a judgement made for the previous round and show it as
-                # current. A new round rates the third party again.
+                # Criticality and its inputs are typed by hand, so a revision would
+                # show last round's judgement as current. A new round rates again.
                 reference_link=source.reference_link,
                 due_date=request.data.get("due_date") or None,
             )
@@ -1394,9 +1383,8 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         ):
             assignments_by_audit.setdefault(audit_id, []).append(str(assignment_id))
 
-        # Same page-level prefetch the list endpoint uses: the respondent walk reads
-        # every requirement assessment with its questions and answers, so resolving it
-        # per row would issue a query storm.
+        # Same page-level prefetch as the list endpoint: per-row resolution is a
+        # query storm.
         audits_by_id = {
             audit.id: audit
             for audit in ComplianceAssessment.objects.filter(id__in=list(audit_ids))
@@ -1453,9 +1441,8 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 review_assignments[0] if len(review_assignments) == 1 else None
             )
 
-            # Same respondent-facing walk as the assessment list and the auditee
-            # dashboard. `answers_progress` counted questions only, so a framework
-            # without any reported 0% however far along the third party was.
+            # Same respondent-facing walk as the list and the auditee dashboard.
+            # `answers_progress` counted questions only: a framework without any read 0%.
             completion = (
                 compute_respondent_progress(
                     audit, self._prefetched_requirement_assessments(audit)
@@ -1473,9 +1460,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
 
 
 class EntityScoreViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows entity scores to be viewed or edited.
-    """
+    """API endpoint that allows entity scores to be viewed or edited."""
 
     model = EntityScore
     filterset_fields = ["entity", "provider", "filtering_labels", "folder"]

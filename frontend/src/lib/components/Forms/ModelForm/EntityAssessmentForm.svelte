@@ -35,11 +35,8 @@
 
 	const { form: formData } = form;
 
-	// Assessing a third party almost always means sending them a questionnaire, so the
-	// audit is on by default when creating. On edit it stays off: an assessment
-	// deliberately left without one must not grow an audit just by being saved.
-	// Not `$formData.create_audit ?? ...`: the schema defaults the field to `false`,
-	// which `??` happily keeps.
+	// Creating almost always means sending a questionnaire, so the audit is on by
+	// default; on edit it stays off. `??` would keep the schema's `false`.
 	let createAudit = $state(context === 'create' ? true : ($formData.create_audit ?? false));
 	let selectedEntity = $state<string | undefined>(form.data?.entity || initialData.entity);
 

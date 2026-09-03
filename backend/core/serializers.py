@@ -2224,9 +2224,8 @@ class UserWriteSerializer(BaseModelSerializer):
         return language
 
     def to_representation(self, instance):
-        # Stays write_only so DRF never looks for a `language` attribute, but the edit
-        # form reads its initial values from here — without this the picker opens empty
-        # and the user's language looks lost.
+        # write_only so DRF never looks for a `language` attribute; the edit form
+        # still reads its initial value from here.
         data = super().to_representation(instance)
         data["language"] = instance.get_preferences().get("lang")
         return data
@@ -3543,10 +3542,8 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                     if is_field_editable_by(ca, k, "respondent")
                 }
 
-        # A relation the submitting role cannot see must not be writable by it.
-        # The RA form round-trips every schema field, so an auditor saving an audit
-        # whose tasks tab is off would otherwise post an empty list and unlink
-        # tasks attached from the task side.
+        # A relation the submitting role cannot see must not be writable by it: the
+        # form round-trips every field, so a hidden tab would post an empty list.
         if request and self.instance and "task_templates" in data:
             from core.utils import (
                 get_respondent_scoped_folder_ids,

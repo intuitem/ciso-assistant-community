@@ -2499,9 +2499,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		selectFields: [{ field: 'status' }, { field: 'category' }],
 		markdownFields: ['objectives'],
-		// Ordered deliberately: DetailView only shows the first ten rows before the
-		// "show all" toggle, so what a reader needs at a glance goes first and the
-		// bookkeeping (timestamps, version, id) sits below the fold.
+		// DetailView shows ten rows before "show all", so the bookkeeping sits below
+		// the fold.
 		detailViewFields: [
 			{ field: 'ref_id' },
 			{ field: 'name' },
@@ -2650,9 +2649,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				}
 			}
 		],
-		// Ordered deliberately: DetailView shows the first ten rows before "show all", so
-		// what identifies and triages a finding goes first, its links next, and the
-		// bookkeeping last. `path` and `is_published` are internal and stay out.
+		// DetailView shows ten rows before "show all": identity and triage first, links
+		// next, bookkeeping last. `path` and `is_published` are internal.
 		detailViewFields: [
 			{ field: 'ref_id' },
 			{ field: 'name' },

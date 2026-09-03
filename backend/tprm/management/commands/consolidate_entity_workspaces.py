@@ -1,8 +1,6 @@
 """Normalise third-party workspaces: one per entity per domain, named after it.
 
-The upgrade runs this automatically. The command is for support: a dry run to see
-what a database is about to get, or `--apply` to rerun after fixing whatever made an
-entity fail.
+For support: a dry run, or `--apply` to rerun after fixing what made an entity fail.
 """
 
 from django.core.management.base import BaseCommand

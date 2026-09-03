@@ -8,11 +8,10 @@ from iam.models import Folder, User
 
 
 def enclave_folder(entity_assessment):
-    """The vendor's workspace: one enclave per entity within a domain, reused by every
-    assessment of that entity so evidence, tasks and access carry across rounds.
+    """The vendor's workspace: one enclave per entity per domain, reused by every round.
 
-    Matched on where the entity's existing audits live rather than on the folder name,
-    so workspaces created under the old per-assessment naming are adopted as-is.
+    Matched on where the entity's existing audits live, not on the folder name, so
+    workspaces created under the old per-assessment naming are adopted as-is.
     """
     from tprm.models import EntityAssessment
 
@@ -25,9 +24,8 @@ def enclave_folder(entity_assessment):
         .exclude(pk=entity_assessment.pk)
         .values_list("compliance_assessment__folder_id", flat=True)
     )
-    # Only when it is unambiguous. Several workspaces means the entity predates this
-    # model: picking one would silently widen access, so leave them to
-    # `consolidate_entity_workspaces`.
+    # Only when unambiguous: several workspaces means the entity predates this model,
+    # so leave it to `consolidate_entity_workspaces` rather than widening access.
     if len(existing) == 1:
         return Folder.objects.get(pk=existing.pop())
 
@@ -127,9 +125,8 @@ def create_enclave_audit(
             framework=framework,
             selected_implementation_groups=implementation_groups,
             field_visibility=visibility,
-            # The questionnaire is what the third party opens, and what the reminders,
-            # the overdue lock and the activation email all read: without the dates the
-            # deadline shows on the assessment and nowhere the vendor can see it.
+            # The questionnaire is what the third party opens and what the reminders
+            # and the overdue lock read: without the dates the deadline is invisible.
             due_date=entity_assessment.due_date,
             eta=entity_assessment.eta,
         )
@@ -156,12 +153,9 @@ def workspaces_by_entity():
 
 
 def _folder_models():
-    """Models that can hold rows in a workspace, discovered so a model added later is
-    not left behind in an old folder.
+    """Models that can hold rows in a workspace, discovered so a later one is not missed.
 
-    Models whose table is absent (an edition that never migrated them) are skipped
-    here rather than by swallowing query errors later: the callers below decide
-    whether a workspace is safe to delete, so they must not silence a failure.
+    A model whose table is absent is skipped here rather than by swallowing query errors.
     """
     from django.apps import apps
     from django.db import connection
@@ -249,9 +243,8 @@ def consolidate_workspaces(entity, domain, sources):
         try:
             rows = list(model.objects.filter(folder__in=sources))
         except Exception as exc:
-            # Skipping a model here would leave its rows pointing at a folder this
-            # function goes on to delete, and the leftover guard below would not see
-            # them. Abort this entity instead; the caller records the failure.
+            # Skipping a model would leave rows pointing at a folder deleted below,
+            # unseen by the guard: abort this entity instead.
             raise RuntimeError(
                 f"could not read {model._meta.label} while consolidating "
                 f"{entity.name}: {exc}"
@@ -265,10 +258,8 @@ def consolidate_workspaces(entity, domain, sources):
         else:
             model.objects.filter(pk__in=[row.pk for row in rows]).update(folder=target)
 
-    # One save() per child, not a queryset update: the ancestor/descendant closure
-    # in `Folder.descendants` is maintained by save() alone, and a direct column
-    # write would leave the moved subfolders parented to folders deleted below —
-    # breaking recursive role resolution and tripping get_parent_folders().
+    # One save() per child, not a queryset update: `Folder.descendants` is maintained
+    # by save() alone, and a column write would break recursive role resolution.
     for child in Folder.objects.filter(parent_folder__in=sources):
         child.parent_folder = target
         child.save()
@@ -308,11 +299,7 @@ def consolidate_workspaces(entity, domain, sources):
 
 
 def normalize_entity_workspaces(apply=False, entity_name=None):
-    """One workspace per entity per domain, named after the entity.
-
-    Returns a list of planned or applied changes. Each entity is independent: one that
-    fails is reported and skipped rather than taking the rest down with it.
-    """
+    """One workspace per entity per domain. Each entity is independent: one that fails is skipped."""
     from django.db import transaction
 
     plan = []

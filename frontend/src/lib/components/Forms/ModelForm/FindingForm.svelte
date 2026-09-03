@@ -75,12 +75,9 @@
 	const appliedControlModel = getModelInfo('applied-controls');
 	const taskTemplateModel = getModelInfo('task-templates');
 
-	// Populated on mount rather than by a server load, so every `selectOptions` read
-	// below has to tolerate the first render.
-	//
-	// Driven by the model's own `selectFields` and passed through the same formatter the
-	// server load uses: severity and priority are `valueType: 'number'`, and fetching the
-	// endpoints raw would hand the form strings the schema rejects.
+	// Populated on mount, so every `selectOptions` read below tolerates the first
+	// render. Same formatter as the server load: raw values would be strings the
+	// number-typed schema rejects.
 	onMount(async () => {
 		if (model.selectOptions) return;
 		const entries = await Promise.all(

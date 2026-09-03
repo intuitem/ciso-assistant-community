@@ -50,7 +50,6 @@ class EntityReadSerializer(BaseModelSerializer):
     contracts = FieldsRelatedField(many=True)
     legal_identifiers = serializers.SerializerMethodField()
     default_criticality = serializers.ReadOnlyField()
-    # Annotated on the queryset, not stored: see EntityViewSet.get_queryset.
     last_assessment_status = serializers.ReadOnlyField()
     last_assessment_date = serializers.ReadOnlyField()
     filtering_labels = FieldsRelatedField(many=True)
@@ -363,12 +362,7 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
     )
 
     def get_completion(self, obj):
-        """How far the third party has got with filling the questionnaire in.
-
-        The respondent-facing number, so this column and the respondent's own
-        assessment page can never disagree. Distinct from `review_progress`, which
-        is the auditor's side and reads 0% however much the third party has answered.
-        """
+        """How far the third party has got: the respondent's number, not `review_progress`."""
         audit_id = obj.compliance_assessment_id
         if not audit_id:
             return None
@@ -393,11 +387,7 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
         return obj.compliance_assessment.progress
 
     def get_assignment_status(self, obj):
-        """Where the questionnaire stands with its respondent.
-
-        An audit can carry several assignments; the least advanced one is what the
-        assessment as a whole is still waiting on.
-        """
+        """Where the questionnaire stands with its respondent: the least advanced assignment."""
         audit_id = obj.compliance_assessment_id
         if not audit_id:
             return None
@@ -585,9 +575,8 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             for user in old_third_party_users - third_party_users:
                 if not user.is_third_party:
                     logger.warning("User is not a third-party", user=user)
-                # The workspace is shared by every assessment of the entity, so the
-                # group grants access to all of them: dropping a representative from
-                # this round must not cut them off from the rounds they still answer.
+                # The workspace is shared by every round of the entity: dropping a
+                # representative here must not cut them off from the others.
                 if (
                     EntityAssessment.objects.filter(
                         compliance_assessment__folder=enclave, representatives=user
@@ -771,11 +760,9 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
 
     def _create_or_update_user(self, instance, create_user, language=None):
         if not create_user:
-            # The flag only says whether to mint an account. The language is about the
-            # account itself, so it still applies to the one already linked — or to the
-            # one that already exists under this address.
-            # Only ever the linked account, or a third-party one under the same
-            # address: an email match must not reach an internal user's preferences.
+            # The flag only says whether to mint an account; the language applies to
+            # the linked one too.
+            # Email match stays on third-party users: never an internal user's.
             self._apply_language(
                 instance.user
                 or User.objects.filter(

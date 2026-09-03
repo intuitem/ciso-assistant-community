@@ -91,9 +91,8 @@
 		return ACTION_LABELS[transition.value]?.() ?? safeTranslate(transition.value);
 	}
 
-	// Keyed on the object so navigating between two detail pages of the same route
-	// reloads: the component is reused, and stale transitions would be confirmed
-	// against the new object's id. A later request always wins.
+	// Keyed on the object: a same-route navigation reuses the component, and stale
+	// transitions would be confirmed against the new object's id.
 	let loadToken = 0;
 	async function load() {
 		const token = ++loadToken;

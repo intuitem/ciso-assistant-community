@@ -418,8 +418,7 @@ class NullableModelChoiceFilter(df.ModelMultipleChoiceFilter):
 class CommitmentStateFilter(df.MultipleChoiceFilter):
     """Filters hosts by the state of their live commitment.
 
-    Both lookups sit in one `filter()` call on purpose: on a multi-valued relation that
-    constrains a single related row, which is what "the current one" means here.
+    Both lookups in one `filter()` on purpose: they must constrain the same row.
     """
 
     def filter(self, qs, value):
@@ -548,11 +547,8 @@ class ExportMixin:
 
     def _get_export_queryset(self):
         """Get filtered queryset with permissions applied."""
-        # The list view's own queryset, annotations included: the export is handed the
-        # table's whole query string, and filtering or searching on a computed column
-        # errors out on a queryset that was rebuilt from the bare manager. The list
-        # view's prefetches are dropped — export_config declares the ones the rows
-        # need, and iterator() rejects a prefetched queryset.
+        # Same queryset as the list view: the export is handed its query string, so
+        # it needs the annotations. iterator() rejects prefetches, hence the reset.
         queryset = self.get_queryset().prefetch_related(None)
 
         if self.export_config:
@@ -873,9 +869,8 @@ class SmartOrderingFilter(filters.OrderingFilter):
     case_insensitive_suffixes = ("name",)
 
     def get_valid_fields(self, queryset, view, context={}):
-        # A viewset can expose a computed column for ordering by annotating it and
-        # declaring the mapping; without this DRF drops the term as an unknown field
-        # and the header silently does nothing.
+        # Without the mapping DRF drops an annotated column as an unknown field and
+        # the header silently does nothing.
         valid = list(super().get_valid_fields(queryset, view, context))
         remap = getattr(view, "ordering_remap", None) or {}
         return valid + [(key, key) for key in remap]
@@ -910,9 +905,7 @@ class SmartOrderingFilter(filters.OrderingFilter):
         if field.split("__")[-1] in self.case_insensitive_suffixes:
             expr = Lower(field)
             return expr.desc() if descending else expr.asc()
-        # Postgres sorts NULLs first on DESC and last on ASC while SQLite does the
-        # opposite: a column that is mostly empty needs the placement pinned, or the
-        # same click gives a different page per backend.
+        # Postgres and SQLite disagree on where NULLs land, so pin it.
         if field in nulls_last:
             expr = F(field)
             return (
@@ -5147,11 +5140,7 @@ class AppliedControlFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
 
 
 def scoped_findings_prefetch(request, lookup="findings"):
-    """Prefetch only the findings of the binders being filtered on, when there are any.
-
-    On a binder's action plan, a control's *other* findings are noise at best and
-    misleading at worst: the column is read as "what this answers here".
-    """
+    """Prefetch only the findings of the binders being filtered on, when there are any."""
     binder_ids = request.query_params.getlist("findings_assessments") if request else []
     if not binder_ids:
         return lookup
@@ -5164,8 +5153,7 @@ def scoped_findings_prefetch(request, lookup="findings"):
 class CommitmentRegisterViewSet(BaseModelViewSet):
     """Read-only register of every promise, across the models that carry them.
 
-    Read-only on purpose: taking a step depends on who is accountable for the *host*
-    object, so transitions stay on the host's own endpoint and the register links out.
+    Transitions stay on the host's own endpoint: the step depends on who is accountable there.
     """
 
     model = Commitment
@@ -5197,25 +5185,16 @@ class CommitmentRegisterViewSet(BaseModelViewSet):
 
 
 class CommitmentActionsMixin:
-    """Serves the legal next commitment states so the UI never offers an illegal one.
+    """Serves the legal next commitment states; the write serializer is what enforces them."""
 
-    The map itself is enforced in the write serializer; this only mirrors it.
-    """
-
-    # Taking a commitment step is its own right, the way transitioning a requirement
-    # assignment is: a counterparty must be able to promise a date without holding
-    # change rights over every field of the object carrying the promise. The override
-    # keys on the action, so it governs the GET and the POST alike.
+    # Its own right, like transitioning an assignment: a counterparty promises a date
+    # without holding change rights over the whole object. Keyed on the action, so it
+    # governs GET and POST alike.
     permission_overrides = {"commitment_transitions": "transition_commitment"}
 
     @action(detail=True, methods=["get", "post"], name="Commitment transitions")
     def commitment_transitions(self, request, pk=None):
-        """GET the legal next steps; POST one to take it.
-
-        POST accepts {commitment_state, commitment_notes?, commitment_date?} and runs
-        through the write serializer, so the map, the side and the note/date
-        requirements are enforced in exactly one place.
-        """
+        """GET the legal next steps; POST one to take it, through the write serializer."""
         if not ff_is_enabled("commitment_management"):
             return Response(
                 {"error": "This feature is not enabled."},
@@ -5281,9 +5260,8 @@ class CommitmentActionsMixin:
             data["commitment_date"] = promised_date
             data[obj.COMMITMENT_DATE_FIELD] = promised_date
 
-        # Flags the write as a commitment step, so the serializer checks the right to
-        # take one rather than the right to change the object wholesale — a
-        # counterparty promises a date without being able to rewrite the task.
+        # Flags the write as a commitment step: the serializer then checks that right
+        # rather than change rights over the whole task.
         context = {**self.get_serializer_context(), "commitment_transition": True}
         serializer = self.get_serializer_class(action="partial_update")(
             obj, data=data, partial=True, context=context
@@ -10835,14 +10813,7 @@ class CampaignViewSet(BaseModelViewSet):
     def start(self, request, pk):
         """Move a campaign from wiring to under way.
 
-        Launch builds the questionnaires and points an assignment at whoever answers;
-        this is the moment they are told. The transitions run here — they are the
-        campaign's state and must be true the instant the call returns — while the
-        mail goes to a background task, because a fan-out is one SMTP round trip per
-        audit and would hold the request open.
-
-        Re-running only picks up what is still in draft, so adding a target later and
-        pressing start again notifies just that target.
+        Re-running only picks up what is still in draft. The mail goes to a background task.
         """
         if not RoleAssignment.is_object_accessible(
             request.user, "change", Campaign, UUID(pk)
@@ -10863,9 +10834,8 @@ class CampaignViewSet(BaseModelViewSet):
         unassigned = []
         with transaction.atomic():
             for audit in audits:
-                # Re-check the source first: a representative or default assignee added
-                # after launch is otherwise unreachable, since nothing else ever wires
-                # an existing audit.
+                # Re-check the source first: an assignee added after launch is
+                # otherwise unreachable, as nothing else wires an existing audit.
                 ensure_audit_assignment(audit)
                 drafts = audit.requirement_assignments.filter(
                     status=RequirementAssignment.Status.DRAFT
@@ -10924,11 +10894,7 @@ class CampaignViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get campaign dashboard")
     def dashboard(self, request, pk):
-        """Series and counts the campaign widgets need, in one round trip.
-
-        The per-target rows come from the compliance-assessment list endpoint,
-        which already computes progress page-wide.
-        """
+        """Series and counts the campaign widgets need, in one round trip."""
         if not RoleAssignment.is_object_accessible(
             request.user, "view", Campaign, UUID(pk)
         ):
@@ -10952,8 +10918,8 @@ class CampaignViewSet(BaseModelViewSet):
     def _campaign_trend(audit_ids):
         """Daily campaign completion, weighted by requirement count.
 
-        HistoricalMetric only holds a row for the days an audit changed, so the
-        last known sample is carried forward to fill the gaps.
+        HistoricalMetric only holds a row for the days an audit changed, so the last
+        sample is carried forward.
         """
         if not audit_ids:
             return []
@@ -12169,19 +12135,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def mailing(self, request, pk):
         """Start the assignments, then notify.
 
-        The assignment status is the state of the questionnaire; the email is only the
-        notification. Sending first meant an unreachable mail server left every
-        assignment in draft — and, since nothing wrapped the loop, a partial send could
-        tell one author a questionnaire was waiting for them while no assignment had
-        actually started. Delivery failures are reported, never a reason to withhold
-        the work.
+        Delivery failures are reported, never a reason to withhold the work.
         """
         from core.utils import ensure_audit_assignment
 
         instance = self.get_object()
-        # Representatives added after the assessment was created are otherwise
-        # unreachable: nothing else wires an existing audit. Same helper the campaign
-        # start uses, and it only ever fills a gap.
+        # Representatives added after creation are otherwise unreachable: nothing else
+        # wires an existing audit. The helper only ever fills a gap.
         ensure_audit_assignment(instance)
 
         if not instance.requirement_assignments.exists():
@@ -13332,10 +13292,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 ]
             total = len(ras)
 
-            # Respondent-facing progress: the respondent's own work, not the
-            # audit-level progress mode (the status field may not even be visible to
-            # them). Shared with the entity-assessment list and the TPRM metrics
-            # endpoint, so one questionnaire cannot report two different numbers.
+            # The respondent's own work, not the audit-level progress mode. Shared with
+            # the list and the metrics endpoint so the numbers cannot diverge.
             total_q, answered_q, done = respondent_progress_counts(ca, ras)
             progress_percent = int(answered_q / total_q * 100) if total_q else 0
 
@@ -14751,13 +14709,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="findings-binder")
     def findings_binder(self, request, pk=None):
-        """Return the audit's findings binder, creating it on first use.
-
-        A finding raised from a requirement needs a binder to live in. Rather than
-        asking the user to create one, the audit gets exactly one, created lazily and
-        linked back to it — which is also what gives the audit its findings list
-        without a second UI.
-        """
+        """Return the audit's findings binder, creating it on first use."""
         if not ff_is_enabled("findings_from_requirements"):
             return Response(
                 {"error": "This feature is not enabled."},
@@ -14777,9 +14729,8 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 {"folder": "You do not have permission to add a findings binder here"}
             )
 
-        # `compliance_assessment` is a plain FK and is writable, so an audit can end up
-        # with more than one binder; get_or_create would raise MultipleObjectsReturned.
-        # Oldest wins, so the choice is stable across calls.
+        # An audit can carry more than one binder, so get_or_create would raise
+        # MultipleObjectsReturned. Oldest wins, for a stable choice.
         binder = (
             FindingsAssessment.objects.filter(compliance_assessment=audit)
             .order_by("created_at")
@@ -17072,9 +17023,8 @@ class TaskTemplateFilter(GenericFilterSet):
             | Q(findings__findings_assessment__in=value)
         ).distinct()
 
-    # A task reaches an audit three ways: hung on the audit itself, on one of its
-    # requirement assessments, or on a finding raised from one. The action plan is
-    # only complete if it walks all three.
+    # A task reaches an audit three ways — on the audit, on a requirement assessment,
+    # or on a finding raised from one — and the action plan must walk all three.
     compliance_assessments = df.ModelMultipleChoiceFilter(
         method="filter_compliance_assessments",
         queryset=ComplianceAssessment.objects.all(),
@@ -17168,22 +17118,16 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
 
     @action(detail=False, methods=["get"], name="Get task analytics")
     def analytics(self, request):
-        """Aggregates over the filtered task queryset.
-
-        Deliberately not a copy of the applied-control analytics: tasks carry no cost,
-        priority, category or CSF function, so the dimensions that matter here are who
-        holds them, when they are due, and — with the flag on — whether the promises
-        made about them are being kept.
-        """
+        """Aggregates over the filtered task queryset."""
         queryset = self.filter_queryset(self.get_queryset())
         # `str(actor)` resolves a OneToOne hop, so the actor prefetch has to join the
         # target in; `commitments` is already prefetched by get_queryset.
         tasks = list(queryset.prefetch_related(actor_prefetch("assigned_to")))
         today = timezone.localdate()
 
-        # One query for every occurrence, grouped in python: the per-template lookup
-        # the serializer uses would be a query per row.
-        # Same rule as `get_next_occurrence_status`, so the chart and the column agree.
+        # One query for every occurrence, grouped in python: the serializer's
+        # per-template lookup would be a query per row. Same rule as
+        # `get_next_occurrence_status`, so the chart and the column agree.
         recurrent_ids = {t.id for t in tasks if t.is_recurrent}
         next_node_by_template: dict = {}
         for node in (
@@ -18658,13 +18602,11 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 
     @staticmethod
     def _advance_review_states(assignment, transition_key):
-        """Carry the review flags across a transition: answering a rework request
-        makes them RESUBMITTED, closing accepts what is still awaiting a look.
+        """Carry the review flags across a transition.
 
-        Reopening to draft starts a new round, so anything still awaiting a look goes
-        back to flagged: without this, the reviewer's next close would accept items
-        nobody re-examined in the new round. Already ACCEPTED flags are left alone —
-        they record a verdict that was actually given.
+        Answering a rework request makes them RESUBMITTED; closing accepts what is still
+        awaiting a look; reopening flags it again so the next close cannot accept items nobody
+        re-examined. ACCEPTED flags are left alone.
         """
         from core.models import RequirementAssessment
 

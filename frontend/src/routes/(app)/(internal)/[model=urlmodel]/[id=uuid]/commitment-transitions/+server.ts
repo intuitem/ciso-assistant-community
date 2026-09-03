@@ -3,10 +3,8 @@ import { getModelInfo } from '$lib/utils/crud';
 import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-// The `[field=fields]` route only matches names that are table columns, and this is
-// an action rather than a field — hence its own proxy. It also has to exist here
-// rather than being a plain PATCH on `/{model}/{id}`: models whose static route folder
-// has no `+server.ts` (task-templates) shadow the generic proxy and answer PATCH with 405.
+// `[field=fields]` only matches table columns, and a plain PATCH on `/{model}/{id}`
+// is shadowed (405) by static route folders without a `+server.ts` — hence its own proxy.
 const endpointFor = (params: { model: string; id: string }) => {
 	const model = getModelInfo(params.model);
 	return `${BASE_API_URL}/${model.endpointUrl ?? params.model}/${params.id}/commitment_transitions/`;

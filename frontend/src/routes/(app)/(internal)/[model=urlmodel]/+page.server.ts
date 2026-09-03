@@ -59,9 +59,8 @@ export const load: PageServerLoad = async ({ params, fetch, url }) => {
 		});
 	}
 
-	// Reading `url` makes this load re-run when the query changes, and the table is
-	// keyed on it: its filter state is seeded once at creation, so a same-route
-	// navigation (`?kind=internal` -> `?kind=third_party`) needs a fresh instance.
+	// Reading `url` re-runs this load on query change; the table is keyed on it
+	// because its filter state is seeded once at creation.
 	return { createForm, deleteForm, model, URLModel, urlSearch: url.search };
 };
 

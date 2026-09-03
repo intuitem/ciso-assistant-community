@@ -68,9 +68,8 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
 	start: async (event) => {
-		// Returned as a superform, like ?/mailing: the confirm modal submits through
-		// SuperForm, and only a form result triggers its invalidateAll — otherwise the
-		// page keeps showing the pre-start status until a manual refresh.
+		// Returned as a superform like ?/mailing: only a form result triggers
+		// invalidateAll, so the status would otherwise look unchanged.
 		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
 		const form = await superValidate(await event.request.formData(), zod(schema));
 

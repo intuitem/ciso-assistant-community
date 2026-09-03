@@ -5629,13 +5629,8 @@ class Comment(AbstractBaseModel, FolderMixin):
 class Commitment(AbstractBaseModel, FolderMixin):
     """One negotiation cycle over a promise to deliver by a date.
 
-    A row per cycle rather than a set of columns on the host: reopening an agreed
-    commitment closes the current row and opens a new one, so the sequence of promised
-    dates survives instead of each one overwriting the last. The current row is the one
-    with `is_current`; the rest are the history.
-
-    Attached by generic key so a model can carry commitments without growing columns for
-    an optional, flag-gated feature.
+    Reopening closes the current row (`is_current`) and opens a new one, so promised
+    dates are not overwritten.
     """
 
     class State(models.TextChoices):
@@ -5727,11 +5722,7 @@ class Commitment(AbstractBaseModel, FolderMixin):
 
 
 class CommitmentMixin(models.Model):
-    """Lets a model carry commitments — the promise an owner makes to deliver by a date.
-
-    Adds no columns: the promises live in `Commitment`, reached through a generic
-    relation, the way `CustomFieldsMixin` reaches custom field values.
-    """
+    """Lets a model carry commitments; adds no columns, they live in `Commitment`."""
 
     # Subclasses point these at their own date / accountable-actor fields.
     COMMITMENT_DATE_FIELD = "eta"
@@ -5754,9 +5745,7 @@ class CommitmentMixin(models.Model):
 
     @cached_property
     def commitment_entries(self) -> list:
-        """Every cycle, cached: the panel and the serializers read these repeatedly, and
-        `commitments.all()` would otherwise issue a query per access when not prefetched.
-        """
+        """Every cycle, cached: `commitments.all()` would be a query per access unprefetched."""
         return list(self.commitments.all())
 
     @property
@@ -10568,9 +10557,7 @@ class TaskTemplate(
 
     @property
     def status(self):
-        """Status of the single occurrence of a one-time task, so a related field can
-        read it without going through TaskTemplateReadSerializer. None when recurrent:
-        there is no one status to speak of."""
+        """Status of the single occurrence of a one-time task; None when recurrent."""
         if self.is_recurrent:
             return None
         return self._get_task_node_value("status", order_by="due_date")

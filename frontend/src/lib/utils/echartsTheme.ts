@@ -47,10 +47,8 @@ export function mountThemeAwareChart(
 	const resize = () => chart?.resize();
 	if (manageResize) window.addEventListener('resize', resize);
 
-	// The window is not the only thing that resizes a chart: an expanding detail table,
-	// an opening accordion or a tab switch all change the container while the window
-	// stays put, leaving the canvas at its old size. rAF-batched so a resize triggered
-	// by the resize cannot loop.
+	// Containers resize without the window doing so (detail tables, accordions, tabs).
+	// rAF-batched so a resize cannot loop.
 	let pending = 0;
 	const sizeObserver =
 		!manageResize || typeof ResizeObserver === 'undefined'

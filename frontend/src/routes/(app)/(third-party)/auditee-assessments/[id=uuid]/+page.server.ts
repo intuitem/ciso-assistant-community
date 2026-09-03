@@ -253,9 +253,8 @@ export const actions: Actions = {
 		);
 		return message(form, { object });
 	},
-	// The reviewer's half of the loop: closing the round, or sending it back with the
-	// note the backend requires for that transition. Same endpoint the assignments
-	// board uses, so the state machine stays the only authority.
+	// The reviewer's half of the loop, through the same endpoint the assignments board
+	// uses: the state machine stays the only authority.
 	reviewAssignment: async (event) => {
 		const formData = await event.request.formData();
 		const endpoint = `${BASE_API_URL}/requirement-assignments/${event.params.id}/set_status/`;

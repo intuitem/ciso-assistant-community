@@ -372,10 +372,9 @@
 
 	const toastStore = getToastStore();
 
-	// A table handed its rows up front (the library preview, for one) has neither a
-	// model nor an endpoint, so `baseEndpoint` is the literal "/undefined": the remote
-	// handler would poll it, fail, and clear the rows it was seeded with. Tables given
-	// only a `baseEndpoint` (no URLModel) are still remote.
+	// A table handed its rows up front has no model or endpoint ("/undefined"): the
+	// remote handler would poll it and clear the seeded rows. A bare baseEndpoint is
+	// still remote.
 	const hasRemoteSource = Boolean(URLModel) || baseEndpoint !== '/undefined';
 
 	if (hasRemoteSource)
@@ -1130,8 +1129,7 @@
 																: '--'}</span
 														>
 													{:else if key === 'last_assessment_status'}
-														<!-- A null status on an existing round means "status not set": only the
-														absence of a round is "never assessed". -->
+														<!-- The status is nullable: only a missing round is "never assessed". -->
 														{#if !meta?.last_assessment_date}
 															<span class="text-surface-500">{m.neverAssessed()}</span>
 														{:else}

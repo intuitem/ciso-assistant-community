@@ -1,25 +1,8 @@
 """Commitment management: the promise an owner makes to deliver by a date.
 
-A deliberately separate concern from `ValidationFlow`, which is a *reviewer approving an
-object as it stands*. Here the owner promises and the counterparty holds them to it —
-opposite direction, different parties. The vocabularies are kept distinct on purpose so
-the two never read as the same machine, which matters because `Policy` is a proxy of
-`AppliedControl` and can carry both.
-
-There is no propose-then-sign-off handshake: the owner commits directly, with a date.
-A separate proposal step left the promise unfrozen while it waited for a counter-signature,
-so the slip clock never started — that dead zone cost more than the approval bought. If the
-counterparty dislikes the date they reopen the negotiation, which is the single mechanic for
-every change.
-
-The promises live in their own rows (`core.Commitment`), one per negotiation cycle, so the
-sequence of dates promised survives instead of each one overwriting the last. The host model
-keeps no columns; `commitment_state` and friends stay *serializer* fields, which is what lets
-the generic `batch_action` endpoint and the ordinary write path drive the machine unchanged.
-
-The transition map lives here rather than in the UI: `BaseModelViewSet.batch_action`,
-the API, the data wizard and domain import all write through the serializers, so a
-client-side guard would not be one.
+Distinct from `ValidationFlow`, where a reviewer approves an object as it stands.
+One row per negotiation cycle, so promised dates are not overwritten; the host keeps
+no columns and the machine runs off serializer fields, so every write path enforces it.
 """
 
 from django.utils import timezone
@@ -72,13 +55,8 @@ def allowed_targets(current_state: str) -> dict:
 def user_is_accountable(instance, user, incoming: dict | None = None):
     """Is *user* one of the actors accountable for *instance*?
 
-    Returns None when the object has no accountable actor at all — there are no sides
-    to be on, which is different from being on the wrong one.
-
-    An incoming list that is *empty* falls back to the stored actors rather than
-    counting as "nobody is accountable": clearing the field in the same request that
-    closes the promise would otherwise hand the owner the no-sides hatch and let them
-    sign off their own commitment.
+    None when nothing is accountable — no sides to be on. An empty incoming list falls
+    back to the stored actors, else clearing the field would open the no-sides hatch.
     """
     actor_field = instance.COMMITMENT_ACTOR_FIELD
     actors = (incoming or {}).get(actor_field)
@@ -93,8 +71,7 @@ def user_is_accountable(instance, user, incoming: dict | None = None):
 def side_allows(side: str, accountable: bool | None) -> bool:
     """Whether someone whose accountability is *accountable* may take a *side* step.
 
-    An object with nobody accountable (None) has no sides, so every step is open to
-    anyone with change permission — otherwise unassigned objects deadlock.
+    Nobody accountable (None) means no sides, so unassigned objects do not deadlock.
     """
     if side == ANY or accountable is None:
         return True
@@ -104,10 +81,8 @@ def side_allows(side: str, accountable: bool | None) -> bool:
 def user_is_respondent_for(instance, user) -> bool:
     """Is *user* answering this object rather than reviewing it?
 
-    A respondent is the promising side by construction: the questionnaire is
-    addressed to them. Without this an object with nobody assigned falls into the
-    "no sides" hatch below, and a respondent who raised their own task could run the
-    whole lifecycle alone — make the promise and then sign it off.
+    A respondent is the promising side by construction; otherwise they fall into the
+    no-sides hatch and can run the whole lifecycle alone.
     """
     from core.utils import get_respondent_scoped_folder_ids
 
@@ -140,11 +115,7 @@ def serialize_commitment(entry) -> dict:
 
 
 def apply_transition(instance, target: str, user=None, notes=None, promised_date=None):
-    """Move *instance* to *target*, writing the commitment rows. Assumes it is legal.
-
-    Reopening closes the live cycle and starts a new one, so each promise keeps its own
-    date instead of the latest overwriting the record.
-    """
+    """Move *instance* to *target*, writing the commitment rows. Assumes it is legal."""
     current = instance.commitment
 
     if current is None:
@@ -152,9 +123,8 @@ def apply_transition(instance, target: str, user=None, notes=None, promised_date
     elif target == State.IN_NEGOTIATION and current.state in Commitment.CLOSING_STATES:
         current.is_current = False
         current.save(update_fields=["is_current", "updated_at"])
-        # The promise being renegotiated carries onto the new cycle: it is what marks
-        # this as a renegotiation rather than a fresh start, and it keeps a breach
-        # visible instead of letting a reopening erase one.
+        # Carried onto the new cycle: it marks a renegotiation rather than a fresh
+        # start, so a breach stays visible.
         current = Commitment(
             target=instance,
             state=State.IN_NEGOTIATION,
@@ -180,9 +150,7 @@ def apply_transition(instance, target: str, user=None, notes=None, promised_date
 class CommitmentSerializerMixin:
     """Enforces the commitment state machine on a write serializer.
 
-    The commitment fields are declared here rather than coming from the model, so the
-    ordinary update path — including the generic batch endpoint — can drive the machine
-    while the promises live in their own table.
+    The fields are declared here, not on the model, so the ordinary update path drives it.
     """
 
     # Which of the commitment fields this serializer carries. A list serializer trims it
@@ -191,9 +159,8 @@ class CommitmentSerializerMixin:
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Injected rather than declared: they are not model fields, and a plain mixin's
-        # class attributes are invisible to DRF's serializer metaclass. Assigning into
-        # `fields` binds them, which is what `SerializerMethodField` needs.
+        # Injected, not declared: DRF's metaclass cannot see a plain mixin's
+        # attributes, and SerializerMethodField needs binding.
         if not ff_is_enabled("commitment_management"):
             return
         # A recurrent task template is a definition, not a single promise.
