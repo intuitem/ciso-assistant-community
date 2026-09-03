@@ -1037,6 +1037,22 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		filters: []
 	},
+	'identity-providers': {
+		endpointUrl: 'iam/social-apps',
+		name: 'socialapp',
+		localName: 'identityProvider',
+		localNamePlural: 'identityProviders',
+		verboseName: 'Identity provider',
+		verboseNamePlural: 'Identity providers',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'provider_id' },
+			{ field: 'client_id' },
+			{ field: 'server_url' }
+		],
+		filters: []
+	},
 	'service-accounts': {
 		endpointUrl: 'iam/service-accounts',
 		name: 'serviceaccount',
@@ -1044,13 +1060,19 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'serviceAccounts',
 		verboseName: 'Service account',
 		verboseNamePlural: 'Service accounts',
-		foreignKeyFields: [{ field: 'folders', urlModel: 'folders' }],
+		foreignKeyFields: [
+			{ field: 'folders', urlModel: 'folders' },
+			{ field: 'social_app', urlModel: 'identity-providers' }
+		],
 		detailViewFields: [
 			{ field: 'id' },
 			{ field: 'name' },
 			{ field: 'description' },
+			{ field: 'identity_source' },
 			{ field: 'client_id' },
 			{ field: 'secret_preview' },
+			{ field: 'social_app' },
+			{ field: 'federated_subject' },
 			{ field: 'is_active' },
 			{ field: 'expiry_date', type: 'date' },
 			{ field: 'is_recursive' },

@@ -1979,8 +1979,28 @@ export const listViewFields = {
 		body: ['name', 'user_groups']
 	},
 	'service-accounts': {
-		head: ['name', 'clientId', 'secretPreview', 'isActive', 'expiryDate', 'createdAt'],
-		body: ['name', 'client_id', 'secret_preview', 'is_active', 'expiry_date', 'created_at']
+		head: [
+			'name',
+			'identitySource',
+			'clientId',
+			'secretPreview',
+			'isActive',
+			'expiryDate',
+			'createdAt'
+		],
+		body: [
+			'name',
+			'identity_source',
+			'client_id',
+			'secret_preview',
+			'is_active',
+			'expiry_date',
+			'created_at'
+		]
+	},
+	'identity-providers': {
+		head: ['name', 'providerId', 'clientId'],
+		body: ['name', 'provider_id', 'client_id']
 	},
 	roles: {
 		head: ['name', 'description'],

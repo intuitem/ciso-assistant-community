@@ -4,9 +4,11 @@ from datetime import timedelta
 import structlog
 from allauth.account.models import EmailAddress
 from allauth.mfa.models import Authenticator
+from allauth.socialaccount.models import SocialApp
 from django.contrib.auth import get_user_model, login, logout
 from django.db import transaction
 from django.db.models import Q, Exists, OuterRef
+from django.db.models.deletion import ProtectedError
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -44,9 +46,11 @@ from iam.sso.slo import copy_slo_state_from_session_key
 from .service_accounts import (
     UNSET as UNSET_FIELD,
     get_selectable_permissions,
+    provision_federated_service_account,
     provision_service_account,
     update_service_account,
 )
+from .oidc_federation import register_social_app, update_social_app
 from .serializers import (
     ChangePasswordSerializer,
     PersonalAccessTokenReadSerializer,
@@ -54,6 +58,8 @@ from .serializers import (
     ResetPasswordConfirmSerializer,
     ServiceAccountReadSerializer,
     SetPasswordSerializer,
+    SocialAppReadSerializer,
+    SocialAppWriteSerializer,
 )
 
 logger = structlog.get_logger(__name__)
@@ -641,7 +647,7 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
     feature_flag = "service_accounts"
     serializer_class = ServiceAccountReadSerializer
     queryset = ServiceAccount.objects.select_related(
-        "client", "user", "role", "created_by"
+        "client", "user", "role", "created_by", "social_app"
     ).order_by("-created_at")
 
     def get_write_serializer_class(self):
@@ -660,25 +666,78 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
         serializer = self.get_write_serializer_class()(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
+        is_federated = (
+            data.get("identity_source", ServiceAccount.IdentitySource.LOCAL)
+            == ServiceAccount.IdentitySource.FEDERATED
+        )
         try:
-            service_account, plain_secret = provision_service_account(
-                name=data["name"],
-                description=data.get("description"),
-                permission_ids=data.get("permissions"),
-                role_id=data["role"].id if data.get("role") else None,
-                folder_ids=data["folders"],
-                is_recursive=data["is_recursive"],
-                created_by=request.user,
-                expiry_date=data.get("expiry_date"),
-            )
+            if is_federated:
+                service_account = provision_federated_service_account(
+                    name=data["name"],
+                    description=data.get("description"),
+                    permission_ids=data.get("permissions"),
+                    role_id=data["role"].id if data.get("role") else None,
+                    folder_ids=data["folders"],
+                    is_recursive=data["is_recursive"],
+                    created_by=request.user,
+                    social_app=data["social_app"],
+                    federated_subject=data["federated_subject"],
+                    expiry_date=data.get("expiry_date"),
+                )
+                payload = ServiceAccountReadSerializer(service_account).data
+            else:
+                service_account, plain_secret = provision_service_account(
+                    name=data["name"],
+                    description=data.get("description"),
+                    permission_ids=data.get("permissions"),
+                    role_id=data["role"].id if data.get("role") else None,
+                    folder_ids=data["folders"],
+                    is_recursive=data["is_recursive"],
+                    created_by=request.user,
+                    expiry_date=data.get("expiry_date"),
+                )
+                payload = ServiceAccountReadSerializer(service_account).data
+                payload["client_secret"] = plain_secret
         except DjangoValidationError as e:
             return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
-        payload = ServiceAccountReadSerializer(service_account).data
-        payload["client_secret"] = plain_secret
         return Response(payload, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, *args, **kwargs):
         service_account = self.get_object()
+
+        def _changed(field, current):
+            if field not in request.data:
+                return False
+            normalize = lambda v: None if v in (None, "") else str(v)
+            return normalize(request.data[field]) != normalize(current)
+
+        # identity_source is structural (a local account has an OAuth2 client/secret a
+        # federated one doesn't, and update_service_account has no code path to create
+        # or tear one down), so switching it isn't supported. social_app and
+        # federated_subject are just the federated account's identity and may be
+        # re-pointed, subject to the same checks creation applies (see below).
+        if _changed("identity_source", service_account.identity_source):
+            return Response(
+                {"error": ["identity_source cannot be changed after creation."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        federation_fields_changed = _changed(
+            "social_app", service_account.social_app_id
+        ) or _changed("federated_subject", service_account.federated_subject)
+        if (
+            federation_fields_changed
+            and service_account.identity_source
+            != ServiceAccount.IdentitySource.FEDERATED
+        ):
+            return Response(
+                {
+                    "error": [
+                        "social_app and federated_subject are only valid for "
+                        "federated service accounts."
+                    ]
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         serializer = self.get_write_serializer_class()(
             data=request.data, partial=True, context={"instance": service_account}
         )
@@ -699,6 +758,12 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
                     expiry_date=data["expiry_date"]
                     if "expiry_date" in data
                     else UNSET_FIELD,
+                    social_app=data["social_app"]
+                    if "social_app" in data
+                    else UNSET_FIELD,
+                    federated_subject=data["federated_subject"]
+                    if "federated_subject" in data
+                    else UNSET_FIELD,
                 )
                 if "is_active" in data:
                     if data["is_active"] and not service_account.is_active:
@@ -718,6 +783,17 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
 
     def rotate_secret(self, request, pk=None):
         service_account = self.get_object()
+        if service_account.identity_source == ServiceAccount.IdentitySource.FEDERATED:
+            return Response(
+                {
+                    "error": [
+                        "Federated service accounts have no local secret to "
+                        "rotate; key rotation is the identity provider's "
+                        "responsibility."
+                    ]
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         grace_period_days = request.data.get("grace_period_days") or 0
         try:
             grace_period_days = int(grace_period_days)
@@ -777,3 +853,53 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
                 for role in roles
             ]
         )
+
+
+class SocialAppViewSet(viewsets.ModelViewSet):
+    """Admin-only registry of external OIDC providers for federated service accounts."""
+
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsGlobalAdmin,
+        FeatureFlagRequired,
+    ]
+    feature_flag = "service_accounts"
+    serializer_class = SocialAppReadSerializer
+    queryset = SocialApp.objects.order_by("name")
+
+    def create(self, request, *args, **kwargs):
+        serializer = SocialAppWriteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            social_app = register_social_app(**serializer.validated_data)
+        except DjangoValidationError as e:
+            return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            SocialAppReadSerializer(social_app).data, status=status.HTTP_201_CREATED
+        )
+
+    def partial_update(self, request, *args, **kwargs):
+        social_app = self.get_object()
+        serializer = SocialAppWriteSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        try:
+            social_app = update_social_app(social_app, **serializer.validated_data)
+        except DjangoValidationError as e:
+            return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(SocialAppReadSerializer(social_app).data)
+
+    def destroy(self, request, *args, **kwargs):
+        social_app = self.get_object()
+        try:
+            social_app.delete()
+        except ProtectedError:
+            return Response(
+                {
+                    "error": [
+                        "This identity provider is still used by one or more "
+                        "federated service accounts."
+                    ]
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)

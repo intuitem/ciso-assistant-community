@@ -2029,10 +2029,24 @@ export const IdPGroupSchema = z.object({
 	user_groups: z.array(z.string().uuid().optional()).optional()
 });
 
+export const IdentityProviderSchema = z.object({
+	name: z.string().min(1).max(40),
+	provider_id: z
+		.string()
+		.min(1)
+		.max(200)
+		.regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+	client_id: z.string().min(1).max(191),
+	server_url: z.string().url().max(1024)
+});
+
 export const ServiceAccountSchema = z.object({
 	name: z.string().min(1).max(100),
 	description: z.string().optional().nullable(),
 	authorization_mode: z.enum(['role', 'custom', 'global_admin']).default('custom'),
+	identity_source: z.enum(['local', 'federated']).default('local'),
+	social_app: z.coerce.number().int().positive().optional().nullable(),
+	federated_subject: z.string().max(255).optional().nullable(),
 	permissions: z.array(z.number()).optional(),
 	role: z.string().uuid().optional().nullable(),
 	folders: z.array(z.string().uuid()).min(1),
@@ -2069,6 +2083,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'evidence-revisions': EvidenceRevisionSchema,
 	users: UserCreateSchema,
 	'idp-groups': IdPGroupSchema,
+	'identity-providers': IdentityProviderSchema,
 	'service-accounts': ServiceAccountSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
