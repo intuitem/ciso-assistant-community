@@ -81,7 +81,7 @@ def coerce_value(field_type: str, raw):
     if field_type == FieldType.URL:
         value = str(raw)
         try:
-            URLValidator()(value)
+            URLValidator(schemes=["http", "https"])(value)
         except ValidationError:
             raise ValueError(f"'{raw}' is not a valid URL")
         return value
