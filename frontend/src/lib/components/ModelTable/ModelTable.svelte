@@ -436,35 +436,88 @@
 
 	const filters = $derived(source?.filters ?? tableFilters);
 	const filteredFields = $derived(Object.keys(filters));
-	// Only persist filters on standalone list pages, not embedded sub-tables
-	const isStandaloneTable = baseEndpoint === `/${URLModel}`;
-	const filterStoreKey = `${page.url.pathname}::${baseEndpoint}`;
-	const storedFilters = isStandaloneTable ? ($tableFilterStates[filterStoreKey] ?? {}) : {};
-	// Check if any filter-related URL params exist
-	const hasUrlFilterParams = filteredFields.some(
-		(field) => page.url.searchParams.getAll(field).length > 0
-	);
-	const filterValues: { [key: string]: any } = $state(
-		Object.fromEntries(
+	// Column selector is offered on standalone list pages only (embedded tables
+	// pass a curated `fields` prop) -- unrelated to filter persistence below.
+	const isStandaloneTable = $derived(baseEndpoint === `/${URLModel}`);
+	// Unique per parent object + tab (baseEndpoint carries the parent id).
+	// $derived so it updates when this instance is reused for a different
+	// object (DetailView.svelte keys tabs by model name, not by parent id).
+	const filterStoreKey = $derived(`${page.url.pathname}::${baseEndpoint}`);
+
+	function seedFilterValues() {
+		const stored = $tableFilterStates[filterStoreKey] ?? {};
+		// Check if any filter-related URL params exist
+		const hasUrlFilterParams = filteredFields.some(
+			(field) => page.url.searchParams.getAll(field).length > 0
+		);
+		return Object.fromEntries(
 			filteredFields.map((field: string) => {
 				const urlValues = page.url.searchParams.getAll(field).map((value) => ({ value }));
 				if (urlValues.length > 0) return [field, urlValues];
 				// Restore persisted filters only when no URL filter params exist at all
-				if (!hasUrlFilterParams && field in storedFilters) {
-					return [field, storedFilters[field] ?? []];
+				if (!hasUrlFilterParams && field in stored) {
+					return [field, stored[field] ?? []];
 				}
 				const defaultValue = defaultFilters[field] || [];
 				return [field, defaultValue];
 			})
-		)
-	);
+		);
+	}
+
+	const filterValues: { [key: string]: any } = $state(seedFilterValues());
 	$effect(() => onFilterChange(filterValues));
 
 	run(() => {
 		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
 	});
 
+	const filterInitialData: Record<string, string[]> = {};
+	// convert URL search params and default filters to filter initial data
+	for (const [key, value] of page.url.searchParams) {
+		filterInitialData[key] ??= [];
+		filterInitialData[key].push(value);
+	}
+	// Add default filter values if no URL params exist for that field
+	for (const field of filteredFields) {
+		if (!filterInitialData[field] && filterValues[field]?.length > 0) {
+			filterInitialData[field] = filterValues[field].map((v: Record<string, any>) => v.value);
+		}
+	}
+	const zodFiltersObject = {};
+	Object.keys(filters).forEach((k) => {
+		zodFiltersObject[k] = z.array(z.string()).optional().nullable();
+	});
+	const _form = superForm(defaults(filterInitialData, zod(z.object(zodFiltersObject))), {
+		SPA: true,
+		validators: zod(z.object(zodFiltersObject)),
+		dataType: 'json',
+		invalidateAll: false,
+		applyAction: false,
+		resetForm: false,
+		taintedMessage: false,
+		validationMethod: 'auto'
+	});
+
+	// Reseed + sync/persist in one effect: a scope change (instance reused for
+	// a different object) must finish reseeding before anything is written
+	// under the new key -- two separate effects can't guarantee that order.
+	let previousFilterStoreKey = filterStoreKey;
 	$effect(() => {
+		if (filterStoreKey !== previousFilterStoreKey) {
+			previousFilterStoreKey = filterStoreKey;
+			const fresh = seedFilterValues();
+			Object.assign(filterValues, fresh);
+			_form.form.update((data) => ({
+				...data,
+				...Object.fromEntries(
+					Object.entries(fresh).map(([f, v]: [string, any]) => [
+						f,
+						(v ?? []).map((x: any) => x.value)
+					])
+				)
+			}));
+		}
+
 		for (const field of filteredFields) {
 			const filterValue = filterValues[field];
 			const overrideFilterValue = overrideFilters[field];
@@ -493,42 +546,13 @@
 			return next;
 		});
 		// untracked so resetFilters can delete the entry without retriggering us
-		if (isStandaloneTable) {
-			untrack(() => {
-				$tableFilterStates[filterStoreKey] = { ...filterValues };
-			});
-		}
+		untrack(() => {
+			$tableFilterStates[filterStoreKey] = { ...filterValues };
+		});
 		if (hasRemoteSource)
 			setTimeout(() => {
 				handler.invalidate();
 			}, 10);
-	});
-
-	const filterInitialData: Record<string, string[]> = {};
-	// convert URL search params and default filters to filter initial data
-	for (const [key, value] of page.url.searchParams) {
-		filterInitialData[key] ??= [];
-		filterInitialData[key].push(value);
-	}
-	// Add default filter values if no URL params exist for that field
-	for (const field of filteredFields) {
-		if (!filterInitialData[field] && filterValues[field]?.length > 0) {
-			filterInitialData[field] = filterValues[field].map((v: Record<string, any>) => v.value);
-		}
-	}
-	const zodFiltersObject = {};
-	Object.keys(filters).forEach((k) => {
-		zodFiltersObject[k] = z.array(z.string()).optional().nullable();
-	});
-	const _form = superForm(defaults(filterInitialData, zod(z.object(zodFiltersObject))), {
-		SPA: true,
-		validators: zod(z.object(zodFiltersObject)),
-		dataType: 'json',
-		invalidateAll: false,
-		applyAction: false,
-		resetForm: false,
-		taintedMessage: false,
-		validationMethod: 'auto'
 	});
 
 	$effect(() => {
@@ -668,7 +692,6 @@
 			}
 			return data;
 		});
-		if (!isStandaloneTable) return;
 		await tick();
 		const next = { ...$tableFilterStates };
 		delete next[filterStoreKey];
