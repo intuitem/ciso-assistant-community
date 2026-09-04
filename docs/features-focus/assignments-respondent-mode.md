@@ -16,7 +16,7 @@ Once the feature flag is enabled, the design is as follows:
 * through the assignment management, we assign a group of requirements to one or multiple users or teams
 * the assignments can be made to a user or a team, over one or multiple requirements\
   \
-  ![](<../.gitbook/assets/image (1).png>)
+  ![](<../.gitbook/assets/image (1) (2).png>)
 
 <figure><img src="../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -37,10 +37,9 @@ Once the feature flag is enabled, the design is as follows:
 
 ### Workflow
 
-The intereaction between the auditor and respondents follows these steps:\
-<br>
+The intereaction between the auditor and respondents follows these steps:
 
-<figure><img src="../.gitbook/assets/image (1) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (88).png" alt=""><figcaption></figcaption></figure>
 
 The default state is `draft` and you can set them and send feedbacks individually:\
 &#x20;&#x20;
@@ -52,4 +51,4 @@ The default state is `draft` and you can set them and send feedbacks individuall
 For review, if the auditors don't have the permissions to update the requirements compliance result, which will be the general case to keep consistent inputs from the respondent side, they can interact with comments on each one:\
 <br>
 
-<figure><img src="../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (2).png" alt=""><figcaption></figcaption></figure>

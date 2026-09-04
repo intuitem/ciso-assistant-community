@@ -12,7 +12,7 @@ description: Importing CIS Controls or CSA CCM
 
 
 
-<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 Select the downloaded excel sheet and upload it for the engine to convert it to CISO Assistant format:\
 \
