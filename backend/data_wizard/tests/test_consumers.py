@@ -17,6 +17,7 @@ from core.models import (
     AppliedControl,
     Asset,
     Evidence,
+    Finding,
     FindingsAssessment,
     Incident,
     Perimeter,
@@ -1177,6 +1178,92 @@ class TestFindingsAssessmentConsumer:
         assert result.failed == 1
         assert result.created == 0
         assert fa.findings.count() == 0
+
+    def test_applied_controls_resolved_by_ref_id_and_name(
+        self, domain_folder, admin_user
+    ):
+        ac1 = AppliedControl.objects.create(
+            name="Patch A", ref_id="AC-P1", folder=domain_folder
+        )
+        ac2 = AppliedControl.objects.create(name="Patch B", folder=domain_folder)
+        ctx = self._findings_context(domain_folder, admin_user)
+        result = _run(
+            FindingsAssessmentRecordConsumer,
+            ctx,
+            [
+                {
+                    "name": "SQL Injection",
+                    "ref_id": "FIND-AC",
+                    "applied_controls": "AC-P1|Patch B",
+                }
+            ],
+        )
+        assert result.created == 1
+        finding = Finding.objects.get(ref_id="FIND-AC")
+        assert set(finding.applied_controls.all()) == {ac1, ac2}
+
+    def test_owner_resolved_by_user_email(self, domain_folder, admin_user):
+        actor, _ = Actor.objects.get_or_create(user=admin_user)
+        ctx = self._findings_context(domain_folder, admin_user)
+        result = _run(
+            FindingsAssessmentRecordConsumer,
+            ctx,
+            [
+                {
+                    "name": "SQL Injection",
+                    "ref_id": "FIND-OWN",
+                    "owner": admin_user.email,
+                }
+            ],
+        )
+        assert result.created == 1
+        finding = Finding.objects.get(ref_id="FIND-OWN")
+        assert list(finding.owner.all()) == [actor]
+
+    def test_empty_owner_column_clears_existing_owners(self, domain_folder, admin_user):
+        actor, _ = Actor.objects.get_or_create(user=admin_user)
+        perimeter = Perimeter.objects.create(
+            name="Owner Clear Perimeter", folder=domain_folder
+        )
+        seed_ctx = self._findings_context(
+            domain_folder, admin_user, perimeter=perimeter
+        )
+        _run(
+            FindingsAssessmentRecordConsumer,
+            seed_ctx,
+            [
+                {
+                    "name": "Initial",
+                    "ref_id": "FIND-CLR",
+                    "owner": admin_user.email,
+                    "status": "identified",
+                }
+            ],
+        )
+        finding = Finding.objects.get(ref_id="FIND-CLR")
+        assert list(finding.owner.all()) == [actor]
+
+        fa = FindingsAssessment.objects.get(folder=domain_folder)
+        update_ctx = self._findings_context(
+            domain_folder,
+            admin_user,
+            target_id=fa.id,
+            on_conflict=ConflictMode.UPDATE,
+        )
+        _run(
+            FindingsAssessmentRecordConsumer,
+            update_ctx,
+            [
+                {
+                    "name": "Initial",
+                    "ref_id": "FIND-CLR",
+                    "owner": "",
+                    "status": "identified",
+                }
+            ],
+        )
+        finding.refresh_from_db()
+        assert finding.owner.count() == 0
 
 
 # ─────────────────────────────────────────────────────────────────────────────
