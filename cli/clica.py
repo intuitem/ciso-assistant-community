@@ -56,7 +56,10 @@ def ids_map(model, folder=None):
         sys.exit(1)
 
     my_map = dict()
-    url = f"{API_URL}/{model}/ids/"
+    if model == "frameworks":
+        url = f"{API_URL}/{model}"
+    else:
+        url = f"{API_URL}/{model}/ids/"
     headers = {"Authorization": f"Token {TOKEN}"}
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
     if res.status_code != 200:
@@ -129,6 +132,14 @@ def flatten_mapping(mapping) -> Dict[str, str]:
                 flat[key] = value
     return flat
 
+def flatten_frameworks_mapping(mapping) -> Dict[str, str]:
+    flat: Dict[str, str] = {}
+    if isinstance(mapping, dict):
+        results = mapping.get("results")
+        for framework in results:
+            if isinstance(framework, dict):
+                flat[framework.get("name")] = framework.get("id")
+    return flat
 
 def resolve_named_id(
     model: str, name: Optional[str], *, folder: Optional[str] = None
@@ -140,7 +151,10 @@ def resolve_named_id(
     mapping = ids_map(model, folder=folder)
     if not isinstance(mapping, dict):
         return None
-    flat = flatten_mapping(mapping)
+    if model == "frameworks":
+        flat = flatten_frameworks_mapping(mapping)
+    else:
+        flat = flatten_mapping(mapping)
     value = flat.get(name)
     if value:
         return value
