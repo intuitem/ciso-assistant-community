@@ -43,6 +43,7 @@ from django.db.models import (
 from django.db.models.functions import Coalesce
 
 from collections import defaultdict
+from functools import cmp_to_key
 import pytz
 from uuid import UUID
 from itertools import chain, cycle
@@ -868,6 +869,12 @@ class SmartOrderingFilter(filters.OrderingFilter):
     # inconsistent across backends; wrapping in Lower() makes it deterministic.
     case_insensitive_suffixes = ("name",)
 
+    # Fields holding hierarchical numeric identifiers (e.g. "1.2", "10.1") that
+    # must sort numerically segment-by-segment rather than as plain strings,
+    # where a raw DB order_by would put "10.1" before "2.1".
+    natural_sort_fields = ("ref_id",)
+    _natural_split_re = re.compile(r"(\d+)")
+
     def get_valid_fields(self, queryset, view, context={}):
         # Without the mapping DRF drops an annotated column as an unknown field and
         # the header silently does nothing.
@@ -895,9 +902,15 @@ class SmartOrderingFilter(filters.OrderingFilter):
     def filter_queryset(self, request, queryset, view):
         ordering = self.get_ordering(request, queryset, view)
         if ordering:
+            if any(self._field_name(f) in self.natural_sort_fields for f in ordering):
+                return self._natural_order_by(queryset, ordering)
             nulls_last = set(getattr(view, "ordering_nulls_last", None) or ())
             return queryset.order_by(*[self._as_term(f, nulls_last) for f in ordering])
         return queryset
+
+    @staticmethod
+    def _field_name(term):
+        return term[1:] if term.startswith("-") else term
 
     def _as_term(self, term, nulls_last=frozenset()):
         descending = term.startswith("-")
@@ -912,6 +925,69 @@ class SmartOrderingFilter(filters.OrderingFilter):
                 expr.desc(nulls_last=True) if descending else expr.asc(nulls_last=True)
             )
         return term
+
+    def _natural_key(self, value):
+        # Splits "10.2a" into [10, ".", 2, "a"] so segments compare as ints,
+        # not lexicographically ("10" < "2" as strings).
+        if value is None:
+            return None
+        return [
+            int(token) if token.isdigit() else token.lower()
+            for token in self._natural_split_re.split(str(value))
+            if token != ""
+        ]
+
+    @staticmethod
+    def _cmp_values(a, b):
+        if a is None and b is None:
+            return 0
+        if a is None:
+            return 1
+        if b is None:
+            return -1
+        try:
+            if a < b:
+                return -1
+            if a > b:
+                return 1
+            return 0
+        except TypeError:
+            # Segments at the same position can differ in type (e.g. "1.2"
+            # vs "1.a") once split; fall back to a plain string compare.
+            a, b = str(a), str(b)
+            return -1 if a < b else (1 if a > b else 0)
+
+    def _natural_order_by(self, queryset, ordering):
+        fields = []
+        for term in ordering:
+            field = self._field_name(term)
+            if field not in fields:
+                fields.append(field)
+
+        rows = list(queryset.values_list("pk", *fields))
+        if not rows:
+            return queryset
+
+        def compare(row_a, row_b):
+            for term in ordering:
+                descending = term.startswith("-")
+                field = self._field_name(term)
+                idx = fields.index(field) + 1
+                av, bv = row_a[idx], row_b[idx]
+                if field in self.natural_sort_fields:
+                    av, bv = self._natural_key(av), self._natural_key(bv)
+                result = self._cmp_values(av, bv)
+                if result != 0:
+                    return -result if descending else result
+            return 0
+
+        rows.sort(key=cmp_to_key(compare))
+        pk_order = [row[0] for row in rows]
+        preserved = Case(
+            *[When(pk=pk, then=pos) for pos, pk in enumerate(pk_order)],
+            output_field=IntegerField(),
+        )
+        return queryset.order_by(preserved)
 
 
 PERSONAL_FOLDER_SENTINEL = "__personal__"
