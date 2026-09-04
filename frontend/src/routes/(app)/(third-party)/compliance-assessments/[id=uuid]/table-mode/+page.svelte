@@ -75,10 +75,13 @@
 		{ value: 'in_review', label: m.inReview() },
 		{ value: 'done', label: m.done() }
 	];
-	const extended_result_options = Object.keys(extendedResultColorMap).map((value) => ({
-		value,
-		label: safeTranslate(value)
-	}));
+	const extended_result_options = [
+		{ value: 'major_nonconformity', label: m.majorNonconformity() },
+		{ value: 'minor_nonconformity', label: m.minorNonconformity() },
+		{ value: 'observation_sensitive_point', label: m.observationSensitivePoint() },
+		{ value: 'opportunity_for_improvement', label: m.opportunityForImprovement() },
+		{ value: 'good_practice', label: m.goodPractice() }
+	];
 
 	const requirementHashmap = Object.fromEntries(
 		data.requirements.map((requirement: Record<string, any>) => [requirement.id, requirement])
@@ -514,6 +517,7 @@
 	// Scroll to a requirement, expanding any collapsed parent section first.
 	async function goToRequirement(item: { id: string; ancestors: string[] }) {
 		for (const sectionId of item.ancestors) collapsedSections[sectionId] = false;
+		allExpanded = !sectionInfo.rows.some((r) => r.isHeading && collapsedSections[r.id]);
 		await tick();
 		document
 			.getElementById(`requirement-${item.id}`)
@@ -1201,7 +1205,7 @@
 															>
 															<SegmentedControl
 																options={extended_result_options}
-																value={requirementAssessment.extended_result ?? 'not_set'}
+																value={requirementAssessment.extended_result}
 																colorMap={extendedResultColorMap}
 																disabled={isReadOnly}
 																size="sm"
@@ -1209,7 +1213,7 @@
 																onChange={(newValue) => {
 																	requirementAssessment.extended_result =
 																		requirementAssessment.extended_result === newValue
-																			? 'not_set'
+																			? null
 																			: newValue;
 																	update(requirementAssessment, 'extended_result');
 																}}
