@@ -231,13 +231,16 @@
 	optionsExtraFields={[['folder', 'str']]}
 	optionsLabelField="auto"
 	helpText={m.taskTemplateEvidenceHelpText()}
+	helpTextClass="mt-1 border-l-2 border-primary-500 bg-primary-500/5 rounded-r py-1 pl-2"
 	field="evidences"
 	label={m.evidences()}
 	translateOptions={false}
 	allowUserOptions="append"
 	additionalMultiselectOptions={{
 		createOptionMsg: ({ searchText }: { searchText: string }) =>
-			m.createExpectedEvidence({ name: searchText })
+			m.createExpectedEvidence({ name: searchText }),
+		liUserMsgClass: '!text-primary-700 font-semibold',
+		liActiveUserMsgClass: '!bg-primary-500/10'
 	}}
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>

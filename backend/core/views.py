@@ -17841,7 +17841,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
         schedule = schedule or {}
         try:
             interval = max(int(schedule.get("interval") or 1), 1)
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             interval = 1
         unit = cls._SCHEDULE_UNIT.get(
             schedule.get("frequency"), rd.relativedelta(months=1)
