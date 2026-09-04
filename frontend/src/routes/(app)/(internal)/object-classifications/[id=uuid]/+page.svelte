@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { invalidateAll } from '$app/navigation';
+	import { page } from '$app/state';
 	import { isDark } from '$lib/utils/helpers';
 	import { getToastStore } from '$lib/components/Toast/stores';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import {
 		getModalStore,
 		type ModalComponent,
@@ -15,6 +17,31 @@
 	let scheme = $derived(data.scheme);
 	let levels = $derived([...(scheme.levels ?? [])].sort((a: any, b: any) => a.rank - b.rank));
 	let busy = $state(false);
+
+	const canAdd = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'add',
+			model: 'classificationlevel',
+			object: scheme
+		})
+	);
+	const canEdit = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'change',
+			model: 'classificationlevel',
+			object: scheme
+		})
+	);
+	const canDelete = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'delete',
+			model: 'classificationlevel',
+			object: scheme
+		})
+	);
 
 	const toastStore = getToastStore();
 	const modalStore: ModalStore = getModalStore();
@@ -186,13 +213,13 @@
 					<div class="flex flex-col text-surface-400">
 						<button
 							class="hover:text-primary-500 disabled:opacity-30"
-							disabled={busy || i === 0}
+							disabled={busy || i === 0 || !canEdit}
 							onclick={() => move(l, -1)}
 							aria-label={m.moveUp()}><i class="fa-solid fa-chevron-up text-xs"></i></button
 						>
 						<button
 							class="hover:text-primary-500 disabled:opacity-30"
-							disabled={busy || i === levels.length - 1}
+							disabled={busy || i === levels.length - 1 || !canEdit}
 							onclick={() => move(l, 1)}
 							aria-label={m.moveDown()}><i class="fa-solid fa-chevron-down text-xs"></i></button
 						>
@@ -220,27 +247,30 @@
 						>
 						<span class="flex-1 truncate text-sm">{l.name || l.label}</span>
 						<button
-							class="text-surface-400 hover:text-primary-500"
-							disabled={busy}
+							class="text-surface-400 hover:text-primary-500 disabled:opacity-30"
+							disabled={busy || !canEdit}
 							title={m.isVisible()}
 							onclick={() => toggleVisible(l)}
 						>
 							<i class="fa-solid {l.is_visible ? 'fa-eye' : 'fa-eye-slash'}"></i>
 						</button>
-						{#if !l.builtin}
+						{#if !l.builtin && canEdit}
 							<button
 								class="text-surface-400 hover:text-primary-500"
 								disabled={busy}
 								onclick={() => startEdit(l)}
 								aria-label={m.edit()}><i class="fa-solid fa-pen"></i></button
 							>
+						{/if}
+						{#if !l.builtin && canDelete}
 							<button
 								class="text-surface-400 hover:text-error-500"
 								disabled={busy}
 								onclick={() => del(l)}
 								aria-label={m.delete()}><i class="fa-solid fa-trash"></i></button
 							>
-						{:else}
+						{/if}
+						{#if l.builtin}
 							<span class="w-4 text-center text-[10px] text-surface-400" title={m.builtin()}>
 								<i class="fa-solid fa-lock"></i>
 							</span>
@@ -251,17 +281,19 @@
 		</ul>
 
 		<!-- Add level -->
-		<div class="mt-4 flex flex-wrap items-center gap-2 border-t border-surface-200-800 pt-4">
-			<input type="color" bind:value={newColor} class="h-9 w-11 rounded" />
-			<input bind:value={newAbbr} class="input w-32" placeholder={m.abbreviation()} />
-			<input bind:value={newName} class="input min-w-40 flex-1" placeholder={m.name()} />
-			<button
-				class="btn preset-filled-primary-500"
-				disabled={busy || !newAbbr.trim()}
-				onclick={addLevel}
-			>
-				<i class="fa-solid fa-plus mr-2"></i>{m.addLevel()}
-			</button>
-		</div>
+		{#if canAdd}
+			<div class="mt-4 flex flex-wrap items-center gap-2 border-t border-surface-200-800 pt-4">
+				<input type="color" bind:value={newColor} class="h-9 w-11 rounded" />
+				<input bind:value={newAbbr} class="input w-32" placeholder={m.abbreviation()} />
+				<input bind:value={newName} class="input min-w-40 flex-1" placeholder={m.name()} />
+				<button
+					class="btn preset-filled-primary-500"
+					disabled={busy || !newAbbr.trim()}
+					onclick={addLevel}
+				>
+					<i class="fa-solid fa-plus mr-2"></i>{m.addLevel()}
+				</button>
+			</div>
+		{/if}
 	</div>
 </div>
