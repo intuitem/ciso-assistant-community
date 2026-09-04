@@ -917,7 +917,11 @@
 						>
 					</h2>
 					{#if !isReadOnly && hasDraftAssignments}
-						<button class="btn btn-sm preset-filled-warning-500" onclick={handleActivateAll}>
+						<button
+							class="btn btn-sm preset-filled-warning-500"
+							onclick={handleActivateAll}
+							disabled={editingAssignmentId !== null}
+						>
 							<i class="fa-solid fa-play mr-1"></i>
 							{m.activateAll()}
 						</button>
@@ -1040,6 +1044,7 @@
 												class="btn btn-sm preset-filled-warning-500 text-xs"
 												onclick={() => handleSetStatus(assignment.id, 'in_progress')}
 												title={m.activateAssignment()}
+												disabled={editingAssignmentId !== null}
 											>
 												<i class="fa-solid fa-play mr-1"></i>
 												{m.activateAssignment()}

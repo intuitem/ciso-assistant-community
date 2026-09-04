@@ -109,7 +109,7 @@ When working on a **Requirement Assignment** inside an audit, notifications foll
 | Assignment activated (_Draft → In progress_)                  | Assignee                                              |
 | Assignment submitted for review                               | Reviewers (falls back to authors if none are defined) |
 | Assignment reviewed (approved / reopened for review / changes requested) | Assignee                                    |
-| Assignment reopened for editing (sent back to _Draft_)        | Assignee                                              |
+| Assignment reopened for editing (sent back to _Draft_ from _In progress_ or _Changes requested_) | Assignee                          |
 
 ***
 

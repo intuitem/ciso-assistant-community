@@ -215,14 +215,16 @@ Note: `ComplianceAssessmentWriteSerializer.update` and `SecurityExceptionWriteSe
 
 ### 3. Requirement Assignment Review Workflow (Event-Triggered)
 
-These are triggered from a ViewSet action rather than from a serializer's `create()`/`update()`. Every call to `set_status` validates the `(from_status, to_status)` pair against `TRANSITIONS`, then `_send_transition_notification` (`backend/core/views.py:18658`) dispatches the matching task.
+These are triggered from a ViewSet action rather than from a serializer's `create()`/`update()`. Every call to `set_status` validates the `(from_status, to_status)` pair against `TRANSITIONS`, then `_send_transition_notification` (`backend/core/views.py:18676`) dispatches the matching task.
 
 | Transition | Task Function | Template | Recipient |
 |------------|---------------|----------|-----------|
 | `* → in_progress` | `send_assignment_activated_notification` | `assignment_activated` | Assignee |
 | `in_progress/changes_requested → submitted` | `send_assignment_submitted_notification` | `assignment_submitted` | Reviewers (falls back to authors) |
 | `submitted → closed`, `submitted → changes_requested`, `closed → submitted` | `send_assignment_reviewed_notification` (decision = `closed`/`changes_requested`/`reopened`) | `assignment_reviewed` | Assignee |
-| `* → draft` (from `in_progress`, `submitted`, `changes_requested`, or `closed`) | `send_assignment_reopened_notification` | `assignment_reopened` | Assignee |
+| `in_progress → draft`, `changes_requested → draft` | `send_assignment_reopened_notification` | `assignment_reopened` | Assignee |
+
+`submitted → draft` and `closed → draft` are valid transitions but send **no** notification: the assignee had already handed the work back or finished, so a reopening only notifies when it interrupts active work (`in_progress` or `changes_requested`).
 
 ### 4. Password Reset / Welcome Emails
 

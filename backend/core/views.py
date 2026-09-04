@@ -18693,7 +18693,10 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 
             decision = "reopened" if from_status == "closed" else to_status
             send_assignment_reviewed_notification(assignment.id, decision, observation)
-        elif to_status == "draft":
+        elif to_status == "draft" and from_status in (
+            "in_progress",
+            "changes_requested",
+        ):
             from core.tasks import send_assignment_reopened_notification
 
             send_assignment_reopened_notification(assignment.id, observation)
