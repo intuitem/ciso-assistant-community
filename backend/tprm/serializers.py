@@ -1,3 +1,5 @@
+import uuid
+
 import structlog
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -11,6 +13,7 @@ from core.models import (
     Framework,
     RequirementAssessment,
     RequirementAssignment,
+    Terminology,
 )
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.serializers import BaseModelSerializer
@@ -21,6 +24,7 @@ from tprm.models import (
     Contract,
     Entity,
     EntityAssessment,
+    EntityScore,
     Representative,
     Solution,
     SolutionSubcontractor,
@@ -46,6 +50,8 @@ class EntityReadSerializer(BaseModelSerializer):
     contracts = FieldsRelatedField(many=True)
     legal_identifiers = serializers.SerializerMethodField()
     default_criticality = serializers.ReadOnlyField()
+    last_assessment_status = serializers.ReadOnlyField()
+    last_assessment_date = serializers.ReadOnlyField()
     filtering_labels = FieldsRelatedField(many=True)
     subcontracts_count = serializers.SerializerMethodField()
     subcontracts_usage = serializers.SerializerMethodField()
@@ -330,7 +336,12 @@ class ContractImportExportSerializer(BaseModelSerializer):
 
 
 class EntityAssessmentReadSerializer(BaseModelSerializer):
-    compliance_assessment = FieldsRelatedField(fields=["id", "name"])
+    # Bare, so the value carries `str` and the table can render it as a link to the
+    # audit. Only `.id` is read elsewhere.
+    compliance_assessment = FieldsRelatedField()
+    completion = serializers.SerializerMethodField()
+    review_progress = serializers.SerializerMethodField()
+    assignment_status = serializers.SerializerMethodField()
     evidence = FieldsRelatedField()
     perimeter = FieldsRelatedField()
     entity = FieldsRelatedField()
@@ -349,6 +360,50 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
         ],
         source="validationflow_set",
     )
+
+    def get_completion(self, obj):
+        """How far the third party has got: the respondent's number, not `review_progress`."""
+        audit_id = obj.compliance_assessment_id
+        if not audit_id:
+            return None
+        cached = (self.context.get("optimized_data") or {}).get("completion")
+        if cached is not None and audit_id in cached:
+            return cached[audit_id]
+        from core.utils import compute_respondent_progress
+
+        audit = obj.compliance_assessment
+        return compute_respondent_progress(
+            audit, audit.get_requirement_assessments(include_non_assessable=False)
+        )
+
+    def get_review_progress(self, obj):
+        """How much of the audit the auditor has assessed."""
+        audit_id = obj.compliance_assessment_id
+        if not audit_id:
+            return None
+        cached = (self.context.get("optimized_data") or {}).get("review_progress")
+        if cached is not None and audit_id in cached:
+            return cached[audit_id]
+        return obj.compliance_assessment.progress
+
+    def get_assignment_status(self, obj):
+        """Where the questionnaire stands with its respondent: the least advanced assignment."""
+        audit_id = obj.compliance_assessment_id
+        if not audit_id:
+            return None
+        cached = (self.context.get("optimized_data") or {}).get("assignment_statuses")
+        if cached is not None:
+            statuses = cached.get(audit_id, [])
+        else:
+            statuses = list(
+                obj.compliance_assessment.requirement_assignments.values_list(
+                    "status", flat=True
+                )
+            )
+        if not statuses:
+            return None
+        order = [s.value for s in RequirementAssignment.WORKFLOW_ORDER]
+        return min(statuses, key=lambda s: order.index(s) if s in order else len(order))
 
     class Meta:
         model = EntityAssessment
@@ -372,6 +427,9 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
     link_audit = serializers.PrimaryKeyRelatedField(
         queryset=ComplianceAssessment.objects.all(), required=False, allow_null=True
     )
+    # Set on the audit the assessment creates, so the analyst configures respondent
+    # visibility here instead of opening the audit afterwards.
+    field_visibility = serializers.JSONField(required=False)
 
     def _extract_audit_data(self, validated_data):
         audit_data = {
@@ -381,6 +439,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 "selected_implementation_groups", None
             ),
             "link_audit": validated_data.pop("link_audit", None),
+            "field_visibility": validated_data.pop("field_visibility", None),
         }
         return audit_data
 
@@ -415,6 +474,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 locked,
                 audit_data["framework"],
                 audit_data["selected_implementation_groups"],
+                field_visibility=audit_data.get("field_visibility"),
             )
             # The service writes to the locked row; the serializer keeps working
             # with its own instance, and what follows (respondent assignment)
@@ -465,7 +525,11 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             self._link_existing_audit(instance, audit_data)
         else:
             if instance.compliance_assessment:
+                from tprm.services import sync_audit_schedule
+
                 audit = instance.compliance_assessment
+                # Editing the assessment's deadline has to reach the questionnaire.
+                sync_audit_schedule(instance, audit)
                 audit.reviewers.set(instance.reviewers.all())
                 representatives = instance.representatives.all()
                 audit.authors.set(
@@ -488,28 +552,25 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         third_party_users: set[User],
         old_third_party_users: set[User] = set(),
     ):
+        from tprm.services import grant_respondent_access
+
         if instance.compliance_assessment:
             enclave = instance.compliance_assessment.folder
-            respondents, _ = UserGroup.objects.get_or_create(
-                name=UserGroupCodename.THIRD_PARTY_RESPONDENT,
-                folder=enclave,
-                builtin=True,
-            )
-            role_assignment, _ = RoleAssignment.objects.get_or_create(
-                user_group=respondents,
-                role=Role.objects.get(name=RoleCodename.THIRD_PARTY_RESPONDENT),
-                builtin=True,
-                folder=enclave,
-                is_recursive=True,
-            )
-            role_assignment.perimeter_folders.add(enclave)
-            for user in third_party_users:
+            respondents = grant_respondent_access(instance, third_party_users)
+            # Never revoke someone the defaults just put back.
+            for user in old_third_party_users - third_party_users:
                 if not user.is_third_party:
                     logger.warning("User is not a third-party", user=user)
-                user.user_groups.add(respondents)
-            for user in old_third_party_users:
-                if not user.is_third_party:
-                    logger.warning("User is not a third-party", user=user)
+                # The workspace is shared by every round of the entity: dropping a
+                # representative here must not cut them off from the others.
+                if (
+                    EntityAssessment.objects.filter(
+                        compliance_assessment__folder=enclave, representatives=user
+                    )
+                    .exclude(pk=instance.pk)
+                    .exists()
+                ):
+                    continue
                 user.user_groups.remove(respondents)
 
     def create(self, validated_data):
@@ -538,7 +599,16 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         with transaction.atomic():
             instance = super().update(instance, validated_data)
             self._create_or_update_audit(instance, audit_data)
-            if "representatives" in validated_data:
+            newly_audited = bool(
+                audit_data["create_audit"] or audit_data.get("link_audit")
+            )
+            if newly_audited:
+                # Read back from the instance: the submitted list may have been empty
+                # and filled from the entity when the audit was built.
+                self._assign_third_party_respondents(
+                    instance, set(instance.representatives.all()), old_representatives
+                )
+            elif "representatives" in validated_data:
                 self._assign_third_party_respondents(
                     instance, representatives, old_representatives
                 )
@@ -549,6 +619,77 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         exclude = []
 
 
+class EntityScoreReadSerializer(BaseModelSerializer):
+    entity = FieldsRelatedField()
+    provider = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
+    normalized_score = serializers.ReadOnlyField()
+
+    class Meta:
+        model = EntityScore
+        exclude = []
+
+
+class EntityScoreWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = EntityScore
+        exclude = ["folder"]
+        # Else the unique constraint becomes a validator that rejects a replay
+        # before `create` can turn it into an update.
+        validators = []
+
+    def to_internal_value(self, data):
+        """Accept the provider by name as well as by id: a feed knows "Bitsight",
+        not a UUID."""
+        provider = data.get("provider") if hasattr(data, "get") else None
+        if isinstance(provider, str) and provider.strip():
+            try:
+                uuid.UUID(provider)
+            except ValueError:
+                providers = Terminology.objects.filter(
+                    field_path=Terminology.FieldPath.ENTITY_SCORE_PROVIDER,
+                    is_visible=True,
+                )
+                match = providers.filter(name__iexact=provider.strip()).first()
+                if match is None:
+                    known = ", ".join(sorted(providers.values_list("name", flat=True)))
+                    raise serializers.ValidationError(
+                        {
+                            "provider": [
+                                f"Unknown rating provider '{provider}'."
+                                + (f" Known providers: {known}." if known else "")
+                            ]
+                        }
+                    )
+                data = data.copy()
+                data["provider"] = str(match.id)
+        return super().to_internal_value(data)
+
+    @staticmethod
+    def _existing_reading(validated_data):
+        return EntityScore.objects.filter(
+            entity=validated_data.get("entity"),
+            provider=validated_data.get("provider"),
+            as_of=validated_data.get("as_of"),
+        ).first()
+
+    def create(self, validated_data):
+        """A feed re-run for the same reading corrects it instead of colliding. The
+        retry covers a concurrent insert between the lookup and the write."""
+        existing = self._existing_reading(validated_data)
+        if existing is not None:
+            return self.update(existing, validated_data)
+        try:
+            with transaction.atomic():
+                return super().create(validated_data)
+        except IntegrityError:
+            existing = self._existing_reading(validated_data)
+            if existing is None:
+                raise
+            return self.update(existing, validated_data)
+
+
 class RepresentativeReadSerializer(BaseModelSerializer):
     entity = FieldsRelatedField()
     user = FieldsRelatedField()
@@ -556,6 +697,14 @@ class RepresentativeReadSerializer(BaseModelSerializer):
     # Governing folder, derived the same way as backend enforcement
     # (Folder.get_folder path: entity.folder) so the frontend can scope checks.
     folder = FieldsRelatedField(source="entity.folder")
+    # The language belongs to the account, so it reads the same here as on the user.
+    language = serializers.SerializerMethodField()
+
+    def get_language(self, obj):
+        if not obj.user:
+            return None
+        code = obj.user.get_preferences().get("lang")
+        return dict(settings.LANGUAGES).get(code, code)
 
     class Meta:
         model = Representative
@@ -564,13 +713,49 @@ class RepresentativeReadSerializer(BaseModelSerializer):
 
 class RepresentativeWriteSerializer(BaseModelSerializer):
     create_user = serializers.BooleanField(default=False)
+    # Seeds the linked user's language: the questionnaire invitation is the first
+    # thing a vendor contact ever sees of the product.
+    language = serializers.CharField(required=False, allow_blank=True, write_only=True)
+
+    def validate_language(self, language):
+        from iam.models import is_supported_language
+
+        if language and not is_supported_language(language):
+            raise serializers.ValidationError("unsupportedLanguage")
+        return language
 
     def validate_entity(self, value):
         self._ensure_immutable("entity", value)
         return value
 
-    def _create_or_update_user(self, instance, user):
-        if not user:
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["language"] = (
+            instance.user.get_preferences().get("lang") if instance.user else None
+        )
+        return data
+
+    @staticmethod
+    def _apply_language(user, language):
+        if not user or not language:
+            return
+        preferences = user.get_preferences()
+        preferences["lang"] = language
+        user.preferences = preferences
+        user.save(update_fields=["preferences"])
+
+    def _create_or_update_user(self, instance, create_user, language=None):
+        if not create_user:
+            # The flag only says whether to mint an account; the language applies to
+            # the linked one too.
+            # Email match stays on third-party users: never an internal user's.
+            self._apply_language(
+                instance.user
+                or User.objects.filter(
+                    email=instance.email, is_third_party=True
+                ).first(),
+                language,
+            )
             return
         user = User.objects.filter(
             email=instance.email,
@@ -584,6 +769,7 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
                     last_name=instance.last_name,
                     is_third_party=True,
                     keep_local_login=True,
+                    language=language,
                 )
             except Exception as e:
                 logger.error(e)
@@ -613,6 +799,9 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError(
                 {"email": "errorUserAlreadyExistsAsInternal"}
             )
+        # Only past the guard: the write commits, so applying it earlier would leave an
+        # internal user's preference changed by a request that was refused.
+        self._apply_language(user, language)
         user.keep_local_login = True
         user.save()
         instance.user = user
@@ -620,14 +809,16 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         user = validated_data.pop("create_user", False)
+        language = validated_data.pop("language", None)
         instance = super().create(validated_data)
-        self._create_or_update_user(instance, user)
+        self._create_or_update_user(instance, user, language)
         return instance
 
     def update(self, instance, validated_data):
         user = validated_data.pop("create_user", False)
+        language = validated_data.pop("language", None)
         instance = super().update(instance, validated_data)
-        self._create_or_update_user(instance, user)
+        self._create_or_update_user(instance, user, language)
         return instance
 
     class Meta:

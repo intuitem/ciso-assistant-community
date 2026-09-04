@@ -51,15 +51,15 @@
 		></textarea>
 		<div class="flex justify-end items-center">
 			<div class="flex space-x-2">
-				<button type="button" class="btn btn-sm variant-filled-primary" onclick={preview}>
+				<button type="button" class="btn btn-sm preset-filled-primary-500" onclick={preview}>
 					<i class="fas fa-eye mr-1"></i>
 					Preview
 				</button>
-				<button class="btn btn-sm variant-filled-success" onclick={saveChanges} type="button">
+				<button class="btn btn-sm preset-filled-success-500" onclick={saveChanges} type="button">
 					<i class="fa-solid fa-check mr-1"></i>
 					Save
 				</button>
-				<button class="btn btn-sm variant-filled-error" onclick={cancelEdit} type="button">
+				<button class="btn btn-sm preset-filled-error-500" onclick={cancelEdit} type="button">
 					<i class="fa-solid fa-xmark mr-1"></i>
 					Cancel
 				</button>
@@ -93,15 +93,15 @@
 		{#if !disabled}
 			<div class="flex justify-end items-center">
 				<div class="flex space-x-2">
-					<button type="button" class="btn btn-sm variant-soft" onclick={startEdit}>
+					<button type="button" class="btn btn-sm preset-tonal" onclick={startEdit}>
 						<i class="fas fa-edit mr-1"></i>
 						Edit
 					</button>
-					<button class="btn btn-sm variant-filled-success" onclick={saveChanges} type="button">
+					<button class="btn btn-sm preset-filled-success-500" onclick={saveChanges} type="button">
 						<i class="fa-solid fa-check mr-1"></i>
 						Save
 					</button>
-					<button class="btn btn-sm variant-filled-error" onclick={cancelEdit} type="button">
+					<button class="btn btn-sm preset-filled-error-500" onclick={cancelEdit} type="button">
 						<i class="fa-solid fa-xmark mr-1"></i>
 						Cancel
 					</button>

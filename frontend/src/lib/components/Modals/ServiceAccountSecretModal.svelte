@@ -33,7 +33,8 @@
 	}
 
 	// Base Classes
-	const cBase = 'card bg-surface-50-950 p-4 w-fit shadow-xl space-y-4 max-w-[80ch] overflow-auto';
+	const cBase =
+		'card bg-surface-100-900 border border-surface-500 p-4 w-fit shadow-xl space-y-4 max-w-[80ch] overflow-auto';
 	const cHeader = 'text-2xl font-bold';
 </script>
 

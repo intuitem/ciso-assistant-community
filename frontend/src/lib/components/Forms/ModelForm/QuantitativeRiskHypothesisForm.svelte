@@ -118,6 +118,10 @@
 		multiple
 		optionsEndpoint="applied-controls"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsInfoFields={{
+			fields: [{ field: 'category', translate: true }],
+			position: 'prefix'
+		}}
 		field="existing_applied_controls"
 		cacheLock={cacheLocks['existing_applied_controls']}
 		bind:cachedValue={formDataCache['existing_applied_controls']}
@@ -129,6 +133,10 @@
 		multiple
 		optionsEndpoint="applied-controls"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsInfoFields={{
+			fields: [{ field: 'category', translate: true }],
+			position: 'prefix'
+		}}
 		field="added_applied_controls"
 		cacheLock={cacheLocks['added_applied_controls']}
 		bind:cachedValue={formDataCache['added_applied_controls']}
@@ -140,6 +148,10 @@
 		multiple
 		optionsEndpoint="applied-controls"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsInfoFields={{
+			fields: [{ field: 'category', translate: true }],
+			position: 'prefix'
+		}}
 		field="removed_applied_controls"
 		cacheLock={cacheLocks['removed_applied_controls']}
 		bind:cachedValue={formDataCache['removed_applied_controls']}
