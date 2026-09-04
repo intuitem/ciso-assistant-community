@@ -34,7 +34,12 @@ from .models import (
     WorkflowVariable,
     WorkflowVersion,
 )
-from .validation import DISABLED_ACTION_TYPES, DISABLED_NODE_TYPES, SECRET_NAME_RE
+from .validation import (
+    DISABLED_ACTION_TYPES,
+    DISABLED_NODE_TYPES,
+    SECRET_NAME_RE,
+    validate_graph,
+)
 
 SCHEMA_VERSION = 1
 
@@ -398,6 +403,15 @@ def import_workflow(data, folder, user=None, source_version=None, secrets=None):
         except GraphValidationError as e:
             raise WorkflowImportError(e.message)
         _post_import_warnings(data, workflow, folder, warnings)
+        # Publish-time problems are cheaper to hear about now than at the
+        # first publish attempt. Missing secrets already have their own
+        # warning above.
+        refs = {str(n.id): n.ref for n in version.nodes.all()}
+        for error in validate_graph(version):
+            if error["code"] == "secret_missing":
+                continue
+            ref = refs.get(error.get("node_id") or "")
+            warnings.append((f"node '{ref}': " if ref else "") + error["message"])
     return workflow, warnings
 
 
