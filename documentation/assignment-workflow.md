@@ -77,6 +77,6 @@ From the **Assessment** page:
 | Event | Who is notified |
 |-------|----------------|
 | Assignment started | Assigned respondents |
-| Respondent submits | Audit reviewers (or authors if no reviewers are set) 
+| Respondent submits | Audit reviewers (or authors if no reviewers are set) |
 | Reviewer closes, reopens for review, or requests changes | Assigned respondents |
 | Reviewer reopens for editing | Assigned respondents |

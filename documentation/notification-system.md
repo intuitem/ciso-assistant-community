@@ -215,7 +215,7 @@ Note: `ComplianceAssessmentWriteSerializer.update` and `SecurityExceptionWriteSe
 
 ### 3. Requirement Assignment Review Workflow (Event-Triggered)
 
-These are triggered from a ViewSet action rather than from a serializer's `create()`/`update()`. Every call to `set_status` looks up the `(from_status, to_status)` pair in `_send_transition_notification` (`backend/core/views.py:18658`) and dispatches the matching task.
+These are triggered from a ViewSet action rather than from a serializer's `create()`/`update()`. Every call to `set_status` validates the `(from_status, to_status)` pair against `TRANSITIONS`, then `_send_transition_notification` (`backend/core/views.py:18658`) dispatches the matching task.
 
 | Transition | Task Function | Template | Recipient |
 |------------|---------------|----------|-----------|
