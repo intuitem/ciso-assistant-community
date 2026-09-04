@@ -945,6 +945,15 @@ export const IS_RECURRENT_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const ENABLED_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'enabled',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
 export const TASK_TEMPLATE_ASSIGNED_TO_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -3179,13 +3188,14 @@ export const listViewFields = {
 			'filtering_labels'
 		],
 		optionalFields: {
-			head: ['createdAt', 'updatedAt'],
-			body: ['created_at', 'updated_at']
+			head: ['enabled', 'createdAt', 'updatedAt'],
+			body: ['enabled', 'created_at', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			assigned_to: TASK_TEMPLATE_ASSIGNED_TO_FILTER,
 			is_recurrent: IS_RECURRENT_FILTER,
+			enabled: ENABLED_FILTER,
 			last_occurrence_status: LAST_OCCURENCE_STATUS_FILTER,
 			next_occurrence_status: NEXT_OCCURENCE_STATUS_FILTER,
 			filtering_labels: LABELS_FILTER

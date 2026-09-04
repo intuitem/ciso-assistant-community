@@ -17,6 +17,7 @@ import uuid
 import zipfile
 import tempfile
 from datetime import date, datetime, timedelta, timezone
+from types import MappingProxyType
 from typing import Dict, Any, List, Tuple, Final
 import time
 from django.db.models import (
@@ -9897,6 +9898,7 @@ class EvidenceFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
             "filtering_labels",
             "findings",
             "findings_assessments",
+            "task_templates",
             "genericcollection",
             "expiry_date",
             "contracts",
@@ -17064,6 +17066,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "name",
             "assigned_to",
             "is_recurrent",
+            "enabled",
             "applied_controls",
             "last_occurrence_status",
             "next_occurrence_status",
@@ -17119,6 +17122,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
     filterset_fields = [
         "assigned_to",
         "is_recurrent",
+        "enabled",
         "folder",
         "applied_controls",
         "evidences",
@@ -17133,7 +17137,11 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
         queryset = self.filter_queryset(self.get_queryset())
         # `str(actor)` resolves a OneToOne hop, so the actor prefetch has to join the
         # target in; `commitments` is already prefetched by get_queryset.
-        tasks = list(queryset.prefetch_related(actor_prefetch("assigned_to")))
+        tasks = list(
+            queryset.select_related("folder").prefetch_related(
+                actor_prefetch("assigned_to")
+            )
+        )
         today = timezone.localdate()
 
         # One query for every occurrence, grouped in python: the serializer's
@@ -17158,6 +17166,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             for key in ("overdue", "due_30d", "due_90d", "later", "no_eta")
         }
         assignee_counts: dict = {}
+        folder_counts: dict = {}
         recurrence = {"one_time": 0, "recurrent": 0}
         commitment_states: dict = {}
         slipped = breached = 0
@@ -17175,12 +17184,40 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
 
             recurrence["recurrent" if task.is_recurrent else "one_time"] += 1
 
+            # Key by folder_id so two domains sharing a name stay separate.
+            folder_key = str(task.folder_id)
+            bucket = folder_counts.setdefault(
+                folder_key,
+                {
+                    "key": folder_key,
+                    "label": task.folder.name,
+                    "count": 0,
+                    "status_breakdown": {},
+                },
+            )
+            bucket["count"] += 1
+            segment = bucket["status_breakdown"].setdefault(
+                status, {"key": status, "count": 0}
+            )
+            segment["count"] += 1
+
             for actor in task.assigned_to.all():
+                # Key by pk so two actors sharing a display name stay separate.
+                actor_key = str(actor.id)
                 bucket = assignee_counts.setdefault(
-                    str(actor.id),
-                    {"key": str(actor.id), "label": str(actor), "count": 0},
+                    actor_key,
+                    {
+                        "key": actor_key,
+                        "label": str(actor),
+                        "count": 0,
+                        "status_breakdown": {},
+                    },
                 )
                 bucket["count"] += 1
+                segment = bucket["status_breakdown"].setdefault(
+                    status, {"key": status, "count": 0}
+                )
+                segment["count"] += 1
 
             if commitment_enabled and not task.is_recurrent:
                 state = task.commitment_state or "--"
@@ -17191,13 +17228,27 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 if task.commitment_is_breached:
                     breached += 1
 
+        def top_buckets(counts: dict, limit: int = 10) -> list:
+            """Top buckets by count, each with its status_breakdown flattened.
+
+            The order is fixed server-side so the charts stay stable across
+            reloads, as top_owners does for applied controls.
+            """
+            buckets = sorted(counts.values(), key=lambda b: -b["count"])[:limit]
+            for bucket in buckets:
+                bucket["status_breakdown"] = sorted(
+                    bucket["status_breakdown"].values(), key=lambda b: -b["count"]
+                )
+            return buckets
+
+        by_assignee = top_buckets(assignee_counts)
+
         payload = {
             "count": len(tasks),
             "by_status": sorted(by_status.values(), key=lambda b: -b["count"]),
             "due_buckets": list(due_buckets.values()),
-            "by_assignee": sorted(assignee_counts.values(), key=lambda b: -b["count"])[
-                :10
-            ],
+            "by_assignee": by_assignee,
+            "by_folder": top_buckets(folder_counts),
             "unassigned": sum(1 for t in tasks if not t.assigned_to.all()),
             "recurrence": recurrence,
         }
@@ -17712,6 +17763,45 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
 
         return [task for task in tasks_list if task is not None]
 
+    # Every occurrence in the horizon becomes a DB row, so the horizon is what
+    # bounds the TaskNode table. Reads only ever need the next occurrence, and
+    # the calendar materializes whatever range it displays, so a few periods of
+    # buffer is enough — and scaling it to the period keeps a daily task and a
+    # ten-yearly one costing the same handful of rows.
+    SYNC_AHEAD_OCCURRENCES = 3
+    SYNC_HORIZON_CAP = rd.relativedelta(years=2)
+    _SCHEDULE_UNIT = MappingProxyType(
+        {
+            "DAILY": rd.relativedelta(days=1),
+            "WEEKLY": rd.relativedelta(weeks=1),
+            "MONTHLY": rd.relativedelta(months=1),
+            "YEARLY": rd.relativedelta(years=1),
+        }
+    )
+
+    @classmethod
+    def _sync_end_date(cls, schedule: dict | None, today):
+        """Last date `_sync_task_nodes` materializes occurrences up to."""
+        schedule = schedule or {}
+        try:
+            interval = max(int(schedule.get("interval") or 1), 1)
+        except (TypeError, ValueError):
+            interval = 1
+        unit = cls._SCHEDULE_UNIT.get(
+            schedule.get("frequency"), rd.relativedelta(months=1)
+        )
+        end_date = min(
+            today + unit * (interval * cls.SYNC_AHEAD_OCCURRENCES),
+            today + cls.SYNC_HORIZON_CAP,
+        )
+        end_recurrence = schedule.get("end_date")
+        if end_recurrence:
+            # Never materialize past the date the recurrence itself stops.
+            end_date = min(
+                end_date, datetime.strptime(end_recurrence, "%Y-%m-%d").date()
+            )
+        return end_date
+
     def _sync_task_nodes(self, task_template: TaskTemplate):
         if task_template.is_recurrent:
             with transaction.atomic():
@@ -17721,35 +17811,15 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                     Q(scheduled_date__gte=today)
                     | Q(scheduled_date__isnull=True, due_date__gte=today)
                 ).update(to_delete=True)
-                # Determine the end date based on the frequency
-                start_date = task_template.task_date
-                if task_template.is_recurrent:
-                    if task_template.schedule["frequency"] == "DAILY":
-                        delta = rd.relativedelta(months=3)
-                    elif task_template.schedule["frequency"] == "WEEKLY":
-                        delta = rd.relativedelta(weeks=52)
-                    elif task_template.schedule["frequency"] == "MONTHLY":
-                        delta = rd.relativedelta(years=2)
-                    elif task_template.schedule["frequency"] == "YEARLY":
-                        delta = rd.relativedelta(years=5)
-
-                    end_date_param = task_template.schedule.get("end_date")
-                    if end_date_param:
-                        end_date = datetime.strptime(end_date_param, "%Y-%m-%d").date()
-                    else:
-                        end_date = today + delta
-                    # Ensure end_date is not before the calculated delta
-                    min_end_date = today + delta
-                    if end_date < min_end_date:
-                        end_date = min_end_date
-                else:
-                    end_date = start_date
-                # Generate the task nodes
-                self.task_calendar(
-                    task_templates=self.get_queryset().filter(id=task_template.id),
-                    start=start_date,
-                    end=end_date,
-                )
+                # A disabled template generates nothing: the soft-delete above
+                # plus the garbage collection below retire its pending future
+                # occurrences without touching completed or annotated ones.
+                if task_template.enabled:
+                    self.task_calendar(
+                        task_templates=self.get_queryset().filter(id=task_template.id),
+                        start=task_template.task_date,
+                        end=self._sync_end_date(task_template.schedule, today),
+                    )
 
                 # garbage-collect — only delete untouched nodes
                 TaskNode.objects.filter(

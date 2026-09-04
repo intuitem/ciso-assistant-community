@@ -2833,10 +2833,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{
-				field: 'task_templates',
-				urlModel: 'document-containers'
-			},
-			{
 				field: 'task_template',
 				urlModel: 'task-nodes',
 				disableCreate: true,
@@ -2845,6 +2841,20 @@ export const URL_MODEL_MAP: ModelMap = {
 				defaultFilters: {
 					status: [{ value: 'pending' }, { value: 'in_progress' }]
 				}
+			},
+			{
+				field: 'task_templates',
+				urlModel: 'evidences',
+				disableCreate: false,
+				disableDelete: true,
+				disableEdit: true,
+				addExisting: {
+					parentField: 'evidences'
+				}
+			},
+			{
+				field: 'task_templates',
+				urlModel: 'document-containers'
 			},
 			{
 				field: 'task_templates',
