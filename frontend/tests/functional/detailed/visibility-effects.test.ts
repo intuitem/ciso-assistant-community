@@ -125,10 +125,7 @@ test('field visibility effects: each flag toggles the corresponding donut', asyn
 	await page.goto(`${auditDetailUrl}/table-mode`);
 
 	const firstRequirementAssessment = page.locator('.table-mode-form').first();
-	await firstRequirementAssessment
-		.locator('[data-scope="accordion"][data-part="item-trigger"]')
-		.filter({ hasText: m.evidence() })
-		.click();
+	await firstRequirementAssessment.getByTestId('evidence-accordion-trigger').click();
 	await firstRequirementAssessment.getByTestId('select-evidence-button').click();
 
 	await expect(page.getByTestId('modal-title')).toBeVisible();
