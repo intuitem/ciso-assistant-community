@@ -2869,6 +2869,37 @@ export const URL_MODEL_MAP: ModelMap = {
 			commitment_notes: 'commitment_management'
 		},
 		selectFields: [{ field: 'status' }],
+		// Without this the API's own field order wins, which puts a dozen mostly-empty
+		// relations above the fold and pushes ref_id, name and description past the
+		// 10-row cutoff. Identity first, then ownership and cadence, then relations.
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'folder' },
+			{ field: 'assigned_to' },
+			{ field: 'is_recurrent' },
+			{ field: 'enabled' },
+			{ field: 'task_date' },
+			{ field: 'status' },
+			{ field: 'observation' },
+			{ field: 'link' },
+			{ field: 'filtering_labels' },
+			{ field: 'evidences' },
+			{ field: 'applied_controls' },
+			{ field: 'assets' },
+			{ field: 'compliance_assessments' },
+			{ field: 'requirement_assessments' },
+			{ field: 'risk_assessments' },
+			{ field: 'findings_assessment' },
+			{ field: 'findings' },
+			{ field: 'incidents' },
+			{ field: 'next_occurrence' },
+			{ field: 'next_occurrence_status' },
+			{ field: 'last_occurrence_status' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'evidences', urlModel: 'evidences' },
@@ -2884,16 +2915,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' }
 		],
 		reverseForeignKeyFields: [
-			{
-				field: 'task_template',
-				urlModel: 'task-nodes',
-				disableCreate: true,
-				disableDelete: true,
-				disableEdit: true,
-				defaultFilters: {
-					status: [{ value: 'pending' }, { value: 'in_progress' }]
-				}
-			},
 			{
 				field: 'task_templates',
 				urlModel: 'evidences',

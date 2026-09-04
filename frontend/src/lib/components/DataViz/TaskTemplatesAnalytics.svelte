@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { m } from '$paraglide/messages';
+	import {
+		TASK_STATUS_COLORS as statusColorMap,
+		TASK_STATUS_FALLBACK_COLOR as FALLBACK_COLOR
+	} from '$lib/utils/taskStatus';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
@@ -40,15 +44,6 @@
 
 	// Keyed rather than positional: the backend sorts buckets by count, so a
 	// positional palette would repaint a status every time the counts shift.
-	const FALLBACK_COLOR = '#a3a3a3';
-	const statusColorMap: Record<string, string> = {
-		_unset: '#cbd5e1',
-		// Pending warns: nobody has picked it up yet. In progress is the calmer state.
-		pending: '#f59e0b',
-		in_progress: '#3b82f6',
-		completed: '#22c55e',
-		cancelled: '#94a3b8'
-	};
 	const commitmentColorMap: Record<string, string> = {
 		'--': '#cbd5e1',
 		in_negotiation: '#f59e0b',
