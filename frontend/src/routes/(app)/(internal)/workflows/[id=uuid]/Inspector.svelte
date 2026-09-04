@@ -2200,7 +2200,9 @@
 				</p>
 			{/if}
 
-			{#if ['action', 'subprocess', 'loop'].includes(nodeDomain.type)}
+			<!-- set_variables already writes variables: offering "save results to
+			     variables" on it invites putting the value in the wrong place. -->
+			{#if ['action', 'subprocess', 'loop'].includes(nodeDomain.type) && actionConfig?.type !== 'set_variables'}
 				<div>
 					<div class="flex items-center justify-between mb-1">
 						{@render fieldLabel(m.outputMapping())}

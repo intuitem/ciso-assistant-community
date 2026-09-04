@@ -2250,14 +2250,36 @@ def validate_attach_evidence_config(node):
 
 
 def validate_set_variables_config(node):
+    """Publish-time checks for set_variables nodes. The step's output is the
+    dict it just wrote, so an output_mapping on it is redundant at best and,
+    for a path that is not one of its own keys, can never resolve — the
+    classic mistake is putting the value under output_mapping instead of
+    action_config.variables, which used to run as a silent no-op."""
     config = node.action_config or {}
     if config.get("type") != "set_variables":
         return []
-    reserved = RESERVED_VARIABLE_KEYS & (config.get("variables") or {}).keys()
-    return [
+    variables = config.get("variables") or {}
+    errors = [
         ("action_set_variables_reserved", f"'{key}' is set by the engine on every run")
-        for key in sorted(reserved)
+        for key in sorted(RESERVED_VARIABLE_KEYS & variables.keys())
     ]
+    if not variables:
+        errors.append(
+            (
+                "action_set_variables_empty",
+                "This step sets no variables — add them under Variables",
+            )
+        )
+    for key, path in sorted((node.output_mapping or {}).items()):
+        if str(path) not in variables:
+            errors.append(
+                (
+                    "action_set_variables_unmapped_output",
+                    f"'{key}' is mapped from '{path}', which this step never "
+                    "produces — set the value under Variables instead",
+                )
+            )
+    return errors
 
 
 def validate_date_offset_config(node):

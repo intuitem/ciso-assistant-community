@@ -1089,6 +1089,19 @@ def _apply_output_mapping(node, output, instance):
         value = dig(output, path)
         if value is not None:
             updates[variable_key] = value
+        else:
+            # A silent skip is what makes a mis-authored mapping look like an
+            # engine bug; leave a trace in the run log instead.
+            _log(
+                instance,
+                WorkflowInstanceLog.EventType.ERROR,
+                node=node,
+                message=(
+                    f"Output mapping skipped: '{variable_key}' ← '{path}' "
+                    "is not present in this step's output"
+                ),
+                data={"variable": variable_key, "path": str(path)},
+            )
     if updates:
         instance.variables.update(updates)
 
