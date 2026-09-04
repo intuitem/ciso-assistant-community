@@ -17,7 +17,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
 import { safeTranslate } from '$lib/utils/i18n';
 
-export const load: PageServerLoad = async ({ params, fetch }) => {
+export const load: PageServerLoad = async ({ params, fetch, url }) => {
 	const schema = z.object({ id: z.string().uuid() });
 	const deleteForm = await superValidate(zod(schema));
 	const URLModel = params.model!;
@@ -59,7 +59,9 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		});
 	}
 
-	return { createForm, deleteForm, model, URLModel };
+	// Reading `url` re-runs this load on query change; the table is keyed on it
+	// because its filter state is seeded once at creation.
+	return { createForm, deleteForm, model, URLModel, urlSearch: url.search };
 };
 
 export const actions: Actions = {

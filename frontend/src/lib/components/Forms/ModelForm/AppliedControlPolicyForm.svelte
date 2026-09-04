@@ -30,6 +30,7 @@
 		origin?: string | null;
 		initialData?: Record<string, any>;
 		context?: string;
+		object?: any;
 		rest?: Record<string, any>;
 	}
 
@@ -42,7 +43,8 @@
 		schema = {},
 		origin = null,
 		initialData = {},
-		context = 'default'
+		context = 'default',
+		object = {}
 	}: Props = $props();
 
 	// Declare form store at top level
