@@ -17816,11 +17816,14 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
         return [task for task in tasks_list if task is not None]
 
     # Every occurrence in the horizon becomes a DB row, so the horizon is what
-    # bounds the TaskNode table. Reads only ever need the next occurrence, and
-    # the calendar materializes whatever range it displays, so a few periods of
-    # buffer is enough — and scaling it to the period keeps a daily task and a
-    # ten-yearly one costing the same handful of rows.
+    # bounds the TaskNode table. Two things pull against each other: planning views
+    # (yearly_review) read nodes without generating them, so a year has to be
+    # covered to be plannable; but a daily task would be 365 rows. So: at least a
+    # few periods ahead, extended to a year when that costs a sane number of rows,
+    # and never more than that many occurrences.
     SYNC_AHEAD_OCCURRENCES = 3
+    SYNC_MAX_OCCURRENCES = 53
+    SYNC_MIN_HORIZON = rd.relativedelta(years=1)
     SYNC_HORIZON_CAP = rd.relativedelta(years=2)
     _SCHEDULE_UNIT = MappingProxyType(
         {
@@ -17842,10 +17845,15 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
         unit = cls._SCHEDULE_UNIT.get(
             schedule.get("frequency"), rd.relativedelta(months=1)
         )
-        end_date = min(
-            today + unit * (interval * cls.SYNC_AHEAD_OCCURRENCES),
-            today + cls.SYNC_HORIZON_CAP,
-        )
+        end_date = today + unit * (interval * cls.SYNC_AHEAD_OCCURRENCES)
+        min_end = today + cls.SYNC_MIN_HORIZON
+        if end_date < min_end:
+            # Reach for a full year, but stop at the occurrence budget so a short
+            # period does not turn a year into hundreds of rows.
+            end_date = min(
+                min_end, today + unit * (interval * cls.SYNC_MAX_OCCURRENCES)
+            )
+        end_date = min(end_date, today + cls.SYNC_HORIZON_CAP)
         end_recurrence = schedule.get("end_date")
         if end_recurrence:
             # Never materialize past the date the recurrence itself stops.

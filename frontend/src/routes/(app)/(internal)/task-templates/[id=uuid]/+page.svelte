@@ -39,7 +39,7 @@
 					'next_occurrence_status',
 					'last_occurrence_status'
 				]
-			: ['last_occurrence_status', 'next_occurrence', 'next_occurrence_status']),
+			: ['last_occurrence_status', 'next_occurrence', 'next_occurrence_status', 'task_date']),
 		...COMMITMENT_FIELDS
 	]}
 >
@@ -51,6 +51,7 @@
 			<TaskOccurrencesPanel
 				taskTemplateId={data.data.id}
 				isRecurrent={data.data.is_recurrent}
+				schedule={data.data.schedule}
 				past={data.pastOccurrences}
 				upcoming={data.upcomingOccurrences}
 			/>

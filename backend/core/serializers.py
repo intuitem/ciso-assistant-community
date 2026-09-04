@@ -5515,7 +5515,9 @@ class TaskTemplateReadSerializer(CommitmentSerializerMixin, BaseModelSerializer)
 
     class Meta:
         model = TaskTemplate
-        exclude = ["schedule"]
+        # The schedule is exposed so the UI can render the cadence in words; it is
+        # not shown raw anywhere, detailViewFields decides what the table renders.
+        fields = "__all__"
 
     def get_task_node(self, obj):
         """

@@ -2654,13 +2654,55 @@
 	"taskNodes": "Tasks occurrences",
 	"associatedTaskNodes": "Associated occurrences",
 	"nextOccurrence": "Next occurrence",
+	"scheduleDaily": "Daily",
+	"scheduleWeekly": "Weekly",
+	"scheduleMonthly": "Monthly",
+	"scheduleYearly": "Yearly",
+	"scheduleEveryNDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Every day",
+				"countPlural=other": "Every {count} days"
+			}
+		}
+	],
+	"scheduleEveryNWeeks": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Every week",
+				"countPlural=other": "Every {count} weeks"
+			}
+		}
+	],
+	"scheduleEveryNMonths": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Every month",
+				"countPlural=other": "Every {count} months"
+			}
+		}
+	],
+	"scheduleEveryNYears": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Every year",
+				"countPlural=other": "Every {count} years"
+			}
+		}
+	],
 	"dueInDays": "in {count} days",
 	"occurrenceHistory": "Occurrence history",
 	"noOccurrenceHistory": "This task has not run yet.",
 	"moreUpcoming": "{count} more upcoming",
 	"allOccurrences": "All occurrences",
-	"occurrenceDone": "Occurrence marked as done",
-	"occurrenceUpdateFailed": "Could not update the occurrence",
 	"taskTemplate": "Task",
 	"taskTemplates": "Tasks",
 	"noTaskTemplates": "No task",

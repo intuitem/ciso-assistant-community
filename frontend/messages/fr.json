@@ -2614,13 +2614,55 @@
 	"defaultUserGroupsWarning": "Appliqué une seule fois, à la création du compte. Modifier ou supprimer ce paramètre par la suite n'affecte pas les utilisateurs déjà provisionnés. Pour une appartenance aux groupes qui reste synchronisée dans le temps, utilisez plutôt le mappage des groupes IdP.",
 	"lastOccurrenceStatus": "Statut de la dernière occurrence",
 	"nextOccurrence": "Prochaine occurrence",
+	"scheduleDaily": "Quotidienne",
+	"scheduleWeekly": "Hebdomadaire",
+	"scheduleMonthly": "Mensuelle",
+	"scheduleYearly": "Annuelle",
+	"scheduleEveryNDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Tous les jours",
+				"countPlural=other": "Tous les {count} jours"
+			}
+		}
+	],
+	"scheduleEveryNWeeks": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Toutes les semaines",
+				"countPlural=other": "Toutes les {count} semaines"
+			}
+		}
+	],
+	"scheduleEveryNMonths": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Tous les mois",
+				"countPlural=other": "Tous les {count} mois"
+			}
+		}
+	],
+	"scheduleEveryNYears": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Tous les ans",
+				"countPlural=other": "Tous les {count} ans"
+			}
+		}
+	],
 	"dueInDays": "dans {count} jours",
 	"occurrenceHistory": "Historique des occurrences",
 	"noOccurrenceHistory": "Cette tâche n'a pas encore été exécutée.",
 	"moreUpcoming": "{count} autres à venir",
 	"allOccurrences": "Toutes les occurrences",
-	"occurrenceDone": "Occurrence marquée comme faite",
-	"occurrenceUpdateFailed": "Impossible de mettre à jour l'occurrence",
 	"taskTemplate": "Tâche",
 	"taskTemplates": "Tâches",
 	"noTaskTemplates": "Aucune tâche",

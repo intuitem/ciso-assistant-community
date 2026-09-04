@@ -2,6 +2,7 @@
 
 import EvidenceFileName from '$lib/components/ModelTable/field/EvidenceFileName.svelte';
 import CommitmentTarget from '$lib/components/ModelTable/field/CommitmentTarget.svelte';
+import ScheduleDisplay from '$lib/components/ModelTable/field/ScheduleDisplay.svelte';
 import LanguageDisplay from '$lib/components/ModelTable/field/LanguageDisplay.svelte';
 import FrameworkName from '$lib/components/ModelTable/field/FrameworkName.svelte';
 import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svelte';
@@ -3856,6 +3857,9 @@ export const CUSTOM_ACTIONS_COMPONENT = Symbol('CustomActions');
 const FIELD_COMPONENT_MAP = {
 	commitments: {
 		target: CommitmentTarget
+	},
+	'task-templates': {
+		schedule: ScheduleDisplay
 	},
 	evidences: {
 		attachment: EvidenceFileName

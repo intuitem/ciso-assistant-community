@@ -383,8 +383,59 @@ class TestSyncHorizon:
         )
         assert response.status_code == 201
         count = TaskNode.objects.filter(task_template_id=response.json()["id"]).count()
-        assert 1 <= count <= TaskTemplateViewSet.SYNC_AHEAD_OCCURRENCES + 1, (
+        assert 1 <= count <= TaskTemplateViewSet.SYNC_MAX_OCCURRENCES + 1, (
             f"{frequency}/{interval} materialized {count} nodes"
+        )
+
+    @pytest.mark.parametrize(
+        "frequency,interval",
+        [("DAILY", 45), ("WEEKLY", 1), ("MONTHLY", 1), ("MONTHLY", 2), ("MONTHLY", 3)],
+    )
+    def test_a_year_is_covered_when_the_period_allows(
+        self, authenticated_client, frequency, interval
+    ):
+        """Planning views read nodes without generating them, so the year must exist."""
+        response = authenticated_client.post(
+            "/api/task-templates/",
+            {
+                "name": f"{frequency}-{interval}-year",
+                "folder": str(Folder.get_root_folder().id),
+                "is_recurrent": True,
+                "schedule": {"frequency": frequency, "interval": interval},
+            },
+            format="json",
+        )
+        assert response.status_code == 201
+        today = timezone.localdate()
+        # The horizon spans the year; occurrences land on multiples of the period,
+        # so the last one sits within one period of the boundary rather than on it.
+        assert (
+            TaskTemplateViewSet._sync_end_date(
+                {"frequency": frequency, "interval": interval}, today
+            )
+            >= today + TaskTemplateViewSet.SYNC_MIN_HORIZON
+        ), f"{frequency}/{interval} horizon stops short of a year"
+        count = TaskNode.objects.filter(task_template_id=response.json()["id"]).count()
+        assert count > TaskTemplateViewSet.SYNC_AHEAD_OCCURRENCES + 1, (
+            f"{frequency}/{interval} produced only {count} nodes, "
+            "so the year-coverage minimum did not take effect"
+        )
+
+    def test_a_short_period_is_bounded_rather_than_covering_a_year(self):
+        """A daily task would be 365 rows; the occurrence budget wins over the year."""
+        today = timezone.localdate()
+        end = TaskTemplateViewSet._sync_end_date(
+            {"frequency": "DAILY", "interval": 1}, today
+        )
+        assert (end - today).days <= TaskTemplateViewSet.SYNC_MAX_OCCURRENCES + 1
+
+    def test_horizon_never_falls_below_the_minimum_for_a_long_period(self):
+        today = timezone.localdate()
+        assert (
+            TaskTemplateViewSet._sync_end_date(
+                {"frequency": "MONTHLY", "interval": 2}, today
+            )
+            >= today + TaskTemplateViewSet.SYNC_MIN_HORIZON
         )
 
     def test_horizon_stops_at_recurrence_end_date(self):
@@ -408,9 +459,13 @@ class TestSyncHorizon:
 
     def test_horizon_tolerates_schedule_without_interval(self):
         today = timezone.localdate()
-        assert TaskTemplateViewSet._sync_end_date(
-            {"frequency": "WEEKLY", "days_of_week": [0]}, today
-        ) == today + timedelta(weeks=TaskTemplateViewSet.SYNC_AHEAD_OCCURRENCES)
+        # interval defaults to 1, so weekly reaches the one-year minimum
+        assert (
+            TaskTemplateViewSet._sync_end_date(
+                {"frequency": "WEEKLY", "days_of_week": [0]}, today
+            )
+            == today + TaskTemplateViewSet.SYNC_MIN_HORIZON
+        )
 
 
 # ── Disabled templates ────────────────────────────────────────────────────
