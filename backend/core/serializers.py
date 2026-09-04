@@ -22,6 +22,8 @@ from tprm.models import Contract, Solution
 from threat_modeling.models import ThreatModel
 from pmbok.models import GenericCollection
 from global_settings.utils import ff_is_enabled
+
+from core.commitment import COMMITMENT_LIST_FIELDS, CommitmentSerializerMixin
 from iam.models import *
 from django.contrib.auth.models import Permission
 
@@ -203,7 +205,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
         return folder
 
     def update(self, instance: models.Model, validated_data: Any) -> models.Model:
-        self._check_object_perm(instance, "change")
+        if self.context.get("commitment_transition"):
+            # Taking a commitment step is its own right; see CommitmentActionsMixin.
+            self._check_object_perm(instance, "transition", model=Commitment)
+        else:
+            self._check_object_perm(instance, "change")
         if hasattr(instance, "urn") and getattr(instance, "urn"):
             raise PermissionDenied({"urn": "Imported objects cannot be modified"})
         try:
@@ -1456,7 +1462,9 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
         ]
 
 
-class AppliedControlWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
+class AppliedControlWriteSerializer(
+    CommitmentSerializerMixin, CustomFieldsSerializerMixin, BaseModelSerializer
+):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
     )
@@ -1486,7 +1494,12 @@ class AppliedControlWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerial
         required=False, default=False, write_only=True
     )
 
+    def validate(self, attrs):
+        return self.validate_commitment(super().validate(attrs))
+
     def create(self, validated_data: Any):
+        commitment_data = dict(validated_data)
+        self.pop_commitment(validated_data)
         validated_data.pop("create_remote_object", None)
         validated_data.pop("remote_object_id", None)
         validated_data.pop("integration_config", None)
@@ -1509,24 +1522,41 @@ class AppliedControlWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerial
                 applied_control, [user.id for user in owner_data]
             )
 
+        # `validate_commitment` accepts an opening move on create, so honour it here
+        # rather than returning 201 with the state silently dropped.
+        self.apply_commitment(applied_control, commitment_data)
+
         return applied_control
 
     def update(self, instance, validated_data):
         # Track old owners before update
         old_owner_ids = set(instance.owner.values_list("id", flat=True))
+        old_folder_id = instance.folder_id
 
+        commitment_data = dict(validated_data)
+        self.pop_commitment(validated_data)
         findings = validated_data.pop("findings", None)
         task_templates = validated_data.pop("task_templates", None)
         incidents = validated_data.pop("incidents", None)
 
-        updated_instance = super().update(instance, validated_data)
+        # The host and its promise move together: a failed commitment write must not
+        # leave the date changed with nothing promised against it. Notifications stay
+        # outside — they are not part of the record.
+        with transaction.atomic():
+            updated_instance = super().update(instance, validated_data)
 
-        if findings is not None:
-            updated_instance.findings.set(findings)
-        if task_templates is not None:
-            updated_instance.task_templates.set(task_templates)
-        if incidents is not None:
-            updated_instance.incidents.set(incidents)
+            if findings is not None:
+                updated_instance.findings.set(findings)
+            if task_templates is not None:
+                updated_instance.task_templates.set(task_templates)
+            if incidents is not None:
+                updated_instance.incidents.set(incidents)
+
+            if old_folder_id != updated_instance.folder_id:
+                # A commitment is only ever as visible as the object it is about.
+                updated_instance.commitments.update(folder=updated_instance.folder)
+
+            self.apply_commitment(updated_instance, commitment_data)
 
         # Get new owners after update
         new_owner_ids = set(updated_instance.owner.values_list("id", flat=True))
@@ -1715,13 +1745,14 @@ class AppliedControlBulkReadSerializer(AppliedControlReadSerializer):
         return BaseModelSerializer.to_representation(self, instance)
 
 
-class AppliedControlListSerializer(BaseModelSerializer):
+class AppliedControlListSerializer(CommitmentSerializerMixin, BaseModelSerializer):
     """
     Lightweight serializer for the applied controls list view.
 
     Drops the per-row DB-touching fields from `AppliedControlReadSerializer`
     that the list table does not render:
-      - `findings_count` (source="findings.count" → COUNT per row)
+      - `findings_count` (source="findings.count" → COUNT per row); the related
+        findings themselves are served instead, prefetched
       - `ranking_score` (iterates non-prefetched risk_scenarios → 1 query per row)
       - `annual_cost` / `annual_cost_display` / `currency`
         (property hits GlobalSettings per row, called twice)
@@ -1732,6 +1763,9 @@ class AppliedControlListSerializer(BaseModelSerializer):
     to skip the unconditional `SyncMapping` query in Write.to_representation
     that would otherwise also fire per row on the list.
     """
+
+    # Only what the table renders: the full history would be dead weight per row.
+    COMMITMENT_FIELD_NAMES = COMMITMENT_LIST_FIELDS
 
     folder = FieldsRelatedField()
     reference_control = FieldsRelatedField()
@@ -1744,6 +1778,8 @@ class AppliedControlListSerializer(BaseModelSerializer):
     owner = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     assets = FieldsRelatedField(many=True)
+    # The action plan shows which findings a control answers, not how many.
+    findings = FieldsRelatedField(many=True)
     is_assigned = serializers.SerializerMethodField()
     linked_models = serializers.SerializerMethodField()
 
@@ -1772,6 +1808,7 @@ class AppliedControlListSerializer(BaseModelSerializer):
             "owner",
             "filtering_labels",
             "assets",
+            "findings",
             "is_assigned",
             "linked_models",
             "created_at",
@@ -2109,6 +2146,13 @@ class UserReadSerializer(BaseModelSerializer):
     idp_groups = FieldsRelatedField(many=True)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
     folder = FieldsRelatedField()
+    language = serializers.SerializerMethodField()
+
+    def get_language(self, obj):
+        # The label, not the code: this feeds the detail view. The edit form reads the
+        # code from the write serializer instead.
+        code = obj.get_preferences().get("lang")
+        return dict(settings.LANGUAGES).get(code, code)
 
     class Meta:
         model = User
@@ -2128,6 +2172,7 @@ class UserReadSerializer(BaseModelSerializer):
             "expiry_date",
             "is_superuser",
             "folder",
+            "language",
         ]
 
 
@@ -2148,11 +2193,14 @@ class UserRolesOnFolderSerializer(BaseModelSerializer):
 class UserWriteSerializer(BaseModelSerializer):
     is_local = serializers.BooleanField(required=False)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
+    # Lives in `preferences`, not a column, so it is declared rather than derived.
+    language = serializers.CharField(required=False, allow_blank=True, write_only=True)
 
     class Meta:
         model = User
         fields = [
             "id",
+            "language",
             "email",
             "first_name",
             "last_name",
@@ -2171,6 +2219,20 @@ class UserWriteSerializer(BaseModelSerializer):
     def validate_email(self, email):
         validate_email(email)
         return email
+
+    def validate_language(self, language):
+        from iam.models import is_supported_language
+
+        if language and not is_supported_language(language):
+            raise serializers.ValidationError("unsupportedLanguage")
+        return language
+
+    def to_representation(self, instance):
+        # write_only so DRF never looks for a `language` attribute; the edit form
+        # still reads its initial value from here.
+        data = super().to_representation(instance)
+        data["language"] = instance.get_preferences().get("lang")
+        return data
 
     def create(self, validated_data):
         send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
@@ -2209,6 +2271,8 @@ class UserWriteSerializer(BaseModelSerializer):
         return user
 
     def update(self, instance: User, validated_data: Any) -> User:
+        language = validated_data.pop("language", None)
+
         user_groups_data = validated_data.get("user_groups")
         if user_groups_data is not None:
             initial_groups = set(instance.user_groups.all())
@@ -2222,7 +2286,17 @@ class UserWriteSerializer(BaseModelSerializer):
                     new_user_groups=new_groups,
                 )
                 # instance.user_groups.set(user_groups_data)
-        return super().update(instance, validated_data)
+        updated_instance = super().update(instance, validated_data)
+
+        # After, not before: the change permission is enforced inside super().update(),
+        # so writing preferences first would let an unauthorized request through.
+        if language:
+            preferences = updated_instance.get_preferences()
+            preferences["lang"] = language
+            updated_instance.preferences = preferences
+            updated_instance.save(update_fields=["preferences"])
+
+        return updated_instance
 
 
 def build_autocomplete_serializer(model_cls, extra_fields=()):
@@ -2429,6 +2503,17 @@ class FolderImportExportSerializer(BaseModelSerializer):
 # Compliance Assessment
 
 
+class FrameworkOptionsSerializer(serializers.ModelSerializer):
+    """Just enough to render a framework in a picker: the full read serializer
+    carries the visibility maps, implementation groups and reference controls."""
+
+    name = serializers.CharField(source="get_name_translated")
+
+    class Meta:
+        model = Framework
+        fields = ["id", "ref_id", "name"]
+
+
 class FrameworkReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id", "urn"])
@@ -2442,6 +2527,9 @@ class FrameworkReadSerializer(ReferentialSerializer):
     # CA-creation form's editor reads this so its pills always reflect what
     # the backend will actually save.
     effective_field_visibility = serializers.SerializerMethodField()
+    # Same map for an audit addressed to a third party: the entity-assessment form
+    # reads this so its pills match what that path will save.
+    third_party_field_visibility = serializers.SerializerMethodField()
 
     implementation_groups_definition = serializers.SerializerMethodField()
 
@@ -2449,6 +2537,9 @@ class FrameworkReadSerializer(ReferentialSerializer):
         return obj.get_implementation_groups_definition_translated()
 
     def get_has_compliance_assessments(self, obj):
+        flag = getattr(obj, "has_compliance_assessments_flag", None)
+        if flag is not None:
+            return flag
         return obj.complianceassessment_set.exists()
 
     def get_scores_definition(self, obj):
@@ -2461,6 +2552,11 @@ class FrameworkReadSerializer(ReferentialSerializer):
         from core.utils import build_initial_field_visibility
 
         return build_initial_field_visibility(obj)
+
+    def get_third_party_field_visibility(self, obj):
+        from core.utils import build_third_party_field_visibility
+
+        return build_third_party_field_visibility(obj)
 
     class Meta:
         model = Framework
@@ -2863,18 +2959,8 @@ class CampaignReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     compliance_assessments = FieldsRelatedField(many=True)
     perimeters = FieldsRelatedField(many=True)
+    entities = FieldsRelatedField(many=True)
     frameworks = FieldsRelatedField(many=True)
-    status = serializers.CharField(source="get_status_display")
-    framework = FieldsRelatedField(
-        [
-            "id",
-            "min_score",
-            "max_score",
-            "implementation_groups_definition",
-            "ref_id",
-            "reference_controls",
-        ]
-    )
 
     class Meta:
         model = Campaign
@@ -2882,6 +2968,22 @@ class CampaignReadSerializer(BaseModelSerializer):
 
 
 class CampaignWriteSerializer(BaseModelSerializer):
+    def validate_selected_implementation_groups(self, value):
+        """Launch reads `framework` and `value` off each entry with bare subscripts,
+        and the field is free-form JSON: a malformed entry would 500 there."""
+        if not value:
+            return value
+        if not isinstance(value, list) or any(
+            not isinstance(entry, dict)
+            or "framework" not in entry
+            or "value" not in entry
+            for entry in value
+        ):
+            raise serializers.ValidationError(
+                "Each entry must be an object carrying `framework` and `value`."
+            )
+        return value
+
     class Meta:
         model = Campaign
         fields = "__all__"
@@ -2895,6 +2997,8 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
     campaign = FieldsRelatedField()
+    # The binder raised from this audit's requirements, so the page can link to it.
+    findings_assessments = FieldsRelatedField(many=True)
     framework = FieldsRelatedField(
         [
             "id",
@@ -2927,6 +3031,8 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
         ],
         source="validationflow_set",
     )
+    entity_assessments = FieldsRelatedField(many=True, source="entityassessment_set")
+    requirement_assignments = FieldsRelatedField(["id", "status"], many=True)
 
     def get_progress(self, obj):
         # Detail-oriented serializer: delegate to the model's cascade-based
@@ -2986,6 +3092,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
     framework = FieldsRelatedField()
     perimeter = FieldsRelatedField()
     progress = serializers.SerializerMethodField()
+    entity_assessments = FieldsRelatedField(many=True, source="entityassessment_set")
 
     def get_progress(self, obj):
         # Fast path: page-scoped counts from optimized_data, computed for
@@ -3023,6 +3130,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "updated_at",
             "path",
             "authors",
+            "entity_assessments",
         ]
 
 
@@ -3338,6 +3446,11 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
     description = serializers.CharField(source="get_requirement_description")
     evidences = FieldsRelatedField(many=True)
+    # The respondent view lists these as a table, so it needs the promised date and
+    # where the commitment stands, not just a name.
+    task_templates = FieldsRelatedField(
+        ["id", "task_date", "status", "commitment_state", "committed_eta"], many=True
+    )
     compliance_assessment = FieldsRelatedField(
         [
             "id",
@@ -3420,6 +3533,9 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     requirement = serializers.PrimaryKeyRelatedField(read_only=True)
     answers = serializers.JSONField(required=False, write_only=True)
+    task_templates = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=TaskTemplate.objects.all()
+    )
 
     def to_internal_value(self, data):
         # Strip fields the respondent isn't allowed to write before DRF validates
@@ -3445,6 +3561,34 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                     for k, v in data.items()
                     if is_field_editable_by(ca, k, "respondent")
                 }
+
+        # A relation the submitting role cannot see must not be writable by it: the
+        # form round-trips every field, so a hidden tab would post an empty list.
+        if request and self.instance and "task_templates" in data:
+            from core.utils import (
+                get_respondent_scoped_folder_ids,
+                is_field_editable_by,
+            )
+
+            ca = self.instance.compliance_assessment
+            respondent_folders = get_respondent_scoped_folder_ids(request.user)
+            role = (
+                "respondent"
+                if respondent_folders and ca.folder_id in respondent_folders
+                else "auditor"
+            )
+            if not is_field_editable_by(ca, "task_templates", role):
+                data = {k: v for k, v in data.items() if k != "task_templates"}
+
+        # The reviewer's, unconditionally: not routed through field_visibility so it
+        # cannot be configured open.
+        if request and self.instance and "review_state" in data:
+            from core.utils import get_respondent_scoped_folder_ids
+
+            ca = self.instance.compliance_assessment
+            respondent_folders = get_respondent_scoped_folder_ids(request.user)
+            if respondent_folders and ca.folder_id in respondent_folders:
+                data = {k: v for k, v in data.items() if k != "review_state"}
 
         # On update, treat an empty required-choice value as "unchanged" instead
         # of failing validation. The respondent view (`requirements_list`) strips
@@ -4358,12 +4502,14 @@ class CampaignImportExportSerializer(BaseModelSerializer):
         slug_field="urn", read_only=True, many=True
     )
     perimeters = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    entities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = Campaign
         fields = [
             "name",
             "description",
+            "kind",
             "status",
             "start_date",
             "eta",
@@ -4372,6 +4518,7 @@ class CampaignImportExportSerializer(BaseModelSerializer):
             "folder",
             "frameworks",
             "perimeters",
+            "entities",
             "created_at",
             "updated_at",
         ]
@@ -4438,7 +4585,7 @@ class RequirementAssignmentReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     compliance_assessment = FieldsRelatedField()
     actor = FieldsRelatedField(many=True)
-    requirement_assessments = FieldsRelatedField(many=True)
+    requirement_assessments = FieldsRelatedField(["id", "review_state"], many=True)
     events = RequirementAssignmentEventSerializer(many=True, read_only=True)
 
     class Meta:
@@ -4774,6 +4921,8 @@ class FindingsAssessmentWriteSerializer(BaseModelSerializer):
 class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
+    # The audit this binder captures findings for — the way back.
+    compliance_assessment = FieldsRelatedField()
     findings_count = serializers.IntegerField(source="findings.count")
     treatment_progress = serializers.IntegerField(read_only=True, default=0)
     evidences = FieldsRelatedField(many=True)
@@ -4797,28 +4946,86 @@ class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
 
 
 class FindingWriteSerializer(BaseModelSerializer):
+    # Reverse M2M (declared on TaskTemplate): DRF does not pick it up from Meta.
+    task_templates = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=TaskTemplate.objects.all()
+    )
+
     def validate(self, attrs):
-        if (
-            hasattr(self, "instance")
-            and self.instance
-            and self.instance.findings_assessment.is_locked
-        ):
+        current_assessment = getattr(self.instance, "findings_assessment", None)
+        if current_assessment and current_assessment.is_locked:
             raise serializers.ValidationError(
                 "⚠️ Cannot modify the finding when the findings assessment is locked."
+            )
+        target_assessment = attrs.get("findings_assessment")
+        if target_assessment and target_assessment.is_locked:
+            raise serializers.ValidationError(
+                {
+                    "findings_assessment": "⚠️ Cannot attach the finding to a locked findings assessment."
+                }
             )
         return super().validate(attrs)
 
     class Meta:
         model = Finding
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
     def create(self, validated_data):
         findings_assessment = validated_data.get("findings_assessment")
-        if not findings_assessment:
-            raise serializers.ValidationError({"findings_assessment": "mandatory"})
-        validated_data["folder"] = findings_assessment.folder
+        if findings_assessment:
+            validated_data["folder"] = findings_assessment.folder
+        elif not validated_data.get("folder"):
+            raise serializers.ValidationError(
+                {
+                    "folder": "A domain is required for a finding without a findings assessment."
+                }
+            )
+        task_templates = validated_data.pop("task_templates", [])
 
-        return super().create(validated_data)
+        finding = super().create(validated_data)
+        if task_templates:
+            finding.task_templates.set(task_templates)
+
+        return finding
+
+    def update(self, instance, validated_data):
+        task_templates = validated_data.pop("task_templates", None)
+        reparented = "findings_assessment" in validated_data
+        findings_assessment = (
+            validated_data["findings_assessment"]
+            if reparented
+            else instance.findings_assessment
+        )
+        previous_assessment = instance.findings_assessment
+
+        if findings_assessment:
+            # A bound finding lives in its assessment's folder: moving it means
+            # detaching it, or moving the assessment.
+            if (
+                not reparented
+                and "folder" in validated_data
+                and validated_data["folder"] != instance.folder
+            ):
+                raise serializers.ValidationError(
+                    {
+                        "folder": "Detach the finding from its findings assessment to move it to another domain."
+                    }
+                )
+            if findings_assessment.folder != instance.folder:
+                self._check_object_perm(
+                    instance, "add", folder=findings_assessment.folder
+                )
+            validated_data["folder"] = findings_assessment.folder
+
+        updated_instance = super().update(instance, validated_data)
+
+        if task_templates is not None:
+            updated_instance.task_templates.set(task_templates)
+
+        if previous_assessment and previous_assessment != findings_assessment:
+            previous_assessment.upsert_daily_metrics()
+
+        return updated_instance
 
 
 class FindingReadSerializer(FindingWriteSerializer):
@@ -4828,6 +5035,8 @@ class FindingReadSerializer(FindingWriteSerializer):
     # No standalone page exists for requirement nodes: omit "id" so the
     # generic detail view renders plain text instead of a dead link.
     requirement_node = FieldsRelatedField(["ref_id", "name"])
+    # This one does have a page — it is the way back to what raised the finding.
+    requirement_assessment = FieldsRelatedField()
     asset = FieldsRelatedField()
     threats = FieldsRelatedField(many=True)
     vulnerabilities = FieldsRelatedField(many=True)
@@ -4835,8 +5044,11 @@ class FindingReadSerializer(FindingWriteSerializer):
     applied_controls = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
+    task_templates = FieldsRelatedField(many=True)
     perimeter = FieldsRelatedField(
-        source="findings_assessment.perimeter", fields=["id", "name", "folder"]
+        source="findings_assessment.perimeter",
+        fields=["id", "name", "folder"],
+        allow_null=True,
     )
     folder = FieldsRelatedField()
     severity = serializers.CharField(source="get_severity_display")
@@ -4845,6 +5057,29 @@ class FindingReadSerializer(FindingWriteSerializer):
     class Meta:
         model = Finding
         fields = "__all__"
+
+
+class CommitmentReadSerializer(BaseModelSerializer):
+    """The cross-model register: every promise, whoever it is about."""
+
+    folder = FieldsRelatedField()
+    committed_by = FieldsRelatedField()
+    target = serializers.SerializerMethodField()
+    target_type = serializers.SerializerMethodField()
+    is_breached = serializers.BooleanField(read_only=True)
+
+    def get_target(self, obj):
+        target = obj.target
+        if target is None:
+            return None
+        return {"id": str(target.id), "str": str(target)}
+
+    def get_target_type(self, obj):
+        return obj.content_type.model
+
+    class Meta:
+        model = Commitment
+        exclude = ["content_type", "object_id", "is_published"]
 
 
 class PresetReadSerializer(BaseModelSerializer):
@@ -5128,8 +5363,7 @@ class CommentWriteSerializer(BaseModelSerializer):
             parent_count = sum(1 for f in self.PARENT_FIELDS if data.get(f) is not None)
             if parent_count != 1:
                 raise serializers.ValidationError(
-                    "Exactly one parent (requirement_assessment, risk_scenario, "
-                    "applied_control, or finding) must be set."
+                    f"Exactly one parent ({', '.join(self.PARENT_FIELDS)}) must be set."
                 )
         else:
             for field_name in self.PARENT_FIELDS:
@@ -5235,7 +5469,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
         return TimelineEntryReadSerializer(obj.timeline_entries.all(), many=True).data
 
 
-class TaskTemplateReadSerializer(BaseModelSerializer):
+class TaskTemplateReadSerializer(CommitmentSerializerMixin, BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     incidents = FieldsRelatedField(many=True)
@@ -5243,6 +5477,7 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
     assets = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
     compliance_assessments = FieldsRelatedField(many=True)
+    requirement_assessments = FieldsRelatedField(many=True)
     risk_assessments = FieldsRelatedField(many=True)
     assigned_to = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField(many=True)
@@ -5289,7 +5524,7 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
         return task_node.observation if task_node else ""
 
 
-class TaskTemplateWriteSerializer(BaseModelSerializer):
+class TaskTemplateWriteSerializer(CommitmentSerializerMixin, BaseModelSerializer):
     status = serializers.CharField(required=False)
     observation = serializers.CharField(
         required=False, allow_blank=True, allow_null=True
@@ -5323,7 +5558,12 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
                 data["observation"] = ""
         return data
 
+    def validate(self, attrs):
+        return self.validate_commitment(super().validate(attrs))
+
     def create(self, validated_data):
+        commitment_data = dict(validated_data)
+        self.pop_commitment(validated_data)
         assigned_to_data = validated_data.get("assigned_to", [])
         incidents = validated_data.pop("incidents", [])
         tasknode_data = self._extract_tasknode_fields(validated_data)
@@ -5339,11 +5579,18 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
                 instance, [actor.id for actor in assigned_to_data]
             )
 
+        # A recurrent template is a definition, not one promise; the mixin drops the
+        # fields for it on update, but on create there is no instance to check yet.
+        if not instance.is_recurrent:
+            self.apply_commitment(instance, commitment_data)
+
         return instance
 
     def update(self, instance, validated_data):
         # Track old assigned users before update
         old_assigned_ids = set(instance.assigned_to.values_list("id", flat=True))
+        commitment_data = dict(validated_data)
+        self.pop_commitment(validated_data)
 
         # Track old folder before update
         old_folder_id = instance.folder_id
@@ -5364,6 +5611,11 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
                 TaskNode.objects.filter(task_template=instance).update(
                     folder=instance.folder
                 )
+                # A commitment is only ever as visible as the object it is about.
+                instance.commitments.update(folder=instance.folder)
+
+            # Inside the block: the template and its promise move together.
+            self.apply_commitment(instance, commitment_data)
 
         # Get new assigned users after update
         new_assigned_ids = set(instance.assigned_to.values_list("id", flat=True))
