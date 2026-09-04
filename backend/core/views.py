@@ -977,6 +977,23 @@ def actor_prefetch(field_name: str) -> Prefetch:
     )
 
 
+def check_folder_add_permission(user, folder, *models):
+    """Raise PermissionDenied unless *user* may create each of *models* in *folder*.
+
+    Mirror of the check ``BaseModelSerializer.create`` performs; use it from
+    actions that create objects directly through the ORM.
+    """
+    for model in models:
+        if not RoleAssignment.is_access_allowed(
+            user=user,
+            perm=Permission.objects.get(codename=f"add_{model._meta.model_name}"),
+            folder=folder,
+        ):
+            raise PermissionDenied(
+                {"folder": "You do not have permission to add objects in this folder"}
+            )
+
+
 class AutocompleteMixin:
     """Adds a lightweight, server-paginated ``autocomplete`` action for entity
     pickers (search/ordering/filtering come from the viewset's existing filter
@@ -4394,7 +4411,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         serializer_class=RiskAssessmentDuplicateSerializer,
     )
     def duplicate(self, request, pk):
-        serializer = RiskAssessmentDuplicateSerializer(data=request.data)
+        serializer = RiskAssessmentDuplicateSerializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
@@ -4406,7 +4425,12 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             risk_assessment = self.get_object()
 
             perimeter = data.get("perimeter")
-            folder = data.get("folder")
+            # folder always follows the perimeter, as on update
+            folder = perimeter.folder if perimeter else data.get("folder")
+            target_models = [RiskAssessment]
+            if risk_assessment.risk_scenarios.exists():
+                target_models.append(RiskScenario)
+            check_folder_add_permission(request.user, folder, *target_models)
 
             duplicate_risk_assessment = RiskAssessment.objects.create(
                 name=data.get("name"),
@@ -6063,7 +6087,9 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
         serializer_class=AppliedControlDuplicateSerializer,
     )
     def duplicate(self, request, pk):
-        serializer = AppliedControlDuplicateSerializer(data=request.data)
+        serializer = AppliedControlDuplicateSerializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
@@ -6077,6 +6103,10 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
 
         applied_control = self.get_object()
         new_folder = data["folder"]
+        target_models = [AppliedControl]
+        if data["duplicate_evidences"]:
+            target_models.append(Evidence)
+        check_folder_add_permission(request.user, new_folder, *target_models)
         duplicate_applied_control = AppliedControl.objects.create(
             reference_control=applied_control.reference_control,
             name=data["name"],
@@ -10761,7 +10791,9 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
         serializer_class=OrganisationObjectiveDuplicateSerializer,
     )
     def duplicate(self, request, pk):
-        serializer = OrganisationObjectiveDuplicateSerializer(data=request.data)
+        serializer = OrganisationObjectiveDuplicateSerializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
@@ -10774,6 +10806,7 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
             )
 
         new_folder = data["folder"]
+        check_folder_add_permission(request.user, new_folder, OrganisationObjective)
         objective = self.get_object()
         duplicate_objective = OrganisationObjective.objects.create(
             name=data["name"],
@@ -14857,6 +14890,8 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "answers__selected_choices",  # Needed by build_answers_dict() to get choice ref_ids
                 "requirement__questions",  # Needed by FilteredNodeSerializer.questions
                 "requirement__questions__choices",  # Needed by get_questions_translated
+                "requirement__reference_controls",  # Needed by associated_reference_controls property
+                "requirement__threats",  # Needed by associated_threats property
             )
         )
         respondent_folders = get_respondent_scoped_folder_ids(self.request.user)
@@ -14867,6 +14902,34 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 | Q(assignments__actor__in=user_actors)
             ).distinct()
         return qs
+
+    def paginate_queryset(self, queryset):
+        page = super().paginate_queryset(queryset)
+        self._preset_parent_requirements(page if page is not None else queryset)
+        return page
+
+    @staticmethod
+    def _preset_parent_requirements(requirement_assessments):
+        """Batch-resolve RequirementNode.parent_requirement for the page: the
+        property falls back to one query per row when _parent_requirement_obj
+        is not preset (urn is globally unique, so one urn__in fetch is
+        equivalent)."""
+        requirements = [
+            ra.requirement
+            for ra in requirement_assessments
+            if getattr(ra, "requirement", None)
+        ]
+        parent_urns = {req.parent_urn for req in requirements if req.parent_urn}
+        if not parent_urns:
+            return
+        parents_by_urn = {
+            node.urn: node
+            for node in RequirementNode.objects.filter(urn__in=parent_urns)
+        }
+        for req in requirements:
+            parent = parents_by_urn.get(req.parent_urn)
+            if parent:
+                req._parent_requirement_obj = parent
 
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
@@ -17505,10 +17568,12 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 ),
             },
             "labels": {
-                "source": "filtering_labels",
+                "source": "task_template.filtering_labels",
                 "label": "labels",
-                "format": lambda qs: ",".join(
-                    escape_excel_formula(o.label) for o in qs.all()
+                "format": lambda qs: (
+                    ",".join(escape_excel_formula(o.label) for o in qs.all())
+                    if qs
+                    else ""
                 ),
             },
         },
@@ -17889,6 +17954,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                     "task_template__compliance_assessments",
                     "task_template__risk_assessments",
                     "task_template__findings_assessment",
+                    "task_template__filtering_labels",
                 )
                 .order_by("due_date")
             )
@@ -18407,7 +18473,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             ).distinct()
         return qs
 
-    EDITABLE_STATUSES = ("draft", "in_progress")
+    EDITABLE_STATUSES = ("draft",)  # Keep the tuple type
 
     def update(self, request, *args, **kwargs):
         assignment = self.get_object()
@@ -18436,6 +18502,24 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             )
         return super().destroy(request, *args, **kwargs)
 
+    def perform_update(self, serializer):
+        # Override batch_action, which calls perform_update directly
+        # rather than going through update()/partial_update() above.
+        if serializer.instance.status not in self.EDITABLE_STATUSES:
+            raise PermissionDenied(
+                f"Cannot edit assignment in '{serializer.instance.status}' status."
+            )
+        super().perform_update(serializer)
+
+    def perform_destroy(self, instance):
+        # Override batch_action, which calls perform_destroy directly
+        # rather than going through destroy() above.
+        if instance.status not in self.EDITABLE_STATUSES:
+            raise PermissionDenied(
+                f"Cannot delete assignment in '{instance.status}' status."
+            )
+        super().perform_destroy(instance)
+
     # Valid transitions: (from_status, to_status) → config
     # reviewer_only: respondents are forbidden
     # actor_only: only assigned actors can perform this transition
@@ -18460,6 +18544,22 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             "observation": "required",
         },
         ("closed", "submitted"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("submitted", "draft"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("changes_requested", "draft"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("closed", "draft"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("in_progress", "draft"): {
             "reviewer_only": True,
             "observation": "clear",
         },
@@ -18705,6 +18805,13 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 
             decision = "reopened" if from_status == "closed" else to_status
             send_assignment_reviewed_notification(assignment.id, decision, observation)
+        elif to_status == "draft" and from_status in (
+            "in_progress",
+            "changes_requested",
+        ):
+            from core.tasks import send_assignment_reopened_notification
+
+            send_assignment_reopened_notification(assignment.id, observation)
 
 
 class QuestionViewSet(BaseModelViewSet):
