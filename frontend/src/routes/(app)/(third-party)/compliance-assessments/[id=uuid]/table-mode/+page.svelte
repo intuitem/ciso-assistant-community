@@ -398,6 +398,7 @@
 	let collapsedSections: Record<string, boolean> = $state({});
 	function toggleSectionCollapse(id: string) {
 		collapsedSections[id] = !collapsedSections[id];
+		allExpanded = !sectionInfo.rows.some((r) => r.isHeading && collapsedSections[r.id]);
 	}
 	function isRowVisible(index: number) {
 		const row = sectionInfo.rows[index];
@@ -488,7 +489,11 @@
 		}))
 	);
 	const filteredTocSections = $derived(
-		tocFilterResult ? tocSections.filter((s) => s.result === tocFilterResult) : tocSections
+		tocFilterResult
+			? tocSections.filter(
+					(s) => s.result === tocFilterResult || (s.isSection && filterSections.has(s.id))
+				)
+			: tocSections
 	);
 
 	// Compact score formatting for the header analytics.
@@ -818,7 +823,7 @@
 				</div>
 
 				<!-- Row 2: TOC toggle + audit progress analytics -->
-				{#if (!shallow && showToc) || assessableTotal > 0}
+				{#if (!shallow && showToc) || (showResult && assessableTotal > 0) || (showScore && complianceAssessment.scoring_enabled)}
 					<div class="flex items-center gap-4 flex-wrap border-t border-surface-100 pt-2">
 						{#if !shallow && showToc}
 							<button
@@ -831,7 +836,7 @@
 								{m.tableOfContents()}
 							</button>
 						{/if}
-						{#if assessableTotal > 0}
+						{#if showResult && assessableTotal > 0}
 							<div class="flex flex-1 items-center gap-3 min-w-[200px]">
 								<span class="text-xs font-medium text-surface-500 shrink-0">
 									{m.progress()}: {assessedCount}/{assessableTotal}
@@ -864,7 +869,7 @@
 								</div>
 							</div>
 						{/if}
-						{#if complianceAssessment.scoring_enabled}
+						{#if showScore && complianceAssessment.scoring_enabled}
 							<div class="flex items-center gap-2 shrink-0 text-xs font-medium">
 								<span
 									class="inline-flex items-center gap-1 rounded-md bg-surface-100 px-2 py-1 text-surface-700"
@@ -893,7 +898,7 @@
 			</div>
 		{/if}
 		<!-- Read-only banner -->
-		{#if isReadOnly}
+		{#if complianceAssessment.is_locked || complianceAssessment.status === 'in_review'}
 			<div
 				class="card bg-yellow-50 border border-yellow-300 px-5 py-3 flex items-center space-x-3 my-2"
 			>
