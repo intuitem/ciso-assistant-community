@@ -1104,6 +1104,7 @@
 	"secret": "Secret",
 	"key": "Key",
 	"customFields": "Custom fields",
+	"customFieldsLoadError": "Custom fields could not be loaded. Reselect the domain or reopen the form to retry.",
 	"customFieldsDescription": "Define typed, filterable fields on objects (Projects, Assets, and Applied controls).",
 	"customField": "Custom field",
 	"addCustomField": "Add custom field",
