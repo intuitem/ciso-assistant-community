@@ -18,7 +18,7 @@ import pandas as pd
 import structlog
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
-from django.db import IntegrityError, models
+from django.db import IntegrityError, models, transaction
 from django.db.models import Q
 from django.http import FileResponse, HttpRequest
 from django.utils import timezone
@@ -866,6 +866,10 @@ class RecordConsumer[Context = None](ABC):
     ) -> tuple[dict, Optional[Error]]:
         pass
 
+    def after_create(self, instance) -> None:
+        """Hook called after a new record is created. No-op by default."""
+        pass
+
     def find_existing(self, record_data: dict):
         """Find an existing record matching this data based on the model's fields_to_check.
 
@@ -1021,7 +1025,9 @@ class RecordConsumer[Context = None](ABC):
             )
             if serializer.is_valid():
                 try:
-                    serializer.save()
+                    with transaction.atomic():
+                        instance = serializer.save()
+                        self.after_create(instance)
                     results.add_created()
                 except Exception as e:
                     results.add_error(Error(record=record, error=str(e)))
@@ -2596,8 +2602,11 @@ class FolderRecordConsumer(RecordConsumer):
     SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
         {
             "parent_folder": ["domain"],
+            "create_iam_groups": ["iam_group"],
         }
     )
+    IAM_GROUP_TRUE_VALUES: ClassVar[frozenset[str]] = frozenset({"yes", "true", "1"})
+    IAM_GROUP_FALSE_VALUES: ClassVar[frozenset[str]] = frozenset({"no", "false", "0"})
 
     def create_context(self):
         return None, None
@@ -2637,11 +2646,23 @@ class FolderRecordConsumer(RecordConsumer):
         else:
             parent_folder_id = Folder.get_root_folder().id
 
-        return {
+        data = {
             "name": name,
             "description": record.get("description", ""),
             "parent_folder": parent_folder_id,
-        }, None
+        }
+
+        iam_group = str(record.get("iam_group", "")).strip().lower()
+        if iam_group in self.IAM_GROUP_TRUE_VALUES:
+            data["create_iam_groups"] = True
+        elif iam_group in self.IAM_GROUP_FALSE_VALUES:
+            data["create_iam_groups"] = False
+
+        return data, None
+
+    def after_create(self, instance: Folder) -> None:
+        if instance.create_iam_groups:
+            Folder.create_default_ug_and_ra(instance)
 
 
 class VulnerabilityRecordConsumer(RecordConsumer[None]):
