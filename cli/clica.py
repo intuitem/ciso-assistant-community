@@ -145,12 +145,13 @@ def flatten_frameworks_mapping(mapping) -> Dict[str, list[str]]:
     flat: Dict[str, list[str]] = {}
     if isinstance(mapping, dict):
         results = mapping.get("results")
-        for framework in results:
-            if isinstance(framework, dict):
-                framework_name = framework.get("name")
-                framework_id = framework.get("id")
-                if isinstance(framework_name, str) and isinstance(framework_id, str):
-                    flat.setdefault(framework_name, []).append(framework_id)
+        if isinstance(results, list):
+            for framework in results:
+                if isinstance(framework, dict):
+                    framework_name = framework.get("name")
+                    framework_id = framework.get("id")
+                    if isinstance(framework_name, str) and isinstance(framework_id, str):
+                        flat.setdefault(framework_name, []).append(framework_id)
     return flat
 
 
