@@ -151,6 +151,7 @@ from weasyprint import HTML
 
 from core.helpers import *
 from core.models import (
+    Commitment,
     AppliedControl,
     ComplianceAssessment,
     RequirementMappingSet,
@@ -169,6 +170,7 @@ from core.utils import (
     get_respondent_scoped_folder_ids,
     is_field_visible_to,
     render_answers_cell,
+    respondent_progress_counts,
     visible_questions,
     _generate_occurrences,
     _create_task_dict,
@@ -208,6 +210,8 @@ from django.contrib.admin.utils import NestedObjects
 from django.db import router
 from global_settings.models import GlobalSettings
 from global_settings.utils import ff_is_enabled, general_setting_is_enabled
+
+from core import commitment
 
 import structlog
 
@@ -411,6 +415,25 @@ class NullableModelChoiceFilter(df.ModelMultipleChoiceFilter):
         return qs.filter(filters).distinct()
 
 
+class CommitmentStateFilter(df.MultipleChoiceFilter):
+    """Filters hosts by the state of their live commitment.
+
+    Both lookups in one `filter()` on purpose: they must constrain the same row.
+    """
+
+    def filter(self, qs, value):
+        if not value:
+            return qs
+        undefined = Commitment.State.UNDEFINED in value
+        states = [v for v in value if v != Commitment.State.UNDEFINED]
+        query = Q()
+        if states:
+            query |= Q(commitments__is_current=True, commitments__state__in=states)
+        if undefined:
+            query |= Q(commitments__isnull=True) | ~Q(commitments__is_current=True)
+        return qs.filter(query).distinct()
+
+
 def get_mapping_max_depth():
     """Get mapping max depth from general settings at runtime; safe during migrations."""
     try:
@@ -524,10 +547,9 @@ class ExportMixin:
 
     def _get_export_queryset(self):
         """Get filtered queryset with permissions applied."""
-        viewable_ids = RoleAssignment.get_viewable_object_ids(
-            self.request.user, self.model
-        )
-        queryset = self.model.objects.filter(id__in=viewable_ids)
+        # Same queryset as the list view: the export is handed its query string, so
+        # it needs the annotations. iterator() rejects prefetches, hence the reset.
+        queryset = self.get_queryset().prefetch_related(None)
 
         if self.export_config:
             if self.export_config.get("select_related"):
@@ -846,6 +868,13 @@ class SmartOrderingFilter(filters.OrderingFilter):
     # inconsistent across backends; wrapping in Lower() makes it deterministic.
     case_insensitive_suffixes = ("name",)
 
+    def get_valid_fields(self, queryset, view, context={}):
+        # Without the mapping DRF drops an annotated column as an unknown field and
+        # the header silently does nothing.
+        valid = list(super().get_valid_fields(queryset, view, context))
+        remap = getattr(view, "ordering_remap", None) or {}
+        return valid + [(key, key) for key in remap]
+
     def get_ordering(self, request, queryset, view):
         ordering = super().get_ordering(request, queryset, view) or []
         # Only rewrite `folder` to the related name when the model really has
@@ -861,14 +890,18 @@ class SmartOrderingFilter(filters.OrderingFilter):
                 map_folder = folder_field.is_relation and folder_field.concrete
             except FieldDoesNotExist:
                 map_folder = False
-        ordering = [
-            "folder__name"
-            if f == "folder" and map_folder
-            else "-folder__name"
-            if f == "-folder" and map_folder
-            else f
-            for f in ordering
-        ]
+        remap = {
+            **({"folder": "folder__name"} if map_folder else {}),
+            **(getattr(view, "ordering_remap", None) or {}),
+        }
+
+        def resolved(term):
+            descending = term.startswith("-")
+            field = term[1:] if descending else term
+            target = remap.get(field, field)
+            return f"-{target}" if descending else target
+
+        ordering = [resolved(f) for f in ordering]
         # Offset pagination is only lossless over a total order: without a
         # unique tiebreaker, rows tied on the sort key can swap between the
         # separate queries that back each page, silently skipping or
@@ -880,15 +913,22 @@ class SmartOrderingFilter(filters.OrderingFilter):
     def filter_queryset(self, request, queryset, view):
         ordering = self.get_ordering(request, queryset, view)
         if ordering:
-            return queryset.order_by(*[self._as_term(f) for f in ordering])
+            nulls_last = set(getattr(view, "ordering_nulls_last", None) or ())
+            return queryset.order_by(*[self._as_term(f, nulls_last) for f in ordering])
         return queryset
 
-    def _as_term(self, term):
+    def _as_term(self, term, nulls_last=frozenset()):
         descending = term.startswith("-")
         field = term[1:] if descending else term
         if field.split("__")[-1] in self.case_insensitive_suffixes:
             expr = Lower(field)
             return expr.desc() if descending else expr.asc()
+        # Postgres and SQLite disagree on where NULLs land, so pin it.
+        if field in nulls_last:
+            expr = F(field)
+            return (
+                expr.desc(nulls_last=True) if descending else expr.asc(nulls_last=True)
+            )
         return term
 
 
@@ -953,6 +993,23 @@ def actor_prefetch(field_name: str) -> Prefetch:
         field_name,
         queryset=Actor.objects.select_related("user", "team", "entity"),
     )
+
+
+def check_folder_add_permission(user, folder, *models):
+    """Raise PermissionDenied unless *user* may create each of *models* in *folder*.
+
+    Mirror of the check ``BaseModelSerializer.create`` performs; use it from
+    actions that create objects directly through the ORM.
+    """
+    for model in models:
+        if not RoleAssignment.is_access_allowed(
+            user=user,
+            perm=Permission.objects.get(codename=f"add_{model._meta.model_name}"),
+            folder=folder,
+        ):
+            raise PermissionDenied(
+                {"folder": "You do not have permission to add objects in this folder"}
+            )
 
 
 class AutocompleteMixin:
@@ -4401,7 +4458,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         serializer_class=RiskAssessmentDuplicateSerializer,
     )
     def duplicate(self, request, pk):
-        serializer = RiskAssessmentDuplicateSerializer(data=request.data)
+        serializer = RiskAssessmentDuplicateSerializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
@@ -4413,7 +4472,12 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             risk_assessment = self.get_object()
 
             perimeter = data.get("perimeter")
-            folder = data.get("folder")
+            # folder always follows the perimeter, as on update
+            folder = perimeter.folder if perimeter else data.get("folder")
+            target_models = [RiskAssessment]
+            if risk_assessment.risk_scenarios.exists():
+                target_models.append(RiskScenario)
+            check_folder_add_permission(request.user, folder, *target_models)
 
             duplicate_risk_assessment = RiskAssessment.objects.create(
                 name=data.get("name"),
@@ -4993,6 +5057,10 @@ class AppliedControlFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
     status = df.MultipleChoiceFilter(
         choices=AppliedControl.Status.choices, lookup_expr="icontains"
     )
+    # The promises live in their own table, so this reaches through the live cycle.
+    commitment_state = CommitmentStateFilter(
+        choices=Commitment.State.choices, label="Commitment state"
+    )
     is_assigned = df.BooleanFilter(method="filter_is_assigned")
     linked_models = df.MultipleChoiceFilter(
         choices=[("--", "--")] + APPLIED_CONTROL_LINKED_FIELDS,
@@ -5142,7 +5210,150 @@ class AppliedControlFilterSet(TimestampRangeFilterMixin, GenericFilterSet):
         }
 
 
-class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
+def scoped_findings_prefetch(request, lookup="findings"):
+    """Prefetch only the findings of the binders being filtered on, when there are any."""
+    binder_ids = request.query_params.getlist("findings_assessments") if request else []
+    if not binder_ids:
+        return lookup
+    return Prefetch(
+        lookup,
+        queryset=Finding.objects.filter(findings_assessment__in=binder_ids),
+    )
+
+
+class CommitmentRegisterViewSet(BaseModelViewSet):
+    """Read-only register of every promise, across the models that carry them.
+
+    Transitions stay on the host's own endpoint: the step depends on who is accountable there.
+    """
+
+    model = Commitment
+    http_method_names = ["get", "head", "options"]
+    feature_flag = "commitment_management"
+    permission_classes = BaseModelViewSet.permission_classes + [FeatureFlagRequired]
+    ordering = ["-created_at"]
+    search_fields = ["notes"]
+    filterset_fields = {
+        "state": ["exact"],
+        "folder": ["exact"],
+        "committed_by": ["exact"],
+        "is_current": ["exact"],
+        "committed_eta": ["exact", "lte", "gte"],
+    }
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "committed_by", "content_type")
+            .prefetch_related("target")
+        )
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get state choices")
+    def state(self, request):
+        return Response(dict(Commitment.State.choices))
+
+
+class CommitmentActionsMixin:
+    """Serves the legal next commitment states; the write serializer is what enforces them."""
+
+    # Taking a step is its own right, like transitioning an assignment: a counterparty
+    # promises a date without holding change rights over the whole object. Reading the
+    # legal steps is not — that is part of reading the object, and a reader who was
+    # asked for the transition right would be shown a blank panel instead of the state.
+    @property
+    def permission_overrides(self):
+        method = getattr(getattr(self, "request", None), "method", None)
+        if method in permissions.SAFE_METHODS:
+            return {}
+        return {"commitment_transitions": "transition_commitment"}
+
+    @action(detail=True, methods=["get", "post"], name="Commitment transitions")
+    def commitment_transitions(self, request, pk=None):
+        """GET the legal next steps; POST one to take it, through the write serializer."""
+        if not ff_is_enabled("commitment_management"):
+            return Response(
+                {"error": "This feature is not enabled."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        obj = self.get_object()
+
+        if request.method == "POST":
+            return self._perform_commitment_transition(request, obj)
+
+        return Response(self._commitment_payload(request, obj))
+
+    def _commitment_payload(self, request, obj):
+        if getattr(obj, "is_recurrent", False):
+            return {"state": obj.commitment_state, "transitions": []}
+
+        transitions = []
+        for target, config in commitment.allowed_targets(obj.commitment_state).items():
+            transitions.append(
+                {
+                    "value": target,
+                    "label": str(Commitment.State(target).label),
+                    "side": config["side"],
+                    "requires_note": bool(config.get("requires_note")),
+                    "requires_date": bool(config.get("requires_date")),
+                    # Through `user_may_take`, not `side_allows`: the UI must not offer
+                    # a step the write serializer will refuse.
+                    "allowed": commitment.user_may_take(
+                        obj, request.user, config["side"]
+                    ),
+                }
+            )
+        current = obj.commitment
+        return {
+            "state": obj.commitment_state,
+            # The promised date is a normal field of the object, named differently per
+            # model: the client needs to know which one it is editing.
+            "date_field": obj.COMMITMENT_DATE_FIELD,
+            "date": obj.commitment_date,
+            "committed_eta": obj.committed_eta,
+            "committed_by": str(current.committed_by)
+            if current and current.committed_by
+            else None,
+            "committed_at": current.committed_at if current else None,
+            "notes": current.notes if current else None,
+            "reopen_count": obj.commitment_reopen_count,
+            "history": [
+                commitment.serialize_commitment(entry)
+                for entry in obj.commitment_history
+            ],
+            "transitions": transitions,
+        }
+
+    def _perform_commitment_transition(self, request, obj):
+        data = {"commitment_state": request.data.get("commitment_state")}
+        notes = request.data.get("commitment_notes")
+        if notes:
+            data["commitment_notes"] = notes
+        promised_date = request.data.get("commitment_date")
+        if promised_date:
+            # Both: the promise is frozen on the commitment, and the object's own date
+            # moves with it so the two do not disagree the moment it is made.
+            data["commitment_date"] = promised_date
+            data[obj.COMMITMENT_DATE_FIELD] = promised_date
+
+        # Flags the write as a commitment step: the serializer then checks that right
+        # rather than change rights over the whole task.
+        context = {**self.get_serializer_context(), "commitment_transition": True}
+        serializer = self.get_serializer_class(action="partial_update")(
+            obj, data=data, partial=True, context=context
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(self._commitment_payload(request, self.get_object()))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get commitment state choices")
+    def commitment_state(self, request):
+        return Response(dict(Commitment.State.choices))
+
+
+class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows applied controls to be viewed or edited.
     """
@@ -5322,9 +5533,13 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
                 "filtering_labels__folder",
                 "assets",
                 "custom_field_values__definition",
+                # The commitment state is an opt-in column: one query, not one per row.
+                "commitments__committed_by",
+                scoped_findings_prefetch(self.request),
             )
 
         return qs.prefetch_related(
+            "commitments__committed_by",
             "owner",
             "filtering_labels__folder",
             "findings",  # Used for findings_count
@@ -5919,7 +6134,9 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
         serializer_class=AppliedControlDuplicateSerializer,
     )
     def duplicate(self, request, pk):
-        serializer = AppliedControlDuplicateSerializer(data=request.data)
+        serializer = AppliedControlDuplicateSerializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
@@ -5933,6 +6150,10 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
         applied_control = self.get_object()
         new_folder = data["folder"]
+        target_models = [AppliedControl]
+        if data["duplicate_evidences"]:
+            target_models.append(Evidence)
+        check_folder_add_permission(request.user, new_folder, *target_models)
         duplicate_applied_control = AppliedControl.objects.create(
             reference_control=applied_control.reference_control,
             name=data["name"],
@@ -7756,6 +7977,11 @@ class UserViewSet(BaseModelViewSet):
     search_fields = ["email", "first_name", "last_name"]
     autocomplete_fields = ["first_name", "last_name", "email", "is_active"]
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get language choices")
+    def language(self, request):
+        return Response(dict(settings.LANGUAGES))
+
     def get_queryset(self):
         # Use base IAM filtering
         # but ensure current user is always included
@@ -9024,8 +9250,26 @@ class FrameworkViewSet(BaseModelViewSet):
     filterset_class = FrameworkFilter
     search_fields = ["name", "description"]
 
+    def _options_only(self) -> bool:
+        request = getattr(self, "request", None)
+        return (
+            self.action == "list"
+            and request is not None
+            and request.query_params.get("options") == "true"
+        )
+
+    def get_serializer_class(self, **kwargs):
+        if self._options_only():
+            from core.serializers import FrameworkOptionsSerializer
+
+            return FrameworkOptionsSerializer
+        return super().get_serializer_class(**kwargs)
+
     def get_queryset(self):
-        qs = super().get_queryset().prefetch_related("requirement_nodes")
+        qs = super().get_queryset().select_related("folder", "library")
+
+        if self._options_only():
+            return qs
 
         # Annotate if the framework is dynamic (any question choice uses implementation groups)
         qs = qs.annotate(
@@ -9034,7 +9278,10 @@ class FrameworkViewSet(BaseModelViewSet):
                     question__requirement_node__framework=OuterRef("pk"),
                     select_implementation_groups__isnull=False,
                 ).exclude(select_implementation_groups=[])
-            )
+            ),
+            has_compliance_assessments_flag=Exists(
+                ComplianceAssessment.objects.filter(framework=OuterRef("pk"))
+            ),
         )
 
         return qs
@@ -9086,10 +9333,14 @@ class FrameworkViewSet(BaseModelViewSet):
         Query params:
           - implementation_group (str): narrow to a single IG.
             Default honors each CA's selected_implementation_groups.
+          - campaign (uuid): narrow to one campaign's audits. A campaign is
+            already an explicit scope, so planned audits are kept — they are the
+            normal state right after a launch and cannot double-count here.
         """
         framework = self.get_object()  # checks read permission
 
         ig_filter = request.query_params.get("implementation_group") or None
+        campaign_id = request.query_params.get("campaign") or None
 
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
@@ -9099,11 +9350,22 @@ class FrameworkViewSet(BaseModelViewSet):
         # deprecated CAs are intentionally excluded; surface them via the
         # standard CA list page if needed.
         LIVE_STATUSES = ("in_progress", "in_review", "done")
+        if campaign_id:
+            LIVE_STATUSES = LIVE_STATUSES + ("planned",)
 
         visible_cas_qs = ComplianceAssessment.objects.filter(
             framework=framework,
             id__in=viewable_ca_ids,
         ).select_related("folder")
+        campaign_scope = None
+        if campaign_id:
+            visible_cas_qs = visible_cas_qs.filter(campaign_id=campaign_id)
+            campaign = Campaign.objects.filter(
+                id=campaign_id,
+                id__in=RoleAssignment.get_viewable_object_ids(request.user, Campaign),
+            ).first()
+            if campaign:
+                campaign_scope = {"id": str(campaign.id), "name": campaign.name}
 
         all_visible_cas = list(visible_cas_qs)
 
@@ -9284,6 +9546,7 @@ class FrameworkViewSet(BaseModelViewSet):
                 "ca_status_counts": ca_status_counts,
                 "live_statuses": list(LIVE_STATUSES),
                 "aggregation_strategy": aggregation_strategy,
+                "campaign": campaign_scope,
                 "generated_at": timezone.now().isoformat(),
             }
         )
@@ -10540,7 +10803,9 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
         serializer_class=OrganisationObjectiveDuplicateSerializer,
     )
     def duplicate(self, request, pk):
-        serializer = OrganisationObjectiveDuplicateSerializer(data=request.data)
+        serializer = OrganisationObjectiveDuplicateSerializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
@@ -10553,6 +10818,7 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
             )
 
         new_folder = data["folder"]
+        check_folder_add_permission(request.user, new_folder, OrganisationObjective)
         objective = self.get_object()
         duplicate_objective = OrganisationObjective.objects.create(
             name=data["name"],
@@ -10604,13 +10870,215 @@ class OrganisationIssueViewSet(BaseModelViewSet):
 class CampaignViewSet(BaseModelViewSet):
     model = Campaign
 
-    filterset_fields = ["folder", "frameworks", "perimeters", "status"]
+    filterset_fields = [
+        "folder",
+        "frameworks",
+        "perimeters",
+        "entities",
+        "status",
+        "kind",
+    ]
     search_fields = ["name", "description"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder")
+            .prefetch_related(
+                "frameworks",
+                "entities",
+                "compliance_assessments",
+                # Perimeter.__str__ reads folder.name.
+                Prefetch(
+                    "perimeters", queryset=Perimeter.objects.select_related("folder")
+                ),
+            )
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Campaign.Status.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get kind choices")
+    def kind(self, request):
+        return Response(dict(Campaign.Kind.choices))
+
+    @action(detail=True, methods=["post"], name="Start the campaign")
+    def start(self, request, pk):
+        """Move a campaign from wiring to under way.
+
+        Re-running only picks up what is still in draft. The mail goes to a background task.
+        """
+        if not RoleAssignment.is_object_accessible(
+            request.user, "change", Campaign, UUID(pk)
+        ):
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        campaign = self.get_object()
+        audits = list(ComplianceAssessment.objects.filter(campaign=campaign))
+        if not audits:
+            return Response(
+                {"error": "campaignHasNoAudits"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        from core.utils import ensure_audit_assignment
+
+        started = 0
+        unassigned = []
+        with transaction.atomic():
+            for audit in audits:
+                # Re-check the source first: an assignee added after launch is
+                # otherwise unreachable, as nothing else wires an existing audit.
+                ensure_audit_assignment(audit)
+                drafts = audit.requirement_assignments.filter(
+                    status=RequirementAssignment.Status.DRAFT
+                )
+                if not audit.requirement_assignments.exists():
+                    # Still nobody to answer: no perimeter default assignee, or a third
+                    # party with no representative. Reported, never silently skipped.
+                    unassigned.append(audit.name)
+                for assignment in drafts:
+                    assignment.status = RequirementAssignment.Status.IN_PROGRESS
+                    assignment.save(update_fields=["status"])
+                    RequirementAssignmentEvent.objects.create(
+                        assignment=assignment,
+                        event_type=RequirementAssignment.Status.IN_PROGRESS,
+                        event_actor=request.user,
+                        folder=assignment.folder,
+                    )
+                    started += 1
+                # Otherwise the audit stays "planned", which the cross-audit report
+                # filters out — a started campaign would read as empty.
+                if audit.status == ComplianceAssessment.Status.PLANNED:
+                    audit.status = ComplianceAssessment.Status.IN_PROGRESS
+                    audit.save(update_fields=["status"])
+
+            # For a third party the assessment is the object on screen — the campaign
+            # lists those, not the questionnaires behind them — so it has to move too.
+            from tprm.models import EntityAssessment
+
+            EntityAssessment.objects.filter(
+                compliance_assessment__in=audits,
+                status=ComplianceAssessment.Status.PLANNED,
+            ).update(status=ComplianceAssessment.Status.IN_PROGRESS)
+
+            # `None`, not just DRAFT: the column is nullable and campaigns created
+            # before it had a default carry no status at all.
+            if campaign.status in (None, "", Campaign.Status.DRAFT):
+                campaign.status = Campaign.Status.IN_PROGRESS
+                campaign.save(update_fields=["status"])
+
+        if settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE:
+            from core.tasks import notify_campaign_assignees
+
+            transaction.on_commit(lambda: notify_campaign_assignees(str(campaign.id)))
+            warning = []
+        else:
+            warning = ["noMailerConfigured"]
+
+        return Response(
+            {
+                "audits": len(audits),
+                "started": started,
+                "unassigned": unassigned,
+                "warning": warning,
+            }
+        )
+
+    @action(detail=True, name="Get campaign dashboard")
+    def dashboard(self, request, pk):
+        """Series and counts the campaign widgets need, in one round trip."""
+        if not RoleAssignment.is_object_accessible(
+            request.user, "view", Campaign, UUID(pk)
+        ):
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        campaign = self.get_object()
+        audit_ids = list(
+            ComplianceAssessment.objects.filter(campaign=campaign).values_list(
+                "id", flat=True
+            )
+        )
+        return Response(
+            {
+                "trend": self._campaign_trend(audit_ids),
+                "assignments": self._campaign_assignments(audit_ids),
+            }
+        )
+
+    @staticmethod
+    def _campaign_trend(audit_ids):
+        """Daily campaign completion, weighted by requirement count.
+
+        HistoricalMetric only holds a row for the days an audit changed, so the last
+        sample is carried forward.
+        """
+        if not audit_ids:
+            return []
+        rows = (
+            HistoricalMetric.objects.filter(
+                model="ComplianceAssessment", object_id__in=audit_ids
+            )
+            .order_by("date")
+            .values_list("date", "object_id", "data")
+        )
+        by_date = {}
+        for day, object_id, data in rows:
+            reqs = (data or {}).get("reqs") or {}
+            total = reqs.get("total") or 0
+            progress = reqs.get("progress_perc") or 0
+            by_date.setdefault(day, {})[object_id] = (total, progress)
+        if not by_date:
+            return []
+
+        series = []
+        last_seen = {}
+        day = min(by_date)
+        today = date.today()
+        while day <= today:
+            last_seen.update(by_date.get(day, {}))
+            total = sum(t for t, _ in last_seen.values())
+            assessed = sum(t * p / 100 for t, p in last_seen.values())
+            series.append(
+                {
+                    "date": day.isoformat(),
+                    # round, not int: the reconstruction lands on values like
+                    # 57.99999999999999, which truncation would report as 57.
+                    "progress": round(assessed / total * 100) if total else 0,
+                }
+            )
+            day += timedelta(days=1)
+        return series
+
+    @staticmethod
+    def _campaign_assignments(audit_ids):
+        if not audit_ids:
+            return {"per_status": {}, "flagged": 0, "unassigned": 0}
+        per_status = {
+            row["status"]: row["count"]
+            for row in RequirementAssignment.objects.filter(
+                compliance_assessment_id__in=audit_ids
+            )
+            .values("status")
+            .annotate(count=Count("id"))
+        }
+        flagged = RequirementAssessment.objects.filter(
+            compliance_assessment_id__in=audit_ids,
+            review_state=RequirementAssessment.ReviewState.CHANGES_REQUESTED,
+        ).count()
+        # Audits nobody holds. Surfaced so the page can keep offering "start" as the
+        # way to wire them once the missing representative or assignee is added.
+        unassigned = (
+            ComplianceAssessment.objects.filter(id__in=audit_ids)
+            .filter(requirement_assignments__isnull=True)
+            .count()
+        )
+        return {"per_status": per_status, "flagged": flagged, "unassigned": unassigned}
 
     @action(detail=True, name="Get campaign metrics")
     def metrics(self, request, pk):
@@ -10623,33 +11091,79 @@ class CampaignViewSet(BaseModelViewSet):
         campaign = self.get_object()
         return Response(campaign.metrics())
 
-    def perform_create(self, serializer):
-        super().perform_create(serializer)
-        campaign = serializer.instance
-        frameworks = serializer.instance.frameworks.all()
-        for perimeter in campaign.perimeters.all():
-            for framework in frameworks:
-                framework_implementation_groups = None
-                if campaign.selected_implementation_groups:
-                    framework_implementation_groups = [
-                        group["value"]
-                        for group in campaign.selected_implementation_groups
-                        if group["framework"] == str(framework.id)
-                    ]
-                from core.utils import build_initial_field_visibility
+    @staticmethod
+    def _campaign_implementation_groups(campaign, framework):
+        if not campaign.selected_implementation_groups:
+            return None
+        groups = [
+            group["value"]
+            for group in campaign.selected_implementation_groups
+            if group["framework"] == str(framework.id)
+        ]
+        return groups or None
 
+    def perform_create(self, serializer):
+        # One transaction: a campaign that fails halfway through launching would
+        # otherwise be left committed with only some of its audits.
+        with transaction.atomic():
+            super().perform_create(serializer)
+            campaign = serializer.instance
+            frameworks = campaign.frameworks.all()
+            if campaign.kind == Campaign.Kind.THIRD_PARTY:
+                self._launch_third_party(campaign, frameworks)
+            else:
+                self._launch_internal(campaign, frameworks)
+
+    def _launch_internal(self, campaign, frameworks):
+        from core.utils import assign_audit_to, build_initial_field_visibility
+
+        for perimeter in campaign.perimeters.all():
+            # The perimeter says who answers for it; the campaign just hands them the
+            # work. Assignments are created in DRAFT — starting the campaign sends.
+            assignees = list(perimeter.default_assignee.all())
+            for framework in frameworks:
                 compliance_assessment = ComplianceAssessment.objects.create(
                     name=f"{campaign.name} - {perimeter.name} - {framework.name}",
                     campaign=campaign,
                     perimeter=perimeter,
                     framework=framework,
                     folder=perimeter.folder,
-                    selected_implementation_groups=framework_implementation_groups
-                    if framework_implementation_groups
-                    else None,
+                    due_date=campaign.due_date,
+                    selected_implementation_groups=self._campaign_implementation_groups(
+                        campaign, framework
+                    ),
                     field_visibility=build_initial_field_visibility(framework),
                 )
                 compliance_assessment.create_requirement_assessments()
+                if assignees:
+                    compliance_assessment.authors.set(assignees)
+                    assign_audit_to(compliance_assessment, assignees)
+
+    def _launch_third_party(self, campaign, frameworks):
+        from tprm.models import EntityAssessment
+        from tprm.services import create_enclave_audit, grant_respondent_access
+
+        for entity in campaign.entities.all():
+            for framework in frameworks:
+                assessment = EntityAssessment.objects.create(
+                    name=f"{campaign.name} - {entity.name} - {framework.name}",
+                    folder=campaign.folder,
+                    entity=entity,
+                    due_date=campaign.due_date,
+                )
+                audit = create_enclave_audit(
+                    assessment,
+                    framework,
+                    self._campaign_implementation_groups(campaign, framework),
+                )
+                # The campaign FK lives on the audit, not the assessment.
+                audit.campaign = campaign
+                audit.save(update_fields=["campaign"])
+                # Built by hand rather than through the serializer, so the access the
+                # serializer grants has to be granted here too: without it the
+                # questionnaire is invisible to the representatives it is addressed to.
+                assessment.refresh_from_db()
+                grant_respondent_access(assessment)
 
 
 def _serialize_suggestion_preview(entries: list[dict]) -> list[dict]:
@@ -11033,7 +11547,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
 
         if self.action == "list":
-            qs = qs.prefetch_related(actor_prefetch("authors"))  # Optional table column
+            qs = qs.prefetch_related(
+                actor_prefetch("authors"),  # Optional table column
+                "entityassessment_set",
+            )
 
         # No requirement_assessments prefetch on the list action: progress is
         # served by `_get_optimized_object_data` (no-IG audits) or the model's
@@ -11063,6 +11580,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "approver"
                     ).prefetch_related("events"),
                 ),
+                "entityassessment_set",
+                "requirement_assignments",
             )
         # Custom detail actions (tree, global_score, donut_data, etc.)
         # use lightweight querysets — they don't need full prefetches.
@@ -11716,54 +12235,53 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         name="Send compliance assessment by mail to authors",
     )
     def mailing(self, request, pk):
+        """Start the assignments, then notify.
+
+        Delivery failures are reported, never a reason to withhold the work.
+        """
+        from core.utils import ensure_audit_assignment
+
         instance = self.get_object()
-        if settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE:
-            for author in instance.authors.all():
-                try:
-                    specific = author.specific
-                    if not hasattr(specific, "mailing"):
-                        logger.warning(
-                            f"Actor {author} (type: {type(specific).__name__}) has no mailing method, skipping email"
-                        )
-                        continue
-                    assignments = list(
-                        instance.requirement_assignments.filter(actor=author)
-                    )
-                    if not assignments:
-                        logger.warning(
-                            f"Actor {author} has no assignment on this audit, skipping email"
-                        )
-                        continue
-                    for assignment in assignments:
-                        specific.mailing(
-                            email_template_name="tprm/third_party_email.html",
-                            subject=_(
-                                "CISO Assistant: A questionnaire has been assigned to you"
-                            ),
-                            object="auditee-assessments",
-                            object_id=assignment.id,
-                        )
-                except Exception as primary_exception:
-                    logger.error(
-                        f"Failed to send email to {author}: {primary_exception}"
-                    )
-                    raise ValidationError(
-                        {"error": ["An error occurred while sending the email"]}
-                    )
-            draft_assignments = instance.requirement_assignments.filter(
-                status=RequirementAssignment.Status.DRAFT
+        # Representatives added after creation are otherwise unreachable: nothing else
+        # wires an existing audit. The helper only ever fills a gap.
+        ensure_audit_assignment(instance)
+
+        if not instance.requirement_assignments.exists():
+            return Response(
+                {"started": 0, "warning": ["noAssigneeToNotify"]},
+                status=status.HTTP_200_OK,
             )
-            for assignment in draft_assignments:
-                assignment.status = RequirementAssignment.Status.IN_PROGRESS
-                assignment.save(update_fields=["status"])
-                RequirementAssignmentEvent.objects.create(
-                    assignment=assignment,
-                    event_type=RequirementAssignment.Status.IN_PROGRESS,
-                    event_actor=request.user,
-                    folder=assignment.folder,
-                )
-            return Response({"results": "mail sent"})
-        raise ValidationError({"warning": ["noMailerConfigured"]})
+
+        started = 0
+        for assignment in instance.requirement_assignments.filter(
+            status=RequirementAssignment.Status.DRAFT
+        ):
+            assignment.status = RequirementAssignment.Status.IN_PROGRESS
+            assignment.save(update_fields=["status"])
+            RequirementAssignmentEvent.objects.create(
+                assignment=assignment,
+                event_type=RequirementAssignment.Status.IN_PROGRESS,
+                event_actor=request.user,
+                folder=assignment.folder,
+            )
+            started += 1
+
+        if not (settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE):
+            return Response({"started": started, "warning": ["noMailerConfigured"]})
+
+        from core.tasks import notify_audit_assignees
+
+        failed = notify_audit_assignees(instance)
+
+        if failed:
+            return Response(
+                {
+                    "started": started,
+                    "failed": failed,
+                    "warning": ["mailPartiallyFailed"],
+                }
+            )
+        return Response({"results": "mail sent", "started": started})
 
     @action(detail=True, methods=["post"])
     def update_requirement(self, request, pk):
@@ -12843,8 +13361,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             .distinct()
         )
 
-        from core.utils import resolve_visibility_from_overrides
-
         # Only include compliance assessments the user can view
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
@@ -12878,48 +13394,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 ]
             total = len(ras)
 
-            # Respondent-facing progress: track the respondent's own work, not
-            # the audit-level progress mode (the status field may not even be
-            # visible to them). Identical computation to the frontend
-            # assessment page: per requirement, share of answered VISIBLE
-            # questions (get_visible_questions_counts resolves depends_on, so
-            # conditional and informational questionnaires are correct); a
-            # requirement with no questions counts as one virtual unit,
-            # answered via the respondent's alignment answer when that field
-            # is in use, else the result. The Python walk is bounded by the
-            # respondent's own assignments, so its cost stays small.
-            alignment_pair = resolve_visibility_from_overrides(
-                ca.field_visibility
-                or (
-                    getattr(ca.framework, "field_visibility", None)
-                    if ca.framework_id
-                    else None
-                ),
-                "respondent_alignment",
-            )
-            alignment_in_use = alignment_pair.get("respondent", "edit") != "hidden"
-
-            total_q = 0
-            answered_q = 0
-            done = 0
-            for ra in ras:
-                visible, answered = ra.get_visible_questions_counts()
-                if visible > 0:
-                    total_q += visible
-                    answered_q += answered
-                    if answered >= visible:
-                        done += 1
-                    continue
-                # No visible questions: one virtual unit, respondent-driven.
-                total_q += 1
-                unit_done = (
-                    bool(ra.respondent_alignment)
-                    if alignment_in_use
-                    else ra.result != RequirementAssessment.Result.NOT_ASSESSED
-                )
-                if unit_done:
-                    answered_q += 1
-                    done += 1
+            # The respondent's own work, not the audit-level progress mode. Shared with
+            # the list and the metrics endpoint so the numbers cannot diverge.
+            total_q, answered_q, done = respondent_progress_counts(ca, ras)
             progress_percent = int(answered_q / total_q * 100) if total_q else 0
 
             actor_names = ", ".join(str(a) for a in assignment.actor.all())
@@ -14328,6 +14805,56 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     """
 
     model = RequirementAssessment
+    # Raising a finding is an edit of the requirement assessment, not an "add" of one:
+    # nobody has add_requirementassessment, they are created with the audit.
+    permission_overrides = {"findings_binder": "change_requirementassessment"}
+
+    @action(detail=True, methods=["post"], url_path="findings-binder")
+    def findings_binder(self, request, pk=None):
+        """Return the audit's findings binder, creating it on first use."""
+        if not ff_is_enabled("findings_from_requirements"):
+            return Response(
+                {"error": "This feature is not enabled."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        requirement_assessment = self.get_object()
+        audit = requirement_assessment.compliance_assessment
+
+        # `add_findingsassessment` on the audit's folder is what authorizes creating it.
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_findingsassessment"),
+            folder=audit.folder,
+        ):
+            raise PermissionDenied(
+                {"folder": "You do not have permission to add a findings binder here"}
+            )
+
+        # An audit can carry more than one binder, so get_or_create would raise
+        # MultipleObjectsReturned. Oldest wins, for a stable choice.
+        binder = (
+            FindingsAssessment.objects.filter(compliance_assessment=audit)
+            .order_by("created_at")
+            .first()
+        )
+        created = binder is None
+        if created:
+            binder = FindingsAssessment.objects.create(
+                compliance_assessment=audit,
+                # Distinguishable at a glance from the audit it belongs to.
+                name=str(_("%(audit)s (findings)")) % {"audit": audit.name},
+                folder=audit.folder,
+                perimeter=audit.perimeter,
+                category=FindingsAssessment.Category.AUDIT,
+                description=str(_("Findings raised from %(audit)s"))
+                % {"audit": audit.name},
+            )
+        return Response(
+            {"id": str(binder.id), "name": binder.name, "created": created},
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
     filterset_fields = {
         "folder": ["exact"],
         "folder__name": ["exact"],
@@ -14375,6 +14902,8 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "answers__selected_choices",  # Needed by build_answers_dict() to get choice ref_ids
                 "requirement__questions",  # Needed by FilteredNodeSerializer.questions
                 "requirement__questions__choices",  # Needed by get_questions_translated
+                "requirement__reference_controls",  # Needed by associated_reference_controls property
+                "requirement__threats",  # Needed by associated_threats property
             )
         )
         respondent_folders = get_respondent_scoped_folder_ids(self.request.user)
@@ -14385,6 +14914,34 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 | Q(assignments__actor__in=user_actors)
             ).distinct()
         return qs
+
+    def paginate_queryset(self, queryset):
+        page = super().paginate_queryset(queryset)
+        self._preset_parent_requirements(page if page is not None else queryset)
+        return page
+
+    @staticmethod
+    def _preset_parent_requirements(requirement_assessments):
+        """Batch-resolve RequirementNode.parent_requirement for the page: the
+        property falls back to one query per row when _parent_requirement_obj
+        is not preset (urn is globally unique, so one urn__in fetch is
+        equivalent)."""
+        requirements = [
+            ra.requirement
+            for ra in requirement_assessments
+            if getattr(ra, "requirement", None)
+        ]
+        parent_urns = {req.parent_urn for req in requirements if req.parent_urn}
+        if not parent_urns:
+            return
+        parents_by_urn = {
+            node.urn: node
+            for node in RequirementNode.objects.filter(urn__in=parent_urns)
+        }
+        for req in requirements:
+            parent = parents_by_urn.get(req.parent_urn)
+            if parent:
+                req._parent_requirement_obj = parent
 
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
@@ -15304,6 +15861,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "authors",
         "status",
         "evidences",
+        "compliance_assessment",
         "filtering_labels",
         "genericcollection",
     ]
@@ -15782,25 +16340,37 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         return Response(sunburst_data)
 
 
+class FindingFilterSet(GenericFilterSet):
+    # "--" selects the findings with no binder, alongside any picked binders.
+    findings_assessment = NullableModelChoiceFilter(
+        queryset=FindingsAssessment.objects.all()
+    )
+
+    class Meta:
+        model = Finding
+        fields = {
+            "name": ["exact"],
+            "owner": ["exact"],
+            "folder": ["exact"],
+            "status": ["exact"],
+            "severity": ["exact"],
+            "priority": ["exact"],
+            "asset": ["exact"],
+            "requirement_node": ["exact"],
+            "requirement_assessment": ["exact"],
+            "filtering_labels": ["exact"],
+            "applied_controls": ["exact"],
+            "evidences": ["exact"],
+            "vulnerabilities": ["exact"],
+            "due_date": ["exact"],
+            "created_at": ["gte", "lt"],
+            "updated_at": ["gte", "lt"],
+        }
+
+
 class FindingViewSet(BaseModelViewSet):
     model = Finding
-    filterset_fields = {
-        "name": ["exact"],
-        "owner": ["exact"],
-        "folder": ["exact"],
-        "status": ["exact"],
-        "severity": ["exact"],
-        "priority": ["exact"],
-        "findings_assessment": ["exact"],
-        "asset": ["exact"],
-        "filtering_labels": ["exact"],
-        "applied_controls": ["exact"],
-        "evidences": ["exact"],
-        "vulnerabilities": ["exact"],
-        "due_date": ["exact"],
-        "created_at": ["gte", "lt"],
-        "updated_at": ["gte", "lt"],
-    }
+    filterset_class = FindingFilterSet
     ordering = ["ref_id"]
 
     def get_queryset(self) -> models.query.QuerySet:
@@ -15818,6 +16388,7 @@ class FindingViewSet(BaseModelViewSet):
             .prefetch_related(
                 "filtering_labels",
                 "applied_controls",
+                "task_templates",
                 "evidences",
                 actor_prefetch("owner"),
                 "threats",
@@ -16537,14 +17108,7 @@ class TimelineEntryViewSet(BaseModelViewSet):
 
 class CommentViewSet(BaseModelViewSet):
     model = Comment
-    filterset_fields = [
-        "requirement_assessment",
-        "risk_scenario",
-        "applied_control",
-        "finding",
-        "is_active",
-        "author",
-    ]
+    filterset_fields = [*Comment.PARENT_FIELDS, "is_active", "author"]
     search_fields = ["body"]
     ordering = ["created_at"]
 
@@ -16552,14 +17116,7 @@ class CommentViewSet(BaseModelViewSet):
         return (
             super()
             .get_queryset()
-            .select_related(
-                "folder",
-                "author",
-                "requirement_assessment",
-                "risk_scenario",
-                "applied_control",
-                "finding",
-            )
+            .select_related("folder", "author", *Comment.PARENT_FIELDS)
         )
 
     def perform_create(self, serializer):
@@ -16582,6 +17139,39 @@ class CommentViewSet(BaseModelViewSet):
 class TaskTemplateFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
 
+    # A task can hang off the binder itself or off one of its findings; the action plan
+    # wants both, the way the applied-control filter walks findings back to the binder.
+    findings_assessments = df.ModelMultipleChoiceFilter(
+        method="filter_findings_assessments",
+        queryset=FindingsAssessment.objects.all(),
+        label="Findings assessments",
+    )
+
+    def filter_findings_assessments(self, queryset, name, value):
+        if not value:
+            return queryset
+        return queryset.filter(
+            Q(findings_assessment__in=value)
+            | Q(findings__findings_assessment__in=value)
+        ).distinct()
+
+    # A task reaches an audit three ways — on the audit, on a requirement assessment,
+    # or on a finding raised from one — and the action plan must walk all three.
+    compliance_assessments = df.ModelMultipleChoiceFilter(
+        method="filter_compliance_assessments",
+        queryset=ComplianceAssessment.objects.all(),
+        label="Compliance assessments",
+    )
+
+    def filter_compliance_assessments(self, queryset, name, value):
+        if not value:
+            return queryset
+        return queryset.filter(
+            Q(compliance_assessments__in=value)
+            | Q(requirement_assessments__compliance_assessment__in=value)
+            | Q(findings__requirement_assessment__compliance_assessment__in=value)
+        ).distinct()
+
     next_occurrence_status = df.MultipleChoiceFilter(
         choices=TaskNode.TASK_STATUS_CHOICES, method="filter_next_occurrence_status"
     )
@@ -16602,6 +17192,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "objectives",
             "incidents",
             "findings",
+            "requirement_assessments",
             "filtering_labels",
         ]
 
@@ -16630,8 +17221,22 @@ class TaskTemplateFilter(GenericFilterSet):
         )
 
 
-class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
+def _bucket_by_date(due, today):
+    """Same buckets as the applied-control analytics, so the two pages read alike."""
+    if due is None:
+        return "no_eta"
+    if due < today:
+        return "overdue"
+    if due <= today + timedelta(days=30):
+        return "due_30d"
+    if due <= today + timedelta(days=90):
+        return "due_90d"
+    return "later"
+
+
+class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet):
     model = TaskTemplate
+
     filterset_fields = [
         "assigned_to",
         "is_recurrent",
@@ -16642,6 +17247,90 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
     ]
     search_fields = ["ref_id", "name"]
     filterset_class = TaskTemplateFilter
+
+    @action(detail=False, methods=["get"], name="Get task analytics")
+    def analytics(self, request):
+        """Aggregates over the filtered task queryset."""
+        queryset = self.filter_queryset(self.get_queryset())
+        # `str(actor)` resolves a OneToOne hop, so the actor prefetch has to join the
+        # target in; `commitments` is already prefetched by get_queryset.
+        tasks = list(queryset.prefetch_related(actor_prefetch("assigned_to")))
+        today = timezone.localdate()
+
+        # One query for every occurrence, grouped in python: the serializer's
+        # per-template lookup would be a query per row. Same rule as
+        # `get_next_occurrence_status`, so the chart and the column agree.
+        recurrent_ids = {t.id for t in tasks if t.is_recurrent}
+        next_node_by_template: dict = {}
+        for node in (
+            TaskNode.objects.filter(task_template__in=[t.id for t in tasks])
+            .order_by("due_date")
+            .only("task_template_id", "status", "due_date")
+        ):
+            if node.task_template_id in recurrent_ids and (
+                node.due_date is None or node.due_date < today
+            ):
+                continue
+            next_node_by_template.setdefault(node.task_template_id, node)
+
+        by_status: dict = {}
+        due_buckets = {
+            key: {"key": key, "count": 0}
+            for key in ("overdue", "due_30d", "due_90d", "later", "no_eta")
+        }
+        assignee_counts: dict = {}
+        recurrence = {"one_time": 0, "recurrent": 0}
+        commitment_states: dict = {}
+        slipped = breached = 0
+        commitment_enabled = ff_is_enabled("commitment_management")
+
+        for task in tasks:
+            node = next_node_by_template.get(task.id)
+
+            status = (node.status if node else None) or "_unset"
+            entry = by_status.setdefault(status, {"key": status, "count": 0})
+            entry["count"] += 1
+
+            due = node.due_date if node else task.task_date
+            due_buckets[_bucket_by_date(due, today)]["count"] += 1
+
+            recurrence["recurrent" if task.is_recurrent else "one_time"] += 1
+
+            for actor in task.assigned_to.all():
+                bucket = assignee_counts.setdefault(
+                    str(actor.id),
+                    {"key": str(actor.id), "label": str(actor), "count": 0},
+                )
+                bucket["count"] += 1
+
+            if commitment_enabled and not task.is_recurrent:
+                state = task.commitment_state or "--"
+                bucket = commitment_states.setdefault(state, {"key": state, "count": 0})
+                bucket["count"] += 1
+                if task.commitment_has_slipped:
+                    slipped += 1
+                if task.commitment_is_breached:
+                    breached += 1
+
+        payload = {
+            "count": len(tasks),
+            "by_status": sorted(by_status.values(), key=lambda b: -b["count"]),
+            "due_buckets": list(due_buckets.values()),
+            "by_assignee": sorted(assignee_counts.values(), key=lambda b: -b["count"])[
+                :10
+            ],
+            "unassigned": sum(1 for t in tasks if not t.assigned_to.all()),
+            "recurrence": recurrence,
+        }
+        if commitment_enabled:
+            payload["commitment"] = {
+                "by_state": sorted(
+                    commitment_states.values(), key=lambda b: -b["count"]
+                ),
+                "slipped": slipped,
+                "breached": breached,
+            }
+        return Response(payload)
 
     export_config = {
         "filename": "task_templates",
@@ -16891,10 +17580,12 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 ),
             },
             "labels": {
-                "source": "filtering_labels",
+                "source": "task_template.filtering_labels",
                 "label": "labels",
-                "format": lambda qs: ",".join(
-                    escape_excel_formula(o.label) for o in qs.all()
+                "format": lambda qs: (
+                    ",".join(escape_excel_formula(o.label) for o in qs.all())
+                    if qs
+                    else ""
                 ),
             },
         },
@@ -16903,6 +17594,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset().select_related("folder")
         if self.action in ("list", "retrieve"):
+            # Opt-in columns: one query each, not one per row.
             qs = qs.prefetch_related(
                 "filtering_labels__folder",
                 "incidents",
@@ -16910,10 +17602,13 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 "assets",
                 "applied_controls",
                 "compliance_assessments",
+                "requirement_assessments",
                 "risk_assessments",
                 actor_prefetch("assigned_to"),
                 "findings_assessment",
-                "findings",
+                "commitments__committed_by",
+                # Stands in for a plain "findings": same lookup, binder-scoped.
+                scoped_findings_prefetch(self.request),
             )
         ordering = self.request.query_params.get("ordering", "")
 
@@ -17271,6 +17966,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     "task_template__compliance_assessments",
                     "task_template__risk_assessments",
                     "task_template__findings_assessment",
+                    "task_template__filtering_labels",
                 )
                 .order_by("due_date")
             )
@@ -17789,7 +18485,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             ).distinct()
         return qs
 
-    EDITABLE_STATUSES = ("draft", "in_progress")
+    EDITABLE_STATUSES = ("draft",)  # Keep the tuple type
 
     def update(self, request, *args, **kwargs):
         assignment = self.get_object()
@@ -17818,6 +18514,24 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             )
         return super().destroy(request, *args, **kwargs)
 
+    def perform_update(self, serializer):
+        # Override batch_action, which calls perform_update directly
+        # rather than going through update()/partial_update() above.
+        if serializer.instance.status not in self.EDITABLE_STATUSES:
+            raise PermissionDenied(
+                f"Cannot edit assignment in '{serializer.instance.status}' status."
+            )
+        super().perform_update(serializer)
+
+    def perform_destroy(self, instance):
+        # Override batch_action, which calls perform_destroy directly
+        # rather than going through destroy() above.
+        if instance.status not in self.EDITABLE_STATUSES:
+            raise PermissionDenied(
+                f"Cannot delete assignment in '{instance.status}' status."
+            )
+        super().perform_destroy(instance)
+
     # Valid transitions: (from_status, to_status) → config
     # reviewer_only: respondents are forbidden
     # actor_only: only assigned actors can perform this transition
@@ -17842,6 +18556,22 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             "observation": "required",
         },
         ("closed", "submitted"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("submitted", "draft"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("changes_requested", "draft"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("closed", "draft"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("in_progress", "draft"): {
             "reviewer_only": True,
             "observation": "clear",
         },
@@ -17905,6 +18635,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         # Apply transition
         assignment.status = target
         assignment.save(update_fields=["status"])
+        self._advance_review_states(assignment, key)
 
         # Create event for traceability
         RequirementAssignmentEvent.objects.create(
@@ -18040,6 +18771,32 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         )
 
     @staticmethod
+    def _advance_review_states(assignment, transition_key):
+        """Carry the review flags across a transition.
+
+        Answering a rework request makes them RESUBMITTED, closing accepts what was
+        awaiting a look, and every other transition — reopening included — leaves the
+        flags as they are: an accepted item records a verdict that was given.
+        """
+        from core.models import RequirementAssessment
+
+        ReviewState = RequirementAssessment.ReviewState
+        moves = {
+            ("changes_requested", "submitted"): (
+                ReviewState.CHANGES_REQUESTED,
+                ReviewState.RESUBMITTED,
+            ),
+            ("submitted", "closed"): (ReviewState.RESUBMITTED, ReviewState.ACCEPTED),
+        }
+        move = moves.get(transition_key)
+        if move is None:
+            return
+        source, target_state = move
+        assignment.requirement_assessments.filter(review_state=source).update(
+            review_state=target_state
+        )
+
+    @staticmethod
     def _send_transition_notification(assignment, transition_key, observation=""):
         from_status, to_status = transition_key
         if to_status == "in_progress":
@@ -18060,6 +18817,13 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 
             decision = "reopened" if from_status == "closed" else to_status
             send_assignment_reviewed_notification(assignment.id, decision, observation)
+        elif to_status == "draft" and from_status in (
+            "in_progress",
+            "changes_requested",
+        ):
+            from core.tasks import send_assignment_reopened_notification
+
+            send_assignment_reopened_notification(assignment.id, observation)
 
 
 class QuestionViewSet(BaseModelViewSet):

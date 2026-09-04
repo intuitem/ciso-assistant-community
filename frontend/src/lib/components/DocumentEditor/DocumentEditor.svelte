@@ -1220,7 +1220,7 @@
 									showDiff = false;
 								}}
 							>
-								<i class="fa-solid fa-code-compare mr-1.5 text-xs"></i>{m.diff ? m.diff() : 'Diff'}
+								<i class="fa-solid fa-code-compare mr-1.5 text-xs"></i>{m.diff()}
 								<i class="fa-solid fa-xmark ml-1.5 text-xs"></i>
 							</button>
 						{/if}

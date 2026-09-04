@@ -1598,6 +1598,28 @@ DEFAULT_VISIBILITY = {
     # badge would never render — functionally equivalent to HIDDEN. Default
     # off; auditors who want it explicitly flip to "Auditor + Respondent".
     "respondent_alignment": HIDDEN,
+    # Off unless the audit opts in: existing audits track remediation through
+    # applied controls or findings, and should not sprout a tasks tab.
+    "task_templates": HIDDEN,
+}
+
+
+# A third party sees their side of the exchange: answers, alignment, the tasks they
+# owe and the evidence around them — not the auditor's verdict or internal controls.
+# Scores stay off for both; a framework that scores turns them on itself.
+THIRD_PARTY_VISIBILITY = {
+    "answers": EVERYONE_EDIT,
+    "respondent_alignment": EVERYONE_EDIT,
+    "status": AUDITOR_ONLY,
+    "result": AUDITOR_ONLY,
+    "extended_result": HIDDEN,
+    "score": HIDDEN,
+    "documentation_score": HIDDEN,
+    "applied_controls": AUDITOR_ONLY,
+    "task_templates": EVERYONE_EDIT,
+    "evidences": EVERYONE_EDIT,
+    "observation": EVERYONE_EDIT,
+    "comments": EVERYONE_EDIT,
 }
 
 
@@ -1648,16 +1670,17 @@ def is_field_editable_by(compliance_assessment, field_name, role):
     return _role_access(compliance_assessment, field_name, role) == "edit"
 
 
-def build_initial_field_visibility(framework):
+def build_initial_field_visibility(framework, base=None):
     """Build the initial `field_visibility` map for a new CA.
 
-    Layered per-role: code defaults are seeded for every known field, then the
-    framework's overrides are merged on top — but per-role, so a framework that
-    only specifies a single role (e.g. {"score": {"auditor": "edit"}}) does not
-    erase the default value for the other roles.
+    Layered per-role: *base* (the code defaults unless a caller supplies another
+    starting profile) is seeded for every known field, then the framework's
+    overrides are merged on top — but per-role, so a framework that only specifies
+    a single role (e.g. {"score": {"auditor": "edit"}}) does not erase the default
+    value for the other roles.
     """
     fw_overrides = getattr(framework, "field_visibility", None) or {}
-    merged = {key: dict(pair) for key, pair in DEFAULT_VISIBILITY.items()}
+    merged = {key: dict(pair) for key, pair in (base or DEFAULT_VISIBILITY).items()}
     for key, pair in fw_overrides.items():
         if not isinstance(pair, dict):
             continue
@@ -1666,6 +1689,62 @@ def build_initial_field_visibility(framework):
         merged.setdefault(key, dict(EVERYONE_EDIT))
         merged[key].update(pair)
     return merged
+
+
+def respondent_progress_counts(
+    compliance_assessment, requirement_assessments
+) -> tuple[int, int, int]:
+    """How much of the questionnaire the respondent has filled in.
+
+    Returns (units, answered units, requirements completed). Not the auditor's
+    `ComplianceAssessment.progress`.
+    """
+    from core.models import RequirementAssessment
+
+    ca = compliance_assessment
+    alignment_pair = resolve_visibility_from_overrides(
+        ca.field_visibility
+        or (
+            getattr(ca.framework, "field_visibility", None) if ca.framework_id else None
+        ),
+        "respondent_alignment",
+    )
+    alignment_in_use = alignment_pair.get("respondent", "edit") != "hidden"
+
+    total_q = 0
+    answered_q = 0
+    done = 0
+    for ra in requirement_assessments:
+        visible, answered = ra.get_visible_questions_counts()
+        if visible > 0:
+            total_q += visible
+            answered_q += answered
+            if answered >= visible:
+                done += 1
+            continue
+        total_q += 1
+        unit_done = (
+            bool(ra.respondent_alignment)
+            if alignment_in_use
+            else ra.result != RequirementAssessment.Result.NOT_ASSESSED
+        )
+        if unit_done:
+            answered_q += 1
+            done += 1
+    return total_q, answered_q, done
+
+
+def compute_respondent_progress(compliance_assessment, requirement_assessments) -> int:
+    """`respondent_progress_counts` as a percentage."""
+    total_q, answered_q, _ = respondent_progress_counts(
+        compliance_assessment, requirement_assessments
+    )
+    return int(answered_q / total_q * 100) if total_q else 0
+
+
+def build_third_party_field_visibility(framework):
+    """The map a questionnaire sent to a third party starts from; the framework still wins."""
+    return build_initial_field_visibility(framework, base=THIRD_PARTY_VISIBILITY)
 
 
 def bulk_update_with_log(model, rows, fields, batch_size=500):
@@ -1706,3 +1785,66 @@ def bulk_update_with_log(model, rows, fields, batch_size=500):
             )
             logged += 1
     return logged
+
+
+def assign_audit_to(audit, actors):
+    """Point one assignment covering the whole audit at *actors*.
+
+    Created in DRAFT: it is the wiring, not the send.
+    """
+    from core.models import RequirementAssignment
+
+    actors = [actor for actor in actors if actor is not None]
+    assignment = audit.requirement_assignments.first()
+    if assignment is None:
+        if not actors:
+            return None
+        requirement_assessments = audit.requirement_assessments.all()
+        if not requirement_assessments.exists():
+            return None
+        assignment = RequirementAssignment.objects.create(
+            compliance_assessment=audit,
+            folder=audit.folder,
+        )
+        assignment.requirement_assessments.set(requirement_assessments)
+    assignment.actor.set(actors)
+    return assignment
+
+
+def ensure_audit_assignment(audit):
+    """Wire an audit to whoever answers for it, when nothing is wired yet.
+
+    Only ever fills a gap: an existing assignment is left alone, its actors included.
+    """
+    from tprm.models import EntityAssessment
+    from tprm.services import (
+        default_representatives_from_entity,
+        grant_respondent_access,
+    )
+
+    if audit.requirement_assignments.exists():
+        return None
+
+    entity_assessment = EntityAssessment.objects.filter(
+        compliance_assessment=audit
+    ).first()
+    if entity_assessment is not None:
+        # Pulls the entity's representatives onto the assessment when it has none,
+        # which is exactly the "I added the missing representative" case.
+        default_representatives_from_entity(entity_assessment)
+        # And lets them into the workspace: whoever is about to be emailed a link
+        # must be able to open it.
+        grant_respondent_access(entity_assessment)
+        actors = [
+            rep.actor
+            for rep in entity_assessment.representatives.all()
+            if hasattr(rep, "actor")
+        ]
+    else:
+        actors = list(audit.perimeter.default_assignee.all()) if audit.perimeter else []
+
+    if not actors:
+        return None
+    # add, not set: never remove an author the audit already had.
+    audit.authors.add(*actors)
+    return assign_audit_to(audit, actors)

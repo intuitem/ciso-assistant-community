@@ -42,7 +42,7 @@ export const load = (async ({ fetch, params }) => {
 	const assignmentsData = await fetchAllPages<{
 		id: string;
 		actor: Array<{ id: string; str: string; type?: string }>;
-		requirement_assessments: { id: string }[];
+		requirement_assessments: { id: string; review_state?: string }[];
 		status: string;
 		events: Array<{
 			id: string;
@@ -62,6 +62,14 @@ export const load = (async ({ fetch, params }) => {
 			type: a.type || 'user'
 		})),
 		requirement_assessments: assignment.requirement_assessments.map((ra) => ra.id),
+		review_counts: {
+			changes_requested: assignment.requirement_assessments.filter(
+				(ra) => ra.review_state === 'changes_requested'
+			).length,
+			resubmitted: assignment.requirement_assessments.filter(
+				(ra) => ra.review_state === 'resubmitted'
+			).length
+		},
 		status: assignment.status,
 		events: assignment.events ?? []
 	}));

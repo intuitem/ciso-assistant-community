@@ -77,6 +77,15 @@
 						helpText={def.help_text_localized}
 						required={def.required}
 					/>
+				{:else if def.field_type === 'url'}
+					<TextField
+						{form}
+						type="url"
+						field={path}
+						label={def.label_localized}
+						helpText={def.help_text_localized}
+						required={def.required}
+					/>
 				{:else if def.field_type === 'number'}
 					<NumberField
 						{form}
