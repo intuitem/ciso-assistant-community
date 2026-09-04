@@ -15,7 +15,6 @@
 	import {} from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
-	import TreeViewItemLead from './TreeViewItemLead.svelte';
 
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
@@ -286,33 +285,11 @@
 					showStatus,
 					showScore,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
+					showExtendedResult,
 					scoringEnabled: data.compliance_assessment.scoring_enabled,
 					scoreCalculationMethod: data.compliance_assessment.score_calculation_method,
 					hidden,
 					selectedStatus
-				},
-				lead: TreeViewItemLead,
-				leadProps: {
-					statusI18n: node.status_i18n,
-					resultI18n: node.result_i18n,
-					assessable: node.assessable,
-					statusColor: complianceStatusColorMap[node.status],
-					resultColor: complianceResultColorMap[node.result],
-					score: node.score,
-					documentationScore: node.documentation_score,
-					isScored: node.is_scored,
-					showResult,
-					showScore,
-					showStatus,
-					scoringEnabled: data.compliance_assessment.scoring_enabled,
-					showDocumentationScore: data.compliance_assessment.show_documentation_score,
-					max_score: node.max_score,
-					min_score: node.min_score ?? 0,
-					progressStatusEnabled: data.compliance_assessment.progress_status_enabled,
-					extendedResultEnabled: data.compliance_assessment.extended_result_enabled,
-					showExtendedResult,
-					extendedResult: node.extended_result,
-					extendedResultColor: extendedResultColorMap[node.extended_result]
 				},
 				children: node.children ? transformToTreeView(Object.entries(node.children), true) : []
 			};
