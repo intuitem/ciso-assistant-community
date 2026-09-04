@@ -43,8 +43,9 @@
 	const FALLBACK_COLOR = '#a3a3a3';
 	const statusColorMap: Record<string, string> = {
 		_unset: '#cbd5e1',
-		pending: '#3b82f6',
-		in_progress: '#f59e0b',
+		// Pending warns: nobody has picked it up yet. In progress is the calmer state.
+		pending: '#f59e0b',
+		in_progress: '#3b82f6',
 		completed: '#22c55e',
 		cancelled: '#94a3b8'
 	};
