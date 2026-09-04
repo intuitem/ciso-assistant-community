@@ -1031,140 +1031,131 @@
 
 								<!-- Action bar -->
 								{#if !isReadOnly}
-									{@const hasActions =
-										assignment.status === 'draft' ||
-										assignment.status === 'submitted' ||
-										assignment.status === 'closed' ||
-										assignment.status === 'changes_requested' ||
-										assignment.status === 'in_progress' ||
-										canModifyAssignment(assignment.status)}
-									{#if hasActions}
-										<div
-											class="flex flex-wrap items-center gap-1.5 px-3.5 py-2 border-t border-surface-100-900 bg-surface-100-900/50 rounded-b-lg"
-										>
-											<!-- Status transitions -->
-											{#if assignment.status === 'draft'}
-												<button
+									<div
+										class="flex flex-wrap items-center gap-1.5 px-3.5 py-2 border-t border-surface-100-900 bg-surface-100-900/50 rounded-b-lg"
+									>
+										<!-- Status transitions -->
+										{#if assignment.status === 'draft'}
+											<button
+												class="btn btn-sm preset-filled-warning-500 text-xs"
+												onclick={() => handleSetStatus(assignment.id, 'in_progress')}
+												title={m.activateAssignment()}
+											>
+												<i class="fa-solid fa-play mr-1"></i>
+												{m.activateAssignment()}
+											</button>
+										{/if}
+										{#if assignment.status === 'submitted'}
+											<button
+												class="btn btn-sm preset-filled-success-500 text-xs"
+												onclick={() => handleSetStatus(assignment.id, 'closed')}
+												title={m.closeAssignment()}
+											>
+												<i class="fa-solid fa-check mr-1"></i>
+												{m.closeAssignment()}
+											</button>
+											<button
+												class="btn btn-sm preset-filled-error-500 text-xs"
+												onclick={() => openRequestChangesModal(assignment.id)}
+												title={m.requestChanges()}
+											>
+												<i class="fa-solid fa-rotate-left mr-1"></i>
+												{m.requestChanges()}
+											</button>
+										{/if}
+										{#if assignment.status === 'closed'}
+											<!-- Dropdown with the reopening option, either for editing (to draft status) or submition -->
+											<Popover
+												open={reopenMenuOpenId === assignment.id}
+												onOpenChange={(e) => (reopenMenuOpenId = e.open ? assignment.id : null)}
+												positioning={{ placement: 'bottom-start' }}
+												autoFocus={false}
+												onPointerDownOutside={() => (reopenMenuOpenId = null)}
+												closeOnInteractOutside={true}
+											>
+												<Popover.Trigger
 													class="btn btn-sm preset-filled-warning-500 text-xs"
-													onclick={() => handleSetStatus(assignment.id, 'in_progress')}
-													title={m.activateAssignment()}
+													title={m.reopenAssignment()}
 												>
-													<i class="fa-solid fa-play mr-1"></i>
-													{m.activateAssignment()}
-												</button>
-											{/if}
-											{#if assignment.status === 'submitted'}
-												<button
-													class="btn btn-sm preset-filled-success-500 text-xs"
-													onclick={() => handleSetStatus(assignment.id, 'closed')}
-													title={m.closeAssignment()}
-												>
-													<i class="fa-solid fa-check mr-1"></i>
-													{m.closeAssignment()}
-												</button>
-												<button
-													class="btn btn-sm preset-filled-error-500 text-xs"
-													onclick={() => openRequestChangesModal(assignment.id)}
-													title={m.requestChanges()}
-												>
-													<i class="fa-solid fa-rotate-left mr-1"></i>
-													{m.requestChanges()}
-												</button>
-											{/if}
-											{#if assignment.status === 'closed'}
-												<!-- Dropdown with the reopening option, either for editing (to draft status) or submition -->
-												<Popover
-													open={reopenMenuOpenId === assignment.id}
-													onOpenChange={(e) => (reopenMenuOpenId = e.open ? assignment.id : null)}
-													positioning={{ placement: 'bottom-start' }}
-													autoFocus={false}
-													onPointerDownOutside={() => (reopenMenuOpenId = null)}
-													closeOnInteractOutside={true}
-												>
-													<Popover.Trigger
-														class="btn btn-sm preset-filled-warning-500 text-xs"
-														title={m.reopenAssignment()}
+													<i class="fa-solid fa-lock-open mr-1"></i>
+													{m.reopenAssignment()}
+													<i class="fa-solid fa-caret-down ml-1"></i>
+												</Popover.Trigger>
+												<Popover.Positioner class="z-50!">
+													<Popover.Content
+														class="card p-1 bg-surface-50-950 w-40 shadow-lg border border-surface-200"
 													>
-														<i class="fa-solid fa-lock-open mr-1"></i>
-														{m.reopenAssignment()}
-														<i class="fa-solid fa-caret-down ml-1"></i>
-													</Popover.Trigger>
-													<Popover.Positioner class="z-50!">
-														<Popover.Content
-															class="card p-1 bg-surface-50-950 w-40 shadow-lg border border-surface-200"
-														>
-															{#if reopenMenuOpenId === assignment.id}
-																<ul class="space-y-1">
-																	<li>
-																		<button
-																			type="button"
-																			class="btn btn-sm preset-ghost-surface w-full justify-start text-xs"
-																			onclick={() => {
-																				reopenMenuOpenId = null;
-																				handleSetStatus(assignment.id, 'submitted');
-																			}}
-																		>
-																			<i class="fa-solid fa-eye mr-1"></i>
-																			{m.forReview()}
-																		</button>
-																	</li>
-																	<li>
-																		<button
-																			type="button"
-																			class="btn btn-sm preset-ghost-surface w-full justify-start text-xs"
-																			onclick={() => {
-																				reopenMenuOpenId = null;
-																				handleSetStatus(assignment.id, 'draft');
-																			}}
-																		>
-																			<i class="fa-solid fa-pen-to-square mr-1"></i>
-																			{m.forEditing()}
-																		</button>
-																	</li>
-																</ul>
-															{/if}
-														</Popover.Content>
-													</Popover.Positioner>
-												</Popover>
-											{/if}
-											{#if assignment.status === 'submitted' || assignment.status === 'changes_requested' || assignment.status === 'in_progress'}
-												<button
-													class="btn btn-sm preset-tonal text-xs"
-													onclick={() => handleSetStatus(assignment.id, 'draft')}
-													title={m.reopenAssignmentForEditing()}
-												>
-													<i class="fa-solid fa-pen-to-square mr-1"></i>
-													{m.reopenAssignmentForEditing()}
-												</button>
-											{/if}
+														{#if reopenMenuOpenId === assignment.id}
+															<ul class="space-y-1">
+																<li>
+																	<button
+																		type="button"
+																		class="btn btn-sm preset-ghost-surface w-full justify-start text-xs"
+																		onclick={() => {
+																			reopenMenuOpenId = null;
+																			handleSetStatus(assignment.id, 'submitted');
+																		}}
+																	>
+																		<i class="fa-solid fa-eye mr-1"></i>
+																		{m.forReview()}
+																	</button>
+																</li>
+																<li>
+																	<button
+																		type="button"
+																		class="btn btn-sm preset-ghost-surface w-full justify-start text-xs"
+																		onclick={() => {
+																			reopenMenuOpenId = null;
+																			handleSetStatus(assignment.id, 'draft');
+																		}}
+																	>
+																		<i class="fa-solid fa-pen-to-square mr-1"></i>
+																		{m.forEditing()}
+																	</button>
+																</li>
+															</ul>
+														{/if}
+													</Popover.Content>
+												</Popover.Positioner>
+											</Popover>
+										{/if}
+										{#if assignment.status === 'submitted' || assignment.status === 'changes_requested' || assignment.status === 'in_progress'}
+											<button
+												class="btn btn-sm preset-tonal text-xs"
+												onclick={() => handleSetStatus(assignment.id, 'draft')}
+												title={m.reopenAssignmentForEditing()}
+											>
+												<i class="fa-solid fa-pen-to-square mr-1"></i>
+												{m.reopenAssignmentForEditing()}
+											</button>
+										{/if}
 
-											<div class="flex-1"></div>
+										<div class="flex-1"></div>
 
-											<!-- Edit/Delete always on the right -->
-											{#if canModifyAssignment(assignment.status)}
-												<button
-													class="btn btn-sm preset-ghost-surface"
-													onclick={() => startEdit(assignment)}
-													title={m.edit()}
-													disabled={editingAssignmentId !== null}
-												>
-													<i class="fa-solid fa-pen text-xs"></i>
-												</button>
-												<button
-													class="btn btn-sm preset-ghost-error-500"
-													onclick={() => handleDeleteAssignment(assignment.id)}
-													title={m.delete()}
-													disabled={isDeleting === assignment.id || editingAssignmentId !== null}
-												>
-													{#if isDeleting === assignment.id}
-														<i class="fa-solid fa-spinner fa-spin text-xs"></i>
-													{:else}
-														<i class="fa-solid fa-trash text-xs"></i>
-													{/if}
-												</button>
-											{/if}
-										</div>
-									{/if}
+										<!-- Edit/Delete always on the right -->
+										{#if canModifyAssignment(assignment.status)}
+											<button
+												class="btn btn-sm preset-ghost-surface"
+												onclick={() => startEdit(assignment)}
+												title={m.edit()}
+												disabled={editingAssignmentId !== null}
+											>
+												<i class="fa-solid fa-pen text-xs"></i>
+											</button>
+											<button
+												class="btn btn-sm preset-ghost-error-500"
+												onclick={() => handleDeleteAssignment(assignment.id)}
+												title={m.delete()}
+												disabled={isDeleting === assignment.id || editingAssignmentId !== null}
+											>
+												{#if isDeleting === assignment.id}
+													<i class="fa-solid fa-spinner fa-spin text-xs"></i>
+												{:else}
+													<i class="fa-solid fa-trash text-xs"></i>
+												{/if}
+											</button>
+										{/if}
+									</div>
 								{/if}
 							</div>
 						{/each}
