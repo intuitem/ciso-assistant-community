@@ -1141,8 +1141,13 @@ def process_model_relationships(
             )
 
         case "finding":
-            _fields["findings_assessment"] = FindingsAssessment.objects.get(
-                id=link_dump_database_ids.get(_fields["findings_assessment"])
+            findings_assessment_id = link_dump_database_ids.get(
+                _fields.get("findings_assessment")
+            )
+            _fields["findings_assessment"] = (
+                FindingsAssessment.objects.filter(id=findings_assessment_id).first()
+                if findings_assessment_id
+                else None
             )
             # Optional links: the asset may live outside the exported domain
             # and the requirement node's framework may not be loaded on the
