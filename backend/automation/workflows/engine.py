@@ -16,6 +16,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from .actions import (
+    MISSING,
     ActionError,
     DeferredTask,
     FatalActionError,
@@ -1086,8 +1087,22 @@ def _apply_output_mapping(node, output, instance):
         return
     updates = {}
     for variable_key, path in mapping.items():
-        value = dig(output, path)
-        if value is not None:
+        value = dig(output, path, MISSING)
+        if value is MISSING:
+            # A silent skip is what makes a mis-authored mapping look like an
+            # engine bug; leave a trace in the run log instead. A present null
+            # is a legitimate value the step chose not to set, so it stays quiet.
+            _log(
+                instance,
+                WorkflowInstanceLog.EventType.ERROR,
+                node=node,
+                message=(
+                    f"Output mapping skipped: '{variable_key}' ← '{path}' "
+                    "is not present in this step's output"
+                ),
+                data={"variable": variable_key, "path": str(path)},
+            )
+        elif value is not None:
             updates[variable_key] = value
     if updates:
         instance.variables.update(updates)

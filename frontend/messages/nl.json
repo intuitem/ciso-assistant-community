@@ -3713,6 +3713,9 @@
 	"viewUsergroup": "Gebruikersgroep bekijken",
 	"serviceNow": "ServiceNow",
 	"servicenow": "ServiceNow",
+	"reopenAssignmentForEditing": "Heropenen voor bewerking",
+	"forReview": "Voor beoordeling",
+	"forEditing": "Voor bewerking",
 	"actionPlanEmptyHelp": "Alle controles zijn geslaagd — items verschijnen hier wanneer controles mislukken, een fout opleveren of niet zijn gecontroleerd.",
 	"actionPlanNoFollowUpHint": "Er is geen beoordeling van bevindingen gekoppeld — bewerk deze technische status en stel een vervolgbeoordeling in om de herstelmaatregelen voor de bevindingen te plannen.",
 	"addAssetColumn": "Middel toevoegen",
@@ -4654,7 +4657,6 @@
 	"lbDraftMetadataSaved": "Metadata opgeslagen",
 	"lbDraftMetricDefinitions": "Metriek definities",
 	"lbDraftMintUrnSuffix": "(gebruikt om de URN te slaan)",
-
 	"lbPresetOpenList": "De lijst openen (geen specifiek vooraf ingesteld object openen)",
 	"lbPresetOpenScaffoldFromOtherStep": "Of open een object uit een andere stap",
 	"lbPresetPageTitle": "Bibliotheekbouwer — {name}",
