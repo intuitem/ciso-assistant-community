@@ -37,12 +37,14 @@
 		[key: string]: any;
 	}
 
-	const libraryObjects: LibraryObjects = data?.library?.objects ?? [];
-	const riskMatrices = libraryObjects['risk_matrix'] ?? [];
-	const referenceControls = libraryObjects['reference_controls'] ?? [];
-	const threats = libraryObjects['threats'] ?? [];
-	const metricDefinitions = libraryObjects['metric_definitions'] ?? [];
-	const framework = libraryObjects['framework'];
+	// Derived, not plain consts: previewing another library reuses the component, so
+	// a captured value would show the previous one.
+	const libraryObjects: LibraryObjects = $derived(data?.library?.objects ?? {});
+	const riskMatrices = $derived(libraryObjects['risk_matrix'] ?? []);
+	const referenceControls = $derived(libraryObjects['reference_controls'] ?? []);
+	const threats = $derived(libraryObjects['threats'] ?? []);
+	const metricDefinitions = $derived(libraryObjects['metric_definitions'] ?? []);
+	const framework = $derived(libraryObjects['framework']);
 
 	function transformToTreeView(nodes) {
 		return nodes.map(([id, node]) => {
@@ -55,13 +57,13 @@
 		});
 	}
 
-	const riskMatricesTable: TableSource = {
+	const riskMatricesTable: TableSource = $derived({
 		head: { name: 'name', description: 'description' },
 		body: tableSourceMapper(riskMatrices, ['name', 'description']),
 		meta: { count: riskMatrices.length }
-	};
+	});
 
-	const referenceControlsTable: TableSource = {
+	const referenceControlsTable: TableSource = $derived({
 		head: {
 			ref_id: 'ref',
 			name: 'name',
@@ -77,15 +79,15 @@
 			'csf_function'
 		]),
 		meta: { count: referenceControls.length }
-	};
+	});
 
-	const threatsTable: TableSource = {
+	const threatsTable: TableSource = $derived({
 		head: { ref_id: 'ref', name: 'name', description: 'description' },
 		body: tableSourceMapper(threats, ['ref_id', 'name', 'description']),
 		meta: { count: threats.length }
-	};
+	});
 
-	const metricDefinitionsTable: TableSource = {
+	const metricDefinitionsTable: TableSource = $derived({
 		head: {
 			ref_id: 'ref',
 			name: 'name',
@@ -101,7 +103,7 @@
 			'unit'
 		]),
 		meta: { count: metricDefinitions.length }
-	};
+	});
 
 	function riskMatricesPreview(riskMatrices: []) {
 		let riskMatricesDumps = [];
