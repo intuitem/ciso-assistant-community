@@ -105,7 +105,7 @@
 				<Progress.CircleRange class={displayScoreColor(internal, max, false, min)} />
 			</Progress.Circle>
 			<div class="absolute inset-0 flex items-center justify-center">
-				<span class="text-xs font-bold">{active ? internal : '--'}</span>
+				<span class="text-xs font-bold">{active && value != null ? internal : '--'}</span>
 			</div>
 		</Progress>
 	</div>

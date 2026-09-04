@@ -39,6 +39,7 @@
 	import type { Actions, PageData } from './$types';
 	import { onMount, tick } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
+	import { deserialize } from '$app/forms';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	interface Props {
@@ -176,7 +177,7 @@
 		accordionItems[raId] = open.includes(key) ? open.filter((k) => k !== key) : [...open, key];
 	}
 
-	// Patch one or more fields of a requirement assessment
+	// Patch fields; returns false on a rejected backend write
 	async function updateBulk(
 		requirementAssessment: Record<string, any>,
 		data: { [key: string]: string | number | boolean | null }
@@ -188,11 +189,17 @@
 			...data,
 			id: requirementAssessment.id
 		};
-		const res = await fetch(form.action, {
-			method: 'POST',
-			body: JSON.stringify(formData)
-		});
-		return res;
+		try {
+			const res = await fetch(form.action, {
+				method: 'POST',
+				headers: { 'x-sveltekit-action': 'true' },
+				body: JSON.stringify(formData)
+			});
+			const result: any = deserialize(await res.text());
+			return result?.type === 'success' && (result.data?.status ?? 500) < 400;
+		} catch {
+			return false;
+		}
 	}
 
 	// Patch a single field; refresh only when the backend recomputes derived fields
@@ -202,15 +209,20 @@
 		{ refresh = false }: { refresh?: boolean } = {}
 	) {
 		const value = requirementAssessment[field];
-		await updateBulk(requirementAssessment, {
+		const ok = await updateBulk(requirementAssessment, {
 			[field]: value
 		});
+
+		// Reload to drop the optimistic value the backend rejected
+		if (!ok) {
+			if (invalidateAllBool) await invalidateAll();
+			return;
+		}
 
 		if (refresh && invalidateAllBool) {
 			await invalidateAll();
 		}
 
-		// Update requirementAssessment.updateForm.data with the specified field and value
 		if (requirementAssessment.updateForm && requirementAssessment.updateForm.data) {
 			requirementAssessment.updateForm.data[field] = value;
 		}
@@ -291,10 +303,14 @@
 		setTimeout(async () => {
 			const currentScoreValue = requirementAssessmentScores[requirementAssessment.id];
 			if (score === currentScoreValue[1] && documentationScore === currentScoreValue[2]) {
-				await updateBulk(requirementAssessment, {
+				const ok = await updateBulk(requirementAssessment, {
 					score: score,
 					documentation_score: documentationScore
 				});
+				if (!ok) {
+					if (invalidateAllBool) await invalidateAll();
+					return;
+				}
 				await refreshScores();
 			}
 		}, 500); // There must be 500ms without a score change for a request to be sent and modify the score of the RequirementAsessment in the backend
@@ -690,7 +706,7 @@
 				{/if}
 			</div>
 		{/if}
-	{:else if complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && ra.is_scored}
+	{:else if showScore && complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && ra.is_scored}
 		{@const raMin = ra.effective_min_score ?? complianceAssessment.min_score}
 		{@const raMax = ra.effective_max_score ?? complianceAssessment.max_score}
 		<div class="flex items-center gap-4 flex-wrap">
@@ -709,7 +725,7 @@
 				label={m.documentationScoreResult()}
 			/>
 		</div>
-	{:else if complianceAssessment.scoring_enabled && ra.is_scored}
+	{:else if showScore && complianceAssessment.scoring_enabled && ra.is_scored}
 		{@const raMin = ra.effective_min_score ?? complianceAssessment.min_score}
 		{@const raMax = ra.effective_max_score ?? complianceAssessment.max_score}
 		<div class="flex flex-col gap-1">
