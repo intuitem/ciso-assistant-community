@@ -3419,6 +3419,7 @@
 	"dataWizardFindingsAssessmentDescription": "Importer un classeur de constats (pentest, audit interne, etc.)",
 	"dataWizardElementaryActionDescription": "Importer des actions élémentaires pour l'EBIOS RM (atelier 4)",
 	"dataWizardProcessingDescription": "Importer une liste de traitements, ou réimporter le classeur exporté d'un traitement pour recréer ses finalités, données personnelles et autres sous-objets",
+	"dataWizardEvidenceDescription": "Importer des définitions de preuves (nom, responsable, statut, expiration). Les fichiers et liens ne sont pas importés : ils sont ajoutés ensuite sous forme de révisions.",
 	"dataWizardOnConflict": "Si un enregistrement existe déjà",
 	"dataWizardOnConflictStop": "Arrêter",
 	"dataWizardOnConflictSkip": "Ignorer",

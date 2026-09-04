@@ -10000,23 +10000,19 @@ class EvidenceViewSet(BaseModelViewSet):
         response = Response(status=status.HTTP_403_FORBIDDEN)
         if UUID(pk) in object_ids_view:
             evidence = self.get_object()
+            revision = evidence.last_revision
             if (
-                not evidence.last_revision.attachment
-                or not evidence.last_revision.attachment.storage.exists(
-                    evidence.last_revision.attachment.name
-                )
+                revision is None
+                or not revision.attachment
+                or not revision.attachment.storage.exists(revision.attachment.name)
             ):
                 return Response(status=status.HTTP_404_NOT_FOUND)
             if request.method == "GET":
-                content_type = mimetypes.guess_type(evidence.last_revision.filename())[
-                    0
-                ]
+                filename = revision.filename()
                 response = HttpResponse(
-                    evidence.last_revision.attachment,
-                    content_type=content_type,
-                    headers={
-                        "Content-Disposition": f"attachment; filename={evidence.last_revision.filename()}"
-                    },
+                    revision.attachment,
+                    content_type=mimetypes.guess_type(filename)[0],
+                    headers={"Content-Disposition": f"attachment; filename={filename}"},
                     status=status.HTTP_200_OK,
                 )
         return response

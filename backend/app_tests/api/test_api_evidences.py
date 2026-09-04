@@ -214,3 +214,63 @@ class TestEvidencesAuthenticated:
             },
             user_group=test.user_group,
         )
+
+
+@pytest.mark.django_db
+class TestEvidenceRevisionCreation:
+    """A revision stands for a deposited artifact, so an empty one is not opened."""
+
+    def _create(self, authenticated_client, name, **extra):
+        response = authenticated_client.post(
+            "/api/evidences/",
+            {
+                "name": name,
+                "folder": str(Folder.get_root_folder().id),
+                **extra,
+            },
+            format="json",
+        )
+        assert response.status_code == 201, response.json()
+        return Evidence.objects.get(id=response.json()["id"])
+
+    def test_no_revision_when_nothing_is_deposited(self, authenticated_client):
+        evidence = self._create(authenticated_client, "Definition only")
+        assert evidence.revisions.count() == 0
+        assert evidence.last_revision is None
+
+    def test_blank_values_do_not_count_as_content(self, authenticated_client):
+        evidence = self._create(authenticated_client, "Blank fields", observation="")
+        assert evidence.revisions.count() == 0
+
+    def test_link_opens_a_revision(self, authenticated_client):
+        evidence = self._create(
+            authenticated_client, "With link", link="https://example.com/proof"
+        )
+        assert evidence.revisions.count() == 1
+        assert evidence.last_revision.link == "https://example.com/proof"
+
+    def test_observation_opens_a_revision(self, authenticated_client):
+        evidence = self._create(
+            authenticated_client, "With observation", observation="collected by hand"
+        )
+        assert evidence.revisions.count() == 1
+        assert evidence.last_revision.observation == "collected by hand"
+
+    def test_attachment_endpoint_404s_without_a_revision(self, authenticated_client):
+        evidence = self._create(authenticated_client, "No attachment")
+        response = authenticated_client.get(f"/api/evidences/{evidence.id}/attachment/")
+        assert response.status_code == 404
+
+    def test_observation_is_not_echoed_back(self, authenticated_client):
+        """It belongs to the revision, not to the evidence representation."""
+        response = authenticated_client.post(
+            "/api/evidences/",
+            {
+                "name": "Write only",
+                "folder": str(Folder.get_root_folder().id),
+                "observation": "internal note",
+            },
+            format="json",
+        )
+        assert response.status_code == 201
+        assert "observation" not in response.json()

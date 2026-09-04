@@ -3500,6 +3500,7 @@
 	"dataWizardFindingsAssessmentDescription": "Import a findings binder (pentest, internal audit, etc.)",
 	"dataWizardElementaryActionDescription": "Import elementary actions for EBIOS RM",
 	"dataWizardProcessingDescription": "Import processings as a flat list, or re-import an exported processing workbook to recreate its purposes, personal data and other sub-objects",
+	"dataWizardEvidenceDescription": "Import evidence definitions (name, owner, status, expiry). Files and links are not imported: they are added later as revisions.",
 	"dataWizardOnConflict": "If a record already exists",
 	"dataWizardOnConflictStop": "Stop",
 	"dataWizardOnConflictSkip": "Skip",

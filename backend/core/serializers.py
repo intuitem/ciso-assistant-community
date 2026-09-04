@@ -2724,6 +2724,9 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     )
     attachment = serializers.FileField(required=False)
     link = serializers.URLField(required=False)
+    observation = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True, write_only=True
+    )
 
     # A respondent deposits evidence but must not adjudicate it: the status
     # (in_review / approved / rejected / …) is an auditor-side decision.
@@ -2736,12 +2739,23 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     def create(self, validated_data):
         attachment = validated_data.pop("attachment", None)
         link = validated_data.pop("link", None)
+        observation = validated_data.pop("observation", None)
 
         evidence = super().create(validated_data)
 
-        EvidenceRevision.objects.get_or_create(
-            evidence=evidence, defaults={"link": link, "attachment": attachment}
-        )
+        # A revision stands for a deposited artifact. Opening an empty one just to
+        # have a row makes an evidence that holds nothing look like it holds
+        # something; a definition with no content stays revision-less until one
+        # is filed against it.
+        if attachment or link or observation:
+            EvidenceRevision.objects.get_or_create(
+                evidence=evidence,
+                defaults={
+                    "link": link,
+                    "attachment": attachment,
+                    "observation": observation,
+                },
+            )
 
         return evidence
 
@@ -2812,17 +2826,20 @@ class EvidenceRevisionWriteSerializer(BaseModelSerializer):
     class Meta:
         model = EvidenceRevision
         fields = "__all__"
+        read_only_fields = ["version"]
 
     def create(self, validated_data):
-        evidence = validated_data["evidence"]
-        max_version = EvidenceRevision.objects.filter(evidence=evidence).aggregate(
-            models.Max("version")
-        )["version__max"]
-        validated_data["version"] = (max_version or 0) + 1
-        # Update evidence status to in_review when a new revision is submitted
-        evidence.status = Evidence.Status.IN_REVIEW
-        evidence.save()
-        return super().create(validated_data)
+        with transaction.atomic():
+            evidence = Evidence.objects.select_for_update().get(
+                pk=validated_data["evidence"].pk
+            )
+            max_version = EvidenceRevision.objects.filter(evidence=evidence).aggregate(
+                models.Max("version")
+            )["version__max"]
+            validated_data["version"] = (max_version or 0) + 1
+            evidence.status = Evidence.Status.IN_REVIEW
+            evidence.save()
+            return super().create(validated_data)
 
 
 class EvidenceRevisionImportExportSerializer(BaseModelSerializer):
