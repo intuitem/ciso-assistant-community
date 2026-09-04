@@ -372,14 +372,14 @@
 
 	const hiddenRowCount = $derived(typeof expectedCount === 'number' ? expectedCount : 0);
 
-	$tableHandlers[baseEndpoint] = handler;
-
-	const toastStore = getToastStore();
-
 	// A table handed its rows up front has no model or endpoint ("/undefined"): the
 	// remote handler would poll it and clear the seeded rows. A bare baseEndpoint is
 	// still remote.
 	const hasRemoteSource = Boolean(URLModel) || baseEndpoint !== '/undefined';
+
+	if (hasRemoteSource) $tableHandlers[baseEndpoint] = handler;
+
+	const toastStore = getToastStore();
 
 	if (hasRemoteSource)
 		handler.onChange((state: State) =>
@@ -437,7 +437,7 @@
 	const filters = $derived(source?.filters ?? tableFilters);
 	const filteredFields = $derived(Object.keys(filters));
 	// Only persist filters on standalone list pages, not embedded sub-tables
-	const isStandaloneTable = baseEndpoint === `/${URLModel}`;
+	const isStandaloneTable = hasRemoteSource && baseEndpoint === `/${URLModel}`;
 	const filterStoreKey = `${page.url.pathname}::${baseEndpoint}`;
 	const storedFilters = isStandaloneTable ? ($tableFilterStates[filterStoreKey] ?? {}) : {};
 	// Check if any filter-related URL params exist
