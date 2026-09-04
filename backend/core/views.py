@@ -18390,6 +18390,24 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             )
         return super().destroy(request, *args, **kwargs)
 
+    def perform_update(self, serializer):
+        # Override batch_action, which calls perform_update directly
+        # rather than going through update()/partial_update() above.
+        if serializer.instance.status not in self.EDITABLE_STATUSES:
+            raise PermissionDenied(
+                f"Cannot edit assignment in '{serializer.instance.status}' status."
+            )
+        super().perform_update(serializer)
+
+    def perform_destroy(self, instance):
+        # Override batch_action, which calls perform_destroy directly
+        # rather than going through destroy() above.
+        if instance.status not in self.EDITABLE_STATUSES:
+            raise PermissionDenied(
+                f"Cannot delete assignment in '{instance.status}' status."
+            )
+        super().perform_destroy(instance)
+
     # Valid transitions: (from_status, to_status) → config
     # reviewer_only: respondents are forbidden
     # actor_only: only assigned actors can perform this transition
