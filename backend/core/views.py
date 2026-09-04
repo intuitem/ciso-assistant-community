@@ -18494,7 +18494,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             ).distinct()
         return qs
 
-    EDITABLE_STATUSES = ("draft", "in_progress")
+    EDITABLE_STATUSES = ("draft",)  # Keep the tuple type
 
     def update(self, request, *args, **kwargs):
         assignment = self.get_object()
@@ -18523,6 +18523,24 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             )
         return super().destroy(request, *args, **kwargs)
 
+    def perform_update(self, serializer):
+        # Override batch_action, which calls perform_update directly
+        # rather than going through update()/partial_update() above.
+        if serializer.instance.status not in self.EDITABLE_STATUSES:
+            raise PermissionDenied(
+                f"Cannot edit assignment in '{serializer.instance.status}' status."
+            )
+        super().perform_update(serializer)
+
+    def perform_destroy(self, instance):
+        # Override batch_action, which calls perform_destroy directly
+        # rather than going through destroy() above.
+        if instance.status not in self.EDITABLE_STATUSES:
+            raise PermissionDenied(
+                f"Cannot delete assignment in '{instance.status}' status."
+            )
+        super().perform_destroy(instance)
+
     # Valid transitions: (from_status, to_status) → config
     # reviewer_only: respondents are forbidden
     # actor_only: only assigned actors can perform this transition
@@ -18547,6 +18565,22 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             "observation": "required",
         },
         ("closed", "submitted"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("submitted", "draft"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("changes_requested", "draft"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("closed", "draft"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+        ("in_progress", "draft"): {
             "reviewer_only": True,
             "observation": "clear",
         },
@@ -18792,6 +18826,13 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 
             decision = "reopened" if from_status == "closed" else to_status
             send_assignment_reviewed_notification(assignment.id, decision, observation)
+        elif to_status == "draft" and from_status in (
+            "in_progress",
+            "changes_requested",
+        ):
+            from core.tasks import send_assignment_reopened_notification
+
+            send_assignment_reopened_notification(assignment.id, observation)
 
 
 class QuestionViewSet(BaseModelViewSet):
