@@ -172,3 +172,4 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 ## W
 
 - **Webhook endpoint** — A registered URL CISO Assistant calls when configured events happen (e.g. an audit closed, an applied control updated). Used to notify external systems and trigger downstream automation.
+- **Workflow** — A small automation drawn on a canvas: a trigger, steps and wires. Runs inside CISO Assistant with the permissions of the user who published it, and only inside its domain. See [Workflows](../concepts/workflows.md).
