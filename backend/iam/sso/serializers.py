@@ -299,7 +299,22 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         settings_object = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
 
-        if validated_data.get("is_enabled") is False:
+        # The value dict is replaced wholesale below, so an omitted flag must
+        # fall back to the stored state (like secret and jit_provisioning_
+        # enabled already do): otherwise a payload that simply leaves out
+        # is_enabled silently disables SSO — stranding SSO-only users while
+        # skirting the guard, which would only see an explicit False.
+        currently_enabled = settings_object.value.get("is_enabled", False)
+        validated_data["is_enabled"] = validated_data.get(
+            "is_enabled", currently_enabled
+        )
+        validated_data["force_sso"] = validated_data.get(
+            "force_sso", settings_object.value.get("force_sso", False)
+        )
+
+        # Guard the enabled -> disabled transition only: re-saving an already
+        # disabled configuration must stay possible (configure-then-enable).
+        if currently_enabled and not validated_data["is_enabled"]:
             has_sso_only_users_without_local_fallback = User.objects.filter(
                 Q(is_scim_managed=True) | Q(is_jit_provisioned=True),
                 keep_local_login=False,

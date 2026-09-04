@@ -1484,6 +1484,20 @@ def deactivate_expired_users():
 
     count = 0
     for user in expired_users:
+        # Never expire the deployment out of administration: keep the last
+        # active directly-managed admin, mirroring the API-side guard
+        # (UserWriteSerializer._enforce_last_active_admin) for expiry dates
+        # that predate it.
+        if (
+            user.user_groups.filter(name="BI-UG-ADM").exists()
+            and not User.objects.filter(user_groups__name="BI-UG-ADM", is_active=True)
+            .exclude(pk=user.pk)
+            .exists()
+        ):
+            logger.warning(
+                f"Skipping expiry deactivation of the last active admin: {user.email} (ID: {user.id})"
+            )
+            continue
         user.is_active = False
         user.save()
         count += 1
