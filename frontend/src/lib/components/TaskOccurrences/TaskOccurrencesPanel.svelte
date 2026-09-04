@@ -172,13 +172,21 @@
 		<div class="space-y-2">
 			<p class="font-semibold">{m.occurrenceHistory()}</p>
 			{#if timeline.length}
-				<div class="space-y-1">
-					{#each historyByYear as [year, occurrences] (year)}
+				<!-- w-fit: rows align within the widest year rather than the panel width. -->
+				<div class="space-y-1 w-fit max-w-full">
+					{#each historyByYear as [year, occurrences], yearIndex (year)}
 						<div class="flex items-start gap-2">
 							<span class="w-9 shrink-0 pt-0.5 text-xs tabular-nums text-surface-600-400"
 								>{year}</span
 							>
-							<div class="flex flex-wrap gap-1">
+							<!-- The window truncates the start of the oldest year, so its squares
+							     sit flush right — the tail of that year running into the next row —
+							     instead of reading as January-onward. -->
+							<div
+								class="flex flex-wrap gap-1 grow {yearIndex === 0 && historyByYear.length > 1
+									? 'justify-end'
+									: ''}"
+							>
 								{#each occurrences as occurrence (occurrence.id)}
 									{@const isCurrent = occurrence.id === next?.id}
 									{@const isFuture = !isCurrent && (daysUntil(occurrence.due_date) ?? 0) > 0}
