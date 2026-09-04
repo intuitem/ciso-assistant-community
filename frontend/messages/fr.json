@@ -2658,7 +2658,16 @@
 			}
 		}
 	],
-	"dueInDays": "dans {count} jours",
+	"dueInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "dans {count} jour",
+				"countPlural=other": "dans {count} jours"
+			}
+		}
+	],
 	"occurrenceHistory": "Historique des occurrences",
 	"noOccurrenceHistory": "Cette tâche n'a pas encore été exécutée.",
 	"moreUpcoming": "{count} autres à venir",

@@ -2698,7 +2698,16 @@
 			}
 		}
 	],
-	"dueInDays": "in {count} days",
+	"dueInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "in {count} day",
+				"countPlural=other": "in {count} days"
+			}
+		}
+	],
 	"occurrenceHistory": "Occurrence history",
 	"noOccurrenceHistory": "This task has not run yet.",
 	"moreUpcoming": "{count} more upcoming",

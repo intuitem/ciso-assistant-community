@@ -13,11 +13,17 @@ async function fetchOccurrences(fetch: typeof globalThis.fetch, id: string, past
 	const params = new URLSearchParams({
 		task_template: id,
 		past: String(past),
+		// Explicit: without it the viewset's default created_at ordering wins over
+		// the past filter's, and the window cuts by creation order. Past reads
+		// newest-first so the window keeps the most recent history when it fills up.
+		ordering: past ? '-due_date' : 'due_date',
 		limit: String(past ? PAST_WINDOW : UPCOMING_WINDOW)
 	});
 	const res = await fetch(`${BASE_API_URL}/task-nodes/?${params}`);
-	if (!res.ok) return [];
-	return (await res.json()).results ?? [];
+	if (!res.ok) return { results: [], count: 0 };
+	const body = await res.json();
+	const results = body.results ?? [];
+	return { results, count: body.count ?? results.length };
 }
 
 export const load: PageServerLoad = async (event) => {
@@ -25,10 +31,15 @@ export const load: PageServerLoad = async (event) => {
 
 	const data = await loadDetail({ event, model: modelInfo, id: event.params.id });
 
-	const [pastOccurrences, upcomingOccurrences] = await Promise.all([
+	const [past, upcoming] = await Promise.all([
 		fetchOccurrences(event.fetch, event.params.id, true),
 		fetchOccurrences(event.fetch, event.params.id, false)
 	]);
 
-	return { ...data, pastOccurrences, upcomingOccurrences };
+	return {
+		...data,
+		pastOccurrences: past.results,
+		upcomingOccurrences: upcoming.results,
+		upcomingCount: upcoming.count
+	};
 };

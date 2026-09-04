@@ -54,6 +54,7 @@
 				schedule={data.data.schedule}
 				past={data.pastOccurrences}
 				upcoming={data.upcomingOccurrences}
+				upcomingCount={data.upcomingCount}
 			/>
 		</div>
 	{/snippet}

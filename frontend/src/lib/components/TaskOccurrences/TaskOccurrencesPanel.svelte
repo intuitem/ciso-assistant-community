@@ -2,6 +2,8 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime.js';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { taskStatusColor } from '$lib/utils/taskStatus';
 	import { scheduleLabel, type TaskSchedule } from '$lib/utils/taskSchedule';
 
@@ -19,9 +21,18 @@
 		schedule?: TaskSchedule | null;
 		past?: Occurrence[];
 		upcoming?: Occurrence[];
+		/** Total upcoming occurrences on the server; `upcoming` is only a window of them. */
+		upcomingCount?: number;
 	}
 
-	let { taskTemplateId, isRecurrent, schedule = null, past = [], upcoming = [] }: Props = $props();
+	let {
+		taskTemplateId,
+		isRecurrent,
+		schedule = null,
+		past = [],
+		upcoming = [],
+		upcomingCount = undefined
+	}: Props = $props();
 
 	const cadence = $derived(scheduleLabel(schedule));
 
@@ -34,7 +45,9 @@
 	const sortedPast = $derived([...past].sort(byDueDate));
 	const sortedUpcoming = $derived([...upcoming].sort(byDueDate));
 	const next = $derived(sortedUpcoming[0]);
-	const laterCount = $derived(Math.max(sortedUpcoming.length - 1, 0));
+	// From the server total, not the fetched window: a daily task can have far more
+	// upcoming occurrences than the window holds.
+	const laterCount = $derived(Math.max((upcomingCount ?? sortedUpcoming.length) - 1, 0));
 
 	// Past occurrences alone give no "you are here": the current one is upcoming by
 	// definition (due today counts as not yet past), so it was missing from the strip
@@ -42,14 +55,16 @@
 	const timeline = $derived([...sortedPast, ...sortedUpcoming]);
 
 	function formatDate(value: string | null) {
-		return value ? new Date(value).toLocaleDateString() : '--';
+		return formatDateOrDateTime(value, getLocale()) ?? '--';
 	}
 
 	function daysUntil(value: string | null) {
 		if (!value) return null;
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
-		const due = new Date(value);
+		// A date-only string is parsed as UTC midnight, which is the previous day in
+		// time zones west of UTC; anchoring with a local time keeps the calendar date.
+		const due = new Date(value.includes('T') ? value : `${value}T00:00:00`);
 		due.setHours(0, 0, 0, 0);
 		return Math.round((due.getTime() - today.getTime()) / 86400000);
 	}

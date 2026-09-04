@@ -3208,7 +3208,10 @@ export const listViewFields = {
 		body: ['due_date', 'status'],
 		filters: {
 			status: TASK_STATUS_FILTER,
-			past: PAST_FILTER
+			past: PAST_FILTER,
+			// URL-driven only (the "All occurrences" link on a task's detail page):
+			// without an entry here the table drops the param instead of applying it.
+			task_template: { hide: true } as ListViewFilterConfig
 		}
 	},
 	qualifications: {
