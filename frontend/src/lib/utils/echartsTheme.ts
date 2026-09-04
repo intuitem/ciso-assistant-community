@@ -44,8 +44,20 @@ export function mountThemeAwareChart(
 	init();
 	container.setAttribute('data-theme-managed', 'true');
 
-	const resize = () => chart.resize();
+	const resize = () => chart?.resize();
 	if (manageResize) window.addEventListener('resize', resize);
+
+	// Containers resize without the window doing so (detail tables, accordions, tabs).
+	// rAF-batched so a resize cannot loop.
+	let pending = 0;
+	const sizeObserver =
+		!manageResize || typeof ResizeObserver === 'undefined'
+			? undefined
+			: new ResizeObserver(() => {
+					cancelAnimationFrame(pending);
+					pending = requestAnimationFrame(resize);
+				});
+	sizeObserver?.observe(container);
 
 	const observer = new MutationObserver(() => {
 		const now = isDarkTheme();
@@ -58,6 +70,8 @@ export function mountThemeAwareChart(
 
 	return () => {
 		observer.disconnect();
+		sizeObserver?.disconnect();
+		cancelAnimationFrame(pending);
 		if (manageResize) window.removeEventListener('resize', resize);
 		container.removeAttribute('data-theme-managed');
 		chart.dispose();
