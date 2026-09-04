@@ -133,7 +133,7 @@ export const actions: Actions = {
 			setFlash(
 				{
 					type: 'error',
-					message: errData.errors?.join(', ') ?? m.errorOccurred()
+					message: errData.errors?.join(', ') ?? m.anErrorOccurred()
 				},
 				event
 			);

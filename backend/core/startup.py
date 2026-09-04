@@ -13,8 +13,10 @@ READER_PERMISSIONS_LIST = [
     "view_compliance_assessment_full",
     "view_object_audittrail",
     "view_appliedcontrol",
+    "view_commitment",
     "view_asset",
     "view_complianceassessment",
+    "view_entityscore",
     "view_entity",
     "view_entityassessment",
     "view_evidence",
@@ -173,6 +175,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_perimeter",
     "view_riskassessment",
     "view_appliedcontrol",
+    "view_commitment",
     "view_policy",
     "view_riskscenario",
     "view_riskacceptance",
@@ -352,6 +355,7 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_requirementassignment",
     "view_requirementassignment",
     "transition_requirementassignment",
+    "transition_commitment",
     "change_riskacceptance",
     "change_riskassessment",
     "change_riskscenario",
@@ -385,8 +389,13 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_securityadvisory",
     "delete_cwe",
     "view_appliedcontrol",
+    "view_commitment",
     "view_asset",
     "view_complianceassessment",
+    "view_entityscore",
+    "add_entityscore",
+    "change_entityscore",
+    "delete_entityscore",
     "view_entity",
     "view_entityassessment",
     "view_evidence",
@@ -792,6 +801,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_requirementassignment",
     "view_requirementassignment",
     "transition_requirementassignment",
+    "transition_commitment",
     "change_riskacceptance",
     "change_riskassessment",
     "change_riskmatrix",
@@ -832,8 +842,13 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_securityadvisory",
     "delete_cwe",
     "view_appliedcontrol",
+    "view_commitment",
     "view_asset",
     "view_complianceassessment",
+    "view_entityscore",
+    "add_entityscore",
+    "change_entityscore",
+    "delete_entityscore",
     "view_entity",
     "view_entityassessment",
     "view_evidence",
@@ -1330,6 +1345,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_riskassessment",
     "add_appliedcontrol",
     "view_appliedcontrol",
+    "view_commitment",
     "change_appliedcontrol",
     "delete_appliedcontrol",
     "add_policy",
@@ -1366,6 +1382,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_requirementassignment",
     "view_requirementassignment",
     "transition_requirementassignment",
+    "transition_commitment",
     # evidence
     "add_evidence",
     "view_evidence",
@@ -1472,6 +1489,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_requirementmapping",
     "add_entity",
     "change_entity",
+    "view_entityscore",
+    "add_entityscore",
+    "change_entityscore",
+    "delete_entityscore",
     "view_entity",
     "delete_entity",
     "add_representative",
@@ -1873,6 +1894,14 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "view_folder",
     "view_requirementassignment",
     "transition_requirementassignment",
+    # The third party owns their tasks like their evidences, bounded to the enclave by
+    # the role assignment. `transition_commitment` is deliberately separate: promising
+    # a date is governed by the commitment sides, not by write access.
+    "view_tasktemplate",
+    "add_tasktemplate",
+    "change_tasktemplate",
+    "delete_tasktemplate",
+    "transition_commitment",
     "add_comment",
     "view_comment",
     "change_comment",
@@ -1899,7 +1928,9 @@ AUDITEE_PERMISSIONS_LIST = [
     "view_folder",
     "view_requirementassignment",
     "transition_requirementassignment",
+    "transition_commitment",
     "view_appliedcontrol",
+    "view_commitment",
     "add_appliedcontrol",
     "change_appliedcontrol",
     "delete_appliedcontrol",
@@ -1942,6 +1973,70 @@ TECHNICAL_TESTER_PERMISSIONS_LIST = [
     "change_finding",
     "delete_finding",
 ]
+
+
+def seed_feature_flag_defaults():
+    """Fill in flags the stored row has never heard of.
+
+    A flag added by a release is absent from an existing row, and `ff_is_enabled`
+    reads that row: a missing key is False whatever the field declares, so an
+    on-by-default flag would land off while the UI, which reads the serializer,
+    shows it on. Only fills gaps — a choice already made is left alone.
+    """
+    from global_settings.models import GlobalSettings
+    from global_settings.utils import (
+        clear_feature_flags_cache,
+        get_feature_flag_defaults,
+    )
+
+    try:
+        row, _ = GlobalSettings.objects.get_or_create(
+            name=GlobalSettings.Names.FEATURE_FLAGS, defaults={"value": {}}
+        )
+        stored = row.value if isinstance(row.value, dict) else {}
+        missing = {
+            name: value
+            for name, value in get_feature_flag_defaults().items()
+            if name not in stored
+        }
+        if not missing:
+            return
+        row.value = {**stored, **missing}
+        row.save(update_fields=["value"])
+        clear_feature_flags_cache()
+        logger.info("Seeded feature flag defaults", flags=sorted(missing))
+    except Exception:
+        logger.error("Could not seed feature flag defaults", exc_info=True)
+
+
+def normalize_third_party_workspaces():
+    """One workspace per third party per domain, merging the per-assessment ones.
+
+    Here rather than in a migration: it reuses the service the API calls, so it needs
+    real models, safe to read only once every migration has run. Idempotent.
+    """
+    from tprm.services import normalize_entity_workspaces
+
+    try:
+        rows = normalize_entity_workspaces(apply=True)
+    except Exception:
+        logger.error("Could not normalise third-party workspaces", exc_info=True)
+        return
+    for row in rows:
+        if row["error"]:
+            # One awkward entity must not block a startup.
+            logger.warning(
+                "Could not normalise third-party workspace",
+                entity=row["entity"].name,
+                domain=row["domain"].name,
+                error=row["error"],
+            )
+        else:
+            logger.info(
+                "Normalised third-party workspace",
+                entity=row["entity"].name,
+                action=row["action"],
+            )
 
 
 def ensure_admin_user():
@@ -2180,6 +2275,11 @@ def startup(sender=None, **kwargs):
         logger.error("Error creating default Entity Relationships", exc_info=True)
 
     try:
+        Terminology.create_default_entity_score_providers()
+    except Exception as e:
+        logger.error("Error creating default Entity Score Providers", exc_info=True)
+
+    try:
         Terminology.create_default_metric_units()
     except Exception as e:
         logger.error("Error creating default Metric Units", exc_info=True)
@@ -2238,6 +2338,10 @@ def startup(sender=None, **kwargs):
         call_command("backfill_builtin_metrics")
     except Exception as e:
         logger.error("Error backfilling builtin metrics", exc_info=True)
+
+    seed_feature_flag_defaults()
+
+    normalize_third_party_workspaces()
 
     ensure_admin_user()
 
