@@ -80,6 +80,18 @@
 		model: model.name,
 		object: compliance_assessment
 	});
+	// Assignments that have actually been sent out: a draft has nothing to review yet.
+	const activeAssignments = $derived(
+		(compliance_assessment.requirement_assignments ?? []).filter(
+			(a: { status?: string }) => a.status && a.status !== 'draft'
+		)
+	);
+	const reviewResponsesHref = $derived(
+		activeAssignments.length === 1
+			? `/auditee-assessments/${activeAssignments[0].id}`
+			: `${page.url.pathname}/assignments`
+	);
+
 	const requirementAssessmentModel = URL_MODEL_MAP['requirement-assessments'];
 	const canEditRequirementAssessment: boolean =
 		!data.compliance_assessment.is_locked &&
@@ -954,6 +966,15 @@
 					{/if}
 				</div>
 				{#if !page.data.user.is_third_party}
+					{#each page.data?.featureflags?.findings_from_requirements ? (data.compliance_assessment.findings_assessments ?? []) : [] as binder}
+						<Anchor
+							href={`/findings-assessments/${binder.id}`}
+							class="btn preset-filled-secondary-500 h-fit"
+							breadcrumbAction="push"
+							data-testid="go-to-findings-binder-button"
+							><i class="fa-solid fa-bug mr-2"></i>{m.findings()}</Anchor
+						>
+					{/each}
 					<Anchor
 						href={`${page.url.pathname}/action-plan`}
 						class="btn preset-filled-primary-500 h-fit"
@@ -1120,6 +1141,20 @@
 									>
 										<i class="fa-solid fa-user-tag text-green-500 text-base"></i>
 										<span class="text-sm font-medium">{m.assignments()}</span>
+									</Anchor>
+								{/if}
+								{#if page.data?.featureflags?.auditee_mode && activeAssignments.length > 0}
+									<!-- Reviewing what was answered was reachable only through the
+										assignments page, which disappears once the audit is locked or in
+										review — exactly when a reviewer needs it. -->
+									<Anchor
+										breadcrumbAction="push"
+										href={reviewResponsesHref}
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+										data-testid="review-responses-button"
+									>
+										<i class="fa-solid fa-clipboard-check text-blue-500 text-base"></i>
+										<span class="text-sm font-medium">{m.reviewResponses()}</span>
 									</Anchor>
 								{/if}
 							</div>
