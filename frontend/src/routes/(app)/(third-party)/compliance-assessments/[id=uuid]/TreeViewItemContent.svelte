@@ -105,6 +105,9 @@
 		: null;
 	const statusI18nText = safeTranslate(rawNode.status_i18n);
 	const resultI18nText = safeTranslate(rawNode.result_i18n);
+	// TreeViewItem draws this icon itself, but only inside the lead slot this row
+	// no longer uses — hence rendering it here, from the same node field.
+	const hasMappingInference = Object.keys(rawNode.mapping_inference ?? {}).length > 0;
 	const extendedResultText = rawNode.extended_result
 		? safeTranslate(rawNode.extended_result)
 		: null;
@@ -269,6 +272,14 @@
 								class="flex flex-row space-x-2 items-center shrink-0"
 								data-testid="tree-item-badges"
 							>
+								{#if hasMappingInference}
+									<i
+										class="fa-solid fa-diagram-project"
+										title={m.mappingInference()}
+										aria-label={m.mappingInference()}
+										data-testid="mapping-inference-icon"
+									></i>
+								{/if}
 								{#if showStatus}
 									<span class="badge h-fit" style="color: {statusColor ?? '#d1d5db'};">
 										{statusI18nText}
