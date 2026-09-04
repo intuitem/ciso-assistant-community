@@ -213,7 +213,18 @@ def _send_assignment_notifications(self, obj, actor_ids):
 
 Note: `ComplianceAssessmentWriteSerializer.update` and `SecurityExceptionWriteSerializer.update` (status change) use `transaction.on_commit()` to defer notification until the DB transaction is committed. The SecurityException status notification goes to both the exception owners and its approver.
 
-### 3. Password Reset / Welcome Emails
+### 3. Requirement Assignment Review Workflow (Event-Triggered)
+
+These are triggered from a ViewSet action rather than from a serializer's `create()`/`update()`. Every call to `set_status` looks up the `(from_status, to_status)` pair in `_send_transition_notification` (`backend/core/views.py:18658`) and dispatches the matching task.
+
+| Transition | Task Function | Template | Recipient |
+|------------|---------------|----------|-----------|
+| `* → in_progress` | `send_assignment_activated_notification` | `assignment_activated` | Assignee |
+| `in_progress/changes_requested → submitted` | `send_assignment_submitted_notification` | `assignment_submitted` | Reviewers (falls back to authors) |
+| `submitted → closed`, `submitted → changes_requested`, `closed → submitted` | `send_assignment_reviewed_notification` (decision = `closed`/`changes_requested`/`reopened`) | `assignment_reviewed` | Assignee |
+| `* → draft` (from `in_progress`, `submitted`, `changes_requested`, or `closed`) | `send_assignment_reopened_notification` | `assignment_reopened` | Assignee |
+
+### 4. Password Reset / Welcome Emails
 
 These use a separate mechanism (`User.mailing()` in `backend/iam/models.py`) with Django HTML templates instead of YAML.
 
@@ -225,7 +236,7 @@ These use a separate mechanism (`User.mailing()` in `backend/iam/models.py`) wit
 
 These emails support the **rescue (fallback) email server**. Notification emails (from `tasks.py`) currently use only the primary server.
 
-### 4. Non-Notification Periodic Tasks
+### 5. Non-Notification Periodic Tasks
 
 These tasks perform automated actions without sending emails:
 
@@ -276,6 +287,10 @@ This means assigning a Team as owner of a control can notify multiple people in 
 | `security_exception_status_changed.yaml` | `send_security_exception_status_notification` |
 | `security_exception_expiring_soon.yaml` | `send_security_exception_expiring_soon_notification` |
 | `expired_security_exceptions.yaml` | `send_notification_email_expired_security_exception` |
+| `assignment_activated.yaml` | `send_assignment_activated_notification` |
+| `assignment_submitted.yaml` | `send_assignment_submitted_notification` |
+| `assignment_reviewed.yaml` | `send_assignment_reviewed_notification` |
+| `assignment_reopened.yaml` | `send_assignment_reopened_notification` |
 
 ### French (`fr/`)
 

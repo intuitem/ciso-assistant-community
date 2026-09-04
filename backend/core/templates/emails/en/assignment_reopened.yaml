@@ -2,11 +2,11 @@ subject: "CISO Assistant: Your assignment on '${assessment_name}' has been reope
 body: |
   Hello,
 
-  Your assignment on the following audit has been set back to draft so it can be edited:
+  Your assignment on the following audit has been set to paused:
 
   - Audit: ${assessment_name}
   ${reviewer_observation}
 
-  Please log in to your CISO Assistant portal for more details: [Go to CISO Assistant](${ciso_assistant_url}/auditee-dashboard)
+  Please reach out to the relevant team for more information.
 
   Thank you.
