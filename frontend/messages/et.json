@@ -2745,7 +2745,7 @@
 	"mappingSuggestionTeasing": "Vastenduste soovitused on nüüd saadaval! Kasuta filtreid, et uurida laaditud raamistikest tulenevaid soovitusi.",
 	"errorCreatingPersonalAccessToken": "Isikliku juurdepääsutokeni loomisel ilmnes viga.",
 	"errorMaxPatAmountExceeded": "Selle kasutaja jaoks lubatud tokenite maksimaalne arv on ületatud.",
-	"errorSsoRequiredForScimUsers": "SSO-d ei saa keelata, kuni on olemas SCIM-i kaudu loodud kasutajaid, kellel puudub kohalik juurdepääs.",
+	"errorSsoRequiredForManagedUsers": "SSO-d ei saa keelata, kuni on olemas SCIM-i kaudu või automaatselt loodud kasutajaid, kellel puudub kohalik juurdepääs.",
 	"campaign": "Kampaania",
 	"campaigns": "Kampaaniad",
 	"addCampaign": "Alusta kampaaniat",
@@ -4924,5 +4924,14 @@
 	"scimTokenNameTooLong": "Nimi ei tohi olla pikem kui 255 tähemärki.",
 	"idpGroup": "IdP rühm",
 	"idpGroups": "IdP rühmad",
-	"idpGroupsDescription": "Luba IdP rühmade föderatsioon (SCIM ettevalmistamine, IdP rühmade vastendused ja kasutajate IdP rühmade liikmesused)."
+	"idpGroupsDescription": "Luba IdP rühmade föderatsioon (SCIM ettevalmistamine, IdP rühmade vastendused ja kasutajate IdP rühmade liikmesused).",
+	"enableJitProvisioning": "Luba kasutajakontode automaatne loomine",
+	"enableJitProvisioningHelpText": "Loob automaatselt konto koos allpool toodud vaikimisi kasutajarühmadega kasutajatele, kes autentivad SSO kaudu esimest korda.",
+	"defaultUserGroups": "Vaikimisi kasutajarühmad",
+	"defaultUserGroupsHelpText": "Kasutajarühmad, mis antakse automaatselt automaatse provisioneerimise teel loodud kasutajatele.",
+	"defaultUserGroupsWarning": "Rakendub ainult üks kord, konto loomisel. Selle seade hilisem muutmine või eemaldamine ei mõjuta juba provisioneeritud kasutajaid. Kui soovid rühmaliikmelisust, mis püsib ajas sünkroonis, kasuta selle asemel IdP rühmade kaardistamist.",
+	"attributeMappingGroups": "Rühmade atribuudi kaardistus",
+	"attributeMappingGroupsHelpText": "Nõude (claim) nimi/nimed, mis kannavad kasutaja IdP rühmaliikmesust. Siit leitud rühmad sünkroonitakse IdP rühmadega igal sisselogimisel ning annavad need CISO Assistanti kasutajarühmad, millega administraator on need kaardistanud.",
+	"jitProvisioning": "SSO automaatne provisioneerimine (JIT)",
+	"jitProvisioningDescription": "Luba kontode automaatne loomine esimesel SSO sisselogimisel ja nende IdP rühmaliikmesuse sünkroonimine, ilma SCIM-i vajaduseta."
 }

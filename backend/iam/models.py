@@ -581,7 +581,8 @@ class Folder(NameDescriptionMixin):
         )
 
         # Combine both querysets into a single one.
-        all_roles_qs = direct_perms_qs.union(group_perms_qs)
+        # order_by() drops the default ordering Django 6.1 applies to unions.
+        all_roles_qs = direct_perms_qs.union(group_perms_qs).order_by()
 
         user_roles = defaultdict(list)
         for item in all_roles_qs:
@@ -727,6 +728,30 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
         super().delete(*args, **kwargs)
 
 
+def is_supported_language(code) -> bool:
+    return isinstance(code, str) and code in {c for c, _ in settings.LANGUAGES}
+
+
+def default_language() -> str:
+    """The instance-wide default, used when nothing better is known."""
+    try:
+        from global_settings.models import GlobalSettings
+
+        general = GlobalSettings.objects.filter(name="general").first()
+        if general and isinstance(general.value, dict):
+            candidate = general.value.get("default_language", "en")
+            return candidate if is_supported_language(candidate) else "en"
+    except ImportError, OperationalError, ProgrammingError:
+        # Called during startup and from migrations, before the table exists.
+        pass
+    return "en"
+
+
+def resolve_language(code) -> str:
+    """An explicit, supported language, else the instance default."""
+    return code if is_supported_language(code) else default_language()
+
+
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -761,26 +786,18 @@ class UserManager(BaseUserManager):
                 keep_local_login=extra_fields.get("keep_local_login", False),
                 expiry_date=extra_fields.get("expiry_date"),
                 is_published=True,
+                is_jit_provisioned=extra_fields.get("is_jit_provisioned", False),
             ),
         )
         if password:
             user.password = make_password(password)
         else:
             user.set_unusable_password()
-        # Set default language from general settings
-        try:
-            from global_settings.models import GlobalSettings
-
-            general = GlobalSettings.objects.filter(name="general").first()
-            if general and isinstance(general.value, dict):
-                default_lang = general.value.get("default_language", "en")
-            else:
-                default_lang = "en"
-        except Exception:
-            default_lang = "en"
         if not isinstance(user.preferences, dict):
             user.preferences = {}
-        user.preferences["lang"] = default_lang
+        # An explicit language wins over the instance default: a third-party
+        # representative gets their invitation in their own language.
+        user.preferences["lang"] = resolve_language(extra_fields.get("language"))
 
         user.save(using=self._db)
         user.user_groups.set(extra_fields.get("user_groups", []))
@@ -928,6 +945,15 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "scim_external_id, which the provisioning client may omit (RFC 7643)."
         ),
     )
+    is_jit_provisioned = models.BooleanField(
+        default=False,
+        verbose_name=_("JIT provisioned"),
+        help_text=_(
+            "True when this account was auto-provisioned on first SSO login. Like "
+            "SCIM-managed accounts, it stays SSO-only regardless of the global "
+            "'Force SSO' setting, unless 'Keep local login' is set."
+        ),
+    )
     objects = CaseInsensitiveUserManager()
 
     # USERNAME_FIELD is used as the unique identifier for the user
@@ -989,20 +1015,8 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         if not isinstance(prefs, dict):
             prefs = {}
             self.preferences = prefs
-        valid_langs = {code for code, _ in settings.LANGUAGES}
-        if not isinstance(prefs.get("lang"), str) or prefs["lang"] not in valid_langs:
-            try:
-                from global_settings.models import GlobalSettings
-
-                general = GlobalSettings.objects.filter(name="general").first()
-                default_lang = (
-                    general.value.get("default_language", "en")
-                    if general and isinstance(general.value, dict)
-                    else "en"
-                )
-            except Exception:
-                default_lang = "en"
-            prefs["lang"] = default_lang
+        if not is_supported_language(prefs.get("lang")):
+            prefs["lang"] = default_language()
         if prefs.get("date_format") not in self.DATE_FORMATS:
             prefs["date_format"] = "auto"
         ui = prefs.get("ui") if isinstance(prefs.get("ui"), dict) else {}
@@ -1176,19 +1190,19 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     def get_roles(self):
         """get the list of roles attached to the user — directly via its user
-        groups and, when the idp_groups feature is enabled, via the user groups
+        groups and, when IdP-group role inheritance is enabled, via the user groups
         granted by its IdP groups (groups-of-groups closure). Kept consistent
         with the inheritance-aware ``permissions`` and ``is_admin()`` so the
         current-user payload (and the role-name nav gating it drives) matches
         what the user can actually do."""
-        from global_settings.utils import ff_is_enabled
+        from global_settings.utils import idp_group_role_inheritance_enabled
 
         roles = set(
             self.user_groups.all()
             .values_list("roleassignment__role__name", flat=True)
             .distinct()
         )
-        if ff_is_enabled("idp_groups"):
+        if idp_group_role_inheritance_enabled():
             roles |= set(
                 self.idp_groups.all()
                 .values_list("user_groups__roleassignment__role__name", flat=True)
@@ -1227,33 +1241,20 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     @staticmethod
     def get_admin_users() -> QuerySet["User"]:
-        # Admin membership is reached directly or, when the idp_groups feature
-        # is enabled, via an IdP group whose user_groups include BI-UG-ADM
-        # (groups-of-groups closure).
-        from global_settings.utils import ff_is_enabled
+        from global_settings.utils import idp_group_role_inheritance_enabled
 
         q = Q(user_groups__name="BI-UG-ADM")
-        if ff_is_enabled("idp_groups"):
+        if idp_group_role_inheritance_enabled():
             q |= Q(idp_groups__user_groups__name="BI-UG-ADM")
         return User.objects.filter(q).distinct()
 
     def is_admin(self) -> bool:
-        """Whether the user is a *global administrator*.
-
-        "Admin" here always means global admin: membership of the built-in
-        global administrators group (BI-UG-ADM) — either directly, or via an
-        IdP group mapped to it (when the idp_groups feature flag is enabled).
-        This is the canonical check for "is a global administrator?"; the
-        IsGlobalAdmin permission and the current-user `is_admin` field both
-        resolve to it. It is NOT scoped to any domain — domain managers
-        (BI-UG-DMA) are not admins here.
-        """
-        from global_settings.utils import ff_is_enabled
+        from global_settings.utils import idp_group_role_inheritance_enabled
 
         if self.user_groups.filter(name="BI-UG-ADM").exists():
             return True
         return (
-            ff_is_enabled("idp_groups")
+            idp_group_role_inheritance_enabled()
             and self.idp_groups.filter(user_groups__name="BI-UG-ADM").exists()
         )
 
@@ -1282,7 +1283,9 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         """
         from global_settings.models import GlobalSettings
 
-        if self.is_scim_managed and not self.keep_local_login:
+        if (
+            self.is_scim_managed or self.is_jit_provisioned
+        ) and not self.keep_local_login:
             return False
 
         try:
@@ -1408,16 +1411,12 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         if not user.is_active:
             return RoleAssignment.objects.none()
 
-        from global_settings.utils import ff_is_enabled
+        from global_settings.utils import idp_group_role_inheritance_enabled
 
-        filter_query = Q(user=user) | Q(user_group__in=user.user_groups.all())
+        filter_query = Q(user=user) | Q(user_group__user=user)
 
-        if ff_is_enabled("idp_groups"):
-            filter_query |= Q(
-                user_group__in=UserGroup.objects.filter(
-                    idp_groups__in=user.idp_groups.all()
-                )
-            )
+        if idp_group_role_inheritance_enabled():
+            filter_query |= Q(user_group__idp_groups__users=user)
 
         user_role_assignments = RoleAssignment.objects.filter(filter_query).distinct()
 
@@ -1833,9 +1832,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             "id", flat=True
         )
 
+        # order_by() drops the default ordering Django 6.1 applies to unions:
+        # it would reference a column absent from the selected values.
         accessible_folder_ids = directly_accessible_folder_ids.union(
             indirectly_accessible_folder_ids
-        )
+        ).order_by()
         return accessible_folder_ids
 
     @staticmethod
@@ -2245,12 +2246,23 @@ class IdPGroup(AbstractBaseModel, FolderMixin):
     ``user_groups`` (the CISO groups it grants) is admin-managed. Folder-scoped
     (defaults to the root folder) so it participates in RBAC like UserGroup."""
 
+    class Source(models.TextChoices):
+        SCIM = "scim", _("SCIM")
+        SSO = "sso", _("SSO")
+
     name = models.CharField(max_length=512, unique=True, verbose_name=_("Name"))
     user_groups = models.ManyToManyField(
         UserGroup,
         related_name="idp_groups",
         blank=True,
         verbose_name=_("User groups"),
+    )
+    source = models.CharField(
+        max_length=8,
+        choices=Source.choices,
+        null=True,
+        blank=True,
+        verbose_name=_("Source"),
     )
 
     class Meta:

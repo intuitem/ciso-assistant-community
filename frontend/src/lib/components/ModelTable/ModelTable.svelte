@@ -7,12 +7,30 @@
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import { booleanDisplay } from '$lib/utils/boolean-display';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { CUSTOM_ACTIONS_COMPONENT, getFieldComponentMap, URL_MODEL_MAP } from '$lib/utils/crud';
+	import {
+		CUSTOM_ACTIONS_COMPONENT,
+		getFieldComponentMap,
+		isFieldFlagEnabled,
+		URL_MODEL_MAP
+	} from '$lib/utils/crud';
+
+	// A filter on a flag-gated field must go away with its flag, like its column does.
+	function filtersForActiveFlags(urlModel: string) {
+		const filters = listViewFields[urlModel].filters ?? {};
+		const flaggedFields = URL_MODEL_MAP[urlModel]?.flaggedFields;
+		if (!flaggedFields) return filters;
+		const featureFlags = page.data?.featureflags ?? {};
+		return Object.fromEntries(
+			Object.entries(filters).filter(([field]) => {
+				return isFieldFlagEnabled(flaggedFields[field], featureFlags);
+			})
+		);
+	}
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { onMount, tick, untrack } from 'svelte';
+	import { getToastStore } from '$lib/components/Toast/stores';
 
-	import { tableA11y } from '$lib/components/ModelTable/actions';
 	// Types
 	import { browser } from '$app/environment';
 	import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
@@ -165,7 +183,7 @@
 		tableFilters = URLModel &&
 		listViewFields[URLModel] &&
 		Object.hasOwn(listViewFields[URLModel], 'filters')
-			? listViewFields[URLModel].filters
+			? filtersForActiveFlags(URLModel)
 			: {},
 		folderId = '',
 		forcePreventDelete = false,
@@ -189,17 +207,24 @@
 	let model = $derived(URL_MODEL_MAP[URLModel]);
 	// Models keeping some fields writable on built-in rows (BUILTIN_EDITABLE_FIELDS).
 	const BUILTIN_EDITABLE_URL_MODELS = ['terminologies', 'entities', 'asset-class'];
+	// A field's flag(s) can be a single flag name or a list (shown if ANY is on).
+	// Hidden only once every listed flag is a known, explicitly-false feature flag.
+	function isFieldHiddenByFeatureFlags(
+		flaggedFields: Record<string, string | string[]> | undefined,
+		key: string
+	) {
+		if (!flaggedFields || !Object.hasOwn(flaggedFields, key)) return false;
+		const flags = ([] as string[]).concat(flaggedFields[key]);
+		return flags.every(
+			(flag) =>
+				Object.hasOwn(page.data?.featureflags ?? {}, flag) &&
+				page.data?.featureflags[flag] === false
+		);
+	}
+
 	const tableSource: TableSource = $derived(
 		Object.keys(source.head)
-			.filter(
-				(key) =>
-					!(
-						model?.flaggedFields &&
-						Object.hasOwn(model.flaggedFields, key) &&
-						Object.hasOwn(page.data?.featureflags, model.flaggedFields[key]) &&
-						page.data?.featureflags[model.flaggedFields[key]] === false
-					)
-			)
+			.filter((key) => !isFieldHiddenByFeatureFlags(model?.flaggedFields, key))
 			.reduce(
 				(acc, key) => {
 					acc.head[key] = source.head[key];
@@ -271,10 +296,7 @@
 		$tableColumnStates = next;
 	}
 
-	function onRowClick(
-		event: SvelteEvent<MouseEvent | KeyboardEvent, HTMLTableRowElement>,
-		rowIndex: number
-	): void {
+	function onRowClick(event: SvelteEvent<MouseEvent, HTMLTableRowElement>, rowIndex: number): void {
 		if (!interactive) return;
 		event.preventDefault();
 		event.stopPropagation();
@@ -295,13 +317,6 @@
 			label,
 			breadcrumbAction: 'push'
 		});
-	}
-
-	function onRowKeydown(
-		event: SvelteEvent<KeyboardEvent, HTMLTableRowElement>,
-		rowIndex: number
-	): void {
-		if (['Enter', 'Space'].includes(event.code)) onRowClick(event, rowIndex);
 	}
 
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
@@ -359,29 +374,41 @@
 
 	$tableHandlers[baseEndpoint] = handler;
 
-	handler.onChange((state: State) =>
-		loadTableData({
-			state,
-			URLModel,
-			endpoint: baseEndpoint,
-			fields:
-				showColumnSelector && allColumnKeys.length > 0
-					? { head: allColumnKeys, body: allColumnKeys }
-					: fields.length > 0
-						? { head: fields, body: fields }
-						: {
-								head:
-									typeof tableSource.head[0] === 'string'
-										? Object.values(tableSource.head)
-										: Object.keys(tableSource.head),
-								body:
-									typeof tableSource.body[0] === 'string'
-										? Object.values(tableSource.body)
-										: Object.keys(tableSource.body)
-							},
-			featureFlags: page.data?.featureflags
-		})
-	);
+	const toastStore = getToastStore();
+
+	// A table handed its rows up front has no model or endpoint ("/undefined"): the
+	// remote handler would poll it and clear the seeded rows. A bare baseEndpoint is
+	// still remote.
+	const hasRemoteSource = Boolean(URLModel) || baseEndpoint !== '/undefined';
+
+	if (hasRemoteSource)
+		handler.onChange((state: State) =>
+			loadTableData({
+				state,
+				URLModel,
+				endpoint: baseEndpoint,
+				fields:
+					showColumnSelector && allColumnKeys.length > 0
+						? { head: allColumnKeys, body: allColumnKeys }
+						: fields.length > 0
+							? { head: fields, body: fields }
+							: {
+									head:
+										typeof tableSource.head[0] === 'string'
+											? Object.values(tableSource.head)
+											: Object.keys(tableSource.head),
+									body:
+										typeof tableSource.body[0] === 'string'
+											? Object.values(tableSource.body)
+											: Object.keys(tableSource.body)
+								},
+				featureFlags: page.data?.featureflags,
+				onError: (error) => {
+					console.error(error);
+					toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
+				}
+			})
+		);
 
 	onMount(() => {
 		if (orderBy) {
@@ -522,13 +549,14 @@
 		untrack(() => {
 			$tableFilterStates[filterStoreKey] = { ...filterValues };
 		});
-		setTimeout(() => {
-			handler.invalidate();
-		}, 10);
+		if (hasRemoteSource)
+			setTimeout(() => {
+				handler.invalidate();
+			}, 10);
 	});
 
 	$effect(() => {
-		if (page.form?.form?.posted && page.form?.form?.valid) {
+		if (hasRemoteSource && page.form?.form?.posted && page.form?.form?.valid) {
 			console.debug('Form posted, invalidating table');
 			handler.invalidate();
 		}
@@ -693,10 +721,15 @@
 		'user_groups'
 	];
 
+	// Computed in Python from related rows, so there is no column for the backend to
+	// ORDER BY: DRF drops the term and the click does nothing. Better not to offer it.
+	const UNSORTABLE_COMPUTED_COLUMNS = ['completion', 'review_progress'];
+
 	// Function to check if a column is multi-value and should not be sortable
 	const isMultiValueColumn = (key: string): boolean => {
 		return (
 			MULTI_VALUE_COLUMNS.includes(key) ||
+			UNSORTABLE_COMPUTED_COLUMNS.includes(key) ||
 			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]))
 		);
 	};
@@ -744,7 +777,7 @@
 
 	const currentBatchActions: BatchActionConfig[] = $derived(
 		URLModel && model
-			? getBatchActions(URLModel).filter((a) =>
+			? getBatchActions(URLModel, page.data?.featureflags ?? {}).filter((a) =>
 					a.type === 'delete'
 						? !disableDelete && hasPermissionAnywhere(user, `delete_${model.name}`)
 						: !disableEdit && hasPermissionAnywhere(user, `change_${model.name}`)
@@ -911,12 +944,7 @@
 		</div>
 	{/if}
 	<!-- Table -->
-	<table
-		class="table caption-bottom {classesTable}"
-		class:table-interactive={interactive}
-		role="grid"
-		use:tableA11y
-	>
+	<table class="table caption-bottom {classesTable}" class:table-interactive={interactive}>
 		<thead class="table-head {regionHead}">
 			<tr>
 				{#if hasBatchActions}
@@ -973,15 +1001,12 @@
 							{@const meta = row?.meta ?? row}
 							<tr
 								onclick={(e) => onRowClick(e, rowIndex)}
-								onkeydown={(e) => onRowKeydown(e, rowIndex)}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
-								aria-rowindex={rowIndex + 1}
 								class="hover:bg-surface-200-800 even:bg-surface-100-900 cursor-pointer"
 							>
 								{#if hasBatchActions}
 									<td
 										class="group/check w-10 text-center cursor-pointer"
-										role="gridcell"
 										onclick={(e) => {
 											e.stopPropagation();
 											if (meta?.id) toggleRowSelection(meta.id);
@@ -1003,7 +1028,7 @@
 								{#each renderColumnKeys as key (key)}
 									{@const value = row[key]}
 									{@const component = fieldComponentMap[key]}
-									<td role="gridcell">
+									<td>
 										<div class={regionCell}>
 											{#if component && browser}
 												{@const CellComponent = component}
@@ -1116,7 +1141,7 @@
 														>
 															{safeTranslate(value.name ?? value.str) ?? '-'}
 														</p>
-													{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'end_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
+													{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'end_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on' || key === 'last_assessment_date')}
 														{formatDateOrDateTime(value, getLocale())}
 													{:else if [true, false].includes(value)}
 														{@const bd = booleanDisplay(value, key, URLModel)}
@@ -1124,12 +1149,19 @@
 													{:else if value === 'YES' || value === 'NO'}
 														{@const bd = booleanDisplay(value === 'YES', key, URLModel)}
 														<span class="ml-4"><i class="{bd.icon} {bd.colorClass}"></i></span>
-													{:else if key === 'progress' || key === 'treatment_progress' || key === 'progress_field'}
+													{:else if key === 'progress' || key === 'treatment_progress' || key === 'progress_field' || key === 'completion' || key === 'review_progress'}
 														<span class="ml-9"
 															>{value != null
 																? safeTranslate('percentageDisplay', { number: value })
 																: '--'}</span
 														>
+													{:else if key === 'last_assessment_status'}
+														<!-- The status is nullable: only a missing round is "never assessed". -->
+														{#if !meta?.last_assessment_date}
+															<span class="text-surface-500">{m.neverAssessed()}</span>
+														{:else}
+															{safeTranslate(value ?? '-')}
+														{/if}
 													{:else if key === 'translations'}
 														{#if Object.keys(value).length > 0}
 															<div class="flex flex-col gap-2">
@@ -1197,7 +1229,7 @@
 									</td>
 								{/each}
 								{#if displayActions}
-									<td class="text-end {regionCell}" role="gridcell">
+									<td class="text-end {regionCell}">
 										{#if actions}{@render actions({
 												meta: row.meta
 											})}{:else if row.meta[identifierField]}

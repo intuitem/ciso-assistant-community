@@ -79,7 +79,12 @@ from core.serializers import (
     UserWriteSerializer,
     VulnerabilityWriteSerializer,
 )
-from core.utils import AUDITOR_ONLY, build_questions_dict, get_global_currency
+from core.utils import (
+    AUDITOR_ONLY,
+    build_questions_dict,
+    get_global_currency,
+    parse_answers_cell,
+)
 from data_wizard.arm_helpers import process_arm_file
 from data_wizard.cyfun_helpers import (
     CYFUN_FRAMEWORK_URN,
@@ -4729,6 +4734,10 @@ class LoadFileView(APIView):
     ):
         """Update matched requirement assessments from the rows; only populated
         cells are written, so blanks never clobber existing audit data."""
+        # Non-fatal per-line problems (an answer we could not match) land here
+        # rather than being dropped silently. Set here so every caller's results
+        # dict carries the key.
+        results.setdefault("warnings", [])
         for record in records:
             ref_id = record.get("ref_id")
             urn = record.get("urn")
@@ -4797,63 +4806,19 @@ class LoadFileView(APIView):
                     answers_cell = record.get("answers")
                     questions_dict = build_questions_dict(ReqNode) if ReqNode else None
                     if answers_cell not in (None, "") and questions_dict:
-                        text_to_question = {}
-                        for q_urn, qdef in questions_dict.items():
-                            q_text = qdef.get("text", "")
-                            if q_text:
-                                text_to_question[q_text] = (q_urn, qdef)
-
-                        answers = {}
-                        has_any_answer = False
-
-                        for line in str(answers_cell).split("\n"):
-                            line = line.strip()
-                            if ">>" not in line:
-                                continue
-                            q_part, _, a_part = line.partition(">>")
-                            q_text = q_part.replace("(multiple)", "").strip()
-                            a_value = a_part.strip()
-                            # Skip template hints
-                            if a_value.startswith("[") and a_value.endswith("]"):
-                                continue
-                            if not a_value:
-                                continue
-
-                            matched = text_to_question.get(q_text)
-                            if not matched:
-                                continue
-                            q_urn, qdef = matched
-                            q_type = qdef.get("type")
-
-                            if q_type in ("text", "date"):
-                                answers[q_urn] = a_value
-                                has_any_answer = True
-                            elif q_type == "multiple_choice":
-                                selected = [
-                                    v.strip() for v in a_value.split("|") if v.strip()
-                                ]
-                                value_to_urn = {
-                                    c.get("value", ""): c["urn"]
-                                    for c in qdef.get("choices", [])
+                        answers, answer_warnings = parse_answers_cell(
+                            answers_cell, questions_dict
+                        )
+                        for warning in answer_warnings:
+                            results["warnings"].append(
+                                {
+                                    "requirement": ReqNode.ref_id or ReqNode.urn,
+                                    "warning": warning,
                                 }
-                                choice_urns = [
-                                    value_to_urn[v]
-                                    for v in selected
-                                    if v in value_to_urn
-                                ]
-                                if choice_urns:
-                                    answers[q_urn] = choice_urns
-                                    has_any_answer = True
-                            elif q_type == "unique_choice":
-                                value_to_urn = {
-                                    c.get("value", ""): c["urn"]
-                                    for c in qdef.get("choices", [])
-                                }
-                                if a_value in value_to_urn:
-                                    answers[q_urn] = value_to_urn[a_value]
-                                    has_any_answer = True
-
-                        if has_any_answer:
+                            )
+                        # An empty dict means every line was a hint or was
+                        # skipped; sending it would be a no-op write.
+                        if answers:
                             requirement_data["answers"] = answers
 
                     override_cell = record.get("is_score_overridden")
@@ -6204,6 +6169,16 @@ class LoadFileView(APIView):
             # Parse ARM Excel file
             excel_file.seek(0)
             arm_data = process_arm_file(excel_file.read())
+
+            missing_sheets = arm_data.get("missing_sheets", [])
+            if missing_sheets:
+                results["warnings"] = [
+                    {
+                        "sheet": key,
+                        "warning": "Sheet not found in the ARM file, related data was not imported",
+                    }
+                    for key in missing_sheets
+                ]
 
             # Generate study name
             study_name = resolve_container_name(request, "EBIOS_RM_Study")

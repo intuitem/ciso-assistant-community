@@ -367,14 +367,14 @@
 				await invalidateAll();
 				toastStore.trigger({
 					message: m.assignmentCreated(),
-					background: 'variant-filled-success',
+					background: 'preset-filled-success-500',
 					timeout: 3000
 				});
 			} else {
 				console.error('Failed to create assignment:', result);
 				toastStore.trigger({
 					message: m.assignmentCreationFailed(),
-					background: 'variant-filled-error',
+					background: 'preset-filled-error-500',
 					timeout: 3000
 				});
 			}
@@ -382,7 +382,7 @@
 			console.error('Error creating assignment:', error);
 			toastStore.trigger({
 				message: m.assignmentCreationFailed(),
-				background: 'variant-filled-error',
+				background: 'preset-filled-error-500',
 				timeout: 3000
 			});
 		} finally {
@@ -420,14 +420,14 @@
 				await invalidateAll();
 				toastStore.trigger({
 					message: m.assignmentDeleted(),
-					background: 'variant-filled-success',
+					background: 'preset-filled-success-500',
 					timeout: 3000
 				});
 			} else {
 				console.error('Failed to delete assignment:', result);
 				toastStore.trigger({
 					message: m.assignmentDeletionFailed(),
-					background: 'variant-filled-error',
+					background: 'preset-filled-error-500',
 					timeout: 3000
 				});
 			}
@@ -435,7 +435,7 @@
 			console.error('Error deleting assignment:', error);
 			toastStore.trigger({
 				message: m.assignmentDeletionFailed(),
-				background: 'variant-filled-error',
+				background: 'preset-filled-error-500',
 				timeout: 3000
 			});
 		} finally {
@@ -485,14 +485,14 @@
 				await invalidateAll();
 				toastStore.trigger({
 					message: m.assignmentUpdated(),
-					background: 'variant-filled-success',
+					background: 'preset-filled-success-500',
 					timeout: 3000
 				});
 			} else {
 				console.error('Failed to update assignment:', result);
 				toastStore.trigger({
 					message: m.assignmentUpdateFailed(),
-					background: 'variant-filled-error',
+					background: 'preset-filled-error-500',
 					timeout: 3000
 				});
 			}
@@ -500,7 +500,7 @@
 			console.error('Error updating assignment:', error);
 			toastStore.trigger({
 				message: m.assignmentUpdateFailed(),
-				background: 'variant-filled-error',
+				background: 'preset-filled-error-500',
 				timeout: 3000
 			});
 		} finally {
@@ -589,6 +589,10 @@
 	let requestChangesAssignmentId = $state<string | null>(null);
 	let reviewerObservationText = $state('');
 
+	const requestChangesAssignment = $derived(
+		assignments.find((a: Record<string, any>) => a.id === requestChangesAssignmentId)
+	);
+
 	function openRequestChangesModal(assignmentId: string) {
 		requestChangesAssignmentId = assignmentId;
 		reviewerObservationText = '';
@@ -621,13 +625,13 @@
 				await invalidateAll();
 				toastStore.trigger({
 					message: m.statusUpdatedSuccessfully(),
-					background: 'variant-filled-success',
+					background: 'preset-filled-success-500',
 					timeout: 3000
 				});
 			} else {
 				toastStore.trigger({
 					message: result.data?.body?.error || 'Action failed',
-					background: 'variant-filled-error',
+					background: 'preset-filled-error-500',
 					timeout: 3000
 				});
 			}
@@ -968,6 +972,26 @@
 												{m.reviewResponses()}
 											</a>
 										{/if}
+										{#if assignment.review_counts?.changes_requested > 0}
+											<a
+												href="/auditee-assessments/{assignment.id}"
+												class="badge bg-red-100 text-red-700 text-xs hover:bg-red-200 cursor-pointer transition-colors"
+												title={m.reviewChangesRequested()}
+											>
+												<i class="fa-solid fa-flag mr-1"></i>
+												{assignment.review_counts.changes_requested}
+											</a>
+										{/if}
+										{#if assignment.review_counts?.resubmitted > 0}
+											<a
+												href="/auditee-assessments/{assignment.id}"
+												class="badge bg-amber-100 text-amber-700 text-xs hover:bg-amber-200 cursor-pointer transition-colors"
+												title={m.reviewResubmitted()}
+											>
+												<i class="fa-solid fa-flag mr-1"></i>
+												{assignment.review_counts.resubmitted}
+											</a>
+										{/if}
 										{#if assignment.events.length > 0}
 											<button
 												class="badge bg-surface-100-900 text-surface-600-400 text-xs hover:bg-surface-200-800 cursor-pointer transition-colors"
@@ -1181,7 +1205,7 @@
 
 			<!-- Footer -->
 			<div class="p-4 border-t bg-surface-50-950 rounded-b-lg">
-				<button class="btn preset-filled-surface-500 w-full" onclick={closeRequirementsModal}>
+				<button class="btn preset-filled-surface-900-100 w-full" onclick={closeRequirementsModal}>
 					{m.close()}
 				</button>
 			</div>
@@ -1218,6 +1242,21 @@
 				</button>
 			</div>
 			<div class="p-4">
+				{#if requestChangesAssignment?.review_counts?.changes_requested > 0}
+					<a
+						href="/auditee-assessments/{requestChangesAssignmentId}"
+						class="mb-3 flex items-center gap-2 rounded-md border-l-[3px] border-l-red-500 bg-red-50 px-3 py-2 text-sm text-red-800 hover:bg-red-100"
+					>
+						<i class="fa-solid fa-flag"></i>
+						{m.itemsNeedingChanges({
+							count: requestChangesAssignment.review_counts.changes_requested
+						})}
+					</a>
+				{:else}
+					<p class="mb-3 text-sm text-surface-600-400">
+						<i class="fa-solid fa-circle-info mr-1"></i>{m.noFlaggedItemsHint()}
+					</p>
+				{/if}
 				<label class="label mb-2">
 					<span class="text-sm font-medium">{m.reviewerObservation()}</span>
 				</label>
@@ -1329,7 +1368,7 @@
 
 			<!-- Footer -->
 			<div class="p-4 border-t bg-surface-50-950 rounded-b-lg">
-				<button class="btn preset-filled-surface-500 w-full" onclick={closeHistoryModal}>
+				<button class="btn preset-filled-surface-900-100 w-full" onclick={closeHistoryModal}>
 					{m.close()}
 				</button>
 			</div>

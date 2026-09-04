@@ -29,6 +29,7 @@
 	import SolutionsForm from './ModelForm/SolutionForm.svelte';
 	import ContractsForm from './ModelForm/ContractForm.svelte';
 	import RepresentativesForm from './ModelForm/RepresentativeForm.svelte';
+	import EntityScoreForm from './ModelForm/EntityScoreForm.svelte';
 	import FrameworksForm from './ModelForm/FrameworkForm.svelte';
 	import UsersForm from './ModelForm/UserForm.svelte';
 	import TeamForm from './ModelForm/TeamForm.svelte';
@@ -368,6 +369,10 @@
 				optionsEndpoint="reference-controls"
 				optionsExtraFields={[['folder', 'str']]}
 				optionsLabelField="auto"
+				optionsInfoFields={{
+					fields: [{ field: 'category', translate: true }],
+					position: 'prefix'
+				}}
 				optionsSuggestions={suggestions['reference_control']}
 				field="reference_control"
 				cacheLock={cacheLocks['reference_control']}
@@ -450,7 +455,7 @@
 				data-focusindex="1"
 			/>
 		{/if}
-		{#if shape.folder && !customFolder && URLModel !== 'validation-flows'}
+		{#if shape.folder && !customFolder && !['validation-flows', 'findings', 'entity-assessments'].includes(URLModel)}
 			{#key folderKey}
 				<FolderTreeSelect
 					{form}
@@ -568,6 +573,7 @@
 				{origin}
 				{initialData}
 				{context}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'vulnerabilities'}
@@ -623,7 +629,7 @@
 				{model}
 				{cacheLocks}
 				{formDataCache}
-				{initialData}
+				initialData={{ ...initialData, ...additionalInitialData }}
 				{object}
 				{context}
 				{...rest}
@@ -658,6 +664,16 @@
 			<SolutionsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'contracts'}
 			<ContractsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+		{:else if URLModel === 'entity-scores'}
+			<EntityScoreForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{...rest}
+			/>
 		{:else if URLModel === 'representatives'}
 			<RepresentativesForm
 				{form}
@@ -884,6 +900,7 @@
 				{formDataCache}
 				{initialData}
 				{context}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'task-nodes'}

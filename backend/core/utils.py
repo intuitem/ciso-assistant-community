@@ -3,6 +3,7 @@ from decimal import Decimal
 from enum import Enum
 
 import json
+import re
 from re import sub
 from typing import Literal
 from datetime import datetime, timedelta, date
@@ -19,7 +20,19 @@ from uuid import UUID
 # Re-export so callers can import from a single utils module.
 from .friendly_names import generate_friendly_name  # noqa: F401
 
+import yaml
+
+try:
+    from yaml import CSafeLoader as SafeLoader
+except ImportError:  # libyaml unavailable
+    from yaml import SafeLoader
+
 logger = structlog.get_logger(__name__)
+
+
+def yaml_safe_load(stream):
+    """yaml.safe_load backed by libyaml when available (~10x faster)."""
+    return yaml.load(stream, Loader=SafeLoader)
 
 
 def extract_node_id(urn: str | None) -> str | None:
@@ -1285,6 +1298,10 @@ def build_questions_dict(node):
                 )
             if choice.annotation:
                 choice_data["annotation"] = choice.annotation
+            # Carried through so an import can recognise a choice exported under
+            # a different language (see `_choice_values`).
+            if choice.translations:
+                choice_data["translations"] = choice.translations
             choices.append(choice_data)
 
         q_data = {
@@ -1294,6 +1311,8 @@ def build_questions_dict(node):
         }
         if question.annotation:
             q_data["annotation"] = question.annotation
+        if question.translations:
+            q_data["translations"] = question.translations
         if choices:
             q_data["choices"] = choices
         if question.depends_on:
@@ -1301,6 +1320,225 @@ def build_questions_dict(node):
         result[question.urn] = q_data
 
     return result if result else None
+
+
+# One block per question in an exported `answers` cell:
+#     [urn:...:question:1] Do you encrypt backups? >> Yes
+# The leading URN is the round-trip key, and it also keeps every line starting
+# with "[" so Excel formula escaping never rewrites one (a rewritten line would
+# no longer match on re-import).
+ANSWER_LINE_RE = re.compile(r"^\[(?P<urn>urn:[^\]]+)\]\s*(?P<rest>.*)$")
+
+# Returned by the body parser for a line that must leave the stored answer alone
+# (an untouched template hint, or one we could not make sense of). Distinct from
+# None, which means "clear this answer".
+_SKIP = object()
+
+
+def visible_questions(questions_dict, answers_dict):
+    """Drop questions hidden by an unsatisfied `depends_on`, preserving order.
+
+    Each returned definition carries its own `urn`, which `_is_question_visible`
+    needs for cycle protection when it walks a `depends_on` chain.
+    """
+    if not questions_dict:
+        return {}
+    answers_dict = answers_dict or {}
+    by_urn = {urn: {**qdef, "urn": urn} for urn, qdef in questions_dict.items()}
+    return {
+        urn: qdef
+        for urn, qdef in by_urn.items()
+        if _is_question_visible(qdef, answers_dict, by_urn)
+    }
+
+
+def render_answers_cell(questions_dict, answers_dict):
+    """Render a requirement's questions and answers as one spreadsheet cell.
+
+    Blocks are separated by a blank line. An unanswered question gets a
+    bracketed hint instead of a value, which `parse_answers_cell` leaves alone,
+    so an exported workbook doubles as a fillable questionnaire and re-importing
+    an untouched one changes nothing.
+    """
+    questions = visible_questions(questions_dict, answers_dict)
+    if not questions:
+        return ""
+
+    answers_dict = answers_dict or {}
+    lines = []
+    for q_urn, question in questions.items():
+        q_text = question.get("text", "")
+        if not q_text:
+            continue
+        q_type = question.get("type")
+        choices_map = {
+            c["urn"]: c.get("value", "") for c in question.get("choices", [])
+        }
+        answer_value = answers_dict.get(q_urn)
+
+        readable = ""
+        if answer_value:
+            if q_type in ("text", "date"):
+                readable = str(answer_value)
+            elif q_type == "multiple_choice" and isinstance(answer_value, list):
+                readable = " | ".join(choices_map.get(a, a) for a in answer_value)
+            else:
+                readable = choices_map.get(answer_value, str(answer_value))
+
+        if readable:
+            lines.append(f"[{q_urn}] {q_text} >> {readable}")
+        elif q_type == "multiple_choice":
+            lines.append(
+                f"[{q_urn}] {q_text} (multiple) >> [{' / '.join(choices_map.values())}]"
+            )
+        elif q_type in ("text", "date"):
+            lines.append(f"[{q_urn}] {q_text} >> [free text]")
+        else:
+            lines.append(f"[{q_urn}] {q_text} >> [{' / '.join(choices_map.values())}]")
+
+    return "\n\n".join(lines)
+
+
+def _choice_values(choice):
+    """Every string a choice may have been exported as: base value, then each
+    translation. Matching on all of them is what lets a workbook exported in one
+    language be re-imported under another."""
+    values = []
+    base = choice.get("value", "")
+    if base:
+        values.append(base)
+    for translation in (choice.get("translations") or {}).values():
+        value = (translation or {}).get("value")
+        if value:
+            values.append(value)
+    return values
+
+
+def _question_texts(qdef):
+    """Same as `_choice_values`, for the pre-URN text-matching fallback."""
+    texts = []
+    base = qdef.get("text", "")
+    if base:
+        texts.append(base)
+    for translation in (qdef.get("translations") or {}).values():
+        text = (translation or {}).get("text")
+        if text:
+            texts.append(text)
+    return texts
+
+
+def _parse_answer_body(qdef, body, label):
+    """Parse one "... >> answer" block into (value, warning).
+
+    `value` is `_SKIP` to leave the stored answer untouched, None to clear it,
+    otherwise a choice URN, a list of choice URNs, or a raw string.
+    """
+    if ">>" not in body:
+        return _SKIP, f"No '>>' separator for {label}, line skipped"
+
+    _, _, answer_part = body.partition(">>")
+    # strip() drops the space after ">>" and the blank line before the next
+    # block, but keeps the newlines inside a multi-line free-text answer.
+    answer = answer_part.strip()
+
+    if answer.startswith("[") and answer.endswith("]"):
+        return _SKIP, None  # untouched template hint
+    if not answer:
+        return None, None  # emptied by hand: clear the answer
+
+    q_type = qdef.get("type")
+    if q_type in ("text", "date"):
+        return answer, None
+
+    value_to_urn = {}
+    for choice in qdef.get("choices", []):
+        for value in _choice_values(choice):
+            value_to_urn.setdefault(value, choice["urn"])
+
+    if q_type == "multiple_choice":
+        selected = [v.strip() for v in answer.split("|") if v.strip()]
+        urns = [value_to_urn[v] for v in selected if v in value_to_urn]
+        unknown = [v for v in selected if v not in value_to_urn]
+        warning = (
+            f"Unknown choice(s) {', '.join(repr(v) for v in unknown)} for {label}"
+            if unknown
+            else None
+        )
+        if not urns:
+            return _SKIP, warning
+        return urns, warning
+
+    if answer in value_to_urn:
+        return value_to_urn[answer], None
+    return _SKIP, f"Unknown choice '{answer}' for {label}"
+
+
+def _parse_legacy_answers_cell(lines, questions_dict):
+    """Cells exported before the URN prefix existed: one answer per line, matched
+    on question text."""
+    text_to_question = {}
+    for q_urn, qdef in questions_dict.items():
+        for text in _question_texts(qdef):
+            text_to_question.setdefault(text, (q_urn, qdef))
+
+    answers = {}
+    warnings = []
+    for line in lines:
+        line = line.strip()
+        if not line or ">>" not in line:
+            continue
+        q_part, _, _ = line.partition(">>")
+        q_text = q_part.replace("(multiple)", "").strip()
+        matched = text_to_question.get(q_text)
+        if not matched:
+            warnings.append(f"No question matches '{q_text}', line skipped")
+            continue
+        q_urn, qdef = matched
+        value, warning = _parse_answer_body(qdef, line, f"'{q_text}'")
+        if warning:
+            warnings.append(warning)
+        if value is not _SKIP:
+            answers[q_urn] = value
+    return answers, warnings
+
+
+def parse_answers_cell(cell, questions_dict):
+    """Parse an exported `answers` cell back into ({question_urn: value}, warnings).
+
+    Blocks are delimited by the leading "[urn:...]" rather than by newlines, so a
+    free-text answer keeps its own line breaks. Anything skipped is reported in
+    `warnings` instead of vanishing.
+    """
+    if cell in (None, "") or not questions_dict:
+        return {}, []
+
+    blocks = []
+    legacy_lines = []
+    for raw_line in str(cell).split("\n"):
+        match = ANSWER_LINE_RE.match(raw_line.lstrip())
+        if match:
+            blocks.append([match.group("urn"), match.group("rest")])
+        elif blocks:
+            blocks[-1][1] += "\n" + raw_line
+        else:
+            legacy_lines.append(raw_line)
+
+    if not blocks:
+        return _parse_legacy_answers_cell(legacy_lines, questions_dict)
+
+    answers = {}
+    warnings = []
+    for q_urn, body in blocks:
+        qdef = questions_dict.get(q_urn)
+        if qdef is None:
+            warnings.append(f"Unknown question '{q_urn}', line skipped")
+            continue
+        value, warning = _parse_answer_body(qdef, body, f"'{qdef.get('text', q_urn)}'")
+        if warning:
+            warnings.append(warning)
+        if value is not _SKIP:
+            answers[q_urn] = value
+    return answers, warnings
 
 
 AUDITOR_VIEW_PERM = "view_compliance_assessment_full"
@@ -1360,6 +1598,28 @@ DEFAULT_VISIBILITY = {
     # badge would never render — functionally equivalent to HIDDEN. Default
     # off; auditors who want it explicitly flip to "Auditor + Respondent".
     "respondent_alignment": HIDDEN,
+    # Off unless the audit opts in: existing audits track remediation through
+    # applied controls or findings, and should not sprout a tasks tab.
+    "task_templates": HIDDEN,
+}
+
+
+# A third party sees their side of the exchange: answers, alignment, the tasks they
+# owe and the evidence around them — not the auditor's verdict or internal controls.
+# Scores stay off for both; a framework that scores turns them on itself.
+THIRD_PARTY_VISIBILITY = {
+    "answers": EVERYONE_EDIT,
+    "respondent_alignment": EVERYONE_EDIT,
+    "status": AUDITOR_ONLY,
+    "result": AUDITOR_ONLY,
+    "extended_result": HIDDEN,
+    "score": HIDDEN,
+    "documentation_score": HIDDEN,
+    "applied_controls": AUDITOR_ONLY,
+    "task_templates": EVERYONE_EDIT,
+    "evidences": EVERYONE_EDIT,
+    "observation": EVERYONE_EDIT,
+    "comments": EVERYONE_EDIT,
 }
 
 
@@ -1410,16 +1670,17 @@ def is_field_editable_by(compliance_assessment, field_name, role):
     return _role_access(compliance_assessment, field_name, role) == "edit"
 
 
-def build_initial_field_visibility(framework):
+def build_initial_field_visibility(framework, base=None):
     """Build the initial `field_visibility` map for a new CA.
 
-    Layered per-role: code defaults are seeded for every known field, then the
-    framework's overrides are merged on top — but per-role, so a framework that
-    only specifies a single role (e.g. {"score": {"auditor": "edit"}}) does not
-    erase the default value for the other roles.
+    Layered per-role: *base* (the code defaults unless a caller supplies another
+    starting profile) is seeded for every known field, then the framework's
+    overrides are merged on top — but per-role, so a framework that only specifies
+    a single role (e.g. {"score": {"auditor": "edit"}}) does not erase the default
+    value for the other roles.
     """
     fw_overrides = getattr(framework, "field_visibility", None) or {}
-    merged = {key: dict(pair) for key, pair in DEFAULT_VISIBILITY.items()}
+    merged = {key: dict(pair) for key, pair in (base or DEFAULT_VISIBILITY).items()}
     for key, pair in fw_overrides.items():
         if not isinstance(pair, dict):
             continue
@@ -1428,6 +1689,62 @@ def build_initial_field_visibility(framework):
         merged.setdefault(key, dict(EVERYONE_EDIT))
         merged[key].update(pair)
     return merged
+
+
+def respondent_progress_counts(
+    compliance_assessment, requirement_assessments
+) -> tuple[int, int, int]:
+    """How much of the questionnaire the respondent has filled in.
+
+    Returns (units, answered units, requirements completed). Not the auditor's
+    `ComplianceAssessment.progress`.
+    """
+    from core.models import RequirementAssessment
+
+    ca = compliance_assessment
+    alignment_pair = resolve_visibility_from_overrides(
+        ca.field_visibility
+        or (
+            getattr(ca.framework, "field_visibility", None) if ca.framework_id else None
+        ),
+        "respondent_alignment",
+    )
+    alignment_in_use = alignment_pair.get("respondent", "edit") != "hidden"
+
+    total_q = 0
+    answered_q = 0
+    done = 0
+    for ra in requirement_assessments:
+        visible, answered = ra.get_visible_questions_counts()
+        if visible > 0:
+            total_q += visible
+            answered_q += answered
+            if answered >= visible:
+                done += 1
+            continue
+        total_q += 1
+        unit_done = (
+            bool(ra.respondent_alignment)
+            if alignment_in_use
+            else ra.result != RequirementAssessment.Result.NOT_ASSESSED
+        )
+        if unit_done:
+            answered_q += 1
+            done += 1
+    return total_q, answered_q, done
+
+
+def compute_respondent_progress(compliance_assessment, requirement_assessments) -> int:
+    """`respondent_progress_counts` as a percentage."""
+    total_q, answered_q, _ = respondent_progress_counts(
+        compliance_assessment, requirement_assessments
+    )
+    return int(answered_q / total_q * 100) if total_q else 0
+
+
+def build_third_party_field_visibility(framework):
+    """The map a questionnaire sent to a third party starts from; the framework still wins."""
+    return build_initial_field_visibility(framework, base=THIRD_PARTY_VISIBILITY)
 
 
 def bulk_update_with_log(model, rows, fields, batch_size=500):
@@ -1468,3 +1785,66 @@ def bulk_update_with_log(model, rows, fields, batch_size=500):
             )
             logged += 1
     return logged
+
+
+def assign_audit_to(audit, actors):
+    """Point one assignment covering the whole audit at *actors*.
+
+    Created in DRAFT: it is the wiring, not the send.
+    """
+    from core.models import RequirementAssignment
+
+    actors = [actor for actor in actors if actor is not None]
+    assignment = audit.requirement_assignments.first()
+    if assignment is None:
+        if not actors:
+            return None
+        requirement_assessments = audit.requirement_assessments.all()
+        if not requirement_assessments.exists():
+            return None
+        assignment = RequirementAssignment.objects.create(
+            compliance_assessment=audit,
+            folder=audit.folder,
+        )
+        assignment.requirement_assessments.set(requirement_assessments)
+    assignment.actor.set(actors)
+    return assignment
+
+
+def ensure_audit_assignment(audit):
+    """Wire an audit to whoever answers for it, when nothing is wired yet.
+
+    Only ever fills a gap: an existing assignment is left alone, its actors included.
+    """
+    from tprm.models import EntityAssessment
+    from tprm.services import (
+        default_representatives_from_entity,
+        grant_respondent_access,
+    )
+
+    if audit.requirement_assignments.exists():
+        return None
+
+    entity_assessment = EntityAssessment.objects.filter(
+        compliance_assessment=audit
+    ).first()
+    if entity_assessment is not None:
+        # Pulls the entity's representatives onto the assessment when it has none,
+        # which is exactly the "I added the missing representative" case.
+        default_representatives_from_entity(entity_assessment)
+        # And lets them into the workspace: whoever is about to be emailed a link
+        # must be able to open it.
+        grant_respondent_access(entity_assessment)
+        actors = [
+            rep.actor
+            for rep in entity_assessment.representatives.all()
+            if hasattr(rep, "actor")
+        ]
+    else:
+        actors = list(audit.perimeter.default_assignee.all()) if audit.perimeter else []
+
+    if not actors:
+        return None
+    # add, not set: never remove an author the audit already had.
+    audit.authors.add(*actors)
+    return assign_audit_to(audit, actors)

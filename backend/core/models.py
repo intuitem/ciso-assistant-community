@@ -2,7 +2,11 @@ import json
 import os
 import re
 import hashlib
+import operator
 from datetime import date, datetime
+from functools import reduce
+
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from pathlib import Path
 from typing import Self, Union, List, Optional, Literal, Tuple, Final, Iterable
 import statistics
@@ -63,6 +67,7 @@ from .utils import (
     resolve_compute_result,
     sha256,
     update_selected_implementation_groups,
+    yaml_safe_load,
     _is_question_visible,
     _build_answer_context,
 )
@@ -482,7 +487,7 @@ class StoredLibrary(LibraryMixin):
             # We do not store the library if its hash checksum is in the database.
             return None, "libraryAlreadyLoadedError"
         try:
-            library_data = yaml.safe_load(library_content)
+            library_data = yaml_safe_load(library_content)
             if not isinstance(library_data, dict):
                 raise yaml.YAMLError(
                     f"The YAML content must be a dictionary but it's been interpreted as a {type(library_data).__name__} !"
@@ -1849,6 +1854,11 @@ class LibraryUpdater:
         if self.new_requirement_mapping_sets is not None:
             self.update_requirement_mapping_sets()
 
+        if self.new_library.is_preset:
+            from library.utils import upsert_preset_from_stored_library
+
+            upsert_preset_from_stored_library(self.new_library)
+
 
 class LoadedLibrary(LibraryMixin):
     dependencies = models.ManyToManyField(
@@ -2122,6 +2132,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         PROJECT_HEALTH = "project.health", "projectHealth"
         PROCESSING_NATURE = "processing.nature", "processingNature"
         PERSONAL_DATA_CATEGORY = "personal_data.category", "personalDataCategory"
+        ENTITY_SCORE_PROVIDER = "entity_score.provider", "entityScoreProvider"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -2487,6 +2498,33 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         },
     ]
 
+    DEFAULT_ENTITY_SCORE_PROVIDERS = [
+        {
+            "name": "SecurityScorecard",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_SCORE_PROVIDER,
+            "is_visible": True,
+        },
+        {
+            "name": "CyberVadis",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_SCORE_PROVIDER,
+            "is_visible": True,
+        },
+        {
+            "name": "Bitsight",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_SCORE_PROVIDER,
+            "is_visible": True,
+        },
+        {
+            "name": "EcoVadis",
+            "builtin": True,
+            "field_path": FieldPath.ENTITY_SCORE_PROVIDER,
+            "is_visible": True,
+        },
+    ]
+
     DEFAULT_METRIC_UNITS = [
         {
             "name": "count",
@@ -2611,8 +2649,17 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         cls._seed_defaults(cls.DEFAULT_ENTITY_RELATIONSHIPS)
 
     @classmethod
+    def create_default_entity_score_providers(cls):
+        cls._seed_defaults(cls.DEFAULT_ENTITY_SCORE_PROVIDERS)
+
+    @classmethod
     def create_default_metric_units(cls):
         cls._seed_defaults(cls.DEFAULT_METRIC_UNITS)
+
+    @staticmethod
+    def _display(value: str) -> str:
+        """Capitalize lowercase terms; leave names carrying their own casing alone."""
+        return value if any(c.isupper() for c in value) else value.capitalize()
 
     @property
     def get_name_translated(self) -> str:
@@ -2620,18 +2667,10 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         locale_translation = translations.get(get_language(), {})
         if isinstance(locale_translation, dict):
             locale_translation = locale_translation.get("name", "")
-        return (
-            locale_translation.capitalize()
-            if locale_translation
-            else self.name.capitalize()
-        )
+        return self._display(locale_translation or self.name)
 
     def __str__(self) -> str:
-        return (
-            self.get_name_translated.capitalize()
-            if self.get_name_translated
-            else self.name.capitalize()
-        )
+        return self._display(self.get_name_translated or self.name)
 
 
 class Threat(
@@ -5470,13 +5509,19 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
         Incident.objects.filter(pk=incident.pk).update(updated_at=now())
 
 
+# Adding a parent is a one-line change here; the XOR constraint below is generated
+# from it rather than hand-enumerated, which grows with the square of this list.
+COMMENT_PARENT_FIELDS = (
+    "requirement_assessment",
+    "risk_scenario",
+    "applied_control",
+    "finding",
+    "task_template",
+)
+
+
 class Comment(AbstractBaseModel, FolderMixin):
-    PARENT_FIELDS = (
-        "requirement_assessment",
-        "risk_scenario",
-        "applied_control",
-        "finding",
-    )
+    PARENT_FIELDS = COMMENT_PARENT_FIELDS
 
     body = models.TextField(verbose_name=_("Body"))
     is_tainted = models.BooleanField(default=False, verbose_name=_("Edited"))
@@ -5519,36 +5564,29 @@ class Comment(AbstractBaseModel, FolderMixin):
         blank=True,
         related_name="comments",
     )
+    task_template = models.ForeignKey(
+        "TaskTemplate",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
 
     class Meta:
         ordering = ["created_at"]
         constraints = [
             models.CheckConstraint(
-                condition=(
-                    Q(
-                        requirement_assessment__isnull=False,
-                        risk_scenario__isnull=True,
-                        applied_control__isnull=True,
-                        finding__isnull=True,
-                    )
-                    | Q(
-                        requirement_assessment__isnull=True,
-                        risk_scenario__isnull=False,
-                        applied_control__isnull=True,
-                        finding__isnull=True,
-                    )
-                    | Q(
-                        requirement_assessment__isnull=True,
-                        risk_scenario__isnull=True,
-                        applied_control__isnull=False,
-                        finding__isnull=True,
-                    )
-                    | Q(
-                        requirement_assessment__isnull=True,
-                        risk_scenario__isnull=True,
-                        applied_control__isnull=True,
-                        finding__isnull=False,
-                    )
+                condition=reduce(
+                    operator.or_,
+                    (
+                        Q(
+                            **{
+                                f"{field}__isnull": field != parent
+                                for field in COMMENT_PARENT_FIELDS
+                            }
+                        )
+                        for parent in COMMENT_PARENT_FIELDS
+                    ),
                 ),
                 name="comment_exactly_one_parent",
             )
@@ -5556,12 +5594,11 @@ class Comment(AbstractBaseModel, FolderMixin):
 
     @property
     def parent_object(self):
-        return (
-            self.requirement_assessment
-            or self.risk_scenario
-            or self.applied_control
-            or self.finding
-        )
+        for field in self.PARENT_FIELDS:
+            parent = getattr(self, field, None)
+            if parent is not None:
+                return parent
+        return None
 
     def save(self, *args, **kwargs):
         content_object = self.parent_object
@@ -5589,6 +5626,183 @@ class Comment(AbstractBaseModel, FolderMixin):
         return f"Comment by {self.author} on {self.created_at}"
 
 
+class Commitment(AbstractBaseModel, FolderMixin):
+    """One negotiation cycle over a promise to deliver by a date.
+
+    Reopening closes the current row (`is_current`) and opens a new one, so promised
+    dates are not overwritten.
+    """
+
+    class State(models.TextChoices):
+        UNDEFINED = "--", _("Undefined")
+        IN_NEGOTIATION = "in_negotiation", _("In negotiation")
+        COMMITTED = "committed", _("Committed")
+        DECLINED = "declined", _("Declined")
+        FULFILLED = "fulfilled", _("Fulfilled")
+
+    # A cycle is over once it reaches one of these: reopening starts a new row.
+    CLOSING_STATES = (State.COMMITTED, State.DECLINED, State.FULFILLED)
+
+    content_type = models.ForeignKey(
+        "contenttypes.ContentType", on_delete=models.CASCADE
+    )
+    object_id = models.UUIDField()
+    target = GenericForeignKey("content_type", "object_id")
+
+    state = models.CharField(
+        max_length=32,
+        choices=State.choices,
+        default=State.IN_NEGOTIATION,
+        verbose_name=_("Commitment state"),
+    )
+    committed_eta = models.DateField(
+        null=True,
+        blank=True,
+        help_text=_("The date promised, frozen when the commitment is made"),
+        verbose_name=_("Committed date"),
+    )
+    committed_by = models.ForeignKey(
+        "core.Actor",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="commitments",
+        verbose_name=_("Committed by"),
+    )
+    committed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text=_("When the promise was made — not the date promised"),
+        verbose_name=_("Committed at"),
+    )
+    notes = models.TextField(null=True, blank=True, verbose_name=_("Commitment notes"))
+    is_current = models.BooleanField(default=True, verbose_name=_("Is current"))
+
+    fields_to_check = []
+
+    class Meta:
+        permissions = [
+            (
+                "transition_commitment",
+                "Can take a commitment step",
+            )
+        ]
+        verbose_name = _("Commitment")
+        verbose_name_plural = _("Commitments")
+        ordering = ["created_at"]
+        indexes = [models.Index(fields=["content_type", "object_id"])]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["content_type", "object_id"],
+                condition=models.Q(is_current=True),
+                name="unique_current_commitment_per_object",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.get_state_display()} commitment on {self.target}"
+
+    def save(self, *args, **kwargs):
+        # Denormalized for IAM scoping: a commitment is only ever as visible as the
+        # object it is about.
+        if self.target is not None and self.folder_id != self.target.folder_id:
+            self.folder_id = self.target.folder_id
+            if "update_fields" in kwargs and kwargs["update_fields"] is not None:
+                kwargs["update_fields"] = set(kwargs["update_fields"]) | {"folder"}
+        super().save(*args, **kwargs)
+
+    @property
+    def is_breached(self) -> bool:
+        """The promised date passed without delivery. Derived, never stored."""
+        return bool(
+            self.committed_eta
+            and self.state != self.State.FULFILLED
+            and self.committed_eta < date.today()
+        )
+
+
+class CommitmentMixin(models.Model):
+    """Lets a model carry commitments; adds no columns, they live in `Commitment`."""
+
+    # Subclasses point these at their own date / accountable-actor fields.
+    COMMITMENT_DATE_FIELD = "eta"
+    COMMITMENT_ACTOR_FIELD = "owner"
+
+    commitments = GenericRelation(
+        Commitment,
+        content_type_field="content_type",
+        object_id_field="object_id",
+    )
+
+    class Meta:
+        abstract = True
+
+    def refresh_from_db(self, *args, **kwargs):
+        # `refresh_from_db` leaves cached_property values in __dict__, so without this
+        # a reloaded object would still answer from the promises it saw before.
+        super().refresh_from_db(*args, **kwargs)
+        self.__dict__.pop("commitment_entries", None)
+
+    @cached_property
+    def commitment_entries(self) -> list:
+        """Every cycle, cached: `commitments.all()` would be a query per access unprefetched."""
+        return list(self.commitments.all())
+
+    @property
+    def commitment(self):
+        """The live negotiation cycle, if any."""
+        for entry in self.commitment_entries:
+            if entry.is_current:
+                return entry
+        return None
+
+    @property
+    def commitment_history(self):
+        """Closed cycles, oldest first — the sequence of promises made and reopened."""
+        return [entry for entry in self.commitment_entries if not entry.is_current]
+
+    @property
+    def commitment_state(self) -> str:
+        current = self.commitment
+        return current.state if current else Commitment.State.UNDEFINED
+
+    @property
+    def committed_eta(self):
+        current = self.commitment
+        return current.committed_eta if current else None
+
+    @property
+    def committed_by(self):
+        current = self.commitment
+        return current.committed_by if current else None
+
+    @property
+    def commitment_notes(self):
+        current = self.commitment
+        return current.notes if current else None
+
+    @property
+    def commitment_reopen_count(self) -> int:
+        """A cycle per row, so the count of closed ones is the number of reopenings."""
+        return len(self.commitment_history)
+
+    @property
+    def commitment_date(self):
+        return getattr(self, self.COMMITMENT_DATE_FIELD, None)
+
+    @property
+    def commitment_has_slipped(self) -> bool:
+        """The current date is later than the one promised."""
+        promised = self.committed_eta
+        current = self.commitment_date
+        return bool(promised and current and current > promised)
+
+    @property
+    def commitment_is_breached(self) -> bool:
+        current = self.commitment
+        return bool(current and current.is_breached)
+
+
 def _get_default_applied_control_cost():
     return {
         "currency": "€",
@@ -5605,6 +5819,7 @@ class AppliedControl(
     PublishInRootFolderMixin,
     FilteringLabelMixin,
     CustomFieldsMixin,
+    CommitmentMixin,
 ):
     INTEGRATION_MODEL_KEY = "applied_control"
 
@@ -7294,6 +7509,16 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         DONE = "done", _("Done")
         DEPRECATED = "deprecated", _("Deprecated")
 
+    class Kind(models.TextChoices):
+        INTERNAL = "internal", _("Internal")
+        THIRD_PARTY = "third_party", _("Third-party")
+
+    kind = models.CharField(
+        max_length=20,
+        choices=Kind.choices,
+        default=Kind.INTERNAL,
+        verbose_name=_("Kind"),
+    )
     frameworks = models.ManyToManyField(Framework, related_name="campaigns")
     status = models.CharField(
         max_length=100,
@@ -7311,7 +7536,13 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         null=True,
         verbose_name=_("Start date"),
     )
-    perimeters = models.ManyToManyField(Perimeter, related_name="campaigns")
+    perimeters = models.ManyToManyField(Perimeter, related_name="campaigns", blank=True)
+    entities = models.ManyToManyField(
+        "tprm.Entity",
+        related_name="campaigns",
+        blank=True,
+        verbose_name=_("Third parties"),
+    )
 
     class Meta:
         verbose_name = "Campaign"
@@ -7555,7 +7786,7 @@ class ComplianceAssessment(Assessment):
         # Fetch all requirements in a single query
         requirements = RequirementNode.objects.filter(
             framework=self.framework
-        ).select_related()
+        ).select_related("folder")
 
         # If there's a baseline, prefetch all related baseline assessments and answers in one query
         baseline_assessments = {}
@@ -8817,6 +9048,15 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         IN_PROGRESS = "in_progress", _("In progress")
         NOT_APPLICABLE = "not_applicable", _("Not applicable")
 
+    class ReviewState(models.TextChoices):
+        """Per-requirement outcome of a reviewer's pass. RESUBMITTED is what a flag
+        becomes once the respondent has answered it."""
+
+        NONE = "", _("None")
+        CHANGES_REQUESTED = "changes_requested", _("Changes requested")
+        RESUBMITTED = "resubmitted", _("Resubmitted")
+        ACCEPTED = "accepted", _("Accepted")
+
     status = models.CharField(
         max_length=100,
         choices=Status.choices,
@@ -8872,6 +9112,13 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         blank=True,
         null=True,
         verbose_name=_("Respondent alignment"),
+    )
+    review_state = models.CharField(
+        max_length=32,
+        choices=ReviewState.choices,
+        default=ReviewState.NONE,
+        blank=True,
+        verbose_name=_("Review state"),
     )
     compliance_assessment = models.ForeignKey(
         ComplianceAssessment,
@@ -9491,8 +9738,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     _CEL_RELEVANT_FIELDS = frozenset({"score", "result", "status"})
 
     @classmethod
-    def from_db(cls, db, field_names, values):
-        instance = super().from_db(db, field_names, values)
+    def from_db(cls, db, field_names, values, *, fetch_mode=None):
+        instance = super().from_db(db, field_names, values, fetch_mode=fetch_mode)
         instance._loaded_cel_values = {
             f: getattr(instance, f)
             for f in cls._CEL_RELEVANT_FIELDS
@@ -9545,6 +9792,16 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
         SUBMITTED = "submitted", _("Submitted")
         CLOSED = "closed", _("Closed")
         CHANGES_REQUESTED = "changes_requested", _("Changes Requested")
+
+    # Not the declaration order: "changes requested" is back with the respondent.
+    # Shared so the reported status and the sort order cannot drift.
+    WORKFLOW_ORDER = [
+        Status.DRAFT,
+        Status.IN_PROGRESS,
+        Status.CHANGES_REQUESTED,
+        Status.SUBMITTED,
+        Status.CLOSED,
+    ]
 
     compliance_assessment = models.ForeignKey(
         ComplianceAssessment,
@@ -9739,6 +9996,47 @@ class FindingsAssessment(Assessment, FilteringLabelMixin):
 
     reported_at = models.DateField(null=True, blank=True, verbose_name=_("Reported at"))
 
+    compliance_assessment = models.ForeignKey(
+        "ComplianceAssessment",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="findings_assessments",
+        help_text=_("The audit whose findings this binder captures"),
+        verbose_name=_("Audit"),
+    )
+
+    start_date = models.DateField(null=True, blank=True, verbose_name=_("Start date"))
+
+    objectives = models.TextField(null=True, blank=True, verbose_name=_("Objectives"))
+
+    budget = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        verbose_name=_("Budget"),
+    )
+
+    expenses = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        help_text=_("Budget consumed so far"),
+        verbose_name=_("Expenses"),
+    )
+
+    reference_link = models.URLField(
+        null=True,
+        blank=True,
+        max_length=2048,
+        help_text=_("External url for follow-up (eg. report, Jira ticket)"),
+        verbose_name=_("Reference link"),
+    )
+
     def get_findings_metrics(self):
         findings = self.findings.all()
         total_count = findings.count()
@@ -9826,7 +10124,12 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
     ]
 
     findings_assessment = models.ForeignKey(
-        FindingsAssessment, on_delete=models.CASCADE, related_name="findings"
+        FindingsAssessment,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="findings",
+        verbose_name=_("Findings assessment"),
     )
     threats = models.ManyToManyField(
         Threat,
@@ -9895,6 +10198,16 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         related_name="findings",
         verbose_name=_("Requirement"),
     )
+    # The catalog node above is shared by every audit on that framework, so it cannot
+    # say which assessment raised the finding. This can, and it is the way back.
+    requirement_assessment = models.ForeignKey(
+        "RequirementAssessment",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="findings",
+        verbose_name=_("Requirement assessment"),
+    )
     asset = models.ForeignKey(
         Asset,
         on_delete=models.SET_NULL,
@@ -9905,6 +10218,9 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
     )
 
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    recommendation = models.TextField(
+        null=True, blank=True, verbose_name=_("Recommendation")
+    )
 
     class Meta:
         verbose_name = _("Finding")
@@ -9912,12 +10228,14 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
 
     @property
     def is_locked(self) -> bool:
-        return self.findings_assessment.is_locked
+        return self.findings_assessment.is_locked if self.findings_assessment else False
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+        if not self.findings_assessment_id:
+            return
         # Update parent findings assessment's updated_at timestamp
-        FindingsAssessment.objects.filter(id=self.findings_assessment.id).update(
+        FindingsAssessment.objects.filter(id=self.findings_assessment_id).update(
             updated_at=timezone.now()
         )
         self.findings_assessment.upsert_daily_metrics()
@@ -10040,7 +10358,14 @@ class TaskTemplateManager(models.Manager):
         return super().create(**kwargs)
 
 
-class TaskTemplate(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
+class TaskTemplate(
+    NameDescriptionMixin, FolderMixin, FilteringLabelMixin, CommitmentMixin
+):
+    # A recurrent template is a definition, not a single promise: commitment lives
+    # on one-time tasks only (hidden entirely otherwise).
+    COMMITMENT_DATE_FIELD = "task_date"
+    COMMITMENT_ACTOR_FIELD = "assigned_to"
+
     objects = TaskTemplateManager()
 
     SCHEDULE_JSONSCHEMA = {
@@ -10150,6 +10475,13 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         help_text="Compliance assessments related to the task",
         related_name="task_templates",
     )
+    requirement_assessments = models.ManyToManyField(
+        RequirementAssessment,
+        verbose_name="Requirement assessments",
+        blank=True,
+        help_text="Requirement assessments related to the task",
+        related_name="task_templates",
+    )
     risk_assessments = models.ManyToManyField(
         RiskAssessment,
         verbose_name="Risk assessments",
@@ -10222,6 +10554,13 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         return self._get_task_node_value(
             "status", date_filter={"due_date__gte": today}, order_by="due_date"
         )
+
+    @property
+    def status(self):
+        """Status of the single occurrence of a one-time task; None when recurrent."""
+        if self.is_recurrent:
+            return None
+        return self._get_task_node_value("status", order_by="due_date")
 
     class Meta:
         verbose_name = "Task template"
@@ -10666,18 +11005,28 @@ class Actor(AbstractBaseModel):
         Includes:
         - The user's own actor
         - Actors of teams where the user is leader, deputy, or member
+        - Actors of entities the user represents
+
+        Entities act through their representatives: naming an entity as owner or
+        assignee is naming the people who speak for it, so anything addressed to
+        the entity has to reach them. Without this an entity-assigned object has
+        an accountable actor that resolves to nobody, which is worse than leaving
+        it unassigned.
         """
         actors = []
         if hasattr(user, "actor") and user.actor:
             actors.append(user.actor)
 
-        team_actors = cls.objects.filter(
-            team__in=Team.objects.filter(
-                Q(leader=user) | Q(deputies=user) | Q(members=user)
+        group_actors = cls.objects.filter(
+            Q(
+                team__in=Team.objects.filter(
+                    Q(leader=user) | Q(deputies=user) | Q(members=user)
+                )
             )
+            | Q(entity__representatives__user=user)
         ).distinct()
 
-        return actors + list(team_actors)
+        return actors + list(group_actors)
 
     def __str__(self):
         return str(self.specific)
@@ -10715,6 +11064,7 @@ class PresetJourney(NameDescriptionMixin, FolderMixin):
         related_name="journeys",
     )
     applied_version = models.IntegerField(default=1)
+    sequence = models.PositiveIntegerField(default=1)
     object_refs = models.JSONField(default=dict)
     applied_at = models.DateTimeField(auto_now_add=True)
     applied_by = models.ForeignKey(

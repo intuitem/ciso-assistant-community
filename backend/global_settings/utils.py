@@ -105,6 +105,26 @@ def get_supported_feature_flags() -> frozenset:
     )
 
 
+def get_feature_flag_defaults() -> dict:
+    """The value each supported flag takes when nothing was chosen, read off the
+    edition's serializer like `get_supported_feature_flags`."""
+    from rest_framework.fields import empty
+
+    serializer_class = FeatureFlagsSerializer
+    module_path = django_settings.MODULE_PATHS.get("serializers")
+    if module_path:
+        module = importlib.import_module(module_path)
+        serializer_class = getattr(module, "FeatureFlagsSerializer", serializer_class)
+    defaults = {}
+    for field in serializer_class().fields.values():
+        source = getattr(field, "source", None)
+        if not source or not source.startswith("value."):
+            continue
+        if field.default is not empty:
+            defaults[source.split(".")[-1]] = field.default
+    return defaults
+
+
 def clear_feature_flags_cache():
     cache.delete(FEATURE_FLAGS_CACHE_KEY)
 
@@ -148,6 +168,10 @@ def ff_is_enabled(feature_flag: str):
         return False
 
     return flag
+
+
+def idp_group_role_inheritance_enabled() -> bool:
+    return ff_is_enabled("idp_groups") or ff_is_enabled("jit_provisioning")
 
 
 def general_setting_is_enabled(key: str) -> bool:

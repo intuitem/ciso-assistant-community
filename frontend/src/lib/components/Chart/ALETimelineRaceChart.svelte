@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
+	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
+
 	interface TreatmentControl {
 		id: string;
 		name: string;
@@ -188,13 +190,14 @@
 	// Reactive timeline data that updates when scenarios change
 	let timelineData = $derived(prepareTimelineData());
 
-	const updateChart = (frameIndex: number) => {
-		if (!chart || !timelineData || frameIndex >= timelineData.length) return;
+	const buildOption = (frameIndex: number) => {
+		if (!timelineData || frameIndex >= timelineData.length) return null;
 
 		const frame = timelineData[frameIndex];
 		const maxValue = Math.max(...frame.data.map((d: any) => d.value));
 
 		const option = {
+			backgroundColor: 'transparent',
 			title: {
 				text: frame.dateDisplay,
 				left: 'center',
@@ -280,8 +283,12 @@
 			animationEasing: 'cubicOut'
 		};
 
-		option.backgroundColor = 'transparent';
-		chart.setOption(option, true);
+		return option;
+	};
+
+	const updateChart = (frameIndex: number) => {
+		const option = buildOption(frameIndex);
+		if (chart && option) chart.setOption(option, true);
 	};
 
 	const playAnimation = async () => {
@@ -316,28 +323,23 @@
 		}
 	};
 
-	onMount(async () => {
-		const echarts = await import('echarts');
-		chart = echarts.init(
-			document.getElementById(chart_id),
-			document.documentElement.classList.contains('dark') ? 'dark' : null,
-			{ renderer: 'svg' }
-		);
-
-		// Handle window resize
-		const handleResize = () => {
-			if (chart) {
-				chart.resize();
-			}
-		};
-
-		window.addEventListener('resize', handleResize);
-
+	onMount(() => {
+		let dispose: (() => void) | undefined;
+		let active = true;
+		(async () => {
+			const echarts = await import('echarts');
+			if (!active) return;
+			const el = document.getElementById(chart_id);
+			if (!el) return;
+			// a theme flip re-renders whichever frame is currently showing
+			dispose = mountThemeAwareChart(echarts, el, () => buildOption(currentFrameIndex) ?? {}, {
+				onChart: (c: any) => (chart = c)
+			});
+		})();
 		return () => {
-			window.removeEventListener('resize', handleResize);
-			if (chart) {
-				chart.dispose();
-			}
+			active = false;
+			dispose?.();
+			chart = null;
 		};
 	});
 
@@ -368,7 +370,7 @@
 						<div class="flex items-center space-x-2">
 							{#if !isPlaying}
 								<button
-									class="btn btn-sm variant-filled-primary"
+									class="btn btn-sm preset-filled-primary-500"
 									on:click={playAnimation}
 									title="Play Animation"
 								>
@@ -376,7 +378,7 @@
 								</button>
 							{:else}
 								<button
-									class="btn btn-sm variant-filled-error"
+									class="btn btn-sm preset-filled-error-500"
 									on:click={stopAnimation}
 									title="Stop Animation"
 								>
@@ -388,7 +390,7 @@
 						<!-- Frame navigation -->
 						<div class="flex items-center space-x-2">
 							<button
-								class="btn btn-sm variant-ghost-surface"
+								class="btn btn-sm preset-outlined-surface-500"
 								on:click={() => goToFrame(currentFrameIndex - 1)}
 								disabled={currentFrameIndex === 0}
 								title="Previous Frame"
@@ -401,7 +403,7 @@
 							</span>
 
 							<button
-								class="btn btn-sm variant-ghost-surface"
+								class="btn btn-sm preset-outlined-surface-500"
 								on:click={() => goToFrame(currentFrameIndex + 1)}
 								disabled={currentFrameIndex === timelineData.length - 1}
 								title="Next Frame"

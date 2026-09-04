@@ -32,6 +32,7 @@
   * [Applied controls](concepts/applied-controls.md)
   * [Tasks](concepts/tasks.md)
   * [Incidents](concepts/incidents.md)
+  * [Workflows](concepts/workflows.md)
 * Governance
   * [Policies](concepts/policies.md)
   * [Documents](concepts/documents.md)
@@ -129,6 +130,7 @@
   * [Creating your first perimeter](guides/first-perimeter.md)
   * [Creating your first audit](guides/first-audit.md)
   * [Creating your first risk assessment](guides/first-risk-assessment.md)
+  * [Building your first workflow](guides/first-workflow.md)
 * Assessments
   * [Basic audit](guides/basic-audit.md)
   * [Customize your audit](guides/customize-audit.md)
@@ -177,6 +179,7 @@
 * [Action plans](features/action-plans.md)
 * [Working with tables](features/working-with-tables.md)
 * [Custom fields](features/custom-fields.md)
+* [Workflow builder](features/workflows.md)
 * [Command palette](features/command-palette.md)
 * [Universal search](features/search.md)
 * [My assignments](features/my-assignments.md)

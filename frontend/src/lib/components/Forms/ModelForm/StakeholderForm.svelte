@@ -121,6 +121,7 @@
 				<AutocompleteSelect
 					{form}
 					optionsEndpoint="entities"
+					optionsExtraFields={[['folder', 'str']]}
 					field="entity"
 					cacheLock={cacheLocks['entity']}
 					bind:cachedValue={formDataCache['entity']}
@@ -287,6 +288,10 @@
 					{form}
 					optionsEndpoint="applied-controls"
 					optionsExtraFields={[['folder', 'str']]}
+					optionsInfoFields={{
+						fields: [{ field: 'category', translate: true }],
+						position: 'prefix'
+					}}
 					field="applied_controls"
 					label={m.appliedControls()}
 				/>

@@ -5,11 +5,12 @@ import uuid
 import pandas as pd
 
 from core.constants import COUNTRY_CHOICES
-from core.models import Actor, Terminology
+from core.models import Actor, Terminology, ValidationFlow
 from core.serializers import ActorReadSerializer
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
+    actor_prefetch,
     escape_excel_formula,
 )
 from django_filters.rest_framework import DjangoFilterBackend
@@ -17,7 +18,7 @@ from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from itertools import chain
 from collections import defaultdict
 
@@ -343,7 +344,21 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         return (
             super()
             .get_queryset()
-            .prefetch_related("personal_data__category", "data_subjects")
+            .select_related("folder")
+            .prefetch_related(
+                "personal_data__category",
+                "data_subjects",
+                "nature",
+                "associated_controls",
+                actor_prefetch("assigned_to"),
+                "evidences",
+                "purposes",
+                "perimeters",
+                Prefetch(
+                    "validationflow_set",
+                    queryset=ValidationFlow.objects.select_related("approver"),
+                ),
+            )
         )
 
     export_config = {
@@ -835,6 +850,21 @@ class DataBreachViewSet(BaseModelViewSet):
         "incident",
         "evidences",
     ]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "incident")
+            .prefetch_related(
+                "assigned_to",
+                "authorities",
+                "affected_processings",
+                "affected_personal_data",
+                "remediation_measures",
+                "evidences",
+            )
+        )
 
     @action(detail=False, name="Get breach type choices")
     def breach_type(self, request):

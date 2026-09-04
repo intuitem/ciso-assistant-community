@@ -206,7 +206,7 @@
 	}
 
 	const multiSelectOptions = {
-		minSelect: $constraints && $constraints.required === true ? 1 : 0,
+		minSelect: multiple && $constraints && $constraints.required === true ? 1 : 0,
 		maxSelect: multiple ? undefined : 1,
 		liSelectedClass: multiple
 			? '!chip !bg-surface-300-700 !text-surface-900-100'
@@ -815,7 +815,7 @@
 							? (option.translatedLabel ?? option.label ?? option)
 							: (option.label ?? option)}
 					{#if option.infoString?.position === 'prefix'}
-						<span class="text-xs text-surface-600-400">&nbsp;{option.infoString.string}</span>
+						<span class="text-xs text-surface-600-400">{option.infoString.string}&nbsp;</span>
 					{/if}
 					{#if option.path}
 						<span>

@@ -10,13 +10,14 @@ import ChangeCsfFunction from '$lib/components/ContextMenu/applied-controls/Chan
 import EvidenceChangeStatus from '$lib/components/ContextMenu/evidences/ChangeStatus.svelte';
 import WorkflowToggleActive from '$lib/components/ContextMenu/workflows/ToggleActive.svelte';
 import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeStatus.svelte';
-import { getModelInfo } from './crud';
+import { getModelInfo, isFieldFlagEnabled } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
 import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWith.svelte';
 import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
 import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
 import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
+import ChangeChoiceField from '$lib/components/ContextMenu/ChangeChoiceField.svelte';
 import ToggleRecoveryFlags from '$lib/components/ContextMenu/asset-assessments/ToggleRecoveryFlags.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
@@ -80,6 +81,8 @@ const ENTITY_CRITICALITY_OPTIONS = [
 	{ label: '4', value: '4' }
 ];
 
+// Labels are the tokens the API serialises for `content_type`, so the column and this
+// filter resolve through the same messages.
 const CONTENT_TYPE_OPTIONS = [
 	{ label: 'DOMAIN', value: 'DO' },
 	{ label: 'GLOBAL', value: 'GL' },
@@ -192,6 +195,28 @@ export const PROJECT_HEALTH_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'name',
 		label: 'health',
 		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const COMMITMENT_STATE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'commitmentState',
+		optionsEndpoint: 'applied-controls/commitment_state',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		multiple: true
+	}
+};
+
+export const COMMITMENT_OWNER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'committedBy',
+		optionsEndpoint: 'actors',
+		optionsLabelField: 'str',
+		optionsValueField: 'id',
 		multiple: true
 	}
 };
@@ -443,6 +468,17 @@ export const APPLIED_CONTROL_EFFORT_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const FINDINGS_BINDER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'findingsAssessment',
+		optionsEndpoint: 'findings-assessments',
+		optionsValueField: 'id',
+		multiple: true,
+		enableDoubleDash: true
+	}
+};
+
 export const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -475,6 +511,18 @@ export const INCIDENT_STATUS_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const CAMPAIGN_KIND_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'campaigns/kind',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'kind',
 		browserCache: 'force-cache',
 		multiple: true
 	}
@@ -1021,6 +1069,18 @@ export const ENTITY_RELATIONSHIP_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const LAST_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'entities/last_assessment_status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'lastAssessment',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const ACCREDITATION_AUTHORITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1098,7 +1158,8 @@ export const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'framework',
-		optionsEndpoint: 'frameworks',
+		// id/ref_id/name only: the full framework payload is ~10 kB a row.
+		optionsEndpoint: 'frameworks?options=true',
 		multiple: true
 	}
 };
@@ -1795,11 +1856,28 @@ export const listViewFields = {
 			'filtering_labels'
 		],
 		optionalFields: {
-			head: ['progress', 'startDate', 'expiryDate', 'createdAt', 'updatedAt'],
-			body: ['progress_field', 'start_date', 'expiry_date', 'created_at', 'updated_at']
+			head: [
+				'commitmentState',
+				'committedDate',
+				'progress',
+				'startDate',
+				'expiryDate',
+				'createdAt',
+				'updatedAt'
+			],
+			body: [
+				'commitment_state',
+				'committed_eta',
+				'progress_field',
+				'start_date',
+				'expiry_date',
+				'created_at',
+				'updated_at'
+			]
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
+			commitment_state: COMMITMENT_STATE_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
 			assets: ASSET_FILTER,
 			category: APPLIED_CONTROL_CATEGORY_FILTER,
@@ -2191,6 +2269,7 @@ export const listViewFields = {
 			'domain',
 			'parentEntity',
 			'relationship',
+			'lastAssessment',
 			'defaultCriticality'
 		],
 		body: [
@@ -2200,16 +2279,24 @@ export const listViewFields = {
 			'folder',
 			'parent_entity',
 			'relationship',
+			'last_assessment_status',
 			'default_criticality'
 		],
 		optionalFields: {
-			head: ['filteringLabels', 'referenceLink', 'createdAt', 'updatedAt'],
-			body: ['filtering_labels', 'reference_link', 'created_at', 'updated_at']
+			head: ['lastAssessmentDate', 'filteringLabels', 'referenceLink', 'createdAt', 'updatedAt'],
+			body: [
+				'last_assessment_date',
+				'filtering_labels',
+				'reference_link',
+				'created_at',
+				'updated_at'
+			]
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			parent_entity: PARENT_ENTITY_FILTER,
 			relationship: ENTITY_RELATIONSHIP_FILTER,
+			last_assessment_status: LAST_ASSESSMENT_STATUS_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
@@ -2217,8 +2304,13 @@ export const listViewFields = {
 		head: [
 			'name',
 			'entity',
-			'perimeter',
+			'audit',
 			'status',
+			'assignmentStatus',
+			'completion',
+			// Not the shared `reviewProgress` key ("Progress"), which would be
+			// ambiguous next to Completion; the audits table keeps that wording.
+			'auditReviewProgress',
 			'dueDate',
 			'criticality',
 			'conclusion',
@@ -2227,13 +2319,20 @@ export const listViewFields = {
 		body: [
 			'name',
 			'entity',
-			'perimeter',
+			'compliance_assessment',
 			'status',
+			'assignment_status',
+			'completion',
+			'review_progress',
 			'due_date',
 			'criticality',
 			'conclusion',
 			'folder'
 		],
+		optionalFields: {
+			head: ['perimeter'],
+			body: ['perimeter']
+		},
 		filters: {
 			perimeter: PERIMETER_FILTER,
 			entity: ENTITY_FILTER,
@@ -2285,6 +2384,17 @@ export const listViewFields = {
 			provider_entity: PROVIDER_ENTITY_FILTER,
 			beneficiary_entity: BENEFICIARY_ENTITY_FILTER,
 			solutions: SOLUTION_FILTER
+		}
+	},
+	'entity-scores': {
+		head: ['provider', 'score', 'normalizedScore', 'grade', 'asOf', 'entity'],
+		body: ['provider', 'score', 'normalized_score', 'grade', 'as_of', 'entity'],
+		optionalFields: {
+			head: ['scaleMaximum', 'link', 'labels'],
+			body: ['scale_max', 'url', 'filtering_labels']
+		},
+		filters: {
+			entity: ENTITY_FILTER
 		}
 	},
 	representatives: {
@@ -2800,36 +2910,51 @@ export const listViewFields = {
 			status: POSTURE_ASSESSMENT_STATUS_FILTER
 		}
 	},
+	commitments: {
+		head: ['target', 'state', 'committedDate', 'committedBy', 'domain'],
+		body: ['target', 'state', 'committed_eta', 'committed_by', 'folder'],
+		optionalFields: {
+			head: ['commitmentNotes', 'createdAt', 'updatedAt'],
+			body: ['notes', 'created_at', 'updated_at']
+		},
+		filters: {
+			folder: DOMAIN_FILTER,
+			state: COMMITMENT_STATE_FILTER,
+			committed_by: COMMITMENT_OWNER_FILTER
+		}
+	},
 	findings: {
 		head: [
 			'ref_id',
 			'name',
-			'description',
+			'domain',
 			'findings_assessment',
 			'severity',
-			'priority',
 			'owner',
 			'status',
 			'applied_controls',
+			'taskTemplates',
 			'labels'
 		],
 		body: [
 			'ref_id',
 			'name',
-			'description',
+			'folder',
 			'findings_assessment',
 			'severity',
-			'priority',
 			'owner',
 			'status',
 			'applied_controls',
+			'task_templates',
 			'filtering_labels'
 		],
 		optionalFields: {
-			head: ['createdAt', 'updatedAt'],
-			body: ['created_at', 'updated_at']
+			head: ['description', 'priority', 'createdAt', 'updatedAt'],
+			body: ['description', 'priority', 'created_at', 'updated_at']
 		},
 		filters: {
+			folder: DOMAIN_FILTER,
+			findings_assessment: FINDINGS_BINDER_FILTER,
 			filtering_labels: LABELS_FILTER,
 			severity: FINDINGS_SEVERITY_FILTER,
 			status: FINDINGS_STATUS_FILTER,
@@ -2881,9 +3006,10 @@ export const listViewFields = {
 		body: ['entry_type', 'entry', 'author', 'created_at', 'updated_at', 'timestamp']
 	},
 	campaigns: {
-		head: ['name', 'description', 'frameworks', 'status'],
-		body: ['name', 'description', 'frameworks', 'status'],
+		head: ['name', 'kind', 'frameworks', 'status'],
+		body: ['name', 'kind', 'frameworks', 'status'],
 		filters: {
+			kind: CAMPAIGN_KIND_FILTER,
 			status: CAMPAIGN_STATUS_FILTER,
 			frameworks: FRAMEWORK_FILTER
 		}
@@ -3403,6 +3529,11 @@ export type FilterKeys = {
 }[keyof typeof listViewFields];
 
 export const contextMenuActions = {
+	findings: [
+		{ component: ChangeChoiceField, props: { field: 'status', labelKey: 'changeStatus' } },
+		{ component: ChangeChoiceField, props: { field: 'severity', labelKey: 'changeSeverity' } },
+		{ component: ChangeChoiceField, props: { field: 'priority', labelKey: 'changePriority' } }
+	],
 	'applied-controls': [
 		{ component: ChangeStatus, props: {} },
 		{ component: ChangeImpact, props: {} },
@@ -3489,6 +3620,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		}
 	],
 	'applied-controls': [
+		{
+			type: 'change_field',
+			label: 'commitment',
+			icon: 'fa-solid fa-handshake',
+			field: 'commitment_state',
+			optionsEndpoint: 'applied-controls/commitment_state'
+		},
 		{
 			type: 'group',
 			label: 'changeAttributes',
@@ -3703,6 +3841,14 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			optionsEndpoint: 'findings/status'
 		},
 		{
+			type: 'change_field',
+			label: 'batchChangeFindingsAssessment',
+			icon: 'fa-solid fa-folder-tree',
+			field: 'findings_assessment',
+			optionsEndpoint: 'findings-assessments',
+			enableDoubleDash: true
+		},
+		{
 			type: 'change_m2m',
 			label: 'changeOwner',
 			icon: 'fa-solid fa-user-pen',
@@ -3785,6 +3931,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	],
 	'task-templates': [
 		{
+			type: 'change_field',
+			label: 'commitment',
+			icon: 'fa-solid fa-handshake',
+			field: 'commitment_state',
+			optionsEndpoint: 'applied-controls/commitment_state'
+		},
+		{
 			type: 'change_m2m',
 			label: 'changeAssignee',
 			icon: 'fa-solid fa-user-pen',
@@ -3843,7 +3996,7 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		},
 		{
 			type: 'change_field',
-			label: 'changeSeverity',
+			label: 'batchChangeSeverity',
 			icon: 'fa-solid fa-arrow-up-wide-short',
 			field: 'severity',
 			optionsEndpoint: 'vulnerabilities/severity'
@@ -3936,6 +4089,29 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	],
 	entities: [
 		{
+			type: 'group',
+			label: 'manageLabels',
+			icon: 'fa-solid fa-tags',
+			children: [
+				{
+					type: 'add_m2m',
+					label: 'addLabels',
+					icon: 'fa-solid fa-plus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				},
+				{
+					type: 'remove_m2m',
+					label: 'removeLabels',
+					icon: 'fa-solid fa-minus',
+					field: 'filtering_labels',
+					optionsEndpoint: 'filtering-labels',
+					multiSelect: true
+				}
+			]
+		},
+		{
 			type: 'change_folder',
 			label: 'changeDomain',
 			icon: 'fa-solid fa-folder',
@@ -3945,7 +4121,23 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	],
 	representatives: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
 	solutions: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
-	'entity-assessments': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'entity-assessments': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'entity-assessments/status'
+		},
+		{
+			type: 'change_field',
+			label: 'changeConclusion',
+			icon: 'fa-solid fa-flag-checkered',
+			field: 'conclusion',
+			optionsEndpoint: 'entity-assessments/conclusion'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
 	'data-transfers': [
 		{
 			type: 'change_field',
@@ -4023,8 +4215,17 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	]
 };
 
-export function getBatchActions(model: urlModel): BatchActionConfig[] {
-	return batchActions[model] ?? [];
+export function getBatchActions(
+	model: urlModel,
+	featureFlags: Record<string, boolean> = {}
+): BatchActionConfig[] {
+	const flaggedFields = getModelInfo(model)?.flaggedFields;
+	const enabled = (action: BatchActionConfig): boolean => {
+		const flag = action.field ? flaggedFields?.[action.field] : undefined;
+		if (!isFieldFlagEnabled(flag, featureFlags)) return false;
+		return action.type !== 'group' || (action.children ?? []).some(enabled);
+	};
+	return (batchActions[model] ?? []).filter(enabled);
 }
 
 export function getListViewFields({
@@ -4046,23 +4247,25 @@ export function getListViewFields({
 	let head = [...baseEntry.head];
 	let body = [...baseEntry.body];
 
+	// Optional fields are appended after the defaults but are hidden by default in the UI.
+	if (includeOptional && baseEntry.optionalFields) {
+		head = [...head, ...baseEntry.optionalFields.head];
+		body = [...body, ...baseEntry.optionalFields.body];
+	}
+
+	// Applied after the optional columns are in place: a flagged field offered only
+	// as an opt-in column must disappear with its flag too.
 	if (model?.flaggedFields) {
 		const indicesToPop = body
 			.map((field: string, index: number) => {
-				const flag = model.flaggedFields?.[field];
-				// instead of includes, check if featureFlags[flag] is truthy
-				return flag && !featureFlags[flag] ? index : -1;
+				const flags = model.flaggedFields?.[field];
+				if (!flags) return -1;
+				return isFieldFlagEnabled(flags, featureFlags) ? -1 : index;
 			})
 			.filter((i) => i !== -1);
 
 		head = head.filter((_, index) => !indicesToPop.includes(index));
 		body = body.filter((_, index) => !indicesToPop.includes(index));
-	}
-
-	// Optional fields are appended after the defaults but are hidden by default in the UI.
-	if (includeOptional && baseEntry.optionalFields) {
-		head = [...head, ...baseEntry.optionalFields.head];
-		body = [...body, ...baseEntry.optionalFields.body];
 	}
 
 	return {
