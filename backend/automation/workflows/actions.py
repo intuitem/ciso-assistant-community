@@ -132,9 +132,14 @@ class DeferredSendEmailTask(DeferredTask):
         )
 
 
-def dig(data, path):
+MISSING = object()
+"""Sentinel for dig(): a path that breaks, as opposed to one that ends on None."""
+
+
+def dig(data, path, default=None):
     """Dotted-path lookup into nested dicts and lists (numeric segments index
-    into lists: `body.severity.0.score`); None when the path breaks."""
+    into lists: `body.severity.0.score`); `default` when the path breaks. Pass
+    MISSING as the default to tell a broken path from a present null."""
     current = data
     for part in str(path).split("."):
         if isinstance(current, dict) and part in current:
@@ -142,7 +147,7 @@ def dig(data, path):
         elif isinstance(current, list) and part.isdigit() and int(part) < len(current):
             current = current[int(part)]
         else:
-            return None
+            return default
     return current
 
 

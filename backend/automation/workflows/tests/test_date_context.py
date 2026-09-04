@@ -275,6 +275,20 @@ class TestSetVariablesAuthoring:
         assert skipped.get().data == {"variable": "authtoken", "path": "test"}
         assert "'authtoken'" in skipped.get().message
 
+    def test_present_null_output_is_not_reported_as_absent(self):
+        from automation.workflows.models import WorkflowInstanceLog
+
+        version = self._version(
+            {"type": "set_variables", "variables": {"authtoken": None}},
+            output_mapping={"authtoken": "authtoken"},
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert instance.variables["authtoken"] is None
+        assert not instance.logs.filter(
+            event_type=WorkflowInstanceLog.EventType.ERROR
+        ).exists()
+
 
 @pytest.mark.django_db
 class TestDateOffsetAction:

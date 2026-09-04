@@ -2201,8 +2201,10 @@
 			{/if}
 
 			<!-- set_variables already writes variables: offering "save results to
-			     variables" on it invites putting the value in the wrong place. -->
-			{#if ['action', 'subprocess', 'loop'].includes(nodeDomain.type) && actionConfig?.type !== 'set_variables'}
+			     variables" on it invites putting the value in the wrong place. Rows an
+			     older draft or an import already carries stay visible so they can be
+			     removed (publish rejects them). -->
+			{#if ['action', 'subprocess', 'loop'].includes(nodeDomain.type) && (actionConfig?.type !== 'set_variables' || Object.keys(nodeDomain.output_mapping ?? {}).length > 0)}
 				<div>
 					<div class="flex items-center justify-between mb-1">
 						{@render fieldLabel(m.outputMapping())}
@@ -2210,7 +2212,7 @@
 							type="button"
 							class="text-[10px] text-primary-500 hover:text-primary-600 cursor-pointer font-semibold disabled:opacity-50"
 							onclick={addOutputMapping}
-							disabled={!variables.length}
+							disabled={!variables.length || actionConfig?.type === 'set_variables'}
 						>
 							<i class="fa-solid fa-plus mr-0.5"></i>{m.addMapping()}
 						</button>
