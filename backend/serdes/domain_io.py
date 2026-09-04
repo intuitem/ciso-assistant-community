@@ -708,13 +708,14 @@ def create_batch(
                 except ValidationError as e:
                     # clean() raises on fields_to_check uniqueness conflicts;
                     # de-duplicate by appending a UUID, but only for
-                    # string-valued fields. Dates / FKs / enums in error_dict
-                    # (e.g. TaskNode.fields_to_check = ["task_template",
-                    # "due_date"]) are left untouched so we don't corrupt
-                    # them.
+                    # string-valued fields_to_check. Dates / FKs / enums (e.g.
+                    # TaskNode.fields_to_check = ["task_template", "due_date"])
+                    # and non-uniqueness errors raised by a model's own clean()
+                    # are left untouched so we don't corrupt them.
+                    checkable = set(getattr(model, "fields_to_check", []) or [])
                     for field in getattr(e, "error_dict", {}):
                         current = fields.get(field)
-                        if isinstance(current, str):
+                        if field in checkable and isinstance(current, str):
                             fields[field] = f"{current} {uuid.uuid4()}"
                     # Re-validate. Anything still failing isn't a name
                     # collision we can paper over — log it so it's visible
