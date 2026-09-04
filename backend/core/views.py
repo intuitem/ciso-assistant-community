@@ -7968,10 +7968,56 @@ class UserViewSet(AutocompleteMixin, BaseModelViewSet):
                         )
                 return super().update(request, *args, **kwargs)
 
+        # Deactivation (or deferred deactivation via expiry_date) of a direct
+        # admin runs under the same admin-group lock, so the serializer's
+        # last-active-admin check can't race a concurrent deactivation into a
+        # zero-admin lockout.
+        if (
+            "is_active" in request.data or "expiry_date" in request.data
+        ) and user.user_groups.filter(name="BI-UG-ADM").exists():
+            with transaction.atomic():
+                UserGroup.objects.select_for_update().filter(name="BI-UG-ADM").first()
+                return super().update(request, *args, **kwargs)
+
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         user = self.get_object()
+        # SCIM owns this account's lifecycle: identity fields are immutable via
+        # the API (see UserWriteSerializer) and deprovisioning normally arrives
+        # through SCIM. Manual deletion is the admin-only escape hatch for a
+        # decommissioned SCIM integration, not a user-manager operation.
+        if user.is_scim_managed and not request.user.is_admin():
+            logger.warning(
+                "denied privileged user operation",
+                guard="scim_delete",
+                requester=request.user.email,
+                target=user.email,
+            )
+            return Response(
+                {"error": "onlyAdminCanDeleteScimAccount"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        # Deleting an administrator is a lifecycle operation on the admin
+        # group's power: require the right that guards its membership, so the
+        # deactivation guard (UserWriteSerializer) can't be bypassed by
+        # reaching for the bigger hammer. Non-admin accounts stay deletable
+        # with plain delete_user, consistent with their deactivation.
+        if user.is_admin() and not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=UserWriteSerializer._change_usergroup_perm(),
+            folder=Folder.get_root_folder(),
+        ):
+            logger.warning(
+                "denied privileged user operation",
+                guard="admin_delete",
+                requester=request.user.email,
+                target=user.email,
+            )
+            return Response(
+                {"error": "deletingAdminAccountRequiresAdminRights"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         # Protect the last direct (locally-managed) administrator — see update().
         if user.user_groups.filter(name="BI-UG-ADM").exists():
             with transaction.atomic():
