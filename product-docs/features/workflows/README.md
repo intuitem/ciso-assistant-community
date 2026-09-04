@@ -1,5 +1,5 @@
 ---
-description: The canvas where workflows are designed, published and watched: header, palette, inspector, panels and run view
+description: "The canvas where workflows are designed, published and watched: header, palette, inspector, panels and run view"
 ---
 
 # Workflow builder

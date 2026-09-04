@@ -1,5 +1,5 @@
 ---
-description: Action, Condition, Loop and Stop run: what each step does and how wires route a run
+description: "Action, Condition, Loop and Stop run: what each step does and how wires route a run"
 ---
 
 # Steps

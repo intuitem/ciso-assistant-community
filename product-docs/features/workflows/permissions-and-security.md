@@ -1,5 +1,5 @@
 ---
-description: Who a run acts as, what it can reach, what it may never write, and how webhooks and secrets are protected
+description: "Who a run acts as, what it can reach, what it may never write, and how webhooks and secrets are protected"
 ---
 
 # Permissions and security

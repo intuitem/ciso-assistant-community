@@ -1,5 +1,5 @@
 ---
-description: Every action type with its settings, outputs and the permission it requires
+description: "Every action type with its settings, outputs and the permission it requires"
 ---
 
 # Action reference

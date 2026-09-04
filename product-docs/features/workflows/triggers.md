@@ -1,5 +1,5 @@
 ---
-description: What starts a run: Manual, Webhook, Schedule and On event triggers, their settings, their state and the Triggers panel
+description: "What starts a run: Manual, Webhook, Schedule and On event triggers, their settings, their state and the Triggers panel"
 ---
 
 # Triggers

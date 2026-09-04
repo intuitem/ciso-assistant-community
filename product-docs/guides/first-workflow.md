@@ -1,5 +1,5 @@
 ---
-description: Enable the feature, build a workflow that finds overdue applied controls, run it, publish it and put it on a schedule
+description: "Enable the feature, build a workflow that finds overdue applied controls, run it, publish it and put it on a schedule"
 ---
 
 # Building your first workflow

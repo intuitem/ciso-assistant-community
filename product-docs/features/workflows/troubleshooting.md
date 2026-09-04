@@ -1,5 +1,5 @@
 ---
-description: Symptoms and fixes: triggers that do not fire, failed runs, empty expressions, refused publishes
+description: "Symptoms and fixes: triggers that do not fire, failed runs, empty expressions, refused publishes"
 ---
 
 # Troubleshooting

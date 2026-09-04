@@ -1,5 +1,5 @@
 ---
-description: Declaring variables, where their values come from, and how secrets are stored and used
+description: "Declaring variables, where their values come from, and how secrets are stored and used"
 ---
 
 # Variables and secrets

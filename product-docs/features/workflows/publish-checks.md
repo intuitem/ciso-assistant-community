@@ -1,5 +1,5 @@
 ---
-description: Every message the publish step can raise, and how to fix it
+description: "Every message the publish step can raise, and how to fix it"
 ---
 
 # Publish checks
