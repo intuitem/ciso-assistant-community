@@ -24,8 +24,6 @@
 
 	let { data, form }: Props = $props();
 	let exportPopupOpen = $state(false);
-	let chartKey = $state(0);
-
 	const modalStore: ModalStore = getModalStore();
 	const findings_assessment = $derived(data.data);
 
@@ -51,18 +49,6 @@
 		};
 		modalStore.trigger(modal);
 	}
-
-	function resizeObserver(node: HTMLElement) {
-		const observer = new ResizeObserver(() => {
-			chartKey = chartKey + 1;
-		});
-		observer.observe(node);
-		return {
-			destroy() {
-				observer.disconnect();
-			}
-		};
-	}
 </script>
 
 {#if data.data?.is_locked}
@@ -79,6 +65,15 @@
 <DetailView {data} disableCreate={data.data?.is_locked} disableDelete={data.data?.is_locked}>
 	{#snippet actions()}
 		<div class="flex flex-col space-y-2">
+			{#if data.data.compliance_assessment}
+				<Anchor
+					breadcrumbAction="push"
+					href={`/compliance-assessments/${data.data.compliance_assessment.id}`}
+					class="btn preset-filled-secondary-500 w-full"
+					data-testid="go-to-audit-button"
+					><i class="fa-solid fa-list-check mr-2"></i>{m.complianceAssessment()}</Anchor
+				>
+			{/if}
 			<Popover
 				open={exportPopupOpen}
 				onOpenChange={(e) => (exportPopupOpen = e.open)}
@@ -134,7 +129,7 @@
 
 	{#snippet widgets()}
 		{#key form}
-			<div class="h-full flex flex-col space-y-4">
+			<div class="min-h-full flex flex-col space-y-4">
 				<div class="card p-4 bg-surface-50-950 shadow-xs">
 					<h3 class="text-lg font-semibold mb-2">{m.summary()}</h3>
 					<div class="grid grid-cols-2 gap-2">
@@ -154,29 +149,24 @@
 					</div>
 				</div>
 
-				<div
-					class="card p-2 bg-surface-50-950 shadow-xs flex-1 flex flex-row gap-2"
-					use:resizeObserver
-				>
-					{#key chartKey}
-						<div class="flex-1 min-h-0 min-w-0">
-							<HalfDonutChart
-								name="current_h"
-								title={m.severity()}
-								classesContainer="card p-2 bg-surface-50-950 h-full"
-								values={data.findings_metrics.severity_chart_data}
-								colors={data.findings_metrics.severity_chart_data.map((object) => object.color)}
-							/>
-						</div>
-						<div class="flex-1 min-h-0 min-w-0">
-							<DonutChart
-								classesContainer="card p-2 bg-surface-50-950 h-full"
-								name="f_treatment_progress"
-								title={m.progress()}
-								values={data.findings_metrics.status_chart_data.values}
-							/>
-						</div>
-					{/key}
+				<div class="card p-2 bg-surface-50-950 shadow-xs shrink-0 h-80 flex flex-row gap-2">
+					<div class="flex-1 min-h-0 min-w-0">
+						<HalfDonutChart
+							name="current_h"
+							title={m.severity()}
+							classesContainer="card p-2 bg-surface-50-950 h-full"
+							values={data.findings_metrics.severity_chart_data}
+							colors={data.findings_metrics.severity_chart_data.map((object) => object.color)}
+						/>
+					</div>
+					<div class="flex-1 min-h-0 min-w-0">
+						<DonutChart
+							classesContainer="card p-2 bg-surface-50-950 h-full"
+							name="f_treatment_progress"
+							title={m.progress()}
+							values={data.findings_metrics.status_chart_data.values}
+						/>
+					</div>
 				</div>
 				{#if page.data?.featureflags?.validation_flows}
 					{#key findings_assessment.validation_flows}

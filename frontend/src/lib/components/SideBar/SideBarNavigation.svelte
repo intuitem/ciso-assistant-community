@@ -15,6 +15,9 @@
 		.map((item) => {
 			// Check and filter the sub-items based on user permissions
 			const filteredSubItems = item.items.filter((subItem) => {
+				// An entry may preselect a filter (`/campaigns?kind=internal`); the model
+				// it maps to is the path alone.
+				const urlModel = subItem.href.split('?')[0].split('/')[1];
 				if (subItem.adminOnly) {
 					return Boolean(user?.is_admin);
 				}
@@ -22,8 +25,8 @@
 					return user?.roles?.some((role: string) => !subItem.exclude.includes(role)) ?? false;
 				} else if (subItem.permissions) {
 					return subItem.permissions?.some((permission) => hasPermissionAnywhere(user, permission));
-				} else if (Object.hasOwn(URL_MODEL_MAP, subItem.href.split('/')[1])) {
-					const model = URL_MODEL_MAP[subItem.href.split('/')[1]];
+				} else if (Object.hasOwn(URL_MODEL_MAP, urlModel)) {
+					const model = URL_MODEL_MAP[urlModel];
 					return hasPermissionAnywhere(user, `view_${model.name}`);
 				}
 				return false;

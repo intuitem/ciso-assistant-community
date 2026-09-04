@@ -171,6 +171,19 @@ export const defaultLangLabels = {
 	sl: 'Slovenščina'
 };
 
+/** Turn the backend's {code: name} language map into picker options, labelled
+ *  natively with the translated name alongside. */
+export function languageOptions(
+	options: { label: string; value: string | number }[] | undefined
+): { label: string; value: string }[] {
+	return (options ?? []).map((option) => {
+		const code = String(option.value) as keyof typeof defaultLangLabels;
+		const native = defaultLangLabels[code] ?? code;
+		const translated = language[LOCALE_MAP[code as keyof typeof LOCALE_MAP]?.name] ?? option.label;
+		return { value: String(option.value), label: `${native} (${translated})` };
+	});
+}
+
 export function toCamelCase(str: string) {
 	if (typeof str !== 'string') return str;
 	str = str.replace(/[()]/g, ' ').replace(/\s+/g, ' ').trim();
