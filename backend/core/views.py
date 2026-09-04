@@ -977,6 +977,23 @@ def actor_prefetch(field_name: str) -> Prefetch:
     )
 
 
+def check_folder_add_permission(user, folder, *models):
+    """Raise PermissionDenied unless *user* may create each of *models* in *folder*.
+
+    Mirror of the check ``BaseModelSerializer.create`` performs; use it from
+    actions that create objects directly through the ORM.
+    """
+    for model in models:
+        if not RoleAssignment.is_access_allowed(
+            user=user,
+            perm=Permission.objects.get(codename=f"add_{model._meta.model_name}"),
+            folder=folder,
+        ):
+            raise PermissionDenied(
+                {"folder": "You do not have permission to add objects in this folder"}
+            )
+
+
 class AutocompleteMixin:
     """Adds a lightweight, server-paginated ``autocomplete`` action for entity
     pickers (search/ordering/filtering come from the viewset's existing filter
@@ -4394,7 +4411,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         serializer_class=RiskAssessmentDuplicateSerializer,
     )
     def duplicate(self, request, pk):
-        serializer = RiskAssessmentDuplicateSerializer(data=request.data)
+        serializer = RiskAssessmentDuplicateSerializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
@@ -4406,7 +4425,12 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             risk_assessment = self.get_object()
 
             perimeter = data.get("perimeter")
-            folder = data.get("folder")
+            # folder always follows the perimeter, as on update
+            folder = perimeter.folder if perimeter else data.get("folder")
+            target_models = [RiskAssessment]
+            if risk_assessment.risk_scenarios.exists():
+                target_models.append(RiskScenario)
+            check_folder_add_permission(request.user, folder, *target_models)
 
             duplicate_risk_assessment = RiskAssessment.objects.create(
                 name=data.get("name"),
@@ -6063,7 +6087,9 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
         serializer_class=AppliedControlDuplicateSerializer,
     )
     def duplicate(self, request, pk):
-        serializer = AppliedControlDuplicateSerializer(data=request.data)
+        serializer = AppliedControlDuplicateSerializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
@@ -6077,6 +6103,10 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
 
         applied_control = self.get_object()
         new_folder = data["folder"]
+        target_models = [AppliedControl]
+        if data["duplicate_evidences"]:
+            target_models.append(Evidence)
+        check_folder_add_permission(request.user, new_folder, *target_models)
         duplicate_applied_control = AppliedControl.objects.create(
             reference_control=applied_control.reference_control,
             name=data["name"],
@@ -10715,7 +10745,9 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
         serializer_class=OrganisationObjectiveDuplicateSerializer,
     )
     def duplicate(self, request, pk):
-        serializer = OrganisationObjectiveDuplicateSerializer(data=request.data)
+        serializer = OrganisationObjectiveDuplicateSerializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
@@ -10728,6 +10760,7 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
             )
 
         new_folder = data["folder"]
+        check_folder_add_permission(request.user, new_folder, OrganisationObjective)
         objective = self.get_object()
         duplicate_objective = OrganisationObjective.objects.create(
             name=data["name"],
