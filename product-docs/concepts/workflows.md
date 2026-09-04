@@ -1,5 +1,5 @@
 ---
-description: Automation that reacts to what happens in the platform, on a schedule, on an event or on a webhook, and notifies, reads, creates or updates objects on your behalf
+description: "Automation that reacts to what happens in the platform, on a schedule, on an event or on a webhook, and notifies, reads, creates or updates objects on your behalf"
 ---
 
 # Workflows

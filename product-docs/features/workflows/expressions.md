@@ -1,5 +1,5 @@
 ---
-description: The {{ }} syntax for referencing variables, payloads, step outputs, loop items and secrets
+description: "The {{ }} syntax for referencing variables, payloads, step outputs, loop items and secrets"
 ---
 
 # Expressions

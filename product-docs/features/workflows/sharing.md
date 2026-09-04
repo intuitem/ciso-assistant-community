@@ -1,5 +1,5 @@
 ---
-description: Export and import workflows as files, and install ready-made ones from the library catalog
+description: "Export and import workflows as files, and install ready-made ones from the library catalog"
 ---
 
 # Sharing workflows

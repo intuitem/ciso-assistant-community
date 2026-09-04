@@ -1,5 +1,5 @@
 ---
-description: The ready-made workflows that ship as libraries, by domain, and which one to start from
+description: "The ready-made workflows that ship as libraries, by domain, and which one to start from"
 ---
 
 # Template catalog

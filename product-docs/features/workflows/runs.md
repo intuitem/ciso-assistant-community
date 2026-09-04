@@ -1,5 +1,5 @@
 ---
-description: Starting runs, reading the Runs panel and the run log, time limits, and what to do when a run fails
+description: "Starting runs, reading the Runs panel and the run log, time limits, and what to do when a run fails"
 ---
 
 # Runs
