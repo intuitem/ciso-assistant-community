@@ -487,6 +487,8 @@
 	"exportRequirementsWorkbookDesc": "Full data including answers, scoring and progress",
 	"exportExecutiveSummary": "Executive summary",
 	"exportExecutiveSummaryDesc": "Cover page, spider chart, framework tree, scored requirements",
+	"exportAuditPosture": "Audit posture",
+	"exportAuditPostureDesc": "Compliance results per requirement, with summary charts and observations",
 	"exportCyFunAssessment": "CyFun self-assessment",
 	"exportCyFunAssessmentDesc": "Excel template mapped to CyFun categories",
 	"cyFunAssessment": "CyFun self-assessment",

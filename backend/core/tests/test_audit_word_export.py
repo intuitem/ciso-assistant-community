@@ -7,6 +7,7 @@ a DOCX executive report for a given compliance assessment.
 Test coverage:
 - Happy path: 200, correct Content-Type and Content-Disposition headers
 - Response body is a structurally valid DOCX (ZIP with word/document.xml)
+- The five generated charts are embedded as media in the archive
 - All RequirementAssessment result types present (exercises all chart paths)
 - Empty audit (no requirement assessments)
 - Implementation groups filter set
@@ -25,6 +26,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from core.apps import startup
+from core.generators import AUDIT_CHART_KEYS
 from core.models import (
     ComplianceAssessment,
     Framework,
@@ -180,6 +182,28 @@ class TestAuditWordExport:
             assert "word/document.xml" in zf.namelist(), (
                 "DOCX archive is missing word/document.xml"
             )
+
+    def test_word_report_embeds_charts(self, admin_client, audit):
+        """The five charts must survive the engine-agnostic context handoff.
+
+        `gen_audit_context` returns raw buffers and `inline_charts_for_docx`
+        wraps them, so a lost key would drop images without failing any of the
+        structural assertions above.
+        """
+        url = reverse(
+            "compliance-assessments-word-report", kwargs={"pk": str(audit.pk)}
+        )
+        response = admin_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+
+        with zipfile.ZipFile(io.BytesIO(_read_streaming(response))) as zf:
+            media = [n for n in zf.namelist() if n.startswith("word/media/")]
+            assert len(media) >= len(AUDIT_CHART_KEYS), (
+                f"Expected at least {len(AUDIT_CHART_KEYS)} embedded charts, "
+                f"got {len(media)}: {media}"
+            )
+            for name in media:
+                assert zf.getinfo(name).file_size > 0, f"{name} is empty"
 
     def test_word_report_with_all_result_types(self, admin_client, audit):
         """Export must not crash when all result values are present (exercises all chart paths)."""

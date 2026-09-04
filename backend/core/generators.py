@@ -10,6 +10,8 @@ from docx.shared import Cm
 from docxtpl import InlineImage
 from library.helpers import get_referential_translation
 
+from .utils import is_field_visible_to
+
 from .models import (
     AppliedControl,
     ComplianceAssessment,
@@ -337,7 +339,7 @@ def calculate_depths(framework):
     return depth_map
 
 
-def gen_audit_context(id, doc, tree, lang):
+def gen_audit_context(id, tree, lang):
     def count_category_results(data):
         def recursive_result_count(node_data):
             # Initialize result counts for this node
@@ -622,8 +624,6 @@ def gen_audit_context(id, doc, tree, lang):
     category_radar_buffer = plot_category_radar(
         category_scores, max_score=max_score, colors=custom_colors
     )
-    chart_category_radar = InlineImage(doc, category_radar_buffer, width=Cm(15))
-
     requirement_assessments_objects = audit.get_requirement_assessments(
         include_non_assessable=True
     )
@@ -716,30 +716,173 @@ def gen_audit_context(id, doc, tree, lang):
 
     completion_bar_buffer = plot_completion_bar(spider_data, colors=custom_colors)
 
-    chart_completion = InlineImage(doc, completion_bar_buffer, width=Cm(15))
-
-    res_donut = InlineImage(doc, plot_donut(donut_data), width=Cm(15))
-    chart_spider = InlineImage(doc, spider_chart_buffer, width=Cm(15))
-    ac_chart = InlineImage(doc, hbar_buffer, width=Cm(15))
+    donut_buffer = plot_donut(donut_data)
     IGs = ", ".join([str(x) for x in audit.get_selected_implementation_groups()])
     context = {
         "audit": _build_safe_audit_context(audit),
         "date": now().strftime("%d/%m/%Y"),
         "contributors": f"{authors}\n{reviewers}",
         "req": aggregated,
-        "compliance_donut": res_donut,
-        "completion_bar": chart_completion,
-        "compliance_radar": chart_spider,
+        "compliance_donut": donut_buffer,
+        "completion_bar": completion_bar_buffer,
+        "compliance_radar": spider_chart_buffer,
         "drifts_per_domain": agg_drifts,
-        "chart_controls": ac_chart,
+        "chart_controls": hbar_buffer,
         "p1_controls": p1_controls,
         "full_controls": full_controls,
         "ac_count": ac_total,
         "igs": IGs,
         "category_scores": category_scores,
-        "category_radar": chart_category_radar,
+        "category_radar": category_radar_buffer,
         "requirement_assessments": requirement_assessments_list,
         "ra_count": len(requirement_assessments_list),
     }
 
     return context
+
+
+AUDIT_CHART_KEYS = (
+    "compliance_donut",
+    "completion_bar",
+    "compliance_radar",
+    "chart_controls",
+    "category_radar",
+)
+
+
+def inline_charts_for_docx(context, doc, width=Cm(15)):
+    """Wrap the chart buffers of `gen_audit_context` for docxtpl.
+
+    The context stays engine-agnostic so other renderers consume the same
+    buffers; the rewind lets one assembly feed several renders.
+    """
+    wrapped = dict(context)
+    for key in AUDIT_CHART_KEYS:
+        buffer = wrapped.get(key)
+        if buffer is None:
+            continue
+        buffer.seek(0)
+        wrapped[key] = InlineImage(doc, buffer, width=width)
+    return wrapped
+
+
+# Fields of a requirement assessment governed by `field_visibility`; `max_score`
+# is not itself governed but is meaningless once `score` is dropped.
+_REDACTABLE_RA_FIELDS = ("status", "extended_result", "score")
+
+# Template chrome, keyed the way `frontend/messages/*.json` keys it so this can be
+# swapped for the shared catalog without touching the template. English literals
+# stand in until then — see docs/backend_i18n_catalog_shaping.md.
+_REPORT_LABEL_KEYS = (
+    "executiveSummary",
+    "scope",
+    "driftsPerDomain",
+    "scoresPerCategory",
+    "priorityControls",
+    "detailedResults",
+    "reference",
+    "date",
+    "implementationGroups",
+    "contributors",
+    "domain",
+    "findings",
+    "category",
+    "average",
+    "scored",
+    "items",
+    "control",
+    "status",
+    "progress",
+    "resultDetail",
+    "score",
+    "observation",
+    "appliedControls",
+    "compliant",
+    "partiallyCompliant",
+    "nonCompliant",
+    "notApplicable",
+    "notAssessed",
+    "assessableRequirements",
+    "all",
+)
+
+_REPORT_LABELS_EN = {
+    "executiveSummary": "Executive summary",
+    "scope": "Scope",
+    "driftsPerDomain": "Drifts per domain",
+    "scoresPerCategory": "Scores per category",
+    "priorityControls": "Priority controls",
+    "detailedResults": "Detailed results",
+    "reference": "Reference",
+    "date": "Date",
+    "implementationGroups": "Implementation groups",
+    "contributors": "Contributors",
+    "domain": "Domain",
+    "findings": "Findings",
+    "category": "Category",
+    "average": "Average",
+    "scored": "Scored",
+    "items": "Items",
+    "control": "Control",
+    "status": "Status",
+    "progress": "Progress",
+    "resultDetail": "Result detail",
+    "score": "Score",
+    "observation": "Observation",
+    "appliedControls": "Applied controls",
+    "compliant": "Compliant",
+    "partiallyCompliant": "Partially compliant",
+    "nonCompliant": "Non compliant",
+    "notApplicable": "Not applicable",
+    "notAssessed": "Not assessed",
+    "assessableRequirements": "assessable requirements",
+    "all": "All",
+}
+
+
+def report_labels(lang="en"):
+    """Chrome strings for the Typst templates.
+
+    Single seam for document i18n: once `core.i18n_catalog` lands this reads the
+    maintained frontend catalog for `lang` and the templates stay unchanged.
+    """
+    return {key: _REPORT_LABELS_EN[key] for key in _REPORT_LABEL_KEYS}
+
+
+def audit_context_for_typst(context, audit, role="auditor", lang="en"):
+    """Split `gen_audit_context` output into a JSON payload and chart images.
+
+    Fields hidden from `role` are dropped here rather than in the template:
+    templates are overridable, so a guard living in one could be removed by an
+    override and leak auditor-only values to a respondent.
+    """
+    payload = {
+        key: value for key, value in context.items() if key not in AUDIT_CHART_KEYS
+    }
+
+    hidden = {
+        field
+        for field in _REDACTABLE_RA_FIELDS
+        if not is_field_visible_to(audit, field, role)
+    }
+    if hidden:
+        payload["requirement_assessments"] = [
+            {
+                key: value
+                for key, value in ra.items()
+                if key not in hidden and not (key == "max_score" and "score" in hidden)
+            }
+            for ra in payload.get("requirement_assessments", [])
+        ]
+    payload["hidden_fields"] = sorted(hidden)
+
+    images = {}
+    for key in AUDIT_CHART_KEYS:
+        buffer = context.get(key)
+        if buffer is None:
+            continue
+        buffer.seek(0)
+        images[f"{key}.png"] = buffer.read()
+    payload["charts"] = sorted(images)
+    payload["labels"] = report_labels(lang)
+    return payload, images

@@ -66,7 +66,12 @@ from jinja2.sandbox import SandboxedEnvironment
 from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
 from webhooks.service import dispatch_webhook_event
-from .generators import gen_audit_context
+from .generators import (
+    audit_context_for_typst,
+    gen_audit_context,
+    inline_charts_for_docx,
+)
+from .typst_render import render_pdf
 from .serializer_fields import FieldsRelatedField
 
 from django.utils import timezone, translation
@@ -11402,8 +11407,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         # children in place but the returned dict drops them).
         filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, audit_obj)
-        context = gen_audit_context(pk, doc, tree, user_lang)
-        doc.render(context, jinja_env=SandboxedEnvironment())
+        context = gen_audit_context(pk, tree, user_lang)
+        doc.render(
+            inline_charts_for_docx(context, doc), jinja_env=SandboxedEnvironment()
+        )
         buffer_doc = io.BytesIO()
         doc.save(buffer_doc)
         buffer_doc.seek(0)
@@ -11414,6 +11421,52 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
         response["Content-Disposition"] = "attachment; filename=exec_report.docx"
 
+        return response
+
+    @action(detail=True, name="Get audit posture PDF", url_path="posture-pdf")
+    def posture_pdf(self, request, pk):
+        """Audit posture as a PDF, redacted for the caller's viewer role."""
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, ComplianceAssessment
+        )
+        if UUID(pk) not in object_ids_view:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        audit = self.get_object()
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
+        role = (
+            "respondent"
+            if respondent_folders and audit.folder_id in respondent_folders
+            else "auditor"
+        )
+
+        framework = audit.framework
+        tree = get_sorted_requirement_nodes(
+            RequirementNode.objects.filter(framework=framework).all(),
+            RequirementAssessment.objects.filter(compliance_assessment=audit).all(),
+            audit.max_score if audit.max_score is not None else framework.max_score,
+            audit.min_score if audit.min_score is not None else framework.min_score,
+        )
+        # Don't reassign: empty top-level sections must survive for the charts.
+        filter_graph_by_implementation_groups(
+            tree, audit.selected_implementation_groups
+        )
+        annotate_tree_with_aggregated_scores(tree, audit)
+
+        lang = request.user.preferences.get("lang") or "en"
+        context = gen_audit_context(pk, tree, lang)
+        payload, images = audit_context_for_typst(context, audit, role, lang)
+
+        response = HttpResponse(
+            render_pdf("audit_report.typ", payload, images=images),
+            content_type="application/pdf",
+        )
+        safe_name = slugify(audit.name) or "audit"
+        response["Content-Disposition"] = (
+            f'attachment; filename="{safe_name}_posture.pdf"'
+        )
         return response
 
     @action(detail=True, name="Get action plan CSV")
