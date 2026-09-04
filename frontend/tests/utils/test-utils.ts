@@ -305,7 +305,7 @@ export const test = base.extend<Fixtures>({
 	},
 
 	findingsAssessmentsPage: async ({ page }, use) => {
-		const fPage = new PageContent(page, '/findings-assessments', 'Follow-ups', [
+		const fPage = new PageContent(page, '/findings-assessments', 'Findings binders', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'ref_id', type: type.TEXT },
@@ -783,7 +783,7 @@ export class TestContent {
 			},
 
 			findingsAssessmentsPage: {
-				displayName: 'Follow-ups',
+				displayName: 'Findings binders',
 				modelName: 'findingsassessment',
 				build: {
 					name: vars.findingsAssessmentName,
