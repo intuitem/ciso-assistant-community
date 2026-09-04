@@ -385,9 +385,7 @@ class TestEntityAssessmentAuditRoundTrip:
 
 class TestFlattenedNameCollision:
     @pytest.mark.django_db
-    def test_same_named_objects_in_two_subdomains_import(
-        self, root_folder, admin_user
-    ):
+    def test_same_named_objects_in_two_subdomains_import(self, root_folder, admin_user):
         """Two sub-domains each holding a same-named evidence collide once the
         import flattens them into one folder; the clash must be de-duplicated
         instead of aborting the whole import."""

@@ -748,12 +748,20 @@ def create_batch(
                     try:
                         obj_created = model.objects.create(**fields)
                     except ValidationError as e:
-                        # Dedup name clashes with a sibling created earlier in
-                        # this batch (flattened sub-folders), unseen pre-create.
-                        for field in getattr(e, "error_dict", {}):
-                            current = fields.get(field)
-                            if isinstance(current, str):
-                                fields[field] = f"{current} {uuid.uuid4()}"
+                        # clean() also raises for non-uniqueness reasons, so only
+                        # dedup the fields_to_check values it flagged (clash with
+                        # a sibling created earlier in this batch) and re-raise
+                        # anything else rather than mutating an invalid object.
+                        checkable = set(getattr(model, "fields_to_check", []) or [])
+                        clashes = [
+                            field
+                            for field in getattr(e, "error_dict", {})
+                            if field in checkable and isinstance(fields.get(field), str)
+                        ]
+                        if not clashes:
+                            raise
+                        for field in clashes:
+                            fields[field] = f"{fields[field]} {uuid.uuid4()}"
                         obj_created = model.objects.create(**fields)
                     created_objects.append(obj_created)
             else:
