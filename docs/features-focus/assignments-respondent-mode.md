@@ -39,12 +39,12 @@ Once the feature flag is enabled, the design is as follows:
 
 The intereaction between the auditor and respondents follows these steps:
 
-<figure><img src="../.gitbook/assets/image (88).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/exca_assign (1).jpg" alt=""><figcaption></figcaption></figure>
 
 The default state is `draft` and you can set them and send feedbacks individually:\
 &#x20;&#x20;
 
-<figure><img src="../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/assign.jpg" alt=""><figcaption></figcaption></figure>
 
 
 
