@@ -17459,10 +17459,12 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 ),
             },
             "labels": {
-                "source": "filtering_labels",
+                "source": "task_template.filtering_labels",
                 "label": "labels",
-                "format": lambda qs: ",".join(
-                    escape_excel_formula(o.label) for o in qs.all()
+                "format": lambda qs: (
+                    ",".join(escape_excel_formula(o.label) for o in qs.all())
+                    if qs
+                    else ""
                 ),
             },
         },
@@ -17843,6 +17845,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                     "task_template__compliance_assessments",
                     "task_template__risk_assessments",
                     "task_template__findings_assessment",
+                    "task_template__filtering_labels",
                 )
                 .order_by("due_date")
             )
