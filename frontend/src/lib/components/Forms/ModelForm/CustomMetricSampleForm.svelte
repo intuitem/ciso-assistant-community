@@ -108,7 +108,7 @@
 	function handleQuantitativeChange(event: Event) {
 		const value = (event.target as HTMLInputElement).value;
 		const numValue = parseFloat(value);
-		if (!isNaN(numValue)) {
+		if (!Number.isNaN(numValue)) {
 			$valueFieldProxy = { result: numValue };
 		}
 	}
