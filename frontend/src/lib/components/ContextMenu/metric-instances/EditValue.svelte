@@ -26,7 +26,6 @@
 		if (!id) return;
 		const initialData = {
 			metric_instance: id,
-			folder: row.meta.folder?.id ?? row.meta.folder,
 			_metric_definition: row.meta.metric_definition,
 			_evidences: row.meta.evidences
 		};
