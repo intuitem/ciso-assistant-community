@@ -708,13 +708,14 @@ def create_batch(
                 except ValidationError as e:
                     # clean() raises on fields_to_check uniqueness conflicts;
                     # de-duplicate by appending a UUID, but only for
-                    # string-valued fields. Dates / FKs / enums in error_dict
-                    # (e.g. TaskNode.fields_to_check = ["task_template",
-                    # "due_date"]) are left untouched so we don't corrupt
-                    # them.
+                    # string-valued fields_to_check. Dates / FKs / enums (e.g.
+                    # TaskNode.fields_to_check = ["task_template", "due_date"])
+                    # and non-uniqueness errors raised by a model's own clean()
+                    # are left untouched so we don't corrupt them.
+                    checkable = set(getattr(model, "fields_to_check", []) or [])
                     for field in getattr(e, "error_dict", {}):
                         current = fields.get(field)
-                        if isinstance(current, str):
+                        if field in checkable and isinstance(current, str):
                             fields[field] = f"{current} {uuid.uuid4()}"
                     # Re-validate. Anything still failing isn't a name
                     # collision we can paper over — log it so it's visible
@@ -744,7 +745,25 @@ def create_batch(
             if has_save_override and not is_requirement_assessment:
                 created_objects = []
                 for object_creation_data in objects_creation_data:
-                    obj_created = model.objects.create(**object_creation_data["fields"])
+                    fields = object_creation_data["fields"]
+                    try:
+                        obj_created = model.objects.create(**fields)
+                    except ValidationError as e:
+                        # clean() also raises for non-uniqueness reasons, so only
+                        # dedup the fields_to_check values it flagged (clash with
+                        # a sibling created earlier in this batch) and re-raise
+                        # anything else rather than mutating an invalid object.
+                        checkable = set(getattr(model, "fields_to_check", []) or [])
+                        clashes = [
+                            field
+                            for field in getattr(e, "error_dict", {})
+                            if field in checkable and isinstance(fields.get(field), str)
+                        ]
+                        if not clashes:
+                            raise
+                        for field in clashes:
+                            fields[field] = f"{fields[field]} {uuid.uuid4()}"
+                        obj_created = model.objects.create(**fields)
                     created_objects.append(obj_created)
             else:
                 objects_to_create = [
