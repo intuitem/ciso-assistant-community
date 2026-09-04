@@ -44,8 +44,15 @@ class SerializerFactory:
     """
 
     def __init__(self, *modules: str):
+        # Flatten modules because some callers pass a list as an argument
+        flat_modules = []
+        for mod in modules:
+            if isinstance(mod, list):
+                flat_modules.extend(mod)
+            elif mod:
+                flat_modules.append(mod)
         # Reverse to prioritize later modules
-        self.modules = list(reversed(modules))
+        self.modules = list(reversed(flat_modules))
 
     def get_serializer(self, base_name: str, action: str):
         if action in ["list", "retrieve"]:
@@ -69,9 +76,13 @@ class SerializerFactory:
         for module_name in self.modules:
             try:
                 serializer_module = importlib.import_module(module_name)
+            except ModuleNotFoundError:
+                continue
+
+            try:
                 serializer_class = getattr(serializer_module, serializer_name)
                 return serializer_class
-            except ModuleNotFoundError, AttributeError:
+            except AttributeError:
                 continue
 
         raise ValueError(
@@ -819,6 +830,32 @@ class AssetWriteSerializer(
     class Meta:
         model = Asset
         exclude = ["business_value"]
+
+    def to_internal_value(self, data):
+        # Convert array of objects from Swagger/API to the expected dict format
+        for field in [
+            "security_objectives",
+            "security_capabilities",
+            "disaster_recovery_objectives",
+            "recovery_capabilities",
+        ]:
+            if field in data and isinstance(data[field], list):
+                converted = {"objectives": {}}
+                for item in data[field]:
+                    if not isinstance(item, dict):
+                        raise serializers.ValidationError({field: ["Array items must be objects."]})
+                    for key, val in item.items():
+                        if isinstance(val, dict) and "value" in val:
+                            converted["objectives"][key] = val
+                        elif isinstance(val, int):
+                            converted["objectives"][key] = {
+                                "value": val,
+                                "is_enabled": True,
+                            }
+                        else:
+                            raise serializers.ValidationError({field: [f"Unsupported value for '{key}'."]})
+                data[field] = converted
+        return super().to_internal_value(data)
 
     def validate(self, data):
         parent_assets = data.get("parent_assets", [])
