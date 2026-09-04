@@ -37,6 +37,7 @@ from django.db.models import (
     ForeignKey,
     OneToOneField,
     ManyToManyField,
+    ProtectedError,
     QuerySet,
     Prefetch,
 )
@@ -8337,6 +8338,21 @@ class FolderViewSet(BaseModelViewSet):
         """
         folder = serializer.save()
         Folder.create_default_ug_and_ra(folder)
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError:
+            return Response(
+                {
+                    "detail": (
+                        "Cannot delete this domain: it still contains elements "
+                        "referenced elsewhere (e.g. elementary actions used in an "
+                        "operating mode scenario). Remove those references first."
+                    )
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
 
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
