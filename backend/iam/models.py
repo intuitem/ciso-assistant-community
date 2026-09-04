@@ -607,7 +607,8 @@ class Folder(NameDescriptionMixin):
         )
 
         # Combine both querysets into a single one.
-        all_roles_qs = direct_perms_qs.union(group_perms_qs)
+        # order_by() drops the default ordering Django 6.1 applies to unions.
+        all_roles_qs = direct_perms_qs.union(group_perms_qs).order_by()
 
         user_roles = defaultdict(list)
         for item in all_roles_qs:
@@ -734,6 +735,30 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
         super().delete(*args, **kwargs)
 
 
+def is_supported_language(code) -> bool:
+    return isinstance(code, str) and code in {c for c, _ in settings.LANGUAGES}
+
+
+def default_language() -> str:
+    """The instance-wide default, used when nothing better is known."""
+    try:
+        from global_settings.models import GlobalSettings
+
+        general = GlobalSettings.objects.filter(name="general").first()
+        if general and isinstance(general.value, dict):
+            candidate = general.value.get("default_language", "en")
+            return candidate if is_supported_language(candidate) else "en"
+    except ImportError, OperationalError, ProgrammingError:
+        # Called during startup and from migrations, before the table exists.
+        pass
+    return "en"
+
+
+def resolve_language(code) -> str:
+    """An explicit, supported language, else the instance default."""
+    return code if is_supported_language(code) else default_language()
+
+
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -774,20 +799,11 @@ class UserManager(BaseUserManager):
             user.password = make_password(password)
         else:
             user.set_unusable_password()
-        # Set default language from general settings
-        try:
-            from global_settings.models import GlobalSettings
-
-            general = GlobalSettings.objects.filter(name="general").first()
-            if general and isinstance(general.value, dict):
-                default_lang = general.value.get("default_language", "en")
-            else:
-                default_lang = "en"
-        except Exception:
-            default_lang = "en"
         if not isinstance(user.preferences, dict):
             user.preferences = {}
-        user.preferences["lang"] = default_lang
+        # An explicit language wins over the instance default: a third-party
+        # representative gets their invitation in their own language.
+        user.preferences["lang"] = resolve_language(extra_fields.get("language"))
 
         user.save(using=self._db)
         user.user_groups.set(extra_fields.get("user_groups", []))
@@ -1005,20 +1021,8 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         if not isinstance(prefs, dict):
             prefs = {}
             self.preferences = prefs
-        valid_langs = {code for code, _ in settings.LANGUAGES}
-        if not isinstance(prefs.get("lang"), str) or prefs["lang"] not in valid_langs:
-            try:
-                from global_settings.models import GlobalSettings
-
-                general = GlobalSettings.objects.filter(name="general").first()
-                default_lang = (
-                    general.value.get("default_language", "en")
-                    if general and isinstance(general.value, dict)
-                    else "en"
-                )
-            except Exception:
-                default_lang = "en"
-            prefs["lang"] = default_lang
+        if not is_supported_language(prefs.get("lang")):
+            prefs["lang"] = default_language()
         if prefs.get("date_format") not in self.DATE_FORMATS:
             prefs["date_format"] = "auto"
         ui = prefs.get("ui") if isinstance(prefs.get("ui"), dict) else {}
@@ -1867,9 +1871,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             "id", flat=True
         )
 
+        # order_by() drops the default ordering Django 6.1 applies to unions:
+        # it would reference a column absent from the selected values.
         accessible_folder_ids = directly_accessible_folder_ids.union(
             indirectly_accessible_folder_ids
-        )
+        ).order_by()
         return accessible_folder_ids
 
     @staticmethod

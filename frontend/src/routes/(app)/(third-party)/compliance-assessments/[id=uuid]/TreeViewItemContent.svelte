@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
+	import {
+		complianceResultColorMap,
+		complianceStatusColorMap,
+		extendedResultColorMap
+	} from '$lib/utils/constants';
 	import { darkenColor } from '$lib/utils/helpers';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
@@ -28,6 +32,7 @@
 		showStatus: boolean;
 		showScore: boolean;
 		showDocumentationScore: boolean;
+		showExtendedResult?: boolean;
 		scoringEnabled?: boolean;
 		scoreCalculationMethod: string;
 		selectedStatus: string[];
@@ -54,6 +59,7 @@
 		showStatus,
 		showScore,
 		showDocumentationScore,
+		showExtendedResult = true,
 		scoringEnabled = false,
 		scoreCalculationMethod,
 		selectedStatus,
@@ -83,6 +89,28 @@
 	const pattern = (ref_id ? 2 : 0) + (name ? 1 : 0);
 	const title: string =
 		pattern == 3 ? `${ref_id} - ${name}` : pattern == 2 ? ref_id : pattern == 1 ? name : '';
+
+	// Badge styling for the assessable leaf case: kept here (rather than in a
+	// separate lead component) so the whole title+badges row can share a
+	// single Anchor, with no dead click zone between the two.
+	// `rawNode` mirrors the existing (rest as Record<string, any>) cast used
+	// below for aggregated_* fields: these come from the API node and aren't
+	// named in Props, so TS can't see them through the `...rest` spread.
+	const rawNode = rest as Record<string, any>;
+	const statusColor = complianceStatusColorMap[rawNode.status];
+	const resultColor = complianceResultColorMap[rawNode.result];
+	const resultTextClass = resultColor === '#000000' ? 'text-surface-100' : 'text-surface-900';
+	const extendedResultColor = rawNode.extended_result
+		? extendedResultColorMap[rawNode.extended_result]
+		: null;
+	const statusI18nText = safeTranslate(rawNode.status_i18n);
+	const resultI18nText = safeTranslate(rawNode.result_i18n);
+	// TreeViewItem draws this icon itself, but only inside the lead slot this row
+	// no longer uses — hence rendering it here, from the same node field.
+	const hasMappingInference = Object.keys(rawNode.mapping_inference ?? {}).length > 0;
+	const extendedResultText = rawNode.extended_result
+		? safeTranslate(rawNode.extended_result)
+		: null;
 
 	let showInfo = $state(false);
 
@@ -215,44 +243,118 @@
 
 {#if !displayOnlyAssessableNodes || assessable || hasAssessableChildren}
 	<div class="flex flex-row justify-between space-x-8">
-		<div class="flex flex-1 justify-center max-w-[80ch] flex-col">
+		<div class="flex flex-1 justify-center flex-col">
 			<div class="flex flex-row space-x-2 items-center" style="font-weight: 300;">
-				<div>
+				<div class="flex-1 min-w-0">
 					{#if assessable}
-						<span class="w-full h-full flex rounded-base hover:text-primary-500">
-							{#if canEditRequirementAssessment}
-								<Anchor
-									breadcrumbAction="push"
-									label={title || m.requirementAssessment()}
-									href="/requirement-assessments/{ra_id}/edit?next={page.url.pathname}"
-								>
-									{#if title || description}
-										{#if title}
-											<span style="font-weight: 600;">{title}</span>
-										{/if}
-										{#if description}
-											<MarkdownRenderer content={description} />
-										{/if}
-									{:else if Object.keys(node.questions).length > 0}
-										<!-- This displays the first question's text -->
-										{Object.entries(node.questions)[0][1].text}
-									{/if}
-								</Anchor>
-							{:else}
-								<Anchor
-									breadcrumbAction="push"
-									label={title || m.requirementAssessment()}
-									href="/requirement-assessments/{ra_id}?next={page.url.pathname}"
-								>
+						<Anchor
+							breadcrumbAction="push"
+							label={title || m.requirementAssessment()}
+							href={canEditRequirementAssessment
+								? `/requirement-assessments/${ra_id}/edit?next=${page.url.pathname}`
+								: `/requirement-assessments/${ra_id}?next=${page.url.pathname}`}
+							class="w-full flex flex-row justify-between items-center gap-2 rounded-base hover:text-primary-500"
+						>
+							<div class="max-w-[80ch]">
+								{#if title || description}
 									{#if title}
 										<span style="font-weight: 600;">{title}</span>
 									{/if}
 									{#if description}
 										<MarkdownRenderer content={description} />
 									{/if}
-								</Anchor>
-							{/if}
-						</span>
+								{:else if Object.keys(node.questions).length > 0}
+									<!-- This displays the first question's text -->
+									{Object.entries(node.questions)[0][1].text}
+								{/if}
+							</div>
+							<div
+								class="flex flex-row space-x-2 items-center shrink-0"
+								data-testid="tree-item-badges"
+							>
+								{#if hasMappingInference}
+									<i
+										class="fa-solid fa-diagram-project"
+										title={m.mappingInference()}
+										aria-label={m.mappingInference()}
+										data-testid="mapping-inference-icon"
+									></i>
+								{/if}
+								{#if showStatus}
+									<span class="badge h-fit" style="color: {statusColor ?? '#d1d5db'};">
+										{statusI18nText}
+									</span>
+								{/if}
+								{#if showResult}
+									<span
+										class="badge {resultTextClass} h-fit"
+										style="background-color: {resultColor ?? '#d1d5db'};"
+									>
+										{resultI18nText}
+									</span>
+								{/if}
+								{#if showExtendedResult && extendedResultText && extendedResultColor}
+									<span
+										class="badge text-white h-fit"
+										style="background-color: {extendedResultColor};"
+									>
+										{extendedResultText}
+									</span>
+								{/if}
+								{#if showScore && rawNode.result_i18n !== 'notApplicable' && rawNode.is_scored}
+									{@const scoreMin = rawNode.min_score ?? 0}
+									{@const range = max_score - scoreMin}
+									{@const safeScore = rawNode.score ?? scoreMin}
+									<div class="relative">
+										<Progress
+											value={range > 0
+												? Math.max(0, Math.min(100, ((safeScore - scoreMin) * 100) / range))
+												: 0}
+											min={0}
+											max={100}
+											data-testid="progress-ring-svg"
+										>
+											<Progress.Circle class="[--size:--spacing(12)]">
+												<Progress.CircleTrack />
+												<Progress.CircleRange
+													class={displayScoreColor(rawNode.score, max_score, false, scoreMin)}
+												/>
+											</Progress.Circle>
+											<div class="absolute inset-0 flex items-center justify-center">
+												<span class="text-xs font-bold">{rawNode.score}</span>
+											</div>
+										</Progress>
+									</div>
+									{#if showDocumentationScore}
+										{@const safeDoc = rawNode.documentation_score ?? scoreMin}
+										<div class="relative">
+											<Progress
+												value={range > 0
+													? Math.max(0, Math.min(100, ((safeDoc - scoreMin) * 100) / range))
+													: 0}
+												min={0}
+												max={100}
+											>
+												<Progress.Circle class="[--size:--spacing(12)]">
+													<Progress.CircleTrack />
+													<Progress.CircleRange
+														class={displayScoreColor(
+															rawNode.documentation_score,
+															max_score,
+															false,
+															scoreMin
+														)}
+													/>
+												</Progress.Circle>
+												<div class="absolute inset-0 flex items-center justify-center">
+													<span class="text-xs font-bold">{rawNode.documentation_score}</span>
+												</div>
+											</Progress>
+										</div>
+									{/if}
+								{/if}
+							</div>
+						</Anchor>
 					{:else}
 						<p class="max-w-[80ch] whitespace-pre-line">
 							{#if title}

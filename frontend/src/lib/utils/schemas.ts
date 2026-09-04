@@ -290,6 +290,8 @@ export const RiskScenarioSchema = z.object({
 
 export const AppliedControlSchema = z.object({
 	...NameDescriptionMixin,
+	commitment_state: z.string().optional(),
+	commitment_notes: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	category: z.string().optional().nullable(),
 	csf_function: z.string().optional().nullable(),
@@ -501,6 +503,7 @@ export const RequirementAssessmentSchema = z.object({
 	evidences: z.array(z.string().uuid().optional()).optional(),
 	compliance_assessment: z.string(),
 	applied_controls: z.array(z.string().uuid().optional()).optional(),
+	task_templates: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	respondent_alignment: z.string().optional().nullable(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
@@ -510,6 +513,7 @@ export const RequirementAssessmentSchema = z.object({
 
 export const UserEditSchema = z.object({
 	email: z.string().email(),
+	language: z.string().optional().default(''),
 	first_name: z.string().optional(),
 	last_name: z.string().optional(),
 	is_active: z.boolean().optional(),
@@ -522,6 +526,7 @@ export const UserEditSchema = z.object({
 
 export const UserCreateSchema = z.object({
 	email: z.string().email(),
+	language: z.string().optional().default(''),
 	observation: z.string().optional().nullable(),
 	expiry_date: z
 		.union([z.literal('').transform(() => null), z.iso.date()])
@@ -596,11 +601,13 @@ export const ComplianceAssessmentSchema = z.object({
 
 export const CampaignSchema = z.object({
 	...NameDescriptionMixin,
+	kind: z.string().default('internal'),
 	frameworks: z.array(z.string()),
 	selected_implementation_groups: z
 		.array(z.object({ value: z.string(), framework: z.string() }))
 		.optional(),
-	perimeters: z.array(z.string()),
+	perimeters: z.array(z.string()).optional(),
+	entities: z.array(z.string()).optional(),
 	status: z.string().optional().nullable(),
 	start_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
@@ -763,6 +770,10 @@ export const FeatureFlagsSchema = z.object({
 	object_audit_trail: z.boolean().optional(),
 	custom_portals: z.boolean().optional(),
 	posture_assessments: z.boolean().optional(),
+	commitment_management: z.boolean().optional(),
+	findings_from_requirements: z.boolean().optional(),
+	dora: z.boolean().optional(),
+	external_ratings: z.boolean().optional(),
 	jit_provisioning: z.boolean().optional()
 });
 
@@ -864,7 +875,7 @@ export const EntitiesSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
-	is_active: z.boolean().optional(),
+	is_active: z.boolean().optional().default(true),
 	parent_entity: z.string().optional().nullable(),
 	mission: z.string().optional(),
 	reference_link: z
@@ -895,6 +906,16 @@ export const EntityAssessmentSchema = z.object({
 	create_audit: z.boolean().optional().default(false),
 	framework: z.string().optional(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
+	field_visibility: z
+		.record(
+			z.string(),
+			z.object({
+				auditor: z.enum(['edit', 'read', 'hidden']),
+				respondent: z.enum(['edit', 'read', 'hidden'])
+			})
+		)
+		.optional()
+		.default({}),
 	version: z.string().optional().default('0.1'),
 	folder: z.string(),
 	perimeter: z.string().optional().nullable(),
@@ -956,6 +977,7 @@ export const solutionSchema = z.object({
 
 export const representativeSchema = z.object({
 	create_user: z.boolean().optional().default(false),
+	language: z.string().optional().default(''),
 	email: z.string().email(),
 	entity: z.string(),
 	first_name: z.string().optional(),
@@ -963,6 +985,23 @@ export const representativeSchema = z.object({
 	phone: z.string().optional(),
 	role: z.string().optional(),
 	description: z.string().optional()
+});
+
+export const entityScoreSchema = z.object({
+	entity: z.string(),
+	provider: z.string(),
+	score: z.number(),
+	scale_max: z.number().default(100),
+	grade: z.string().optional(),
+	as_of: z.iso.date(),
+	url: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: "Link must be either empty or a valid URL starting with 'http'"
+		})
+		.optional(),
+	observation: z.string().optional().nullable(),
+	filtering_labels: z.array(z.string()).optional()
 });
 
 export const contractSchema = z.object({
@@ -1415,7 +1454,11 @@ export const FindingSchema = z.object({
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	reference_controls: z.string().uuid().optional().array().optional(),
-	findings_assessment: z.string(),
+	task_templates: z.string().uuid().optional().array().optional(),
+	findings_assessment: z.string().optional().nullable(),
+	requirement_node: z.string().uuid().optional().nullable(),
+	requirement_assessment: z.string().uuid().optional().nullable(),
+	folder: z.string().optional(),
 	asset: z.string().optional().nullable(),
 	severity: z.number().default(-1),
 	priority: z.number().optional().nullable(),
@@ -1423,7 +1466,8 @@ export const FindingSchema = z.object({
 	evidences: z.string().uuid().optional().array().optional(),
 	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	recommendation: z.string().optional().nullable()
 });
 
 export const FindingsAssessmentSchema = z.object({
@@ -1443,6 +1487,11 @@ export const FindingsAssessmentSchema = z.object({
 	evidences: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
 	reported_at: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	start_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	objectives: z.string().optional().nullable(),
+	budget: z.coerce.number().optional().nullable(),
+	expenses: z.coerce.number().optional().nullable(),
+	reference_link: z.string().url().optional().nullable().or(z.literal('')),
 	is_locked: z.boolean().optional().default(false)
 });
 
@@ -1569,6 +1618,8 @@ export const TimelineEntrySchema = z.object({
 
 export const TaskTemplateSchema = z.object({
 	...NameDescriptionMixin,
+	commitment_state: z.string().optional(),
+	commitment_notes: z.string().optional().nullable(),
 	folder: z.string(),
 	status: z.string().default('pending'),
 	assigned_to: z.string().optional().array().optional(),
@@ -1591,6 +1642,7 @@ export const TaskTemplateSchema = z.object({
 	risk_assessments: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string().uuid().optional().array().optional(),
 	findings: z.string().uuid().optional().array().optional(),
+	requirement_assessments: z.string().uuid().optional().array().optional(),
 	objectives: z.string().uuid().optional().array().optional(),
 	incidents: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional(),
@@ -1709,7 +1761,7 @@ export const CustomFieldDefinitionSchema = z
 			}),
 		label: z.string().min(1),
 		help_text: z.string().optional().default(''),
-		field_type: z.enum(['text', 'number', 'date', 'boolean', 'choice', 'multi_choice']),
+		field_type: z.enum(['text', 'number', 'date', 'boolean', 'choice', 'multi_choice', 'url']),
 		required: z.boolean().default(false),
 		visible: z.boolean().default(true),
 		searchable: z.boolean().default(false),
@@ -2079,6 +2131,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	entities: EntitiesSchema,
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,
+	'entity-scores': entityScoreSchema,
 	solutions: solutionSchema,
 	contracts: contractSchema,
 	vulnerabilities: vulnerabilitySchema,

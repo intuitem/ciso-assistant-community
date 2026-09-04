@@ -21,8 +21,8 @@ from rest_framework.parsers import (
     MultiPartParser,
 )
 from rest_framework.response import Response
-import weasyprint
 from weasyprint import HTML
+from weasyprint.urls import URLFetcher, URLFetcherResponse
 
 import django_filters as df
 
@@ -110,6 +110,7 @@ def _get_user_lang(request):
 
 
 _PDF_FETCH_MAX_BYTES = 10 * 1024 * 1024
+_DATA_URL_FETCHER = URLFetcher(allowed_protocols=("data",), allow_redirects=False)
 
 
 # WeasyPrint passes a configured `ssl_context` we don't thread through:
@@ -117,7 +118,7 @@ _PDF_FETCH_MAX_BYTES = 10 * 1024 * 1024
 # an issue if that becomes a real need.
 def _safe_url_fetcher(url, timeout=10, ssl_context=None):
     if url.startswith("data:"):
-        return weasyprint.default_url_fetcher(url)
+        return _DATA_URL_FETCHER.fetch(url)
     assert_public_url(url, allowed_schemes=("https",))
     r = requests.get(url, timeout=timeout, allow_redirects=False, stream=True)
     try:
@@ -131,8 +132,8 @@ def _safe_url_fetcher(url, timeout=10, ssl_context=None):
         r.close()
     if len(content) > _PDF_FETCH_MAX_BYTES:
         raise BlockedRequestError(f"Response exceeds {_PDF_FETCH_MAX_BYTES} bytes")
-    mime = content_type.split(";")[0].strip() or None
-    return {"string": content, "mime_type": mime, "redirected_url": final_url}
+    mime = content_type.split(";")[0].strip() or "application/octet-stream"
+    return URLFetcherResponse(final_url, content, {"Content-Type": mime})
 
 
 class DocumentContainerFilter(GenericFilterSet):
