@@ -234,6 +234,11 @@
 	field="evidences"
 	label={m.evidences()}
 	translateOptions={false}
+	allowUserOptions="append"
+	additionalMultiselectOptions={{
+		createOptionMsg: ({ searchText }: { searchText: string }) =>
+			m.createExpectedEvidence({ name: searchText })
+	}}
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<AutocompleteSelect

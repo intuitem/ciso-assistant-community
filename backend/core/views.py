@@ -1142,17 +1142,50 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return new_labels
 
     def _process_evidences(self, evidences, folder):
+        """Resolve an evidence list where entries may be names instead of ids.
+
+        A name typed into the picker declares an expected evidence that does not
+        exist yet; it is created in the parent object's own folder. Reusing a name
+        already taken in that folder links the existing evidence rather than
+        creating a homonym nobody can tell apart.
+        """
         new_evidences = []
         for value in evidences or []:
             try:
                 uuid.UUID(str(value), version=4)
                 new_evidences.append(str(value))
+                continue
             except ValueError:
-                new_evidence = Evidence(name=value, folder=folder)
-                new_evidence.full_clean()
-                new_evidence.save()
-                new_evidences.append(str(new_evidence.id))
+                pass
+            evidence = Evidence.objects.filter(name=value, folder=folder).first()
+            if evidence is None:
+                evidence = Evidence(name=value, folder=folder)
+                evidence.full_clean()
+                evidence.save()
+            new_evidences.append(str(evidence.id))
         return new_evidences
+
+    def _process_task_template_evidences(self, request: Request) -> None:
+        """Turn typed evidence names on a TaskTemplate payload into evidence ids."""
+        if not request.data.get("evidences") or self.model != TaskTemplate:
+            return
+        folder_id = request.data.get("folder")
+        if not folder_id:
+            # A partial write can carry evidences without a folder; fall back to the
+            # object being updated, and leave the payload alone when there is none.
+            instance = self.get_object() if self.kwargs.get("pk") else None
+            if instance is None:
+                return
+            folder = instance.folder
+        else:
+            folder = Folder.objects.filter(id=folder_id).first()
+            if folder is None:
+                return
+        if hasattr(request.data, "_mutable"):
+            request.data._mutable = True
+        request.data["evidences"] = self._process_evidences(
+            request.data["evidences"], folder=folder
+        )
 
     def _resolve_related_model(self, source: str):
         """Resolve a dotted source path (e.g. 'asset.folder') to its related model."""
@@ -1394,22 +1427,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             request.data["filtering_labels"] = self._process_labels(
                 request.data["filtering_labels"]
             )
-        # Experimental: process evidences on TaskTemplate creation
-        if request.data.get("evidences") and self.model == TaskTemplate:
-            folder = Folder.objects.get(id=request.data.get("folder"))
-            request.data["evidences"] = self._process_evidences(
-                request.data.get("evidences"), folder=folder
-            )
+        self._process_task_template_evidences(request)
         return super().create(request, *args, **kwargs)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
-        # Experimental: process evidences on TaskTemplate update
-
-        if request.data.get("evidences") and self.model == TaskTemplate:
-            folder = Folder.objects.get(id=request.data.get("folder"))
-            request.data["evidences"] = self._process_evidences(
-                request.data["evidences"], folder=folder
-            )
+        self._process_task_template_evidences(request)
 
         # NOTE: Handle filtering_labels field - SvelteKit SuperForms behavior inconsistency:
         # Forms with file inputs (like Evidence attachments) use dataType="form" and omit empty fields
@@ -1430,6 +1452,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
+        self._process_task_template_evidences(request)
         return super().partial_update(request, *args, **kwargs)
 
     def destroy(self, request: Request, *args, **kwargs) -> Response:
