@@ -154,6 +154,7 @@
 		<label for="value-select" class="text-sm font-semibold block mb-2">{m.value()}</label>
 		<select
 			id="value-select"
+			data-testid="form-input-value"
 			class="select w-full"
 			value={selectedChoiceIndex}
 			onchange={(e) => handleQualitativeChange(e.currentTarget.value)}
@@ -174,6 +175,7 @@
 		</label>
 		<input
 			id="value-input"
+			data-testid="form-input-value"
 			type="number"
 			step="any"
 			class="input w-full"
