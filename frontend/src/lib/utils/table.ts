@@ -19,6 +19,7 @@ import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabiliti
 import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
 import ChangeChoiceField from '$lib/components/ContextMenu/ChangeChoiceField.svelte';
 import ToggleRecoveryFlags from '$lib/components/ContextMenu/asset-assessments/ToggleRecoveryFlags.svelte';
+import MetricInstanceEditValue from '$lib/components/ContextMenu/metric-instances/EditValue.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -3555,7 +3556,8 @@ export const contextMenuActions = {
 		{ component: VulnerabilityChangeStatus, props: {} },
 		{ component: VulnerabilityChangeSeverity, props: {} }
 	],
-	'asset-assessments': [{ component: ToggleRecoveryFlags, props: {} }]
+	'asset-assessments': [{ component: ToggleRecoveryFlags, props: {} }],
+	'metric-instances': [{ component: MetricInstanceEditValue, props: {} }]
 };
 
 // Batch action configuration.

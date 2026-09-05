@@ -3729,6 +3729,17 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'metric_instance', urlModel: 'metric-instances' },
 			{ field: 'evidence_revision', urlModel: 'evidence-revisions' }
 		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'metric_instance' },
+			{ field: 'timestamp', type: 'datetime' },
+			{ field: 'display_value' },
+			{ field: 'observation' },
+			{ field: 'evidence_revision' },
+			{ field: 'folder' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
 		filters: [{ field: 'folder' }, { field: 'metric_instance' }]
 	},
 	dashboards: {
